@@ -285,11 +285,7 @@ export default function LogsInstrumentationListicle({
           {
             name: 'Convex',
             href: '/docs/logs-management/send-logs/convex-log-streams-signoz',
-            icon: (
-              <span className="flex h-7 w-7 items-center justify-center font-bold text-purple-600">
-                CX
-              </span>
-            ),
+            icon: <img src="/img/icons/convex-logo.svg" alt="Convex" className="h-9 w-9" />,
             clickName: 'Convex Logs Link',
           },
         ]}

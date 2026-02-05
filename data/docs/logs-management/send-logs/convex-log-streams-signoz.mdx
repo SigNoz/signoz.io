@@ -1,14 +1,14 @@
 ---
 date: 2026-02-02
 id: convex-log-streams-signoz
-title: Send logs from Convex to SigNoz using log streaming
-description: Send Convex logs to SigNoz using Convex log streaming webhooks and a Webhook Bridge.
+title: Send logs from Convex to SigNoz
+description: Send Convex logs to SigNoz using Convex log streaming webhook.
 doc_type: howto
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
 
-This guide shows you how to send logs from a Convex backend to SigNoz using **Convex log streaming** and a **Webhook Bridge**.
+This guide shows you how to send logs from a Convex backend to SigNoz using **Convex log streaming**.
 
 Convex log streaming sends logs as JSON or JSONL webhooks with HMAC-SHA256 signatures. SigNoz ingests logs via its JSON logs endpoint. You'll need to deploy a small Express service that:
 
@@ -220,19 +220,17 @@ Add `"type": "module"` to your `package.json` to enable ES modules:
 }
 ```
 
-## Step 2: Environment Variables
+## Step 2: Set Environment Variables
 
 Configure the following environment variables:
 
-| Variable | Description |
-|----------|-------------|
-| `WEBHOOK_SECRET` | The HMAC secret from your Convex dashboard |
-| `SIGNOZ_REGION` | Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (e.g., `us`, `eu`, `in`) |
-| `SIGNOZ_INGESTION_KEY` | Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) |
-| `SERVICE_NAME` | (Optional) Service name for logs in SigNoz, defaults to `convex-logs` |
-| `PORT` | (Optional) Server port, defaults to `3080` |
+- `WEBHOOK_SECRET`: The HMAC secret from your Convex dashboard
+- `SIGNOZ_REGION`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `SERVICE_NAME`: (Optional) Service name for logs in SigNoz, defaults to `convex-logs`
+- `PORT`: (Optional) Server port, defaults to `3080`
 
-## Step 3: Run Locally
+## Step 3: Test Webhook Bridge
 
 Start the bridge with environment variables:
 
@@ -303,6 +301,7 @@ Logs should appear within a few seconds.
 
 <details>
 <ToggleHeading>
+
 ## Troubleshooting
 </ToggleHeading>
 
