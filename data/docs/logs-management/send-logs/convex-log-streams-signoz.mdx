@@ -137,7 +137,7 @@ app.post("/webhook", async (req, res) => {
 });
 
 async function sendToSigNoz(logs) {
-  const ingestionKey = process.env.SIGNOZ_INGESTION_KEY || "<your-ingestion-key>";
+  const ingestionKey = process.env.SIGNOZ_INGESTION_KEY;
   const serviceName = process.env.SERVICE_NAME || "convex-logs";
 
   if (!ingestionKey) {
@@ -221,6 +221,14 @@ Add `"type": "module"` to your `package.json` to enable ES modules:
 
 ## Step 2: Set Environment Variables
 
+```bash
+export REGION="<region>"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+export WEBHOOK_SECRET="<your-convex-secret>"
+export SERVICE_NAME="convex-logs"
+export PORT=3080
+```
+
 Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
@@ -234,9 +242,9 @@ Verify these values:
 Start the bridge with environment variables:
 
 ```bash
-WEBHOOK_SECRET=<your-convex-secret> \
-SIGNOZ_INGESTION_KEY=<your-ingestion-key> \
-node index.js
+export WEBHOOK_SECRET="<your-convex-secret>"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+npm run start
 ```
 
 Verify these values:
