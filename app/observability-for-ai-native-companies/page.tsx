@@ -4,21 +4,24 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Observability for AI Native Companies | SigNoz',
+    absolute:
+      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces | SigNoz',
   },
   openGraph: {
-    title: 'Observability for AI Native Companies | SigNoz',
+    title:
+      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces | SigNoz',
     description:
-      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces.',
-    images: '/img/platform/LlmObservabilityMeta.webp',
+      'Track token usage, latency, and costs alongside your microservices, databases, and GPU clusters. Handle high-cardinality data at scale with usage-based pricing and span-level alerting for traces.',
+    images: '/img/platform/ObservabilityForAiNativeCompaniesMeta.webp',
   },
   description:
-    'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces.',
+    'Track token usage, latency, and costs alongside your microservices, databases, and GPU clusters. Handle high-cardinality data at scale with usage-based pricing and span-level alerting for traces.',
   twitter: {
-    title: 'Observability for AI Native Companies | SigNoz',
+    title:
+      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces | SigNoz',
     description:
-      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces.',
-    images: '/img/platform/LlmObservabilityMeta.webp',
+      'Track token usage, latency, and costs alongside your microservices, databases, and GPU clusters. Handle high-cardinality data at scale with usage-based pricing and span-level alerting for traces.',
+    images: '/img/platform/ObservabilityForAiNativeCompaniesMeta.webp',
   },
 }
 

@@ -77,7 +77,7 @@ const Header: React.FC = () => {
       </div>
 
       <SectionLayout variant="no-border" className="!mt-0 max-md:-mb-[3rem]">
-        <div className="w-100 mx-[-28px]">
+        <div className="w-full">
           <Image
             src="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
             alt="Observability for AI Native Companies hero"
@@ -156,55 +156,51 @@ const EverythingYouNeedCards: React.FC = () => {
       className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]"
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="relative">
-        <div className="container">
-          <div className="flex flex-col gap-6 pt-32">
-            <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
-              Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+      <div className="relative flex flex-col gap-6 py-32">
+        <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
+          Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+        </div>
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-16 gap-y-8 px-4">
+          {TRUSTED_BY_LOGOS.map((logo, index) => (
+            <div key={index} className="flex h-12 items-center justify-center">
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                width={140}
+                height={48}
+                className="object-contain"
+              />
             </div>
-            <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-16 gap-y-8 px-4">
-              {TRUSTED_BY_LOGOS.map((logo, index) => (
-                <div key={index} className="flex h-12 items-center justify-center">
-                  <Image
-                    src={logo.src}
-                    alt={logo.alt}
-                    width={140}
-                    height={48}
-                    className="object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="w-full text-center">
-              <Button
-                variant="secondary"
-                rounded="full"
-                className="mx-auto flex w-fit items-center gap-2"
-                asChild
-              >
-                <TrackingLink
-                  href="/case-study/"
-                  clickType="Secondary CTA"
-                  clickName="Observability for AI Native Companies Customer Stories Button"
-                  clickLocation="Observability for AI Native Companies Testimonials"
-                  clickText="Read customer stories"
-                >
-                  <span>Read customer stories</span>
-                  <ArrowRight size={14} />
-                </TrackingLink>
-              </Button>
-            </div>
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-                <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-                  Capabilities That Make Us the <br className="hidden md:block" /> Default Choice
-                  for AI Companies
-                </h2>
-                <SectionLayout variant="no-border" className="!mx-auto p-0">
-                  <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS} />
-                </SectionLayout>
-              </div>
-            </div>
+          ))}
+        </div>
+        <div className="w-full text-center">
+          <Button
+            variant="secondary"
+            rounded="full"
+            className="mx-auto flex w-fit items-center gap-2"
+            asChild
+          >
+            <TrackingLink
+              href="/case-study/"
+              clickType="Secondary CTA"
+              clickName="Observability for AI Native Companies Customer Stories Button"
+              clickLocation="Observability for AI Native Companies Testimonials"
+              clickText="Read customer stories"
+            >
+              <span>Read customer stories</span>
+              <ArrowRight size={14} />
+            </TrackingLink>
+          </Button>
+        </div>
+        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+            <h2 className="my-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
+              Capabilities That Make Us the <br className="hidden md:block" /> Default Choice for AI
+              Companies
+            </h2>
+            <SectionLayout variant="no-border" className="!mx-auto p-0">
+              <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS} />
+            </SectionLayout>
           </div>
         </div>
       </div>

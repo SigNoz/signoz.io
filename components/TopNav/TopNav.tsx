@@ -125,11 +125,11 @@ const productDropdownItems = [
     order: 4,
   },
   {
-    key: 'ingest',
-    url: '/blog/introducing-ingest-guard-feature/',
+    key: 'observability-for-ai-native-companies',
+    url: '/observability-for-ai-native-companies/',
     icon: '/img/index_features/shield-plus.svg',
-    description: 'Control your observability costs',
-    name: 'Ingest Guard',
+    description: 'Monitor AI Workloads Across LLM Layer and Infrastructure',
+    name: 'Observability for AI Native Companies',
     order: 8,
   },
   {

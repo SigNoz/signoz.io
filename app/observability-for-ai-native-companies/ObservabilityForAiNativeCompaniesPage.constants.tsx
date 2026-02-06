@@ -54,14 +54,14 @@ export const CAPABILITIES_CARDS: IconTitleDescriptionCardData[] = [
           />
           <Image
             src="/img/observability-for-ai-native-companies/olly-at-work.webp"
-            className="absolute -right-[120px] bottom-0 z-[5] w-3/5 object-contain"
+            className="absolute bottom-0 right-0 z-[5] w-3/5 object-contain md:-right-[120px]"
             alt="Olly at work"
             width={1000}
             height={1000}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <h4 className="m-0 text-left font-semibold text-red-500">
+          <h4 className="m-0 text-left text-2xl font-semibold text-red-500">
             Full-Stack Platform Capabilities
           </h4>
           <span>
