@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import { Edit } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { components } from '@/components/MDXComponents'
@@ -11,8 +11,10 @@ import TableOfContents from '../DocsTOC/DocsTOC'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
-import CopyAsMarkdown from '@/components/CopyAsMarkdown'
+import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
+import { usePathname } from 'next/navigation'
+import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFromRendered'
 
 const DocContent: React.FC<{
   title: string
@@ -22,6 +24,7 @@ const DocContent: React.FC<{
   editLink?: string
 }> = ({ title, post, toc, hideTableOfContents, editLink }) => {
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate = lastUpdatedDate
     ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
@@ -40,6 +43,25 @@ const DocContent: React.FC<{
   const shouldRenderTOC =
     !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && source !== ONBOARDING_SOURCE
   const shouldReserveTocColumn = source !== ONBOARDING_SOURCE
+  const articleRef = useRef<HTMLElement | null>(null)
+
+  const docTags = useMemo(() => post?.docTags || [], [post?.docTags])
+
+  const fallbackMarkdown = useMemo(() => {
+    const tagLine = docTags.length > 0 ? `Tags: ${docTags.join(', ')}` : ''
+    return [`# ${title}`, tagLine, post?.body?.raw || ''].filter(Boolean).join('\n\n')
+  }, [docTags, post?.body?.raw, title])
+
+  const getMarkdownContent = useCallback(async () => {
+    if (!articleRef.current) {
+      return fallbackMarkdown
+    }
+    return buildCopyMarkdownFromRendered(articleRef.current, {
+      title,
+      tags: docTags,
+      includeTagDefinitions: true,
+    })
+  }, [docTags, fallbackMarkdown, title])
 
   return (
     <>
@@ -52,17 +74,16 @@ const DocContent: React.FC<{
             <h1 className="mt-2 text-3xl leading-tight">{title}</h1>
           </div>
           {!isIntroductionPage && post.body?.raw && (
-            <CopyAsMarkdown
-              markdownContent={post.body.raw}
+            <OpenInAI
+              getMarkdownContent={getMarkdownContent}
+              pageUrl={pathname}
               className="shrink-0"
-              buttonVariant="ghost"
-              buttonSize="sm"
-              label="Copy markdown"
+              copyLabel="Copy markdown"
               docSlug={post.slug}
             />
           )}
         </div>
-        <article className="prose prose-slate max-w-none pb-6 dark:prose-invert">
+        <article ref={articleRef} className="prose prose-slate max-w-none pb-6 dark:prose-invert">
           <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         </article>
         <div className="mt-8 flex items-center justify-between text-sm">
@@ -81,9 +102,13 @@ const DocContent: React.FC<{
       </div>
 
       {shouldRenderTOC ? (
-        <TableOfContents toc={toc} hideTableOfContents={effectiveHideTOC} source={source || ''} />
+        <>
+          <TableOfContents toc={toc} hideTableOfContents={!shouldRenderTOC} source={source || ''} />
+        </>
       ) : shouldReserveTocColumn ? (
-        <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+        <>
+          <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+        </>
       ) : null}
     </>
   )

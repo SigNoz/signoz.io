@@ -415,4 +415,30 @@ ORDER BY ts ASC;
 ## Panel Time preference
 
 Using the `Panel Time Preference` present on the right you can select a custom time range for your panel. When you open the dashboard the specific panel will render for the time
-specified for that panel. 
+specified for that panel.
+
+## Troubleshooting
+
+### Why am I getting no data when using timestamp in WHERE clause?
+
+If you're getting no data when querying logs with a WHERE clause that uses `timestamp < {{.end_timestamp}}`, this is because **timestamps in logs are stored in nanoseconds**, not the standard timestamp format used for traces.
+
+**Solution:** Use the nanosecond timestamp variable instead.
+
+Replace `{{.end_timestamp}}` with `{{.end_timestamp_nano}}` in your WHERE clause.
+
+**Example:**
+
+Change:
+```sql
+WHERE timestamp < {{.end_timestamp}}
+```
+
+To:
+```sql
+WHERE timestamp < {{.end_timestamp_nano}}
+```
+
+<Admonition type="info">
+This is specific to logs queries. Traces use the standard timestamp format, but logs require the nanosecond precision timestamp variable (`$start_timestamp_nano` and `$end_timestamp_nano`).
+</Admonition> 

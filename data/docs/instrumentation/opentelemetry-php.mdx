@@ -1,885 +1,450 @@
 ---
-date: 2024-06-06
+date: 2026-02-01
 id: php
-
-title: PHP Opentelemetry Instrumentation
-description: Send events from your PHP application to SigNoz
-hide_table_of_contents: true
+title: PHP OpenTelemetry Instrumentation
+description: Send traces to SigNoz using OpenTelemetry instrumentation for PHP frameworks like Laravel, WordPress, Symfony, and Slim.
+doc_type: howto
 ---
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
+This guide shows you how to instrument your PHP application with OpenTelemetry and send traces to SigNoz. The auto-instrumentation approach works with Laravel, WordPress, Symfony, Slim, and other PHP frameworks.
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your PHP applications and view your application traces in SigNoz.
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-{/* This doc contains instructions about how to set up OpenTelemetry(OTel) instrumentation in your PHP application.  */}
+## Prerequisites
 
-{/* OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your PHP application. */}
-{/* 
-Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
+- PHP 8.0 or newer
+- [PECL](https://pecl.php.net/) package manager
+- [Composer](https://getcomposer.org/) dependency manager
+- A SigNoz Cloud account or self-hosted SigNoz instance
 
-There are three major steps to using OpenTelemetry:
+## Send traces to SigNoz
 
-- Instrumenting your PHP application with OpenTelemetry
-- Configuring the exporter to send data to SigNoz
-- Validating that configuration to ensure that data is being sent as expected. */}
-
-{/* In this documentation, we will instrument a PHP application for traces and send it to SigNoz. */}
-
-## Requirements
-
-- [PHP 8.0+](https://www.php.net/)
-- [PECL](https://pecl.php.net/)
-- [Composer](https://getcomposer.org/)
-
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-## Send traces to SigNoz Cloud
-Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
-
-<Tabs>
+<Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
-From VMs, there are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+</KeyPointCallout>
 
-#### Send traces directly to SigNoz cloud
-
-Here we will be sending traces to SigNoz cloud in 4 easy steps. We will be using Zero-code configuration for Automatic Instrumentation.
-
-**Step 1: Setup Development Environment**
-
-To configure our PHP application to send data, you need to use OpenTelemetry PHP extension. Since the extension is built from the source, you need to have the build tools, which can be installed using the following command:
-
-<Tabs>
-<TabItem value="linux" label="Linux (apt)" default>
-
-```
-sudo apt-get install gcc make autoconf
-```
-
-</TabItem>
-<TabItem value="mac" label="Mac (Homebrew)">
-
-```
-brew install gcc make autoconf
-```
-
-</TabItem>
-</Tabs>
-
-
-**Step 2: Build the extension**
-
-With our environment set up we can install the extension using [PECL](https://pecl.php.net/):
+### Step 1. Set environment variables
 
 ```bash
-pecl install opentelemetry               
-pecl install protobuf
+export OTEL_PHP_AUTOLOAD_ENABLED=true
+export OTEL_SERVICE_NAME=<service-name>
+export OTEL_TRACES_EXPORTER=otlp
+export OTEL_METRICS_EXPORTER=none
+export OTEL_LOGS_EXPORTER=none
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+export OTEL_PROPAGATORS=baggage,tracecontext
 ```
 
-After successfully installing the OpenTelemetry extension, add the extension to `php.ini` file of your project:
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry PHP SDK enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
-```php
-[opentelemetry]
-extension=opentelemetry.so
-```
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+</KeyPointCallout>
 
-Verify that the extension is enabled by running:
+Verify these values:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
-```
-php -m | grep opentelemetry
-```
-
-This should output:
-
-```
-opentelemetry
-```
-
-**Step 3: Add the dependencies**
-
-Add dependencies required for OpenTelemetry SDK for PHP to perform automatic instrumentation using this command :
-
-```
-composer config allow-plugins.php-http/discovery false
-composer require \
-  open-telemetry/sdk \
-  open-telemetry/exporter-otlp \
-  php-http/guzzle7-adapter \
-  open-telemetry/opentelemetry-auto-slim
-```
-
-<Admonition type="info">
-You can install the additional dependencies provided by OpenTelemetry for different PHP frameworks from [here](https://packagist.org/explore/?query=open-telemetry).
-</Admonition>
-
-
-**Step 4: Set environment variables and run app**
-
-We are passing the environment variables on run time and this way we don't have to change anything in code.
-Run your application using:
-
-```
-env OTEL_PHP_AUTOLOAD_ENABLED=true \
-    OTEL_SERVICE_NAME=<SERVICE_NAME> \
-    OTEL_TRACES_EXPORTER=otlp \
-    OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 \
-    OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<INGESTION_KEY> \
-    OTEL_PROPAGATORS=baggage,tracecontext \
-    php -S localhost:8080 app.php
-```
-
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-
-
-#### Send traces via OTel Collector binary
-
-**Step 1.** Install OTel Collector binary<br></br>
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
-
-**Step 2: Setup Development Environment**
-
-To configure our PHP application to send data, you need to use OpenTelemetry PHP extension. Since the extension is built from the source, you need to have the build tools, which can be installed using the following command:
-
-<Tabs>
-<TabItem value="linux" label="Linux (apt)" default>
-
-```
-sudo apt-get install gcc make autoconf
-```
-
-</TabItem>
-<TabItem value="mac" label="Mac (Homebrew)">
-
-```
-brew install gcc make autoconf
-```
-
-</TabItem>
-</Tabs>
-
-
-**Step 3: Build the extension**
-
-With our environment set up we can install the extension using [PECL](https://pecl.php.net/):
+### Step 2. Install the OpenTelemetry extension
 
 ```bash
+sudo apt-get install gcc make autoconf
 pecl install opentelemetry
-pecl install protobuf
 ```
 
-After successfully installing the OpenTelemetry extension, add the extension to `php.ini` file of your project:
+Add to `php.ini`:
 
-```php
-[opentelemetry]
+```ini
 extension=opentelemetry.so
 ```
 
-Verify that the extension is enabled by running:
-
-```
-php -m | grep opentelemetry
-```
-
-This should output:
-
-```
-opentelemetry
-```
-
-**Step 4: Add the dependencies**
-
-Add dependencies required for OpenTelemetry SDK for PHP to perform automatic instrumentation using this command :
-
-```
-composer config allow-plugins.php-http/discovery false
-composer require \
-  open-telemetry/sdk \
-  open-telemetry/exporter-otlp \
-  php-http/guzzle7-adapter \
-  open-telemetry/opentelemetry-auto-slim
-```
+Verify: `php --ri opentelemetry`
 
 <Admonition type="info">
-You can install the additional dependencies provided by OpenTelemetry for different PHP frameworks from [here](https://packagist.org/explore/?query=open-telemetry).
+PHP needs the OpenTelemetry extension loaded globally so that all processes can access it, including those spawned by web servers or commands like `php artisan serve`. Without this, auto-instrumentation packages will fail to install and no traces will be generated.
+
+Add `extension=opentelemetry.so` to your main `php.ini` file. Run `php --ini` to find its location.
 </Admonition>
-
-**Step 5: Set environment variables and run app**
-
-We are passing the environment variables on run time and this way we don't have to change anything in code.
-Run your application using:
-
-```
-env OTEL_PHP_AUTOLOAD_ENABLED=true \
-    OTEL_SERVICE_NAME=<SERVICE_NAME> \
-    OTEL_TRACES_EXPORTER=otlp \
-    OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=<COLLECTOR_ENDPOINT> \
-    OTEL_PROPAGATORS=baggage,tracecontext \
-    php -S localhost:8080 app.php
-```
-
-You can change the env vars value by referencing values from the following lookup table
-
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<COLLECTOR_ENDPOINT>` replace this with the Otel Collector Endpoint. If you have hosted it somewhere, provide the URL. Otherwise, the default is `http://localhost:4317`, if you have followed our guide.                       |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-**Step 1: Install OTel Collector agent in K8s**
+### Step 1. Set environment variables
 
-For PHP application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+Add these environment variables to your deployment manifest:
 
-
-**Step 2: Setup Development Environment**
-
-To configure our PHP application to send data, you need to use OpenTelemetry PHP extension. Since the extension is built from the source, you need to have the build tools, which can be installed using the following command:
-
-<Tabs>
-<TabItem value="linux" label="Linux (apt)" default>
-
-```
-sudo apt-get install gcc make autoconf
-```
-
-</TabItem>
-<TabItem value="mac" label="Mac (Homebrew)">
-
-```
-brew install gcc make autoconf
-```
-
-</TabItem>
-</Tabs>
-
-
-**Step 3: Build the extension**
-
-With our environment set up we can install the extension using [PECL](https://pecl.php.net/):
-
-```bash
-pecl install opentelemetry
+```yaml:deployment.yaml
+env:
+- name: OTEL_PHP_AUTOLOAD_ENABLED
+  value: "true"
+- name: OTEL_SERVICE_NAME
+  value: "<service-name>"
+- name: OTEL_TRACES_EXPORTER
+  value: "otlp"
+- name: OTEL_METRICS_EXPORTER
+  value: "none"
+- name: OTEL_LOGS_EXPORTER
+  value: "none"
+- name: OTEL_EXPORTER_OTLP_PROTOCOL
+  value: "http/protobuf"
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: "https://ingest.<region>.signoz.cloud:443"
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: "signoz-ingestion-key=<your-ingestion-key>"
+- name: OTEL_PROPAGATORS
+  value: "baggage,tracecontext"
 ```
 
-After successfully installing the OpenTelemetry extension, add the extension to `php.ini` file of your project:
+Verify these values:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service.
 
-```php
-[opentelemetry]
-extension=opentelemetry.so
-```
+### Step 2. Install the OpenTelemetry extension in your Dockerfile
 
-Verify that the extension is enabled by running:
-
-```
-php -m | grep opentelemetry
-```
-
-This should output:
-
-```
-opentelemetry
-```
-
-**Step 4: Add the dependencies**
-
-Add dependencies required for OpenTelemetry SDK for PHP to perform automatic instrumentation using this command :
-
-```
-composer config allow-plugins.php-http/discovery false
-composer require \
-  open-telemetry/sdk \
-  open-telemetry/exporter-otlp \
-  php-http/guzzle7-adapter \
-  open-telemetry/transport-grpc
-```
-
-<Admonition type="info">
-You can install the additional dependencies provided by OpenTelemetry for different PHP frameworks from [here](https://packagist.org/explore/?query=open-telemetry).
-</Admonition>
-
-**Step 5: Set environment variables and run app**
-
-We are passing the environment variables on run time and this way we don't have to change anything in code.
-Run your application using:
-
-```
-env OTEL_PHP_AUTOLOAD_ENABLED=true \
-    OTEL_SERVICE_NAME=<SERVICE_NAME> \
-    OTEL_TRACES_EXPORTER=otlp \
-    OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=<COLLECTOR_ENDPOINT> \
-    OTEL_PROPAGATORS=baggage,tracecontext \
-    php -S localhost:8080 app.php
-```
-
-You can change the env vars value by referencing values from the following lookup table
-
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<COLLECTOR_ENDPOINT>` replace this with the Otel Collector Endpoint. If you have hosted it somewhere, provide the URL. Otherwise, the default is `http://localhost:4317`, if you have followed our guide.                       |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
-</TabItem>
-<TabItem value="windows" label="Windows">
-From Windows, there are two ways to send data to SigNoz Cloud.
-
-- Send traces directly to SigNoz Cloud
-- Send traces via OTel Collector binary (recommended)
-
-#### Send traces directly to SigNoz cloud
-
-Here we will be sending traces to SigNoz cloud in 4 easy steps. We will be using Zero-code configuration for Automatic Instrumentation.
-
-**Step 1: Setup Development Environment**
-
-Initialize the application using
-
-```
-composer init --no-interaction --stability beta --require slim/slim:"^4" --require slim/psr7:"^1"
-```
-
-After successful run of prior command a file named `composer.json` will be generated if it does not exist. Next run the following command, make sure the version of `php` you are using is `7.4` or else you might encounter some issues running the following command.
-
-```
-composer update
-```
-
-**Step 2: Build the extension**
-
-With our environment set up we can install the extension using [PECL](https://pecl.php.net/):
-
-```bash
-pecl install opentelemetry
-```
-
-If gRPC is already downloaded and installed, skip the following step.
-
-```bash
-pecl install grpc 
-```
-
-After successfully installing the OpenTelemetry extension, add the extension to `php.ini` file of your project:
-
-```php
-[opentelemetry]
-extension=opentelemetry.so
-```
-
-Verify that the extension is enabled by running:
-
-```
-php -m | grep opentelemetry
-```
-
-This should output:
-
-```
-opentelemetry
-```
-
-**Step 3: Add the dependencies**
-
-Add dependencies required for OpenTelemetry SDK for PHP to perform automatic instrumentation using this command :
-
-```
-composer config allow-plugins.php-http/discovery false
-```
-
-```
-composer require open-telemetry/sdk open-telemetry/exporter-otlp php-http/guzzle7-adapter open-telemetry/transport-grpc guzzlehttp/guzzle
-```
-
-<Admonition type="info">
-You can install the additional dependencies provided by OpenTelemetry for different PHP frameworks from [here](https://packagist.org/explore/?query=open-telemetry).
-</Admonition>
-
-
-**Step 4: Modify php code**
-
-```
-<?php
-
-use OpenTelemetry\API\Common\Instrumentation\Globals;
-use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
-use OpenTelemetry\Contrib\Otlp\SpanExporter;
-use OpenTelemetry\SDK\Common\Attribute\Attributes;
-use OpenTelemetry\SDK\Common\Export\Stream\StreamTransportFactory;
-use OpenTelemetry\SDK\Resource\ResourceInfo;
-use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
-use OpenTelemetry\SDK\Sdk;
-use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
-use OpenTelemetry\SDK\Trace\Sampler\ParentBased;
-use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
-use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessorBuilder;
-use OpenTelemetry\SDK\Trace\TracerProvider;
-use OpenTelemetry\SemConv\ResourceAttributes;
-use OpenTelemetry\Contrib\Grpc\GrpcTransportFactory;
-use OpenTelemetry\Contrib\Otlp\OtlpUtil;
-use OpenTelemetry\API\Common\Signal\Signals;
-
-function initOpenTelemetry()
-{ 
- $resource = ResourceInfoFactory::emptyResource()->merge(ResourceInfo::create(Attributes::create([
- ResourceAttributes::SERVICE_NAME => '<SERVICE_NAME>'
- ])));
-
-
- $headers = [
- 'signoz-ingestion-key' => "<INGESTION_KEY>",
- ];
- $transport = (new GrpcTransportFactory())->create('ingest.<region>.signoz.cloud:443' . OtlpUtil::method(Signals::TRACE), 'application/x-protobuf', $headers);
- $spanExporter = new SpanExporter($transport);
-
-
- $tracerProvider = TracerProvider::builder()
- ->addSpanProcessor(
- (new BatchSpanProcessorBuilder($spanExporter))->build()
- )
- ->setResource($resource)
- ->setSampler(new ParentBased(new AlwaysOnSampler()))
- ->build();
-
- Sdk::builder()
- ->setTracerProvider($tracerProvider)
- ->setPropagator(TraceContextPropagator::getInstance())
- ->setAutoShutdown(true)
- ->buildAndRegisterGlobal();
-
-}
-?>
-```
-
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-
-{/* You can change the env vars value by referencing values from the following lookup table
-
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with SigNoz cloud endpoint                       |
-| OTEL_EXPORTER_OTLP_HEADERS     | signoz-ingestion-key=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        | */}
-
-**Step 5: Set environment variables and run app**
-
-Run application using your run command or the following generalized command (depending on framework you are using):
-
-```
-    php -S localhost:8080 app.php
-```
-
-#### Send traces via OTel Collector binary
-
-**Step 1.** Install OTel Collector binary<br></br>
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
-
-**Step 2: Setup Development Environment**
-
-To configure our PHP application to send data, you need to use OpenTelemetry PHP extension. Since the extension is built from the source, you need to have the build tools, which can be installed using the following command:
-
-**Step 3: Build the extension**
-
-With our environment set up we can install the extension using [PECL](https://pecl.php.net/):
-
-```bash
-pecl install opentelemetry
-```
-
-If gRPC is already downloaded and installed, skip the following step.
-
-```bash
-pecl install grpc 
-```
-
-After successfully installing the OpenTelemetry extension, add the extension to `php.ini` file of your project:
-
-```php
-[opentelemetry]
-extension=opentelemetry.so
-```
-
-Verify that the extension is enabled by running:
-
-```
-php -m | grep opentelemetry
-```
-
-This should output:
-
-```
-opentelemetry
-```
-
-**Step 4: Add the dependencies**
-
-Add dependencies required for OpenTelemetry SDK for PHP to perform automatic instrumentation using this command :
-
-```
-composer config allow-plugins.php-http/discovery false
-```
-
-```
-composer require  open-telemetry/sdk  open-telemetry/exporter-otlp php-http/guzzle7-adapter open-telemetry/transport-grpc guzzlehttp/guzzle
-```
-
-<Admonition type="info">
-You can install the additional dependencies provided by OpenTelemetry for different PHP frameworks from [here](https://packagist.org/explore/?query=open-telemetry).
-</Admonition>
-
-
-**Step 5: Modify php code**
-
-```
-<?php
-
-use OpenTelemetry\API\Common\Instrumentation\Globals;
-use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
-use OpenTelemetry\Contrib\Otlp\SpanExporter;
-use OpenTelemetry\SDK\Common\Attribute\Attributes;
-use OpenTelemetry\SDK\Common\Export\Stream\StreamTransportFactory;
-use OpenTelemetry\SDK\Resource\ResourceInfo;
-use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
-use OpenTelemetry\SDK\Sdk;
-use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
-use OpenTelemetry\SDK\Trace\Sampler\ParentBased;
-use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
-use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessorBuilder;
-use OpenTelemetry\SDK\Trace\TracerProvider;
-use OpenTelemetry\SemConv\ResourceAttributes;
-use OpenTelemetry\Contrib\Grpc\GrpcTransportFactory;
-use OpenTelemetry\Contrib\Otlp\OtlpUtil;
-use OpenTelemetry\API\Common\Signal\Signals;
-
-function initOpenTelemetry()
-{ 
- $resource = ResourceInfoFactory::emptyResource()->merge(ResourceInfo::create(Attributes::create([
- ResourceAttributes::SERVICE_NAME => '<SERVICE_NAME>'
- ])));
-
-
- $headers = [];
- $transport = (new GrpcTransportFactory())->create('<COLLECTOR_ENDPOINT>' . OtlpUtil::method(Signals::TRACE), 'application/x-protobuf', $headers);
- $spanExporter = new SpanExporter($transport);
-
-
- $tracerProvider = TracerProvider::builder()
- ->addSpanProcessor(
- (new BatchSpanProcessorBuilder($spanExporter))->build()
- )
- ->setResource($resource)
- ->setSampler(new ParentBased(new AlwaysOnSampler()))
- ->build();
-
- Sdk::builder()
- ->setTracerProvider($tracerProvider)
- ->setPropagator(TraceContextPropagator::getInstance())
- ->setAutoShutdown(true)
- ->buildAndRegisterGlobal();
-
-}
-?>
-```
-
-**Step 6: Set environment variables and run app**
-
-Run application using your run command or the following generalized command (depending on framework you are using):
-
-```
-    php -S localhost:8080 app.php
-```
-
-You can change the env vars value by referencing values from the following lookup table
-
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<COLLECTOR_ENDPOINT>` replace this with the Otel Collector Endpoint. If you have hosted it somewhere, provide the URL. Otherwise, the default is `http://localhost:4317`, if you have followed our guide.                       |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
-
-</TabItem>
-<TabItem value="Docker" label="Docker">
-
-There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
-
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
-
-#### Send traces directly to SigNoz Cloud
-
-**Step 1.** Configure OpenTelemetry to run in Docker Container
-
-Add the following in your Dockerfile.
-
-```bash
-...
-
-# Install build tools, protobuf, unzip, git, curl
-RUN apt-get update && apt-get install -y \
-   gcc \
-   make \
-   autoconf \
-   libprotobuf-dev \
-   protobuf-compiler \
-   unzip \
-   git \
-   curl \
-   && apt-get clean \
-   && rm -rf /var/lib/apt/lists/*
-
-# Install Composer globally
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-...
-
-# Install PHP extensions via PECL
+```dockerfile
 RUN pecl install opentelemetry \
-   && pecl install protobuf \
-   && docker-php-ext-enable opentelemetry protobuf
+    && docker-php-ext-enable opentelemetry
+```
 
-...
+</TabItem>
+<TabItem value="docker" label="Docker">
 
-# Environment variables
+### Step 1. Set environment variables
+
+Set in your Dockerfile:
+
+```dockerfile
 ENV OTEL_PHP_AUTOLOAD_ENABLED=true
-ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_SERVICE_NAME="<service-name>"
 ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_METRICS_EXPORTER="none"
+ENV OTEL_LOGS_EXPORTER="none"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_PROPAGATORS="baggage,tracecontext"
-
-...
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-
-The above steps install OpenTelemetry dependencies directly inside the Docker container without altering `composer.json` of project & sets environment variables to export the traces.
-
-**Step 2.** Run your Docker container
-
-Here's how you can run your docker container:
+Or pass them at runtime:
 
 ```bash
-docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+docker run -d -p 8080:80 \
+    -e OTEL_PHP_AUTOLOAD_ENABLED=true \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_TRACES_EXPORTER="otlp" \
+    -e OTEL_METRICS_EXPORTER="none" \
+    -e OTEL_LOGS_EXPORTER="none" \
+    -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+    -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_PROPAGATORS="baggage,tracecontext" \
+    <your-image>
 ```
 
-- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+Verify these values:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service.
 
-- `-d` runs the container in detached mode
-- `-p` maps a host port to a container port
+### Step 2. Install the OpenTelemetry extension in your Dockerfile
 
-
-**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
-
----
-
-#### Send traces via OTel Collector binary
-
-**Step 1.** Configure OpenTelemetry to run in Docker Container
-
-Add the following in your Dockerfile.
-
-```bash
-# -------- Stage 1: Get OpenTelemetry Collector --------
-FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
-
-...
-
-# Install build tools and deps
-RUN apt-get update && apt-get install -y \
-   gcc \
-   make \
-   autoconf \
-   libprotobuf-dev \
-   protobuf-compiler \
-   unzip \
-   git \
-   curl \
-   && apt-get clean \
-   && rm -rf /var/lib/apt/lists/*
-
-# Install Composer globally
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-...
-
-# Install PECL extensions (opentelemetry + protobuf)
+```dockerfile
 RUN pecl install opentelemetry \
-   && pecl install protobuf \
-   && docker-php-ext-enable opentelemetry protobuf
-
-...
-
-# Copy OpenTelemetry Collector binary + config from first stage
-COPY --from=otel /otelcol-contrib /otelcol-contrib
-COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
-COPY config.yaml /etc/otelcol-contrib/config.yaml
-
-# Expose ports (App + Collector)
-EXPOSE <APP_PORT> 4317 4318
-
-...
-
-# Environment variables (point PHP to local Collector)
-ENV OTEL_PHP_AUTOLOAD_ENABLED=true
-ENV OTEL_SERVICE_NAME="<service_name>"
-ENV OTEL_TRACES_EXPORTER="otlp"
-ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
-ENV OTEL_PROPAGATORS="baggage,tracecontext"
-
-
-# Run both Collector and PHP app in the same container
-CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & <run_command>"
-
-```
-
-Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
-
-- Replace `<run_command>` with the command to run your application
-- `<service_name>` is name of your service
-
-
-**Step 2.** Run your Docker container
-
-Run your docker container to start exporting.
-
-```bash
-docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
-```
-
-- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
-
-- `-d` runs the container in detached mode
-
-- `-p` maps a host port to a container port
-
-
-**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
-
-</TabItem>
-</Tabs>
-</TabItem>
-<TabItem value='self-host' label='Self-Host'>
-
-## Send Traces to Self-Hosted SigNoz
-
-**Step 1: Setup Development Environment**
-
-To configure our PHP application to send data, you need to use OpenTelemetry PHP extension. Since the extension is built from the source, you need to have the build tools, which can be installed using the following command:
-
-<Tabs>
-<TabItem value="linux" label="Linux (apt)" default>
-
-```
-sudo apt-get install gcc make autoconf
+    && docker-php-ext-enable opentelemetry
 ```
 
 </TabItem>
-<TabItem value="mac" label="Mac (Homebrew)">
+<TabItem value="windows" label="Windows">
 
+### Step 1. Set environment variables
+
+```powershell
+$env:OTEL_PHP_AUTOLOAD_ENABLED = "true"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_TRACES_EXPORTER = "otlp"
+$env:OTEL_METRICS_EXPORTER = "none"
+$env:OTEL_LOGS_EXPORTER = "none"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_PROPAGATORS = "baggage,tracecontext"
 ```
-brew install gcc make autoconf
-```
+
+Verify these values:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service.
+
+### Step 2. Install the OpenTelemetry extension
+
+1. Download the DLL from the <a href="https://github.com/open-telemetry/opentelemetry-php-instrumentation/releases" target="_blank" rel="noopener noreferrer nofollow">releases page</a>
+2. Choose the version matching your PHP version and architecture (x64/x86, thread-safe/non-thread-safe)
+3. Place the DLL in your PHP `ext` directory
+4. Add to `php.ini`:
+   ```ini
+   extension=opentelemetry
+   ```
+5. Verify: `php --ri opentelemetry`
 
 </TabItem>
 </Tabs>
 
-
-**Step 2: Build the extension**
-
-With our environment set up we can install the extension using [PECL](https://pecl.php.net/):
+### Step 3. Install Composer dependencies
 
 ```bash
-pecl install opentelemetry
-pecl install protobuf
-```
-
-After successfully installing the OpenTelemetry extension, add the extension to `php.ini` file of your project:
-
-```php
-[opentelemetry]
-extension=opentelemetry.so
-```
-
-Verify that the extension is enabled by running:
-
-```
-php -m | grep opentelemetry
-```
-
-This should output:
-
-```
-opentelemetry
-```
-
-**Step 3: Add the dependencies**
-
-Add dependencies required for OpenTelemetry SDK for PHP to perform automatic instrumentation using this command :
-
-```
 composer config allow-plugins.php-http/discovery false
 composer require \
   open-telemetry/sdk \
-  open-telemetry/opentelemetry-auto-slim \
-  php-http/guzzle7-adapter \
-  open-telemetry/exporter-otlp
+  open-telemetry/exporter-otlp \
+  php-http/guzzle7-adapter
 ```
 
 <Admonition type="info">
-You can install the additional dependencies provided by OpenTelemetry for different PHP frameworks from [here](https://packagist.org/explore/?query=open-telemetry).
+For framework-specific auto-instrumentation, add the corresponding package. See [Framework instrumentation](#framework-instrumentation) below.
 </Admonition>
 
-**Step 4: Set environment variables and run app**
+### Step 4. Create a custom span (optional)
 
-We are passing the environment variables on run time and this way we don't have to change anything in code.
-Run your application using:
+Without a framework auto-instrumentation package, you need to create spans manually. Here's a minimal example:
 
+```php:app.php
+<?php
+require __DIR__ . '/vendor/autoload.php';
+
+use OpenTelemetry\API\Globals;
+
+$tracer = Globals::tracerProvider()->getTracer('my-app');
+$span = $tracer->spanBuilder('handle-request')->startSpan();
+
+try {
+    $span->setAttribute('http.method', $_SERVER['REQUEST_METHOD'] ?? 'GET');
+    // Your application logic here
+    echo json_encode(['message' => 'Hello!']);
+} finally {
+    $span->end();
+}
 ```
-env OTEL_PHP_AUTOLOAD_ENABLED=true \
-    OTEL_SERVICE_NAME=<service_name> \
-    OTEL_TRACES_EXPORTER=otlp \
-    OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=<self-host-ip> \
-    OTEL_PROPAGATORS=baggage,tracecontext \
-    php -S localhost:8080 app.php
+
+### Step 5. Run your application
+
+```bash
+php -S localhost:8080 app.php
 ```
 
-- Set the `<self-host-ip>` as the IP of Self-Hosted SigNoz.
-- `<service_name>` is name of your service
+## Framework instrumentation
 
-</TabItem>
-</Tabs>
+OpenTelemetry PHP provides auto-instrumentation packages for popular frameworks and libraries. These packages automatically capture traces for HTTP requests, database queries, and other operations without requiring code changes.
 
-## Sample PHP Application
+<LibraryTabs
+    className="mb-8"
+    defaultCategory="all"
+    defaultLibrary="laravel"
+    categoryLabels={{
+        frameworks: 'Frameworks',
+        cms: 'CMS',
+    }}
+>
+    <LibraryTab value="laravel" label="Laravel" category="frameworks">
 
-We have included a sample PHP application at [Sample PHP App Github Repo](https://github.com/SigNoz/OpenTelemetry-PHP-example), 
+        ### Additional package
 
-{/* ## Tutorial
+        ```bash
+        composer require open-telemetry/opentelemetry-auto-laravel
+        ```
 
-Here's a [tutorial](https://signoz.io/blog/opentelemetry-php) with step by step guide on how to install SigNoz and start monitoring a sample PHP app. */}
+        ### Run command
 
-{/* <InstrumentationFAQ /> */}
+        ```bash
+        php artisan serve
+        ```
+
+        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-laravel" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+
+    </LibraryTab>
+    <LibraryTab value="symfony" label="Symfony" category="frameworks">
+
+        ### Additional package
+
+        ```bash
+        composer require open-telemetry/opentelemetry-auto-symfony
+        ```
+
+        ### Run command
+
+        ```bash
+        symfony server:start
+        ```
+
+        Or with the built-in PHP server:
+
+        ```bash
+        php -S localhost:8080 -t public
+        ```
+
+        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-symfony" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+
+    </LibraryTab>
+    <LibraryTab value="wordpress" label="WordPress" category="cms">
+
+        ### Additional package
+
+        ```bash
+        composer require open-telemetry/opentelemetry-auto-wordpress
+        ```
+
+        ### Configure autoloader (required)
+
+        <Admonition type="warning">
+        This step is required. Without configuring `auto_prepend_file`, WordPress will not generate any traces.
+        </Admonition>
+
+        For Apache, add to your WordPress `.htaccess` file:
+
+        ```apache
+        php_value auto_prepend_file /var/www/html/vendor/autoload.php
+        ```
+
+        For Nginx with PHP-FPM, add to your PHP-FPM pool configuration:
+
+        ```ini
+        php_admin_value[auto_prepend_file] = /var/www/html/vendor/autoload.php
+        ```
+
+        Replace the path with your actual WordPress installation path where `vendor/autoload.php` is located.
+
+        ### Run command
+
+        Restart your web server or PHP-FPM to apply changes.
+
+        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-wordpress" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+
+    </LibraryTab>
+    <LibraryTab value="slim" label="Slim" category="frameworks">
+
+        ### Additional package
+
+        ```bash
+        composer require open-telemetry/opentelemetry-auto-slim
+        ```
+
+        ### Run command
+
+        ```bash
+        php -S localhost:8080 public/index.php
+        ```
+
+        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-slim" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+
+    </LibraryTab>
+</LibraryTabs>
+
+## Validate
+
+With your application running, verify traces are being sent to SigNoz:
+
+1. Trigger an action in your app that generates a web request. Hit the endpoint a few times.
+2. In SigNoz, open the **Services** tab and click **Refresh**. Your application should appear.
+3. Go to the **Traces** tab to see your application's traces.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't traces appear in SigNoz?
+
+**Check that the OpenTelemetry extension is loaded:**
+
+```bash
+php --ri opentelemetry
+```
+
+If you see "Extension 'opentelemetry' not present", the extension isn't installed correctly. Check your `php.ini` configuration.
+
+**Check environment variables are set:**
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_SERVICE_NAME
+```
+
+**Verify network connectivity:**
+
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+**Enable console exporter to verify spans are being created:**
+
+```bash
+OTEL_TRACES_EXPORTER=console OTEL_PHP_AUTOLOAD_ENABLED=true php -S localhost:8080 app.php
+```
+
+If you see span output in your terminal but traces don't appear in SigNoz, the issue is with export configuration (endpoint, auth, or network). If no output appears, the instrumentation isn't capturing your requests.
+
+### PECL installation fails
+
+If `pecl install opentelemetry` fails:
+
+1. Ensure build tools are installed (`gcc`, `make`, `autoconf`)
+2. Check your PHP version is 8.0 or higher: `php -v`
+3. Try installing with verbose output: `pecl install -v opentelemetry`
+
+### Composer dependency conflicts
+
+If you see dependency conflicts, try:
+
+```bash
+composer require open-telemetry/sdk --with-all-dependencies
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data**  - Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight**  - Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically**  - The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility**  - Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next steps
+
+- [Add manual instrumentation](https://signoz.io/docs/instrumentation/php/manual-instrumentation/) for custom spans and attributes
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your PHP application
+- [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize metrics
+- Explore [supported PHP instrumentation libraries](https://packagist.org/search/?query=open-telemetry&tags=instrumentation) for automatic instrumentation of additional frameworks and libraries
+
+**Sample application**:
+- <a href="https://github.com/SigNoz/OpenTelemetry-PHP-example" target="_blank" rel="noopener noreferrer nofollow">PHP sample app with OpenTelemetry</a>
+- <a href="https://github.com/SigNoz/OpenTelemetry-laravel-example" target="_blank" rel="noopener noreferrer nofollow">Laravel sample app with OpenTelemetry</a>

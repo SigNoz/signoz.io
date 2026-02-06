@@ -1,5 +1,5 @@
 ---
-date: 2025-12-28
+date: 2026-02-02
 id: vpc-logs
 title: Send your VPC logs to SigNoz
 description: Learn how to collect AWS VPC Flow Logs from S3 and forward them to SigNoz using AWS Lambda for network traffic monitoring and analysis.
@@ -106,7 +106,7 @@ Follow these steps to create the lambda function:
 </figure>
 
 
-**Step 4:** Once you are done configuring the lambda function, you Lambda function is created.
+**Step 4:** Once you are done configuring the lambda function, your Lambda function is created.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/docs/vpc-docs/lambda_function.webp" alt="Newly created Lambda function overview page"/>
@@ -312,7 +312,7 @@ def lambda_handler(event, context):
             json_data = [convert_log_line_to_json(line) for line in list_of_strings]
             
             req_headers = {
-                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                     'signoz-ingestion-key': '<your-ingestion-key>',
                      'Content-Type': 'application/json'
                 }
             # Specify the HTTP endpoint for sending the data
@@ -325,10 +325,10 @@ def lambda_handler(event, context):
             print(f"Sent data to {http_url}. Response: {response.status_code}")
 ```
 
-Replace the following placeholders:
+Verify the following:
 - `<name_of_your_bucket>`: The name of your S3 bucket containing VPC Flow Logs.
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for details.
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [SigNoz Cloud endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for details.
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
 
 Here’s how a raw, unprocessed VPC log line looks like:
@@ -415,7 +415,7 @@ def process_log_file(file_path):
         list_of_strings = json.loads(result)
         json_data = [convert_log_line_to_json(line) for line in list_of_strings]
         req_headers = {
-                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                     'signoz-ingestion-key': '<your-ingestion-key>',
                      'Content-Type': 'application/json'
                 }
         http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'

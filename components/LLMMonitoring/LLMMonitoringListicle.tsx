@@ -71,6 +71,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Claude Code Monitoring',
   },
   {
+    name: 'Codex (OpenAI)',
+    href: '/docs/codex-monitoring',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex (OpenAI) Monitoring',
+  },
+  {
     name: 'Crew AI',
     href: '/docs/crewai-observability',
     icon: (
@@ -111,13 +117,17 @@ const LLMMonitoringData: IconCardData[] = [
   {
     name: 'Grok',
     href: '/docs/grok-monitoring',
-    icon: <img src="/svgs/icons/LLMMonitoring/grok-logo.svg" alt="Grok Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+    ),
     clickName: 'Grok Monitoring',
   },
   {
     name: 'Groq',
     href: '/docs/groq-observability',
-    icon: <img src="/svgs/icons/LLMMonitoring/groq-logo.svg" alt="Groq Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+    ),
     clickName: 'Groq Monitoring',
   },
   {

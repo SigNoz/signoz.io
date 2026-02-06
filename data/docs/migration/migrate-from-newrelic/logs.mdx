@@ -1,7 +1,6 @@
 ---
-date: 2025-11-30
+date: 2026-01-27
 id: logs
-
 title: Migrate Logs from New Relic
 description: Learn how to migrate your logs from New Relic to SigNoz using OpenTelemetry.
 doc_type: howto
@@ -94,7 +93,7 @@ exporters:
   otlp:
     endpoint: ingest.<region>.signoz.cloud:443
     headers:
-      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+      signoz-ingestion-key: <your-ingestion-key>
     tls:
       insecure: false
 
@@ -105,8 +104,8 @@ service:
 ```
 
 Replace:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
-- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region]
+- `<your-ingestion-key>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ## Step 3: Migrate Each Log Source
 
@@ -151,7 +150,7 @@ The OTel Java agent can collect logs automatically from Logback and Log4j withou
 ```bash
 OTEL_LOGS_EXPORTER=otlp \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
 java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
 ```
@@ -165,7 +164,7 @@ Python logs can be collected automatically without SDK code changes—just add a
 ```bash
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
 opentelemetry-instrument --logs_exporter otlp python app.py
 ```
 
@@ -232,9 +231,9 @@ curl -X POST https://log-api.newrelic.com/log/v1 \
 **After (HTTP to SigNoz):**
 
 ```bash
-curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json' \
+curl --location 'https://ingest.<region>.signoz.cloud:443/logs/json' \
 --header 'Content-Type: application/json' \
---header 'signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>' \
+--header 'signoz-ingestion-key: <your-ingestion-key>' \
 --data '[
     {
         "trace_id": "000000000000000018c51935df0b93b9",
