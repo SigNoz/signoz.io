@@ -219,39 +219,33 @@ Add `"type": "module"` to your `package.json` to enable ES modules:
 }
 ```
 
-## Step 2: Set Environment Variables
+## Step 2: Configure and Run Webhook Bridge
+
+Set the required environment variables:
 
 ```bash
 export REGION="<region>"
 export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 export WEBHOOK_SECRET="<your-convex-secret>"
-export SERVICE_NAME="<service-name>"
-export PORT="<port>"
+export SERVICE_NAME="<service-name>"  # Optional
+export PORT="<port>"  # Optional
 ```
 
 Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<your-convex-secret>`: Set the HMAC secret from your Convex dashboard
+- `<your-convex-secret>`: The HMAC secret from your Convex dashboard
 - `<service-name>`: (Optional) Service name for logs in SigNoz, defaults to `convex-logs`
 - `<port>`: (Optional) Server port, defaults to `3080`
 
-## Step 3: Test Webhook Bridge
-
-Start the bridge with environment variables:
+Start the bridge:
 
 ```bash
-export WEBHOOK_SECRET="<your-convex-secret>"
-export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 npm run start
 ```
 
-Verify these values:
-- `<your-convex-secret>`: The HMAC secret from your Convex dashboard (see Step 4)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
-Verify it's running:
+Test the bridge is running:
 
 ```bash
 curl -X POST http://localhost:3080/webhook -d '{"topic":"test"}' -H "x-webhook-signature: sha256=invalid"
@@ -260,7 +254,7 @@ curl -X POST http://localhost:3080/webhook -d '{"topic":"test"}' -H "x-webhook-s
 
 For production, deploy to any Node.js hosting platform (Railway, Render, AWS, etc.) and note the public HTTPS URL.
 
-## Step 4: Configure Convex Log Streaming
+## Step 3: Configure Convex Log Streaming
 
 1. Open your **Convex Dashboard**
 2. Go to **Settings** → **Integrations**
