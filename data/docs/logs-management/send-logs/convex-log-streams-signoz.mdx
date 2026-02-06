@@ -1,0 +1,349 @@
+---
+date: 2026-02-02
+id: convex-log-streams-signoz
+title: Send logs from Convex to SigNoz
+description: Send Convex logs to SigNoz using Convex log streaming webhook.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+This guide shows you how to send logs from a Convex backend to SigNoz using **Convex log streaming**.
+
+Convex log streaming sends logs as JSON or JSONL webhooks with HMAC-SHA256 signatures. SigNoz ingests logs via its JSON logs endpoint. You'll need to deploy a small Express service that:
+
+1. Receives and verifies Convex webhook requests
+2. Transforms Convex log events for SigNoz
+3. Forwards them to SigNoz Cloud
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- A **Convex project** on the **Professional plan** (log streaming requires this plan)
+- A **SigNoz Cloud account** with an [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- **Node.js 18+** installed locally or a platform to deploy the bridge (Vercel, Railway, AWS, etc.)
+
+## Architecture
+
+<Figure
+  src="/img/docs/logs-management/send-logs/convex-signoz-architecture.svg"
+  alt="Architecture diagram showing Convex sending webhooks to Express Webhook Bridge which forwards logs to SigNoz Cloud"
+  caption="Convex log streaming architecture"
+/>
+
+The Webhook Bridge handles:
+- **Security**: Verifies `x-webhook-signature` header using HMAC-SHA256
+- **Parsing**: Supports both JSON and JSONL formats from Convex
+- **Transformation**: Adds a `body` field and structures attributes for SigNoz
+- **Export**: Sends logs to SigNoz via the native JSON logs endpoint
+
+## Step 1: Create the Webhook Bridge
+
+Create a new directory and initialize a Node.js project:
+
+```bash
+mkdir convex-signoz-bridge
+cd convex-signoz-bridge
+npm init -y
+npm install express
+```
+
+Create a file named `index.js` with the following code:
+
+```javascript:index.js
+import express from "express";
+import crypto from "node:crypto";
+
+const app = express();
+const port = process.env.PORT || 3080;
+
+// Parse all request bodies as text for signature verification
+app.use(
+  express.text({
+    type: "*/*",
+    limit: "5mb",
+  })
+);
+
+app.post("/webhook", async (req, res) => {
+  const textPayload = req.body;
+  const signature = req.headers["x-webhook-signature"];
+
+  if (!signature) {
+    return res.status(401).send("Unauthorized: Missing signature");
+  }
+
+  if (!process.env.WEBHOOK_SECRET) {
+    console.error("Missing WEBHOOK_SECRET environment variable");
+    return res.status(500).send("Server configuration error");
+  }
+
+  try {
+    // 1. Verify HMAC-SHA256 Signature
+    const hmacSecret = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(process.env.WEBHOOK_SECRET),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const isValid = await crypto.subtle.verify(
+      "HMAC",
+      hmacSecret,
+      Buffer.from(signature.replace("sha256=", ""), "hex"),
+      new TextEncoder().encode(textPayload)
+    );
+
+    if (!isValid) {
+      return res.status(401).send("Unauthorized: Invalid signature");
+    }
+
+    // 2. Parse Payload (JSON or JSONL)
+    let logs;
+    try {
+      logs = JSON.parse(textPayload);
+      if (!Array.isArray(logs)) logs = [logs];
+    } catch {
+      // Try JSONL format
+      logs = textPayload
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => JSON.parse(line));
+    }
+
+    // 3. Handle Verification Ping
+    if (logs.length === 1 && logs[0].topic === "verification") {
+      console.log("Received verification ping from Convex");
+      return res.send("Verification successful");
+    }
+
+    // 4. Replay Attack Protection
+    const firstLog = logs[0];
+    if (firstLog.timestamp && firstLog.timestamp < Date.now() - 5 * 60 * 1000) {
+      return res.status(403).send("Request expired");
+    }
+
+    // 5. Transform and Send to SigNoz
+    await sendToSigNoz(logs);
+    res.send("Success");
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
+async function sendToSigNoz(logs) {
+  const ingestionKey = process.env.SIGNOZ_INGESTION_KEY;
+  const serviceName = process.env.SERVICE_NAME || "convex-logs";
+
+  if (!ingestionKey) {
+    console.warn("Skipping SigNoz export: Missing SIGNOZ_INGESTION_KEY");
+    return;
+  }
+
+  const url = `https://ingest.<region>.signoz.cloud:443/logs/json`;
+
+  const transformedLogs = logs.map((log) => {
+    const newLog = { ...log };
+
+    // Set resource attributes
+    newLog.resources = {
+      "service.name": serviceName,
+    };
+
+    // Map Convex log_level to OTel severity_text
+    const severityMap = {
+      DEBUG: "DEBUG",
+      INFO: "INFO",
+      LOG: "INFO",
+      WARN: "WARN",
+      ERROR: "ERROR",
+    };
+    newLog.severity_text = severityMap[log.log_level] || "INFO";
+
+    // Add a 'body' field for the log message
+    if (!newLog.body) {
+      if (newLog.message) {
+        newLog.body = newLog.message;
+      } else if (newLog.topic === "function_execution" && newLog.function) {
+        newLog.body = `Function: ${newLog.function.path} (${newLog.status || "unknown"}) in ${newLog.execution_time_ms ?? "?"}ms`;
+      } else if (newLog.topic === "audit_log") {
+        newLog.body = `Audit: ${newLog.audit_log_action}`;
+      } else {
+        newLog.body = `Convex: ${newLog.topic}`;
+      }
+    }
+
+    // Structure attributes for querying in SigNoz
+    newLog.attributes = {
+      "convex.topic": newLog.topic,
+      "convex.deployment": newLog.convex?.deployment_name,
+      "convex.project": newLog.convex?.project_name,
+      ...newLog.attributes,
+    };
+
+    return newLog;
+  });
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "signoz-ingestion-key": ingestionKey,
+    },
+    body: JSON.stringify(transformedLogs),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error(`Failed to send to SigNoz: ${response.status} ${text}`);
+  } else {
+    console.log(`Sent ${logs.length} logs to SigNoz`);
+  }
+}
+
+app.listen(port, () => {
+  console.log(`Webhook Bridge running on port ${port}`);
+});
+```
+
+Add `"type": "module"` to your `package.json` to enable ES modules:
+
+```json:package.json
+{
+  "type": "module"
+}
+```
+
+## Step 2: Configure and Run Webhook Bridge
+
+Set the required environment variables:
+
+```bash
+export REGION="<region>"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+export WEBHOOK_SECRET="<your-convex-secret>"
+export SERVICE_NAME="<service-name>"  # Optional
+export PORT="<port>"  # Optional
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-convex-secret>`: The HMAC secret from your Convex dashboard
+- `<service-name>`: (Optional) Service name for logs in SigNoz, defaults to `convex-logs`
+- `<port>`: (Optional) Server port, defaults to `3080`
+
+Start the bridge:
+
+```bash
+npm run start
+```
+
+Test the bridge is running:
+
+```bash
+curl -X POST http://localhost:3080/webhook -d '{"topic":"test"}' -H "x-webhook-signature: sha256=invalid"
+# Expected: "Unauthorized: Invalid signature"
+```
+
+For production, deploy to any Node.js hosting platform (Railway, Render, AWS, etc.) and note the public HTTPS URL.
+
+## Step 3: Configure Convex Log Streaming
+
+1. Open your **Convex Dashboard**
+2. Go to **Settings** → **Integrations**
+3. Select **Webhook (Log Stream)**
+4. Set the webhook URL to your bridge endpoint:
+   ```
+   https://<your-bridge-host>/webhook
+   ```
+5. Select format: **JSON** or **JSONL**
+6. Click **Save**
+7. Copy the **HMAC Secret** and set it as `WEBHOOK_SECRET` in your bridge
+
+Convex immediately starts sending logs to the webhook.
+
+## Validate
+
+1. Trigger a Convex function that produces logs (e.g., `console.log("Hello from Convex")`)
+2. Open **SigNoz** → **Logs Explorer**
+3. Filter logs using:
+   - `convex.topic`
+   - `convex.deployment`
+   - `convex.project`
+
+Logs should appear within a few seconds.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/convex-logs-list.webp"
+  alt="SigNoz Logs Explorer showing Convex logs with attributes like convex.topic and convex.deployment"
+  caption="Convex logs in SigNoz Logs Explorer"
+/>
+
+<Figure
+  src="/img/docs/logs-management/send-logs/convex-log-details.webp"
+  alt="Detailed log pane showing all Convex log attributes and message body"
+  caption="Log details pane showing Convex function execution details"
+/>
+
+## Limitations
+
+- Log streaming requires the **Convex Professional plan**
+- The Webhook Bridge must be publicly accessible over HTTPS
+- Convex provides **best-effort delivery** (logs may be dropped under high load or duplicated on retry)
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### Logs do not appear in SigNoz
+
+**Possible causes**
+- Webhook Bridge not reachable from the internet
+- `SIGNOZ_INGESTION_KEY` is incorrect
+- `WEBHOOK_SECRET` doesn't match the Convex dashboard
+
+**Fix**
+- Test the bridge URL is accessible: `curl https://<your-bridge>/webhook`
+- Check bridge logs for errors
+- Verify your [SigNoz region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Bridge returns 401 Unauthorized
+
+**Possible causes**
+- HMAC signature verification is failing
+- `WEBHOOK_SECRET` environment variable is missing or wrong
+
+**Fix**
+- Ensure `WEBHOOK_SECRET` exactly matches the secret from Convex dashboard
+- Check that the raw request body is being used for verification (not parsed JSON)
+
+### Missing log attributes in SigNoz
+
+**Possible causes**
+- Log transformation doesn't extract all fields from your event type
+
+**Fix**
+- Add console logging to inspect the raw Convex payload
+- Update the `transformedLogs` mapping to include additional fields
+- See the <a href="https://docs.convex.dev/production/integrations/log-streams#log-event-schema" target="_blank" rel="noopener noreferrer nofollow">Convex log event schema</a> for all available fields
+
+</details>
+
+## Next Steps
+
+- Explore the [Logs Explorer](https://signoz.io/docs/userguide/logs/) to query and filter Convex logs
+- Create [alerts](https://signoz.io/docs/userguide/alerts-management/) on Convex error logs or specific log patterns
+- Learn how to [create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your Convex log trends
+
+## Get Help
+
+<GetHelp />
