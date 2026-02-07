@@ -1,26 +1,32 @@
 ---
-date: 2024-06-06
+date: 2025-12-19
 id: drop-metrics
+doc_type: howto
 
 title: How to Drop and Filter OpenTelemetry Metrics
+description: Learn how to drop and filter OpenTelemetry metrics at the collector level and disable metrics generation at the SDK level for different programming languages.
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
 
+## Overview
+
 This guide explains different methods to filter out or disable metrics in your OpenTelemetry instrumentation. You can either:
-- Filter metrics at the collector level using the OpenTelemetry Collector
+- Filter metrics at the collector level using the OpenTelemetry Collector (or Agent)
 - Disable metrics generation at the SDK level for different programming languages
 
 ## Filtering Metrics at the Collector Level
 
 The filter processor in OpenTelemetry allows you to drop metrics based on their name, label values, or other attributes. This is useful if you want to exclude certain metrics from being sent to SigNoz while still collecting them at the source.
 
-The filter processor is configured in the `processors::filter` section of the `otel-collector-config.yaml` file.
+You should configure the OpenTelemetry Collector Agent to filter metrics at the collector level if you want to filter data before it is exported to the backend. See [Get Started with OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) to install the OpenTelemetry Collector Agent.
+
+The filter processor is configured in the `processors` section of the `otel-collector-config.yaml` file.
 
 <Admonition>
 
 The processor needs to be added to the metrics pipeline to take effect. 
-```
+```yaml:otel-collector-config.yaml
 metrics:
   receivers: [otlp]
   processors: [filter/drop_metrics_by_name, batch]
@@ -28,12 +34,15 @@ metrics:
 ```
 </Admonition>
 
+<KeyPointCallout title="Dropping labels does not reduce sample count" defaultCollapsed={true}>
+If you are trying to drop specific labels (attributes) to reduce cardinality, simply removing them may not work as expected and does not reduce ingest volume. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for details.
+</KeyPointCallout>
 
 ### Drop Metrics by Exact Name Match
 
 You can drop specific metrics by their exact names:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_metrics_by_name:
     metrics:
@@ -48,7 +57,7 @@ processors:
 
 You can use regular expressions to drop metrics matching a pattern:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_metrics_by_name_regex:
     metrics:
@@ -63,7 +72,7 @@ processors:
 
 You can filter metrics based on resource attributes such as `service.name`, `host.name`, `k8s.pod.name`, etc:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_metrics_by_label_values:
     metrics:
@@ -75,7 +84,7 @@ processors:
 
 You can use regular expressions to match resource attributes:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_metrics_by_label_values_regex:
     metrics:
@@ -87,7 +96,7 @@ processors:
 
 You can filter metrics based on their attributes like `http.method`, `message.operation`, etc:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_metrics_by_label_values:
     metrics:
@@ -99,7 +108,7 @@ processors:
 
 You can use regular expressions to match metric attributes:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_metrics_by_label_values_regex:
     metrics:
@@ -107,7 +116,7 @@ processors:
         - IsMatch(attributes["http.method"], "GET|POST")
 ```
 
-Refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor) for more details on how to configure the filter processor.
+Refer to the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry documentation</a> for more details on how to configure the filter processor.
 
 ## Disabling SDK-Generated Metrics
 
@@ -135,7 +144,7 @@ To disable instruments from specific packages, you can use environment variables
 OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=system-metrics
 ```
 
-For more configuration options, see the [Python SDK Configuration documentation](https://opentelemetry.io/docs/zero-code/python/configuration/#disabling-specific-instrumentations).
+For more configuration options, see the <a href="https://opentelemetry.io/docs/zero-code/python/configuration/#disabling-specific-instrumentations" target="_blank" rel="noopener noreferrer nofollow">Python SDK Configuration documentation</a>.
 
 </TabItem>
 <TabItem value="java" label="Java">
@@ -152,7 +161,7 @@ otel.instrumentation.[name].enabled=false
 otel.instrumentation.akka-http.enabled=false
 ```
 
-For more configuration options, see the [Java Agent Configuration documentation](https://opentelemetry.io/docs/zero-code/java/agent/disable/).
+For more configuration options, see the <a href="https://opentelemetry.io/docs/zero-code/java/agent/disable/" target="_blank" rel="noopener noreferrer nofollow">Java Agent Configuration documentation</a>.
 
 </TabItem>
 <TabItem value="nodejs" label="Node.js">
@@ -162,7 +171,7 @@ For more configuration options, see the [Java Agent Configuration documentation]
 OTEL_NODE_DISABLED_INSTRUMENTATIONS=http,express,dns
 ```
 
-For more configuration options, see the [Node.js SDK Configuration documentation](https://opentelemetry.io/docs/zero-code/js/configuration/#disable-specific-instrumentations).
+For more configuration options, see the <a href="https://opentelemetry.io/docs/zero-code/js/configuration/#disable-specific-instrumentations" target="_blank" rel="noopener noreferrer nofollow">Node.js SDK Configuration documentation</a>.
 
 </TabItem>
 <TabItem value=".net" label=".NET">
@@ -172,7 +181,7 @@ For more configuration options, see the [Node.js SDK Configuration documentation
 OTEL_DOTNET_AUTO_METRICS_ENABLED=false
 ```
 
-For more configuration options, see the [.NET SDK Configuration documentation](https://opentelemetry.io/docs/zero-code/dotnet/configuration/#additional-settings).
+For more configuration options, see the <a href="https://opentelemetry.io/docs/zero-code/dotnet/configuration/#additional-settings" target="_blank" rel="noopener noreferrer nofollow">.NET SDK Configuration documentation</a>.
 </TabItem>
 </Tabs>
 

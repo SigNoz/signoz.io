@@ -10,7 +10,8 @@ import {
   SiClickhouse,
   SiGo,
   SiTypescript,
-  SiAmazonwebservices
+  SiAmazonwebservices,
+  SiMysql,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -117,11 +118,11 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
             name: 'Microsoft SQL Server',
             href: '/docs/integrations/sql-server',
             icon: (
-                <img
-                 src="/svgs/icons/microsoft-sql-server.svg"
-                 alt="Microsoft SQL Server"
-                 className="h-7 w-7 object-contain"
-                />
+              <img
+                src="/svgs/icons/microsoft-sql-server.svg"
+                alt="Microsoft SQL Server"
+                className="h-7 w-7 object-contain"
+              />
             ),
             clickName: 'Microsoft SQL Server Integration Link',
           },
@@ -139,21 +140,27 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
       <IconCardGrid
         cards={[
           {
-            name: 'AWS RDS PostgreSQL',
+            name: 'One-Click AWS Integrations',
+            href: '/docs/integrations/aws/one-click-aws-integrations',
+            icon: <SiAmazonwebservices className="h-7 w-7 text-[#FF9900]" />,
+            clickName: 'One-Click AWS Integrations Link',
+          },
+          {
+            name: 'AWS RDS PostgreSQL (Manual)',
             href: '/docs/integrations/aws-rds-postgres',
-            icon: <SiAmazonwebservices className="h-7 w-7" />,
+            icon: <SiPostgresql className="h-7 w-7 text-[#FF9900]" />,
             clickName: 'AWS RDS PostgreSQL Link',
           },
           {
-            name: 'AWS RDS MySQL',
+            name: 'AWS RDS MySQL (Manual)',
             href: '/docs/integrations/aws-rds-mysql',
-            icon: <SiAmazonwebservices className="h-7 w-7" />,
+            icon: <SiMysql className="h-7 w-7 text-[#FF9900]" />,
             clickName: 'AWS RDS MySQL Link',
           },
           {
-            name: 'AWS Elasticache Redis',
+            name: 'AWS Elasticache Redis (Manual)',
             href: '/docs/integrations/aws-elasticache-redis',
-            icon: <SiAmazonwebservices className="h-7 w-7 " />,
+            icon: <SiRedis className="h-7 w-7 text-[#FF9900]" />,
             clickName: 'AWS Elasticache Redis Link',
           },
         ]}

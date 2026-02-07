@@ -1,0 +1,435 @@
+---
+date: 2026-01-21
+id: opentelemetry-nodejs
+title: Send Metrics from Node.js application
+description: Learn how to send metrics from Node.js applications (Express, Fastify, Koa, NestJS, Runtime) to SigNoz using OpenTelemetry
+
+doc_type: howto
+---
+
+This guide shows you how to send metrics from your Node.js application (Express, Fastify, Koa, NestJS, Runtime) to SigNoz using OpenTelemetry.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+    Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Node.js 18 or later (LTS versions 18, 20, or 22 are supported)
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Send metrics to SigNoz
+
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+    A VM is a virtual computer that runs on physical hardware. This includes:
+    - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+    - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+    - **Bare metal servers**: Physical servers running Linux/Unix directly
+
+    Use this section if you're deploying your Node.js application directly on a server or VM without containerization.
+</KeyPointCallout>
+
+### Step 1. Set environment variables
+Set the following environment variables to configure the OpenTelemetry exporter:
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_METRICS_EXPORTER="otlp"
+export OTEL_TRACES_EXPORTER="none"
+export OTEL_LOGS_EXPORTER="none"
+export OTEL_METRIC_EXPORT_INTERVAL="60000"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+```
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+### Step 1. Set environment variables
+Add these environment variables to your deployment manifest:
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+- name: OTEL_METRICS_EXPORTER
+  value: 'otlp'
+- name: OTEL_TRACES_EXPORTER
+  value: 'none'
+- name: OTEL_LOGS_EXPORTER
+  value: 'none'
+- name: OTEL_METRIC_EXPORT_INTERVAL
+  value: '60000'
+- name: NODE_OPTIONS
+  value: '--require @opentelemetry/auto-instrumentations-node/register'
+```
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+### Step 1. Set environment variables (PowerShell)
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_METRICS_EXPORTER = "otlp"
+$env:OTEL_TRACES_EXPORTER = "none"
+$env:OTEL_LOGS_EXPORTER = "none"
+$env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
+$env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
+```
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service.
+- `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+### Step 1. Set environment variables in Dockerfile
+Add environment variables to your Dockerfile:
+```dockerfile:Dockerfile
+# ... build stages ...
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_METRICS_EXPORTER="otlp"
+ENV OTEL_TRACES_EXPORTER="none"
+ENV OTEL_LOGS_EXPORTER="none"
+ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
+ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+CMD ["node", "app.js"]
+```
+
+Or pass them at runtime using `docker run`:
+```bash
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_METRICS_EXPORTER="otlp" \
+    -e OTEL_TRACES_EXPORTER="none" \
+    -e OTEL_LOGS_EXPORTER="none" \
+    -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
+    -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
+    your-image:latest
+```
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+
+</TabItem>
+</Tabs>
+
+<KeyPointCallout title="Why explicitly disable traces and logs?" defaultCollapsed={true}>
+The auto-instrumentation package (`@opentelemetry/auto-instrumentations-node`) includes instrumentations for web frameworks like Express, Fastify, and Koa. These instrumentations generate traces (spans) for every incoming HTTP request.
+
+Since OpenTelemetry Node.js enables traces and logs export by default, these would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant volume and costs.
+
+Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables traces and logs while keeping metrics working as expected. If you want traces or logs later, you can change them to `otlp` or remove these variables altogether.
+</KeyPointCallout>
+
+### Step 2. Install OpenTelemetry packages
+
+```bash
+npm install @opentelemetry/api @opentelemetry/auto-instrumentations-node
+```
+
+### Step 3. Add custom metrics
+
+Add custom metrics to your application using `metrics.getMeter()`:
+
+```javascript:app.js
+const { metrics } = require('@opentelemetry/api');
+
+// Get a meter - MeterProvider is auto-configured by auto-instrumentations-node
+const meter = metrics.getMeter('my.meter.name');
+
+// Create a counter instrument
+const requestCounter = meter.createCounter('requests.total', {
+    unit: '1',
+    description: 'Total number of requests'
+});
+
+function handleRequest(endpoint) {
+    // Record the metric with attributes
+    requestCounter.add(1, { endpoint: endpoint });
+    // ... handle the request ...
+}
+
+module.exports = { handleRequest };
+```
+
+<Admonition type="info">
+This example shows a Counter, which only increases. OpenTelemetry supports other metric types like UpDownCounter, Histogram, and Observable Gauge. See [Custom Metrics Examples](#custom-metrics-examples) for complete examples of each type.
+</Admonition>
+
+### Step 4. Run your application
+
+Run your application normally. The `NODE_OPTIONS` environment variable set in Step 1 automatically loads the auto-instrumentation:
+
+```bash
+node app.js
+```
+
+<Admonition type="info">
+The auto-instrumentation package automatically generates HTTP metrics (`http.server.request.duration` and `http.client.request.duration`) for Node.js built-in `http` and `https` modules. Since frameworks like Express, Fastify, and Koa use these modules internally, HTTP metrics are captured automatically. See the [HTTP instrumentation documentation](https://github.com/open-telemetry/opentelemetry-js/blob/main/experimental/packages/opentelemetry-instrumentation-http/README.md) for more details.
+</Admonition>
+
+## Validate
+
+Once you have configured your application to start sending metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+<Admonition type="info">
+Want more metrics? For system-level metrics like CPU, memory, and event loop stats, see [Runtime Metrics](#runtime-metrics).
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Custom Metrics Examples
+</ToggleHeading>
+
+OpenTelemetry supports six metric instrument types. Here's a complete example demonstrating all of them:
+
+### Synchronous Instruments
+
+Synchronous instruments are called inline with your application code.
+
+**Counter** - A value that only increases (e.g., total requests, bytes sent):
+
+```javascript
+const counter = meter.createCounter('requests.total', {
+    unit: '1',
+    description: 'Total number of requests'
+});
+
+// Record a value
+counter.add(1, { endpoint: '/api/users' });
+```
+
+**UpDownCounter** - A value that can increase or decrease (e.g., active connections, queue size):
+
+```javascript
+const updownCounter = meter.createUpDownCounter('connections.active', {
+    unit: '1',
+    description: 'Number of active connections'
+});
+
+// Increment
+updownCounter.add(1);
+
+// Decrement
+updownCounter.add(-1);
+```
+
+**Histogram** - A distribution of values (e.g., request latency, response sizes):
+
+```javascript
+const histogram = meter.createHistogram('request.duration', {
+    unit: 'ms',
+    description: 'Request duration in milliseconds'
+});
+
+// Record a value
+histogram.record(45.5, { endpoint: '/api/users' });
+```
+
+### Asynchronous Instruments
+
+Asynchronous instruments use callback functions that are invoked during metric collection.
+
+**ObservableCounter** - Observes a monotonically increasing value (e.g., CPU time, page faults):
+
+```javascript
+const observableCounter = meter.createObservableCounter('system.cpu.time', {
+    unit: 's',
+    description: 'CPU time'
+});
+
+observableCounter.addCallback((observableResult) => {
+    // Return current cumulative value
+    observableResult.observe(getTotalCpuTime(), { cpu: 'cpu0' });
+});
+```
+
+**ObservableUpDownCounter** - Observes a value that can go up or down (e.g., memory usage, thread count):
+
+```javascript
+const observableUpDown = meter.createObservableUpDownCounter('process.memory.usage', {
+    unit: 'By',
+    description: 'Memory usage in bytes'
+});
+
+observableUpDown.addCallback((observableResult) => {
+    observableResult.observe(process.memoryUsage().heapUsed, {});
+});
+```
+
+**ObservableGauge** - Observes a point-in-time value (e.g., temperature, current CPU utilization):
+
+```javascript
+const gauge = meter.createObservableGauge('temperature.current', {
+    unit: 'Cel',
+    description: 'Current temperature'
+});
+
+gauge.addCallback((observableResult) => {
+    observableResult.observe(getCurrentTemperature(), { location: 'server-room' });
+});
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+## Runtime Metrics
+</ToggleHeading>
+
+To collect Node.js runtime metrics (event loop, V8 heap, garbage collection), use the `@opentelemetry/instrumentation-runtime-node` package.
+
+### Install
+
+```bash
+npm install @opentelemetry/instrumentation-runtime-node
+```
+
+### Usage
+
+Enable runtime metrics by setting the environment variable:
+
+```bash
+export OTEL_NODE_ENABLED_INSTRUMENTATIONS="runtime-node"
+```
+
+Then run your application as usual:
+
+```bash
+node --require @opentelemetry/auto-instrumentations-node/register app.js
+```
+
+<Admonition type="info">
+By default, `@opentelemetry/auto-instrumentations-node` includes the runtime instrumentation. If you're using selective instrumentation and have disabled it, add `runtime-node` to your enabled instrumentations list.
+</Admonition>
+
+### Exported Metrics
+
+The `@opentelemetry/instrumentation-runtime-node` package automatically exports the following Node.js runtime metrics:
+
+**Event Loop Metrics:**
+- `nodejs.eventloop.delay.min` - Minimum event loop delay
+- `nodejs.eventloop.delay.max` - Maximum event loop delay
+- `nodejs.eventloop.delay.mean` - Mean event loop delay
+- `nodejs.eventloop.delay.stddev` - Standard deviation of event loop delay
+- `nodejs.eventloop.delay.p50` - 50th percentile of event loop delay
+- `nodejs.eventloop.delay.p90` - 90th percentile of event loop delay
+- `nodejs.eventloop.delay.p99` - 99th percentile of event loop delay
+- `nodejs.eventloop.time` - Cumulative event loop time (active/idle)
+- `nodejs.eventloop.utilization` - Event loop utilization ratio (0.0 to 1.0)
+
+**V8 Heap Memory Metrics:**
+- `v8js.memory.heap.limit` - Total heap memory size pre-allocated
+- `v8js.memory.heap.used` - Heap memory size allocated
+- `v8js.memory.heap.space.available_size` - Heap space available size
+- `v8js.memory.heap.space.physical_size` - Committed size of a heap space
+
+**V8 Garbage Collection Metrics:**
+- `v8js.gc.duration` - Garbage collection duration (histogram)
+
+See the OpenTelemetry semantic conventions for the complete list:
+- <a href="https://opentelemetry.io/docs/specs/semconv/runtime/nodejs-metrics/" target="_blank" rel="noopener noreferrer nofollow">Node.js runtime metrics</a>
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Metrics not appearing?
+
+1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_ENDPOINT` is set correctly:
+    - For gRPC (default): `https://ingest.<region>.signoz.cloud:443`
+    - For HTTP: `https://ingest.<region>.signoz.cloud:443` (SDK appends `/v1/metrics` automatically)
+
+2. **Check Metrics Exporter**: Ensure `OTEL_METRICS_EXPORTER` is set to `otlp` (this is the default).
+
+3. **Enable Debug Logging**: Set the log level to see detailed output:
+    ```bash
+    export OTEL_LOG_LEVEL=debug
+    ```
+
+4. **Resource Attributes**: Ensure `OTEL_SERVICE_NAME` is set. This helps you filter metrics by service in SigNoz.
+
+5. **Verify Package Installation**: Ensure all required packages are installed:
+    ```bash
+    npm list @opentelemetry/api @opentelemetry/auto-instrumentations-node
+    ```
+
+### Authentication errors
+
+If you see errors like "Unauthorized" or "403 Forbidden":
+- Verify your ingestion key is correct in `OTEL_EXPORTER_OTLP_HEADERS`
+- Ensure the header format is exactly: `signoz-ingestion-key=<your-key>` (no extra spaces)
+- Check that your ingestion key is active in the SigNoz Cloud dashboard
+
+### "Connection Refused" errors
+
+- If running locally and sending to SigNoz Cloud, check your internet connection and firewall.
+- If sending to a self-hosted collector, ensure the collector is running and listening on port 4317 (gRPC) or 4318 (HTTP).
+
+### SSL/TLS errors
+
+If you encounter SSL certificate errors:
+- Ensure you're using `https://` in the endpoint URL
+- For self-hosted setups with self-signed certificates, you may need to configure the exporter to trust your CA
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy metrics you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next Steps
+
+- [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your metrics.
+- [Set up Alerts](https://signoz.io/docs/setup-alerts-notification/) on your metrics.
+- Instrument your Node.js application with [traces](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/) and [logs](https://signoz.io/docs/logs-management/send-logs/nodejs-logs/) for complete observability.

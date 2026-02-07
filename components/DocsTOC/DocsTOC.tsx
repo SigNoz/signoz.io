@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
+import { RegionDropdown } from '../Region/RegionDropdown'
 
 interface TocItemProps {
   url: string
@@ -277,17 +278,26 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
   }
 
   return (
-    <div className="doc-toc" ref={tocContainerRef}>
-      <div className="mb-3 text-xs uppercase"> On this page </div>
-      <div ref={tocItemsRef} className="doc-toc-items border-l border-signoz_slate-500 pl-3">
-        <TableOfContents
-          toc={filteredToc}
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          scrollableContainerRef={tocContainerRef}
-        />
+    <>
+      <div className="doc-toc" ref={tocContainerRef}>
+        <div className="mb-4 pt-4">
+          <RegionDropdown />
+        </div>
+        {hideTableOfContents ? null : (
+          <>
+            <div className="mb-3 text-xs uppercase"> On this page </div>
+            <div ref={tocItemsRef} className="doc-toc-items border-l border-signoz_slate-500 pl-3">
+              <TableOfContents
+                toc={filteredToc}
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+                scrollableContainerRef={tocContainerRef}
+              />
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </>
   )
 }
 

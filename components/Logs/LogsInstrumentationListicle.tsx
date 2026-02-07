@@ -282,6 +282,12 @@ export default function LogsInstrumentationListicle({
             icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
             clickName: 'Cloudflare Cloud Logs Link',
           },
+          {
+            name: 'Convex',
+            href: '/docs/logs-management/send-logs/convex-log-streams-signoz',
+            icon: <img src="/img/icons/convex-logo.svg" alt="Convex" className="h-9 w-9" />,
+            clickName: 'Convex Logs Link',
+          },
         ]}
         sectionName="Cloud Logs"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"

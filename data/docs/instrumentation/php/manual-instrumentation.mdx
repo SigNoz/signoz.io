@@ -1,0 +1,283 @@
+---
+date: 2026-02-01
+id: php-manual-instrumentation
+title: How to add manual instrumentation in PHP
+description: Create custom spans, add attributes, record exceptions, and enrich traces in PHP applications with OpenTelemetry and SigNoz
+doc_type: howto
+---
+
+Manual instrumentation gives you fine-grained control when automatic instrumentation alone cannot express important business operations. Use it to capture steps that matter for debugging, attach business-specific attributes, or ensure failures surface with the right context in SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- PHP 7.4 or newer (PHP 8.0+ recommended).
+- OpenTelemetry SDK installed via [Composer](https://getcomposer.org/):
+  ```bash
+  composer require open-telemetry/sdk open-telemetry/exporter-otlp
+  ```
+- Environment variables configured to export traces to SigNoz. See the [PHP instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-php/) for setup instructions.
+
+## Step 1. Get a tracer
+
+Acquire a tracer from the global tracer provider to create spans:
+
+```php:tracer.php
+<?php
+
+use OpenTelemetry\API\Globals;
+
+$tracerProvider = Globals::tracerProvider();
+$tracer = $tracerProvider->getTracer(
+    'my-app',      // instrumentation scope name
+    '1.0.0'        // version (optional)
+);
+```
+
+Reuse the tracer instance throughout your application instead of creating new ones for each request.
+
+## Step 2. Create manual spans
+
+Wrap important operations inside custom spans:
+
+```php:create-span.php
+<?php
+
+use OpenTelemetry\API\Globals;
+
+function processOrder(string $orderId): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('order-service');
+
+    $span = $tracer->spanBuilder('process-order')->startSpan();
+
+    try {
+        // Your business logic here
+        validateOrder($orderId);
+        chargePayment($orderId);
+        fulfillOrder($orderId);
+    } finally {
+        $span->end();
+    }
+}
+```
+
+Tips:
+- Use descriptive span names that match business operations (`checkout`, `validate-user`, `send-email`).
+- Always call `end()` on spans—they won't export otherwise.
+- Use `try/finally` to ensure spans end even when exceptions occur.
+
+## Step 3. Create nested spans
+
+Track hierarchical operations by activating parent spans:
+
+```php:nested-spans.php
+<?php
+
+use OpenTelemetry\API\Globals;
+use OpenTelemetry\API\Trace\Span;
+
+function processCheckout(string $cartId): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('checkout-service');
+
+    // Parent span
+    $parentSpan = $tracer->spanBuilder('checkout')->startSpan();
+    $scope = $parentSpan->activate();
+
+    try {
+        // Child span - automatically linked to parent
+        $childSpan = $tracer->spanBuilder('validate-cart')->startSpan();
+        try {
+            validateCart($cartId);
+        } finally {
+            $childSpan->end();
+        }
+
+        // Another child span
+        $paymentSpan = $tracer->spanBuilder('process-payment')->startSpan();
+        try {
+            processPayment($cartId);
+        } finally {
+            $paymentSpan->end();
+        }
+    } finally {
+        $scope->detach();
+        $parentSpan->end();
+    }
+}
+```
+
+Always detach scopes to prevent context leaks.
+
+## Step 4. Add attributes
+
+Attributes show up as key-value pairs in SigNoz for filtering and aggregation:
+
+```php:attributes.php
+<?php
+
+use OpenTelemetry\API\Globals;
+
+function handlePayment(float $amount, string $currency): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('payment-service');
+
+    $span = $tracer->spanBuilder('payment')->startSpan();
+
+    try {
+        $span->setAttribute('payment.amount', $amount);
+        $span->setAttribute('payment.currency', $currency);
+        $span->setAttribute('payment.method', 'credit_card');
+        $span->setAttribute('user.id', getCurrentUserId());
+
+        // Process payment...
+    } finally {
+        $span->end();
+    }
+}
+```
+
+Use [semantic conventions](https://opentelemetry.io/docs/specs/semconv/) for common attributes when possible.
+
+## Step 5. Add events
+
+Events capture notable moments within a span:
+
+```php:events.php
+<?php
+
+use OpenTelemetry\API\Globals;
+use OpenTelemetry\SDK\Common\Attribute\Attributes;
+
+function processJob(string $jobId): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('job-service');
+
+    $span = $tracer->spanBuilder('process-job')->startSpan();
+
+    try {
+        $span->addEvent('job.started');
+
+        // Do work...
+
+        $span->addEvent('job.completed', Attributes::create([
+            'job.id' => $jobId,
+            'job.result' => 'success',
+            'job.duration_ms' => 1234,
+        ]));
+    } finally {
+        $span->end();
+    }
+}
+```
+
+Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
+
+## Step 6. Record errors
+
+Flag failures so they're easy to query in SigNoz:
+
+```php:error-handling.php
+<?php
+
+use OpenTelemetry\API\Globals;
+use OpenTelemetry\API\Trace\StatusCode;
+
+function riskyOperation(): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('my-service');
+
+    $span = $tracer->spanBuilder('risky-operation')->startSpan();
+
+    try {
+        doSomethingRisky();
+        $span->setStatus(StatusCode::STATUS_OK);
+    } catch (Throwable $e) {
+        $span->recordException($e, [
+            'exception.escaped' => true,
+        ]);
+        $span->setStatus(StatusCode::STATUS_ERROR, $e->getMessage());
+        throw $e;
+    } finally {
+        $span->end();
+    }
+}
+```
+
+- `recordException()` attaches exception details including stack trace.
+- Setting status to `STATUS_ERROR` surfaces the span in SigNoz error views and alerts.
+
+## Step 7. Add span links
+
+Link spans representing causally-related but not parent-child operations:
+
+```php:span-links.php
+<?php
+
+use OpenTelemetry\API\Globals;
+
+function processBatch(array $itemSpanContexts): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('batch-service');
+
+    $spanBuilder = $tracer->spanBuilder('batch-process');
+
+    // Link to all items being processed in this batch
+    foreach ($itemSpanContexts as $context) {
+        $spanBuilder->addLink($context);
+    }
+
+    $span = $spanBuilder->startSpan();
+
+    try {
+        // Process batch...
+    } finally {
+        $span->end();
+    }
+}
+```
+
+## Validate
+
+1. Trigger the code paths that emit manual spans.
+2. In SigNoz **Traces**, filter by `service.name` or your span name.
+3. Open a trace and verify attributes, events, and error status.
+4. Check the **Errors** view to confirm failures show up with recorded exceptions.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't I see my custom spans in SigNoz?
+
+- Ensure the OpenTelemetry extension is loaded: `php --ri opentelemetry`
+- Verify environment variables are set correctly (`OTEL_PHP_AUTOLOAD_ENABLED=true`, `OTEL_EXPORTER_OTLP_ENDPOINT`, etc.).
+- Check that `span->end()` is being called—spans without `end()` won't export.
+- Confirm the SDK is properly initialized before your application code runs.
+
+### Why are child spans not linked to parent spans?
+
+- Make sure you call `activate()` on the parent span before creating children.
+- Always `detach()` the scope when done to prevent context leaks.
+- Verify you're using the same tracer provider instance throughout.
+
+### Why don't attributes or events appear on the span?
+
+- Call `setAttribute()` or `addEvent()` before `span->end()`. Post-end mutations are ignored.
+- Attribute values must be scalar types (string, int, float, bool) or arrays of scalars.
+- Avoid reusing finished spans—always create a new span for each invocation.
+
+</details>
+
+## Next steps
+
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your PHP application
+- [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your custom spans
+- Explore [supported PHP instrumentation libraries](https://packagist.org/search/?query=open-telemetry&tags=instrumentation) for automatic instrumentation of frameworks and libraries

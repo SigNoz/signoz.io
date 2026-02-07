@@ -1,0 +1,321 @@
+---
+title: A Developer’s Guide to Configuring OpenTelemetry Environment Variables
+slug: otel-environment-variables
+date: 2026-01-30
+tags: [OpenTelemetry, Observability]
+authors: [dhruv_ahuja]
+description: "Learn what OpenTelemetry (OTel) Environment Variables are, and how you can use them to manage application behaviour through this practical guide."
+keywords: [opentelemetry, opentelemetry env vars, opentelemetry environment variables, otel resources, opentelemetry resources, otel attributes]
+image: /img/blog/2026/01/otel-environment-variables-export.webp
+---
+
+If you routinely manage the deployment and configuration of your application services, you must likely adjust telemetry settings across deployments often, as requirements change and your applications evolve. The process of packaging and deploying new application versions for these adjustments can be time-consuming and error-prone.
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) environment variables relieve this pressure by enabling developers to manage telemetry configuration without making code changes and frequent end-to-end deployments.
+
+This guide covers what OpenTelemetry environment variables are, the core OTel environment variables that you should know about, and how they work practically.
+
+## What are OpenTelemetry Environment Variables?
+
+OpenTelemetry environment variables (commonly known as OTel env vars) decide how OpenTelemetry SDKs collect and export telemetry data from applications. By separating configuration from application logic, and standardizing the configuration across SDKs for different languages, OpenTelemetry ensures your applications remain *portable*.
+
+Since most applications likely export telemetry to the same destination, application deployments in, say, the staging environment, could run the same configuration with minimal changes. Whereas specialized components or services, such as a high-throughput background job service, could require more tailored configurations to better handle their traffic patterns.
+
+Now that we’ve covered the basics, let’s check out the environment variables and understand the nuances around their usage.
+
+## Establish Resource Identity with Service Variables
+
+When it comes to using OpenTelemetry with distributed systems, the most important step after instrumenting applications is to establish their identity. Identification helps OTel-compatible backends like [SigNoz](https://signoz.io/) understand the *source of the telemetry data*, and allows users to gain insights about their systems on a per-component level.
+
+There are two key environment variables that maintain identity in OpenTelemetry-based telemetry pipelines.
+
+### OTEL_SERVICE_NAME
+
+`OTEL_SERVICE_NAME` is the most critical identifier for applications using OpenTelemetry, as it ensures that any traces, metrics, and logs are exclusively linked to that application. Setting a valid service name enables users to easily monitor and understand all events that the application is processing. This identification is critical to debugging issues across distributed systems where many services interact with each other per-request.
+
+You must ensure that each application (or any other component, such as Kafka) in your distributed system sets a unique `OTEL_SERVICE_NAME`. If you omit the service name, OpenTelemetry SDKs typically default a value like `unknown_service`, meaning the telemetry from this application will be grouped together with all other services with omitted values.
+
+```bash
+export OTEL_SERVICE_NAME="worker-svc"
+```
+
+### OTEL_RESOURCE_ATTRIBUTES
+
+While `OTEL_SERVICE_NAME` defines the service name, which acts as the unique identifier,  `OTEL_RESOURCE_ATTRIBUTES` further enriches telemetry data.
+
+Resource attributes are key-value pairs that describe where the telemetry data is coming from, by adding critical details like the deployment environment, service version, and even service name. If you define service name via both `OTEL_RESOURCE_ATTRIBUTES` and `OTEL_SERVICE_NAME`, most SDKs prioritize the value set by `OTEL_SERVICE_NAME`.
+
+Developers can also register custom resource attributes to further enrich their telemetry data:
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="service.name=worker-svc,service.version=0.5.0,deployment.environment.name=staging,message.type=user"
+```
+
+By defining resource attributes like this, you can effectively debug issues by understanding scenarios like “the latest version of the worker service handling user messages in staging, has a higher error rate as compared to the previous version”.
+
+You can check out our [detailed write up](https://signoz.io/blog/otel-resource-attributes/) on OpenTelemetry resource attributes to understand how they standardize application identity within observability pipelines.
+
+## Managing How OpenTelemetry Data is Exported
+
+Once you have configured identity for your applications, OpenTelemetry-compatible backends can recognize where the data is coming from. To do that, you need to define **how to send telemetry data** to these backends. The `OTEL_EXPORTER_*` series of environment variables manage how OpenTelemetry-instrumented applications export telemetry data to compatible backends.
+
+<KeyPointCallout title="Per-Signal Configurability">
+
+Many exporter-related variables support **per-signal values** (separate settings for traces, metrics, and logs). We’ll see many examples of these values in the following sections.
+
+</KeyPointCallout>
+
+### OTEL_EXPORTER_OTLP_ENDPOINT
+
+The OpenTelemetry SDK sends the telemetry data that your application generates to the value defined via the `OTEL_EXPORTER_OTLP_ENDPOINT` env var. The value can point to an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) instance running locally — [or deployed as a gateway](https://signoz.io/blog/opentelemetry-deployment-patterns/#1-load-balanced-gateway-pattern) — or directly to an observability backend.
+
+When defining the endpoint, you should set the scheme (`http`/`https`) as most SDKs use secure or insecure modes of transport based on this value:
+
+```bash
+# send data to a local OTel collector instance
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+
+# send data to an observability backend like SigNoz
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443"
+```
+
+If you are using multiple observability tools, you can configure different endpoints for each signal. Here, we will send metrics to a local [Prometheus](https://signoz.io/guides/prometheus-monitoring-101/) instance <a href="https://prometheus.io/docs/prometheus/latest/querying/api/#otlp-receiver" rel="noopener noreferrer nofollow" target="_blank">configured to receive OTLP data</a>.
+
+```bash
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="http://localhost:9090/api/v1/otlp/v1/metrics"
+```
+
+<KeyPointCallout title="Fallback Behaviour">
+
+Since we didn’t define separate endpoints for traces (via `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`) and logs (via `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` ), OpenTelemetry will continue sending them to the “global” endpoint defined through the `OTEL_EXPORTER_OTLP_ENDPOINT` value. The same behaviour is followed for all other environment variables that support per-signal configuration.
+
+</KeyPointCallout>
+
+### OTEL_EXPORTER_OTLP_PROTOCOL
+
+The `OTEL_EXPORTER_OTLP_PROTOCOL` variable defines the protocol to use for exporting the telemetry data to the defined endpoint. OpenTelemetry enables data transmission via `grpc`,  `http/protobuf` and `http/json`. 
+
+We recommend that you use gRPC as it is optimized for high-throughput data transfer. Whereas the HTTP protocol is ideal if you wish to maintain compatibility with existing implementations, or when working with environments lacking gRPC support.
+
+Within HTTP, prefer `http/protobuf` as it will give you better throughput due to its compact message size. `http/json` is better for browser-based implementations where the protobuf package increases the Javascript *bundle size*.
+
+If you are interested in learning more about these implementations, check out our detailed write up on the [OTLP implementation](https://signoz.io/blog/what-is-otlp/).
+
+```bash
+# prefer grpc
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+
+# use json for more human-readable messages, helpful while debugging issues
+export OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=http/json
+
+# send metrics over http using protobuf message encoding
+export OTEL_EXPORTER_OTLP_METRICS_PROTOCOL=http/protobuf
+```
+
+### Selecting Exporters per-Signal
+
+The OpenTelemetry SDK uses the exporter environment variables to decide the data format for exporting telemetry data per-signal. By default, most implementations use the `otlp` exporter for all signals. By overriding this value, you can change the exporter type, send data to multiple sources at once, or even stop exporting data completely.
+
+```bash
+# export traces to the console and the otlp endpoint
+export OTEL_TRACES_EXPORTER="console,otlp"
+
+# export metrics via a pull-based prometheus endpoint
+export OTEL_METRICS_EXPORTER="prometheus"
+
+# prevent the SDK from emitting any logs
+export OTEL_LOGS_EXPORTER="none"
+```
+
+Using the `console` exporter to visualize telemetry in your terminal, or disabling data export for particular signals, is helpful during local development or when debugging issues with data transmission from the application to its destination.
+
+<Figure src="/img/blog/2026/01/otel-environment-variables-export.webp" alt="A view of the OTel SDK exporting trace data to the console." caption="A view of the OTel SDK exporting trace data to the console." />
+
+### OTEL_EXPORTER_OTLP_TIMEOUT
+
+This variable controls how long the exporter waits for every batch of data to finish transmission before timing out. For *transient* errors — short-term errors that are expected to resolve themselves — the OTLP exporters retry exports with exponential backoff to avoid overwhelming the system.
+
+<Figure src="/img/blog/2026/01/otel-environment-variables-failure.webp" alt="For transient errors, the exporter retries data export with exponential backoff." caption="For transient errors, the exporter retries data export with exponential backoff." />
+
+<KeyPointCallout title="Export Timeout Configuration Mismatch">
+
+The OpenTelemetry documentation (as of protocol version 1.53.0) officially states <a href="https://opentelemetry.io/docs/specs/otel/protocol/exporter/#configuration-options" rel="noopener noreferrer nofollow" target="_blank">10 seconds as the default timeout</a>, and the SDK spec uses `milliseconds` to <a href="https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#otel_exporter_otlp_timeout" rel="noopener noreferrer nofollow" target="_blank">define this value</a>. However, due to a unit value mismatch in older versions of some OpenTelemetry SDKs, this value might not be properly enforced across different languages and SDK versions, as tracked in the <a href="https://github.com/open-telemetry/opentelemetry-python/pull/4860" rel="noopener noreferrer nofollow" target="_blank">OTel Python implementation</a>.
+
+We recommend that you check the behaviour for your implementation locally before pushing changes to production.
+
+</KeyPointCallout>
+
+```bash
+# value in milliseconds, but interpretation can vary by implementation!
+export OTEL_EXPORTER_OTLP_TIMEOUT=10000
+```
+
+### OTEL_EXPORTER_OTLP_HEADERS
+
+This variable defines custom headers to be added to each outgoing request made by the SDK, practically used for authenticating telemetry data sources to receiving backends. You can attach multiple headers by separating them with commas.
+
+```bash
+# common configuration when using SigNoz as the exporter OTLP endpoint
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-key-here>"
+
+# separate configuration per-signal
+export OTEL_EXPORTER_OTLP_LOGS_HEADERS="signoz-ingestion-key=<your-key-here>,x-auth-id=log-admin"
+export OTEL_EXPORTER_OTLP_TRACES_HEADERS="..."
+export OTEL_EXPORTER_OTLP_METRICS_HEADERS="..."
+```
+
+## Debugging Instrumentation Issues
+
+Configuring and maintaining observability pipelines can be difficult, particularly when instrumenting applications. A common concern is the performance overhead caused by the OpenTelemetry SDK constantly generating and exporting traces, metrics and logs from your applications.
+
+To diagnose such instrumentation issues, you can use the `OTEL_SDK_DISABLED` variable to disable telemetry data generation across all signals.
+
+### OTEL_SDK_DISABLED
+
+This environment variable completely disables the SDK’s runtime setup, which means that the OpenTelemetry APIs use *no-op* implementations, that don’t do anything when called. This minimizes the performance impact that OpenTelemetry has on your application since no telemetry is generated.
+
+Once the SDK is disabled, you can restart the service (for the changes to take effect), perform thorough benchmarking and diagnose any potential issues caused by instrumentation. Combined with the signal-specific exporter configuration, you can understand how OpenTelemetry works with your data, and its impact on your applications. Once caught, you can fix the issues or plan for adjustments as needed.
+
+```bash
+# disable all telemetry
+export OTEL_SDK_DISABLED=true
+
+# re-enable telemetry generation
+export OTEL_SDK_DISABLED=false
+```
+
+For example, memory profiling might show a background task generating hundreds of spans per run, which spikes memory usage and increases export pressure. Such scenarios can also potentially lead to data loss, as is explained in a following section.
+
+## Controlling Trace Volumes
+
+It is rarely necessary to record each trace emitted by your application, especially in a high-traffic production environment. Instead of analyzing *all the requests* for an endpoint, you only need to analyze a small subset of them to understand patterns and diagnose problems. A *sampled* trace is one that will be processed and exported to the observability backend. Any trace that is not processed is a *dropped* trace.
+
+OpenTelemetry allows you to sample traces at the beginning of a request using `OTEL_TRACES_SAMPLER`, and tweak the exact numbers via `OTEL_TRACES_SAMPLER_ARG`.
+
+### OTEL_TRACES_SAMPLER
+
+For development, you can use the basic options: `always_on` that records everything, or `always_off` to drop all traces. For production, you would use a ratio-based sampler that keeps a ratio of the traces, dropping others.
+
+Since each application or service can sample trace data in a distributed system, a sampled trace by Service A could be dropped by Service B, leading to data loss and *broken traces*. To solve this, you should use a “parent-based” ratio strategy. When a service receives a request from another service, this strategy ensures that the current service follows the existing sampling strategy. 
+
+```bash
+# follow the parent, else sample a ratio of the traces
+export OTEL_TRACES_SAMPLER=parentbased_traceidratio
+```
+
+### OTEL_TRACES_SAMPLER_ARG
+
+This defines the actual ratio of the traces to sample, where `0.1` means sample 10% of the traces, while `1` means sample 100% of traces.
+
+```bash
+# sample 10% of traces
+export OTEL_TRACES_SAMPLER_ARG=0.1
+```
+
+## Effectively Exporting Application Metrics
+
+Ensuring you have a high enough **resolution**, or the frequency of data collection, into system behaviour is a key job of any metrics pipeline. The resolution decides whether you capture or miss short-lived disruptions or spikes.
+
+To capture metrics effectively based on your observability needs, you can configure the behaviour of the <a href="https://opentelemetry.io/docs/specs/otel/metrics/sdk/#periodic-exporting-metricreader" rel="noopener noreferrer nofollow" target="_blank">Periodic exporting metric reader</a>, which collects metrics on an interval and sends them to push-based exporters (like OTLP). 
+
+### OTEL_METRIC_EXPORT_INTERVAL
+
+The `OTEL_METRIC_EXPORT_INTERVAL` variable defines in milliseconds how frequently the metric reader collects metrics for export. By default, the interval is set to 60,000 milliseconds or 60 seconds.
+
+Keep in mind that setting lower values will drive up your application’s CPU and network usage as the SDK has to gather and export data more frequently. It will also increase your observability bills, as you will multiply the amount of data your observability backend has to store. You must use a value that balances your business needs and system limits.
+
+```bash
+# set to 60 seconds (default)
+export OTEL_METRIC_EXPORT_INTERVAL=60000
+```
+
+### OTEL_METRIC_EXPORT_TIMEOUT
+
+This defines the maximum duration to wait for a batch of metric data to finish exporting. Since implementations like <a href="https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/metrics/_internal/export/__init__.py#L459" rel="noopener noreferrer nofollow" target="_blank">Python use a mutex</a> (a `Lock` in Python) to prevent concurrent access, we recommend you set an export interval that is significantly larger than the timeout value, so that the SDK processes each batch before attempting to export the next one and avoid long wait times.
+
+```bash
+# set to 30 seconds (default)
+export OTEL_METRIC_EXPORT_TIMEOUT=30000
+```
+
+## Adjusting Data Batches for Export
+
+Unless you manually instrument your code to use the alternate processors or exporters, the OTel SDK processes data in batches to minimize CPU and network overhead. Configuring how spans and logs are batched before export can help manage telemetry loads for high-throughput applications.
+
+### Configuring Batching of Spans
+
+The SDK enables you to adjust how the <a href="https://opentelemetry-python.readthedocs.io/en/latest/sdk/trace.export.html#opentelemetry.sdk.trace.export.BatchSpanProcessor" rel="noopener noreferrer nofollow" target="_blank">Batch Span Processor (BSP)</a> batches spans together in-memory before sending them for export. This is a critical area for performance because it balances how “fresh” your data is, compared to the overhead the export frequency has on your application.
+
+The *schedule delay* and the *batch size* are the primary aspects to manage, while the *queue size* acts as the main regulator for spans.
+
+The `OTEL_BSP_SCHEDULE_DELAY` decides how often the processor *flushes* spans from the span queue for the exporter. By lowering this value, you see trace data in more “real-time”, at the cost of increased network calls.
+
+The `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` controls the maximum number of spans to send per batch. You might see frequent memory spikes if your application generates spans rapidly. To control the memory usage, the processor will export spans as soon as the batch size limit is hit, bypassing the schedule delay.
+
+The `OTEL_BSP_MAX_QUEUE_SIZE` defines the buffer size to maintain for spans in-memory. If the exporter experiences delays or you have a network outage, the SDK will buffer spans up to the queue size. Once the queue is full, the processor must flush those spans to make space, else **incoming spans will be dropped** to prevent Out of Memory (OOM) errors. 
+
+```bash
+# flush every 5 seconds (default)
+export OTEL_BSP_SCHEDULE_DELAY=5000
+
+# send max 512 spans per request (default)
+export OTEL_BSP_MAX_EXPORT_BATCH_SIZE=512
+
+# buffer up to 2048 spans before dropping data (default)
+export OTEL_BSP_MAX_QUEUE_SIZE=2048
+```
+
+### Configuring Batching of Logs
+
+Since the size of log records can be (and often is) quite large, transmission of logs can become a big bottleneck for applications. The OpenTelemetry SDK handles logs using a <a href="https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/_logs/_internal/export/__init__.py#L202" rel="noopener noreferrer nofollow" target="_blank">Batch Log Record Processor</a> (BLRP), which behaves similarly to the BSP, and follows a similar mental model for configuration.
+
+```bash
+# flush logs every 1 second (default)
+export OTEL_BLRP_SCHEDULE_DELAY=1000
+
+# buffer up to 2048 log records (default)
+export OTEL_BLRP_MAX_QUEUE_SIZE=2048
+
+# send max 512 logs per request (default)
+export OTEL_BLRP_MAX_EXPORT_BATCH_SIZE=512
+```
+
+## Defining Limits for Metadata
+
+Somewhat similarly to how you manage batching limits, OpenTelemetry also allows you to control how metadata is added to telemetry data via **attribute, span and log record limits**. You may need to begin adjusting limits when developers manually instrument their code and add metadata to enrich their telemetry.
+
+For example, when adding attributes to traces, a developer may accidentally add a large payload, or may forget removing some debug logic that accidentally goes live.
+
+```python
+# where user_payload is a large JSON
+span.set_attribute("user.payload", user_payload)
+```
+
+Such attributes will consume your network bandwidth during data export, increase in-memory usage and increase your observability bills due to the excess storage required to store these large values.
+
+The most common limit to configure is `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT`. If any attribute exceeds this limit, the SDK will truncate the data. You can also limit the number of attributes per span or log, where a single data point too difficult to process due to its large size.
+
+```bash
+# truncate attribute values longer than 4KB
+export OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT=4096
+
+# allow max 128 distinct attributes per span
+export OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT=128
+
+# allow max 128 distinct attributes per log record
+export OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT=128
+```
+
+## Conclusion
+
+You now have familiarity with the core OTel env vars for service identity, export, sampling, batching, and limits. These env vars will enable you to better manage configuration across your applications and reduce dependency on code changes.
+
+Do note that we have not covered each and every available environment variable or its per-signal variations. Check out the <a href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/" rel="noopener noreferrer nofollow" target="_blank">official documentation</a> if you need more information.
+
+To further measure and optimize application performance, you need to gain visibility across requests within your distributed systems.
+
+[SigNoz](https://signoz.io/) is an all-in-one, OpenTelemetry-native observability platform for logs, metrics, and traces, with correlation across signals so you can move from a metric anomaly to the related traces/logs.
+
+<Figure src="/img/blog/2026/01/signoz-flamegraph.webp" alt="SigNoz trace detail view showcasing detailed breakdown of a distributed request." caption="SigNoz trace detail view showcasing detailed breakdown of a distributed request." />
+
+You can try it out with [SigNoz Cloud](https://signoz.io/teams/) or self-host the [Community Edition](https://github.com/SigNoz/signoz) for free.

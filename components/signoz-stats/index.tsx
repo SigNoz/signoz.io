@@ -16,7 +16,7 @@ const SigNozStats = () => {
       name: 'OSS Downloads',
       value: '10 million+',
     },
-    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '22k+' },
+    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '25k+' },
     { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
     { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
   ]

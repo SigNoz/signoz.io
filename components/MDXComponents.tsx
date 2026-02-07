@@ -1,5 +1,4 @@
 import TOCInline from 'pliny/ui/TOCInline'
-import Pre from 'pliny/ui/Pre'
 import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
 import type { MDXComponents } from 'mdx/types'
 import Image from './Image'
@@ -39,6 +38,7 @@ import TrackingLink from './TrackingLink'
 import APMQuickStartOverview from './APM/APMQuickStartOverview'
 import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
 import JavascriptInstrumentationListicle from './APM/JavascriptInstrumentationListicle'
+import JavaInstrumentationListicle from './APM/JavaInstrumentationListicle'
 import LibraryTabs from './LibraryTabs/LibraryTabs'
 import LibraryTab from './LibraryTabs/LibraryTab'
 import MDXButton from './MDXButton/MDXButton'
@@ -70,13 +70,30 @@ import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
 import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
 import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
+import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
+import AWSOneClickListicle from './AWS/AWSOneClickListicle'
+import Region from './Region/Region'
+import RegionTable from './Region/RegionTable'
+import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
+
+import CardinalityExplosion from './HighCardinalityData/CardinalityExplosion'
+import MemoryGauge from './HighCardinalityData/MemoryGauge'
+import QueryRace from './HighCardinalityData/QueryRace'
+import SamplingAggregation from './HighCardinalityData/SamplingAggregation'
+import UsersAnalogy from './HighCardinalityData/UsersAnalogy'
+import Tooltip from './ui/Tooltip'
+import DatabaseTable from './HighCardinalityData/DatabaseTable'
 
 export const components: MDXComponents = {
+  Region,
+  region: Region,
+  RegionTable,
   ToggleHeading,
   Image,
   TOCInline,
   a: CustomLink,
-  pre: Pre,
+  pre: RegionAwarePre,
+  code: RegionAwareCode,
   table: TableWrapper,
   BlogNewsletterForm,
   YouTube,
@@ -113,6 +130,7 @@ export const components: MDXComponents = {
   APMQuickStartOverview,
   APMInstrumentationListicle,
   JavascriptInstrumentationListicle,
+  JavaInstrumentationListicle,
   LibraryTabs,
   LibraryTab,
   MDXButton,
@@ -140,4 +158,13 @@ export const components: MDXComponents = {
   ProductFeatureShowcase,
   MetricsQuickStartOverview,
   CICDMonitoringListicle,
+  AWSMonitoringListicle,
+  AWSOneClickListicle,
+  CardinalityExplosion,
+  MemoryGauge,
+  QueryRace,
+  SamplingAggregation,
+  UsersAnalogy,
+  Tooltip,
+  DatabaseTable,
 }

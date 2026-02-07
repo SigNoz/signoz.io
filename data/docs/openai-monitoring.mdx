@@ -1,9 +1,9 @@
 ---
-date: 2025-11-20
+date: 2026-01-27
 id: openai-monitoring
 
-title: OpenAI Monitoring with SigNoz
-description: Monitoring adn observability for your OpenAI applications with OpenTelemetry to send traces, logs, and metrics to SigNoz
+title: OpenAI Monitoring & Observability with OpenTelemetry
+description: Monitoring and observability for your OpenAI applications with OpenTelemetry to send traces, logs, and metrics to SigNoz
 ---
 
 This document contains instructions on how to set up OpenTelemetry instrumentation for monitoring and observability of your OpenAI applications and view your application traces, logs, and metrics
@@ -62,8 +62,8 @@ opentelemetry-instrument <your_run_command>
 - `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` - Enables automatic logging instrumentation
 - `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` - Captures prompts and completions as logs
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<service-name>` with the name of your service
 - Replace `<your-openai-key>` with your OpenAI API key
 
@@ -449,8 +449,8 @@ java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 **Configuration Variables:**
 
 - Set `<service_name>` to the name of your service
-- Set `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<my-app>` with your application JAR file name
 
 <Admonition type="info">
@@ -546,7 +546,11 @@ export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
 
 **Note:** Be cautious when enabling this in production as it may capture sensitive user data. This feature is already included in the run command above.
 
+
+<details>
+<ToggleHeading>
 ## Troubleshooting your installation
+</ToggleHeading>
 
 ### Spans are not being reported
 
@@ -599,3 +603,11 @@ If you don't see your telemetry data:
 2. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
 3. **Check ingestion key** - Verify your SigNoz ingestion key is correct
 4. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+
+</details>
+
+## Dashboard
+
+You can also check out our custom OpenAI dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/openai-dashboard/) which provides specialized visualizations for monitoring your OpenAI usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure src="/img/docs/llm/openai/openai-dashboard.webp" alt="OpenAI Dashboard" caption="OpenAI Dashboard Template" />

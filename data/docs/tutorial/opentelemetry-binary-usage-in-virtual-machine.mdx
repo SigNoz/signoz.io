@@ -1,13 +1,11 @@
 ---
-date: 2024-06-06
+date: 2026-01-27
 id: opentelemetry-binary-usage-in-virtual-machine
-
-title: OpenTelemetry Binary - Overview
-description: Using OpenTelemetry binary as an agent collector to monitor the virtual machine (VM) and applications running on it.
+title: OpenTelemetry Collector Binary in Virtual Machine
+description: Learn how to set up the OpenTelemetry Collector binary on Virtual Machines (Linux, MacOS, Windows) to collect and send telemetry data to SigNoz.
+doc_type: tutorial
 hide_table_of_contents: true
 ---
-
-
 
 import HostMetrics from '@/components/shared/hostmetrics-list.md'
 // import OtelDownloadWindowsAmd from '@/components/shared/otel-binary-download-windows-amd.md'
@@ -27,8 +25,6 @@ import HostMetrics from '@/components/shared/hostmetrics-list.md'
 // import TailLogs from '@/components/shared/otel-binary-logs.md'
 // import OtelStop from '@/components/shared/otel-binary-stop.md'
 
-### Overview
-
 This tutorial shows how you can deploy OpenTelemetry binary as an agent, which
 collects telemetry data. Data such as traces, metrics and logs generated
 by applications most likely running in the same virtual machine (VM).
@@ -47,11 +43,11 @@ metrics from the VM and view in SigNoz.
 
 OpenTelemetry-instrumented applications in a VM can send data to the `otel-binary` agent running in the same VM. The OTel agent can then be configured to send data to the SigNoz cloud.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/saas-docs/vm-setup-2x.webp" alt="Collecting data from applications deployed in VM"/>
-    <figcaption><i>OpenTelemetry-instrumented applications in a VM can send data to otel-binary which then sends data to SigNoz cloud.</i></figcaption>
-</figure>
-
+<Figure
+  src="/img/docs/saas-docs/vm-setup-2x.webp"
+  alt="Collecting data from applications deployed in VM"
+  caption="OpenTelemetry-instrumented applications in a VM can send data to otel-binary which then sends data to SigNoz cloud."
+/>
 
 Here are the steps to set up OpenTelemetry binary as an agent.
 
@@ -61,18 +57,18 @@ Here are the steps to set up OpenTelemetry binary as an agent.
 1. Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_linux_amd64.tar.gz
 ```
 
 2. Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
 3. Create `config.yaml` in `otelcol-contrib` folder and paste the below yaml configuration code in it.
 
-```YAML
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -103,7 +99,7 @@ receivers:
         - job_name: otel-collector-binary
           static_configs:
             - targets:
-              # - localhost:8888
+              # - localhost:8888 # Uncomment to scrape Collector's own metrics
 processors:
   batch:
     send_batch_size: 1000
@@ -130,7 +126,7 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8888
+      level: basic
   extensions: [health_check, zpages]
   pipelines:
     metrics:
@@ -151,9 +147,8 @@ service:
       exporters: [otlp]
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 4. Once we are done with the above configurations, we can now run the collector service with the following command:
 
@@ -163,22 +158,23 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
+
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
-   
 If you want to see the output of the logs you’ve just set up for the background process, you may look it up with:
 
 ```bash
 tail -f -n 50 otelcol-output.log
 ```
-tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
+tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
 You can stop the collector service `otelcol` when running in backgorund, with the following command:
 
@@ -192,18 +188,18 @@ kill "$(< otel-pid)"
 1. Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_arm64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_linux_arm64.tar.gz
 ```
 
 2. Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_arm64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_linux_arm64.tar.gz -C otelcol-contrib
 ```
 
 3. Create `config.yaml` in `otelcol-contrib` folder and paste the below yaml configuration code in it.
 
-```YAML
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -234,7 +230,7 @@ receivers:
         - job_name: otel-collector-binary
           static_configs:
             - targets:
-              # - localhost:8888
+              # - localhost:8888 # Uncomment to scrape Collector's own metrics
 processors:
   batch:
     send_batch_size: 1000
@@ -261,7 +257,7 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8888
+      level: basic
   extensions: [health_check, zpages]
   pipelines:
     metrics:
@@ -282,9 +278,8 @@ service:
       exporters: [otlp]
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 4. Once we are done with the above configurations, we can now run the collector service with the following command:
 
@@ -294,22 +289,23 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
+
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
-   
 If you want to see the output of the logs you’ve just set up for the background process, you may look it up with:
 
 ```bash
 tail -f -n 50 otelcol-output.log
 ```
-tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
+tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
 You can stop the collector service `otelcol` when running in backgorund, with the following command:
 
@@ -323,18 +319,18 @@ kill "$(< otel-pid)"
 1. Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_darwin_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_darwin_amd64.tar.gz
 ```
 
 2. Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_darwin_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_darwin_amd64.tar.gz -C otelcol-contrib
 ```
 
 3. Create `config.yaml` in `otelcol-contrib` folder and paste the below yaml configuration code in it.
 
-```YAML
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -352,10 +348,6 @@ receivers:
       memory: {}
       network: {}
       paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
       processes: {}
   prometheus:
     config:
@@ -365,7 +357,7 @@ receivers:
         - job_name: otel-collector-binary
           static_configs:
             - targets:
-              # - localhost:8888
+              # - localhost:8888 # Uncomment to scrape Collector's own metrics
 processors:
   batch:
     send_batch_size: 1000
@@ -392,7 +384,7 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8888
+      level: basic
   extensions: [health_check, zpages]
   pipelines:
     metrics:
@@ -413,9 +405,8 @@ service:
       exporters: [otlp]
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 4. Once we are done with the above configurations, we can now run the collector service with the following command:
 
@@ -425,23 +416,23 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
 
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
-   
 If you want to see the output of the logs you’ve just set up for the background process, you may look it up with:
 
 ```bash
 tail -f -n 50 otelcol-output.log
 ```
-tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
+tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
 You can stop the collector service `otelcol` when running in backgorund, with the following command:
 
@@ -455,18 +446,18 @@ kill "$(< otel-pid)"
 1. Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_darwin_arm64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_darwin_arm64.tar.gz
 ```
 
 2. Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_darwin_arm64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_darwin_arm64.tar.gz -C otelcol-contrib
 ```
 
 3. Create `config.yaml` in `otelcol-contrib` folder and paste the below yaml configuration code in it.
 
-```YAML
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -484,10 +475,6 @@ receivers:
       memory: {}
       network: {}
       paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
       processes: {}
   prometheus:
     config:
@@ -497,7 +484,7 @@ receivers:
         - job_name: otel-collector-binary
           static_configs:
             - targets:
-              # - localhost:8888
+              # - localhost:8888 # Uncomment to scrape Collector's own metrics
 processors:
   batch:
     send_batch_size: 1000
@@ -524,7 +511,7 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8888
+      level: basic
   extensions: [health_check, zpages]
   pipelines:
     metrics:
@@ -545,9 +532,8 @@ service:
       exporters: [otlp]
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 4. Once we are done with the above configurations, we can now run the collector service with the following command:
 
@@ -557,23 +543,23 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
 
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
-   
 If you want to see the output of the logs you’ve just set up for the background process, you may look it up with:
 
 ```bash
 tail -f -n 50 otelcol-output.log
 ```
-tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
+tail 50 will give the last 50 lines from the file `otelcol-output.log`
 
 You can stop the collector service `otelcol` when running in backgorund, with the following command:
 
@@ -587,14 +573,14 @@ kill "$(< otel-pid)"
 1. Download otel-collector tar.gz for your architecture using command line or from [releases](https://github.com/open-telemetry/opentelemetry-collector-releases/releases) page.
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v/otelcol-contrib_0.116.0_windows_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_windows_amd64.tar.gz
 ```
 
 2. Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib 
-tar xvzf otelcol-contrib_0.116.0_windows_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib
+tar xvzf otelcol-contrib_0.143.1_windows_amd64.tar.gz -C otelcol-contrib
 ```
 
 Upon successful extraction, change directory using
@@ -612,10 +598,9 @@ To verify the successful setup of Otel Collector, run the following command
 Expected output:
 `otelcol-contrib version `
 
-
 3. Create `config.yaml` in `otelcol-contrib` folder and paste the below yaml configuration code in it.
 
-```YAML
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -637,6 +622,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
   prometheus:
     config:
@@ -646,7 +632,7 @@ receivers:
         - job_name: otel-collector-binary
           static_configs:
             - targets:
-              # - localhost:8888
+              # - localhost:8888 # Uncomment to scrape Collector's own metrics
 processors:
   batch:
     send_batch_size: 1000
@@ -673,7 +659,7 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8888
+      level: basic
   extensions: [health_check, zpages]
   pipelines:
     metrics:
@@ -694,9 +680,8 @@ service:
       exporters: [otlp]
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 4. Once we are done with the above configurations, we can now run the collector service with the following command:
 
@@ -747,7 +732,6 @@ If the SigNoz endpoint in the configuration is set correctly and accessible,
 you should be able to see the traces sent via OpenTelemetry collector in VM
 from `telemetrygen` in the SigNoz UI.
 
-
 </TabItem>
 
 <TabItem value='self-host' label='Self-Host'>
@@ -772,7 +756,7 @@ default configuration prepopulated at the `/etc/otelcol-contrib` path. This meth
 would be preferable in case you want the OpenTelemetry collector to always be
 running in the background.
 
-To download the `deb` file of release version `0.116.0`:
+To download the `deb` file of release version `0.143.1`:
 
 Here are the steps to set up OpenTelemetry binary as an agent.
 
@@ -780,21 +764,22 @@ Here are the steps to set up OpenTelemetry binary as an agent.
 <TabItem value="amd" label="amd64" default>
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.deb
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_linux_amd64.deb
 ```
 
 </TabItem>
 <TabItem value="arm" label="arm64">
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_arm64.deb
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_linux_arm64.deb
 ```
 
 </TabItem>
 </Tabs>
 
 <Admonition type="info">
-In the case of different OpenTelemetry collector versions, replace `0.116.0` with the respective version.
+  In the case of different OpenTelemetry collector versions, replace `0.143.1` with the respective
+  version.
 </Admonition>
 
 To install `otelcol` as `systemd` using `dpkg`:
@@ -803,14 +788,14 @@ To install `otelcol` as `systemd` using `dpkg`:
 <TabItem value="amd" label="amd64" default>
 
 ```bash
-sudo dpkg -i otelcol-contrib_0.116.0_linux_amd64.deb
+sudo dpkg -i otelcol-contrib_0.143.1_linux_amd64.deb
 ```
 
 </TabItem>
 <TabItem value="arm" label="arm64">
 
 ```bash
-sudo dpkg -i otelcol-contrib_0.116.0_linux_arm64.deb
+sudo dpkg -i otelcol-contrib_0.143.1_linux_arm64.deb
 ```
 
 </TabItem>
@@ -828,13 +813,13 @@ with flags by using tools like `screen` or `tmux`.
 1. Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_linux_amd64.tar.gz
 ```
 
 2. Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
 </TabItem>
@@ -843,13 +828,13 @@ mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C 
 Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_arm64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_linux_arm64.tar.gz
 ```
 
 Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_arm64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_linux_arm64.tar.gz -C otelcol-contrib
 ```
 
 </TabItem>
@@ -858,13 +843,13 @@ mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_arm64.tar.gz -C 
 Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_darwin_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_darwin_amd64.tar.gz
 ```
 
 Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_darwin_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_darwin_amd64.tar.gz -C otelcol-contrib
 ```
 
 </TabItem>
@@ -873,13 +858,13 @@ mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_darwin_amd64.tar.gz -C
 Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_darwin_arm64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.143.1/otelcol-contrib_0.143.1_darwin_arm64.tar.gz
 ```
 
 Extract otel-collector tar.gz to the `otelcol-contrib` folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_darwin_arm64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.143.1_darwin_arm64.tar.gz -C otelcol-contrib
 ```
 
 </TabItem>
@@ -898,10 +883,10 @@ highlighted below:
 
 ```yaml {3}
 exporters:
-   otlp:
-     endpoint: "<IP of machine hosting SigNoz>:4317"
-     tls:
-       insecure: true
+  otlp:
+    endpoint: '<IP of machine hosting SigNoz>:4317'
+    tls:
+      insecure: true
 ```
 
 In the configuration above, we enable three receivers: `OTLP`, `hostmetrics`
@@ -985,12 +970,14 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
+
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
 </TabItem>
@@ -1004,12 +991,14 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
+
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
 </TabItem>
@@ -1023,13 +1012,14 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
 
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
 </TabItem>
@@ -1043,13 +1033,14 @@ From the `otelcol-contrib`, run the following command:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-### Run in background 
+### Run in background
 
 If you want to run otel collector process in the background:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
 ```
+
 The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
 
 </TabItem>

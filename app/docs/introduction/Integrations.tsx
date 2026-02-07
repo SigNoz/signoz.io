@@ -50,7 +50,7 @@ const integrationsData: IconCardData[] = [
   },
   {
     name: 'AWS',
-    href: '/docs/integrations/aws-rds-postgres/',
+    href: '/docs/integrations/aws/one-click-aws-integrations/',
     icon: <SiAmazonwebservices className="h-7 w-7 text-orange-500" />,
     clickName: 'AWS Integration Link',
   },

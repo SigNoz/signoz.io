@@ -1,7 +1,6 @@
 ---
-date: 2025-12-01
+date: 2026-01-18
 id: metrics
-
 title: Migrate Metrics from ELK Stack
 description: Learn how to migrate your metrics from ELK Stack (Metricbeat) to SigNoz using OpenTelemetry.
 doc_type: howto
@@ -17,17 +16,17 @@ This guide walks you through migrating metrics from the ELK Stack (specifically 
 4. Validate metrics are flowing correctly to SigNoz
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Key Differences: ELK vs SigNoz
 
-| Aspect | ELK Stack | SigNoz |
-|--------|-----------|--------|
-| **Collection** | Metricbeat, Elastic Agent | OpenTelemetry Collector |
-| **Data Model** | Elasticsearch Documents | OpenTelemetry Metrics |
-| **Query Language** | KQL, Lucene, TSVB | Query Builder, PromQL, ClickHouse SQL |
-| **Storage** | Elasticsearch (Indices) | ClickHouse (Columnar) |
+| Aspect             | ELK Stack                 | SigNoz                                |
+| ------------------ | ------------------------- | ------------------------------------- |
+| **Collection**     | Metricbeat, Elastic Agent | OpenTelemetry Collector               |
+| **Data Model**     | Elasticsearch Documents   | OpenTelemetry Metrics                 |
+| **Query Language** | KQL, Lucene, TSVB         | Query Builder, PromQL, ClickHouse SQL |
+| **Storage**        | Elasticsearch (Indices)   | ClickHouse (Columnar)                 |
 
 SigNoz uses the OpenTelemetry Collector for metric collection, which offers a wide range of receivers to replace Metricbeat modules.
 
@@ -57,13 +56,13 @@ Review your `metricbeat.yml` and `modules.d/` directory to see which modules are
 
 Group your metrics by source type:
 
-| Metricbeat Module | OTel Receiver | Migration Path |
-|-------------------|---------------|----------------|
-| **system** | `hostmetrics` | [Use Host Metrics Receiver](#from-system-metrics) |
-| **docker** | `docker_stats` | [Use Docker Stats Receiver](#from-docker-metrics) |
-| **kubernetes** | K8s Infra Chart | [Use K8s Infra Chart](#from-kubernetes-metrics) |
-| **prometheus** | `prometheus` | [Use Prometheus Receiver](#from-prometheus-endpoints) |
-| **Other Modules** | Various | Check [OTel Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver) to configure [OTel receivers](https://signoz.io/docs/userguide/otel-metrics-receivers/) |
+| Metricbeat Module | OTel Receiver   | Migration Path                                                                                                                                                                 |
+| ----------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **system**        | `hostmetrics`   | [Use Host Metrics Receiver](#from-system-metrics)                                                                                                                              |
+| **docker**        | `docker_stats`  | [Use Docker Stats Receiver](#from-docker-metrics)                                                                                                                              |
+| **kubernetes**    | K8s Infra Chart | [Use K8s Infra Chart](#from-kubernetes-metrics)                                                                                                                                |
+| **prometheus**    | `prometheus`    | [Use Prometheus Receiver](#from-prometheus-endpoints)                                                                                                                          |
+| **Other Modules** | Various         | Check [OTel Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver) to configure [OTel receivers](https://signoz.io/docs/userguide/otel-metrics-receivers/) |
 
 ## Step 2: Set Up the OpenTelemetry Collector
 
@@ -79,51 +78,33 @@ Work through each module from your inventory. For a complete list of supported r
 
 ### From System Metrics
 
-Replace the Metricbeat `system` module with the `hostmetrics` receiver. See [Host Metrics](https://signoz.io/docs/userguide/hostmetrics/) for detailed configuration.
+Replace the Metricbeat `system` module with the `hostmetrics` receiver.
 
 **Metricbeat `system`:**
+
 ```yaml
 - module: system
   period: 10s
-  metricsets: ["cpu", "memory", "network", "filesystem"]
+  metricsets: ['cpu', 'memory', 'network', 'filesystem']
 ```
 
-**OTel `hostmetrics`:**
-```yaml:otel-collector-config.yaml
-receivers:
-  hostmetrics:
-    collection_interval: 10s
-    scrapers:
-      cpu:
-      memory:
-      network:
-      filesystem:
-      load:
-      disk:
-```
-
-Enable it in the pipeline:
-```yaml:otel-collector-config.yaml {4}
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp, hostmetrics]
-      processors: [batch, resourcedetection]
-      exporters: [otlp]
-```
+**Migration:**
+Follow the **[Host Metrics Collection Guide](https://signoz.io/docs/userguide/hostmetrics/)** to set up the OpenTelemetry Collector with the `hostmetrics` receiver. This guide provides connection details and configuration examples.
 
 ### From Docker Metrics
 
 Replace the Metricbeat `docker` module with the `docker_stats` receiver. See [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/) for detailed configuration.
 
 **Metricbeat `docker`:**
+
 ```yaml
 - module: docker
   period: 10s
-  hosts: ["unix:///var/run/docker.sock"]
+  hosts: ['unix:///var/run/docker.sock']
 ```
 
 **OTel `docker_stats`:**
+
 ```yaml:otel-collector-config.yaml
 receivers:
   docker_stats:
@@ -148,14 +129,16 @@ See [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k
 If you used Metricbeat's `prometheus` module to scrape endpoints, use the OTel `prometheus` receiver. See [Prometheus Metrics](https://signoz.io/docs/userguide/prometheus-metrics/) for detailed configuration.
 
 **Metricbeat `prometheus`:**
+
 ```yaml
 - module: prometheus
   period: 10s
-  hosts: ["localhost:9090"]
+  hosts: ['localhost:9090']
   metrics_path: /metrics
 ```
 
 **OTel `prometheus`:**
+
 ```yaml:otel-collector-config.yaml
 receivers:
   prometheus:
@@ -206,8 +189,6 @@ processors:
     timeout: 2s
 ```
 
-
-
 ## Validate
 
 Verify metrics are flowing correctly by comparing against your source inventory.
@@ -218,10 +199,15 @@ Verify metrics are flowing correctly by comparing against your source inventory.
 2. Use the **List View** to browse available metrics.
 3. Search for metrics like `system_cpu_time`, `container_cpu_usage_seconds`, etc.
 
-<Figure src="/img/docs/migration/metrics-explorer.webp" alt="SigNoz Metrics Explorer showing list of available metrics" caption="SigNoz Metrics Explorer interface" />
+<Figure
+  src="/img/docs/migration/metrics-explorer.webp"
+  alt="SigNoz Metrics Explorer showing list of available metrics"
+  caption="SigNoz Metrics Explorer interface"
+/>
 
 <details>
 <ToggleHeading>
+
 ## Troubleshooting
 </ToggleHeading>
 
@@ -242,6 +228,7 @@ If metrics appear but lack expected attributes (like `host.name` or `k8s.pod.nam
 ### Metric names differ
 
 OpenTelemetry metric names may differ from Metricbeat names.
+
 - Metricbeat: `system.cpu.total.pct`
 - OTel: `system.cpu.utilization`
 

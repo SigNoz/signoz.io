@@ -1,0 +1,125 @@
+---
+title: Reducing OpenTelemetry Bundle Size in Browser Frontend
+slug: reduce-opentelemetry-bundle-size-for-browser-frontend
+date: 2025-12-22
+tags: [OpenTelemetry]
+authors: [elizabeth_mathew]
+description: Learn how to reduce the bundle size of OpenTelemetry in browser frontend applications using tree-shaking and lazy-loading.
+image: /img/blog/2025/12/reduce-bundle-size-cover.webp
+keywords: [openTelemetry, browser frontend, bundle size, tree-shaking, lazy-loading]
+---
+
+
+When I was building applications, I used to always rely on the DevTools console of my web browser to examine logs in the frontend. But, with UI log messages only being accessible within your browser rather than forwarded to a file somewhere, which is the common pattern with backend services, losing visibility of this resource when triaging user issues was a real dilemma. Since adding any kind of monitoring/ observability solution would blow up the bundle size, I’d try to avoid it as much as possible.
+
+But here’s the thing, neglecting observability for reducing bundle size isn’t a good trade-off. There are several other ways for you to run up that hill, and meanwhile, if you are caught in a scenario where your requests are not being sent, and the site is crashing and everything is turning upside down, you’ll have to inevitably start looking inside. 
+
+Inside your traces, spans and contexts.
+
+<Figure src="/img/blog/2025/12/reduce-bundle-size-cover.webp"/>
+
+In this blog, we explore strategies to trim the bundle impact of OTel, focusing on tree-shaking [removing unused code] and lazy-loading [deferring loading until needed] and how to apply these in different frameworks. 
+
+## Impact of OpenTelemetry on Bundle Size and Performance
+
+Out of the box, adding OpenTelemetry’s web libraries can introduce quite a significant amount of JavaScript. For example, the official browser auto-instrumentation bundle was about **300 KB uncompressed [~60 KB gzipped]** after recent optimisations, which is in the same ballpark as many third-party RUM [Real User Monitoring] agents. While 60 KB may seem *okay-ish*, loading and executing this script during initial page load can **delay rendering**. A large script can increase **blocking time**, potentially pushing out LCP [Largest Contentful Paint — the render of the largest element] beyond the optimal 2.5s threshold.
+
+<Figure src="/img/blog/2025/12/users-on-bundle-size.webp" alt="Not opting for OTel due to heavy bundle-size" caption="Not opting for OTel due to heavy bundle-size" />
+
+Not opting for OTel due to heavy bundle-size
+
+Core Web Vitals are very sensitive to any render-blocking resources. We generally avoid deferring critical content, but telemetry scripts are *not* user-facing content. In fact, web performance guidelines note you should *not* lazy-load an LCP image [since that delays visible content]; however, lazy-loading a telemetry script is a good practice precisely because it’s non-essential to the user’s immediate experience. The challenge is finding a balance: we want to collect telemetry [traces of page loads, API calls, user interactions, metrics like Web Vitals, etc.] for observability, *but* we must prevent the OTel code from slowing down the page. We will look at two proven techniques — tree-shaking and lazy-loading to reduce bundle bloat.
+
+## Tree-Shaking 🌳 OpenTelemetry Code
+
+Tree-shaking is a build optimisation that removes dead code including modules or functions that your application doesn’t actually use. OpenTelemetry’s JavaScript SDK is modular, which means if you import only certain parts [say, the tracing API and one exporter], you *should* be able to exclude others [like metrics, logging, or unused instrumentations]. Ensuring that tree-shaking works with OTel involves a few considerations:
+
+### Use Modern ESM Imports
+
+All OTel packages support [ES Modules](https://www.w3schools.com/nodejs/nodejs_modules_esm.asp). Import the specific symbols you need rather than importing entire libraries. For example, if you only need the web tracer and the OTLP exporter, you might do:
+
+```jsx
+import {WebTracerProvider }from'@opentelemetry/sdk-trace-web';
+import {BatchSpanProcessor }from'@opentelemetry/sdk-trace-base';
+import {OTLPTraceExporter }from'@opentelemetry/exporter-trace-otlp-http';
+```
+
+This pulls in only tracing-related code and the OTLP trace exporter, leaving out metrics and logging code.
+
+### Avoid Catch-all Imports or Meta-Packages
+
+OpenTelemetry offers auto-instrumentation packages that conveniently bundle many instrumentations. For example, **`@opentelemetry/auto-instrumentations-web`** will include document load, fetch/XHR, user interaction, and more. If you use it, your bundle will include *all* *those instrumentations*. To keep things slim, *only import the instrumentations you actually want* individually, instead of a blanket import. This way, unused ones can be dropped. 
+
+In code, that means doing something like:
+
+```jsx
+import {DocumentLoadInstrumentation }from'@opentelemetry/instrumentation-document-load';
+import {FetchInstrumentation }from'@opentelemetry/instrumentation-fetch';
+// ... then use these in registerInstrumentations ...
+```
+
+If you don’t need, say, user interaction tracking or certain network instrumentation, not importing them will ensure they don’t appear in the bundle.
+
+### Mark OTel Packages as Side-Effect-Free
+
+Tree-shaking works best when libraries declare that they have no side effects on import. Many OTel packages now include `sideEffects: false` in their package.json, which helps Web-pack/Rollup know it can safely drop unused exports. 
+
+This was more of an issue in the previous versions. A user noted that manually adding `sideEffects: false` to OTel packages reduced bundle size by ~40KB, and the OTel maintainers addressed this in later releases. You can view the [Github discussions](https://github.com/open-telemetry/opentelemetry-js/issues/2855) here. Using OpenTelemetry JS v1.2+ or v2.x is recommended, as newer versions have improved in this area. In fact, the OTel JS SDK 2.0 [released in 2025] explicitly removed certain patterns [like extensive classes or namespaces] to improve tree-shakability and minification.
+
+ Upgrading to the latest version can yield a smaller bundle thanks to these optimisations!
+
+### Consistent Versioning to Avoid Duplicates
+
+One subtle cause of bundle bloat that often goes missed, is version mismatches. If you depend on multiple OTel packages that internally bring different versions of the core API, you might accidentally bundle two copies. Ensure all your OTel packages are on the same version so the bundler can deduplicate them. For instance, if everything is on version 1.5.0 except one package on 0.26.0, you may get two sets of code.
+
+Aligning package versions will help prevent that scenario.
+
+In summary, *tree-shake aggressively.* That means prune everything optional — disable features that aren’t useful anymore, drop instrumentations you don’t need, and let your bundler eliminate the dead code. By doing so, you minimise the impact on bundle size to a great extent.
+
+## Lazy-Loading the OpenTelemetry SDK
+
+This is the next concept you can explore. Lazy-load the OTel code, so it isn’t even downloaded or executed until after the critical page content is loaded. This strategy has perhaps the biggest positive impact on LCP and initial load performance. The idea is to defer the initialisation of OpenTelemetry modules to a non-critical moment [for example, after the page’s main content is on screen or when the user interacts], rather than blocking the main thread early.
+
+### Dynamic import() in Single-Page Apps
+
+In a React or other Single Page Application [SPA], you can use the dynamic `import()` function to load your telemetry setup code asynchronously. 
+
+For example, you might create a module `otel-init.js` that configures the OTel SDK, and *then* instead of importing it at the top of your app, you load it on demand. For instance:
+
+```jsx
+// In your main App component
+useEffect(() => {
+import('./otel-init').then(module => {
+module.initTelemetry(); // call the initialization function exported here
+  });
+}, []);
+```
+
+This ensures that the OTel code [everything inside `otel-init` and its imports] is pulled in only *after* the first render. The UI can render, LCP can happen, and only then does the telemetry code load in the background. From the user’s perspective, the page appears quickly; from the app’s perspective, OTel starts slightly later. 
+
+### Code-Splitting with Bundler Config
+
+ If you’re using Webpack, you can explicitly split OTel into its own chunk. For example, in an Angular app using Webpack, you can configure a separate cache group for `@opentelemetry` modules.
+
+ This means your build will produce something like `main.js` and `opentelemetry.js`. However, to truly lazy-load that chunk, you should ensure it’s not required immediately. In practice, that again means using dynamic import or a similar mechanism to load that chunk at a later time. The Webpack config might look like:
+
+```jsx
+// webpack.config excerpt
+optimization: {
+splitChunks: {
+chunks:'all',
+cacheGroups: {
+opentelemetry: {
+test:/[\\/]node_modules[\\/](@opentelemetry)[\\/]/,
+name:'opentelemetry',
+priority:10,
+reuseExistingChunk:true,
+      },
+    },
+  },
+}
+```
+
+There’s a small trade-off here. Delaying the loading of OTel modules would also inevitably result in the loss of some early telemetry data. For example, if you want to capture any errors or events during the first few seconds, a delayed start misses them. If those are crucial, you might decide to load a minimal part of OTel early [or use a buffered logging approach] and load the rest later. It’s a balancing act.
+
+Both of the above are proven techniques for bringing down bundle size. Apart from these, there are some more optimisations for how we send telemetry data from the browser and framework-specific techniques, which are potentially some topics you can explore next!
