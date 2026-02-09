@@ -2559,6 +2559,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/ollama-monitoring',
+        label: 'Ollama',
+        type: 'doc',
+      },
+      {
         route: '/docs/openai-monitoring',
         label: 'OpenAI',
         type: 'doc',
