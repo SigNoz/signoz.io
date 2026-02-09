@@ -142,8 +142,8 @@ export const useTracer = (): TracerResult => {
 };
 ```
 
-<Admonition type="info" title="Why do I see two spans per network request?">
-React Native's `fetch()` is built on top of `XMLHttpRequest`. Since both are instrumented, each network request produces two spans — one from `FetchInstrumentation` and one from `XMLHttpRequestInstrumentation`. This is a known characteristic of React Native's networking architecture, not a bug in the instrumentation.
+<Admonition type="info">
+React Native's `fetch()` is implemented on top of `XMLHttpRequest`. When both `FetchInstrumentation` and `XMLHttpRequestInstrumentation` are enabled, each network request produces two spans — one from each instrumentation layer. This is a known characteristic of React Native's networking architecture when using both instrumentations together.
 </Admonition>
 
 Verify these values:
@@ -180,7 +180,7 @@ After running your instrumented application, verify traces appear in SigNoz:
 />
 
 <KeyPointCallout title="Trailing slash - 404 from self-hosted collector" defaultCollapsed={true}>
-React Native's iOS networking layer (NSURLSession) appends a trailing slash to URLs. The OTLP exporter sends to `/v1/traces/` instead of `/v1/traces`, and the collector returns 404.
+React Native's iOS networking layer (NSURLSession) appends a trailing slash to URLs, which is a known behavior in certain React Native versions. The OTLP exporter sends to `/v1/traces/` instead of `/v1/traces`, and the collector returns 404.
 
 **Fix:** Set `traces_url_path: /v1/traces/` in your collector's OTLP HTTP receiver config:
 
