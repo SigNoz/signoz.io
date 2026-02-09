@@ -2045,6 +2045,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/ollama-dashboard',
+            label: 'Ollama',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openai-dashboard',
             label: 'OpenAI',
           },
