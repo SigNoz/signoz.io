@@ -1220,6 +1220,81 @@ const docsSideNav = [
         route: '/docs/logs-management/send-logs-to-signoz',
         items: [
           {
+            type: 'category',
+            isExpanded: false,
+            label: 'Application Logs',
+            route: '/docs/logs-management/send-logs/application-logs',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/userguide/collect_logs_from_file',
+                label: 'From Log File',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/python-logs',
+                label: 'Python logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/java-logs',
+                label: 'Java Logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
+                label: 'AWS Lambda Node.js logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-logs',
+                label: 'Node.js logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-pino-logs',
+                label: 'Pino Node.js logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-winston-logs',
+                label: 'Winston Node.js logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs',
+                label: 'Bunyan Node.js logs',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Existing Collectors to SigNoz',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/userguide/fluentbit_to_signoz',
+                label: 'FluentBit to SigNoz',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/fluentd_to_signoz',
+                label: 'FluentD to SigNoz',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/logstash_to_signoz',
+                label: 'Logstash to SigNoz',
+              },
+            ],
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/log-export-methods',
+            label: 'Log export methods',
+          },
+          {
             type: 'doc',
             route: '/docs/userguide/collect_kubernetes_pod_logs',
             label: 'Kubernetes pod logs',
@@ -1254,54 +1329,7 @@ const docsSideNav = [
             route: '/docs/logs-management/send-logs/logrus-to-signoz',
             label: 'Logrus',
           },
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'Application Logs',
-            route: '/docs/logs-management/send-logs/application-logs',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/userguide/collect_logs_from_file',
-                label: 'From Log File',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-management/send-logs/python-logs',
-                label: 'Python logs',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/collecting_application_logs_otel_sdk_java',
-                label: 'Using OTel Java SDK',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
-                label: 'AWS Lambda Node.js logs',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-management/send-logs/nodejs-logs',
-                label: 'Node.js logs',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-management/send-logs/nodejs-pino-logs',
-                label: 'Pino Node.js logs',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-management/send-logs/nodejs-winston-logs',
-                label: 'Winston Node.js logs',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs',
-                label: 'Bunyan Node.js logs',
-              },
-            ],
-          },
+
           {
             type: 'doc',
             route: '/docs/userguide/send-cloudwatch-logs-to-signoz',
@@ -1313,26 +1341,9 @@ const docsSideNav = [
             label: 'Cloudflare logs',
           },
           {
-            type: 'category',
-            isExpanded: false,
-            label: 'Existing Collectors to SigNoz',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/userguide/fluentbit_to_signoz',
-                label: 'FluentBit to SigNoz',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/fluentd_to_signoz',
-                label: 'FluentD to SigNoz',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/logstash_to_signoz',
-                label: 'Logstash to SigNoz',
-              },
-            ],
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
+            label: 'Convex logs',
           },
           {
             type: 'doc',
