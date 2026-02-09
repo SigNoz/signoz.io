@@ -222,7 +222,7 @@ const PillarsOfAiFocusedObservabilityArchitecture: React.FC = () => {
     <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] py-32 md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
       <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
-        <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
+        <h2 className="mb-24 text-center text-4xl font-semibold text-signoz_sakura-100">
           4 Pillars of AI-Focused <br className="hidden md:block" /> Observability Architecture
         </h2>
         <IconTitleDescriptionCardGrid cards={PILLARS_DATA} />
