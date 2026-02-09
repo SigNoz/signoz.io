@@ -44,7 +44,7 @@ export const CAPABILITIES_CARDS: IconTitleDescriptionCardData[] = [
     title: '',
     description: (
       <div className="flex flex-col gap-10">
-        <div className="relative -mt-10 flex w-full justify-center">
+        <div className="relative -mt-10 flex hidden w-full justify-center md:flex">
           <Image
             src="/img/observability-for-ai-native-companies/feature-graphic-single-tool.webp"
             className="w-full object-contain"
@@ -94,29 +94,6 @@ export const CAPABILITIES_CARDS: IconTitleDescriptionCardData[] = [
       </div>
     ),
   },
-  // {
-  //   icon: '',
-  //   iconText: '',
-  //   title: <span className="text-red-500">Full-Stack Platform Capabilities</span>,
-  //   description:
-  //     'Unlike LLM-only observability tools, we correlate AI layer performance with your entire infrastructure - databases, microservices, and application logs',
-  // },
-  // {
-  //   icon: '',
-  //   iconText: '',
-  //   title: '',
-  //   description: (
-  //     <div className="flex flex-col justify-center">
-  //       <Image
-  //         src="/img/observability-for-ai-native-companies/apm-to-logs.webp"
-  //         className="w-full object-contain"
-  //         alt="APM to Logs"
-  //         width={1000}
-  //         height={1000}
-  //       />
-  //     </div>
-  //   ),
-  // },
   {
     icon: '',
     iconText: '',

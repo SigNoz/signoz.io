@@ -100,10 +100,10 @@ const ComparisonTable: React.FC<ComparisonTableProps | TraditionalComparisonTabl
     <div
       className={`overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50 ${className}`}
     >
-      <table className="m-0 h-fit w-fit border-collapse text-left">
+      <table className="m-0 h-fit border-collapse text-left">
         <tbody className="text-sm text-signoz_vanilla-300">
-          <tr>
-            <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
+          <tr className="relative">
+            <td className="sticky left-0 border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
               Feature
             </td>
             {vendors.map((vendor) => (
@@ -117,7 +117,7 @@ const ComparisonTable: React.FC<ComparisonTableProps | TraditionalComparisonTabl
           </tr>
           {rows.map((row, index) => (
             <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
-              <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-sm text-signoz_robin-400">
+              <td className="sticky left-0 border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-sm text-signoz_robin-400">
                 {row.feature}
               </td>
               {vendors.map((vendor) => {
@@ -199,6 +199,15 @@ const EverythingYouNeedCards: React.FC = () => {
               Companies
             </h2>
             <SectionLayout variant="no-border" className="!mx-auto p-0">
+              <div className="border-t border-dashed border-signoz_slate-400 px-8 py-4 text-left">
+                <h5 className="mb-1 text-2xl font-semibold text-signoz_robin-400">
+                  Capabilities that AI Companies Need Most
+                </h5>
+                <div className="text-sm text-signoz_vanilla-400">
+                  Features that help you debug non-deterministic LLM outputs, control inference
+                  costs, track business outcomes, and meet compliance requirements
+                </div>
+              </div>
               <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS} />
             </SectionLayout>
           </div>
