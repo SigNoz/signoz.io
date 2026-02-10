@@ -2199,14 +2199,21 @@ const docsSideNav = [
         label: 'Field Context & Data Types',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/search-troubleshooting',
-        label: 'Troubleshooting Guide',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/query-troubleshooting-faqs',
-        label: 'Query Troubleshooting - FAQs',
+        type: 'category',
+        isExpanded: false,
+        label: 'Troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-troubleshooting',
+            label: 'Troubleshooting Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/query-troubleshooting-faqs',
+            label: 'Query Troubleshooting - FAQs',
+          },
+        ],
       },
       {
         type: 'doc',
