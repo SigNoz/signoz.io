@@ -56,11 +56,11 @@ Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-
 
 ## Issues Catalog
 
-### Why am I seeing "connection is draining" errors when pushing metrics to SigNoz?
+### Why am I seeing "connection is draining" logs when pushing metrics to SigNoz?
 
-These "connection is draining" errors are expected and occur occasionally as the SigNoz ingestor system automatically scales up and down. The errors indicate temporary connection issues, but they don't result in data loss.
+These "connection is draining" logs are expected and occur occasionally as the SigNoz ingestor system automatically scales up and down. These logs indicate temporary connection issues, but they don't result in data loss.
 
-**Example error log:**
+**Example log:**
 
 ```json
 {"level":"info","ts":1757814915.0786107,"caller":"exporterhelper/retry_sender.go:118","msg":"Exporting failed. Will retry the request after interval.","kind":"exporter","data_type":"metrics","name":"otlp","error":"rpc error: code = Unavailable desc = the connection is draining","interval":"7.07140113s"}
@@ -68,9 +68,9 @@ These "connection is draining" errors are expected and occur occasionally as the
 
 <details>
 
-<summary> Show detailed steps </summary>
+<summary> Show details </summary>
 
-When you see these errors:
+When you see these info logs:
 
 - The failed requests are automatically retried with exponential backoff for up to 5 minutes
 - The retries will eventually succeed, ensuring your metrics data is delivered
@@ -82,7 +82,7 @@ Only worry if you see "dropping data" messages in your logs, as this would indic
 
 **Frequency:**
 
-Seeing these errors 2-3 times per day is within normal operating parameters and doesn't require any action on your part. The retry mechanism built into the OTLP exporter ensures reliable delivery of your observability data despite these temporary connection issues.
+Seeing these info logs 2-3 times per day is within normal operating parameters and doesn't require any action on your part. The retry mechanism built into the OTLP exporter ensures reliable delivery of your observability data despite these temporary connection issues.
 
 </details>
 
