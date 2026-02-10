@@ -14,6 +14,7 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
           iconText={card.iconText}
           title={card.title}
           description={card.description}
+          className={card.className}
         />
       ))}
     </div>

@@ -3,6 +3,7 @@ export type IconTitleDescriptionCardData = {
   iconText: string
   title: string | React.ReactNode
   description: string | React.ReactNode
+  className?: string
 }
 
 export type IconTitleDescriptionCardGridProps = {

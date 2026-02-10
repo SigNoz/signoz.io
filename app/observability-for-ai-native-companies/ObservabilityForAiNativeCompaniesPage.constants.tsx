@@ -1,4 +1,4 @@
-import { TextSearch, Atom, ChevronsDown, TrendingUpDown } from 'lucide-react'
+import { TextSearch, Atom, ChevronsDown, TrendingUpDown, ArrowRight } from 'lucide-react'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import {
   ComparisonTableRow,
@@ -8,80 +8,24 @@ import {
 } from './ObservabilityForAiNativeCompaniesPage.types'
 import React from 'react'
 import Image from 'next/image'
+import Button from '@/components/ui/Button'
+import TrackingLink from '@/components/TrackingLink'
 
-export const CAPABILITIES_CARDS: IconTitleDescriptionCardData[] = [
+export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
   {
     icon: '',
     iconText: '',
     title: 'Span-Level Alerting',
     description:
       'Set alerts on specific spans within a trace to isolate internal latency from third-party provider slowness. Configure thresholds on individual service spans rather than entire trace duration, so you only get notified when your code is slow, not when external APIs degrade.',
-  },
-  {
-    icon: '',
-    iconText: '',
-    title: 'LLM FinOps',
-    description:
-      'Track token usage and costs per model, operation, and user. View cost breakdowns, prompt efficiency scores, and configure budget alerts to optimize spending without sacrificing quality.',
-  },
-  {
-    icon: '',
-    iconText: '',
-    title: 'MCP Server for Agentic SRE',
-    description:
-      'Enable AI agents to query your telemetry via Model Context Protocol. Agents can debug themselves, create dashboards, or perform root-cause analysis by importing telemetry data directly.',
-  },
-  {
-    icon: '',
-    iconText: '',
-    title: 'Trace Funnels',
-    description:
-      'Track multi-step workflows like "calls dialed" to "leads qualified" for voice agents, or visualize drop-off rates across your AI agent pipelines to identify where users abandon flows.',
+    className: 'md:min-h-96 md:justify-center',
   },
   {
     icon: '',
     iconText: '',
     title: '',
     description: (
-      <div className="flex flex-col gap-10">
-        <div className="relative -mt-10 flex hidden w-full justify-center md:flex">
-          <Image
-            src="/img/observability-for-ai-native-companies/feature-graphic-single-tool.webp"
-            className="w-full object-contain"
-            alt="Feature graphic single tool"
-            width={1000}
-            height={1000}
-          />
-          <Image
-            src="/img/observability-for-ai-native-companies/olly-at-work.webp"
-            className="absolute bottom-0 right-0 z-[5] w-3/5 object-contain md:-right-[120px]"
-            alt="Olly at work"
-            width={1000}
-            height={1000}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <h4 className="m-0 text-left text-2xl font-semibold text-red-500">
-            Full-Stack Platform Capabilities
-          </h4>
-          <span>
-            Unlike LLM-only observability tools, we correlate AI layer performance with your entire
-            infrastructure - databases, microservices, and application logs
-          </span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    icon: '',
-    iconText: '',
-    title: 'Self-Hosted / BYOC Compliance',
-    description: (
-      <div className="flex flex-col gap-24">
-        <span>
-          Deploy on your infrastructure to meet HIPAA/GDPR compliance requirements. Keep sensitive
-          prompt data on-premise for healthcare, banking, and government contracts.
-        </span>
+      <>
         <div className="flex flex-col justify-center">
           <Image
             src="/img/observability-for-ai-native-companies/apm-to-logs.webp"
@@ -91,9 +35,86 @@ export const CAPABILITIES_CARDS: IconTitleDescriptionCardData[] = [
             height={1000}
           />
         </div>
+      </>
+    ),
+  },
+  {
+    icon: '',
+    iconText: '',
+    title: 'Trace Funnels',
+    description: (
+      <div className="flex flex-col gap-4">
+        Track multi-step workflows like "calls dialed" to "leads qualified" for voice agents, or
+        visualize drop-off rates across your AI agent pipelines to identify where users abandon
+        flows.
+        <Button
+          variant="secondary"
+          rounded="full"
+          className="flex w-fit items-center gap-2"
+          asChild
+        >
+          <TrackingLink
+            href="/docs/trace-funnels/overview/"
+            clickType="Observability for AI Native Companies Card CTA"
+            clickName="Trace Funnels Button"
+            clickLocation="Capabilities Section"
+            clickText="Read Documentation"
+            target="_blank"
+          >
+            Read Documentation
+            <ArrowRight size={14} />
+          </TrackingLink>
+        </Button>
       </div>
     ),
   },
+  {
+    icon: '',
+    iconText: '',
+    title: 'MCP Server for Agentic SRE',
+    description: (
+      <div className="flex flex-col gap-4">
+        Enable AI agents to query your telemetry via Model Context Protocol. Agents can debug
+        themselves, create dashboards, or perform root-cause analysis by importing telemetry data
+        directly.
+        <Button
+          variant="secondary"
+          rounded="full"
+          className="flex w-fit items-center gap-2"
+          asChild
+        >
+          <TrackingLink
+            href="/docs/signoz-mcp-server/"
+            clickType="Observability for AI Native Companies Card CTA"
+            clickName="MCP Server for Agentic SRE Button"
+            clickLocation="Capabilities Section"
+            clickText="Read Documentation"
+            target="_blank"
+          >
+            Read Documentation
+            <ArrowRight size={14} />
+          </TrackingLink>
+        </Button>
+      </div>
+    ),
+  },
+  {
+    icon: '',
+    iconText: '',
+    title: 'Self-Hosted / BYOC Compliance',
+    description:
+      'Deploy on your infrastructure to meet HIPAA/GDPR compliance requirements. Keep sensitive prompt data on-premise for healthcare, banking, and government contracts.',
+  },
+  {
+    icon: '',
+    iconText: '',
+    title: 'Monitoring Model Token Usage',
+    description:
+      'Track token usage and costs per model, operation, and user. View cost breakdowns, prompt efficiency scores, and configure budget alerts to optimize spending without sacrificing quality.',
+  },
+]
+
+export const CAPABILITIES_CARDS2: IconTitleDescriptionCardData[] = [
   {
     icon: '',
     iconText: '',
@@ -104,9 +125,9 @@ export const CAPABILITIES_CARDS: IconTitleDescriptionCardData[] = [
   {
     icon: '',
     iconText: '',
-    title: 'Computing Metrics from Raw Logs',
+    title: 'Query Any Field Without Re-Instrumentation',
     description:
-      'Generate metrics directly from log data without adding separate instrumentation to your codebase.',
+      "Unlike Langfuse's fixed observation schema, you can track custom reasoning steps, tool calls, or model parameters without code changes.",
   },
   {
     icon: '',
@@ -252,7 +273,7 @@ export const TRADITIONAL_COMPARISON_TABLE_ROWS: TraditionalComparisonTableRow[] 
       signoz: { supported: true, text: 'No cardinality limits' },
       datadog: { supported: 'partial', text: 'Warns against "unbounded attributes"' },
       honeycomb: { supported: true, text: 'Built for high-cardinality' },
-      grafana: { supported: true, text: 'Mimir handles 1B series' },
+      grafana: { supported: 'partial', text: '4 backends, mixed handling' },
     },
   },
   {
