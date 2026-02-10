@@ -156,7 +156,7 @@ const EverythingYouNeedCards: React.FC = () => {
       className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]"
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="relative flex flex-col gap-6 py-32">
+      <div className="relative flex flex-col gap-6 md:py-20">
         <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
           Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
         </div>
@@ -296,7 +296,7 @@ const HowSigNozCompares: React.FC = () => {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
       <div className="relative">
         <div className="container pb-16">
-          <div className="flex flex-col gap-6 py-32">
+          <div className="flex flex-col gap-6 md:py-20">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
               <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
                 <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
@@ -323,7 +323,7 @@ const HowSigNozComparesToTraditionalTools: React.FC = () => {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
       <div className="relative">
         <div className="container pb-16">
-          <div className="flex flex-col gap-6 py-32">
+          <div className="flex flex-col gap-6 md:py-32">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
               <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
                 <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">

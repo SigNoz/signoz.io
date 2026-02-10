@@ -348,15 +348,15 @@ export const TRUSTED_BY_LOGOS = [
     alt: 'Lovart',
   },
   {
-    src: '/img/observability-for-ai-native-companies/sarvam.webp',
+    src: '/svgs/icons/sarvam.svg',
     alt: 'Sarvam',
   },
   {
-    src: '/img/observability-for-ai-native-companies/blaxel.webp',
+    src: '/svgs/icons/blaxel.svg',
     alt: 'Blaxel',
   },
   {
-    src: '/img/observability-for-ai-native-companies/salient.webp',
+    src: '/svgs/icons/salient.svg',
     alt: 'Salient',
   },
   {
@@ -364,15 +364,15 @@ export const TRUSTED_BY_LOGOS = [
     alt: 'Shaped',
   },
   {
-    src: '/img/observability-for-ai-native-companies/tavus.webp',
+    src: '/svgs/icons/tavus.svg',
     alt: 'Tavus',
   },
   {
-    src: '/img/observability-for-ai-native-companies/inkeep.webp',
+    src: '/svgs/icons/inkeep.svg',
     alt: 'Inkeep',
   },
   {
-    src: '/img/observability-for-ai-native-companies/drivetrain.webp',
+    src: '/svgs/icons/drivetrain.svg',
     alt: 'Drivetrain',
   },
 ]
