@@ -140,9 +140,9 @@ const CapabilitiesSection: React.FC = () => {
         </h2>
         <SectionLayout variant="no-border" className="!mx-auto p-0">
           <div className="border-y border-dashed border-signoz_slate-400 p-8 text-left">
-            <h5 className="mb-1 text-2xl font-semibold text-signoz_robin-400">
+            <h4 className="mb-1 font-semibold text-signoz_robin-400">
               Capabilities that AI Companies Need Most
-            </h5>
+            </h4>
             <div className="text-sm text-signoz_vanilla-400">
               Features that help you debug non-deterministic LLM outputs, control inference costs,
               track business outcomes, and meet compliance requirements
@@ -150,9 +150,9 @@ const CapabilitiesSection: React.FC = () => {
           </div>
           <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS1} />
           <div className="relative flex w-full flex-col items-start border border-dashed border-signoz_slate-400/50 p-8">
-            <h3 className="text-left text-2xl font-semibold text-red-400">
+            <h4 className="text-left font-semibold text-red-400">
               Full-Stack Platform Capabilities
-            </h3>
+            </h4>
             <div className="text-left text-sm text-signoz_vanilla-400">
               Unlike LLM-only observability tools, we correlate AI layer performance with your
               entire infrastructure - databases, microservices, and application logs.

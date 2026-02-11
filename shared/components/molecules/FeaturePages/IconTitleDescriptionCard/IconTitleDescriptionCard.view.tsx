@@ -20,7 +20,7 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
         {iconText && <span>{iconText}</span>}
       </div>
 
-      {title && <div className="m-0 text-left font-semibold text-signoz_vanilla-100">{title}</div>}
+      {title && <h4 className="m-0 text-left font-semibold text-signoz_vanilla-100">{title}</h4>}
 
       {description && (
         <div className="m-0 text-left text-sm text-signoz_vanilla-400">{description}</div>
