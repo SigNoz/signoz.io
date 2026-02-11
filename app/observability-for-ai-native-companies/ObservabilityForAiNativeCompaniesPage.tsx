@@ -73,7 +73,10 @@ const Header: React.FC = () => {
         <ButtonGroup buttons={headerButtons} />
       </div>
 
-      <SectionLayout variant="no-border" className="!mt-0 max-md:-mb-[3rem]">
+      <SectionLayout
+        variant="no-border"
+        className="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+      >
         <div className="w-full">
           <Image
             src="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
