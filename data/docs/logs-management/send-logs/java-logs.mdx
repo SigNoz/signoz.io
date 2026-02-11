@@ -1,0 +1,592 @@
+---
+date: 2026-02-07
+title: Send logs from Java to SigNoz using OpenTelemetry
+id: java-logs
+doc_type: howto
+description: Learn how to send logs from Java application to SigNoz using OpenTelemetry (Automatic and Manual Instrumentation).
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Java 8 or higher
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Choosing a Log Collection Method
+
+There are two primary ways to send logs from your Java application to SigNoz:
+
+1. **Application-level Collection (OTLP)**:  
+   Your application sends logs directly to SigNoz using the OpenTelemetry Java Agent.  
+   **Recommended for**: Most users. It provides automatic **trace-log correlation**, rich metadata, and requires no changing of infrastructure.
+
+2. **Infrastructure-level Collection (Stdout/Stderr)**:  
+   Your application writes logs to the console, and an agent running on the node/cluster collects them.  
+   **Recommended for**: Kubernetes environments, legacy applications you can't reconfigure, or when you want strictly separated logging concerns.
+
+This guide focuses on **Application-level Collection (OTLP)**.
+
+## Send logs to SigNoz
+
+<Tabs>
+<TabItem value="automatic" label="Auto-Instrumentation (Recommended)" default>
+
+The **OpenTelemetry Java Agent** automatically captures logs from popular logging frameworks like Log4j 2, Logback, and java.util.logging (JUL) and sends them to SigNoz.
+
+### Step 1: Download the Java Agent
+
+Download the latest `opentelemetry-javaagent.jar`:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+### Step 2: Run the application
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+Set the environment variables and run your application:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="java-app"
+
+java -javaagent:./opentelemetry-javaagent.jar -jar your-app.jar
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If using a local OTel Collector (e.g., self-hosted), use:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_SERVICE_NAME="java-app"
+
+java -javaagent:./opentelemetry-javaagent.jar -jar your-app.jar
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: 'java-app'
+  - name: JAVA_TOOL_OPTIONS
+    value: '-javaagent:/path/to/opentelemetry-javaagent.jar'
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+**Note**: You need to ensure the `opentelemetry-javaagent.jar` is available in the container or added via an init container / volume.
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile`:
+
+```dockerfile:Dockerfile
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+# Download the OpenTelemetry Java Agent
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
+
+# Copy your application JAR
+COPY target/your-app.jar /app/app.jar
+
+# Set environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="java-app"
+
+# Configure the agent
+ENV JAVA_TOOL_OPTIONS="-javaagent:/app/opentelemetry-javaagent.jar"
+
+CMD ["java", "-jar", "/app/app.jar"]
+```
+
+Build and run:
+
+```bash
+docker build -t java-app .
+docker run -p 8080:8080 java-app
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If you have a log driver or a collector picking up Docker container logs (stdout), you might see duplicate logs in SigNoz. To avoid this, either disable container log collection for this service or use only one method.
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "java-app"
+
+java -javaagent:./opentelemetry-javaagent.jar -jar your-app.jar
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+</Tabs>
+
+### Log Correlation
+
+The OpenTelemetry Java Agent automatically injects `trace_id` and `span_id` into your logs when a tracing context is active, allowing you to correlate logs with traces in SigNoz.
+
+<Admonition type="info">
+By default, the Java Agent collects traces, metrics, and logs. To collect **only logs**, disable traces and metrics:
+
+```bash
+export OTEL_TRACES_EXPORTER="none"
+export OTEL_METRICS_EXPORTER="none"
+```
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="manual" label="Code Level Instrumentation (Advanced)">
+
+### Step 1: Add dependencies
+
+Add the following OpenTelemetry dependencies to your project.
+
+<Tabs>
+<TabItem value="maven" label="Maven" default>
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-bom</artifactId>
+      <version>1.57.0</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+      <version>2.23.0-alpha</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+  <!-- OpenTelemetry SDK -->
+  <dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-sdk</artifactId>
+  </dependency>
+  <!-- OpenTelemetry Autoconfigure -->
+  <dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
+    <version>1.57.0</version>
+  </dependency>
+  <!-- OpenTelemetry Exporter -->
+  <dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-otlp</artifactId>
+  </dependency>
+  <!-- Semantic Conventions -->
+  <dependency>
+    <groupId>io.opentelemetry.semconv</groupId>
+    <artifactId>opentelemetry-semconv</artifactId>
+  </dependency>
+  <!-- Logback Appender -->
+  <dependency>
+    <groupId>io.opentelemetry.instrumentation</groupId>
+    <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+  </dependency>
+</dependencies>
+```
+
+</TabItem>
+<TabItem value="gradle" label="Gradle">
+
+```groovy
+dependencies {
+    implementation platform('io.opentelemetry:opentelemetry-bom:1.57.0')
+    implementation platform('io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.23.0-alpha')
+
+    // OpenTelemetry SDK
+    implementation 'io.opentelemetry:opentelemetry-sdk'
+
+    // OpenTelemetry Autoconfigure
+    implementation 'io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:1.57.0'
+
+    // OpenTelemetry Exporter
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+
+    // Semantic Conventions
+    implementation 'io.opentelemetry.semconv:opentelemetry-semconv'
+
+    // Logback Appender
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0'
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Step 2: Set environment variables
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="java-manual-app"
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: 'java-manual-app'
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile:Dockerfile
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+# Copy your application JAR
+COPY target/your-app.jar /app/app.jar
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="java-manual-app"
+
+CMD ["java", "-jar", "/app/app.jar"]
+```
+
+Build and run the container:
+
+```bash
+docker build -t java-manual-app .
+docker run java-manual-app
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If you have a log driver or a collector picking up Docker container logs (stdout), you might see duplicate logs in SigNoz. To avoid this, either disable container log collection for this service or use only one method.
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "java-manual-app"
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
+
+### Step 3: Initialize OpenTelemetry SDK
+
+Create a file named `src/main/java/com/example/OpenTelemetryConfig.java` to initialize the OpenTelemetry SDK. You must initialize both the **LoggerProvider** (for logs) and the **TracerProvider** (for correlation).
+
+```java:src/main/java/com/example/OpenTelemetryConfig.java
+package com.example;
+
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+
+public class OpenTelemetryConfig {
+
+    public static OpenTelemetry init() {
+        AutoConfiguredOpenTelemetrySdk autoConfiguredSdk = AutoConfiguredOpenTelemetrySdk.initialize();
+        return autoConfiguredSdk.getOpenTelemetrySdk();
+    }
+}
+```
+
+### Step 4: Configure Logback
+
+Create a file named `src/main/resources/logback.xml` and add the `OpenTelemetryAppender` to bridge logs to the OpenTelemetry SDK.
+
+```xml:src/main/resources/logback.xml
+<configuration>
+  <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+    <captureExperimentalAttributes>true</captureExperimentalAttributes>
+    <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
+  </appender>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="OTEL" />
+    <appender-ref ref="CONSOLE" />
+  </root>
+</configuration>
+```
+
+### Step 5: Instrument usage with Log Correlation
+
+Initialize the SDK at the start of your application. When you create spans and make them current, the OpenTelemetry appender will automatically add the `trace_id` and `span_id` to your logs.
+
+Create or update your main application file `src/main/java/com/example/Application.java`.
+
+```java:src/main/java/com/example/Application.java
+package com.example;
+
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class Application {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+
+    public static void main(String[] args) {
+        // Initialize OpenTelemetry
+        OpenTelemetryConfig.init();
+
+        // Install the Logback appender using GlobalOpenTelemetry
+        OpenTelemetryAppender.install(GlobalOpenTelemetry.get());
+        logger.info("Application started (no active span)");
+
+        // Create span for correlation
+        Tracer tracer = GlobalOpenTelemetry.getTracer("my-app");
+        Span span = tracer.spanBuilder("my-span").startSpan();
+
+        try (Scope scope = span.makeCurrent()) {
+            logger.info("Processing data within a span...");
+            doWork();
+        } finally {
+            span.end();
+        }
+
+        logger.info("Application finished");
+    }
+
+    private static void doWork() {
+        logger.warn("Simulated work log - also correlated!");
+    }
+}
+```
+
+### Step 6: Build and Run
+
+Build your project and run the application.
+
+<Tabs>
+<TabItem value="maven" label="Maven" default>
+
+```bash
+mvn clean package
+java -jar target/your-app-1.0-SNAPSHOT.jar
+```
+
+</TabItem>
+<TabItem value="gradle" label="Gradle">
+
+```bash
+./gradlew build
+java -jar build/libs/your-app-1.0-SNAPSHOT.jar
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Validate Logs
+
+Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/userguide/logs/) section.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/java-logs.webp"
+  alt="Java Application Logs"
+  caption="Java Application Logs"
+/>
+
+<Figure
+  src="/img/docs/logs-management/send-logs/java-logs-detailed-view.webp"
+  alt="Java Application Logs Detailed View"
+  caption="Java Application Logs Detailed View"
+/>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+#### Why are my logs not appearing?
+
+- Ensure `OTEL_LOGS_EXPORTER` is set to `otlp` (for Auto-Instrumentation).
+- Verify the `OTEL_EXPORTER_OTLP_ENDPOINT` is correct and reachable.
+- Check the console output for any OTel-related errors.
+- If using `logback.xml`, ensure the `OTEL` appender is added to `<root>`.
+
+</details>
+
+## Next Steps
+
+- [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+
+## Get Help
+
+<GetHelp />

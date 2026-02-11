@@ -34,8 +34,42 @@ You can use [Go templates](https://prometheus.io/docs/alerting/latest/notificati
 
 ![new-notification-channel](/img/docs/new-notification-channel.webp)
 
-**Test Configuration**: 
+**Test Configuration**:
 Click the Test button to send a test alert to the configured Slack channel. This verifies that SigNoz can communicate with your Slack webhook.
+
+## Mentioning Slack Groups in Alerts
+
+When configuring SigNoz alerts to mention Slack groups (user groups), you need to use the proper formatting to ensure the group is tagged correctly instead of appearing as plain text.
+
+### Slack Group Mention Format
+
+To properly mention a Slack group in your SigNoz alerts, use the following format:
+
+```
+<!subteam^GROUP_ID>
+```
+
+Where `GROUP_ID` is the unique identifier for your Slack group.
+
+### Finding Your Group ID
+
+To find the Group ID for your Slack group:
+
+1. In Slack, go to your group's settings
+2. The Group ID will be displayed in the group information
+3. Copy this ID and use it in the format above
+
+### Example
+
+If your group ID is `S1234567890`, your mention should look like:
+
+```
+<!subteam^S1234567890>
+```
+
+You can include this format in the **Title** or **Text** fields when creating or editing a notification channel, or directly in the **Recipient** field to notify the entire group.
+
+For more detailed information about Slack message formatting, refer to the [official Slack documentation on mentioning groups](https://docs.slack.dev/messaging/formatting-message-text/#mentioning-groups).
 
 ## Editing a Notification channel
 

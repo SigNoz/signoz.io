@@ -2,13 +2,14 @@
 title: "How OpenTelemetry Baggage Enables Global Context for Distributed Systems"
 slug: otel-baggage
 date: 2026-01-31
-tags: [opentelemetry, observability]
+tags: [OpenTelemetry, Observability]
 authors: [dhruv_ahuja]
 description: Understand OpenTelemetry Baggage - Learn what it is and how it enables cross-signal context propagation, and its usage via a hands-on demo.
-keywords: [otel baggage, opentelemetry, context propagation, otel, demo]
+keywords: [otel baggage, opentelemetry, context propagation, otel, demo, context, opentelemetry context propagation]
+image: /img/blog/2026/01/otel-baggage-trace.webp
 ---
 
-[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) baggage is a signal that allows you to pass “global” metadata, like a customer ID or a feature flag, across every service in a distributed system. While standard tracing captures the *what* of an operation, it is often restricted to individual spans. Baggage fills this gap by automating *context propagation* across distributed systems.
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) baggage is a signal that allows you to pass “global” metadata, like a customer ID or a feature flag, across every service in a distributed system. While standard tracing captures the *what* of an operation, it is often restricted to individual spans. Baggage fills this gap by facilitating *arbitrary metadata propagation* across distributed systems.
 
 This write-up explains how Baggage works, how it helps resolve "parameter drilling", and enables you to affect application behaviour during a request. You’ll also see how it works practically via a hands-on demo.
 
@@ -16,7 +17,7 @@ This write-up explains how Baggage works, how it helps resolve "parameter drilli
 
 Baggage is one of OpenTelemetry’s established <a href="https://opentelemetry.io/docs/concepts/signals/" rel="noopener noreferrer nofollow" target="_blank">observability signals</a>, that primarily complements the three major signals considered the “pillars of observability” - traces, metrics, and logs. It introduces a standard way of propagating context across components in a *distributed* request, even if you aren’t exporting other signals for that request.
 
-A baggage is an *immutable* object that holds metadata as key-value pairs, similar to how [resource attributes](https://signoz.io/blog/otel-resource-attributes/) are defined. When OpenTelemetry-instrumented applications make or receive API calls, most libraries (such as HTTP clients) automatically inject and extract the baggage via HTTP header or gRPC metadata.
+A baggage is an *immutable* object that holds metadata as key-value pairs, similar to how [resource attributes](https://signoz.io/blog/otel-resource-attributes/) are defined. When applications *auto-instrumented* by OpenTelemetry make or receive API calls, most libraries (such as HTTP clients) automatically inject and extract the baggage via HTTP header or gRPC metadata.
 
 With its implementation as a “utility” signal, baggage solves two primary problems for developers of modern applications.
 
@@ -137,7 +138,7 @@ The `frontend` script acts like a real frontend by calling a backend API, parsin
 
 ### How Baggage Propagation Works in Code
 
-For each request, the `frontend` determines whether the user is “lucky” and receives a discount or not. It adds its decision as context to the baggage, and calls the `pricing` service.
+For each request, the `frontend` determines whether the user is “lucky” and receives a discount or not. It adds its decision as context to the baggage, and calls the `pricing` service. Since our Python scripts use auto-instrumentation (ran via the `opentelemetry-instrument python ...` commands), baggage context is automatically propagated across requests.
 
 ```python
 # Set baggage; key-value pairs should be strings
