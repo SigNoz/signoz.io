@@ -26,12 +26,10 @@ export default function Figure({
   figureClassName,
   captionClassName,
 }: FigureProps) {
-  const imageClassName = ['rounded-md', className].filter(Boolean).join(' ')
-
   return (
     <Zoom>
       <figure className={figureClassName}>
-        <img src={src} alt={alt} className={imageClassName} />
+        <img src={src} alt={alt} className={`rounded-md ${className ?? ''}`.trim()} />
         <figcaption className={captionClassName}>
           <i>
             {link && !sourceText ? (
