@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowDown, ArrowRight, Check, TriangleAlert, X } from 'lucide-react'
+import { ArrowDown, ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
@@ -201,7 +201,7 @@ const CostComparison: React.FC = () => {
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <div className="sticky top-[100px] px-10 pt-10 md:px-0 md:px-12">
+          <div className="sticky top-[100px] min-w-fit px-10 pt-10 md:px-12">
             <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
               Cost <br className="hidden md:block" />
               Comparison
@@ -214,36 +214,34 @@ const CostComparison: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex-[2_2_0%] border-l border-dashed border-signoz_slate-400">
-          <div className="p-10">
-            <h3 className="mb-4 text-xl font-semibold text-signoz_vanilla-100">
-              SigNoz vs Langfuse for 1 Billion Spans/Month
-            </h3>
-            <p className="mb-8 text-signoz_vanilla-400">
-              We charge based on data size while Langfuse charges per unit count. AI applications
-              generate more spans due to complex agent workflows and tool calls, making unit-based
-              pricing expensive at scale.
-            </p>
+        <div className="flex-[2_2_0%] border-l border-dashed border-signoz_slate-400 p-10">
+          <h3 className="mb-4 text-xl font-semibold text-signoz_vanilla-100">
+            SigNoz vs Langfuse for 1 Billion Spans/Month
+          </h3>
+          <p className="mb-8 text-signoz_vanilla-400">
+            We charge based on data size while Langfuse charges per unit count. AI applications
+            generate more spans due to complex agent workflows and tool calls, making unit-based
+            pricing expensive at scale.
+          </p>
 
-            <div className="flex flex-col gap-4">
-              <div className="rounded-lg p-6">
-                <h4 className="mb-2 font-semibold text-signoz_vanilla-100">Langfuse Core</h4>
-                <div className="mb-2 font-bold text-signoz_vanilla-100">$60,331/month</div>
-                <p className="text-sm text-signoz_vanilla-400">
-                  Base $29 + $60,302 usage (graduated pricing from 100k to 1B units). Langfuse
-                  counts traces, observations, and scores as billable units.
-                </p>
-              </div>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-lg p-6">
+              <h4 className="mb-2 font-semibold text-signoz_vanilla-100">Langfuse Core</h4>
+              <div className="mb-2 font-bold text-signoz_vanilla-100">$60,331/month</div>
+              <p className="text-sm text-signoz_vanilla-400">
+                Base $29 + $60,302 usage (graduated pricing from 100k to 1B units). Langfuse counts
+                traces, observations, and scores as billable units.
+              </p>
+            </div>
 
-              <div className="rounded-lg p-6">
-                <h4 className="mb-2 font-semibold text-signoz_vanilla-100">SigNoz Cloud</h4>
-                <div className="mb-2 font-bold text-signoz_vanilla-100">$300 - $3,000/month</div>
-                <p className="text-sm text-signoz_vanilla-400">
-                  Span sizes typically range from 1 KB to 10 KB depending on your instrumentation
-                  and payload complexity. It also includes traces, logs, and metrics with no
-                  separate instrumentation.
-                </p>
-              </div>
+            <div className="rounded-lg p-6">
+              <h4 className="mb-2 font-semibold text-signoz_vanilla-100">SigNoz Cloud</h4>
+              <div className="mb-2 font-bold text-signoz_vanilla-100">$300 - $3,000/month</div>
+              <p className="text-sm text-signoz_vanilla-400">
+                Span sizes typically range from 1 KB to 10 KB depending on your instrumentation and
+                payload complexity. It also includes traces, logs, and metrics with no separate
+                instrumentation.
+              </p>
             </div>
           </div>
         </div>
@@ -256,23 +254,14 @@ const HowSigNozCompares: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="relative">
-        <div className="container pb-16">
-          <div className="flex flex-col gap-6 md:py-20">
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-                <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-                  How SigNoz Compares to <br /> LLM-Only Tools
-                </h2>
-                <SectionLayout
-                  variant="no-border"
-                  className="!mx-auto flex items-center justify-center"
-                >
-                  <ComparisonTable vendors={VENDORS} rows={LLM_COMPARISON_TABLE_ROWS} />
-                </SectionLayout>
-              </div>
-            </div>
-          </div>
+      <div className="container relative mx-auto flex flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
+        <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+          <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
+            How SigNoz Compares to <br /> LLM-Only Tools
+          </h2>
+          <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
+            <ComparisonTable vendors={VENDORS} rows={LLM_COMPARISON_TABLE_ROWS} />
+          </SectionLayout>
         </div>
       </div>
     </section>
@@ -283,26 +272,17 @@ const HowSigNozComparesToTraditionalTools: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="relative">
-        <div className="container pb-16">
-          <div className="flex flex-col gap-6 md:py-20">
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-                <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-                  How SigNoz Compares to <br /> Traditional Tools
-                </h2>
-                <SectionLayout
-                  variant="no-border"
-                  className="!mx-auto flex items-center justify-center"
-                >
-                  <ComparisonTable
-                    vendors={TRADITIONAL_VENDORS}
-                    rows={TRADITIONAL_COMPARISON_TABLE_ROWS}
-                  />
-                </SectionLayout>
-              </div>
-            </div>
-          </div>
+      <div className="container relative mx-auto flex flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
+        <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+          <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
+            How SigNoz Compares to <br /> Traditional Tools
+          </h2>
+          <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
+            <ComparisonTable
+              vendors={TRADITIONAL_VENDORS}
+              rows={TRADITIONAL_COMPARISON_TABLE_ROWS}
+            />
+          </SectionLayout>
         </div>
       </div>
     </section>
@@ -314,25 +294,22 @@ const CustomerStories: React.FC = () => {
     <>
       <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-
-        <div className="relative">
-          <div className="container pb-16">
-            <div className="flex flex-col gap-6 py-32">
-              <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-                <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-                  <Image
-                    src="/img/case_study/logos/shaped-logo.svg"
-                    alt="Shaped"
-                    width={100}
-                    height={100}
-                  />
-                  Every single time we have an issue, SigNoz is always the first place to check. It
-                  was super straightforward to migrate - just updating the exporter configuration,
-                  basically three lines of code.
-                  <span className="text-sm text-signoz_vanilla-400">
-                    <span className="font-semibold">Karl Lyons</span> <br /> Senior SRE, Shaped
-                  </span>
-                </div>
+        <div className="container relative pb-16">
+          <div className="flex flex-col gap-6 py-32">
+            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+              <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+                <Image
+                  src="/img/case_study/logos/shaped-logo.svg"
+                  alt="Shaped"
+                  width={100}
+                  height={100}
+                />
+                Every single time we have an issue, SigNoz is always the first place to check. It
+                was super straightforward to migrate - just updating the exporter configuration,
+                basically three lines of code.
+                <span className="text-sm text-signoz_vanilla-400">
+                  <span className="font-semibold">Karl Lyons</span> <br /> Senior SRE, Shaped
+                </span>
               </div>
             </div>
           </div>
@@ -401,43 +378,39 @@ const StartMonitoring: React.FC = () => {
             Start Monitoring Your AI Apps in <span className="text-red-500">Minutes</span>
           </p>
         </div>
-        <div className="flex-[2_2_0%]">
-          <div className="border-b border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
-            <div className="grid grid-cols-1 lg:grid-cols-3">
-              <div className="col-span-2 flex flex-col gap-6 p-10">
-                <h3 className="m-0 text-2xl font-semibold text-signoz_vanilla-100">
-                  Get started in three steps:
-                </h3>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 shrink-0 font-semibold text-red-500">I</span>Sign up for
-                    free SigNoz Cloud account
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 shrink-0 font-semibold text-red-500">II</span>Install your
-                    framework's instrumentation package
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 shrink-0 font-semibold text-red-500">III</span>Add two
-                    lines to initialize tracing
-                  </div>
-                </div>
-                <div className="flex flex-col items-center gap-6 text-justify text-signoz_vanilla-400 lg:items-start">
-                  Your existing application code remains completely untouched while traces start
-                  flowing to SigNoz in real-time, giving you instant visibility into every aspect of
-                  your LLM operations.
-                  <ButtonGroup buttons={startMonitoringButtons} />
-                </div>
+        <div className="grid flex-[2_2_0%] grid-cols-1 border-b border-l border-dashed border-signoz_slate-400 bg-transparent p-0 lg:grid-cols-3">
+          <div className="col-span-2 flex flex-col gap-6 p-10">
+            <h3 className="m-0 text-2xl font-semibold text-signoz_vanilla-100">
+              Get started in three steps:
+            </h3>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="w-6 shrink-0 font-semibold text-red-500">I</span>Sign up for free
+                SigNoz Cloud account
               </div>
-              <div className="relative col-span-1 h-full min-h-[400px] w-full">
-                <Image
-                  src="/img/llm-observability/start-monitoring-section.webp"
-                  alt="Start Monitoring"
-                  fill
-                  className="object-contain"
-                />
+              <div className="flex items-center gap-2">
+                <span className="w-6 shrink-0 font-semibold text-red-500">II</span>Install your
+                framework's instrumentation package
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-6 shrink-0 font-semibold text-red-500">III</span>Add two lines to
+                initialize tracing
               </div>
             </div>
+            <div className="flex flex-col items-center gap-6 text-justify text-signoz_vanilla-400 lg:items-start">
+              Your existing application code remains completely untouched while traces start flowing
+              to SigNoz in real-time, giving you instant visibility into every aspect of your LLM
+              operations.
+              <ButtonGroup buttons={startMonitoringButtons} />
+            </div>
+          </div>
+          <div className="relative col-span-1 h-full min-h-[400px] w-full">
+            <Image
+              src="/img/llm-observability/start-monitoring-section.webp"
+              alt="Start Monitoring"
+              fill
+              className="object-contain"
+            />
           </div>
         </div>
       </div>
