@@ -66,3 +66,32 @@ Aggregation: count or rate
 Evaluation: at least once
 Reason: Detects any occurrence of error spikes and evaluates system reliability
 ```
+
+## Detecting Continuous Uptrends in Derived Metrics
+
+You can detect continuous uptrends in derived metrics by using the `running_diff` function on individual queries rather than on formulas. This is useful for scenarios like monitoring RabbitMQ message queue trends where you want to alert on sustained increases rather than temporary spikes.
+
+### Setting Up Uptrend Detection
+
+To detect a continuous uptrend in a derived metric (like the rate difference between messages published and acknowledged), follow these steps:
+
+1. **Create your base queries:**
+   - Query A: `rate(messages_published)` (every 120s)
+   - Query B: `rate(messages_acked)` (every 120s)
+
+2. **Apply running difference to each query:**
+   - Apply `running_diff` directly on Query A with 120-second interval
+   - Apply `running_diff` directly on Query B with 120-second interval
+
+3. **Create the formula:**
+   - Use formula: `A - B` to get your derived rate difference
+
+4. **Set up the alert condition:**
+   - Alert when the result is `> 0` to detect upward trends
+
+The `running_diff` function calculates `R(t) - R(t-previous)`, allowing you to detect when each consecutive reading is higher than the previous one, which is exactly what you need for sustained uptrend detection.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/running-diff-uptrend-detection.webp" alt="Running difference function dropdown showing options like Cut Off Min, Running Diff, and Log2"/>
+    <figcaption><i>Applying running_diff function to detect continuous uptrends</i></figcaption>
+</figure>
