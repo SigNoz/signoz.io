@@ -461,3 +461,21 @@ Detailed Celery Traces
 </i>
 </figcaption>
 </figure>
+
+## Troubleshooting
+
+### Worker Online Status Shows 0
+
+If your Celery dashboard shows "Worker Online: 0" even when workers are running, this is because the worker task events are disabled by default. The "Worker Online" status is determined by the `flower_worker_online` metric, which requires the `worker_send_task_events` setting to be enabled.
+
+To enable worker online status:
+
+1. Start your Celery worker with the `-E` flag to enable task events:
+
+```bash
+celery -A your_app worker --loglevel=info -E
+```
+
+2. This will allow the dashboard to properly track and display worker online status.
+
+For more information, refer to the [Celery configuration documentation](https://docs.celeryq.dev/en/latest/userguide/configuration.html#worker_send_task_events) and [monitoring guide](https://docs.celeryq.dev/en/stable/userguide/monitoring.html#worker-online).
