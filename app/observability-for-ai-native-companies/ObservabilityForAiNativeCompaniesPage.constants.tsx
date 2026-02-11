@@ -1,15 +1,14 @@
 import { TextSearch, Atom, ChevronsDown, TrendingUpDown, ArrowRight } from 'lucide-react'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
-import {
-  ComparisonTableRow,
-  TraditionalComparisonTableRow,
-  VendorKey,
-  TraditionalVendorKey,
-} from './ObservabilityForAiNativeCompaniesPage.types'
 import React from 'react'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
+import { type ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
+import {
+  type VendorKey,
+  type TraditionalVendorKey,
+} from './ObservabilityForAiNativeCompaniesPage.types'
 
 export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
   {
@@ -173,7 +172,7 @@ export const TRADITIONAL_VENDORS: { key: TraditionalVendorKey; label: string }[]
   { key: 'grafana', label: 'Grafana LGTM' },
 ]
 
-export const LLM_COMPARISON_TABLE_ROWS: ComparisonTableRow[] = [
+export const LLM_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] = [
   {
     feature: 'LLM Tracing',
     vendors: {
@@ -257,7 +256,7 @@ export const LLM_COMPARISON_TABLE_ROWS: ComparisonTableRow[] = [
   },
 ]
 
-export const TRADITIONAL_COMPARISON_TABLE_ROWS: TraditionalComparisonTableRow[] = [
+export const TRADITIONAL_COMPARISON_TABLE_ROWS: ComparisonTableRow<TraditionalVendorKey>[] = [
   {
     feature: 'GPU Cluster Economics',
     vendors: {

@@ -18,7 +18,7 @@ import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageB
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import TrackingLink from '@/components/TrackingLink'
-import { ComparisonTableProps } from './LlmObservabilityPage.types'
+import ComparisonTable from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -81,58 +81,6 @@ const Header: React.FC = () => {
         </div>
       </SectionLayout>
     </header>
-  )
-}
-
-const ComparisonTable: React.FC<ComparisonTableProps> = ({ rows, className = '' }) => {
-  return (
-    <div
-      className={`overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50 ${className}`}
-    >
-      <table className="m-0 h-fit w-fit border-collapse text-left">
-        <tbody className="text-sm text-signoz_vanilla-300">
-          <tr>
-            <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
-              Feature
-            </td>
-            {VENDORS.map((vendor) => (
-              <th
-                key={vendor.key}
-                className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400"
-              >
-                {vendor.label}
-              </th>
-            ))}
-          </tr>
-          {rows.map((row, index) => (
-            <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
-              <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-sm text-signoz_robin-400">
-                {row.feature}
-              </td>
-              {VENDORS.map((vendor) => {
-                const cellData = row.vendors[vendor.key]
-
-                return (
-                  <td
-                    key={vendor.key}
-                    className="border-b border-signoz_slate-400 px-4 py-4 text-left"
-                  >
-                    <span className="flex items-center gap-2">
-                      {cellData.supported ? (
-                        <Check size={20} className="text-green-400" />
-                      ) : (
-                        <X size={20} className="text-red-400" />
-                      )}
-                      {cellData.text}
-                    </span>
-                  </td>
-                )
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   )
 }
 
@@ -260,7 +208,7 @@ const HowSigNozCompares: React.FC = () => {
                   variant="no-border"
                   className="!mx-auto flex items-center justify-center"
                 >
-                  <ComparisonTable rows={LLM_COMPARISON_TABLE_ROWS} />
+                  <ComparisonTable vendors={VENDORS} rows={LLM_COMPARISON_TABLE_ROWS} />
                 </SectionLayout>
               </div>
             </div>

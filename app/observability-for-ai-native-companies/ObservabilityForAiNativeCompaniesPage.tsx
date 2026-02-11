@@ -21,11 +21,7 @@ import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageB
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import TrackingLink from '@/components/TrackingLink'
-import {
-  ComparisonTableProps,
-  TraditionalComparisonTableProps,
-} from './ObservabilityForAiNativeCompaniesPage.types'
-import GridLayout from 'shared/components/molecules/FeaturePages/GridLayout'
+import ComparisonTable from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -92,64 +88,6 @@ const Header: React.FC = () => {
   )
 }
 
-const ComparisonTable: React.FC<ComparisonTableProps | TraditionalComparisonTableProps> = ({
-  vendors,
-  rows,
-  className = '',
-}) => {
-  return (
-    <div
-      className={`overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50 ${className}`}
-    >
-      <table className="m-0 border-collapse text-left">
-        <tbody className="text-sm text-signoz_vanilla-300">
-          <tr className="relative">
-            <td className="sticky left-[-1px] border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
-              Feature
-            </td>
-            {vendors.map((vendor) => (
-              <th
-                key={vendor.key}
-                className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400"
-              >
-                {vendor.label}
-              </th>
-            ))}
-          </tr>
-          {rows.map((row, index) => (
-            <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
-              <td className="sticky left-[-1px] border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-sm text-signoz_robin-400">
-                {row.feature}
-              </td>
-              {vendors.map((vendor) => {
-                const cellData = row.vendors[vendor.key]
-
-                return (
-                  <td
-                    key={vendor.key}
-                    className="border-b border-signoz_slate-400 px-4 py-4 text-left"
-                  >
-                    <span className="flex items-center gap-2">
-                      {cellData.supported === 'partial' ? (
-                        <TriangleAlert size={20} className="text-yellow-400" />
-                      ) : cellData.supported ? (
-                        <Check size={20} className="text-green-400" />
-                      ) : (
-                        <X size={20} className="text-red-400" />
-                      )}
-                      {cellData.text}
-                    </span>
-                  </td>
-                )
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
 const TrustedByTeams: React.FC = () => {
   return (
     <>
@@ -201,7 +139,7 @@ const CapabilitiesSection: React.FC = () => {
           Companies
         </h2>
         <SectionLayout variant="no-border" className="!mx-auto p-0">
-          <div className="border-t border-dashed border-signoz_slate-400 px-8 py-4 text-left">
+          <div className="border-y border-dashed border-signoz_slate-400 p-8 text-left">
             <h5 className="mb-1 text-2xl font-semibold text-signoz_robin-400">
               Capabilities that AI Companies Need Most
             </h5>
@@ -211,7 +149,7 @@ const CapabilitiesSection: React.FC = () => {
             </div>
           </div>
           <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS1} />
-          <div className="relative flex w-full flex-col items-start border border-dashed border-signoz_slate-400/50 px-8 py-6">
+          <div className="relative flex w-full flex-col items-start border border-dashed border-signoz_slate-400/50 p-8">
             <h3 className="text-left text-2xl font-semibold text-red-400">
               Full-Stack Platform Capabilities
             </h3>
@@ -259,7 +197,7 @@ const CostComparison: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
-      className="!border-t-1 border-dashed border-signoz_slate-400 !px-0"
+      className="!border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
