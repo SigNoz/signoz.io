@@ -78,7 +78,7 @@ const Header: React.FC = () => {
           <Image
             src="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
             alt="Observability for AI Native Companies hero"
-            className="relative z-10 w-full rounded-xl"
+            className="z-1 relative w-full rounded-xl"
             width={10000}
             height={10000}
           />
@@ -254,7 +254,7 @@ const HowSigNozCompares: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="container relative mx-auto flex flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
+      <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
             How SigNoz Compares to <br /> LLM-Only Tools
@@ -272,7 +272,7 @@ const HowSigNozComparesToTraditionalTools: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="container relative mx-auto flex flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
+      <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
             How SigNoz Compares to <br /> Traditional Tools
@@ -325,8 +325,8 @@ const CustomerStories: React.FC = () => {
               <TrackingLink
                 href="/case-study/"
                 clickType="Secondary CTA"
-                clickName="LLM Observability Customer Stories Button"
-                clickLocation="LLM Observability Testimonials"
+                clickName="Observability for AI Native Companies Customer Stories Button"
+                clickLocation="Observability for AI Native Companies Testimonials"
                 clickText="Read customer stories"
               >
                 Read customer stories
@@ -349,8 +349,8 @@ const StartMonitoring: React.FC = () => {
       className: 'flex-center',
       tracking: {
         clickType: 'Primary CTA',
-        clickName: 'LLM Observability Bottom CTA Start Trial',
-        clickLocation: 'LLM Observability Bottom Section',
+        clickName: 'Observability for AI Native Companies Start Monitoring CTA Start Trial',
+        clickLocation: 'Observability for AI Native Companies Start Monitoring Section',
         clickText: 'Start your free trial',
       },
     },
@@ -361,8 +361,8 @@ const StartMonitoring: React.FC = () => {
       className: 'flex-center',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'LLM Observability Bottom CTA Docs',
-        clickLocation: 'LLM Observability Bottom Section',
+        clickName: 'Observability for AI Native Companies Start Monitoring CTA Docs',
+        clickLocation: 'Observability for AI Native Companies Start Monitoring Section',
         clickText: 'Read Documentation',
       },
     },
@@ -374,7 +374,7 @@ const StartMonitoring: React.FC = () => {
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:px-12">
+          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-12">
             Start Monitoring Your AI Apps in <span className="text-red-500">Minutes</span>
           </p>
         </div>
@@ -418,7 +418,7 @@ const StartMonitoring: React.FC = () => {
   )
 }
 
-const LlmObservabilityPage: React.FC = () => {
+const ObservabilityForAiNativeCompaniesPage: React.FC = () => {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
@@ -446,4 +446,4 @@ const LlmObservabilityPage: React.FC = () => {
   )
 }
 
-export default LlmObservabilityPage
+export default ObservabilityForAiNativeCompaniesPage

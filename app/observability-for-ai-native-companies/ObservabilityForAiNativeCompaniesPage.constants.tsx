@@ -12,16 +12,12 @@ import {
 
 export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
   {
-    icon: '',
-    iconText: '',
     title: 'Span-Level Alerting',
     description:
       'Set alerts on specific spans within a trace to isolate internal latency from third-party provider slowness. Configure thresholds on individual service spans rather than entire trace duration, so you only get notified when your code is slow, not when external APIs degrade.',
     className: 'md:min-h-96 md:justify-center',
   },
   {
-    icon: '',
-    iconText: '',
     title: '',
     description: (
       <>
@@ -38,8 +34,6 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
     ),
   },
   {
-    icon: '',
-    iconText: '',
     title: 'Trace Funnels',
     description: (
       <div className="flex flex-col gap-4">
@@ -68,8 +62,6 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
     ),
   },
   {
-    icon: '',
-    iconText: '',
     title: 'MCP Server for Agentic SRE',
     description: (
       <div className="flex flex-col gap-4">
@@ -98,15 +90,11 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
     ),
   },
   {
-    icon: '',
-    iconText: '',
     title: 'Self-Hosted / BYOC Compliance',
     description:
       'Deploy on your infrastructure to meet HIPAA/GDPR compliance requirements. Keep sensitive prompt data on-premise for healthcare, banking, and government contracts.',
   },
   {
-    icon: '',
-    iconText: '',
     title: 'Monitoring Model Token Usage',
     description:
       'Track token usage and costs per model, operation, and user. View cost breakdowns, prompt efficiency scores, and configure budget alerts to optimize spending without sacrificing quality.',
@@ -115,8 +103,6 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
 
 export const CAPABILITIES_CARDS2: IconTitleDescriptionCardData[] = [
   {
-    icon: '',
-    iconText: '',
     title: 'ClickHouse Architecture',
     description:
       'Handle high-cardinality tagging without performance degradation or out-of-memory crashes using columnar storage optimized for analytical queries.',
@@ -129,8 +115,6 @@ export const CAPABILITIES_CARDS2: IconTitleDescriptionCardData[] = [
       "Unlike Langfuse's fixed observation schema, you can track custom reasoning steps, tool calls, or model parameters without code changes.",
   },
   {
-    icon: '',
-    iconText: '',
     title: 'OpenTelemetry Native',
     description:
       'Avoid vendor lock-in with industry standard instrumentation. Switch observability providers without rewriting instrumentation or removing proprietary agents.',
@@ -143,15 +127,11 @@ export const CAPABILITIES_CARDS2: IconTitleDescriptionCardData[] = [
       'Manage dashboards and alerts with Terraform to maintain stability during rapid product updates. Version control your observability configuration.',
   },
   {
-    icon: '',
-    iconText: '',
     title: 'Alert Segmentation for On-Call Health',
     description:
       'Define granular alert severity levels instead of blanket alerts that cause on-call burnout. Route notifications dynamically by service, environment, or customer.',
   },
   {
-    icon: '',
-    iconText: '',
     title: 'Out-of-the-Box Dashboards',
     description:
       'Start monitoring immediately with pre-built dashboards for OpenAI, Anthropic, LangChain, database queries, Kubernetes pods, and API latency. Get visibility into your LLM applications, infrastructure, and application performance on day 1.',

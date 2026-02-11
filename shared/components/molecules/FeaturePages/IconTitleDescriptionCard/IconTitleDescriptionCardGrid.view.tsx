@@ -11,7 +11,7 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
         <IconTitleDescriptionCard
           key={index}
           icon={card.icon}
-          iconText={card.iconText}
+          iconText={card.iconText || ''}
           title={card.title}
           description={card.description}
           className={card.className}
