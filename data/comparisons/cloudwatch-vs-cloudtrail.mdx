@@ -27,7 +27,7 @@ CloudWatch answers questions like:
 - How many 5xx errors did my API Gateway return in the last hour?
 - Should my auto-scaling group add more instances?
 
-### Metrics: Real-Time Resource Performance Data
+### Resource Monitoring with CloudWatch Metrics
 
 CloudWatch automatically collects some performance metrics from AWS services, so EC2 instances report CPU utilization, network traffic, and disk I/O, while Lambda functions surface invocation count, duration, and error rate. RDS databases contribute connection count, read/write latency, and storage usage to the same metrics pipeline.
 
@@ -35,7 +35,7 @@ You can also push custom metrics from your applications for business-specific me
 
 <Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-ec2-metrics.webp" alt="EC2 instance Monitoring tab in the AWS Console showing default CloudWatch metrics like CPU utilization and network traffic" caption="EC2 instance Monitoring tab showing default CloudWatch metrics including CPU utilization, network I/O, and credit usage" />
 
-### Logs: Centralized Output from Your Workloads
+### Centralized Logging with CloudWatch Logs
 
 Beyond metrics, CloudWatch Logs centralizes log output from your workloads. EC2 instances, Lambda functions, ECS containers, and API Gateway all route logs into CloudWatch Log Groups, where each group contains log streams organized by source.
 
@@ -47,7 +47,7 @@ Inside each log group, you can search and filter log events, set up metric filte
 
 <Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-log-events.webp" alt="CloudWatch Logs page showing log events for a selected log group" caption="Viewing individual log events inside a CloudWatch log group" />
 
-### Alarms: Threshold-Based Alerts and Automated Actions
+### Threshold-Based Alerting with CloudWatch Alarms
 
 With metrics and logs flowing in, the next step is acting on them. CloudWatch Alarms let you set thresholds on any metric and trigger actions when those thresholds are breached, whether that is sending a notification through SNS, triggering an Auto Scaling action, or invoking a Lambda function.
 
@@ -68,13 +68,13 @@ CloudTrail answers questions like:
 - Which IP address was used to modify the security group?
 - Did anyone access this KMS key in the last 30 days?
 
-### Event History: Your 90-Day Audit Timeline
+### Auditing Account Activity with CloudTrail Event History
 
 By default, CloudTrail retains 90 days of management event history at no cost. Management events are control-plane operations like creating an EC2 instance, modifying an S3 bucket policy, or changing an IAM role. The event history table surfaces the fields that matter for investigations, including event name, timestamp, user name, event source, and affected resources.
 
 <Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-event-history.webp" alt="CloudTrail Event History table showing event name, time, user, source, and resources" caption="CloudTrail Event History showing recent API activity with columns for actor attribution: who did what, when, and to which resource" />
 
-### Event Detail: The "Who, What, When, From Where" Breakdown
+### Analyzing CloudTrail Event Details
 
 Drilling into any event reveals a JSON record with detailed attribution fields that map directly to the forensic questions you ask during an investigation:
 
@@ -91,7 +91,7 @@ Here is a real event detail page from the AWS Console, showing a `PutBucketEncry
 
 <Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-event-details.webp" alt="CloudTrail event details for a PutBucketEncryption API call showing user identity, source IP, and full event JSON" caption="CloudTrail event detail for a PutBucketEncryption action, showing identity, source IP, region, and event JSON" />
 
-### Trails and Event Data Stores for Longer Retention
+### CloudTrail Trails and Long-Term Retention
 
 The 90-day event history covers many investigation needs, but compliance and long-term auditing often require more. For retention beyond that window, you create a Trail that delivers events to an S3 bucket (and optionally to CloudWatch Logs), or use CloudTrail Lake to store event data for up to ~10 years with the one-year extendable retention option (or ~7 years with the seven-year retention option).
 
