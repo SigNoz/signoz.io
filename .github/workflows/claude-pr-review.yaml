@@ -188,7 +188,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.19.4'
           cache: 'yarn'
 
       - name: Install dependencies
@@ -234,40 +234,51 @@ jobs:
 
             ## FRONTEND CODE REVIEW (for *.js, *.jsx, *.ts, *.tsx files)
             
-            Focus on code quality, maintainability, and Next.js best practices. Provide inline comments for issues.
+            Focus on code quality, maintainability, and Next.js 14 App Router best practices. Provide inline comments for issues.
 
             ### 1. DRY PRINCIPLE & CODE DUPLICATION
             - Identify duplicated logic across files (identical or near-identical functions/components)
             - Check for repeated patterns that could be extracted into shared utilities or hooks
             - Look for copy-pasted code blocks
             - Suggest consolidation opportunities with specific file paths
-            - Check if new code duplicates existing utilities in /lib, /utils, or /hooks
+            - Check if new code duplicates existing utilities in /utils, /hooks, or app/lib/utils.ts
+            - Verify if similar components exist in /shared/components or /components/ui that could be reused
 
             ### 2. COMPONENT DESIGN & ARCHITECTURE
             - Verify proper component decomposition (not too large, single responsibility)
             - Check for prop drilling; suggest Context API or composition patterns
-            - Ensure components are appropriately client ('use client') or server components
+            - Ensure components are appropriately client ('use client') or server components (default in App Router)
             - Look for opportunities to extract reusable components
-            - Check if similar components exist elsewhere that could be reused
-            - Validate component file location matches its purpose (e.g., shared components in /components, page-specific in /pages or /app)
+            - Check if similar components exist in /components/ui, /shared/components, or /components that could be reused
+            - Validate component file location matches its purpose:
+              * Shared/reusable components → /shared/components or /components/ui
+              * Page-specific components → /app/[route]/components or co-located with page
+              * Feature-specific components → /components/[feature]/
+            - For /shared components, verify they follow the pattern: ComponentName.types.ts, ComponentName.view.tsx, index.tsx
 
-            ### 3. NEXT.JS BEST PRACTICES
-            - Verify correct usage of Next.js App Router vs Pages Router conventions
-            - Check proper use of server components (default) vs client components
-            - Validate data fetching patterns (Server Components, Server Actions, API routes)
-            - Check proper use of Next.js Image component for images
-            - Verify correct metadata API usage for SEO
-            - Check proper dynamic imports and code splitting
+            ### 3. NEXT.JS 14 APP ROUTER BEST PRACTICES
+            - Verify correct usage of Next.js 14 App Router conventions (not Pages Router)
+            - Check proper use of server components (default) vs client components ('use client')
+            - Validate data fetching patterns:
+              * Server Components for async data fetching
+              * Server Actions for mutations
+              * Route Handlers (app/api/) for API endpoints
+            - Check proper use of Next.js Image component (next/image) for images
+            - Verify correct metadata API usage (generateMetadata, metadata export) for SEO
+            - Check proper dynamic imports (next/dynamic) and code splitting
             - Validate correct usage of next/link for navigation
-            - Check for proper error boundaries and loading states
+            - Check for proper error boundaries (error.tsx) and loading states (loading.tsx)
+            - Verify proper use of Suspense boundaries for async components
+            - Check correct usage of usePathname, useRouter, useSearchParams from next/navigation (not next/router)
 
-            ### 4. REACT BEST PRACTICES
+            ### 4. REACT 18 BEST PRACTICES
             - Verify proper hooks usage (useEffect dependencies, useMemo/useCallback optimization)
             - Check for missing key props in lists
             - Identify unnecessary re-renders
             - Validate proper state management (useState, useReducer, Context)
             - Check for proper error handling and loading states
             - Look for React anti-patterns (e.g., directly mutating state)
+            - Verify proper cleanup in useEffect hooks
 
             ### 5. TYPESCRIPT USAGE
             - Check for 'any' types that should be properly typed
@@ -276,58 +287,82 @@ jobs:
             - Check for proper type imports and exports
             - Validate proper use of generics
             - Check for type assertions that could be avoided
+            - For /shared components, verify types are in ComponentName.types.ts files
 
             ### 6. PERFORMANCE CONSIDERATIONS
-            - Identify expensive operations that should be memoized
+            - Identify expensive operations that should be memoized (useMemo, useCallback)
             - Check for N+1 query patterns in data fetching
             - Look for large bundle sizes (unnecessary dependencies)
-            - Verify proper lazy loading and code splitting
-            - Check for unoptimized images or assets
+            - Verify proper lazy loading and code splitting with dynamic imports
+            - Check for unoptimized images or assets (should use next/image)
             - Identify blocking operations in render paths
+            - Verify proper use of React Server Components to reduce client bundle size
 
             ### 7. CODE MAINTAINABILITY
             - Check for overly complex functions (>50 lines, high cyclomatic complexity)
             - Verify meaningful variable and function names
-            - Look for magic numbers or strings that should be constants
+            - Look for magic numbers or strings that should be constants (move to /constants or co-located constants file)
             - Check for proper error messages and logging
             - Validate proper code organization and file structure
             - Check for TODO/FIXME comments that should be addressed
+            - For components, verify types/constants are co-located (ComponentName.types.ts, ComponentName.constants.ts)
 
             ### 8. FOLDER STRUCTURE & ORGANIZATION
-            - Verify files are in appropriate directories
+            - Verify files are in appropriate directories per project structure:
+              * /app - Next.js App Router pages and routes
+              * /components - React components (including /components/ui for primitives)
+              * /shared/components - Shared reusable components (molecules pattern)
+              * /layouts - Layout components
+              * /hooks - Custom React hooks
+              * /utils - Utility functions
+              * /constants - Constants and configuration
             - Check for proper separation of concerns (UI, logic, data, types)
             - Validate consistent naming conventions across directories
             - Look for orphaned or misplaced files
-            - Ensure shared code is properly located in /lib, /utils, /hooks, or /components
+            - Ensure shared code is properly located in /utils, /hooks, /shared/components, or /components/ui
             - Check for feature-specific folders that could benefit from co-location
+            - Verify path aliases are used correctly (@/shared, @/components, @/utils, @/hooks, @/layouts, @/constants)
 
             ### 9. STYLING & CSS
-            - Check for duplicate CSS rules or styles
-            - Verify proper use of CSS modules or styled-components
-            - Look for inline styles that should be extracted
-            - Check for responsive design patterns
-            - Validate proper use of design system tokens/variables if applicable
+            - Check for duplicate Tailwind CSS classes or styles
+            - Verify proper use of Tailwind CSS (project uses Tailwind, not CSS modules or styled-components)
+            - Look for inline styles that should be extracted to Tailwind classes
+            - Check for responsive design patterns (Tailwind responsive prefixes)
+            - Validate proper use of design tokens from @signozhq/design-tokens if applicable
+            - Check for consistent spacing, colors, and typography using Tailwind utilities
 
             ### 10. DEPENDENCIES & IMPORTS
             - Check for unused imports
             - Verify proper import order and organization
             - Look for circular dependencies
             - Check for duplicated dependency functionality
-            - Validate proper use of absolute vs relative imports
+            - Validate proper use of path aliases (@/shared, @/components, etc.) vs relative imports
+            - Verify imports use existing dependencies (lucide-react, react-icons for icons; @nextui-org/react, @headlessui/react for UI)
+            - Check that new dependencies are justified (per CONTRIBUTING.md: "Do not add new packages unless they are required")
 
-            ### 11. ERROR HANDLING & EDGE CASES
+            ### 11. PROJECT-SPECIFIC GUIDELINES (from CONTRIBUTING.md)
+            - Prefer existing icon libraries: lucide-react or react-icons (not custom SVGs unless brand/logo)
+            - Prefer existing UI primitives: components in /components/ui (e.g., components/ui/Button) instead of raw HTML
+            - Keep types/constants co-located: ComponentName.types.ts, ComponentName.constants.ts, export from index.ts
+            - Avoid concurrent async invocations: prevent multiple concurrent runs in click handlers (set loading state, guard with ref)
+            - Be deliberate about DOM cleanup/transforms: avoid redundant selectors, ensure cleanup order
+            - Dependencies must be justified: no new packages unless required, include justification in PR description
+
+            ### 12. ERROR HANDLING & EDGE CASES
             - Verify proper try-catch blocks for async operations
             - Check for proper null/undefined handling
-            - Look for missing error boundaries
+            - Look for missing error boundaries (error.tsx in App Router)
             - Validate proper form validation
             - Check for race conditions in async code
+            - Verify proper handling of loading and error states in Server Components
 
-            ### 12. ACCESSIBILITY (A11Y)
+            ### 13. ACCESSIBILITY (A11Y)
             - Check for missing ARIA labels
             - Verify keyboard navigation support
             - Check for proper semantic HTML
             - Validate proper focus management
             - Check color contrast and screen reader compatibility
+            - Verify proper use of Headless UI and Radix UI components (they include accessibility features)
 
             ### REVIEW GUIDELINES:
             - Only comment on actual issues found; do not praise correct code
@@ -345,6 +380,8 @@ jobs:
             - Use gh pr diff to see the full diff
             - Use gh pr view to see PR description and metadata
             - Execute: gh issue edit ${{ env.PR_NUMBER }} --add-label "<label>" to add labels
+            - Search for similar components: find components shared -name "*.tsx" -type f
+            - Check for duplicate utilities: grep -r "functionName" utils hooks app/lib
 
             ### FINAL SUMMARY:
             After completing the review, provide ONE summary comment that:
