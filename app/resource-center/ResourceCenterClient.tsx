@@ -6,7 +6,6 @@ import ComparisonsListing from './comparisons/Comparisons'
 import Guides from './guides/Guides'
 import OpenTelemetry from './opentelemetry/OpenTelemetry'
 import Button from '@/components/ui/Button'
-import { MDXContent } from '@/utils/strapi'
 
 const tabs = [
   {
@@ -74,69 +73,6 @@ export default function ResourceCenterClient() {
 
       <div className="tab-content pt-6">
         {tabs.map((tab) => activeTab === tab.id && <tab.component key={tab.id} />)}
-      </div>
-
-      <div id="default-tab-content">
-        <div
-          className="hidden rounded-lg bg-gray-50 p-4 dark:bg-gray-800"
-          id="profile"
-          role="tabpanel"
-          aria-labelledby="profile-tab"
-        >
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            This is some placeholder content the{' '}
-            <strong className="font-medium text-gray-800 dark:text-white">
-              Profile tab's associated content
-            </strong>
-            . Clicking another tab will toggle the visibility of this one for the next. The tab
-            JavaScript swaps classNamees to control the content visibility and styling.
-          </p>
-        </div>
-        <div
-          className="hidden rounded-lg bg-gray-50 p-4 dark:bg-gray-800"
-          id="dashboard"
-          role="tabpanel"
-          aria-labelledby="dashboard-tab"
-        >
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            This is some placeholder content the{' '}
-            <strong className="font-medium text-gray-800 dark:text-white">
-              Dashboard tab's associated content
-            </strong>
-            . Clicking another tab will toggle the visibility of this one for the next. The tab
-            JavaScript swaps classNamees to control the content visibility and styling.
-          </p>
-        </div>
-        <div
-          className="hidden rounded-lg bg-gray-50 p-4 dark:bg-gray-800"
-          id="settings"
-          role="tabpanel"
-          aria-labelledby="settings-tab"
-        >
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            This is some placeholder content the{' '}
-            <strong className="font-medium text-gray-800 dark:text-white">
-              Settings tab's associated content
-            </strong>
-            . Clicking another tab will toggle the visibility of this one for the next. The tab
-            JavaScript swaps classNamees to control the content visibility and styling.
-          </p>
-        </div>
-        <div
-          className="hidden rounded-lg bg-gray-50 p-4 dark:bg-gray-800"
-          id="contacts"
-          role="tabpanel"
-          aria-labelledby="contacts-tab"
-        >
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            This is some placeholder content the{' '}
-            <strong className="font-medium text-gray-800 dark:text-white">
-              Contacts tab's associated content
-            </strong>
-            . Clicking another tab will toggle the visibility of this one for the next. The tab
-            JavaScript swaps classNamees to control the content visibility and styling.
-          </p>
-        </div>
       </div>
     </div>
   )

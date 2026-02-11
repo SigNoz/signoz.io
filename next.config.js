@@ -109,6 +109,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/resource-center/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
           source: '/docs/',
           destination: '/docs/introduction',
           permanent: true,

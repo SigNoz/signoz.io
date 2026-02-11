@@ -6,8 +6,7 @@ import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
-import { MDXContent } from '@/utils/strapi'
-import { transformComparison } from '@/utils/mdxUtils'
+import type { Comparison } from '../../../types/transformedContent'
 
 interface ComparisonsPageHeaderProps {
   onSearch: (e) => void
@@ -32,8 +31,8 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
   )
 }
 
-export default function ComparisonsListing({ comparisons = [] }: { comparisons?: MDXContent[] }) {
-  const posts = allCoreContent(sortPosts(comparisons as ReturnType<typeof transformComparison>[]))
+export default function ComparisonsListing({ comparisons = [] }: { comparisons?: Comparison[] }) {
+  const posts = allCoreContent(sortPosts(comparisons))
   const primaryFeaturedBlogs = posts.slice(0, 2)
   const secondaryFeaturedBlogs = posts.slice(0)
 
@@ -54,7 +53,7 @@ export default function ComparisonsListing({ comparisons = [] }: { comparisons?:
         <div className="mt-5 w-full max-md:max-w-full">
           <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {primaryFeaturedBlogs.map((featuredBlog, index) => {
-              return <BlogPostCard blog={featuredBlog as any} key={index} />
+              return <BlogPostCard blog={featuredBlog} key={index} />
             })}
           </div>
         </div>
@@ -68,7 +67,7 @@ export default function ComparisonsListing({ comparisons = [] }: { comparisons?:
 
       <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {blogs.map((post, index) => {
-          return <BlogPostCard blog={post as any} key={index} />
+          return <BlogPostCard blog={post} key={index} />
         })}
       </div>
     </div>

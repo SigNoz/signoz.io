@@ -1,8 +1,9 @@
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
 import { allBlogs, allGuides, type Blog, type Guide } from 'contentlayer/generated'
-import { transformComparison } from './mdxUtils'
-import { fetchMDXContentByPath, MDXContent } from './strapi'
+import type { Comparison } from '../types/transformedContent'
+import { fetchAllComparisonsForPage } from './cachedData'
+import type { MDXContent } from './strapi'
 
 type RawHubPath = {
   key: string
@@ -63,23 +64,9 @@ type HubIndex = {
 
 let memoizedHubIndex: HubIndex | null = null
 
-import { getCachedComparisons } from './cachedData'
-
-const getComparisons = async () => {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedComparisons(deploymentStatus)
-  } catch (error) {
-    console.error('Error fetching comparisons:', error)
-    return []
-  }
-}
-
 type ContentIndexItem = {
   prefix: string
-  collection: (Blog | Guide | MDXContent)[]
+  collection: (Blog | Guide | MDXContent | Comparison)[]
 }
 
 function normalizeRoute(route: string) {
@@ -266,7 +253,7 @@ async function buildHubIndex(comparisons: MDXContent[]): Promise<HubIndex> {
   return { lookup, paths }
 }
 
-async function getHubIndex(comparisons?: MDXContent[]): Promise<HubIndex> {
+async function getHubIndex(comparisons?: Comparison[]): Promise<HubIndex> {
   if (memoizedHubIndex) {
     return memoizedHubIndex
   }
@@ -274,7 +261,7 @@ async function getHubIndex(comparisons?: MDXContent[]): Promise<HubIndex> {
   let usedComparisons = comparisons
   if (!usedComparisons) {
     try {
-      usedComparisons = await getComparisons()
+      usedComparisons = await fetchAllComparisonsForPage()
     } catch (e) {
       usedComparisons = []
     }
@@ -284,7 +271,7 @@ async function getHubIndex(comparisons?: MDXContent[]): Promise<HubIndex> {
   return memoizedHubIndex
 }
 
-export async function getHubContextForRoute(route: string, comparisons?: MDXContent[]) {
+export async function getHubContextForRoute(route: string, comparisons?: Comparison[]) {
   const normalized = normalizeRoute(route)
   const { lookup, paths } = await getHubIndex(comparisons)
 

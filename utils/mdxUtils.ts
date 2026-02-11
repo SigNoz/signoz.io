@@ -71,7 +71,7 @@ export function generateTOC(content: string) {
       return {
         value: content,
         url: `#${slugger.slug(content)}`,
-        depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+        depth: flag?.length === 1 ? 1 : flag?.length === 2 ? 2 : 3,
       }
     })
     .filter((heading): heading is NonNullable<typeof heading> => heading !== null)
@@ -79,6 +79,13 @@ export function generateTOC(content: string) {
   return headings
 }
 
+/**
+ * Transforms a raw MDX comparison content from CMS into the expected format
+ * for the frontend application.
+ *
+ * @param comparison - Raw comparison data from CMS
+ * @returns Transformed comparison with TOC, reading time, structured data, etc.
+ */
 export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`
@@ -116,7 +123,7 @@ export const transformComparison = (comparison: MDXContent) => {
         _raw: {},
         path: `comparisons${relatedComparison.path || ''}`,
         url: `${siteMetadata.siteUrl}/comparisons${relatedComparison.path || ''}`,
-        slug: relatedComparison.path.split('/').pop() || '',
+        slug: (relatedComparison.path || '').split('/').pop() || '',
         title: relatedComparison.title,
         date:
           relatedComparison.date || relatedComparison.updatedAt || relatedComparison.publishedAt,
@@ -153,6 +160,6 @@ export const transformComparison = (comparison: MDXContent) => {
     path,
     filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
     structuredData: generateStructuredData('comparisons', contentForStructuredData),
-    relatedArticles: [...(updatedRelatedComparisons || []), ...(comparison.related_blogs || [])],
+    relatedArticles: [...(updatedRelatedComparisons || [])],
   }
 }

@@ -15,11 +15,10 @@ import { notFound } from 'next/navigation'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
-import { getCachedComparisons } from '@/utils/cachedData'
+import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { mdxOptions, transformComparison } from '@/utils/mdxUtils'
 import { compileMDX } from 'next-mdx-remote/rsc'
-
-type Comparison = ReturnType<typeof transformComparison>
+import type { Comparison } from '../../../types/transformedContent'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -35,11 +34,9 @@ export async function generateMetadata({
 }: {
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
   const slug = decodeURI(params.slug.join('/'))
 
-  const comparisons = await getCachedComparisons(deploymentStatus)
+  const comparisons = await fetchAllComparisonsForPage()
   const post: Comparison | undefined = comparisons.find((p) => p.slug === slug)
 
   if (!post) {
@@ -101,7 +98,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   // Fetch lightweight list and specific content in parallel
   const [comparisonsList, post]: [Comparison[], Comparison | undefined] = await Promise.all([
-    getCachedComparisons(deploymentStatus),
+    fetchAllComparisonsForPage(),
     fetchMDXContentByPath('comparisons', slug, deploymentStatus)
       .then((response) => {
         if ('data' in response && !Array.isArray(response.data)) {

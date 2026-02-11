@@ -9,7 +9,7 @@ async function fetchComparisons(deploymentStatus: string) {
       undefined,
       deploymentStatus,
       true,
-      ['title', 'path', 'date', 'description', 'updatedAt', 'publishedAt']
+      ['title', 'path', 'date', 'description', 'updatedAt', 'publishedAt', 'content']
     )
 
     if ('data' in comparisons && Array.isArray(comparisons.data)) {
@@ -22,18 +22,43 @@ async function fetchComparisons(deploymentStatus: string) {
   }
 }
 
-export function getCachedComparisons(deploymentStatus: string) {
+async function getCachedMDXContent<T>(
+  cacheKey: string,
+  deploymentStatus: string,
+  tags: string[],
+  fetchFn: () => Promise<T[]>
+): Promise<T[]> {
   const cachedFn = unstable_cache(
     async () => {
-      console.log('Cache MISS - comparisons - status', deploymentStatus)
-      return fetchComparisons(deploymentStatus)
+      return fetchFn()
     },
-    ['cached-comparisons-list', deploymentStatus],
+    [cacheKey, deploymentStatus],
     {
-      tags: ['mdx-content-list', 'comparisons-list'],
+      tags: ['mdx-content-list', ...tags],
       revalidate: 3600,
     }
   )
 
   return cachedFn()
+}
+
+export function getCachedComparisons(deploymentStatus: string) {
+  return getCachedMDXContent(
+    'cached-comparisons-list',
+    deploymentStatus,
+    ['comparisons-list'],
+    () => fetchComparisons(deploymentStatus)
+  )
+}
+
+export async function fetchAllComparisonsForPage() {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedComparisons(deploymentStatus)
+  } catch (error) {
+    console.error('Error fetching comparisons:', error)
+    return []
+  }
 }
