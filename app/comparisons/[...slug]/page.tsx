@@ -168,7 +168,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   }
 
   // Choose layout based on slug or post layout
-  let layoutName = (post as MDXContent).layout || defaultLayout
+  let layoutName = post?.layout || defaultLayout
   if (slug.includes('opentelemetry')) {
     layoutName = 'OpenTelemetryLayout'
   } else {

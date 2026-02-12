@@ -107,7 +107,7 @@ function articleToDoc(article: RawHubArticle, contentIndex: ContentIndexItem[]):
   return {
     type: 'doc',
     route,
-    label: title as string,
+    label: title,
     language: article.language,
   }
 }

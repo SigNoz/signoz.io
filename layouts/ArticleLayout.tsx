@@ -21,6 +21,7 @@ import NewsletterSubscription from '@/components/NewsletterSubscription/Newslett
 import authorsDirectory from '@/constants/authors.json'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
 import { MDXContent } from '@/utils/strapi'
+import type { Comparison } from '../types/transformedContent'
 
 const MAIN_CONTENT_ID = 'article-main'
 
@@ -30,7 +31,7 @@ export interface TocItemProps {
   value: string
 }
 
-type ContentType = Blog | MDXContent | Guide
+type ContentType = Blog | Guide | Comparison
 
 type ArticleContent = ContentType & {
   cta_title?: string
@@ -99,7 +100,7 @@ const getReadingTimeText = (content: LayoutProps['content']) => {
 }
 
 const getFormattedDate = (content: LayoutProps['content']) => {
-  const updatedDate = content.lastmod || content.date
+  const updatedDate = content.date
   return updatedDate
     ? new Date(updatedDate).toLocaleDateString('en-US', {
         month: 'short',
