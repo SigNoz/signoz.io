@@ -1165,6 +1165,11 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'doc',
+        route: '/docs/traces-management/long-term-storage',
+        label: 'Long Term Storage',
+      },
     ],
   },
   {
