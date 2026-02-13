@@ -281,6 +281,8 @@ Every doc should be skimmable and actionable.
 
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
 
+  - **Validate all links before submitting a PR.** Open every internal link (navigate to `https://signoz.io/...` or check locally at `http://localhost:3000/...`) and every external link to confirm they resolve to a live page. Broken links hurt user experience and SEO. Pay special attention when copying links from other docs — URLs may have changed due to renames or restructuring.
+
 - Cloud vs Self-Host
   - Add the relevant tags in frontmatter only if the content is specific to one platform (e.g., `tags: ["Self-Host"]`).
   - **Default to SigNoz Cloud** in all examples and instructions.
@@ -615,6 +617,7 @@ Set `doc_type: reference` for these pages.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
 - [ ] For Dashboard Template docs: include a clear link to set up the data source (relevant Send Data/instrumentation guide) near the top, ideally as a brief Prerequisites or info note.
 - [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
+- [ ] All links (internal and external) have been manually verified to resolve to a live page. No broken or outdated URLs.
 - [ ] Cross-link existing SigNoz docs. For OTel Collector changes, link the config guide.
 - [ ] Images use WebP format, have alt text and captions via the `Figure` component, are cropped/readable, and live under `public/img/docs/...`.
 - [ ] Added the page to the sidebar (`constants/docsSideNav.ts`) with the correct route/label.

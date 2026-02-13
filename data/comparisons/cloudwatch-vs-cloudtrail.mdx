@@ -1,0 +1,191 @@
+---
+
+title: CloudWatch vs CloudTrail - What's the Difference and When to Use Each
+slug: cloudwatch-vs-cloudtrail
+date: 2026-02-11
+tags: [Monitoring]
+authors: [yuvraj]
+description: Learn the key differences between AWS CloudWatch and CloudTrail, when to use each, and how they work together with practical examples and console walkthroughs.
+keywords: [cloudwatch vs cloudtrail, cloudtrail vs cloudwatch, difference between cloudwatch and cloudtrail, aws cloudwatch, aws cloudtrail]
+
+---
+
+CloudWatch and CloudTrail are two AWS services that sound similar but solve completely different problems. CloudWatch monitors the health and performance of your AWS resources, while CloudTrail records who did what in your AWS account and when.
+
+If your Lambda function starts throwing errors, CloudWatch tells you about it. If someone changed your S3 bucket's encryption settings, CloudTrail tells you who made that change, from which IP address, and at what time.
+
+This guide breaks down what each service does, shows you real console walkthroughs, and explains when to use one, the other, or both.
+
+## What is Amazon CloudWatch?
+
+Amazon CloudWatch is a monitoring and observability service for AWS resources and the applications running on them. It collects metrics, aggregates logs, and triggers alarms based on thresholds you define.
+
+CloudWatch answers questions like:
+
+- Is my EC2 instance running out of memory?
+- Why is my Lambda function timing out?
+- How many 5xx errors did my API Gateway return in the last hour?
+- Should my auto-scaling group add more instances?
+
+### Resource Monitoring with CloudWatch Metrics
+
+CloudWatch automatically collects some performance metrics from AWS services, so EC2 instances report CPU utilization, network traffic, and disk I/O, while Lambda functions surface invocation count, duration, and error rate. RDS databases contribute connection count, read/write latency, and storage usage to the same metrics pipeline.
+
+You can also push custom metrics from your applications for business-specific measurements like order processing time or queue depth.
+
+<Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-ec2-metrics.webp" alt="EC2 instance Monitoring tab in the AWS Console showing default CloudWatch metrics like CPU utilization and network traffic" caption="EC2 instance Monitoring tab showing default CloudWatch metrics including CPU utilization, network I/O, and credit usage" />
+
+### Centralized Logging with CloudWatch Logs
+
+Beyond metrics, CloudWatch Logs centralizes log output from your workloads. EC2 instances, Lambda functions, ECS containers, and API Gateway all route logs into CloudWatch Log Groups, where each group contains log streams organized by source.
+
+For example, a Lambda function creates a new log stream for each execution environment. An EC2 instance running the CloudWatch agent sends application logs to a log group you configure.
+
+<Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-log-groups.webp" alt="CloudWatch Log Groups page in AWS Console showing log groups from Lambda and EC2" caption="CloudWatch Log Groups showing log data flowing in from Lambda functions and EC2 instances" />
+
+Inside each log group, you can search and filter log events, set up metric filters to extract numeric values from log lines, and create subscription filters to stream logs to other destinations.
+
+<Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-log-events.webp" alt="CloudWatch Logs page showing log events for a selected log group" caption="Viewing individual log events inside a CloudWatch log group" />
+
+### Threshold-Based Alerting with CloudWatch Alarms
+
+With metrics and logs flowing in, the next step is acting on them. CloudWatch Alarms let you set thresholds on any metric and trigger actions when those thresholds are breached, whether that is sending a notification through SNS, triggering an Auto Scaling action, or invoking a Lambda function.
+
+Each alarm has three states (OK, ALARM, and INSUFFICIENT_DATA), and you configure the evaluation period, comparison operator, and threshold value. For example, you might create an alarm that fires when EC2 CPU utilization exceeds 80% for three consecutive 5-minute periods, sending a message to your on-call channel when it transitions to ALARM state.
+
+<Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-alarm.webp" alt="CloudWatch Create Alarm page showing metric selection, threshold configuration, and alarm conditions for EC2 CPU utilization" caption="Creating a CloudWatch Alarm with metric selection, threshold configuration, and evaluation conditions" />
+
+The overall flow in CloudWatch follows a pattern: metrics arrive from your resources, you visualize them in dashboards, set alarms on critical thresholds, and respond when something degrades.
+
+## What is AWS CloudTrail?
+
+AWS CloudTrail is a governance and auditing service that records API activity across your AWS account. Monitorable actions taken through the AWS Console, CLI, SDK, or another AWS service generate an event in CloudTrail.
+
+CloudTrail answers questions like:
+
+- Who deleted that S3 bucket?
+- When was this IAM role's permissions changed?
+- Which IP address was used to modify the security group?
+- Did anyone access this KMS key in the last 30 days?
+
+### Auditing Account Activity with CloudTrail Event History
+
+By default, CloudTrail retains 90 days of management event history at no cost. Management events are control-plane operations like creating an EC2 instance, modifying an S3 bucket policy, or changing an IAM role. The event history table surfaces the fields that matter for investigations, including event name, timestamp, user name, event source, and affected resources.
+
+<Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-event-history.webp" alt="CloudTrail Event History table showing event name, time, user, source, and resources" caption="CloudTrail Event History showing recent API activity with columns for actor attribution: who did what, when, and to which resource" />
+
+### Analyzing CloudTrail Event Details
+
+Drilling into any event reveals a JSON record with detailed attribution fields that map directly to the forensic questions you ask during an investigation:
+
+| Question | CloudTrail Field | Example Value |
+|---|---|---|
+| **Who** did it? | `userIdentity` | `arn:aws:iam::123456789012:user/admin` |
+| **What** action? | `eventName` | `PutBucketEncryption` |
+| **When** did it happen? | `eventTime` | `2026-02-11T09:15:32Z` |
+| **From where?** | `sourceIPAddress` | `203.0.113.45` |
+| **Which service?** | `eventSource` | `s3.amazonaws.com` |
+| **Which region?** | `awsRegion` | `us-east-1` |
+
+Here is a real event detail page from the AWS Console, showing a `PutBucketEncryption` action with the full event record:
+
+<Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-event-details.webp" alt="CloudTrail event details for a PutBucketEncryption API call showing user identity, source IP, and full event JSON" caption="CloudTrail event detail for a PutBucketEncryption action, showing identity, source IP, region, and event JSON" />
+
+### CloudTrail Trails and Long-Term Retention
+
+The 90-day event history covers many investigation needs, but compliance and long-term auditing often require more. For retention beyond that window, you create a Trail that delivers events to an S3 bucket (and optionally to CloudWatch Logs), or use CloudTrail Lake to store event data for up to ~10 years with the one-year extendable retention option (or ~7 years with the seven-year retention option).
+
+There are four types of events you can capture:
+
+- **Management events**: Control-plane operations (creating, deleting, or modifying resources). Enabled by default.
+- **Data events**: Data-plane operations (S3 object-level actions like `GetObject` and `PutObject`, Lambda invocations). Must be enabled explicitly.
+- **Network activity events**: VPC-related network actions. Also require explicit configuration.
+- **Insights events**: Unusual API call rates or error rates detected by CloudTrail Insights. Must be enabled on a trail.
+
+## CloudWatch vs CloudTrail: Side-by-Side Comparison
+
+| Dimension | Amazon CloudWatch | AWS CloudTrail |
+|---|---|---|
+| **Primary purpose** | Monitoring and observability | Governance, compliance, and auditing |
+| **Core data** | Metrics, logs, alarms, events | API event records (management, data, network) |
+| **Key question answered** | "What is failing or degrading?" | "Who changed what, when, and from where?" |
+| **Primary users** | DevOps, SRE, platform teams | Security, compliance, governance teams |
+| **Typical workflows** | Dashboards, alerting, log search, troubleshooting | Event history, trail investigation, audit evidence |
+| **Default retention** | Metrics: 15 months (varies by resolution). Logs: indefinite (you pay for storage) | 90-day event history (free). Trails/Lake for longer. |
+| **Real-time** | Yes, real-time or near real-time | Near real-time: often within minutes (average ~5 minutes), but not guaranteed and can take longer |
+| **Visualization** | Built-in dashboards and graphs | Limited, often paired with Athena or third-party tools |
+| **Alerting** | Native alarms with SNS, Auto Scaling, Lambda actions | Not primarily for alerting, but can trigger via EventBridge |
+| **Cost model** | Based on metrics, logs volume, alarms, and dashboards | Based on event volume, trail storage, and Lake queries |
+| **Coverage scope** | Individual resource performance | Account-wide API activity |
+| **Common integrations** | SNS, Auto Scaling, Lambda, EventBridge | S3, CloudWatch Logs, IAM, AWS Config, EventBridge |
+
+## How CloudWatch and CloudTrail Work Together: A Practical Scenario
+
+Consider this scenario: your team gets paged because a Lambda function's error rate spiked at 9:15 AM.
+
+**Step 1: CloudWatch tells you something is wrong.**
+
+CloudWatch Alarms fire because the Lambda error metric exceeded the configured threshold. You open CloudWatch Logs and see that the function is failing with `AccessDeniedException` when trying to read from an S3 bucket.
+
+At this point, you know the symptom: the function lost access to S3. But CloudWatch cannot tell you why the permissions changed or who changed them.
+
+**Step 2: CloudTrail tells you what happened.**
+
+You open CloudTrail Event History and filter by the S3 bucket name. At 9:10 AM, five minutes before the errors started, you see a `PutBucketPolicy` event. The `userIdentity` field shows it was a team member's IAM user. The `sourceIPAddress` shows the request came from the office VPN.
+
+Now you have the full picture: a bucket policy change at 9:10 AM removed the Lambda function's read access, causing the errors that CloudWatch detected at 9:15 AM.
+
+This is why most teams need both services. CloudWatch catches the operational impact. CloudTrail provides the accountability trail.
+
+## Where SigNoz Fits in Your Observability Stack
+
+<Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-signoz.webp" alt="SigNoz Log Management Dashboard" caption="SigNoz Log Management Dashboard" />
+
+CloudWatch works well for collecting AWS telemetry, but investigating incidents with it means jumping between four separate consoles: Logs Insights for log queries, the Metrics console for dashboards, X-Ray for traces, and Application Signals for service health. Each uses different query syntax, and clicking from metrics to logs resets your time filters. Finding logs for a trace requires copying trace IDs from X-Ray and running a separate search in CloudWatch Logs.
+
+[SigNoz](https://signoz.io/) is an all-in-one observability platform built natively on [OpenTelemetry](https://signoz.io/opentelemetry/) that eliminates this context-switching. Metrics, traces, and logs live in a single interface, so you can jump from a latency spike to the responsible trace to the related logs without leaving one screen.
+
+CloudWatch's billing adds another friction point: log ingestion at \$0.50/GB, custom metrics at \$0.30/metric/month per dimension combination, Logs Insights charges of \$0.005/GB scanned per query, and additional `GetMetricData` API charges when third-party tools poll metrics. SigNoz uses simple, usage-based pricing (\$0.3/GB for logs and traces, \$0.1/million metric samples) with no per-host charges or per-query fees.
+
+For AWS-specific integrations, you can [send CloudWatch logs to SigNoz](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/), use [one-click AWS integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/), and set up dedicated monitoring for [EC2](https://signoz.io/docs/aws-monitoring/ec2/), [Lambda metrics](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/), [Lambda logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/), and [Lambda traces](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/).
+
+### What SigNoz Does Not Replace
+
+SigNoz does not replace CloudTrail, which remains the authoritative record for AWS account and API activity required for governance and compliance. No external observability platform substitutes that audit trail.
+
+When a Lambda error spike appears in SigNoz, engineers verify runtime impact there, then check CloudTrail to confirm whether a recent IAM, S3, or API configuration change triggered it.
+
+## Get Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+## FAQ
+
+### Is CloudTrail needed if we already use CloudWatch?
+Yes. CloudWatch tracks resource performance and application logs. CloudTrail records who made API calls and what changes they made. If someone deletes an S3 bucket or modifies an IAM role, CloudWatch will not have a record of who did it. You need CloudTrail for that accountability.
+
+### Can CloudWatch tell us who changed IAM or S3 settings?
+No. CloudWatch monitors metrics and logs from your running workloads. It does not record control-plane API activity like IAM policy changes or S3 bucket configuration updates. That information is only available in CloudTrail.
+
+### Does sending CloudWatch data to SigNoz remove the need for CloudTrail?
+No. Forwarding CloudWatch metrics and logs to SigNoz gives you a unified observability workflow for operational telemetry. But CloudTrail's audit trail of API actions is a separate concern entirely. SigNoz complements CloudWatch for debugging and investigation, while CloudTrail remains your AWS-native record for governance and compliance.
+
+## Conclusion
+
+CloudWatch and CloudTrail serve different purposes that become clear once you use both in a real incident:
+
+- **CloudWatch** = runtime behavior, resource health, alerting, and operational logs.
+- **CloudTrail** = API activity history, identity attribution, audit evidence, and compliance records.
+- **SigNoz** = unified observability workspace that brings metrics, traces, and logs together across your stack with an OpenTelemetry-native approach.
+
+For teams looking to move beyond CloudWatch's fragmented console experience and unpredictable billing, SigNoz handles the observability side while CloudTrail continues to serve as your AWS-native audit trail.
+
+---
+
+Hope we answered all your questions regarding CloudWatch vs CloudTrail. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

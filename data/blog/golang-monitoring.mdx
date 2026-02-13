@@ -84,7 +84,7 @@ go get go.opentelemetry.io/otel/sdk/log@latest
 go get go.opentelemetry.io/otel/sdk/trace@latest
 ```
 
-<KeyPointCallout title="Core Packages Explained" defaultCollapsed={true}> 
+<KeyPointCallout title="Core Packages Explained" defaultCollapsed="true"> 
 These packages define the core OpenTelemetry structure in Go:
 - `otel`: Core OpenTelemetry API for Go.
 - `otel/attribute`: Attribute key-value system used for spans, metrics, and logs.
@@ -100,7 +100,7 @@ go get go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc@latest
 go get go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc@latest
 ```
 
-<KeyPointCallout title="Exporter Packages Explained" defaultCollapsed={true}> 
+<KeyPointCallout title="Exporter Packages Explained" defaultCollapsed="true"> 
 These enable the application to send data to an OTLP-compliant backend using the gRPC transport layer:
 - `otlptracegrpc`: gRPC exporter that sends traces to the OTLP backend.
 - `otlpmetricgrpc`: gRPC exporter that sends metrics to the OTLP backend.
@@ -113,7 +113,7 @@ go get go.opentelemetry.io/contrib/bridges/otellogrus@latest
 go get go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin@latest
 ```
 
-<KeyPointCallout title="Integration Packages Explained" defaultCollapsed={true}> 
+<KeyPointCallout title="Integration Packages Explained" defaultCollapsed="true"> 
 These are for automating instrumentation and bridging existing libraries:
 - `otellogrus`: Bridge for converting Logrus structured logs into OTEL logs, automatically including trace context.
 - `otelgin`: Gin middleware for automatic request tracing of HTTP endpoints. 
@@ -177,7 +177,7 @@ func InitTracer() func(context.Context) error {
 
 The function above initialises distributed tracing for the Golang application. It configures the trace exporter, sets up the tracing pipeline, and ensures all traces include service metadata for backend identification. It also handles secure/insecure modes depending on the environment and returns a shutdown handler that flushes buffered spans on exit. With this in place, the application can produce traces, including nested spans, and request timings. Flamegraphs and timelines become available inside your tracing UI.
 
-<KeyPointCallout title="Tracing Function Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Tracing Function Breakdown" defaultCollapsed="true">
 - `otlptracegrpc.New()`: creates a gRPC OTLP trace exporter for sending spans.
 - **Security Mode**
   - When `config.Insecure == "false"`: communication is encrypted using TLS.
@@ -241,7 +241,7 @@ func InitMeter() func(context.Context) error {
 
 The function above configures metric exporting for your Go service. It creates a gRPC-based OTLP metrics exporter, sets up a periodic reader to push data every 10s, registers application-level counters for business logic and HTTP requests, and exposes Go runtime telemetry such as memory allocation and goroutine count. It gives you both business-level telemetry and Go runtime behaviour in real time.
 
-<KeyPointCallout title="Metrics Function Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Metrics Function Breakdown" defaultCollapsed="true">
 - `otlpmetricgrpc.New()`: initializes the OTLP metric exporter over gRPC.
 - `sdkmetric.NewMeterProvider()`: central engine for emitting and managing metrics.
 - `sdkmetric.WithPeriodicReader(...10s)`: batches and exports metrics every 10 seconds.
@@ -283,7 +283,7 @@ func InitLogger() func(context.Context) error {
 
 The function above wires OpenTelemetry logging into the application. It configures an OTLP log exporter, creates a LoggerProvider that batches logs, and attaches a Logrus hook so log statements automatically include trace and span metadata.
 
-<KeyPointCallout title="Logging Function Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Logging Function Breakdown" defaultCollapsed="true">
 - `otlploggrpc.New()`: creates gRPC exporter for logs.
 - **Security Mode**
   - When `config.Insecure == "false"`: communication is encrypted using TLS.
@@ -392,7 +392,7 @@ Now that you have your credentials, start the application with the environment v
 OTEL_SERVICE_NAME=goApp INSECURE_MODE=false REDIS_ADDR=<REDIS-ADDRESS>  OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ-INGESTION-KEY>" OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443 go run main.go
 ```
 
-<KeyPointCallout title="Configuration Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Configuration Breakdown" defaultCollapsed="true">
 
 * **`OTEL_EXPORTER_OTLP_HEADERS`**: Replace `<SIGNOZ_INGESTION_KEY>` with the key you retrieved from the settings page.
 * **`OTEL_EXPORTER_OTLP_ENDPOINT`**: Update `{region}` to match your account location:
