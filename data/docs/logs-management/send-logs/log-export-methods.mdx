@@ -1,0 +1,279 @@
+---
+date: 2026-02-06
+title: Log export methods
+id: log-export-methods
+description: Understand the different ways to export logs to SigNoz — SDK OTLP, HTTP API, file-based collection, OTel receivers, and log processors. Learn when to use each method.
+doc_type: explanation
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+SigNoz accepts logs via **OTLP** (OpenTelemetry Protocol) or **HTTP**. This doc explains the different paths your logs can take to reach SigNoz and helps you understand the trade-offs of each approach.
+
+For step-by-step setup guides, see [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/).
+
+## Quick Decision Guide
+
+| Your Situation | Recommended Path | Why |
+|----------------|-----------------|-----|
+| Need trace-log correlation | [SDK OTLP Export](#path-1-sdk-otlp-export) | Automatic `trace_id` and `span_id` injection when logging within active spans |
+| Need reliability over in-app SDK | [File + OTel Collector](#path-3-write-to-file--otel-collector) | Logs persist even if app crashes |
+| Collect from external log sources | [OTel Collector Receivers](#path-4-otel-collector-receivers) | Native receivers for many sources |
+| Already using FluentBit/Fluentd | [Log Processors](#path-5-log-processors) | Use existing infrastructure |
+| Custom HTTP integration | [HTTP API](#path-2-http-api) | Language-agnostic, simple |
+
+---
+
+## Path 1: SDK OTLP Export
+
+Your application uses an OpenTelemetry SDK to send logs directly to SigNoz via OTLP.
+
+```
+┌─────────────────────┐         OTLP          ┌─────────────────────┐
+│   Your Application  │ ───────────────────▶  │       SigNoz        │
+│   (OTel SDK)        │                       │                     │
+└─────────────────────┘                       └─────────────────────┘
+```
+
+**Benefits:**
+- ✅ **Trace-log correlation** — Automatic `trace_id` and `span_id` injection
+- ✅ Structured logs with rich application context
+- ✅ No additional infrastructure needed
+
+**Trade-offs:**
+- ❌ Logs are in-process — if app crashes, buffered logs may be lost
+- ❌ Requires code changes or runtime configuration
+
+### Language Guides
+
+| Language | Guide |
+|----------|-------|
+| Python | [Python Logs](https://signoz.io/docs/logs-management/send-logs/python-logs/) |
+| Node.js | [Console](https://signoz.io/docs/logs-management/send-logs/nodejs-logs/), [Pino](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/), [Winston](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/), [Bunyan](https://signoz.io/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs/) |
+| Java | [Java Logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/) |
+| Go | [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/), [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/) |
+
+---
+
+## Path 2: HTTP API
+
+Send logs directly to SigNoz over HTTP using a simple JSON payload.
+
+```
+┌─────────────────────┐         HTTP          ┌─────────────────────┐
+│   Your Application  │ ───────────────────▶  │       SigNoz        │
+│   (HTTP Client)     │                       │                     │
+└─────────────────────┘                       └─────────────────────┘
+```
+
+**Benefits:**
+- ✅ Language-agnostic — works with any language that can make HTTP requests
+- ✅ Simple integration for custom log sources
+
+**Trade-offs:**
+- ❌ Manual implementation required
+- ❌ No automatic trace correlation (include trace context fields manually if needed)
+
+→ [HTTP Logs API Guide](https://signoz.io/docs/userguide/send-logs-http/)
+
+---
+
+## Path 3: Write to File + OTel Collector
+
+Your application writes logs to stdout/file. The OpenTelemetry Collector reads these files and sends logs to SigNoz.
+
+```
+┌─────────────────────┐         ┌─────────────────────┐         ┌─────────────────────┐
+│   Your Application  │ ──────▶ │   Log File/stdout   │ ──────▶ │   OTel Collector    │ ──────▶ SigNoz
+│   (any language)    │  write  │                     │  read   │   (filelog recv)    │  OTLP
+└─────────────────────┘         └─────────────────────┘         └─────────────────────┘
+```
+
+**Benefits:**
+- ✅ **More reliable than SDK** — logs persist to disk even if app crashes
+- ✅ **Preprocessing** — filter, enrich, and transform logs before sending
+- ✅ **Add metadata** — inject Kubernetes labels, host info, etc.
+- ✅ No code changes to your application
+- ✅ Common pattern for **Kubernetes** and **Docker** environments
+
+**Trade-offs:**
+- ❌ No automatic trace correlation (unless you include trace context fields in log output)
+- ❌ Requires running an OTel Collector
+
+### Platform Guides
+
+| Platform | Guide |
+|----------|-------|
+| Kubernetes | [K8s Pod Logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) — DaemonSet auto-collects all pod logs |
+| Docker | [Docker Logs](https://signoz.io/docs/userguide/collect_docker_logs/) |
+| VM / Bare Metal | [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file/) |
+
+---
+
+## Path 4: OTel Collector Receivers
+
+The OpenTelemetry Collector has native receivers for many log sources. These receivers connect directly to services and pull logs without needing file-based collection.
+
+```
+┌─────────────────────┐                       ┌─────────────────────┐
+│   Log Source        │ ───────────────────▶  │   OTel Collector    │ ──────▶ SigNoz
+│   (CloudWatch,      │   Native receiver     │                     │  OTLP
+│    Kafka, etc.)     │                       └─────────────────────┘
+└─────────────────────┘
+```
+
+**Benefits:**
+- ✅ Native integration with many services
+- ✅ No intermediate file storage needed
+- ✅ Preprocessing and filtering in the collector
+
+### Available Receivers
+
+| Source | Receiver | Guide |
+|--------|----------|-------|
+| **CloudWatch** | `awscloudwatch` | [CloudWatch Logs](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/) |
+| **Syslog** | `syslog` | [Syslogs Guide](https://signoz.io/docs/userguide/collecting_syslogs/) |
+| **Systemd/Journald** | `journald` | [Systemd Logs](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/) |
+| **Windows Events** | `windowseventlog` | [Windows Event Logs](https://signoz.io/docs/logs-management/send-logs/windows-events-log/) |
+| **Kafka** | `kafka` | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkareceiver" target="_blank" rel="noopener noreferrer nofollow">Receives logs from Kafka topics</a> |
+| **MongoDB Atlas** | `mongodb_atlas` | [Collects MongoDB Atlas logs](https://signoz.io/docs/integrations/mongodb-atlas/) |
+
+<KeyPointCallout title="More OTel Collector Receivers" defaultCollapsed="false">
+
+The OpenTelemetry Collector supports many more receivers. See the full list in the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector Contrib repository</a>.
+
+</KeyPointCallout>
+
+---
+
+## Path 5: Log Processors
+
+If you already have FluentBit, Fluentd, Logstash, or Vector in your infrastructure, you can forward logs to SigNoz.
+
+```
+┌─────────────────────┐         ┌─────────────────────┐         ┌─────────────────────┐
+│   Your Application  │ ──────▶ │   FluentBit/Fluentd │ ──────▶ │       SigNoz        │
+│                     │         │   Logstash/Vector   │  OTLP   │                     │
+└─────────────────────┘         └─────────────────────┘         └─────────────────────┘
+```
+
+**Benefits:**
+- ✅ Use existing log infrastructure
+- ✅ No changes to current logging setup
+
+**Trade-offs:**
+- ❌ Extra hop in the pipeline
+- ❌ No automatic trace correlation
+
+### Forwarder Guides
+
+| Forwarder | Guide |
+|-----------|-------|
+| FluentBit | [FluentBit to SigNoz](https://signoz.io/docs/userguide/fluentbit_to_signoz/) |
+| Fluentd | [Fluentd to SigNoz](https://signoz.io/docs/userguide/fluentd_to_signoz/) |
+| Logstash | [Logstash to SigNoz](https://signoz.io/docs/userguide/logstash_to_signoz/) |
+| Vector | [Vector to SigNoz](https://signoz.io/docs/logs-management/send-logs/vector-logs-to-signoz/) |
+
+---
+
+## Cloud & Platform Scenarios
+
+Different cloud platforms and deployment models support multiple collection paths. This section helps you understand which paths apply to your specific scenario.
+
+### AWS
+
+<Admonition type="info">
+**SigNoz Cloud users:** [One-Click AWS Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) provide the fastest setup with auto-discovery and pre-built dashboards. See the [comparison guide](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to choose.
+</Admonition>
+
+| Scenario | Available Paths | Recommended |
+|----------|----------------|-------------|
+| **EKS (Kubernetes)** | Path 1 (SDK), Path 3 (k8s-infra), Path 4 (CloudWatch), One-Click | [k8s-infra for pod logs](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), SDK for trace correlation |
+| **ECS** | Path 1 (SDK), Path 3 (Firelens sidecar), Path 4 (CloudWatch), One-Click | [ECS Logs Guide](https://signoz.io/docs/userguide/collecting-ecs-logs-and-metrics/) |
+| **EC2** | Path 1 (SDK), Path 3 (file collection), Path 4 (CloudWatch), One-Click | [EC2 Guide](https://signoz.io/docs/aws-monitoring/ec2/) |
+| **Lambda** | Path 1 (SDK with OTel layer), Path 4 (CloudWatch), One-Click | [Lambda Logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/), [Lambda Traces](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/) |
+| **CloudWatch Logs** | Path 4 (`awscloudwatch` receiver) | [CloudWatch Logs Guide](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/) |
+| **S3 Logs** | S3 Sync (One-Click), Path 4 (S3 Lambda forwarder) | [S3 Sync](https://signoz.io/docs/integrations/aws/s3-sync/) (Cloud), [S3 Manual](https://signoz.io/docs/aws-monitoring/s3/) |
+| **RDS, DynamoDB, etc.** | One-Click, Path 4 (CloudWatch receiver) | [AWS Service Guides](https://signoz.io/docs/aws-monitoring/overview/) |
+
+<Admonition type="tip">
+**Need trace-log correlation on AWS?** Use the SDK approach (Path 1) within your application code. CloudWatch-based collection (Path 4) doesn't provide automatic trace correlation.
+</Admonition>
+
+### Azure
+
+| Scenario | Available Paths | Recommended |
+|----------|----------------|-------------|
+| **AKS (Kubernetes)** | Path 1 (SDK), Path 3 (k8s-infra) | [AKS Guide](https://signoz.io/docs/azure-monitoring/aks/) |
+| **Virtual Machines** | Path 1 (SDK), Path 3 (file collection) | [Azure VMs Guide](https://signoz.io/docs/azure-monitoring/virtual-machines/) |
+| **App Service** | Path 1 (SDK) | [App Service Guide](https://signoz.io/docs/azure-monitoring/app-service/) |
+| **Functions** | Path 1 (SDK) | [Azure Functions Guide](https://signoz.io/docs/azure-monitoring/az-fns/) |
+| **Event Hub** | Path 4 (`azure_event_hub` receiver) | [Azure Monitoring Overview](https://signoz.io/docs/azure-monitoring/) |
+
+### GCP
+
+| Scenario | Available Paths | Recommended |
+|----------|----------------|-------------|
+| **GKE (Kubernetes)** | Path 1 (SDK), Path 3 (k8s-infra) | [GKE Guide](https://signoz.io/docs/gcp-monitoring/gke/) |
+| **Compute Engine** | Path 1 (SDK), Path 3 (file collection) | [Compute Engine Guide](https://signoz.io/docs/gcp-monitoring/compute-engine/) |
+| **Cloud Run** | Path 1 (SDK) | [Cloud Run Guide](https://signoz.io/docs/gcp-monitoring/cloud-run/) |
+| **Cloud Functions** | Path 1 (SDK) | [Cloud Functions Guide](https://signoz.io/docs/gcp-monitoring/gcp-fns/) |
+| **Pub/Sub** | Path 4 (`googlecloudpubsub` receiver) | [GCP Monitoring Overview](https://signoz.io/docs/gcp-monitoring/) |
+
+### PaaS Platforms
+
+| Platform | Collection Method | Guide |
+|----------|------------------|-------|
+| Heroku | Log drain (HTTP) | [Heroku Logs](https://signoz.io/docs/userguide/heroku_logs_to_signoz/) |
+| Vercel | Log drain (HTTP) | [Vercel Logs](https://signoz.io/docs/userguide/vercel_logs_to_signoz/) |
+| Cloudflare Workers | Path 1 (SDK - native OTLP) | [Cloudflare Logs](https://signoz.io/docs/logs-management/send-logs/cloudflare-logs/) |
+
+---
+
+## Why Use the OTel Collector?
+
+The OpenTelemetry Collector is a key component in Paths 3 and 4. It provides:
+
+- **Filtering** — Drop noisy logs or sensitive data before they reach SigNoz
+- **Enrichment** — Add Kubernetes metadata, host info, or custom attributes  
+- **Batching & Compression** — Efficient network usage
+- **Reliability** — Buffer logs during network issues
+
+Learn more: [OTel Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
+
+---
+
+## Combining Multiple Paths
+
+Many teams use multiple collection methods:
+
+- **SDK OTLP** for application services where trace correlation matters
+- **OTel Collector** (File or Receivers) for infrastructure logs, databases, and third-party software
+
+If you're on Kubernetes and use both approaches, [disable automatic log collection](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection) for pods using SDK export to avoid duplicates.
+
+---
+
+## Comparison Summary
+
+| Path | Trace Correlation | Reliability | Code Changes | Best For |
+|------|------------------|-------------|--------------|----------|
+| SDK OTLP | Automatic | In-process | Required | Apps needing trace correlation |
+| HTTP | Manual | In-process | Required | Custom integrations |
+| File + Collector | Manual | Disk-persisted | None | K8s, Docker, VMs |
+| OTel Receivers | Manual | Managed | None | CloudWatch, Kafka, Journald |
+| Log Processors | Manual | Depends | None | Existing FluentBit/Fluentd |
+
+---
+
+## Next Steps
+
+Once logs are flowing to SigNoz:
+
+1. [Explore logs in the Logs Explorer](https://signoz.io/docs/userguide/logs/)
+2. [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/)
+3. [Use log pipelines for parsing and enrichment](https://signoz.io/docs/logs-pipelines/introduction/)
+
+## Get Help
+
+<GetHelp />

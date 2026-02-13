@@ -23,6 +23,7 @@ import {
   SiGo,
   SiTemporal,
   SiOpenai,
+  SiOllama,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -394,6 +395,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/nomad',
     icon: <Layers className="h-7 w-7 text-purple-600" />,
     clickName: 'Nomad Dashboard Template',
+  },
+  {
+    name: 'Ollama',
+    href: '/docs/dashboards/dashboard-templates/ollama-dashboard',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Dashboard Template',
   },
   {
     name: 'OpenAI',

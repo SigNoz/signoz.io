@@ -71,7 +71,7 @@ export function generateTOC(content: string) {
       return {
         value: content,
         url: `#${slugger.slug(content)}`,
-        depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+        depth: flag?.length === 1 ? 1 : flag?.length === 2 ? 2 : 3,
       }
     })
     .filter((heading): heading is NonNullable<typeof heading> => heading !== null)
@@ -79,53 +79,62 @@ export function generateTOC(content: string) {
   return headings
 }
 
+/**
+ * Transforms a raw MDX comparison content from CMS into the expected format
+ * for the frontend application.
+ *
+ * @param comparison - Raw comparison data from CMS
+ * @returns Transformed comparison with TOC, reading time, structured data, etc.
+ */
 export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`
 
   const authors = Array.isArray(comparison.authors)
-    ? comparison.authors.map((author: any) => (typeof author === 'string' ? author : author.key))
+    ? comparison.authors.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      )
     : []
 
   const tags = Array.isArray(comparison.tags)
-    ? comparison.tags.map((tag: any) => (typeof tag === 'string' ? tag : tag.value))
+    ? comparison.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
     : []
 
   const keywords = Array.isArray(comparison.keywords)
-    ? comparison.keywords.map((keyword: any) =>
+    ? comparison.keywords.map((keyword: string | MDXContent) =>
         typeof keyword === 'string' ? keyword : keyword.value
       )
     : []
 
   const readingTimeStats = readingTime(comparison.content || '')
 
-  const contentForStructuredData: any = {
+  const contentForStructuredData = {
     ...comparison,
     slug,
     path,
     publishedAt: comparison.date || comparison.updatedAt || comparison.publishedAt,
-  }
+  } as MDXContent
 
   const updatedRelatedComparisons = comparison.related_comparisons?.map(
-    (relatedComparison: any) => {
+    (relatedComparison: MDXContent) => {
       return {
         ...relatedComparison,
         _id: relatedComparison.documentId || String(relatedComparison.id),
         _raw: {},
         path: `comparisons${relatedComparison.path || ''}`,
         url: `${siteMetadata.siteUrl}/comparisons${relatedComparison.path || ''}`,
-        slug: relatedComparison.path.split('/').pop() || '',
+        slug: (relatedComparison.path || '').split('/').pop() || '',
         title: relatedComparison.title,
         date:
           relatedComparison.date || relatedComparison.updatedAt || relatedComparison.publishedAt,
-        tags: relatedComparison.tags?.map((tag: any) =>
+        tags: relatedComparison.tags?.map((tag: string | MDXContent) =>
           typeof tag === 'string' ? tag : tag.value
         ),
         description: relatedComparison.description,
-        authors: relatedComparison.authors?.map((author: any) =>
+        authors: relatedComparison.authors?.map((author: string | MDXContent) =>
           typeof author === 'string' ? author : author.key
         ),
-        keywords: relatedComparison.keywords?.map((keyword: any) =>
+        keywords: relatedComparison.keywords?.map((keyword: string | MDXContent) =>
           typeof keyword === 'string' ? keyword : keyword.value
         ),
       }
@@ -136,6 +145,7 @@ export const transformComparison = (comparison: MDXContent) => {
     ...comparison,
     _id: comparison.documentId || String(comparison.id),
     _raw: {},
+    type: 'Comparison',
     title: comparison.title,
     date: comparison.date,
     tags,
@@ -144,11 +154,12 @@ export const transformComparison = (comparison: MDXContent) => {
     keywords,
     slug,
     content: comparison.content,
+    body: { raw: '', code: '' },
     toc: generateTOC(comparison.content || ''),
     readingTime: readingTimeStats,
     path,
     filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
     structuredData: generateStructuredData('comparisons', contentForStructuredData),
-    relatedArticles: [...(updatedRelatedComparisons || []), ...(comparison.related_blogs || [])],
+    relatedArticles: [...(updatedRelatedComparisons || [])],
   }
 }

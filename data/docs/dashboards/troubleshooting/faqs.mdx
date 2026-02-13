@@ -61,3 +61,32 @@ A. You can download table data as CSV directly from the dashboard view. Follow t
 
 Note: The CSV download option is only available in the dashboard view mode, not in the dashboard editor mode.
 
+### Q. Why do my time series and bar charts show 'no data' even though my table view displays results?
+
+A. Time series and bar charts require a timestamp column in your query results to plot data correctly. These chart types use time as the x-axis, so without a timestamp column, they cannot display the data even if your table view shows results.
+
+<details>
+
+<summary> Show detailed steps to resolve </summary>
+
+To resolve this issue:
+
+1. **Add a timestamp column to your SELECT statement**
+   - Your query must include a column that represents time/date values
+
+2. **Ensure the timestamp column is properly formatted**
+   - The timestamp should be in a format that the charting system can recognize
+
+3. **Verify your GROUP BY clause includes time-based grouping**
+   - For time series charts, you typically need to group your data by time intervals
+
+**Example:**
+
+If you have a query like `max(last_seen) AS bucket_completed` which contains timestamp data, you may need to adjust how this is structured or ensure it's being recognized as the time dimension for your charts.
+
+**Alternative visualization:**
+
+If you only need to display aggregate data without time-based visualization, consider using a table view or other chart types that don't require time-based x-axis data.
+
+</details>
+

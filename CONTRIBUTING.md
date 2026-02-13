@@ -14,6 +14,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - [Git Hooks and Checks](#git-hooks-and-checks)
 - [Site Code Guidelines](#site-code-guidelines)
 - [General Guidelines](#general-guidelines)
+  - [Write docs around a Jobs-To-Be-Done (JTBD)](#write-docs-around-a-jobs-to-be-done-jtbd)
 - [Documentation types and Diátaxis](#documentation-types-and-diátaxis)
 - [Content Structure](#content-structure)
   - [Patterns and components](#patterns-and-components)
@@ -134,6 +135,15 @@ These guidelines apply when your PR changes website code (for example: `app/**`,
 - Placeholders and variables
   - Must use angle-bracket placeholders like `<service-name>`, `<region>`, `<your-ingestion-key>`.
   - Immediately below the snippet, explain what each placeholder means.
+
+### Write docs around a Jobs-To-Be-Done (JTBD)
+
+- Persona check: assume the reader is new to observability/OTel; reduce cognitive load and define OTel terms briefly as they appear.
+- Define the primary job in 1 sentence: When … I want to … so I can …
+- Optimize for time-to-first-success: default path first, alternatives later/collapsible.
+- Show the success signal: where in SigNoz UI the user should see results.
+- Use a scope guard: if content doesn’t help the primary job, move it to Next Steps / Troubleshooting / separate doc.
+- Alternatives: if there are multiple valid paths (Direct export vs Collector), state the default and keep alternatives in collapsible sections.
 
 ## Documentation types and Diátaxis
 
@@ -271,6 +281,8 @@ Every doc should be skimmable and actionable.
 
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
 
+  - **Validate all links before submitting a PR.** Open every internal link (navigate to `https://signoz.io/...` or check locally at `http://localhost:3000/...`) and every external link to confirm they resolve to a live page. Broken links hurt user experience and SEO. Pay special attention when copying links from other docs — URLs may have changed due to renames or restructuring.
+
 - Cloud vs Self-Host
   - Add the relevant tags in frontmatter only if the content is specific to one platform (e.g., `tags: ["Self-Host"]`).
   - **Default to SigNoz Cloud** in all examples and instructions.
@@ -386,6 +398,7 @@ These are the top-level “Overview” pages for a module or feature area (for e
 ### Product docs (features, UI flows)
 
 - Audience: end users in the SigNoz UI.
+- Start with the primary job and success signal. Don’t turn feature docs into conceptual deep dives—link those.
 - Cover: feature overview, why/when to use it, prerequisites, step-by-step with screenshots, expected outcomes, and links to related user guides.
 - Include caveats, version availability, and plan differences if any.
 - Show the exact UI path and terminology that matches the product.
@@ -394,6 +407,8 @@ These are the top-level “Overview” pages for a module or feature area (for e
 ### Send Data docs (instrumentation and pipelines)
 
 Send Data docs guide users through instrumenting their applications to send telemetry to SigNoz. These are the most common entry points for new users.
+
+- The job is “get telemetry flowing.” Optimize for time-to-first-success and always include a concrete Validate section.
 
 #### Audience assumptions
 
@@ -514,6 +529,7 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 ### Troubleshooting docs
 
 - Start with a short problem statement and affected environments.
+- The job is “unblock me.” Start with symptoms + exact error string where possible, and end with verification.
 - Structure:
   - Symptoms (error messages, logs, UI behavior)
   - Likely causes (ordered by frequency)
@@ -537,6 +553,8 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 Explanation docs are where we answer **“why does this work like this?”** and **“how does this fit together?”**
 
+- The job is "build a mental model." End with links to the how-to that completes the action.
+
 - Audience: users trying to build a mental model or make design decisions.
 - Cover:
   - Core observability concepts in SigNoz (for example, how traces become APM metrics, how logs are stored and queried, how sampling or retention works).
@@ -554,6 +572,8 @@ Set `doc_type: explanation` for these pages.
 ### Reference docs (schemas, config, APIs)
 
 Reference docs exist so users can **look up exact facts** quickly.
+
+- The job is "look up exact facts." Lead with the answer; keep prose minimal.
 
 - Audience: users who already know *what* they’re doing and just need details.
 - Cover:
@@ -597,6 +617,7 @@ Set `doc_type: reference` for these pages.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
 - [ ] For Dashboard Template docs: include a clear link to set up the data source (relevant Send Data/instrumentation guide) near the top, ideally as a brief Prerequisites or info note.
 - [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
+- [ ] All links (internal and external) have been manually verified to resolve to a live page. No broken or outdated URLs.
 - [ ] Cross-link existing SigNoz docs. For OTel Collector changes, link the config guide.
 - [ ] Images use WebP format, have alt text and captions via the `Figure` component, are cropped/readable, and live under `public/img/docs/...`.
 - [ ] Added the page to the sidebar (`constants/docsSideNav.ts`) with the correct route/label.
