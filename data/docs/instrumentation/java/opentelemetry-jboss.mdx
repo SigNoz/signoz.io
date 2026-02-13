@@ -9,7 +9,7 @@ doc_type: howto
 
 This guide walks you through instrumenting your JBoss EAP or WildFly application server with OpenTelemetry and sending traces to SigNoz. JBoss and WildFly use `standalone.conf` (Linux/Mac) or `standalone.conf.bat` (Windows) to configure JVM options, making it straightforward to attach the OpenTelemetry Java agent.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -24,7 +24,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
 
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
 - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
 - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -56,7 +56,7 @@ JAVA_OPTS="$JAVA_OPTS -Dotel.metrics.exporter=none"
 JAVA_OPTS="$JAVA_OPTS -Dotel.logs.exporter=none"
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the line entirely.
@@ -77,7 +77,7 @@ Verify these values:
 /opt/wildfly/bin/standalone.sh
 ```
 
-<KeyPointCallout title="Running in background mode" defaultCollapsed={true}>
+<KeyPointCallout title="Running in background mode" defaultCollapsed="true">
 To run JBoss/WildFly in the background with logs:
 ```bash
 /opt/jboss-eap-7.x/bin/standalone.sh > /opt/jboss/nohup.out 2>&1 &
@@ -100,7 +100,7 @@ tail -f /opt/jboss/nohup.out
 <Tabs entityName="k8s-method">
 <TabItem value="direct" label="Direct" default>
 
-<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed="true">
 For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
 </KeyPointCallout>
 
@@ -144,7 +144,7 @@ env:
   value: 'none'
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
@@ -188,7 +188,7 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
@@ -264,7 +264,7 @@ set "JAVA_OPTS=%JAVA_OPTS% -Dotel.metrics.exporter=none"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.logs.exporter=none"
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the line entirely.
@@ -310,7 +310,7 @@ EXPOSE 8080
 CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.

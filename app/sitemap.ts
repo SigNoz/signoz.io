@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
-import { fetchMDXContentByPath, MDXContentApiResponse } from '@/utils/strapi'
+import { fetchAllCMSContent } from '@/utils/cmsContent'
 
 const mapChangeFrequency = (
   frequency: string
@@ -57,62 +57,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
-  const [faqsResult, caseStudiesResult, opentelemetryResult, comparisonsResult] =
-    await Promise.allSettled([
-      fetchMDXContentByPath('faqs', undefined, deploymentStatus, true),
-      fetchMDXContentByPath('case-studies', undefined, deploymentStatus, true),
-      fetchMDXContentByPath('opentelemetries', undefined, deploymentStatus, true),
-      fetchMDXContentByPath('comparisons', undefined, deploymentStatus, true),
-    ])
+  const { faqs, caseStudies, opentelemetries, comparisons } =
+    await fetchAllCMSContent(deploymentStatus)
 
   let faqRoutes: MetadataRoute.Sitemap = []
-  if (faqsResult.status === 'fulfilled') {
-    const data = faqsResult.value as MDXContentApiResponse
+  if (faqs) {
+    const data = faqs
     faqRoutes = data.data.map((faq) => ({
       url: `${siteUrl}/faqs${faq.path}/`,
       lastModified: faq.date || faq.updatedAt || faq.publishedAt,
     }))
-  } else {
-    console.error('Error fetching FAQs for sitemap:', faqsResult.reason)
   }
 
   let caseStudyRoutes: MetadataRoute.Sitemap = []
-  if (caseStudiesResult.status === 'fulfilled') {
-    const data = caseStudiesResult.value as MDXContentApiResponse
+  if (caseStudies) {
+    const data = caseStudies
     caseStudyRoutes = data.data.map((caseStudy) => ({
       url: `${siteUrl}/case-study${caseStudy.path}/`,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
       lastModified: caseStudy.updatedAt || caseStudy.publishedAt,
     }))
-  } else {
-    console.error('Error fetching case studies for sitemap:', caseStudiesResult.reason)
   }
 
   let opentelemetryRoutes: MetadataRoute.Sitemap = []
-  if (opentelemetryResult.status === 'fulfilled') {
-    const data = opentelemetryResult.value as MDXContentApiResponse
+  if (opentelemetries) {
+    const data = opentelemetries
     opentelemetryRoutes = data.data.map((opentelemetry) => ({
       url: `${siteUrl}/opentelemetry${opentelemetry.path}/`,
       lastModified: opentelemetry.date || opentelemetry.updatedAt || opentelemetry.publishedAt,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
     }))
-  } else {
-    console.error('Error fetching opentelemetry routes for sitemap:', opentelemetryResult.reason)
   }
 
   let comparisonRoutes: MetadataRoute.Sitemap = []
-  if (comparisonsResult.status === 'fulfilled') {
-    const data = comparisonsResult.value as MDXContentApiResponse
+  if (comparisons) {
+    const data = comparisons
     comparisonRoutes = data.data.map((comparison) => ({
       url: `${siteUrl}/comparisons${comparison.path}/`,
       lastModified: comparison.date || comparison.updatedAt || comparison.publishedAt,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
     }))
-  } else {
-    console.error('Error fetching comparisons for sitemap:', comparisonsResult.reason)
   }
 
   const routes = [

@@ -1,7 +1,8 @@
 import OpenTelemetryClient from './OpenTelemetryClient'
 import { Metadata } from 'next'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
-import { transformComparison } from '@/utils/mdxUtils'
+import { fetchAllComparisonsForPage } from '@/utils/cachedData'
+import type { Comparison } from '../../../types/transformedContent'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -34,18 +35,15 @@ export default async function OpenTelemetryHome() {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deployment_status = isProduction ? 'live' : 'staging'
   let articles: MDXContent[] = []
-  let comparisons: MDXContent[] = []
+  let comparisons: Comparison[] = []
 
   try {
-    const [articlesResponse, comparisonsResponse] = await Promise.all([
+    const [articlesResponse, comparisonsResult] = await Promise.all([
       fetchMDXContentByPath('opentelemetries', undefined, deployment_status, true),
-      fetchMDXContentByPath('comparisons', undefined, deployment_status, true),
+      fetchAllComparisonsForPage(),
     ])
 
-    const updatedComparisons = comparisonsResponse.data.map((comparison) =>
-      transformComparison(comparison)
-    )
-    comparisons = updatedComparisons
+    comparisons = comparisonsResult
     articles = (articlesResponse.data || []) as any[]
   } catch (error) {
     console.error('Error fetching OpenTelemetry articles:', error)

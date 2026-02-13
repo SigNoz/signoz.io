@@ -1,12 +1,31 @@
-name: Claude Docs Review
+name: Claude Code & Docs Review
 on:
   pull_request:
     types: [opened, ready_for_review]
     paths:
+      # Documentation files
       - 'data/docs/**'
       - 'public/img/docs/**'
       - 'constants/docsSideNav.ts'
+      # Frontend code files
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/components/**'
+      - '**/pages/**'
+      - '**/app/**'
+      - '**/lib/**'
+      - '**/utils/**'
+      - '**/hooks/**'
+      - '**/context/**'
+      - '**/styles/**'
+      # Config files
       - 'next.config.js'
+      - 'next.config.mjs'
+      - 'tsconfig.json'
+      - 'package.json'
+      # Scripts
       - 'scripts/check-doc-redirects.js'
       - 'scripts/check-docs-metadata.js'
   issue_comment:
@@ -166,6 +185,15 @@ jobs:
             git fetch origin "${HEAD_BRANCH}:${HEAD_BRANCH}" --depth=20 || true
           fi
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.4'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --prefer-offline --no-audit
+
       - uses: anthropics/claude-code-action@v1
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
@@ -175,7 +203,12 @@ jobs:
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ env.PR_NUMBER }}
-            Review only documentation-related changes.
+            
+            You are reviewing both DOCUMENTATION and FRONTEND CODE changes in this PR.
+            Analyze the changed files and apply appropriate review criteria based on file type.
+
+            ## DOCUMENTATION REVIEW (for data/docs/**, public/img/docs/**, constants/docsSideNav.ts)
+            
             Use CONTRIBUTING.md at the repo root as the single source of truth for what to check and how to comment. Do not restate rules; apply them.
             Provide inline comments for specific issues and one summary comment referencing the PR Checklist in CONTRIBUTING.md. Ignore date related guideline.
             Do not mention things that are correct. Do not praise or restate compliant items.
@@ -199,5 +232,164 @@ jobs:
             - If this PR adds a NEW documentation file (not just modifies an existing one) that explains how to send data to SigNoz Cloud (e.g., a new instrumentation, a new collector receiver, or a new log collection method), you MUST add the label "add-to-onboarding" to the PR.
             - To add the label, execute the command: gh issue edit ${{ env.PR_NUMBER }} --add-label "add-to-onboarding"
 
+            ## FRONTEND CODE REVIEW (for *.js, *.jsx, *.ts, *.tsx files)
+            
+            Focus on code quality, maintainability, and Next.js 14 App Router best practices. Provide inline comments for issues.
+
+            ### 1. DRY PRINCIPLE & CODE DUPLICATION
+            - Identify duplicated logic across files (identical or near-identical functions/components)
+            - Check for repeated patterns that could be extracted into shared utilities or hooks
+            - Look for copy-pasted code blocks
+            - Suggest consolidation opportunities with specific file paths
+            - Check if new code duplicates existing utilities in /utils, /hooks, or app/lib/utils.ts
+            - Verify if similar components exist in /shared/components or /components/ui that could be reused
+
+            ### 2. COMPONENT DESIGN & ARCHITECTURE
+            - Verify proper component decomposition (not too large, single responsibility)
+            - Check for prop drilling; suggest Context API or composition patterns
+            - Ensure components are appropriately client ('use client') or server components (default in App Router)
+            - Look for opportunities to extract reusable components
+            - Check if similar components exist in /components/ui, /shared/components, or /components that could be reused
+            - Validate component file location matches its purpose:
+              * Shared/reusable components → /shared/components or /components/ui
+              * Page-specific components → /app/[route]/components or co-located with page
+              * Feature-specific components → /components/[feature]/
+            - For /shared components, verify they follow the pattern: ComponentName.types.ts, ComponentName.view.tsx, index.tsx
+
+            ### 3. NEXT.JS 14 APP ROUTER BEST PRACTICES
+            - Verify correct usage of Next.js 14 App Router conventions (not Pages Router)
+            - Check proper use of server components (default) vs client components ('use client')
+            - Validate data fetching patterns:
+              * Server Components for async data fetching
+              * Server Actions for mutations
+              * Route Handlers (app/api/) for API endpoints
+            - Check proper use of Next.js Image component (next/image) for images
+            - Verify correct metadata API usage (generateMetadata, metadata export) for SEO
+            - Check proper dynamic imports (next/dynamic) and code splitting
+            - Validate correct usage of next/link for navigation
+            - Check for proper error boundaries (error.tsx) and loading states (loading.tsx)
+            - Verify proper use of Suspense boundaries for async components
+            - Check correct usage of usePathname, useRouter, useSearchParams from next/navigation (not next/router)
+
+            ### 4. REACT 18 BEST PRACTICES
+            - Verify proper hooks usage (useEffect dependencies, useMemo/useCallback optimization)
+            - Check for missing key props in lists
+            - Identify unnecessary re-renders
+            - Validate proper state management (useState, useReducer, Context)
+            - Check for proper error handling and loading states
+            - Look for React anti-patterns (e.g., directly mutating state)
+            - Verify proper cleanup in useEffect hooks
+
+            ### 5. TYPESCRIPT USAGE
+            - Check for 'any' types that should be properly typed
+            - Verify type safety and proper interface/type definitions
+            - Look for missing return types on functions
+            - Check for proper type imports and exports
+            - Validate proper use of generics
+            - Check for type assertions that could be avoided
+            - For /shared components, verify types are in ComponentName.types.ts files
+
+            ### 6. PERFORMANCE CONSIDERATIONS
+            - Identify expensive operations that should be memoized (useMemo, useCallback)
+            - Check for N+1 query patterns in data fetching
+            - Look for large bundle sizes (unnecessary dependencies)
+            - Verify proper lazy loading and code splitting with dynamic imports
+            - Check for unoptimized images or assets (should use next/image)
+            - Identify blocking operations in render paths
+            - Verify proper use of React Server Components to reduce client bundle size
+
+            ### 7. CODE MAINTAINABILITY
+            - Check for overly complex functions (>50 lines, high cyclomatic complexity)
+            - Verify meaningful variable and function names
+            - Look for magic numbers or strings that should be constants (move to /constants or co-located constants file)
+            - Check for proper error messages and logging
+            - Validate proper code organization and file structure
+            - Check for TODO/FIXME comments that should be addressed
+            - For components, verify types/constants are co-located (ComponentName.types.ts, ComponentName.constants.ts)
+
+            ### 8. FOLDER STRUCTURE & ORGANIZATION
+            - Verify files are in appropriate directories per project structure:
+              * /app - Next.js App Router pages and routes
+              * /components - React components (including /components/ui for primitives)
+              * /shared/components - Shared reusable components (molecules pattern)
+              * /layouts - Layout components
+              * /hooks - Custom React hooks
+              * /utils - Utility functions
+              * /constants - Constants and configuration
+            - Check for proper separation of concerns (UI, logic, data, types)
+            - Validate consistent naming conventions across directories
+            - Look for orphaned or misplaced files
+            - Ensure shared code is properly located in /utils, /hooks, /shared/components, or /components/ui
+            - Check for feature-specific folders that could benefit from co-location
+            - Verify path aliases are used correctly (@/shared, @/components, @/utils, @/hooks, @/layouts, @/constants)
+
+            ### 9. STYLING & CSS
+            - Check for duplicate Tailwind CSS classes or styles
+            - Verify proper use of Tailwind CSS (project uses Tailwind, not CSS modules or styled-components)
+            - Look for inline styles that should be extracted to Tailwind classes
+            - Check for responsive design patterns (Tailwind responsive prefixes)
+            - Validate proper use of design tokens from @signozhq/design-tokens if applicable
+            - Check for consistent spacing, colors, and typography using Tailwind utilities
+
+            ### 10. DEPENDENCIES & IMPORTS
+            - Check for unused imports
+            - Verify proper import order and organization
+            - Look for circular dependencies
+            - Check for duplicated dependency functionality
+            - Validate proper use of path aliases (@/shared, @/components, etc.) vs relative imports
+            - Verify imports use existing dependencies (lucide-react, react-icons for icons; @nextui-org/react, @headlessui/react for UI)
+            - Check that new dependencies are justified (per CONTRIBUTING.md: "Do not add new packages unless they are required")
+
+            ### 11. PROJECT-SPECIFIC GUIDELINES (from CONTRIBUTING.md)
+            - Prefer existing icon libraries: lucide-react or react-icons (not custom SVGs unless brand/logo)
+            - Prefer existing UI primitives: components in /components/ui (e.g., components/ui/Button) instead of raw HTML
+            - Keep types/constants co-located: ComponentName.types.ts, ComponentName.constants.ts, export from index.ts
+            - Avoid concurrent async invocations: prevent multiple concurrent runs in click handlers (set loading state, guard with ref)
+            - Be deliberate about DOM cleanup/transforms: avoid redundant selectors, ensure cleanup order
+            - Dependencies must be justified: no new packages unless required, include justification in PR description
+
+            ### 12. ERROR HANDLING & EDGE CASES
+            - Verify proper try-catch blocks for async operations
+            - Check for proper null/undefined handling
+            - Look for missing error boundaries (error.tsx in App Router)
+            - Validate proper form validation
+            - Check for race conditions in async code
+            - Verify proper handling of loading and error states in Server Components
+
+            ### 13. ACCESSIBILITY (A11Y)
+            - Check for missing ARIA labels
+            - Verify keyboard navigation support
+            - Check for proper semantic HTML
+            - Validate proper focus management
+            - Check color contrast and screen reader compatibility
+            - Verify proper use of Headless UI and Radix UI components (they include accessibility features)
+
+            ### REVIEW GUIDELINES:
+            - Only comment on actual issues found; do not praise correct code
+            - Prioritize HIGH-IMPACT issues: duplication, performance problems, architecture issues
+            - Be specific: reference exact file paths, line numbers, and function names
+            - Provide actionable suggestions with code examples when possible
+            - For duplication: explicitly mention which files/functions are duplicated
+            - Group related issues in a single comment when appropriate
+            - If no issues found in a category, don't mention it
+            - Use inline comments for specific code issues
+            - Provide one summary comment at the end categorizing issues by severity (Critical/High/Medium/Low)
+
+            ### COMMANDS AVAILABLE:
+            - Use bash tools to search for similar code patterns: grep, find, cat
+            - Use gh pr diff to see the full diff
+            - Use gh pr view to see PR description and metadata
+            - Execute: gh issue edit ${{ env.PR_NUMBER }} --add-label "<label>" to add labels
+            - Search for similar components: find components shared -name "*.tsx" -type f
+            - Check for duplicate utilities: grep -r "functionName" utils hooks app/lib
+
+            ### FINAL SUMMARY:
+            After completing the review, provide ONE summary comment that:
+            1. Separates Documentation Review and Code Review findings
+            2. For Code Review: categorize issues by severity (Critical/High/Medium/Low)
+            3. Highlights most important improvements needed
+            4. References specific inline comments
+            5. Keeps it concise and actionable
+
           claude_args: |
-            --allowedTools "WebSearch,WebFetch,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue edit:*),Bash(gh api:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(head:*),Bash(tail:*)"
+            --allowedTools "WebSearch,WebFetch,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue edit:*),Bash(gh api:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(find:*),Bash(head:*),Bash(tail:*),Bash(ls:*)"

@@ -6,8 +6,13 @@ import Link from 'next/link'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { formatDate } from 'pliny/utils/formatDate'
 import { MDXContent } from '@/utils/strapi'
+import type { Comparison } from '../../../types/transformedContent'
 
-export default function BlogPostCard({ blog }: { blog: CoreContent<Blog | Guide | MDXContent> }) {
+export default function BlogPostCard({
+  blog,
+}: {
+  blog: CoreContent<Blog | Guide | MDXContent | Comparison>
+}) {
   const { path, date, title, authors } = blog
 
   const getAuthorDetails = (authorID) => {

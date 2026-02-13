@@ -21,10 +21,11 @@ export const normaliseSlug = (value) => {
 export const resolvePostPath = (post) => {
   const sourcePath = post._raw?.sourceFilePath ?? ''
   if (sourcePath.startsWith('docs/')) return `docs/${post.slug}`
-  if (sourcePath.startsWith('comparisons/')) return `comparisons/${post.slug}`
+  if (sourcePath.startsWith('comparisons/')) return `comparisons${post.path}`
   if (sourcePath.startsWith('guides/')) return `guides/${post.slug}`
   if (sourcePath.startsWith('opentelemetry/')) return `opentelemetry${post.path}`
   if (sourcePath.startsWith('faqs/')) return `faqs${post.path}`
+  if (sourcePath.startsWith('blog/')) return `blog/${post.slug}`
 
   return `/${post.slug}`
 }

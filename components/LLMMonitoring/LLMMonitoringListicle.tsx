@@ -10,6 +10,7 @@ import {
   SiAmazonwebservices,
   SiPydantic,
   SiTemporal,
+  SiOllama,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -189,6 +190,12 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/mastra-observability',
     icon: <img src="/img/docs/llm/mastra/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />,
     clickName: 'Mastra Monitoring',
+  },
+  {
+    name: 'Ollama',
+    href: '/docs/ollama-monitoring',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Monitoring',
   },
   {
     name: 'OpenAI',

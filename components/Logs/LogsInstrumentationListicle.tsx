@@ -129,10 +129,10 @@ export default function LogsInstrumentationListicle({
             clickName: 'Python Logs Link',
           },
           {
-            name: 'Java OTel SDK',
-            href: '/docs/userguide/collecting_application_logs_otel_sdk_java',
+            name: 'Java',
+            href: '/docs/logs-management/send-logs/java-logs',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
-            clickName: 'Java SDK Logs Link',
+            clickName: 'Java Logs Link',
           },
           {
             name: 'Node.js',
@@ -281,6 +281,12 @@ export default function LogsInstrumentationListicle({
             href: '/docs/logs-management/send-logs/cloudflare-logs',
             icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
             clickName: 'Cloudflare Cloud Logs Link',
+          },
+          {
+            name: 'Convex',
+            href: '/docs/logs-management/send-logs/convex-log-streams-signoz',
+            icon: <img src="/img/icons/convex-logo.svg" alt="Convex" className="h-9 w-9" />,
+            clickName: 'Convex Logs Link',
           },
         ]}
         sectionName="Cloud Logs"

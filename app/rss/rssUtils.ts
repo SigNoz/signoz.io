@@ -1,8 +1,8 @@
 import { sortPosts } from 'pliny/utils/contentlayer.js'
 import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
-import { fetchMDXContentByPath, MDXContentApiResponse } from '../../utils/strapi'
+import { MDXContentApiResponse } from '../../utils/strapi'
 import { normaliseSlug } from '../../scripts/rssFeed.mjs'
-import { transformComparison } from '@/utils/mdxUtils'
+import { fetchAllCMSContent } from '@/utils/cmsContent'
 
 const buildFaqSlug = (path = '') => {
   const cleanedPath = path.startsWith('/') ? path : `/${path}`
@@ -25,6 +25,21 @@ const mapFaqEntries = (faqs: MDXContentApiResponse | undefined) => {
   }))
 }
 
+const mapComparisonEntries = (comparisons: MDXContentApiResponse | undefined) => {
+  return comparisons?.data.map((comparison) => ({
+    ...comparison,
+    slug: buildComparisonSlug(comparison.path),
+    date: comparison.date ?? comparison.publishedAt ?? comparison.updatedAt ?? comparison.createdAt,
+    tags: comparison.tags?.map((tag) => tag?.value),
+    authors: comparison?.authors?.map((author) => author?.key),
+  }))
+}
+
+const buildComparisonSlug = (path = '') => {
+  const cleanedPath = path.startsWith('/') ? path : `/${path}`
+  return normaliseSlug(`comparisons${cleanedPath}`)
+}
+
 const buildOpentelemetrySlug = (path = '') => {
   const cleanedPath = path.startsWith('/') ? path : `/${path}`
   return normaliseSlug(`opentelemetry${cleanedPath}`)
@@ -44,38 +59,18 @@ const mapOpentelemetryEntries = (opentelemetries: MDXContentApiResponse | undefi
 
 export const loadPublishedPosts = async () => {
   const deploymentStatus = getDeploymentStatus()
-  const allFaqs = (await fetchMDXContentByPath('faqs', undefined, deploymentStatus, true)) as
-    | MDXContentApiResponse
-    | undefined
+  const { faqs, opentelemetries, comparisons } = await fetchAllCMSContent(deploymentStatus)
 
-  const faqPosts = mapFaqEntries(allFaqs)
-
-  const allOpentelemetries = (await fetchMDXContentByPath(
-    'opentelemetries',
-    undefined,
-    deploymentStatus,
-    true
-  )) as MDXContentApiResponse | undefined
-
-  const allComparisons = (await fetchMDXContentByPath(
-    'comparisons',
-    undefined,
-    deploymentStatus,
-    true
-  )) as MDXContentApiResponse | undefined
-
-  const updatedComparisons = allComparisons?.data.map((comparison) =>
-    transformComparison(comparison)
-  )
-
-  const opentelemetryPosts = mapOpentelemetryEntries(allOpentelemetries)
+  const faqPosts = mapFaqEntries(faqs)
+  const opentelemetryPosts = mapOpentelemetryEntries(opentelemetries)
+  const comparisonPosts = mapComparisonEntries(comparisons)
 
   const combinedPosts = [
     ...faqPosts,
     ...allBlogs,
     ...(opentelemetryPosts || []),
     ...allDocs,
-    ...(updatedComparisons || []),
+    ...(comparisonPosts || []),
     ...allGuides,
   ]
 

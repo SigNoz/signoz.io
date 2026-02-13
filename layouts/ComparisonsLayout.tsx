@@ -6,16 +6,10 @@ import type { Authors } from 'contentlayer/generated'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import { MDXContent } from '@/utils/strapi'
-
-// Extend the Comparison type to include CTA fields
-interface ComparisonContent extends MDXContent {
-  cta_title?: string
-  cta_text?: string
-}
+import type { Comparison } from '../types/transformedContent'
 
 interface LayoutProps {
-  content: CoreContent<MDXContent>
+  content: CoreContent<Comparison>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode

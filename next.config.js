@@ -109,6 +109,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/resource-center/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
           source: '/docs/',
           destination: '/docs/introduction',
           permanent: true,
@@ -264,7 +269,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3mkbiaxsz-QBhH_p84LIbzv2LkgkIGhQ',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3pdv47cad-1O4lTFY1H2E8UwQcnQ4fZg',
           basePath: false,
           permanent: true,
         },
@@ -1287,6 +1292,11 @@ module.exports = () => {
         {
           source: '/docs/userguide/k8s-metrics/',
           destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_java/',
+          destination: '/docs/logs-management/send-logs/java-logs/',
           permanent: true,
         },
       ]
