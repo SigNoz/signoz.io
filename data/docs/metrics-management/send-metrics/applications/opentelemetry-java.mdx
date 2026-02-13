@@ -9,7 +9,7 @@ doc_type: howto
 
 This guide shows you how to send custom and JVM runtime metrics from your Java application to SigNoz using the OpenTelemetry Java agent.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -18,7 +18,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 - Java 8 or later (Java 17+ recommended for enhanced JVM metrics)
 - A SigNoz Cloud account or self-hosted SigNoz instance
 
-<KeyPointCallout title="Why Java 17+ for enhanced metrics?" defaultCollapsed={true}>
+<KeyPointCallout title="Why Java 17+ for enhanced metrics?" defaultCollapsed="true">
 Java 17+ enables **JFR-based (Java Flight Recorder) metrics** collection, providing deeper runtime insights with lower overhead. JFR captures detailed GC events, memory allocation patterns, thread contention, and CPU profiling data that aren't available through standard JMX/MBeans on Java 8.
 </KeyPointCallout>
 
@@ -27,7 +27,7 @@ Java 17+ enables **JFR-based (Java Flight Recorder) metrics** collection, provid
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
 
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
 - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
 - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -59,7 +59,7 @@ Replace the following:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
-<KeyPointCallout title="Why disable traces and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why disable traces and logs?" defaultCollapsed="true">
 The Java agent auto-instruments web frameworks like Spring Boot, JAX-RS, and Servlet containers, generating traces for every HTTP request. Since traces and logs export is enabled by default, these would be sent to SigNoz even though this guide only covers metrics.
 
 For applications handling many requests, this can generate significant data volume and costs. Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables them while keeping metrics working. If you want traces or logs later, change them to `otlp` or remove these variables.
