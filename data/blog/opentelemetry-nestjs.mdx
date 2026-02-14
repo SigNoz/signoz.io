@@ -89,9 +89,9 @@ const traceExporter = process.env.NODE_ENV === 'development'
   ? debugExporter 
   : new OTLPTraceExporter({
       url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'https://ingest.us.signoz.cloud:443/v1/traces',
-      headers: {
-        'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || '',
-      },
+      headers: process.env.OTEL_EXPORTER_OTLP_HEADERS
+      ? JSON.parse(process.env.OTEL_EXPORTER_OTLP_HEADERS)
+      : {},
     });
 
 // Create SDK instance with comprehensive configuration
@@ -178,7 +178,7 @@ OTEL_SERVICE_VERSION=1.0.0
 
 # SigNoz Cloud configuration
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/traces
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+OTEL_EXPORTER_OTLP_HEADERS={"signoz-ingestion-key":"<your-ingestion-key>"}
 
 # Environment
 NODE_ENV=production
@@ -194,7 +194,7 @@ Here, there are three critical values that you must configure:
 
 If configuring the service name and/or service version via `OTEL_RESOURCE_ATTRIBUTES` as well as the `OTEL_SERVICE_NAME` and `OTEL_SERVICE_VERSION` environment variables, do keep in mind that OpenTelemetry SDKs typically prioritize the values defined through the `OTEL_SERVICE_` variables.
 
-We have discussed OTel environments variables and their *prioritization orders* in detail [in this write-up](https://signoz.io/blog/otel-resource-attributes/).
+We have discussed OTel environments variables and their *prioritization orders* in detail [in this write-up](https://signoz.io/blog/otel-environment-variables/).
 
 ### Setting Up Your Observability Backend
 
@@ -456,23 +456,31 @@ Here's a production-optimized configuration that maintains visibility while mini
 
 ```typescript
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { TraceIdRatioBasedSampler, ParentBasedSampler, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { Resource } from '@opentelemetry/resources';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import {
+  ConsoleSpanExporter,
+  BatchSpanProcessor,
+  TraceIdRatioBasedSampler,
+  ParentBasedSampler,
+} from '@opentelemetry/sdk-trace-base';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { ATTR_DEPLOYMENT_ENVIRONMENT_NAME } from '@opentelemetry/semantic-conventions/incubating';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Configure trace exporter - use console for development debugging
-const debugExporter = new ConsoleSpanExporter();
-const traceExporter = !isProduction
-  ? debugExporter 
-  : new OTLPTraceExporter({
-      url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'https://ingest.us.signoz.cloud:443/v1/traces',
-      headers: {
-        'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || '',
-      },
-    });
+// Configure trace exporter based on environment
+const traceExporter = isProduction
+  ? new OTLPTraceExporter({
+    url:
+      process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
+      'http://localhost:4318/v1/traces',
+    headers: process.env.OTEL_EXPORTER_OTLP_HEADERS
+      ? JSON.parse(process.env.OTEL_EXPORTER_OTLP_HEADERS)
+      : {},
+  })
+  : new ConsoleSpanExporter();
 
 // Production-optimized configuration
 const sdk = new NodeSDK({
@@ -480,31 +488,32 @@ const sdk = new NodeSDK({
   sampler: new ParentBasedSampler({
     root: new TraceIdRatioBasedSampler(isProduction ? 0.1 : 1.0),
   }),
-  
+
   // Batch export for better performance
   spanProcessor: new BatchSpanProcessor(traceExporter, {
     maxExportBatchSize: isProduction ? 200 : 50,
     exportTimeoutMillis: isProduction ? 5000 : 2000,
     scheduledDelayMillis: isProduction ? 2000 : 1000,
   }),
-  
-  resource: new Resource({
-    [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
-    [ATTR_SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION,
-    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.NODE_ENV,
+
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: process.env.SERVICE_NAME,
+    [ATTR_SERVICE_VERSION]: process.env.SERVICE_VERSION,
+    // use raw string or the deprecated SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT resource attribute
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV,
   }),
-  
+
   instrumentations: [
     getNodeAutoInstrumentations({
       // Disable high-volume instrumentation in production
       '@opentelemetry/instrumentation-fs': { enabled: false },
       '@opentelemetry/instrumentation-dns': { enabled: false },
-      
+
       '@opentelemetry/instrumentation-http': {
         enabled: true,
         ignoreIncomingRequestHook: (req) => {
           const ignorePaths = ['/health', '/metrics', '/favicon.ico'];
-          return ignorePaths.some(path => req.url?.includes(path));
+          return ignorePaths.some((path) => req.url?.includes(path)) || false;
         },
       },
     }),
