@@ -1,7 +1,7 @@
 ---
 title: "OpenTelemetry NestJS Implementation Guide: Complete Setup for Production [2026]"
 slug: opentelemetry-nestjs  
-date: 2026-02-12
+date: 2026-02-15
 tags: [OpenTelemetry, JavaScript]
 authors: [ankit_anand, vishal]
 description: Complete guide to implementing OpenTelemetry in NestJS applications with automatic instrumentation, distributed tracing, and production-ready configuration. Includes troubleshooting tips and performance optimization.
@@ -58,20 +58,20 @@ First, let's install the OpenTelemetry packages. These provide the core SDK and 
 ```bash
 npm install --save @opentelemetry/api@latest
 npm install --save @opentelemetry/sdk-node@latest
-npm install --save @opentelemetry/auto-instrumentations-node@^0.67.0
+npm install --save @opentelemetry/auto-instrumentations-node@^0.62.0
 npm install --save @opentelemetry/exporter-trace-otlp-http@latest
 npm install --save @opentelemetry/sdk-trace-base@latest
 ```
 
-What do these packages do?
+And what do these packages do?
 
-- `@opentelemetry/api`: The core API that your application code can optionally use for custom instrumentation
-- `@opentelemetry/sdk-node`: The Node.js SDK that manages trace collection and export
-- `@opentelemetry/auto-instrumentations-node`: The magic package that automatically instruments Express, Fastify, HTTP clients, and database drivers.
-
-    It also installs the [`@opentelemetry/instrumentation-nestjs-core`](https://www.npmjs.com/package/@opentelemetry/instrumentation-nestjs-core) package, that creates spans for NestJS controller handlers and enhances them with route and controller metadata
-- `@opentelemetry/exporter-trace-otlp-http`: Exports traces using the OpenTelemetry Protocol (OTLP)
-- `@opentelemetry/sdk-trace-base`: Base tracing utilities for custom configurations
+| Package | Description |
+| :--- | :--- |
+| `@opentelemetry/api` | The core API that your application code can optionally use for custom instrumentation. |
+| `@opentelemetry/sdk-node` | The Node.js SDK that manages trace collection and export. |
+| `@opentelemetry/auto-instrumentations-node` | Automatically instruments Express, Fastify, HTTP clients, and DB drivers. Includes `@opentelemetry/instrumentation-nestjs-core` for controller metadata. |
+| `@opentelemetry/exporter-trace-otlp-http` | Exports traces using the OpenTelemetry Protocol (OTLP). |
+| `@opentelemetry/sdk-trace-base` | Base tracing utilities for custom configurations. |
 
 ## Step 2: Creating the Tracer Configuration
 
@@ -123,12 +123,11 @@ This configuration does several important things:
 - **Selective instrumentation:** Disables file system instrumentation (which can be noisy) while keeping HTTP instrumentation
 - **Health check filtering:** Prevents health check endpoints from cluttering your traces
 
-
 ## Step 3: The Critical Initialization Order
 
-Here's where most developers hit their first roadblock. OpenTelemetry must be initialized before NestJS imports any modules that need instrumentation. Get this wrong, and you'll wonder why your traces are missing.
+Here's where most developers hit their first roadblock. OpenTelemetry must be initialized before NestJS imports any modules that need instrumentation. Get this wrong, and you'll wonder why your traces are missing, and lose precious time that could be spent actually progressing with your observability journey.
 
-The golden rule: **Import and start the tracer before anything else**.
+So here's the golden rule: **Import and start the tracer before anything else**.
 
 ```typescript
 // THIS MUST BE THE FIRST IMPORT
@@ -164,7 +163,9 @@ async function bootstrap() {
 bootstrap();
 ```
 
-Why is the order so important? OpenTelemetry works by "monkey-patching" Node.js modules before they're loaded. If NestJS loads Express or your database driver before OpenTelemetry patches them, you'll miss those traces entirely.
+<KeyPointCallout title="Why does the tracer initialization order matter?">
+Since OpenTelemetry instruments works by "monkey-patching" Node.js modules before they're loaded, we must ensure we initialize the tracer before any other components have been spun up. For example, if NestJS loads Express or your database driver before OpenTelemetry patches them, you will be unable to capture their operations as [spans in any generated traces](https://signoz.io/blog/opentelemetry-spans/).
+</KeyPointCallout>
 
 ## Step 4: Environment Configuration
 
@@ -186,10 +187,14 @@ NODE_ENV=production
 OTEL_RESOURCE_ATTRIBUTES=service.name=your-nestjs-app,service.version=1.0.0
 ```
 
-Three critical values to configure:
-- **OTEL_SERVICE_NAME**: How your service appears in traces (keep it consistent across deployments)
-- **OTEL_EXPORTER_OTLP_TRACES_ENDPOINT**: Where to send your traces
-- **OTEL_EXPORTER_OTLP_HEADERS**: Authentication for your observability backend
+Here, there are three critical values that you must configure:
+- **`OTEL_SERVICE_NAME`**: How your service appears in traces (keep it consistent across deployments)
+- **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`**: Where to send your traces
+- **`OTEL_EXPORTER_OTLP_HEADERS`**: Authentication for your observability backend
+
+If configuring the service name and/or service version via `OTEL_RESOURCE_ATTRIBUTES` as well as the `OTEL_SERVICE_NAME` and `OTEL_SERVICE_VERSION` environment variables, do keep in mind that OpenTelemetry SDKs typically prioritize the values defined through the `OTEL_SERVICE_` variables.
+
+We have discussed OTel environments variables and their *prioritization orders* in detail [in this write-up](https://signoz.io/blog/otel-resource-attributes/).
 
 ### Setting Up Your Observability Backend
 
@@ -271,7 +276,6 @@ This decorator pattern keeps your code clean while adding powerful observability
 - Captures method parameters as span attributes
 - Records exceptions with full stack traces
 - Sets appropriate span status based on success or failure
-
 
 ## Tracing Database Operations
 
@@ -443,7 +447,6 @@ propagation.inject(context.active(), headers);
 ```
 
 This injects the current trace context into HTTP headers, which the receiving service can extract to continue the same trace. The result? You can follow a request from your frontend through multiple services and see exactly where time is spent.
-
 
 ## Production Performance Optimization
 
@@ -660,7 +663,6 @@ Want to see all these concepts working together? Check out our [complete NestJS 
 - Microservices with context propagation
 - Production-ready configurations
 
-
 ## Getting Started with SigNoz
 
 [SigNoz](https://signoz.io/docs/introduction/) provides comprehensive monitoring and observability features specifically designed for NestJS applications. The platform automatically captures [distributed traces](https://signoz.io/blog/distributed-tracing/), metrics, and logs from your instrumented NestJS application, supporting REST APIs, GraphQL endpoints, and microservices architectures.
@@ -683,7 +685,6 @@ Those who have the expertise to manage SigNoz themselves or just want to start w
 
 Hope we answered all your questions regarding OpenTelemetry NestJS implementation. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
 
-
 ## Conclusion
 
 Implementing OpenTelemetry in your NestJS application transforms debugging from guesswork to data-driven investigation. With proper setup, you gain visibility into every request, database query, and service interaction, all with minimal performance overhead.
@@ -700,7 +701,6 @@ Whether you're troubleshooting a production issue at 3 AM or optimizing database
 
 Ready to see the difference? Implement OpenTelemetry in your NestJS application today and experience the confidence that comes from truly understanding your system's behavior.
 
-
 ## Frequently Asked Questions
 
 ### What's the minimum Node.js version for OpenTelemetry?
@@ -709,14 +709,14 @@ OpenTelemetry requires Node.js 18.19.0+ or 20.6.0+. If you're using NestJS 11+, 
 
 ### How do I debug missing traces?
 
-First, use ConsoleSpanExporter to verify traces are being generated locally. Then check:
+First, use `ConsoleSpanExporter` to verify traces are being generated locally. Then check:
 1. Initialization order (tracer before NestJS imports)
 2. Environment variables are correctly set
 3. Network connectivity to your backend
 
 ### What's the performance impact?
 
-With proper configuration:
+The exact impact of OpenTelemetry's overhead on NestJS application can vary significantly based on the SDK versions, libraries instrumented, the deployment environment, available resources, etc. But as a rough figure, you can expect:
 - Development (100% sampling): 10-15% overhead
 - Production (10% sampling): 5-10% overhead
 - Optimized setup: As low as 2-5% overhead
