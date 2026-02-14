@@ -128,6 +128,10 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
     ],
   }
 
+
+
+  const formatTracesAndLogsRetentionLabel = (days: number) => days === 365 ? "1 year retention" : `${days} days retention`
+
   // State for retention periods
   const [tracesRetentionPeriod, setTracesRetentionPeriod] = useState(RETENTION_PERIOD.TRACES_AND_LOGS[0].days)
   const [logsRetentionPeriod, setLogsRetentionPeriod] = useState(RETENTION_PERIOD.TRACES_AND_LOGS[0].days)
@@ -557,7 +561,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                   >
                     {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
                       <option key={`traces-${option.days}-${idx}`} value={option.days}>
-                        {`${option.days} days`}
+                        {`${formatTracesAndLogsRetentionLabel(option.days)}`}
                       </option>
                     ))}
                   </select>
@@ -620,7 +624,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                   >
                     {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
                       <option key={`logs-${option.days}-${idx}`} value={option.days}>
-                        {`${option.days} days`}
+                        {`${formatTracesAndLogsRetentionLabel(option.days)}`}
                       </option>
                     ))}
                   </select>
@@ -802,7 +806,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                         {(isSectionVisible("traces") || isSectionVisible("logs")) ? (
                           RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
                             <option key={`${isSectionVisible("traces") ? "traces" : "logs"}-${option.days}-${idx}`} value={option.days}>
-                              {`${option.days} days`}
+                              {`${formatTracesAndLogsRetentionLabel(option.days)}`}
                             </option>
                           ))
                         ) : (
@@ -899,7 +903,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                   >
                     {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
                       <option key={`traces-${option.days}-${idx}`} value={option.days}>
-                        {`${option.days} days`}
+                        {`${formatTracesAndLogsRetentionLabel(option.days)}`}
                       </option>
                     ))}
                   </select>
@@ -954,7 +958,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                   >
                     {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
                       <option key={`logs-${option.days}-${idx}`} value={option.days}>
-                        {`${option.days} days`}
+                        {`${formatTracesAndLogsRetentionLabel(option.days)}`}
                       </option>
                     ))}
                   </select>

@@ -38,6 +38,9 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
     ] as MetricsRetention[],
   }
 
+  const formatTracesAndLogsRetentionLabel = (days: number) =>
+    days === 365 ? '1 year retention' : `${days} days retention`
+
   const [tracesRetentionPeriod, setTracesRetentionPeriod] = useState(
     RETENTION_PERIOD.TRACES_AND_LOGS[0].days
   )
@@ -138,7 +141,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               ${getPrice('TRACES_AND_LOGS', logsRetentionPeriod)}/GB ingested
             </p>
             <span className="relative cursor-pointer border-b border-gray-400 text-sm text-gray-400">
-              {logsRetentionPeriod} days retention
+              {formatTracesAndLogsRetentionLabel(logsRetentionPeriod)}
               <select
                 value={logsRetentionPeriod}
                 onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
@@ -146,7 +149,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               >
                 {RETENTION_PERIOD.TRACES_AND_LOGS.map(({ days }) => (
                   <option key={days} value={days}>
-                    {days} days retention
+                    {formatTracesAndLogsRetentionLabel(days)}
                   </option>
                 ))}
               </select>
@@ -159,7 +162,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               ${getPrice('TRACES_AND_LOGS', tracesRetentionPeriod)}/GB ingested
             </p>
             <span className="relative cursor-pointer border-b border-gray-400 text-sm text-gray-400">
-              {tracesRetentionPeriod} days retention
+              {formatTracesAndLogsRetentionLabel(tracesRetentionPeriod)}
               <select
                 value={tracesRetentionPeriod}
                 onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
@@ -167,7 +170,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               >
                 {RETENTION_PERIOD.TRACES_AND_LOGS.map(({ days }) => (
                   <option key={days} value={days}>
-                    {days} days retention
+                    {formatTracesAndLogsRetentionLabel(days)}
                   </option>
                 ))}
               </select>
