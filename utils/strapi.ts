@@ -1,4 +1,5 @@
 import qs from 'qs'
+import { CACHE_REVALIDATE_SECONDS } from './mdxCacheConstants'
 
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH
@@ -338,12 +339,13 @@ export const fetchMDXContentByPath = async (
       const initialQueryParams = qs.stringify(initialQueryObject, {
         encode: false,
         addQueryPrefix: true,
-        arrayFormat: 'repeat',
+        arrayFormat: 'indices',
       })
 
       const initialResponse = await fetch(`${API_URL}/api/${collectionName}${initialQueryParams}`, {
         next: {
           tags: [`${collectionName}-list`, 'mdx-content-list'],
+          revalidate: CACHE_REVALIDATE_SECONDS,
         },
         headers: {
           'Content-Type': 'application/json',
@@ -376,13 +378,14 @@ export const fetchMDXContentByPath = async (
           const pageQueryParams = qs.stringify(pageQueryObject, {
             encode: false,
             addQueryPrefix: true,
-            arrayFormat: 'repeat',
+            arrayFormat: 'indices',
           })
 
           pagePromises.push(
             fetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
               next: {
                 tags: [`${collectionName}-list`, 'mdx-content-list'],
+                revalidate: CACHE_REVALIDATE_SECONDS,
               },
               headers: {
                 'Content-Type': 'application/json',
@@ -429,6 +432,7 @@ export const fetchMDXContentByPath = async (
     const response = await fetch(`${API_URL}/api/${collectionName}${queryParams}`, {
       next: {
         tags: [`${collectionName}-${path}`, `mdx-content-${path}`],
+        revalidate: CACHE_REVALIDATE_SECONDS,
       },
       headers: {
         'Content-Type': 'application/json',

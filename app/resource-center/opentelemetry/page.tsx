@@ -1,7 +1,8 @@
 import OpenTelemetryClient from './OpenTelemetryClient'
 import { Metadata } from 'next'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
-import { fetchAllComparisonsForPage } from '@/utils/cachedData'
+import { fetchAllComparisonsForPage, fetchAllGuidesForPage } from '@/utils/cachedData'
+import { LIST_FIELDS } from '@/utils/mdxCacheConstants'
 import type { Comparison } from '../../../types/transformedContent'
 
 export const revalidate = 3600
@@ -36,18 +37,25 @@ export default async function OpenTelemetryHome() {
   const deployment_status = isProduction ? 'live' : 'staging'
   let articles: MDXContent[] = []
   let comparisons: Comparison[] = []
+  let guides: Awaited<ReturnType<typeof fetchAllGuidesForPage>> = []
 
   try {
-    const [articlesResponse, comparisonsResult] = await Promise.all([
-      fetchMDXContentByPath('opentelemetries', undefined, deployment_status, true),
+    const [articlesResponse, comparisonsResult, guidesResult] = await Promise.all([
+      fetchMDXContentByPath('opentelemetries', undefined, deployment_status, true, [
+        ...LIST_FIELDS,
+      ]),
       fetchAllComparisonsForPage(),
+      fetchAllGuidesForPage(),
     ])
 
     comparisons = comparisonsResult
+    guides = guidesResult
     articles = (articlesResponse.data || []) as any[]
   } catch (error) {
     console.error('Error fetching OpenTelemetry articles:', error)
   }
 
-  return <OpenTelemetryClient initialArticles={articles} comparisons={comparisons} />
+  return (
+    <OpenTelemetryClient initialArticles={articles} comparisons={comparisons} guides={guides} />
+  )
 }

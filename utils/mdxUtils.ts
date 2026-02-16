@@ -163,3 +163,77 @@ export const transformComparison = (comparison: MDXContent) => {
     relatedArticles: [...(updatedRelatedComparisons || [])],
   }
 }
+
+/**
+ * Transforms a raw MDX guide content from CMS into the expected format
+ * for the frontend application.
+ *
+ * @param guide - Raw guide data from CMS
+ * @returns Transformed guide with TOC, reading time, structured data, etc.
+ */
+export const transformGuide = (guide: MDXContent) => {
+  const slug = guide.path?.split('/').pop() || ''
+  const path = `guides/${slug}`
+
+  const authors = Array.isArray(guide.authors)
+    ? guide.authors.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      )
+    : []
+
+  const tags = Array.isArray(guide.tags)
+    ? guide.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
+    : []
+
+  const readingTimeStats = readingTime(guide.content || '')
+
+  const updatedRelatedGuides = guide.related_guides?.map((relatedGuide: MDXContent) => {
+    return {
+      ...relatedGuide,
+      publishedOn: relatedGuide.date || relatedGuide.updatedAt || relatedGuide.publishedAt,
+      tags: relatedGuide.tags?.map((tag: string | MDXContent) =>
+        typeof tag === 'string' ? tag : tag.value
+      ),
+      authors: relatedGuide.authors?.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      ),
+      keywords: relatedGuide.keywords?.map((keyword: string | MDXContent) =>
+        typeof keyword === 'string' ? keyword : keyword.value
+      ),
+      description: relatedGuide.description,
+      title: relatedGuide.title,
+      path: `guides${relatedGuide.path || ''}`,
+      url: `${siteMetadata.siteUrl}/guides${relatedGuide.path || ''}`,
+      slug: (relatedGuide.path || '').split('/').pop() || '',
+      date: relatedGuide.date || relatedGuide.updatedAt || relatedGuide.publishedAt,
+    }
+  })
+
+  const contentForStructuredData = {
+    ...guide,
+    slug,
+    path,
+    publishedAt: guide.date || guide.updatedAt || guide.publishedAt,
+  } as MDXContent
+
+  return {
+    ...guide,
+    _id: guide.documentId || String(guide.id),
+    _raw: {},
+    type: 'Guide',
+    title: guide.title,
+    date: guide.date || guide.updatedAt || guide.publishedAt,
+    tags,
+    description: guide.description,
+    authors,
+    slug,
+    content: guide.content,
+    body: { raw: '', code: '' },
+    toc: generateTOC(guide.content || ''),
+    readingTime: readingTimeStats,
+    path,
+    filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
+    structuredData: generateStructuredData('guides', contentForStructuredData),
+    relatedArticles: [...(updatedRelatedGuides || [])],
+  }
+}

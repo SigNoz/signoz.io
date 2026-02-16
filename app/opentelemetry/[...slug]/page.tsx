@@ -23,6 +23,8 @@ import { compileMDX } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { Authors } from 'contentlayer/generated'
+import { CACHE_REVALIDATE_SECONDS } from '@/utils/mdxCacheConstants'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -32,7 +34,7 @@ const layouts = {
   OpenTelemetryLayout,
 }
 
-export const revalidate = 0
+export const revalidate = CACHE_REVALIDATE_SECONDS
 export const dynamicParams = true
 
 export async function generateMetadata({
@@ -190,7 +192,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   }
 
   // Prepare author details
-  const authorDetails: CoreContent<MDXContent>[] = content.authors?.map((author) => ({
+  const authorDetails: CoreContent<MDXContent | Authors>[] = content.authors?.map((author) => ({
     name: author?.name || 'Unknown Author',
     avatar: author?.image_url || '/static/images/signoz-logo.png',
     occupation: author?.title || 'Developer Tools',

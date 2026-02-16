@@ -53,7 +53,7 @@ export default function ComparisonsListing({ comparisons = [] }: { comparisons?:
         <div className="mt-5 w-full max-md:max-w-full">
           <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2">
             {primaryFeaturedBlogs.map((featuredBlog, index) => {
-              return <BlogPostCard blog={featuredBlog} key={index} />
+              return <BlogPostCard blog={featuredBlog as any} key={index} />
             })}
           </div>
         </div>
@@ -67,7 +67,7 @@ export default function ComparisonsListing({ comparisons = [] }: { comparisons?:
 
       <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {blogs.map((post, index) => {
-          return <BlogPostCard blog={post} key={index} />
+          return <BlogPostCard blog={post as any} key={index} />
         })}
       </div>
     </div>

@@ -1,8 +1,10 @@
 import { fetchMDXContentByPath, MDXContentApiResponse } from '@/utils/strapi'
+import { LIST_FIELDS } from '@/utils/mdxCacheConstants'
 import { notFound } from 'next/navigation'
 import FAQsClient from './FAQsClient'
+import { CACHE_REVALIDATE_SECONDS } from '@/utils/mdxCacheConstants'
 
-export const revalidate = 0
+export const revalidate = CACHE_REVALIDATE_SECONDS
 export const dynamicParams = true
 
 export default async function FAQsPage() {
@@ -11,12 +13,9 @@ export default async function FAQsPage() {
 
   try {
     // Fetch all FAQs from Strapi
-    const response = (await fetchMDXContentByPath(
-      'faqs',
-      undefined,
-      deploymentStatus,
-      true
-    )) as MDXContentApiResponse
+    const response = (await fetchMDXContentByPath('faqs', undefined, deploymentStatus, true, [
+      ...LIST_FIELDS,
+    ])) as MDXContentApiResponse
 
     if (!response || !response.data) {
       console.error('Invalid response from Strapi')

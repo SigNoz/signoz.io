@@ -1,9 +1,8 @@
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
-import { allBlogs, allGuides, type Blog, type Guide } from 'contentlayer/generated'
-import type { Comparison } from '../types/transformedContent'
-import { fetchAllComparisonsForPage } from './cachedData'
-import type { MDXContent } from './strapi'
+import { allBlogs, type Blog } from 'contentlayer/generated'
+import type { Comparison, Guide } from '../types/transformedContent'
+import { fetchAllComparisonsForPage, fetchAllGuidesForPage } from './cachedData'
 
 type RawHubPath = {
   key: string
@@ -66,7 +65,7 @@ let memoizedHubIndex: HubIndex | null = null
 
 type ContentIndexItem = {
   prefix: string
-  collection: (Blog | Guide | MDXContent | Comparison)[]
+  collection: (Blog | Comparison | Guide)[]
 }
 
 function normalizeRoute(route: string) {
@@ -107,7 +106,7 @@ function articleToDoc(article: RawHubArticle, contentIndex: ContentIndexItem[]):
   return {
     type: 'doc',
     route,
-    label: title,
+    label: title as string,
     language: article.language,
   }
 }
@@ -162,14 +161,14 @@ function collectLanguages(items: HubNavItem[], accumulator: Set<string>) {
   }
 }
 
-async function buildHubIndex(comparisons: MDXContent[]): Promise<HubIndex> {
+async function buildHubIndex(comparisons: Comparison[], guides: Guide[]): Promise<HubIndex> {
   const lookup = new Map<string, HubLookupEntry>()
   const paths: HubPathNav[] = []
 
-  const contentIndex = [
+  const contentIndex: ContentIndexItem[] = [
     {
       prefix: '/blog/',
-      collection: allBlogs as Array<Blog | Guide>,
+      collection: allBlogs as Blog[],
     },
     {
       prefix: '/comparisons/',
@@ -177,7 +176,7 @@ async function buildHubIndex(comparisons: MDXContent[]): Promise<HubIndex> {
     },
     {
       prefix: '/guides/',
-      collection: allGuides as Array<Blog | Guide>,
+      collection: guides,
     },
   ]
 
@@ -253,27 +252,38 @@ async function buildHubIndex(comparisons: MDXContent[]): Promise<HubIndex> {
   return { lookup, paths }
 }
 
-async function getHubIndex(comparisons?: Comparison[]): Promise<HubIndex> {
+type HubIndexParams = {
+  comparisons?: Comparison[]
+  guides?: Guide[]
+}
+
+async function getHubIndex(params?: HubIndexParams): Promise<HubIndex> {
   if (memoizedHubIndex) {
     return memoizedHubIndex
   }
 
-  let usedComparisons = comparisons
-  if (!usedComparisons) {
-    try {
-      usedComparisons = await fetchAllComparisonsForPage()
-    } catch (e) {
-      usedComparisons = []
-    }
+  let usedComparisons = params?.comparisons
+  let usedGuides = params?.guides
+
+  if (!usedComparisons || !usedGuides) {
+    const [fetchedComparisons, fetchedGuides] = await Promise.all([
+      usedComparisons ?? fetchAllComparisonsForPage().catch(() => []),
+      usedGuides ?? fetchAllGuidesForPage().catch(() => []),
+    ])
+    usedComparisons = usedComparisons ?? fetchedComparisons
+    usedGuides = usedGuides ?? fetchedGuides
   }
 
-  memoizedHubIndex = await buildHubIndex(usedComparisons || [])
+  memoizedHubIndex = await buildHubIndex(usedComparisons || [], usedGuides || [])
   return memoizedHubIndex
 }
 
-export async function getHubContextForRoute(route: string, comparisons?: Comparison[]) {
+export async function getHubContextForRoute(
+  route: string,
+  params?: { comparisons?: Comparison[]; guides?: Guide[] }
+) {
   const normalized = normalizeRoute(route)
-  const { lookup, paths } = await getHubIndex(comparisons)
+  const { lookup, paths } = await getHubIndex(params)
 
   const match = lookup.get(normalized)
   if (!match) {

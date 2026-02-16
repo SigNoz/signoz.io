@@ -2,7 +2,7 @@ import 'css/prism.css'
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
+import { coreContent } from 'pliny/utils/contentlayer'
 import { allAuthors } from 'contentlayer/generated'
 import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
@@ -14,7 +14,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
-import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
+import { fetchMDXContentByPath } from '@/utils/strapi'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { mdxOptions, transformComparison } from '@/utils/mdxUtils'
 import { compileMDX } from 'next-mdx-remote/rsc'
@@ -34,6 +34,8 @@ export async function generateMetadata({
 }: {
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
   const slug = decodeURI(params.slug.join('/'))
 
   const comparisons = await fetchAllComparisonsForPage()
@@ -126,7 +128,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
-  const hubContext = await getHubContextForRoute(currentRoute, comparisonsList)
+  const hubContext = await getHubContextForRoute(currentRoute, {
+    comparisons: comparisonsList,
+  })
 
   let compiledContent
   try {

@@ -18,8 +18,9 @@ import { Blog, Authors } from 'contentlayer/generated'
 import { compileMDX } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { CACHE_REVALIDATE_SECONDS } from '@/utils/mdxCacheConstants'
 
-export const revalidate = 0
+export const revalidate = CACHE_REVALIDATE_SECONDS
 export const dynamicParams = true
 
 export async function generateMetadata({

@@ -244,7 +244,7 @@ function extractAssetPaths(content, frontmatter) {
   const mdImageRegex = /!\[.*?\]\((.*?)\)/g
 
   let match
-  while ((match = mdImageRegex.exec(content)) !== null) {
+  while ((match = mdImageRegex.exec(contentWithoutCode)) !== null) {
     if (match[1] && !match[1].startsWith('http') && !match[1].startsWith('https')) {
       paths.add(match[1])
     }

@@ -2,9 +2,10 @@
 
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
-import { allBlogs, allGuides, type Blog, type Guide } from 'contentlayer/generated'
+import { allBlogs, type Blog } from 'contentlayer/generated'
 import { coreContent, type CoreContent } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
+import type { Guide } from '../../../types/transformedContent'
 import BlogPostCard from '../Shared/BlogPostCard'
 import SearchInput from '../Shared/Search'
 import React from 'react'
@@ -44,8 +45,6 @@ type HubConfigPath = {
   sections?: HubConfigGroup[]
   articles?: HubConfigArticle[]
 }
-
-const docCollections = [...allBlogs, ...allGuides] as Array<Blog | Guide>
 
 function normalizeRoute(route: string) {
   if (!route) return '/'
@@ -116,9 +115,10 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 
 interface OpenTelemetryProps {
   articles?: MDXContent[]
+  guides?: Guide[]
 }
 
-export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
+export default function OpenTelemetry({ articles = [], guides = [] }: OpenTelemetryProps) {
   const [searchValue, setSearchValue] = React.useState('')
   const [activeLanguageKey, setActiveLanguageKey] = React.useState('ALL')
   const trimmedSearch = searchValue.trim()
@@ -130,8 +130,8 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
       const docLanguageMap = new Map<string, string>()
       const normalizedDocMap = new Map<string, HubDoc>()
 
-      // Merge collections
-      const allDocs: (Blog | Guide | HubDoc)[] = [...docCollections]
+      // Merge collections: blogs from contentlayer + guides from CMS
+      const allDocs: (Blog | Guide | HubDoc)[] = [...(allBlogs as Blog[]), ...guides]
 
       // Add Strapi opentelemetry articles
       articles.forEach((article) => {
@@ -246,7 +246,7 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
         AVAILABLE_LANGUAGES: languages,
         getDocLanguage: (doc: HubDoc) => docLanguageMap.get(doc.path),
       }
-    }, [articles])
+    }, [articles, guides])
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value)

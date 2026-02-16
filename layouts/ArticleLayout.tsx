@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors, Guide } from 'contentlayer/generated'
+import type { Blog, Authors } from 'contentlayer/generated'
 import { ExternalLink } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
@@ -20,8 +20,7 @@ import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 import authorsDirectory from '@/constants/authors.json'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
-import { MDXContent } from '@/utils/strapi'
-import type { Comparison } from '../types/transformedContent'
+import type { Comparison, Guide } from '../types/transformedContent'
 
 const MAIN_CONTENT_ID = 'article-main'
 

@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
+import { allBlogs, allDocs } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 
@@ -44,20 +44,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }))
 
-  // New section for guides
-  const guideRoutes = allGuides
-    .filter((guide) => !guide.draft)
-    .map((guide) => ({
-      url: `${siteUrl}/${guide.path}/`,
-      lastModified: guide.lastmod || guide.date,
-      changeFrequency: mapChangeFrequency('weekly'),
-      priority: 0.7,
-    }))
-
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
-  const { faqs, caseStudies, opentelemetries, comparisons } =
+  const { faqs, caseStudies, opentelemetries, comparisons, guides } =
     await fetchAllCMSContent(deploymentStatus)
 
   let faqRoutes: MetadataRoute.Sitemap = []
@@ -99,6 +89,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: comparison.date || comparison.updatedAt || comparison.publishedAt,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
+    }))
+  }
+
+  let guideRoutes: MetadataRoute.Sitemap = []
+  if (guides) {
+    const data = guides
+    guideRoutes = data.data.map((guide) => ({
+      url: `${siteUrl}/guides${guide.path}/`,
+      lastModified: guide.date || guide.updatedAt || guide.publishedAt,
+      changeFrequency: mapChangeFrequency('weekly'),
+      priority: 0.7,
     }))
   }
 
