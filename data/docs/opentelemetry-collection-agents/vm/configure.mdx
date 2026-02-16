@@ -10,9 +10,9 @@ This guide walks you through configuring the OpenTelemetry Collector binary on y
 
 ## Prerequisites
 
-- OpenTelemetry Collector binary installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install))
+- OpenTelemetry Collector binary installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/))
 - SigNoz Cloud account or self-hosted SigNoz instance
-- Access to create and edit the OpenTelemetry Collector configuration file (see your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install) for where it lives and how to apply changes)
+- Access to create and edit the OpenTelemetry Collector configuration file (see your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) for where it lives and how to apply changes)
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -20,7 +20,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ## Resource Detection
 
-The `resourcedetection` processor adds host and cloud metadata to your telemetry so you can filter and group by environment, hostname, or cloud provider in SigNoz.
+The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and cloud metadata to your telemetry so you can filter and group by environment, hostname, or cloud provider in SigNoz.
 
 Use the following configuration on a VM. On **AWS**, **GCP**, or **Azure**, add the corresponding cloud detector **before** the `system` detector.
 
@@ -50,10 +50,10 @@ service:
 
 ### Custom resource attributes
 
-Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable where you run the collector; the `env` detector will attach those key-value pairs to all telemetry. Example:
+You can attach custom resource attributes (for example, `environment`, `team`, or any custom key) to **all telemetry** sent by the collector by setting the [`OTEL_RESOURCE_ATTRIBUTES` environment variable](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-environment-variables) in the collector’s environment.
 
 ```bash
-export OTEL_RESOURCE_ATTRIBUTES="service.namespace=production,environment=staging"
+export OTEL_RESOURCE_ATTRIBUTES="key1=value1,key2=value2"
 ```
 
 ## Send data from applications to collector on VM
@@ -102,7 +102,7 @@ See [Instrumentation](https://signoz.io/docs/instrumentation/) for language-spec
 
 ## Collect host metrics from the VM
 
-Use the `hostmetrics` receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from the VM.
+Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from the VM.
 
 ```yaml:config.yaml {20}
 receivers:
@@ -132,7 +132,7 @@ You can enable only the scrapers you need or tune `collection_interval`.
 
 ## Collect logs from files on the VM
 
-Use the `filelog` receiver to tail log files on the VM and send them as log records to SigNoz (application or system log files).
+Use the [filelog](https://signoz.io/docs/userguide/collect_logs_from_file/) receiver to tail log files on the VM and send them as log records to SigNoz (application or system log files).
 
 **Example: single log file**
 
@@ -156,7 +156,7 @@ service:
 receivers:
   filelog:
     include:
-      -/path/to/your/application-logs/*.log
+      - /path/to/your/application-logs/*.log
     start_at: end
     include_file_name: true
     include_file_path: true
@@ -207,22 +207,22 @@ To stream Windows Event logs (Application, Security, System channels) to SigNoz 
   - [Fluentd to SigNoz](https://signoz.io/docs/userguide/fluentd_to_signoz)
   - [Logstash to SigNoz](https://signoz.io/docs/userguide/logstash_to_signoz)
 
-## Apply and Run
+## Verify
+
+- **Config and logs:** Use the validation steps for your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to confirm the config is valid and the collector is running without errors.
+- **In SigNoz:** Confirm data in [Traces](https://signoz.io/docs/traces/), [Metrics](https://signoz.io/docs/metrics/), or [Logs](https://signoz.io/docs/logs/) (and [Infrastructure](https://signoz.io/docs/infrastructure-monitoring/) for host metrics) depending on what you enabled.
+
+## Apply Changes
 
 After editing the config:
 
-1. Copy the configuration to the path used by your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install) (e.g. systemd unit `Environment` or the path passed to `--config`).
+1. Copy the configuration to the path used by your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) (e.g. systemd unit `Environment` or the path passed to `--config`).
 2. Restart or start the collector as described in the install guide.
 3. View collector logs to confirm there are no configuration errors.
 
-To validate the config without starting the collector:
-
-```bash
-otelcol-contrib --config ./config.yaml --dry-run
-```
 
 ## Next Steps
 
-- [VM Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/vm/overview)
+- [VM Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/vm/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
