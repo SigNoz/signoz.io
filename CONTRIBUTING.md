@@ -134,15 +134,20 @@ These guidelines apply when your PR changes website code (for example: `app/**`,
   - Examples: “OpenTelemetry (OTel),” “OpenTelemetry Collector (OTel Collector),” “OpenTelemetry Protocol (OTLP).”
 - Placeholders and variables
   - Must use angle-bracket placeholders like `<service-name>`, `<region>`, `<your-ingestion-key>`.
+  - Use explicit placeholder names (for example, `<path-to-log-file>` instead of generic placeholders).
   - Immediately below the snippet, explain what each placeholder means.
 
 ### Write docs around a Jobs-To-Be-Done (JTBD)
 
 - Persona check: assume the reader is new to observability/OTel; reduce cognitive load and define OTel terms briefly as they appear.
+- Before drafting, identify target persona(s), assumed context, and the primary job-to-be-done.
+- Use the chosen persona(s) to decide scope, wording, examples, and the level of detail.
+- Persona is an authoring/review aid; do not add a mandatory "Target Persona" section in the doc unless context genuinely requires it.
 - Define the primary job in 1 sentence: When … I want to … so I can …
 - Optimize for time-to-first-success: default path first, alternatives later/collapsible.
 - Show the success signal: where in SigNoz UI the user should see results.
 - Use a scope guard: if content doesn’t help the primary job, move it to Next Steps / Troubleshooting / separate doc.
+- For setup docs: keep scope to prerequisites, install, start/restart, and verify. Move tuning and deep config to Configure/Troubleshooting collapsed section at bottom or in separate docs.
 - Alternatives: if there are multiple valid paths (Direct export vs Collector), state the default and keep alternatives in collapsible sections.
 
 ## Documentation types and Diátaxis
@@ -261,11 +266,13 @@ Every doc should be skimmable and actionable.
   - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
     - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
     - ❌ "Replace your `otel-collector-config.yaml` with the following content:"
+  - **Safe default snippets**: Any default snippet in the main flow must run after replacing documented `<...>` placeholders only. Move optional or environment-specific config (for example, `debug` exporter, `filelog` path examples, Prometheus self-scrape, extra detectors) into `KeyPointCallout`/`<details>` sections.
 
 - Hyperlinks
 
   - Internal links should open in the new tab. Always prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
-
+  - For Collector receiver/processor sections, link the relevant internal docs for the component you mention (for example: resource detection/resource processor, hostmetrics, filelog).
+  - Add internal/external links wherever they directly help users complete the current step. Avoid link dumping and irrelevant references.
   - External links should open in a new tab and preserve security attributes by using href:
 
     ```mdx
@@ -319,6 +326,13 @@ Every doc should be skimmable and actionable.
   ```
 - Use `Tabs`/`TabItem` to branch by platform, OS, or materially different flows. For Cloud vs Self-Host, prefer the drop-in snippet + comparison page.
 - Use numbered steps for procedures and bullets for reference content.
+- In procedure docs, each numbered step should include: what to do, the exact command/config change, and the expected result.
+- Keep mandatory steps to the minimum needed for first success.
+- Merge or remove redundant mandatory steps.
+- Optional or advanced variations should not appear in the primary numbered flow.
+- Each required step must be unambiguous, actionable, and outcome-oriented.
+- Avoid multi-purpose steps that combine unrelated actions.
+- Convert non-essential, edge-case, or optional steps into `KeyPointCallout` or collapsed `<details>` blocks to keep the main flow focused.
 - Keep headings short and meaningful. Prefer H2 for main sections.
 
 ### Link references to keep handy
@@ -337,6 +351,9 @@ For tutorials and how-to docs, write for the **happy path** by default:
 
 - Assume a normal, supported setup and show one clear end-to-end flow.
 - Avoid branching into multiple edge cases in the middle of the procedure.
+- Do a common-path walkthrough as a first-time reader before opening a PR.
+- If a user needs guesswork or detours, rewrite the step or add exactly one relevant link.
+- Move tangential material to Troubleshooting, Next Steps, or collapsed optional sections.
 
 Handle problems as follows:
 
@@ -381,6 +398,7 @@ These are the top-level “Overview” pages for a module or feature area (for e
 - Content:
   - 1–3 short paragraphs on **what it is** and **when to use it**.
   - A brief list of key capabilities.
+  - If telemetry collection is mentioned, explicitly state what is covered (for example: app traces/metrics/logs, host metrics) and link to the exact setup docs for anything not enabled by default.
   - Curated links grouped by intent, such as:
     - “Get started” (Send Data / basic setup how-tos)
     - “Do specific tasks” (Working with [Module] how-tos)
@@ -422,6 +440,7 @@ Explain OTel-specific terms (spans, traces, exporters, collectors) when first in
 - Explicitly mention OpenTelemetry in the URL/slug, title, and overview.
   - Example slug and file name: `data/docs/instrumentation/<tech>/opentelemetry-<tech>.mdx`.
 - Specify the tested versions of SDKs/agents/collectors up front.
+- Use pinned, tested or latest versions in the main steps and command snippets. Do not ask users to "check releases" in the primary flow; if needed, mention version updates in an optional note/callout.
 
 #### Default to direct export to SigNoz Cloud
 
@@ -494,6 +513,8 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 - Explain each code snippet: what it configures, where it lives, and how it works.
 - Provide validation steps in SigNoz (Traces/Logs/Metrics views) with screenshots where possible.
+- Keep default config minimal and directly aligned to the primary goal ("first data in SigNoz"). Optional items should be collapsed.
+- In default config, avoid enabling non-essential components unless required for first success (for example, `debug` exporter, Prometheus self-scrape, placeholder filelog paths, advanced detectors).
 
 #### Troubleshooting section
 
@@ -608,8 +629,16 @@ Set `doc_type: reference` for these pages.
 - [ ] SEO: primary keywords appear in `title`, `description`, URL/slug, and the first paragraph. For Send Data docs, include "OpenTelemetry" in slug/title.
 - [ ] For Send Data docs: includes self-hosted `KeyPointCallout` near the top and optional Collector setup section before Troubleshooting.
 - [ ] For Send Data docs: covers all four deployment types (VM, Kubernetes, Docker, Windows) where applicable, with VM explanation callout.
+- [ ] For setup docs: each platform path/tab includes an explicit **Verify** step that confirms the service/binary is running.
+- [ ] For install docs: install page is scoped to install/start/verify. Advanced tuning and optional receiver/processor details are moved to Configure/Troubleshooting collapsed section at bottom or in separate docs.
+- [ ] Reviewer confirmed target persona was considered while drafting (not required to be explicitly declared in doc body).
+- [ ] Happy/common path is easy to follow end-to-end without tangential detours.
+- [ ] Mandatory steps are minimal, clear, and concise; optional/advanced information is moved out of the main path.
+- [ ] Relevant supporting links are present where needed for user completion.
 - [ ] Commands explain what they do and where to run them.
 - [ ] Code/config snippets are annotated and explained; placeholders are defined.
+- [ ] Placeholders use angle-bracket format only (for example, `<region>`, `<your-ingestion-key>`, `<path-to-log-file>`), not `{...}`.
+- [ ] Default snippets are runnable after replacing documented placeholders; optional/advanced config is collapsed in callouts/toggles.
 - [ ] “Validate” section shows how to confirm success.
 - [ ] Troubleshooting covers common failures with concrete fixes. For Send Data docs, use `<ToggleHeading>` to collapse this section.
 - [ ] The content matches the chosen `doc_type` (tutorial / howto / reference / explanation).
@@ -617,8 +646,10 @@ Set `doc_type: reference` for these pages.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
 - [ ] For Dashboard Template docs: include a clear link to set up the data source (relevant Send Data/instrumentation guide) near the top, ideally as a brief Prerequisites or info note.
 - [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
+- [ ] Links use production docs domain only (`https://signoz.io/...`); no preview/staging domains (for example, `*.vercel.app`).
 - [ ] All links (internal and external) have been manually verified to resolve to a live page. No broken or outdated URLs.
 - [ ] Cross-link existing SigNoz docs. For OTel Collector changes, link the config guide.
+- [ ] For Collector config sections: include internal links to the relevant component docs (resource/resource-detection, hostmetrics, filelog) where applicable.
 - [ ] Images use WebP format, have alt text and captions via the `Figure` component, are cropped/readable, and live under `public/img/docs/...`.
 - [ ] Added the page to the sidebar (`constants/docsSideNav.ts`) with the correct route/label.
 - [ ] If you renamed or moved a doc: added a permanent redirect in `next.config.js`, updated internal links and the sidebar, and verified with `yarn check:doc-redirects`.
