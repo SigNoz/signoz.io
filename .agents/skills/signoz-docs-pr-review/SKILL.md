@@ -5,7 +5,7 @@ description: Review SigNoz documentation pull requests using CONTRIBUTING.md and
 
 # SigNoz Docs PR Review
 
-Review documentation pull requests in `signoz.io` with a strict, actionable rubric.
+Review documentation pull requests in `signoz.io` with a strict, actionable rubric, prioritizing a JTBD-first lens.
 
 ## Scope
 
@@ -28,15 +28,54 @@ If a PR includes frontend code too, use this skill only for the docs part.
 
 1. Identify docs files changed in the PR.
 2. Read relevant sections in `CONTRIBUTING.md` (JTBD, patterns/components, happy path, hyperlinks, doc-type rules, docs checklist).
-3. Review docs with priority on user success:
-   - Persona/JTBD lens as reviewer guidance (not mandatory doc section)
-   - Happy/common path clarity
-   - Clear, concise, minimal mandatory steps
-   - Recommended defaults in main path; advanced options moved to optional areas
-   - Relevant internal/external links where they help complete steps
-4. Verify technical accuracy when claims involve OpenTelemetry behavior/configuration.
-5. Post inline findings for concrete issues.
-6. Post exactly one concise summary comment referencing Docs PR Checklist coverage.
+3. Identify intended user personas for each changed doc (for example: OTel beginner, platform engineer, app developer, SRE) from doc context.
+4. Run a **JTBD-first pass** (mandatory) before technical verification.
+5. Verify technical accuracy when claims involve OpenTelemetry behavior/configuration.
+6. Post inline findings for concrete issues.
+7. Post exactly one concise summary comment referencing Docs PR Checklist coverage.
+
+## JTBD Priority Rubric (Mandatory)
+
+Review each changed doc against these checks in order. If any check fails, raise a finding.
+
+1. Intended personas
+   - List primary and secondary personas the doc appears to target.
+   - Confirm scope, assumptions, and language match those personas.
+2. Primary job clarity
+   - The reader can quickly tell what problem this page solves.
+   - The page does not mix unrelated jobs into one mandatory flow.
+3. Happy/common path focus
+   - Common path is easy to follow end-to-end.
+   - Tangential information is minimized or moved to optional/collapsible sections.
+4. Time-to-first-success
+   - A clear default path exists and reaches first success without optional detours.
+   - Mandatory steps are minimal and in the right order.
+5. Step clarity and concision
+   - Steps are concrete, unambiguous, and concise.
+   - Users can execute each step without guessing missing actions.
+6. Minimal required steps
+   - The doc requires only what is necessary to complete the primary job.
+   - Non-essential actions are explicitly optional.
+7. Recommended defaults vs advanced options
+   - Best/recommended configuration is presented as default.
+   - Advanced options are moved to the bottom, troubleshooting, collapsible sections, or next steps.
+8. Beginner unblockers
+   - Any required attribute/config/concept has a direct "how to set this" step or link to a doc that explains how to set it.
+   - No critical prerequisite is implied without remediation guidance.
+9. Symptom-to-action mapping
+   - Troubleshooting starts from user-visible symptoms and points to exact next actions.
+   - Failure modes are concrete (not generic "check your setup").
+10. Success signal
+   - Validation tells users exactly where to check in SigNoz and what success looks like.
+11. Follow-through
+   - Next steps help users complete the broader job (for example dashboards, alerts, deeper guides).
+12. Helpful links (internal/external)
+   - Link to internal/external docs wherever they directly help completion of the current step.
+   - Avoid irrelevant link dumping.
+13. Link health
+   - Added/edited links resolve (no dead links). Prefer canonical production paths.
+
+If a JTBD check cannot be validated from the PR context, explicitly call out the assumption and residual risk.
 
 ## Technical Accuracy and Sources
 
@@ -102,9 +141,11 @@ For each issue include:
 Post one summary comment that includes:
 
 1. Key findings grouped by severity (`P1`, `P2`, `P3`)
-2. Checklist-oriented coverage summary (what failed/needs work)
-3. Any open questions/assumptions
-4. Whether onboarding label was applied (when relevant)
+2. Intended personas and fit summary (who this doc serves and where fit is weak)
+3. JTBD coverage summary (which mandatory JTBD checks failed or were at risk)
+4. Checklist-oriented coverage summary (what failed/needs work)
+5. Any open questions/assumptions
+6. Whether onboarding label was applied (when relevant)
 
 ## Suggested Commands
 
@@ -119,6 +160,9 @@ rg -n "JTBD|happy path|Patterns and components|Hyperlinks|Docs PR Checklist" CON
 
 # scan for likely docs quality issues
 rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|<[^>]+>" data/docs
+
+# quick link health checks for changed links
+curl -sI <URL>
 ```
 
 ## Guardrails
@@ -126,3 +170,4 @@ rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|
 - Do not require a dedicated "Target Persona" section unless context truly needs it.
 - Keep advanced options out of the mandatory path unless essential for first success.
 - Keep review feedback decision-oriented and immediately actionable.
+- Do not mark a review complete if mandatory JTBD checks were skipped.
