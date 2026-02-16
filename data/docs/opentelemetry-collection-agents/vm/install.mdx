@@ -6,6 +6,8 @@ description: Install the OpenTelemetry Collector binary on your virtual machine 
 doc_type: howto
 ---
 
+import OtelConfig from '@/components/shared/opentelemetry-collection-agents/vm/otel-config.mdx'
+
 This guide walks you through installing the OpenTelemetry Collector **contrib** binary on your virtual machine. We use the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases" target="_blank" rel="noopener noreferrer nofollow">contrib distribution</a> and tailor the steps for sending data to SigNoz.
 
 ## Prerequisites
@@ -59,7 +61,11 @@ curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases
 sudo dpkg -i otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.deb
 ```
 
-### Step 5: Set the collector config
+### Step 5: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
+
+<OtelConfig />
 
 <KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
 The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
@@ -68,9 +74,6 @@ The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use
 /usr/bin/otelcol-contrib --help
 ```
 </KeyPointCallout>
-
-Use the [OTEL Collector configuration](#opentelemetry-collector-configuration) below. Save it as `/etc/otelcol-contrib/config.yaml`, then restart the service.
-
 ### Step 6: Applying changes
 
 After modifying the configuration or environment file, restart the service:
@@ -123,7 +126,11 @@ curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases
 sudo rpm -ivh otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.rpm
 ```
 
-### Step 5: Set the collector config
+### Step 5: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
+
+<OtelConfig />
 
 <KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
 The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
@@ -132,7 +139,6 @@ The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use
 /usr/bin/otelcol-contrib --help
 ```
 </KeyPointCallout>
-Use the [OTEL Collector configuration](#opentelemetry-collector-configuration) below. Save it as `/etc/otelcol-contrib/config.yaml`, then restart the service.
 
 ### Step 6: Applying changes
 
@@ -180,15 +186,13 @@ curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases
 tar -xvf otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.tar.gz
 ```
 
-### Step 4: Run the collector
+### Step 4: Create OpenTelemetry Collector Configuration
 
-Use the [OTEL Collector configuration](#opentelemetry-collector-configuration) below. Create `config.yaml` in the extracted directory with that config, then run:
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the extracted directory.
 
-```bash
-./otelcol-contrib --config ./config.yaml
-```
+<OtelConfig />
 
-### Step 5: Run in background
+### Step 5: Run the collector
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
@@ -237,15 +241,13 @@ curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases
 tar -xvf otelcol-contrib_${OTEL_VERSION}_darwin_${ARCH}.tar.gz
 ```
 
-### Step 4: Run the collector
+### Step 4: Create OpenTelemetry Collector Configuration
 
-Use the [OTEL Collector configuration](#opentelemetry-collector-configuration) below. Create `config.yaml` in the same directory with that config, then run:
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same directory.
 
-```bash
-./otelcol-contrib --config ./config.yaml
-```
+<OtelConfig />
 
-### Step 5: Run in background
+### Step 5: Run the collector
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
@@ -279,16 +281,17 @@ The MSI installs the Collector as a Windows service (display name "OpenTelemetry
 $OTEL_VERSION = "0.139.0"
 ```
 
-### Step 2: Run the installer
+### Step 2: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to the `config.yaml` file.
+
+<OtelConfig />
+
+### Step 3: Run the Collector
 
 ```powershell
-Start-Process msiexec -ArgumentList "/i", "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v$OTEL_VERSION/otelcol-contrib_${OTEL_VERSION}_windows_amd64.msi" -Wait
+Start-Process msiexec -ArgumentList "/i", "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v$OTEL_VERSION/otelcol-contrib_${OTEL_VERSION}_windows_amd64.msi CONFIG=config.yaml" -Wait
 ```
-
-### Step 3: Set the collector config
-
-Use the [OTEL Collector configuration](#opentelemetry-collector-configuration) below. Save it as the service config file, then restart the service.
-
 </TabItem>
 <TabItem value="manual" label="Manual">
 
@@ -318,15 +321,13 @@ curl -sSL -o "otelcol-contrib_${OTEL_VERSION}_windows_amd64.tar.gz" "https://git
 tar -xvzf otelcol-contrib_${OTEL_VERSION}_windows_amd64.tar.gz
 ```
 
-### Step 4: Run the collector
+### Step 4: Create OpenTelemetry Collector Configuration
 
-Use the [OTEL Collector configuration](#opentelemetry-collector-configuration) below. Create `config.yaml` in the same folder with that config, then run:
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same folder.
 
-```powershell
-.\otelcol-contrib.exe --config .\config.yaml
-```
+<OtelConfig />
 
-### Step 5: Run in background
+### Step 5: Run the collector
 
 ```powershell
 Start-Process -FilePath ".\otelcol-contrib.exe" -ArgumentList "--config", ".\config.yaml" -RedirectStandardOutput "otelcol-output.log" -RedirectStandardError "otelcol-error.log" -NoNewWindow
@@ -345,107 +346,6 @@ Get-Content otelcol-output.log -Wait -Tail 50
 
 </TabItem>
 </Tabs>
-
-## OpenTelemetry Collector Configuration
-
-
-The following config is tailored for SigNoz usage (traces, metrics, logs). Copy it to the config path for your install method (see your tab above).
-
-```yaml:config.yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
-  prometheus:
-    config:
-      global:
-        scrape_interval: 60s
-      scrape_configs:
-        - job_name: otel-collector-binary
-          static_configs:
-            - targets:
-              # - localhost:8888 # Uncomment to scrape Collector's own metrics
-  filelog:
-    include: ["<path-to-your-application-log>"]
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
-  resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
-    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
-    timeout: 2s
-    system:
-      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
-extensions:
-  health_check: {}
-  zpages: {}
-exporters:
-  otlp:
-    endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
-    headers:
-      signoz-ingestion-key: <your-ingestion-key>
-service:
-  telemetry:
-    metrics:
-      level: basic
-  extensions: [health_check, zpages]
-  pipelines:
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics/internal:
-      receivers: [prometheus, hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    logs:
-      receivers: [otlp, filelog]
-      processors: [batch]
-      exporters: [otlp]
-```
-Verify the following values:
-
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<path-to-your-application-log>`: Path to the application or system log files you want to tail (or remove the `filelog` receiver and its entry from `service.pipelines.logs` if you do not need file-based logs)
-
-In the configuration above, three receivers are enabled: `otlp`, `hostmetrics`, and `prometheus`.
-
-- The **[otlp receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#otlp-receiver)** is configured to receive all types of telemetry data—traces, metrics, and logs. These data are forwarded to SigNoz via the OTLP gRPC endpoint.
-
-- The **[hostmetrics receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#hostmetrics-receiver)** is set up to collect various metrics from the virtual machine, including those related to CPU, memory, disk, file system, network, and more.
-
-- The **[prometheus receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#prometheus-receiver)** collects internal metrics from the `otelcol` Collector itself. You can modify its configuration to include additional scrape targets accessible from the VM, or remove existing targets as needed.
-
 
 ## Next Steps
 
