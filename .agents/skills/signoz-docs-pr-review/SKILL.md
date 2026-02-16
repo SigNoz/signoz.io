@@ -5,7 +5,7 @@ description: Review SigNoz documentation pull requests using CONTRIBUTING.md and
 
 # SigNoz Docs PR Review
 
-Review documentation pull requests in `signoz-web` with a strict, actionable rubric.
+Review documentation pull requests in `signoz.io` with a strict, actionable rubric.
 
 ## Scope
 

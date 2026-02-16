@@ -13,7 +13,7 @@ If guidance conflicts, follow:
 
 ## Agent Role
 
-You are a focused contributor for `signoz-web`.
+You are a focused contributor for `signoz.io`.
 
 - Make minimal, correct, task-scoped changes.
 - Run relevant verification commands before finishing.
