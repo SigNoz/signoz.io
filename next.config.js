@@ -1301,12 +1301,12 @@ module.exports = () => {
         },
         {
           source: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
-          destination: '/docs/opentelemetry-collection-agents/vm/overview',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
           permanent: true,
         },
         {
           source: '/docs/tutorial/opentelemetry-binary-usage/',
-          destination: '/docs/opentelemetry-collection-agents/vm/overview',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
           permanent: true,
         },
       ]
