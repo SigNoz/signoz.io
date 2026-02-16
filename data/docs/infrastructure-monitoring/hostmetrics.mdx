@@ -522,6 +522,44 @@ Once configured, verify that metrics are flowing to SigNoz.
 2. Verify the hostmetrics receiver is enabled in your config.
 3. Ensure the collector can reach the SigNoz endpoint (port 443 for Cloud, 4317 for Self-Hosted).
 
+### Host Name is blank/empty
+
+**Symptoms:** Host name appears blank or empty in **Infrastructure Monitoring > Hosts** tab.
+
+**Cause:** Metrics are missing the `host.name` resource attribute (metadata the collector attaches to every metric to identify which host it came from). This typically happens when:
+- The `resourcedetection` [processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#2-processors) is not added to the `processors` section of your collector config, or
+- The processor is defined but not enabled in your metrics pipeline (the `processors` list under `service > pipelines > metrics`).
+
+**Resolution:**
+
+1. Verify that the `resourcedetection` processor is in your `processors` section:
+
+```yaml:config.yaml
+processors:
+  resourcedetection:
+    detectors: [env, system, docker]
+  batch:
+```
+
+2. Verify that `resourcedetection` is listed in your metrics pipeline **before** `batch`:
+
+```yaml:config.yaml {5}
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+3. Restart the collector to apply changes and check logs for errors (see [Run the Collector](#step-3-run-the-collector)).
+
+<Admonition type="info">
+The `resourcedetection` processor automatically detects resource attributes like `host.name` and OS information from the host environment. For the full list of supported detectors, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">resourcedetection processor documentation</a>.
+</Admonition>
+
+**Verification:** After restarting, go to **Infrastructure Monitoring > Hosts**. Your host should now appear with its hostname populated.
+
 ### Connection Refused
 
 **Symptoms:** Logs show connection refused errors.
