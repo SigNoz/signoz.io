@@ -104,16 +104,6 @@ module.exports = () => {
     async redirects() {
       return [
         {
-          source: '/feed.xml',
-          destination: '/rss',
-          permanent: true,
-        },
-        {
-          source: '/resource-center/',
-          destination: '/resource-center/blog/',
-          permanent: true,
-        },
-        {
           source: '/docs/',
           destination: '/docs/introduction',
           permanent: true,

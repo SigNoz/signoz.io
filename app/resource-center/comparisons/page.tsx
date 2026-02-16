@@ -1,14 +1,25 @@
-import React from 'react'
-import Comparisons from './Comparisons'
-import { fetchAllComparisonsForPage } from '@/utils/cachedData'
+'use client'
 
-export default async function ComparisonsHome() {
-  const comparisons = await fetchAllComparisonsForPage()
+import React, { useState } from 'react'
+import Blogs from '../blog/Blogs'
+import Comparisons from './Comparisons'
+import Guides from '../guides/Guides'
+import OpenTelemetry from '../opentelemetry/OpenTelemetry'
+
+export default function ComparisonsHome() {
+  const [activeTab, setActiveTab] = useState('comparisons-tab')
 
   return (
-    <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
+    <div className="container mx-auto py-16 sm:py-8 !mt-[48px]">
+
       <div className="tab-content pt-6">
-        <Comparisons comparisons={comparisons} />
+        {activeTab === 'blog-tab' && <Blogs />}
+
+        {activeTab === 'comparisons-tab' && <Comparisons />}
+
+        {activeTab === 'guides-tab' && <Guides />}
+
+        {activeTab === 'openTelemetry-tab' && <OpenTelemetry />}
       </div>
     </div>
   )

@@ -5,6 +5,7 @@ import tagData from '../app/tag-data.json' assert { type: 'json' }
 import {
   allBlogs,
   allDocs,
+  allComparisons,
   allGuides,
 } from '../.contentlayer/generated/index.mjs'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
@@ -42,6 +43,7 @@ function generateRSS(config, allCollections) {
 const rss = () => {
   generateRSS(siteMetadata, [
     ...allBlogs,
+    ...allComparisons,
     ...allGuides,
     ...allDocs,
   ])
