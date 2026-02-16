@@ -39,6 +39,7 @@ import {
   MdStorage,
   MdWeb,
   MdDns,
+  MdOfflineBolt,
 } from 'react-icons/md'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -404,7 +405,7 @@ export default function LogsInstrumentationListicle({
           {
             name: 'Azure Functions',
             href: '/docs/azure-monitoring/az-fns/logging/',
-            icon: <SiAwslambda className="h-7 w-7 text-orange-500" />,
+            icon: <MdOfflineBolt className="h-7 w-7 text-orange-500" />,
             clickName: 'Azure Functions Logs Link',
           },
           {
