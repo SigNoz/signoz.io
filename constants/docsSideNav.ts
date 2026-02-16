@@ -213,6 +213,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Deploying to Render',
+            route: '/docs/setup/render',
+          },
+          {
+            type: 'doc',
             route: '/docs/install/uninstall',
             label: 'Uninstall',
           },
