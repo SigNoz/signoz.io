@@ -108,7 +108,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
-  const hubContext = getHubContextForRoute(currentRoute)
+  const hubContext = await getHubContextForRoute(currentRoute)
 
   if (hubContext) {
     return (

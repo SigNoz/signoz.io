@@ -1,13 +1,8 @@
+'use client'
+
 import hubConfig from '@/constants/opentelemetry_hub.json'
-import { LEARN_CHAPTER_ORDER } from '@/utils/opentelemetryHub'
-import {
-  allBlogs,
-  allComparisons,
-  allGuides,
-  type Blog,
-  type Comparison,
-  type Guide,
-} from 'contentlayer/generated'
+import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
+import { allBlogs, allGuides, type Blog, type Guide } from 'contentlayer/generated'
 import { coreContent, type CoreContent } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
 import BlogPostCard from '../Shared/BlogPostCard'
@@ -16,7 +11,7 @@ import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
 
-type HubDoc = CoreContent<Blog | Comparison | Guide | MDXContent>
+type HubDoc = CoreContent<Blog | Guide | MDXContent>
 
 type HubChapterGroup = {
   key: string
@@ -50,9 +45,7 @@ type HubConfigPath = {
   articles?: HubConfigArticle[]
 }
 
-const docCollections = [...allBlogs, ...allComparisons, ...allGuides] as Array<
-  Blog | Comparison | Guide
->
+const docCollections = [...allBlogs, ...allGuides] as Array<Blog | Guide>
 
 function normalizeRoute(route: string) {
   if (!route) return '/'
@@ -122,7 +115,7 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 }
 
 interface OpenTelemetryProps {
-  articles?: any[]
+  articles?: MDXContent[]
 }
 
 export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
@@ -138,7 +131,7 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
       const normalizedDocMap = new Map<string, HubDoc>()
 
       // Merge collections
-      const allDocs: (Blog | Comparison | Guide | HubDoc)[] = [...docCollections]
+      const allDocs: (Blog | Guide | HubDoc)[] = [...docCollections]
 
       // Add Strapi opentelemetry articles
       articles.forEach((article) => {

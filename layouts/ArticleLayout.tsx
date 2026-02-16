@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors, Comparison, Guide } from 'contentlayer/generated'
+import type { Blog, Authors, Guide } from 'contentlayer/generated'
 import { ExternalLink } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
@@ -20,6 +20,8 @@ import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 import authorsDirectory from '@/constants/authors.json'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
+import { MDXContent } from '@/utils/strapi'
+import type { Comparison } from '../types/transformedContent'
 
 const MAIN_CONTENT_ID = 'article-main'
 
@@ -29,7 +31,7 @@ export interface TocItemProps {
   value: string
 }
 
-type ContentType = Blog | Comparison | Guide
+type ContentType = Blog | Guide | Comparison
 
 type ArticleContent = ContentType & {
   cta_title?: string
@@ -98,7 +100,7 @@ const getReadingTimeText = (content: LayoutProps['content']) => {
 }
 
 const getFormattedDate = (content: LayoutProps['content']) => {
-  const updatedDate = content.lastmod || content.date
+  const updatedDate = content.date
   return updatedDate
     ? new Date(updatedDate).toLocaleDateString('en-US', {
         month: 'short',
@@ -310,11 +312,14 @@ export default function ArticleLayout({
                               {article.title}
                             </h3>
                             <p className="mt-2 text-sm text-gray-400">
-                              {new Date(article.publishedOn).toLocaleDateString('en-US', {
-                                month: 'long',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
+                              {new Date(article.publishedOn || article.date).toLocaleDateString(
+                                'en-US',
+                                {
+                                  month: 'long',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                }
+                              )}
                             </p>
                           </div>
                           <ExternalLink

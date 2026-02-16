@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { clearPathsCache } from '@/utils/strapi'
+import { clearHubIndexCache } from '@/utils/opentelemetryHub'
 
 interface RevalidationResult {
   path?: string
@@ -23,13 +24,16 @@ export async function POST(request: NextRequest) {
 
     if (clearCache) {
       clearPathsCache()
-      console.log('Cleared paths cache')
+      clearHubIndexCache()
+      console.log('Cleared paths and hub index cache')
     }
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
+      revalidateTag('comparisons-list')
       revalidateTag('mdx-paths')
+      clearHubIndexCache()
 
       results.push({
         path: '/',
@@ -79,6 +83,9 @@ export async function POST(request: NextRequest) {
     if (tags && Array.isArray(tags)) {
       for (const t of tags) {
         revalidateTag(t)
+        if (t === 'mdx-content-list' || t === 'comparisons-list') {
+          clearHubIndexCache()
+        }
 
         results.push({
           tag: t,
@@ -125,13 +132,16 @@ export async function GET(request: NextRequest) {
 
     if (clearCache) {
       clearPathsCache()
-      console.log('Cleared paths cache')
+      clearHubIndexCache()
+      console.log('Cleared paths and hub index cache')
     }
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
+      revalidateTag('comparisons-list')
       revalidateTag('mdx-paths')
+      clearHubIndexCache()
 
       results.push({
         path: '/',
