@@ -279,6 +279,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'HAProxy Dashboard Template',
   },
   {
+    name: 'Haystack',
+    href: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Dashboard Template',
+  },
+  {
     name: 'Host Metrics',
     href: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
     icon: <Monitor className="h-7 w-7 text-blue-500" />,

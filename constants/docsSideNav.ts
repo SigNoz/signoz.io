@@ -1964,6 +1964,11 @@ const docsSideNav = [
             label: 'HAProxy',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+            label: 'Haystack',
+          },
+          {
             label: 'Hostmetrics',
             type: 'category',
             isExpanded: false,
