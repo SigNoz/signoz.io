@@ -90,10 +90,9 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
     isTocPlacement && 'my-[6px] mb-[8px] text-[12px] leading-[1.35]'
   )
 
-  const buttonGroupChoiceClassName = cx(
-    'flex flex-wrap justify-stretch gap-2 md:justify-center md:gap-3',
-    isTocPlacement && 'justify-center gap-1.5 md:justify-center md:gap-1.5'
-  )
+  const buttonGroupChoiceClassName = isTocPlacement
+    ? 'flex w-fit self-start flex-wrap gap-1.5'
+    : 'flex flex-wrap justify-stretch gap-2 md:justify-center md:gap-3'
 
   const choiceButtonClassName = cx(
     'inline-flex items-center justify-center gap-2 border border-[rgba(78,116,248,0.32)] rounded-[10px] cursor-pointer text-[#edf2ff] transition-colors motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.52)]',
