@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import { RegionDropdown } from '../Region/RegionDropdown'
+import PageFeedback from '../PageFeedback/PageFeedback'
 
 interface TocItemProps {
   url: string
@@ -56,6 +57,16 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
   useEffect(() => {
     if (!toc || toc.length === 0) return
 
+    const areTocItemsEqual = (a: TocItemProps[], b: TocItemProps[]) => {
+      if (a.length !== b.length) return false
+      return a.every(
+        (item, index) =>
+          item.url === b[index].url &&
+          item.depth === b[index].depth &&
+          item.value === b[index].value
+      )
+    }
+
     const computeFiltered = () => {
       const next: TocItemProps[] = []
       toc.forEach((item) => {
@@ -77,27 +88,38 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
         const isRendered = el.getClientRects().length > 0
         if (isRendered) next.push(item)
       })
-      setFilteredToc(next)
+      setFilteredToc((prev) => (areTocItemsEqual(prev, next) ? prev : next))
+    }
+
+    let isScheduled = false
+    const scheduleComputeFiltered = () => {
+      if (isScheduled) return
+      isScheduled = true
+      requestAnimationFrame(() => {
+        isScheduled = false
+        computeFiltered()
+      })
     }
 
     computeFiltered()
 
     // Recompute on tab button clicks
     const onTabClick = (e: Event) => {
-      const target = e.target as HTMLElement
+      const target = e.target
+      if (!(target instanceof Element)) return
       const isTabButton = !!target.closest('button[data-tab-value]')
       if (isTabButton) {
         // Delay to allow React to update visibility
-        setTimeout(computeFiltered, 0)
+        setTimeout(scheduleComputeFiltered, 0)
       }
     }
     document.addEventListener('click', onTabClick, { capture: true })
 
     // Recompute on details toggle
     const onToggle = (e: Event) => {
-      if ((e.target as HTMLElement).tagName === 'DETAILS') {
-        setTimeout(computeFiltered, 0)
-      }
+      const target = e.target
+      if (!(target instanceof HTMLDetailsElement)) return
+      setTimeout(scheduleComputeFiltered, 0)
     }
     document.addEventListener('toggle', onToggle, { capture: true })
 
@@ -105,21 +127,25 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
     const observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
         if (m.type === 'attributes') {
-          computeFiltered()
+          scheduleComputeFiltered()
           break
         }
       }
     })
-    observer.observe(document.body, { attributes: true, subtree: true })
+    observer.observe(document.body, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['hidden', 'open'],
+    })
 
     // Recompute on resize as layout can change
-    window.addEventListener('resize', computeFiltered)
+    window.addEventListener('resize', scheduleComputeFiltered)
 
     return () => {
       document.removeEventListener('click', onTabClick, { capture: true } as any)
       document.removeEventListener('toggle', onToggle, { capture: true } as any)
       observer.disconnect()
-      window.removeEventListener('resize', computeFiltered)
+      window.removeEventListener('resize', scheduleComputeFiltered)
     }
   }, [toc])
 
@@ -232,7 +258,8 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
     }
 
     const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
+      const target = e.target
+      if (!(target instanceof Element)) return
       const anchor = target.closest('a') as HTMLAnchorElement | null
       if (!anchor || !anchor.getAttribute('href')?.startsWith('#')) return
 
@@ -280,20 +307,24 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
   return (
     <>
       <div className="doc-toc" ref={tocContainerRef}>
-        <div className="mb-4 pt-4">
+        <div className="mb-4">
           <RegionDropdown />
         </div>
         {hideTableOfContents ? null : (
           <>
             <div className="mb-3 text-xs uppercase"> On this page </div>
-            <div ref={tocItemsRef} className="doc-toc-items border-l border-signoz_slate-500 pl-3">
+            <div
+              ref={tocItemsRef}
+              className="doc-toc-items doc-toc-scroll border-l border-signoz_slate-500 pl-3"
+            >
               <TableOfContents
                 toc={filteredToc}
                 activeSection={activeSection}
                 setActiveSection={setActiveSection}
-                scrollableContainerRef={tocContainerRef}
+                scrollableContainerRef={tocItemsRef}
               />
             </div>
+            <PageFeedback placement="toc" />
           </>
         )}
       </div>

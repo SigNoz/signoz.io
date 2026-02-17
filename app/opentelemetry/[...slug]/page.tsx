@@ -340,14 +340,15 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
             {compiledContent}
           </div>
-          <PageFeedback />
         </OpenTelemetryHubLayout>
       </>
     )
   }
 
+  const layoutName = content.layout || defaultLayout
+  const shouldRenderLayoutFeedback = layoutName !== 'OpenTelemetryLayout'
   // @ts-ignore
-  const Layout = layouts[content.layout || defaultLayout]
+  const Layout = layouts[layoutName]
 
   return (
     <>
@@ -366,7 +367,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
           {compiledContent}
         </div>
-        <PageFeedback />
+        {shouldRenderLayoutFeedback && <PageFeedback />}
       </Layout>
     </>
   )
