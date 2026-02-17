@@ -2540,6 +2540,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/haystack-monitoring',
+        label: 'Haystack',
+        type: 'doc',
+      },
+      {
         route: '/docs/inkeep-monitoring',
         label: 'Inkeep',
         type: 'doc',
