@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useId, useRef, useState } from 'react'
+import React, { useId, useState } from 'react'
 import styles from './PageFeedback.module.css'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '../../constants/queryParams'
@@ -53,7 +53,7 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
   const [submitted, setSubmitted] = useState<boolean>(false)
   const [submitError, setSubmitError] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const feedbackRef = useRef<HTMLDivElement>(null)
+
   const feedbackFieldPrefix = useId().replace(/:/g, '')
 
   const searchParams = useSearchParams()
@@ -149,7 +149,7 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
 
   if (submitted) {
     return (
-      <div ref={feedbackRef} className={feedbackClassName}>
+      <div className={feedbackClassName}>
         <div className={styles.separatorLine}></div>
         <section
           className={cx(styles.panel, isTocPlacement && styles.panelToc, styles.successPanel)}
@@ -164,7 +164,7 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
   }
 
   return (
-    <div ref={feedbackRef} className={feedbackClassName}>
+    <div className={feedbackClassName}>
       <div className={styles.separatorLine}></div>
       <section
         className={cx(
@@ -181,7 +181,6 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
               <button
                 type="button"
                 className={cx(styles.button, styles.choiceButton)}
-                aria-pressed={helpful === true}
                 onClick={() => {
                   setSubmitError('')
                   setHelpful(true)
@@ -195,7 +194,6 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
               <button
                 type="button"
                 className={cx(styles.button, styles.choiceButton)}
-                aria-pressed={helpful === false}
                 onClick={() => {
                   setSubmitError('')
                   setHelpful(false)
