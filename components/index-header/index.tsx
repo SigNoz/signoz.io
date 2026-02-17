@@ -15,7 +15,7 @@ export async function Header() {
   const variantId = useAlternativeCopy
     ? EXPERIMENTS.HOMEPAGE_HEADER_COPY.variants.VARIANT
     : EXPERIMENTS.HOMEPAGE_HEADER_COPY.variants.CONTROL
-  const primaryCTA = useAlternativeCopy ? 'Get Started - Free' : 'Get Started - Free'
+  const primaryCTA = 'Get Started - Free'
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
