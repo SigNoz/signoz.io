@@ -61,21 +61,26 @@ export async function Header() {
         <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
           {useAlternativeCopy ? (
             <div className="flex flex-col items-center gap-3 md:flex-row">
-              <TrackingLink
-                href="/teams/"
-                clickType="Primary CTA"
-                clickName="Sign Up Button"
-                clickText={primaryCTA}
-                clickLocation="Hero Section"
-                experimentId={experimentId}
-                variantId={variantId}
-                className="block w-[220px]"
-              >
-                <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
-                  {primaryCTA}
-                  <ArrowRight size={14} />
-                </Button>
-              </TrackingLink>
+              <div className="group relative flex flex-col items-center">
+                <TrackingLink
+                  href="/teams/"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText={primaryCTA}
+                  clickLocation="Hero Section"
+                  experimentId={experimentId}
+                  variantId={variantId}
+                  className="block w-[220px]"
+                >
+                  <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
+                    {primaryCTA}
+                    <ArrowRight size={14} />
+                  </Button>
+                </TrackingLink>
+                <p className="pointer-events-none absolute left-1/2 top-full hidden -translate-x-1/2 whitespace-nowrap pt-2 text-xs italic opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 md:block">
+                  No credit card required
+                </p>
+              </div>
               <TrackingLink
                 href="/docs/introduction/"
                 clickType="Secondary CTA"
