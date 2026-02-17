@@ -25,7 +25,14 @@ export async function Header() {
           <div className="absolute left-0 top-[147px] z-[-1] h-10 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[253px] md:!w-[80vw]" />
           <Hero>
             {useAlternativeCopy ? (
-              'Observability on your terms, powered by open standards.'
+              <>
+                <span className="md:hidden">
+                  Observability on Your Terms, Powered by Open Standards.
+                </span>
+                <span className="hidden md:inline">Observability on Your Terms,</span>
+                <br className="hidden md:inline" />
+                <span className="hidden md:inline">Powered by Open Standards.</span>
+              </>
             ) : (
               <>
                 OpenTelemetry-Native Logs,&nbsp;
@@ -53,42 +60,37 @@ export async function Header() {
         </div>
         <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
           {useAlternativeCopy ? (
-            <div className="grid grid-cols-1 items-center gap-y-3 md:grid-cols-[auto_auto] md:items-start md:gap-x-3 md:gap-y-2">
-              <div className="flex flex-col items-center">
-                <TrackingLink
-                  href="/teams/"
-                  clickType="Primary CTA"
-                  clickName="Sign Up Button"
-                  clickText={primaryCTA}
-                  clickLocation="Hero Section"
-                  experimentId={experimentId}
-                  variantId={variantId}
-                  className="block w-[220px]"
-                >
-                  <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
-                    {primaryCTA}
-                    <ArrowRight size={14} />
-                  </Button>
-                </TrackingLink>
-                <p className="mt-2 hidden text-xs italic md:block">No credit card required</p>
-              </div>
-              <div className="flex justify-center">
-                <TrackingLink
-                  href="/docs/introduction/"
-                  clickType="Secondary CTA"
-                  clickName="Explore Docs Button"
-                  clickText="Explore the Docs"
-                  clickLocation="Hero Section"
-                  experimentId={experimentId}
-                  variantId={variantId}
-                  className="block w-[220px]"
-                >
-                  <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
-                    <BookOpen size={14} />
-                    Explore the Docs
-                  </Button>
-                </TrackingLink>
-              </div>
+            <div className="flex flex-col items-center gap-3 md:flex-row">
+              <TrackingLink
+                href="/teams/"
+                clickType="Primary CTA"
+                clickName="Sign Up Button"
+                clickText={primaryCTA}
+                clickLocation="Hero Section"
+                experimentId={experimentId}
+                variantId={variantId}
+                className="block w-[220px]"
+              >
+                <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
+                  {primaryCTA}
+                  <ArrowRight size={14} />
+                </Button>
+              </TrackingLink>
+              <TrackingLink
+                href="/docs/introduction/"
+                clickType="Secondary CTA"
+                clickName="Explore Docs Button"
+                clickText="Explore the Docs"
+                clickLocation="Hero Section"
+                experimentId={experimentId}
+                variantId={variantId}
+                className="block w-[220px]"
+              >
+                <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
+                  <BookOpen size={14} />
+                  Explore the Docs
+                </Button>
+              </TrackingLink>
             </div>
           ) : (
             <TrackingLink
