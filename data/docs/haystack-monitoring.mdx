@@ -66,11 +66,9 @@ This sets the minimum log level for the root logger to DEBUG, which ensures that
 ### Step 4: Create an example Haystack application
 
 ```python:main.py
-import os
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
-from haystack.tools import ComponentTool
 
 agent = Agent(
     chat_generator=OpenAIChatGenerator(model='gpt-4o-mini'),
@@ -115,7 +113,7 @@ opentelemetry-instrument <your_run_command>
 
 </TabItem>
 
-<TabItem value="Manual" label="Manual" default>
+<TabItem value="Manual" label="Manual">
 
 Code-based manual instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
 
@@ -203,7 +201,7 @@ from opentelemetry import metrics
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
 import os
 
-resource = Resource.create({"service.name": "<service-name>"})
+resource = Resource.create({"service.name": "<service_name>"})
 metric_exporter = OTLPMetricExporter(
     endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
     headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
@@ -284,11 +282,9 @@ httpx_logger.addHandler(handler)
 </Admonition>
 
 ```python:main.py
-import os
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
-from haystack.tools import ComponentTool
 
 agent = Agent(
     chat_generator=OpenAIChatGenerator(model='gpt-4o-mini'),
