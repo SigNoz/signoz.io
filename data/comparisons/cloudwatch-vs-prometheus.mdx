@@ -1,17 +1,17 @@
 ---
-title: "CloudWatch vs Prometheus: Hands-On Comparison for AWS Teams"
+title: "CloudWatch vs Prometheus: Setup, Cost, and Tradeoffs"
 slug: "cloudwatch-vs-prometheus"
 date: "2026-02-17"
 tags: [monitoring, comparisons]
 authors: [yuvraj]
-description: "CloudWatch vs Prometheus compared with real EC2/Lambda screenshots, setup effort, cost tradeoffs, and when a hybrid stack with SigNoz makes sense."
+description: "CloudWatch vs Prometheus in practice: what each tool does best, what it misses, and how to pick the right stack for your monitoring goals."
 keywords:
   [cloudwatch-vs-prometheus, prometheus-vs-cloudwatch, cloudwatch-or-prometheus-for-aws, prometheus-cloudwatch-lambda, aws-monitoring]
 ---
 
-CloudWatch and Prometheus solve overlapping problems, but they approach monitoring from very different starting points. CloudWatch provides metrics and logs for AWS resources out of the box. For distributed tracing, AWS uses X-Ray (and newer Application Signals features that build on trace data). Prometheus is an open-source metrics engine you run and configure yourself, built for flexibility and portability across any environment.
+CloudWatch and Prometheus solve overlapping problems, but they approach monitoring from very different starting points. CloudWatch provides metrics and logs for AWS resources out of the box (and for distributed tracing, provides X-Ray integration). Prometheus is an open-source metrics engine you run and configure yourself, built for flexibility and portability across any environment.
 
-If your stack is mostly AWS-native services like Lambda and managed databases, CloudWatch gets you to baseline visibility fastest. If you run Kubernetes, operate across multiple clouds, or need deep custom metric analysis with PromQL, Prometheus gives you more control. Some teams end up running both and adding a correlation layer on top.
+If your stack is mostly AWS-native services like Lambda and managed databases, CloudWatch gets you to baseline visibility fastest. If you run Kubernetes, operate across multiple clouds, or need deep custom metric analysis with PromQL, Prometheus gives you more control. 
 
 This article compares CloudWatch and Prometheus through hands-on setup, feature coverage, cost patterns, and real practitioner feedback, so you can decide which fits your operating model.
 
@@ -29,13 +29,13 @@ Most AWS services publish metrics to CloudWatch automatically. When a Lambda fun
   caption="Lambda metrics appear in CloudWatch automatically once the function receives traffic."
 />
 
-These default metrics cover infrastructure-level visibility, but they have gaps. For EC2, you do not get memory utilization or disk space usage without additional setup. AWS cannot see these metrics because EC2 instances are virtualized. The hypervisor sees CPU and network activity, but memory management and filesystem usage happen inside the guest operating system.
+These default metrics cover infrastructure-level visibility, but they have gaps. For example in EC2, you do not get memory utilization or disk space usage without additional setup. 
 
 ### Installing the CloudWatch Agent for Detailed Monitoring
 
 To collect memory, disk space, custom application metrics, and logs, you install the CloudWatch agent on your EC2 instances. The recommended approach uses AWS Systems Manager, which runs the agent installation and configuration through a wizard.
 
-The wizard walks you through what to collect (CPU, memory, disk, network, etc.), collection intervals, and which log files to ship. It can also generate config for StatsD and collectd-based custom metrics.
+The wizard walks you through what to collect (CPU, memory, disk, network, etc.), collection intervals, and which log files to ship.
 
 <Figure
   src="/img/comparisons/2026/02/cloudwatch-agent-wizard-ec2.webp"
@@ -46,8 +46,6 @@ The wizard walks you through what to collect (CPU, memory, disk, network, etc.),
 You still need an IAM role with permissions for the agent to publish metrics and logs (and SSM permissions if using Systems Manager), but the wizard handles the rest of the configuration. You select which log files to collect (application logs, system logs, custom paths), and the agent starts shipping them to CloudWatch Logs.
 
 Once the agent runs, custom metrics appear under the CWAgent namespace in CloudWatch. Memory usage, disk space percentage, and log files become queryable.
-
-### Logs: Automatic Collection for AWS Services
 
 CloudWatch Logs organizes log data into log groups (per service or application) and log streams (per instance or container). Lambda logs flow automatically. For EC2, the CloudWatch agent ships application and system logs once configured.
 
@@ -161,7 +159,7 @@ Switching to graph mode with a 5-minute window reveals the traffic pattern clear
 
 ### Setup Effort Comparison
 
-The contrast is clear. CloudWatch gave us visibility for AWS services with zero setup for default metrics, and agent installation for detailed monitoring. Prometheus required us to write application instrumentation, configure scrape targets, run infrastructure, generate traffic, and compose queries.
+CloudWatch gave us visibility for AWS services with zero setup for default metrics, and agent installation for detailed monitoring. Prometheus required us to write application instrumentation, configure scrape targets, run infrastructure, generate traffic, and compose queries.
 
 That said, the Prometheus approach gives you full control over what gets measured and how it gets queried. The PromQL query `rate(sample_http_requests_total[1m])` returned results in tens of milliseconds on our test setup, with exactly the label dimensions we defined, nothing more, nothing less.
 
@@ -179,7 +177,7 @@ CloudWatch is not just a metrics tool. It is an observability platform that hand
 - **Logs**: CloudWatch Logs with log groups, streams, Logs Insights for querying, and live tail for real-time viewing
 - **Traces**: AWS X-Ray integration for distributed tracing across Lambda, API Gateway, and other AWS services
 
-For an AWS-native stack, this means you can go from a Lambda error spike in CloudWatch Metrics, to the error logs in CloudWatch Logs, to the trace in X-Ray without leaving the AWS console. That workflow has real value during incidents.
+For an AWS-native stack, this means you can go from a Lambda error spike in CloudWatch Metrics, to the error logs in CloudWatch Logs, to the trace in X-Ray without leaving the AWS console.
 
 The limitation is that CloudWatch's strength drops sharply outside AWS. Monitoring a Kubernetes cluster on GCP or an on-prem database through CloudWatch is technically possible but awkward and expensive compared to purpose-built tools.
 
@@ -191,7 +189,7 @@ Prometheus is a metrics-first system. It does one thing with depth:
 - **Logs**: Not supported. You need a companion system like Loki, Elasticsearch, or a centralized logging platform
 - **Traces**: Not supported. You need Jaeger, Zipkin, Tempo, or another tracing backend
 
-This single-signal focus is both a strength and a limitation. Prometheus excels at metric collection and analysis. PromQL lets you slice, aggregate, and compare time series in ways that CloudWatch's metric math cannot match. But during an incident, you will inevitably need to context-switch to other tools for logs and traces.
+This single-signal focus is both a strength and a limitation. Prometheus excels at metric collection and analysis. PromQL lets you slice, aggregate, and compare time series in ways that [CloudWatch's metric math](https://docs.aws.amazon.com/efs/latest/ug/monitoring-metric-math.html) cannot match. But during an incident, you will inevitably need to context-switch to other tools for logs and traces.
 
 The broader Prometheus ecosystem fills these gaps through integrations. Grafana for visualization, Loki for logs, Tempo for traces, and Alertmanager for alert routing. The tradeoff is that you assemble and operate each of these components yourself.
 
@@ -239,14 +237,14 @@ Cost is one of the most debated aspects of CloudWatch vs Prometheus, and users o
 
 ### CloudWatch: Usage-Based, Can Creep Up
 
-CloudWatch pricing is usage-based across multiple dimensions:
+CloudWatch pricing is usage-based across multiple dimensions and differs across regions:
 
 - **Metrics**: Basic monitoring metrics from AWS services are free. Custom and detailed monitoring metrics are billed per metric-month with volume tiers (e.g., first 10,000 at $0.30, then lower tiers). Each unique dimension combination counts as a separate metric
-- **API requests**: $0.01 per 1,000 requests after the free tier (1M requests/month). GetMetricData is always charged and billed by the number of metrics requested
-- **Log ingestion**: Starts at $0.50 per GB in US East (varies by region and log type; vended logs from services like Lambda use volume-based tiers). See the [CloudWatch pricing guide](https://signoz.io/guides/cloudwatch-pricing/) for a full breakdown
-- **Log storage**: $0.03 per GB per month archived
-- **Dashboards**: First 3 dashboards (up to 50 metrics each) are free, then $3.00 per dashboard per month
-- **Alarms**: $0.10 per standard-resolution alarm metric-month. Composite alarms are $0.50/alarm-month. Anomaly detection alarms bill 3 metrics each
+- **API requests**: \$0.01 per 1,000 requests after the free tier (1M requests/month). GetMetricData is always charged and billed by the number of metrics requested
+- **Log ingestion**: Starts at \$0.50 per GB in US East (varies by region and log type; vended logs from services like Lambda use volume-based tiers). See the [CloudWatch pricing guide](https://signoz.io/guides/cloudwatch-pricing/) for a full breakdown
+- **Log storage**: \$0.03 per GB per month archived
+- **Dashboards**: First 3 dashboards (up to 50 metrics each) are free, then \$3.00 per dashboard per month
+- **Alarms**: \$0.10 per standard-resolution alarm metric-month. Composite alarms are \$0.50/alarm-month. Anomaly detection alarms bill 3 metrics each
 
 The most common cost surprises come from log ingestion and custom metrics. Custom metric cardinality is multiplicative, so adding a single high-cardinality tag like `customer_id` with 100 unique values can turn 90 metric combinations into 9,000, each billed separately. Log retention defaults to "never expire," meaning storage costs accumulate silently unless you set an explicit policy.
 
@@ -291,7 +289,7 @@ Managed Prometheus services (Amazon Managed Service for Prometheus, Grafana Clou
 
 ## Hybrid Patterns: Running Both
 
-Many production environments end up running CloudWatch and Prometheus together. This is not a compromise, it is often the practical answer for teams with mixed infrastructure.
+Some teams with mixed infrastructure (AWS and non-AWS) end up running CloudWatch and Prometheus together.
 
 A typical hybrid pattern looks like this:
 
@@ -315,7 +313,7 @@ The hybrid CloudWatch + Prometheus pattern works, but investigating incidents wi
   caption="SigNoz distributed trace flamegraph showing POST /process latency dominated by a downstream POST /enrich call with logs and metrics correlation."
 />
 
-CloudWatch's billing adds friction on top of the fragmented experience: log ingestion charges that vary by log type and region, custom metrics at $0.30/metric/month per dimension combination (in US East), Logs Insights charges of $0.005/GB scanned per query, and additional `GetMetricData` API charges when third-party tools poll metrics. SigNoz uses simple, usage-based pricing ($0.3/GB for logs and traces, $0.1/million metric samples) with no per-host charges or per-query fees.
+CloudWatch's billing adds friction on top of the fragmented experience: log ingestion charges that vary by log type and region, custom metrics at \$0.30/metric/month per dimension combination (in US East), Logs Insights charges of \$0.005/GB scanned per query, and additional `GetMetricData` API charges when third-party tools poll metrics. SigNoz uses simple, usage-based pricing (\$0.3/GB for logs and traces, \$0.1/million metric samples) with no per-host charges or per-query fees.
 
 ### Getting AWS and Prometheus Data into SigNoz
 
