@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { CORRELATION_CAROUSEL_DATA } from './ExternalApisPage.constants'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
+import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import TestimonialCards from '@/shared/components/molecules/FeaturePages/TestimonialCard'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
@@ -45,48 +46,38 @@ const Header: React.FC = () => {
   ]
 
   return (
-    <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
-      {/* Border decorations */}
-      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
-
-      {/* Main content */}
-      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
-        <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
+    <FeaturePageHeader
+      title={
+        <>
           Monitor External APIs With Built-In <br /> Service Correlation
-        </h1>
-
-        <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
+        </>
+      }
+      description={
+        <>
           Automatically detect external API calls using OpenTelemetry semantic conventions. <br />{' '}
           Click any metric to view the service making the call or the underlying trace.
-        </p>
-      </div>
-
-      {/* Buttons */}
-      <div className="relative z-[1] !mx-auto mx-2 !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]">
-        <ButtonGroup buttons={headerButtons} />
-      </div>
-
-      {/* Hero image */}
-      <SectionLayout variant="no-border" className="!mt-0 max-md:-mb-[3rem]">
-        <div className="w-100 mx-[-28px]">
-          <div className="product-explainer-video hero-figure rounded-xl px-3">
-            <div className="embed-container">
-              <div className="absolute w-full">
-                <div className="p-0">
-                  <Image
-                    src="/img/platform/ExternalApisMeta.png"
-                    alt="External APIs hero"
-                    className="w-full rounded-xl"
-                    width={10000}
-                    height={10000}
-                  />
-                </div>
+        </>
+      }
+      buttons={headerButtons}
+    >
+      <div className="w-100 mx-[-28px]">
+        <div className="product-explainer-video hero-figure rounded-xl px-3">
+          <div className="embed-container">
+            <div className="absolute w-full">
+              <div className="p-0">
+                <Image
+                  src="/img/platform/ExternalApisMeta.png"
+                  alt="External APIs hero"
+                  className="w-full rounded-xl"
+                  width={10000}
+                  height={10000}
+                />
               </div>
             </div>
           </div>
         </div>
-      </SectionLayout>
-    </header>
+      </div>
+    </FeaturePageHeader>
   )
 }
 

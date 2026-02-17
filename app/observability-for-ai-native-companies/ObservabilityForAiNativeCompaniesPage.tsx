@@ -15,6 +15,7 @@ import {
   TRUSTED_BY_LOGOS,
 } from './ObservabilityForAiNativeCompaniesPage.constants'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
+import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import TestimonialCards from '@/shared/components/molecules/FeaturePages/TestimonialCard'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
@@ -52,42 +53,34 @@ const Header: React.FC = () => {
   ]
 
   return (
-    <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
-      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
-
-      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
-        <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
+    <FeaturePageHeader
+      title={
+        <>
           Monitor AI Workloads Across LLM <br className="hidden md:block" /> Layer and
           Infrastructure with <br className="hidden md:block" /> Correlated Logs, Metrics, and
           Traces
-        </h1>
-
-        <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
+        </>
+      }
+      description={
+        <>
           Track token usage, latency, and costs alongside your microservices, databases, and GPU
           clusters. <br className="hidden md:block" /> Handle high-cardinality data at scale with
           usage-based pricing and span-level alerting for traces.
-        </p>
+        </>
+      }
+      buttons={headerButtons}
+      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+    >
+      <div className="w-full">
+        <Image
+          src="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
+          alt="Observability for AI Native Companies hero"
+          className="z-1 relative w-full rounded-xl"
+          width={10000}
+          height={10000}
+        />
       </div>
-
-      <div className="relative z-[1] !mx-auto mx-2 !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]">
-        <ButtonGroup buttons={headerButtons} />
-      </div>
-
-      <SectionLayout
-        variant="no-border"
-        className="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
-      >
-        <div className="w-full">
-          <Image
-            src="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
-            alt="Observability for AI Native Companies hero"
-            className="z-1 relative w-full rounded-xl"
-            width={10000}
-            height={10000}
-          />
-        </div>
-      </SectionLayout>
-    </header>
+    </FeaturePageHeader>
   )
 }
 
@@ -264,7 +257,7 @@ const CostComparison: React.FC = () => {
 
 const HowSigNozCompares: React.FC = () => {
   return (
-    <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
+    <section className="relative mx-auto w-[100vw] max-w-7xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
       <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
@@ -282,7 +275,7 @@ const HowSigNozCompares: React.FC = () => {
 
 const HowSigNozComparesToTraditionalTools: React.FC = () => {
   return (
-    <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
+    <section className="relative mx-auto w-[100vw] max-w-7xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
       <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
