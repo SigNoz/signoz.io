@@ -264,6 +264,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.112',
+            label: 'Upgrade to v0.112',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.94',
             label: 'Upgrade to v0.94',
           },
