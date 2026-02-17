@@ -138,7 +138,7 @@ const CapabilitiesSection: React.FC = () => {
     <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
       <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
         <h2 className="my-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-          Capabilities That Make Us the <br className="hidden md:block" /> Default Choice for AI
+          Capabilities That Make SigNoz the <br className="hidden md:block" /> Default Choice for AI
           Companies
         </h2>
         <SectionLayout variant="no-border" className="!mx-auto p-0">
