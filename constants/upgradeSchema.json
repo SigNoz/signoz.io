@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.5",
-  "pathHead": "v0.100.0",
+  "pathHead": "v0.112.0",
   "general": {
     "upgradeSummary": [
       "This tool provides the mandatory sequential path to upgrade your instance safely.",
@@ -28,9 +28,32 @@
     "troubleshootingUrl": "https://signoz.io/docs/user-guide/troubleshooting/"
   },
   "releases": {
+    "v0.112.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": null,
+      "releaseDate": "2026-02-18",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.112",
+      "instructions": [
+        "The standalone signoz-schema-migrator image is deprecated. Database schema migrations are now built into signoz-otel-collector.",
+        "Docker and Docker Swarm users must replace the old schema-migrator service(s) with the new telemetrystore-migrator service in their docker-compose.yaml.",
+        "Linux Binary users must use the new signoz-otel-collector migrate commands instead of the signoz-schema-migrator binary."
+      ],
+      "deprecations": [
+        {
+          "title": "signoz-schema-migrator Image Deprecated",
+          "details": "The signoz/signoz-schema-migrator Docker image and binary are deprecated. Migrations are now handled by signoz/signoz-otel-collector using the built-in 'migrate' command (bootstrap, sync up, async up)."
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Docker Compose Changes Required",
+          "details": "Docker Standalone and HA users must replace schema-migrator-sync and schema-migrator-async services with a single telemetrystore-migrator service. Docker Swarm users must replace the schema-migrator service. See the upgrade guide for exact steps."
+        }
+      ]
+    },
     "v0.100.0": {
       "isMandatoryStop": false,
-      "nextMandatoryStop": null,
+      "nextMandatoryStop": "v0.112.0",
       "releaseDate": "2025-11-05",
       "patchRelease": {
         "label": "v0.100.1",
