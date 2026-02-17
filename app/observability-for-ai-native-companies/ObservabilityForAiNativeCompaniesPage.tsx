@@ -142,8 +142,8 @@ const CapabilitiesSection: React.FC = () => {
           Companies
         </h2>
         <SectionLayout variant="no-border" className="!mx-auto p-0">
-          <div className="border-y border-dashed border-signoz_slate-400 p-8 text-left">
-            <h4 className="mb-1 font-semibold text-signoz_robin-400">
+          <div className="flex flex-col items-start justify-start gap-3 border-y border-dashed border-signoz_slate-400 p-8 text-left">
+            <h4 className="mb-1 text-xl font-semibold text-signoz_robin-400">
               Capabilities that AI Companies Need Most
             </h4>
             <div className="text-sm text-signoz_vanilla-400">
@@ -151,8 +151,11 @@ const CapabilitiesSection: React.FC = () => {
               track business outcomes, and meet compliance requirements
             </div>
           </div>
-          <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS1} />
-          <div className="relative flex w-full flex-col items-start border border-dashed border-signoz_slate-400/50 p-8">
+          <IconTitleDescriptionCardGrid
+            cards={CAPABILITIES_CARDS1}
+            className="[&>div>h4]:text-xl [&>div]:gap-3"
+          />
+          <div className="relative flex w-full flex-col items-start border border-dashed border-signoz_slate-400/50 p-8 [&>h4]:text-xl">
             <h4 className="text-left font-semibold text-red-400">
               Full-Stack Platform Capabilities
             </h4>
@@ -161,7 +164,10 @@ const CapabilitiesSection: React.FC = () => {
               entire infrastructure - databases, microservices, and application logs.
             </div>
           </div>
-          <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS2} />
+          <IconTitleDescriptionCardGrid
+            cards={CAPABILITIES_CARDS2}
+            className="[&>div>h4]:text-xl [&>div]:gap-3"
+          />
         </SectionLayout>
       </div>
     </div>
@@ -185,9 +191,12 @@ const CapabilitiesThatMakeUsTheDefaultChoiceForAiCompanies: React.FC = () => {
 
 const PillarsOfAiFocusedObservabilityArchitecture: React.FC = () => {
   return (
-    <SectionLayout variant="bordered" className="!pb-20 !pt-20">
+    <SectionLayout
+      variant="bordered"
+      className="bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] !pb-20 !pt-20"
+    >
       <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
-        <h2 className="mb-24 text-center text-4xl font-semibold text-signoz_sakura-100">
+        <h2 className="mb-24 text-center text-4xl font-semibold text-signoz_sienna-100">
           4 Pillars of AI-Focused <br className="hidden md:block" /> Observability Architecture
         </h2>
         <IconTitleDescriptionCardGrid cards={PILLARS_DATA} />
