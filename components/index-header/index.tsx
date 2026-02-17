@@ -1,6 +1,6 @@
 import React from 'react'
 import Hero from '@/components/ui/Hero'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { VideoModalPlayer } from './VideoModalPlayer'
@@ -15,7 +15,7 @@ export async function Header() {
   const variantId = useAlternativeCopy
     ? EXPERIMENTS.HOMEPAGE_HEADER_COPY.variants.VARIANT
     : EXPERIMENTS.HOMEPAGE_HEADER_COPY.variants.CONTROL
-  const primaryCTA = useAlternativeCopy ? 'Get Started — Free' : 'Get Started - Free'
+  const primaryCTA = useAlternativeCopy ? 'Get Started - Free' : 'Get Started - Free'
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
@@ -36,7 +36,12 @@ export async function Header() {
           </Hero>
           <p className="m-0 p-3 text-base font-medium sm:p-0">
             {useAlternativeCopy ? (
-              'Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple usage-based pricing, no proprietary lock-in, and the freedom to run on our cloud or your infrastructure.'
+              <>
+                Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple
+                usage-based pricing,
+                <br className="hidden lg:inline" /> no proprietary lock-in, and the freedom to run
+                on our cloud or your infrastructure.
+              </>
             ) : (
               <>
                 SigNoz is an open-source Datadog or New Relic alternative. Get APM, logs,{' '}
@@ -47,7 +52,45 @@ export async function Header() {
           </p>
         </div>
         <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-          <div className="flex flex-col items-center">
+          {useAlternativeCopy ? (
+            <div className="grid grid-cols-1 items-center gap-y-3 md:grid-cols-[auto_auto] md:items-start md:gap-x-3 md:gap-y-2">
+              <div className="flex flex-col items-center">
+                <TrackingLink
+                  href="/teams/"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText={primaryCTA}
+                  clickLocation="Hero Section"
+                  experimentId={experimentId}
+                  variantId={variantId}
+                  className="block w-[220px]"
+                >
+                  <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
+                    {primaryCTA}
+                    <ArrowRight size={14} />
+                  </Button>
+                </TrackingLink>
+                <p className="mt-2 hidden text-xs italic md:block">No credit card required</p>
+              </div>
+              <div className="flex justify-center">
+                <TrackingLink
+                  href="/docs/introduction/"
+                  clickType="Secondary CTA"
+                  clickName="Explore Docs Button"
+                  clickText="Explore the Docs"
+                  clickLocation="Hero Section"
+                  experimentId={experimentId}
+                  variantId={variantId}
+                  className="block w-[220px]"
+                >
+                  <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
+                    <BookOpen size={14} />
+                    Explore the Docs
+                  </Button>
+                </TrackingLink>
+              </div>
+            </div>
+          ) : (
             <TrackingLink
               href="/teams/"
               clickType="Primary CTA"
@@ -60,22 +103,6 @@ export async function Header() {
               <Button className="flex-center" id="btn-get-started-homepage-hero">
                 {primaryCTA}
                 <ArrowRight size={14} />
-              </Button>
-            </TrackingLink>
-            {useAlternativeCopy && <p className="mt-2 text-xs italic">No credit card required</p>}
-          </div>
-          {useAlternativeCopy && (
-            <TrackingLink
-              href="/docs/introduction/"
-              clickType="Secondary CTA"
-              clickName="Explore Docs Button"
-              clickText="Explore the Docs"
-              clickLocation="Hero Section"
-              experimentId={experimentId}
-              variantId={variantId}
-            >
-              <Button className="flex-center" type={Button.TYPES.SECONDARY}>
-                Explore the Docs
               </Button>
             </TrackingLink>
           )}
