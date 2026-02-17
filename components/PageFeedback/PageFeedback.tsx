@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useId, useState } from 'react'
-import styles from './PageFeedback.module.css'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '../../constants/queryParams'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
@@ -59,17 +58,102 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
   const searchParams = useSearchParams()
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
-  // Use environment variables
   const apiUrl = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
   const feedbackPath = process.env.NEXT_PUBLIC_SIGNOZ_CMS_FEEDBACK_PATH
   const isTocPlacement = placement === 'toc'
   const helpfulQuestion = isTocPlacement ? 'Is this page helpful?' : 'Was this page helpful?'
-  const feedbackClassName = [
-    styles.feedbackContainer,
-    isTocPlacement ? styles.feedbackContainerToc : '',
-  ]
-    .filter(Boolean)
-    .join(' ')
+
+  const containerClassName = cx(
+    'font-sans text-[#edf2ff] max-w-[560px] mx-auto mt-6 mb-0 pt-[14px] pb-[10px]',
+    isTocPlacement &&
+      'w-full max-w-full mt-1 mb-0 pt-[2px] pb-0 shrink-0 min-h-0 overflow-visible relative z-[2]'
+  )
+
+  const separatorClassName = cx(
+    'w-full h-px mb-3 bg-[rgba(126,142,177,0.4)]',
+    isTocPlacement && 'bg-[rgba(60,65,82,0.65)] mb-1'
+  )
+
+  const panelBaseClassName = cx(
+    'border-0 rounded-none p-0 bg-transparent',
+    isTocPlacement &&
+      'border border-[rgba(42,46,55,0.8)] rounded-lg bg-[rgba(11,12,14,0.5)] max-h-[min(42vh,480px)] overflow-hidden flex flex-col p-[14px] md:p-[8px_10px_6px]'
+  )
+
+  const titleClassName = cx(
+    'm-0 text-[clamp(1.02rem,0.96rem+0.3vw,1.16rem)] font-semibold leading-[1.3] [text-wrap:balance] text-[#edf2ff]',
+    isTocPlacement && 'text-[13px]'
+  )
+
+  const helpTextClassName = cx(
+    'my-[8px] mb-[14px] text-[13px] leading-[1.45] text-[#c3cde6] [text-wrap:pretty]',
+    isTocPlacement && 'my-[6px] mb-[8px] text-[12px] leading-[1.35]'
+  )
+
+  const buttonGroupChoiceClassName = cx(
+    'flex flex-wrap justify-stretch gap-2 md:justify-center md:gap-3',
+    isTocPlacement && 'justify-center gap-1.5 md:justify-center md:gap-1.5'
+  )
+
+  const choiceButtonClassName = cx(
+    'inline-flex items-center justify-center gap-2 border border-[rgba(78,116,248,0.32)] rounded-[10px] cursor-pointer text-[#edf2ff] transition-colors motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.52)]',
+    isTocPlacement
+      ? 'px-[9px] py-[6px] text-[12px] min-w-[86px] flex-[0_0_auto] rounded-lg md:min-w-[76px]'
+      : 'px-4 py-[9px] text-sm min-w-0 flex-1 md:flex-none md:min-w-[88px]'
+  )
+
+  const choiceIconClassName = cx(
+    'inline-flex items-center justify-center',
+    isTocPlacement ? 'w-[14px] h-[14px] text-[12px]' : 'w-[18px] h-[18px] text-sm'
+  )
+
+  const formClassName = cx('flex flex-col', isTocPlacement && 'h-full min-h-0 overflow-hidden')
+
+  const optionGroupClassName = cx(
+    'grid gap-2 mb-3',
+    isTocPlacement && 'flex-1 min-h-0 overflow-y-auto pr-0.5 gap-1.5 mb-1'
+  )
+
+  const optionLabelClassName = cx(
+    'flex items-start gap-[10px] cursor-pointer',
+    isTocPlacement && 'gap-1.5'
+  )
+
+  const radioClassName = cx(
+    'w-[18px] h-[18px] mt-px shrink-0 cursor-pointer accent-signoz_robin-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300',
+    isTocPlacement && 'w-4 h-4 mt-0'
+  )
+
+  const optionTextClassName = cx(
+    'text-sm font-semibold leading-[1.35] text-[#edf2ff]',
+    isTocPlacement && 'text-[12px] leading-[1.3] [overflow-wrap:anywhere]'
+  )
+
+  const optionDescriptionClassName = cx(
+    'text-[12px] leading-[1.35] text-[#c3cde6] [text-wrap:pretty]',
+    isTocPlacement && 'leading-[1.25]'
+  )
+
+  const textAreaClassName = isTocPlacement
+    ? 'mt-1 min-h-[68px] w-full rounded-lg border border-[rgba(78,116,248,0.32)] bg-[rgba(12,16,27,0.78)] p-1.5 text-[12px] leading-[1.35] text-[#edf2ff] placeholder:text-[#91a2c8] resize-y transition-colors motion-reduce:transition-none focus:outline-none focus:border-signoz_robin-500'
+    : 'mt-1 min-h-[88px] w-full rounded-lg border border-[rgba(78,116,248,0.32)] bg-[rgba(12,16,27,0.78)] p-[10px] text-[13px] leading-[1.45] text-[#edf2ff] placeholder:text-[#91a2c8] resize-y transition-colors motion-reduce:transition-none focus:outline-none focus:border-signoz_robin-500 md:w-[calc(100%-30px)] md:ml-[30px]'
+
+  const formActionsClassName = cx(
+    'mt-0.5 flex flex-col items-center gap-2',
+    isTocPlacement &&
+      'shrink-0 mt-0 gap-1 px-0 pt-1 pb-[1px] border-t border-[rgba(60,65,82,0.45)] bg-[rgba(11,12,14,0.5)]'
+  )
+
+  const submitButtonClassName = cx(
+    'self-center mt-0.5 border border-signoz_robin-600 rounded-lg bg-signoz_robin-500 text-[#f5f8ff] px-4 py-[9px] text-sm font-semibold cursor-pointer transition motion-reduce:transition-none hover:bg-signoz_robin-600 hover:border-signoz_robin-600 hover:brightness-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 disabled:opacity-[0.62] disabled:cursor-not-allowed',
+    isTocPlacement && 'mt-0 min-h-[30px] px-[10px] py-[5px] text-[12px] leading-[1.2]'
+  )
+
+  const errorTextClassName = cx(
+    'm-0 text-[#ffb8c2] text-[12px] leading-[1.45] text-center',
+    isTocPlacement && 'leading-[1.3]'
+  )
+
   const needsImprovementFieldName = `${feedbackFieldPrefix}-needsImprovement`
   const positiveFeedbackFieldName = `${feedbackFieldPrefix}-positiveFeedback`
 
@@ -104,7 +188,6 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
       return
     }
 
-    // Only include details for the currently selected reason
     const selectedReason = helpful ? positiveFeedback : needsImprovement
     const filteredDetails: AdditionalDetails =
       selectedReason && additionalDetails[selectedReason]
@@ -149,13 +232,18 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
 
   if (submitted) {
     return (
-      <div className={feedbackClassName}>
-        <div className={styles.separatorLine}></div>
+      <div className={containerClassName}>
+        <div className={separatorClassName}></div>
         <section
-          className={cx(styles.panel, isTocPlacement && styles.panelToc, styles.successPanel)}
+          className={cx(
+            panelBaseClassName,
+            isTocPlacement
+              ? 'text-left'
+              : 'rounded-[10px] border border-[rgba(78,116,248,0.24)] bg-[rgba(10,15,27,0.42)] p-3 text-left'
+          )}
         >
-          <h3 className={styles.title}>Thank you for your feedback.</h3>
-          <p className={styles.helpText}>
+          <h3 className={titleClassName}>Thank you for your feedback.</h3>
+          <p className={helpTextClassName}>
             Your response helps us keep docs clear, accurate, and actionable.
           </p>
         </section>
@@ -164,42 +252,40 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
   }
 
   return (
-    <div className={feedbackClassName}>
-      <div className={styles.separatorLine}></div>
+    <div className={containerClassName}>
+      <div className={separatorClassName}></div>
       <section
-        className={cx(
-          styles.panel,
-          isTocPlacement && styles.panelToc,
-          helpful === null && !isTocPlacement && styles.panelChoice
-        )}
+        className={cx(panelBaseClassName, helpful === null && !isTocPlacement && 'text-center')}
       >
         {helpful === null && (
           <>
-            <h3 className={styles.title}>{helpfulQuestion}</h3>
-            <p className={styles.helpText}>Your response helps us improve this page.</p>
-            <div className={cx(styles.buttonGroup, styles.buttonGroupChoice)}>
+            <h3 className={titleClassName}>{helpfulQuestion}</h3>
+            <p className={cx(helpTextClassName, !isTocPlacement && 'mb-3')}>
+              Your response helps us improve this page.
+            </p>
+            <div className={buttonGroupChoiceClassName}>
               <button
                 type="button"
-                className={cx(styles.button, styles.choiceButton)}
+                className={choiceButtonClassName}
                 onClick={() => {
                   setSubmitError('')
                   setHelpful(true)
                 }}
               >
-                <span className={styles.choiceIcon} aria-hidden="true">
+                <span className={choiceIconClassName} aria-hidden="true">
                   👍
                 </span>
                 <span>Yes</span>
               </button>
               <button
                 type="button"
-                className={cx(styles.button, styles.choiceButton)}
+                className={choiceButtonClassName}
                 onClick={() => {
                   setSubmitError('')
                   setHelpful(false)
                 }}
               >
-                <span className={styles.choiceIcon} aria-hidden="true">
+                <span className={choiceIconClassName} aria-hidden="true">
                   👎
                 </span>
                 <span>No</span>
@@ -209,47 +295,46 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
         )}
 
         {helpful === false && (
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <h3 className={styles.title}>What needs improvement?</h3>
-            <p className={styles.helpText}>
+          <form className={formClassName} onSubmit={handleSubmit}>
+            <h3 className={titleClassName}>What needs improvement?</h3>
+            <p className={helpTextClassName}>
               Pick the issue that blocked you. You can add details after selecting one.
             </p>
-            <div className={styles.optionGroup}>
+            <div className={optionGroupClassName}>
               {negativeOptions.map((option, index) => {
                 const inputId = `${feedbackFieldPrefix}-negative-${index}`
                 const isSelected = needsImprovement === option.value
                 return (
                   <div
                     className={cx(
-                      styles.option,
-                      styles.optionCard,
-                      isSelected && styles.optionCardSelected
+                      'flex flex-col gap-2 rounded-[10px] border p-[10px_11px] transition-colors motion-reduce:transition-none',
+                      isTocPlacement
+                        ? 'rounded-lg border-[rgba(78,116,248,0.32)] bg-[rgba(18,19,23,0.72)] p-[6px_8px] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(22,24,29,0.9)]'
+                        : 'border-[rgba(78,116,248,0.32)] bg-[rgba(14,21,36,0.68)] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.76)]',
+                      isSelected && 'border-[rgba(78,116,248,0.72)] bg-[rgba(31,44,78,0.88)]'
                     )}
                     key={option.value}
                   >
-                    <label
-                      className={cx(styles.optionLabel, styles.optionLabelCard)}
-                      htmlFor={inputId}
-                    >
+                    <label className={optionLabelClassName} htmlFor={inputId}>
                       <input
                         id={inputId}
-                        className={styles.optionRadio}
+                        className={radioClassName}
                         type="radio"
                         name={needsImprovementFieldName}
                         value={option.value}
                         checked={needsImprovement === option.value}
                         onChange={(e) => selectNegativeReason(e.target.value)}
                       />
-                      <span className={styles.optionBody}>
-                        <span className={styles.optionText}>{option.value}</span>
+                      <span className="flex min-w-0 flex-col gap-[3px]">
+                        <span className={optionTextClassName}>{option.value}</span>
                         {option.description && (
-                          <span className={styles.optionDescription}>{option.description}</span>
+                          <span className={optionDescriptionClassName}>{option.description}</span>
                         )}
                       </span>
                     </label>
                     {needsImprovement === option.value && (
                       <textarea
-                        className={styles.textArea}
+                        className={textAreaClassName}
                         placeholder="Optional: Provide more details..."
                         aria-label={`Additional details for ${option.value}`}
                         value={additionalDetails[option.value] || ''}
@@ -260,12 +345,12 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
                 )
               })}
             </div>
-            <div className={styles.formActions}>
-              <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+            <div className={formActionsClassName}>
+              <button className={submitButtonClassName} type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
               {submitError && (
-                <p className={styles.errorText} role="alert">
+                <p className={errorTextClassName} role="alert">
                   {submitError}
                 </p>
               )}
@@ -274,45 +359,46 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
         )}
 
         {helpful === true && (
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <h3 className={styles.title}>What did you like?</h3>
-            <p className={styles.helpText}>Pick the option that best describes your experience.</p>
-            <div className={cx(styles.optionGroup, styles.optionGroupPositive)}>
+          <form className={formClassName} onSubmit={handleSubmit}>
+            <h3 className={titleClassName}>What did you like?</h3>
+            <p className={helpTextClassName}>
+              Pick the option that best describes your experience.
+            </p>
+            <div className={optionGroupClassName}>
               {positiveOptions.map((option, index) => {
                 const inputId = `${feedbackFieldPrefix}-positive-${index}`
                 const isSelected = positiveFeedback === option.value
                 return (
                   <div
                     className={cx(
-                      styles.option,
-                      styles.optionCard,
-                      isSelected && styles.optionCardSelected
+                      'flex flex-col gap-2 rounded-[10px] border p-[10px_11px] transition-colors motion-reduce:transition-none',
+                      isTocPlacement
+                        ? 'rounded-lg border-[rgba(78,116,248,0.32)] bg-[rgba(18,19,23,0.72)] p-[6px_8px] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(22,24,29,0.9)]'
+                        : 'border-[rgba(78,116,248,0.32)] bg-[rgba(14,21,36,0.68)] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.76)]',
+                      isSelected && 'border-[rgba(78,116,248,0.72)] bg-[rgba(31,44,78,0.88)]'
                     )}
                     key={option.value}
                   >
-                    <label
-                      className={cx(styles.optionLabel, styles.optionLabelCard)}
-                      htmlFor={inputId}
-                    >
+                    <label className={optionLabelClassName} htmlFor={inputId}>
                       <input
                         id={inputId}
-                        className={styles.optionRadio}
+                        className={radioClassName}
                         type="radio"
                         name={positiveFeedbackFieldName}
                         value={option.value}
                         checked={positiveFeedback === option.value}
                         onChange={(e) => selectPositiveReason(e.target.value)}
                       />
-                      <span className={styles.optionBody}>
-                        <span className={styles.optionText}>{option.value}</span>
+                      <span className="flex min-w-0 flex-col gap-[3px]">
+                        <span className={optionTextClassName}>{option.value}</span>
                         {option.description && (
-                          <span className={styles.optionDescription}>{option.description}</span>
+                          <span className={optionDescriptionClassName}>{option.description}</span>
                         )}
                       </span>
                     </label>
                     {positiveFeedback === option.value && (
                       <textarea
-                        className={styles.textArea}
+                        className={textAreaClassName}
                         placeholder="Optional: Provide more details..."
                         aria-label={`Additional details for ${option.value}`}
                         value={additionalDetails[option.value] || ''}
@@ -323,12 +409,12 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
                 )
               })}
             </div>
-            <div className={styles.formActions}>
-              <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+            <div className={formActionsClassName}>
+              <button className={submitButtonClassName} type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
               {submitError && (
-                <p className={styles.errorText} role="alert">
+                <p className={errorTextClassName} role="alert">
                   {submitError}
                 </p>
               )}

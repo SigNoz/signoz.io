@@ -104,6 +104,9 @@ If a PR includes docs too, use this skill for code review only.
 ### 9) Styling and CSS
 
 - Check Tailwind consistency and duplication.
+- Treat avoidable `.module.css` additions/expansions as findings when equivalent Tailwind classes/utilities can be used.
+- Flag new CSS custom properties, font-family declarations, and visual tokens added in component CSS modules unless there is a clear technical need (for example: pseudo-elements, complex keyframes, or browser-specific behavior Tailwind cannot express cleanly).
+- For styling-only PRs, explicitly verify that new visual changes are primarily implemented via existing Tailwind tokens/utilities.
 - Flag avoidable inline styles.
 - Check responsive utilities and token consistency where applicable.
 
@@ -186,5 +189,6 @@ rg -n "^import " app components hooks utils shared
 ## Guardrails
 
 - Prefer existing patterns over introducing new abstractions by default.
+- For style changes, prefer Tailwind-first implementations and avoid introducing new component-level CSS systems when existing Tailwind patterns already solve the requirement.
 - Avoid speculative refactors outside PR scope unless there is clear risk reduction.
 - Keep feedback decision-oriented and implementable without ambiguity.
