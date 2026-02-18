@@ -1,8 +1,9 @@
 import { fetchMDXContentByPath, MDXContentApiResponse } from '@/utils/strapi'
 import { notFound } from 'next/navigation'
 import FAQsClient from './FAQsClient'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = 0
+export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
 export default async function FAQsPage() {

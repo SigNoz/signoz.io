@@ -1,0 +1,1 @@
+export const CMS_REVALIDATE_INTERVAL = 21600
