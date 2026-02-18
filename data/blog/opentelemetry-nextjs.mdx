@@ -4,7 +4,7 @@ title: Monitor NextJS with OpenTelemetry - Traces, Metrics, and Logs
 slug: opentelemetry-nextjs
 date: 2026-02-18
 tags: [OpenTelemetry, NextJS, JavaScript]
-authors: [yuvraj]
+authors: [yuvraj, dhruv_ahuja]
 description: This in-depth guide walks you through how to instrument your Next.js application using OpenTelemetry. Learn how to collect traces, metrics, and logs—and send them to Jaeger or SigNoz for complete observability.
 image: /img/blog/2024/12/opentelemetry-nextjs-cover.webp
 keywords: [opentelemetry,nextjs,opentelemetry nextjs,javascript,apm tools,application performance monitoring]
@@ -23,9 +23,15 @@ keywords: [opentelemetry,nextjs,opentelemetry nextjs,javascript,apm tools,applic
 Vercel gives you some observability out of the box for your NextJS application: function logs, perf insights, basic metrics. While these might be enough for you initially, these metrics and insights aren't enough for a modern application that interacts with multiple complex integrations, such as a distributed system, or even LLMs, as basically all applications in 2026 rely on AI in some form.
 
 As an engineer interacting with, or as a decision maker for engineering systems, you should be aware of Vercel's observability offering and where it can potentially fall short for your needs.<br />
-Once done, you can recognize the next steps forward to ensure you have an observability system that scales as your business needs -- and inevitably, the application complexity -- do. For the purpose of this write-up, we'll showcase how NextJS integrates with OpenTelemetry.
+From there, you can chart a path toward an observability system that scales alongside your business needs — and, inevitably, your application's complexity. In this write-up, we'll showcase how NextJS integrates with OpenTelemetry.
 
 ## Where Vercel Falls Short
+
+<KeyPointCallout title="Understanding OpenTelemetry" defaultCollapsed="true">
+OpenTelemetry (OTel), the open-source observability standard, aims to standardize how telemetry is generated and exported, reducing the engineering bandwidth required to maintain telemetry logic across complex application systems. Since it makes it trivial to define the target for your application telemetry data, OpenTelemetry eliminates *vendor lock-in* and forces observability vendors to compete on features to retain customers.
+
+If you wish to learn more, feel free to check out our [detailed write-up on OpenTelemetry](https://signoz.io/opentelemetry/).
+</KeyPointCallout>
 
 Following are some key aspects where Vercel lacks the features we expect to see in a robust observability platform:
 
@@ -60,37 +66,41 @@ Checking the internals, you will see that Next.js interacts with multiple layers
 - **API Routers**: Has two options: the [App Router](https://nextjs.org/docs/app) and the [Pages Router](https://nextjs.org/docs/pages),that follow distinct implementation patterns.
 - **Client/server boundaries**: Boundaries between client and server components are often blurred, dynamic, and hard to trace. Functionalities in client components might not be available in server components and vice-versa.
 
-So, when you lack instrumentation for your Next.js applications, you are essentially flying blind, and are prone to errors that would be tough to contextualize, and correlate otherwise. For example, redirection from  an application's home page to the `Choose Project` section, based on the user authorization status, could cause a duplicate API call due to state mismatch. Without observability into your application's web interactions, you might not be able to correlate the duplicate API call with the state mismatch easily. Whereas, instrumentation would showcase all operations that the application makes, under a [single trace](https://signoz.io/blog/distributed-tracing/).
+So, when you lack instrumentation for your Next.js applications, you are essentially flying blind — prone to errors that are tough to contextualize or correlate. Let's understand the impact observability has with a few real-world scenarios.
 
 ## Real Scenarios Where Tracing Saves Hours
 
 ### The Mysterious Slow Page Load
 
 > User says: “The dashboard is slow.”
-> 
 
-**Without tracing**: Stare at server logs. Hope for a clue.
+**Without tracing**: You tail server logs and grep for errors. But it is not immediately obvious what is taking long, or whether it's an issue on the user's end.
 
-**With tracing**: 50ms render + 3s wait on a third-party API. Case closed.
+**With tracing**: You see 50ms for server rendering and a 3s wait on a third-party analytics API. You swap it for an async call, and the dashboard feels snappy again.
 
 ### The Intermittent 500
 
-> API crashes randomly.
-> 
+> An API crashes randomly without any obvious pattern.
 
-**Without tracing**: Try to reproduce locally. Maybe cry.
+**Without tracing**: You add more logging, redeploy, and wait for it to happen again. It could happen anytime and you do not have concrete steps to take.
 
-**With tracing**: DB timeout after 12 retries—problem found.
+**With tracing**: A DB connection times out after 12 retries under load. The trace shows exactly which query, which endpoint, and the load level that causes the failure.
 
 ### The Deployment Regression
 
-> Site feels slower after latest deploy.
-> 
+> Site feels slower after the latest deployment. There's a regression somewhere.
 
-**Without tracing**: Play “spot the difference” in DevTools.
+**Without tracing**: You diff the PRs, stare at bundle sizes, and run Lighthouse hoping for a clue.
 
-**With tracing**: New query in Server Component adds 200ms—roll it back or optimize.
+**With tracing**: A new function call inside a Server Component adds 200ms to every page load. You get a quick patch-fix out while your team optimizes the function.
 
+### The Auth Redirect Loop
+
+> You notice frequent 404 errors in the logs, but without any clear reason. It often happens when opening shared Project links.
+
+**Without tracing**: You see an erroneous API call in the network tab but can't tell where it's coming from or why it's returning 404 `Not Found` responses.
+
+**With tracing**: The application redirects users that lack access to given Project. However, a state mismatch mid-redirect triggers a second auth check. The relevant [traces](https://signoz.io/blog/distributed-tracing/) shows both calls, their order, and exactly where the state diverged.
 
 **Bottom line**: Instrumentation turns debugging from guesswork into precision diagnosis.
 
@@ -103,14 +113,12 @@ Let’s start with something non-trivial. We'll use the official `with-supabase`
 ```bash
 npx create-next-app@latest nextjs-observability-demo --example with-supabase
 cd nextjs-observability-demo
-
 ```
 
 ### Add Environment Config
 
 ```bash
 cp .env.example .env.local
-
 ```
 
 Update `.env.local`:
@@ -118,7 +126,6 @@ Update `.env.local`:
 ```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-
 ```
 
 ### Test it Locally
@@ -141,7 +148,6 @@ Open `http://localhost:3000` and test signup, login, and protected routes.
 
 <Figure src="/img/blog/2025/06/opentelemetry-nextjs-CleanShot_2025-06-20_at_10.02.372x.webp" alt="NextJS + Supabase Template Project" caption="NextJS + Supabase Template Project" />
 
-
 ## What This App Gives Us
 
 - **Auth system**: Signup, login, password reset, session flow
@@ -160,14 +166,11 @@ Time to wire up OpenTelemetry into your app. We'll follow the <a href="https://n
 
 It supports both Node and Edge runtimes, comes with sane defaults, and is maintained by the Next.js team, so no need to reinvent the wheel unless you *really* want to
 
-
 ### 1. Install `@vercel/otel`
 
 ```bash
 npm install @vercel/otel
 ```
-
-
 
 ### 2. Create `instrumentation.ts`
 
@@ -198,8 +201,6 @@ const nextConfig = {
 }
 ```
 
-
-
 ### Why Use `@vercel/otel`?
 
 Because it just works—with minimal boilerplate.
@@ -210,8 +211,6 @@ Because it just works—with minimal boilerplate.
 - Pre-configured with smart defaults
 - Maintained by the Next.js team
 - Simple to install, easy to maintain
-
-
 
 ### What If You Want Full Control?
 
@@ -227,8 +226,6 @@ export async function register() {
 ```
 
 This gives you full access to the OpenTelemetry Node SDK, but you’ll be responsible for configuring everything—exporters, propagators, batching, etc by creating your own `instrumentation.node.ts` file as explained in the <a href="https://nextjs.org/docs/app/guides/open-telemetry#manual-opentelemetry-configuration" rel="noopener noreferrer nofollow" target="_blank">official documentation</a>
-
-
 
 ### 3. Run It and Verify
 
@@ -251,8 +248,6 @@ Trigger a trace:
 ```bash
 curl http://localhost:3001/protected
 ```
-
-
 
 ### What Gets Instrumented Automatically?
 
@@ -338,7 +333,6 @@ Without writing a single line of tracing code, you now get:
 
 It’s a solid start—but you still need somewhere better than Jaeger to actually *work with* these traces at scale.
 
-
 ### Debugging with Env Variables
 
 Need to see more detail?
@@ -348,7 +342,6 @@ export NEXT_OTEL_VERBOSE=1
 ```
 
 You’ll get verbose span logs in the terminal—useful when debugging instrumentation issues.
-
 
 **Next**: These traces are only local for now. Let’s plug in a collector and pipe them to something visual - starting with Jaeger.
 
@@ -364,14 +357,12 @@ We’ll use <a href="https://github.com/vercel/opentelemetry-collector-dev-setup
 - Prometheus
 - Pre-wired Docker Compose config
 
-
 ### 1. Clone and Start the Collector Stack
 
 ```bash
 git clone https://github.com/vercel/opentelemetry-collector-dev-setup.git
 cd opentelemetry-collector-dev-setup
 ```
-
 
 ### 2. Update the Collector Config (Important)
 
@@ -429,8 +420,6 @@ service:
 - Adds support for latest collector version
 - Sends traces to both Jaeger and Zipkin
 
-
-
 ### 3. Start the Collector Stack
 
 ```bash
@@ -438,8 +427,6 @@ export OTELCOL_IMG=otel/opentelemetry-collector-contrib:latest
 export OTELCOL_ARGS=""
 docker compose up -d
 ```
-
-
 
 ### 4. Confirm It’s Running
 
@@ -453,8 +440,6 @@ You should see:
 - Jaeger UI: <a href="http://localhost:16686/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:16686</a>
 - Zipkin UI: <a href="http://localhost:9411/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:9411</a>
 - Prometheus: <a href="http://localhost:9090/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:9090</a>
-
-
 
 ## Configure Next.js to Export Traces
 
@@ -483,8 +468,6 @@ You should see logs like:
 
 ```
 
-
-
 ## Test It
 
 Send a few requests:
@@ -507,8 +490,6 @@ Look for:
 info  Traces  {"resource spans": 2, "spans": 23}
 ```
 
-
-
 ## View Traces in Jaeger
 
 1. Go to <a href="http://localhost:16686/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:16686</a>
@@ -526,7 +507,6 @@ info  Traces  {"resource spans": 2, "spans": 23}
 | `onError` in Next.js console | Collector unreachable | Use `0.0.0.0:4318`, not `localhost:4318` in collector config |
 | No traces in Jaeger | Missing env vars | Check `.env.local` for correct `OTEL_EXPORTER_OTLP_...` values |
 | Docker doesn’t start | Docker Desktop not running | `open -a Docker` (macOS) or start it manually |
-
 
 
 Now that traces are flowing and visualized, we’ll look at **how to interpret them**—what each span tells you, and how to drill into performance issues in your Next.js stack using real trace data.
