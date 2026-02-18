@@ -3,25 +3,27 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styles from './styles.module.css'
 import { useHubspotForm } from '@aaronhayes/react-use-hubspot-form'
+import Button from '@/components/ui/Button'
 
 const FORM_LOAD_TIMEOUT_MS = 10_000
 const MIN_FORM_HEIGHT_PX = 100
 
 function FormBlockedFallback() {
   return (
-    <div className="rounded-lg border border-signoz_amber-500/30 bg-signoz_amber-500/5 px-5 py-4 text-center">
-      <p className="mb-1 text-sm font-medium text-signoz_amber-400">Unable to load the form</p>
-      <p className="mb-3 text-xs leading-relaxed text-signoz_vanilla-400">
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-signoz_slate-100 bg-signoz_ink-300 px-6 py-8 text-center">
+      <p className="text-base font-semibold text-signoz_vanilla-100">Unable to load the form</p>
+      <p className="max-w-sm text-sm leading-relaxed text-signoz_vanilla-400">
         Your browser&apos;s tracking protection or an ad blocker may be preventing this form from
-        loading. Try disabling tracking protection for this page, using a different browser, or
-        reach out to us directly.
+        loading. Try disabling tracking protection for this page, or use a different browser.
       </p>
-      <a
+      <Button
+        variant="outline"
+        rounded="full"
         href="mailto:cloud-support@signoz.io"
-        className="inline-block rounded-full border border-signoz_robin-500 px-4 py-1.5 text-xs font-medium text-signoz_robin-500 no-underline transition-colors hover:bg-signoz_robin-500 hover:text-white"
+        className="mt-1"
       >
         Email us at cloud-support@signoz.io
-      </a>
+      </Button>
     </div>
   )
 }
