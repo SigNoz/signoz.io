@@ -10,9 +10,7 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'data/faqs',
   'data-assets',
   '.github/workflows',
-  'scripts/vercel-ignore-build.mjs',
-  'scripts/sync-content-to-strapi.js',
-  'scripts/update-pr-comment.js',
+  'scripts',
   '.gitignore',
 ]
 
