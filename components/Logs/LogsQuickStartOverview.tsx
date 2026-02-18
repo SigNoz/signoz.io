@@ -4,7 +4,7 @@ import {
   SiDocker,
   SiPython,
   SiNodedotjs,
-  SiFluentd,
+  SiFluentbit,
   SiAmazonwebservices,
   SiGo,
 } from 'react-icons/si'
@@ -72,7 +72,7 @@ const logsData: IconCardData[] = [
   {
     name: 'FluentBit',
     href: '/docs/userguide/fluentbit_to_signoz',
-    icon: <SiFluentd className="h-7 w-7 text-blue-500" />,
+    icon: <SiFluentbit className="h-7 w-7 text-blue-500" />,
     clickName: 'FluentBit Logs Link',
   },
   {
