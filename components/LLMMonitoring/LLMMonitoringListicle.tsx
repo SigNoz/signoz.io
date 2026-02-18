@@ -10,6 +10,7 @@ import {
   SiAmazonwebservices,
   SiPydantic,
   SiTemporal,
+  SiOllama,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -71,6 +72,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Claude Code Monitoring',
   },
   {
+    name: 'Codex (OpenAI)',
+    href: '/docs/codex-monitoring',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex (OpenAI) Monitoring',
+  },
+  {
     name: 'Crew AI',
     href: '/docs/crewai-observability',
     icon: (
@@ -111,14 +118,30 @@ const LLMMonitoringData: IconCardData[] = [
   {
     name: 'Grok',
     href: '/docs/grok-monitoring',
-    icon: <img src="/svgs/icons/LLMMonitoring/grok-logo.svg" alt="Grok Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+    ),
     clickName: 'Grok Monitoring',
   },
   {
     name: 'Groq',
     href: '/docs/groq-observability',
-    icon: <img src="/svgs/icons/LLMMonitoring/groq-logo.svg" alt="Groq Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+    ),
     clickName: 'Groq Monitoring',
+  },
+  {
+    name: 'Haystack',
+    href: '/docs/haystack-monitoring',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Monitoring',
   },
   {
     name: 'Inkeep',
@@ -179,6 +202,12 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/mastra-observability',
     icon: <img src="/img/docs/llm/mastra/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />,
     clickName: 'Mastra Monitoring',
+  },
+  {
+    name: 'Ollama',
+    href: '/docs/ollama-monitoring',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Monitoring',
   },
   {
     name: 'OpenAI',

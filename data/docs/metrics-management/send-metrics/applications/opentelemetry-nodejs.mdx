@@ -9,7 +9,7 @@ doc_type: howto
 
 This guide shows you how to send metrics from your Node.js application (Express, Fastify, Koa, NestJS, Runtime) to SigNoz using OpenTelemetry.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
     Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -22,7 +22,7 @@ This guide shows you how to send metrics from your Node.js application (Express,
 
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
     A VM is a virtual computer that runs on physical hardware. This includes:
     - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
     - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -43,8 +43,8 @@ export OTEL_LOGS_EXPORTER="none"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
@@ -73,8 +73,8 @@ env:
 - name: NODE_OPTIONS
   value: '--require @opentelemetry/auto-instrumentations-node/register'
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
@@ -93,8 +93,8 @@ $env:OTEL_LOGS_EXPORTER = "none"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
 $env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
@@ -133,8 +133,8 @@ docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:
     your-image:latest
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
@@ -142,7 +142,7 @@ Replace the following:
 </TabItem>
 </Tabs>
 
-<KeyPointCallout title="Why explicitly disable traces and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable traces and logs?" defaultCollapsed="true">
 The auto-instrumentation package (`@opentelemetry/auto-instrumentations-node`) includes instrumentations for web frameworks like Express, Fastify, and Koa. These instrumentations generate traces (spans) for every incoming HTTP request.
 
 Since OpenTelemetry Node.js enables traces and logs export by default, these would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant volume and costs.

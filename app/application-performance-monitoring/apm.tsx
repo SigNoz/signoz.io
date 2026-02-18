@@ -3,10 +3,11 @@
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import Button from "@/components/ui/Button"
+import Button from '@/components/ui/Button'
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
+import SigNozStats from '@/components/signoz-stats'
 
 function Apm() {
   return (
@@ -159,14 +160,19 @@ const Header = () => {
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button variant='default' rounded='full' to="/teams/" id="btn-get-started-homepage-hero">
+        <Button variant="default" rounded="full" to="/teams/" id="btn-get-started-homepage-hero">
           <span className="flex-center">
             Get Started - Free
             <ArrowRight size={14} />
           </span>
         </Button>
 
-        <Button variant='secondary' rounded='full' to="/docs/introduction/" id="btn-read-documentation-homepage-hero">
+        <Button
+          variant="secondary"
+          rounded="full"
+          to="/docs/introduction/"
+          id="btn-read-documentation-homepage-hero"
+        >
           <span className="flex-center">
             <BookOpen size={14} />
             Read Documentation
@@ -236,12 +242,7 @@ const TrustedByTeams = ({ page }) => {
         `}
         >
           <div className="flex flex-col items-center text-center">
-            <Button
-              variant='secondary'
-              rounded='full'
-              to="/case-study/"
-              id={customerStoriesId}
-            >
+            <Button variant="secondary" rounded="full" to="/case-study/" id={customerStoriesId}>
               <span className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
               </span>
@@ -438,7 +439,13 @@ const UsageBasedPricing = () => {
               We’re here for you.
             </p>
             <UsageList />
-            <Button variant='default' rounded='full' to="/pricing/" id="btn-get-started-homepage-hero" className="mt-5">
+            <Button
+              variant="default"
+              rounded="full"
+              to="/pricing/"
+              id="btn-get-started-homepage-hero"
+              className="mt-5"
+            >
               <span className="flex-center">
                 Check Pricing
                 <ArrowRight size={14} />
@@ -470,75 +477,6 @@ const ExploreDocs = () => {
   )
 }
 
-const SigNozStats = () => {
-  const STATS_LIST = [
-    {
-      id: 1,
-      logo: '/img/index_features/download.svg',
-      name: 'OSS Downloads',
-      value: '10 million+',
-    },
-    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '22k+' },
-    { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
-    { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
-  ]
-  return (
-    <section>
-      <div className="">
-        <div className="section-container !mx-auto flex !w-[100vw] flex-col border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:flex-row md:!w-[80vw]">
-          <div className="!w-[300px] flex-1 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-            <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
-              Developers <br />
-              Love
-              <br />
-              SigNoz
-            </p>
-          </div>
-
-          <div className="flex flex-[2_2_0%] flex-col">
-            <div className="grid grid-cols-1 text-left sm:grid-cols-2">
-              {STATS_LIST.map((stat, index) => (
-                <Card
-                  logo={stat.logo}
-                  stats={stat.value}
-                  description={stat.name}
-                  logoSize={24}
-                  key={index}
-                />
-              ))}
-            </div>
-            <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
-              <Button 
-                href="https://signoz.io/slack/" 
-                variant={"default"}
-                rounded={"full"}
-                id="btn-join-community-homepage"
-              >
-                <span className="flex-center">
-                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  Join the community
-                  <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </span>
-              </Button>
-              <Button  href="https://github.com/SigNoz/signoz/" 
-                variant={"secondary"}
-                rounded={"full"}
-                id="btn-github-repo-homepage"
-              >
-                <span className="flex-center">
-                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  GitHub Repository
-                  <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 const GetStarted = ({ page }) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
@@ -554,22 +492,17 @@ const GetStarted = ({ page }) => {
                   Get started with <br /> SigNoz Cloud today
                 </p>
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                  <Button 
-                    to="/teams/" 
-                    variant={"default"}
-                    rounded={"full"}
-                    id={getStartedId}
-                  >
+                  <Button to="/teams/" variant={'default'} rounded={'full'} id={getStartedId}>
                     <span className="flex-center">
                       Get Started - Free
                       <ArrowRight size={14} />
                     </span>
                   </Button>
 
-                  <Button 
+                  <Button
                     to="/docs/introduction/"
-                    variant={"secondary"}
-                    rounded={"full"}
+                    variant={'secondary'}
+                    rounded={'full'}
                     id={readDocumentationId}
                   >
                     <span className="flex-center">

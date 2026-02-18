@@ -5,6 +5,8 @@ import React from 'react'
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 
+import { cn } from 'app/lib/utils'
+
 interface FigureProps {
   src: string
   alt: string
@@ -29,7 +31,7 @@ export default function Figure({
   return (
     <Zoom>
       <figure className={figureClassName}>
-        <img src={src} alt={alt} className={className} />
+        <img src={src} alt={alt} className={cn('rounded-md', className)} />
         <figcaption className={captionClassName}>
           <i>
             {link && !sourceText ? (

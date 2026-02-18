@@ -16,6 +16,7 @@ import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import type { HubPathMeta, LayoutProps } from './open-telemetry-hub/types'
 import { normalizeRoute } from './open-telemetry-hub/navigation'
 import { ExternalLink } from 'lucide-react'
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 const LANGUAGES_CATEGORY_KEY = 'Language and Frameworks'
 const MAIN_CONTENT_ID = 'opentelemetry-hub-main'
@@ -150,165 +151,167 @@ export default function OpenTelemetryHubLayout({
   ) : null
 
   return (
-    <main id={MAIN_CONTENT_ID}>
-      <ScrollToHashClient />
-      <SectionContainer>
-        <OpenTelemetryProgressBar targetId={MAIN_CONTENT_ID} />
+    <RegionProvider>
+      <main id={MAIN_CONTENT_ID}>
+        <ScrollToHashClient />
+        <SectionContainer>
+          <OpenTelemetryProgressBar targetId={MAIN_CONTENT_ID} />
 
-        <div className="mb-4 hidden flex-wrap items-center justify-between gap-3 border-b border-signoz_ink-300 px-4 pb-3 pt-6 md:px-6 lg:flex lg:px-8">
-          <div className="doc-header flex flex-wrap items-center gap-6">
-            {orderedPathMeta.map((path) => {
-              if (!path.firstRoute) return null
-              const isActive = path.key === currentHubPath
-              const isQuickStart = path.key === 'quick-start'
-              const label =
-                path.key === 'learn'
-                  ? 'Learn OpenTelemetry'
-                  : path.key === 'quick-start'
-                    ? 'OpenTelemetry Quick Start'
-                    : path.label
-              const iconColor = isActive ? 'text-white' : 'text-gray-400'
-              return (
-                <Link
-                  key={path.key}
-                  href={path.firstRoute}
-                  target={isQuickStart ? '_blank' : undefined}
-                  rel={isQuickStart ? 'noopener noreferrer' : undefined}
-                  className={`border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
-                    isActive
-                      ? 'border-white/60 text-white'
-                      : 'border-transparent text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <span className="flex items-center gap-1">
-                    {label}
-                    {isQuickStart && <ExternalLink size={14} className={iconColor} />}
-                  </span>
-                </Link>
-              )
-            })}
+          <div className="mb-4 hidden flex-wrap items-center justify-between gap-3 border-b border-signoz_ink-300 px-4 pb-3 pt-6 md:px-6 lg:flex lg:px-8">
+            <div className="doc-header flex flex-wrap items-center gap-6">
+              {orderedPathMeta.map((path) => {
+                if (!path.firstRoute) return null
+                const isActive = path.key === currentHubPath
+                const isQuickStart = path.key === 'quick-start'
+                const label =
+                  path.key === 'learn'
+                    ? 'Learn OpenTelemetry'
+                    : path.key === 'quick-start'
+                      ? 'OpenTelemetry Quick Start'
+                      : path.label
+                const iconColor = isActive ? 'text-white' : 'text-gray-400'
+                return (
+                  <Link
+                    key={path.key}
+                    href={path.firstRoute}
+                    target={isQuickStart ? '_blank' : undefined}
+                    rel={isQuickStart ? 'noopener noreferrer' : undefined}
+                    className={`border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
+                      isActive
+                        ? 'border-white/60 text-white'
+                        : 'border-transparent text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1">
+                      {label}
+                      {isQuickStart && <ExternalLink size={14} className={iconColor} />}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
-        </div>
 
-        <div className={docClasses}>
-          {showSidebar && (
-            <OpenTelemetrySidebarClient
-              navItems={navItems}
-              normalizedRoute={normalizedRoute}
-              availableLanguages={availableLanguages}
-              defaultLanguage={defaultLanguage}
-              languagesCategoryKey={LANGUAGES_CATEGORY_KEY}
-              showSidebar={showSidebar}
-              mobileTriggerId={MOBILE_TRIGGER_ID}
-              mobileOverlayId={MOBILE_OVERLAY_ID}
-            />
-          )}
+          <div className={docClasses}>
+            {showSidebar && (
+              <OpenTelemetrySidebarClient
+                navItems={navItems}
+                normalizedRoute={normalizedRoute}
+                availableLanguages={availableLanguages}
+                defaultLanguage={defaultLanguage}
+                languagesCategoryKey={LANGUAGES_CATEGORY_KEY}
+                showSidebar={showSidebar}
+                mobileTriggerId={MOBILE_TRIGGER_ID}
+                mobileOverlayId={MOBILE_OVERLAY_ID}
+              />
+            )}
 
-          <div className="doc-content md:px-0 lg:px-4">
-            {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
+            <div className="doc-content md:px-0 lg:px-4">
+              {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
-            <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
-              <h1 className="text-3xl font-bold">{title}</h1>
-              {(formattedUpdatedDate || readingTimeText) && (
-                <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
-                  {formattedUpdatedDate && <span>Updated {formattedUpdatedDate}</span>}
-                  {readingTimeText && <span>{readingTimeText}</span>}
-                </div>
-              )}
-              {children}
-            </article>
+              <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
+                <h1 className="text-3xl font-bold">{title}</h1>
+                {(formattedUpdatedDate || readingTimeText) && (
+                  <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
+                    {formattedUpdatedDate && <span>Updated {formattedUpdatedDate}</span>}
+                    {readingTimeText && <span>{readingTimeText}</span>}
+                  </div>
+                )}
+                {children}
+              </article>
 
-            {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
-              <div className="lg:hidden">
-                <div className="rounded-xl border border-signoz_ink-300/80 bg-signoz_ink-500/50 p-4 text-xs text-white/90 shadow-lg">
-                  <div className="flex flex-col gap-4">
-                    {renderedAuthors.length > 0 && (
-                      <div className="flex items-center gap-3">
-                        {renderedAuthors[0].image && (
-                          <Image
-                            src={renderedAuthors[0].image}
-                            alt={renderedAuthors[0].name}
-                            width={36}
-                            height={36}
-                            className="h-9 w-9 rounded-full border border-white/10 object-cover"
-                          />
-                        )}
-                        <div className="flex flex-col gap-1">
+              {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
+                <div className="lg:hidden">
+                  <div className="rounded-xl border border-signoz_ink-300/80 bg-signoz_ink-500/50 p-4 text-xs text-white/90 shadow-lg">
+                    <div className="flex flex-col gap-4">
+                      {renderedAuthors.length > 0 && (
+                        <div className="flex items-center gap-3">
+                          {renderedAuthors[0].image && (
+                            <Image
+                              src={renderedAuthors[0].image}
+                              alt={renderedAuthors[0].name}
+                              width={36}
+                              height={36}
+                              className="h-9 w-9 rounded-full border border-white/10 object-cover"
+                            />
+                          )}
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+                              Author{renderedAuthors.length > 1 ? 's' : ''}
+                            </span>
+                            <span className="text-sm text-white">
+                              {renderedAuthors.map((author, idx) => (
+                                <span key={`${author.name}-${idx}`}>
+                                  {author.url ? (
+                                    <Link
+                                      href={author.url}
+                                      className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
+                                    >
+                                      {author.name}
+                                    </Link>
+                                  ) : (
+                                    author.name
+                                  )}
+                                  {idx < renderedAuthors.length - 1 && (
+                                    <span className="text-white/60">, </span>
+                                  )}
+                                </span>
+                              ))}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {primaryTags.length > 0 && (
+                        <div className="flex flex-col gap-2">
                           <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                            Author{renderedAuthors.length > 1 ? 's' : ''}
+                            Tags
                           </span>
-                          <span className="text-sm text-white">
-                            {renderedAuthors.map((author, idx) => (
-                              <span key={`${author.name}-${idx}`}>
-                                {author.url ? (
-                                  <Link
-                                    href={author.url}
-                                    className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
-                                  >
-                                    {author.name}
-                                  </Link>
-                                ) : (
-                                  author.name
-                                )}
-                                {idx < renderedAuthors.length - 1 && (
-                                  <span className="text-white/60">, </span>
-                                )}
+                          <div className="flex flex-wrap gap-2">
+                            {primaryTags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/90"
+                              >
+                                {tag}
                               </span>
                             ))}
-                          </span>
+                            {hiddenTags.length > 0 && (
+                              <span
+                                className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/70"
+                                title={hiddenTagsTitle}
+                              >
+                                +{hiddenTags.length} more
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-
-                    {primaryTags.length > 0 && (
-                      <div className="flex flex-col gap-2">
-                        <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                          Tags
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {primaryTags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/90"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {hiddenTags.length > 0 && (
-                            <span
-                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/70"
-                              title={hiddenTagsTitle}
-                            >
-                              +{hiddenTags.length} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+            </div>
+
+            {(hasMetaInfo || hasToc) && (
+              <aside className="doc-right hidden lg:block" aria-label="On this page navigation">
+                <div className="doc-right-inner">
+                  {metaInfoCard}
+                  {hasToc && <OpenTelemetryTocClient toc={toc} />}
+                </div>
+              </aside>
             )}
           </div>
 
-          {(hasMetaInfo || hasToc) && (
-            <aside className="doc-right hidden lg:block" aria-label="On this page navigation">
-              <div className="doc-right-inner">
-                {metaInfoCard}
-                {hasToc && <OpenTelemetryTocClient toc={toc} />}
-              </div>
-            </aside>
+          {showSidebar && <div id={MOBILE_OVERLAY_ID} />}
+
+          {hasToc && (
+            <div className="lg:hidden">
+              <FloatingTableOfContents />
+            </div>
           )}
-        </div>
-
-        {showSidebar && <div id={MOBILE_OVERLAY_ID} />}
-
-        {hasToc && (
-          <div className="lg:hidden">
-            <FloatingTableOfContents />
-          </div>
-        )}
-      </SectionContainer>
-    </main>
+        </SectionContainer>
+      </main>
+    </RegionProvider>
   )
 }

@@ -272,8 +272,7 @@ const FilterAndAutomaticDetectionSection: React.FC = () => {
               <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
                 External API calls are automatically identified using OpenTelemetry's span.kind
                 attribute to detect client spans. API details like domain, endpoint, and URL are
-                extracted from semantic convention attributes (net.peer.name, http.url,
-                http.target).
+                extracted from semantic convention attributes (server.address, url.full).
               </p>
             </div>
           </div>
