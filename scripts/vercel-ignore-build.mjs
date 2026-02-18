@@ -4,7 +4,6 @@ import { execSync } from 'node:child_process'
 import https from 'node:https'
 
 const SKIP_IF_ONLY_CHANGES_IN = [
-  'data/comparisons',
   'data/opentelemetry',
   'data/case-study',
   'data/faqs',
