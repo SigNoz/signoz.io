@@ -1216,12 +1216,12 @@ const docsSideNav = [
     label: 'Logs Management',
     type: 'category',
     isExpanded: false,
-    route: '/docs/userguide/logs',
+    route: '/docs/logs-management/overview',
     items: [
       {
         type: 'doc',
-        route: '/docs/userguide/logs',
-        label: 'Get Started',
+        route: '/docs/logs-management/overview',
+        label: 'Overview',
       },
       {
         type: 'category',
@@ -1353,8 +1353,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/logs-management/send-logs/log-export-methods',
-            label: 'Log Export Methods',
+            route: '/docs/logs-management/send-logs/collection-methods',
+            label: 'Collection Methods',
           },
           {
             type: 'doc',
