@@ -56,32 +56,16 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-    >
-      <div className="w-100 mx-[-28px]">
-        <div className="product-explainer-video hero-figure rounded-xl px-3">
-          <div className="embed-container">
-            <div className="absolute w-full">
-              <div className="p-0">
-                <Image
-                  src="/img/platform/ExternalApisMeta.png"
-                  alt="External APIs hero"
-                  className="w-full rounded-xl"
-                  width={10000}
-                  height={10000}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </FeaturePageHeader>
+      heroImageAlt="External APIs hero"
+      heroImage="/img/platform/ExternalApisMeta.png"
+    />
   )
 }
 
 const ViewAllExternalApiDomains: React.FC = () => {
   return (
     <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
+      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6 max-md:mt-12">
         <div className="mb-8 max-w-4xl">
           <h2 className="mb-6 text-signoz_vanilla-100">View all external API domains</h2>
           <p className="mb-8 leading-relaxed text-signoz_vanilla-400">

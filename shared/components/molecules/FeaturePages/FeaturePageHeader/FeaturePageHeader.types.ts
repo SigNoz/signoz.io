@@ -5,7 +5,9 @@ export interface FeaturePageHeaderProps {
   title: React.ReactNode
   description: React.ReactNode
   buttons: ButtonGroupProps['buttons']
-  children: React.ReactNode
+  heroImage?: string | React.ReactNode
+  heroImageAlt?: string
+  children?: React.ReactNode
   sectionLayoutVariant?: SectionLayoutProps['variant']
   sectionLayoutClassName?: string
   className?: string

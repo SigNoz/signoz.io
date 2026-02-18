@@ -47,25 +47,9 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-    >
-      <div className="w-100 mx-[-28px]">
-        <div className="product-explainer-video hero-figure rounded-xl px-3">
-          <div className="embed-container">
-            <div className="absolute w-full">
-              <div className="p-0">
-                <Image
-                  src="/img/platform/AlertsManagementMeta.png"
-                  alt="Alerts management hero"
-                  className="w-full rounded-xl"
-                  width={10000}
-                  height={10000}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </FeaturePageHeader>
+      heroImage="/img/platform/AlertsManagementMeta.png"
+      heroImageAlt="Alerts management hero"
+    />
   )
 }
 

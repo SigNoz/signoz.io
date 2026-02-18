@@ -70,17 +70,9 @@ const Header: React.FC = () => {
       }
       buttons={headerButtons}
       sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
-    >
-      <div className="w-full">
-        <Image
-          src="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
-          alt="Observability for AI Native Companies hero"
-          className="z-1 relative w-full rounded-xl"
-          width={10000}
-          height={10000}
-        />
-      </div>
-    </FeaturePageHeader>
+      heroImageAlt="Observability for AI Native Companies hero"
+      heroImage="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
+    />
   )
 }
 
@@ -144,10 +136,7 @@ const CapabilitiesSection: React.FC = () => {
               track business outcomes, and meet compliance requirements
             </div>
           </div>
-          <IconTitleDescriptionCardGrid
-            cards={CAPABILITIES_CARDS1}
-            className="[&>div>h4]:text-xl [&>div]:gap-3"
-          />
+          <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS1} variant="xl" />
           <div className="relative flex w-full flex-col items-start border border-dashed border-signoz_slate-400/50 p-8 [&>h4]:text-xl">
             <h4 className="text-left font-semibold text-red-400">
               Full-Stack Platform Capabilities
@@ -157,10 +146,7 @@ const CapabilitiesSection: React.FC = () => {
               entire infrastructure - databases, microservices, and application logs.
             </div>
           </div>
-          <IconTitleDescriptionCardGrid
-            cards={CAPABILITIES_CARDS2}
-            className="[&>div>h4]:text-xl [&>div]:gap-3"
-          />
+          <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS2} variant="xl" />
         </SectionLayout>
       </div>
     </div>
