@@ -1,7 +1,6 @@
 ---
 
 title: OpenTelemetry vs Loki - Choosing the Right Observability Tool
-slug: opentelemetry-vs-loki 
 date: 2024-11-07
 tags: [OpenTelemetry]
 authors: [soumya_gupta]
@@ -36,13 +35,13 @@ While OpenTelemetry casts a wide net over the observability landscape, Loki zero
 
 The OpenTelemetry Collector plays a crucial role in the OpenTelemetry ecosystem. It acts as a vendor-agnostic way to receive, process, and export telemetry data. 
 
-<Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%201.webp" alt="Collector Pipeline" caption="Collector Pipeline" /> 
+<Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 1.webp" alt="Collector Pipeline" caption="Collector Pipeline" /> 
 
 Here's what makes it special:
 
 - Flexible deployment: The Collector can be deployed in two main modes—either as an agent running alongside your application to collect telemetry locally or as a gateway, operating as a standalone service to centralize data collection and forwarding.
     
-    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%202.webp" alt="Modes of Collector Deployment" caption="Modes of Collector Deployment" />
+    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 2.webp" alt="Modes of Collector Deployment" caption="Modes of Collector Deployment" />
     
     This flexibility ensures that the Collector fits seamlessly into various infrastructure setups, whether distributed or centralized.
     
@@ -59,7 +58,7 @@ Loki is a log management solution from Grafana Labs, designed to streamline log 
 - Minimal Indexing Architecture : Unlike conventional log management systems that index the full content of logs, Loki uses a minimalist approach by only indexing metadata, such as labels. This means that instead of maintaining massive indexes of all log data, Loki limits its indexing to crucial attributes (like tenant IDs, log labels, and timestamps).
 - Log Streams and Labels: Similar to the time-series data model in Prometheus, Loki organizes logs into streams, which are groups of logs associated with a unique set of labels.
     
-    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%203.webp" alt="Log streams and labels" caption="Log streams and labels" />
+    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 3.webp" alt="Log streams and labels" caption="Log streams and labels" />
     
     These labels (e.g., `application`, `environment`, or `pod`) are key to filtering, querying, and analyzing logs. By allowing you to query logs based on their labels rather than content, Loki optimizes the search process, making it faster to retrieve specific logs without sifting through an entire log file. This structure is especially helpful in modern cloud-native environments where logs from distributed microservices need to be efficiently tracked and analyzed.
     
@@ -77,7 +76,7 @@ Conventional log management systems often index a broader set of attributes, inc
 
 ## Promtail: Loki's Log Shipper
 
-<Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%204.webp" alt="Loki’s Promtail v/s OpenTelemetry’s Collector" caption="Loki’s Promtail v/s OpenTelemetry’s Collector" />
+<Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 4.webp" alt="Loki’s Promtail v/s OpenTelemetry’s Collector" caption="Loki’s Promtail v/s OpenTelemetry’s Collector" />
 
 Promtail is to Loki what the Collector is to OpenTelemetry. It's responsible for gathering logs and sending them to Loki. It can currently tail logs from two sources: local log files and the `systemd journal`. Promtail's main functions include discovering targets, attaching labels to log streams, and pushing them to a Loki instance.
 
@@ -97,11 +96,11 @@ To set up a Promtail configuration file for sending logs from a standalone host:
 
 1. Log into Grafana Cloud: Access your Grafana Cloud account and select Launch. 
     
-    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%205.webp" alt="" caption="" />2. Go to the Manage Your Stack Page: Once there, choose Loki and select Send Logs.
+    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 5.webp" alt="" caption="" />2. Go to the Manage Your Stack Page: Once there, choose Loki and select Send Logs.
     
-    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%206.webp" alt="" caption="" />3. Select Standalone Host: Choose the standalone host option and assign a name to the token that this integration will use.
+    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 6.webp" alt="" caption="" />3. Select Standalone Host: Choose the standalone host option and assign a name to the token that this integration will use.
     
-    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%207.webp" alt="" caption="" />4. Review and Save the Configuration File: Scroll down to view the configuration file. Replace `<GrafanaCloudToken>` in the config below with the generated API token and make sure to save it to `promtail/config.yaml`.
+    <Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 7.webp" alt="" caption="" />4. Review and Save the Configuration File: Scroll down to view the configuration file. Replace `<GrafanaCloudToken>` in the config below with the generated API token and make sure to save it to `promtail/config.yaml`.
 
 ```yaml
 server:
@@ -177,7 +176,7 @@ allow_structured_metadata: true
 
 Let’s take an in-depth look at how it’s done: 
 
-<Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image%208.webp" alt="Integrated use of OpenTelemetry, Loki and Grafana" caption="Integrated use of OpenTelemetry, Loki and Grafana" />
+<Figure src="/img/comparisons/2024/11/opentelemetry-vs-loki-image 8.webp" alt="Integrated use of OpenTelemetry, Loki and Grafana" caption="Integrated use of OpenTelemetry, Loki and Grafana" />
 
 - Use the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/): Set up the OpenTelemetry Collector to gather telemetry data from your applications, including logs, metrics, and traces. The Collector acts as an intermediary, standardizing the way telemetry is collected and processed.
 - Configure the Loki Exporter: In the Collector configuration, use the Loki exporter to send logs directly to Loki. This ensures that your application logs, collected by OpenTelemetry, are efficiently stored and managed in Loki’s index-free architecture.
