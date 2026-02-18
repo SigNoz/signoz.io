@@ -203,13 +203,9 @@ export default function ArticleLayout({
               )}
               {children}
             </article>
-            {hasToc ? (
-              <div className="lg:hidden">
-                <PageFeedback />
-              </div>
-            ) : (
+            <div className={hasToc ? 'lg:hidden' : ''}>
               <PageFeedback />
-            )}
+            </div>
 
             {/* Mobile meta info card */}
             {(renderedAuthors.length > 0 || primaryTags.length > 0) && (

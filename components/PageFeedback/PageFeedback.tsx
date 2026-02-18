@@ -44,6 +44,118 @@ const positiveOptions = [
 const cx = (...classNames: Array<string | false | undefined>) =>
   classNames.filter(Boolean).join(' ')
 
+interface FeedbackOption {
+  value: string
+  description: string
+}
+
+interface FeedbackFormProps {
+  title: string
+  helpText: string
+  options: FeedbackOption[]
+  selectedValue: string
+  fieldName: string
+  idPrefix: string
+  onSelect: (value: string) => void
+  additionalDetails: AdditionalDetails
+  onTextAreaChange: (option: string, value: string) => void
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  isSubmitting: boolean
+  submitError: string
+  formClassName: string
+  titleClassName: string
+  helpTextClassName: string
+  optionGroupClassName: string
+  optionCardClassName: (isSelected: boolean) => string
+  optionLabelClassName: string
+  radioClassName: string
+  optionTextClassName: string
+  optionDescriptionClassName: string
+  textAreaClassName: string
+  formActionsClassName: string
+  submitButtonClassName: string
+  errorTextClassName: string
+}
+
+const FeedbackForm: React.FC<FeedbackFormProps> = ({
+  title,
+  helpText,
+  options,
+  selectedValue,
+  fieldName,
+  idPrefix,
+  onSelect,
+  additionalDetails,
+  onTextAreaChange,
+  onSubmit,
+  isSubmitting,
+  submitError,
+  formClassName,
+  titleClassName,
+  helpTextClassName,
+  optionGroupClassName,
+  optionCardClassName,
+  optionLabelClassName,
+  radioClassName,
+  optionTextClassName,
+  optionDescriptionClassName,
+  textAreaClassName,
+  formActionsClassName,
+  submitButtonClassName,
+  errorTextClassName,
+}) => (
+  <form className={formClassName} onSubmit={onSubmit}>
+    <h3 className={titleClassName}>{title}</h3>
+    <p className={helpTextClassName}>{helpText}</p>
+    <div className={optionGroupClassName}>
+      {options.map((option, index) => {
+        const inputId = `${idPrefix}-${index}`
+        const isSelected = selectedValue === option.value
+        return (
+          <div className={optionCardClassName(isSelected)} key={option.value}>
+            <label className={optionLabelClassName} htmlFor={inputId}>
+              <input
+                id={inputId}
+                className={radioClassName}
+                type="radio"
+                name={fieldName}
+                value={option.value}
+                checked={isSelected}
+                onChange={(e) => onSelect(e.target.value)}
+              />
+              <span className="flex min-w-0 flex-col gap-[3px]">
+                <span className={optionTextClassName}>{option.value}</span>
+                {option.description && (
+                  <span className={optionDescriptionClassName}>{option.description}</span>
+                )}
+              </span>
+            </label>
+            {isSelected && (
+              <textarea
+                className={textAreaClassName}
+                placeholder="Optional: Provide more details..."
+                aria-label={`Additional details for ${option.value}`}
+                value={additionalDetails[option.value] || ''}
+                onChange={(e) => onTextAreaChange(option.value, e.target.value)}
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
+    <div className={formActionsClassName}>
+      <button className={submitButtonClassName} type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Submitting...' : 'Submit'}
+      </button>
+      {submitError && (
+        <p className={errorTextClassName} role="alert">
+          {submitError}
+        </p>
+      )}
+    </div>
+  </form>
+)
+
 const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) => {
   const [helpful, setHelpful] = useState<boolean | null>(null)
   const [needsImprovement, setNeedsImprovement] = useState<string>('')
@@ -293,132 +405,46 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
           </>
         )}
 
-        {helpful === false && (
-          <form className={formClassName} onSubmit={handleSubmit}>
-            <h3 className={titleClassName}>What needs improvement?</h3>
-            <p className={helpTextClassName}>
-              Pick the issue that blocked you. You can add details after selecting one.
-            </p>
-            <div className={optionGroupClassName}>
-              {negativeOptions.map((option, index) => {
-                const inputId = `${feedbackFieldPrefix}-negative-${index}`
-                const isSelected = needsImprovement === option.value
-                return (
-                  <div
-                    className={cx(
-                      'flex flex-col gap-2 rounded-[10px] border p-[10px_11px] transition-colors motion-reduce:transition-none',
-                      isTocPlacement
-                        ? 'rounded-lg border-[rgba(78,116,248,0.32)] bg-[rgba(18,19,23,0.72)] p-[6px_8px] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(22,24,29,0.9)]'
-                        : 'border-[rgba(78,116,248,0.32)] bg-[rgba(14,21,36,0.68)] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.76)]',
-                      isSelected && 'border-[rgba(78,116,248,0.72)] bg-[rgba(31,44,78,0.88)]'
-                    )}
-                    key={option.value}
-                  >
-                    <label className={optionLabelClassName} htmlFor={inputId}>
-                      <input
-                        id={inputId}
-                        className={radioClassName}
-                        type="radio"
-                        name={needsImprovementFieldName}
-                        value={option.value}
-                        checked={needsImprovement === option.value}
-                        onChange={(e) => selectNegativeReason(e.target.value)}
-                      />
-                      <span className="flex min-w-0 flex-col gap-[3px]">
-                        <span className={optionTextClassName}>{option.value}</span>
-                        {option.description && (
-                          <span className={optionDescriptionClassName}>{option.description}</span>
-                        )}
-                      </span>
-                    </label>
-                    {needsImprovement === option.value && (
-                      <textarea
-                        className={textAreaClassName}
-                        placeholder="Optional: Provide more details..."
-                        aria-label={`Additional details for ${option.value}`}
-                        value={additionalDetails[option.value] || ''}
-                        onChange={(e) => handleTextAreaChange(option.value, e.target.value)}
-                      />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-            <div className={formActionsClassName}>
-              <button className={submitButtonClassName} type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </button>
-              {submitError && (
-                <p className={errorTextClassName} role="alert">
-                  {submitError}
-                </p>
-              )}
-            </div>
-          </form>
-        )}
-
-        {helpful === true && (
-          <form className={formClassName} onSubmit={handleSubmit}>
-            <h3 className={titleClassName}>What did you like?</h3>
-            <p className={helpTextClassName}>
-              Pick the option that best describes your experience.
-            </p>
-            <div className={optionGroupClassName}>
-              {positiveOptions.map((option, index) => {
-                const inputId = `${feedbackFieldPrefix}-positive-${index}`
-                const isSelected = positiveFeedback === option.value
-                return (
-                  <div
-                    className={cx(
-                      'flex flex-col gap-2 rounded-[10px] border p-[10px_11px] transition-colors motion-reduce:transition-none',
-                      isTocPlacement
-                        ? 'rounded-lg border-[rgba(78,116,248,0.32)] bg-[rgba(18,19,23,0.72)] p-[6px_8px] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(22,24,29,0.9)]'
-                        : 'border-[rgba(78,116,248,0.32)] bg-[rgba(14,21,36,0.68)] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.76)]',
-                      isSelected && 'border-[rgba(78,116,248,0.72)] bg-[rgba(31,44,78,0.88)]'
-                    )}
-                    key={option.value}
-                  >
-                    <label className={optionLabelClassName} htmlFor={inputId}>
-                      <input
-                        id={inputId}
-                        className={radioClassName}
-                        type="radio"
-                        name={positiveFeedbackFieldName}
-                        value={option.value}
-                        checked={positiveFeedback === option.value}
-                        onChange={(e) => selectPositiveReason(e.target.value)}
-                      />
-                      <span className="flex min-w-0 flex-col gap-[3px]">
-                        <span className={optionTextClassName}>{option.value}</span>
-                        {option.description && (
-                          <span className={optionDescriptionClassName}>{option.description}</span>
-                        )}
-                      </span>
-                    </label>
-                    {positiveFeedback === option.value && (
-                      <textarea
-                        className={textAreaClassName}
-                        placeholder="Optional: Provide more details..."
-                        aria-label={`Additional details for ${option.value}`}
-                        value={additionalDetails[option.value] || ''}
-                        onChange={(e) => handleTextAreaChange(option.value, e.target.value)}
-                      />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-            <div className={formActionsClassName}>
-              <button className={submitButtonClassName} type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </button>
-              {submitError && (
-                <p className={errorTextClassName} role="alert">
-                  {submitError}
-                </p>
-              )}
-            </div>
-          </form>
+        {helpful !== null && (
+          <FeedbackForm
+            title={helpful ? 'What did you like?' : 'What needs improvement?'}
+            helpText={
+              helpful
+                ? 'Pick the option that best describes your experience.'
+                : 'Pick the issue that blocked you. You can add details after selecting one.'
+            }
+            options={helpful ? positiveOptions : negativeOptions}
+            selectedValue={helpful ? positiveFeedback : needsImprovement}
+            fieldName={helpful ? positiveFeedbackFieldName : needsImprovementFieldName}
+            idPrefix={`${feedbackFieldPrefix}-${helpful ? 'positive' : 'negative'}`}
+            onSelect={helpful ? selectPositiveReason : selectNegativeReason}
+            additionalDetails={additionalDetails}
+            onTextAreaChange={handleTextAreaChange}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            submitError={submitError}
+            formClassName={formClassName}
+            titleClassName={titleClassName}
+            helpTextClassName={helpTextClassName}
+            optionGroupClassName={optionGroupClassName}
+            optionCardClassName={(isSelected: boolean) =>
+              cx(
+                'flex flex-col gap-2 rounded-[10px] border p-[10px_11px] transition-colors motion-reduce:transition-none',
+                isTocPlacement
+                  ? 'rounded-lg border-[rgba(78,116,248,0.32)] bg-[rgba(18,19,23,0.72)] p-[6px_8px] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(22,24,29,0.9)]'
+                  : 'border-[rgba(78,116,248,0.32)] bg-[rgba(14,21,36,0.68)] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.76)]',
+                isSelected && 'border-[rgba(78,116,248,0.72)] bg-[rgba(31,44,78,0.88)]'
+              )
+            }
+            optionLabelClassName={optionLabelClassName}
+            radioClassName={radioClassName}
+            optionTextClassName={optionTextClassName}
+            optionDescriptionClassName={optionDescriptionClassName}
+            textAreaClassName={textAreaClassName}
+            formActionsClassName={formActionsClassName}
+            submitButtonClassName={submitButtonClassName}
+            errorTextClassName={errorTextClassName}
+          />
         )}
       </section>
     </div>

@@ -220,13 +220,9 @@ export default function OpenTelemetryHubLayout({
                 )}
                 {children}
               </article>
-              {hasToc ? (
-                <div className="lg:hidden">
-                  <PageFeedback />
-                </div>
-              ) : (
+              <div className={hasToc ? 'lg:hidden' : ''}>
                 <PageFeedback />
-              )}
+              </div>
 
               {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
                 <div className="lg:hidden">
