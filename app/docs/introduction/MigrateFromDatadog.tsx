@@ -31,7 +31,7 @@ export default function MigrateFromDatadog() {
   const sectionName = 'Migrate From Datadog Section'
 
   return (
-    <div className="mx-auto mb-12 w-full max-w-7xl">
+    <div className="mx-auto mb-12 w-full max-w-8xl">
       <div className="mb-6 text-left">
         <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
           Migrate from Datadog or Grafana

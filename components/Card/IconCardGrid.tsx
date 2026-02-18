@@ -31,7 +31,7 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
   gridCols = 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6', // Default grid columns
 }) => {
   return (
-    <div className="mx-auto mb-12 w-full max-w-7xl">
+    <div className="mx-auto mb-12 w-full max-w-8xl">
       {/* Section Header - Only render if title or description exists */}
       {(title || description) && (
         <div className="mb-6 text-left">

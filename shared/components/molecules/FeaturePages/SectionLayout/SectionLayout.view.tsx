@@ -25,7 +25,7 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
 
   return (
     <div
-      className={`section-container ${getVariantClasses()} ${backgroundClass} ${className} max-w-7xl`}
+      className={`section-container ${getVariantClasses()} ${backgroundClass} ${className} max-w-8xl`}
     >
       {children}
     </div>
