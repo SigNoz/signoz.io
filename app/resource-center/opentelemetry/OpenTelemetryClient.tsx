@@ -6,7 +6,7 @@ import Comparisons from '../comparisons/Comparisons'
 import Guides from '../guides/Guides'
 import OpenTelemetry from './OpenTelemetry'
 import { MDXContent } from '@/utils/strapi'
-import type { Comparison } from 'contentlayer/generated'
+import type { Comparison } from '../../../types/transformedContent'
 
 export default function OpenTelemetryClient({
   initialArticles,

@@ -2,7 +2,7 @@ import OpenTelemetryClient from './OpenTelemetryClient'
 import { Metadata } from 'next'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
-import type { Comparison } from 'contentlayer/generated'
+import type { Comparison } from '../../../types/transformedContent'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
@@ -39,7 +39,7 @@ export default async function OpenTelemetryHome() {
   let comparisons: Comparison[] = []
 
   try {
-    const [articlesResponse, comparisonsResult, guidesResult] = await Promise.all([
+    const [articlesResponse, comparisonsResult] = await Promise.all([
       fetchMDXContentByPath('opentelemetries', undefined, deployment_status, true),
       fetchAllComparisonsForPage(),
     ])

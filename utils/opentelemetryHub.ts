@@ -275,7 +275,7 @@ async function getCachedHubIndex(): Promise<HubIndex> {
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
   const cachedFn = unstable_cache(fetchAndBuildHubIndex, ['hub-index', deploymentStatus], {
-    tags: ['mdx-content-list', 'comparisons-list', 'guides-list'],
+    tags: ['mdx-content-list', 'comparisons-list'],
     revalidate: CMS_REVALIDATE_INTERVAL,
   })
 
