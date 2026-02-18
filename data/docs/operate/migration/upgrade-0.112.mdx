@@ -357,7 +357,9 @@ Replace `<job-name>` with the job name from the output above.
 
 The `signoz-schema-migrator` binary is no longer needed. Migrations are now built into `signoz-otel-collector`.
 
-When following the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#linux-binary-installation), replace Step 3 (Run database migrations) with these commands:
+### Step 1: Run database migrations
+
+Replace the migration step in the standard upgrade guide with these commands:
 
 ```bash
 /opt/signoz-otel-collector/bin/signoz-otel-collector migrate bootstrap --clickhouse-dsn "tcp://localhost:9000?password=<your-clickhouse-password>"
@@ -367,9 +369,11 @@ When following the [standard upgrade guide](https://signoz.io/docs/operate/migra
 
 Replace `<your-clickhouse-password>` with your ClickHouse password. If no password is set, use `tcp://localhost:9000` without the `?password=` parameter.
 
-Then follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#linux-binary-installation).
+### Step 2: Apply the changes
 
-### Validate migrations
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#linux-binary-installation) to download and restart with the new binary.
+
+### Step 3: Validate migrations
 
 Each migration command prints its progress to stdout. Verify that all three commands completed without errors before proceeding.
 
