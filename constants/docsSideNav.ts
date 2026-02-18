@@ -213,6 +213,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Deploying to Render',
+            route: '/docs/setup/render',
+          },
+          {
+            type: 'doc',
             route: '/docs/install/uninstall',
             label: 'Uninstall',
           },
@@ -1959,6 +1964,11 @@ const docsSideNav = [
             label: 'HAProxy',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+            label: 'Haystack',
+          },
+          {
             label: 'Hostmetrics',
             type: 'category',
             isExpanded: false,
@@ -2532,6 +2542,11 @@ const docsSideNav = [
       {
         route: '/docs/groq-observability',
         label: 'Groq',
+        type: 'doc',
+      },
+      {
+        route: '/docs/haystack-monitoring',
+        label: 'Haystack',
         type: 'doc',
       },
       {

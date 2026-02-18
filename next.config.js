@@ -109,6 +109,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/logs-pipelines/guides/severity/',
+          destination: '/docs/logs-pipelines/guides/severity-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/timestamp/',
+          destination: '/docs/logs-pipelines/guides/timestamp-parsing/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/php/',
           destination: '/docs/instrumentation/opentelemetry-php/',
           permanent: true,

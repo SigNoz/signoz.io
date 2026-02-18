@@ -13,7 +13,6 @@ import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 
 const defaultLayout = 'ComparisonsLayout'
@@ -127,7 +126,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           currentRoute={currentRoute}
         >
           <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-          <PageFeedback />
         </OpenTelemetryHubLayout>
       </>
     )

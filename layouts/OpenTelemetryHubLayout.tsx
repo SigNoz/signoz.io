@@ -17,6 +17,7 @@ import type { HubPathMeta, LayoutProps } from './open-telemetry-hub/types'
 import { normalizeRoute } from './open-telemetry-hub/navigation'
 import { ExternalLink } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
+import PageFeedback from '@/components/PageFeedback/PageFeedback'
 
 const LANGUAGES_CATEGORY_KEY = 'Language and Frameworks'
 const MAIN_CONTENT_ID = 'opentelemetry-hub-main'
@@ -219,6 +220,9 @@ export default function OpenTelemetryHubLayout({
                 )}
                 {children}
               </article>
+              <div className={hasToc ? 'lg:hidden' : ''}>
+                <PageFeedback />
+              </div>
 
               {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
                 <div className="lg:hidden">
