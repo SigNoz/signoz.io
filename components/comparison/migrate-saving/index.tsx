@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styles from './styles.module.css'
 import { useHubspotForm } from '@aaronhayes/react-use-hubspot-form'
 
 const FORM_LOAD_TIMEOUT_MS = 10_000
+const MIN_FORM_HEIGHT_PX = 100
 
 function FormBlockedFallback() {
   return (
@@ -36,15 +37,22 @@ const MigrateSaving = (props) => {
     target: '#my-hubspot-form',
   })
 
-  const [timedOut, setTimedOut] = useState(false)
+  const formRef = useRef<HTMLDivElement>(null)
+  const [showFallback, setShowFallback] = useState(false)
 
   useEffect(() => {
-    if (formCreated) return
-    const timer = setTimeout(() => setTimedOut(true), FORM_LOAD_TIMEOUT_MS)
+    if (error) {
+      setShowFallback(true)
+      return
+    }
+    const timer = setTimeout(() => {
+      const el = formRef.current
+      if (el && el.offsetHeight < MIN_FORM_HEIGHT_PX) {
+        setShowFallback(true)
+      }
+    }, FORM_LOAD_TIMEOUT_MS)
     return () => clearTimeout(timer)
-  }, [formCreated])
-
-  const showFallback = error || (timedOut && !formCreated)
+  }, [error])
 
   return (
     <>
@@ -57,10 +65,12 @@ const MigrateSaving = (props) => {
             <div className={'col col--6 margin-vert--md'}>
               <div className={`card ${styles.hubForm}`}>
                 <div className="card__body">
-                  <div id="my-hubspot-form">
-                    {!formCreated && !showFallback && <p className="text--center">Loading...</p>}
-                    {showFallback && !formCreated && <FormBlockedFallback />}
+                  <div id="my-hubspot-form" ref={formRef}>
+                    {!formCreated && !error && !showFallback && (
+                      <p className="text--center">Loading...</p>
+                    )}
                   </div>
+                  {showFallback && <FormBlockedFallback />}
                 </div>
               </div>
             </div>
