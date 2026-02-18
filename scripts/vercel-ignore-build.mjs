@@ -8,8 +8,24 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'data/case-study',
   'data/faqs',
   'data-assets',
-  '.github/workflows',
-  'scripts',
+  '.github',
+  '.husky',
+  '.vscode',
+  'tests',
+  'reports',
+  'faq',
+  'scripts/vercel-ignore-build.mjs',
+  'scripts/sync-content-to-strapi.js',
+  'scripts/update-pr-comment.js',
+  'scripts/check-doc-redirects.js',
+  'scripts/check-docs-metadata.js',
+  'scripts/clean-guides-related-json.js',
+  'scripts/migrate-assets.js',
+  'scripts/update-guides-related.js',
+  'CONTRIBUTING.md',
+  'README.md',
+  'LICENSE.md',
+  'AGENTS.md',
   '.gitignore',
 ]
 
@@ -52,11 +68,15 @@ function fetchJSON(url) {
           res.resume()
           return
         }
+
         let data = ''
         res.on('data', (chunk) => (data += chunk))
         res.on('end', () => {
           try {
-            resolve(JSON.parse(data))
+            const linkHeader = res.headers['link'] || ''
+            const nextMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/)
+            const nextUrl = nextMatch ? nextMatch[1] : null
+            resolve({ body: JSON.parse(data), nextUrl })
           } catch (e) {
             reject(e)
           }
@@ -67,9 +87,18 @@ function fetchJSON(url) {
 }
 
 async function getChangedFilesFromAPI() {
-  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_SLUG}/pulls/${PR_ID}/files?per_page=100`
-  const files = await fetchJSON(url)
-  return files.map((f) => f.filename).filter(Boolean)
+  const files = []
+  let url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_SLUG}/pulls/${PR_ID}/files?per_page=100`
+
+  while (url) {
+    const { body, nextUrl } = await fetchJSON(url)
+    for (const f of body) {
+      if (f.filename) files.push(f.filename)
+    }
+    url = nextUrl
+  }
+
+  return files
 }
 
 async function getChangedFiles() {
@@ -77,6 +106,7 @@ async function getChangedFiles() {
     return gitDiff('HEAD~1 HEAD')
   }
 
+  // Always assume squash merge, if the merge strategy is changed, this will need to be updated
   if (VERCEL_ENV === 'production') {
     return gitDiff('HEAD~1 HEAD')
   }
