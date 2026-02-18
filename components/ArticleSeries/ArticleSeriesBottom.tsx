@@ -11,10 +11,14 @@ type ArticleLink = {
 type ArticleSeriesProps = {
   seriesName: string
   seriesOverviewHref?: string
-  currentPart: number
-  totalParts: number
+  currentPart: number | string
+  totalParts: number | string
   previous?: ArticleLink | null
   next?: ArticleLink | null
+  previousTitle?: string
+  previousHref?: string
+  nextTitle?: string
+  nextHref?: string
   className?: string
 }
 
@@ -25,10 +29,20 @@ export default function ArticleSeriesBottom({
   totalParts,
   previous,
   next,
+  previousTitle,
+  previousHref,
+  nextTitle,
+  nextHref,
   className,
 }: ArticleSeriesProps) {
-  const showPrevious = Boolean(previous)
-  const showNext = Boolean(next)
+  const part = Number(currentPart)
+  const total = Number(totalParts)
+  const prevLink =
+    previous ??
+    (previousTitle && previousHref ? { title: previousTitle, href: previousHref } : null)
+  const nextLink = next ?? (nextTitle && nextHref ? { title: nextTitle, href: nextHref } : null)
+  const showPrevious = Boolean(prevLink)
+  const showNext = Boolean(nextLink)
 
   return (
     <div
@@ -38,18 +52,18 @@ export default function ArticleSeriesBottom({
       )}
     >
       {/* Next Article Section */}
-      {showNext && next ? (
+      {showNext && nextLink ? (
         <Link
-          href={next.href}
+          href={nextLink.href}
           className="group block p-4 no-underline transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 sm:p-6"
         >
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Next in "{seriesName}" (Part {currentPart + 1} of {totalParts})
+                Next in "{seriesName}" (Part {part + 1} of {total})
               </p>
               <h3 className="mt-1 line-clamp-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                {next.title}
+                {nextLink.title}
               </h3>
             </div>
             <ArrowRight className="ml-4 h-5 w-5 flex-shrink-0 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-500 dark:group-hover:text-blue-400" />
@@ -68,9 +82,9 @@ export default function ArticleSeriesBottom({
 
       {/* Footer for Previous & Full Series */}
       <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50/50 px-4 py-3 text-sm dark:border-gray-600 dark:bg-gray-700/30 sm:px-6">
-        {showPrevious && previous ? (
+        {showPrevious && prevLink ? (
           <Link
-            href={previous.href}
+            href={prevLink.href}
             className="group flex items-center font-medium text-gray-600 no-underline transition-colors hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
           >
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
