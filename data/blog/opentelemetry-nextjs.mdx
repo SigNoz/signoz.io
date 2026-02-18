@@ -2,7 +2,7 @@
 
 title: Monitor NextJS with OpenTelemetry - Traces, Metrics, and Logs
 slug: opentelemetry-nextjs
-date: 2025-06-23
+date: 2026-02-18
 tags: [OpenTelemetry, NextJS, JavaScript]
 authors: [yuvraj]
 description: This in-depth guide walks you through how to instrument your Next.js application using OpenTelemetry. Learn how to collect traces, metrics, and logs—and send them to Jaeger or SigNoz for complete observability.
@@ -20,40 +20,47 @@ keywords: [opentelemetry,nextjs,opentelemetry nextjs,javascript,apm tools,applic
   nextHref="/blog/opentelemetry-nextjs-use-cases"
 />
 
-Vercel gives you some observability out of the box for your NextJS application: function logs, perf insights, basic metrics. But as your app grows, the cracks start showing.
+Vercel gives you some observability out of the box for your NextJS application: function logs, perf insights, basic metrics. While these might be enough for you initially, these metrics and insights aren't enough for a modern application that interacts with multiple complex integrations, such as a distributed system, or even LLMs, as basically all applications in 2026 rely on AI in some form.
+
+As an engineer interacting with, or as a decision maker for engineering systems, you should be aware of Vercel's observability offering and where it can potentially fall short for your needs.<br />
+Once done, you can recognize the next steps forward to ensure you have an observability system that scales as your business needs -- and inevitably, the application complexity -- do. For the purpose of this write-up, we'll showcase how NextJS integrates with OpenTelemetry.
 
 ## Where Vercel Falls Short
 
+Following are some key aspects where Vercel lacks the features we expect to see in a robust observability platform:
+
 - **No End-to-End Traces**: You get function-level timings, but not the full request lifecycle across middleware, DB calls, and third-party APIs.
-- **Locked In**: Logs and metrics stay tied to Vercel. Want to move infra or test locally? Too bad.
+- **Platform Lock-In**: Logs and metrics stay tied to Vercel. Want to move infra or test locally? Too bad, you must make do without it, and lose critical insights into application behaviour.
 - **Zero Custom Instrumentation**: Can’t trace auth flow timing, cache performance, or business-critical logic.
-- **No Service Correlation**: Can’t trace calls across microservices, queue workers, or even a database hop.
-- **Weak Debug Context**: No slow query breakdowns. No cache hit/miss metrics. No idea why stuff is slow.
+- **No Service Correlation**: Can’t trace calls across microservices, queue workers, or other components in a distributed system.
+- **Weak Debug Context**: No slow query breakdowns. No cache hit/miss metrics. No idea why stuff is slow. This remains a persistent problem as there is no scope for custom instrumentation.
 
-At this point, you’ll likely explore Jaeger or Datadog. But:
+At this point, you’ll research, understand [observability in detail](https://signoz.io/guides/what-is-observability/), likely explore Jaeger or Datadog. But:
 
-- **Jaeger**: Great for tracing, useless for metrics and logs.
-- **Datadog**: Full-featured—but don’t blink, or your bill will triple.
+- **Jaeger**: Great for tracing, lacks support for metrics and logs. You would have to juggle between multiple tools and lack correlation between traces, metrics, and logs.
+- **Datadog**: Full-featured, but don’t blink, or [*your bill will triple*](https://signoz.io/blog/datadog-pricing/).
+
+<Figure src="/img/blog/common/datadog-pricing.webp" alt="Datadog is feature-rich but prone to pricing spikes." caption="Datadog is feature-rich but prone to pricing spikes." link="https://www.reddit.com/r/devops/comments/1ok48jx/datadog_suddenly_increasing_charges/" sourceText="Reddit" />
 
 This guide walks through how to instrument a Next.js app using OpenTelemetry, explains Jaeger’s limits, and shows how SigNoz gives you a complete [observability pipeline](https://signoz.io/guides/observability-pipeline/)—without breaking the bank.
 
-## Why Even Bother Instrumenting Next.js?
+## Why Even Bother Instrumenting Next.js Applications?
 
-You might think: “My app’s just pages and API routes. Why trace anything?”
+You might think: “My app’s just pages and API routes. Why should I trace anything?”
 
-But Next.js isn’t simple. It just *looks* simple.
+But while it seems simple on the surface, Next.js hides layers of complexity behind its elegant API design. It's important to be aware of the components that power your web applications, and the possible environments on which these components live, to build features that scale.
 
 ### The Hidden Complexity
 
-Next.js runs on multiple layers:
+Checking the internals, you will see that Next.js interacts with multiple layers:
 
-- **Multiple environments -** Node? Edge? Browser? each with its own quirks.
-- **Hybrid rendering**: SSR, SSG, ISR—each with different bottlenecks.
-- **Middleware**: Runs on every request.
-- **API routes**: Mini backends.
-- **Client/server boundaries**: Blurred, dynamic, often hard to trace.
+- **Multiple environments**: Next.js runs on Node, Edge and the Browser environments. Each of these has its own quirks that require careful management.
+- **Hybrid rendering**: SSR, SSG, ISR—all of these make some trade-offs and have different bottlenecks.
+- **Middleware**: The middleware interacts with each request that comes into the system. User-defined rules and behaviour affect how the framework handles requests and their respective responses.
+- **API Routers**: Has two options: the [App Router](https://nextjs.org/docs/app) and the [Pages Router](https://nextjs.org/docs/pages),that follow distinct implementation patterns.
+- **Client/server boundaries**: Boundaries between client and server components are often blurred, dynamic, and hard to trace. Functionalities in client components might not be available in server components and vice-versa.
 
-Without instrumentation, you're flying blind.
+So, when you lack instrumentation for your Next.js applications, you are essentially flying blind, and are prone to errors that would be tough to contextualize, and correlate otherwise. For example, redirection from  an application's home page to the `Choose Project` section, based on the user authorization status, could cause a duplicate API call due to state mismatch. Without observability into your application's web interactions, you might not be able to correlate the duplicate API call with the state mismatch easily. Whereas, instrumentation would showcase all operations that the application makes, under a [single trace](https://signoz.io/blog/distributed-tracing/).
 
 ## Real Scenarios Where Tracing Saves Hours
 
