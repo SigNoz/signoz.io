@@ -134,7 +134,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 npm run dev
 ```
 
-Output should look like:
+The output should look like:
 
 ```
 ▲ Next.js 15.3.3 (Turbopack)
@@ -156,7 +156,7 @@ Open `http://localhost:3000` and test signup, login, and protected routes.
 - **External APIs**: Supabase
 - **Middleware**: You can add some, we’ll instrument it later
 
-This isn’t “hello world.” It’s mimics production-grade complexity—ideal for tracing, metrics, and debugging in the real world.
+This template project mimics production-grade complexity—real auth, real DB ops, real external APIs. As traces excel at visualizing complex communications among multiple components, it's an ideal choice for our use-case.
 
 Note: In this guide, we will be using different ports (`3000`, `3001`) across the sections. Ensure you are using the port as per your system.
 
@@ -214,7 +214,7 @@ Because it just works—with minimal boilerplate.
 
 ### What If You Want Full Control?
 
-Then go manual:
+To gain complete control over the instrumentation process, and to capture custom business logic, you can manually instrument your Next.js application:
 
 ```
 // For advanced users
@@ -269,25 +269,25 @@ All spans follow OpenTelemetry’s <a href="https://opentelemetry.io/docs/specs/
 
 ### Default Span Types
 
-1. **HTTP Requests**
+1.  **HTTP Requests**
 
 **Type:** `BaseServer.handleRequest`
 
 **What you get:** method, route, status, total duration
 
-2. **Route Rendering**
+2.  **Route Rendering**
 
 **Type:** `AppRender.getBodyResult`
 
 **Tells you:** how long server-side rendering took
 
-3. **API Route Execution**
+3.  **API Route Execution**
 
 **Type:** `AppRouteRouteHandlers.runHandler`
 
 **Covers:** custom handlers in `app/api/`
 
-4. **Fetch Requests**
+4.  **Fetch Requests**
 
 **Type:** `AppRender.fetch`
 
@@ -295,13 +295,13 @@ All spans follow OpenTelemetry’s <a href="https://opentelemetry.io/docs/specs/
 
 **Tip:** disable with `NEXT_OTEL_FETCH_DISABLED=1`
 
-5. **Metadata Generation**
+5.  **Metadata Generation**
 
 **Type:** `ResolveMetadata.generateMetadata`
 
 **Tracks:** SEO-related dynamic metadata costs
 
-6. **Component Loading**
+6.  **Component Loading**
 
 **Types:**
 
@@ -311,15 +311,15 @@ All spans follow OpenTelemetry’s <a href="https://opentelemetry.io/docs/specs/
 
 **Insight:** Which modules are loaded, how long it takes
 
-7. **Server Response Start**
+7.  **Server Response Start**
 
 **Type:** `NextNodeServer.startResponse`
 
 **Why it matters:** measures TTFB (Time to First Byte)
 
-8. **Pages Router Support** (legacy)
+8.  **Pages Router Support** (legacy)
 
-Still using `getServerSideProps` or `getStaticProps`? Next.js instruments those too.
+OpenTelemetry's Next.js instrumentation supports either routing type, meaning you don't lose insights into existing applications already built on the Pages Router.
 
 ### Why This Matters
 
@@ -331,7 +331,7 @@ Without writing a single line of tracing code, you now get:
 - Component/module load times
 - TTFB and response latency
 
-It’s a solid start—but you still need somewhere better than Jaeger to actually *work with* these traces at scale.
+That's a solid baseline—but to actually work with these traces at scale, you need a backend that can store, query, and surface them meaningfully.
 
 ### Debugging with Env Variables
 
@@ -437,9 +437,10 @@ docker compose ps
 You should see:
 
 - OpenTelemetry Collector (ports 4317, 4318)
-- Jaeger UI: <a href="http://localhost:16686/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:16686</a>
-- Zipkin UI: <a href="http://localhost:9411/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:9411</a>
-- Prometheus: <a href="http://localhost:9090/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:9090</a>
+
+- Jaeger UI: `localhost:16686`
+- Zipkin UI: `localhost:9411`
+- Prometheus: `localhost:9090`
 
 ## Configure Next.js to Export Traces
 
@@ -492,10 +493,10 @@ info  Traces  {"resource spans": 2, "spans": 23}
 
 ## View Traces in Jaeger
 
-1. Go to <a href="http://localhost:16686/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:16686</a>
-2. Select **`nextjs-observability-demo`** in the dropdown
-3. Click **Find Traces**
-4. Click any trace to view its full request flow
+1.  Go to `localhost:16686`
+2.  Select **`nextjs-observability-demo`** in the dropdown
+3.  Click **Find Traces**
+4.  Click any trace to view its full request flow
 
 <Figure src="/img/blog/2025/06/opentelemetry-nextjs-image.webp" alt="Example NextJS trace in Jaeger" caption="Example NextJS trace in Jaeger" />
 
@@ -508,7 +509,6 @@ info  Traces  {"resource spans": 2, "spans": 23}
 | No traces in Jaeger | Missing env vars | Check `.env.local` for correct `OTEL_EXPORTER_OTLP_...` values |
 | Docker doesn’t start | Docker Desktop not running | `open -a Docker` (macOS) or start it manually |
 
-
 Now that traces are flowing and visualized, we’ll look at **how to interpret them**—what each span tells you, and how to drill into performance issues in your Next.js stack using real trace data.
 
 ### Useful Jaeger Features
@@ -518,16 +518,18 @@ Now that traces are flowing and visualized, we’ll look at **how to interpret t
 - **Direct links** — share traces with teammates
 - **Export support** — for deeper analysis
 
-### But Here's the Catch
+### Where Jaeger Falls Short
 
-Jaeger is great—until it isn’t.
+Jaeger covers the core use case well. But once you're in production and need metrics, alerting, or log correlation alongside your traces, you'll hit its ceiling fast.
 
-|  What It Does Well | ❌ What It Lacks |
-| --- | --- |
-| Visualize request flow | No dashboards |
-| Drill into trace timings | No metrics or alerts |
-| Debug route/API latency | No log correlation |
-| Understand call dependencies | No business KPI visibility |
+| Capability | Jaeger | SigNoz |
+| --- | --- | --- |
+| Distributed tracing | ✅ | ✅ |
+| Metrics dashboard | ❌ | ✅ |
+| Log aggregation + correlation | ❌ | ✅ |
+| Real-time alerting | ❌ | ✅ |
+| Long-term storage | ❌ | ✅ |
+| Custom dashboards / KPIs | ❌ | ✅ |
 
 We need more than just a trace viewer. In production, you want:
 
@@ -542,20 +544,7 @@ Let’s go.
 
 ## Sending Data to SigNoz: Production-Ready Observability
 
-Jaeger is great for local debugging—but when you move to production, you need more: metrics, logs, alerting, dashboards. That’s where [SigNoz](https://signoz.io/) comes in.
-
-### Why SigNoz Over Jaeger?
-
-| Capability | Jaeger | SigNoz  |
-| --- | --- | --- |
-| Distributed tracing | ✅ | ✅ |
-| Metrics dashboard | ❌ | ✅ |
-| Log aggregation + correlation | ❌ | ✅ |
-| Real-time alerting | ❌  | ✅ |
-| Long-term storage | ❌ | ✅ |
-| Custom dashboards / KPIs | ❌ | ✅ |
-
-You get everything Jaeger does, plus actual production monitoring.
+Jaeger works well for local debugging, but production demands more — metrics, log correlation, alerting, and dashboards that your team can actually act on. That's where [SigNoz](https://signoz.io/) comes in.
 
 ## Updating the Collector to Send Data to SigNoz
 
@@ -571,7 +560,6 @@ SIGNOZ_INGESTION_KEY=your-signoz-key-here
 ```
 
 Note: Create an account on [SigNoz Cloud](https://signoz.io/teams/) and get the ingestion key and region from the settings page.
-
 
 ### Step 2: Modify `otel-collector-config.yaml`
 
@@ -594,7 +582,6 @@ service:
       exporters: [debug, prometheus, otlp/signoz]
 ```
 
-
 ### Step 3: Update `docker-compose.yaml`
 
 Pass SigNoz credentials as environment vars:
@@ -604,8 +591,6 @@ environment:
   - SIGNOZ_ENDPOINT=${SIGNOZ_ENDPOINT}
   - SIGNOZ_INGESTION_KEY=${SIGNOZ_INGESTION_KEY}
 ```
-
-
 
 ### Step 4: Restart Collector
 
@@ -626,8 +611,6 @@ You should see:
 Successfully exported trace data to SigNoz
 ```
 
-
-
 ## Generate Traffic to Test
 
 ```bash
@@ -637,17 +620,13 @@ curl http://localhost:3001/auth/login
 curl http://localhost:3001/nonexistent
 ```
 
-
-
 ## View in SigNoz
 
-1. Head to your [SigNoz dashboard](https://signoz.io/teams/)
-2. Check **Services** – you should see `nextjs-observability-demo`
-3. Go to **Traces and Select** one to visualize it
+1.  Head to your [SigNoz dashboard](https://signoz.io/teams/)
+2.  Check **Services** – you should see `nextjs-observability-demo`
+3.  Go to **Traces and Select** one to visualize it
 
 <Figure src="/img/blog/2025/06/opentelemetry-nextjs-image%201.webp" alt="SigNoz Trace Details Page with Support for over a million span." caption="SigNoz Trace Details Page with Support for over a million span." />
-
-
 
 ## Alternatively: Direct Export to SigNoz
 
@@ -686,7 +665,7 @@ export function register() {
 
 ## Exploring the Out-of-the-Box APM in SigNoz
 
-Now that your Next.js app is streaming traces to SigNoz, you’ll notice something right away: this isn’t just a Jaeger clone with better UI. 
+Now that your Next.js app is streaming traces to SigNoz, the first thing you'll notice is that the APM view is already populated — latency percentiles, error rates, endpoint breakdown — without any additional configuration.
 
 SigNoz ships with full-blown APM (Application Performance Monitoring) capabilities out of the box - without you having to write a single custom metric.
 
@@ -696,7 +675,7 @@ That means no YAML spelunking, no manual dashboard setups—just useful insights
 
 ### What Makes SigNoz APM Actually Useful?
 
-Most APMs either overload you with graphs or bury useful data behind paywalls. SigNoz hits the sweet spot: high-fidelity insights derived directly from [OpenTelemetry traces](https://signoz.io/blog/opentelemetry-spans/), backed by high performing columnar database for blazing-fast queries and dashboards that update in near real-time.
+SigNoz derives its APM metrics directly from [OpenTelemetry traces](https://signoz.io/blog/opentelemetry-spans/), stored in a columnar database built for fast aggregations. Latency percentiles, error rates, and endpoint breakdowns update in near real-time as traffic flows through.
 
 You get:
 
@@ -705,7 +684,7 @@ You get:
 - Database and external API performance
 - Auto-discovered endpoints
 
-No extra config. No magic wrappers. Just signal.
+All of this comes from the same trace data you're already sending — no extra instrumentation, no separate metric pipelines.
 
 ### From Spikes to Spans in 3 Clicks
 
@@ -715,7 +694,7 @@ Let’s say you see a latency spike around 2:45 PM. Instead of guessing, you:
 2. SigNoz filters down to relevant traces
 3. You spot a rogue DB query eating 2.1 seconds
 
-No guesswork. No slow log tailing. Just trace → span → fix.
+The spike on the chart links directly to the traces that caused it. From there, you drill into the spans, find the slow query, and build intutition on why it happened it in the first place.
 
 ```json
 "spans": [
@@ -730,8 +709,6 @@ No guesswork. No slow log tailing. Just trace → span → fix.
 If your app calls Supabase, Stripe, or any third-party API, you’ll see how long those calls take, how often they fail, and where they sit in your request timeline.
 
 Same goes for your database queries: SigNoz shows frequency, duration, and highlights outliers as slow queries—without needing a separate DB monitoring solution.
-
-
 
 ## Next: Visualizing + Building Dashboards in SigNoz
 
