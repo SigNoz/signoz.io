@@ -16,6 +16,7 @@ import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX } from 'next-mdx-remote/rsc'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -23,7 +24,7 @@ const layouts = {
   ComparisonsLayout,
 }
 
-export const revalidate = 0
+export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
 export async function generateMetadata({

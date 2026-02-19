@@ -1,5 +1,3 @@
-'use client'
-
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
 import { allBlogs, allGuides, type Blog, type Guide } from 'contentlayer/generated'
