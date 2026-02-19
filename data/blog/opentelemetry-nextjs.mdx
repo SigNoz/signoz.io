@@ -124,9 +124,13 @@ cp .env.example .env.local
 Update `.env.local`:
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your_supabase_publishable_key>
 ```
+
+<KeyPointCallout title="Understanding Publishable Keys">
+Supabase replaced introduced Publishable Keys as the default alternative in June 2025 as a more secure and convenient method of using API Keys. <a href="https://supabase.com/changelog?next=Y3Vyc29yOnYyOpK0MjAyNC0wOS0xM1QxNTowMDoyOVrOAG2JYw==&restPage=2#whats-the-change" target="_blank" rel="noopener noreferrer nofollow">The changelog</a> describes it in more detail.
+</KeyPointCallout>
 
 ### Test it Locally
 
@@ -137,11 +141,15 @@ npm run dev
 The output should look like:
 
 ```
-▲ Next.js 15.3.3 (Turbopack)
-- Local:        http://localhost:3000
-✓ Ready in 855ms
-GET /auth/sign-up 200 in 491ms
-GET /protected 200 in 665ms
+▲ Next.js 16.1.6 (Turbopack, Cache Components)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.3:3000
+- Environments: .env.local
+
+✓ Starting...
+✓ Ready in 712ms
+ GET / 200 in 580ms (compile: 275ms, proxy.ts: 100ms, render: 206ms)
+ GET /auth/sign-up 200 in 289ms (compile: 269ms, proxy.ts: 7ms, render: 13ms)
 ```
 
 Open `http://localhost:3000` and test signup, login, and protected routes.
@@ -158,7 +166,7 @@ Open `http://localhost:3000` and test signup, login, and protected routes.
 
 This template project mimics production-grade complexity—real auth, real DB ops, real external APIs. As traces excel at visualizing complex communications among multiple components, it's an ideal choice for our use-case.
 
-Note: In this guide, we will be using different ports (`3000`, `3001`) across the sections. Ensure you are using the port as per your system.
+Note: In this guide, we will be using different ports (`3000`, `3000`) across the sections. Ensure you are using the port as per your system.
 
 ## Setting Up OpenTelemetry in Next.js
 
@@ -235,7 +243,7 @@ Start your dev server:
 npm run dev
 ```
 
-You should see something like:
+Depending on the Next.js version, you might see something like:
 
 ```
 ✓ Compiled instrumentation Node.js in 157ms
@@ -243,10 +251,10 @@ You should see something like:
 ✓ Ready in 1235ms
 ```
 
-Trigger a trace:
+Now, trigger a trace by making a web request:
 
 ```bash
-curl http://localhost:3001/protected
+curl http://localhost:3000/protected
 ```
 
 ### What Gets Instrumented Automatically?
@@ -366,7 +374,7 @@ cd opentelemetry-collector-dev-setup
 
 ### 2. Update the Collector Config (Important)
 
-The default config may be outdated. Replace `otel-collector-config.yaml` with the following updated version:
+The default config may be outdated. Replace the existing configuration `otel-collector-config.yaml` with the following:
 
 ```yaml
 receivers:
@@ -463,10 +471,30 @@ npm run dev
 You should see logs like:
 
 ```
-✓ Compiled instrumentation Node.js in 157ms
-✓ Compiled instrumentation Edge in 107ms
-@vercel/otel/otlp: onSuccess 200 OK
+▲ Next.js 16.1.6 (Turbopack, Cache Components)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.3:3000
+- Environments: .env.local
 
+✓ Starting...
+@opentelemetry/api: Registered a global for diag v1.9.0.
+@vercel/otel: Configure context manager: default
+@opentelemetry/api: Registered a global for context v1.9.0.
+da found resource. r {
+  _rawAttributes: [],
+  _asyncAttributesPending: false,
+  _schemaUrl: undefined,
+  _memoizedAttributes: undefined
+}
+@vercel/otel: Configure propagators: tracecontext, baggage, vercel-runtime
+@vercel/otel: Configure sampler:  always_on
+@vercel/otel: Configure trace exporter:  http/protobuf http://localhost:4318/v1/traces headers: <none>
+@vercel/otel/otlp: onInit
+@opentelemetry/api: Registered a global for trace v1.9.0.
+@opentelemetry/api: Registered a global for propagation v1.9.0.
+@vercel/otel: Configure instrumentations: fetch undefined
+@vercel/otel: started nextjs-observability-demo nodejs
+✓ Ready in 491ms
 ```
 
 ## Test It
@@ -555,8 +583,8 @@ Let's update the existing `otel-collector` setup to export traces and metrics to
 Update your `.env` file in `opentelemetry-collector-dev-setup`:
 
 ```bash
-SIGNOZ_ENDPOINT=ingest.us.signoz.cloud:443       # change 'us' if needed
-SIGNOZ_INGESTION_KEY=your-signoz-key-here
+SIGNOZ_ENDPOINT=ingest.us.signoz.cloud:443       # change 'us' to another region if needed
+SIGNOZ_INGESTION_KEY=<your-signoz-key-here>
 ```
 
 Note: Create an account on [SigNoz Cloud](https://signoz.io/teams/) and get the ingestion key and region from the settings page.
@@ -614,10 +642,10 @@ Successfully exported trace data to SigNoz
 ## Generate Traffic to Test
 
 ```bash
-curl http://localhost:3001/
-curl http://localhost:3001/protected
-curl http://localhost:3001/auth/login
-curl http://localhost:3001/nonexistent
+curl http://localhost:3000/
+curl http://localhost:3000/protected
+curl http://localhost:3000/auth/login
+curl http://localhost:3000/nonexistent
 ```
 
 ## View in SigNoz
