@@ -23,6 +23,7 @@ import {
   SiGo,
   SiTemporal,
   SiOpenai,
+  SiSupabase,
   SiOllama,
 } from 'react-icons/si'
 import {
@@ -479,6 +480,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Supabase',
+    href: '/docs/dashboards/dashboard-templates/supabase',
+    icon: <SiSupabase className="h-7 w-7 text-green-500" />,
+    clickName: 'Supabase Dashboard Template',
   },
   {
     name: 'Temporal Agents',
