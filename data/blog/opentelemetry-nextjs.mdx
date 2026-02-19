@@ -41,7 +41,7 @@ Following are some key aspects where Vercel lacks the features we expect to see 
 - **No Service Correlation**: Can’t trace calls across microservices, queue workers, or other components in a distributed system.
 - **Weak Debug Context**: No slow query breakdowns. No cache hit/miss metrics. No idea why stuff is slow. This remains a persistent problem as there is no scope for custom instrumentation.
 
-At this point, you’ll research, understand [observability in detail](https://signoz.io/guides/what-is-observability/), likely explore Jaeger or Datadog. But:
+At this point, you’ll research and understand [observability in detail](https://signoz.io/guides/what-is-observability/), and likely find Jaeger or Datadog. However, both come with meaningful trade-offs:
 
 - **Jaeger**: Great for tracing, lacks support for metrics and logs. You would have to juggle between multiple tools and lack correlation between traces, metrics, and logs.
 - **Datadog**: Full-featured, but don’t blink, or [*your bill will triple*](https://signoz.io/blog/datadog-pricing/).
@@ -106,7 +106,7 @@ So, when you lack instrumentation for your Next.js applications, you are essenti
 
 ## Setup a Real App
 
-Let’s start with something non-trivial. We'll use the official `with-supabase` example - it’s got real user auth, DB reads/writes, and third-party API usage. Exactly the kind of app where observability shines.
+Rather than instrumenting a toy counter app, we'll use the official Next.js `with-supabase` template. Supabase handles auth, database, and storage. So the app has real user sessions, DB reads/writes, and external API calls already configured for us. That gives us meaningful traces to actually look at.
 
 ### Create the App
 
@@ -203,7 +203,7 @@ const nextConfig = {
 
 ### Why Use `@vercel/otel`?
 
-Because it just works—with minimal boilerplate.
+`@vercel/otel` wraps the OpenTelemetry SDK with sensible defaults and handles the Node vs Edge runtime configuration automatically.
 
 **Benefits:**
 
@@ -471,7 +471,7 @@ You should see logs like:
 
 ## Test It
 
-Send a few requests:
+Send a few requests to generate trace data. Hitting different route types gives you a more representative sample:
 
 ```bash
 curl http://localhost:3000
@@ -479,13 +479,13 @@ curl http://localhost:3000/protected
 curl http://localhost:3000/auth/login
 ```
 
-Check collector logs:
+Then check the collector logs to confirm traces are arriving:
 
 ```bash
 docker compose logs otel-collector --tail=10
 ```
 
-Look for:
+You're looking for a line like this — `resource spans` is the number of services that sent data, `spans` is the total operation count:
 
 ```
 info  Traces  {"resource spans": 2, "spans": 23}
@@ -509,7 +509,7 @@ info  Traces  {"resource spans": 2, "spans": 23}
 | No traces in Jaeger | Missing env vars | Check `.env.local` for correct `OTEL_EXPORTER_OTLP_...` values |
 | Docker doesn’t start | Docker Desktop not running | `open -a Docker` (macOS) or start it manually |
 
-Now that traces are flowing and visualized, we’ll look at **how to interpret them**—what each span tells you, and how to drill into performance issues in your Next.js stack using real trace data.
+With traces flowing into Jaeger, you can start using it to explore request flows and spot bottlenecks. Here's what it does well:
 
 ### Useful Jaeger Features
 
@@ -630,7 +630,7 @@ curl http://localhost:3001/nonexistent
 
 ## Alternatively: Direct Export to SigNoz
 
-You *can* send traces directly from the app (skip collector), but it’s not ideal for production:
+If you're prototyping quickly or running in an environment where adding a collector isn't practical, you can send traces directly from the app to SigNoz — skipping the collector entirely:
 
 ```jsx
 import { registerOTel, OTLPHttpJsonTraceExporter } from '@vercel/otel'
@@ -665,11 +665,7 @@ export function register() {
 
 ## Exploring the Out-of-the-Box APM in SigNoz
 
-Now that your Next.js app is streaming traces to SigNoz, the first thing you'll notice is that the APM view is already populated — latency percentiles, error rates, endpoint breakdown — without any additional configuration.
-
-SigNoz ships with full-blown APM (Application Performance Monitoring) capabilities out of the box - without you having to write a single custom metric.
-
-That means no YAML spelunking, no manual dashboard setups—just useful insights, right there, from the moment traces start flowing.
+Now that your Next.js app is streaming traces to SigNoz, the APM view is already populated — latency percentiles, error rates, endpoint breakdown — without any additional configuration. SigNoz derives these metrics directly from the trace data, so there's nothing extra to instrument.
 
 <Figure src="/img/blog/2025/06/opentelemetry-nextjs-image%202.webp" alt="SigNoz out of the box APM" caption="SigNoz out of the box APM" />
 
@@ -710,16 +706,18 @@ If your app calls Supabase, Stripe, or any third-party API, you’ll see how lon
 
 Same goes for your database queries: SigNoz shows frequency, duration, and highlights outliers as slow queries—without needing a separate DB monitoring solution.
 
-## Next: Visualizing + Building Dashboards in SigNoz
+## What's Next: Visualizing Application Data 
 
-In the upcoming articles, we'll explore how to actually use SigNoz to:
+At this point, your Next.js app is fully instrumented — traces flowing through the collector, visible in both Jaeger and SigNoz, with APM metrics derived automatically. You've gone from zero observability to a production-ready setup without writing a single custom metric.
 
-- Find slow endpoints
-- Track API performance
-- Alert on spikes or failures
-- Create dashboards for your team
+In the next part of this series, we'll go deeper into what you can actually *do* with this data:
 
-Let’s observe!
+- Trace 404s, slow external API calls, and unhandled exceptions
+- Build custom dashboards for your team
+- Set up alerts on latency spikes and error rate thresholds
+- Correlate logs with traces for full-context debugging
+
+Let's continue our observability journey!
 
 <ArticleSeriesBottom
   seriesName="OpenTelemetry NextJS Tutorial"
