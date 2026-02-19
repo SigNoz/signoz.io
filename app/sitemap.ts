@@ -21,7 +21,7 @@ const mapChangeFrequency = (
   }
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-static'
 export const revalidate = CMS_REVALIDATE_INTERVAL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -117,6 +117,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'faqs', // Add the main FAQs page
     'opentelemetry',
     'comparisons',
+    'guides',
   ].map((route) => ({
     url: `${siteUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],

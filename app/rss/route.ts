@@ -6,6 +6,7 @@ import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const runtime = 'nodejs'
 export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamic = 'force-static'
 
 const CACHE_CONTROL_HEADER = `s-maxage=${CMS_REVALIDATE_INTERVAL}, stale-while-revalidate=30`
 

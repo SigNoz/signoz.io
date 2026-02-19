@@ -1,8 +1,8 @@
 ---
-date: 2024-06-06
-
-title: Logs Schema and Writing ClickHouse Queries for Building Dashboard Panels.
+date: 2026-02-11
 id: logs_clickhouse_queries
+title: Logs Schema and Writing ClickHouse Queries for Building Dashboard Panels
+description: Learn the SigNoz logs schema and how to write custom ClickHouse queries for building dashboard panels, including queries to find the largest logs for payload auditing.
 ---
 
 At SigNoz we store our data on ClickHouse. In this documentation, we will go through the schema of the logs table and see how we can write clickhouse queries to create different dashboard panels from Logs Data.
@@ -392,25 +392,67 @@ ORDER BY ts ASC;
 
 ```sql
 WITH __resource_filter AS (
-    SELECT fingerprint 
-    FROM signoz_logs.distributed_logs_v2_resource 
+    SELECT fingerprint
+    FROM signoz_logs.distributed_logs_v2_resource
     WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
-SELECT 
+SELECT
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts,
     resource.`service.name`::String as `service.name`,
-    toFloat64(count()) AS value 
-FROM 
-    signoz_logs.distributed_logs_v2  
-WHERE 
+    toFloat64(count()) AS value
+FROM
+    signoz_logs.distributed_logs_v2
+WHERE
     resource_fingerprint GLOBAL IN  __resource_filter AND
-    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND 
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND
     severity_text='ERROR' AND
     `service.name` IS NOT NULL AND
     ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY `service.name`, ts
 ORDER BY ts ASC;
 ```
+
+### Finding the largest individual logs for payload audit
+
+Currently, there isn't a built-in feature to show the top largest individual logs directly in the interface. However, you can use a custom ClickHouse query in a dashboard to identify the largest log entries.
+
+<Admonition type="warning">
+**Important:** Keep queries limited to the last 6 hours for optimal performance. While this query can be slow on large durations, it should return results in a reasonable time when limited to recent data (last day or less).
+</Admonition>
+
+This query calculates the size of each log entry by summing the bytes from the log body and all attributes, then returns the top 10 largest logs:
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint
+    FROM signoz_logs.distributed_logs_v2_resource
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT
+    fromUnixTimestamp64Nano(timestamp) AS log_timestamp,
+    (OCTET_LENGTH(body) +
+     OCTET_LENGTH(toJSONString(attributes_string)) +
+     OCTET_LENGTH(toJSONString(attributes_number)) +
+     OCTET_LENGTH(toJSONString(attributes_bool))) as size_bytes,
+    id
+FROM signoz_logs.distributed_logs_v2
+WHERE
+    timestamp BETWEEN $start_timestamp_nano AND $end_timestamp_nano AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
+    resource_fingerprint GLOBAL IN __resource_filter
+ORDER BY size_bytes DESC
+LIMIT 10
+settings max_threads=5
+```
+
+This query returns:
+- The timestamp of each log
+- The size in bytes (calculated from body and all attributes)
+- The unique ID of the log entry
+
+**To view full log details:**
+
+Once you have the log ID from the query results, use the filter expression `id=<log_id>` in the logs explorer to see the complete details of that specific log entry.
 
 ## Panel Time preference
 

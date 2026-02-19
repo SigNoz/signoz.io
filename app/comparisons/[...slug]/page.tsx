@@ -15,7 +15,8 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
-import { compileMDX } from 'next-mdx-remote/rsc'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -23,8 +24,9 @@ const layouts = {
   ComparisonsLayout,
 }
 
-export const revalidate = 0
+export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -112,7 +114,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     const { content: mdxContent } = await compileMDX({
       source: post?.content,
       components,
-      options: mdxOptions as any,
+      options: mdxOptions as MDXRemoteProps['options'],
     })
     compiledContent = mdxContent
   } catch (error) {

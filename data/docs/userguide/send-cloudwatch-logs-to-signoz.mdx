@@ -240,10 +240,30 @@ After a few minutes (based on your `poll_interval`), verify that logs are appear
 
 **Symptoms**: OTel Collector memory usage grows over time when collecting many log groups.
 
-**Fix**: 
+**Fix**:
 - Reduce the number of log groups by using a more specific prefix
 - Increase the `poll_interval` to reduce polling frequency
 - Use named log groups instead of autodiscovery to limit scope
+
+### Logs are not ordered correctly by timestamp
+
+**Symptoms**: CloudWatch logs appear out of order in SigNoz, especially when multiple log lines from the same log stream have timestamps close together (e.g., CI/CD pipeline logs, CodeBuild logs).
+
+**Root cause**: The AWS CloudWatch receiver uses the timestamp provided by CloudWatch as the event timestamp, which often has lower precision than the actual log entries. This can cause logs from the same CloudWatch log stream to appear out of order, especially when multiple log lines share the same CloudWatch timestamp.
+
+The receiver does not automatically parse or extract timestamps from within the log message content itself. For example, if your CodeBuild logs contain timestamps like `[Container] 2026/01/05 17:52:19.313300`, these more precise timestamps are not used for ordering.
+
+**Fix**: Use [Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse and extract the timestamp from your log payload:
+
+1. Create a pipeline to parse and extract the timestamp from your log message content
+2. Configure the pipeline to set the extracted timestamp as the correct log timestamp
+3. This will allow SigNoz to use the more precise timestamp embedded in your log messages for proper ordering
+
+For detailed instructions on parsing timestamps, see the [Timestamp Parser documentation](https://signoz.io/docs/logs-pipelines/guides/timestamp/).
+
+<Admonition type="info">
+This behavior is expected when using the AWS CloudWatch receiver, as it relies on CloudWatch's event timestamps rather than parsing log content. The limitation comes from how the OpenTelemetry AWS CloudWatch receiver processes the data from the CloudWatch API.
+</Admonition>
 
 </details>
 

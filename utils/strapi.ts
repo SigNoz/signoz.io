@@ -399,10 +399,12 @@ export const fetchMDXContentByPath = async (
           )
         }
 
-        const pagesData = await Promise.all(pagePromises)
-        pagesData.forEach((pageData) => {
-          if (pageData.data && pageData.data.length > 0) {
-            allData = allData.concat(pageData.data)
+        const pagesResults = await Promise.allSettled(pagePromises)
+        pagesResults.forEach((result, idx) => {
+          if (result.status === 'fulfilled' && result.value.data?.length > 0) {
+            allData = allData.concat(result.value.data)
+          } else if (result.status === 'rejected') {
+            console.warn(`Failed to fetch page ${idx + 2} of ${collectionName}:`, result.reason)
           }
         })
       }
