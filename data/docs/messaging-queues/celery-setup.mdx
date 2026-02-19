@@ -1,5 +1,5 @@
 ---
-date: 2026-01-27
+date: 2026-02-19
 title: Monitor Celery
 description: This documentation provides a comprehensive, ready-to-use guide to set up metrics collection for Celery using OpenTelemetry and SigNoz.
 id: celery-setup
@@ -466,16 +466,21 @@ Detailed Celery Traces
 
 ### Worker Online Status Shows 0
 
-If your Celery dashboard shows "Worker Online: 0" even when workers are running, this is because the worker task events are disabled by default. The "Worker Online" status is determined by the `flower_worker_online` metric, which requires the `worker_send_task_events` setting to be enabled.
+If your Celery dashboard shows "Worker Online: 0" even when workers are running, this is likely because task events are disabled by default. The "Worker Online" status relies on the `flower_worker_online` metric from Flower, which requires the `worker_send_task_events` setting to be enabled.
 
-To enable worker online status:
-
-1. Start your Celery worker with the `-E` flag to enable task events:
+To fix this, start your Celery worker with the `-E` flag to enable task events:
 
 ```bash
 celery -A your_app worker --loglevel=info -E
 ```
 
-2. This will allow the dashboard to properly track and display worker online status.
+Alternatively, you can enable task events in your Celery configuration:
 
-For more information, refer to the [Celery configuration documentation](https://docs.celeryq.dev/en/latest/userguide/configuration.html#worker_send_task_events) and [monitoring guide](https://docs.celeryq.dev/en/stable/userguide/monitoring.html#worker-online).
+```python
+# In your Celery configuration
+worker_send_task_events = True
+```
+
+Once enabled, the dashboard will properly track and display worker online status.
+
+For more information, refer to the [Celery configuration documentation](https://docs.celeryq.dev/en/latest/userguide/configuration.html#worker-send-task-events) and [monitoring guide](https://docs.celeryq.dev/en/stable/userguide/monitoring.html#worker-online).
