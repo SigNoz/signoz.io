@@ -4,11 +4,6 @@ import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
-export const dynamicParams = true
-
-export async function generateStaticParams() {
-  return []
-}
 
 export default async function ComparisonsHome() {
   const comparisons = await fetchAllComparisonsForPage()
