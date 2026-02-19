@@ -1299,6 +1299,11 @@ module.exports = () => {
           destination: '/docs/logs-management/send-logs/java-logs/',
           permanent: true,
         },
+        {
+          source: '/comparisons/open-source-datadog-alternatives/',
+          destination: '/blog/open-source-datadog-alternative/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
