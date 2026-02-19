@@ -6,7 +6,7 @@ import type { Comparison } from '../../../types/transformedContent'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
-export const dynamicParams = true
+export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
   title: 'OpenTelemetry Learning Track | SigNoz',

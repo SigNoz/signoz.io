@@ -21,7 +21,7 @@ const mapChangeFrequency = (
   }
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-static'
 export const revalidate = CMS_REVALIDATE_INTERVAL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -5,6 +5,7 @@ import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
+export const dynamic = 'force-static'
 
 export default async function FAQsPage() {
   const isProduction = process.env.VERCEL_ENV === 'production'
