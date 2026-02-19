@@ -26,6 +26,7 @@ const layouts = {
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
