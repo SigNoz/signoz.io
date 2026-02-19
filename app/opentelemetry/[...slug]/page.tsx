@@ -19,7 +19,7 @@ import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
-import { compileMDX } from 'next-mdx-remote/rsc'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
@@ -156,7 +156,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     const { content: mdxContent } = await compileMDX({
       source: content?.content,
       components,
-      options: mdxOptions as any,
+      options: mdxOptions as MDXRemoteProps['options'],
     })
     compiledContent = mdxContent
   } catch (error) {

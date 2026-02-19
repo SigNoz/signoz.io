@@ -15,7 +15,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
-import { compileMDX } from 'next-mdx-remote/rsc'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const defaultLayout = 'ComparisonsLayout'
@@ -114,7 +114,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     const { content: mdxContent } = await compileMDX({
       source: post?.content,
       components,
-      options: mdxOptions as any,
+      options: mdxOptions as MDXRemoteProps['options'],
     })
     compiledContent = mdxContent
   } catch (error) {

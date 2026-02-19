@@ -9,11 +9,9 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
-import { compileMDX } from 'next-mdx-remote/rsc'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
-// import { CaseStudy } from '../../../.contentlayer/generated'
-
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 
 export const revalidate = 0
@@ -129,7 +127,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     const { content: mdxContent } = await compileMDX({
       source: content?.content,
       components,
-      options: mdxOptions as any,
+      options: mdxOptions as MDXRemoteProps['options'],
     })
     compiledContent = mdxContent
   } catch (error) {
