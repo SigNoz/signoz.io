@@ -117,6 +117,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'faqs', // Add the main FAQs page
     'opentelemetry',
     'comparisons',
+    'guides',
   ].map((route) => ({
     url: `${siteUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],
