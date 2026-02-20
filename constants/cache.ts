@@ -1,1 +1,1 @@
-export const CMS_REVALIDATE_INTERVAL = 360 // 6 minutes
+export const CMS_REVALIDATE_INTERVAL = 3600 // 1 hour
