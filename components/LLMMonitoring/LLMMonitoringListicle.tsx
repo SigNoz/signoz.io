@@ -228,6 +228,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'OpenLIT',
   },
   {
+    name: 'OpenRouter',
+    href: '/docs/openrouter-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Monitoring',
+  },
+  {
     name: 'Pipecat',
     href: '/docs/pipecat-monitoring',
     icon: (

@@ -2605,6 +2605,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/openrouter-observability',
+        label: 'OpenRouter',
+        type: 'doc',
+      },
+      {
         route: '/docs/pipecat-monitoring',
         label: 'Pipecat',
         type: 'doc',
