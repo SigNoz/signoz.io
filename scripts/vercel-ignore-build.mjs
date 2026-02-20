@@ -4,6 +4,7 @@ import { execSync } from 'node:child_process'
 import https from 'node:https'
 
 const SKIP_IF_ONLY_CHANGES_IN = [
+  'data/comparisons',
   'data/opentelemetry',
   'data/case-study',
   'data/faqs',
@@ -19,9 +20,6 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'scripts/update-pr-comment.js',
   'scripts/check-doc-redirects.js',
   'scripts/check-docs-metadata.js',
-  'scripts/clean-guides-related-json.js',
-  'scripts/migrate-assets.js',
-  'scripts/update-guides-related.js',
   'CONTRIBUTING.md',
   'README.md',
   'LICENSE.md',
