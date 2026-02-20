@@ -20,7 +20,10 @@ Key changes:
 ## Upgrade Instructions
 
 <Tabs>
-<TabItem value="docker-standalone" label="Docker Standalone" default>
+<TabItem value="docker" label="Docker" default>
+
+<Tabs>
+<TabItem value="docker-standalone" label="Standalone" default>
 
 <Admonition type="info">
 If you are using the default Docker Compose files from the repo, no manual changes are required. The [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone).
@@ -143,7 +146,7 @@ docker ps -a --filter "name=telemetrystore-migrator"
 The container should show status `Exited (0)`.
 
 </TabItem>
-<TabItem value="docker-standalone-ha" label="Docker Standalone (HA)">
+<TabItem value="docker-ha" label="HA">
 
 <Admonition type="info">
 If you are using the default Docker Compose files from the repo, no manual changes are required. The [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone).
@@ -269,7 +272,12 @@ docker ps -a --filter "name=telemetrystore-migrator"
 The container should show status `Exited (0)`.
 
 </TabItem>
+</Tabs>
+</TabItem>
 <TabItem value="docker-swarm" label="Docker Swarm">
+
+<Tabs>
+<TabItem value="docker-swarm-standalone" label="Standalone" default>
 
 <Admonition type="info">
 If you are using the default Docker Compose files from the repo, no manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to deploy the updated stack.
@@ -319,7 +327,6 @@ Add the following service definition. It runs bootstrap, sync, and async migrati
       /signoz-otel-collector migrate async up
     depends_on:
       - clickhouse
-    restart: on-failure
 ```
 
 ### Step 3: Update signoz and otel-collector services
@@ -383,6 +390,135 @@ docker service ps signoz_telemetrystore-migrator
 
 The task should show `Complete` state.
 
+</TabItem>
+<TabItem value="docker-swarm-ha" label="HA">
+
+<Admonition type="info">
+If you are using the default Docker Compose files from the repo, no manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to deploy the updated stack.
+</Admonition>
+
+If you have customized your `docker-compose.ha.yaml`, make the following changes before upgrading:
+
+### Step 1: Remove signoz-schema-migrator and references
+
+Remove the `schema-migrator` entry from the `x-db-depend` anchor:
+
+```diff:docker-compose.ha.yaml
+x-db-depend: &db-depend
+  !!merge <<: *common
+  depends_on:
+    - clickhouse
+    - clickhouse-2
+    - clickhouse-3
+-    - schema-migrator
+```
+
+Remove the `schema-migrator` service definition:
+
+```diff:docker-compose.ha.yaml
+-  schema-migrator:
+-    ...
+```
+
+### Step 2: Add the new telemetrystore-migrator service
+
+Add the following service definition. It runs bootstrap, sync, and async migrations sequentially:
+
+```yaml:docker-compose.ha.yaml
+  telemetrystore-migrator:
+    !!merge <<: *db-depend
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.142.0}
+    container_name: telemetrystore-migrator
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    entrypoint:
+      - /bin/sh
+    command:
+    - -c
+    - |
+      /signoz-otel-collector migrate bootstrap &&
+      /signoz-otel-collector migrate sync up &&
+      /signoz-otel-collector migrate async up
+```
+
+### Step 3: Update signoz and otel-collector services
+
+Apply the following changes to the `signoz` service:
+
+```diff:docker-compose.ha.yaml
+  signoz:
+    ...
+-    command:
+-      - --config=/root/config/prometheus.yml
+    volumes:
+-      - ../common/signoz/prometheus.yml:/root/config/prometheus.yml
+-      - ../common/dashboards:/root/config/dashboards
+      - ./clickhouse-setup/data/signoz/:/var/lib/signoz/
+    environment:
+      ...
+-      - DASHBOARDS_PATH=/root/config/dashboards
+-      - STORAGE=clickhouse
+-      - GODEBUG=netdns=go
+-      - TELEMETRY_ENABLED=true
+-      - DEPLOYMENT_TYPE=docker-swarm
+-      - SIGNOZ_TOKENIZER_JWT_SECRET=secret
+```
+
+Apply the following changes to the `otel-collector` service — it now runs `migrate sync check` as a startup guard. Replace volumes with configs:
+
+```diff:docker-compose.ha.yaml
+  otel-collector:
+    !!merge <<: *db-depend
+    ...
++    entrypoint:
++    - /bin/sh
+    command:
+-      - --config=/etc/otel-collector-config.yaml
+-      - --manager-config=/etc/manager-config.yaml
+-      - --copy-path=/var/tmp/collector-config.yaml
++      - -c
++      - |
++        /signoz-otel-collector migrate sync check &&
++        /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml
+-    volumes:
+-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+-      - ../common/signoz/otel-collector-opamp-config.yaml:/etc/manager-config.yaml
++    configs:
++      - source: otel-collector-config
++        target: /etc/otel-collector-config.yaml
++      - source: otel-manager-config
++        target: /etc/manager-config.yaml
+    environment:
+      ...
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
++      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+-    depends_on:
+-      - clickhouse
+-      - schema-migrator
+-      - signoz
+```
+
+Ensure the top-level `configs:` section includes `otel-collector-config` and `otel-manager-config` (and `clickhouse-*` if using configs for ClickHouse).
+
+### Step 4: Apply the changes
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to deploy the updated stack.
+
+### Step 5: Validate migrations
+
+```bash
+docker service ps signoz_telemetrystore-migrator
+```
+
+The task should show `Complete` state.
+
+</TabItem>
+</Tabs>
 </TabItem>
 <TabItem value="kubernetes" label="Kubernetes">
 
