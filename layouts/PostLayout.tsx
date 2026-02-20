@@ -1,3 +1,5 @@
+'use client'
+
 import '../css/post.css'
 
 import { ReactNode, useRef, useState, useEffect } from 'react'
