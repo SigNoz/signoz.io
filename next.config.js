@@ -1302,6 +1302,13 @@ module.exports = () => {
         {
           source: '/comparisons/open-source-datadog-alternatives/',
           destination: '/blog/open-source-datadog-alternative/',
+          source: '/docs/userguide/logs/',
+          destination: '/docs/logs-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/log-export-methods/',
+          destination: '/docs/logs-management/send-logs/collection-methods/',
           permanent: true,
         },
       ]
