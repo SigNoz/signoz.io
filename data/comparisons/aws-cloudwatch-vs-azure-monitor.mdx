@@ -20,7 +20,7 @@ The strongest argument for either tool is the same. It works best inside its own
 
 ### CloudWatch
 
-CloudWatch is built into the AWS control plane. Most AWS services (EC2, Lambda, RDS, ECS, S3, and others) publish metrics to CloudWatch automatically. You do not need to install agents or configure exporters to get baseline infrastructure visibility for managed services.
+CloudWatch is built into the AWS <Tooltip text="control plane" content="The management layer of a cloud provider that handles creating, configuring, and managing resources. Being built into the control plane means CloudWatch has direct, automatic access to everything running in your AWS account." /> and most AWS services (EC2, Lambda, RDS, ECS, S3, and others) publish metrics to CloudWatch automatically. You do not need to install agents or configure exporters to get baseline infrastructure visibility for managed services.
 
 The integrations go beyond metrics collection. CloudWatch alarms can trigger Auto Scaling policies, Lambda functions, EC2 actions, and SNS notifications directly. EventBridge routes CloudWatch alarm state changes into broader event-driven workflows. IAM controls who can view metrics, query logs, and modify alarms. CloudWatch supports cross-account observability (commonly used with AWS Organizations, but also available for individually linked accounts) so a monitoring account can view metrics, logs, and traces from linked source accounts.
 
@@ -30,13 +30,14 @@ The integrations go beyond metrics collection. CloudWatch alarms can trigger Aut
   caption="CloudWatch automatically collects metrics from AWS services. Each service appears as a namespace in the All Metrics view."
 />
 
-Where CloudWatch is weaker — it is not designed as a cloud-neutral control plane. If you run workloads across AWS and another provider, CloudWatch can ingest custom metrics from external sources, but you lose the zero-setup automatic collection that AWS services get. External metrics require you to publish data through the CloudWatch API or agent, configure custom namespaces, and manage the ingestion pipeline yourself. There are no pre-built dashboards, no automatic alarm recommendations, and no native service map integration for non-AWS resources. Teams with genuine multi-cloud footprints typically need an additional layer to unify their monitoring workflows.
+There are instances where CloudWatch is weaker like it is not designed as a cloud-neutral control plane. If you run workloads across AWS and another provider, CloudWatch can ingest custom metrics from external sources, but you lose the zero-setup automatic collection that AWS services get.
+External metrics require you to publish data through the CloudWatch API or agent, configure custom namespaces, and manage the ingestion pipeline yourself. There are no pre-built dashboards, no automatic alarm recommendations, and no native service map integration for non-AWS resources. Teams with genuine multi-cloud footprints typically need an additional layer to unify their monitoring workflows.
 
 ### Azure Monitor
 
-Azure Monitor is the observability platform for Azure resources, applications, and hybrid environments. It integrates tightly with the Azure resource model. Platform logs from Azure services are routed via diagnostic settings, while agent-based collection (for example, VM guest telemetry via Azure Monitor Agent) is governed by Data Collection Rules (DCRs).
+Azure Monitor is the observability platform for Azure resources, applications, and hybrid environments. It integrates tightly with the Azure resource model. Platform logs from Azure services are routed via <Tooltip text="diagnostic settings" content="An Azure configuration you set up per resource to route its platform-generated logs and metrics to a destination like a Log Analytics workspace. Controls what telemetry gets collected at the platform level." />, while agent-based collection (for example, VM guest telemetry via Azure Monitor Agent) is governed by <Tooltip text="Data Collection Rules (DCRs)" content="Azure's way of defining what data to collect from agents (e.g., running on VMs) and where to send it. They act as filters between your data sources and your Log Analytics workspace, letting you drop low-value data before it's ingested." />.
 
-Azure Monitor respects Azure RBAC (Role-Based Access Control), subscription boundaries, and resource group structures. This makes it easier to enforce access policies, scope monitoring to specific teams, and align observability with existing Azure governance hierarchies.
+Azure Monitor respects Azure RBAC (Role-Based Access Control), <Tooltip text="subscription boundaries" content="Azure subscriptions are billing and access containers. Each subscription holds a set of resources and has its own spending limits and access policies. Monitoring respects these boundaries for access control." />, and <Tooltip text="resource group structures" content="Resource groups are logical containers within an Azure subscription that hold related resources (VMs, databases, etc.) together. They make it easier to manage permissions and costs for a specific project or team." />. This makes it easier to enforce access policies, scope monitoring to specific teams, and align observability with existing Azure governance hierarchies.
 
 <Figure
   src="/img/comparisons/2026/02/aws-cloudwatch-vs-azure-monitor-azure-monitor-portal-overview.webp"
@@ -54,7 +55,7 @@ Both tools cover metrics, logs, and application traces. The differences are in h
 
 **Metrics:** AWS services publish metrics to CloudWatch automatically under service-specific namespaces (AWS/EC2, AWS/Lambda, AWS/RDS, etc.). Custom metrics require explicit publishing through the CloudWatch API or the CloudWatch agent. Metric retention follows a tiered model by granularity: 1-minute data points are retained for 15 days, 5-minute data points for 63 days, and 1-hour data points for 455 days (about 15 months).
 
-**Logs:** CloudWatch Logs collects log data through log groups and log streams. Lambda function logs flow automatically. For EC2 instances and on-premise servers, you install the CloudWatch agent and configure which log files to ship. Log data can be routed via subscription filters to Firehose, Lambda, Kinesis Data Streams, or OpenSearch Service (and from there to S3 through Firehose or Lambda).
+**Logs:** CloudWatch Logs collects log data through <Tooltip text="log groups" content="Containers for logs from the same source (e.g., one per Lambda function or application). Each log group has its own retention settings and access policies." /> and <Tooltip text="log streams" content="Individual sequences of log events within a log group. Each instance, container, or function invocation typically writes to its own log stream." />. Lambda function logs flow automatically. For EC2 instances and on-premise servers, you install the CloudWatch agent and configure which log files to ship. Log data can be routed via <Tooltip text="subscription filters" content="Rules attached to a CloudWatch log group that automatically forward matching log events to another AWS service in real time. Used to stream logs into processing or storage pipelines." /> to Firehose, Lambda, Kinesis Data Streams, or OpenSearch Service (and from there to S3 through Firehose or Lambda).
 
 <Figure
   src="/img/comparisons/2026/02/aws-cloudwatch-vs-azure-monitor-cloudwatch-log-groups-lambda-ec2-flow-aws-console.webp"
@@ -68,7 +69,7 @@ Both tools cover metrics, logs, and application traces. The differences are in h
 
 **Metrics:** Azure Monitor Metrics is a time-series database for Azure platform metrics and custom metrics. Platform metrics from Azure services (VMs, App Services, SQL Database, etc.) are collected automatically. Retention for platform metrics is 93 days. Custom metrics have a separate retention behavior and can be sent via the Azure Monitor ingestion API or OpenTelemetry.
 
-**Logs:** Azure Monitor Logs, powered by Log Analytics workspaces, handles diagnostic logs, activity logs, and custom log data. You configure what data to collect and where to send it through Data Collection Rules (DCRs), which give you granular control over ingestion. DCRs matter for both observability quality and cost control, since they determine what gets ingested into your workspace.
+**Logs:** Azure Monitor Logs, powered by <Tooltip text="Log Analytics workspaces" content="The central data store in Azure Monitor where log data lands and gets queried. Think of it as a database — you route logs into a workspace and run KQL queries against it." />, handles diagnostic logs, activity logs, and custom log data. You configure what data to collect and where to send it through Data Collection Rules (DCRs), which give you granular control over ingestion. DCRs matter for both observability quality and cost control, since they determine what gets ingested into your workspace.
 
 <Figure
   src="/img/comparisons/2026/02/aws-cloudwatch-vs-azure-monitor-azure-monitor-metrics-explorer.webp"
@@ -94,7 +95,7 @@ CloudWatch provides two distinct query interfaces for different data types.
   caption="CloudWatch Logs Insights supports structured queries with filtering, aggregation, and time-series visualization of log data."
 />
 
-**CloudWatch Metrics Insights** supports a SQL-like syntax for querying metrics across namespaces. It is useful for high-cardinality metric analysis, like finding the top 10 EC2 instances by CPU utilization or comparing latency across Lambda functions.
+**CloudWatch Metrics Insights** supports a SQL-like syntax for querying metrics across namespaces. It is useful for <Tooltip text="high-cardinality" content="A metric with many unique dimension combinations (e.g., thousands of unique instance IDs or request paths). More unique combinations means more individual time series to store and bill for." link="https://signoz.io/blog/high-cardinality-data/" /> metric analysis, like finding the top 10 EC2 instances by CPU utilization or comparing latency across Lambda functions.
 
 The investigation gap is context switching. Metrics, logs, and traces live in separate views within the CloudWatch console. During incident triage, you may find yourself jumping between Logs Insights, the Metrics explorer, and X-Ray trace views to build a complete picture. Each tool works well individually, but correlating signals across them takes manual navigation.
 
@@ -110,7 +111,7 @@ KQL supports rich operations: filtering, aggregation, joins, time-series analysi
   caption="KQL queries in Azure Monitor Logs support aggregation, time-series analysis, and inline chart rendering. (Source: Microsoft Azure Docs)"
 />
 
-Azure Monitor can also run KQL queries across multiple Log Analytics workspaces and subscriptions. Cross-tenant querying is also possible when you have delegated access through [Azure Lighthouse](https://learn.microsoft.com/en-us/azure/lighthouse/overview) and appropriate RBAC permissions. This is valuable for organizations running centralized operations teams or managed-service providers that need visibility across different business units or customer environments.
+Azure Monitor can also run KQL queries across multiple Log Analytics workspaces and subscriptions. <Tooltip text="Cross-tenant querying" content="An Azure tenant is a dedicated directory instance, usually representing one organization. Cross-tenant querying lets you search logs across separate organizations' Azure environments — useful for managed-service providers." /> is also possible when you have delegated access through [Azure Lighthouse](https://learn.microsoft.com/en-us/azure/lighthouse/overview) and appropriate RBAC permissions. This is valuable for organizations running centralized operations teams or managed-service providers that need visibility across different business units or customer environments.
 
 Azure Monitor Workbooks add another layer, providing shareable visual reports that combine metrics, logs, and parameter-driven queries into a single view. They serve as investigation templates that teams can reuse during incidents.
 
@@ -149,7 +150,7 @@ The operational challenge at scale is alarm hygiene. Teams that create alarms re
 
 Azure Monitor Alerts provides a unified alerting surface across Azure signals, including platform metrics, log query results, activity log events, and Application Insights data.
 
-Alert rules define the condition, and action groups define what happens when the condition is met. Action groups can route notifications through email, SMS, webhook, Azure Functions, Logic Apps, ITSM connectors, and more. This separation between detection (alert rules) and response (action groups) makes it easier to reuse notification routing across different alert types.
+Alert rules define the condition, and <Tooltip text="action groups" content="Reusable notification bundles in Azure Monitor. An action group defines who gets notified and how (email, SMS, webhook, etc.) when an alert fires. You create them once and attach them to multiple alert rules." /> define what happens when the condition is met. Action groups can route notifications through email, SMS, webhook, Azure Functions, Logic Apps, ITSM connectors, and more. This separation between detection (alert rules) and response (action groups) makes it easier to reuse notification routing across different alert types.
 
 <Figure
   src="/img/comparisons/2026/02/aws-cloudwatch-vs-azure-monitor-azure-monitor-alerts-ui.webp"
@@ -163,13 +164,13 @@ Similar to CloudWatch, the operational challenge is tuning. Broad signal coverag
 
 ## OpenTelemetry and Portability
 
-OpenTelemetry (OTel) is the CNCF standard for vendor-neutral telemetry collection, covering traces, metrics, and logs. Both CloudWatch and Azure Monitor support OpenTelemetry, but the portability outcome depends on how deeply your operational workflows depend on each platform's native constructs.
+OpenTelemetry (OTel) is the <Tooltip text="CNCF" content="Cloud Native Computing Foundation — the open-source organization behind Kubernetes, Prometheus, and OpenTelemetry. CNCF governance is why OTel is considered a vendor-neutral standard." /> standard for vendor-neutral telemetry collection, covering traces, metrics, and logs. Both CloudWatch and Azure Monitor support OpenTelemetry, but the portability outcome depends on how deeply your operational workflows depend on each platform's native constructs.
 
 ### CloudWatch
 
 AWS maintains the AWS Distro for OpenTelemetry (ADOT), an AWS-supported distribution of the OpenTelemetry Collector and SDKs. ADOT lets you instrument applications using standard OTel APIs and route telemetry to CloudWatch, X-Ray, or other backends.
 
-If your instrumentation stays OTel-native (using OTel SDKs and semantic conventions rather than AWS-specific SDK calls), your application code remains portable. You can switch backends by changing the collector configuration without re-instrumenting your services.
+If your instrumentation stays OTel-native (using OTel SDKs and <Tooltip text="semantic conventions" content="Standardized attribute names defined by OpenTelemetry (e.g., http.method instead of a custom name). Using these conventions means any OTel-compatible backend interprets your data the same way." /> rather than AWS-specific SDK calls), your application code remains portable. You can switch backends by changing the collector configuration without re-instrumenting your services.
 
 The lock-in risk lives in the operations layer. If your team builds runbooks, dashboards, alarm pipelines, and investigation workflows around CloudWatch-specific features (Logs Insights syntax, CloudWatch alarm actions, CloudWatch dashboards), those workflows do not transfer to another platform. The application telemetry may be portable, but the operational muscle memory is not.
 
@@ -191,12 +192,12 @@ CloudWatch pricing is multi-dimensional. You are billed across several independe
 
 The prices below are for US East (N. Virginia) as of February 2026. CloudWatch pricing is region-specific, so rates differ across AWS regions. Always verify against the [official AWS CloudWatch pricing page](https://aws.amazon.com/cloudwatch/pricing/) for your region.
 
-- **Custom metrics:** $0.30 per metric per month (first 10,000), decreasing at higher volumes. Most basic monitoring metrics sent by AWS services by default are free, but detailed monitoring and custom metrics are billed.
-- **Logs ingestion:** Starts at $0.50 per GB after the first 5 GB/month free (rates and tiering vary by log type and region).
-- **Logs storage:** $0.03 per GB-month for CloudWatch Logs storage (pricing can vary by log class and region). Logs stored beyond the default "never expire" retention setting accumulate costs indefinitely.
-- **Logs Insights queries:** $0.005 per GB of data scanned.
-- **Alarms:** $0.10 per standard-resolution metric alarm per month, $0.50 per composite alarm. Anomaly detection alarms cost $0.30 per alarm (standard-resolution) or $0.90 (high-resolution) because each one creates three underlying metrics (the original plus upper and lower bounds).
-- **Dashboards:** $3.00 per dashboard per month beyond the first 3 free.
+- **Custom metrics:** \$0.30 per metric per month (first 10,000), decreasing at higher volumes. Most basic monitoring metrics sent by AWS services by default are free, but detailed monitoring and custom metrics are billed.
+- **Logs ingestion:** Starts at \$0.50 per GB after the first 5 GB/month free (rates and tiering vary by log type and region).
+- **Logs storage:** \$0.03 per GB-month for CloudWatch Logs storage (pricing can vary by log class and region). Logs stored beyond the default "never expire" retention setting accumulate costs indefinitely.
+- **Logs Insights queries:** \$0.005 per GB of data scanned.
+- **Alarms:** \$0.10 per standard-resolution metric alarm per month, \$0.50 per composite alarm. Anomaly detection alarms cost \$0.30 per alarm (standard-resolution) or \$0.90 (high-resolution) because each one creates three underlying metrics (the original plus upper and lower bounds).
+- **Dashboards:** \$3.00 per dashboard per month beyond the first 3 free.
 - **API calls:** GetMetricData, PutMetricData, and other API calls have per-request pricing.
 
 One thing to watch: enabling advanced features like Container Insights or CloudWatch Synthetics generates charges across multiple buckets simultaneously (logs, metrics, Lambda invocations, S3 storage). Estimating the cost of a feature without accounting for its downstream impact can materially undercount the real spend. For a detailed breakdown of every pricing axis and how they compound, see the [complete CloudWatch pricing guide](https://signoz.io/guides/cloudwatch-pricing/).
@@ -224,9 +225,9 @@ Azure Monitor pricing centers on Log Analytics workspace usage, with additional 
 Like CloudWatch, Azure Monitor pricing is region-specific. The prices below are approximate pay-as-you-go rates as of February 2026. Always verify against the [official Azure Monitor pricing page](https://azure.microsoft.com/en-us/pricing/details/monitor/) and use the region filter for your workspace location.
 
 The major cost components are:
-- **Log ingestion (Analytics Logs):** Billed per GB ingested, with the first 5 GB per billing account per month free. Per-GB rates vary by region, and commitment tiers (starting at 100 GB/day) lower the effective rate.
+- **Log ingestion (Analytics Logs):** Billed per GB ingested, with the first 5 GB per billing account per month free. Per-GB rates vary by region, and <Tooltip text="commitment tiers" content="Pre-purchased daily ingestion capacity at a discounted rate. You commit to a minimum daily volume (e.g., 100 GB/day) and get a lower per-GB price compared to pay-as-you-go." /> (starting at 100 GB/day) lower the effective rate.
 - **Log retention:** Analytics Logs include 31 days of retention by default (up to 90 days included when Microsoft Sentinel is enabled, depending on plan and tier). Beyond that, interactive retention (up to 2 years) and long-term retention (up to 12 years) are both billed per GB-month at rates that vary by region. Check the [Azure pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/?service=monitor) for current rates in your workspace region.
-- **Log queries:** Query cost is included for Analytics Logs. Queries on Basic and Auxiliary Logs are billed per GB scanned, and querying older or archived data can involve additional restore and search-job charges.
+- **Log queries:** Query cost is included for Analytics Logs. Queries on <Tooltip text="Basic and Auxiliary Logs" content="Lower-cost log tiers in Azure Monitor. Basic Logs have cheaper ingestion but charge per query. Auxiliary Logs are the cheapest tier, designed for high-volume, rarely-queried data like verbose debug logs." /> are billed per GB scanned, and querying older or archived data can involve additional restore and search-job charges.
 - **Alerts:** Metric alert rules are priced per monitored time-series. Log search alert rules are priced per evaluation frequency.
 - **Data export:** Exporting data from Log Analytics to Storage or Event Hub has per-GB costs.
 
