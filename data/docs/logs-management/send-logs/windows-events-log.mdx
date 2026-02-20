@@ -1,6 +1,6 @@
 ---
 date: 2026-02-20
-title: Send Windows Events Logs to SigNoz
+title: Send Windows Events Logs to SigNoz Using OpenTelemetry
 description: Send Windows environment Event Logs to SigNoz using OpenTelemetry Collector.
 doc_type: howto
 id: windows_events_logs
@@ -33,7 +33,7 @@ Add the OpenTelemetry Collector binary to your Windows VM/machine by following t
 
 ### Step 2: Configure the `windowseventlog` Receiver
 
-Add the `windowseventlog` receiver to your `config.yaml` to monitor application and system logs:
+Add the following `windowseventlog` receivers to the `receivers` section of your existing `config.yaml`:
 
 ```yaml
 receivers:
@@ -41,13 +41,21 @@ receivers:
     channel: application
   windowseventlog/system:
     channel: system
+```
 
+Add the SigNoz Cloud exporter to the `exporters` section:
+
+```yaml
 exporters:
   otlp:
     endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<your-ingestion-key>"
+```
 
+Enable the receivers in the `service.pipelines.logs` section:
+
+```yaml
 service:
   pipelines:
     logs:
@@ -62,9 +70,15 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - Learn more about the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/windowseventlogreceiver" target="_blank" rel="noopener noreferrer nofollow">windowseventlog receiver</a>.
 
-### Step 3: Start the Collector
+### Step 3: Restart the Collector
 
-Save the changes and restart the OpenTelemetry Collector service.
+Save the changes and restart the OpenTelemetry Collector Windows service:
+
+```powershell
+Restart-Service -Name "otelcol-contrib"
+```
+
+The Collector should start without errors and begin tailing the configured channels.
 
 ## Validate
 
@@ -74,10 +88,11 @@ Once the Collector is running:
 2. Search for logs by filtering on your service or source. Windows Event logs should start appearing within a few seconds.
 3. Click on a log entry and verify it contains the expected fields.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/send-logs/windows-events-logs.webp" alt="Windows System Events Logs visible in SigNoz"/>
-    <figcaption><i>Windows System Events Logs in SigNoz</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/send-logs/windows-events-logs.webp"
+  alt="Windows System Events Logs visible in SigNoz"
+  caption="Windows System Events Logs in SigNoz"
+/>
 
 ### Example Log Output
 
@@ -126,9 +141,16 @@ This is what typical event logs look like after being parsed in SigNoz:
 
 #### Logs are not appearing in SigNoz
 
-- Verify that the OpenTelemetry Collector service is running successfully on your Windows machine.
-- Check the OpenTelemetry Collector logs (usually in the installation directory or Windows Event Viewer) for errors related to the `windowseventlog` receiver or `otlp` exporter.
-- Ensure the Windows machine has outbound network access to the `<region>.signoz.cloud:443` endpoint.
+- **Symptom:** No Windows Event logs appear in **Logs > Logs Explorer** after configuring the receiver.
+- **Likely causes:**
+  - The OpenTelemetry Collector service is not running.
+  - A configuration error in `config.yaml` (incorrect receiver name, YAML indentation, or missing pipeline entry).
+  - The Windows machine cannot reach the SigNoz endpoint (`<region>.signoz.cloud:443`).
+- **Fix:**
+  1. Verify the Collector service is running: `Get-Service otelcol-contrib` in PowerShell.
+  2. Check the Collector logs (installation directory or Windows Event Viewer) for errors mentioning `windowseventlog` or `otlp`.
+  3. Test outbound connectivity: `Test-NetConnection ingest.<region>.signoz.cloud -Port 443`.
+- **Verification:** After applying the fix, restart the Collector and confirm logs appear in **Logs > Logs Explorer** within a few seconds.
 
 </details>
 
