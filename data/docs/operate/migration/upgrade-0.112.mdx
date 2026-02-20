@@ -9,7 +9,7 @@ doc_type: howto
 
 <Admonition type="warning">
 
-With v0.112.0, the standalone `signoz-schema-migrator` is deprecated. Telemetry Store migrations (ClickHouse schema migrations) are now built into `signoz-otel-collector` via `migrate` commands.
+With v0.112.1, the standalone `signoz-schema-migrator` is deprecated. Telemetry Store migrations (ClickHouse schema migrations) are now built into `signoz-otel-collector` via `migrate` commands.
 
 Key changes:
 - The `signoz/signoz-schema-migrator` is replaced by `signoz/signoz-otel-collector`.
@@ -104,7 +104,7 @@ Apply the following changes to the `signoz` service:
 -      - DEPLOYMENT_TYPE=docker-standalone-amd
 ```
 
-Apply the following changes to the `otel-collector` service — it now runs `migrate sync check` as a startup guard:
+Apply the following changes to the `otel-collector` service, it now runs `migrate sync check` as a startup guard:
 
 ```diff:docker-compose.yaml
   otel-collector:
@@ -228,7 +228,7 @@ Apply the following changes to the `signoz` service:
 -      - DEPLOYMENT_TYPE=docker-standalone-amd
 ```
 
-Apply the following changes to the `otel-collector` service — it now runs `migrate sync check` as a startup guard:
+Apply the following changes to the `otel-collector` service, it now runs `migrate sync check` as a startup guard:
 
 ```diff:docker-compose.ha.yaml
   otel-collector:
@@ -350,7 +350,7 @@ Apply the following changes to the `signoz` service:
 -      - DEPLOYMENT_TYPE=docker-swarm
 ```
 
-Apply the following changes to the `otel-collector` service — it now runs `migrate sync check` as a startup guard:
+Apply the following changes to the `otel-collector` service, it now runs `migrate sync check` as a startup guard:
 
 ```diff:docker-compose.yaml
   otel-collector:
@@ -526,89 +526,51 @@ The task should show `Complete` state.
 If you are using the default SigNoz Helm chart without custom overrides for `schemaMigrator`, no changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment).
 </Admonition>
 
-If you have custom overrides under `schemaMigrator.*` in your values file, make the following changes before upgrading:
+If you have custom `schemaMigrator` overrides, update your `values.yaml` before upgrading.
 
-### Step 1: Update Helm values
+### Step 1: Update your values.yaml
 
-Rename the `schemaMigrator` block to `telemetryStoreMigrator` in your `values.yaml`:
+Rename the `schemaMigrator` block to `telemetryStoreMigrator` and update keys according to the table below:
 
-From:
+| Key | Status | Replacement |
+| --- | --- | --- |
+| `schemaMigrator.enabled` | Replaced | `telemetryStoreMigrator.enabled` |
+| `schemaMigrator.name` | Replaced | `telemetryStoreMigrator.name` |
+| `schemaMigrator.annotations` | Replaced | `telemetryStoreMigrator.annotations` |
+| `schemaMigrator.upgradeHelmHooks` | Replaced | `telemetryStoreMigrator.upgradeHelmHooks` |
+| `schemaMigrator.enableReplication` | Replaced | `telemetryStoreMigrator.enableReplication` |
+| `schemaMigrator.nodeSelector` | Replaced | `telemetryStoreMigrator.nodeSelector` |
+| `schemaMigrator.tolerations` | Replaced | `telemetryStoreMigrator.tolerations` |
+| `schemaMigrator.affinity` | Replaced | `telemetryStoreMigrator.affinity` |
+| `schemaMigrator.topologySpreadConstraints` | Replaced | `telemetryStoreMigrator.topologySpreadConstraints` |
+| `schemaMigrator.resources` | Replaced | `telemetryStoreMigrator.resources` |
+| `schemaMigrator.serviceAccount` | Replaced | `telemetryStoreMigrator.serviceAccount` |
+| `schemaMigrator.image` | Deprecated | None (uses otel-collector image) |
+| `schemaMigrator.args` | Deprecated | None |
+| `schemaMigrator.initContainers` | Deprecated | None |
+| `schemaMigrator.role` | Deprecated | None |
+| `signoz.initContainers.init` | Deprecated | None |
+| `signoz.initContainers.migration` | Deprecated | None |
+| `otelCollector.initContainers.init` | Deprecated | None |
 
-```yaml
-schemaMigrator:
-  ...
-```
+- **Replaced** : Move the key to the new path shown in the Replacement column.
+- **Deprecated** : Remove the key from your overrides entirely.
 
-To:
+### Step 2: Upgrade the Helm release
 
-```yaml
-telemetryStoreMigrator:
-  ...
-```
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment) to apply your updated values and upgrade the release.
 
-The following values have moved within the block:
+### Step 3: Validate migrations
 
-| Existing Helm value | Updated Helm value |
-| --- | --- |
-| `schemaMigrator.initContainers.init.image.*` | `telemetryStoreMigrator.image.*` |
-| `schemaMigrator.initContainers.init.resources` | `telemetryStoreMigrator.resources` |
-
-The following values have been removed with no replacement:
-
-- `schemaMigrator.args`
-- `schemaMigrator.initContainers.init.enabled`
-- `schemaMigrator.initContainers.init.command.*`
-- `schemaMigrator.initContainers.chReady.*`
-- `schemaMigrator.initContainers.wait.*`
-
-A new `telemetryStoreMigrator.timeout` value is available to control migration timeout.
-
-### Step 2: Apply the changes
-
-Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment) to upgrade the Helm release.
-
-### Validate migrations
-
-Check that the `telemetrystore-migrator` job completed successfully:
-
+Check that the migration job completed:
 ```bash
 kubectl get jobs -n <namespace> | grep telemetrystore-migrator
 ```
 
-Replace `<namespace>` with the namespace of your SigNoz deployment.
-
-The job should show `1/1` completions. If it failed, check the logs:
-
+Expected: `1/1` completions. If the job failed, inspect the logs:
 ```bash
 kubectl logs -n <namespace> job/<job-name> --tail=100
 ```
-
-Replace `<job-name>` with the job name from the output above.
-
-</TabItem>
-<TabItem value="linux" label="Linux Binary">
-
-The `signoz-schema-migrator` binary is no longer needed. Migrations are now built into `signoz-otel-collector`.
-
-### Step 1: Run database migrations
-
-Replace the migration step in the standard upgrade guide with these commands:
-
-```bash
-/opt/signoz-otel-collector/bin/signoz-otel-collector migrate bootstrap --clickhouse-dsn "tcp://localhost:9000?password=<your-clickhouse-password>"
-/opt/signoz-otel-collector/bin/signoz-otel-collector migrate sync up --clickhouse-dsn "tcp://localhost:9000?password=<your-clickhouse-password>"
-/opt/signoz-otel-collector/bin/signoz-otel-collector migrate async up --clickhouse-dsn "tcp://localhost:9000?password=<your-clickhouse-password>"
-```
-
-Replace `<your-clickhouse-password>` with your ClickHouse password. If no password is set, use `tcp://localhost:9000` without the `?password=` parameter.
-
-### Step 2: Apply the changes
-
-Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#linux-binary-installation) to download and restart with the new binary.
-
-### Step 3: Validate migrations
-
-Each migration command prints its progress to stdout. Verify that all three commands completed without errors before proceeding.
 
 </TabItem>
 </Tabs>
