@@ -2,7 +2,7 @@ import OpenTelemetryClient from './OpenTelemetryClient'
 import { Metadata } from 'next'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
-import type { Comparison } from '../../../types/transformedContent'
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
@@ -36,7 +36,7 @@ export default async function OpenTelemetryHome() {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deployment_status = isProduction ? 'live' : 'staging'
   let articles: MDXContent[] = []
-  let comparisons: Comparison[] = []
+  let comparisonPosts: any[] = []
 
   try {
     const [articlesResponse, comparisonsResult] = await Promise.all([
@@ -44,11 +44,11 @@ export default async function OpenTelemetryHome() {
       fetchAllComparisonsForPage(),
     ])
 
-    comparisons = comparisonsResult
+    comparisonPosts = allCoreContent(sortPosts(comparisonsResult))
     articles = (articlesResponse.data || []) as any[]
   } catch (error) {
     console.error('Error fetching OpenTelemetry articles:', error)
   }
 
-  return <OpenTelemetryClient initialArticles={articles} comparisons={comparisons} />
+  return <OpenTelemetryClient initialArticles={articles} comparisonPosts={comparisonPosts} />
 }
