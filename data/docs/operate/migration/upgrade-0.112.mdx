@@ -60,7 +60,7 @@ Add the following `telemetrystore-migrator` service definition to your `docker-c
 
 ```yaml:docker-compose.yaml
   telemetrystore-migrator:
-    !!merge <<: *common
+    !!merge <<: *db-depend
     image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.142.0}
     container_name: telemetrystore-migrator
     environment:
@@ -76,9 +76,6 @@ Add the following `telemetrystore-migrator` service definition to your `docker-c
       /signoz-otel-collector migrate bootstrap &&
       /signoz-otel-collector migrate sync up &&
       /signoz-otel-collector migrate async up
-    depends_on:
-      clickhouse:
-        condition: service_healthy
     restart: on-failure
 ```
 
@@ -310,7 +307,7 @@ Add the following service definition. It runs bootstrap, sync, and async migrati
 
 ```yaml:docker-compose.yaml
   telemetrystore-migrator:
-    !!merge <<: *common
+    !!merge <<: *db-depend
     image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.142.0}
     environment:
       - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
@@ -325,8 +322,6 @@ Add the following service definition. It runs bootstrap, sync, and async migrati
       /signoz-otel-collector migrate bootstrap &&
       /signoz-otel-collector migrate sync up &&
       /signoz-otel-collector migrate async up
-    depends_on:
-      - clickhouse
 ```
 
 ### Step 3: Update signoz and otel-collector services
