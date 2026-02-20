@@ -1310,6 +1310,8 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/comparisons/open-source-datadog-alternatives/',
+          destination: '/blog/open-source-datadog-alternative/',
           source: '/docs/userguide/logs/',
           destination: '/docs/logs-management/overview/',
           permanent: true,

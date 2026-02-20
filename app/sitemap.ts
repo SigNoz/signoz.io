@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
-      priority: 0.5,
+      priority: 0.7,
     }))
 
   const isProduction = process.env.VERCEL_ENV === 'production'
