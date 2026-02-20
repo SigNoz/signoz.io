@@ -2071,6 +2071,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+            label: 'OpenRouter',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
             label: 'Pipecat',
           },
