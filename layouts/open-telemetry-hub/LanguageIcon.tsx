@@ -1,5 +1,3 @@
-'use client'
-
 import Image from 'next/image'
 import { FileCode } from 'lucide-react'
 import type { IconType } from 'react-icons'
