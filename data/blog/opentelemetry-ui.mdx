@@ -88,72 +88,67 @@ This allows you to investigate trace data around timestamps where APM metrics ar
 
 <Figure src="/img/blog/common/metrics_correlation.webp" alt="Access traces and logs from metrics for a given timestamp" caption="Access traces and logs from metrics for a given timestamp" />
 
-<br />
-
 **List view of all spans**
 
 This allows you to sort through spans based on duration. The duration can be relative, such as last 30 minutes, or an absolute time range. You can also apply filters to only fetch spans matching certain criteria.
 
 <Figure src="/img/docs/instrumentation/golang/trace-list.webp" alt="List view of spans has all the spans around a particular timestamp" caption="List view of spans has all the spans around a particular timestamp" />
 
-<br />
-
 **Charts for aggregates on trace data**
 
 This is a powerful visualization available in some OpenTelemetry UI like SigNoz. You can apply aggregates like `avg`, `p90`, `p99`, etc. and group it by things like `service.name`, `http.method`, `status.code` , etc.
 
-<Figure src="/img/blog/common/trace_aggregates.webp" alt="Running aggregates on your tracing data enables you to create service-centric views." caption="Running aggregates on your tracing data enables you to create service-centric views." />
-
-Visualizations like above in an OpenTelemetry UI helps you dig deeper for application insights and makes debugging easier.
-
-### Flamegraphs & Gantt charts
+### Flamegraphs & Gantt Charts
 
 Flamegraphs and Gantt charts are two powerful visualization features that can be used to analyze OpenTelemetry data. Flamegraphs can be used to visualize the flow of requests in a trace. Gantt charts provide a timeline view of task execution, helping to identify resource contention and bottlenecks.
 
 <Figure src="/img/blog/common/signoz_flamegraphs.webp" alt="A trace represented with Flamegraph in the upper part and a Gantt Chart in the lower part in SigNoz" caption="A trace represented with Flamegraph in the upper part and a Gantt Chart in the lower part in SigNoz" />
 
-### Trace exploration with queries
+### Trace Exploration with Queries
 
 Trace exploration with queries refers to the capability within an observability tool, to search and analyze traces (sequences of events) based on specific criteria or conditions.
 
 A good OpenTelemetry UI empowers developers to perform targeted investigations. They can achieve this by applying filters or conditions to the traces, allowing them to narrow down their search. This focused approach enables them to concentrate on specific transactions, requests, or events within a distributed system.
 
-<Figure src="/img/blog/common/signoz_trace_explorer.webp" alt="Trace explorer provided in an OpenTelemetry UI like SigNoz helps you dig deeper in trace data" caption="Trace explorer provided in an OpenTelemetry UI like SigNoz helps you dig deeper in trace data" />
+<Figure src="/img/blog/common/trace_aggregates.webp" alt="Trace Explorer provided in an OpenTelemetry UI like SigNoz helps you dig deeper in trace data" caption="Trace Explorer provided in an OpenTelemetry UI like SigNoz helps you dig deeper in trace data" />
 
-In production environments, trace exploration with queries proves invaluable. For instance, during a service outage, they become instrumental in troubleshooting.
+In production environments, trace exploration with queries proves invaluable. For instance, during a service outage, they become instrumental in troubleshooting or deriving near real-time, actionable insights and understanding application behaviour patterns.
 
 ### Metrics Dashboard
 
-OpenTelemetry provides a [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) using which you can collect any kind of metrics and visualize it in an OpenTelemetry UI.
+OpenTelemetry provides an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) that collects all kind of metrics to export and visualize in an OpenTelemetry UI.
 
 A metrics dashboard displays a collection of key performance indicators (KPIs) and metrics relevant to the system's health and performance. This can include metrics related to resource utilization (e.g. CPU, memory), network traffic, and application-specific metrics.
 
-An OpenTelemetry UI should include visualization for a metrics dashboard, like a host metric and Kubernetes metrics dashboard.
+An OpenTelemetry UI should include visualization for a metrics dashboard, like host metrics and Kubernetes metrics dashboard.
 
-- **Host metrics dashboard**
-
+- **Host Metrics Dashboard**
 This dashboard provides a specialized view of performance indicators specific to the underlying host system. It captures crucial data related to the utilization of system resources, including CPU, memory utilization, disk usage, and network activity. These metrics are instrumental in fine-tuning resource allocation and uncovering possible performance constraints.
 
-<Figure src="/img/blog/common/signoz-infra-metrics.webp" alt="Hostmetrics dashboard in SigNoz - Data is collected using OpenTelemetry Collector" caption="Hostmetrics dashboard in SigNoz - Data is collected using OpenTelemetry Collector" />
+<Figure src="/img/blog/common/signoz_infra_metrics_split_view.webp" alt="The Host Metrics Dashboard captures all essential metrics in an intuitive panel." caption="The Host Metrics Dashboard captures all essential metrics in an intuitive panel." />
 
 <br />
 
-- **Kubernetes metrics**
+- **Kubernetes Metrics**
 
-Similar to the Host Metrics Dashboard, the Kubernetes Metrics Dashboard focuses on monitoring and analyzing performance metrics. However, it is specifically tailored to Kubernetes environments, which are commonly used for container orchestration. This offers detailed visibility at the container level, encompassing metrics concerning resource usage, health, and overall performance.
+Similar to the Host Metrics Dashboard, the Kubernetes Metrics Dashboard focuses on monitoring and analyzing performance metrics. However, it is specifically tailored to Kubernetes environments, which are commonly used for container orchestration. This offers detailed visibility at the pod level, encompassing metrics concerning resource usage, health, and overall performance.
+
+<Figure src="/img/blog/common/signoz_k8s_metrics_view.webp" alt="The Kubernetes Metrics Dashboard enables intuitive monitoring of individual K8s pods." caption="The Kubernetes Metrics Dashboard enables intuitive monitoring of individual K8s pods." />
+
+These dashboards are correlated with traces and logs being emitted from those sources, enabling contextual analysis across telemetry signals at the infrastructure level.
 
 ### Logs
 
 Logs provide a detailed record of events and activities within an application or system, providing in-depth insights into events, errors, and transactions, enabling effective troubleshooting and analysis.
 
-An [OpenTelemetry UI](https://signoz.io/blog/opentelemetry-ui/#signoz---an-open-source-apm-built-natively-for-opentelemetry) should include a logs visualization for the following benefits:
+An OpenTelemetry UI should include a logs visualization for the following benefits:
 
 - **Proactive [System Health Monitoring](https://signoz.io/guides/server-health-monitoring/):** Through continuous [log monitoring](https://signoz.io/blog/log-monitoring/), potential system vulnerabilities and impending issues can be identified and addressed before they escalate into full-blown outages. This preemptive approach is crucial for maintaining uninterrupted service.
 - **Centralized Log View:** A centralized view of logs from all components of a distributed system streamlines the process of issue identification and troubleshooting. This consolidated perspective offers a comprehensive overview of system activities.
 - **Dynamic Filtering and Rapid Search Capabilities:** These capabilities allow developers to efficiently sift through logs, to precisely locate specific information even within large and extensive log datasets.
 - **Visual Data Representation:** Visual representation aids in the identification of trends, patterns, and anomalies within the log data, enabling more detailed analysis.
 
-<Figure src="/img/blog/common/signoz_logs.webp" alt="Logs Collected using OpenTelemetry and visualized in SigNoz" caption="Logs Collected using OpenTelemetry and visualized in SigNoz" />
+<Figure src="/img/blog/2026/01/otel-baggage-logs.webp" alt="Logs visualization in SigNoz supports the full suite of filtering and search capabilities" caption="Logs visualization in SigNoz supports the full suite of filtering and search capabilities" />
 
 You can choose any [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/) to send data to. Of course, our choice is [SigNoz](https://signoz.io/) - an observability tool built natively on OpenTelemetry.
 
@@ -174,7 +169,7 @@ Some of the things SigNoz can help you track:
 
 ## Getting started with OpenTelemetry
 
-To start with [OpenTelemetry visualization](https://signoz.io/blog/opentelemetry-visualization/), you first need to instrument your application code with OpenTelemetry client libraries. Opentelemetry also provides auto-instrumentation agents for some programming languages like Java. With auto-instrumentation, you can start to monitor your application with minimal code changes.
+To start with OpenTelemetry visualization, you first need to instrument your application code with OpenTelemetry client libraries. Opentelemetry also provides [auto-instrumentation agents](https://signoz.io/blog/opentelemetry-agent/) for most popular programming languages like Python and Java. With auto-instrumentation, you can start to observe your application with minimal code changes.
 
 Below are the steps required to start with OpenTelemetry visualization:
 
@@ -184,8 +179,9 @@ Below are the steps required to start with OpenTelemetry visualization:
 
 OpenTelemetry has language-specific instrumentation steps. You can explore our blog for specific instructions for different programming languages:
 
-- [Java](https://signoz.io/blog/opentelemetry-spring-boot/)
-- [Python](https://signoz.io/blog/opentelemetry-django/)
+- [Java (Sprint Boot)](https://signoz.io/blog/opentelemetry-spring-boot/)
+- [Python (Flask)](https://signoz.io/opentelemetry/python/)
+- [Python (Django)](https://signoz.io/blog/opentelemetry-django/)
 - [Nodejs](https://signoz.io/opentelemetry/nodejs/)
 - [PHP](https://signoz.io/blog/opentelemetry-php/)
 - [Ruby](https://signoz.io/blog/opentelemetry-ruby/)
