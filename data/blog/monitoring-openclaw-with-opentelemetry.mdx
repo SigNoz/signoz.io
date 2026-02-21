@@ -1,5 +1,5 @@
 ---
-title: Monitoring OpenClaw Agent with OpenTelemetry
+title: OpenClaw's hidden OTel plugin shows where all your tokens go
 slug: monitoring-openclaw-with-opentelemetry
 date: 2026-02-21
 tags: [openclaw, opentelemetry]
@@ -8,11 +8,15 @@ description: Set up monitoring for your OpenClaw AI agent using the built-in dia
 keywords: [openclaw monitoring, openclaw opentelemetry, openclaw diagnostics-otel, ai agent observability, openclaw signoz, openclaw traces, openclaw metrics, llm observability, genai semantic conventions]
 ---
 
-OpenClaw Agent has seen explosive popularity over the last few weeks. And it's been so much fun to experiment with it. I started experimenting with various connectors and channels, only for the token limit to hit annoyingly fast. That's when I realized I had no visibility into what was actually happening under the hood. So I set up this monitoring dashboard with the help of `diagnostic-otel` plugin which comes with OpenClaw.
+OpenClaw Agent has seen explosive popularity, and building autonomous workflows with it is a lot of fun. But if you've experimented with various plugins, and model integrations, you've probably hit rate limits or drained your token budget surprisingly fast.
 
-<Figure src="/img/blog/2026/02/openclaw-monitoring-dashboard-with-opentelemetry.webp" alt="OpenClaw monitoring dashboard set up with OpenTelemetry (Visualization: SigNoz)" caption="OpenClaw monitoring with OpenTelemetry" />
+Without visibility into what's happening under the hood—which tool calls are failing, or exactly how many tokens are being consumed, you can't plan your agent usage and budget.
 
-If you're looking to setup some monitoring for your OpenClaw agent, here are the steps to do it. I have also shared the dashboard json to get you the above dashboard quickly.
+It turns out OpenClaw ships with a built-in (but disabled by default) `diagnostics-otel` plugin that emits standard OpenTelemetry traces and metrics. I enabled it and built a dashboard to track exactly where the tokens are going.
+
+<Figure src="/img/blog/2026/02/openclaw-monitoring-dashboard-with-opentelemetry.webp" alt="OpenClaw monitoring dashboard tracking token limits and usage with OpenTelemetry (Visualization: SigNoz)" caption="OpenClaw token usage dashboard with OpenTelemetry" />
+
+Here's a quick guide on how to enable this hidden plugin to get full visibility into your OpenClaw agent, plus a ready-to-use Dashboard JSON file so you can grab this dashboard right away.
 
 ## What type of Telemetry does Diagnostic-OTel provide?
 
@@ -195,4 +199,6 @@ Walkthrough of the OpenClaw Overview dashboard showing LLM token usage, queue an
 
 ## Conclusion
 
-Just as we enable observability in our CI/CD pipelines and microservices, we should also enable it in AI agents. OpenClaw's `diagnostics-otel` plugin makes this straightforward, it speaks standard OTLP, follows the GenAI semantic conventions, and requires no custom instrumentation code. Combined with SigNoz Cloud, you get traces, metrics, and logs in one place, giving you full visibility into every model call, tool execution, and token spent.
+When building autonomous workflows with OpenClaw, running blind isn't an option. Without tracking your model calls and tool executions, token budgets drain quickly and debugging agent loops is impossible. 
+
+The built-in `diagnostics-otel` plugin makes fixing this straightforward. With no custom code required, you can connect it directly to SigNoz and see exactly where your tokens are going.
