@@ -1,6 +1,6 @@
 ---
 title: Monitoring OpenClaw Agent with OpenTelemetry
-slug: openclaw-monitoring-with-opentelemetry
+slug: monitoring-openclaw-with-opentelemetry
 date: 2026-02-21
 tags: [openclaw, opentelemetry]
 authors: [saurabh_patil]
@@ -8,9 +8,11 @@ description: Set up monitoring for your OpenClaw AI agent using the built-in dia
 keywords: [openclaw monitoring, openclaw opentelemetry, openclaw diagnostics-otel, ai agent observability, openclaw signoz, openclaw traces, openclaw metrics, llm observability, genai semantic conventions]
 ---
 
-OpenClaw Agent has seen explosive popularity over the last few weeks. But for people like me, who eat, live and pray technology, this looked like the best playground. I immediately got my hands dirty and experimented with various connectors and channels, only for the token limit to hit annoyingly fast. That's when I realized I had no visibility into what was actually happening under the hood. That made me feel uncomfortable, and that's when I started looking for ways to instrument OpenClaw to monitor it. 
+OpenClaw Agent has seen explosive popularity over the last few weeks. And it's been so much fun to experiment with it. I started experimenting with various connectors and channels, only for the token limit to hit annoyingly fast. That's when I realized I had no visibility into what was actually happening under the hood. So I set up this monitoring dashboard with the help of `diagnostic-otel` plugin which comes with OpenClaw.
 
-After asking OpenClaw, it introduced me to  `diagnostic-otel` plugin which comes with OpenClaw and just needs to be enabled. You can follow step in this article to enable it.
+<Figure src="/img/blog/2026/02/openclaw-monitoring-dashboard-with-opentelemetry.webp" alt="OpenClaw monitoring dashboard set up with OpenTelemetry (Visualization: SigNoz)" caption="OpenClaw monitoring with OpenTelemetry" />
+
+If you're looking to setup some monitoring for your OpenClaw agent, here are the steps to do it. I have also shared the dashboard json to get you the above dashboard quickly.
 
 ## What type of Telemetry does Diagnostic-OTel provide?
 
@@ -114,11 +116,11 @@ openclaw config set diagnostics.otel.metrics true
 openclaw config set diagnostics.otel.logs true
 openclaw config set diagnostics.otel.protocol http/protobuf
 openclaw config set diagnostics.otel.endpoint "https://ingest.<region>.signoz.cloud:443"
-openclaw config set diagnostics.otel.headers '{"signoz-access-token":"<YOUR_SIGNOZ_INGESTION_KEY>"}'
+openclaw config set diagnostics.otel.headers '{"signoz-ingestion-key":"<YOUR_SIGNOZ_INGESTION_KEY>"}'
 openclaw config set diagnostics.otel.serviceName "openclaw-gateway"
 ```
 
-If you are following and using SigNoz Cloud, you can follow our [Ingestion Key guide](/docs/ingestion/signoz-cloud/keys/) to get your Ingestion Region and API Key.
+If you are following and using SigNoz Cloud, you can follow our [Ingestion Key guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to get your Ingestion Region and API Key.
 
 <KeyPointCallout defaultCollapsed='true' title='Important Note of Config'>
 
@@ -129,7 +131,6 @@ If you are following and using SigNoz Cloud, you can follow our [Ingestion Key g
 - **`headers`** - SigNoz Cloud requires the `signoz-ingestion-key` header for authentication.
 - **`flushIntervalMs`** - Minimum 1000ms. The default (60s) means quick tasks won't show traces for up to a minute. I set mine to `5000` for near-real-time visibility.
 - **`sampleRate`** - Controls trace sampling (0.0–1.0, applied to root spans only). For personal use, `1.0` is fine.
-- **`flushIntervalMs`** - Minimum 1000ms. The default (60s) means quick tasks won't show traces for up to a minute. I set mine to `5000` for near-real-time visibility.
 
 </KeyPointCallout>
 
@@ -151,7 +152,7 @@ Your output should look like this.
     "endpoint": "https://ingest.<region>.signoz.cloud:443",
     "protocol": "http/protobuf",
     "headers": {
-      "signoz-access-token": "<YOUR_SIGNOZ_INGESTION_KEY>"
+      "signoz-ingestion-key": "<YOUR_SIGNOZ_INGESTION_KEY>"
     },
     "serviceName": "openclaw-gateway",
     "traces": true,
