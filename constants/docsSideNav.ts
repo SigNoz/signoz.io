@@ -471,6 +471,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/root-user',
+                label: 'Root User Configuration',
+                isExpanded: false,
+              },
+              {
+                type: 'doc',
                 route: '/docs/manage/administrator-guide/configuration/relational-database',
                 label: 'Relational Databases Support',
                 isExpanded: false,
