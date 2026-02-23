@@ -379,9 +379,8 @@ OpenTelemetry is vendor-agnostic and provides a standardized way to instrument y
 To set up OpenTelemetry instrumentation for Django:
 1. Install necessary packages ([opentelemetry-distro](https://signoz.io/opentelemetry/python-auto-instrumentation/), opentelemetry-exporter-otlp)
 2. Configure environment variables for the OTLP exporter
-3. Use the opentelemetry-instrument command to run your Django application
+3. Use the `opentelemetry-instrument` command to run your Django application
 4. Choose a backend (like SigNoz) to visualize and analyze the collected data
-
 ### Can I use OpenTelemetry with Docker for my Django application?
 Yes, you can use OpenTelemetry with Docker for your Django application. You'll need to build a Docker image of your app, set the necessary environment variables for OpenTelemetry, and run the container with these variables. The article provides specific instructions for this setup.
 
@@ -393,9 +392,21 @@ With OpenTelemetry, you can monitor various metrics for your Django application,
 - Database query performance
 - External service calls
 - Custom metrics specific to your application logic
-
 ### How does OpenTelemetry Django instrumentation affect my application's performance?
 OpenTelemetry is designed to have minimal impact on application performance. However, as with any instrumentation, there may be a slight overhead. The benefits of comprehensive monitoring and troubleshooting capabilities usually outweigh this minimal performance impact.
+
+### Why am I getting no traces from Django even though I started with opentelemetry-instrument?
+
+The most common causes are: the OTLP exporter endpoint/protocol isn’t reachable, required environment variables aren’t set, or the server’s reload/fork model prevents exporter threads from starting correctly. Start by disabling Django autoreload (via `--noreload` flag) or by removing Gunicorn `--reload` flag, and verifying endpoint/protocol values. Then use URL Inspection / logs to confirm the page and its config are being served as expected.
+
+### Do I need manual instrumentation if I already have automatic instrumentation?
+
+Automatic instrumentation is the best “quick win” for broad trace coverage (requests, framework hooks, common libraries). Manual instrumentation becomes valuable when you need domain-level spans/attributes (e.g., “checkout”, “payment authorization”), or to capture flows not covered by automatic libraries.
+
+### How do I prevent tracing health checks or noisy endpoints in Django?
+
+Use OpenTelemetry Python configuration to exclude URLs. OpenTelemetry provides [Python-specific environment variables](https://opentelemetry.io/docs/zero-code/python/configuration/#excluded-urls) for exclusions. You can set a global excluded URL pattern (`OTEL_PYTHON_EXCLUDED_URLS`) list, or set Django-specific excluded URL patterns (`OTEL_PYTHON_DJANGO_EXCLUDED_URLS`). This is a common best practice to reduce noise and cost while keeping high-value traces.
+
 
 ---
 
