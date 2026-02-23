@@ -21,37 +21,7 @@ This feature is available starting with <a href="https://github.com/SigNoz/signo
 
 ## Configuration
 
-You can set the root user via **YAML config** or **environment variables**.
-
-### YAML configuration
-
-In your SigNoz configuration file, add or edit the following:
-
-```yaml:signoz-config.yaml
-user:
-  root:
-    # Whether to enable the root user. When enabled, a root user is provisioned
-    # on startup using the email and password below. The root user cannot be
-    # deleted, updated, or have their password changed through the UI.
-    enabled: false
-    # The email address of the root user.
-    email: ""
-    # The password of the root user. Use a strong password.
-    password: ""
-    # The name of the organization to create or look up for the root user.
-    org:
-      name: default
-```
-
-Verify these values:
-- `enabled`: Set to `true` to provision the root user on startup.
-- `email`: Email address for the root user.
-- `password`: Strong password for the root user.
-- `org.name`: Organization name to create or attach the root user to (e.g. `default`).
-
-### Environment variables
-
-Equivalent environment variables:
+Set the root user via **environment variables**:
 
 | Variable | Description |
 |----------|-------------|
@@ -60,7 +30,7 @@ Equivalent environment variables:
 | `SIGNOZ_USER_ROOT_PASSWORD` | Password for the root user. Use a strong password. |
 | `SIGNOZ_USER_ROOT_ORG_NAME` | Name of the organization for the root user (e.g. `default`). |
 
-Example (env):
+Example:
 
 ```bash
 SIGNOZ_USER_ROOT_ENABLED=true
@@ -69,16 +39,16 @@ SIGNOZ_USER_ROOT_PASSWORD=<secure-password>
 SIGNOZ_USER_ROOT_ORG_NAME=default
 ```
 <KeyPointCallout title="How the root user works" defaultCollapsed={false}>
-- The root user cannot be deleted, edited, or have its password changed from the SigNoz UI. To change credentials, update the configuration or env vars and restart (where supported by your deployment).
-- Root user provisioning runs at startup only; changing config requires a restart to take effect.
+- The root user cannot be deleted, edited, or have its password changed from the SigNoz UI. To change credentials, update the environment variables and restart (where supported by your deployment).
+- Root user provisioning runs at startup only; changing env vars requires a restart to take effect.
 </KeyPointCallout>
 
 ## Fresh installs
 
 For a **new** SigNoz deployment:
 
-1. Set the root user config or env vars **before** first start (e.g. in your deployment manifest, Helm values, or Compose file).
-2. Set `enabled: true` (or `SIGNOZ_USER_ROOT_ENABLED=true`) and set `email`, `password`, and `org.name` (or the corresponding env vars).
+1. Set the root user environment variables **before** first start (e.g. in your deployment manifest, Helm values, or Compose file).
+2. Set `SIGNOZ_USER_ROOT_ENABLED=true` and provide `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, and `SIGNOZ_USER_ROOT_ORG_NAME`.
 3. Deploy or start SigNoz. On startup, the root user and organization (if needed) are created. You can log in immediately with the configured email and password.
 
 ## Existing installs
@@ -92,14 +62,14 @@ If SigNoz is **already running** and you want to enable the root user:
    ```
 
    Verify this value:
-   - `<org-name>`: The value you will use for `user.root.org.name` or `SIGNOZ_USER_ROOT_ORG_NAME` (e.g. `default`). Use the same value in both the query and the config.
+   - `<org-name>`: The value you will use for `SIGNOZ_USER_ROOT_ORG_NAME` (e.g. `default`). Use the same value in both the query and the env var.
 
-2. **Set the root user configuration** (YAML or env vars) with `enabled: true`, and set `email`, `password`, and `org.name` to match the organization you updated above.
+2. **Set the root user environment variables** (`SIGNOZ_USER_ROOT_ENABLED`, `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, `SIGNOZ_USER_ROOT_ORG_NAME`) to match the organization you updated above.
 
 3. **Restart SigNoz** so it provisions the root user on startup.
 
 <KeyPointCallout title="Existing installs: organization name must match database" defaultCollapsed={false}>
-The value in `SIGNOZ_USER_ROOT_ORG_NAME` (or `user.root.org.name`) must match the organization name in the database. A mismatch can prevent the root user from being associated with the correct organization.
+The value in `SIGNOZ_USER_ROOT_ORG_NAME` must match the organization name in the database. A mismatch can prevent the root user from being associated with the correct organization.
 </KeyPointCallout>
 
 ## Validate
@@ -118,12 +88,12 @@ After deployment or restart:
 ### Root user not created after restart
 
 - Ensure SigNoz is v0.112.0 or later.
-- Check that `SIGNOZ_USER_ROOT_ENABLED` is `true` (or `user.root.enabled` is `true` in YAML) and that `email`, `password`, and `org.name` are set. Restart SigNoz after changing config.
+- Check that `SIGNOZ_USER_ROOT_ENABLED` is `true` and that `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, and `SIGNOZ_USER_ROOT_ORG_NAME` are set. Restart SigNoz after changing env vars.
 - Check SigNoz logs for errors during startup related to root user provisioning.
 
 ### Root user cannot log in or is in the wrong organization
 
-- Ensure the organization name in the database matches `SIGNOZ_USER_ROOT_ORG_NAME` (or `user.root.org.name`). Re-run the `UPDATE organizations` query from [Existing installs](#existing-installs) with the same `<org-name>` as in your config, then restart SigNoz.
+- Ensure the organization name in the database matches `SIGNOZ_USER_ROOT_ORG_NAME`. Re-run the `UPDATE organizations` query from [Existing installs](#existing-installs) with the same `<org-name>` as in your env vars, then restart SigNoz.
 
 </details>
 
