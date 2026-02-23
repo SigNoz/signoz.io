@@ -23,6 +23,7 @@ import {
   SiGo,
   SiTemporal,
   SiOpenai,
+  SiSupabase,
   SiOllama,
 } from 'react-icons/si'
 import {
@@ -421,6 +422,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'OpenAI Dashboard Template',
   },
   {
+    name: 'OpenRouter',
+    href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Dashboard Template',
+  },
+  {
     name: 'Pipecat',
     href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
     icon: (
@@ -479,6 +492,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Supabase',
+    href: '/docs/dashboards/dashboard-templates/supabase',
+    icon: <SiSupabase className="h-7 w-7 text-green-500" />,
+    clickName: 'Supabase Dashboard Template',
   },
   {
     name: 'Temporal Agents',
