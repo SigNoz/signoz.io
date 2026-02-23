@@ -44,6 +44,7 @@ const CopyCell = ({ text }: { text: string }) => {
     <div className="group flex items-center justify-between gap-2">
       <span className="font-mono text-sm">{text}</span>
       <Button
+        isButton
         variant="ghost"
         size="icon"
         onClick={handleCopy}
