@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { formatDate } from 'pliny/utils/formatDate'
 import { MDXContent } from '@/utils/strapi'
-import type { Comparison } from '../../../types/transformedContent'
+import { type Comparison } from 'types/transformedContent'
 
 export default function BlogPostCard({
   blog,
