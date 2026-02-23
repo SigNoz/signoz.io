@@ -7,11 +7,12 @@ doc_type: howto
 tags: [Self-Host]
 ---
 
-You can provision a **root user** when SigNoz starts so an admin account exists as soon as the instance is deployed. This removes the gap between deployment and manually creating the first admin, which improves security for fresh installs and automation (e.g. IaC, GitOps). The root user is created on startup from configuration and cannot be deleted, updated, or have its password changed through the SigNoz UI.
+You can provision a **root user** when SigNoz starts so an admin account exists as soon as the instance is deployed. This removes the gap between deployment and manually creating the first admin, which improves security for fresh installs and automation (e.g. IaC, GitOps). The root user is created on startup from configuration.
 
-<Admonition type="info">
+<KeyPointCallout title="Available from SigNoz v0.112.0" defaultCollapsed={false}>
 This feature is available starting with <a href="https://github.com/SigNoz/signoz/releases/tag/v0.112.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.112.0</a>.
-</Admonition>
+</KeyPointCallout>
+
 
 ## Prerequisites
 
@@ -67,8 +68,10 @@ SIGNOZ_USER_ROOT_EMAIL=admin@example.com
 SIGNOZ_USER_ROOT_PASSWORD=<secure-password>
 SIGNOZ_USER_ROOT_ORG_NAME=default
 ```
-
-- `<secure-password>`: A strong password for the root user.
+<KeyPointCallout title="How the root user works" defaultCollapsed={false}>
+- The root user cannot be deleted, edited, or have its password changed from the SigNoz UI. To change credentials, update the configuration or env vars and restart (where supported by your deployment).
+- Root user provisioning runs at startup only; changing config requires a restart to take effect.
+</KeyPointCallout>
 
 ## Fresh installs
 
@@ -95,9 +98,9 @@ If SigNoz is **already running** and you want to enable the root user:
 
 3. **Restart SigNoz** so it provisions the root user on startup.
 
-<Admonition type="warning">
-Use a consistent organization name: the value in `SIGNOZ_USER_ROOT_ORG_NAME` (or `user.root.org.name`) must match the organization name in the database. Mismatch can prevent the root user from being associated with the correct organization.
-</Admonition>
+<KeyPointCallout title="Existing installs: organization name must match database" defaultCollapsed={false}>
+The value in `SIGNOZ_USER_ROOT_ORG_NAME` (or `user.root.org.name`) must match the organization name in the database. A mismatch can prevent the root user from being associated with the correct organization.
+</KeyPointCallout>
 
 ## Validate
 
@@ -120,16 +123,11 @@ After deployment or restart:
 
 ### Root user cannot log in or is in the wrong organization
 
-- For existing installs, the value of `SIGNOZ_USER_ROOT_ORG_NAME` (or `user.root.org.name`) must match the organization name in the database. Re-run `UPDATE organizations SET name = '<org-name>';` with the same `<org-name>` you set in config, then restart SigNoz.
+- Ensure the organization name in the database matches `SIGNOZ_USER_ROOT_ORG_NAME` (or `user.root.org.name`). Re-run the `UPDATE organizations` query from [Existing installs](#existing-installs) with the same `<org-name>` as in your config, then restart SigNoz.
 
 </details>
-
-## Limitations
-
-- The root user cannot be deleted, edited, or have its password changed from the SigNoz UI. To change credentials, update the configuration or env vars and restart (where supported by your deployment).
-- Root user provisioning runs at startup only; changing config requires a restart to take effect.
 
 ## Next steps
 
 - [Authentication and user management](https://signoz.io/docs/userguide/authentication/)
-- [JWT Secret](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/)
+- [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/)
