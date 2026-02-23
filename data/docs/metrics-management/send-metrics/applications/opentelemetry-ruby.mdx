@@ -1,5 +1,5 @@
 ---
-date: 2026-02-06
+date: 2026-02-23
 id: opentelemetry-ruby
 title: Send Metrics from Ruby Application Using OpenTelemetry
 description: Learn how to send metrics from Ruby applications (Rails, Sinatra, Sidekiq) to SigNoz using OpenTelemetry
@@ -42,6 +42,7 @@ Set the following environment variables to configure the OpenTelemetry exporter:
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_TRACES_EXPORTER="none"
 export OTEL_LOGS_EXPORTER="none"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
@@ -50,6 +51,7 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `OTEL_METRICS_EXPORTER`: Set to `otlp` to export metrics to SigNoz.
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
 
 </TabItem>
@@ -65,6 +67,8 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_METRICS_EXPORTER
+  value: 'otlp'
 - name: OTEL_TRACES_EXPORTER
   value: 'none'
 - name: OTEL_LOGS_EXPORTER
@@ -76,6 +80,7 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `OTEL_METRICS_EXPORTER`: Set to `otlp` to export metrics to SigNoz.
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
 
 </TabItem>
@@ -90,6 +95,7 @@ Add environment variables to your Dockerfile:
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_TRACES_EXPORTER="none"
 ENV OTEL_LOGS_EXPORTER="none"
 ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
@@ -102,6 +108,7 @@ Or pass them at runtime using `docker run`:
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_METRICS_EXPORTER="otlp" \
     -e OTEL_TRACES_EXPORTER="none" \
     -e OTEL_LOGS_EXPORTER="none" \
     -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
@@ -112,6 +119,7 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `OTEL_METRICS_EXPORTER`: Set to `otlp` to export metrics to SigNoz.
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
 
 </TabItem>
@@ -122,6 +130,7 @@ Verify these values:
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_TRACES_EXPORTER = "none"
 $env:OTEL_LOGS_EXPORTER = "none"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
@@ -130,6 +139,7 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
+- `OTEL_METRICS_EXPORTER`: Set to `otlp` to export metrics to SigNoz.
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
 
 </TabItem>
@@ -173,7 +183,7 @@ OpenTelemetry::SDK.configure do |c|
 end
 ```
 
-The SDK automatically configures the OTLP metrics exporter using `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` from your environment variables. Metrics are exported periodically based on `OTEL_METRIC_EXPORT_INTERVAL`.
+With `OTEL_METRICS_EXPORTER=otlp`, the SDK uses the OTLP metrics exporter configured by `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS`. Metrics are exported periodically based on `OTEL_METRIC_EXPORT_INTERVAL`.
 
 ### Step 4. Add custom metrics
 
@@ -331,10 +341,12 @@ meter.create_observable_up_down_counter(
 **ObservableGauge** - Observes a point-in-time value (e.g., temperature, current memory usage):
 
 ```ruby
+require 'get_process_mem'
+
+process_mem = GetProcessMem.new
 memory_callback = proc do
-  # Return resident set size in bytes
-  memory_kb = `ps -o rss= -p #{Process.pid}`.to_i
-  memory_kb * 1024
+  # Return resident set size in bytes (cross-platform, no shell command)
+  process_mem.bytes.to_i
 end
 
 meter.create_observable_gauge(
@@ -356,15 +368,23 @@ Ruby does not have a built-in runtime metrics package like Python or Node.js. Ho
 
 ### Create a Runtime Metrics Helper
 
+Install an additional gem for cross-platform process memory:
+
+```ruby:Gemfile
+gem 'get_process_mem'
+```
+
 Create a helper module to collect common runtime metrics:
 
 ```ruby:lib/runtime_metrics.rb
+require 'get_process_mem'
+
 module RuntimeMetrics
   def self.setup(meter)
     # Memory usage (returns bytes)
+    process_mem = GetProcessMem.new
     memory_callback = proc do
-      memory_kb = `ps -o rss= -p #{Process.pid}`.to_i
-      memory_kb * 1024
+      process_mem.bytes.to_i
     end
     meter.create_observable_gauge(
       'process.memory.usage',
