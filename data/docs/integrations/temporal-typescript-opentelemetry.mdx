@@ -384,9 +384,11 @@ Deploy your Temporal worker and client as Kubernetes deployments with environmen
 
 **1. Create a Secret for the ingestion key:**
 
+The secret value must be the full OTLP header string, not just the key alone:
+
 ```bash
 kubectl create secret generic signoz-secrets \
-  --from-literal=signoz-ingestion-key=<your-ingestion-key>
+  --from-literal=OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
 
 **2. Create a ConfigMap for OpenTelemetry settings:**
@@ -433,7 +435,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: signoz-secrets
-                  key: signoz-ingestion-key
+                  key: OTEL_EXPORTER_OTLP_HEADERS
             - name: OTEL_RESOURCE_ATTRIBUTES
               valueFrom:
                 configMapKeyRef:
@@ -441,21 +443,20 @@ spec:
                   key: OTEL_RESOURCE_ATTRIBUTES
 ```
 
-```yaml:temporal-client-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
+The Temporal client starts a workflow and exits, so it runs as a Kubernetes **Job** (not a Deployment, which would crash-loop on exit):
+
+```yaml:temporal-client-job.yaml
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: temporal-client
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: temporal-client
   template:
     metadata:
       labels:
         app: temporal-client
     spec:
+      restartPolicy: OnFailure
       containers:
         - name: client
           image: your-registry/temporal-client:latest
@@ -471,7 +472,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: signoz-secrets
-                  key: signoz-ingestion-key
+                  key: OTEL_EXPORTER_OTLP_HEADERS
             - name: OTEL_RESOURCE_ATTRIBUTES
               valueFrom:
                 configMapKeyRef:
@@ -484,7 +485,7 @@ spec:
 ```bash
 kubectl apply -f otel-configmap.yaml
 kubectl apply -f temporal-worker-deployment.yaml
-kubectl apply -f temporal-client-deployment.yaml
+kubectl apply -f temporal-client-job.yaml
 ```
 
 </TabItem>
