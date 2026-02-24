@@ -8,10 +8,16 @@ doc_type: howto
 ---
 
 
-<KeyPointCallout title="Why this deprecation?" defaultCollapsed={false}>
-The old setup used a separate **signoz-schema-migrator** Job; otel-collector (and init containers) had to wait for that Job to exist and complete before starting. That caused "Job not found" on installs/upgrades, brittle workarounds, and stacks getting stuck when the migration Job retried or timed out.
+<KeyPointCallout title="What changed in v0.113" defaultCollapsed={false}>
+With v0.113, the standalone `signoz-schema-migrator` image is replaced by migration commands built directly into `signoz-otel-collector`. This removes the startup ordering issues caused by the old Job-based approach.
 
-**Now:** Migrations live inside **signoz-otel-collector** (`migrate` subcommands). One **signoz-telemetrystore-migrator** replaces sync + async migrators, and the collector uses a ClickHouse-based check (`migrate sync check`) instead of depending on the Job — so startup no longer hinges on Job ordering. [Details →](https://github.com/SigNoz/charts/issues/828)
+Key changes:
+
+- `signoz-telemetrystore-migrator` replaces both `schema-migrator-sync` and `schema-migrator-async` services
+- Migration commands (`migrate bootstrap`, `migrate sync up`, `migrate async up`) are now subcommands of `signoz-otel-collector`
+- `otel-collector` now runs `migrate sync check` against ClickHouse at startup instead of waiting on a Job
+
+For more details, see [SigNoz/charts#828](https://github.com/SigNoz/charts/issues/828).
 </KeyPointCallout>
 
 ## Upgrade Instructions
@@ -22,9 +28,9 @@ The old setup used a separate **signoz-schema-migrator** Job; otel-collector (an
 <Tabs>
 <TabItem value="docker-standalone" label="Standalone" default>
 
-<Admonition type="info">
-If you are using the default Docker Compose files from the repo, no manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart.
-</Admonition>
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart.
+</KeyPointCallout>
 
 If you have customized your `docker-compose.yaml`, make the following changes before upgrading:
 
@@ -142,9 +148,9 @@ The container should show status `Exited (0)`.
 </TabItem>
 <TabItem value="docker-ha" label="HA">
 
-<Admonition type="info">
-If you are using the default Docker Compose files from the repo, no manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart.
-</Admonition>
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart.
+</KeyPointCallout>
 
 If you have customized your `docker-compose.ha.yaml`, make the following changes before upgrading:
 
@@ -255,7 +261,13 @@ Apply the following changes to the `otel-collector` service, it now runs `migrat
 
 ### Step 4: Apply the changes
 
-Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart the stack.
+Pull the latest changes and restart using your HA compose file:
+
+```bash
+cd deploy/docker
+docker compose -f docker-compose.ha.yaml pull
+docker compose -f docker-compose.ha.yaml up -d --remove-orphans
+```
 
 ### Step 5: Validate migrations
 
@@ -273,9 +285,9 @@ The container should show status `Exited (0)`.
 <Tabs>
 <TabItem value="docker-swarm-standalone" label="Standalone" default>
 
-<Admonition type="info">
-If you are using the default Docker Compose files from the repo, no manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to pull the latest changes and restart.
-</Admonition>
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to pull the latest changes and restart.
+</KeyPointCallout>
 
 If you have customized your `docker-compose.yaml`, make the following changes before upgrading:
 
@@ -385,9 +397,9 @@ The task should show `Complete` state.
 </TabItem>
 <TabItem value="docker-swarm-ha" label="HA">
 
-<Admonition type="info">
-If you are using the default Docker Compose files from the repo, no manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to pull the latest changes and restart.
-</Admonition>
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to pull the latest changes and restart.
+</KeyPointCallout>
 
 If you have customized your `docker-compose.ha.yaml`, make the following changes before upgrading:
 
@@ -512,9 +524,9 @@ The task should show `Complete` state.
 </TabItem>
 <TabItem value="kubernetes" label="Kubernetes">
 
-<Admonition type="info">
-If you are using the default SigNoz Helm chart without custom overrides for `schemaMigrator`, no changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment).
-</Admonition>
+<KeyPointCallout title="Using the default Helm chart?" defaultCollapsed={false}>
+No changes are required if you have no custom overrides for `schemaMigrator`. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment).
+</KeyPointCallout>
 
 If you have custom `schemaMigrator` overrides, update your `values.yaml` before upgrading.
 
