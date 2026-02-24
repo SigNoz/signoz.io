@@ -20,6 +20,7 @@ import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 import authorsDirectory from '@/constants/authors.json'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
+import PageFeedback from '@/components/PageFeedback/PageFeedback'
 
 const MAIN_CONTENT_ID = 'article-main'
 
@@ -202,6 +203,9 @@ export default function ArticleLayout({
               )}
               {children}
             </article>
+            <div className={hasToc ? 'lg:hidden' : ''}>
+              <PageFeedback />
+            </div>
 
             {/* Mobile meta info card */}
             {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
@@ -348,6 +352,7 @@ export default function ArticleLayout({
                         scrollableContainerRef={tocContainerRef}
                       />
                     </div>
+                    <PageFeedback placement="toc" />
                   </div>
                 )}
               </div>

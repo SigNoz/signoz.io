@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { waitUntil, ipAddress } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
+import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
 
 // Extract OS from user agent (server-side version)
@@ -33,6 +34,13 @@ export function middleware(req: NextRequest) {
   const userAgent = req.headers.get('user-agent') || ''
   const { isBot, botType } = detectBotFromUserAgent(userAgent)
 
+  const acceptHeader = req.headers.get('accept') || ''
+  const contentTypeHeader = req.headers.get('content-type') || ''
+
+  const prefersMarkdown =
+    acceptHeader.toLowerCase().includes('text/markdown') ||
+    contentTypeHeader.toLowerCase().includes('text/markdown')
+
   // Get request details
   const pathname = req.nextUrl.pathname
   const referer = req.headers.get('referer') || req.headers.get('referrer') || 'direct'
@@ -59,6 +67,9 @@ export function middleware(req: NextRequest) {
           custom_request_method: req.method,
           custom_has_javascript: false,
           custom_vercel_ip: vercelIp,
+          custom_accept_header: acceptHeader,
+          custom_content_type_header: contentTypeHeader,
+          custom_prefers_markdown: prefersMarkdown,
         },
         anonymousId,
       })
@@ -68,6 +79,19 @@ export function middleware(req: NextRequest) {
   // Prepare response
   const res = NextResponse.next()
 
+  // Preserve request path for server-rendered global not-found suggestions.
+  res.headers.set(NOT_FOUND_PATHNAME_HEADER, pathname)
+
+  // Add custom headers for downstream consumption
+  if (isBot) {
+    res.headers.set('x-bot-detected', 'true')
+    res.headers.set('x-bot-type', botType || 'unknown')
+
+    // Flag if this request seems to be from an LLM or requesting non-HTML
+    if (prefersMarkdown) {
+      res.headers.set('x-prefers-markdown', 'true')
+    }
+  }
   const currentVercelIpCookie = req.cookies.get('vercel_ip')?.value
   if (currentVercelIpCookie !== vercelIp && vercelIp !== 'unknown') {
     res.cookies.set('vercel_ip', vercelIp, {

@@ -108,7 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let opentelemetryRoutes: MetadataRoute.Sitemap = []
   try {
     const opentelemetryRoutesResponse = (await fetchMDXContentByPath(
-      'opentelemetry',
+      'opentelemetries',
       undefined,
       deploymentStatus,
       true
@@ -154,5 +154,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...guideRoutes,
     ...faqRoutes,
     ...caseStudyRoutes,
+    ...comparisonRoutes,
   ]
 }

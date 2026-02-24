@@ -1,6 +1,7 @@
 ---
-date: 2024-12-18
+date: 2026-01-27
 title: Send traces and logs from AWS Lambda Node.js functions to SigNoz
+description: Learn how to send traces and logs from AWS Lambda Node.js functions to SigNoz using OpenTelemetry auto-instrumentation.
 tags : [SigNoz Cloud]
 id: aws-lambda-nodejs
 hide_table_of_contents: true
@@ -85,18 +86,18 @@ OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name>
 ```
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- Replace `<your-ingestion-key>` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>`is the name of your Lambda function.
 
 ### Add the OpenTelemetry Lambda Layer
 Go to the **Layers** section and add the following ARN:
 
 ```environment
-arn:aws:lambda:<region>:184161586896:layer:opentelemetry-nodejs-0_9_0:4
+arn:aws:lambda:<aws_region>:184161586896:layer:opentelemetry-nodejs-0_9_0:4
 ```
 
-Replace `<region>` with your AWS region.
+Replace `<aws_region>` with your AWS region.
 Check [OpenTelemetry Lambda releases](https://github.com/open-telemetry/opentelemetry-lambda/releases) for the latest version.
 
 ### Test the Lambda Function

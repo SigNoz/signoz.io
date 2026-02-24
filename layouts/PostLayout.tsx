@@ -10,6 +10,7 @@ import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import BlogHeader from '@/components/BlogHeader/BlogHeader'
 import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 export interface tocItemProps {
   url: string
@@ -67,47 +68,51 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
   }, [])
 
   return (
-    <main ref={mainRef} className="container mx-auto">
-      <SectionContainer>
-        <ScrollTopAndComment />
-
-        <BlogHeader
-          title={title}
-          tags={tags}
-          authors={authors}
-          publishedDate={date}
-          readingTime={readingTime.text}
-          key={slug}
-        />
+    <RegionProvider>
+      <main ref={mainRef}>
         <ProgressBar target={mainRef} />
-        <div className="post container flex flex-row-reverse overflow-clip">
-          <div
-            className={`post-toc ml-4 w-1/4 transition-opacity duration-1000 ${
-              isTocVisible ? 'opacity-100' : 'opacity-30'
-            } hover:opacity-100`}
-          >
-            {toc.map((tocItem: tocItemProps) => {
-              return (
-                <div className="post-toc-item" key={tocItem.url}>
-                  <a data-level={tocItem.depth} href={tocItem.url} className="line-clamp-2">
-                    {tocItem.value}
-                  </a>
-                </div>
-              )
-            })}
-          </div>
+        <div className="container mx-auto">
+          <SectionContainer>
+            <ScrollTopAndComment />
 
-          <div className="post-content w-3/4 pr-4">
-            <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
-              {children}
-            </article>
-          </div>
+            <BlogHeader
+              title={title}
+              tags={tags}
+              authors={authors}
+              publishedDate={date}
+              readingTime={readingTime.text}
+              key={slug}
+            />
+            <div className="post container flex flex-row-reverse overflow-clip">
+              <div
+                className={`post-toc ml-4 w-1/4 transition-opacity duration-1000 ${
+                  isTocVisible ? 'opacity-100' : 'opacity-30'
+                } hover:opacity-100`}
+              >
+                {toc.map((tocItem: tocItemProps) => {
+                  return (
+                    <div className="post-toc-item" key={tocItem.url}>
+                      <a data-level={tocItem.depth} href={tocItem.url} className="line-clamp-2">
+                        {tocItem.value}
+                      </a>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="post-content w-3/4 pr-4">
+                <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
+                  {children}
+                </article>
+              </div>
+            </div>
+
+            {relatedArticles && Array.isArray(relatedArticles) && (
+              <RelatedArticles relatedArticles={relatedArticles} />
+            )}
+          </SectionContainer>
         </div>
-
-        {relatedArticles && Array.isArray(relatedArticles) && (
-          <RelatedArticles relatedArticles={relatedArticles} />
-        )}
-      </SectionContainer>
-    </main>
+      </main>
+    </RegionProvider>
   )
 }
