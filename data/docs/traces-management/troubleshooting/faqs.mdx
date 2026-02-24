@@ -1,5 +1,5 @@
 ---
-date: 2025-08-07
+date: 2026-02-24
 id: faqs
 title: General FAQs
 description: General FAQs about traces
@@ -13,5 +13,29 @@ A. Make sure your logs include `trace_id` and `span_id`.
 
 * If you are collecting application logs from file, ensure you emit the `trace_id` and `span_id` to those logs.
 * Once you have `trace_id` and `span_id` in your logs, parse them using the pipelines trace parser. See documentation [here](https://signoz.io/docs/logs-pipelines/guides/trace/).
+
+</details>
+
+
+### Q. Why do my custom rate queries differ from the Services dashboard?
+A. If you're trying to recreate the rate metrics shown in the Services dashboard using custom queries in the Metrics section, you may notice that your numbers don't match. This is because the Services dashboard has specific filtering that affects the calculations.
+
+<details>
+
+<summary>Show detailed explanation</summary>
+
+**Understanding the difference**
+
+The rate table under Services only considers **top-level operations**, which is why there's a discrepancy between what you see in the Services dashboard and what you get when querying `signoz_calls_total` directly with Rate and Sum functions.
+
+When you query `signoz_calls_total` in the Metrics section, you're getting data from all operations, including nested or child operations. However, the Services dashboard filters this data to show only top-level operations, resulting in different (typically lower) values.
+
+**Getting accurate Service-level metrics**
+
+To recreate the same metrics you see in the Services dashboard, you'll need to use queries that filter for top-level operations only.
+
+For reference queries and examples, you can import the official [APM Metrics dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics) from the SigNoz documentation. This will provide you with the proper query structure to match the Services dashboard calculations.
+
+For more information about how APM metrics are generated from span data, see [Guide to APM metrics](https://signoz.io/docs/traces-management/guides/apm-metrics).
 
 </details>

@@ -17,6 +17,19 @@ export async function fetchAllCMSContent(deploymentStatus: string): Promise<CMSC
       fetchMDXContentByPath('comparisons', undefined, deploymentStatus, true),
     ])
 
+  if (faqsResult.status === 'rejected') {
+    console.error('Failed to fetch FAQs for CMS content:', faqsResult.reason)
+  }
+  if (caseStudiesResult.status === 'rejected') {
+    console.error('Failed to fetch case studies for CMS content:', caseStudiesResult.reason)
+  }
+  if (opentelemetryResult.status === 'rejected') {
+    console.error('Failed to fetch opentelemetries for CMS content:', opentelemetryResult.reason)
+  }
+  if (comparisonsResult.status === 'rejected') {
+    console.error('Failed to fetch comparisons for CMS content:', comparisonsResult.reason)
+  }
+
   return {
     faqs:
       faqsResult.status === 'fulfilled' ? (faqsResult.value as MDXContentApiResponse) : undefined,

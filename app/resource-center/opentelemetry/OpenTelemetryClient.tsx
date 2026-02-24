@@ -6,13 +6,14 @@ import Comparisons from '../comparisons/Comparisons'
 import Guides from '../guides/Guides'
 import OpenTelemetry from './OpenTelemetry'
 import { MDXContent } from '@/utils/strapi'
+import { Comparison } from 'types/transformedContent'
 
 export default function OpenTelemetryClient({
   initialArticles,
   comparisonPosts,
 }: {
   initialArticles?: MDXContent[]
-  comparisonPosts?: any[]
+  comparisonPosts?: Comparison[]
 }) {
   const [activeTab, setActiveTab] = useState('openTelemetry-tab')
 
