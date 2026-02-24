@@ -527,6 +527,11 @@ const docsSideNav = [
                     route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
                     label: 'Setting Up SSO SAML 2.0 With Keycloak',
                   },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/oidc-keycloak',
+                    label: 'Keycloak - OIDC Authentication',
+                  },
                 ],
               },
             ],
