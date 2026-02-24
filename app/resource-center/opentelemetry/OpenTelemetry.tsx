@@ -10,7 +10,7 @@ import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
-import type { Comparison } from '../../../types/transformedContent'
+import { type Comparison } from 'types/transformedContent'
 
 type HubDoc = CoreContent<Blog | Comparison | Guide | MDXContent>
 

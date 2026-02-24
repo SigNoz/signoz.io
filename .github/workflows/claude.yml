@@ -223,11 +223,25 @@ jobs:
         uses: anthropics/claude-code-action@v1
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           trigger_phrase: "@claude"
           track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ env.PR_NUMBER }}
+
+            USER COMMENT: ${{ env.COMMENT_BODY }}
+
+            Instructions:
+            1. Analyze the USER COMMENT to understand their intent.
+            2. IF the user is explicitly asking for a review (e.g. "review this", "review my changes", "thoughts?"):
+               - Use `signoz-docs-pr-review` for docs files (`data/docs/**`, etc).
+               - Use `signoz-website-frontend-pr-review` for frontend files.
+            3. IF the user is asking for specific changes or answering a question, you may skip the full review skill and just address the request.
+
+            CRITICAL: If you make ANY changes to files during this interaction, you MUST review your own changes using the relevant skill(s) before finishing. Verify they are correct, follow the style guide, and match the user's intent.
           claude_args: |
             --model "claude-opus-4-6"
-            --system-prompt "Use relevant project skills from .claude/skills whenever useful. For PR reviews, use signoz-docs-pr-review for docs changes and signoz-website-frontend-pr-review for frontend code changes."
             --allowedTools "WebSearch,WebFetch,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue edit:*),Bash(gh api:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(find:*),Bash(head:*),Bash(tail:*),Bash(ls:*)"
