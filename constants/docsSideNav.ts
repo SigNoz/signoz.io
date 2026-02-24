@@ -1214,6 +1214,11 @@ const docsSideNav = [
             route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
             label: 'Telemetry Data Requirements for Infrastructure Monitoring',
           },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics',
+            label: 'Understanding CPU Utilization Metrics and Aggregation Intervals',
+          },
         ],
       },
     ],
@@ -2404,6 +2409,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
+            label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
           },
         ],
       },
