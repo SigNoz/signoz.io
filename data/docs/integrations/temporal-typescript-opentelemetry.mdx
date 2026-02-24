@@ -1,5 +1,5 @@
 ---
-date: 2026-01-22
+date: 2026-02-24
 id: temporal-typescript-opentelemetry
 title: Instrumenting a Temporal application in typescript with OpenTelemetry
 description: Learn how to instrument a Temporal TypeScript application with OpenTelemetry and export data to SigNoz.
@@ -148,11 +148,14 @@ otelSdk.start();
 console.log('[OpenTelemetry] SDK initialized successfully');
 ```
 
-**What this does**:
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
 - Reads your SigNoz endpoint and ingestion key from environment variables
 - Sets up trace and metric exporters to send data to SigNoz using OTLP/gRPC
 - Enables automatic instrumentation for Node.js libraries (HTTP, DNS, etc.)
 - Must be imported first in your client and worker files
+</details>
 
 ### Step 3: Instrument the Temporal Client
 
@@ -186,10 +189,13 @@ async function run() {
 run().catch(console.error);
 ```
 
-**What this does**:
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
 - The `OpenTelemetryWorkflowClientInterceptor` automatically creates spans for workflow start, signal, and query operations
 - Each workflow operation becomes a trace you can view in SigNoz
 - Always import `instrumentation.ts` first to enable auto-instrumentation
+</details>
 
 ### Step 4: Instrument the Temporal Worker
 
@@ -255,11 +261,14 @@ async function run() {
 run().catch(console.error);
 ```
 
-**What this does**:
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
 - `Runtime.install()` sends Temporal's internal metrics (worker health, task queue lag) to SigNoz
 - `makeWorkflowExporter()` exports traces from workflow execution
 - Activity interceptors capture spans for each activity invocation
 - You'll see the entire workflow execution as a distributed trace in SigNoz
+</details>
 
 ### Step 5: Instrument Workflows
 
@@ -287,10 +296,13 @@ export async function myWorkflow(): Promise<string> {
 }
 ```
 
-**What this does**:
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
 - `OpenTelemetryInboundInterceptor` traces incoming signals and queries
 - `OpenTelemetryOutboundInterceptor` traces outgoing activity calls
 - `OpenTelemetryInternalsInterceptor` traces internal workflow operations like timers and child workflows
+</details>
 
 ### Step 6: Configure Logging (Optional)
 
@@ -323,7 +335,11 @@ export const logger = winston.createLogger({
 
 Use this logger in your worker configuration by passing it to `Runtime.install({ logger })`.
 
-### Step 7: Run Your Application
+### Step 7: Configure Environment and Run
+
+**Verify these values:**
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 Choose your deployment environment and follow the corresponding instructions:
 
@@ -339,25 +355,25 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 Use this section if you're deploying your application directly on a server or VM without containerization.
 </KeyPointCallout>
 
-Set environment variables and start your worker and client:
+Set environment variables and start your worker and client. You must `export` the environment variables before running the application.
 
 **Start the worker:**
 
 ```bash
-OTEL_SERVICE_NAME="temporal-worker" \
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production" \
+export OTEL_SERVICE_NAME="temporal-worker"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
 npm run start
 ```
 
 **Start the client (in another terminal):**
 
 ```bash
-OTEL_SERVICE_NAME="temporal-client" \
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production" \
+export OTEL_SERVICE_NAME="temporal-client"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
 npm run workflow
 ```
 
@@ -385,7 +401,7 @@ data:
   OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=production"
 ```
 
-**3. Deploy the worker:**
+**3. Deploy the worker and client:**
 
 ```yaml:temporal-worker-deployment.yaml
 apiVersion: apps/v1
@@ -425,11 +441,50 @@ spec:
                   key: OTEL_RESOURCE_ATTRIBUTES
 ```
 
+```yaml:temporal-client-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temporal-client
+  template:
+    metadata:
+      labels:
+        app: temporal-client
+    spec:
+      containers:
+        - name: client
+          image: your-registry/temporal-client:latest
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "temporal-client"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: otel-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-secrets
+                  key: signoz-ingestion-key
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: otel-config
+                  key: OTEL_RESOURCE_ATTRIBUTES
+```
+
 **4. Apply the manifests:**
 
 ```bash
 kubectl apply -f otel-configmap.yaml
 kubectl apply -f temporal-worker-deployment.yaml
+kubectl apply -f temporal-client-deployment.yaml
 ```
 
 </TabItem>
@@ -528,11 +583,6 @@ npm run start
 
 </TabItem>
 </Tabs>
-
-**Replace the following placeholders:**
-
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 ## Validate in SigNoz
 
