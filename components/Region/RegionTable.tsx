@@ -1,7 +1,62 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useRegion } from './RegionContext'
+import { Copy, CheckCircle } from 'lucide-react'
+import Button from '@/components/ui/Button'
+
+const CopyCell = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false)
+  const isCopying = useRef(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleCopy = async () => {
+    if (isCopying.current) return
+    isCopying.current = true
+
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        setCopied(false)
+        isCopying.current = false
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to copy text: ', err)
+      isCopying.current = false
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
+  return (
+    <div className="group flex items-center justify-between gap-2">
+      <span className="font-mono text-sm">{text}</span>
+      <Button
+        isButton
+        variant="ghost"
+        size="icon"
+        onClick={handleCopy}
+        className="h-6 w-6 p-0 text-gray-400 opacity-0 transition-opacity hover:bg-transparent hover:text-gray-600 group-hover:opacity-100 dark:text-gray-500 dark:hover:text-gray-300"
+        title="Copy to clipboard"
+        aria-label="Copy to clipboard"
+      >
+        {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+      </Button>
+    </div>
+  )
+}
 
 const RegionTable = () => {
   const { regions, isLoading } = useRegion()
@@ -20,7 +75,7 @@ const RegionTable = () => {
       name: region.name,
       cloudRegion: cluster.cloud_region,
       provider: cluster.cloud_provider,
-      dns: `ingest.${region.dns}`,
+      dns: `https://ingest.${region.dns}`,
     }))
   )
 
@@ -54,7 +109,9 @@ const RegionTable = () => {
                 {row.provider}
               </td>
               <td className="px-6 py-4 text-gray-900 dark:text-gray-100">{row.cloudRegion}</td>
-              <td className="px-6 py-4 text-gray-900 dark:text-gray-100">{row.dns}</td>
+              <td className="px-6 py-4 text-gray-900 dark:text-gray-100">
+                <CopyCell text={row.dns} />
+              </td>
             </tr>
           ))}
         </tbody>

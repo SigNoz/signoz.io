@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { waitUntil, ipAddress } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
+import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
 
 // Extract OS from user agent (server-side version)
@@ -77,6 +78,9 @@ export function middleware(req: NextRequest) {
 
   // Prepare response
   const res = NextResponse.next()
+
+  // Preserve request path for server-rendered global not-found suggestions.
+  res.headers.set(NOT_FOUND_PATHNAME_HEADER, pathname)
 
   // Add custom headers for downstream consumption
   if (isBot) {
