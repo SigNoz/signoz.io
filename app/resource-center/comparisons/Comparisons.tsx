@@ -1,7 +1,5 @@
 'use client'
 
-import { allComparisons } from 'contentlayer/generated'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import BlogPostCard from '../Shared/BlogPostCard'
 import SearchInput from '../Shared/Search'
 import React from 'react'
@@ -31,8 +29,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
   )
 }
 
-export default function ComparisonsListing() {
-  const posts = allCoreContent(sortPosts(allComparisons))
+export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
   const primaryFeaturedBlogs = posts.slice(0, 2)
   const secondaryFeaturedBlogs = posts.slice(0)
 

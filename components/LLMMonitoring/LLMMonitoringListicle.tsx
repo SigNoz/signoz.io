@@ -132,6 +132,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Groq Monitoring',
   },
   {
+    name: 'Haystack',
+    href: '/docs/haystack-monitoring',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Monitoring',
+  },
+  {
     name: 'Inkeep',
     href: '/docs/inkeep-monitoring',
     icon: (
@@ -214,6 +226,18 @@ const LLMMonitoringData: IconCardData[] = [
       />
     ),
     clickName: 'OpenLIT',
+  },
+  {
+    name: 'OpenRouter',
+    href: '/docs/openrouter-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Monitoring',
   },
   {
     name: 'Pipecat',

@@ -105,6 +105,11 @@ const COLLECTION_SCHEMAS = {
         matchField: 'path', // Match against comparison.path
         frontmatterField: 'related_comparisons', // Array of comparison paths in frontmatter
       },
+      related_blogs: {
+        endpoint: 'blogs',
+        matchField: 'path', // Match against blog.path
+        frontmatterField: 'related_blogs', // Array of blog paths in frontmatter
+      },
       keywords: {
         endpoint: 'keywords',
         matchField: 'key', // Match against keyword.key
@@ -142,6 +147,16 @@ const COLLECTION_SCHEMAS = {
         endpoint: 'guides',
         matchField: 'path', // Match against guide.path
         frontmatterField: 'related_guides', // Array of guide paths in frontmatter
+      },
+      related_blogs: {
+        endpoint: 'blogs',
+        matchField: 'path', // Match against blog.path
+        frontmatterField: 'related_blogs', // Array of blog paths in frontmatter
+      },
+      related_comparisons: {
+        endpoint: 'comparisons',
+        matchField: 'path', // Match against comparison.path
+        frontmatterField: 'related_comparisons', // Array of comparison paths in frontmatter
       },
     },
   },
@@ -226,9 +241,7 @@ function parseMDXFile(filePath) {
 function extractAssetPaths(content, frontmatter) {
   const paths = new Set()
 
-  // Matches: ![alt](url) and <(img|video|source) ... src="url" ... />
   const mdImageRegex = /!\[.*?\]\((.*?)\)/g
-  const htmlTagRegex = /<(?:img|video|source|Image|Figure).*?src=["'](.*?)["']/g
 
   let match
   while ((match = mdImageRegex.exec(content)) !== null) {
@@ -237,11 +250,35 @@ function extractAssetPaths(content, frontmatter) {
     }
   }
 
-  while ((match = htmlTagRegex.exec(content)) !== null) {
-    if (match[1] && !match[1].startsWith('http') && !match[1].startsWith('https')) {
-      paths.add(match[1])
+  const componentTags = ['img', 'video', 'source', 'Image', 'Figure', 'Table']
+
+  componentTags.forEach((tagName) => {
+    const tagRegex = new RegExp(
+      `<${tagName}[^>]*?\\s+src\\s*=\\s*["']([^"']+)["'][^>]*?(?:/>|>[\\s\\S]*?</${tagName}>)`,
+      'gi'
+    )
+
+    let match
+    while ((match = tagRegex.exec(content)) !== null) {
+      const srcValue = match[1]
+      if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
+        paths.add(srcValue)
+      }
     }
-  }
+
+    // src appears without quotes
+    const tagRegexNoQuotes = new RegExp(
+      `<${tagName}[^>]*?\\s+src\\s*=\\s*([^\\s>"']+)[^>]*?(?:/>|>[\\s\\S]*?</${tagName}>)`,
+      'gi'
+    )
+
+    while ((match = tagRegexNoQuotes.exec(content)) !== null) {
+      const srcValue = match[1]
+      if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
+        paths.add(srcValue)
+      }
+    }
+  })
 
   // Recursively check frontmatter fields for potential asset paths
   function checkValue(value) {
@@ -265,7 +302,6 @@ function extractAssetPaths(content, frontmatter) {
   }
 
   checkValue(frontmatter)
-
   return Array.from(paths)
 }
 
@@ -351,13 +387,16 @@ function replaceAssetPaths(content, frontmatter, assets) {
   assets.forEach((assetPath) => {
     const cleanPath = assetPath.startsWith('/') ? assetPath.slice(1) : assetPath
     const cdnUrl = `${CDN_URL}/${cleanPath}`
-
     const escapedAssetPath = assetPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-    const regex = new RegExp(`(["'(])${escapedAssetPath}(["')])`, 'g')
+    const attrPattern = new RegExp(`(src\\s*=\\s*["'])${escapedAssetPath}(["'])`, 'g')
+    newContent = newContent.replace(attrPattern, `$1${cdnUrl}$2`)
 
-    // Replace in content using the regex
-    newContent = newContent.replace(regex, `$1${cdnUrl}$2`)
+    const mdPattern = new RegExp(`(!\\[.*?\\]\\()${escapedAssetPath}(\\))`, 'g')
+    newContent = newContent.replace(mdPattern, `$1${cdnUrl}$2`)
+
+    const noQuotesPattern = new RegExp(`(src\\s*=\\s*)${escapedAssetPath}([\\s>])`, 'g')
+    newContent = newContent.replace(noQuotesPattern, `$1${cdnUrl}$2`)
 
     // Replace in frontmatter
     Object.keys(newFrontmatter).forEach((key) => {
@@ -373,17 +412,37 @@ function replaceAssetPaths(content, frontmatter, assets) {
 // Helper: Fetch all entities from Strapi endpoint
 async function fetchAllEntities(endpoint) {
   try {
-    const response = await axios.get(`${CMS_API_URL}/api/${endpoint}`, {
-      params: {
-        pagination: { pageSize: 100 }, // Adjust if you have more
-      },
-      headers: {
-        Authorization: `Bearer ${CMS_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    let allEntities = []
+    let page = 1
+    const pageSize = 100
+    let pageCount = 1
 
-    return response.data.data || []
+    do {
+      const response = await axios.get(`${CMS_API_URL}/api/${endpoint}`, {
+        params: {
+          pagination: {
+            page,
+            pageSize,
+          },
+        },
+        headers: {
+          Authorization: `Bearer ${CMS_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = response.data.data || []
+      allEntities = allEntities.concat(data)
+
+      // Update pagination info
+      const meta = response.data.meta || {}
+      const pagination = meta.pagination || {}
+      pageCount = pagination.pageCount || 1
+
+      page++
+    } while (page <= pageCount)
+
+    return allEntities
   } catch (error) {
     console.error(`Failed to fetch ${endpoint}: ${error.message}`)
     return []

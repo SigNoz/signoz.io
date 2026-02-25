@@ -104,8 +104,28 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/feed.xml',
+          destination: '/rss',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
           source: '/docs/',
           destination: '/docs/introduction',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/severity/',
+          destination: '/docs/logs-pipelines/guides/severity-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/timestamp/',
+          destination: '/docs/logs-pipelines/guides/timestamp-parsing/',
           permanent: true,
         },
         {
@@ -1287,6 +1307,21 @@ module.exports = () => {
         {
           source: '/docs/userguide/collecting_application_logs_otel_sdk_java/',
           destination: '/docs/logs-management/send-logs/java-logs/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/open-source-datadog-alternatives/',
+          destination: '/blog/open-source-datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs/',
+          destination: '/docs/logs-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/log-export-methods/',
+          destination: '/docs/logs-management/send-logs/collection-methods/',
           permanent: true,
         },
       ]

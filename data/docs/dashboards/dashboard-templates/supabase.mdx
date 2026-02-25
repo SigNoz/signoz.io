@@ -1,0 +1,103 @@
+---
+date: 2026-02-18
+id: supabase
+title: Supabase Monitoring Dashboard
+description: Monitor Supabase, PgBouncer, and Postgres performance using OpenTelemetry.
+doc_type: explanation
+---
+
+This dashboard provides monitoring for your Supabase projects, including insights into connection pooling (PgBouncer), database performance (Postgres), and system resource usage.
+
+<Admonition type="info">
+To use this dashboard, you need to configure Supabase to send metrics to SigNoz. Follow the [Supabase Integration](https://signoz.io/docs/integrations/supabase) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/supabase-dashboard-1.webp"
+  alt="Supabase Dashboard - Overview and Connections"
+  caption="Supabase Dashboard - Overview and Connections"
+/>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/supabase-dashboard-2.webp"
+  alt="Supabase Dashboard - Database Performance"
+  caption="Supabase Dashboard - Database Performance"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/main/supabase/supabase-dashboard-detailed.json"
+    dashboardName="Supabase Monitoring"
+  />
+</div>
+
+## Dashboard Variables
+
+This dashboard includes pre-configured variables for filtering:
+
+- **supabase_project_ref**: Filter by specific Supabase project ID
+- **database**: Filter by database name
+- **service.name**: Filter by specific service name
+- **service_type**: Filter by service type (e.g., pgbouncer, postgres)
+
+## What This Dashboard Monitors
+
+This dashboard provides visibility into:
+
+- **Connection Health**: Track active, waiting, and idle connections in PgBouncer.
+- **Database Throughput**: Monitor transactions, rows fetched/inserted, and cache hit ratios.
+- **Resource Usage**: Keep tabs on CPU, memory, and disk usage for your database services.
+- **Query Performance**: Analyze query execution times and identify potential bottlenecks like deadlocks.
+- **Network Traffic**: Monitor ingress and egress traffic for database connections.
+
+## Metrics Included
+
+### Overview & Resources
+- **Active DB Connections**: Current active client connections to database.
+- **CPU Usage %**: Overall CPU utilization.
+- **Memory Usage %**: Memory utilization percentage.
+- **Disk Usage %**: Filesystem usage by mountpoint.
+- **Network I/O**: Network receive and transmit rates.
+
+### Connection Pool (PgBouncer)
+- **Active Connections**: Active client connections by database.
+- **Waiting Connections**: Clients waiting for server connection.
+- **Server Connections (Idle)**: Idle server connections ready for queries.
+- **Max Client Connections**: Maximum allowed client connections.
+- **Client Wait Time**: Time clients spend waiting for server.
+- **Connection Pool Efficiency**: Percentage of max connections in use.
+
+### Database Performance
+- **Transactions/sec**: Committed transactions per second.
+- **Rows Fetched/Inserted**: Rate of rows fetched and inserted.
+- **Cache Hit Ratio**: Percentage of queries served from cache.
+- **Deadlocks**: Database deadlocks per second.
+- **Database Size**: Database size breakdown.
+
+### Query Performance
+- **Query Execution Time**: Total query execution time per second.
+- **Total Queries Executed**: Queries executed per second.
+- **Average Query Duration**: Average query execution time in milliseconds.
+- **Total User Queries**: Total queries from users.
+- **Query Rate**: Queries per second pooled by PgBouncer.
+
+### Detailed Resource Usage
+- **CPU & Memory**: Detailed breakdown of CPU (user, system, wait) and memory usage.
+- **Disk & Network**: I/O operations, throughput, and network traffic details.
+
+### Logs & Traces
+- **Logs**: Log volume and error logs trend.
+- **Traces**: Application error rate, top error spans, and latency distribution.
+
+## Next Steps
+
+- Explore the [Supabase Integration](https://signoz.io/docs/integrations/supabase) to configure metrics collection
+- Set up [alerts](https://signoz.io/docs/userguide/alerts-management/) for connection pool issues or performance degradation
+- Learn about [querying metrics](https://signoz.io/docs/product-features/query-builder) to create custom visualizations
+
+## Related Dashboards
+
+- [Postgres](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)
+- [MongoDB](https://github.com/SigNoz/dashboards/tree/main/mongodb)
