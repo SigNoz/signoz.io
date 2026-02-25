@@ -20,7 +20,6 @@ import siteMetadata from './data/siteMetadata'
 import blogRelatedArticles from './constants/blogRelatedArticles.json'
 import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
 import guidesRelatedArticles from './constants/guidesRelatedArticles.json'
-import opentelemetryRelatedArticles from './constants/opentelemetryRelatedArticles.json'
 import allAuthors from './constants/authors.json'
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -366,64 +365,6 @@ export const Comparison = defineDocumentType(() => ({
   },
 }))
 
-export const Opentelemetry = defineDocumentType(() => ({
-  name: 'Opentelemetry',
-  filePathPattern: 'opentelemetry/*.mdx',
-  contentType: 'mdx',
-  fields: {
-    title: { type: 'string', required: true },
-    date: { type: 'date', required: true },
-    tags: { type: 'list', of: { type: 'string' }, default: [] },
-    lastmod: { type: 'date' },
-    draft: { type: 'boolean' },
-    summary: { type: 'string' },
-    description: { type: 'string' },
-    slug: { type: 'string', required: false },
-    images: { type: 'json' },
-    image: { type: 'string' },
-    authors: { type: 'list', of: { type: 'string' } },
-    layout: { type: 'string', default: 'OpenTelemetryLayout' },
-    cta_title: { type: 'string', required: false },
-    cta_text: { type: 'string', required: false },
-    bibliography: { type: 'string' },
-    canonicalUrl: { type: 'string' },
-    keywords: { type: 'list', of: { type: 'string' }, required: false },
-  },
-  computedFields: {
-    ...computedFields,
-    relatedArticles: {
-      type: 'json',
-      resolve: (doc) => getRelatedArticles(doc, opentelemetryRelatedArticles),
-    },
-    structuredData: {
-      type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/opentelemetry/${doc.slug}`,
-        },
-        author: getAuthors(doc),
-        publisher: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-          logo: {
-            '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
-          },
-        },
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
-    },
-  },
-}))
-
 export const Guide = defineDocumentType(() => ({
   name: 'Guide',
   filePathPattern: 'guides/**/*.mdx',
@@ -575,7 +516,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom],
+  documentTypes: [Blog, Authors, Comparison, Guide, Doc, Newsroom],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [

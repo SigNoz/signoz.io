@@ -1,5 +1,5 @@
 ---
-date: 2026-01-02
+date: 2026-01-27
 id: send-cloudwatch-logs-to-signoz
 title: Send CloudWatch logs to SigNoz
 description: Learn how to forward AWS CloudWatch logs to SigNoz using the OpenTelemetry Collector with step-by-step configuration and validation.
@@ -10,7 +10,7 @@ doc_type: howto
 
 This guide walks you through forwarding AWS CloudWatch logs to SigNoz using the OpenTelemetry (OTel) Collector's `awscloudwatch` receiver. By the end, you'll have CloudWatch logs flowing into SigNoz where you can search, filter, and correlate them with traces and metrics.
 
-<KeyPointCallout title="What is the OpenTelemetry Collector?" defaultCollapsed={true}>
+<KeyPointCallout title="What is the OpenTelemetry Collector?" defaultCollapsed="true">
 The OpenTelemetry Collector is a vendor-agnostic agent that collects, processes, and exports telemetry data (logs, metrics, traces). In this setup, it pulls logs from CloudWatch and forwards them to SigNoz. Learn more in the [OTel Collector documentation](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/).
 </KeyPointCallout>
 
@@ -45,7 +45,7 @@ Replace the placeholders:
 - `<YOUR_AWS_ACCESS_KEY_ID>`: Your AWS access key ID
 - `<YOUR_AWS_SECRET_ACCESS_KEY>`: Your AWS secret access key
 
-<KeyPointCallout title="Using named profiles?" defaultCollapsed={true}>
+<KeyPointCallout title="Using named profiles?" defaultCollapsed="true">
 If you use multiple AWS profiles, you can specify a named profile like this:
 
 ```bash:~/.aws/credentials
@@ -160,19 +160,19 @@ Make sure your `exporters` section includes the correct SigNoz endpoint. For Sig
 ```yaml:config.yaml
 exporters:
   otlp:
-    endpoint: ingest.<REGION>.signoz.cloud:443
+    endpoint: ingest.<region>.signoz.cloud:443
     tls:
       insecure: false
     headers:
-      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+      signoz-ingestion-key: <your-ingestion-key>
 ```
 
 Replace:
-- `<REGION>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
-- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [SigNoz Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region]
+- `<your-ingestion-key>`: Your ingestion key from [SigNoz Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 </Admonition>
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -240,10 +240,30 @@ After a few minutes (based on your `poll_interval`), verify that logs are appear
 
 **Symptoms**: OTel Collector memory usage grows over time when collecting many log groups.
 
-**Fix**: 
+**Fix**:
 - Reduce the number of log groups by using a more specific prefix
 - Increase the `poll_interval` to reduce polling frequency
 - Use named log groups instead of autodiscovery to limit scope
+
+### Logs are not ordered correctly by timestamp
+
+**Symptoms**: CloudWatch logs appear out of order in SigNoz, especially when multiple log lines from the same log stream have timestamps close together (e.g., CI/CD pipeline logs, CodeBuild logs).
+
+**Root cause**: The AWS CloudWatch receiver uses the timestamp provided by CloudWatch as the event timestamp, which often has lower precision than the actual log entries. This can cause logs from the same CloudWatch log stream to appear out of order, especially when multiple log lines share the same CloudWatch timestamp.
+
+The receiver does not automatically parse or extract timestamps from within the log message content itself. For example, if your CodeBuild logs contain timestamps like `[Container] 2026/01/05 17:52:19.313300`, these more precise timestamps are not used for ordering.
+
+**Fix**: Use [Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse and extract the timestamp from your log payload:
+
+1. Create a pipeline to parse and extract the timestamp from your log message content
+2. Configure the pipeline to set the extracted timestamp as the correct log timestamp
+3. This will allow SigNoz to use the more precise timestamp embedded in your log messages for proper ordering
+
+For detailed instructions on parsing timestamps, see the [Timestamp Parser documentation](https://signoz.io/docs/logs-pipelines/guides/timestamp/).
+
+<Admonition type="info">
+This behavior is expected when using the AWS CloudWatch receiver, as it relies on CloudWatch's event timestamps rather than parsing log content. The limitation comes from how the OpenTelemetry AWS CloudWatch receiver processes the data from the CloudWatch API.
+</Admonition>
 
 </details>
 

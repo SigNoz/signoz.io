@@ -2,20 +2,22 @@
 
 Thanks for helping improve SigNoz documentation. Clear, complete docs are critical for adoption of SigNoz and for the broader OpenTelemetry ecosystem. This guide explains how to contribute and the standards we follow.
 
-- Scope: The guidelines below apply to product documentation pages under `data/docs/**`.
+- Scope: The documentation content guidelines below apply to product documentation pages under `data/docs/**`.
 - Development setup and local preview are in `README.md`.
 - A blog contribution workflow is included later for convenience, but the content/style rules in this guide are specific to docs (not blogs).
+- If your PR changes site code (for example: `app/**`, `components/**`, `hooks/**`, `utils/**`), follow [Website Code Guidelines](#website-code-guidelines).
 - For questions or clarifications, open a draft PR early and ask for feedback.
 
 ## Table of Contents
 
 - [Workflow](#workflow)
 - [Git Hooks and Checks](#git-hooks-and-checks)
+- [Website Code Guidelines](#website-code-guidelines)
 - [General Guidelines](#general-guidelines)
+  - [Write docs around a Jobs-To-Be-Done (JTBD)](#write-docs-around-a-jobs-to-be-done-jtbd)
 - [Documentation types and Diátaxis](#documentation-types-and-diátaxis)
 - [Content Structure](#content-structure)
   - [Patterns and components](#patterns-and-components)
-  - [Link references to keep handy](#link-references-to-keep-handy)
   - [Happy path vs troubleshooting](#happy-path-vs-troubleshooting)
   - [URLs and redirects](#urls-and-redirects)
 - [Doc Type–Specific Guidelines](#doc-type–specific-guidelines)
@@ -70,127 +72,105 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - When a PR is labeled `add-to-onboarding`, this job checks that the PR includes docs changes. If none are found, the job fails with a message.
   - If docs are present, it auto-creates an onboarding issue listing changed docs and comments on the PR with a link.
 
+## Website Code Guidelines
+
+These guidelines apply when your PR changes website code (for example: `app/**`, `components/**`, `hooks/**`, `utils/**`).
+
+- Prefer existing icon libraries
+  - Use `lucide-react` or `react-icons` for icons.
+  - If you need a custom brand/logo asset, place it under `public/svgs/**` and reference it via `/svgs/...` (avoid inline SVG blobs in components).
+- Prefer existing UI primitives
+  - Use existing components in `components/ui/**` (for example `components/ui/Button`) instead of raw HTML elements for interactive UI.
+  - Avoid styling overrides unless necessary; keep Tailwind classes consistent with existing patterns.
+- Keep types/constants co-located and reusable
+  - Move component-local types/constants into separate files (for example `MyComponent.types.ts`, `MyComponent.constants.ts`) and export from the folder `index.ts` when needed outside the folder.
+- Avoid concurrent async invocations
+  - For click handlers that do async work, prevent multiple concurrent runs (set loading state before `await` and/or guard with a ref).
+- Be deliberate about DOM cleanup/transforms
+  - When cleaning up rendered DOM before transforming (for example, HTML → Markdown), avoid redundant selectors and ensure cleanup order matches the intended behavior.
+- Dependencies must be justified
+  - Do not add new packages unless they are required and there is no existing dependency that fits.
+  - If you add a dependency, include a short justification in the PR description and ensure it is used in code.
+
 ## General Guidelines
 
-- Assume basic language/library knowledge
-  - Readers know their programming language and framework basics.
-  - Do not explain language fundamentals (e.g., how to install dependencies, what environment variables are, basic syntax).
-  - However, assume **no prior OpenTelemetry knowledge**. Briefly explain OTel concepts when introduced (spans, traces, collectors, exporters, etc.) and link to reference docs. Do not go deep into explanation.
-- Be complete and practical
-  - Cover end-to-end use cases. Link to related topics: ingestion, dashboard templates, alerts, query builder, and relevant features.
-  - Add brief context for OpenTelemetry-specific terms and define them on first use.
-  - Cross-link existing SigNoz docs instead of duplicating content. For example, when describing OTel Collector receivers or pipelines, reference the [configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
-- Be concise and direct
-  - Avoid filler and marketing fluff. Get to the point.
-  - Avoid generic intros like “In today’s digital landscape…” and adjectives like “powerful,” “robust,” “seamless.”
-  - Prefer short, focused sentences. If a sentence has multiple clauses, consider splitting it.
-  - Assume the reader is busy and scanning; lead with the most important information.
-- Use plain, consistent language
-  - Avoid jargon if a simpler phrase works.
-  <!-- - When you must use domain-specific terms (for example, “span,” “instrumentation library”), define them once and link to a reference doc. (Reference docs or Glossary page are still WIP so this is not yet required.) -->
-  - Use the same term for the same concept across docs.
-- Prefer clarity over cleverness
-  - Use active voice and second person (“you”).
-  - Show before/after and expected outcomes when it helps.
-  - Be explicit about what a feature or setting does. For example, instead of “configure the agent as needed,” specify what can be configured and recommended defaults.
-- Set clear expectations and limitations
-  - Call out important caveats (supported environments, versions, performance constraints, and missing features).
-  - If a feature is beta or has known gaps, say so directly so users can plan around it.
-- AI/LLM Usage
-  - Using AI/LLMs for research is fine, but verify everything and rewrite in your voice.
-  - Do not paste unvetted AI/LLM text. Avoid vague generalities and ensure steps are reproducible.
-- Tone: friendly, not cutesy
-  - Docs are not marketing copy, a blog post, or LinkedIn content.
-  - Aim for confident, clear, professional language with a small amount of warmth when appropriate.
-  - Avoid slang or hypey phrases that get in the way of instructions.
-- Anchor concepts in real-world use cases
-  - When explaining new ideas, ground them in concrete scenarios (for example, “monitoring a Kubernetes app,” “tracking latency across microservices,” or “setting up alerts for errors”).
-  - Prefer concrete, named examples over abstract descriptions.
-- Acronyms and short forms
-  - Define on first use, then use the short form consistently.
-  - Examples: “OpenTelemetry (OTel),” “OpenTelemetry Collector (OTel Collector),” “OpenTelemetry Protocol (OTLP).”
-- Placeholders and variables
-  - Use angle-bracket placeholders like `<service-name>`, `<region>`, `<SIGNOZ_INGESTION_KEY>`.
-  - Immediately below the snippet, explain what each placeholder means.
+- Assume language/framework basics, but assume no prior OpenTelemetry knowledge.
+  - Do not explain programming fundamentals.
+  - Briefly explain OTel terms on first use and link to references.
+- Write concise, task-first instructions.
+  - Avoid filler, hype, and generic intros.
+  - Use active voice and second person.
+- Keep terminology and naming consistent across pages.
+- Be explicit about caveats and limitations (version, environment, scale, beta gaps).
+- Prefer concrete examples over abstract descriptions.
+- Define acronyms on first use, then use the short form consistently.
+- Use angle-bracket placeholders only (`<region>`, `<your-ingestion-key>`) and explain each placeholder right below the snippet.
+- Cross-link existing SigNoz docs instead of duplicating instructions.
+- AI/LLM use is fine for research, but all output must be verified and rewritten clearly.
+
+### Write docs around a Jobs-To-Be-Done (JTBD)
+
+- Identify persona(s), assumptions, and the primary job before drafting.
+- Keep persona as an authoring aid; do not add a mandatory "Target Persona" section in docs.
+- Define the primary job in one sentence: "When ..., I want to ..., so I can ...".
+- Optimize for time-to-first-success:
+  - one clear default path
+  - minimal mandatory steps
+  - clear success signal in SigNoz
+- Keep the happy/common path clean.
+  - Move optional, advanced, and edge-case content to callouts, collapsed sections, troubleshooting, or separate pages.
+- For setup docs, scope the main flow to prerequisites, install/configure, start/restart, and validate.
 
 ## Documentation types and Diátaxis
 
-We classify each docs page by its primary purpose using the [Diátaxis framework](https://diataxis.fr/).  
-This helps keep pages focused and makes the docs easier to navigate and maintain.
+Classify each doc by its primary purpose using [Diátaxis](https://diataxis.fr/) and set `doc_type` in frontmatter:
 
-Set a `doc_type` in the frontmatter for new docs:
+- `tutorial`: learn by doing (opinionated end-to-end flow)
+- `howto`: complete a specific task
+- `reference`: look up exact facts (options, schemas, limits)
+- `explanation`: understand how/why something works
 
-- `tutorial` – **Learn by doing**  
-  - Guided, opinionated, end-to-end flows.  
-  - Example: “Set up RED-style monitoring and alerts for a microservice”.
-- `howto` – **Achieve a specific goal**  
-  - Narrow, task-focused instructions.  
-  - Example: “Send traces from Spring Boot to SigNoz”, “Edit columns in Logs Explorer”.
-- `reference` – **Look up exact facts**  
-  - Schemas, config options, endpoints, limits. No step-by-step flow.  
-  - Example: “SigNoz Cloud ingestion endpoints and ports”.
-- `explanation` – **Understand concepts**  
-  - Why and how something works; background and trade-offs.  
-  - Example: “How SigNoz turns traces into APM metrics”, “Types and aggregations in Metrics”.
+Rough mapping:
 
-**Rough mapping to SigNoz sections:**
-
-- **Send Data docs** – usually `howto` (instrumentation, pipelines).
-- **User Guides / end-to-end flows** – usually `tutorial`.
-- **Knowledge base – concepts** – `explanation`.
-- **Knowledge base – schemas / options** – `reference`.
-- **Product docs / Working with [Module]** – mostly `howto`, with separate `explanation` docs for deep dives.
-- **Overview docs for modules/features** – usually `explanation` (short concept + navigation, not step-by-step).
-- **Dashboard template docs** – usually `explanation` (overview of the dashboard and its metrics).
-- **Troubleshooting docs** – `howto` with a problem-first framing.
-
-For a deeper dive into Diátaxis, see  
-[Diátaxis: streamlining technical documentation](https://edify.cr/insights/streamlining-technical-documentation-with-diataxis-framework/).
+- Send Data docs: usually `howto`
+- User guides (end-to-end flows): usually `tutorial`
+- Conceptual knowledge base: `explanation`
+- Schemas/options/limits: `reference`
+- Troubleshooting docs: `howto` with problem-first framing
 
 ## Content Structure
 
-Every doc should be skimmable and actionable.
+Every docs page should be skimmable, actionable, and validated.
 
-- Required frontmatter
-  - Always include and keep current:
-    ```yaml
-    ---
-    date: 2025-01-15 # YYYY-MM-DD
-    id: <unique-id-or-slug>
-    title: <Title in Sentence Case>
-    description: <1–2 line summary with key terms>
-    doc_type: howto # one of: tutorial | howto | reference | explanation
-    # tags are optional — see below
-    ---
-    ```
-  - Use `id` as a stable unique slug (no spaces); update links if it changes.
-  - **Tags**: Default tags (`SigNoz Cloud`, `Self-Host`) are automatically applied to all docs. You only need to specify `tags` in frontmatter when the doc applies to a **subset** of the defaults:
-    - Use `tags: [Self-Host]` if the doc is **only** relevant to self-hosted users.
-    - Use `tags: [SigNoz Cloud]` if the doc is **only** relevant to SigNoz Cloud users.
-    - Use `tags: []` (empty array) if the doc is **not** relevant to any tags.
-    - Omit `tags` entirely if the doc applies to both (the defaults will be applied automatically).
-  - Use `doc_type` to match the main intent of the page (see [Documentation types and Diátaxis](#documentation-types-and-diátaxis)).
-- Standard sections (H2 level)
-  - `## Overview` – what the doc covers and when to use it. Skip this section if the overview is only 1-2 lines.
-  - `## Prerequisites` – versions, accounts, keys, cluster access, etc. Include links.
-  - `## Steps` or specific setup sections – ordered, with subheadings for clarity.
-  - `## Validate` – how to confirm it worked (UI path, endpoint, example output).
-  - `## Troubleshooting` – common issues and fixes (more details below).
-  - `## Limitations` – when relevant, call out important constraints and unsupported scenarios (environments, versions, data sources, scale).
-- Explaining commands and code
+- Required frontmatter:
+  ```yaml
+  ---
+  date: 2025-01-15 # YYYY-MM-DD
+  id: <unique-id-or-slug>
+  title: <Title in Sentence Case>
+  description: <1-2 line summary with key terms>
+  doc_type: howto # tutorial | howto | reference | explanation
+  # tags optional; see rules below
+  ---
+  ```
+- Tags:
+  - omit `tags` when doc applies to both Cloud and Self-Host
+  - `tags: [Self-Host]` for self-host-only docs
+  - `tags: [SigNoz Cloud]` for cloud-only docs
+  - `tags: []` if none apply
+- Standard sections (H2):
+  - `## Overview` (skip if intro is already 1-2 lines)
+  - `## Prerequisites`
+  - `## Steps` (or clear setup sections)
+  - `## Validate`
+  - `## Troubleshooting`
+  - `## Limitations` (when relevant)
 
-  - Before each command, explain what it does and where to run it (local shell, container, Kubernetes, CI, etc.).
-  - After commands, note expected results and what happens next if relevant.
-  - For code/config blocks, annotate with language and filename to improve context:
-    ````markdown
-    ```yaml:/deploy/docker/otel-collector-config.yaml
-    receivers:
-      otlp:
-        protocols:
-          http:
-            endpoint: 0.0.0.0:4318
-    ```
-    ````
+- Commands and snippets:
+  - Explain what each command does and where to run it.
+  - State expected result after major steps.
+  - Annotate code blocks with language and filename when useful.
+  - Explain important fields and placeholders directly below snippets.
   - Highlight specific lines to focus attention using braces after the language identifier. Example: highlight line 4 in a YAML block:
 
     ````markdown
@@ -206,7 +186,6 @@ Every doc should be skimmable and actionable.
 
     This renders as:  
     ![Highlighted line example](public/img/docs/guidelines/code-highlight-example.png)
-
   - Immediately below, explain each critical field and placeholder.
   - Example with placeholders and explanations:
     ```yaml:/deploy/docker/otel-collector-config.yaml
@@ -214,61 +193,47 @@ Every doc should be skimmable and actionable.
       otlphttp:
         endpoint: https://ingest.<region>.signoz.cloud:443
         headers:
-          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+          signoz-ingestion-key: <your-ingestion-key>
     service:
       pipelines:
         traces:
           exporters: [otlphttp]
     ```
     This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
-    Replace the following placeholders:
-    - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
-    - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
-
+    
+    Verify these values:
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
   - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
     - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
     - ❌ "Replace your `otel-collector-config.yaml` with the following content:"
+  - Main-path snippets must be safe defaults that work after replacing documented placeholders.
+  - Move advanced/environment-specific options into callouts or collapsed sections.
 
-- Hyperlinks
-
-  - Internal links should open in the new tab. Always prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
-
-  - External links should open in a new tab and preserve security attributes by using href:
-
+- Hyperlinks:
+  - Internal links should use absolute URLs. Use `[Text](https://signoz.io/endpoint)` rather than site-relative `[Text](/endpoint)`.
+  - Add links where they directly help users finish the current step.
+  - Avoid link dumping.
+  - External links in MDX should use:
     ```mdx
     <a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">
       Example
     </a>
     ```
+  - Use descriptive anchor text (avoid "here" and raw URLs in body text).
+  - Validate all internal and external links before PR.
 
-  - Use descriptive anchor text that makes the link destination clear. Avoid generic phrases like "here" or "link" and do not paste raw URLs into the body text.
-
-    - ✅ `Learn from the [Temporal Golang tutorial](https://signoz.io/docs/integrations/temporal-golang-opentelemetry/)`
-    - ❌ `See (link)` or `Refer to https://signoz.io/...`
-
-  - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
-
-- Cloud vs Self-Host
-  - Add the relevant tags in frontmatter only if the content is specific to one platform (e.g., `tags: ["Self-Host"]`).
-  - **Default to SigNoz Cloud** in all examples and instructions.
-  - Include a collapsible `KeyPointCallout` for self-hosted users instead of duplicating with tabs.
+- Cloud vs Self-Host:
+  - Default to SigNoz Cloud examples.
+  - Use a collapsible `KeyPointCallout` for self-hosted users instead of duplicating with tabs.
   - Use the Cloud vs Self-Hosted comparison doc when a guide only shows one environment and the other only differs by endpoint/auth/TLS: https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud
-  - Drop-in snippet for Cloud-first guides (copy this into your docs):
-    ```mdx
-    <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-    Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-    </KeyPointCallout>
-    ```
-  - Only use tabs if instructions materially diverge (e.g., different components/flows), not for small endpoint/header differences.
-- Images and media
-  - Store images under `public/img/docs/<topic>/...` and reference as `/img/docs/<topic>/...`.
-  - Use the `Figure` component with descriptive `alt` and a concise `caption`.
-  - Keep images small and readable; crop UI screenshots to the relevant area.
-  - Use WebP format (`.webp`) for all images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools
-- Discoverability and SEO
-  - Put primary keywords in `title`, `description`, `url`, and the first paragraph.
+  - Use tabs only when the workflows materially differ.
+- Images and SEO:
+  - Store docs images in `public/img/docs/<topic>/...`, reference `/img/docs/<topic>/...`.
+  - Use `Figure` with descriptive alt text and concise caption.
+  - Use WebP format for all images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools
+  - Include primary keywords in title, description, slug, and first paragraph.
   - Use natural variants/synonyms in headings and body.
-  - Link to adjacent features (ingestion, dashboards, alerts) where relevant.
 
 ### Patterns and components
 
@@ -284,32 +249,23 @@ Every doc should be skimmable and actionable.
   ```
 - Use `Tabs`/`TabItem` to branch by platform, OS, or materially different flows. For Cloud vs Self-Host, prefer the drop-in snippet + comparison page.
 - Use numbered steps for procedures and bullets for reference content.
+- In procedure docs, each numbered step should include: what to do, the exact command/config change, and the expected result.
+- Keep mandatory steps to the minimum needed for first success.
+- Merge or remove redundant mandatory steps.
+- Optional or advanced variations should not appear in the primary numbered flow.
+- Each required step must be unambiguous, actionable, and outcome-oriented.
+- Avoid multi-purpose steps that combine unrelated actions.
+- Convert non-essential, edge-case, or optional steps into `KeyPointCallout` or collapsed `<details>` blocks to keep the main flow focused.
 - Keep headings short and meaningful. Prefer H2 for main sections.
-
-### Link references to keep handy
-
-- Ingestion to SigNoz Cloud endpoints: <https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint>
-- Ingestion keys for SigNoz Cloud: <https://signoz.io/docs/ingestion/signoz-cloud/keys/>
-- Cloud → Self-Hosted anchor: <https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted>
-- OpenTelemetry Collector docs: link the specific receiver/exporter you use.
-- OTel Collector configuration guide: <https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/>
-- Why use the OTel Collector: <https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/>
-- Switch from direct export to Collector: <https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/>
 
 ### Happy path vs troubleshooting
 
-For tutorials and how-to docs, write for the **happy path** by default:
-
-- Assume a normal, supported setup and show one clear end-to-end flow.
-- Avoid branching into multiple edge cases in the middle of the procedure.
-
-Handle problems as follows:
-
-- Put **critical, common caveats** (version constraints, destructive actions, known sharp edges) inline as short notes or warnings next to the relevant step.
-- Put **detailed debugging and rare edge cases** in a `## Troubleshooting` section at the end of the doc, or in a separate troubleshooting/FAQ page.
-
-Rule of thumb: if most readers will hit the issue, keep a brief warning inline.  
-If only some users will hit it, link them to troubleshooting instead of bloating the main flow.
+- Write for the happy/common path first.
+- Keep mandatory steps minimal and focused on first success.
+- Keep the main path free of tangential details.
+- Put common blockers as short inline warnings near the step.
+- Put rare/verbose debugging in `## Troubleshooting` or a dedicated troubleshooting doc.
+- If users need guesswork to continue, rewrite the step or add one high-value link.
 
 ### URLs and redirects
 
@@ -339,69 +295,47 @@ If only some users will hit it, link them to troubleshooting instead of bloating
 
 ### Overview docs (modules and feature families)
 
-These are the top-level “Overview” pages for a module or feature area (for example, Metrics overview, Logs overview).
-
-- Audience: users deciding **“Is this the right place for my job?”**
-- Goal: explain what the module/feature is for and route users to the right docs.
-- Content:
-  - 1–3 short paragraphs on **what it is** and **when to use it**.
-  - A brief list of key capabilities.
-  - Curated links grouped by intent, such as:
-    - “Get started” (Send Data / basic setup how-tos)
-    - “Do specific tasks” (Working with [Module] how-tos)
-    - “Learn more” (User guides / tutorials)
-    - “Reference and concepts” (Knowledge base)
-- Avoid:
-  - Step-by-step setup instructions.
-  - Large configuration tables or API/field listings.
-  - Deep theory or long troubleshooting sections.
-- **Components**:
-  - Prefer using a "Listicle" component (e.g., `<AWSMonitoringListicle />` or `<APMInstrumentationListicle />`) to display supported integrations/services in a grid with category tabs. This improves navigation and visual appeal compared to long lists.
-
-`doc_type` for overview pages is usually `explanation`.
+- Audience: readers deciding where to start.
+- Include what the module does, when to use it, and where to go next.
+- Link to setup/how-to/tutorial/reference pages by intent.
+- Avoid step-by-step setup and long config/reference tables.
+- `doc_type` is usually `explanation`.
 
 ### Product docs (features, UI flows)
 
-- Audience: end users in the SigNoz UI.
-- Cover: feature overview, why/when to use it, prerequisites, step-by-step with screenshots, expected outcomes, and links to related user guides.
-- Include caveats, version availability, and plan differences if any.
-- Show the exact UI path and terminology that matches the product.
-- `doc_type` is usually `howto`. If the page is purely conceptual, use `explanation`.
+- Start from the user job and expected outcome.
+- Include exact UI path/labels, prerequisites, step-by-step flow, and validation.
+- Keep deep concepts in separate explanation docs; link them.
+- `doc_type` is usually `howto` (or `explanation` if concept-only).
 
 ### Send Data docs (instrumentation and pipelines)
 
-Send Data docs guide users through instrumenting their applications to send telemetry to SigNoz. These are the most common entry points for new users.
+- Primary job: get telemetry flowing quickly.
+- Always include a concrete `## Validate` section.
 
 #### Audience assumptions
 
-- **Knows**: Their programming language, framework basics, and general development workflow.
-- **Doesn't know**: OpenTelemetry concepts, instrumentation patterns, or how observability data flows.
-
-Explain OTel-specific terms (spans, traces, exporters, collectors) when first introduced. Add brief context and reference other docs; do not go deep into explanation. Don't explain language basics.
+- Readers know their language/framework basics.
+- Readers may not know OTel concepts or pipeline patterns.
+- Explain OTel terms briefly; do not teach language fundamentals.
 
 #### URL and naming
 
 - Explicitly mention OpenTelemetry in the URL/slug, title, and overview.
   - Example slug and file name: `data/docs/instrumentation/<tech>/opentelemetry-<tech>.mdx`.
-- Specify the tested versions of SDKs/agents/collectors up front.
+- Specify tested versions when relevant.
+- Use pinned/tested/latest versions in main steps; keep version caveats in optional notes.
 
 #### Default to direct export to SigNoz Cloud
 
-All Send Data docs should default to sending telemetry **directly to SigNoz Cloud** (not through a Collector). This is the simplest path for getting started.
-
-- Show the direct OTLP export configuration as the primary method.
-- Include the optional Collector setup as a collapsible section at the end (see template below).
+- Use direct export to SigNoz Cloud as the primary path.
+- Keep Collector-based setup optional and out of the main path. Include it as a collapsible section at the end.
 
 #### Deployment types
 
-Send Data docs should cover **four deployment types** using tabs:
-
-1. **VM** – Virtual machines and bare metal servers
-2. **Kubernetes** – Container orchestration
-3. **Docker** – Containerized applications
-4. **Windows** – Windows servers and environments
-
-Include a VM explanation callout at the start of the VM section:
+- Cover VM, Kubernetes, Docker, and Windows when applicable.
+- If flows differ by platform, use tabs.
+- Include a VM explanation callout at the start of the VM section:
 
 ```mdx
 <KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
@@ -426,8 +360,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 #### Optional Collector setup section
 
-Include this collapsible section at the end of Send Data docs which by default don't mandatorily need OTel collector, before Troubleshooting:
-
+If Collector is optional, keep it in a collapsed section near the bottom. Eg:
 ```mdx
 <details>
 <ToggleHeading>
@@ -454,26 +387,16 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 #### Code and configuration
 
-- Explain each code snippet: what it configures, where it lives, and how it works.
-- Provide validation steps in SigNoz (Traces/Logs/Metrics views) with screenshots where possible.
+- Explain what each snippet does, where it goes, and why it is needed.
+- Keep default config minimal for first success.
+- Move non-essential options (`debug`, self-scrape, extra detectors, placeholder paths) out of the main flow.
 
 #### Troubleshooting section
 
-- Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification.
-- Provide as much context as possible to make it clear where the troubleshooting instructions apply.
-- Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
-- Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO.
-- Use `<ToggleHeading>` to collapse troubleshooting sections:
-  ```mdx
-  <details>
-  <ToggleHeading>
-  ## Troubleshooting
-  </ToggleHeading>
-
-  ### Issue 1...
-  </details>
-  ```
-
+- Include `## Troubleshooting` with symptoms, likely causes, concrete fixes, and verification.
+- Include frequent checks: endpoint, auth key/token, TLS, versions.
+- Use error-string or problem-style headings for discoverability.
+- For Send Data docs, use collapsed troubleshooting sections with `<ToggleHeading>`.
 - Don’t stop at “Data Sent”. Close the loop with next steps: Link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
 - `doc_type` is usually `howto` for Send Data docs.
 
@@ -490,14 +413,9 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 ### Troubleshooting docs
 
-- Start with a short problem statement and affected environments.
-- Structure:
-  - Symptoms (error messages, logs, UI behavior)
-  - Likely causes (ordered by frequency)
-  - Resolution steps (copy-pasteable, with context)
-  - Verification (what success looks like)
-- Include logs/commands snippets and known edge cases.
-- Provide links to relevant product docs and Send Data docs.
+- Start with the problem statement and affected environments.
+- Structure: Symptoms -> Likely causes -> Resolution -> Verification.
+- Include concrete logs/commands and known edge cases.
 - Titles and headings: use question-style titles or include the exact error/topic to improve search and SEO. Prefer exact error strings and component names (SDK/receiver/exporter) in headings.
 - For minor, frequently asked Q&A, add/update a concise FAQ page. Keep answers short and point to deeper guides when needed.
 `doc_type` for troubleshooting docs is `howto`. Treat each page as a focused “how to fix this specific problem” guide, with a problem-first title and concrete resolution steps.
@@ -513,6 +431,8 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 ### Explanation docs (concepts and deep dives)
 
 Explanation docs are where we answer **“why does this work like this?”** and **“how does this fit together?”**
+
+- The job is "build a mental model."
 
 - Audience: users trying to build a mental model or make design decisions.
 - Cover:
@@ -532,6 +452,8 @@ Set `doc_type: explanation` for these pages.
 
 Reference docs exist so users can **look up exact facts** quickly.
 
+- The job is "look up exact facts." Lead with the answer; keep prose minimal.
+
 - Audience: users who already know *what* they’re doing and just need details.
 - Cover:
   - Configuration options, environment variables, CLI flags.
@@ -545,8 +467,7 @@ Reference docs exist so users can **look up exact facts** quickly.
 - Avoid:
   - Guided workflows (“first do X, then Y…”).
   - Long conceptual intros — keep context tight and link to explanation docs instead.
-
-Set `doc_type: reference` for these pages.
+- Use `doc_type: reference`.
 
 ### Sample apps (README.md files)
 
@@ -561,24 +482,27 @@ Set `doc_type: reference` for these pages.
 
 ## Docs PR Checklist
 
-- [ ] Frontmatter includes `date`, `id`, `title`, `description`, appropriate `tags`, and a `doc_type` (`tutorial`, `howto`, `reference`, or `explanation`).
+- [ ] Frontmatter includes `date`, `id`, `title`, `description`, `doc_type`, and correct tags.
 - [ ] SEO: primary keywords appear in `title`, `description`, URL/slug, and the first paragraph. For Send Data docs, include "OpenTelemetry" in slug/title.
-- [ ] For Send Data docs: includes self-hosted `KeyPointCallout` near the top and optional Collector setup section before Troubleshooting.
-- [ ] For Send Data docs: covers all four deployment types (VM, Kubernetes, Docker, Windows) where applicable, with VM explanation callout.
-- [ ] Commands explain what they do and where to run them.
-- [ ] Code/config snippets are annotated and explained; placeholders are defined.
-- [ ] “Validate” section shows how to confirm success.
-- [ ] Troubleshooting covers common failures with concrete fixes. For Send Data docs, use `<ToggleHeading>` to collapse this section.
-- [ ] The content matches the chosen `doc_type` (tutorial / howto / reference / explanation).
-- [ ] Included a short “Next steps” section linking to adjacent features or deeper guides when applicable.
-- [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
-- [ ] For Dashboard Template docs: include a clear link to set up the data source (relevant Send Data/instrumentation guide) near the top, ideally as a brief Prerequisites or info note.
-- [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
-- [ ] Cross-link existing SigNoz docs. For OTel Collector changes, link the config guide.
-- [ ] Images use WebP format, have alt text and captions via the `Figure` component, are cropped/readable, and live under `public/img/docs/...`.
-- [ ] Added the page to the sidebar (`constants/docsSideNav.ts`) with the correct route/label.
-- [ ] If you renamed or moved a doc: added a permanent redirect in `next.config.js`, updated internal links and the sidebar, and verified with `yarn check:doc-redirects`.
-- [ ] Built locally (`yarn build`) and reviewed the page at `http://localhost:3000`.
+- [ ] Content matches the chosen `doc_type`.
+- [ ] Primary persona and primary job are clear in scope and flow.
+- [ ] Happy/common path is easy to follow end-to-end.
+- [ ] Steps are clear, concise, and minimal for first success.
+- [ ] Recommended/default config is in main flow; advanced options are moved to optional/collapsed sections.
+- [ ] `## Validate` clearly shows where success appears in SigNoz.
+- [ ] `## Troubleshooting` includes symptom -> cause -> fix -> verification.
+- [ ] Commands/snippets explain what, where, and expected outcome.
+- [ ] Placeholders use `<...>` format and are documented.
+- [ ] Default snippets are runnable after placeholder replacement.
+- [ ] Relevant internal/external links are included where helpful (without link dumping).
+- [ ] Internal links use `https://signoz.io/...`; no preview/staging domains.
+- [ ] All links were manually validated as live.
+- [ ] Images (if any) use WebP, clear alt/caption, and correct path under `public/img/docs/...`.
+- [ ] Sidebar entry is added/updated in `constants/docsSideNav.ts` when needed.
+- [ ] If URL changed: permanent redirect added in `next.config.js` and redirect checks were run.
+- [ ] For Send Data docs: cloud-first default path, self-hosted callout, and optional Collector section near bottom.
+- [ ] For Send Data docs: include VM/Kubernetes/Docker/Windows paths where applicable.
+- [ ] Built locally (`yarn build`) and reviewed at `http://localhost:3000`.
 
 ## Contribute a Doc or Blog Post
 

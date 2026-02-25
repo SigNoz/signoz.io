@@ -1,0 +1,247 @@
+name: Claude Code & Docs Review
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+    paths:
+      # Documentation files
+      - 'data/docs/**'
+      - 'public/img/docs/**'
+      - 'constants/docsSideNav.ts'
+      # Frontend code files
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/components/**'
+      - '**/pages/**'
+      - '**/app/**'
+      - '**/lib/**'
+      - '**/utils/**'
+      - '**/hooks/**'
+      - '**/context/**'
+      - '**/styles/**'
+      # Config files
+      - 'next.config.js'
+      - 'next.config.mjs'
+      - 'tsconfig.json'
+      - 'package.json'
+      # Scripts
+      - 'scripts/check-doc-redirects.js'
+      - 'scripts/check-docs-metadata.js'
+  issue_comment:
+    types: [created]
+
+jobs:
+  review:
+    # Run on PR events as before, or when a new PR comment contains "@claude"
+    if: >-
+      (
+        github.event_name == 'pull_request' &&
+        (
+          github.event.action == 'ready_for_review' ||
+          (
+            github.event.action == 'opened' &&
+            github.event.pull_request.draft == false
+          )
+        )
+      ) ||
+      (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request != null &&
+        contains(github.event.comment.body, '@claude') &&
+        (
+          github.event.comment.author_association == 'OWNER' ||
+          github.event.comment.author_association == 'MEMBER' ||
+          github.event.comment.author_association == 'COLLABORATOR'
+        )
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Check GitHub App private key
+        id: check_app_private_key
+        # Only runs when the workflow has access to secrets (non-fork contexts).
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          set -euo pipefail
+          if [ -n "${APP_PRIVATE_KEY}" ]; then
+            echo "has_private_key=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_private_key=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Mint identity token
+        id: mint_identity_token
+        # Run when an App is configured AND we're not in a forked PR context
+        # (secrets are unavailable for forked pull_request events).
+        if: ${{ vars.APP_ID && steps.check_app_private_key.outputs.has_private_key == 'true' }}
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-issues: write
+          permission-pull-requests: write
+
+      - name: Resolve PR details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            let prNumber = '';
+            if (context.payload.pull_request) {
+              prNumber = String(context.payload.pull_request.number);
+            } else if (context.eventName === 'issue_comment' && context.payload.issue.pull_request) {
+              prNumber = String(context.payload.issue.number);
+            }
+
+            let headBranch = '';
+            let headSha = '';
+            let mergeRef = context.ref;
+            let headRef = context.ref;
+            let checkoutRef = context.ref;
+            let headRepoFullName = '';
+            let headRepoCloneUrl = '';
+
+            if (prNumber) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: Number(prNumber),
+              });
+
+              headBranch = pr.head?.ref || '';
+              headSha = pr.head?.sha || '';
+              mergeRef = `refs/pull/${prNumber}/merge`;
+              headRef = `refs/pull/${prNumber}/head`;
+              checkoutRef = headRef;
+              headRepoFullName = pr.head?.repo?.full_name || '';
+              headRepoCloneUrl = pr.head?.repo?.clone_url || '';
+
+              try {
+                await github.rest.git.getRef({
+                  owner,
+                  repo,
+                  ref: `pull/${prNumber}/merge`,
+                });
+                checkoutRef = mergeRef;
+              } catch (error) {
+                core.info(`Merge ref not available for PR #${prNumber}; using head ref.`);
+              }
+            }
+
+            core.setOutput('checkout_ref', checkoutRef);
+            core.setOutput('merge_ref', mergeRef);
+            core.setOutput('head_ref', headRef);
+            core.setOutput('head_branch', headBranch);
+            core.setOutput('head_sha', headSha);
+            core.setOutput('head_repo_full_name', headRepoFullName || '');
+            core.setOutput('head_repo_clone_url', headRepoCloneUrl || '');
+            core.setOutput('number', prNumber);
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.pr.outputs.checkout_ref }}
+          token: ${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}
+          fetch-depth: 0
+
+      - name: Prepare PR workspace
+        if: steps.pr.outputs.number
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          HEAD_BRANCH: ${{ steps.pr.outputs.head_branch }}
+        run: |
+          set -e
+          if [ -n "${HEAD_REF}" ]; then
+            TARGET="refs/remotes/origin/${HEAD_BRANCH:-pr-${PR_NUMBER}-head}"
+            git fetch origin "${HEAD_REF}:${TARGET}" || true
+          fi
+
+      - name: Point origin at PR fork
+        if: >-
+          steps.pr.outputs.head_repo_clone_url &&
+          steps.pr.outputs.head_repo_full_name &&
+          steps.pr.outputs.head_repo_full_name != github.repository
+        env:
+          HEAD_REPO_CLONE_URL: ${{ steps.pr.outputs.head_repo_clone_url }}
+          HEAD_BRANCH: ${{ steps.pr.outputs.head_branch }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+          git remote rename origin upstream
+          git remote add origin "${HEAD_REPO_CLONE_URL}"
+          if [ -n "${HEAD_BRANCH}" ]; then
+            git fetch origin "${HEAD_BRANCH}:${HEAD_BRANCH}" --depth=20 || true
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.4'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --prefer-offline --no-audit
+
+      - name: Claude automated PR review
+        if: github.event_name == 'pull_request'
+        uses: anthropics/claude-code-action@v1
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true # ✨ Enables tracking comments
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ env.PR_NUMBER }}
+
+            Review this pull request and use relevant project skills from `.claude/skills`.
+            - Use `signoz-docs-pr-review` for docs changes.
+            - Use `signoz-website-frontend-pr-review` for frontend code changes.
+
+            Apply only the relevant skill(s) based on changed files.
+            Leave inline comments for concrete issues and post exactly one concise summary comment.
+            Do not add praise-only comments.
+
+          claude_args: |
+            --model "claude-opus-4-6"
+            --allowedTools "WebSearch,WebFetch,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue edit:*),Bash(gh api:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(find:*),Bash(head:*),Bash(tail:*),Bash(ls:*)"
+
+      - name: Claude interactive PR comments
+        if: github.event_name == 'issue_comment'
+        uses: anthropics/claude-code-action@v1
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          trigger_phrase: "@claude"
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ env.PR_NUMBER }}
+
+            USER COMMENT: ${{ env.COMMENT_BODY }}
+
+            Instructions:
+            1. Analyze the USER COMMENT to understand their intent.
+            2. IF the user is explicitly asking for a review (e.g. "review this", "review my changes", "thoughts?"):
+               - Use `signoz-docs-pr-review` for docs files (`data/docs/**`, etc).
+               - Use `signoz-website-frontend-pr-review` for frontend files.
+            3. IF the user is asking for specific changes or answering a question, you may skip the full review skill and just address the request.
+
+            CRITICAL: If you make ANY changes to files during this interaction, you MUST review your own changes using the relevant skill(s) before finishing. Verify they are correct, follow the style guide, and match the user's intent.
+          claude_args: |
+            --model "claude-opus-4-6"
+            --allowedTools "WebSearch,WebFetch,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue edit:*),Bash(gh api:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(find:*),Bash(head:*),Bash(tail:*),Bash(ls:*)"

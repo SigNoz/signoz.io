@@ -4,10 +4,13 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
+const defaultFrameAncestors =
+  "'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud"
+
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
@@ -15,7 +18,7 @@ const ContentSecurityPolicy = `
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
-  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors ${process.env.CSP_FRAME_ANCESTORS || defaultFrameAncestors};
 `
 
 const securityHeaders = [
@@ -103,6 +106,54 @@ module.exports = () => {
         {
           source: '/docs/',
           destination: '/docs/introduction',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/severity/',
+          destination: '/docs/logs-pipelines/guides/severity-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/timestamp/',
+          destination: '/docs/logs-pipelines/guides/timestamp-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/php/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/laravel/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-laravel/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-wordpress/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/jvm-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/send-metrics/runtimes/java-metrics/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
           permanent: true,
         },
         {
@@ -218,7 +269,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3mkbiaxsz-QBhH_p84LIbzv2LkgkIGhQ',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3pdv47cad-1O4lTFY1H2E8UwQcnQ4fZg',
           basePath: false,
           permanent: true,
         },
@@ -386,6 +437,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/manual-instrumentation/dotnet/manual-instrumentation/',
+          destination: '/docs/instrumentation/dotnet/manual-instrumentation/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/elixir/',
           destination: '/docs/instrumentation/opentelemetry-elixir/',
           permanent: true,
@@ -422,7 +478,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/java/',
-          destination: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
@@ -442,7 +498,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/jboss/',
-          destination: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
           permanent: true,
         },
         {
@@ -488,16 +544,6 @@ module.exports = () => {
         {
           source: '/docs/instrumentation/opentelemetry-react-native/',
           destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
-          permanent: true,
-        },
-        {
-          source: '/docs/instrumentation/php/',
-          destination: '/docs/instrumentation/opentelemetry-php/',
-          permanent: true,
-        },
-        {
-          source: '/docs/instrumentation/laravel/',
-          destination: '/docs/instrumentation/opentelemetry-laravel/',
           permanent: true,
         },
         {
@@ -568,12 +614,17 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/ruby/',
-          destination: '/docs/instrumentation/ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/ruby-on-rails/',
-          destination: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
@@ -583,7 +634,39 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/springboot/',
-          destination: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java framework-specific redirects to new java/ folder structure
+        {
+          source: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-quarkus/',
+          destination: '/docs/instrumentation/java/opentelemetry-quarkus/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java manual instrumentation redirect
+        {
+          source: '/docs/instrumentation/manual-instrumentation/java/annotations/',
+          destination: '/docs/instrumentation/java/manual-instrumentation/',
           permanent: true,
         },
         {
@@ -593,13 +676,23 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/tomcat/',
-          destination: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
-          destination:
-            '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation/',
+          destination: '/docs/instrumentation/javascript/nodejs-selective-instrumentation/',
           permanent: true,
         },
         {
@@ -1184,6 +1277,41 @@ module.exports = () => {
         {
           source: '/docs/userguide/python-logs-auto-instrumentation/',
           destination: '/docs/logs-management/send-logs/python-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/llm-community-integrations/',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/hostmetrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_java/',
+          destination: '/docs/logs-management/send-logs/java-logs/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/open-source-datadog-alternatives/',
+          destination: '/blog/open-source-datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs/',
+          destination: '/docs/logs-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/log-export-methods/',
+          destination: '/docs/logs-management/send-logs/collection-methods/',
           permanent: true,
         },
       ]

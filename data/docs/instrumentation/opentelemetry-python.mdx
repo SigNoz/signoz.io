@@ -1,5 +1,5 @@
 ---
-date: 2025-12-16
+date: 2026-01-17
 id: python
 
 title: Python OpenTelemetry Instrumentation
@@ -9,7 +9,7 @@ doc_type: howto
 
 This guide shows you how to instrument your Python application with OpenTelemetry and send traces to SigNoz. The auto-instrumentation approach works with Django, Flask, FastAPI, Falcon, Celery, and most Python libraries out of the box.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -25,7 +25,7 @@ Tested with Python 3.11 and OpenTelemetry Python SDK v1.27.0.
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
 
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
 - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
 - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -41,10 +41,19 @@ export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+export OTEL_METRICS_EXPORTER="none"
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed="true">
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
@@ -80,7 +89,7 @@ See [Framework instrumentation](#framework-instrumentation) below for framework-
 <Tabs entityName="k8s-method">
 <TabItem value="direct" label="Direct" default>
 
-<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed="true">
 For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
 </KeyPointCallout>
 
@@ -98,10 +107,20 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_EXPORTER_OTLP_PROTOCOL
   value: 'grpc'
+- name: OTEL_METRICS_EXPORTER
+  value: 'none'
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed="true">
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
@@ -155,9 +174,20 @@ spec:
   propagators:
     - tracecontext
     - baggage
+  env:
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed="true">
+The OTel Operator's Python auto-instrumentation image includes instrumentations for HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms for every outgoing HTTP call.
+
+Since metrics are enabled by default, these HTTP metrics would be sent to your collector even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting `OTEL_METRICS_EXPORTER` to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
 
 Deploy this resource to your cluster.
 
@@ -183,10 +213,19 @@ $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_EXPORTER_OTLP_PROTOCOL = "grpc"
+$env:OTEL_METRICS_EXPORTER = "none"
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed="true">
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
@@ -226,6 +265,7 @@ ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+ENV OTEL_METRICS_EXPORTER=none
 ```
 
 Or pass them at runtime using `docker run`:
@@ -235,11 +275,20 @@ docker run -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>" \
     -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_EXPORTER_OTLP_PROTOCOL="grpc" \
+    -e OTEL_METRICS_EXPORTER="none" \
     your-image:latest
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed="true">
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
@@ -305,7 +354,7 @@ Choose your framework below to see the specific run command. The setup steps abo
         Always use `--noreload` with Django. The auto-reload mechanism spawns child processes that break OpenTelemetry instrumentation.
         </Admonition>
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed={true}>
+        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
         ```dockerfile
         CMD ["opentelemetry-instrument", "python", "manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
         ```
@@ -330,7 +379,7 @@ Choose your framework below to see the specific run command. The setup steps abo
         Always use `--no-reload` with Flask. The reloader spawns a child process that breaks OpenTelemetry instrumentation. Also avoid `FLASK_ENV=development` as it enables the reloader.
         </Admonition>
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed={true}>
+        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
         ```dockerfile
         CMD ["opentelemetry-instrument", "flask", "run", "--host=0.0.0.0", "--no-reload"]
         ```
@@ -359,7 +408,7 @@ Choose your framework below to see the specific run command. The setup steps abo
         Uvicorn's `--workers` flag is not supported with `opentelemetry-instrument`. Use Gunicorn with Uvicorn workers instead: `gunicorn -k uvicorn.workers.UvicornWorker main:app`
         </Admonition>
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed={true}>
+        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
         ```dockerfile
         CMD ["opentelemetry-instrument", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
         ```
@@ -380,7 +429,7 @@ Choose your framework below to see the specific run command. The setup steps abo
         opentelemetry-instrument waitress-serve --port=8000 app:api
         ```
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed={true}>
+        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
         ```dockerfile
         CMD ["opentelemetry-instrument", "gunicorn", "app:api", "--bind", "0.0.0.0:8000"]
         ```
@@ -397,7 +446,7 @@ Choose your framework below to see the specific run command. The setup steps abo
 
         Replace `tasks` with your Celery app module name.
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed={true}>
+        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
         ```dockerfile
         CMD ["opentelemetry-instrument", "celery", "-A", "tasks", "worker", "--loglevel=info"]
         ```
@@ -407,7 +456,7 @@ Choose your framework below to see the specific run command. The setup steps abo
         Celery instrumentation captures task execution spans, including task name, arguments, and status. Both the worker and the code that enqueues tasks should be instrumented for full trace propagation.
         </Admonition>
 
-        <KeyPointCallout title="Celery with prefork workers (advanced)" defaultCollapsed={true}>
+        <KeyPointCallout title="Celery with prefork workers (advanced)" defaultCollapsed="true">
         Celery uses the prefork worker model by default. The OpenTelemetry SDK is not fork-safe, so you must initialize it in each worker process using the `worker_process_init` signal. Add this to your Celery app file:
 
         ```python
@@ -452,7 +501,7 @@ Choose your framework below to see the specific run command. The setup steps abo
         opentelemetry-instrument gunicorn -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8000
         ```
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed={true}>
+        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
         ```dockerfile
         CMD ["opentelemetry-instrument", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000"]
         ```
@@ -476,7 +525,7 @@ Choose your framework below to see the specific run command. The setup steps abo
 - Add `lazy-apps = true` to your uWSGI config (recommended, simplest fix)
 - Or implement a post_fork hook (see <a href="https://opentelemetry-python.readthedocs.io/en/latest/examples/fork-process-model/README.html" target="_blank" rel="noopener noreferrer nofollow">example</a>)
 
-<KeyPointCallout title="Why do some setups need extra config?" defaultCollapsed={true}>
+<KeyPointCallout title="Why do some setups need extra config?" defaultCollapsed="true">
 OpenTelemetry's span exporter uses a background thread. When a server forks worker processes, this thread doesn't copy over correctly, causing spans to get stuck.
 
 **Gunicorn** loads your app in each worker after forking (so the thread starts fresh). With `--preload`, it loads before forking, causing the same issue.
@@ -595,7 +644,8 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 - [Add manual instrumentation](https://signoz.io/docs/instrumentation/python/manual-instrumentation) for custom spans and attributes
 - [Send logs from Python](https://signoz.io/docs/userguide/python-logs-auto-instrumentation/) using auto-instrumentation
-- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Python application
+- [Send metrics from Python](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-python/) to correlate traces with metrics for better observability
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your Python application
 - [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize metrics
 
 **Sample applications**:

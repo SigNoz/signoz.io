@@ -1,0 +1,103 @@
+---
+date: 2026-02-23
+id: root-user
+title: Root User Configuration
+description: Learn how to configure a pre-set root (admin) user in SigNoz so an admin account is provisioned at deploy time.
+doc_type: howto
+tags: [Self-Host]
+---
+
+SigNoz allows you to provision a **root user** during startup so an admin account exists immediately after deployment. This eliminates the gap between deployment and manually creating the first admin, enhancing security for fresh installs and automation (e.g., IaC, GitOps). The root user is created from configuration at startup.
+
+<KeyPointCallout title="Available from SigNoz v0.112.0" defaultCollapsed={false}>
+This feature is available starting with <a href="https://github.com/SigNoz/signoz/releases/tag/v0.112.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.112.0</a>.
+</KeyPointCallout>
+
+
+## Prerequisites
+
+- SigNoz v0.112.0 or later.
+- A relational database (SQLite or Postgres) already configured for SigNoz (used for organizations and users).
+
+## Configuration
+
+Set the root user via **environment variables**:
+
+| Variable | Description |
+|----------|-------------|
+| `SIGNOZ_USER_ROOT_ENABLED` | Enable root user provisioning (`true` / `false`). |
+| `SIGNOZ_USER_ROOT_EMAIL` | Email address of the root user. |
+| `SIGNOZ_USER_ROOT_PASSWORD` | Password for the root user. Use a strong password. |
+| `SIGNOZ_USER_ROOT_ORG_NAME` | Name of the organization for the root user (e.g. `default`). |
+
+Example:
+
+```bash
+SIGNOZ_USER_ROOT_ENABLED=true
+SIGNOZ_USER_ROOT_EMAIL=admin@example.com
+SIGNOZ_USER_ROOT_PASSWORD=<secure-password>
+SIGNOZ_USER_ROOT_ORG_NAME=default
+```
+<KeyPointCallout title="How the root user works" defaultCollapsed={false}>
+- The root user cannot be deleted, edited, or have its password changed from the SigNoz UI. To change credentials, update the environment variables and restart (where supported by your deployment).
+- Root user provisioning runs at startup only; changing env vars requires a restart to take effect.
+</KeyPointCallout>
+
+## Fresh installs
+
+For a **new** SigNoz deployment:
+
+1. Set the root user environment variables **before** first start (e.g. in your deployment manifest, Helm values, or Compose file).
+2. Set `SIGNOZ_USER_ROOT_ENABLED=true` and provide `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, and `SIGNOZ_USER_ROOT_ORG_NAME`.
+3. Deploy or start SigNoz. On startup, the root user and organization (if needed) are created. You can log in immediately with the configured email and password.
+
+## Existing installs
+
+If SigNoz is **already running** and you want to enable the root user:
+
+1. **Align the organization name** with what you will set in config. This query sets the organization name in the database so it matches the root user config. In your SigNoz relational database (SQLite or Postgres), run:
+
+   ```sql
+   UPDATE organizations SET name = '<org-name>';
+   ```
+
+   Verify this value:
+   - `<org-name>`: The value you will use for `SIGNOZ_USER_ROOT_ORG_NAME` (e.g. `default`). Use the same value in both the query and the env var.
+
+2. **Set the root user environment variables** (`SIGNOZ_USER_ROOT_ENABLED`, `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, `SIGNOZ_USER_ROOT_ORG_NAME`) to match the organization you updated above.
+
+3. **Restart SigNoz** so it provisions the root user on startup.
+
+<KeyPointCallout title="Existing installs: organization name must match database" defaultCollapsed={false}>
+The value in `SIGNOZ_USER_ROOT_ORG_NAME` must match the organization name in the database. A mismatch can prevent the root user from being associated with the correct organization.
+</KeyPointCallout>
+
+## Validate
+
+After deployment or restart:
+
+1. Open the SigNoz UI and go to the login page.
+2. Sign in with the root user **email** and **password** you configured.
+3. Confirm you have full admin access (e.g. **Settings** → **Org Settings**, user management).
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Root user not created after restart
+
+- Ensure SigNoz is v0.112.0 or later.
+- Check that `SIGNOZ_USER_ROOT_ENABLED` is `true` and that `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, and `SIGNOZ_USER_ROOT_ORG_NAME` are set. Restart SigNoz after changing env vars.
+- Check SigNoz logs for errors during startup related to root user provisioning.
+
+### Root user cannot log in or is in the wrong organization
+
+- Ensure the organization name in the database matches `SIGNOZ_USER_ROOT_ORG_NAME`. Re-run the `UPDATE organizations` query from [Existing installs](#existing-installs) with the same `<org-name>` as in your env vars, then restart SigNoz.
+
+</details>
+
+## Next steps
+
+- [Authentication and user management](https://signoz.io/docs/userguide/authentication/)
+- [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/)

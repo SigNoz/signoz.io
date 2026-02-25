@@ -1,6 +1,5 @@
 ---
 title: Complete Guide to Implementing OpenTelemetry in Go Applications
-slug: go
 date: 2025-12-05
 tags: [opentelemetry, golang]
 authors: [aayush_sharma, ankit_anand]
@@ -57,7 +56,7 @@ Run the commands below after navigating to the application source folder:
   go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
 ```
 
-<KeyPointCallout title="Dependencies Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Dependencies Breakdown" defaultCollapsed="true">
 - **`otel`**: Core OpenTelemetry APIs for Go
 - **`otel/trace`**: Tracing interfaces and utilities
 - **`otel/sdk`**: SDK implementation for telemetry
@@ -104,7 +103,7 @@ import (
 )
 ```
 
-<KeyPointCallout title="Dependencies Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Dependencies Breakdown" defaultCollapsed="true">
 - **`attribute`**: Used to attach useful descriptive data to spans, like `user_id`, `region`, and `request_type`, making traces meaningful and searchable.
 - **`resource`**: Stores information about what is producing telemetry, such as `service name`, `environment (prod/staging)`, `version`, and `container ID`, etc.
 - **`sdktrace`**: Used to create, manage and sample spans, and sends them to the tracing backend.
@@ -166,7 +165,7 @@ func initTracer() func(context.Context) error {
 
 The function above configures OpenTelemetry tracing for your Go service. It creates the OTLP exporter that pushes traces to your collector and assigns metadata. Hence, the backend knows which service the traces belong to and configures the tracer provider to sample, batch, and manage spans efficiently. It also returns a shutdown function that flushes all pending traces when the app stops.
 
-<KeyPointCallout title="Keyword glossary for the above function" defaultCollapsed={true}>
+<KeyPointCallout title="Keyword glossary for the above function" defaultCollapsed="true">
 - **`otlptrace.New`**: creates the OTLP trace exporter
 - **`resource.WithAttributes`**: defines service metadata (`service.name`, etc.)
 - **`sdktrace.NewTracerProvider`**: main engine for tracing in the app
@@ -346,11 +345,7 @@ OTEL_SERVICE_NAME=goApp INSECURE_MODE=false go run main.go
 
 And congratulations! You have successfully instrumented and started your sample Golang application.
 
-<Figure
-  src="/img/blog/2025/11/go-app-running.webp"
-  alt="Starting the Go demo app"
-  caption="Go App started successfully"
-/>
+<Figure src="/img/blog/2025/11/go-app-running.webp" alt="Starting the Go demo app" caption="Go App started successfully" />
 
 ### Step 9: Generate Traffic
 
@@ -409,7 +404,7 @@ Now that you have your credentials, restart the application with the environment
 OTEL_SERVICE_NAME=goApp INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-KEY> OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443 go run main.go
 ```
 
-<KeyPointCallout title="Configuration Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Configuration Breakdown" defaultCollapsed="true">
 
 * **`OTEL_EXPORTER_OTLP_HEADERS`**: Replace `<SIGNOZ_INGESTION_KEY>` with the key you retrieved from the settings page.
 * **`OTEL_EXPORTER_OTLP_ENDPOINT`**: Update `{region}` to match your account location:
@@ -424,35 +419,19 @@ With the application running, ensure your traffic generator (from Step 9) is sti
 
 Navigate to the **Services** tab in your SigNoz dashboard. You should see `goApp` listed.
 
-<Figure
-src="/img/blog/2025/11/services-tab-go.webp"
-alt="Go app being monitored under services tab"
-caption="Your Go Gin application being monitored on the SigNoz dashboard"
-/>
+<Figure src="/img/blog/2025/11/services-tab-go.webp" alt="Go app being monitored under services tab" caption="Your Go Gin application being monitored on the SigNoz dashboard" />
 
 Click on the `goApp` service to view the **Metrics** page, where you can monitor application latency, requests per second, and error rates.
 
-<Figure
-src="/img/blog/2025/11/metrics-page-go.webp"
-alt="Metrics from Go app"
-caption="Monitor your Go Gin application metrics like application latency, requests per second, error percentage, etc."
-/>
+<Figure src="/img/blog/2025/11/metrics-page-go.webp" alt="Metrics from Go app" caption="Monitor your Go Gin application metrics like application latency, requests per second, error percentage, etc." />
 
 To dive deeper, switch to the **Traces** tab. Here you can analyze individual requests using filters for status codes, service names, and operation duration.
 
-<Figure
-src="/img/blog/2025/11/traces-tab-go.webp"
-alt="Traces tab"
-caption="Use powerful filters to analyze your tracing data from the Gin application"
-/>
+<Figure src="/img/blog/2025/11/traces-tab-go.webp" alt="Traces tab" caption="Use powerful filters to analyze your tracing data from the Gin application" />
 
 You can also visualize your tracing data with [flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to identify exactly which part of a request caused a delay.
 
-<Figure
-src="/img/blog/2025/11/flamegraphs-go.webp"
-alt="Flamegraphs and Gantt charts visualization"
-caption="Flamegraphs and Gantt charts on SigNoz dashboard"
-/>
+<Figure src="/img/blog/2025/11/flamegraphs-go.webp" alt="Flamegraphs and Gantt charts visualization" caption="Flamegraphs and Gantt charts on SigNoz dashboard" />
 
 ## Adding OpenTelemetry Custom Attributes and Events in Go Applications
 
@@ -641,17 +620,9 @@ func DeleteBook(c *gin.Context) {
 
 Once you've updated your application, restart it and generate new telemetry data. Then, navigate to your SigNoz cloud account and select one of the traces. You should be able to see the custom attributes and events that you've added. These will provide deeper insights into the activities within your application, improving observability and the debugging process.
 
-<Figure
-  src="/img/blog/2025/11/custom-attributes.webp"
-  alt="Custom attributes"
-  caption="Custom attributes can be seen under the Attributes section on the SigNoz trace detail page"
-/>
+<Figure src="/img/blog/2025/11/custom-attributes.webp" alt="Custom attributes" caption="Custom attributes can be seen under the Attributes section on the SigNoz trace detail page" />
 
-<Figure
-  src="/img/blog/2025/11/events.webp"
-  alt="Events"
-  caption="Events can be seen under the Events section on the SigNoz trace detail page"
-/>
+<Figure src="/img/blog/2025/11/events.webp" alt="Events" caption="Events can be seen under the Events section on the SigNoz trace detail page" />
 
 ## Next Steps
 

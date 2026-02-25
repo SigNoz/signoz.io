@@ -1,5 +1,5 @@
 ---
-date: 2025-12-01
+date: 2026-01-27
 id: migrate-from-signoz-self-host-to-signoz-cloud
 title: Migrate from Self-Hosted SigNoz to SigNoz Cloud
 description: Step-by-step guide to migrate your observability setup from self-hosted SigNoz to SigNoz Cloud, including telemetry pipelines, dashboards, alerts, and pipelines.
@@ -24,7 +24,7 @@ Before starting the migration:
 
 - **SigNoz Cloud account**: [Sign up for SigNoz Cloud](https://signoz.io/teams/) if you haven't already
 - **Ingestion key**: Obtain your ingestion key from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- **Region**: Note your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (`us`, `eu`, or `in`)
+- **Region**: Note your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 - **Self-hosted access**: Admin access to your self-hosted SigNoz instance and its SQLite database
 
 ## Migration Approach
@@ -62,9 +62,9 @@ exporters:
       insecure: false
 ```
 
-Replace the following placeholders:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoint reference](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 Then update your `service.pipelines` to use the new exporter:
 
@@ -94,10 +94,11 @@ Update your application's OpenTelemetry SDK configuration to send directly to Si
 
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
 
-Replace `<region>` and `<SIGNOZ_INGESTION_KEY>` with your values from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 For language-specific configuration, see the [instrumentation guides](https://signoz.io/docs/instrumentation/).
 
@@ -117,7 +118,7 @@ global:
   deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
 otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
 otelInsecure: false
-signozApiKey: <SIGNOZ_INGESTION_KEY>
+signozApiKey: <your-ingestion-key>
 presets:
   otlpExporter:
     enabled: true

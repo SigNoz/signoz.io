@@ -292,7 +292,6 @@ export const fetchMDXContentByPath = async (
       }
       // Ensure path starts with a slash and has no trailing slashes
       const normalizedPath = `/${path.replace(/^\/+|\/+$/g, '')}`
-      console.log('Normalized path for Strapi query:', normalizedPath)
 
       queryObject.filters = {
         path: {
@@ -411,13 +410,6 @@ export const fetchMDXContentByPath = async (
     }
 
     const data: MDXContentApiResponse = await response.json()
-
-    console.log('Data:', data)
-    console.log('Data.data:', data.data)
-    console.log('Data.data.length:', data.data.length)
-    console.log('Query URL:', `${API_URL}/api/${collectionName}${queryParams}`)
-    console.log('Authors in response:', data.data[0]?.attributes?.authors)
-    console.log('Related FAQs in response:', data.data[0]?.attributes?.related_faqs)
 
     if (!data.data || data.data.length === 0) {
       throw new Error('Content not found')

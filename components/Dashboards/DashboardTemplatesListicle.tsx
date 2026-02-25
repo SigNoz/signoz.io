@@ -22,6 +22,9 @@ import {
   SiPydantic,
   SiGo,
   SiTemporal,
+  SiOpenai,
+  SiSupabase,
+  SiOllama,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -157,6 +160,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ClickHouse Dashboard Template',
   },
   {
+    name: 'Codex (OpenAI)',
+    href: '/docs/dashboards/dashboard-templates/codex-dashboard',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex Dashboard Template',
+  },
+  {
     name: 'Cost Meter',
     href: '/docs/dashboards/dashboard-templates/cost-meter',
     icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
@@ -219,6 +228,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'GCP Compute Engine Dashboard Template',
   },
   {
+    name: 'Google ADK',
+    href: '/docs/dashboards/dashboard-templates/google-adk-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+        alt="Google ADK Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Google ADK Dashboard Template',
+  },
+  {
     name: 'Google Gemini',
     href: 'https://github.com/SigNoz/dashboards/tree/main/google-gemini',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
@@ -233,8 +254,18 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Grok',
     href: '/docs/dashboards/dashboard-templates/grok-dashboard',
-    icon: <img src="/svgs/icons/LLMMonitoring/grok-logo.svg" alt="Grok Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+    ),
     clickName: 'xAi Grok Dashboard Template',
+  },
+  {
+    name: 'Groq',
+    href: '/docs/dashboards/dashboard-templates/groq-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Groq Dashboard Template',
   },
   {
     name: 'Hadoop',
@@ -247,6 +278,18 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
     icon: <Shield className="h-7 w-7 text-blue-600" />,
     clickName: 'HAProxy Dashboard Template',
+  },
+  {
+    name: 'Haystack',
+    href: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Dashboard Template',
   },
   {
     name: 'Host Metrics',
@@ -367,6 +410,30 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Nomad Dashboard Template',
   },
   {
+    name: 'Ollama',
+    href: '/docs/dashboards/dashboard-templates/ollama-dashboard',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Dashboard Template',
+  },
+  {
+    name: 'OpenAI',
+    href: '/docs/dashboards/dashboard-templates/openai-dashboard',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'OpenAI Dashboard Template',
+  },
+  {
+    name: 'OpenRouter',
+    href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Dashboard Template',
+  },
+  {
     name: 'Pipecat',
     href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
     icon: (
@@ -425,6 +492,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Supabase',
+    href: '/docs/dashboards/dashboard-templates/supabase',
+    icon: <SiSupabase className="h-7 w-7 text-green-500" />,
+    clickName: 'Supabase Dashboard Template',
   },
   {
     name: 'Temporal Agents',

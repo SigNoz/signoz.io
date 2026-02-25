@@ -7,7 +7,8 @@ import {
   DatabaseZap,
 } from 'lucide-react'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
-import { ComparisonTableRow, VendorKey } from './LlmObservabilityPage.types'
+import { type VendorKey } from './LlmObservabilityPage.types'
+import { type ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 import React from 'react'
 
 export const LLM_OBSERVABILITY_CARDS: IconTitleDescriptionCardData[] = [
@@ -62,7 +63,7 @@ export const VENDORS: { key: VendorKey; label: string }[] = [
   { key: 'braintrust', label: 'Braintrust' },
 ]
 
-export const LLM_COMPARISON_TABLE_ROWS: ComparisonTableRow[] = [
+export const LLM_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] = [
   {
     feature: 'LLM Tracing',
     vendors: {

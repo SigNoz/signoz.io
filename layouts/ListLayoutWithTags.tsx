@@ -5,21 +5,22 @@ import { usePathname } from 'next/navigation'
 import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Doc, Guide, Opentelemetry } from 'contentlayer/generated'
+import type { Blog, Doc, Guide } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import Button from '@/components/Button/Button'
 import siteMetadata from '@/data/siteMetadata'
 import tagData from 'app/tag-data.json'
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 interface PaginationProps {
   totalPages: number
   currentPage: number
 }
 interface ListLayoutProps {
-  posts: CoreContent<Blog | Doc | Opentelemetry | Guide>[]
+  posts: CoreContent<Blog | Doc | Guide>[]
   title: string
-  initialDisplayPosts?: CoreContent<Blog | Doc | Opentelemetry | Guide>[]
+  initialDisplayPosts?: CoreContent<Blog | Doc | Guide>[]
   pagination?: PaginationProps
   emptyMessage?: string
 }
@@ -78,7 +79,7 @@ export default function ListLayoutWithTags({
   const displayPosts = initialDisplayPosts.length > 0 ? initialDisplayPosts : posts
 
   return (
-    <>
+    <RegionProvider>
       <div className="container mx-auto">
         <div className="pb-6 pt-6">
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:hidden sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
@@ -175,6 +176,6 @@ export default function ListLayoutWithTags({
           </div>
         </div>
       </div>
-    </>
+    </RegionProvider>
   )
 }

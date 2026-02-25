@@ -12,7 +12,6 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
-import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
@@ -144,7 +143,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           currentRoute={currentRoute}
         >
           <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-          <PageFeedback />
         </OpenTelemetryHubLayout>
 
         {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}
@@ -191,7 +189,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-        <PageFeedback />
       </Layout>
 
       {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}

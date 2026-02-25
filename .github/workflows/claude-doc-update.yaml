@@ -3,6 +3,8 @@ name: Claude Doc Update (from issue)
 on:
   issues:
     types: [opened, edited, labeled]
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: write
@@ -20,9 +22,24 @@ jobs:
     if: >-
       contains(github.event.issue.labels.*.name, 'doc-automation') &&
       (
-        github.event.issue.author_association == 'OWNER' ||
-        github.event.issue.author_association == 'MEMBER' ||
-        github.event.issue.author_association == 'COLLABORATOR'
+      (
+        github.event_name == 'issues' &&
+        (
+          github.event.issue.author_association == 'OWNER' ||
+          github.event.issue.author_association == 'MEMBER' ||
+          github.event.issue.author_association == 'COLLABORATOR'
+        )
+      )
+      ||
+      (
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '@claude edit') &&
+      (
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'COLLABORATOR'
+      )
+      )
       )
 
     runs-on: ubuntu-latest
@@ -94,6 +111,13 @@ jobs:
 
             Docs root: ${{env.DOCS_ROOT}}
 
+            Issue: 
+            === Issue body ===
+            ${{ github.event.issue.body }}
+
+            === Trigger comment (if any) ===
+            ${{ github.event.comment.body }}
+
             Task:
             - Read the issue request below.
             - Scan ${{ env.DOCS_ROOT }} to decide where the text belongs.
@@ -105,6 +129,8 @@ jobs:
             - If you add a new page, ensure it is reachable from navigation.
               IMPORTANT: constants/docsSideNav.ts is large — do NOT read it fully.
               Use Grep to find the relevant nav section and only read a small window around it.
+            - Update date to latest data, and ensure description is present of whichever page you are updating
+            - Always ensure to paste full url, don't paste half url
             
             Allowed paths to modify:
             - ${{env.DOCS_ROOT}}/**
@@ -115,7 +141,12 @@ jobs:
             - next.config.js
 
             Do NOT modify application code.
-
+            Only add under FAQ if it's brief problem/solution. Else create new page under troubleshooting.
+            - Follow the repo's CONTRIBUTING.md documentation guidelines.
+            - Content placement:
+              - If it's a brief problem/solution, add it under FAQs.
+              - Otherwise, add it under troubleshooting 
+            
             Issue: #${{ github.event.issue.number }} — "${{ github.event.issue.title }}"
 
             === Issue body ===
@@ -192,7 +223,7 @@ jobs:
 
           PR_URL="$(gh pr create \
             --title "Docs update (issue #${{ github.event.issue.number }})" \
-            --body "Automated docs update from issue #${{ github.event.issue.number }}.\n\nCloses #${{ github.event.issue.number }}" \
+            --body "Closes #${{ github.event.issue.number }}" \
             --base "${BASE_BRANCH}" \
             --head "${BRANCH_NAME}")"
 
