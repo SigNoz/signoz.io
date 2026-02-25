@@ -1,0 +1,33 @@
+---
+date: 2026-02-25
+title: Docker Collection Agent - Overview
+id: overview
+description: Monitor Docker hosts and containers using the OpenTelemetry Collector to send metrics, logs, and traces to SigNoz.
+doc_type: explanation
+---
+
+The Docker Collection Agent uses the OpenTelemetry Collector Contrib image to collect telemetry data from Docker hosts and containers. The collector runs as a container on the Docker host, collecting host metrics, container metrics, and container logs, while also acting as a gateway for application traces.
+
+## How It Works
+
+The collector runs as a long-lived container alongside your application containers on the Docker host:
+
+1. **Collects host metrics**: Scrapes CPU, memory, disk, filesystem, network, and load metrics from the host
+2. **Collects container metrics**: Queries the Docker Engine API for per-container resource usage
+3. **Collects container logs**: Tails and parses JSON-formatted container log files
+4. **Acts as a gateway**: Receives OTLP telemetry data from instrumented applications and forwards everything to SigNoz
+
+## What You Can Collect
+
+- **Host Metrics**: CPU usage, memory consumption, disk I/O, filesystem usage, network statistics, and load averages from the Docker host
+- **Container Metrics**: Per-container CPU, memory, network I/O, and lifecycle metrics
+- **Container Logs**: stdout/stderr logs from all Docker containers, parsed from JSON log format
+- **Application Traces**: Distributed traces from OpenTelemetry-instrumented applications
+- **Application Metrics**: Custom metrics from your applications via OTLP
+- **Application Logs**: Log data from your applications via OTLP
+
+## Next Steps
+
+- [Install the Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/install)
+- [Configure the Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

@@ -748,9 +748,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
+                route: '/docs/opentelemetry-collection-agents/docker/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
+              {
                 route: '/docs/opentelemetry-collection-agents/docker/install',
                 type: 'doc',
                 label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/docker/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
