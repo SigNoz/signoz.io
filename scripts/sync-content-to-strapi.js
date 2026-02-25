@@ -8,13 +8,9 @@ const mime = require('mime-types')
 const DEPLOYMENT_STATUS = process.env.DEPLOYMENT_STATUS
 
 const CMS_API_URL =
-  DEPLOYMENT_STATUS === 'staging'
-    ? process.env.CMS_STAGING_API_URL || process.env.CMS_API_URL
-    : process.env.CMS_API_URL
+  DEPLOYMENT_STATUS === 'staging' ? process.env.CMS_STAGING_API_URL : process.env.CMS_API_URL
 const CMS_API_TOKEN =
-  DEPLOYMENT_STATUS === 'staging'
-    ? process.env.CMS_STAGING_API_TOKEN || process.env.CMS_API_TOKEN
-    : process.env.CMS_API_TOKEN
+  DEPLOYMENT_STATUS === 'staging' ? process.env.CMS_STAGING_API_TOKEN : process.env.CMS_API_TOKEN
 
 const SYNC_FOLDERS = JSON.parse(process.env.SYNC_FOLDERS)
 
