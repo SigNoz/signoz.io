@@ -1,5 +1,5 @@
 ---
-date: 2026-02-23
+date: 2026-02-26
 id: root-user
 title: Root User Configuration
 description: Learn how to configure a pre-set root (admin) user in SigNoz so an admin account is provisioned at deploy time.
@@ -29,8 +29,9 @@ Set the root user via **environment variables**:
 | `SIGNOZ_USER_ROOT_EMAIL` | Email address of the root user. |
 | `SIGNOZ_USER_ROOT_PASSWORD` | Password for the root user. Use a strong password. |
 | `SIGNOZ_USER_ROOT_ORG_NAME` | Name of the organization for the root user (e.g. `default`). |
+| `SIGNOZ_USER_ROOT_ORG_ID` | *(Optional)* Predetermined UUID for the organization. When set, the reconciler looks up the org by this ID instead of by name. Useful when other components (e.g. a sharder) need to know the org ID at startup. |
 
-Example:
+Example (basic):
 
 ```bash
 SIGNOZ_USER_ROOT_ENABLED=true
@@ -38,9 +39,21 @@ SIGNOZ_USER_ROOT_EMAIL=admin@example.com
 SIGNOZ_USER_ROOT_PASSWORD=<secure-password>
 SIGNOZ_USER_ROOT_ORG_NAME=default
 ```
+
+Example (with predetermined org ID):
+
+```bash
+SIGNOZ_USER_ROOT_ENABLED=true
+SIGNOZ_USER_ROOT_EMAIL=admin@example.com
+SIGNOZ_USER_ROOT_PASSWORD=<secure-password>
+SIGNOZ_USER_ROOT_ORG_NAME=default
+SIGNOZ_USER_ROOT_ORG_ID=<some-uuid7>
+```
 <KeyPointCallout title="How the root user works" defaultCollapsed={false}>
 - The root user cannot be deleted, edited, or have its password changed from the SigNoz UI. To change credentials, update the environment variables and restart (where supported by your deployment).
 - Root user provisioning runs at startup only; changing env vars requires a restart to take effect.
+- When `SIGNOZ_USER_ROOT_ORG_ID` is set, the reconciler looks up the organization by ID. When it is not set, it looks up by name (default behavior).
+- If `SIGNOZ_USER_ROOT_ORG_ID` is set but an organization with the configured name already exists under a different ID, the reconciler will log an actionable error instead of creating a duplicate.
 </KeyPointCallout>
 
 ## Fresh installs
@@ -48,7 +61,7 @@ SIGNOZ_USER_ROOT_ORG_NAME=default
 For a **new** SigNoz deployment:
 
 1. Set the root user environment variables **before** first start (e.g. in your deployment manifest, Helm values, or Compose file).
-2. Set `SIGNOZ_USER_ROOT_ENABLED=true` and provide `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, and `SIGNOZ_USER_ROOT_ORG_NAME`.
+2. Set `SIGNOZ_USER_ROOT_ENABLED=true` and provide `SIGNOZ_USER_ROOT_EMAIL`, `SIGNOZ_USER_ROOT_PASSWORD`, and `SIGNOZ_USER_ROOT_ORG_NAME`. Optionally set `SIGNOZ_USER_ROOT_ORG_ID` if you need other components to use a known org ID from day one.
 3. Deploy or start SigNoz. On startup, the root user and organization (if needed) are created. You can log in immediately with the configured email and password.
 
 ## Existing installs
@@ -94,6 +107,10 @@ After deployment or restart:
 ### Root user cannot log in or is in the wrong organization
 
 - Ensure the organization name in the database matches `SIGNOZ_USER_ROOT_ORG_NAME`. Re-run the `UPDATE organizations` query from [Existing installs](#existing-installs) with the same `<org-name>` as in your env vars, then restart SigNoz.
+
+### Error: organization already exists with a different ID
+
+- This happens when `SIGNOZ_USER_ROOT_ORG_ID` is set but an organization with the configured `SIGNOZ_USER_ROOT_ORG_NAME` already exists under a different ID. Either remove `SIGNOZ_USER_ROOT_ORG_ID` to use name-based lookup, or set it to the ID of the existing organization.
 
 </details>
 
