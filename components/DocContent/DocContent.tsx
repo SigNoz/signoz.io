@@ -15,7 +15,6 @@ import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
 import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFromRendered'
-import { RegionProvider } from '../Region/RegionContext'
 
 const DocContent: React.FC<{
   title: string
@@ -86,9 +85,7 @@ const DocContent: React.FC<{
           )}
         </div>
         <article ref={articleRef} className="prose prose-slate max-w-none pb-6 dark:prose-invert">
-          <RegionProvider>
-            <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
-          </RegionProvider>
+          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         </article>
         <div className="mt-8 flex items-center justify-between text-sm">
           {formattedDate && (

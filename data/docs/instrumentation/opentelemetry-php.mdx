@@ -1,5 +1,5 @@
 ---
-date: 2026-02-01
+date: 2026-02-24
 id: php
 title: PHP OpenTelemetry Instrumentation
 description: Send traces to SigNoz using OpenTelemetry instrumentation for PHP frameworks like Laravel, WordPress, Symfony, and Slim.
@@ -254,6 +254,7 @@ OpenTelemetry PHP provides auto-instrumentation packages for popular frameworks 
     categoryLabels={{
         frameworks: 'Frameworks',
         cms: 'CMS',
+        runtime: 'Runtime',
     }}
 >
     <LibraryTab value="laravel" label="Laravel" category="frameworks">
@@ -296,6 +297,73 @@ OpenTelemetry PHP provides auto-instrumentation packages for popular frameworks 
         <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-symfony" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
 
     </LibraryTab>
+    <LibraryTab value="php-fpm" label="PHP-FPM" category="runtime">
+
+        ### Additional package
+
+        No additional Composer package is required specifically for PHP-FPM.
+
+        You still need your framework-specific auto-instrumentation package. For example, Slim requires `open-telemetry/opentelemetry-auto-slim`.
+
+        ### Configuration
+
+        `clear_env` controls whether PHP-FPM clears inherited environment variables before starting worker processes.
+
+        It defaults to `yes` for security, but this can strip `OTEL_*` variables before PHP request handlers run.
+
+        Update your PHP-FPM pool configuration file (common paths):
+        - Debian/Ubuntu: `/etc/php/<php-version>/fpm/pool.d/www.conf`
+        - RHEL/CentOS/Amazon Linux: `/etc/php-fpm.d/www.conf`
+
+        See [PHP-FPM pool directives](https://www.php.net/manual/en/install.fpm.configuration.php) for `clear_env` and `env[...]` details.
+
+        Option 1 (simple, less restrictive): allow inherited environment variables for the pool:
+
+        ```ini
+        clear_env = no
+        ```
+
+        Option 2 (recommended): keep `clear_env = yes` and pass only required OpenTelemetry variables:
+
+        ```ini
+        env[OTEL_PHP_AUTOLOAD_ENABLED] = true
+        env[OTEL_SERVICE_NAME] = <service-name>
+        env[OTEL_TRACES_EXPORTER] = otlp
+        env[OTEL_METRICS_EXPORTER] = none
+        env[OTEL_LOGS_EXPORTER] = none
+        env[OTEL_EXPORTER_OTLP_PROTOCOL] = http/protobuf
+        env[OTEL_EXPORTER_OTLP_ENDPOINT] = https://ingest.<region>.signoz.cloud:443
+        env[OTEL_EXPORTER_OTLP_HEADERS] = signoz-ingestion-key=<your-ingestion-key>
+        env[OTEL_PROPAGATORS] = baggage,tracecontext
+        ```
+
+        ### Run command
+
+        Start PHP-FPM:
+
+        ```bash
+        # Debian/Ubuntu
+        sudo systemctl start php<php-version>-fpm
+
+        # RHEL/CentOS/Amazon Linux
+        sudo systemctl start php-fpm
+        ```
+
+        If PHP-FPM is already running and you updated the pool configuration, reload it:
+
+        ```bash
+        # Debian/Ubuntu
+        sudo systemctl reload php<php-version>-fpm
+
+        # RHEL/CentOS/Amazon Linux
+        sudo systemctl reload php-fpm
+        ```
+
+        ### Validate
+
+        After starting or reloading PHP-FPM, send a request to your application and verify that traces appear in the **Services** tab in SigNoz.
+
+    </LibraryTab>
     <LibraryTab value="wordpress" label="WordPress" category="cms">
 
         ### Additional package
@@ -334,6 +402,8 @@ OpenTelemetry PHP provides auto-instrumentation packages for popular frameworks 
     <LibraryTab value="slim" label="Slim" category="frameworks">
 
         ### Additional package
+
+        Slim auto-instrumentation requires `open-telemetry/opentelemetry-auto-slim`.
 
         ```bash
         composer require open-telemetry/opentelemetry-auto-slim
