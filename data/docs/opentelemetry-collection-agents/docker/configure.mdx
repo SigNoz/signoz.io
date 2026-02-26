@@ -84,150 +84,18 @@ service:
 You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
 
 <KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed={true}>
-Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk — not the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
+Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk metrics instead of the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
 
-- The value must match the volume mount in your `docker run` or Compose file (`/:/hostfs:ro`).
+In most cases you mount the host root at `/hostfs` (e.g. `-v /:/hostfs:ro`). If you prefer to expose only certain paths to the collector, mount those under `/hostfs` so paths line up—for example `docker run-v /proc:/hostfs/proc` for process-related metrics.
+
+- The `root_path` value in config must match the volume mount path in your `docker run` or Compose file (e.g. `/hostfs`).
 - This applies to **Linux only**.
 - If you run multiple hostmetrics receiver instances, they must all share the same `root_path`.
 
 See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md#collecting-host-metrics-from-inside-a-container-linux-only" target="_blank" rel="noopener noreferrer nofollow">upstream docs</a> for more details.
 </KeyPointCallout>
 
-## Collect Container Metrics
-
-Use the `docker_stats` receiver to collect per-container resource metrics from the Docker Engine API. For full setup details and a pre-configured dashboard, see [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/).
-
-```yaml:config.yaml
-receivers:
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    metrics:
-      # Following metrics are enabled by default in the docker_stats receiver
-      container.cpu.utilization:
-        enabled: true
-      container.memory.percent:
-        enabled: true
-      container.memory.usage.limit:
-        enabled: true
-      container.memory.usage.total:
-        enabled: true
-      container.network.io.usage.rx_bytes:
-        enabled: true
-      container.network.io.usage.tx_bytes:
-        enabled: true
-      container.network.io.usage.rx_dropped:
-        enabled: true
-      container.network.io.usage.tx_dropped:
-        enabled: true
-      container.blockio.io_service_bytes_recursive:
-        enabled: true
-
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp, hostmetrics, docker_stats]
-```
-
-The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
-
-<KeyPointCallout title="Docker socket permissions" defaultCollapsed={true}>
-The install guide runs the collector as root (`user: "0:0"`) so it can read the Docker socket and host filesystem. For production, you can avoid running as root by adding the container to the host's `docker` group: `docker run --group-add $(getent group docker | cut -d: -f3) ...`. If you see permission errors on the socket, see [Troubleshooting](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/#troubleshooting) in the install guide.
-</KeyPointCallout>
-
-## Collect Container Logs
-
-Use the `filelog` receiver to tail Docker container JSON log files. For full setup details, see [Collecting Docker Container Logs](https://signoz.io/docs/userguide/collect_docker_logs/).
-
-```yaml:config.yaml
-receivers:
-  filelog:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-    operators:
-      - id: container-parser
-        type: container
-        format: docker
-        add_metadata_from_filepath: false
-      - id: extract-service-name
-        type: regex_parser
-        parse_from: body
-        regex: 'service.name":\s*"(?P<svc>[^"]+)"'
-      - id: set-service-name
-        type: move
-        from: attributes.svc
-        to: resource["service.name"]
-        if: 'attributes.svc != nil'
-
-service:
-  pipelines:
-    logs:
-      receivers: [otlp, filelog]
-```
-
-The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
-
-## Resource Detection
-
-The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and Docker metadata to your telemetry so you can filter and group by environment, hostname, or container in SigNoz.
-
-```yaml:config.yaml
-processors:
-  resourcedetection:
-    detectors: [env, system, docker]
-    timeout: 2s
-    system:
-      hostname_sources: [os]
-service:
-  pipelines:
-    traces:
-      processors: [resourcedetection]
-    metrics:
-      processors: [resourcedetection]
-    logs:
-      processors: [resourcedetection]
-```
-
-### Custom resource attributes
-
-You can attach custom resource attributes (for example, `deployment.environment`, `team`, or any custom key) to **all telemetry** sent by the collector by setting the `OTEL_RESOURCE_ATTRIBUTES` environment variable in the collector's environment.
-
-```bash
-OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,team=backend"
-```
-
-## Map Container Labels to Metric Attributes
-
-Use `container_labels_to_metric_labels` on the `docker_stats` receiver to promote Docker container labels into metric resource attributes. This enables filtering and grouping by Compose service, project, or any custom label in SigNoz dashboards.
-
-```yaml:config.yaml
-receivers:
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    container_labels_to_metric_labels:
-      com.docker.compose.service: docker.compose.service
-      com.docker.compose.project: docker.compose.project
-```
-
-The keys are Docker label names (check with `docker inspect <container> --format '{{json .Config.Labels}}'`), and the values are the metric attribute names that appear in SigNoz.
-
-## Exclude Containers from Metrics
-
-Use `excluded_images` on the `docker_stats` receiver to filter out the collector itself or infrastructure containers you don't want metrics for.
-
-```yaml:config.yaml
-receivers:
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    excluded_images:
-      - signoz-otel-collector
-      - /.*pause.*/
-```
-
-Values can be exact image names or regex patterns (wrapped in `/`).
-
-## Exclude Filesystem Mounts
+### Exclude filesystem mounts
 
 The `filesystem` scraper in the `hostmetrics` receiver may report virtual or Docker overlay mounts that add noise. Use `exclude_mount_points` and `exclude_fs_types` to filter them out.
 
@@ -273,6 +141,111 @@ receivers:
             - tracefs
 ```
 
+## Collect Container Metrics
+
+Use the `docker_stats` receiver to collect per-container resource metrics from the Docker Engine API. For full setup details and a pre-configured dashboard, see [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/).
+
+```yaml:config.yaml
+receivers:
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    metrics:
+      # Following metrics are enabled by default in the docker_stats receiver
+      container.cpu.utilization:
+        enabled: true
+      container.memory.percent:
+        enabled: true
+      container.memory.usage.limit:
+        enabled: true
+      container.memory.usage.total:
+        enabled: true
+      container.network.io.usage.rx_bytes:
+        enabled: true
+      container.network.io.usage.tx_bytes:
+        enabled: true
+      container.network.io.usage.rx_dropped:
+        enabled: true
+      container.network.io.usage.tx_dropped:
+        enabled: true
+      container.blockio.io_service_bytes_recursive:
+        enabled: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics, docker_stats]
+```
+
+The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
+
+<KeyPointCallout title="Docker socket permissions" defaultCollapsed={true}>
+The install guide runs the collector as root (`user: "0:0"`) so it can read the Docker socket and host filesystem. For production, you can avoid running as root by adding the container to the host's `docker` group: `docker run --group-add $(getent group docker | cut -d: -f3) ...`. If you see permission errors on the socket, see [Troubleshooting](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/#troubleshooting) in the install guide.
+</KeyPointCallout>
+
+### Map container labels to metric attributes
+
+Use `container_labels_to_metric_labels` on the `docker_stats` receiver to promote Docker container labels into metric resource attributes. This enables filtering and grouping by Compose service, project, or any custom label in SigNoz dashboards.
+
+```yaml:config.yaml
+receivers:
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    container_labels_to_metric_labels:
+      com.docker.compose.service: docker.compose.service
+      com.docker.compose.project: docker.compose.project
+```
+
+The keys are Docker label names (check with `docker inspect <container> --format '{{json .Config.Labels}}'`), and the values are the metric attribute names that appear in SigNoz.
+
+### Exclude containers from metrics
+
+Use `excluded_images` on the `docker_stats` receiver to filter out the collector itself or infrastructure containers you don't want metrics for.
+
+```yaml:config.yaml
+receivers:
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    excluded_images:
+      - signoz-otel-collector
+      - /.*pause.*/
+```
+
+Values can be exact image names or regex patterns (wrapped in `/`).
+
+## Collect Container Logs
+
+Use the `filelog` receiver to tail Docker container JSON log files. For full setup details, see [Collecting Docker Container Logs](https://signoz.io/docs/userguide/collect_docker_logs/).
+
+```yaml:config.yaml
+receivers:
+  filelog:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    start_at: end
+    include_file_name: false
+    include_file_path: true
+    operators:
+      - id: container-parser
+        type: container
+        format: docker
+        add_metadata_from_filepath: false
+      - id: extract-service-name
+        type: regex_parser
+        parse_from: body
+        regex: 'service.name":\s*"(?P<svc>[^"]+)"'
+      - id: set-service-name
+        type: move
+        from: attributes.svc
+        to: resource["service.name"]
+        if: 'attributes.svc != nil'
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog]
+```
+
+The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
+
 ## Tune Batch and Memory Limiter
 
 Adjust the `batch` processor for throughput and the `memory_limiter` processor for stability based on your workload. See [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices) for detailed guidance.
@@ -292,6 +265,35 @@ processors:
 <KeyPointCallout title="Setting memory limits" defaultCollapsed={false}>
 Set `limit_mib` to approximately 80% of the memory limit you assign to the collector container. If your Docker host is resource-constrained, reduce both `limit_mib` and `spike_limit_mib` accordingly.
 </KeyPointCallout>
+
+## Resource Detection
+
+The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and Docker metadata to your telemetry so you can filter and group by environment, hostname, or container in SigNoz.
+
+```yaml:config.yaml
+processors:
+  resourcedetection:
+    detectors: [env, system, docker]
+    timeout: 2s
+    system:
+      hostname_sources: [os]
+service:
+  pipelines:
+    traces:
+      processors: [resourcedetection]
+    metrics:
+      processors: [resourcedetection]
+    logs:
+      processors: [resourcedetection]
+```
+
+### Custom resource attributes
+
+You can attach custom resource attributes (for example, `deployment.environment`, `team`, or any custom key) to **all telemetry** sent by the collector by setting the `OTEL_RESOURCE_ATTRIBUTES` environment variable in the collector's environment.
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,team=backend"
+```
 
 ## Scrape Prometheus Metrics from Containers
 
@@ -350,7 +352,7 @@ networks:
 
 With bridge mode, application containers that send OTLP data to the collector must be on the same Docker network (`monitoring` in this example) or use the published host ports.
 
-## Verify
+## Validate
 
 - **Config and logs:** Check the collector logs to confirm the config is valid and the collector is running without errors.
 

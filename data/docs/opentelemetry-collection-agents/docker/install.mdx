@@ -20,16 +20,18 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ## Step 1: Create Collector Configuration
 
-Create a `config.yaml` file with the following content. This config is tailored for SigNoz usage — it collects host metrics, container metrics, container logs, and accepts OTLP data from instrumented applications.
+Create a `config.yaml` file with the following content. This config is tailored for SigNoz usage, it collects host metrics, container metrics, container logs, and accepts OTLP data from instrumented applications.
 
 ```yaml:config.yaml
 receivers:
+  # OTLP: accept traces, metrics, and logs from instrumented apps (SDKs, agents)
   otlp:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  # Host metrics: CPU, disk, memory, network, etc. (root_path for container)
   hostmetrics:
     collection_interval: 60s
     root_path: /hostfs
@@ -46,11 +48,12 @@ receivers:
         mute_process_exe_error: true
         mute_process_io_error: true
       processes: {}
+  # Container metrics from Docker daemon
   docker_stats:
     endpoint: unix:///var/run/docker.sock
     collection_interval: 10s
     timeout: 20s
-
+  # Container logs: Docker JSON log files
   filelog:
     include: [/var/lib/docker/containers/*/*-json.log]
     start_at: end
@@ -94,11 +97,15 @@ exporters:
       'signoz-ingestion-key': '<your-ingestion-key>'
 
 extensions:
-  health_check: {}
-  zpages: {}
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
 
 service:
-  extensions: [health_check, zpages]
+  extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
