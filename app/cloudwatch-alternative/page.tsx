@@ -2,6 +2,9 @@ import React from 'react'
 import CloudwatchAlternativePage from './CloudwatchAlternativePage'
 import { Metadata } from 'next'
 
+export const dynamic = 'force-static'
+export const revalidate = 60 * 60 * 24 * 365
+
 export const metadata: Metadata = {
   title: {
     absolute: 'AWS CloudWatch Alternative | SigNoz',

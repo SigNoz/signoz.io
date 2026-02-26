@@ -19,6 +19,7 @@ import {
   DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE,
   DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW,
 } from './CloudwatchAlternativePage.constants'
+import TrackingLink from '@/components/TrackingLink'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -136,7 +137,7 @@ const CostComparison: React.FC = () => {
         variant="bordered"
         className="flex flex-col gap-y-9 !border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
       >
-        <div className="flex flex-col gap-4 px-10 md:px-12">
+        <div className="flex flex-col gap-4 px-10 md:px-12 md:py-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
           <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
             You shouldn't pay to look at your own data
@@ -150,24 +151,31 @@ const CostComparison: React.FC = () => {
         </div>
         <div className="flex flex-col sm:flex-row">
           <div className="!w-[100%] flex-1 md:!w-[300px]">
-            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 pt-10 md:px-12">
+            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-12">
               <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
                 CloudWatch's billing complexity
               </h2>
-              <Button
-                variant="secondary"
-                href="https://aws.amazon.com/cloudwatch/pricing/"
-                className="flex items-center gap-2"
-              >
-                CloudWatch pricing details <ArrowRight size={16} />
+              <Button asChild variant="secondary" rounded="full">
+                <TrackingLink
+                  href="https://aws.amazon.com/cloudwatch/pricing/"
+                  clickType="Secondary CTA"
+                  clickName="Cloudwatch Alternative Cost Comparison CloudWatch Pricing Details Button"
+                  clickLocation="Cloudwatch Alternative Cost Comparison"
+                  clickText="CloudWatch pricing details"
+                >
+                  CloudWatch pricing details <ArrowRight size={16} />
+                </TrackingLink>
               </Button>
             </div>
           </div>
           <div className="flex-[2_2_0%] border-l border-dashed border-signoz_slate-400 p-10">
             <div className="flex flex-col gap-4">
               {CLOUDWATCH_BILLING_CARDS.map((card) => (
-                <Card key={card.title} className="p-0 [&>*]:rounded-lg [&>*]:border-0">
-                  <div className="rounded-lg p-6">
+                <Card
+                  key={card.title}
+                  className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+                >
+                  <div className="p-6">
                     <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
                     <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
                   </div>
