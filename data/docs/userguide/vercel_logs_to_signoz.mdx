@@ -22,15 +22,15 @@ Follow the steps below to send your logs from Vercel to SigNoz Cloud:
 
 ### Step 1: Open the Vercel Dashboard
 
-Navigate to **Team Settings** > **Drains** and click **Add Drain**.
+Navigate to **Team Settings** > **Drains** and click **Add Drain**. This opens a dialog to configure your new log drain.
 
 ### Step 2: Choose Data Type
 
-Select the type of observability data you want to drain. In this case, choose **Logs**.
+Select the type of observability data you want to drain. In this case, choose **Logs**. The configuration options for Log drains will appear.
 
 ### Step 3: Configure the Drain
 
-Provide a name for your drain, select which projects should send data to your endpoint, and configure the log source, environment, and sampling rate.
+Provide a name for your drain, select which projects should send data to your endpoint, and configure the log source, environment, and sampling rate. After configuring these settings, click the **Next** button to proceed.
 
 <Figure
   src="/img/logs/vercel/sources.webp"
@@ -50,7 +50,7 @@ Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingest
 
 ### Step 5: Configure Destination
 
-Choose how you want to receive your drain data. Under the **Custom Endpoint** tab, set the delivery format to `JSON`.
+Choose how you want to receive your drain data. Under the **Custom Endpoint** tab, set the delivery format to `JSON`. Vercel will now be configured to send JSON payloads to your endpoint.
 
 ### Step 6: Add Custom Headers
 
@@ -104,11 +104,13 @@ After creating the drain, verify that logs are flowing into SigNoz:
 - **Incorrect region**: Verify that `<region>` in the endpoint URL matches your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - **Invalid ingestion key**: Confirm the `signoz-ingestion-key` header value matches the key shown in your [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - **Drain not active**: Check the drain status in **Team Settings > Drains** in Vercel. If it shows an error, click the drain to see details.
+- **Verification**: After applying fixes, click **Test** in your Vercel drain config and check the SigNoz Logs Explorer again.
 
 ### Drain creation or test fails
 
 - **Endpoint URL format**: Ensure the URL is exactly `https://ingest.<region>.signoz.cloud:443/logs/json` with no trailing slash or extra path segments.
 - **Missing headers**: Confirm the `signoz-ingestion-key` custom header is set and the value does not contain leading/trailing whitespace.
+- **Verification**: Once corrected, the **Test** button in Vercel should return a successful response.
 
 ## Next Steps
 
