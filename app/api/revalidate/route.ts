@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     if (revalidateAll) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
+      revalidateTag('comparisons-list')
       revalidateTag('mdx-paths')
 
       results.push({
@@ -131,6 +132,7 @@ export async function GET(request: NextRequest) {
     if (revalidateAll) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
+      revalidateTag('comparisons-list')
       revalidateTag('mdx-paths')
 
       results.push({

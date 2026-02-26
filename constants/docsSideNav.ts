@@ -264,6 +264,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.113',
+            label: 'Upgrade to v0.113',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.94',
             label: 'Upgrade to v0.94',
           },
@@ -1721,6 +1726,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/dropping-metric-labels',
         label: 'Dropping Metric Labels (Attributes)',
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/reducing-costs',
+        label: 'Understanding Metrics Billing and Reducing Costs',
       },
       {
         type: 'category',

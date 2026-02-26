@@ -2,10 +2,9 @@ import 'css/prism.css'
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allAuthors, allComparisons } from 'contentlayer/generated'
-import type { Authors, Comparison } from 'contentlayer/generated'
+import { coreContent } from 'pliny/utils/contentlayer'
+import { allAuthors } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubLayout from '@/layouts/OpenTelemetryHubLayout'
 import ComparisonsLayout from '@/layouts/ComparisonsLayout'
@@ -14,6 +13,10 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
+import { fetchComparisonBySlug } from '@/utils/cachedData'
+import { mdxOptions } from '@/utils/mdxUtils'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -21,7 +24,8 @@ const layouts = {
   ComparisonsLayout,
 }
 
-export const dynamicParams = false
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamicParams = true
 export const dynamic = 'force-static'
 
 export async function generateMetadata({
@@ -30,7 +34,8 @@ export async function generateMetadata({
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allComparisons.find((p) => p.slug === slug)
+
+  const post = await fetchComparisonBySlug(slug)
 
   if (!post) {
     return notFound()
@@ -43,11 +48,11 @@ export async function generateMetadata({
   })
 
   const publishedAt = new Date(post.date).toISOString()
-  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
+  const modifiedAt = new Date(post.date).toISOString()
   const authors = authorDetails.map((author) => author.name)
   let imageList = [siteMetadata.socialBanner]
-  if (post.image) {
-    imageList = typeof post.image === 'string' ? [post.image] : post.image
+  if (post?.image) {
+    imageList = typeof post?.image === 'string' ? [post.image] : post.image
   }
   const ogImages = imageList.map((img) => {
     return {
@@ -80,22 +85,20 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allComparisons.map((p) => ({ slug: p.slug?.split('/') }))
-
-  return paths
+  return []
 }
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
-  const currentRoute = `/comparisons/${slug}`
-  // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allComparisons))
-  const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
-  if (postIndex === -1) {
+
+  const post = await fetchComparisonBySlug(slug)
+
+  if (!post) {
     return notFound()
   }
 
-  const post = allComparisons.find((p) => p.slug === slug) as Comparison
+  const currentRoute = `/comparisons/${slug}`
+
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
@@ -104,7 +107,20 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
-  const hubContext = getHubContextForRoute(currentRoute)
+  const hubContext = await getHubContextForRoute(currentRoute)
+
+  let compiledContent
+  try {
+    const { content: mdxContent } = await compileMDX({
+      source: post?.content,
+      components,
+      options: mdxOptions as MDXRemoteProps['options'],
+    })
+    compiledContent = mdxContent
+  } catch (error) {
+    console.error('Error compiling MDX:', error)
+    notFound()
+  }
 
   if (hubContext) {
     return (
@@ -125,14 +141,14 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           availableLanguages={hubContext.languages}
           currentRoute={currentRoute}
         >
-          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          {compiledContent}
         </OpenTelemetryHubLayout>
       </>
     )
   }
 
   // Choose layout based on slug or post layout
-  let layoutName = post.layout || defaultLayout
+  let layoutName = post?.layout || defaultLayout
   if (slug.includes('opentelemetry')) {
     layoutName = 'OpenTelemetryLayout'
   } else {
@@ -154,7 +170,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authors={authorList}
         toc={post.toc}
       >
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        {compiledContent}
       </Layout>
     </>
   )
