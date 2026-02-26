@@ -1,8 +1,7 @@
 ---
-date: 2025-08-29
+date: 2026-02-25
 title: Collecting Syslogs via OpenTelemetry Collector
 id: collecting_syslogs
-
 description: Learn how to collect and analyze the system logs (syslogs) with SigNoz. This step-by-step guide covers configuring rsyslog to forward logs to SigNoz via the OpenTelemetry Collector's syslog receiver.
 hide_table_of_contents: true
 ---
@@ -21,6 +20,7 @@ This document shows how to set up `rsyslog` to forward logs to the OpenTelemetry
   our [Systemd Logs
   documentation](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/).
 </Admonition>
+
 ## Setup
 
 <Tabs entityName="plans">
@@ -85,7 +85,7 @@ Add the following lines at the end:
 template(
   name="UTCTraditionalForwardFormat"
   type="string"
-  string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+  string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%\n"
 )
 
 *.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
@@ -187,7 +187,7 @@ Add the following lines:
 template(
   name="UTCTraditionalForwardFormat"
   type="string"
-  string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+  string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%\n"
 )
 
 *.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
