@@ -1,0 +1,103 @@
+---
+title: "ClickStack's Managed Pricing: When 'Less Than 3 Cents Per GB' Isn't the Full Story"
+slug: clickstack-managed-pricing-compute-costs
+date: 2026-02-23
+tags: [Pricing, OpenTelemetry]
+authors: [anushka_karmakar]
+description: ClickStack's managed observability offering promises storage at less than $0.03/GB. But the cost driver that matters most, query compute, remains unpublished and unpredictable. We break down what's known, what's missing, and why it matters.
+image: /img/blog/2026/02/clickstack-pricing.webp
+keywords: [clickstack pricing, clickhouse observability, observability costs, clickstack vs signoz, observability pricing, opentelemetry observability, managed observability]
+---
+
+ClickHouse launched Managed ClickStack in beta couple weeks ago. It's a managed observability platform built on ClickHouse Cloud, covering logs, metrics, traces, and session replays, all backed by ClickHouse's columnar storage engine.
+
+This is a meaningful development. ClickHouse has proven itself as a high-performance backend for observability data, and the database's compression ratios on telemetry data translating to significant storage savings.
+
+ClickStack's stated mission is to "democratize access to ClickHouse for observability." The headline pricing supports that ambition. Store high-cardinality OpenTelemetry data for less than $0.03 per gigabyte per month, with no per-user, per-host, or other extraneous fees.
+
+We looked closely at how this pricing works. The storage economics are compelling, but there's a dimension that deserves more scrutiny.
+
+## Less than $0.03/GB
+
+ClickStack's managed pricing is built on ClickHouse Cloud's separation of storage and compute. Observability data sits in low-cost object storage while compute is elastic and independent, allowing you to scale ingest and query resources separately.
+
+This architecture is well-established. Snowflake popularized compute-storage separation over a decade ago, and a [Vantage cost analysis](https://vantage.sh/blog/snowflake-vs-clickhouse-cloud-cost) described ClickHouse Cloud's pricing as "much simpler and much more predictable" than Snowflake's. The model itself isn't controversial.
+
+The storage number is genuinely impressive. At less than $0.03/GB/month, retaining a year of observability data becomes economically viable in ways that most managed platforms don't allow. ClickStack's own blog makes this point well: "retention effectively stops being a meaningful cost dimension."
+
+Well, for storage, they're right!
+
+## The part that gets less attention: "compute"
+
+ClickStack's [managed blog post](https://clickhouse.com/blog/introducing-managed-clickstack-beta) acknowledges that with storage costs effectively solved, "the remaining variable becomes compute." They frame this as a manageable variable, not a problem. But the details reveal an asymmetry between the two compute dimensions.
+
+**Ingest compute** runs continuously to process incoming data. ClickStack provides a benchmark here, noting that each core can sustain up to 20MB/s of writes, translating to "less than 1 cent per GB" for ingest compute. This is specific and useful, and teams can reasonably estimate their ingest costs from it.
+
+**Query compute** is elastic, scaling up for investigations and scaling down when idle. The blog describes this as a feature, noting that "larger pools can be spun up on demand for investigations or historical analysis, then scaled down or idled when no longer needed."
+
+What's missing is any published benchmark, cost estimate, or worked example for query compute. Not in the blog post. Not on the pricing page. Not anywhere we could find in public documentation.
+
+Ingest compute is roughly estimable, query compute is not and that asymmetry matters.
+
+## The query tax
+
+Observability exists for one primary reason: to help you understand what's happening in your systems, especially when things go wrong.
+
+During an incident, engineers run more queries across wider time ranges and investigate across multiple signals like logs, traces, and metrics. They build ad-hoc dashboards, correlate events, and dig deeper until they find the root cause. This is exactly what observability tooling should encourage.
+
+In ClickStack's pricing model, this is also exactly when costs increase. More queries mean more compute, and more compute means a higher bill. The more thoroughly you investigate, the more you pay.
+
+This creates a perverse incentive where the moment you need observability most, during an outage, a performance degradation, a customer-impacting incident, is the moment your costs are least predictable.
+
+This isn't a theoretical concern. [Altinity](https://altinity.com/alternative-to-clickhouse-cloud/), a company that provides managed ClickHouse services, has observed that ClickHouse Cloud users find per-consumption billing confusing, noting that changing table sort order or tweaking SQL queries can result in unpredictable cost increases. They explicitly position fixed-cost alternatives against this variability.
+
+[Quesma](https://quesma.com/blog/clickhouse-pricing) has documented that ClickHouse Cloud takes approximately 15 minutes to autoscale, and that queries at regular intervals can prevent compute from scaling to zero. This means idle costs may persist even when nobody is actively investigating anything.
+
+[Tinybird](https://tinybird.co/blog/tinybird-vs-clickhouse-cloud-cost-comparison) notes that ClickHouse Cloud has four cost dimensions (compute, storage, data transfer, and ClickPipes) and that compute specifically can become "expensive and volatile."
+
+None of this is unique to ClickStack. It's inherent to the ClickHouse Cloud billing model that Managed ClickStack is built on.
+
+
+## What "$0.03/GB" leaves out
+
+ClickStack's headline storage rate of less than \$0.03/ GB per month is published and specific. Their ingest compute benchmark of roughly \$0.01/GB is also published and useful for estimation.
+
+But query compute and data transfer/egress costs have no published estimates anywhere in their documentation. These are two of the four cost dimensions, and query compute is the one that varies most depending on how a team uses the platform.
+
+This means a team evaluating Managed ClickStack can estimate storage and ingest costs with reasonable confidence, but has no way to estimate what querying that data will cost. The total cost of ownership is unknowable from publicly available information.
+
+The [Grafana Labs 2025 Observability Survey](https://grafana.com/blog/observability-survey-takeaways) asked 1,255 respondents about their priorities when selecting observability vendors. 75% cited cost as important, and among those concerned about cost, 88% worried about costs being too high while 85% worried about costs being too difficult to predict and budget for.
+
+Therefore, unpredictable costs are, by the largest available survey data, one of the top reasons teams switch observability vendors in the first place.
+
+## "Democratizing" observability, but can you budget for it?
+
+ClickStack's stated goal is democratization, making ClickHouse-for-observability accessible to teams who don't want to manage infrastructure themselves.
+
+It's worth noting that "managed" doesn't mean fully hands-off here. Even on Managed ClickStack, users still deploy and configure their own OTel Collectors, choose compute pool sizes and scaling limits, make data schema decisions, and set retention TTL policies. ClickHouse Cloud handles database provisioning and scaling, which removes a significant operational burden, but it's not a fully managed experience in the way that a pure SaaS observability platform would be.
+
+Democratization implies accessibility. It implies that a team can evaluate a platform, estimate costs, get budget approval, and start using it without surprises. But if you can't estimate your monthly query compute bill before committing, because no public benchmark, pricing calculator, or worked example exists, that's a barrier. Especially for the smaller, cost-conscious teams that the "less than $0.03/GB" headline is designed to attract.
+
+It states the goal of "keeping costs transparent and predictable." For storage, this is demonstrably true. For query compute, it remains an aspiration with no published documentation behind it yet.
+
+They do mention that users can set maximum auto-scaling limits on compute pools, which is a meaningful safeguard against runaway costs. But a cost ceiling is not the same as cost predictability. Knowing your bill won't exceed $X is different from knowing what your bill will be.
+
+## How we think about this at SigNoz
+
+At SigNoz, your bill is your ingestion volume multiplied by a transparent pricing: \$0.30/GB for logs and traces, $0.10 per million metric samples. That's it.
+
+<IncidentCostGraphic />
+
+Querying your data is free. No compute surcharge when your team is investigating an incident at 2 AM. No variable that depends on how many dashboards you run or how complex your queries are. Your bill next month is a function of how much data you send, predictable at all times using [Cost Meter](https://signoz.io/docs/cost-meter/overview/), not how thoroughly you use it.
+
+## Early days, and we're watching
+
+We want to be straightforward about the limits of this analysis. Managed ClickStack is in beta, and pricing may change before GA.
+
+The storage economics are compelling. ClickHouse's compression and object storage model represent a meaningful advance in how cheaply observability data can be retained.
+
+However, the compute economics are unproven and criticized across the entire industry.
+
+If you're evaluating Managed ClickStack, ask for a total cost estimate that covers more than just the storage rate. Ask what query compute costs look like for your expected workload and query patterns. These are reasonable questions, and any vendor should be able to answer them.
+
+We'll update this analysis as more information becomes available.

@@ -264,6 +264,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.113',
+            label: 'Upgrade to v0.113',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.94',
             label: 'Upgrade to v0.94',
           },
@@ -472,6 +477,12 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/manage/administrator-guide/configuration/jwt-secret',
                 label: 'JWT Secret',
+                isExpanded: false,
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/root-user',
+                label: 'Root User Configuration',
                 isExpanded: false,
               },
               {
@@ -1208,6 +1219,11 @@ const docsSideNav = [
             route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
             label: 'Telemetry Data Requirements for Infrastructure Monitoring',
           },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics',
+            label: 'Understanding CPU Utilization Metrics and Aggregation Intervals',
+          },
         ],
       },
     ],
@@ -1712,6 +1728,11 @@ const docsSideNav = [
         label: 'Dropping Metric Labels (Attributes)',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/reducing-costs',
+        label: 'Understanding Metrics Billing and Reducing Costs',
+      },
+      {
         type: 'category',
         route: '/docs/metrics-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',
@@ -2071,6 +2092,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+            label: 'OpenRouter',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
             label: 'Pipecat',
           },
@@ -2394,6 +2420,11 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
+            label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
+          },
         ],
       },
       {
@@ -2602,6 +2633,11 @@ const docsSideNav = [
       {
         route: '/docs/openlit',
         label: 'OpenLIT',
+        type: 'doc',
+      },
+      {
+        route: '/docs/openrouter-observability',
+        label: 'OpenRouter',
         type: 'doc',
       },
       {

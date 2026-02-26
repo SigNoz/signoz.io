@@ -104,6 +104,16 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/feed.xml',
+          destination: '/rss',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
           source: '/docs/',
           destination: '/docs/introduction',
           permanent: true,
@@ -1297,6 +1307,11 @@ module.exports = () => {
         {
           source: '/docs/userguide/collecting_application_logs_otel_sdk_java/',
           destination: '/docs/logs-management/send-logs/java-logs/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/open-source-datadog-alternatives/',
+          destination: '/blog/open-source-datadog-alternative/',
           permanent: true,
         },
         {

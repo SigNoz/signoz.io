@@ -422,6 +422,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'OpenAI Dashboard Template',
   },
   {
+    name: 'OpenRouter',
+    href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Dashboard Template',
+  },
+  {
     name: 'Pipecat',
     href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
     icon: (
