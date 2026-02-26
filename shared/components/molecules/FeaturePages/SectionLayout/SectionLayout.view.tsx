@@ -1,10 +1,10 @@
-import { SectionLayoutProps } from "./SectionLayout.types"
+import { SectionLayoutProps } from './SectionLayout.types'
 
-const SectionLayout: React.FC<SectionLayoutProps> = ({ 
-  children, 
-  className = '', 
+const SectionLayout: React.FC<SectionLayoutProps> = ({
+  children,
+  className = '',
   variant = 'default',
-  withBackground = false
+  withBackground = false,
 }) => {
   const getVariantClasses = () => {
     switch (variant) {
@@ -24,7 +24,9 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
   const backgroundClass = withBackground ? 'bg-signoz_ink-500' : ''
 
   return (
-    <div className={`section-container ${getVariantClasses()} ${backgroundClass} ${className}`}>
+    <div
+      className={`section-container ${getVariantClasses()} ${backgroundClass} ${className} max-w-8xl`}
+    >
       {children}
     </div>
   )
