@@ -74,34 +74,28 @@ const Header: React.FC = () => {
 
 const WhyTeamsSwitchFromCloudWatch: React.FC = () => {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-      <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
-        <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
-          Why Teams Switch From CloudWatch
-        </h2>
-        <SectionLayout variant="no-border" className="!mx-auto p-0">
-          <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
-        </SectionLayout>
-      </div>
-    </div>
-  )
-}
-
-const CapabilitiesThatMakeUsTheDefaultChoiceForAiCompanies: React.FC = () => {
-  return (
     <SectionLayout
       variant="bordered"
       className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]"
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
       <div className="relative flex flex-col gap-6 pt-32 md:py-20">
-        <WhyTeamsSwitchFromCloudWatch />
+        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
+            <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
+              Why Teams Switch From CloudWatch
+            </h2>
+            <SectionLayout variant="no-border" className="!mx-auto p-0">
+              <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
+            </SectionLayout>
+          </div>
+        </div>
       </div>
     </SectionLayout>
   )
 }
 
-const PillarsOfAiFocusedObservabilityArchitecture: React.FC = () => {
+const DeploymentAndDataResidency: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
@@ -172,7 +166,7 @@ const CostComparison: React.FC = () => {
   )
 }
 
-const HowSigNozCompares: React.FC = () => {
+const ArchitectureAndApproach: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
@@ -201,28 +195,28 @@ const HowSigNozCompares: React.FC = () => {
   )
 }
 
-const ObservabilityForAiNativeCompaniesPage: React.FC = () => {
+const CloudwatchAlternativePage: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
 
       <SectionLayout variant="bordered" className="!px-0">
-        <CapabilitiesThatMakeUsTheDefaultChoiceForAiCompanies />
-        <HowSigNozCompares />
+        <WhyTeamsSwitchFromCloudWatch />
+        <ArchitectureAndApproach />
         <CostComparison />
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <PillarsOfAiFocusedObservabilityArchitecture />
+      <DeploymentAndDataResidency />
       <SigNozStats />
       <CustomerStoriesSection
         tracking={{
-          clickName: 'Observability for AI Native Companies Customer Stories Button',
-          clickLocation: 'Observability for AI Native Companies Testimonials',
+          clickName: 'Cloudwatch Alternative Customer Stories Button',
+          clickLocation: 'Cloudwatch Alternative Testimonials',
         }}
       />
     </FeaturePageLayout>
   )
 }
 
-export default ObservabilityForAiNativeCompaniesPage
+export default CloudwatchAlternativePage
