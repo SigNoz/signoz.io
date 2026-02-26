@@ -23,6 +23,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
           className="w-full rounded-xl"
           width={10000}
           height={10000}
+          priority
         />
       </div>
     ) : (

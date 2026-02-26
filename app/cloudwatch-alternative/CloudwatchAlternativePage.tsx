@@ -16,7 +16,8 @@ import {
   CLOUDWATCH_COMPARISON_TABLE_ROWS,
   CLOUDWATCH_BILLING_CARDS,
   VENDORS,
-  DEPLOYMENT_AND_DATA_RESIDENCY_CARDS,
+  DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE,
+  DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW,
 } from './CloudwatchAlternativePage.constants'
 
 const Header: React.FC = () => {
@@ -99,16 +100,30 @@ const DeploymentAndDataResidency: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
-      className="bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] !pb-20 !pt-20"
+      className="bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] !pb-24 !pt-24"
     >
       <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
         <h2 className="text-center text-4xl font-normal text-signoz_vanilla-100">
           Deployment & Data Residency
         </h2>
-        <h4 className="text-xl font-normal text-signoz_vanilla-100">
+        <h4 className="mb-24 text-xl font-normal text-signoz_vanilla-100">
           Your Data, Your Infrastructure, Your Rules.
         </h4>
-        <IconTitleDescriptionCardGrid cards={DEPLOYMENT_AND_DATA_RESIDENCY_CARDS} />
+        <IconTitleDescriptionCardGrid
+          cards={DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE}
+          variant="xl"
+        />
+        <div className="hidden w-full items-center gap-0 md:flex">
+          <div className="h-px flex-1 border-t border-dashed border-signoz_sakura-600" />
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-signoz_sakura-600 text-xl font-bold text-white">
+            VS
+          </span>
+          <div className="h-px flex-1 border-t border-dashed border-signoz_sakura-600" />
+        </div>
+        <IconTitleDescriptionCardGrid
+          cards={DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW}
+          variant="xl"
+        />
       </div>
     </SectionLayout>
   )
@@ -119,7 +134,7 @@ const CostComparison: React.FC = () => {
     <>
       <SectionLayout
         variant="bordered"
-        className="!border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
+        className="flex flex-col gap-y-9 !border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
       >
         <div className="flex flex-col gap-4 px-10 md:px-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
@@ -206,9 +221,27 @@ const CloudwatchAlternativePage: React.FC = () => {
         <CostComparison />
       </SectionLayout>
 
-      <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
+      <UsageBasedPricing
+        show={['traces', 'metrics', 'logs']}
+        sectionTitle=""
+        sectionDescription={
+          <>
+            <p>
+              SigNoz eliminates query costs, dashboard fees, and API charges. Pay only for data
+              volume ingested.
+            </p>
+            <p>
+              Use the calculator below to estimate costs, then track actual usage with Cost Meter to
+              catch unexpected bursts before they impact your bill.
+            </p>
+          </>
+        }
+      />
       <DeploymentAndDataResidency />
-      <SigNozStats />
+      <SigNozStats
+        sectionTitle="Your data stays where you want"
+        sectionDescription="Use SigNoz cloud with your data staying in the US, EU, or India, or self-host."
+      />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Cloudwatch Alternative Customer Stories Button',

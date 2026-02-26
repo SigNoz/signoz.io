@@ -244,7 +244,7 @@ export const CLOUDWATCH_BILLING_CARDS = [
   },
 ]
 
-export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS = [
+export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE = [
   {
     icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
     iconText: 'Regional Silos',
@@ -271,6 +271,9 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS = [
       </>
     ),
   },
+]
+
+export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
   {
     icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
     iconText: 'Managed SaaS',
@@ -282,7 +285,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS = [
           and security patches. Includes built-in SOC2 Type II and HIPAA compliance with data
           centers in US, EU, and India regions to minimize latency and meet residency requirements.
         </p>
-        <p>Zero-ops deployment. Up and running in 5 minutes.</p>
+        <p>Zero-ops deployment. Up and running in &lt;5 minutes.</p>
       </>
     ),
   },
