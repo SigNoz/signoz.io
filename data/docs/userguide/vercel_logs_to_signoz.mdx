@@ -4,15 +4,16 @@ title: Stream Logs from Vercel to SigNoz
 description: Learn how to stream logs from your Vercel applications to SigNoz Cloud using Vercel log drains.
 id: vercel_logs_to_signoz
 doc_type: howto
+tags: [SigNoz Cloud]
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
 
-If you are running your applications on [Vercel](https://vercel.com/), you can stream logs from Vercel to SigNoz using [log drains](https://vercel.com/docs/drains).
+If you are running your applications on <a href="https://vercel.com/" target="_blank" rel="noopener noreferrer nofollow">Vercel</a>, you can stream logs from Vercel to SigNoz using <a href="https://vercel.com/docs/drains" target="_blank" rel="noopener noreferrer nofollow">log drains</a>.
 
 ## Prerequisites
 
-- Vercel Pro or Enterprise accounts
+- A <a href="https://vercel.com/docs/plans" target="_blank" rel="noopener noreferrer nofollow">Vercel Pro or Enterprise</a> account
 - An instance of [SigNoz Cloud](https://signoz.io/teams/)
 
 ## Configure Vercel Log Drains
@@ -39,10 +40,13 @@ Provide a name for your drain, select which projects should send data to your en
 
 ### Step 4: Set the Endpoint URL
 
-Use the following endpoint format:
+Enter the SigNoz logs ingestion endpoint:
 
-- `https://ingest.<region>.signoz.cloud:443/logs/json`
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+```
+https://ingest.<region>.signoz.cloud:443/logs/json
+```
+
+Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
 ### Step 5: Configure Destination
 
@@ -50,9 +54,13 @@ Choose how you want to receive your drain data. Under the **Custom Endpoint** ta
 
 ### Step 6: Add Custom Headers
 
-Enable **Custom Headers** and add the following headers:
+Enable **Custom Headers** and add the following header:
 
-- `signoz-ingestion-key`: Use the ingestion key from your SigNoz Cloud instance for data authentication.
+```
+signoz-ingestion-key: <your-ingestion-key>
+```
+
+Replace `<your-ingestion-key>` with the [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) from your SigNoz Cloud account. You can find this under **Settings > Ingestion Settings** in SigNoz.
 
 <Figure
   src="/img/logs/vercel/headers.webp"
@@ -79,6 +87,33 @@ Click on **Test** to ensure your endpoint receives the data correctly. If succes
 After checking your configuration and successfully testing, click **Create Drain** in your Vercel dashboard.
 
 Your Vercel logs will now be streamed to SigNoz Cloud.
+
+## Validate
+
+After creating the drain, verify that logs are flowing into SigNoz:
+
+1. Open **Logs Explorer** in your SigNoz Cloud dashboard.
+2. Wait a few minutes for logs to arrive — there may be a short delay.
+3. Look for log entries with Vercel-specific attributes such as `source`, `projectName`, and `deploymentId`.
+4. If you see log entries from your Vercel projects, the integration is working correctly.
+
+## Troubleshooting
+
+### No logs appearing in SigNoz
+
+- **Incorrect region**: Verify that `<region>` in the endpoint URL matches your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- **Invalid ingestion key**: Confirm the `signoz-ingestion-key` header value matches the key shown in your [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- **Drain not active**: Check the drain status in **Team Settings > Drains** in Vercel. If it shows an error, click the drain to see details.
+
+### Drain creation or test fails
+
+- **Endpoint URL format**: Ensure the URL is exactly `https://ingest.<region>.signoz.cloud:443/logs/json` with no trailing slash or extra path segments.
+- **Missing headers**: Confirm the `signoz-ingestion-key` custom header is set and the value does not contain leading/trailing whitespace.
+
+## Next Steps
+
+- [Set up alerts](https://signoz.io/docs/userguide/alerts-management/) to get notified when your Vercel logs contain errors.
+- [Create a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) to visualize log volume, error rates, and latency across your Vercel projects.
 
 ## Get Help
 
