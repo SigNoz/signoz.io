@@ -25,9 +25,6 @@ processors:
   resourcedetection:
     # Allow using OTEL_RESOURCE_ATTRIBUTES env var, env detector adds custom labels.
     detectors: [env, system]
-    timeout: 2s
-    system:
-      hostname_sources: [os]  # Use [dns,os] for FQDN as host.name with os as fallback
 service:
   pipelines:
     traces:
@@ -43,14 +40,6 @@ service:
 - **AWS EC2:** Use `detectors: [env, ec2, system]` so the collector detects `cloud.provider`, `cloud.region`, `host.id`, and related attributes.
 - **GCP:** Use `detectors: [env, gcp, system]` for GCP VM metadata.
 - **Azure:** Use `detectors: [env, azure, system]` for Azure VM metadata.
-
-### Custom resource attributes
-
-You can attach custom resource attributes (for example, `environment`, `team`, or any custom key) to **all telemetry** sent by the collector by setting the [`OTEL_RESOURCE_ATTRIBUTES` environment variable](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-environment-variables) in the collector’s environment.
-
-```bash
-export OTEL_RESOURCE_ATTRIBUTES="key1=value1,key2=value2"
-```
 
 ## Send data from applications to collector on VM
 
