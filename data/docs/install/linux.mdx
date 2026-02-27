@@ -1,5 +1,5 @@
 ---
-date: 2026-02-16
+date: 2026-02-27
 title: Linux
 tags : [Self-Host]
 description: Learn how to install SigNoz on Linux
@@ -175,20 +175,21 @@ sudo journalctl -u clickhouse-server.service -f
 sudo journalctl -u zookeeper.service -f
 ```
 
-## Run Clickhouse migrations 
+## Run Clickhouse migrations
 
-1. Get and extract the latest release of SigNoz Schema Migrator:.
+1. Get and extract the latest release of SigNoz Otel Collector:
 
 ```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
-tar -xzf signoz-schema-migrator.tar.gz
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+tar -xzf signoz-otel-collector.tar.gz
 ```
 
 2. Run the migrations:
 
 ```bash
-./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
-./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
+./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate bootstrap --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
+./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate sync up --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
+./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate async up --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
 ```
 
 
@@ -289,14 +290,8 @@ sudo journalctl -u signoz.service -f
 
 ## Install SigNoz Otel Collector
 
-1. Get and extract the latest release of SigNoz Otel Collector:
 
-```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
-tar -xzf signoz-otel-collector.tar.gz
-```
-
-2. Create the necessary directories and copy the extracted files to `/opt/signoz-otel-collector`:
+1. Create the necessary directories and copy the extracted files to `/opt/signoz-otel-collector`:
 
 ```bash
 sudo mkdir -p /var/lib/signoz-otel-collector
@@ -304,14 +299,14 @@ sudo mkdir -p /opt/signoz-otel-collector
 sudo cp -r signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz-otel-collector
 ```
 
-3. Change the ownership of the files to the `signoz` user and group:
+2. Change the ownership of the files to the `signoz` user and group:
 
 ```bash
 sudo chown -R signoz:signoz /var/lib/signoz-otel-collector
 sudo chown -R signoz:signoz /opt/signoz-otel-collector
 ```
 
-4. Create a `config.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+3. Create a `config.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
 
 ```bash
 sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/config.yaml
@@ -395,7 +390,7 @@ service:
 EOF'
 ```
 
-5. Create a `opamp.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+4. Create a `opamp.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
 
 ```bash
 sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/opamp.yaml
@@ -403,7 +398,7 @@ server_endpoint: ws://127.0.0.1:4320/v1/opamp
 EOF'
 ```
 
-6. Create the SigNoz Otel Collector systemd service:
+5. Create the SigNoz Otel Collector systemd service:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz-otel-collector.service
@@ -426,7 +421,7 @@ WantedBy=multi-user.target
 EOF'
 ```
 
-7. Reload the systemd daemon and start the SigNoz Otel Collector service:
+6. Reload the systemd daemon and start the SigNoz Otel Collector service:
 
 ```bash
 sudo systemctl daemon-reload
