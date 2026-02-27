@@ -73,6 +73,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
 
 service:
@@ -228,15 +229,6 @@ receivers:
         type: container
         format: docker
         add_metadata_from_filepath: false
-      - id: extract-service-name
-        type: regex_parser
-        parse_from: body
-        regex: 'service.name":\s*"(?P<svc>[^"]+)"'
-      - id: set-service-name
-        type: move
-        from: attributes.svc
-        to: resource["service.name"]
-        if: 'attributes.svc != nil'
 
 service:
   pipelines:

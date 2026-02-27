@@ -48,6 +48,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
   # Container metrics from Docker daemon
   docker_stats:
@@ -118,19 +119,82 @@ Verify the following values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-## Step 2: Add Config to Swarm
+## Step 2: Deploy the Collector Service
 
-Create a Swarm config from your `config.yaml`:
+Deploy the collector as a **global** service so one replica runs on each Swarm node. Each replica collects host metrics, container metrics, and logs from its local node.
+
+<KeyPointCallout title="Why global mode?" defaultCollapsed={true}>
+With `--mode global`, one collector runs on each Swarm node. Bind mounts (`/var/run/docker.sock`, `/var/lib/docker/containers`, `/`) are node-local, so each replica collects telemetry from its own node. For a single-node Swarm, you still get one collector.
+
+`--hostname '{{.Node.Hostname}}'` sets the container hostname to the Swarm node's hostname. Without this, the `system` resource detector reports the container ID as `host.name` instead of the actual node hostname, making it hard to identify which node data came from in SigNoz.
+</KeyPointCallout>
+
+<Tabs>
+<TabItem value="docker-stack" label="Docker Stack" default>
+
+Create a `docker-stack.yaml` file:
+
+```yaml:docker-stack.yaml
+services:
+  signoz-collection-agent:
+    image: otel/opentelemetry-collector-contrib:0.139.0
+    user: "0:0"
+    hostname: "{{.Node.Hostname}}"
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>
+    configs:
+      - source: otelcol_config
+        target: /etc/otelcol-contrib/config.yaml
+        mode: 0444
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /
+        target: /hostfs
+        read_only: true
+    ports:
+      - target: 4317
+        published: 4317
+        protocol: tcp
+        mode: host
+      - target: 4318
+        published: 4318
+        protocol: tcp
+        mode: host
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+
+configs:
+  otelcol_config:
+    file: ./config.yaml
+```
+
+Deploy the stack:
+
+```bash
+docker stack deploy -c docker-stack.yaml signoz
+```
+
+To update the config, edit `config.yaml` and redeploy with the same command. Docker Swarm automatically creates a new config version and updates the running tasks.
+
+</TabItem>
+<TabItem value="docker-service" label="Docker Service">
+
+First, create a Swarm config from your `config.yaml`:
 
 ```bash
 docker config create otelcol_config ./config.yaml
 ```
 
-To update the config later, create a new config (for example `otelcol_config_v2`), update the service to use it, and remove the old config.
-
-## Step 3: Deploy the Collector Service
-
-Deploy the collector as a **global** service so one replica runs on each Swarm node. Each replica collects host metrics, container metrics, and logs from its local node.
+Then deploy the service:
 
 ```bash
 docker service create \
@@ -139,6 +203,7 @@ docker service create \
   --detach \
   --restart-condition any \
   --user 0:0 \
+  --hostname '{{.Node.Hostname}}' \
   --env OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment> \
   --config source=otelcol_config,target=/etc/otelcol-contrib/config.yaml,mode=0444 \
   --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
@@ -148,36 +213,19 @@ docker service create \
   --publish target=4318,published=4318,protocol=tcp,mode=host \
   otel/opentelemetry-collector-contrib:0.139.0
 ```
+
+To update the config later, create a new config (for example `otelcol_config_v2`), update the service to use it, and remove the old config.
+
+### Optional: Attach to an overlay network
+
+If your application services send OTLP over an overlay network, attach the collector to that network by adding `--network your_overlay_network` to the command above.
+
+</TabItem>
+</Tabs>
 
 Verify the following values:
 
 - `<your-environment>`: The environment name for the deployment
-
-<KeyPointCallout title="Why global mode?" defaultCollapsed={true}>
-With `--mode global`, one collector runs on each Swarm node. Bind mounts (`/var/run/docker.sock`, `/var/lib/docker/containers`, `/`) are node-local, so each replica collects telemetry from its own node. For a single-node Swarm, you still get one collector.
-</KeyPointCallout>
-
-### Optional: Attach to an overlay network
-
-If your application services send OTLP over an overlay network, attach the collector to that network:
-
-```bash
-docker service create \
-  --name signoz-collection-agent \
-  --mode global \
-  --network your_overlay_network \
-  --detach \
-  --restart-condition any \
-  --user 0:0 \
-  --env OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment> \
-  --config source=otelcol_config,target=/etc/otelcol-contrib/config.yaml,mode=0444 \
-  --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-  --mount type=bind,source=/var/lib/docker/containers,target=/var/lib/docker/containers,readonly \
-  --mount type=bind,source=/,target=/hostfs,readonly \
-  --publish target=4317,published=4317,protocol=tcp,mode=host \
-  --publish target=4318,published=4318,protocol=tcp,mode=host \
-  otel/opentelemetry-collector-contrib:0.139.0
-```
 
 ## Validate
 
@@ -251,7 +299,13 @@ Common causes:
 
 ### Updating the config
 
-To apply a new configuration:
+**Docker Stack:** Edit `config.yaml` and redeploy:
+
+```bash
+docker stack deploy -c docker-stack.yaml signoz
+```
+
+**docker service create:** Create a new config and update the service manually:
 
 1. Create a new config: `docker config create otelcol_config_v2 ./config.yaml`
 2. Update the service: `docker service update --config-rm otelcol_config --config-add source=otelcol_config_v2,target=/etc/otelcol-contrib/config.yaml,mode=0444 signoz-collection-agent`
