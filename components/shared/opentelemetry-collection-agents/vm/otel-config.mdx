@@ -47,20 +47,16 @@ service:
   extensions: [health_check, zpages]
   pipelines:
     metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics/internal:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
       exporters: [otlp]
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, resourcedetection]
       exporters: [otlp]
     logs:
       receivers: [otlp, filelog]
-      processors: [batch]
+      processors: [batch, resourcedetection]
       exporters: [otlp]
 ```
 Verify the following values:
@@ -69,10 +65,10 @@ Verify the following values:
 - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<path-to-your-application-log>`: Path to the application or system log files you want to tail (or remove the `filelog` receiver and its entry from `service.pipelines.logs` if you do not need file-based logs)
 
-In the configuration above, three receivers are enabled: `otlp`, `hostmetrics`, and `prometheus`.
+In the configuration above, three receivers are enabled: `otlp`, `hostmetrics`, and `filelog`.
 
 - The **[otlp receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#otlp-receiver)** is configured to receive all types of telemetry data—traces, metrics, and logs. These data are forwarded to SigNoz via the OTLP gRPC endpoint.
 
 - The **[hostmetrics receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#hostmetrics-receiver)** is set up to collect various metrics from the virtual machine, including those related to CPU, memory, disk, file system, network, and more.
 
-- The **[prometheus receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#prometheus-receiver)** collects internal metrics from the `otelcol` Collector itself. You can modify its configuration to include additional scrape targets accessible from the VM, or remove existing targets as needed.
+- The **[filelog receiver](https://signoz.io/docs/userguide/collect_logs_from_file/)** tails log files from host. Set `include` to the path(s) of your application or system logs.

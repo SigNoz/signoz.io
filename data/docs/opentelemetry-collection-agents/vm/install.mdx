@@ -366,6 +366,48 @@ In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your h
 </TabItem>
 </Tabs>
 
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No data appears in SigNoz after installation
+
+**Symptoms:** Host does not appear in **Infrastructure Monitoring → Hosts**, or traces, metrics, or logs do not show in SigNoz despite the Collector running.
+
+**Likely causes:** Collector not receiving data; incorrect SigNoz endpoint or ingestion key; network or firewall blocking egress.
+
+**Resolution:** Add a [debug exporter](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#debug-exporter) to verify whether the Collector receives telemetry. Append the snippet below to your existing config—do not replace your full config.
+
+Add the `debug` exporter to your `exporters` section:
+
+```yaml:/etc/otelcol-contrib/config.yaml {2-3}
+exporters:
+  debug:
+    verbosity: detailed
+```
+
+Then add `debug` to each pipeline's `exporters` list (before `otlp`):
+
+```yaml:/etc/otelcol-contrib/config.yaml {4-11}
+service:
+  pipelines:
+    metrics:
+      exporters: [debug, otlp]
+    traces:
+      exporters: [debug, otlp]
+    logs:
+      exporters: [debug, otlp]
+```
+
+The `verbosity: detailed` setting logs full telemetry payloads to the Collector output.
+
+**Verification:** Restart the Collector and tail logs (`journalctl -u otelcol-contrib -f` for DEB/RPM, or `tail -f otelcol-output.log` for manual runs). If spans, metrics, or logs appear in the debug output but not in SigNoz, the issue is with the SigNoz exporter (endpoint, ingestion key, or network). Remove the debug exporter after troubleshooting.
+
+</details>
+
 ## Next Steps
 
 - [Configure the Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/)
