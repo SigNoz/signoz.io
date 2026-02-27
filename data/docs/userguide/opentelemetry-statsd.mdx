@@ -8,7 +8,7 @@ date: 2026-02-25
 
 import GetHelp from '@/components/shared/get-help.md'
 
-[StatsD](https://github.com/statsd/statsd) is a popular network daemon that listens for statistics (like counters, timers, and gauges) sent over UDP or TCP and aggregates them before forwarding to a backend. You can send custom metrics from your applications using StatsD clients to SigNoz by configuring the OpenTelemetry Collector's `statsd` receiver.
+<a href="https://github.com/statsd/statsd" target="_blank" rel="noopener noreferrer nofollow">StatsD</a> is a popular network daemon that listens for statistics (like counters, timers, and gauges) sent over UDP or TCP and aggregates them before forwarding to a backend. You can send custom metrics from your applications using StatsD clients to SigNoz by configuring the OpenTelemetry Collector's `statsd` receiver.
 
 This guide explains how to set up the OpenTelemetry Collector to listen for StatsD metrics and send them to SigNoz.
 
@@ -25,7 +25,7 @@ This guide explains how to set up the OpenTelemetry Collector to listen for Stat
 
 ### Step 1: Configure the StatsD receiver
 
-The OpenTelemetry Collector uses the [StatsD receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/statsdreceiver) to ingest metrics in the StatsD format.
+The OpenTelemetry Collector uses the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/statsdreceiver" target="_blank" rel="noopener noreferrer nofollow">StatsD receiver</a> to ingest metrics in the StatsD format.
 
 Add the `statsd` receiver to your `otel-collector-config.yaml` file. Make sure it listens on the desired address (default for StatsD is UDP port `8125`):
 
@@ -33,26 +33,37 @@ Add the `statsd` receiver to your `otel-collector-config.yaml` file. Make sure i
 receivers:
   statsd:
     endpoint: "0.0.0.0:8125"
-    aggregation_interval: 60s
-    enable_metric_type: true
-    is_monotonic_counter: false
-    timer_histogram_mapping:
-      - statsd_type: "histogram"
-        observer_type: "gauge"
-      - statsd_type: "timing"
-        observer_type: "histogram"
 ```
 
 **Explanation of the fields:**
 
 - `endpoint`: The address (`host:port`) where the receiver will listen for UDP StatsD packets. Use `0.0.0.0` to listen on all interfaces.
-- `aggregation_interval`: How often the receiver aggregates the received StatsD metrics before sending them out (default is `60s`).
-- `enable_metric_type`: When `true`, it preserves the original StatsD metric type (counter, gauge, timer) as a resource attribute or metric description.
-- `is_monotonic_counter`: When `true`, sets all counter-type metrics received as monotonic (meaning they only ever increase).
-- `timer_histogram_mapping`: Specifies what OpenTelemetry data type to convert received timing or histogram data into. In the example above:
-  - StatsD `histogram` data is converted to an OpenTelemetry `gauge` (no aggregation).
-  - StatsD `timing` data is converted to an OpenTelemetry `histogram` (aggregated over time).
-    See the [StatsD receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/statsdreceiver#configuration) for more mapping options.
+
+<KeyPointCallout title="Advanced Configuration" defaultCollapsed={true}>
+  If you need to configure options like sample rates or timing mappings, you can add them to the `statsd` receiver.
+
+  ```yaml
+  receivers:
+    statsd:
+      endpoint: "0.0.0.0:8125"
+      aggregation_interval: 60s
+      enable_metric_type: true
+      is_monotonic_counter: false
+      timer_histogram_mapping:
+        - statsd_type: "histogram"
+          observer_type: "gauge"
+        - statsd_type: "timing"
+          observer_type: "histogram"
+  ```
+  - `aggregation_interval`: How often the receiver aggregates the received StatsD metrics before sending them out (default is `60s`).
+  - `enable_metric_type`: When `true`, the receiver emits the original StatsD metric type (counter, gauge, timer) as a metric attribute label.
+  - `is_monotonic_counter`: When `true`, sets all counter-type metrics received as monotonic (meaning they only ever increase).
+  - `timer_histogram_mapping`: Specifies what OpenTelemetry data type to convert received timing or histogram data into. In the example above:
+    - StatsD `histogram` data is converted to an OpenTelemetry `gauge` (no aggregation).
+    - StatsD `timing` data is converted to an OpenTelemetry `histogram` (aggregated over time).
+
+  See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/statsdreceiver#configuration" target="_blank" rel="noopener noreferrer nofollow">StatsD receiver documentation</a> for more mapping options.
+</KeyPointCallout>
 
 ### Step 2: Configure the exporter to SigNoz Cloud
 
@@ -166,6 +177,11 @@ services:
 ### Step 5: Restart the OpenTelemetry Collector
 
 After modifying the configuration file and exposing the necessary ports, restart the OpenTelemetry Collector for the changes to take effect.
+
+Depending on your environment, you can restart the collector using the following commands:
+
+- **Docker**: `docker restart otel-collector`
+- **VM**: `sudo systemctl restart signoz-otel-collector` (or the respective service name)
 
 ## Validate
 
