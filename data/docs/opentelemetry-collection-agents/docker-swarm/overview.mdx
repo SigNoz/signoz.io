@@ -1,0 +1,33 @@
+---
+date: 2026-02-27
+title: Docker Swarm Collection Agent - Overview
+id: overview
+description: Monitor Docker Swarm nodes and containers using the OpenTelemetry Collector to send metrics, logs, and traces to SigNoz.
+doc_type: explanation
+---
+
+The Docker Swarm Collection Agent uses the OpenTelemetry Collector Contrib image to collect telemetry data from Docker Swarm nodes and containers. The collector runs as a Swarm service (typically in global mode, one per node), collecting host metrics, container metrics, and container logs, while also acting as a gateway for application traces.
+
+## How It Works
+
+The collector runs as a Swarm service across your cluster:
+
+1. **Collects host metrics**: Scrapes CPU, memory, disk, filesystem, network, and load metrics from each node
+2. **Collects container metrics**: Queries the Docker Engine API for per-container resource usage on each node
+3. **Collects container logs**: Tails and parses JSON-formatted container log files
+4. **Acts as a gateway**: Receives OTLP telemetry data from instrumented applications and forwards everything to SigNoz
+
+## What You Can Collect
+
+- **Host Metrics**: CPU usage, memory consumption, disk I/O, filesystem usage, network statistics, and load averages from each Swarm node
+- **Container Metrics**: Per-container CPU, memory, network I/O, and lifecycle metrics
+- **Container Logs**: stdout/stderr logs from all Docker containers, parsed from JSON log format
+- **Application Traces**: Distributed traces from OpenTelemetry-instrumented applications
+- **Application Metrics**: Custom metrics from your applications via OTLP
+- **Application Logs**: Log data from your applications via OTLP
+
+## Next Steps
+
+- [Install the Docker Swarm Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install)
+- [Configure the Docker Swarm Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
