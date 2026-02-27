@@ -1332,6 +1332,7 @@ module.exports = () => {
         {
           source: '/docs/tutorial/opentelemetry-binary-usage/',
           destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
         },
       ]
     },
