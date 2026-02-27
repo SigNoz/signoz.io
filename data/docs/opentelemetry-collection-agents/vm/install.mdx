@@ -1,5 +1,5 @@
 ---
-date: 2026-02-13
+date: 2026-02-27
 title: VM Collection Agent - Install
 id: install
 description: Install the OpenTelemetry Collector binary on your virtual machine to collect telemetry data.
@@ -36,32 +36,26 @@ The DEB package installs the Collector as a `systemd` service on Debian or Ubunt
 - `sudo` or root access
 - Network access to download packages
 
-### Step 1: Set version and architecture
-
-```bash
-OTEL_VERSION="0.139.0"
-ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
-```
-
-### Step 2: Update package list
+### Step 1: Update package list
 
 ```bash
 sudo apt-get update
 ```
 
-### Step 3: Download the package
+### Step 2: Download the package
 
 ```bash
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_VERSION}/otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.deb"
+ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.deb"
 ```
 
-### Step 4: Install the package
+### Step 3: Install the package
 
 ```bash
-sudo dpkg -i otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.deb
+sudo dpkg -i otelcol-contrib_0.139.0_linux_${ARCH}.deb
 ```
 
-### Step 5: Create OpenTelemetry Collector Configuration
+### Step 4: Create OpenTelemetry Collector Configuration
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
 
@@ -74,7 +68,7 @@ The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use
 /usr/bin/otelcol-contrib --help
 ```
 </KeyPointCallout>
-### Step 6: Applying changes
+### Step 5: Applying changes
 
 After modifying the configuration or environment file, restart the service:
 
@@ -82,13 +76,21 @@ After modifying the configuration or environment file, restart the service:
 sudo systemctl restart otelcol-contrib
 ```
 
-### Step 7: Verify
+### Step 6: Validate
 
-To verify the installation, check the service logs:
+Check that the collector is running:
 
 ```bash
 sudo journalctl -u otelcol-contrib -f
 ```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
 
 </TabItem>
 <TabItem value="rpm" label="RPM">
@@ -101,32 +103,26 @@ The RPM package installs the Collector as a `systemd` service on Red Hat, CentOS
 - `sudo` or root access
 - Network access to download packages
 
-### Step 1: Set version and architecture
-
-```bash
-OTEL_VERSION="0.139.0"
-ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
-```
-
-### Step 2: Update packages
+### Step 1: Update packages
 
 ```bash
 sudo yum update
 ```
 
-### Step 3: Download the package
+### Step 2: Download the package
 
 ```bash
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_VERSION}/otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.rpm"
+ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.rpm"
 ```
 
-### Step 4: Install the package
+### Step 3: Install the package
 
 ```bash
-sudo rpm -ivh otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.rpm
+sudo rpm -ivh otelcol-contrib_0.139.0_linux_${ARCH}.rpm
 ```
 
-### Step 5: Create OpenTelemetry Collector Configuration
+### Step 4: Create OpenTelemetry Collector Configuration
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
 
@@ -140,7 +136,7 @@ The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use
 ```
 </KeyPointCallout>
 
-### Step 6: Applying changes
+### Step 5: Applying changes
 
 After modifying the configuration or environment file, restart the service:
 
@@ -148,13 +144,21 @@ After modifying the configuration or environment file, restart the service:
 sudo systemctl restart otelcol-contrib
 ```
 
-### Step 7: Viewing logs
+### Step 6: Validate
 
-To check the service logs:
+Check that the collector is running:
 
 ```bash
-sudo journalctl -u otelcol-contrib
+sudo journalctl -u otelcol-contrib -f
 ```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
 
 </TabItem>
 <TabItem value="manual" label="Manual">
@@ -167,46 +171,46 @@ Download the Collector as a gzipped tarball and run the binary yourself. No pack
 - `curl` and `tar` installed
 - Network access to download the tarball
 
-### Step 1: Set version and architecture
+### Step 1: Download the tarball
 
 ```bash
-OTEL_VERSION="0.139.0"
 ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.tar.gz"
 ```
 
-### Step 2: Download the tarball
+### Step 2: Extract
 
 ```bash
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_VERSION}/otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.tar.gz"
+tar -xvf otelcol-contrib_0.139.0_linux_${ARCH}.tar.gz
 ```
 
-### Step 3: Extract
-
-```bash
-tar -xvf otelcol-contrib_${OTEL_VERSION}_linux_${ARCH}.tar.gz
-```
-
-### Step 4: Create OpenTelemetry Collector Configuration
+### Step 3: Create OpenTelemetry Collector Configuration
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the extracted directory.
 
 <OtelConfig />
 
-### Step 5: Run the collector
+### Step 4: Run the collector
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-### Step 6: Verify
+### Step 5: Validate
 
-To verify the installation, check the logs:
+Check that the collector is running:
 
 ```bash
-tail -f -n 50 otelcol-output.log
+tail -f otelcol-output.log
 ```
 
+You should see log lines indicating the receivers started successfully:
 
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
 
 </TabItem>
 </Tabs>
@@ -222,44 +226,46 @@ Download the Collector as a gzipped tarball for macOS (Intel or Apple Silicon). 
 - Terminal and `curl` (included with macOS)
 - Network access to download the tarball
 
-### Step 1: Set version and architecture
+### Step 1: Download the tarball
 
 ```bash
-OTEL_VERSION="0.139.0"
-ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+ARCH=$(uname -m | sed 's/x86_64/amd64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz"
 ```
 
-### Step 2: Download the tarball
+### Step 2: Extract
 
 ```bash
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_VERSION}/otelcol-contrib_${OTEL_VERSION}_darwin_${ARCH}.tar.gz"
+tar -xvf otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz
 ```
 
-### Step 3: Extract
-
-```bash
-tar -xvf otelcol-contrib_${OTEL_VERSION}_darwin_${ARCH}.tar.gz
-```
-
-### Step 4: Create OpenTelemetry Collector Configuration
+### Step 3: Create OpenTelemetry Collector Configuration
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same directory.
 
 <OtelConfig />
 
-### Step 5: Run the collector
+### Step 4: Run the collector
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-### Step 6: Verify
+### Step 5: Validate
 
-To verify the installation, check the service logs:
+Check that the collector is running:
+
 ```bash
-tail -f -n 50 otelcol-output.log
+tail -f otelcol-output.log
 ```
 
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
 
 </TabItem>
 <TabItem value="windows" label="Windows">
@@ -275,23 +281,34 @@ The MSI installs the Collector as a Windows service (display name "OpenTelemetry
 - Administrator rights to install the service
 - Network access to download the MSI
 
-### Step 1: Set version
-
-```powershell
-$OTEL_VERSION = "0.139.0"
-```
-
-### Step 2: Create OpenTelemetry Collector Configuration
+### Step 1: Create OpenTelemetry Collector Configuration
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to the `config.yaml` file.
 
 <OtelConfig />
 
-### Step 3: Run the Collector
+### Step 2: Run the Collector
 
 ```powershell
-Start-Process msiexec -ArgumentList "/i", "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v$OTEL_VERSION/otelcol-contrib_${OTEL_VERSION}_windows_amd64.msi CONFIG=config.yaml" -Wait
+Start-Process msiexec -ArgumentList "/i", "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.msi", "CONFIG=config.yaml" -Wait
 ```
+
+### Step 3: Validate
+
+Check that the collector is running:
+
+```powershell
+Get-EventLog -LogName Application -Source "OpenTelemetry Collector" -Newest 20
+```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
+
 </TabItem>
 <TabItem value="manual" label="Manual">
 
@@ -303,43 +320,45 @@ Download the Collector as a gzipped tarball and run the executable yourself. No 
 - `curl` (included in Windows 10+) and `tar` (Windows 10+)
 - Network access to download the tarball
 
-### Step 1: Set version
+### Step 1: Download the tarball
 
 ```powershell
-$OTEL_VERSION = "0.139.0"
+curl -sSL -o "otelcol-contrib_0.139.0_windows_amd64.tar.gz" "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.tar.gz"
 ```
 
-### Step 2: Download the tarball
+### Step 2: Extract
 
 ```powershell
-curl -sSL -o "otelcol-contrib_${OTEL_VERSION}_windows_amd64.tar.gz" "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v$OTEL_VERSION/otelcol-contrib_${OTEL_VERSION}_windows_amd64.tar.gz"
+tar -xvzf otelcol-contrib_0.139.0_windows_amd64.tar.gz
 ```
 
-### Step 3: Extract
-
-```powershell
-tar -xvzf otelcol-contrib_${OTEL_VERSION}_windows_amd64.tar.gz
-```
-
-### Step 4: Create OpenTelemetry Collector Configuration
+### Step 3: Create OpenTelemetry Collector Configuration
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same folder.
 
 <OtelConfig />
 
-### Step 5: Run the collector
+### Step 4: Run the collector
 
 ```powershell
 Start-Process -FilePath ".\otelcol-contrib.exe" -ArgumentList "--config", ".\config.yaml" -RedirectStandardOutput "otelcol-output.log" -RedirectStandardError "otelcol-error.log" -NoNewWindow
 ```
 
-### Step 6: Verify
+### Step 5: Validate
 
-To verify the installation, check the logs:
+Check that the collector is running:
 
 ```powershell
 Get-Content otelcol-output.log -Wait -Tail 50
 ```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
 
 </TabItem>
 </Tabs>
