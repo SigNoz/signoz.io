@@ -59,7 +59,62 @@ sudo dpkg -i otelcol-contrib_0.139.0_linux_${ARCH}.deb
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
 
-<OtelConfig />
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
 The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
@@ -126,7 +181,63 @@ sudo rpm -ivh otelcol-contrib_0.139.0_linux_${ARCH}.rpm
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
 
-<OtelConfig />
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
 
 <KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
 The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
@@ -188,7 +299,63 @@ tar -xvf otelcol-contrib_0.139.0_linux_${ARCH}.tar.gz
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the extracted directory.
 
-<OtelConfig />
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
 
 ### Step 4: Run the collector
 
@@ -243,7 +410,63 @@ tar -xvf otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same directory.
 
-<OtelConfig />
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
 
 ### Step 4: Run the collector
 
@@ -285,7 +508,63 @@ The MSI installs the Collector as a Windows service (display name "OpenTelemetry
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to the `config.yaml` file.
 
-<OtelConfig />
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
 
 ### Step 2: Run the Collector
 
@@ -336,7 +615,63 @@ tar -xvzf otelcol-contrib_0.139.0_windows_amd64.tar.gz
 
 The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same folder.
 
-<OtelConfig />
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
 
 ### Step 4: Run the collector
 
