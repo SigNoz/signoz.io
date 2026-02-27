@@ -6,25 +6,24 @@ description: Monitor Docker Swarm nodes and containers using the OpenTelemetry C
 doc_type: explanation
 ---
 
-The Docker Swarm Collection Agent uses the OpenTelemetry Collector Contrib image to collect telemetry data from Docker Swarm nodes and containers. The collector runs as a Swarm service (typically in global mode, one per node), collecting host metrics, container metrics, and container logs, while also acting as a gateway for application traces.
+The Docker Swarm Collection Agent collects telemetry from Docker Swarm nodes and containers. The agent runs as a Swarm service with one replica per node.
 
 ## How It Works
 
-The collector runs as a Swarm service across your cluster:
+The agent runs as a Swarm service with one replica on each node. It collects host and container metrics from the local OS and Docker Engine, tails container log files on that node, and listens for OTLP telemetry from applications, then forwards everything to SigNoz.
 
-1. **Collects host metrics**: Scrapes CPU, memory, disk, filesystem, network, and load metrics from each node
-2. **Collects container metrics**: Queries the Docker Engine API for per-container resource usage on each node
-3. **Collects container logs**: Tails and parses JSON-formatted container log files
-4. **Acts as a gateway**: Receives OTLP telemetry data from instrumented applications and forwards everything to SigNoz
+1. **Scrapes the host**: Reads CPU, memory, disk, and network data from the mounted host filesystem on each node
+2. **Polls the Docker API**: Fetches per-container resource stats via the Docker socket on each node
+3. **Tails container logs**: Reads stdout/stderr from Docker's JSON log files in the container directory
+4. **Forwards OTLP**: Receives telemetry from instrumented apps on ports 4317/4318 and batches it to SigNoz
 
 ## What You Can Collect
 
-- **Host Metrics**: CPU usage, memory consumption, disk I/O, filesystem usage, network statistics, and load averages from each Swarm node
-- **Container Metrics**: Per-container CPU, memory, network I/O, and lifecycle metrics
-- **Container Logs**: stdout/stderr logs from all Docker containers, parsed from JSON log format
-- **Application Traces**: Distributed traces from OpenTelemetry-instrumented applications
-- **Application Metrics**: Custom metrics from your applications via OTLP
-- **Application Logs**: Log data from your applications via OTLP
+- **Node health**: CPU, memory, disk, filesystem, network, and load averages from each Swarm node
+- **Container resource usage**: Per-container CPU, memory, and network I/O on each node
+- **Container logs**: stdout/stderr logs from all running containers across the cluster
+- **Application traces**: Distributed traces from OpenTelemetry-instrumented applications
+- **Application metrics and logs**: Any OTLP telemetry sent directly from your applications
 
 ## Next Steps
 

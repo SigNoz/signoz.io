@@ -87,7 +87,7 @@ You can enable only the scrapers you need or tune `collection_interval`. The hos
 <KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed={true}>
 Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk metrics instead of the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
 
-In most cases you mount the host root at `/hostfs` (e.g. `-v /:/hostfs:ro`). If you prefer to expose only certain paths to the collector, mount those under `/hostfs` so paths line up—for example `docker run-v /proc:/hostfs/proc` for process-related metrics.
+In most cases you mount the host root at `/hostfs` (e.g. `-v /:/hostfs:ro`). If you prefer to expose only certain paths to the collector, mount those under `/hostfs` so paths line up—for example `docker run -v /proc:/hostfs/proc` for process-related metrics.
 
 - The `root_path` value in config must match the volume mount path in your `docker run` or Compose file (e.g. `/hostfs`).
 - This applies to **Linux only**.
@@ -207,7 +207,7 @@ receivers:
   docker_stats:
     endpoint: unix:///var/run/docker.sock
     excluded_images:
-      - signoz-otel-collector
+      - opentelemetry-collector-contrib
       - /.*pause.*/
 ```
 
