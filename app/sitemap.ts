@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const mapChangeFrequency = (
   frequency: string
@@ -20,8 +21,8 @@ const mapChangeFrequency = (
   }
 }
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 60
+export const dynamic = 'force-static'
+export const revalidate = CMS_REVALIDATE_INTERVAL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
@@ -44,12 +45,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }))
 
-  // New section for guides
   const guideRoutes = allGuides
-    .filter((guide) => !guide.draft)
-    .map((guide) => ({
-      url: `${siteUrl}/${guide.path}/`,
-      lastModified: guide.lastmod || guide.date,
+    .filter((post) => !post.draft)
+    .map((post) => ({
+      url: `${siteUrl}/${post.path}/`,
+      lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.7,
     }))
@@ -114,10 +114,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'security',
     'support',
     'teams',
-    'guides', // Add the main guides page
     'faqs', // Add the main FAQs page
     'opentelemetry',
     'comparisons',
+    'guides',
   ].map((route) => ({
     url: `${siteUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],

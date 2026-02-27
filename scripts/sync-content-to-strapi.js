@@ -5,11 +5,14 @@ const axios = require('axios')
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
 const mime = require('mime-types')
 
-// Configuration
-const CMS_API_URL = process.env.CMS_API_URL
-const CMS_API_TOKEN = process.env.CMS_API_TOKEN
-const SYNC_FOLDERS = JSON.parse(process.env.SYNC_FOLDERS)
 const DEPLOYMENT_STATUS = process.env.DEPLOYMENT_STATUS
+
+const CMS_API_URL =
+  DEPLOYMENT_STATUS === 'staging' ? process.env.CMS_STAGING_API_URL : process.env.CMS_API_URL
+const CMS_API_TOKEN =
+  DEPLOYMENT_STATUS === 'staging' ? process.env.CMS_STAGING_API_TOKEN : process.env.CMS_API_TOKEN
+
+const SYNC_FOLDERS = JSON.parse(process.env.SYNC_FOLDERS)
 
 function getAssetsListFromEnv(envName, pathEnvName) {
   if (process.env[pathEnvName] && fs.existsSync(process.env[pathEnvName])) {

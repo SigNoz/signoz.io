@@ -1,9 +1,10 @@
+import { unstable_cache } from 'next/cache'
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
-import { allBlogs, allGuides, type Blog, type Guide } from 'contentlayer/generated'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { allBlogs, allGuides } from 'contentlayer/generated'
 import type { Comparison } from '../types/transformedContent'
 import { fetchAllComparisonsForPage } from './cachedData'
-import type { MDXContent } from './strapi'
 
 type RawHubPath = {
   key: string
@@ -62,11 +63,14 @@ type HubIndex = {
   paths: HubPathNav[]
 }
 
-let memoizedHubIndex: HubIndex | null = null
+type SerializedHubIndex = {
+  lookup: Record<string, HubLookupEntry>
+  paths: HubPathNav[]
+}
 
 type ContentIndexItem = {
   prefix: string
-  collection: (Blog | Guide | MDXContent | Comparison)[]
+  collection: readonly { slug?: string; title?: string }[]
 }
 
 function normalizeRoute(route: string) {
@@ -162,14 +166,14 @@ function collectLanguages(items: HubNavItem[], accumulator: Set<string>) {
   }
 }
 
-async function buildHubIndex(comparisons: MDXContent[]): Promise<HubIndex> {
+async function buildHubIndex(comparisons: Comparison[]): Promise<HubIndex> {
   const lookup = new Map<string, HubLookupEntry>()
   const paths: HubPathNav[] = []
 
-  const contentIndex = [
+  const contentIndex: ContentIndexItem[] = [
     {
       prefix: '/blog/',
-      collection: allBlogs as Array<Blog | Guide>,
+      collection: allBlogs,
     },
     {
       prefix: '/comparisons/',
@@ -177,7 +181,7 @@ async function buildHubIndex(comparisons: MDXContent[]): Promise<HubIndex> {
     },
     {
       prefix: '/guides/',
-      collection: allGuides as Array<Blog | Guide>,
+      collection: allGuides,
     },
   ]
 
@@ -253,27 +257,35 @@ async function buildHubIndex(comparisons: MDXContent[]): Promise<HubIndex> {
   return { lookup, paths }
 }
 
-async function getHubIndex(comparisons?: Comparison[]): Promise<HubIndex> {
-  if (memoizedHubIndex) {
-    return memoizedHubIndex
+async function fetchAndBuildHubIndex(): Promise<SerializedHubIndex> {
+  let comparisons: Comparison[] = []
+
+  try {
+    comparisons = await fetchAllComparisonsForPage()
+  } catch (e) {
+    console.error('Failed to fetch content for hub index:', e)
   }
 
-  let usedComparisons = comparisons
-  if (!usedComparisons) {
-    try {
-      usedComparisons = await fetchAllComparisonsForPage()
-    } catch (e) {
-      usedComparisons = []
-    }
-  }
-
-  memoizedHubIndex = await buildHubIndex(usedComparisons || [])
-  return memoizedHubIndex
+  const { lookup, paths } = await buildHubIndex(comparisons)
+  return { lookup: Object.fromEntries(lookup), paths }
 }
 
-export async function getHubContextForRoute(route: string, comparisons?: Comparison[]) {
+async function getCachedHubIndex(): Promise<HubIndex> {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  const cachedFn = unstable_cache(fetchAndBuildHubIndex, ['hub-index', deploymentStatus], {
+    tags: ['mdx-content-list', 'comparisons-list'],
+    revalidate: CMS_REVALIDATE_INTERVAL,
+  })
+
+  const serialized = await cachedFn()
+  return { lookup: new Map(Object.entries(serialized.lookup)), paths: serialized.paths }
+}
+
+export async function getHubContextForRoute(route: string) {
   const normalized = normalizeRoute(route)
-  const { lookup, paths } = await getHubIndex(comparisons)
+  const { lookup, paths } = await getCachedHubIndex()
 
   const match = lookup.get(normalized)
   if (!match) {
@@ -293,18 +305,4 @@ export async function getHubContextForRoute(route: string, comparisons?: Compari
     defaultLanguage: match.language || null,
     firstRouteByPath: paths.map((p) => ({ key: p.key, label: p.label, firstRoute: p.firstRoute })),
   }
-}
-
-export async function listHubRoutes(): Promise<string[]> {
-  const { lookup } = await getHubIndex()
-  return Array.from(lookup.keys())
-}
-
-export async function getHubPaths(): Promise<HubPathNav[]> {
-  const { paths } = await getHubIndex()
-  return paths
-}
-
-export function clearHubIndexCache() {
-  memoizedHubIndex = null
 }

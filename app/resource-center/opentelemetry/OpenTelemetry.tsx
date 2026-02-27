@@ -10,8 +10,9 @@ import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
+import { type Comparison } from 'types/transformedContent'
 
-type HubDoc = CoreContent<Blog | Guide | MDXContent>
+type HubDoc = CoreContent<Blog | Comparison | Guide | MDXContent>
 
 type HubChapterGroup = {
   key: string
@@ -44,8 +45,6 @@ type HubConfigPath = {
   sections?: HubConfigGroup[]
   articles?: HubConfigArticle[]
 }
-
-const docCollections = [...allBlogs, ...allGuides] as Array<Blog | Guide>
 
 function normalizeRoute(route: string) {
   if (!route) return '/'
@@ -131,7 +130,7 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
       const normalizedDocMap = new Map<string, HubDoc>()
 
       // Merge collections
-      const allDocs: (Blog | Guide | HubDoc)[] = [...docCollections]
+      const allDocs: (Blog | Comparison | Guide | HubDoc)[] = [...allBlogs, ...allGuides]
 
       // Add Strapi opentelemetry articles
       articles.forEach((article) => {

@@ -70,8 +70,8 @@ export const loadPublishedPosts = async () => {
     ...allBlogs,
     ...(opentelemetryPosts || []),
     ...allDocs,
-    ...(comparisonPosts || []),
     ...allGuides,
+    ...(comparisonPosts || []),
   ]
 
   return sortPosts(combinedPosts.filter((post: any) => post?.draft !== true) as any[])

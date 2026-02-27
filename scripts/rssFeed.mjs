@@ -108,4 +108,3 @@ export const filterPostsByTag = (posts, tag) => {
     Array.isArray(post.tags) ? post.tags.map((t) => slug(t)).includes(tag) : false
   )
 }
-

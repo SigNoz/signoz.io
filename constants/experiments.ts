@@ -57,6 +57,14 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'get-started-free-copy',
   },
+  HOMEPAGE_HEADER_COPY: {
+    id: 'homepage-header-copy-experiment',
+    variants: {
+      CONTROL: 'existing-homepage-header-copy',
+      VARIANT: 'observability-on-your-terms-copy',
+    },
+    flagName: 'homepage-header-copy-experiment',
+  },
   TEAMS_PAGE: {
     id: 'teams-page-focused-layout-experiment',
     variants: {

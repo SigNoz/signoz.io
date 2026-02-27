@@ -213,6 +213,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Deploying to Render',
+            route: '/docs/setup/render',
+          },
+          {
+            type: 'doc',
             route: '/docs/install/uninstall',
             label: 'Uninstall',
           },
@@ -256,6 +261,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-standard',
             label: 'Upgrade Standard',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.113',
+            label: 'Upgrade to v0.113',
           },
           {
             type: 'doc',
@@ -467,6 +477,12 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/manage/administrator-guide/configuration/jwt-secret',
                 label: 'JWT Secret',
+                isExpanded: false,
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/root-user',
+                label: 'Root User Configuration',
                 isExpanded: false,
               },
               {
@@ -1213,6 +1229,11 @@ const docsSideNav = [
             route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
             label: 'Telemetry Data Requirements for Infrastructure Monitoring',
           },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics',
+            label: 'Understanding CPU Utilization Metrics and Aggregation Intervals',
+          },
         ],
       },
     ],
@@ -1221,12 +1242,12 @@ const docsSideNav = [
     label: 'Logs Management',
     type: 'category',
     isExpanded: false,
-    route: '/docs/userguide/logs',
+    route: '/docs/logs-management/overview',
     items: [
       {
         type: 'doc',
-        route: '/docs/userguide/logs',
-        label: 'Get Started',
+        route: '/docs/logs-management/overview',
+        label: 'Overview',
       },
       {
         type: 'category',
@@ -1248,7 +1269,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/python-logs',
-                label: 'Python logs',
+                label: 'Python',
               },
               {
                 type: 'doc',
@@ -1258,34 +1279,49 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
-                label: 'AWS Lambda Node.js logs',
+                label: 'AWS Lambda Node.js',
               },
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-logs',
-                label: 'Node.js logs',
+                label: 'Node.js',
               },
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-pino-logs',
-                label: 'Pino Node.js logs',
+                label: 'Pino Node.js',
               },
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-winston-logs',
-                label: 'Winston Node.js logs',
+                label: 'Winston Node.js',
               },
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs',
-                label: 'Bunyan Node.js logs',
+                label: 'Bunyan Node.js',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/logrus-to-signoz',
+                label: 'Logrus',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/zerolog-to-signoz',
+                label: 'Zerolog',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/zap-to-signoz',
+                label: 'Zap',
               },
             ],
           },
           {
             type: 'category',
             isExpanded: false,
-            label: 'Existing Collectors to SigNoz',
+            label: 'Existing Collectors',
             items: [
               {
                 type: 'doc',
@@ -1305,60 +1341,66 @@ const docsSideNav = [
             ],
           },
           {
-            type: 'doc',
-            route: '/docs/logs-management/send-logs/log-export-methods',
-            label: 'Log export methods',
+            type: 'category',
+            isExpanded: false,
+            label: 'Infrastructure Logs',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/userguide/collect_kubernetes_pod_logs',
+                label: 'Kubernetes Pod',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/collect_docker_logs',
+                label: 'Docker',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/collecting_syslogs',
+                label: 'Syslogs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/send-cloudwatch-logs-to-signoz',
+                label: 'Cloudwatch',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/windows-events-log',
+                label: 'Windows Event',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/collect-systemd-logs',
+                label: 'Systemd/journald',
+              },
+            ],
           },
           {
             type: 'doc',
-            route: '/docs/userguide/collect_kubernetes_pod_logs',
-            label: 'Kubernetes pod logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/collect_docker_logs',
-            label: 'Docker logs',
+            route: '/docs/logs-management/send-logs/collection-methods',
+            label: 'Collection Methods',
           },
           {
             type: 'doc',
             route: '/docs/userguide/heroku_logs_to_signoz',
-            label: 'Heroku logs',
+            label: 'Heroku',
           },
           {
             type: 'doc',
             route: '/docs/userguide/vercel_logs_to_signoz',
-            label: 'Vercel logs',
+            label: 'Vercel',
           },
           {
             type: 'doc',
             route: '/docs/userguide/send-logs-http',
-            label: 'HTTP logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting_syslogs',
-            label: 'Syslogs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/send-logs/logrus-to-signoz',
-            label: 'Logrus',
-          },
-
-          {
-            type: 'doc',
-            route: '/docs/userguide/send-cloudwatch-logs-to-signoz',
-            label: 'Cloudwatch logs',
+            label: 'Logs via HTTP (JSON)',
           },
           {
             type: 'doc',
             route: '/docs/logs-management/send-logs/cloudflare-logs',
-            label: 'Cloudflare logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
-            label: 'Convex logs',
+            label: 'Cloudflare',
           },
           {
             type: 'doc',
@@ -1370,26 +1412,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/vector-logs-to-signoz',
             label: 'Vector',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/send-logs/zap-to-signoz',
-            label: 'Zap',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/send-logs/windows-events-log',
-            label: 'Windows Event logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/send-logs/collect-systemd-logs',
-            label: 'Systemd/journald logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/send-logs/zerolog-to-signoz',
-            label: 'Zerolog',
           },
         ],
       },
@@ -1716,6 +1738,11 @@ const docsSideNav = [
         label: 'Dropping Metric Labels (Attributes)',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/reducing-costs',
+        label: 'Understanding Metrics Billing and Reducing Costs',
+      },
+      {
         type: 'category',
         route: '/docs/metrics-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',
@@ -1968,6 +1995,11 @@ const docsSideNav = [
             label: 'HAProxy',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+            label: 'Haystack',
+          },
+          {
             label: 'Hostmetrics',
             type: 'category',
             isExpanded: false,
@@ -2070,6 +2102,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+            label: 'OpenRouter',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
             label: 'Pipecat',
           },
@@ -2097,6 +2134,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
             label: 'SigNoz Ingestion Analysis',
+          },
+          {
+            type: 'doc',
+            label: 'Supabase',
+            route: '/docs/dashboards/dashboard-templates/supabase',
           },
           {
             type: 'doc',
@@ -2388,6 +2430,11 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
+            label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
+          },
         ],
       },
       {
@@ -2544,6 +2591,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/haystack-monitoring',
+        label: 'Haystack',
+        type: 'doc',
+      },
+      {
         route: '/docs/inkeep-monitoring',
         label: 'Inkeep',
         type: 'doc',
@@ -2591,6 +2643,11 @@ const docsSideNav = [
       {
         route: '/docs/openlit',
         label: 'OpenLIT',
+        type: 'doc',
+      },
+      {
+        route: '/docs/openrouter-observability',
+        label: 'OpenRouter',
         type: 'doc',
       },
       {

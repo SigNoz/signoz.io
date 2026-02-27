@@ -1,5 +1,5 @@
 ---
-date: 2024-06-06
+date: 2026-02-24
 id: traces
 
 title: View Traces in SigNoz
@@ -31,7 +31,7 @@ From the sidebar, select **Traces**:
 
 ## Visualize Aggregate Metrics from Traces
 
-SigNoz allows you to create aggregates of your filtered traces with various aggregate functions. Refer to query builder aggregation docs [here](https://signoz.io/docs/userguide/query-builder/#aggregation)
+SigNoz allows you to create aggregates of your filtered traces with various aggregate functions. Refer to [query builder aggregation docs](https://signoz.io/docs/userguide/query-builder/#aggregation)
 
 ## Filter Spans by Tags/Attributes
 
@@ -39,25 +39,54 @@ The Traces Explorer in SigNoz provides a feature for quick filtering of spans us
 
 There are two ways in which you can filter traces by tags:
 
-- You can select a filter from the **Quick Filter**. More details on available quick filters are [here](/docs/product-features/trace-explorer/#quick-filters)
+- You can select a filter from the **Quick Filter**. More details on available [quick filters for Traces Explorer](https://signoz.io/docs/product-features/trace-explorer/#quick-filters).
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/trace-explorer/trace-explorer-quick-filters.webp" alt="Quick Filters in Traces Explorer"/>
     <figcaption><i> Quick Filters in Traces Explorer </i></figcaption>
 </figure>
-- You can use the query builder. To access the query builder, select the **Search Filter** input. Then, use the dropdown list to select a key from the list of your attributes, select an operator and enter a value. When you’ve finished, select the **Stage and Run Query** button. Refer to [this doc](/docs/userguide/query-builder/#using-the-filtering-feature) for more details on Query Builder.
+- You can use the query builder. To access the query builder, select the **Search Filter** input. Then, use the dropdown list to select a key from the list of your attributes, select an operator and enter a value. When you’ve finished, select the **Stage and Run Query** button. Refer to [this doc](https://signoz.io/docs/userguide/query-builder/#using-the-filtering-feature) for more details on Query Builder.
 
 
 ## Inspect a Span
 
-To further troubleshoot your application, you can select a span from the list to view its details. For details, see the [Span Details](/docs/userguide/span-details) page.
+To further troubleshoot your application, you can select a span from the list to view its details. For details, see the [Span Details](https://signoz.io/docs/userguide/span-details) page.
 
 ## Missing Spans
 
-If you are seeing missing spans in your traces, it could be due to the following reasons:
+A "missing span" occurs when a span's parent span is not found in the collected trace.
 
-- One of the service is instrumented but not sending spans to SigNoz. For example, the service might not be exporting spans to SigNoz.
+### Common Causes
 
-- The spans are not being sent to SigNoz. For example, the spans might be dropped due to network issues or the spans might be dropped due to sampling.
+- **Tail Sampling**: If you have configured tail sampling in your OpenTelemetry Collector pipeline, the sampler randomly selects a subset of spans to keep and drops the rest. This means some spans from a trace may be retained while others are discarded, resulting in incomplete traces with missing spans.
+
+- **Network Issues**: Spans may be dropped in transit due to network issues between your application and the OpenTelemetry Collector, or between the Collector and SigNoz. This can happen due to transient connectivity failures, timeouts, or packet loss.
+
+- **Misconfigured Services**: If a service in your request chain is not exporting its spans to SigNoz, the spans it generates will be missing from the trace. Since its span ID is used as the parent span ID by downstream services, those downstream spans will appear as missing spans.
+
+<Figure
+  src="/img/docs/missing-spans-diagram.webp"
+  alt="Diagram showing a normal trace with all spans present vs a trace with a missing span where no collected span matches the referenced Parent ID"
+  caption="Normal trace vs trace with missing span"
+/>
+
+<details>
+<summary>Click to read more details</summary>
+
+Every span has two key identifiers: a **Span ID** (its own unique ID) and a **Parent Span ID** (the ID of the span that called it). When a service makes a call to a downstream service, it propagates context via the `traceparent` header. This header carries the current span's Span ID, which the downstream service uses as the Parent Span ID of the new span it creates. A span is flagged as "missing" when no span in the collected trace matches its Parent Span ID — the parent span exists but was never collected.
+
+Learn more about <a href="https://opentelemetry.io/docs/concepts/signals/traces/" target="_blank" rel="noopener noreferrer nofollow">how traces work in OpenTelemetry</a>.
+
+The **root span** is the first span in a trace — it does not have a Parent Span ID because no upstream service initiated it.
+
+For example, consider three services — `Frontend`, `Auth`, and `Database`:
+
+1. `Frontend` creates the root span (Span ID: `abc1`, Parent ID: none).
+2. `Frontend` calls `Auth`, passing its Span ID `abc1` in the `traceparent` header. `Auth` creates a new span (Span ID: `def2`, Parent ID: `abc1`).
+3. `Auth` calls `Database`, passing its Span ID `def2`. `Database` creates a new span (Span ID: `ghi3`, Parent ID: `def2`).
+
+If `Auth` fails to export its span (Span ID: `def2`), the `Database` span will reference a Parent Span ID (`def2`) that does not exist in the collected trace — resulting in a missing span.
+
+</details>
 
 ## Span Gaps
 

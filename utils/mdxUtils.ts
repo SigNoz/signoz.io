@@ -79,13 +79,6 @@ export function generateTOC(content: string) {
   return headings
 }
 
-/**
- * Transforms a raw MDX comparison content from CMS into the expected format
- * for the frontend application.
- *
- * @param comparison - Raw comparison data from CMS
- * @returns Transformed comparison with TOC, reading time, structured data, etc.
- */
 export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`

@@ -1,0 +1,616 @@
+---
+title: How to Enable and Query VPC Flow Logs in AWS?
+slug: vpc-flow-logs-aws
+date: 2026-02-10
+tags: [vpc, logging]
+authors: [saurabh_patil, yuvraj]
+description: Complete guide to enabling VPC Flow Logs via Console, CLI, and Terraform. Query with CloudWatch Insights and Athena, overcome limitations with SigNoz.
+keywords: [vpc flow logs setup, enable vpc flow logs, cloudwatch insights queries, athena vpc flow logs, vpc flow logs terraform, vpc flow logs monitoring, signoz vpc logs]
+---
+
+<ArticleSeriesTop
+  seriesName="VPC Flow Logs - Complete Guide"
+  seriesOverviewHref="/guides/vpc-flow-logs-aws"
+  currentPart={2}
+  totalParts={2}
+  previous={{
+    title: 'VPC Flow Logs Deep Dive - How They Work and Why You Need Them?',
+    href: '/guides/vpc-flow-logs',
+  }}
+/>
+
+The previous part [VPC Flow Logs Deep Dive - How They Work and Why You Need Them?](/guides/vpc-flow-logs) covered how VPC Flow Logs capture network flow metadata, how aggregation works, and the differences between record format versions.
+
+In this hands-on guide you will learn to enable VPC Flow Logs in your AWS environment, query them with CloudWatch Insights and Athena, and setting up unified monitoring.
+
+## Prerequisites
+
+Before enabling flow logs, you need to set up the destination where AWS will deliver your log records. The requirements differ based on which destination you choose, you only need to complete the section for your chosen destination.
+
+### Option 1: Using Amazon S3 (Recommended for Production)
+
+Create an S3 bucket where AWS will deliver your flow log files.
+
+**Step 1: Create an S3 bucket**
+
+You can create the bucket via the AWS Console or CLI. Make sure S3 bucket name is globally unique across ALL AWS accounts. If the name is taken, try adding your account ID or a random number to the name.
+
+```bash
+aws s3 mb s3://YOUR_BUCKET_NAME --region YOUR_REGION
+```
+
+**Step 2: Attach bucket policy**
+
+When you create a flow log via the AWS Console and own bucket, AWS **automatically attaches** the required bucket policy. You don't need to do anything manually. However, if you're creating the flow log via CLI/Terraform, or using a bucket in a different AWS account, you need to manually add this policy. Save the following as `bucket-policy.json`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AWSLogDeliveryWrite",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*",
+      "Condition": {
+        "StringEquals": {
+          "s3:x-amz-acl": "bucket-owner-full-control",
+          "aws:SourceAccount": "YOUR_ACCOUNT_ID"
+        }
+      }
+    },
+    {
+      "Sid": "AWSLogDeliveryAclCheck",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:GetBucketAcl",
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME"
+    }
+  ]
+}
+```
+
+Replace before using:
+
+- `YOUR_BUCKET_NAME` - Your actual bucket name (e.g., `my-vpc-flow-logs-bucket-0210`)
+- `YOUR_ACCOUNT_ID` - Your AWS account ID (find it by running `aws sts get-caller-identity`)
+
+**Apply the policy:**
+
+```bash
+aws s3api put-bucket-policy --bucket YOUR_BUCKET_NAME --policy file://bucket-policy.json
+```
+
+With the bucket and policy in place, you’re ready to create the flow log itself. You can now skip to [How to Enable VPC Flow Logs](#how-to-enable-vpc-flow-logs-in-aws).
+
+### Option 2: Set Up CloudWatch Logs Destination
+
+Create a CloudWatch Logs log group (a container for your flow logs) and an IAM role that gives the VPC Flow Logs service permission to write to it.
+
+**Step 1: Create a log group**
+
+```bash
+aws logs create-log-group --log-group-name /vpc/flowlogs/my-vpc
+```
+
+**Step 2: Create an IAM Role for flow log delivery**
+
+VPC Flow Logs needs permission to write to your CloudWatch log group. When you create the flow log via the Console (covered in the next section), AWS will auto-generate a role with the correct permissions. No manual setup needed.
+
+When creating using CLI we need to create the role manually. 
+
+1. Create a file called `flow-logs-trust-policy.json`:
+    
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "vpc-flow-logs.amazonaws.com"
+          },
+          "Action": "sts:AssumeRole"
+        }
+      ]
+    }
+    ```
+    
+2. Create the IAM role:
+    
+    ```bash
+    aws iam create-role \
+      --role-name VPCFlowLogsRole \
+      --assume-role-policy-document file://flow-logs-trust-policy.json
+    ```
+    
+3. Create `flow-logs-permissions.json`:
+    
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:DescribeLogGroups",
+            "logs:DescribeLogStreams"
+          ],
+          "Resource": "*"
+        }
+      ]
+    }
+    ```
+    
+4. Attach the permissions to the role:
+    
+    ```bash
+    aws iam put-role-policy \
+      --role-name VPCFlowLogsRole \
+      --policy-name VPCFlowLogsPolicy \
+      --policy-document file://flow-logs-permissions.json
+    ```
+    
+
+That's it for CloudWatch setup! Now proceed to enabling VPC Flow Logs.
+
+## How to Enable VPC Flow Logs in AWS?
+
+Now that your destination is ready, it's time to create the flow log itself. VPC Flow Logs can be enabled at three different levels:
+
+| Level | Scope | When to Use |
+| --- | --- | --- |
+| **VPC** | All ENIs in the VPC | Broad security monitoring, compliance |
+| **Subnet** | All ENIs in the subnet | Focused monitoring on specific tiers (e.g., database subnet) |
+| **ENI** | Single network interface | Debugging a specific instance or service |
+
+We will start with VPC-level flow logs. This captures everything and you can always filter the data later in your queries.
+
+### Method 1: Enable via AWS Console (Recommended for Beginners)
+
+The AWS Console provides the most user-friendly way to enable VPC Flow Logs. The steps differ slightly based on whether you're using S3 or CloudWatch Logs as your destination.
+
+**For S3 destination:**
+
+1. Open the <a href="https://console.aws.amazon.com/vpc/" rel="noopener noreferrer nofollow" target="_blank">Amazon VPC Console</a>
+2. In the left sidebar, click **Your VPCs**
+3. Select the VPC you want to monitor (check the box next to it)
+4. Click **Actions** → **Create flow log**
+5. Fill in the form:
+    - **Name:** `my-vpc-flow-log` (optional but helpful)
+    - **Filter:** Select **All** (captures both accepted and rejected traffic)
+    - **Maximum aggregation interval:** Select **10 minutes** (good balance of detail vs. cost) or **1 minute** for more granular data
+    - **Destination:** Select **Send to an Amazon S3 bucket**
+    - **S3 bucket ARN:** Enter `arn:aws:s3:::YOUR_BUCKET_NAME` (e.g., `arn:aws:s3:::my-vpc-flow-logs-bucket-0210`)
+    - **Log record format:** Select **AWS default format** (14 fields, perfect for getting started)
+    - **Log file format:** Select **Parquet** (compressed format, faster queries, lower cost)
+    - **Partition logs by time:** Select **Every 24 hours (default)**
+6. Click **Create flow log**
+
+**For CloudWatch Logs destination:**
+
+1. Follow steps 1-4 above
+2. Fill in the form:
+    - **Name:** `my-vpc-flow-log-cw`
+    - **Filter:** Select **All**
+    - **Maximum aggregation interval:** Select **1 minute** (CloudWatch is for real-time, so more granularity is better)
+    - **Destination:** Select **Send to CloudWatch Logs**
+    - **Destination log group:** Enter `/vpc/flowlogs/my-vpc`
+    - **Service access:** Select **"Create and use a new service role".** AWS auto-generates a role name like `VPCFlowLogs-Cloudwatch-XXXXXXXXX` and creates it with the correct permissions when you click Create. (If you already created a role manually, select "Use an existing service role" and pick `VPCFlowLogsRole` from the dropdown.)
+    - **Log record format:** Select **AWS default format**
+3. Click **Create flow log**
+
+**After creation:** Typically, logs arrive in ~5 minutes to CloudWatch Logs and ~10 minutes to S3 (delays can be longer). In some cases it can take 10+ minutes for the log group/data to appear.
+
+<KeyPointCallout defaultCollapsed="true" title="Can I Modify a flow log after creation?">
+
+You cannot modify a flow log after creation. To change the configuration (format, destination, filter), you need to delete the existing flow log and create a new one.
+
+</KeyPointCallout>
+
+### Method 2: Enable via AWS CLI
+
+For below steps you will need to have <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" rel="noopener noreferrer nofollow" target="_blank">AWS CLI</a> installed. It will allow to run the below AWS commands from your terminal without needing to access the AWS console.
+
+1. **Find your VPC ID first**
+
+    This lists all your VPCs. Copy the VPC ID you want to monitor (e.g., `vpc-07810113181a81357`).
+
+    ```bash
+    aws ec2 describe-vpcs --query 'Vpcs[*].[VpcId,CidrBlock,IsDefault]' --output table
+    ```
+
+2. **Create flow log to S3 (with Parquet)**
+
+    Run below command only if you want to create a flow to S3 bucket as your destination.
+
+    ```bash
+    aws ec2 create-flow-logs \
+      --resource-type VPC \
+      --resource-ids vpc-YOUR_VPC_ID \
+      --traffic-type ALL \
+      --log-destination-type s3 \
+      --log-destination arn:aws:s3:::YOUR_BUCKET_NAME/vpc-flow-logs/ \
+      --max-aggregation-interval 60 \
+      --destination-options FileFormat=parquet
+    ```
+
+3. **Create flow log to CloudWatch Logs**
+
+    Run below command only if you want to create a flow to Cloudwatch Logs as your destination. If you have created S3 bucket no need to run this command.
+
+    ```bash
+    aws ec2 create-flow-logs \
+      --resource-type VPC \
+      --resource-ids vpc-YOUR_VPC_ID \
+      --traffic-type ALL \
+      --log-destination-type cloud-watch-logs \
+      --log-group-name /vpc/flowlogs/my-vpc \
+      --deliver-logs-permission-arn arn:aws:iam::YOUR_ACCOUNT_ID:role/VPCFlowLogsRole \
+      --max-aggregation-interval 60
+    ```
+
+4. **Replace these values**
+
+    | Placeholder | Replace with | How to find it |
+    | --- | --- | --- |
+    | `vpc-YOUR_VPC_ID` | Your VPC ID | Run `aws ec2 describe-vpcs` |
+    | `YOUR_BUCKET_NAME` | Your S3 bucket name | The bucket you created in prerequisites |
+    | `YOUR_ACCOUNT_ID` | Your 12-digit AWS account ID | Run `aws sts get-caller-identity` |
+
+5. **Verify the flow log was created**
+
+```bash
+aws ec2 describe-flow-logs --output table
+```
+
+<KeyPointCallout defaultCollapsed="true" title="How to enable custom log format?">
+
+Omitting `--log-format` uses AWS default format (14 fields). To use custom format with additional fields, add:
+
+```bash
+--log-format '${version} ${account-id} ${interface-id} ${srcaddr} ${dstaddr} ${srcport} ${dstport} ${protocol} ${packets} ${bytes} ${start} ${end} ${action} ${log-status} ${vpc-id} ${subnet-id} ${instance-id}'
+```
+
+</KeyPointCallout>
+
+## How to Search VPC Flow Logs with CloudWatch Insights
+
+CloudWatch Insights lets you search and analyze flow logs published to CloudWatch Logs using a purpose-built query language. It can scan millions of records in seconds.
+
+### How to Open CloudWatch Insights
+
+1. Open the <a href="https://console.aws.amazon.com/cloudwatch/" rel="noopener noreferrer nofollow" target="_blank">CloudWatch Console</a>
+2. In the left sidebar, click **Logs** → **Logs Insights**
+3. In the **Select log group(s)** dropdown, choose your flow log group (e.g., `/vpc/flowlogs/my-vpc`)
+4. Set the time range in the top-right corner (e.g., last 1 hour)
+5. Paste a query from below into the query editor
+6. Click **Run query**
+
+### Useful Queries
+
+**1. Verify logs are being ingested (run this first):**
+
+```sql
+fields @timestamp, srcAddr, dstAddr, srcPort, dstPort, action
+| sort @timestamp desc
+| limit 10
+```
+
+This shows the 10 most recent flow log records. If you see results, your logs are working. If empty, wait a few more minutes, it can take up to 15 minutes for initial delivery.
+
+**2. Find all rejected SSH traffic (potential brute-force attempts):**
+
+```sql
+filter action = "REJECT" and dstPort = 22
+| stats count(*) as attempts by srcAddr
+| sort attempts desc
+| limit 25
+```
+
+**3. Top talkers — who's sending the most data:**
+
+```sql
+filter action = "ACCEPT"
+| stats sum(bytes) as totalBytes by srcAddr, dstAddr
+| sort totalBytes desc
+| limit 20
+```
+
+**4. Traffic to non-standard ports (suspicious activity):**
+
+```sql
+filter action = "ACCEPT" and dstPort not in [80, 443, 22, 3306, 5432, 6379, 53]
+| stats count(*) as connections, sum(bytes) as totalBytes by srcAddr, dstAddr, dstPort
+| sort connections desc
+| limit 25
+```
+
+**5. Rejected traffic over time (useful for dashboards):**
+
+```sql
+filter action = "REJECT"
+| stats count(*) as rejectedCount by bin(5m)
+```
+
+**6. Find all traffic involving a specific IP:**
+
+```sql
+filter srcAddr = "203.0.113.50" or dstAddr = "203.0.113.50"
+| sort @timestamp desc
+| limit 100
+```
+
+## How to Query VPC Flow Logs with Amazon Athena
+
+For flow logs stored in S3, Amazon Athena lets you run standard SQL queries against your log data. This is the most cost-effective approach for analyzing large volumes of historical flow logs.
+
+<KeyPointCallout defaultCollapsed="true" title="What is Athena?">
+
+It's a serverless query service, you don't need to set up any servers or databases. You point it at your S3 data, define a table schema, and run SQL queries. You pay only for the data scanned ($5 per TB).
+
+</KeyPointCallout>
+
+### Step 1: Open Athena
+
+1. Open the <a href="https://console.aws.amazon.com/athena/" rel="noopener noreferrer nofollow" target="_blank">Athena Console</a>
+2. If this is your first time, Athena will ask you to set a **query result location**. Click **Settings** → **Manage**, then enter an S3 path like `s3://YOUR_BUCKET_NAME/athena-results/` and click **Save**
+3. Make sure you're in the **Query editor** tab
+
+### Step 2: Create the Athena Table
+
+Paste the following SQL into the Athena query editor and click **Run**. This tells Athena how to read your Parquet flow log files from S3.
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS vpc_flow_logs_parquet (
+  version int,
+  account_id string,
+  interface_id string,
+  srcaddr string,
+  dstaddr string,
+  srcport int,
+  dstport int,
+  protocol bigint,
+  packets bigint,
+  bytes bigint,
+  start bigint,
+  `end` bigint,
+  action string,
+  log_status string
+)
+PARTITIONED BY (
+  `aws-account-id` string,
+  `aws-service` string,
+  `aws-region` string,
+  `year` string,
+  `month` string,
+  `day` string
+)
+ROW FORMAT SERDE
+  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+STORED AS INPUTFORMAT
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
+OUTPUTFORMAT
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
+LOCATION 's3://YOUR_BUCKET_NAME/AWSLogs/'
+TBLPROPERTIES (
+  "projection.enabled" = "true",
+  "projection.aws-account-id.type" = "enum",
+  "projection.aws-account-id.values" = "YOUR_ACCOUNT_ID",
+  "projection.aws-service.type" = "enum",
+  "projection.aws-service.values" = "vpcflowlogs",
+  "projection.aws-region.type" = "enum",
+  "projection.aws-region.values" = "YOUR_REGION",
+  "projection.year.type" = "integer",
+  "projection.year.range" = "2024,2027",
+  "projection.month.type" = "integer",
+  "projection.month.range" = "1,12",
+  "projection.month.digits" = "2",
+  "projection.day.type" = "integer",
+  "projection.day.range" = "1,31",
+  "projection.day.digits" = "2",
+  "storage.location.template" = "s3://YOUR_BUCKET_NAME/AWSLogs/${aws-account-id}/${aws-service}/${aws-region}/${year}/${month}/${day}"
+);
+```
+
+**Before running, replace these 3 values:**
+
+| Placeholder | Replace with | Example |
+| --- | --- | --- |
+| `YOUR_BUCKET_NAME` | Your S3 bucket name (appears twice) | `my-vpc-flow-logs-bucket-0210` |
+| `YOUR_ACCOUNT_ID` | Your 12-digit AWS account ID | `123456789012` |
+| `YOUR_REGION` | Your AWS region | `ap-south-1` |
+
+If the query succeeds, you'll see "Query successful" and the table `vpc_flow_logs_parquet` will appear in the left sidebar under Tables.
+
+### Step 3: Useful Athena Queries
+
+**1. Verify data is accessible (run this first):**
+
+```sql
+SELECT * FROM vpc_flow_logs_parquet LIMIT 10;
+```
+
+If you see 10 rows of flow log data, everything is working. If you get zero results, check that your S3 path and account ID are correct.
+
+**2. Find all rejected SSH traffic:**
+
+```sql
+SELECT srcaddr, dstaddr, srcport, dstport, action, packets
+FROM vpc_flow_logs_parquet
+WHERE dstport = 22
+  AND action = 'REJECT'
+ORDER BY packets DESC
+LIMIT 25;
+```
+
+**3. Top talkers by bytes transferred:**
+
+```sql
+SELECT srcaddr, dstaddr, SUM(bytes) as total_bytes, SUM(packets) as total_packets
+FROM vpc_flow_logs_parquet
+WHERE action = 'ACCEPT'
+GROUP BY srcaddr, dstaddr
+ORDER BY total_bytes DESC
+LIMIT 20;
+```
+
+**4. Traffic to non-standard ports:**
+
+```sql
+SELECT srcaddr, dstaddr, dstport, protocol, SUM(packets) as total_packets
+FROM vpc_flow_logs_parquet
+WHERE action = 'ACCEPT'
+AND dstport NOT IN (80, 443, 22, 3306, 5432, 6379, 53)
+GROUP BY srcaddr, dstaddr, dstport, protocol
+ORDER BY total_packets DESC
+LIMIT 25;
+```
+
+**5. Daily traffic volume by source IP:**
+
+```sql
+SELECT srcaddr,
+  SUM(bytes) / 1073741824 AS total_gb,
+  COUNT(*) as flow_count
+FROM vpc_flow_logs_parquet
+WHERE year = '2026' AND month = '02'
+GROUP BY srcaddr
+ORDER BY total_gb DESC
+LIMIT 20;
+```
+
+**6. Detect potential port scanning (one source hitting many ports):**
+
+```sql
+SELECT srcaddr, COUNT(DISTINCT dstport) as unique_ports, COUNT(*) as total_attempts
+FROM vpc_flow_logs_parquet
+WHERE action = 'REJECT'
+GROUP BY srcaddr
+HAVING COUNT(DISTINCT dstport) > 20
+ORDER BY unique_ports DESC;
+```
+
+## How to Disable or Delete VPC Flow Logs
+
+If you no longer need flow logs for a specific resource (or want to recreate one with a different configuration), here's how to delete them:
+
+### Delete via AWS Console
+
+1. Open the <a href="https://console.aws.amazon.com/vpc/" rel="noopener noreferrer nofollow" target="_blank">Amazon VPC Console</a>.
+2. In the navigation pane, select **Your VPCs** (or **Subnets** or **Network Interfaces**).
+3. Select the resource.
+4. Go to the **Flow logs** tab.
+5. Select the flow log you want to delete.
+6. Click **Actions** → **Delete flow logs**.
+7. When prompted, type **delete** to confirm, then click **Delete**.
+
+### Delete via AWS CLI
+
+First, find your flow log ID:
+
+```bash
+aws ec2 describe-flow-logs --query 'FlowLogs[*].[FlowLogId,FlowLogStatus,LogDestination]' --output table
+```
+
+Then delete it:
+
+```bash
+aws ec2 delete-flow-logs --flow-log-ids fl-01234567890abcdef
+```
+
+<KeyPointCallout defaultCollapsed="true" title="Cleanup Reminder">
+
+After deleting a flow log, the data already stored in S3 or CloudWatch remains (and continues to incur storage costs). To fully clean up:
+
+- **S3:** Delete the flow log files from your bucket, or set up an <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html" rel="noopener noreferrer nofollow" target="_blank">S3 lifecycle rule</a> to auto-delete old files
+- **CloudWatch:** Delete the log group or set a retention period
+
+</KeyPointCallout>
+
+## Limitations of CloudWatch and Athena for Flow Log Analysis
+
+CloudWatch Insights and Athena work well for basic use cases, but costs and query latency blow up once you’re past a few dozen GB per day.
+
+### CloudWatch Insights Limitations
+
+**High cost at volume**
+
+CloudWatch Logs charges for ingestion (often around `$0.50/GB` in many regions) plus storage and query scanning. Logs Insights queries are charged per GB scanned and the rate varies by region (for example, `$0.005/GB` in us-east-1). For a VPC generating 100 GB/day of flow logs, that's `$1,500+/month` in ingestion alone, before running a single query.
+
+**Limited query language**
+
+No joins, subqueries, or window functions. You can't write a single query like "show me all IPs that were rejected 50+ times AND also had accepted traffic to port 443." That requires two separate queries and manual correlation.
+
+**No correlation with application data**
+
+CloudWatch Logs, Metrics, and X-Ray are three separate tools. If your app's latency spikes at 2:15 PM and you want to check for a corresponding surge in rejected traffic, you need to open separate tabs and visually compare timestamps.
+
+**Single-region scope**
+
+Each log group is locked to one region. If you have VPCs in `us-east-1`, `eu-west-1`, and `ap-southeast-1`, you need to query each region separately.
+
+### Athena Limitations
+
+**Not real-time**
+
+Athena is built for historical analysis. If you’re in the middle of an incident, it’s usually too slow and delayed to be useful.
+
+**Query cost scales with data scanned**
+
+Athena charges $5/TB scanned. Without proper partitioning or time filters, a single broad query can scan terabytes of data.
+
+**No alerting**
+
+You can't set Athena to run a query every 5 minutes and fire an alert when rejected traffic exceeds a threshold. That requires building a separate pipeline with Lambda and EventBridge.
+
+**No dashboards**
+
+Athena returns raw table results. Visualizing trends requires connecting it to QuickSight, Grafana, or another tool.
+
+## Monitoring VPC Flow Logs with SigNoz
+
+[SigNoz](https://signoz.io/) is an all-in-one, OpenTelemetry-native observability platform that brings metrics, logs, and traces into a single interface, directly addressing the limitations above.
+
+Because it's built on OpenTelemetry, VPC Flow Logs from AWS, GCP, or Azure can be ingested alongside your application telemetry using the same collector and protocol. No vendor-specific agents, no separate consoles.
+
+### How SigNoz Addresses the Gaps?
+
+**Unified query interface**
+
+Flow logs, application logs, metrics, and traces all in the same backend. Filter flow logs by source IP, then pivot to traces from the same time window — without leaving the interface.
+
+**Built-in alerting on log data**
+
+Create alerts directly on flow log attributes. For example: trigger an alert when `REJECT` count from a single IP exceeds 100 in 5 minutes, or when traffic appears on port 3389 (RDP) from an external range. No Lambda-EventBridge pipeline needed.
+
+**Cross-signal dashboards**
+
+Build a single dashboard showing rejected traffic trends, application error rates, and slow traces, all on the same time axis. When a network event causes an application problem, the correlation is visual and immediate.
+
+**Multi-cloud and multi-account**
+
+Pipe flow logs from multiple AWS accounts, GCP projects, and Azure subscriptions into one SigNoz instance. One query interface, one set of dashboards, one alerting system.
+
+### How to Send VPC Flow Logs to SigNoz?
+
+The setup involves enabling flow logs to publish to a storage destination (S3 on AWS, Cloud Logging on GCP) and configuring a forwarding pipeline to SigNoz via OpenTelemetry.
+
+For step-by-step instructions:
+
+- [**AWS VPC Flow Logs**](/docs/aws-monitoring/vpc/)
+- [**GCP VPC Flow Logs**](/docs/gcp-monitoring/vpc/logging/)
+
+## Conclusion
+
+VPC Flow Logs give you agent-free, visibility into every network flow across your VPC, from detecting rejected SSH attempts and port scans to identifying top talkers and analyzing traffic patterns.
+
+In this guide, you enabled flow logs on your VPC, configured S3 and CloudWatch as destinations, and learned how to query your data using both CloudWatch Insights (for real-time analysis) and Athena (for cost-effective historical queries). For production environments where network data needs to be correlated with application metrics and traces, tools like SigNoz provide the unified observability layer that native AWS tools lack.

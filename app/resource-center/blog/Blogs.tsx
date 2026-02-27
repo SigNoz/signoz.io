@@ -8,11 +8,6 @@ import SearchInput from '../Shared/Search'
 import FeaturedBlogs from './FeaturedBlogs'
 import AllBlogs from './AllBlogs'
 
-interface SearchInputProps {
-  placeholder: string
-  iconSrc: string
-}
-
 interface BlogPageHeaderProps {
   onSearch: (e) => void
 }

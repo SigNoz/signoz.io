@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
+import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import type { TocItemProps } from './types'
 
 interface OpenTelemetryTocClientProps {
@@ -62,6 +63,7 @@ export default function OpenTelemetryTocClient({ toc }: OpenTelemetryTocClientPr
           scrollableContainerRef={tocContainerRef}
         />
       </div>
+      <PageFeedback placement="toc" />
     </div>
   )
 }

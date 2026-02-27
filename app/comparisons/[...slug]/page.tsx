@@ -2,7 +2,7 @@ import 'css/prism.css'
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
+import { coreContent } from 'pliny/utils/contentlayer'
 import { allAuthors } from 'contentlayer/generated'
 import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
@@ -12,13 +12,11 @@ import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
-import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
-import { fetchAllComparisonsForPage } from '@/utils/cachedData'
-import { mdxOptions, transformComparison } from '@/utils/mdxUtils'
-import { compileMDX } from 'next-mdx-remote/rsc'
-import type { Comparison } from '../../../types/transformedContent'
+import { fetchComparisonBySlug } from '@/utils/cachedData'
+import { mdxOptions } from '@/utils/mdxUtils'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -26,8 +24,9 @@ const layouts = {
   ComparisonsLayout,
 }
 
-export const revalidate = 0
+export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -36,8 +35,7 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
 
-  const comparisons = await fetchAllComparisonsForPage()
-  const post: Comparison | undefined = comparisons.find((p) => p.slug === slug)
+  const post = await fetchComparisonBySlug(slug)
 
   if (!post) {
     return notFound()
@@ -91,26 +89,9 @@ export const generateStaticParams = async () => {
 }
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
   const slug = decodeURI(params.slug.join('/'))
 
-  // Fetch lightweight list and specific content in parallel
-  const [comparisonsList, post]: [Comparison[], Comparison | undefined] = await Promise.all([
-    fetchAllComparisonsForPage(),
-    fetchMDXContentByPath('comparisons', slug, deploymentStatus)
-      .then((response) => {
-        if ('data' in response && !Array.isArray(response.data)) {
-          return transformComparison(response.data)
-        }
-        return undefined
-      })
-      .catch((error) => {
-        console.error('Error fetching single comparison:', error)
-        return undefined
-      }),
-  ])
+  const post = await fetchComparisonBySlug(slug)
 
   if (!post) {
     return notFound()
@@ -126,14 +107,14 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
-  const hubContext = await getHubContextForRoute(currentRoute, comparisonsList)
+  const hubContext = await getHubContextForRoute(currentRoute)
 
   let compiledContent
   try {
     const { content: mdxContent } = await compileMDX({
       source: post?.content,
       components,
-      options: mdxOptions as any,
+      options: mdxOptions as MDXRemoteProps['options'],
     })
     compiledContent = mdxContent
   } catch (error) {
@@ -161,7 +142,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           currentRoute={currentRoute}
         >
           {compiledContent}
-          <PageFeedback />
         </OpenTelemetryHubLayout>
       </>
     )

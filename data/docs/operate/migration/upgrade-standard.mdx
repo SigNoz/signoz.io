@@ -1,9 +1,10 @@
 ---
-date: 2025-08-01
+date: 2026-02-18
 id: upgrade-standard
 tags: [Self-Host]
 title: Standard Upgrade Guide for SigNoz
 description: Learn how to upgrade SigNoz Instance
+doc_type: howto
 ---
 
 This guide covers how to upgrade your SigNoz instance across different deployment methods.
@@ -70,9 +71,11 @@ For more details, see the [Helm upgrade documentation](https://helm.sh/docs/helm
    git pull origin main
    ```
 
-3. **Run the installation script:**
+3. **Pull updated images and restart:**
    ```bash
-   cd deploy && ./install.sh
+   cd deploy/docker
+   docker compose pull
+   docker compose up -d --remove-orphans
    ```
 
 ### Upgrade to Specific Version
@@ -84,9 +87,11 @@ To upgrade to a specific version (e.g., v0.6.2):
    git checkout v0.6.2
    ```
 
-2. **Run the installation script:**
+2. **Pull updated images and restart:**
    ```bash
-   cd deploy && ./install.sh
+   cd deploy/docker
+   docker compose pull
+   docker compose up -d --remove-orphans
    ```
 
 
@@ -95,10 +100,27 @@ To upgrade to a specific version (e.g., v0.6.2):
 ### Manual Image Update
 
 1. **Update image tags** in your `docker-compose.yaml` for these services:
+
+<Tabs>
+<TabItem value="v0.113+" label="v0.113 and later" default>
+
    - `signoz`
-   - `schema-migrator-sync`
-   - `schema-migrator-async`
+   - `signoz-telemetrystore-migrator`
    - `signoz-otel-collector`
+
+<Admonition type="info">
+Starting with v0.113, the `signoz-schema-migrator` service is replaced by `signoz-telemetrystore-migrator` which uses the `signoz/signoz-otel-collector` image. See the [v0.113 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0.113/) for migration steps.
+</Admonition>
+
+</TabItem>
+<TabItem value="before-v0.113" label="Before v0.113">
+
+   - `signoz`
+   - `signoz-schema-migrator`
+   - `signoz-otel-collector`
+
+</TabItem>
+</Tabs>
 
 2. **Deploy the updated stack:**
    ```bash
@@ -140,12 +162,6 @@ The following commands automatically detect your system architecture:
    tar -xzf signoz-otel-collector.tar.gz
    ```
 
-3. **Download Schema Migrator:**
-   ```bash
-   curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
-   tar -xzf signoz-schema-migrator.tar.gz
-   ```
-
 ### Step 3: Replace Binaries and Run Migrations
 
 1. **Install new binaries:**
@@ -161,10 +177,41 @@ The following commands automatically detect your system architecture:
    ```
 
 3. **Run database migrations:**
+
+<Tabs>
+<TabItem value="v0.113+" label="v0.113 and later" default>
+
+   Starting with v0.113, migrations are built into `signoz-otel-collector`. The separate `signoz-schema-migrator` binary is no longer needed. See the [v0.113 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0.113/) for details.
+
    ```bash
-   ./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=password" --replication=true --up=
-   ./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=password" --replication=true --up=
+   /opt/signoz-otel-collector/bin/signoz-otel-collector migrate bootstrap --clickhouse-dsn "tcp://localhost:9000?password=<your-clickhouse-password>"
+   /opt/signoz-otel-collector/bin/signoz-otel-collector migrate sync up --clickhouse-dsn "tcp://localhost:9000?password=<your-clickhouse-password>"
+   /opt/signoz-otel-collector/bin/signoz-otel-collector migrate async up --clickhouse-dsn "tcp://localhost:9000?password=<your-clickhouse-password>"
    ```
+
+   - `<your-clickhouse-password>`: The password for your ClickHouse instance. If no password is set, use `tcp://localhost:9000` without the `?password=` parameter.
+
+</TabItem>
+<TabItem value="before-v0.113" label="Before v0.113">
+
+   Download the schema migrator binary first:
+
+   ```bash
+   curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
+   tar -xzf signoz-schema-migrator.tar.gz
+   ```
+
+   Then run the migrations:
+
+   ```bash
+   ./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=<your-clickhouse-password>" --replication=true --up=
+   ./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=<your-clickhouse-password>" --replication=true --up=
+   ```
+
+   - `<your-clickhouse-password>`: The password for your ClickHouse instance. If no password is set, use `tcp://localhost:9000` without the `?password=` parameter.
+
+</TabItem>
+</Tabs>
 
 ### Step 4: Start Services and Verify
 
