@@ -97,14 +97,16 @@ Add the following lines at the end of the file:
 template(
   name="UTCTraditionalForwardFormat"
   type="string"
-  string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%\n"
+  string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
 )
 
-*.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
+*.* action(type="omfwd" target="127.0.0.1" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
 ```
 
 The `template` defines a custom format for forwarding syslog messages; it includes priority, UTC timestamp, hostname, syslog tag, and the message content itself.
-The `action` forwards all (`*.*`) syslog messages over TCP to the OpenTelemetry Collector listening at `0.0.0.0:54527`.
+The `action` forwards all (`*.*`) syslog messages over TCP to the OpenTelemetry Collector listening at `127.0.0.1:54527`.
+
+If your OpenTelemetry Collector is running on a different host, replace `127.0.0.1` with the IP address or hostname of that machine.
 
 <KeyPointCallout title="Production settings for rsyslog" defaultCollapsed={true}>
 
@@ -113,7 +115,7 @@ For production use cases, it is highly recommended to configure retries and queu
 ```rsyslog:/etc/rsyslog.conf
 *.* action(
   type="omfwd" 
-  target="0.0.0.0" 
+  target="127.0.0.1" 
   port="54527" 
   protocol="tcp"
   action.resumeRetryCount="10"
@@ -141,7 +143,13 @@ sudo systemctl status rsyslog.service
 
 ## Validate
 
-If there are no errors in `rsyslog.service`, logs will be forwarded to the OpenTelemetry Collector and eventually to SigNoz.
+Once both services are running, generate a test syslog entry:
+
+```bash
+logger "SigNoz syslog test message"
+```
+
+Then open **Logs Explorer** in SigNoz and search for the message body containing `SigNoz syslog test message`. You should see the log entry with attributes like `syslog.hostname` populated.
 
 Captured syslogs can be viewed in the **Logs Explorer** section of SigNoz. Search for attributes like `syslog.hostname` or the specific application reporting to syslog.
 
