@@ -25,6 +25,7 @@ import {
   SiOpenai,
   SiSupabase,
   SiOllama,
+  SiHuggingface,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -296,6 +297,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
     icon: <Monitor className="h-7 w-7 text-blue-500" />,
     clickName: 'Host Metrics Dashboard Template',
+  },
+  {
+    name: 'Hugging Face',
+    href: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
+    icon: <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />,
+    clickName: 'Hugging Face Dashboard Template',
   },
   {
     name: 'Inkeep',
