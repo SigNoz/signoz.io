@@ -1,12 +1,13 @@
 ---
-date: 2025-07-07
+date: 2026-03-02
 id: no-data-alerts-for-groups
+description: This document descibes how to use alerting feature to detect when specific groups of resources/entities stop sending data.
 title: No Data Alerts for Groups in SigNoz
 ---
 
 ## Overview
 
-This document descibes how to use alerting feature to detect when specific groups of resources/entities stop sending data. While the basic "No Data" option notifies you when there's no data at all, this advanced feature allows you to monitor individual groups (like specific hosts, services, or regions) and get alerted when any particular group stops reporting metrics.
+This document describes how to use alerting feature to detect when specific groups of resources/entities stop sending data. While the basic "No Data" option notifies you when there's no data at all, this advanced feature allows you to monitor individual groups (like specific hosts, services, or regions) and get alerted when any particular group stops reporting metrics.
 
 ## Understanding Group-Based No Data Alerts
 
@@ -36,23 +37,23 @@ Let's walk through setting up an alert that notifies you when a specific host st
 
 ### Step 1: Configure the Query
 
-*Select your metric*: Choose system.cpu.utilization
-*Set aggregation*: Select `Count` as the aggregation method
-*Group by host*: In the "Sum By" field, select `host.name`
+- *Select your metric*: Choose system.cpu.utilization
+- *Set aggregation*: Select `Count` as the aggregation method
+- *Group by host*: In the "Sum By" field, select `host.name`
 
-Step 2: Add Time-Shift Conditions
+### Step 2: Add Time-Shift Conditions
 
 Click on the F(x) option next to Query name and add Time shift function. Enter the value in seconds. Example 600s for last 10 minutes.
 
-Step 3: Create a new Query
+### Step 3: Create a new Query
 
 Create a exactly same query but without timeshift
 
-Step 4: Create the Formula
+### Step 4: Create the Formula
 
 Use the expression `B/A`
 
-Step 5: Configure Alert Conditions
+### Step 5: Configure Alert Conditions
 
 <Figure src="/img/features/alerts/no-data-alert-for-group-condition.webp" alt="Condition for No Data Alerts for Group"/>
 
@@ -61,7 +62,7 @@ Set up the alert to trigger when the formula equals zero:
 - Condition: Set to "is equal to"
 - Threshold: Enter 0
 - Evaluation: Select "all the times" to ensure the condition is met consistently
-- Duration: Choose your evaluation window (e.g., "10 mins"), should be same as the timeshift duration
+- Duration: Choose your evaluation window (e.g., "10 mins"), should be the same as the timeshift duration
 
 ## Multi-Attribute Grouping
 You can group by multiple attributes for more granular monitoring:
