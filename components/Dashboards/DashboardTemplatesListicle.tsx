@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useState } from 'react'
 import {
   SiKubernetes,
   SiPostgresql,
@@ -8,7 +10,6 @@ import {
   SiApache,
   SiNginx,
   SiRabbitmq,
-  SiApachekafka,
   SiDocker,
   SiJenkins,
   SiSnowflake,
@@ -19,6 +20,11 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiGo,
+  SiTemporal,
+  SiOpenai,
+  SiSupabase,
+  SiOllama,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -43,6 +49,7 @@ import {
   Target,
   Clock,
   Award,
+  Search,
 } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -54,6 +61,14 @@ interface IconCardData {
 }
 
 const DashboardTemplatesData: IconCardData[] = [
+  {
+    name: 'Agno',
+    href: '/docs/dashboards/dashboard-templates/agno-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Agno Dashboard Template',
+  },
   {
     name: 'Amazon Bedrock',
     href: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
@@ -83,6 +98,18 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/argocd-dashboard',
     icon: <GitBranch className="h-7 w-7 text-orange-500" />,
     clickName: 'ArgoCD Dashboard Template',
+  },
+  {
+    name: 'Autogen',
+    href: '/docs/dashboards/dashboard-templates/autogen-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/autogen-logo.webp"
+        alt="Autogen Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Autogen Dashboard Template',
   },
   {
     name: 'AWS ElastiCache Redis',
@@ -133,6 +160,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ClickHouse Dashboard Template',
   },
   {
+    name: 'Codex (OpenAI)',
+    href: '/docs/dashboards/dashboard-templates/codex-dashboard',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex Dashboard Template',
+  },
+  {
+    name: 'Cost Meter',
+    href: '/docs/dashboards/dashboard-templates/cost-meter',
+    icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
+    clickName: 'Cost Meter Dashboard Template',
+  },
+  {
     name: 'CouchDB',
     href: '/docs/dashboards/dashboard-templates/couchdb',
     icon: <Database className="h-7 w-7 text-red-500" />,
@@ -177,16 +216,56 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Flask Monitoring Dashboard Template',
   },
   {
+    name: 'Frontend Monitoring',
+    href: '/docs/dashboards/dashboard-templates/frontend-monitoring',
+    icon: <Network className="h-7 w-7 text-white" />,
+    clickName: 'Frontend Monitoring Dashboard Template',
+  },
+  {
     name: 'GCP Compute Engine',
     href: 'https://github.com/SigNoz/dashboards/tree/main/gcp/compute-engine',
     icon: <Cloud className="h-7 w-7 text-blue-500" />,
     clickName: 'GCP Compute Engine Dashboard Template',
   },
   {
+    name: 'Google ADK',
+    href: '/docs/dashboards/dashboard-templates/google-adk-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+        alt="Google ADK Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Google ADK Dashboard Template',
+  },
+  {
     name: 'Google Gemini',
     href: 'https://github.com/SigNoz/dashboards/tree/main/google-gemini',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
     clickName: 'Google Gemini Dashboard Template',
+  },
+  {
+    name: 'Go Runtime',
+    href: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+    icon: <SiGo className="h-7 w-7 text-cyan-500" />,
+    clickName: 'Go Runtime Dashboard Template',
+  },
+  {
+    name: 'Grok',
+    href: '/docs/dashboards/dashboard-templates/grok-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+    ),
+    clickName: 'xAi Grok Dashboard Template',
+  },
+  {
+    name: 'Groq',
+    href: '/docs/dashboards/dashboard-templates/groq-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Groq Dashboard Template',
   },
   {
     name: 'Hadoop',
@@ -201,10 +280,30 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'HAProxy Dashboard Template',
   },
   {
+    name: 'Haystack',
+    href: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Dashboard Template',
+  },
+  {
     name: 'Host Metrics',
     href: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
     icon: <Monitor className="h-7 w-7 text-blue-500" />,
     clickName: 'Host Metrics Dashboard Template',
+  },
+  {
+    name: 'Inkeep',
+    href: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Inkeep Dashboard Template',
   },
   {
     name: 'Jenkins',
@@ -255,6 +354,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'LiteLLM Dashboard Template',
   },
   {
+    name: 'LiveKit',
+    href: '/docs/dashboards/dashboard-templates/livekit-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/livekit-icon.svg"
+        alt="LiveKit Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'LiveKit Dashboard Template',
+  },
+  {
     name: 'LLM Observability',
     href: 'https://github.com/SigNoz/dashboards/tree/main/llm-observability',
     icon: <Brain className="h-7 w-7 text-purple-600" />,
@@ -299,6 +410,42 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Nomad Dashboard Template',
   },
   {
+    name: 'Ollama',
+    href: '/docs/dashboards/dashboard-templates/ollama-dashboard',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Dashboard Template',
+  },
+  {
+    name: 'OpenAI',
+    href: '/docs/dashboards/dashboard-templates/openai-dashboard',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'OpenAI Dashboard Template',
+  },
+  {
+    name: 'OpenRouter',
+    href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Dashboard Template',
+  },
+  {
+    name: 'Pipecat',
+    href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
+        alt="Pipecat Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Pipecat Dashboard Template',
+  },
+  {
     name: 'PostgreSQL',
     href: '/docs/dashboards/dashboard-templates/postgresql',
     icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,
@@ -323,6 +470,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Redis Dashboard Template',
   },
   {
+    name: 'Semantic Kernel',
+    href: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/sk-logo.webp"
+        alt="Semantic Kernel Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Semantic Kernel Dashboard Template',
+  },
+  {
     name: 'SigNoz Ingestion Analysis',
     href: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
     icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
@@ -333,6 +492,18 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Supabase',
+    href: '/docs/dashboards/dashboard-templates/supabase',
+    icon: <SiSupabase className="h-7 w-7 text-green-500" />,
+    clickName: 'Supabase Dashboard Template',
+  },
+  {
+    name: 'Temporal Agents',
+    href: '/docs/dashboards/dashboard-templates/temporal-dashboard',
+    icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
+    clickName: 'Temporal Agents Dashboard Template',
   },
   {
     name: 'Temporal.io',
@@ -349,12 +520,39 @@ const DashboardTemplatesData: IconCardData[] = [
 ]
 
 export default function DashboardTemplatesListicle() {
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredData = DashboardTemplatesData.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
-    <IconCardGrid
-      cards={DashboardTemplatesData}
-      sectionName="Dashboard Templates Section"
-      viewAllText="View all dashboard templates"
-      gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4"
-    />
+    <div className="space-y-6">
+      <div className="relative mx-auto mb-8 max-w-md">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+          <Search className="h-5 w-5 text-gray-400" />
+        </div>
+        <input
+          type="text"
+          placeholder="Search dashboard templates..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 leading-5 placeholder-gray-500 focus:border-blue-500 focus:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+        />
+      </div>
+
+      {filteredData.length > 0 ? (
+        <IconCardGrid
+          cards={filteredData}
+          sectionName="Dashboard Templates Section"
+          viewAllText="View all dashboard templates"
+          gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4"
+        />
+      ) : (
+        <div className="py-8 text-center text-gray-500">
+          No dashboard templates found matching "{searchQuery}"
+        </div>
+      )}
+    </div>
   )
 }

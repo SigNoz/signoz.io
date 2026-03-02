@@ -230,3 +230,242 @@ export const fetchChangelogById = async (
     throw error
   }
 }
+
+// MDX Content schema
+export type MDXContent = {
+  id: number
+  documentId: string
+  title: string
+  slug: string
+  path: string
+  content: string
+  excerpt?: string
+  publishedAt: string
+  createdAt: string
+  updatedAt: string
+  image?: string
+  layout?: string
+  [key: string]: any
+}
+
+export type MDXContentApiResponse = {
+  data: MDXContent[]
+  meta: {
+    pagination: {
+      page: number
+      pageSize: number
+      pageCount: number
+      total: number
+    }
+  }
+}
+
+export type MDXContentByIdApiResponse = {
+  data: MDXContent
+  meta: {}
+}
+
+// Cache for storing paths to avoid repeated API calls - avoid later maybe
+let pathsCache: string[] | null = null
+let pathsCacheTimestamp: number = 0
+const PATHS_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+// Fetch MDX content by path or all content for a collection
+export const fetchMDXContentByPath = async (
+  collectionName: string,
+  path?: string,
+  deployment_status?: string,
+  fetchAll: boolean = false,
+  fields?: string[]
+): Promise<MDXContentByIdApiResponse | MDXContentApiResponse> => {
+  try {
+    const queryObject: any = {
+      populate: '*',
+      pagination: {
+        page: 1,
+        pageSize: 100,
+      },
+      sort: ['publishedAt:desc'],
+    }
+
+    if (fields && fields.length > 0) {
+      queryObject.fields = fields
+    }
+
+    // Add filters only if not fetching all
+    if (!fetchAll) {
+      if (!path) {
+        throw new Error('Path is required when fetchAll is false')
+      }
+      // Ensure path starts with a slash and has no trailing slashes
+      const normalizedPath = `/${path.replace(/^\/+|\/+$/g, '')}`
+
+      queryObject.filters = {
+        path: {
+          $eq: normalizedPath,
+        },
+      }
+
+      if (deployment_status) {
+        queryObject.filters.deployment_status = {
+          $eq: deployment_status,
+        }
+      }
+    } else {
+      // Optionally filter by deployment status for list views
+      if (deployment_status) {
+        queryObject.filters = {
+          deployment_status: {
+            $eq: deployment_status,
+          },
+        }
+      }
+    }
+
+    if (!API_URL) {
+      throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
+    }
+
+    // If fetchAll is true, fetch all pages and combine results
+    if (fetchAll) {
+      const BATCH_PAGE_SIZE = 50
+      let allData: MDXContent[] = []
+
+      const initialQueryObject = { ...queryObject }
+      initialQueryObject.pagination.page = 1
+      initialQueryObject.pagination.pageSize = BATCH_PAGE_SIZE
+
+      const initialQueryParams = qs.stringify(initialQueryObject, {
+        encode: false,
+        addQueryPrefix: true,
+        arrayFormat: 'repeat',
+      })
+
+      const initialResponse = await fetch(`${API_URL}/api/${collectionName}${initialQueryParams}`, {
+        cache: 'force-cache',
+        next: {
+          tags: [`${collectionName}-list`, 'mdx-content-list'],
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!initialResponse.ok) {
+        if (initialResponse.status === 404) {
+          throw new Error('Content not found')
+        }
+        const errorMessage = await initialResponse.text()
+        throw new Error(`Network response was not ok: ${initialResponse.status} ${errorMessage}`)
+      }
+
+      const initialData: MDXContentApiResponse = await initialResponse.json()
+
+      if (initialData.data && initialData.data.length > 0) {
+        allData = initialData.data
+      }
+
+      const totalPages = initialData.meta.pagination.pageCount
+
+      if (totalPages > 1) {
+        const pagePromises: Promise<MDXContentApiResponse>[] = []
+        for (let i = 2; i <= totalPages; i++) {
+          const pageQueryObject = { ...queryObject }
+          pageQueryObject.pagination.page = i
+          pageQueryObject.pagination.pageSize = BATCH_PAGE_SIZE
+
+          const pageQueryParams = qs.stringify(pageQueryObject, {
+            encode: false,
+            addQueryPrefix: true,
+            arrayFormat: 'repeat',
+          })
+
+          pagePromises.push(
+            fetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
+              cache: 'force-cache',
+              next: {
+                tags: [`${collectionName}-list`, 'mdx-content-list'],
+              },
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }).then(async (res) => {
+              if (!res.ok) {
+                const msg = await res.text()
+                throw new Error(`Failed to fetch page ${i}: ${res.status} ${msg}`)
+              }
+              return res.json() as Promise<MDXContentApiResponse>
+            })
+          )
+        }
+
+        const pagesResults = await Promise.allSettled(pagePromises)
+        pagesResults.forEach((result, idx) => {
+          if (result.status === 'fulfilled' && result.value.data?.length > 0) {
+            allData = allData.concat(result.value.data)
+          } else if (result.status === 'rejected') {
+            console.warn(`Failed to fetch page ${idx + 2} of ${collectionName}:`, result.reason)
+          }
+        })
+      }
+
+      const finalMeta = initialData.meta
+      finalMeta.pagination = {
+        page: 1,
+        pageSize: allData.length,
+        pageCount: 1,
+        total: allData.length,
+      }
+
+      return {
+        data: allData,
+        meta: finalMeta,
+      }
+    }
+
+    // Single content fetch
+    const queryParams = qs.stringify(queryObject, {
+      encode: false,
+      addQueryPrefix: true,
+      arrayFormat: 'repeat',
+    })
+
+    const response = await fetch(`${API_URL}/api/${collectionName}${queryParams}`, {
+      cache: 'force-cache',
+      next: {
+        tags: [`${collectionName}-${path}`, `mdx-content-${path}`],
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Content not found')
+      }
+      const errorMessage = await response.text()
+      throw new Error(`Network response was not ok: ${response.status} ${errorMessage}`)
+    }
+
+    const data: MDXContentApiResponse = await response.json()
+
+    if (!data.data || data.data.length === 0) {
+      throw new Error('Content not found')
+    }
+
+    return {
+      data: data.data[0],
+      meta: {},
+    }
+  } catch (error) {
+    console.error(`Error fetching MDX content for ${collectionName}:`, error)
+    throw error
+  }
+}
+
+// Clear the paths cache (useful for revalidation)
+export const clearPathsCache = (): void => {
+  pathsCache = null
+  pathsCacheTimestamp = 0
+}

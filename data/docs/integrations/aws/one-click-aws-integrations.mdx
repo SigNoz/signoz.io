@@ -1,158 +1,128 @@
 ---
-date: 2025-06-08
-title: One-Click Integrations Overview
-tags : [SigNoz Cloud]
+date: 2025-12-27
+title: AWS One-Click Integrations
+description: Monitor your AWS infrastructure with SigNoz's One-Click AWS Integration. Automatically discover and collect metrics and logs from services like EC2, Lambda, RDS, and more.
+doc_type: explanation
+tags: [SigNoz Cloud]
 id: one-click-aws-integrations
-hide_table_of_contents: false
 ---
 
-# AWS Integrations with AutoDiscovery
+**SigNoz One-Click AWS Integration** automates the collection of metrics and logs from your AWS infrastructure. Using CloudFormation and an intelligent AutoDiscovery agent, it provisions the necessary AWS resources (IAM roles, Firehose streams, CloudWatch subscriptions) to stream telemetry data directly to SigNoz.
 
-Monitoring your AWS infrastructure can quickly become complex especially when dealing with multiple services and regions. SigNoz's Native AWS Integrations with 
-AutoDiscovery simplifies this process by providing a one-click solution to ingest CloudWatch metrics and logs directly into SigNoz. It automates the entire process, 
-from setup to continuous auto-discovery, ensuring users get all their logs and metrics into SigNoz seamlessly.
+This integration eliminates manual configuration for individual services and automatically detects new resources as they are provisioned.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/aws-integration-overview.webp" alt=""/>
-    <figcaption><i>AWS One Click Integrations Overview</i></figcaption>
-</figure>
+## Supported Integrations
 
-## The Challenge: Manual AWS Monitoring Setup
+The following AWS services are supported for one-click monitoring:
 
-Traditionally, setting up AWS monitoring involves:
-- Manually configuring AWS components like CloudWatch, metric streams and log subscriptions
-- Managing multiple AWS accounts and regions
-- Performing ongoing maintenance to track new services
-- Requiring deep AWS expertise, making monitoring a complex side quest for developers
+<AWSOneClickListicle />
 
-This process adds overhead and often turns observability into a burden rather than a seamless experience.
+## Key Capabilities
 
-## The Solution: One-Click AWS Integration
+- **AutoDiscovery**: Automatically detects new AWS services and instances in real-time.
+- **Automated Setup**: Deploys all necessary resources (Log Groups, Metric Streams, Firehose) via CloudFormation.
+- **Multi-Region & Multi-Account**: Monitor resources across multiple regions and accounts from a single SigNoz instance.
+- **Pre-built Dashboards**: Access out-of-the-box dashboards for key services immediately after connection.
 
-SigNoz one-click AWS integration that removes all manual configuration and maintenance. Users can integrate AWS accounts with SigNoz in just a few clicks by:
+## Installation
 
-1. Selecting the AWS regions to monitor
-2. Deploying the AWS Integration Agent using CloudFormation
-3. The agent automatically configures all necessary AWS components to collect logs and metrics
+### Prerequisites
 
-## Key Features
+- **AWS Account Access**: You need permissions to create CloudFormation stacks and IAM roles in your AWS account.
+- **SigNoz Cloud Account**: This feature is available for SigNoz Cloud users.
 
-### Seamless AWS Account Connection
-SigNoz allows users to integrate AWS accounts effortlessly. After selecting the AWS regions to monitor, the AWS Integration Agent is deployed using CloudFormation. 
-Once installed, the agent automatically configures all required AWS components, eliminating the need for manual setup.
+### Step 1: Connect AWS Account
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/aws-integration-cloudformation-output.webp" alt=""/>
-    <figcaption><i>CloudFormation Stack</i></figcaption>
-</figure>
+1. In SigNoz, navigate to **Integrations** > **Amazon Web Services**.
 
-### AutoDiscovery for AWS Resources
-One of the biggest pain points in AWS monitoring is ensuring new service instances are automatically tracked. With SigNoz's AutoDiscovery, the agent:
-- Detects new AWS services and instances in real time
-- Automatically creates CloudWatch log subscriptions for newly added resources
-- Eliminates the need for manual configuration updates whenever infrastructure changes
+<Figure
+  src="/img/docs/integrations/one-click-aws/aws-integration-overview.webp"
+  alt="AWS One Click Integrations Overview"
+  caption="AWS One Click Integrations Overview"
+  className="box-shadowed-image"
+/>
 
-### Pre-Built Dashboards for AWS Services
-SigNoz provides ready-to-use dashboards that instantly visualize key AWS service metrics.
+2. Select the services you want to monitor (e.g., EC2, RDS, Lambda).
+3. **Select the Region** where you want to deploy the integration agent.
+4. **Choose Regions to Monitor**: Select all AWS regions you wish to collect data from.
+5. Click **Launch CloudFormation Stack**. This will redirect you to the AWS Console with a pre-filled template.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/aws-integration-dashboards.webp" alt=""/>
-    <figcaption><i>Pre-Built Dashboard with each integration</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/one-click-aws/aws-integration-cloudformation-setup.webp"
+  alt="CloudFormation Template Setup"
+  caption="CloudFormation Template with pre-filled details"
+  className="box-shadowed-image"
+/>
 
-These dashboards are locked by default.
+6. In AWS, acknowledge the required capabilities and create the stack. The stack will provision:
+   - IAM Roles for permissions
+   - Kinesis Firehose streams for data delivery
+   - CloudWatch Metric Streams
+   - Subscription filters for logs
 
-### Multi-Region & Multi-Account Support
-SigNoz makes it easy to monitor AWS services across multiple regions and accounts:
-- Enable monitoring for additional AWS regions with a single click
-- No need to manually configure each region
-- Multiple AWS accounts can be connected and managed in one centralized observability platform
+### Step 2: Verify Connection
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/aws-integration-region.webp" alt=""/>
-    <figcaption><i>Select your AWS Region(s)</i></figcaption>
-</figure>
+Once the CloudFormation stack is deployed:
 
-### Uninstallation & Cleanup
-Unlike traditional AWS monitoring setups that require manual deprovisioning, SigNoz simplifies removal:
-- Disabling AWS monitoring removes all associated configurations
-- The agent cleans up all created resources automatically
-- You just need to remove the agent manually after it has cleaned up all configurations
+1. Return to the SigNoz Integrations page.
+2. The status will update to **Connected** once data ingestion begins.
+3. Dashboards for the selected services will be automatically enabled.
 
-## Getting Started
+<Figure
+  src="/img/docs/integrations/one-click-aws/aws-integration-success.webp"
+  alt="Integration Success Message"
+  caption="Successful integration confirmation"
+  className="box-shadowed-image"
+/>
 
-Before starting, ensure you have necessary permissions and access to your AWS account.
+## Managing Integrations
 
-### Step 1: Choose Service and Connect Your AWS Account
+### Adding Regions or Services
 
-1. Select services to monitor (Ex. Lambda, ECS, EKS etc)
-2. **Choose the region** to install the integration agent
-3. **Select regions to monitor** – You can monitor one or more enabled AWS regions
-4. **Launch the CloudFormation stack**:
-   - Pre-filled with required parameters
-   - Acknowledge permissions
-   - Deploy the stack
+To expand monitoring to new regions or services:
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/aws-integration-cloudformation-setup.webp" alt=""/>
-    <figcaption><i>CloudFormation Template with pre-filled details of SigNoz account</i></figcaption>
-</figure>
+1. Go to the **Integrations** page and open the AWS configuration.
+2. Select the additional regions or services you wish to monitor.
+3. The agent will automatically update the configuration to include these new resources.
 
-This creates:
-- IAM roles
-- Log group for logs
-- Firehose delivery streams
-- Metrics streams
+<Figure
+  src="/img/docs/integrations/one-click-aws/aws-integration-multi-region.webp"
+  alt="Adding Multi-Region Support"
+  caption="Select additional regions to monitor"
+  className="box-shadowed-image"
+/>
 
-The agent will:
-- Auto-detect namespaces (e.g., `AWS/RDS`)
-- Identify relevant log groups (e.g., `/aws/rds/...`)
-- Set up CloudWatch Metric Streams and Log Subscriptions
-- Provision Firehose streams to send data to SigNoz
+### Adding Multiple Accounts
 
+You can connect multiple AWS accounts to a single SigNoz workspace:
 
-### Step 2: View Data in SigNoz
+1. In the AWS Integrations page, click **Add Account**.
+2. Follow the same CloudFormation deployment steps for the new account.
+3. Data from all accounts will be aggregated in your dashboards, taggable by `account_id`.
 
-- Status updates to **Connected** once ingestion begins
-- Access pre-built [dashboards](https://signoz.io/docs/userguide/manage-dashboards/) 
-- [Logs](https://signoz.io/docs/product-features/logs-explorer/) and [metrics](https://signoz.io/docs/metrics-management/metrics-explorer/) start streaming within minutes
+### Uninstallation
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/aws-integration-success.webp" alt=""/>
-    <figcaption><i>Success Box after the integration is Successful</i></figcaption>
-</figure>
+To remove the integration:
 
-## Step 3: (Optional) Add More Regions or Services
+1. Disable the AWS integration in SigNoz.
+2. The agent will clean up the created resources (subscription filters, streams).
+3. Manually delete the CloudFormation stack in your AWS Console to remove the agent and IAM roles.
 
-Need to expand?
+## Architecture
 
-- Open the integration UI
-- Go to account settings and select new regions
-- The agent will deploy new telemetry stacks automatically
+The integration deploys an **AWS Integration Agent** in your chosen region. This agent:
+- Scans for selected services across enabled regions.
+- Configures CloudWatch Metric Streams to push metrics to SigNoz.
+- Sets up CloudWatch Log Subscription Filters to forward logs via Kinesis Firehose.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/aws-integration-multi-region.webp" alt=""/>
-    <figcaption><i>Select new regions</i></figcaption>
-</figure>
-
-
-## Step 4: (Optional) Add another AWS account
-
-Need to expand?
-
-- Open the integration UI
-- Check additional regions or services
-- The agent will deploy new telemetry stacks automatically
-
-## What's Next? 
-
-The AWS Integration Agent is just the beginning. Planned expansions include:
-- Support for more AWS services
-- Advanced log parsing and analytics for AWS logs
-- Expanding integrations to GCP and Azure for multi-cloud observability
-
+<Figure
+  src="/img/docs/integrations/one-click-aws/aws-integration-cloudformation-output.webp"
+  alt="CloudFormation Stack Resources"
+  caption="Resources created by the CloudFormation stack"
+  className="box-shadowed-image"
+/>
 
 ## Related Resources
 
 - [Blog Post](https://signoz.io/blog/native-aws-integrations-with-autodiscovery/)
-- [Demo Video ](https://youtu.be/PkGE1MdFF4A?si=DxyKTyEjw1NSkfAe)
+- <a href="https://youtu.be/PkGE1MdFF4A?si=DxyKTyEjw1NSkfAe" target="_blank" rel="noopener noreferrer nofollow">Demo Video</a>

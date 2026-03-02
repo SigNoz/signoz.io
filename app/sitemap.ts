@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next'
-import { allBlogs, allAuthors, allComparisons, allGuides, allOpentelemetries, allDocs, allFAQs } from 'contentlayer/generated'
+import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
+import { fetchAllCMSContent } from '@/utils/cmsContent'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const mapChangeFrequency = (
   frequency: string
@@ -19,7 +21,10 @@ const mapChangeFrequency = (
   }
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = 'force-static'
+export const revalidate = CMS_REVALIDATE_INTERVAL
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 
   const blogRoutes = allBlogs
@@ -40,38 +45,62 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     }))
 
-  const comparisonRoutes = allComparisons
-    .filter((post) => !post.draft)
-    .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
-      lastModified: post.lastmod || post.date,
-      changeFrequency: mapChangeFrequency('weekly'),
-      priority: 0.5,
-    }))
-
-  const opentelemetryRoutes = allOpentelemetries
-    .filter((post) => !post.draft)
-    .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
-      lastModified: post.lastmod || post.date,
-      changeFrequency: mapChangeFrequency('weekly'),
-      priority: 0.5,
-    }))
-
-  // New section for guides
   const guideRoutes = allGuides
-    .filter((guide) => !guide.draft)
-    .map((guide) => ({
-      url: `${siteUrl}/${guide.path}/`,
-      lastModified: guide.lastmod || guide.date,
+    .filter((post) => !post.draft)
+    .map((post) => ({
+      url: `${siteUrl}/${post.path}/`,
+      lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.7,
     }))
 
-  const faqRoutes = allFAQs.map((faq) => ({
-    url: `${siteUrl}/${faq.path}/`,
-    lastModified: faq.lastmod || faq.date,
-  }))
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  const { faqs, caseStudies, opentelemetries, comparisons } =
+    await fetchAllCMSContent(deploymentStatus)
+
+  let faqRoutes: MetadataRoute.Sitemap = []
+  if (faqs) {
+    const data = faqs
+    faqRoutes = data.data.map((faq) => ({
+      url: `${siteUrl}/faqs${faq.path}/`,
+      lastModified: faq.date || faq.updatedAt || faq.publishedAt,
+    }))
+  }
+
+  let caseStudyRoutes: MetadataRoute.Sitemap = []
+  if (caseStudies) {
+    const data = caseStudies
+    caseStudyRoutes = data.data.map((caseStudy) => ({
+      url: `${siteUrl}/case-study${caseStudy.path}/`,
+      changeFrequency: mapChangeFrequency('weekly'),
+      priority: 0.5,
+      lastModified: caseStudy.updatedAt || caseStudy.publishedAt,
+    }))
+  }
+
+  let opentelemetryRoutes: MetadataRoute.Sitemap = []
+  if (opentelemetries) {
+    const data = opentelemetries
+    opentelemetryRoutes = data.data.map((opentelemetry) => ({
+      url: `${siteUrl}/opentelemetry${opentelemetry.path}/`,
+      lastModified: opentelemetry.date || opentelemetry.updatedAt || opentelemetry.publishedAt,
+      changeFrequency: mapChangeFrequency('weekly'),
+      priority: 0.5,
+    }))
+  }
+
+  let comparisonRoutes: MetadataRoute.Sitemap = []
+  if (comparisons) {
+    const data = comparisons
+    comparisonRoutes = data.data.map((comparison) => ({
+      url: `${siteUrl}/comparisons${comparison.path}/`,
+      lastModified: comparison.date || comparison.updatedAt || comparison.publishedAt,
+      changeFrequency: mapChangeFrequency('weekly'),
+      priority: 0.5,
+    }))
+  }
 
   const routes = [
     '',
@@ -85,13 +114,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'security',
     'support',
     'teams',
-    'guides', // Add the main guides page
     'faqs', // Add the main FAQs page
+    'opentelemetry',
+    'comparisons',
+    'guides',
   ].map((route) => ({
     url: `${siteUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: mapChangeFrequency('weekly'),
   }))
 
-  return [...routes, ...blogRoutes, ...comparisonRoutes, ...opentelemetryRoutes, ...docRoutes, ...guideRoutes, ...faqRoutes]
+  return [
+    ...routes,
+    ...blogRoutes,
+    ...opentelemetryRoutes,
+    ...docRoutes,
+    ...guideRoutes,
+    ...faqRoutes,
+    ...caseStudyRoutes,
+    ...comparisonRoutes,
+  ]
 }

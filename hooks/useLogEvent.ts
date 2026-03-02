@@ -1,6 +1,20 @@
+// hooks/useLogEvent.ts
+
 import { useCallback, useEffect } from 'react'
 import { logEvent, LogEventPayload, detectBotClientSide } from '../utils/logEvent'
 import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '../utils/userUtils'
+import {
+  getOS,
+  getTimezone,
+  getTimezoneAnalysis,
+  getUserAgentString,
+  getWebdriver,
+  isHeadless,
+  getBrowserEnvironmentSignals,
+  getJSCapabilitySignals,
+  getAnalyticsHealthSignals,
+} from '../utils/browserSignals'
+import Cookies from 'js-cookie'
 
 const INITIAL_REFERRER_KEY = 'app_initial_referrer'
 const UTM_PARAMS_KEY = 'app_utm_params'
@@ -30,43 +44,6 @@ const getInitialReferrer = (): string | undefined => {
   }
 }
 
-const getUserAgent = (): string => {
-  if (typeof window === 'undefined') return ''
-  return window.navigator.userAgent
-}
-
-const getWebdriver = (): boolean => {
-  return typeof window !== 'undefined' && !!window.navigator.webdriver
-}
-
-const isHeadless = (): boolean => {
-  return /HeadlessChrome/.test(getUserAgent())
-}
-
-const getOS = (): string => {
-  if (typeof window === 'undefined') return 'unknown'
-
-  const userAgent = getUserAgent().toLowerCase()
-
-  if (userAgent.indexOf('win') !== -1) return 'Windows'
-  if (userAgent.indexOf('ipad') !== -1) return 'iPad'
-  if (userAgent.indexOf('iphone') !== -1 || userAgent.indexOf('like mac') !== -1) return 'iOS'
-  if (userAgent.indexOf('mac') !== -1) return 'MacOS'
-  if (userAgent.indexOf('android') !== -1) return 'Android'
-  if (userAgent.indexOf('linux') !== -1) return 'Linux'
-  return 'unknown'
-}
-
-const getTimezone = (): string => {
-  if (typeof window === 'undefined') return 'unknown'
-
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone
-  } catch (error) {
-    return 'unknown'
-  }
-}
-
 export const useLogEvent = () => {
   useEffect(() => {
     getInitialReferrer()
@@ -89,13 +66,18 @@ export const useLogEvent = () => {
       const clientBotDetection = detectBotClientSide()
 
       const utmParams = getStoredUtmParams()
+      const userIp = Cookies.get('user_ip')
+      const vercelIp = Cookies.get('vercel_ip')
 
       const enhancedAttributes = {
         ...attributes,
+        custom_ip: userIp || 'unknown',
+        custom_vercel_ip: vercelIp || 'unknown',
         custom_os: getOS(),
         custom_timezone: getTimezone(),
+        ...getTimezoneAnalysis(),
         custom_initial_referrer: getInitialReferrer(),
-        custom_user_agent: getUserAgent(),
+        custom_user_agent: getUserAgentString(),
         custom_webdriver: getWebdriver(),
         custom_headless: isHeadless(),
         custom_source: 'web',
@@ -104,6 +86,10 @@ export const useLogEvent = () => {
         custom_bot_type_client: clientBotDetection.botType,
         custom_bot_detection_reason: clientBotDetection.reason,
         custom_has_javascript: true, // This runs in JS context
+        // Browser environment signals for bot detection
+        ...getBrowserEnvironmentSignals(),
+        ...getJSCapabilitySignals(),
+        ...getAnalyticsHealthSignals(),
         ...utmParams,
       }
 

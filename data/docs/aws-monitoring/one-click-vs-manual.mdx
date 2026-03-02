@@ -1,0 +1,169 @@
+---
+date: 2025-12-26
+id: one-click-vs-manual
+title: One-Click vs Manual AWS Integration
+description: Compare one-click and manual integration methods for monitoring AWS services with SigNoz.
+doc_type: explanation
+---
+
+SigNoz offers two ways to monitor your AWS infrastructure. This guide helps you choose the right approach.
+
+## Quick Comparison
+
+| Feature | One-Click Integration | Manual Setup (OpenTelemetry) |
+|---------|----------------------|------------------------------|
+| **Availability** | SigNoz Cloud only | Cloud & Self-Hosted |
+| **Setup Time** | ~5 minutes | 15-60 minutes per service |
+| **Pre-built Dashboards** | ✅ Included | ❌ Build your own |
+| **Auto-Discovery** | ✅ New resources detected automatically | ❌ Manual configuration |
+| **AWS Cost** | CloudWatch + Firehose charges | Minimal (OpenTelemetry based) |
+| **Granular Control** | Limited | Full control |
+| **Best For** | Quick start, managed experience | Cost optimization, self-hosted |
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** users only.
+</Admonition>
+
+### Get Started
+
+See the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) for setup instructions.
+
+### How It Works
+
+1. **Connect AWS Account**: Deploy a CloudFormation stack that creates necessary IAM roles
+2. **Auto-Discovery**: SigNoz automatically discovers your AWS resources
+3. **CloudWatch Integration**: Metrics and logs are streamed via CloudWatch Metric Streams and Firehose
+4. **Pre-built Dashboards**: Dashboards are automatically imported for each service
+
+### Supported Services
+
+- [EC2](https://signoz.io/docs/integrations/aws/ec2/), [ECS](https://signoz.io/docs/integrations/aws/ecs/), [EKS](https://signoz.io/docs/integrations/aws/eks/), [Lambda](https://signoz.io/docs/integrations/aws/lambda/)
+- [RDS](https://signoz.io/docs/integrations/aws/rds/), [DynamoDB](https://signoz.io/docs/integrations/aws/dynamodb/), [ElastiCache](https://signoz.io/docs/integrations/aws/elasticache/)
+- [ALB](https://signoz.io/docs/integrations/aws/alb/), [API Gateway](https://signoz.io/docs/integrations/aws/api-gateway/)
+- [MSK](https://signoz.io/docs/integrations/aws/msk/), [SQS](https://signoz.io/docs/integrations/aws/sqs/), [SNS](https://signoz.io/docs/integrations/aws/sns/)
+- [S3 (via S3 Sync)](https://signoz.io/docs/integrations/aws/s3-sync/)
+
+### AWS Cost Considerations
+
+<Admonition type="warning">
+One-Click integration incurs additional AWS charges beyond standard resource costs.
+</Admonition>
+
+| Component | Pricing Model |
+|-----------|--------------|
+| CloudWatch Metric Streams | ~$0.003 per 1,000 metric updates |
+| Kinesis Firehose | ~$0.03 per GB ingested |
+| CloudWatch Logs (if enabled) | ~$0.50 per GB ingested (region & tier dependent) |
+
+*Actual AWS bills depend heavily on number of metrics, resolution, enabled logs, and region. Use <a href="https://calculator.aws/" target="_blank" rel="noopener noreferrer nofollow">AWS Pricing Calculator</a> for exact estimates. <a href="https://aws.amazon.com/pricing/" target="_blank" rel="noopener noreferrer nofollow">View AWS pricing docs</a>.*
+
+## Manual Setup (OpenTelemetry)
+
+### How It Works
+
+Deploy OpenTelemetry Collectors to collect metrics and logs directly from your AWS resources. This approach works with both **SigNoz Cloud** and **Self-Hosted** deployments.
+
+### Collection Methods
+
+#### 1. OTel Collection Agents (Recommended for ECS/EKS)
+
+Deploy collectors as sidecars or DaemonSets to collect infrastructure metrics and application telemetry.
+
+- **ECS EC2**: [OTel Collector for ECS EC2](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
+- **ECS Serverless**: [OTel Collector for ECS Serverless](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/)
+- **EKS/K8s**: [OTel Collector for K8s](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/)
+- **EKS Fargate**: [OTel Collector for EKS Fargate](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/)
+
+#### 2. CloudWatch Receiver (Logs Only)
+
+Use the `awscloudwatch` receiver to poll for CloudWatch logs directly.
+
+*Note: This receiver does not collect metrics.*
+
+```yaml
+receivers:
+  awscloudwatch:
+    region: us-east-1
+    logs:
+      poll_interval: 1m
+      groups:
+        named:
+          /aws/lambda/my-function:
+```
+
+See [Send CloudWatch Logs to SigNoz](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/) for full configuration.
+
+#### 3. S3 Lambda Forwarder (Log Files in S3)
+
+For services that export logs to S3, deploy a Lambda function to forward logs to SigNoz.
+
+See individual service docs for specific configurations:
+- [ELB Logs](https://signoz.io/docs/aws-monitoring/elb/)
+- [VPC Flow Logs](https://signoz.io/docs/aws-monitoring/vpc/)
+- [RDS Logs](https://signoz.io/docs/aws-monitoring/rds/)
+- [S3 Access Logs](https://signoz.io/docs/aws-monitoring/s3/)
+
+#### 4. AWS Service Metrics (Manual via CloudWatch Exporter)
+
+For AWS services where metrics are only available via CloudWatch (RDS, DynamoDB, Lambda, etc.), you can manually set up the **CloudWatch Exporter** if you are not using One-Click Metric Streams.
+
+See the "Manual Setup" tab in each service guide for the specific YAML configuration:
+- [API Gateway](https://signoz.io/docs/aws-monitoring/api-gateway/)
+- [DynamoDB](https://signoz.io/docs/aws-monitoring/dynamodb/)
+- [ElastiCache](https://signoz.io/docs/aws-monitoring/elasticache/)
+- [ELB Metrics](https://signoz.io/docs/aws-monitoring/elb/)
+- [Lambda](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)
+- [MSK](https://signoz.io/docs/aws-monitoring/msk/)
+- [RDS](https://signoz.io/docs/aws-monitoring/rds/)
+- [SQS](https://signoz.io/docs/aws-monitoring/sqs/)
+- [SNS](https://signoz.io/docs/aws-monitoring/sns/)
+
+#### 5. Lambda OTel Layers (Lambda Traces & Logs)
+
+For AWS Lambda, use OpenTelemetry Lambda layers to auto-instrument your functions and send traces/logs directly to SigNoz.
+
+**How it works:**
+1. Add the language-specific OTel auto-instrumentation layer (Python, Node.js, Java, Ruby)
+2. Add the OTel Collector layer to forward telemetry
+3. Configure environment variables to point to SigNoz
+
+```bash
+# Example layer ARNs (replace <region> with your AWS region)
+# Python auto-instrumentation
+arn:aws:lambda:<region>:184161586896:layer:opentelemetry-python-0_11_0:1
+
+# OTel Collector (x86_64)
+arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-amd64-0_12_0:1
+```
+
+See the detailed guides:
+- [Lambda Logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/) - S3-based log forwarding
+- [Lambda Traces](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/) - OTel auto-instrumentation with layers
+
+### AWS Cost Considerations
+
+Manual setup minimizes AWS costs:
+
+| Component | Cost |
+|-----------|------|
+| OTel Collector (EC2/ECS) | Compute cost only |
+| CloudWatch Receiver | API calls (~$0.01 per 1,000 requests) |
+| S3 Lambda Forwarder | Lambda invocations + S3 GET requests |
+
+### When to Choose Manual
+
+- You're using **Self-Hosted SigNoz**
+- You need **fine-grained control** over what's collected
+- You want to **minimize AWS costs**
+- You need **custom processing** (filtering, transforming data)
+
+## Hybrid Approach
+
+You can combine both methods:
+
+1. Use **One-Click** for critical services where pre-built dashboards save time
+2. Use **Manual** for services where you need custom collection or cost control
+
+The data from both methods flows into the same SigNoz instance and can be queried together.

@@ -5,7 +5,18 @@ import { Button, Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowBigLeft, ArrowRight, BookOpenText, Brain, ChevronDown, Cone, Logs, PenSquare, WorkflowIcon } from 'lucide-react'
+import {
+  ArrowBigLeft,
+  ArrowRight,
+  BookOpenText,
+  Brain,
+  ChevronDown,
+  Cone,
+  Logs,
+  PenSquare,
+  ShieldPlus,
+  WorkflowIcon,
+} from 'lucide-react'
 import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
@@ -46,16 +57,16 @@ const productDropdownItems = [
     key: 'Alerts',
     url: '/alerts-management',
     icon: '/img/index_features/concierge-bell_feature.svg',
-    description: "Multiple thresholds and dynamic routing at scale",
+    description: 'Multiple thresholds and dynamic routing at scale',
     name: 'Alerts',
     order: 5,
   },
   {
-    key: 'trace-funnels',
-    url: '/trace-funnels/',
-    icon: <Cone className="text-signoz_robin-400" size={20} />,
-    description: 'Track drop-offs in multi-step flows',
-    name: 'Trace Funnels',
+    key: 'external-apis',
+    url: '/external-apis/',
+    icon: <WorkflowIcon className="text-signoz_robin-400" size={20} />,
+    description: 'Track third-party API performance',
+    name: 'External API Monitoring',
     order: 9,
   },
   {
@@ -75,11 +86,11 @@ const productDropdownItems = [
     order: 6,
   },
   {
-    key: 'external-apis',
-    url: '/external-apis/',
-    icon: <WorkflowIcon className="text-signoz_robin-400" size={20} />,
-    description: 'Track third-party API performance',
-    name: 'External API Monitoring',
+    key: 'messaging-queues',
+    url: '/docs/messaging-queues/overview/',
+    icon: <Logs className="text-signoz_robin-400" size={20} />,
+    description: 'Monitor Kafka, Celery lag & throughput',
+    name: 'Messaging Queues',
     order: 10,
   },
   {
@@ -99,11 +110,11 @@ const productDropdownItems = [
     order: 7,
   },
   {
-    key: 'messaging-queues',
-    url: '/docs/messaging-queues/overview/',
-    icon: <Logs className="text-signoz_robin-400" size={20} />,
-    description: 'Monitor Kafka, Celery lag & throughput',
-    name: 'Messaging Queues',
+    key: 'llm-observability',
+    url: '/llm-observability/',
+    icon: <Brain className="text-signoz_robin-400" size={20} />,
+    description: 'Monitor AI and LLM workflows',
+    name: 'LLM Observability',
     order: 11,
   },
   {
@@ -115,19 +126,19 @@ const productDropdownItems = [
     order: 4,
   },
   {
-    key: 'ingest',
-    url: '/blog/introducing-ingest-guard-feature/',
-    icon: '/img/index_features/shield-plus.svg',
-    description: 'Control your observability costs',
-    name: 'Ingest Guard',
+    key: 'trace-funnels',
+    url: '/trace-funnels/',
+    icon: <Cone className="text-signoz_sakura-400" size={20} />,
+    description: 'Track drop-offs in multi-step flows',
+    name: 'Trace Funnels',
     order: 8,
   },
   {
-    key: 'llm-observability',
-    url: '/docs/llm-observability/',
-    icon: <Brain className="text-signoz_robin-400" size={20} />,
-    description: 'Monitor AI and LLM workflows',
-    name: 'LLM Observability',
+    key: 'observability-for-ai-native-companies',
+    url: '/observability-for-ai-native-companies/',
+    icon: <ShieldPlus className="text-signoz_robin-400" size={20} />,
+    description: 'Full-stack monitoring for AI applications',
+    name: 'AI Observability',
     order: 12,
   },
 ]
@@ -381,7 +392,7 @@ export default function TopNav() {
                               <TrackingLink
                                 href={item.url || ''}
                                 disabled={item.url === undefined}
-                                className={`group flex h-auto items-center gap-4 ${item.url === undefined ? 'opacity-80 cursor-not-allowed' : ''}`}
+                                className={`group flex h-auto items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
                                 key={item.key}
                                 clickType="Nav Click"
                                 clickName={`${item.name} Product Link`}
@@ -389,14 +400,16 @@ export default function TopNav() {
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
                               >
-                                {
-                                  typeof item.icon === 'string' && item.icon !== null ? <Image
+                                {typeof item.icon === 'string' && item.icon !== null ? (
+                                  <Image
                                     src={item.icon}
                                     alt={`${item.name}`}
                                     width={20}
                                     height={20}
-                                  /> : <div className="h-5 w-5">{item.icon}</div>
-                                }
+                                  />
+                                ) : (
+                                  <div className="h-5 w-5">{item.icon}</div>
+                                )}
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
                                     <span>{item.name}</span>{' '}

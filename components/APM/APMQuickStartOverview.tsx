@@ -29,19 +29,19 @@ const instrumentationData: IconCardData[] = [
   },
   {
     name: 'Java',
-    href: '/docs/instrumentation/java',
+    href: '/docs/instrumentation/java/overview',
     icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
     clickName: 'Java Instrumentation Link',
   },
   {
     name: 'JavaScript',
-    href: '/docs/instrumentation/javascript',
+    href: '/docs/instrumentation/javascript/overview',
     icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
     clickName: 'JavaScript Instrumentation Link',
   },
   {
     name: 'Golang (Go)',
-    href: '/docs/instrumentation/golang',
+    href: '/docs/instrumentation/opentelemetry-golang',
     icon: <SiGo className="h-7 w-7 text-cyan-500" />,
     clickName: 'Golang Instrumentation Link',
   },
@@ -53,7 +53,7 @@ const instrumentationData: IconCardData[] = [
   },
   {
     name: '.NET',
-    href: '/docs/instrumentation/dotnet',
+    href: '/docs/instrumentation/opentelemetry-dotnet',
     icon: <SiDotnet className="h-7 w-7 text-blue-600" />,
     clickName: '.NET Instrumentation Link',
   },

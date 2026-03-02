@@ -17,7 +17,7 @@ const TagsWithTooltips: React.FC<TagsWithTooltipsProps> = ({ tags, className = '
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      {tags.map((tag) => {
+      {tags?.map((tag) => {
         const tooltipContent = tagDefinitions[tag as keyof typeof tagDefinitions]
         
         return tooltipContent ? (

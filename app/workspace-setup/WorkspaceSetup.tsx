@@ -1,16 +1,75 @@
-import { ArrowRight, XCircleIcon } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { CheckCircleIcon, HouseIcon, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import React, { useEffect } from 'react'
+import { useLogEvent } from '../../hooks/useLogEvent'
 import './workspace-setup.styles.css'
 
-interface WorkspaceSetupProps {
-  isWorkspaceSetupDelayed: boolean;
-  verificationError: string | null;
-  isEmailVerified: boolean;
-}
+function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
+  const logEvent = useLogEvent()
+  const pathname = usePathname()
 
-function WorkspaceSetup({ isWorkspaceSetupDelayed, verificationError, isEmailVerified }: WorkspaceSetupProps) {
+  useEffect(() => {
+    logEvent({
+      eventName: 'Workspace Setup Loading View',
+      eventType: 'track',
+      attributes: {
+        isDelayed: isWorkspaceSetupDelayed,
+      },
+    })
+  }, [logEvent, isWorkspaceSetupDelayed])
+
+  const handleContactSupport = (location) => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: location === 'button' ? 'Button Click' : 'Link Click',
+        clickName: 'Contact Support',
+        clickLocation: 'Workspace Setup Loading',
+        clickText: 'Contact cloud support',
+        pageLocation: pathname,
+        isDelayed: isWorkspaceSetupDelayed,
+        email: email || '',
+        workspaceData: workspaceData,
+      },
+    })
+  }
+
+  const handleSlackClick = () => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Link Click',
+        clickName: 'Slack Community',
+        clickLocation: 'Workspace Setup Loading',
+        clickText: 'Slack Community',
+        pageLocation: pathname,
+        isDelayed: isWorkspaceSetupDelayed,
+        email: email || '',
+        workspaceData: workspaceData,
+      },
+    })
+  }
+
+  const handleReadDocs = () => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Button Click',
+        clickName: 'Read Docs',
+        clickLocation: 'Workspace Setup Loading',
+        clickText: 'Read the docs',
+        pageLocation: pathname,
+        email: email || '',
+        workspaceData: workspaceData,
+      },
+    })
+  }
+
   return (
     <div className="welcome-container mx-auto flex max-w-[640px] flex-col items-center py-32">
       <HouseIcon size={56} className="text-signoz_robin-500" />
@@ -18,38 +77,36 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, verificationError, isEmailVer
       <div className="mt-[28px] bg-neutral-950 text-2xl"> Setting up your workspace </div>
 
       <div className="text-md mt-[28px] w-full rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
-        {verificationError ? (
-          <div className="flex items-center gap-4 text-sm text-signoz_cherry-500">
-            <XCircleIcon size={24} /> {verificationError}
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center gap-4 text-sm">
-              <CheckCircleIcon size={24} /> Email verified! Looking good.
-            </div>
+        <div className="flex items-center gap-4 text-sm">
+          <CheckCircleIcon size={24} /> Email verified! Looking good.
+        </div>
 
-            {isEmailVerified && (
-              <div
-                className={`mt-[28px] flex items-center gap-4 text-sm ${
-                  isWorkspaceSetupDelayed ? 'text-signoz_amber-500' : ''
-                }`}
-              >
-                <Loader2 size={24} className="animate-spin" /> Preparing your cloud workspace, This may
-                take a few minutes ...
-              </div>
-            )}
-          </>
-        )}
+        <div
+          className={`mt-[28px] flex items-center gap-4 text-sm ${
+            isWorkspaceSetupDelayed ? 'text-signoz_amber-500' : ''
+          }`}
+        >
+          <Loader2 size={24} className="animate-spin" /> Preparing your cloud workspace, This may
+          take a few minutes ...
+        </div>
       </div>
 
       {isWorkspaceSetupDelayed && (
         <div className="text-md workspace-setup-delay-message-container mt-[28px] w-full rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px] text-sm">
           Looks like it's taking a bit longer. Need help? Reach out on{' '}
-          <a href="https://signoz.io/slack'" className="text-signoz_robin-500">
+          <a
+            href="https://signoz.io/slack'"
+            className="text-signoz_robin-500"
+            onClick={handleSlackClick}
+          >
             Slack Community
           </a>{' '}
           or email us at{' '}
-          <a href="mailto:cloud-support@signoz.io" className="text-signoz_robin-500">
+          <a
+            href="mailto:cloud-support@signoz.io"
+            className="text-signoz_robin-500"
+            onClick={() => handleContactSupport('delayed message')}
+          >
             cloud-support@signoz.io
           </a>
           .
@@ -61,12 +118,13 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, verificationError, isEmailVer
           type="submit"
           className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
           href="mailto:cloud-support@signoz.io"
+          onClick={() => handleContactSupport('button')}
         >
           <span className="flex text-xs leading-5">Contact cloud support</span>
           <ArrowRight size={14} />
         </a>
 
-        <Link href="/docs" className="w-full">
+        <Link href="/docs" className="w-full" onClick={handleReadDocs}>
           <button className="flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
             <span className="flex text-xs leading-5">Read the docs </span>
             <ArrowRight size={14} />

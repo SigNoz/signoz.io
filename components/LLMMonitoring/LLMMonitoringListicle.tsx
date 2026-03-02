@@ -9,6 +9,8 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiTemporal,
+  SiOllama,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -20,6 +22,14 @@ interface IconCardData {
 
 const LLMMonitoringData: IconCardData[] = [
   {
+    name: 'Agno',
+    href: '/docs/agno-monitoring',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Agno Monitoring',
+  },
+  {
     name: 'Amazon Bedrock',
     href: '/docs/amazon-bedrock-monitoring',
     icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
@@ -30,6 +40,18 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/anthropic-monitoring',
     icon: <SiAnthropic className="h-7 w-7 text-orange-500" />,
     clickName: 'Anthropic API Monitoring',
+  },
+  {
+    name: 'AutoGen',
+    href: '/docs/autogen-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/autogen-logo.webp"
+        alt="AutoGen Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'AutoGen Monitoring',
   },
   {
     name: 'Azure OpenAI API',
@@ -48,6 +70,12 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/claude-code-monitoring',
     icon: <SiClaude className="h-7 w-7 text-orange-500" />,
     clickName: 'Claude Code Monitoring',
+  },
+  {
+    name: 'Codex (OpenAI)',
+    href: '/docs/codex-monitoring',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex (OpenAI) Monitoring',
   },
   {
     name: 'Crew AI',
@@ -70,10 +98,58 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'DeepSeek Monitoring',
   },
   {
+    name: 'Google ADK',
+    href: '/docs/google-adk-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+        alt="Google ADK Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Google ADK Monitoring',
+  },
+  {
     name: 'Google Gemini',
     href: '/docs/google-gemini-monitoring',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
     clickName: 'Google Gemini Monitoring',
+  },
+  {
+    name: 'Grok',
+    href: '/docs/grok-monitoring',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Grok Monitoring',
+  },
+  {
+    name: 'Groq',
+    href: '/docs/groq-observability',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Groq Monitoring',
+  },
+  {
+    name: 'Haystack',
+    href: '/docs/haystack-monitoring',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Monitoring',
+  },
+  {
+    name: 'Inkeep',
+    href: '/docs/inkeep-monitoring',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Inkeep Monitoring',
   },
   {
     name: 'LangChain/LangGraph',
@@ -82,12 +158,32 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'LangChain Monitoring',
   },
   {
+    name: 'Langtrace',
+    href: '/docs/langtrace',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/langtrace-logo.webp"
+        alt="Langtrace Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Langtrace',
+  },
+  {
     name: 'LiteLLM',
     href: '/docs/litellm-observability',
     icon: (
       <img src="/img/docs/llm/litellm/litellm-logo.webp" alt="LiteLLM Icon" className="h-7 w-7" />
     ),
     clickName: 'LiteLLM Monitoring',
+  },
+  {
+    name: 'LiveKit',
+    href: '/docs/livekit-observability',
+    icon: (
+      <img src="/img/docs/llm/livekit/livekit-icon.svg" alt="LiveKit Icon" className="h-7 w-7" />
+    ),
+    clickName: 'LiveKit Monitoring',
   },
   {
     name: 'LlamaIndex',
@@ -108,16 +204,88 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Mastra Monitoring',
   },
   {
+    name: 'Ollama',
+    href: '/docs/ollama-monitoring',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Monitoring',
+  },
+  {
     name: 'OpenAI',
     href: '/docs/openai-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-green-400" />,
     clickName: 'OpenAI Monitoring',
   },
   {
+    name: 'OpenLIT',
+    href: '/docs/openlit',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openlit-logo.webp"
+        alt="OpenLIT Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenLIT',
+  },
+  {
+    name: 'OpenRouter',
+    href: '/docs/openrouter-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Monitoring',
+  },
+  {
+    name: 'Pipecat',
+    href: '/docs/pipecat-monitoring',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
+        alt="Pipecat Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Pipecat Monitoring',
+  },
+  {
     name: 'Pydantic AI',
     href: '/docs/pydantic-ai-observability',
     icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
     clickName: 'Pydantic AI Monitoring',
+  },
+  {
+    name: 'Semantic Kernel',
+    href: '/docs/semantic-kernel-observability',
+    icon: (
+      <img
+        src="/img/docs/llm/semantic-kernel/sk-logo.webp"
+        alt="Semantic Kernel Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Semantic Kernel Monitoring',
+  },
+  {
+    name: 'Temporal',
+    href: '/docs/temporal-observability',
+    icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
+    clickName: 'Temporal Monitoring',
+  },
+  {
+    name: 'Traceloop (OpenLLMetry)',
+    href: '/docs/traceloop',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/traceloop-logo.webp"
+        alt="Traceloop Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Traceloop (OpenLLMetry)',
   },
   {
     name: 'Vercel AI SDK',

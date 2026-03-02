@@ -1,8 +1,9 @@
 ---
-date: 2025-07-18
-tags : [SigNoz Cloud, Self-Host]
+date: 2026-02-04
+
 title: K8s Infra - Configure
 id: k8s-infra-otel-config
+description: Configure the k8s-infra OpenTelemetry collection agent to send Kubernetes metrics, logs, and traces to SigNoz.
 ---
 
 This guide explains how to configure the OpenTelemetry Collectors deployed by the SigNoz [K8s-Infra Helm chart](https://github.com/signoz/charts/tree/main/charts/k8s-infra/README.md). You'll learn how to set up telemetry data collection and enable the collection of metrics, logs, and traces from your Kubernetes cluster.
@@ -65,8 +66,6 @@ env:
 <Admonition>
   - Replace `APPLICATION_NAME` with your application name that you wish to see in SigNoz.
   - In cases of some SDKs, you would need to include `http://` or `https://` prefix for `OTEL_EXPORTER_OTLP_ENDPOINT`
-  - You can also include `deployment.environment` as an attribute in `OTEL_RESOURCE_ATTRIBUTES` environment variable.
-    This attribute will take precedence over `global.deploymentEnvironment` configuration of `k8s-infra` chart.
 </Admonition>
 
 ### Disable Logs Collection
@@ -290,6 +289,63 @@ presets:
 - Monitor specific namespaces by listing them
 - Useful for compliance and security monitoring
 
+### 8. Prometheus Metrics Scraping
+
+Prometheus preset allows to scrapes metrics from pods that have the appropriate annotations. This enables collecting metrics from applications that expose Prometheus endpoints without manual configuration.
+
+```yaml
+presets:
+  prometheus:
+    enabled: true
+    annotationsPrefix: signoz.io    # Prefix for pod annotations
+    scrapeInterval: 60s              # How often to scrape metrics
+    namespaceScoped: false           # Limit to same namespace only
+    namespaces: []                   # Specific namespaces to scrape
+    includePodLabel: false           # Include pod labels (may increase cardinality)
+    includeContainerName: false      # Include container name in metrics
+    scrapeConfigs: []                # Custom scrape configurations
+```
+
+#### Custom Scrape Configurations
+
+For more advanced use cases, you can define custom scrape configurations using the `scrapeConfigs` field. This allows you to specify Prometheus-compatible scrape configs directly:
+
+```yaml
+presets:
+  prometheus:
+    enabled: true
+    scrapeConfigs:
+      # Scrape metrics from a specific service
+      - job_name: 'my-custom-service'
+        static_configs:
+          - targets: ['my-service.default.svc.cluster.local:9090']
+            labels:
+              environment: 'production'
+```
+
+## Configurations
+
+The `k8s-infra` chart exposes the full OpenTelemetry Collector configuration via Helm values, so you can adapt the running agents to your needs. The following are common options you may want to adjust.
+
+### Batch Processor
+
+The [batch processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md) batches spans, metrics, and logs before export. That reduces connections and improves compression. It supports both size-based and time-based batching.
+
+Configure the batch processor by overriding [otelAgent.config.processors.batch](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L953) and [otelDeployment.config.processors.batch](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L1325) in your Helm values. Example override:
+
+```diff
+otelAgent:
+  config:
+    processors:
+      # otelAgent.config.processors.batch -- Batch processor config.
+      batch:
+-        send_batch_size: 10000
++        send_batch_size: 15000
++        send_batch_max_size: 20000 # settings can be provided as key value pairs
+```
+<Admonition type="info">
+Any setting supported by the OpenTelemetry batch processor can be set under `processors.batch` in the chart values.
+</Admonition>
 ## Common Deployment Scenarios
 
 ### Production Cluster with Full Monitoring
@@ -340,19 +396,20 @@ presets:
 ```
 
 ### Development Environment
+
+Telemetry data can be tagged with a "deployment environment" attribute (such as development, staging, or production) by setting it globally or explicitly in your application's OTEL_RESOURCE_ATTRIBUTES.
+
 ```yaml
-presets:
-  otlpExporter:
-    enabled: true
-  hostMetrics:
-    enabled: true
-    collectionInterval: 30s
-  logsCollection:
-    enabled: true
-  kubeletMetrics:
-    enabled: true
-  kubernetesAttributes:
-    enabled: true
+global:
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+```
+
+You can specify the environment by including `deployment.environment` in the `OTEL_RESOURCE_ATTRIBUTES` environment variable of your application manifest. This will take precedence over the `global.deploymentEnvironment` setting in the `k8s-infra` chart—or, if not set, the global value will be used.
+
+```yaml
+env:
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
 ```
 
 ## Exposing Ports for Custom Receivers
@@ -442,3 +499,9 @@ Recommended resource allocations based on preset combinations:
 | Full | 500m | 1Gi | 1000m | 2Gi |
 
 Adjust these values based on your cluster size and monitoring requirements.
+
+## Next Steps
+
+- [K8s-Infra Overview](/docs/collection-agents/k8s/k8s-infra/overview)
+- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

@@ -1,0 +1,58 @@
+---
+date: 2026-01-21
+title: Monitor Render with SigNoz
+id: render-metrics
+tags: [SigNoz Cloud]
+doc_type: howto
+description: Stream Render service metrics to SigNoz using Render Metrics Streams and OpenTelemetry.
+---
+
+This document explains how to send metrics from Render workspace using Metrics Streams.
+
+<Admonition type="info">
+Render Metrics Streams require a **Professional plan** for Render.
+</Admonition>
+
+## Prerequisites
+
+- Render workspace with **Professional** plan or higher
+- SigNoz Cloud account 
+- A running Render service (web service or background worker). Static sites are not supported.
+
+## Step 1: Get SigNoz Cloud Ingestion Details
+
+1. In SigNoz, go to **Settings → Ingestion**
+2. Copy your **Ingestion Endpoint** and **Ingestion Key**
+
+## Step 2: Create a Metrics Stream Destination in Render
+
+1. In Render Dashboard, open **Integrations → Observability**
+2. Under **Metrics Stream**, click **Add destination**
+3. Choose provider: **SigNoz**
+4. Enter:
+   - **Endpoint**: Your SigNoz ingestion endpoint
+   - **Ingestion Key**: Your SigNoz ingestion key
+5. Save
+
+Render will begin streaming metrics for all supported services in your workspace.
+
+## Step 3: Verify Metrics in SigNoz
+
+1. Go to **Metrics Explorer** in SigNoz
+2. Search for metrics starting with `render.service.`
+
+Common metrics you should see:
+- `render.service.http.requests.total`
+- `render.service.http.requests.latency`
+- `render.service.cpu.time`
+- `render.service.memory.rss`
+- `render.service.memory.usage`
+
+<Admonition type="tip">
+If you don't see metrics, widen the time range and generate some traffic to your Render service.
+</Admonition>
+
+## Notes
+
+- Metrics streams include service metrics for your workspace; static sites are excluded.
+- Some HTTP request metric features are gated behind Professional workspaces.

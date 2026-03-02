@@ -48,15 +48,17 @@ export const WhyOpenTelemetry = () => {
               <br className="hidden lg:inline" />
               Kubernetes being more active.
             </p>
-            <TrackingLink 
-              href="/why-opentelemetry"
+            <TrackingLink
+              href="/opentelemetry/#why-developers-choose-opentelemetry"
               clickType="Secondary CTA"
-              clickName="Why OpenTelemetry Link"
-              clickText="Learn why OpenTelemetry is the future"
+              clickName="Why Developers choose OpenTelemetry Link"
+              clickText="Learn why Developers choose OpenTelemetry"
               clickLocation="Why OpenTelemetry Section"
-              className="h-10 px-4 py-2 mt-3 mb-3 rounded-full text-[10px] sm:text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]"
+              className="mb-3 mt-3 flex h-10 items-center justify-center gap-1.5 rounded-full border border-signoz_slate-200 bg-signoz_slate-400 px-4 py-2 text-[10px] font-medium leading-5 text-white shadow-[0_0_20px_0_rgba(242,71,105,0.20)] sm:text-sm"
             >
-              <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5"/>Learn why OpenTelemetry is the future<ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              Learn why Developers choose OpenTelemetry
+              <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </TrackingLink>
           </div>
         </div>
@@ -84,8 +86,9 @@ export const WhyOpenTelemetry = () => {
                 </p>
 
                 <p className="my-3 max-w-[100vw] text-base font-normal leading-9 text-signoz_vanilla-400 sm:w-[42rem] md:max-w-[50vw]">
-                  SigNoz offers the best in class support for OpenTelemetry{"'"}s semantic conventions
-                  with the best visualizations ⎯ powered by our powerful ingestion engine.
+                  SigNoz offers the best in class support for OpenTelemetry{"'"}s semantic
+                  conventions with the best visualizations ⎯ powered by our powerful ingestion
+                  engine.
                 </p>
                 <ul className="ul-no-padding mt-8 md:mt-0 ">
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
@@ -104,7 +107,9 @@ export const WhyOpenTelemetry = () => {
                   </li>
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
                     <ArrowRightSolid />
-                    <span>Messaging queue monitoring based on OTel{"'"}s trace & metric{"'"}s data</span>
+                    <span>
+                      Messaging queue monitoring based on OTel{"'"}s trace & metric{"'"}s data
+                    </span>
                   </li>
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
                     <ArrowRightSolid />

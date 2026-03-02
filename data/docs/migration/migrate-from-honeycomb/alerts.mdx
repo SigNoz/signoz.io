@@ -1,0 +1,62 @@
+---
+date: 2025-11-30
+id: migrate-alerts-from-honeycomb
+title: Migrate Alerts from Honeycomb to SigNoz
+description: Learn how to migrate Honeycomb triggers and SLOs to SigNoz alert rules.
+
+doc_type: howto
+---
+
+This guide helps you migrate Honeycomb triggers and SLOs to SigNoz alert rules.
+
+## Prerequisites
+
+- SigNoz account (Cloud or Self-Hosted) with permissions to create alert channels and rules
+- List of Honeycomb triggers/SLOs you plan to recreate
+
+## Alert Differences
+
+| Feature            | Honeycomb                 | SigNoz                            |
+| ------------------ | ------------------------- | --------------------------------- |
+| **Query Language** | Proprietary syntax        | Query Builder, PromQL, ClickHouse SQL            |
+| **Alert Engine**   | Honeycomb native          | Prometheus Alertmanager           |
+| **SLO Management** | Built-in SLOs             | Custom PromQL-based rules         |
+| **Configuration**   | UI only                   | UI, Terraform, API                |
+| **Alert Types**    | Triggers, SLO burn alerts | Metrics, logs, traces, exceptions |
+## Notification Channels
+
+Set up channels in **Settings** > **Alert Channel**.
+
+| Channel              | Honeycomb   | SigNoz |
+| -------------------- | ----------- | ------ |
+| Email                | ✓           | ✓          |
+| Slack                | ✓           | ✓          |
+| Microsoft Teams      | ✓           | ✓          |
+| PagerDuty            | ✓           | ✓          |
+| Webhook              | ✓           | ✓          |
+| OpsGenie             | Via Webhook | ✓          |
+| Incident.io          | Via Webhook | Via Webhook|
+| Rootly               | Via Webhook | Via Webhook|
+| Zenduty              | Via Webhook | Via Webhook|
+
+See [Alert Notification Channels](https://signoz.io/docs/alerts-management/notification-channel/).
+
+## Translating Queries
+
+Translate Honeycomb queries to PromQL for metrics-based alerts.
+
+| Honeycomb Query            | SigNoz Equivalent                                  |
+| -------------------------- | -------------------------------------------------- |
+| `COUNT`                    | `sum(rate(metric[5m]))` or `count()` in ClickHouse |
+| `COUNT WHERE condition`    | `sum(rate(metric{condition}[5m]))`                 |
+| `AVG(field)`               | `avg(metric)` or `avg(column)`                     |
+| `P95(field)`, `P99(field)` | `histogram_quantile(0.95, ...)`                    |
+
+## Infrastructure as Code (Terraform)
+
+Use the [SigNoz Terraform Provider](https://signoz.io/docs/alerts-management/terraform-provider-signoz/) to manage alerts.
+
+## Next Steps
+
+- [Monitor Alert Performance](/docs/userguide/alerts-management/)
+- [Configure Maintenance Windows](https://signoz.io/docs/alerts-management/planned-maintenance/)

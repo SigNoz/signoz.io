@@ -1,7 +1,7 @@
 ---
 date: 2024-06-06
 title: Metric Types and Aggregation
-tags : [SigNoz Cloud, Self-Host]
+
 id: types-and-aggregation
 ---
 
@@ -18,6 +18,13 @@ SigNoz supports the following types of metrics:
 - **Histogram**: A histogram is a metric that represents the distribution of a set of values. Histograms are used to track the distribution of values over time. For example, the response time of a web service.
 
 - **Exponential Histogram**: An exponential histogram is a metric that represents the distribution of a set of values on a logarithmic scale. Exponential histograms are used to track the distribution of values that span several orders of magnitude. For example, the latency of a network request.
+
+<Admonition type="info">
+Exponential histograms are supported only in self-hosted SigNoz (not SigNoz Cloud). To enable them in your OTel Collector configuration:
+1. Set `enable_exp_hist: true` in both the `clickhousemetricswrite` and `signozclickhousemetrics` exporters in your collector config.
+2. Ensure your metrics use delta temporality. Although OpenTelemetry supports both delta and cumulative temporality for exponential histograms, SigNoz currently only supports delta, so cumulative temporality metrics will not work.
+For background, see <a href="https://github.com/SigNoz/signoz-otel-collector/issues/625#issuecomment-2994987941" target="_blank" rel="noopener noreferrer nofollow">the collector issue notes</a>.
+</Admonition>
 
 ### Temporality of Metrics
 
