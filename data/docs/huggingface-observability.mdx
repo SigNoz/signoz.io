@@ -8,7 +8,7 @@ doc_type: howto
 
 ## Overview
 
-This guide walks you through setting up observability and monitoring for Hugging Face using [OpenTelemetry](https://opentelemetry.io/) and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe and track various metrics for your Hugging Face applications and llm usage.
+This guide walks you through setting up observability and monitoring for Hugging Face using [OpenTelemetry](https://opentelemetry.io/) and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe and track various metrics for your Hugging Face applications and LLM usage.
 
 Monitoring Hugging Face in your AI applications with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
 
@@ -137,49 +137,15 @@ pip install \
   opentelemetry-instrumentation-openai-v2
 ```
 
-### Step 2: Import the necessary modules in your Python application
-
-**Traces:**
+### Step 2: Set up Traces
 
 ```python
-from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
 from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
-```
-
-**Metrics:**
-
-```python
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry import metrics
-from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
-from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-```
-
-**Logs**
-```python
-import logging
-from opentelemetry.sdk.resources import Resource
-from opentelemetry._logs import set_logger_provider
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
-```
-
-### Step 3: Set up Traces
-
-```python
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry import trace
-from openinference.instrumentation.openai_v2 import OpenAIInstrumentor
 import os
 
 
@@ -207,7 +173,7 @@ OpenAIInstrumentor().instrument()
 </Admonition>
 
 
-### Step 4: Set up Metrics
+### Step 3: Set up Metrics
 
 ```python
 from opentelemetry.sdk.resources import Resource
@@ -218,7 +184,7 @@ from opentelemetry import metrics
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
 import os
 
-resource = Resource.create({"service.name": "<service-name>"})
+resource = Resource.create({"service.name": "<service_name>"})
 metric_exporter = OTLPMetricExporter(
     endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
     headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
@@ -248,7 +214,7 @@ HTTPXClientInstrumentor().instrument()
    SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your Hugging Face application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
 </Admonition>
 
-### Step 5: Set up Logs
+### Step 4: Set up Logs
 
 ```python
 import logging
@@ -292,7 +258,7 @@ httpx_logger.addHandler(handler)
   <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
 </Admonition>
 
-### Step 6: Run an example Hugging Face application
+### Step 5: Run an example Hugging Face application
 
 <Admonition type="important">
    Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
