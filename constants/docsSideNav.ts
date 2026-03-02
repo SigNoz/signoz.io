@@ -2001,6 +2001,21 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+            label: 'Go Runtime',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/grok-dashboard',
+            label: 'Grok',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
+            label: 'Groq',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
             label: 'HAProxy',
           },
@@ -2026,21 +2041,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
             label: 'Hugging Face',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
-            label: 'Go Runtime',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/grok-dashboard',
-            label: 'Grok',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
-            label: 'Groq',
           },
           {
             type: 'doc',
