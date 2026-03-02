@@ -11,6 +11,7 @@ import {
   SiPydantic,
   SiTemporal,
   SiOllama,
+  SiHuggingface,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -142,6 +143,12 @@ const LLMMonitoringData: IconCardData[] = [
       />
     ),
     clickName: 'Haystack Monitoring',
+  },
+  {
+    name: 'Hugging Face',
+    href: '/docs/huggingface-observability',
+    icon: <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />,
+    clickName: 'Hugging Face Monitoring',
   },
   {
     name: 'Inkeep',

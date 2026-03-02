@@ -2623,6 +2623,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/huggingface-observability',
+        label: 'Hugging Face',
+        type: 'doc',
+      },
+      {
         route: '/docs/inkeep-monitoring',
         label: 'Inkeep',
         type: 'doc',
