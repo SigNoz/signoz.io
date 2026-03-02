@@ -7,7 +7,7 @@ title: No Data Alerts for Groups in SigNoz
 
 ## Overview
 
-This document describes how to use alerting feature to detect when specific groups of resources/entities stop sending data. While the basic "No Data" option notifies you when there's no data at all, this advanced feature allows you to monitor individual groups (like specific hosts, services, or regions) and get alerted when any particular group stops reporting metrics.
+This document describes how to use the alerting feature to detect when specific groups of resources/entities stop sending data. While the basic "No Data" option notifies you when there's no data at all, this advanced feature allows you to monitor individual groups (like specific hosts, services, or regions) and get alerted when any particular group stops reporting metrics.
 
 ## Understanding Group-Based No Data Alerts
 
@@ -43,15 +43,16 @@ Let's walk through setting up an alert that notifies you when a specific host st
 
 ### Step 2: Add Time-Shift Conditions
 
-Click on the F(x) option next to Query name and add Time shift function. Enter the value in seconds. Example 600s for last 10 minutes.
+Click on the F(x) option next to Query name and add Time shift function from the function list. Enter the duration in seconds (for example, `600` for 10 minutes). This tells Query A to look at data from 10 minutes ago.
 
-### Step 3: Create a new Query
+### Step 3: Create a New Query
 
-Create a exactly same query but without timeshift
+Create **Query B** with the exact same metric (`system.cpu.utilization`), aggregation (`Count`), and group-by (`host.name`) as Query A, but **without** a time-shift function. Query B represents the current data.
 
 ### Step 4: Create the Formula
 
-Use the expression `B/A`
+Create a formula with the expression `B/A`.
+This divides current data (Query B) by historical data (Query A). When a group stops sending data, its current count drops to zero while the historical count is still non-zero, making the result `0/non-zero = 0`. This zero value is what triggers the alert.
 
 ### Step 5: Configure Alert Conditions
 
