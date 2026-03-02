@@ -200,6 +200,12 @@ export default function MetricsQuickStartOverview({
             icon: <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
             clickName: 'Envoy Metrics Link',
           },
+          {
+            name: 'Render',
+            href: '/docs/metrics-management/render-metrics',
+            icon: <FaCloud className="h-7 w-7 text-purple-500" />,
+            clickName: 'Render Metrics Link',
+          },
         ]}
         sectionName="Infrastructure Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"

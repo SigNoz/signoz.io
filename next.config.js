@@ -1324,6 +1324,16 @@ module.exports = () => {
           destination: '/docs/logs-management/send-logs/collection-methods/',
           permanent: true,
         },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {

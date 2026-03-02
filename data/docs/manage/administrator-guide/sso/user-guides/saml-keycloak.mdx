@@ -1,9 +1,10 @@
 ---
-date: 2025-12-01
+date: 2026-02-22
 id: saml-keycloak
 
 title: Setting Up SSO SAML 2.0 With Keycloak
-description: Setting Up Single Sign-On (SSO) SAML 2.0 With Keycloak.
+description: Setting Up Single Sign-On (SSO) SAML 2.0 With Keycloak, including attribute mapping and role mapping.
+doc_type: tutorial
 ---
 
 <Admonition type="info">
@@ -29,60 +30,99 @@ Before you begin, ensure you have:
 ## Keycloak Configuration Steps
 
 ### Step 1: Create SigNoz Realm in Keycloak Admin Console
-![Admin login page](/img/docs/saml-keycloak/create-realm.webp)
-### Step 2: Configure a new SAML client
-- Navigate to Clients → Create Client
-- Select SAML as the client type
-- Set Client ID to your SigNoz domain (e.g., `signoz.example.com`)
-![Admin login page](/img/docs/saml-keycloak/create-client.webp)
+1. Login to Keycloak Admin Console
+2. Create a new realm (or use an existing one) for your SigNoz integration
+
+![](/img/docs/saml-keycloak/create-realm.webp)
+
+### Step 2: Configure a new SAML Client
+1. Navigate to **Clients** → **Create client**
+2. Under **Client type**, select **SAML**
+3. Set **Client ID** to your SigNoz domain (e.g., `signoz.example.com`)
+4. Click **Next**
+
+![Create SAML Client](/img/docs/saml-keycloak/create-client.webp)
 
 ### Step 3: Configure Client Settings
-- Set the `Home URL` as `<your-instance-url>/api/v1/complete/saml`
-- Set the `Valid redirect URIs` as `<your-instance-url>/*`
-![Admin login page](/img/docs/saml-keycloak/client-access-settings.webp)
-- Navigate to the `Advanced` tab
-- Set the `Assertion Consumer Service POST Binding URL` as `<your-instance-url>/api/v1/complete/saml`
-![Admin login page](/img/docs/saml-keycloak/client-settings-advanced-idp-acs.webp)
 
-### Step 4: Set up SAML Mappers
-- Go to Client Scopes → `signoz.example.com-dedicated`
-- Add these predefined mappers:
-   - role list
-   - X500 email
-   - X500 givenName
-   ![Admin login page](/img/docs/saml-keycloak/add-predefined-mappers.webp)
+**Login Settings** (on the second wizard page, or under **Settings** tab after creation):
 
-### Step 5: Configure SAML capabilities
-- Set Name ID format to "email"
-![Admin login page](/img/docs/saml-keycloak/saml-capabilities-email-id.webp)
-- Disable Client Signature Required
-![Admin login page](/img/docs/saml-keycloak/client-signature-required.webp)
+1. Set **Home URL** to `<your-instance-url>/api/v1/complete/saml`
+2. Set **Valid redirect URIs** to `<your-instance-url>/*`
+3. Click **Save**
+
+![KeyCloak Client Settings](/img/docs/saml-keycloak/client-access-settings.webp)
+
+**Fine Grain SAML Endpoint Configuration** (under the **Advanced** tab):
+
+1. Open the **Advanced** tab of your client
+2. Scroll to **Fine Grain SAML Endpoint Configuration**
+3. Set **Assertion Consumer Service POST Binding URL** to `<your-instance-url>/api/v1/complete/saml`
+4. Click **Save**
+
+![KeyCloak SAML Endpoint Configuration](/img/docs/saml-keycloak/client-settings-advanced-idp-acs.webp)
+
+### Step 4: Set Up SAML Mappers
+1. Go to the **Client scopes** tab of your SAML client
+2. Click on `<your-client-id>-dedicated` (e.g., `signoz.example.com-dedicated`)
+3. Click **Add predefined mapper** and select:
+   - **role list**
+   - **X500 email**
+   - **X500 givenName**
+4. Click **Add**
+
+![Add Predefined Mappers](/img/docs/saml-keycloak/add-predefined-mappers.webp)
+
+### Step 5: Configure SAML Capabilities
+
+**Name ID format** (under the **Settings** tab):
+
+1. Scroll to the **SAML capabilities** section
+2. Set **Name ID format** to **email**
+
+![Name ID format to Email](/img/docs/saml-keycloak/saml-capabilities-email-id.webp)
+
+**Disable Client Signature Required** (under the **Keys** tab):
+
+1. Open the **Keys** tab of your client
+2. Turn **Client Signature Required** to **OFF**
+3. Click **Save**
+
+![Disable Client Signature Required](/img/docs/saml-keycloak/client-signature-required.webp)
 
 ## SigNoz Configuration Steps
 
 ### Gather SAML Information
-- Access Realm Settings → SAML 2.0 Identity Provider Metadata
-- Note down:
-   - SAML ACS URL (ends with `/protocol/saml`)
-   - Entity ID
-   - X.509 certificate
-   ![Admin login page](/img/docs/saml-keycloak/realm-settings-saml.webp)
+
+1. In Keycloak, go to **Realm settings** → **General** tab
+2. Scroll to the **Endpoints** section and click **SAML 2.0 Identity Provider Metadata**
+3. From the XML metadata, note down:
+   - **Entity ID** — the `entityID` attribute of the root element
+   - **SSO URL** — the `Location` attribute of the `SingleSignOnService` element with POST binding (ends with `/protocol/saml`)
+   - **X.509 Certificate** — the certificate inside the `X509Certificate` element
+
+![KeyCloak SAML 2.0 IdP Metadata Link](/img/docs/saml-keycloak/realm-settings-saml.webp)
 
 ### Configure SigNoz
-- Go to Settings → Organization Settings → Authenticated Domains
-- Click on `Add Domain` button and select `SAML Authentication`
-- Add your email domain (e.g., `your-domain.com`)
-- Configure SAML settings with collected information
-- Enable "Enforce SSO" toggle
-![Admin login page](/img/docs/saml-keycloak/add-domain.webp)
+1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Click on **Add Domain** button and select **SAML Authentication**
+3. Add your email domain (e.g., `your-domain.com`)
+4. Configure SAML settings with collected information
+5. Enable **Enforce SSO** toggle
+
+![Admin login page - SAML Configuration](/img/docs/saml-keycloak/add-domain.webp)
 
 ### Configure IdP-initiated Login
-- Go to SigNoz Settings → Organization Settings → Authenticated Domains
-- Copy the `IDP Initiated SSO URL` of your domain
-- Go to Keycloak Admin → Open Client settings
-- Set the `IDP-Initiated SSO URL name` as some unique idenfier like `signoz-idp`
-- Set the `IDP Initiated SSO Relay State`as the URL copied in previous steps from SigNoz's `Authenticated Domains` page
-![Admin login page](/img/docs/saml-keycloak/idp-settings.webp)
+
+1. In SigNoz, go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Copy the **IDP Initiated SSO URL** shown for your domain
+3. In Keycloak, open your SAML client → **Settings** tab
+4. Scroll to the **Login settings** section
+5. Set **IDP-Initiated SSO URL name** to a unique identifier (e.g., `signoz-idp`)
+6. Set **IDP Initiated SSO Relay State** to the URL copied from SigNoz in step 2
+7. Click **Save**
+
+![KeyCloak IdP Initiated Login Setting](/img/docs/saml-keycloak/idp-settings.webp)
 
 ### Verify the setup
 
@@ -97,3 +137,193 @@ Before you begin, ensure you have:
 1. Navigate to `<your-keycloak-domain>/realms/master/protocol/saml/clients/<your-unique-sso-url-name>` (like `signoz-idp` above)
 2. Enter Keycloak credentials when prompted
 3. Verify successful authentication
+
+## Configure Attribute Mapping (Optional)
+
+Attribute mapping tells SigNoz which SAML assertion attributes contain the user's email, display name, groups, and role. The defaults work if your Keycloak mappers use standard attribute names, but you can customize them when your mappers use different names.
+
+### Attribute Mapping Fields
+
+Configure these in SigNoz under **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains** → edit your domain → **Attribute Mapping** section:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| **Email** | `email` | SAML attribute name containing the user's email address |
+| **Name** | `name` | SAML attribute name containing the user's display name |
+| **Groups** | `groups` | SAML attribute name containing the user's group memberships |
+| **Role** | `role` | SAML attribute name containing the user's role |
+
+Each value must match the **SAML Attribute Name** (or **Friendly Name**) configured in the corresponding Keycloak mapper. The predefined mappers added in [Step 4](#step-4-set-up-saml-mappers) already cover email and name — the sections below explain how to add mappers for groups and role.
+
+### Add a Group Mapper in Keycloak
+
+To include group memberships in the SAML assertion:
+
+1. In Keycloak, go to **Clients** → select your SigNoz client → **Client scopes** tab
+2. Click on `<your-client-id>-dedicated` (e.g., `signoz.example.com-dedicated`)
+3. Go to the **Mappers** tab and click **Add mapper** → **By configuration**
+4. Select **Group list**
+5. Fill in the fields:
+   - **Name**: `groups`
+   - **Group attribute name**: `groups`
+   - **SAML Attribute NameFormat**: `Basic`
+   - **Single Group Attribute**: **ON**
+   - **Full group path**: **OFF**
+6. Click **Save**
+
+![KeyCloak Client Scopes Group Mapper](/img/docs/saml-keycloak/client-scopes-group-mapper.webp)
+
+<Admonition type="note">
+The **Group attribute name** you set here (e.g., `groups`) must match the **Groups** attribute mapping field in SigNoz. If you use a different name like `member_of`, update the SigNoz attribute mapping accordingly.
+</Admonition>
+
+### Add a Role Attribute Mapper in Keycloak (Optional)
+
+If you want to assign SigNoz roles directly via a Keycloak user attribute (instead of group-based mapping), you need to:
+
+1. Register the custom attribute in the user profile
+2. Create a SAML mapper for it
+3. Set the attribute value on each user
+
+#### Register the Custom Attribute
+
+1. In Keycloak, go to **Realm settings** → **User profile** tab
+2. Click **Create attribute**
+3. Fill in:
+   - **Attribute name**: `signoz_role`
+   - **Display name**: `SigNoz Role`
+   - Under **Permissions**, enable **Can user view?** and **Can admin edit?**
+4. Click **Create**
+
+![Keycloak User Attribute Settings](/img/docs/saml-keycloak/signoz-role-user-attribute.webp)
+
+#### Create the SAML Mapper
+
+1. Go to **Clients** → select your SigNoz client → **Client scopes** tab
+2. Click on `<your-client-id>-dedicated`
+3. Go to the **Mappers** tab and click **Add mapper** → **By configuration**
+4. Select **User Attribute**
+5. Fill in the fields:
+   - **Name**: `signoz_role`
+   - **User Attribute**: `signoz_role`
+   - **SAML Attribute Name**: `signoz_role`
+   - **SAML Attribute NameFormat**: `Basic`
+6. Click **Save**
+
+![KeyCloak Client Scopes Role Attribute Mapper](/img/docs/saml-keycloak/client-scopes-signoz-role-attribute-mapper.webp)
+
+#### Set the Attribute on Users
+
+1. Go to **Users** → select a user → **Attributes** tab
+2. Set the key `signoz_role` with a value of `ADMIN`, `EDITOR`, or `VIEWER`
+3. Click **Save**
+
+![KeyCloak Set User SigNoz Role](/img/docs/saml-keycloak/keycloak-set-user-signoz-role.webp)
+
+### Configure Attribute Mapping in SigNoz
+
+1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Click on your SAML domain to edit it
+3. In the **Attribute Mapping** section, set the fields to match your Keycloak mappers:
+   - **Name**: `givenName` (matches the X500 givenName predefined mapper's friendly name)
+   - **Groups**: `groups` (matches the group mapper created above)
+   - **Role**: `signoz_role` (matches the role attribute mapper created above)
+4. Click **Save**
+
+![SigNoz Domains Attribute Mapping Advanced](/img/docs/saml-keycloak/domains-attribute-mapping-advanced.webp)
+
+<Admonition type="note">
+You only need to configure attributes that differ from the defaults. If you did not set up a group or role mapper, leave those fields at their defaults.
+</Admonition>
+
+## Configure Role Mapping (Optional)
+
+Role mapping automatically assigns SigNoz roles (VIEWER, EDITOR, ADMIN) to users when they log in via SAML, based on their Keycloak groups or a custom role attribute.
+
+### Role Resolution Priority
+
+When a user logs in, SigNoz determines their role using this priority (highest to lowest):
+
+1. **Use Role Attribute** — if enabled and the SAML assertion contains a role attribute, that value is used directly
+2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (ADMIN > EDITOR > VIEWER)
+3. **Default Role** — fallback role from configuration
+4. **VIEWER** — ultimate default if nothing else is configured
+
+### Option A: Group-Based Role Mapping
+
+Map Keycloak groups to SigNoz roles. Users are assigned the highest-privilege role from their group memberships.
+
+#### Create Groups in Keycloak
+
+1. In Keycloak, go to **Groups** in the left sidebar
+2. Click **Create group**
+3. Enter a group name (e.g., `signoz-admins`) and click **Create**
+4. Repeat for other groups (e.g., `signoz-editors`, `signoz-viewers`)
+
+![KeyCloak Create Group](/img/docs/saml-keycloak/keycloak-create-group.webp)
+
+#### Assign Users to Groups
+
+1. Go to **Users** → select a user → **Groups** tab
+2. Click **Join Group**
+3. Select the group (e.g., `signoz-admins`) and click **Join**
+
+![KeyCloak User Join Group](/img/docs/saml-keycloak/keycloak-user-join-group.webp)
+
+#### Configure in SigNoz
+
+1. Ensure you have [added a group mapper](#add-a-group-mapper-in-keycloak) and [configured attribute mapping](#configure-attribute-mapping-in-signoz) for groups
+2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+3. Click on your SAML domain to edit it
+4. In the **Role Mapping** section:
+   - Set **Default Role** to `VIEWER`
+   - Under **Group Mappings**, add entries mapping each Keycloak group name to a SigNoz role:
+
+     | Keycloak Group | SigNoz Role |
+     |----------------|-------------|
+     | `signoz-admins` | `ADMIN` |
+     | `signoz-editors` | `EDITOR` |
+     | `signoz-viewers` | `VIEWER` |
+
+   - Leave **Use Role Attribute** turned **OFF**
+5. Click **Save**
+
+![SigNoz Role Group Mappings](/img/docs/saml-keycloak/signoz-role-group-mappings.webp)
+
+### Option B: Direct Role Attribute Mapping
+
+Assign SigNoz roles directly via a custom user attribute in Keycloak, without using groups.
+
+#### Set Up Keycloak
+
+1. [Register the `signoz_role` custom attribute](#register-the-custom-attribute) in the user profile
+2. [Create the SAML mapper](#create-the-saml-mapper) for the attribute
+3. [Set the `signoz_role` attribute](#set-the-attribute-on-users) on each user to `ADMIN`, `EDITOR`, or `VIEWER`
+
+#### Configure in SigNoz
+
+1. Ensure you have [configured attribute mapping](#configure-attribute-mapping-in-signoz) with **Role** set to `signoz_role`
+2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+3. Click on your SAML domain to edit it
+4. In the **Role Mapping** section:
+   - Set **Default Role** to `VIEWER` (used as fallback)
+   - Turn **Use Role Attribute** to **ON**
+5. Click **Save**
+
+![SigNoz Direct Role Mapping](/img/docs/saml-keycloak/signoz-direct-role-mapping.webp)
+
+<Admonition type="info">
+The role value in the SAML assertion is matched case-insensitively — `admin`, `Admin`, and `ADMIN` all resolve to the ADMIN role. If the value doesn't match any valid role, SigNoz falls back to group mappings (if configured) and then the default role.
+</Admonition>
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- **"Authentication failed" error**: Verify that the **Assertion Consumer Service POST Binding URL** in Keycloak exactly matches `<your-instance-url>/api/v1/complete/saml`
+- **Stuck in a login loop**: Ensure **Enforce SSO** is enabled in SigNoz **and** the user's email domain matches the configured authenticated domain
+- **User created with wrong role**: Check the [role resolution priority](#role-resolution-priority) — if **Use Role Attribute** is ON, it takes precedence over group mappings. Verify the SAML attribute name in the Keycloak mapper matches the **Role** field in SigNoz attribute mapping
+- **Groups not appearing in SAML assertion**: Ensure the [group mapper](#add-a-group-mapper-in-keycloak) is added to the `<client-id>-dedicated` scope (not a shared scope), **Single Group Attribute** is ON, and the user is assigned to groups in Keycloak
+- **Custom attribute not included in assertion**: Make sure the attribute is [registered in the user profile](#register-the-custom-attribute) and the [SAML mapper](#create-the-saml-mapper) is saved in the dedicated client scope
+- **IdP-initiated login fails**: Confirm that **IDP-Initiated SSO URL name** is set in Keycloak and the **IDP Initiated SSO Relay State** matches the URL from SigNoz's Authenticated Domains page
+- **Locked out?**: If you're unable to login because of faulty SSO setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`

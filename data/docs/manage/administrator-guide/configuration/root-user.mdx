@@ -1,5 +1,5 @@
 ---
-date: 2026-02-23
+date: 2026-02-26
 id: root-user
 title: Root User Configuration
 description: Learn how to configure a pre-set root (admin) user in SigNoz so an admin account is provisioned at deploy time.
@@ -29,6 +29,7 @@ Set the root user via **environment variables**:
 | `SIGNOZ_USER_ROOT_EMAIL` | Email address of the root user. |
 | `SIGNOZ_USER_ROOT_PASSWORD` | Password for the root user. Use a strong password. |
 | `SIGNOZ_USER_ROOT_ORG_NAME` | Name of the organization for the root user (e.g. `default`). |
+| `SIGNOZ_USER_ROOT_ORG_ID` | *(Optional)* Predetermined UUID (v7) for the organization. When set, SigNoz looks up the org by this ID instead of by name. Useful when other components (e.g. a sharder) need to know the org ID at startup. |
 
 Example:
 
@@ -37,10 +38,13 @@ SIGNOZ_USER_ROOT_ENABLED=true
 SIGNOZ_USER_ROOT_EMAIL=admin@example.com
 SIGNOZ_USER_ROOT_PASSWORD=<secure-password>
 SIGNOZ_USER_ROOT_ORG_NAME=default
+SIGNOZ_USER_ROOT_ORG_ID=<org-uuid> # (UUID7)
 ```
 <KeyPointCallout title="How the root user works" defaultCollapsed={false}>
 - The root user cannot be deleted, edited, or have its password changed from the SigNoz UI. To change credentials, update the environment variables and restart (where supported by your deployment).
 - Root user provisioning runs at startup only; changing env vars requires a restart to take effect.
+- When `SIGNOZ_USER_ROOT_ORG_ID` is set, SigNoz looks up the organization by ID. When it is not set, it looks up by name (default behavior).
+- If `SIGNOZ_USER_ROOT_ORG_ID` is set but an organization with the configured name already exists under a different ID, SigNoz will log an actionable error instead of creating a duplicate.
 </KeyPointCallout>
 
 ## Fresh installs
@@ -94,6 +98,10 @@ After deployment or restart:
 ### Root user cannot log in or is in the wrong organization
 
 - Ensure the organization name in the database matches `SIGNOZ_USER_ROOT_ORG_NAME`. Re-run the `UPDATE organizations` query from [Existing installs](#existing-installs) with the same `<org-name>` as in your env vars, then restart SigNoz.
+
+### Error: organization already exists with a different ID
+
+- This happens when `SIGNOZ_USER_ROOT_ORG_ID` is set but an organization with the configured `SIGNOZ_USER_ROOT_ORG_NAME` already exists under a different ID. Either remove `SIGNOZ_USER_ROOT_ORG_ID` to use name-based lookup, or set it to the ID of the existing organization.
 
 </details>
 
