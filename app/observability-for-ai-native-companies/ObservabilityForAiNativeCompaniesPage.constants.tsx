@@ -32,6 +32,7 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
         </div>
       </>
     ),
+    className: 'md:min-h-96 md:justify-center',
   },
   {
     title: 'Trace Funnels',

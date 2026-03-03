@@ -104,6 +104,16 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/feed.xml',
+          destination: '/rss',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
           source: '/docs/',
           destination: '/docs/introduction',
           permanent: true,
@@ -1312,6 +1322,16 @@ module.exports = () => {
         {
           source: '/docs/logs-management/send-logs/log-export-methods/',
           destination: '/docs/logs-management/send-logs/collection-methods/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
           permanent: true,
         },
       ]
