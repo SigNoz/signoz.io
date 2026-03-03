@@ -1,5 +1,5 @@
 ---
-date: 2026-01-18
+date: 2026-01-27
 id: java-springboot
 
 title: Java / Spring Boot OpenTelemetry Instrumentation
@@ -9,7 +9,7 @@ doc_type: howto
 
 This guide walks you through instrumenting your Java or Spring Boot application with OpenTelemetry and sending traces to SigNoz. The Java agent handles most popular libraries and frameworks automatically—Spring, JDBC, HTTP clients, message queues, and more.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -23,7 +23,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
 
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
 - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
 - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -48,14 +48,14 @@ export OTEL_METRICS_EXPORTER="none"
 export OTEL_LOGS_EXPORTER="none"
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
 </KeyPointCallout>
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) .
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
@@ -83,7 +83,7 @@ java -javaagent:./opentelemetry-javaagent.jar \
 <Tabs entityName="k8s-method">
 <TabItem value="direct" label="Direct" default>
 
-<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed="true">
 For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
 </KeyPointCallout>
 
@@ -118,14 +118,14 @@ env:
   value: 'none'
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
 </KeyPointCallout>
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) .
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
@@ -162,7 +162,7 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
@@ -201,13 +201,14 @@ $env:OTEL_METRICS_EXPORTER = "none"
 $env:OTEL_LOGS_EXPORTER = "none"
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
 </KeyPointCallout>
 
-Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) .
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3. Run your application
 
@@ -249,13 +250,15 @@ ENV OTEL_LOGS_EXPORTER="none"
 ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
 ```
 
-<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
 
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
 </KeyPointCallout>
 
-Replace `<my-app>.jar`, `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+Replace `<my-app>.jar` and `<service-name>` with your values.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 2. Build and run
 
@@ -395,7 +398,7 @@ See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetr
 ## Next steps
 
 - [Add manual instrumentation](https://signoz.io/docs/instrumentation/java/manual-instrumentation) for custom spans and business context
-- [Collect Java application logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java) with OpenTelemetry
+- Send [metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-java/) and [logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/) from your Java application for complete observability
 - [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your Java application
 
 **Sample applications**:

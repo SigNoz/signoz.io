@@ -23,6 +23,7 @@ export const getPageType = (pathname: string): string => {
     '/trace-funnels',
     '/external-apis',
     '/llm-observability',
+    '/observability-for-ai-native-companies',
   ]
   if (featurePages.includes(normalizedPath)) return 'Feature Page'
 

@@ -1,19 +1,12 @@
-'use client'
-
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Comparison, Authors } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
-import PageFeedback from '@/components/PageFeedback/PageFeedback'
-
-// Extend the Comparison type to include CTA fields
-interface ComparisonContent extends Comparison {
-  cta_title?: string
-  cta_text?: string
-}
+import { RegionProvider } from '@/components/Region/RegionContext'
+import type { Comparison } from '../types/transformedContent'
 
 interface LayoutProps {
-  content: CoreContent<ComparisonContent>
+  content: CoreContent<Comparison>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode
@@ -28,17 +21,18 @@ export default function ComparisonsLayout({
   toc,
 }: LayoutProps) {
   return (
-    <ArticleLayout
-      content={content}
-      authorDetails={authorDetails}
-      authors={authors}
-      toc={toc}
-      contentType="comparison"
-      showNewsletter={true}
-      showRelatedArticles={true}
-    >
-      {children}
-      <PageFeedback />
-    </ArticleLayout>
+    <RegionProvider>
+      <ArticleLayout
+        content={content}
+        authorDetails={authorDetails}
+        authors={authors}
+        toc={toc}
+        contentType="comparison"
+        showNewsletter={true}
+        showRelatedArticles={true}
+      >
+        {children}
+      </ArticleLayout>
+    </RegionProvider>
   )
 }

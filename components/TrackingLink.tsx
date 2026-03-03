@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import Link from '@/components/Link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 import { useLogEvent } from 'hooks/useLogEvent'

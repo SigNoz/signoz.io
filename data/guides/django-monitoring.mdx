@@ -1,0 +1,874 @@
+---
+title: Django Monitoring with Prometheus and Why it’s Not Enough?
+slug: django-monitoring
+date: 2026-02-23
+tags: [python, monitoring]
+authors: [saurabh_patil]
+description: Set up Django monitoring with Prometheus. Step-by-step guide covering metrics, visualization, alerting, and why OpenTelemetry is a better long-term choice.
+keywords: [django monitoring, django prometheus, django metrics, django performance monitoring, django opentelemetry, django observability]
+---
+
+Django monitoring involves tracking the performance of the web server, database queries, and background tasks to maintain system health. Achieving effective monitoring requires instrumenting the application to collect metrics, traces, and logs, which together provide deep visibility into the Django request-response cycle and its third-party integrations.
+
+This guide walks through setting up Django monitoring using Prometheus, from installing django-prometheus to querying metrics in the Prometheus UI and configuring alerts with Alertmanager. It also covers where the Prometheus-only approach falls short and when OpenTelemetry is a better fit.
+
+## Key Metrics to Track in a Django Application
+
+The `django-prometheus` library exposes several metric families once configured. Here are some important metrics, grouped by category, along with the Prometheus metric names you can query.
+
+### Request Metrics
+
+These are the most immediately useful metrics. They tell you how much traffic your app is handling and how quickly it responds.
+
+| Metric Name| What It Tells You |
+| --- | --- |
+| `django_http_requests_total_by_method_total` | Total request count, labeled by HTTP method (GET, POST, etc.) |
+| `django_http_requests_total_by_transport_total` | Request count by transport (HTTP/HTTPS) |
+| `django_http_requests_latency_seconds_by_view_method_bucket` | Request latency distribution per view and method. Use with `histogram_quantile()` to get p50, p90, p99. |
+| `django_http_responses_total_by_status_total` | Response count by HTTP status code. Use to calculate error rates. |
+| `django_http_requests_body_total_bytes_bucket` | Request body sizes. Useful for spotting unexpectedly large payloads. |
+
+A p99 latency above 500ms on API endpoints usually points to a problem worth investigating. An error rate (5xx responses / total responses) above 1% sustained for more than a few minutes warrants immediate attention.
+
+### Database Metrics
+
+These metrics track how many SQL queries your app runs, how long each takes, and whether connections/errors are piling up.
+
+| Metric Name | What It Tells You |
+| --- | --- |
+| `django_db_execute_total` | Total number of SQL queries executed. A sudden increase often means an N+1 query problem. |
+| `django_db_execute_many_total` | Bulk query execution count. |
+| `django_db_errors_total` | Database errors. Any sustained increase here needs investigation. |
+| `django_db_new_connections_total` | New database connections created. If this grows faster than expected, your connection pooling may not be working. |
+| `django_db_query_duration_seconds_bucket` | Query latency distribution. |
+
+If your Django views are generating more than 15-20 queries per request (visible as a steep `django_db_execute_total` rate relative to your request rate), that is a strong indicator of N+1 problems.
+
+### Cache Metrics
+
+These metrics track cache reads, hits, and misses, so you can calculate your hit ratio and identify inefficient caching.
+
+| Metric Name | What It Tells You |
+| --- | --- |
+| `django_cache_get_total` | Total cache read attempts. |
+| `django_cache_get_hits_total` | Successful cache reads. |
+| `django_cache_get_misses_total` | Cache reads that missed. |
+
+The cache hit ratio (`hits / (hits + misses)`) should stay above 80% for most applications. A sustained ratio below 70% usually means your caching strategy needs adjustment, either the TTLs are too short, the cache is being invalidated too aggressively, or you are caching the wrong things.
+
+### Model Operation Metrics
+
+These metrics count insert/update/delete operations per model so you can catch unexpected write spikes.
+
+| Metric Name | What It Tells You |
+| --- | --- |
+| `django_model_inserts_total{model="<n>"}` | Row insertions per model. |
+| `django_model_updates_total{model="<n>"}` | Row updates per model. |
+| `django_model_deletes_total{model="<n>"}` | Row deletions per model. |
+
+These are useful for spotting unexpected write patterns. A sudden spike in `django_model_deletes_total` for your `book` model, for example, would be worth investigating immediately.
+
+### Migration Metrics
+
+These metrics report how many migrations are applied vs unapplied per database, so you can alert if production has pending migrations.
+
+| Metric Name | What It Tells You |
+| --- | --- |
+| `django_migrations_applied_by_connection` | Number of applied migrations per database. |
+| `django_migrations_unapplied_by_connection` | Number of unapplied migrations per database. Alert if this is greater than 0 in production. |
+
+## Prerequisites
+
+- **Python** - <a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank">Python 3.9+ (examples use 3.12)</a> or higher and `pip` installed.
+- **Prometheus** - A monitoring and alerting toolkit that collects and stores metrics as time series data. Download and install Prometheus from the <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">official website</a>.
+
+## Setting Up a Sample Django Project
+
+If you already have a Django project running, skip ahead to the [Instrumenting Your Django Application](#instrumenting-your-django-application) section. Otherwise, follow the steps below to create a fresh project that we will use throughout this guide.
+
+### Step 1: Create a virtual environment and activate
+
+```bash
+python3.12 -m venv venv
+source venv/bin/activate
+```
+
+### Step 2: Install Django
+
+```bash
+pip install Django
+```
+
+### Step 3: Create the Project and App
+
+Run the following two commands. The first creates a new Django project named `myproject`. The second creates an app named `catalog` inside it. An "app" in Django is a module that handles a specific piece of functionality (in our case, a book catalog).
+
+```bash
+django-admin startproject myproject
+cd myproject
+python manage.py startapp catalog
+```
+
+### Step 4: Review the Project Structure
+
+After running the commands above, your folder structure should look like this.
+
+```text
+myproject/                  # root project folder
+├── manage.py               # Django CLI entry point
+├── myproject/              # project configuration folder
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py         # all project settings
+│   ├── urls.py             # URL routing for the project
+│   └── wsgi.py
+└── catalog/                # the app we just created
+    ├── __init__.py
+    ├── admin.py
+    ├── apps.py
+    ├── migrations/
+    ├── models.py
+    ├── tests.py
+    └── views.py            # request handlers
+```
+
+Two files matter most for this guide: `myproject/settings.py` (where we will add Prometheus configuration) and `catalog/views.py` (where we will write the endpoints that generate metrics).
+
+### Step 5: Register the App
+
+Django needs to know about the `catalog` app. Open `myproject/settings.py` and find the `INSTALLED_APPS` list. Add `"catalog"` at the end.
+
+```python {10}
+# myproject/settings.py
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "catalog",  # add this line
+]
+```
+
+### Step 6: Create a Model
+
+Open `catalog/models.py` and replace its contents with the following. This creates a simple `Book` model with a title, author, price, and availability flag.
+
+```python
+# catalog/models.py
+
+from django.db import models
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_available = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+```
+
+### Step 7: Create Views
+
+Open `catalog/views.py` and replace its contents with the following. These views give you real endpoints that generate database `reads`, `writes`, `404s`, and `500s`, so you have actual metrics to observe once Prometheus is connected.
+
+```python
+# catalog/views.py
+
+from django.http import JsonResponse
+from .models import Book
+
+def book_list(request):
+    """Returns all books. Generates DB read metrics."""
+    books = list(Book.objects.values("id", "title", "author", "price", "is_available"))
+    return JsonResponse({"books": books})
+
+def book_detail(request, book_id):
+    """Looks up a single book. Generates per-view latency metrics."""
+    try:
+        book = Book.objects.get(pk=book_id)
+        return JsonResponse({
+            "id": book.pk,
+            "title": book.title,
+            "author": book.author,
+            "price": str(book.price),
+            "is_available": book.is_available,
+        })
+    except Book.DoesNotExist:
+        return JsonResponse({"error": "Book not found"}, status=404)
+
+def add_book(request):
+    """Creates a new book. Generates DB write metrics."""
+    book = Book.objects.create(
+        title="New Book",
+        author="Unknown Author",
+        price=19.99,
+        is_available=True,
+    )
+    return JsonResponse({"id": book.pk, "title": book.title})
+
+def error_view(request):
+    """Always returns a 500. Useful for testing error rate alerts."""
+    return JsonResponse({"error": "Something went wrong"}, status=500)
+```
+
+### Step 8: Add URL Routes
+
+The views exist, but Django does not know which URLs should trigger them. Create a new file at `catalog/urls.py` with the following content.
+
+```python
+# catalog/urls.py
+
+from django.urls import path
+from catalog import views
+
+urlpatterns = [
+    path("books/", views.book_list, name="book-list"),
+    path("books/<int:book_id>/", views.book_detail, name="book-detail"),
+    path("books/add/", views.add_book, name="add-book"),
+    path("error/", views.error_view, name="error-view"),
+]
+```
+
+Then open `myproject/urls.py` and include the catalog URLs.
+
+```python {8}
+# myproject/urls.py
+
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("catalog.urls")),
+]
+```
+
+### Step 9: Run Migrations and Seed Data
+
+Run migrations to create the database tables, then seed some test books so the views have data to return.
+
+```bash
+python manage.py makemigrations catalog
+python manage.py migrate
+
+python manage.py shell -c "
+from catalog.models import Book
+Book.objects.bulk_create([
+    Book(title='The Pragmatic Programmer', author='Hunt & Thomas', price=49.99),
+    Book(title='Designing Data-Intensive Applications', author='Kleppmann', price=44.99),
+    Book(title='Clean Code', author='Robert C. Martin', price=39.99),
+])
+print(f'Created {Book.objects.count()} books')
+"
+```
+
+### Step 10: Verify the App
+
+Start the development server and hit the endpoints to confirm everything works.
+
+```bash
+python manage.py runserver
+```
+
+In another terminal:
+
+```bash
+curl http://localhost:8000/books/
+curl http://localhost:8000/books/1/
+curl http://localhost:8000/books/add/
+curl http://localhost:8000/error/
+```
+
+You should see JSON responses from each endpoint. With the app running, you can now add Prometheus instrumentation.
+
+## Instrumenting Your Django Application
+
+### Step 1: Install django-prometheus
+
+```bash
+pip install django-prometheus
+```
+
+This installs `prometheus_client` as a dependency.
+
+### Step 2: Configure Django Settings
+
+Add `django_prometheus` to your installed apps and wrap your middleware stack with the Prometheus middleware pair. Open `myproject/settings.py` and update both `INSTALLED_APPS` and `MIDDLEWARE`.
+
+```python {10, 15, 23}
+# myproject/settings.py
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_prometheus",  # add this
+    "catalog",
+]
+
+MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",  # must be first
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",  # must be last
+]
+```
+
+The `PrometheusBeforeMiddleware` starts a timer when a request comes in. The `PrometheusAfterMiddleware` stops it when the response leaves. Placing them at the outermost positions of the middleware stack gives you the most accurate measurement of total request processing time.
+
+### Step 3: Add the Metrics URL Endpoint
+
+Expose the `/metrics` endpoint so that Prometheus can scrape it. Open `myproject/urls.py` and add the `django_prometheus.urls` include.
+
+```python {8}
+# myproject/urls.py
+
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("django_prometheus.urls")),  # exposes /metrics
+    path("", include("catalog.urls")),
+]
+```
+
+Restart your Django server, hit a few of the app endpoints first (`/books/`, `/books/add/`) so there is data to show, then visit `http://localhost:8000/metrics`. You should see Prometheus-formatted output, including lines like:
+
+```bash
+django_http_requests_total_by_method_total{method="GET"} 5.0
+django_http_requests_latency_seconds_by_view_method_bucket{le="0.1",method="GET",view="catalog.views.book_list"} 3.0
+django_http_responses_total_by_status_total{status="200"} 4.0
+```
+
+### Step 4: To Monitor Database Operations (Optional)
+
+Replace the default Django database backend with the `django-prometheus` wrapper to automatically track query counts and latencies. Open `myproject/settings.py` and update the `DATABASES` setting.
+
+For SQLite (development):
+
+```python
+# myproject/settings.py
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django_prometheus.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+```
+
+For PostgreSQL:
+
+```python
+# myproject/settings.py
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django_prometheus.db.backends.postgresql",
+        "NAME": "mydb",
+        "USER": "myuser",
+        "PASSWORD": "mypassword",
+        "HOST": "localhost",
+        "PORT": "5432",
+    }
+}
+```
+
+For MySQL:
+
+```python
+# myproject/settings.py
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django_prometheus.db.backends.mysql",
+        "NAME": "mydb",
+        "USER": "myuser",
+        "PASSWORD": "mypassword",
+        "HOST": "localhost",
+        "PORT": "3306",
+    }
+}
+```
+
+This exposes metrics like `django_db_new_connections_total` and `django_db_execute_total` with no changes to your application code.
+
+### Step 5: Monitor Cache Operations (Optional)
+
+If your app uses caching, replace cache backends with their `django-prometheus` equivalents. Open `myproject/settings.py` and update the `CACHES` setting.
+
+For Redis cache:
+
+```python
+# myproject/settings.py
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_prometheus.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}
+```
+
+For Memcached:
+
+```python
+# myproject/settings.py
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_prometheus.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": "127.0.0.1:11211",
+    }
+}
+```
+
+For file-based cache (development):
+
+```python
+# myproject/settings.py
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_prometheus.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/var/tmp/django_cache",
+    }
+}
+```
+
+This adds metrics like `django_cache_get_total`, `django_cache_get_hits_total`, and `django_cache_get_misses_total`.
+
+### Step 6: Track Model Changes
+
+Add the `ExportModelOperationsMixin` to the `Book` model you created earlier. Open `catalog/models.py` and update it.
+
+```python
+# catalog/models.py
+
+from django.db import models
+from django_prometheus.models import ExportModelOperationsMixin
+
+class Book(ExportModelOperationsMixin("book"), models.Model):
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_available = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+```
+
+The only change is adding `ExportModelOperationsMixin("book")` as the first parent class. The string you pass becomes the `model` label in the exported metrics. No new migrations are needed since the mixin does not add database columns.
+
+This exports counters like `django_model_inserts_total{model="book"}`, `django_model_updates_total{model="book"}`, and `django_model_deletes_total{model="book"}`.
+
+### Step 7: Customize Latency Buckets (Optional)
+
+The default histogram buckets may not match your application's latency profile. You can override them in `myproject/settings.py`
+
+```python
+# myproject/settings.py
+
+PROMETHEUS_LATENCY_BUCKETS = (
+    0.01, 0.025, 0.05, 0.075, 0.1, 0.15, 0.2, 0.3, 0.5, 0.75,
+    1.0, 2.0, 5.0, 10.0, float("inf"),
+)
+```
+
+More buckets give you finer resolution at the cost of slightly higher memory usage per metric.
+
+## Setting Up Prometheus
+
+With Django exposing metrics at `/metrics`, you need Prometheus to collect and store them.
+
+### Step 1: Create the Prometheus Configuration
+
+Create a directory for the Prometheus config and alert rules.
+
+```bash
+mkdir -p prometheus
+```
+
+Create the configuration file at `prometheus/prometheus.yml`. This tells Prometheus to scrape your Django app every 15 seconds.
+
+```yaml
+# prometheus/prometheus.yml
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["localhost:9093"]
+
+scrape_configs:
+  - job_name: "django"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["localhost:8000"]
+        labels:
+          environment: "development"
+          service: "django-app"
+```
+
+### Step 2: Download and Start Prometheus
+
+Download the latest Prometheus release for your platform from the <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">official downloads page</a>. Extract the archive and run it with your config file. Make sure to have the correct path for Prometheus, and its config file while running, if possible keep them in the same folder.
+
+```bash
+# Start Prometheus
+./prometheus --config.file=prometheus.yml --web.enable-lifecycle
+```
+
+Prometheus will log `Server is ready to receive web requests` when it starts successfully.
+
+### Step 3: Verify the Scrape Target
+
+Open `http://localhost:9090/targets` in your browser. You should see the `django` job listed with a state of **UP**. If it shows **DOWN**, check that your Django server is running on port 8000.
+
+<Figure src="/img/guides/2026/02/django-monitoring-prometheus-ui.webp" alt="Prometheus UI displaying the Django scrape target at metrics endpoint with status UP and recent scrape time." caption="Prometheus target health page showing the Django metrics endpoint up and successfully scraped" />
+
+## Visualizing Django Metrics in the Prometheus UI
+
+Prometheus ships with a built-in expression browser at `http://localhost:9090/graph`. While it is not a full dashboarding tool, it allows you to query and inspect your Django metrics directly.
+
+### Useful PromQL Queries
+
+Paste these into the Prometheus expression browser to start exploring your Django metrics. Click the **Graph** tab after running any query to see a time-series chart. You can adjust the time range with the controls above the chart.
+
+- Request rate (requests per second):
+
+    ```text
+    rate(django_http_requests_total_by_method_total[5m])
+    ```
+
+    <Figure src="/img/guides/2026/02/django-monitoring-prometheus-graph.webp" alt="Prometheus UI displaying a time-series graph for rate(django_http_requests_total_by_method_total[5m]) with a steadily increasing line." caption="Prometheus graph showing the rate of Django HTTP GET requests over time using a `rate()` query" />
+
+- p50 request latency by view:
+
+    ```text
+    histogram_quantile(
+      0.5,
+      rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])
+    )
+    ```
+
+    <Figure src="/img/guides/2026/02/django-monitoring-prometheus-graph-p50.webp" alt="Prometheus UI displaying a time-series graph for histogram_quantile(0.5, rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])) with a flat latency line." caption="Prometheus graph showing the p50 (median) Django request latency calculated from histogram buckets" />
+
+- p99 request latency by view:
+
+    ```text
+    histogram_quantile(
+      0.99,
+      rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])
+    )
+    ```
+
+    <Figure src="/img/guides/2026/02/django-monitoring-prometheus-graph-p99.webp" alt="Prometheus UI displaying a time-series graph for histogram_quantile(0.99, rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])) with a flat latency line." caption="Prometheus graph showing the p99 Django request latency calculated from histogram buckets" />
+
+- Error rate (4xx and 5xx responses as a fraction of total):
+
+    ```text
+    sum(rate(django_http_responses_total_by_status_total{status=~"[45].."}[5m]))
+    /
+    sum(rate(django_http_responses_total_by_status_total[5m]))
+    ```
+
+    <Figure src="/img/guides/2026/02/django-monitoring-prometheus-graph-error.webp" alt="Prometheus graph showing the Django error rate calculated from 4xx and 5xx responses" caption="Prometheus graph showing the Django error rate calculated from 4xx and 5xx responses" />
+
+- Database connection count:
+
+    ```text
+    django_db_new_connections_total
+    ```
+
+    <Figure src="/img/guides/2026/02/django-monitoring-prometheus-timeseries.webp" alt="Prometheus UI displaying a time-series graph for django_db_new_connections_total with step increases indicating new database connections." caption="Prometheus graph showing the total number of new Django database connections over time" />
+
+## Setting Up Alerts with Alertmanager
+
+Prometheus evaluates alert rules locally and fires alerts to Alertmanager, which handles deduplication, grouping, and routing to notification channels like Slack, PagerDuty, or email.
+
+### Step 1: Create Alert Rules
+
+Create the alert rules file at `prometheus/alert_rules.yml`.
+
+```yaml
+# prometheus/alert_rules.yml
+
+groups:
+  - name: django_alerts
+    rules:
+      - alert: DjangoHighErrorRate
+        expr: |
+          sum(rate(django_http_responses_total_by_status_total{status=~"5.."}[5m]))
+          /
+          sum(rate(django_http_responses_total_by_status_total[5m]))
+          > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Django 5xx error rate is above 5%"
+          description: "The 5xx error rate has been {{ $value | humanizePercentage }} for the past 2 minutes."
+
+      - alert: DjangoHighP99Latency
+        expr: |
+          histogram_quantile(
+            0.99,
+            rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])
+          ) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Django p99 latency exceeds 2 seconds"
+          description: "One or more views have a p99 latency of {{ $value | humanizeDuration }}."
+
+      - alert: DjangoLowCacheHitRatio
+        expr: |
+          sum(rate(django_cache_get_hits_total[5m]))
+          /
+          (sum(rate(django_cache_get_hits_total[5m])) + sum(rate(django_cache_get_misses_total[5m])))
+          < 0.7
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Django cache hit ratio below 70%"
+          description: "Cache hit ratio has been {{ $value | humanizePercentage }} for 10 minutes."
+
+      - alert: DjangoHighRequestLatencyP50
+        expr: |
+          histogram_quantile(
+            0.5,
+            rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Django median latency exceeds 500ms"
+          description: "The p50 latency for one or more views is {{ $value | humanizeDuration }}."
+```
+
+### Step 2: Configure Alertmanager
+
+Create a directory and configuration file for Alertmanager. This example routes alerts to Slack (substitute your webhook URL).
+
+```bash
+mkdir -p alertmanager
+```
+
+```yaml
+# alertmanager/alertmanager.yml
+
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: "slack-notifications"
+  group_by: ["alertname", "service"]
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+
+receivers:
+  - name: "slack-notifications"
+    slack_configs:
+      - api_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+        channel: "#django-alerts"
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ "\n" }}{{ end }}'
+```
+
+For email notifications, replace the `slack_configs` block with:
+
+```yaml
+receivers:
+  - name: "email-notifications"
+    email_configs:
+      - to: "oncall-team@yourcompany.com"
+        from: "prometheus@yourcompany.com"
+        smarthost: "smtp.yourcompany.com:587"
+        auth_username: "prometheus@yourcompany.com"
+        auth_password: "your-smtp-password"
+```
+
+### Step 3: Download and Start Alertmanager
+
+Download Alertmanager from the <a href="https://prometheus.io/download/#alertmanager" rel="noopener noreferrer nofollow" target="_blank">official downloads page</a>. Extract it and run with your config.
+
+```bash
+# Download Alertmanager (Linux amd64 example, check the downloads page for your OS)
+wget https://github.com/prometheus/alertmanager/releases/download/v0.28.1/alertmanager-0.28.1.linux-amd64.tar.gz
+tar xvfz alertmanager-0.28.1.linux-amd64.tar.gz
+cd alertmanager-0.28.1.linux-amd64
+
+# Copy your config into the Alertmanager directory
+cp /path/to/your/alertmanager/alertmanager.yml .
+
+# Start Alertmanager
+./alertmanager --config.file=alertmanager.yml
+```
+
+### Step 4: Verify Alerts
+
+Open `http://localhost:9090/alerts` in the Prometheus UI. You should see your four alert rules listed. Their state will be **inactive** (green) if conditions are not met, **pending** if the condition is true, but the `for` duration has not elapsed, or **firing** (red) if the alert is active.
+
+<Figure src="/img/guides/2026/02/django-monitoring-prometheus-ui-alert.webp" alt="Prometheus UI displaying the Alerts tab with multiple Django alert rules such as high error rate and high latency listed as inactive." caption="Prometheus alerts page showing Django alert rules in an inactive state" />
+
+Open `http://localhost:9093` to see the Alertmanager UI, where you can view active alerts, silence them, and check notification history.
+
+<Figure src="/img/guides/2026/02/django-monitoring-alert-manager-web.webp" alt="Alertmanager web interface displaying the Alerts view with filters and a message indicating no alert groups found." caption="Alertmanager UI showing the alerts page with no active alert groups" />
+
+## Adding Custom Application Metrics
+
+Beyond the built-in `django-prometheus` metrics, you can instrument your own application code using the `prometheus_client` library directly. Create a new file at `catalog/metrics.py`.
+
+```python
+# catalog/metrics.py
+
+from prometheus_client import Counter, Histogram
+
+# Track checkout events
+checkout_completed = Counter(
+    "catalog_checkout_completed_total",
+    "Total number of checkouts completed",
+    ["status", "payment_method"],
+)
+
+checkout_duration = Histogram(
+    "catalog_checkout_processing_seconds",
+    "Time spent processing a checkout",
+    ["payment_method"],
+    buckets=(0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, float("inf")),
+)
+```
+
+Then use these metrics in a view. Add the following to the bottom of `catalog/views.py`.
+
+```python
+# catalog/views.py
+# Add this at the bottom of the file.
+
+import time
+from .metrics import checkout_completed, checkout_duration
+
+def checkout(request):
+    method = request.POST.get("payment_method", "card")
+    start = time.time()
+
+    try:
+        # ... your checkout logic ...
+        checkout_completed.labels(status="success", payment_method=method).inc()
+        return JsonResponse({"status": "ok"})
+    except Exception as e:
+        checkout_completed.labels(status="error", payment_method=method).inc()
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    finally:
+        checkout_duration.labels(payment_method=method).observe(time.time() - start)
+```
+
+These custom metrics will automatically appear at the `/metrics` endpoint alongside the `django-prometheus` metrics. Prometheus picks them up on the next scrape with no configuration changes.
+
+## Limitations of Prometheus-Based Django Monitoring
+
+The setup above gives you a working monitoring pipeline for a single Django service. However, several gaps become more apparent as your application scales or adds services.
+
+### Metrics-only visibility
+
+Prometheus is metrics-first, traces/log correlation typically requires additional systems and manual linking.
+
+### No distributed tracing
+
+If your Django app talks to other services (payments, auth, search, etc.), Prometheus cannot trace a single request across service boundaries. You get isolated metrics per service, not an end-to-end view of a user request.
+
+### No native log correlation
+
+Logs and metrics live in separate systems. When latency spikes or error rates rise, you have to manually switch between Prometheus and your logging system and match timestamps, which is slow and error-prone during incidents.
+
+### Weak root-cause analysis
+
+Prometheus surfaces issues (p95 latency, 5xx spikes) without pointing to the exact view, query, or dependency causing them. You still need separate tools to find the actual failing query, view, or dependency.
+
+### Limited visualization out of the box
+
+The Prometheus UI is primarily used for ad hoc queries. It lacks proper dashboards, saved views, and team-friendly visualizations.
+
+### Pull-based scraping misses short-lived jobs
+
+Short-lived Django processes, such as Celery tasks, management commands, or batch jobs, may finish before Prometheus scrapes them, resulting in missing metrics and blind spots in background job monitoring.
+
+### Multi-worker metric inconsistencies
+
+With Gunicorn or uWSGI, each worker maintains its own counters. Prometheus may scrape different workers each time, producing inconsistent or misleading metrics. The multiprocess workaround exists, but it adds extra configuration and operational complexity.
+
+### No request-level context
+
+You cannot easily answer questions like: “Which endpoints are slow for which users?" or “Which requests trigger this specific spike?" because Prometheus aggregates data and does not preserve per-request context.
+
+### Operational overhead
+
+Even for basic setups, you typically run `Prometheus + Alertmanager + Grafana`. That’s multiple services to configure, secure, scale, back up, and maintain, before you even add logs or traces.
+
+## A Better Approach: OpenTelemetry with SigNoz
+
+[OpenTelemetry (OTel)](https://signoz.io/opentelemetry/) addresses the limitations above by providing a single, vendor-agnostic instrumentation standard that generates traces, metrics, and logs. Instead of installing `django-prometheus` and only gets metrics, the OTel Python SDK auto-instruments Django, database drivers (psycopg2, PyMySQL), cache clients (redis), background workers (Celery), and HTTP libraries in one step. All three signals are correlated by trace ID out of the box.
+
+[SigNoz](https://signoz.io/) is an all-in-one observability platform built natively on OpenTelemetry. It stores traces, metrics, and logs in a single backend and provides unified dashboards, alerting, and exception tracking within a single UI. With SigNoz, you can avoid operating a separate `Prometheus+Alertmanager+Grafana` stack for this workflow, depending on your deployment needs.
+
+Here is a comparison of the two approaches.
+
+| Aspect | Prometheus + django-prometheus | OpenTelemetry + SigNoz |
+| --- | --- | --- |
+| Telemetry signals | Metrics only | Metrics, traces, and logs |
+| Trace support | None | Full distributed tracing with span waterfalls |
+| Log correlation | Needs external tools | You can correlate logs to traces by injecting trace context into your log format (often via SDK/logging integration). |
+| Instrumentation | Library-specific wrappers (swap DB backends, add mixins) | Auto-instrumentation for Django, databases, caches, HTTP clients, and Celery |
+| Multi-service correlation | Separate Prometheus per service, no request-level linking | Single trace follows a request across all services |
+| Exception tracking | Not built in | Stack traces captured as span events |
+| Infrastructure | Prometheus + Alertmanager + Grafana (3 services) | SigNoz (single platform, self-hosted or cloud) |
+
+With OTel and SigNoz, you can filter traces by `service.name`, click any trace to see the span waterfall showing exactly which middleware, view, DB query, or external call is slow, and jump directly from a trace to the correlated logs for that request.
+
+For a detailed walkthrough of setting up OpenTelemetry with Django and sending telemetry to SigNoz, see [Beginner's Guide to OpenTelemetry & Django](/blog/opentelemetry-django/).
+
+For general Python auto-instrumentation with OpenTelemetry (applicable to Django, Flask, FastAPI, and Celery), see the [SigNoz Python Instrumentation Docs](/docs/instrumentation/opentelemetry-python/).
+
+For Django logging configuration and how to centralize logs with OpenTelemetry, see the [Django Logging guide](/guides/django-logging/).
+
+## Troubleshooting Common Issues
+
+| Symptom | Likely Cause | Fix |
+| --- | --- | --- |
+| `/metrics` endpoint returns 404 | `django_prometheus.urls` not included in `urlpatterns` | Add `path("", include("django_prometheus.urls"))` to your root `urls.py` |
+| Prometheus target shows "DOWN" | Django not reachable from Prometheus | Verify Django is running on `localhost:8000` and the `targets` value in `prometheus.yml` matches |
+| Metrics counters reset unexpectedly | Django server restarted or worker recycled | This is expected for counters. Use `rate()` or `increase()` in queries to handle resets. |
+| Duplicate/inconsistent metrics with Gunicorn | Each worker maintains separate counters | Set the `PROMETHEUS_MULTIPROC_DIR` environment variable and configure `MultiProcessCollector` |
+| Database metrics not appearing | Standard Django backend still configured | Replace `django.db.backends.postgresql` with `django_prometheus.db.backends.postgresql` in `DATABASES` |
+| Cache metrics not appearing | Standard Django cache backend in use | Replace `django.core.cache.backends.**` with `django_prometheus.cache.backends.**` in `CACHES` |
+| Alert rules not showing in Prometheus | Rule file path mismatch or file not found | Check the `rule_files` path in `prometheus.yml` matches the actual location of `alert_rules.yml` relative to the Prometheus binary |
+| Alertmanager not receiving alerts | Wrong Alertmanager target in Prometheus config | Verify the `alertmanagers` target matches the Alertmanager host and port (default 9093) |
+| Latency histogram has too few buckets | Default buckets do not match your app's latency range | Override `PROMETHEUS_LATENCY_BUCKETS` in settings.py |
+
+## Conclusion
+
+Prometheus gives you a working Django monitoring setup with request, database, cache, and model metrics. When you need distributed tracing, log correlation, and exception tracking, [OpenTelemetry with SigNoz](/blog/opentelemetry-django/) provides all three signals in a single platform without the operational overhead of managing Prometheus, Alertmanager, and Grafana separately.
