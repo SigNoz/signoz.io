@@ -23,6 +23,8 @@ import {
   SiGo,
   SiTemporal,
   SiOpenai,
+  SiSupabase,
+  SiOllama,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -278,6 +280,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'HAProxy Dashboard Template',
   },
   {
+    name: 'Haystack',
+    href: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Dashboard Template',
+  },
+  {
     name: 'Host Metrics',
     href: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
     icon: <Monitor className="h-7 w-7 text-blue-500" />,
@@ -396,10 +410,28 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Nomad Dashboard Template',
   },
   {
+    name: 'Ollama',
+    href: '/docs/dashboards/dashboard-templates/ollama-dashboard',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Dashboard Template',
+  },
+  {
     name: 'OpenAI',
     href: '/docs/dashboards/dashboard-templates/openai-dashboard',
     icon: <SiOpenai className="h-7 w-7 text-white" />,
     clickName: 'OpenAI Dashboard Template',
+  },
+  {
+    name: 'OpenRouter',
+    href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Dashboard Template',
   },
   {
     name: 'Pipecat',
@@ -460,6 +492,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Supabase',
+    href: '/docs/dashboards/dashboard-templates/supabase',
+    icon: <SiSupabase className="h-7 w-7 text-green-500" />,
+    clickName: 'Supabase Dashboard Template',
   },
   {
     name: 'Temporal Agents',

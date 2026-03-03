@@ -1,7 +1,7 @@
 ---
-title: OpenTelemetry Histograms Explained in Detail with Examples and Implementation
+title: Understanding How OpenTelemetry Histograms (Actually) Work
 slug: opentelemetry-histogram
-date: 2026-01-19
+date: 2026-02-11
 tags: [OpenTelemetry, Metrics]
 authors: [dhruv_ahuja]
 image: /img/blog/2026/01/opentelemetry-histogram.webp
@@ -11,9 +11,9 @@ keywords: [opentelemetry histogram, otel metrics, exponential histograms, promet
 
 In the context of [OpenTelemetry](https://signoz.io/opentelemetry/) (OTel), a histogram is a core metric type that shows the distribution of values, like request latencies. Counters and gauges tell you totals and point-in-time values, not the metric data's *shape*.
 
-Consider an application serving 100 requests per second that responds slowly only for a few users. Histograms help understand *how slow* the requests are getting, and for *what percentage* of users.
+Consider an application serving 100 requests per second that responds slowly only for a few users. Histograms help understand *how slow* the requests are getting, and for *what percentage* of users. This is a good start, but we must go through each detail to properly understand histograms and their implementation within OpenTelemetry.
 
-You’ll learn how OTel histograms bucket values, what the SDK exports, what the different types of histograms are, and the best practices to keep in mind while using histograms in your applications.
+In this write-up, you’ll learn how OTel histograms bucket values, what the SDK exports, what the different types of histograms are, and the best practices to keep in mind while using histograms in your applications. By the end, you would have wrapped your head around how OTel Histograms *actually* work.
 
 ## What are OpenTelemetry Histograms?
 
@@ -25,7 +25,7 @@ OpenTelemetry histogram buckets include the **upper value but exclude the lower 
 
 `bucket_range = [0, 5, 10, 15, 20, 50, 75, 100, 250, 500, 1000, 2500, 5000]`
 
-Here, values up to and including 0 go into the first bucket, values greater than 0 and up to 5 go into the bucket, and so on until the final bucket. This final bucket acts as an **overflow** bucket, meaning any value greater than 5000 goes there.
+Here, values up to and including 0 go into the first bucket, values greater than 0 and up to 5 go into the next bucket, and so on until the final bucket. This final bucket acts as an **overflow** bucket, meaning any value greater than 5000 goes there.
 
 When distributing values that belong to the middle of a range, such as 35, the histogram simply checks the upper bounds of the bucket, finds the bucket whose upper bound is greater than or equal to that value, and increments the counter for that bucket.
 

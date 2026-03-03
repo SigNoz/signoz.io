@@ -5,11 +5,12 @@ import { ChevronDown } from 'lucide-react'
 interface KeyPointCalloutProps {
   title?: string
   children: React.ReactNode
-  defaultCollapsed?: boolean
+  defaultCollapsed?: boolean | 'true' | 'false'
 }
 
 const KeyPointCallout: React.FC<KeyPointCalloutProps> = ({ title, children, defaultCollapsed }) => {
-  const [isCollapsed, setIsCollapsed] = React.useState(Boolean(defaultCollapsed))
+  const isDefaultCollapsed = defaultCollapsed === true || defaultCollapsed === 'true'
+  const [isCollapsed, setIsCollapsed] = React.useState(isDefaultCollapsed)
 
   return (
     <div className="my-8 w-full rounded-2xl border border-white/10 bg-white/5 text-gray-100 shadow-lg shadow-black/10 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10">

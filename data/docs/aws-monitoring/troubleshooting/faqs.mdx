@@ -1,0 +1,47 @@
+---
+date: 2026-02-06
+id: faqs
+title: AWS Monitoring - FAQs
+description: Frequently Asked Questions About AWS Monitoring
+doc_type: howto
+---
+
+### Why doesn't my AWS metric have an average statistic form?
+
+Some AWS metrics collected through CloudWatch may not always export an `average` statistic directly from the collector. This is because the OpenTelemetry Collector exports metrics using the statistic forms provided by AWS CloudWatch Metric Streams.
+
+**Available metric forms:**
+
+AWS CloudWatch provides the following statistic forms for most metrics:
+- `min` - Minimum value
+- `max` - Maximum value
+- `sum` - Sum of all values
+- `count` - Number of data points
+
+**To calculate the average:**
+
+You can calculate the average manually using the formula:
+
+```
+average = sum / count
+```
+
+This will give you the same result as the `average` statistic you would see in AWS CloudWatch console.
+
+**Example: EC2 CPU Utilization**
+
+For the `aws_EC2_CPUUtilization` metric:
+1. Use the formula: `aws_EC2_CPUUtilization_sum / aws_EC2_CPUUtilization_count`
+2. This calculates the average CPU utilization percentage
+3. The result matches the `average` metric shown in CloudWatch
+
+**Why this approach?**
+
+The available metric forms (min/max/sum/count) follow the AWS CloudWatch Metric Streams standard. For detailed information about how these metrics are calculated and exported, refer to:
+- [AWS CloudWatch Metric Streams Documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams.html)
+- [AWS CloudWatch Statistics Definitions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Statistic)
+
+This approach allows you to:
+- Migrate alarms that previously used the average statistic in CloudWatch
+- Create custom calculations and aggregations
+- Maintain the same monitoring functionality across platforms

@@ -1,5 +1,5 @@
 ---
-date: 2026-01-02
+date: 2026-02-06
 id: drop-logs
 title: Guide to drop logs
 description: Learn how to drop unwanted logs at the Collector level to reduce storage and billing.
@@ -9,15 +9,15 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-The filter processor in OpenTelemetry allows you to drop logs based on body, log level (aka severity text), or other attributes. This is useful if you want to exclude certain logs from being sent to SigNoz.
+The filter processor in the [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) allows you to drop logs based on body, log level (aka severity text), or other attributes. This is useful if you want to exclude certain logs from being sent to SigNoz.
 
-The filter processor is configured in the `processors::filter` section of the `otel-collector-config.yaml` file.
+The filter processor is configured in the `processors::filter` section of the `config.yaml` file.
 
 <Admonition>
 
-The processor needs to be added to the logs pipeline to take effect.
+The processor needs to be added to the logs pipeline in `config.yaml` to take effect.
 
-```
+```config.yaml
 logs:
   receivers: [otlp]
   processors: [filter/drop_logs_by_severity_text, batch]
@@ -30,7 +30,7 @@ logs:
 
 1. Drop logs by log level / severity text
 
-```yaml
+```config.yaml
 processors:
   filter/drop_logs_by_level:
     logs:
@@ -40,7 +40,7 @@ processors:
 
 2. Drop logs by body regex
 
-```yaml
+```config.yaml
 processors:
   filter/drop_logs_by_body_regex:
     logs:
@@ -50,7 +50,7 @@ processors:
 
 3. Drop logs by resource attributes (like service.name, host.name, k8s.pod.name, etc.)
 
-```yaml
+```config.yaml
 processors:
   filter/drop_logs_by_label_values:
     logs:
@@ -60,7 +60,7 @@ processors:
 
 4. Drop logs by resource attributes regex
 
-```yaml
+```config.yaml
 processors:
   filter/drop_logs_by_label_values_regex:
     logs:
@@ -70,7 +70,7 @@ processors:
 
 5. Drop logs by logs attributes (like remote_addr, user_agent.name, etc.)
 
-```yaml
+```config.yaml
 processors:
   filter/drop_logs_by_label_values:
     logs:
@@ -80,7 +80,7 @@ processors:
 
 6. Drop logs by logs attributes regex
 
-```yaml
+```config.yaml
 processors:
   filter/drop_logs_by_label_values_regex:
     logs:
@@ -99,6 +99,45 @@ See our [Kubernetes pod logs collection guide](https://signoz.io/docs/userguide/
 - Using filter operators for expression-based filtering
 
 Refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor) for more details on how to configure the filter processor.
+
+## Limit Log Body Size
+
+If you're concerned about logs that are too large causing issues or potential abuse, you can control the size of log bodies using the transform processor with the `truncate_all` function.
+
+This is useful to:
+- Prevent accidental collection of oversized logs
+- Avoid abuse scenarios where extremely large log entries could impact system performance
+- Reduce storage costs and improve query performance
+
+### Configuration
+
+Add the [transform processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#transform-processor) to your OpenTelemetry Collector configuration to truncate log bodies to a maximum size:
+
+```config.yaml
+processors:
+  transform/truncate_logs:
+    log_statements:
+      - context: log
+        statements:
+          - truncate_all(body, 4096)  # Limit log body to 4096 characters
+```
+
+In this example, log bodies will be truncated to 4096 characters. You can adjust this value based on your needs.
+
+<Admonition>
+
+The processor needs to be added to the logs pipeline in `config.yaml` to take effect.
+
+```config.yaml
+logs:
+  receivers: [otlp]
+  processors: [transform/truncate_logs, batch]
+  exporters: [otlp]
+```
+
+</Admonition>
+
+For more information about the transform processor and the `truncate_all` function, refer to the [SigNoz documentation](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#transform-processor).
 
 ## Related Guides
 

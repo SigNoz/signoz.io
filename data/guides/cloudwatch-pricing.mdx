@@ -1,0 +1,161 @@
+---
+
+title: CloudWatch Pricing Without the Confusion [Part 1]
+slug: cloudwatch-pricing
+date: 2026-02-15
+tags: [aws, cloudwatch]
+authors: [yuvraj]
+description: CloudWatch pricing is confusing because it bills across 7+ feature buckets, each with different units, free-tier rules, and hidden multipliers. This guide maps every bucket, explains the catches, and shows you exactly what drives your bill.
+keywords:
+  - cloudwatch pricing
+  - aws cloudwatch pricing
+  - cloudwatch cost
+  - cloudwatch billing
+  - cloudwatch pricing explained
+  - aws monitoring cost
+
+---
+
+<ArticleSeriesTop
+  seriesName="CloudWatch Pricing & Cost Optimization Series"
+  currentPart="1"
+  totalParts="2"
+  nextTitle="CloudWatch Cost Optimization Playbook [Part 2]"
+  nextHref="/guides/cloudwatch-cost-optimization"
+/>
+
+Your CloudWatch bill is a combination of at least seven different feature buckets, each with its own billing unit, free-tier boundary, and per-region scope. Some features bill per GB, others per metric-hour, others per alarm, and a few per API making it difficult to plan and predict observability costs.
+
+In this guide, we unravel CloudWatch pricing by covering the main billing caveats that make CloudWatch pricing hard to predict and a simplified breakdown of every pricing bucket with rates and free tiers.
+
+[Part 2](/guides/cloudwatch-cost-optimization/) covers what to do about it including optimization moves, verification steps, and when CloudWatch alone stops being cost-effective.
+
+## CloudWatch Pricing Details You Should Be Aware Of
+
+CloudWatch started as a simple metrics and alarms service. Over time, AWS added Logs, Insights queries, Container Insights, Application Signals, X-Ray, RUM, Synthetics, and more. Each feature came with its own pricing model, and none of them were retroactively unified.
+
+The result is a pricing page that reads like a legal document. Because structurally, it is one. Before getting into the rates, let's discuss the AWS cloudwatch billing behaviors that catch teams off guard.
+
+### How Dimensions Multiply Your Metric Costs
+
+CloudWatch bills [custom metrics](/blog/cloudwatch-metrics) based on the number of unique metric time series you publish. Each unique combination of metric name, namespace, and dimension values counts as a separate billable metric, at \$0.30/month for the first 10,000.
+
+The problem is that dimensions are multiplicative and adding a single high-cardinality tag can turn one metric into thousands.
+
+Say you want to monitor API latency. You publish a metric called `api.latency` for 10 endpoints, tagged by `status_code` (3 values) and `region` (3 values):
+
+> 10 endpoints × 3 status codes × 3 regions = **90 unique metrics = \$27/month**
+
+That is for one metric name. Now add a `customer_id` dimension with 100 unique values:
+
+> 90 × 100 = **9,000 unique metrics**
+
+- **Your bill:** \$2,700/month for a single metric name
+- **Your expectation:** "I added one tag"
+
+This is the single most common cause of [CloudWatch bill surprises](/blog/6-silent-traps-inside-cloudWatch-that-can-hurt-your-observability). Teams running services with `request_id` or `user_id` as metric dimensions have seen this generate six-figure monthly charges.
+
+### You Pay Three Times for Logs
+
+CloudWatch Logs pricing is a three-part tariff. You pay separately to collect logs, store them, and then search them.
+
+- **Ingest:** \$0.50 per GB to collect your logs into CloudWatch.
+- **Store:** \$0.03 per GB-month to keep them in compressed archival storage.
+- **Query:** \$0.005 per GB scanned every time you run a Logs Insights query.
+
+This means operational debugging has a direct, per-query cost that scales with your total log volume, not with how much useful data the query returns. If your query scans 500 GB (for example, by searching a broad time range) and your query matches 12 lines, you still pay for scanning all 500 GB: `500 × $0.005 = $2.50`.
+
+
+During incidents, this works against you. An engineer debugging a production outage runs dozens of exploratory queries against large log groups, each one scanning hundreds of GB. A 4-hour incident with heavy querying can rack up more Logs Insights charges than the entire previous week of normal usage.
+
+The pricing model penalizes teams for using the tool at the exact moment they need it most. And as your team grows — more engineers, more services, more log data — query costs scale in both directions. Teams end up fighting against adoption internally, which is the opposite of why you introduce centralized logging in the first place.
+
+The problem gets worse if you query a single monolithic log group with months of accumulated data. If that log group holds 500 GB and your team runs 20 queries a day, `500 × $0.005 × 20 × 30 = $1,500/month` in query costs alone, regardless of how many results those queries return.
+
+And storage itself is a slow-building trap. CloudWatch Logs default to **indefinite retention** — "Never expire." The storage rate of $0.03/GB-month is low enough that nobody notices it at first. But if your application ingests 100 GB/month and you never set a retention policy, after 12 months you've ingested 1.2 TB of logs. Your billed archived storage will typically be lower due to compression, but costs still grow monotonically unless you set retention.
+
+### The 3× Anomaly Detection Alarm Markup
+
+CloudWatch offers four types of alarms, and the price difference between them is significant:
+
+| Alarm Type | Cost |
+|---|---|
+| Standard resolution (60-sec) | \$0.10/alarm metric/month |
+| High resolution (10-sec) | \$0.30/alarm metric/month |
+| Composite | \$0.50/alarm/month |
+| Anomaly detection (standard-res) | **\$0.30/alarm/month** |
+| Anomaly detection (high-res) | **\$0.90/alarm/month** |
+
+The pricing works because each anomaly detection alarm generates three metrics internally: the original metric plus the upper and lower bounds of the expected band. So a standard-resolution anomaly detection alarm costs `3 × $0.10 = $0.30/month` which is 3× a single standard alarm.
+
+That multiplier compounds when teams switch all their alarms to anomaly detection "for safety" without realizing the cost difference:
+
+- **20 standard alarms:** \$2/month
+- **20 standard-res anomaly detection alarms:** \$6/month
+- **20 high-res anomaly detection alarms:** \$18/month
+
+Unless you genuinely need dynamic thresholds that adapt to seasonal patterns, the cost premium buys you very little.
+
+### Enabling One Feature Charges You Across Multiple Buckets
+
+When you turn on Container Insights for an EKS cluster, it starts publishing CloudWatch metrics (billed under the Metrics bucket) and ingesting performance logs with 700 extra bytes of metadata per log line (billed under Logs). A 10-node EKS cluster in standard mode generates roughly 320 custom metrics — that alone is \$96/month before any log costs.
+
+Synthetics is worse. Each canary run costs \$0.0012, but the real bill comes from the services each run triggers. Five canaries running every 5 minutes:
+
+- **Canary run charges:** \$53.57/month
+- **Lambda execution charges:** \$14.89/month
+- **CloudWatch Logs charges:** \$3.55/month
+- **S3 storage charges:** \$1.25/month
+- **Custom metric charges:** \$0.90/month
+
+**Total: \$74.66/month** — of which \$54.07 is the Synthetics canary + alarm portion. You will also see CloudWatch Logs (\$3.55) and CloudWatch Metrics (\$0.90) charges on your CloudWatch bill, plus Lambda (\$14.89) and S3 (\$1.25) charges under those respective services. The real cost is spread across multiple billing categories, making it hard to attribute back to Synthetics.
+
+### Free Tiers That Don't Pool
+
+Core CloudWatch free-tier quotas (metrics, logs, dashboards, alarms) apply independently per feature bucket and are commonly scoped per account per region. Your 10 free custom metrics and your 5 GB free log data are completely separate allowances. If you use 0 custom metrics and 15 GB of logs, you still pay for 10 GB of log ingestion — the unused metric free tier does not help.
+
+A few application-observability free tiers are scoped differently: Application Signals offers 3 months of free usage per account (with limits), and RUM includes a first-time trial of 1 million web events per account. These do not follow the per-region pattern.
+
+Multi-region deployments multiply the core free tiers. If you operate in 3 regions, you do not get 15 GB of free log data total, instead you get 5 GB per region. If all your logs land in one region, the other two regions' free tiers go to waste.
+
+## A Simplified Breakdown of CloudWatch Pricing
+
+With the caveats out of the way, here is a simplified rate card for the most common billing buckets. All prices are for US East (N. Virginia) as of February 2026 — always verify against the [official AWS CloudWatch pricing page](https://aws.amazon.com/cloudwatch/pricing/).
+
+| Bucket | Billing Unit | Rate | Free Tier (per region) | Key Gotcha |
+|---|---|---|---|---|
+| **Metrics** | Per metric/month (prorated hourly) | \$0.30 (first 10K), \$0.10 (next 240K), \$0.05 (next 750K) | 10 custom metrics and detailed monitoring metrics | Dimensions multiply your metric count exponentially |
+| **Log Ingestion** | Per GB | \$0.50 (standard), \$0.25 (Infrequent Access) | Shared 5 GB/month | Largest cost driver for most teams |
+| **Log Storage** | Per GB-month (compressed) | \$0.03 | Shared 5 GB/month | Accumulates indefinitely if no retention policy is set |
+| **Log Analytics** | Per GB scanned (Insights), per minute (Live Tail) | \$0.005/GB scanned, \$0.01/minute | Shared 5 GB data; 1,800 Live Tail minutes | You pay per GB scanned, not per result returned |
+| **Alarms** | Per alarm metric/month (prorated hourly) | \$0.10 (standard), \$0.30 (high-res), \$0.50 (composite) | 10 standard alarms | Anomaly detection uses 3 metrics per alarm (3× standard cost) |
+| **Dashboards** | Per dashboard/month | \$3.00 | 3 dashboards (up to 50 metrics each) | Adds up when teams create one per microservice |
+| **API Requests** | Per 1,000 requests | \$0.01 | 1,000,000 requests | Usually small; spikes when external tools poll frequently |
+| **Vended Logs** | Per GB delivered (tiered) | \$0.50/GB (first 10 TB) → \$0.05/GB (50+ TB) | None | Also incurs downstream storage and query charges |
+| **Metric Streams** | Per 1,000 metric updates | \$0.003 | None | Bills per update, not per unique metric — volume grows fast |
+| **Container Insights** | Per million observations (enhanced) or standard metric/log rates | \$0.21/million (EKS enhanced) | None | Generates metrics *and* logs billed at standard rates |
+| **Application Signals** | Per million signals | \$1.50 (first 100M) → \$0.75 (next 900M) → \$0.30 (1B+) | 3-month free trial per account (limits apply) | Enables X-Ray tracing by default, adding trace charges |
+| **Synthetics** | Per canary run | \$0.0012 | 100 canary runs/month | Real cost is Lambda + S3 + Logs + metrics per run |
+| **RUM** | Per 100K events (web) or per GB (mobile) | \$1.00 / 100K events or \$0.35 / GB | First-time trial: 1M web RUM events/account | Scales directly with user traffic |
+| **X-Ray** | Per trace stored/scanned | \$0.000005/trace stored | 100K traces stored; 1M traces scanned | Often enabled silently by Application Signals |
+
+### A Few Things Worth Noting About This Table
+
+**Prorating works in your favor — sometimes.** CloudWatch prorates metrics and alarms on an hourly basis. You're billed for the fraction of hours the resource exists in the month: `(hours active ÷ hours in month) × monthly rate`. But prorating also makes estimation harder, because your bill depends on exactly when things were created or deleted.
+
+**Infrequent Access log class cuts ingestion cost in half.** At \$0.25/GB instead of \$0.50/GB, it is a meaningful savings for log groups you do not need full features on. Logs Insights queries still work on Infrequent Access log groups. The trade-off is losing Live Tail, metric extraction and filters, alarming from logs, and data protection.
+
+**Vended logs have hidden downstream costs.** The delivery rate is only part of the bill. VPC Flow Logs delivered to CloudWatch also incur standard log storage charges (\$0.03/GB-month) and query charges if you run Insights against them. Routing vended logs to S3 instead avoids CloudWatch storage but still incurs S3 costs.
+
+**Advanced features always generate charges in the core buckets.** Every advanced feature — Container Insights, Application Signals, Synthetics, RUM — produces metrics, logs, or API calls billed at core-bucket rates on top of its own charges. Estimating the cost of an advanced feature without accounting for its downstream impact on logs and metrics will undercount the real spend by 20-40%.
+
+## What Comes Next
+
+CloudWatch pricing is not a single rate card. It is a collection of independent billing systems — 7+ feature buckets, per-region free tiers that do not pool, cross-bucket cost generation, and non-linear multipliers from dimensions and alarm types.
+
+Understanding the mechanics is step one. Step two is doing something about it — finding your biggest cost drivers, applying targeted optimizations, verifying the savings, and deciding whether CloudWatch's pricing model is structurally compatible with your monitoring needs.
+
+That is what [Part 2](/guides/cloudwatch-cost-optimization/) covers: a practical cost optimization playbook with bucket-specific moves, verification loops, and a framework for evaluating whether a unified observability platform like [SigNoz](https://signoz.io/) — with simpler, usage-based pricing — is the better path forward.
+
+<ArticleSeriesBottom seriesName="CloudWatch Pricing & Cost Optimization Series" currentPart="1" totalParts="2" nextTitle="CloudWatch Cost Optimization Playbook [Part 2]" nextHref="/guides/cloudwatch-cost-optimization" />
+

@@ -1,5 +1,5 @@
 ---
-date: 2026-01-18
+date: 2026-02-12
 title: Collect Host Metrics with OpenTelemetry
 id: opentelemetry-hostmetrics
 description: Collect host metrics like CPU, memory, disk, and network from your servers using the OpenTelemetry hostmetrics receiver and send them to SigNoz.
@@ -13,7 +13,7 @@ Host metrics are fundamental performance indicators collected directly from a sy
 
 The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, network, paging, and system performance.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -25,7 +25,7 @@ The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, ne
 
 <TabItem value="vm" label="Virtual Machine" default>
 
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
 - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
 - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -192,7 +192,7 @@ If you are running the binary manually (e.g., for testing):
 </TabItem>
 <TabItem value="docker" label="Docker">
 
-<KeyPointCallout title="Want to monitor Docker container metrics?" defaultCollapsed={true}>
+<KeyPointCallout title="Want to monitor Docker container metrics?" defaultCollapsed="true">
   This section explains how to run the collector as a Docker container to collect **Host Metrics** (like CPU/Memory of the underlying Node).
 
   If you want to monitor the performance of your Docker containers themselves (e.g. CPU/Memory usage per container), please refer to the [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/) documentation.
@@ -522,6 +522,44 @@ Once configured, verify that metrics are flowing to SigNoz.
 2. Verify the hostmetrics receiver is enabled in your config.
 3. Ensure the collector can reach the SigNoz endpoint (port 443 for Cloud, 4317 for Self-Hosted).
 
+### Host Name is blank/empty
+
+**Symptoms:** Host name appears blank or empty in **Infrastructure Monitoring > Hosts** tab.
+
+**Cause:** Metrics are missing the `host.name` resource attribute (metadata the collector attaches to every metric to identify which host it came from). This typically happens when:
+- The `resourcedetection` [processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#2-processors) is not added to the `processors` section of your collector config, or
+- The processor is defined but not enabled in your metrics pipeline (the `processors` list under `service > pipelines > metrics`).
+
+**Resolution:**
+
+1. Verify that the `resourcedetection` processor is in your `processors` section:
+
+```yaml:config.yaml
+processors:
+  resourcedetection:
+    detectors: [env, system, docker]
+  batch:
+```
+
+2. Verify that `resourcedetection` is listed in your metrics pipeline **before** `batch`:
+
+```yaml:config.yaml {5}
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+3. Restart the collector to apply changes and check logs for errors (see [Run the Collector](#step-3-run-the-collector)).
+
+<Admonition type="info">
+The `resourcedetection` processor automatically detects resource attributes like `host.name` and OS information from the host environment. For the full list of supported detectors, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">resourcedetection processor documentation</a>.
+</Admonition>
+
+**Verification:** After restarting, go to **Infrastructure Monitoring > Hosts**. Your host should now appear with its hostname populated.
+
 ### Connection Refused
 
 **Symptoms:** Logs show connection refused errors.
@@ -545,9 +583,9 @@ Once configured, verify that metrics are flowing to SigNoz.
 
 ## Next Steps
 
-- [Visualize Host Metrics using Dashboard Templates](https://signoz.io/docs/userguide/dashboard-templates/)
-- [Set up Alerts for Host Metrics](https://signoz.io/docs/userguide/alerts-management/)
-- [Learn more about Infrastructure Monitoring](https://signoz.io/docs/userguide/infrastructure-monitoring/)
+- [Visualize Host Metrics using Dashboard Templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/)
+- [Set up Alerts for Host Metrics](https://signoz.io/docs/alerts-management/metrics-based-alerts/)
+- [Learn more about Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)
 
 ## Get Help
 

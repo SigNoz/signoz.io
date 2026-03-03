@@ -9,12 +9,12 @@ import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubLayout from '@/layouts/OpenTelemetryHubLayout'
 import BlogLayout from '@/layouts/BlogLayout'
 import NewsroomLayout from '@/layouts/NewsroomLayout'
+import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 
 const defaultLayout = 'BlogLayout'
 const layouts = {
@@ -110,7 +110,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
-  const hubContext = getHubContextForRoute(currentRoute)
+  const hubContext = await getHubContextForRoute(currentRoute)
 
   if (hubContext) {
     return (
@@ -134,7 +134,6 @@ export default async function Page(props: { params: { slug: string[] } }) {
           currentRoute={currentRoute}
         >
           <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-          <PageFeedback />
         </OpenTelemetryHubLayout>
       </>
     )
@@ -167,6 +166,10 @@ export default async function Page(props: { params: { slug: string[] } }) {
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        {/* NewsroomLayout is the only layout that needs inline PageFeedback here
+            because it doesn't extend ArticleLayout, which handles feedback placement internally
+            for BlogLayout and OpenTelemetryLayout. */}
+        {layoutName === 'NewsroomLayout' && <PageFeedback />}
       </Layout>
     </>
   )
