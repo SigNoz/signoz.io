@@ -1,0 +1,122 @@
+---
+date: 2026-02-11
+id: kubernetes-pod-startup-alerts
+title: How to Create Alerts for Slow-Starting Kubernetes Pods
+description: Learn how to create alerts for Kubernetes pods that take more than 5 minutes to start using SigNoz.
+tags: ["SigNoz Cloud", "Self-Host"]
+---
+
+This guide shows you how to create an alert for Kubernetes pods that take more than 5 minutes to start. This helps you identify pods experiencing startup issues, which can indicate problems with container images, resource constraints, or configuration issues.
+
+## Prerequisites
+
+Before setting up this alert, ensure you have:
+
+1. Enabled Kubernetes monitoring in SigNoz using the [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) or configured the [k8scluster receiver](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/) manually
+2. Verified that the `k8s.pod.phase` metric is being collected (this metric is available from the k8scluster receiver)
+
+## Understanding k8s.pod.phase Metric
+
+The `k8s.pod.phase` metric tracks the current lifecycle phase of Kubernetes pods. The metric uses numeric values to represent each phase:
+
+| Phase Value | Phase Name | Description |
+|-------------|------------|-------------|
+| 1 | Pending | Pod has been accepted but containers are not yet running |
+| 2 | Running | Pod is bound to a node and all containers are created |
+| 3 | Succeeded | All containers terminated successfully |
+| 4 | Failed | All containers terminated, at least one failed |
+| 5 | Unknown | Pod state cannot be determined |
+
+For monitoring startup time, focus on pods transitioning from **Pending (1)** to **Running (2)**.
+
+## Creating the Alert
+
+Follow these steps to set up an alert for slow-starting pods:
+
+### Step 1: Navigate to Alerts
+
+1. Go to your SigNoz dashboard
+2. Click on **Alerts** in the left navigation menu
+3. Click **New Alert**
+4. Select **Metrics based** alert type
+
+### Step 2: Define the Metric Query
+
+Configure the query to detect pods stuck in the Pending phase:
+
+1. **Metric**: Select `k8s.pod.phase`
+2. **Time aggregation**: Choose `latest` (to get the current phase)
+3. **WHERE**: Add filters if needed (e.g., specific namespace: `k8s.namespace.name = production`)
+4. **Space aggregation**: Select `no aggregation` or `avg` depending on your needs
+5. **Group by**: Add `k8s.pod.name` and `k8s.namespace.name` to identify specific pods
+
+### Step 3: Define Alert Conditions
+
+Set up the condition to trigger when pods remain in Pending phase too long:
+
+- **Query**: Select the query you defined (e.g., `A`)
+- **Condition**: `Equal to`
+- **Threshold**: `1` (Pending phase)
+- **Match Type**: `at all times`
+- **Evaluation Window (For)**: `5 minutes`
+
+This configuration checks if any pod has been in the Pending phase (value = 1) for at least 5 minutes (300 seconds).
+
+**Important**: Adjust your alert evaluation window to match how frequently the metric is updating in SigNoz. For example, if the metric reports every 40 seconds and your evaluation window is only 60 seconds, you may not have enough data points for reliable alerting. Ensure your metric collection interval is significantly lower than the evaluation window to avoid false alerts.
+
+### Step 4: Configure Alert Details
+
+1. **Severity**: Choose appropriate severity (e.g., `Warning` or `Critical`)
+2. **Alert Name**: Provide a descriptive name (e.g., "Kubernetes Pod Slow Startup - More than 5 minutes")
+3. **Alert Description**: Add context, for example:
+
+```
+Pod {{k8s.pod.name}} in namespace {{k8s.namespace.name}} has been in Pending phase for more than 5 minutes.
+
+This may indicate:
+- Resource constraints (CPU/memory limits)
+- Image pull issues
+- Node scheduling problems
+- Configuration errors
+
+Pod Phase Values: 1=Pending, 2=Running, 3=Succeeded, 4=Failed, 5=Unknown
+```
+
+4. **Labels**: Add relevant labels for filtering (e.g., `team: platform`, `component: kubernetes`)
+
+### Step 5: Set Up Notifications
+
+Configure how you want to be notified when the alert triggers:
+
+1. **Notification channels**: Select one or more channels (Slack, PagerDuty, email, etc.)
+2. **Test notifications**: Use the test button to verify your notification setup works
+
+Learn more about [notification channels](https://signoz.io/docs/setup-alerts-notification/).
+
+### Step 6: Save and Enable
+
+1. Review your alert configuration
+2. Click **Save** to create the alert
+3. Ensure the alert is **enabled**
+
+## Troubleshooting
+
+### Alert Not Firing
+
+If your alert isn't triggering as expected:
+
+1. **Verify metric availability**: Check that `k8s.pod.phase` metrics are being collected
+   - Navigate to **Metrics Explorer**
+   - Search for `k8s.pod.phase`
+   - Verify data is flowing
+
+2. **Check the evaluation window**: If your evaluation window is too short, pods might transition to Running before the alert fires
+
+3. **Review filters**: Ensure your WHERE clause isn't filtering out the pods you want to monitor
+
+## Additional Resources
+
+- [Kubernetes Metrics Configuration Guide](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/)
+- [Metrics-Based Alerts Documentation](https://signoz.io/docs/alerts-management/metrics-based-alerts/)
+- [OpenTelemetry k8scluster Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver)
+- [Kubernetes Pod Lifecycle Documentation](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)

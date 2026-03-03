@@ -1,7 +1,6 @@
 ---
-date: 2025-11-10
+date: 2026-02-04
 id: overview
-
 title: ECS EC2 Collection Agent - Install
 description: View metrics and logs for your ECS infrastructure
 ---
@@ -25,6 +24,7 @@ The CloudFormation template defines the infrastructure needed for the daemon ser
 
 <Tabs groupId="launch-type">
 <TabItem value="ec2" label="EC2" default>
+
 ```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
@@ -131,7 +131,7 @@ Resources:
             - ContainerPort: 4318
               HostPort: 4318
               Protocol: tcp
-          Command: !Split [ " ", !Ref command ]
+          Command: !Split [' ', !Ref command]
           Secrets:
             - Name: SIGNOZ_CONFIG_CONTENT
               ValueFrom: !Ref SigNozConfigPath
@@ -208,6 +208,7 @@ Resources:
         - 'arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess'
       RoleName: OtelECSExecutionRole
 ```
+
 </TabItem>
 
 <TabItem value="external" label="External">
@@ -485,8 +486,10 @@ exporters:
     tls:
       insecure: false
     headers:
-      signoz-ingestion-key: '<SIGNOZ_INGESTION_KEY>'
-  logging:
+      signoz-ingestion-key: '<your-ingestion-key>'
+  # Useful for debugging; prints telemetry to the collector's logs.
+  # Can be disabled by removing it from the pipelines below.
+  debug:
     verbosity: basic
 
 service:
@@ -500,12 +503,12 @@ service:
     metrics:
       receivers: [otlp, hostmetrics, awsecscontainermetrics]
       processors: [resourcedetection, batch]
-      exporters: [otlp, logging]
+      exporters: [otlp, debug]
 
     logs:
       receivers: [otlp, filelog]
       processors: [resourcedetection, batch]
-      exporters: [otlp, logging]
+      exporters: [otlp, debug]
 ```
 
 </TabItem>
@@ -584,7 +587,7 @@ exporters:
 
   # Useful for debugging; prints telemetry to the collector's logs.
   # Can be disabled by removing it from the pipelines below.
-  logging:
+  debug:
     verbosity: basic
 
 service:
@@ -598,12 +601,12 @@ service:
     metrics:
       receivers: [otlp, hostmetrics, awsecscontainermetrics]
       processors: [resourcedetection, batch]
-      exporters: [otlp, logging]
+      exporters: [otlp, debug]
 
     logs:
       receivers: [otlp, filelog]
       processors: [resourcedetection, batch]
-      exporters: [otlp, logging]
+      exporters: [otlp, debug]
 ```
 
 </TabItem>
@@ -727,4 +730,6 @@ This will remove all resources created by the CloudFormation template, including
 ## Next Steps
 
 - [Configure the Daemon Service Collection Agent](/docs/collection-agents/ecs/ec2/configure/)
+- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
 - [Learn more about Collection from EC2](/docs/collection-agents/ecs/ec2/overview)

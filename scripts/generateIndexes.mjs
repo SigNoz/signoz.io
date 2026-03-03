@@ -3,9 +3,7 @@ import siteMetadata from '../data/siteMetadata.js'
 import {
   allBlogs,
   allDocs,
-  allComparisons,
   allGuides,
-  allOpentelemetries,
 } from '../.contentlayer/generated/index.mjs'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 
@@ -28,9 +26,7 @@ function createSearchIndex(content) {
 const searchIndexes = () => {
   createSearchIndex([
     ...allBlogs,
-    ...allComparisons,
     ...allGuides,
-    ...allOpentelemetries,
     ...allDocs,
   ])
   console.log('Search Indexes generated...')

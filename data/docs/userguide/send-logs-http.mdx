@@ -1,8 +1,9 @@
 ---
-date: 2024-12-17
+date: 2026-01-27
 id: send-logs-http
 
 title: Sending Logs to SigNoz over HTTP
+description: Learn how to send logs to SigNoz using HTTP. This guide covers payload structure, cURL examples for Cloud and Self-Hosted setups, and configuration details.
 hide_table_of_contents: true
 ---
 
@@ -97,9 +98,9 @@ Then they will be moved to `attributes` and the log record will be finally treat
 You can use cURL to send your logs. Below is a sample cURL request to send a JSON-formatted log record to a SigNoz Cloud ingestion endpoint:
 
 ```bash
-curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json' \
+curl --location 'https://ingest.<region>.signoz.cloud:443/logs/json' \
 --header 'Content-Type: application/json' \
---header 'signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>' \
+--header 'signoz-ingestion-key: <your-ingestion-key>' \
 --data '[
     {
         "trace_id": "000000000000000018c51935df0b93b9",
@@ -120,16 +121,16 @@ curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json' \
 ]'
 ```
 
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<REGION>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud
 
 <Admonition>
 To include a specific timestamp, add the `timestamp` field:
 
 ```bash
-curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json' \
+curl --location 'https://ingest.<region>.signoz.cloud:443/logs/json' \
 --header 'Content-Type: application/json' \
---header 'signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>' \
+--header 'signoz-ingestion-key: <your-ingestion-key>' \
 --data '[
     {
         "timestamp": 1698310066000000000,

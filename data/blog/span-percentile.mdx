@@ -1,0 +1,69 @@
+---
+title: Is this span actually slow? Span Percentile gives you the answer
+slug: span-percentile
+date: 2026-01-06
+tags: [Feature]
+authors: [anushka_karmakar]
+description: When you're debugging a trace and staring at a span that took 2 seconds, you need to know if that's actually slow or just normal. Span Percentile shows you the percentile inline in the trace detail view.
+image: /img/blog/2026/01/span-percentile.webp
+keywords: [SigNoz, Span Percentile, Distributed Tracing, OpenTelemetry, Observability, Trace Detail, Latency, APM, Developer Tools]
+---
+
+You're debugging a slow request. You drill into the trace, find a span that took 2.16 seconds, and immediately hit the question that always comes up. Is this actually slow for this operation, or is 2.16s just what this span normally takes?
+
+Without context, you can't tell. A database call that usually takes 50ms hitting 2 seconds is a problem. A batch job that normally runs for 3 seconds finishing in 2.16 seconds is fine, maybe even fast.
+
+The typical workaround is to open another browser tab, navigate to your tracing analytics, set up filters for the same service and span name, query the percentile distribution, and then mentally map where 2.16s falls. By the time you've done this context-switch, you've lost 30 seconds and broken your debugging flow.
+
+We built Span Percentile to eliminate that friction.
+
+## What it does
+
+When you open a span in the trace detail view, you'll see a percentile badge right next to the span name, something like "p78". This tells you immediately that this span's duration was slower than 78% of similar spans over the last hour.
+
+<video width="820" height="540" controls>
+   <source src="/img/blog/2026/01/span-percentile.mp4" type="video/mp4"/>
+   Your browser does not support the video tag.
+</video>
+
+Click on the badge, and an expandable panel shows you the full picture.
+
+The panel displays p50, p90, p99 values with their corresponding durations. A visual indicator shows exactly where your span sits relative to these markers. You also see the evaluation window, which defaults to 1 hour from the span's start time.
+
+The comparison is scoped by default to spans with the same `service.name`, `span.name`, and `deployment.environment`. So you're comparing apples to apples, this specific operation in this specific service in this environment.
+
+### Narrowing the comparison
+
+Sometimes the default scope is too broad. Maybe you want to know if latency is specific to a particular deployment, or a specific endpoint.
+
+Click the "+" button in the percentile panel, and you can add filters like `k8s.deployment.name` to compare only against spans from the same Kubernetes deployment, or `http.url` to compare only against spans hitting the same endpoint. Any span attribute that makes sense for your investigation works here.
+
+This lets you answer questions like "is this slow because of my new deployment, or is it slow across all deployments?"
+
+## When this helps
+
+**During incident triage -** You're paged for high latency. You pull up a slow trace and find a span that took 800ms. The percentile badge shows "p94". That's useful because this span is slower than usual, but it's not a dramatic outlier. You keep digging. Another span shows "p99.5". There's your culprit.
+
+**Validating a deployment -** You just rolled out a new version. Users are complaining about slowness, but you're not sure if it's real or confirmation bias. You find a slow trace, add `k8s.deployment.name` as a filter, and see that the span is "p97" within the new deployment but would only be "p60" compared to all deployments. The new code has a regression.
+
+**Investigating endpoint-specific issues -** Support reports that one particular API endpoint feels slow. You add `http.url` as a filter and check a few traces. Spans for this endpoint are consistently hitting p85-p95, while other endpoints hover around p50. Something's wrong with this specific code path.
+
+## How other tools handle this
+
+**Datadog** shows a percentile for a resource in the trace detail view. But you can't customize the comparison scope. You get what you get. If you need to narrow down to a specific deployment or endpoint, you'll need to leave the trace view and go query elsewhere.
+
+**Honeycomb** has heatmaps and BubbleUp, which are excellent for exploring distributions and finding what's different about slow requests. But these are query-level tools. When you're looking at a specific span in the trace waterfall, you don't get inline percentile context. You'd need to switch to the query builder, set up a heatmap visualization, select your region of interest, and run BubbleUp. It's powerful, but it's a different workflow.
+
+**Grafana Tempo** offers TraceQL metrics and the Traces Drilldown app for aggregate latency analysis. You can get p50/p90/p99 breakdowns grouped by attributes. But like Honeycomb, this is a separate view from the trace detail. When you're staring at a specific span, you don't see its percentile position inline.
+
+The difference with SigNoz is where the information surfaces. Percentile context appears directly in the trace detail view, right where you're already looking. And you can refine the comparison cohort without leaving that view.
+
+Context-switching during an incident costs time and mental energy. Having the percentile right there, in the same view where you're already debugging, means one less tab to open and one less mental context to maintain.
+
+## Try it
+
+Span Percentile is available in SigNoz Cloud and in self-hosted SigNoz from version 0.100.0 onwards.
+
+To use it, open any trace, click on a span in the waterfall, and look for the percentile badge next to the span name. Click to expand the full breakdown. Use the "+" button to add filters if you need a narrower comparison.
+
+We're curious which filters you find yourself adding most often. That'll help us decide what to include in the default scope. Drop us a note in [GitHub Discussions](https://github.com/SigNoz/signoz/discussions) or the [SigNoz Community Slack](https://signoz.io/slack).

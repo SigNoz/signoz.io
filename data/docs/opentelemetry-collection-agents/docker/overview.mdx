@@ -1,0 +1,33 @@
+---
+date: 2026-02-25
+title: Docker Collection Agent - Overview
+id: overview
+description: Monitor Docker hosts and containers using the OpenTelemetry Collector to send metrics, logs, and traces to SigNoz.
+doc_type: explanation
+---
+
+The Docker Collection Agent collects telemetry from Docker hosts and containers. The agent runs as a container alongside your application containers.
+
+## How It Works
+
+The agent runs as a long-lived container alongside your application containers. It reads host and container metrics from the local OS and Docker Engine, tails container log files, and listens for OTLP telemetry from instrumented applications, then forwards everything to SigNoz.
+
+1. **Scrapes the host**: Reads CPU, memory, disk, and network data from the mounted host filesystem
+2. **Polls the Docker API**: Fetches per-container resource stats via the Docker socket
+3. **Tails container logs**: Reads stdout/stderr from Docker's JSON log files in the container directory
+4. **Forwards OTLP**: Receives telemetry from instrumented apps on ports 4317/4318 and batches it to SigNoz
+
+## What You Can Collect
+
+- **Host Metrics**: CPU usage, memory consumption, disk I/O, filesystem usage, network statistics, and load averages from the Docker host
+- **Container Metrics**: Per-container CPU, memory, network I/O, and lifecycle metrics
+- **Container Logs**: stdout/stderr logs from all Docker containers, parsed from JSON log format
+- **Application Traces**: Distributed traces from OpenTelemetry-instrumented applications
+- **Application Metrics**: Custom metrics from your applications via OTLP
+- **Application Logs**: Log data from your applications via OTLP
+
+## Next Steps
+
+- [Install the Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/install)
+- [Configure the Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

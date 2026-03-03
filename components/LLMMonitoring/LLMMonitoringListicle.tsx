@@ -10,6 +10,7 @@ import {
   SiAmazonwebservices,
   SiPydantic,
   SiTemporal,
+  SiOllama,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -71,6 +72,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Claude Code Monitoring',
   },
   {
+    name: 'Codex (OpenAI)',
+    href: '/docs/codex-monitoring',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex (OpenAI) Monitoring',
+  },
+  {
     name: 'Crew AI',
     href: '/docs/crewai-observability',
     icon: (
@@ -91,6 +98,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'DeepSeek Monitoring',
   },
   {
+    name: 'Google ADK',
+    href: '/docs/google-adk-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+        alt="Google ADK Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Google ADK Monitoring',
+  },
+  {
     name: 'Google Gemini',
     href: '/docs/google-gemini-monitoring',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
@@ -99,8 +118,30 @@ const LLMMonitoringData: IconCardData[] = [
   {
     name: 'Grok',
     href: '/docs/grok-monitoring',
-    icon: <img src="/svgs/icons/LLMMonitoring/grok-logo.svg" alt="Grok Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+    ),
     clickName: 'Grok Monitoring',
+  },
+  {
+    name: 'Groq',
+    href: '/docs/groq-observability',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Groq Monitoring',
+  },
+  {
+    name: 'Haystack',
+    href: '/docs/haystack-monitoring',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Monitoring',
   },
   {
     name: 'Inkeep',
@@ -115,6 +156,18 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/langchain-observability',
     icon: <SiLangchain className="h-7 w-7 text-white" />,
     clickName: 'LangChain Monitoring',
+  },
+  {
+    name: 'Langtrace',
+    href: '/docs/langtrace',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/langtrace-logo.webp"
+        alt="Langtrace Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Langtrace',
   },
   {
     name: 'LiteLLM',
@@ -151,10 +204,40 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Mastra Monitoring',
   },
   {
+    name: 'Ollama',
+    href: '/docs/ollama-monitoring',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Monitoring',
+  },
+  {
     name: 'OpenAI',
     href: '/docs/openai-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-green-400" />,
     clickName: 'OpenAI Monitoring',
+  },
+  {
+    name: 'OpenLIT',
+    href: '/docs/openlit',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openlit-logo.webp"
+        alt="OpenLIT Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenLIT',
+  },
+  {
+    name: 'OpenRouter',
+    href: '/docs/openrouter-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Monitoring',
   },
   {
     name: 'Pipecat',
@@ -191,6 +274,18 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/temporal-observability',
     icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
     clickName: 'Temporal Monitoring',
+  },
+  {
+    name: 'Traceloop (OpenLLMetry)',
+    href: '/docs/traceloop',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/traceloop-logo.webp"
+        alt="Traceloop Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Traceloop (OpenLLMetry)',
   },
   {
     name: 'Vercel AI SDK',

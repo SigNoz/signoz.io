@@ -1,0 +1,304 @@
+---
+date: 2026-02-23
+id: oidc-keycloak
+
+title: Setting Up SSO OIDC With Keycloak
+description: Setting Up Single Sign-On (SSO) OpenID Connect (OIDC) With Keycloak, including claim mapping and role mapping.
+doc_type: tutorial
+---
+
+<Admonition type="info">
+OIDC-based authentication is available exclusively on Self Hosted Enterprise plan and SigNoz Cloud.
+</Admonition>
+
+### Overview
+
+This guide walks you through setting up SSO using OpenID Connect (OIDC) with Keycloak, a powerful open-source identity and access management solution, with SigNoz.
+
+**What you'll accomplish:**
+- Configure Keycloak as an OIDC identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing Keycloak accounts
+
+### Prerequisites
+
+Before you begin, ensure you have:
+
+- **Keycloak** with administrative access
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Keycloak Configuration Steps
+
+### Step 1: Create a Realm in Keycloak Admin Console
+
+1. Log in to the Keycloak admin console at `http://<your-keycloak-domain>/admin/`
+2. Click the realm dropdown in the top-left corner
+3. Click **Create Realm**
+4. Enter a **Realm name** (e.g., `signoz`)
+5. Click **Create**
+
+![KeyCloak - Create Realm](/img/docs/oidc-keycloak/create-realm.webp)
+
+### Step 2: Create an OIDC Client
+
+1. Navigate to **Clients** → **Create client**
+2. Under **Client type**, select **OpenID Connect**
+3. Set **Client ID** to a unique identifier (e.g., `signoz`)
+4. Click **Next**
+5. On the **Capability config** page:
+   - Turn **Client authentication** to **ON** (this makes it a confidential client with a secret)
+   - Ensure **Standard flow** is checked
+6. Click **Next**
+7. On the **Login settings** page:
+   - Set **Valid redirect URIs** to `<your-instance-url>/api/v1/complete/oidc`
+   - Set **Web origins** to `<your-instance-url>`
+8. Click **Save**
+
+### Step 3: Note the Client Secret
+
+1. Open your newly created client and go to the **Credentials** tab
+2. Copy the **Client secret** — you'll need this when configuring SigNoz
+
+![KeyCloak - OIDC Secret](/img/docs/oidc-keycloak/keycloak-oidc-credentials.webp)
+
+### Step 4: Set Up Claim Mappers (Optional)
+
+By default, Keycloak includes standard OIDC claims like `email` and `name` in the token. To include group memberships, you need to create a **groups** client scope.
+
+#### Create the Groups Client Scope
+
+1. In the left sidebar, go to **Client scopes**
+2. Click **Create client scope**
+3. Fill in:
+   - **Name**: `groups`
+   - **Type**: `Default`
+   - **Protocol**: `OpenID Connect`
+4. Click **Save**
+
+![KeyCloak Group Client Scope](/img/docs/oidc-keycloak/keycloak-oidc-group-client-scope.webp)
+
+#### Add a Group Membership Mapper
+
+1. Inside the newly created `groups` scope, go to the **Mappers** tab
+2. Click **Add mapper** → **By configuration**
+3. Select **Group Membership**
+4. Fill in:
+   - **Name**: `groups`
+   - **Token Claim Name**: `groups`
+   - **Full group path**: **OFF**
+   - **Add to ID token**: **ON**
+   - **Add to access token**: **ON**
+   - **Add to userinfo**: **ON**
+5. Click **Save**
+
+![KeyCloak Group Membership Mapper](/img/docs/oidc-keycloak/keycloak-oidc-group-membership-mapper.webp)
+
+#### Assign the Scope to Your Client
+
+1. Navigate to **Clients** → select your SigNoz client → **Client scopes** tab
+2. Click **Add client scope**
+3. Select **groups** and click **Add** → **Default**
+
+![KeyCloak Add Groups Mapper to Client Scopes](/img/docs/oidc-keycloak/keycloak-add-groups-client-scope.webp)
+
+## SigNoz Configuration Steps
+
+### Gather OIDC Information
+
+You need three values from Keycloak:
+
+1. **Issuer URL**: `http(s)://<your-keycloak-domain>/realms/<your-realm-name>`
+   - You can verify this by visiting `http(s)://<your-keycloak-domain>/realms/<your-realm-name>/.well-known/openid-configuration` and checking the `issuer` field
+2. **Client ID**: The Client ID you set in [Step 2](#step-2-create-an-oidc-client)
+3. **Client Secret**: The secret from the [Credentials tab](#step-3-note-the-client-secret)
+
+### Configure SigNoz
+
+1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Click **Add Domain** and select **OIDC Authentication**
+3. Enter your email domain (e.g., `your-domain.com`)
+4. Fill in the OIDC settings:
+   - **Issuer URL**: the issuer URL from Keycloak (e.g., `https://keycloak.example.com/realms/signoz`)
+   - **Client ID**: your OIDC client ID
+   - **Client Secret**: the client secret from Keycloak
+5. Turn **Get User Info** to **ON** — this fetches additional claims (like groups) from the userinfo endpoint
+6. Enable the **Enforce SSO** toggle
+7. Click **Save**
+
+![SigNoz Configure OIDC Domain](/img/docs/oidc-keycloak/signoz-configure-oidc-domain.webp)
+
+### Verify the Setup
+
+1. Create a user in your Keycloak realm (or use an existing one)
+2. Open a private/incognito window and navigate to your SigNoz URL
+3. Click **Login** → **SSO Login**
+4. Enter your Keycloak credentials when prompted
+5. Verify you are redirected back to SigNoz and authenticated
+
+## Configure Claim Mapping (Optional)
+
+Claim mapping tells SigNoz which OIDC token claims contain the user's email, display name, groups, and role. The defaults work with standard Keycloak claims, but you can customize them if your mappers use different claim names.
+
+### Claim Mapping Fields
+
+Configure these in SigNoz under **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains** → edit your domain → **Claim Mapping** section:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| **Email** | `email` | Token claim name containing the user's email address |
+| **Name** | `name` | Token claim name containing the user's display name |
+| **Groups** | `groups` | Token claim name containing the user's group memberships |
+| **Role** | `role` | Token claim name containing the user's role |
+
+Each value must match the **Token Claim Name** configured in the corresponding Keycloak mapper.
+
+### Add a Role Attribute Mapper in Keycloak (Optional)
+
+If you want to assign SigNoz roles directly via a Keycloak user attribute, add a mapper for it:
+
+#### Register the Custom Attribute
+
+1. In Keycloak, go to **Realm settings** → **User profile** tab
+2. Click **Create attribute**
+3. Fill in:
+   - **Attribute name**: `signoz_role`
+   - **Display name**: `SigNoz Role`
+   - Under **Permissions**, enable **Can user view?** and **Can admin edit?**
+4. Click **Create**
+
+![KeyCloak Realm User SigNoz Role Attribute](/img/docs/oidc-keycloak/signoz-role-user-attribute.webp)
+
+#### Create the Token Mapper
+
+1. Go to **Client scopes** → select the `groups` scope
+2. Go to the **Mappers** tab and click **Add mapper** → **By configuration**
+3. Select **User Attribute**
+4. Fill in:
+   - **Name**: `signoz_role`
+   - **User Attribute**: `signoz_role`
+   - **Token Claim Name**: `signoz_role`
+   - **Claim JSON Type**: `String`
+   - **Add to ID token**: **ON**
+   - **Add to access token**: **ON**
+   - **Add to userinfo**: **ON**
+5. Click **Save**
+
+![Keycloak SigNoz Role Client Scopes](/img/docs/oidc-keycloak/keycloak-client-scopes-oidc-signoz-role-2.webp)
+
+![KeyCloak Created SigNoz Role Mapper in Client Scopes](/img/docs/oidc-keycloak/keycloak-client-scopes-oidc-signoz-role-1.webp)
+
+#### Set the Attribute on Users
+
+1. Go to **Users** → select a user → **Attributes** tab
+2. Set the key `signoz_role` with a value of `ADMIN`, `EDITOR`, or `VIEWER`
+3. Click **Save**
+
+![KeyCloak Set User Role Attribute](/img/docs/oidc-keycloak/keycloak-set-user-signoz-role.webp)
+
+### Configure Claim Mapping in SigNoz
+
+1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Click on your OIDC domain to edit it
+3. In the **Claim Mapping** section, set the fields to match your Keycloak mappers:
+   - **Groups**: `groups` (matches the group membership mapper created above)
+   - **Role**: `signoz_role` (matches the role attribute mapper created above)
+4. Click **Save**
+
+![SigNoz OIDC Claim Mapping Configuration](/img/docs/oidc-keycloak/signoz-claim-mapping-configuration-oidc.webp)
+
+<Admonition type="note">
+You only need to configure claims that differ from the defaults. The standard OIDC `email` and `name` claims work out of the box with Keycloak — you typically only need to set **Groups** and **Role**.
+</Admonition>
+
+## Configure Role Mapping (Optional)
+
+Role mapping automatically assigns SigNoz roles (VIEWER, EDITOR, ADMIN) to users when they log in via OIDC, based on their Keycloak groups or a custom role claim.
+
+### Role Resolution Priority
+
+When a user logs in, SigNoz determines their role using this priority (highest to lowest):
+
+1. **Use Role Attribute** — if enabled and the token contains a role claim, that value is used directly
+2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (ADMIN > EDITOR > VIEWER)
+3. **Default Role** — fallback role from configuration
+4. **VIEWER** — ultimate default if nothing else is configured
+
+### Option A: Group-Based Role Mapping
+
+Map Keycloak groups to SigNoz roles. Users are assigned the highest-privilege role from their group memberships.
+
+#### Create Groups in Keycloak
+
+1. In Keycloak, go to **Groups** in the left sidebar
+2. Click **Create group**
+3. Enter a group name (e.g., `signoz-admins`) and click **Create**
+4. Repeat for other groups (e.g., `signoz-editors`, `signoz-viewers`)
+
+![Keycloak Group Creation](/img/docs/oidc-keycloak/keycloak-create-group.webp)
+
+#### Assign Users to Groups
+
+1. Go to **Users** → select a user → **Groups** tab
+2. Click **Join Group**
+3. Select the group (e.g., `signoz-admins`) and click **Join**
+
+![Keycloak User Joining Group](/img/docs/oidc-keycloak/keycloak-user-join-group.webp)
+
+#### Configure in SigNoz
+
+1. Ensure you have [set up the groups client scope](#step-4-set-up-claim-mappers-optional) and [configured claim mapping](#configure-claim-mapping-in-signoz) for groups
+2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+3. Click on your OIDC domain to edit it
+4. In the **Role Mapping** section:
+   - Set **Default Role** to `VIEWER`
+   - Under **Group Mappings**, add entries mapping each Keycloak group name to a SigNoz role:
+
+     | Keycloak Group | SigNoz Role |
+     |----------------|-------------|
+     | `signoz-admins` | `ADMIN` |
+     | `signoz-editors` | `EDITOR` |
+     | `signoz-viewers` | `VIEWER` |
+
+   - Leave **Use Role Attribute Directly** turned **OFF**
+5. Click **Save**
+
+![SigNoz OIDC Role Mapping Configuration](/img/docs/oidc-keycloak/signoz-oidc-role-mapping-configuration.webp)
+
+### Option B: Direct Role Attribute Mapping
+
+Assign SigNoz roles directly via a custom user attribute in Keycloak, without using groups.
+
+#### Set Up Keycloak
+
+1. [Register the `signoz_role` custom attribute](#register-the-custom-attribute) in the user profile
+2. [Create the token mapper](#create-the-token-mapper) for the attribute
+3. [Set the `signoz_role` attribute](#set-the-attribute-on-users) on each user to `ADMIN`, `EDITOR`, or `VIEWER`
+
+#### Configure in SigNoz
+
+1. Ensure you have [configured claim mapping](#configure-claim-mapping-in-signoz) with **Role** set to `signoz_role`
+2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+3. Click on your OIDC domain to edit it
+4. In the **Role Mapping** section:
+   - Set **Default Role** to `VIEWER` (used as fallback)
+   - Turn **Use Role Attribute** to **ON**
+5. Click **Save**
+
+![SigNoz OIDC Direct Role Mapping Configuration](/img/docs/oidc-keycloak/signoz-oidc-direct-role-mapping-configuration.webp)
+
+<Admonition type="info">
+The role value in the token is matched case-insensitively — `admin`, `Admin`, and `ADMIN` all resolve to the ADMIN role. If the value doesn't match any valid role, SigNoz falls back to group mappings (if configured) and then the default role.
+</Admonition>
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- **"Authentication failed" error**: Verify that the **Valid redirect URI** in Keycloak exactly matches `<your-instance-url>/api/v1/complete/oidc`. Ensure **Client authentication** is ON and the client secret in SigNoz matches the one in Keycloak's Credentials tab
+- **"Invalid issuer" error**: Check that the **Issuer URL** in SigNoz matches the `issuer` value from `<keycloak-url>/realms/<realm>/.well-known/openid-configuration` exactly. If SigNoz and Keycloak use different hostnames (e.g., Docker networking), configure **Issuer Alias** for the external URL
+- **Stuck in a login loop**: Ensure **Enforce SSO** is enabled in SigNoz **and** the user's email domain matches the configured authenticated domain
+- **Groups not appearing in token**: Verify that the `groups` client scope is assigned to your client as a **Default** scope (not Optional), and the group membership mapper has **Add to ID token** and **Add to userinfo** set to ON
+- **User created with wrong role**: Check the [role resolution priority](#role-resolution-priority) — if **Use Role Attribute** is ON, it takes precedence over group mappings. Verify the **Token Claim Name** in the Keycloak mapper matches the **Role** field in SigNoz claim mapping
+- **Custom attribute not included in token**: Make sure the attribute is [registered in the user profile](#register-the-custom-attribute) and the mapper has **Add to ID token**, **Add to access token**, and **Add to userinfo** all set to ON
+- **"Get User Info" related errors**: If your Keycloak is behind a reverse proxy or uses different internal/external URLs, ensure SigNoz can reach the userinfo endpoint at the issuer URL
+- **Locked out?**: If you're unable to login because of faulty SSO setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`

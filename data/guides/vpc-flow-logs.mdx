@@ -1,880 +1,316 @@
 ---
-title: Complete Guide to VPC Flow Logs
+title: VPC Flow Logs Deep Dive - How They Work and Why You Need Them?
 slug: vpc-flow-logs
-date: 2024-07-03
-tags: [logging]
-authors: [daniel]
-description: VPC flow logs are a network monitoring feature that captures detailed information about the IP traffic entering and leaving your Virtual Private Cloud (VPC). This includes details such as…
-keywords: [logs, log monitoring, vpc, signoz]
+date: 2026-02-10
+tags: [logging, vpc]
+authors: [saurabh_patil, yuvraj]
+description: Deep dive into VPC Flow Logs architecture. Understand capture mechanisms, aggregation intervals, record format versions and troubleshooting patterns.
+keywords: [vpc flow logs, aws vpc flow logs, flow logs format, vpc flow logs architecture, flow logs record format, cloudwatch flow logs, vpc network monitoring]
 ---
 
-<head>
-<script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Complete Guide to VPC Flow Logs",
-  "alternativeHeadline": "Understanding, Implementing, and Analyzing VPC Flow Logs for Network Monitoring and Security",
-  "author": {
-    "@type": "Person",
-    "name": "Daniel"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-07-03",
-  "dateModified": "2024-07-03",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/guides/vpc-flow-logs/"
-  },
-  "description": "VPC flow logs are a network monitoring feature that captures detailed information about the IP traffic entering and leaving your Virtual Private Cloud (VPC). This includes details such as source/destination IP addresses, ports, protocols, and data volume.",
-  "keywords": "logs, log monitoring, vpc, signoz",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "VPC Flow Logs",
-      "description": "A feature that captures information about IP traffic going to and from network interfaces in a VPC"
-    },
-    {
-      "@type": "Thing",
-      "name": "Network Monitoring",
-      "description": "The practice of overseeing and analyzing network traffic and performance"
-    },
-    {
-      "@type": "Thing",
-      "name": "Cloud Security",
-      "description": "Measures and controls that protect data, applications, and infrastructure associated with cloud computing"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "Amazon Web Services",
-      "applicationCategory": "Cloud Computing Platform"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "AWS Lambda",
-      "applicationCategory": "Serverless Computing Service"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What are VPC flow logs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "They are detailed network traffic records in your Virtual Private Cloud (VPC)."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Where to view VPC flow logs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "In the configured log destination (CloudWatch Logs, S3, or Data Firehose for AWS)."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do you create AWS VPC flow logs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "In the Amazon VPC console, select your VPC or subnet, then choose 'Create flow log' from the Actions menu. You can also do this with the AWS CLI."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is VPC flow log free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No, you are charged for the storage and data transfer of logs."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What does VPC stand for?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Virtual Private Cloud."
-        }
-      }
-    ]
-  },
-  "tutorial": {
-    "@type": "HowTo",
-    "name": "How to Create and Forward VPC Flow Logs to SigNoz",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Create/Configure the S3 Bucket",
-        "text": "Create an S3 bucket in AWS to store your VPC flow logs."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create the VPC",
-        "text": "Set up a Virtual Private Cloud (VPC) in AWS if you don't already have one."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create the VPC Flow Logs",
-        "text": "Enable VPC flow logs for your VPC, configuring them to be stored in your S3 bucket."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create a Lambda Function",
-        "text": "Set up an AWS Lambda function to process the VPC flow logs."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Configure Policies for the Function",
-        "text": "Grant the necessary permissions to your Lambda function to access the S3 bucket."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Trigger the Function",
-        "text": "Set up a trigger for the Lambda function to process new log files in the S3 bucket."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Write the Lambda Function",
-        "text": "Implement the Lambda function to process the VPC flow logs and forward them to SigNoz."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Visualize the VPC Flow Logs in SigNoz",
-        "text": "Access and explore the forwarded VPC flow logs in the SigNoz dashboard."
-      }
-    ]
-  }
-}) }}
-  />
-</head>
-
-Understanding and monitoring your network traffic is vital for maintaining security, optimizing performance, and ensuring compliance across all traffic entering and exiting your Virtual Private Cloud (VPC).
-
-In this guide, you will learn about VPC flow logs, how they work, their importance, and limitations. You will also understand what each flow log is comprised of and how they can be created and forwarded to a monitoring tool for analysis.
-
-## What are VPC Flow Logs?
-
-VPC flow logs are a network monitoring feature that captures detailed information about the IP traffic entering and leaving your Virtual Private Cloud (VPC). This includes details like source/destination IP addresses, ports, protocols, and data volume.
-
-Flow logs are the source of truth for all network activity in your cloud environment. They help with network troubleshooting, security analysis, and traffic optimization.
-
-### How do VPC Flow Logs work?
-
-Within a VPC, there are various subnets containing different network interfaces, such as those associated with EC2 instances, Elastic Load Balancers, and other AWS resources. When you enable VPC flow logs, you can configure them to capture metadata—information about the traffic, not the content itself—flowing within the VPC through these network interfaces. This traffic can originate from various sources, including other AWS accounts, VPC peering connections, VPNs, or the internet.
-
-Once the flow logs are enabled, the log data is aggregated and stored in the specified log destination for analysis and retention. Depending on your cloud platform, these are the destinations where the flow log can be stored:
-
-- AWS: Amazon CloudWatch Logs, Amazon S3, or Amazon Kinesis Data Firehose.
-- Google Cloud: Cloud Logging.
-- Azure: Azure Storage.
-
-Users can create VPC flow logs for an entire VPC, a specific subnet, or an individual network interface. They can also customize the fields captured in the logs to meet their specific needs, such as logging only specific IP ranges or traffic types.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-aws.webp"
-  alt="How flow logs are stored"
-  caption="How flow logs are stored"
+<ArticleSeriesTop
+  seriesName="VPC Flow Logs - Complete Guide"
+  seriesOverviewHref="/guides/vpc-flow-logs"
+  currentPart={1}
+  totalParts={2}
+  next={{
+    title: 'How to Enable and Query VPC Flow Logs in AWS?',
+    href: '/guides/vpc-flow-logs-aws',
+  }}
 />
-<br></br>
 
-### Importance of VPC Flow Logs
+VPC Flow Logs is a powerful, built-in network monitoring feature provided by cloud platforms (AWS, GCP, Azure), designed to capture detailed metadata about IP traffic flowing through your network interfaces. By enabling seamless logging of accepted and rejected traffic flows, it empowers administrators to troubleshoot connectivity issues, detect anomalies, and comply with regulatory requirements, all without the need for additional agents or hardware.
 
-There are several benefits VPC flow logs provide in understanding network traffic within your VPC. They include:
+Each flow log entry (a flow log record) documents a single network flow, characterized by source IP, destination IP, source port, destination port, and protocol. These records are aggregated over a configurable time window (called the aggregation interval) and then delivered to a destination of your choice for storage and analysis. Flow log data is collected outside the path of your network traffic, enabling them has zero impact on your network throughput or latency. VPC Flow Logs don't slow down your instances or degrade application performance.
 
-1. Network Visibility: VPC flow logs provide detailed visibility into the traffic patterns within your Virtual Private Cloud (VPC). This is useful for understanding network behavior and identifying bottlenecks, latency issues, or unexpected traffic flows.
-2. Security Monitoring: VPC flow logs can help detect potential security threats by capturing and analyzing network traffic. For instance, they can alert you to the use of non-standard ports, requests from known crypto mining domains, and traffic to non-approved DNS servers, which could indicate malicious activities such as attempts to compromise systems or exfiltrate data.
-3. Troubleshooting and Performance Optimization: VPC flow logs facilitate diagnosing issues with security policies, monitoring traffic reaching instances, and determining the direction of traffic. This information is essential for troubleshooting network problems and optimizing network performance.
-4. Compliance and Audit Trails: VPC flow logs document network activities and serve as an audit trail for organizations subject to regulatory compliance.
+## Why Do You Need VPC Flow Logs?
 
-## Components of VPC Flow Logs
+Before VPC flow logging, teams often relied on host-based tooling or third-party network sensors, which used to increase operational overhead and usually lacks VPC-wide coverage. This approach was complex, added overhead to each instance, and provided a limited view restricted to traffic visible at the instance level. VPC Flow Logs eliminate all of that by providing centralized, agent-free visibility at three levels: the entire VPC, a specific subnet, or an individual network interface (ENI).
 
-VPC flow logs provide a comprehensive record of all network traffic within a Virtual Private Cloud (VPC). This record is composed of individual entries called flow log records. Each flow log record offers detailed, structured information about a specific network interaction, including the source and destination IP addresses, ports, protocol, and data transfer volume.
+Here are the practical reasons to use VPC Flow Logs:
 
-A VPC flow log record follows the below syntax:
+### Security Monitoring and Threat Detection
 
-```jsx
+VPC Flow Logs help you detect port scanning, network enumeration attempts, lateral movement after a compromised host, and data exfiltration. If an attacker communicates with a compromised system on a non-standard port (say, using SMTPS for an HTTPS request), flow logs catch it.
+
+### Troubleshooting Connectivity Issues
+
+When an application can't reach a database or a service times out, flow logs help you pinpoint whether the traffic is being rejected by a security group, blocked by a network ACL, or it is not reaching the intended destination at all.
+
+### Compliance Monitoring
+
+Many compliance standards, like PCI DSS and HIPAA, require organizations to monitor and log network traffic. VPC Flow Logs provide the comprehensive record needed for auditing and compliance reporting. AWS itself recommends enabling VPC Flow Logs for every VPC as a security best practice.
+
+### Cost Optimization
+
+By analyzing traffic patterns, you can identify top talkers in your network, discover unnecessary cross-AZ traffic that's inflating your bill, and understand how your network resources are actually being utilized.
+
+## How do VPC Flow Logs Work?
+
+The architecture behind VPC Flow Logs involves three stages: **Capture**, **Aggregate**, and **Deliver**.
+
+<Figure src="/img/guides/2026/02/vpc-flow-logs-working.webp" alt="A high-level overview of the VPC Flow Logs architecture" caption="A high-level overview of the VPC Flow Logs architecture" />
+
+### 1. Capture
+
+When you enable VPC Flow Logs, the cloud provider begins capturing metadata about IP traffic to/from the network interface level. On AWS, the flow log service captures connection-level metadata for every IP traffic flow passing through the ENIs (Elastic Network Interface) within your configured scope (VPC, subnet, or individual ENI).In practice, not all traffic types are logged, and in rare cases records can be skipped (log-status = SKIPDATA). The capture happens outside the data path, so there is no performance penalty.
+
+### 2. Aggregate
+
+Captured flow metadata is aggregated into flow log records (source IP, destination IP, source port, destination port, protocol) and aggregated within a time window called the **aggregation interval**. By default, this interval is **10 minutes** on AWS. You can reduce it to **1 minute** for more granular data, but this significantly increases the volume (and cost) of log records.
+
+On Nitro-based instances (most modern EC2 instance types), the aggregation interval is always 1 minute or less, regardless of the configured setting.
+
+### 3. Deliver
+
+After aggregation, the flow log records are delivered to your configured destination. On AWS, you have three options:
+
+| Destination | Best For |
+| --- | --- |
+| **Amazon CloudWatch Logs** | Real-time analysis, quick queries using CloudWatch Insights, metric filters and alerts |
+| **Amazon S3** | Long-term archival, cost-effective storage, big data analysis with Athena |
+| **Amazon Data Firehose** | Streaming to third-party tools (SigNoz, Datadog, Splunk, etc.), real-time processing pipelines |
+
+## VPC Flow Logs Across Different Cloud Providers
+
+While this guide primarily focuses on AWS, VPC Flow Logs are available across all major cloud providers. Here's a quick comparison:
+
+| Feature | AWS VPC Flow Logs | GCP VPC Flow Logs | Azure NSG Flow Logs |
+| --- | --- | --- | --- |
+| **Scope** | VPC, Subnet, ENI | VPC Network, Subnet, VLAN Attachment, VPN Tunnel | Network Security Group |
+| **Aggregation Interval** | 1 min or 10 min | 5 sec (default), 30 sec, 1 min, 5 min, 10 min, 15 min | 1 min |
+| **Log Destinations** | CloudWatch, S3, Firehose | Cloud Logging | Azure Storage (Blob) (primary). Optional downstream analytics/export (e.g., Traffic Analytics / SIEM tooling). |
+| **Sampling** | All flows captured | Configurable (50% default, adjustable) | All flows captured |
+| **Format** | Space-delimited or Parquet | JSON | JSON |
+| **Container-level visibility** | Yes (ECS, Version 7) | Yes (GKE nodes) | Yes (AKS Container Network Logs / Advanced Container Networking Services) |
+
+GCP's VPC Flow Logs work differently in a few important ways. They use a dynamic primary sampling rate that varies with host load. You also get a configurable secondary sampling rate (default 50%), meaning not all flows are guaranteed to be logged. The tradeoff is lower cost for high-traffic environments.
+
+Azure has evolved from NSG Flow Logs (which log at the security group level) to the newer **VNet Flow Logs**, which provide virtual network-level logging, closer to what AWS and GCP offer at the VPC level.
+
+## VPC Flow Logs Format: Understanding the Record Structure
+
+A flow log record is a space-delimited string, with each field representing a component of the network flow. Understanding the format is critical for writing queries, building dashboards, and debugging network issues.
+
+### Default Format (Version 2)
+
+The default format includes 14 fields:
+
+```bash
 <version> <account-id> <interface-id> <srcaddr> <dstaddr> <srcport> <dstport> <protocol> <packets> <bytes> <start> <end> <action> <log-status>
 ```
 
-| Version      | The version of the flow log format                                 |
-| ------------ | ------------------------------------------------------------------ |
-| Account-id   | The AWS account ID associated with the flow log.                   |
-| Interface-id | The ID of the network interface for which the traffic is recorded. |
-| Srcaddr      | The source IP address of the traffic.                              |
-| Dstaddr      | The destination IP address of the traffic.                         |
-| Srcport      | The source port of the traffic.                                    |
-| Dstport      | The destination port of the traffic.                               |
-| Protocol     | The protocol used (e.g., TCP, UDP).                                |
-| Packets      | The number of packets transferred.                                 |
-| Bytes        | The number of bytes transferred.                                   |
-| Start        | The start time of the flow.                                        |
-| End          | The end time of the flow.                                          |
-| Action       | The action taken (e.g., accept, reject).                           |
-| Log-status   | The status of the log (e.g., OK, NODATA).                          |
+Here's what a real flow log record looks like:
 
-Example of a VPC flow log record:
-
-```jsx
-2 123456789012 eni-abcdef01 10.0.1.1 203.0.113.5 54321 80 TCP 10 3456 1510868790 1510868850 ACCEPT OK
+```bash
+2 123456789012 eni-abcdef01 10.0.1.1 203.0.113.5 54321 80 6 10 3456 1510868790 1510868850 ACCEPT OK
 ```
 
-A complete VPC flow log would include multiple flow log records, typically in a tabular format:
+Let's break down each field:
 
-```jsx
-version account-id interface-id srcaddr dstaddr srcport dstport protocol packets bytes start end action log-status
-2 901660615925 eni-00257d510cfc77a72 74.82.47.48 10.0.12.216 34888 123 17 1 40 1718806751 1718806806 REJECT OK
-2 901660615925 eni-00257d510cfc77a72 80.75.212.75 10.0.12.216 34752 25836 6 1 40 1718806751 1718806806 REJECT OK
-2 901660615925 eni-00257d510cfc77a72 212.70.149.34 10.0.12.216 51989 8099 6 1 40 1718806751 1718806806 REJECT OK
-2 901660615925 eni-00257d510cfc77a72 91.189.91.157 10.0.12.216 123 40995 17 1 76 1718806751 1718806806 ACCEPT OK
+| Field | Value in Example | What it Means |
+| --- | --- | --- |
+| **version** | 2 | Flow log format version |
+| **account-id** | 123456789012 | Your AWS account ID |
+| **interface-id** | eni-abcdef01 | The ENI where traffic was captured |
+| **srcaddr** | 10.0.1.1 | Source IP address |
+| **dstaddr** | 203.0.113.5 | Destination IP address |
+| **srcport** | 54321 | Source port |
+| **dstport** | 80 | Destination port (HTTP) |
+| **protocol** | 6 | IANA protocol number (6 = TCP, 17 = UDP, 1 = ICMP) |
+| **packets** | 10 | Number of packets in the aggregation interval |
+| **bytes** | 3456 | Number of bytes in the aggregation interval |
+| **start** | 1510868790 | Start time of the capture window (Unix epoch) |
+| **end** | 1510868850 | End time of the capture window (Unix epoch) |
+| **action** | ACCEPT | Whether traffic was accepted or rejected |
+| **log-status** | OK | Logging status (OK, NODATA, or SKIPDATA) |
+
+<KeyPointCallout defaultCollapsed="true" title="What do NODATA and SKIPDATA mean?">
+
+- **NODATA:** No network traffic was recorded for the ENI (Network Interface) during the aggregation interval.
+- **SKIPDATA:** Some flow log records were skipped during the aggregation interval due to an internal AWS capacity constraint. This doesn't mean the traffic was lost, it means the logging of that traffic was missed.
+
+</KeyPointCallout>
+
+### Custom Format Fields (Version 3+)
+
+The default format gives you the basics, but AWS has introduced additional fields across multiple versions that provide significantly deeper visibility. You access these by choosing a custom format when creating the flow log. 
+
+When using custom format, the `${version}` field is automatically set to the highest version number among all the fields you include, you don't manually specify the version. For example, if you include `reject-reason` (v8), your log records will show `version = 8`.
+
+**Version 3 fields (VPC/Subnet/Instance context):**
+
+| Field | Purpose |
+| --- | --- |
+| `vpc-id` | Identifies which VPC the traffic belongs to |
+| `subnet-id` | Identifies the subnet |
+| `instance-id` | Maps traffic to a specific EC2 instance |
+| `tcp-flags` | Bitmask of TCP flags (SYN, ACK, FIN, RST), it is critical for understanding connection state |
+| `type` | IPv4 or IPv6 |
+| `pkt-srcaddr` | Original packet source IP (important when traffic passes through NAT or load balancers) |
+| `pkt-dstaddr` | Original packet destination IP |
+
+**Version 4 fields (Location awareness):**
+
+| Field | Purpose |
+| --- | --- |
+| `region` | AWS region of the flow |
+| `az-id` | Availability Zone ID |
+| `sublocation-type` | Type of sublocation (e.g., wavelength) |
+| `sublocation-id` | ID of the sublocation |
+
+**Version 5 fields (Service and direction awareness):**
+
+| Field | Purpose |
+| --- | --- |
+| `pkt-src-aws-service` | AWS service name for the source (e.g.,S3, DYNAMODB) |
+| `pkt-dst-aws-service` | AWS service name for the destination |
+| `flow-direction` | Whether traffic is ingress or egress |
+| `traffic-path` | The path traffic takes to exit (e.g., through internet gateway, NAT gateway, VPC peering) |
+
+**Version 7 fields (ECS container visibility):**
+
+Version 7, introduced in 2024, adds 10 new fields specific to Amazon ECS workloads, giving you visibility into container-level traffic for the first time, including task IDs, cluster ARNs, container instance IDs, and service names.
+
+<KeyPointCallout defaultCollapsed="true" title="Why pkt-srcaddr and pkt-dstaddr matter?">
+
+In the default format (version 2), `srcaddr` and `dstaddr` give you the IP addresses of the two interfaces that communicate directly. But if your EC2 instance sits behind a load balancer or NAT gateway, these fields show the load balancer's IP address, not the original client's IP address.
+
+The `pkt-srcaddr` and `pkt-dstaddr` fields (version 3+) preserve the original packet IPs, which is essential for tracing the actual source of traffic.
+
+</KeyPointCallout>
+
+### Version 8+ fields (Enhanced troubleshooting)
+
+| Field | Version | Purpose |
+| --- | --- | --- |
+| `reject-reason` | 8 | Reason traffic was rejected (currently BPA or EC; ‘-’ otherwise). |
+| `resource-id` | 9 | Resource ID associated with the flow (e.g., NAT gateway ID, transit gateway ID) |
+| `encryption-status` | 10 | Encryption status for the flow |
+
+### Recommended Custom Format for Production
+
+If you're setting this up for the first time, here is a recommended custom format that balances depth and cost. It covers security, troubleshooting, and cost optimization use cases:
+
+```bash
+${version} ${account-id} ${interface-id} ${srcaddr} ${dstaddr} ${srcport} ${dstport} ${protocol} ${packets} ${bytes} ${start} ${end} ${action} ${log-status} ${vpc-id} ${subnet-id} ${instance-id} ${tcp-flags} ${type} ${pkt-srcaddr} ${pkt-dstaddr} ${flow-direction} ${traffic-path}
 ```
 
-## Limitations of VPC Flow log
+Add `pkt-src-aws-service` and `pkt-dst-aws-service` if you need to trace traffic to specific AWS services.
 
-While VPC flow logs provide valuable insights into network traffic, there are several important limitations you should be aware of:
+### Log File Format: Plain Text vs Parquet
 
-1. Unsupported Traffic Types: VPC flow logs do not capture all types of traffic. For example, they do not log traffic generated by instances when they contact the Amazon DNS server, nor do they log traffic to and from 169.254.169.254 for instance metadata.
-2. Packet Data: VPC flow logs capture metadata about IP traffic but do not capture the actual packet payload. This means you can't inspect the contents of the packets.
-3. Immutable Configuration: Once a flow log is created, its settings and log record format cannot be modified. Any necessary changes require setting up a new flow log.
-4. VPC Peering: Flow logs cannot be enabled for VPCs peered with your VPC unless the peered VPC resides within your own account.
+When publishing to S3, you can choose between two file formats:
 
-These are a few of the flow log limitations. If you want to see a complete list of the limitations, you can visit the <a href="https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-limitations.html" rel="noopener noreferrer nofollow" target="_blank">AWS documentation</a>.
+- **Plain Text:** The default. Human-readable, space-delimited records. Simple but slower to query at scale.
+- **Apache Parquet:** A columnar data format. AWS documentation states that queries on Parquet data are 10 to 100 times faster compared to plain text, and the format compresses better, reducing storage costs significantly.
 
-## How to Create VPC Flow Logs
+For any production deployment publishing to S3, use Parquet.
 
-VPC Flow logs can be created across different cloud platforms. In this tutorial, you will learn how to create them specifically in AWS.
+## VPC Flow Logs Examples: Reading and Interpreting Records
 
-### Prerequisites
+Understanding how to read flow log records is essential for effective troubleshooting. Here are the most common patterns and what they mean:
 
-- An AWS account with Admin privileges
-- A SigNoz cloud account
+### Example 1: Security Group Rejecting Inbound Traffic
 
-### Create/Configure the S3 Bucket
-
-As stated earlier, VPC flow logs can be stored in Amazon CloudWatch Logs, Amazon S3, or Amazon Kinesis Data Firehose. In this tutorial, Amazon S3 will be utilized as the storage medium, so you need to create an S3 bucket.
-
-An S3 bucket is an Amazon S3 storage service that acts as a container for storing objects, which can be any type of data such as files, images, videos, or documents. This bucket will be used to house the VPC flow logs that will later be created.
-
-To create an s3 bucket, follow the below steps:
-
-Step 1: Navigate to your AWS account. In the AWS management console, search for `S3` and click on the first option.
-
-<Figure src="/img/guides/2024/07/vpc-flow-logs-S3.webp" alt="Amazon S3" caption="Amazon S3" />
-<br></br>Step 2: Click on the `Create bucket` button.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-s3_bucket.webp"
-  alt="Create an S3 bucket"
-  caption="Create an S3 bucket"
-/>
-<br></br>Give the bucket a unique name and leave all other settings as default.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-create_bucket.webp"
-  alt="Bucket configuration"
-  caption="Bucket configuration"
-/>
-<br></br>Scroll to the bottom of the page and click on the `Create bucket` button.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-created_bucket.webp"
-  alt="S3 bucket created"
-  caption="S3 bucket created"
-/>
-<br></br>
-
-### Create the VPC
-
-VPC Flow Logs can only be created within an existing Virtual Private Cloud, in this case, Amazon VPC. This virtual network, logically isolated within AWS, allows you to launch and manage resources like servers, databases, and applications securely.
-
-To create a VPC, follow the below steps:
-
-Step 1: In the AWS management console, search for `VPC` and select it.
-
-<Figure src="/img/guides/2024/07/vpc-flow-logs-VPC.webp" alt="Amazon VPC" caption="Amazon VPC" />
-<br></br>Step 2: Once redirected to the VPC page, click on the `Create VPC` button.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-VPc_page.webp"
-  alt="Create VPC"
-  caption="Create VPC"
-/>
-<br></br>For your VPC settings, select `VPC and more`, give the VPC a name, and leave other settings
-as default. Scroll to the bottom of the page and click on `Create VPC`.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-VPC_config.webp"
-  alt="VPC configuration"
-  caption="VPC configuration"
-/>
-<br></br>
-
-### Create the VPC Flow Logs
-
-Once the VPC has been created, you can proceed to create the VPC flow logs using the below steps:
-
-Step 1: Right-click on the VPC you created and select `Create flow log`.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-create_VPC_flow_log.webp"
-  alt="VPC Created"
-  caption="VPC Created"
-/>
-<br></br>Step 2: Give the flow log a name and set the filter to `all`. This allows the flow log to
-capture all traffic. For destination, select `Send to an Amazon S3 bucket` and paste the ARN of the
-S3 bucket you created.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-create_flow_log.webp"
-  alt="Flow log configuration"
-  caption="Flow log configuration"
-/>
-<br></br>To get your bucket’s ARN, navigate to the Amazon S3 page on a different tab. Open the
-bucket you created and copy the ARN under the bucket’s properties.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-buckets_ARN.webp"
-  alt="Bucket’s properties"
-  caption="Bucket’s properties"
-/>
-<br></br>Go back to the VPC flow log creation tab, paste the copied ARN, leave all other settings as
-default, and create the flow log.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-VPC_flow_log__created.webp"
-  alt="Created VPC flow log"
-  caption="Created VPC flow log"
-/>
-<br></br>
-
-### Generate traffic for the VPC
-
-Once you have created the VPC and the VPC flow log, the process of generating logs is automatic. VPC flow logs are continuously generated as network traffic flows through your VPC.
-
-To generate some network traffic, you can create an EC2 instance under that VPC and access it via the browser. This traffic would be recorded in the VPC flow logs.
-
-Step 1: In the AWS management console, search `EC2`, and open the page.
-
-<Figure src="/img/guides/2024/07/vpc-flow-logs-ec2.webp" alt="Amazon EC2" caption="Amazon EC2" />
-<br></br>Step 2: Click on the `Launch instance` button to create an instance. Give the instance a
-name and select the Ubuntu image.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-create_instance.webp"
-  alt="Create an instance"
-  caption="Create an instance"
-/>
-<br></br>Create a key pair if you don’t have an existing one to use. For the network settings,
-create a new security group and allow SSH and HTTP traffic.{' '}
-
-Note: In a production environment, you should be careful when opening up these ports and ensure access is limited to your IP address.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-instance_network_settings.webp"
-  alt="Network settings for the instance"
-  caption="Network settings for the instance"
-/>
-<br></br>Leave all other settings as default and create the VPC.
-
-Step 3: Log into your instance using the created key pair. Once logged in, run the following commands:
-
-```jsx
-sudo apt-get update
-sudo apt install apache2 -y
-sudo systemctl status apache2
-cd /var/www/html
-echo "VPC flog logs server test" | sudo tee /var/www/html/index.html
-sudo systemctl restart apache2
+```text
+2 123456789012 eni-abcdef01 203.0.113.50 10.0.1.15 49152 3389 6 20 4000 1510868790 1510868850 REJECT OK
 ```
 
-The above commands install the Apache2 web server on the instance, overwrite the default `index.html` file content in the web server’s root directory (which is usually `/var/www/html` in Apache) with the content "VPC flog logs server test" and restart the web server.
+This record shows someone from an external IP `203.0.113.50` trying to connect to your instance on port `3389` (RDP). The traffic was **rejected**, which means your security group or network ACL is working correctly. However, if you see hundreds of these from different source IPs, it likely indicates a brute-force or port scanning attempt.
 
-On the EC2 page, copy the public IP address of the instance and load it in the browser.
+### Example 2: Accepted Traffic to an Unexpected Port
 
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-instance_webpage.webp"
-  alt="Instance webpage"
-  caption="Instance webpage"
-/>
-<br></br>You can reload the page multiple times to generate traffic.
-
-Step 4: Navigate back to the Amazon S3 page. Open the bucket you previously created, and you should see some compressed log files generated.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-s3_bucket_log_files.webp"
-  alt="Flow logs in S3 bucket"
-  caption="Flow logs in S3 bucket"
-/>
-<br></br>Download and open one of the log files locally to see the generated logs from your VPC.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-s3_bucket_vpc_flow_log_file.webp"
-  alt="VPC flow logs"
-  caption="VPC flow logs"
-/>
-<br></br>This is the default format in which VPC logs are presented:
-
-```jsx
-vpc_headers = [
-  'version',
-  'account-id',
-  'interface-id',
-  'srcaddr',
-  'dstaddr',
-  'srcport',
-  'dstport',
-  'protocol',
-  'packets',
-  'bytes',
-  'start',
-  'end',
-  'action',
-  'log-status',
-]
+```text
+2 123456789012 eni-abcdef01 10.0.1.15 198.51.100.25 43567 8443 6 15 5200 1510868790 1510868850 ACCEPT OK
 ```
 
-## Forwarding VPC Flow Logs to a Visualization Tool
+Your instance at `10.0.1.15` is sending traffic to an external IP on port `8443`. If this isn't expected (for example, if your application should only communicate with known API endpoints on port 443), it could indicate a compromised instance or a misconfigured application.
 
-Once your VPC flow logs have been generated, they need to be analyzed to understand the network traffic in your VPC. While AWS offers various services for log analysis, these options can lead to vendor lock-in and potentially unpredictable pricing as your usage scales. Additionally, you may need to switch between different services for comprehensive analysis. A better alternative is to forward your VPC flow logs to a third-party tool that can visualize and analyze your logs in one place. A good option is [SigNoz](https://signoz.io/).
+### Example 3: NODATA Records
 
-SigNoz is a full-stack, open-source monitoring tool that allows you to visualize and analyze your log data on a single pane of glass. It integrates logs, metrics, and traces with intelligent correlation, providing a holistic view of your system's performance.
-
-Here are some key benefits of using SigNoz:
-
-- Avoid Vendor Lock-In: As an open-source tool, SigNoz eliminates dependency on a single vendor, offering greater flexibility.
-- Transparent Pricing: SigNoz provides straightforward and transparent pricing for its [cloud option](https://signoz.io/docs/cloud/), making cost management easier.
-- Advanced Log Management: With SigNoz, you can leverage advanced log management capabilities to gain deep insights into your log data.
-- Fast Queries: SigNoz uses a columnar database, <a href="https://clickhouse.com/" rel="noopener noreferrer nofollow" target="_blank">ClickHouse</a>, to store logs. This allows for lightning-fast queries and aggregations.
-- Supports OpenTelemetry: SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively for seamless telemetry data collection.
-
-## How to Forward VPC Flow Logs to SigNoz
-
-To send the VPC flow logs from the S3 buckets to SigNoz for analysis, you need to create an AWS Lambda function. A Lambda function is a piece of code that runs in the cloud when triggered by an event without you needing to manage servers. This Lambda function will serve as a bridge between S3 and SigNoz. Whenever a new VPC flow log is created or updated in the bucket, the function will be triggered, and the flow log will be forwarded to SigNoz.
-
-The architectural diagram below shows a visualization of the process.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-aws_signoz_architecture_diagram.webp"
-  alt="How flow logs are forwarded to SigNoz"
-  caption="How flow logs are forwarded to SigNoz"
-/>
-<br></br>
-
-### Create a Lambda Function
-
-Follow the below steps to create your Lambda function.
-
-Step 1: In the AWS management console, search Lambda. Open it and select `Create a function`.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-AWS_lambda.webp"
-  alt="AWS Lambda"
-  caption="AWS Lambda"
-/>
-<br></br>Step 2: For the configurations, select `Author from scratch`, give the function a name,
-select the latest Python version for runtime, and use `x86_64` for the architecture.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-create_function.webp"
-  alt="Create Lambda function"
-  caption="Create Lambda function"
-/>
-<br></br>Step 3: For permissions, select `Create a new role with basic Lambda permissions`.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-lambda_permissions.webp"
-  alt="Permissions for Lambda function"
-  caption="Permissions for Lambda function"
-/>
-<br></br>Proceed to create the function.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-function_created.webp"
-  alt="Created Lambda function"
-  caption="Created Lambda function"
-/>
-<br></br>
-
-### Configure Policies for the Function
-
-The created Lambda function will be used to fetch new or updated VPC flow log files from the S3 bucket. To enable this communication between Lambda and S3, you need to grant your Lambda function the necessary permissions to access the S3 bucket.
-
-Step 1: Open the Lambda function you created, under `Configuration`, click on `Permissions` on the left-hand side and select the `Role name`. This will redirect you to the AWS IAM Role page.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-lambda_role.webp"
-  alt="IAM role for Lambda function"
-  caption="IAM role for Lambda function"
-/>
-<br></br>Step 2: To give permission to the role to access Amazon S3, click on `Add permission`, and
-in the drop-down, click on `Attach Policies`.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-add_permission.webp"
-  alt="Attach policies to the function’s IAM role"
-  caption="Attach policies to the function’s IAM role"
-/>
-<br></br>Search for `S3`, and you will see a policy named `AmazonS3FullAccess`. Select the policy
-and click on `Add permissions`.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-s3_full_access_policy.webp"
-  alt="S3 permission policy"
-  caption="S3 permission policy"
-/>
-<br></br>
-
-### Trigger the Function
-
-Now that the Lambda function can access Amazon S3, you need to add a trigger. This trigger automatically invokes the Lambda function whenever a new VPC flow log file is created or updated in the S3 bucket.
-
-Step 1: Open your Lambda function and click on the `Add trigger` button.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-add_trigger.webp"
-  alt="Add trigger for function"
-  caption="Add trigger for function"
-/>
-<br></br>Step 2: For your trigger configuration, choose `S3` as your source, and for the bucket
-field, select the bucket containing the VPC flow logs. For the event types field, you can select the
-events of your choice. The trigger will occur depending on what option(s) you choose here. By
-default, the `All object create events` will be selected.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-trigger_config.webp"
-  alt="Trigger configuration"
-  caption="Trigger configuration"
-/>
-<br></br>Verify the settings, scroll to the bottom of the page, and click on the `Add` button to add
-this trigger.
-
-### Create a Request Layer
-
-Once your trigger has been set up, the next step will be to create a layer. AWS Lambda lets you to manage your function's library and dependencies through layers, which it can easily understand and integrate into your Lambda function's execution environment. A layer is a ZIP archive that contains libraries, a custom runtime, or other function dependencies.
-
-The request layer will be created using Python’s `request module`. This module enables the Lambda function to interact with external web services, APIs, and resources over the network. It simplifies the process of sending HTTP requests and handling responses. By default, the Python’s request module is <a href="https://aws.amazon.com/blogs/compute/upcoming-changes-to-the-python-sdk-in-aws-lambda/" rel="noopener noreferrer nofollow" target="_blank">not included</a> in Lambda. To utilize the module within a Lambda function, it's necessary to explicitly add it as a layer. While there may be alternative approaches, it's advisable to adhere to established practices that have been thoroughly tested and proven effective.
-
-Follow the below steps to create the request layer:
-
-Step 1: Run the commands below locally to generate a zip file of the request module. This step requires that you have Python installed.
-
-```jsx
-# make a new directory
-mkdir python
-# move into that directory
-cd python
-
-# install requests module
-pip install --target . requests
-# zip the contents under the name dependencies.zip
-zip -r dependencies.zip ../python
+```text
+2 123456789012 eni-abcdef01 - - - - - - - 1510868790 1510868850 - NODATA
 ```
 
-Step 2: To upload your zip file, go to AWS Lambda, and on the Layers page, click on `Create Layer`. [This is not inside your specific Lambda function, just the landing page of AWS Lambda.]
+No traffic was recorded for this ENI (Network Interface) during the aggregation window. This is normal for idle interfaces.
 
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-create_layer.webp"
-  alt="Create layer"
-  caption="Create layer"
-/>
-<br></br>Step 3: Give the layer a name and an optional description. Select `Upload a .zip file`,
-click on `Upload` and select your generated zip file from the directory where it is saved on your
-system.
+### Example 4: Custom Format with Flow Direction and AWS Services
 
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-upload_zip_file.webp"
-  alt="Layer configuration"
-  caption="Layer configuration"
-/>
-<br></br>Step 4: Select your desired architecture and pick `Python 3.x` as your runtime. Click
-on `Create` to create the layer.
+Using version 5 custom format, here's a record showing an EC2 instance calling Amazon S3:
 
-### Add a New Layer
-
-Once you have created the layer containing your external libraries ( in this case, the `requests` module), you need to associate it with your Lambda function. This allows your function to access and utilize the libraries within that layer during its execution. Without associating the layer with the function, the function wouldn't have access to those libraries and, thus, couldn't perform certain operations that depend on them.
-
-For the request layer to be associated with the Lambda function, it needs to be added directly to the function as a layer. Follow the below steps to add the layer:
-
-Step 1: Go to function, select the function you created, click on `Code`, and scroll to the end of the page. Under `Layers` click on `Add a layer`.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-add_new_layer.webp"
-  alt="Add a new layer"
-  caption="Add a new layer"
-/>
-<br></br>Step 2: Select `Custom layers`. From the drop-down, select the `request package` and the
-version, then add the layer.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-add_the_new_layer.webp"
-  alt="Use a custom layer"
-  caption="Use a custom layer"
-/>
-<br></br>Go back to your function and you should see the layer added.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-new_layer_added.webp"
-  alt="New layer added"
-  caption="New layer added"
-/>
-<br></br>
-
-### Write the Lambda Function
-
-The Lambda function handles the processing and forwarding of flow logs to SigNoz. Copy and save the below function locally. It will be referenced later.
-
-```jsx
-import json
-import gzip
-import boto3
-import requests
-import shlex
-
-# Create an S3 client
-s3 = boto3.client('s3')
-
-# Function to convert a log line into a JSON object
-def convert_log_line_to_json(line):
-    # Define the headers to be used for the JSON keys
-    headers = ["version","account-id","interface-id","srcaddr","dstaddr","srcport","dstport","protocol","packets","bytes","start","end","action","log-status"]
-
-    # Split the log line using shell-like syntax (keeping quotes, etc.)
-    res = shlex.split(line, posix=False)
-
-    # Create a dictionary by zipping headers and log line parts
-    return dict(zip(headers, res))
-
-# Lambda function handler
-def lambda_handler(event, context):
-    # S3 bucket name
-    bucket_name = '<name_of_your_bucket>'
-
-    # List all objects in the specified S3 bucket
-    response = s3.list_objects_v2(Bucket=bucket_name)
-
-    # Iterate through each object in the bucket
-    for obj in response['Contents']:
-        # Check if the object is a gzipped log file
-        if obj['Key'].endswith('.log.gz'):
-            file_key = obj['Key']
-
-            # Download the gzipped file content
-            file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
-            file_content = file_obj['Body'].read()
-
-            # Decompress the gzipped content
-            decompressed_content = gzip.decompress(file_content)
-
-            # Convert bytes to string
-            json_data = str(decompressed_content, encoding='utf-8')
-
-            print(json_data)
-
-            # Split the string into lines
-            lines = json_data.strip().split('\n')
-
-            # Convert the list of strings into a JSON-formatted string
-            result = json.dumps(lines, indent=2)
-            print(result)
-
-            # Load the JSON-formatted string into a list of strings
-            list_of_strings = json.loads(result)
-
-            # Convert each log line string into a JSON object
-            json_data = [convert_log_line_to_json(line) for line in list_of_strings]
-            print(json_data)
-
-            req_headers = {
-                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
-                     'Content-Type': 'application/json'
-                }
-            # Specify the HTTP endpoint for sending the data
-            http_url = 'https://ingest.in.signoz.cloud:443/logs/json/'  # Replace with your actual URL
-
-            # Send the JSON data to the specified HTTP endpoint
-            response = requests.post(http_url, json=json_data, headers=req_headers)
-
-            # Print information about the sent data and the response received
-            print(f"Sent data to {http_url}. Response: {response.status_code}")
+```text
+5 123456789012 eni-abcdef01 10.0.1.15 52.217.33.14 43567 443 6 15 5200 1510868790 1510868850 ACCEPT OK vpc-abc123 subnet-def456 i-0123456789 2 IPv4 10.0.1.15 52.217.33.14 AMAZON S3 egress 8
 ```
 
-The above function processes VPC flow logs stored as gzipped files in your S3 bucket. It reads the log files, decompresses them, parses the log lines into structured JSON objects, and then sends this processed data to SigNoz using the `requests` library.
+The `traffic-path` value of `8` indicates the traffic went through an internet gateway. The `pkt-dst-aws-service` shows it's going to S3. If you're expecting this instance to access S3 via a VPC endpoint (private path), this record reveals it's actually going over the public internet, a common misconfiguration that's both slower and more expensive.
 
-Note: Replace `bucket name` with the actual name of your s3 bucket and `signoz ingestion key` with the ingestion key/ingestion token for your SigNoz cloud account. For `http_url` , replace with your actual URL. Check if your region is India (in), United States (us) or Europe (eu).
+### Example 5: TCP Flags for Connection Analysis
 
-### Testing your Lambda Function
+When using a custom format with `tcp-flags`, you can track the full lifecycle of TCP connections:
 
-After writing the Lambda function, it needs to be deployed and tested. Before you deploy and test it, you need to first increase the timeout setting for the Lambda function, as data transfer from S3 to an external endpoint can take a few minutes, and by default, the Lambda function times out in 3 seconds.
+- **SYN (2):** Connection initiation, a client is trying to connect.
+- **SYN-ACK (18):** Server acknowledging the connection.
+- **FIN (1):** Graceful connection close.
+- **RST (4):** Abrupt connection termination, it often indicates a problem.
 
-Follow the steps below to increase the timeout and to deploy and test the function.
+If you see many `SYN` packets from a single source, but no `SYN-ACK` responses, it's likely a SYN flood or port scan.
 
-Step 1: To increase the timeout time, under your Lambda function, go to `Configuration` → `General Configuration` → Edit button and set it under 10 mins. Usually, the code is executed within 1-4 minutes at maximum.
+## Next Step
 
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-timeout_increase.webp"
-  alt="Increase timeout"
-  caption="Increase timeout"
-/>
-<br></br>Step 2: After increasing the timeout setting, go to your Lambda function. Under `Code`,
-click on the `test` button dropdown option, and select `Configure test event`.{' '}
+VPC Flow Logs provide comprehensive, agent-free visibility into your network traffic at the VPC, subnet, or ENI level. Understanding the architecture, how logs are captured, aggregated, and delivered, and the record format, including its various versions, helps you make informed decisions about which fields to include and how to structure your logging strategy.
 
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-test_event.webp"
-  alt="Configure test event"
-  caption="Configure test event"
-/>
-<br></br>For test event action, select `Create new event` and give the test event a name. Under the
-template drop-down menu, search for `S3 Put` and click on `Save`.
-
-This test event simulates the scenario where a new object (like a VPC Flow Log file) is uploaded or updated in your S3 bucket, triggering the Lambda function to process the event as if an actual file upload occurred.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-lambda_test_event.webp"
-  alt="Test event"
-  caption="Test event"
-/>
-<br></br>Step 3: Go back to your function. Under `Code`, select `lambda_function` and paste in the
-Lambda function code that you copied and saved on your local earlier.{' '}
-
-Click on the `Deploy` button and then the `Test` button to deploy and test the function.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-test_and_deploy_lambda_code.webp"
-  alt="Deploy and test the Lambda function"
-  caption="Deploy and test the Lambda function"
-/>
-<br></br>Below is a successful execution result. The flow logs are printed out, and the data is sent
-to the SigNoz endpoint.{' '}
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-logs_sent_to_signoz.webp"
-  alt="Execution successful"
-  caption="Execution successful"
-/>
-<br></br>
-
-### Visualize the VPC Flow Logs in SigNoz
-
-Once your VPC Flow Logs are successfully forwarded to SigNoz, you can gain valuable insights into your network traffic by visualizing them in the SigNoz logs dashboard. To access and explore these logs, follow these steps:
-
-Step 1: Open your SigNoz cloud account in your browser and click on the `Logs` section.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-signoz_account.webp"
-  alt="SigNoz cloud account"
-  caption="SigNoz cloud account"
-/>
-<br></br>Step 2: The time filter is located at the top right corner of the `Logs` page. From the
-drop-down menu, select `Live` to see the most recent logs.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-filter_live_logs.webp"
-  alt="Live logs view"
-  caption="Live logs view"
-/>
-<br></br>You should see the recent logs sent from the S3 bucket.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-54957ad1-e5e5-45da-9d1a-b032d0fb5cfc.webp"
-  alt="Logs from the S3 bucket"
-  caption="Logs from the S3 bucket"
-/>
-<br></br>You can also click on any of the logs to see more information.
-
-<Figure
-  src="/img/guides/2024/07/vpc-flow-logs-b8b68791-01ee-4554-9b09-f331868e8b8c.webp"
-  alt="Log details"
-  caption="Log details"
-/>
-<br></br>
-
-## Conclusion
-
-In this guide, you have explored the fundamentals of VPC Flow Logs, including their functionality and significance in monitoring network traffic. You learned about the components that make up each log, assessed their limitations, and learned the steps to create and forward them to SigNoz for visualization and analysis.
-
-VPC Flow Logs are powerful for monitoring and analyzing network traffic within your AWS environment. By integrating VPC Flow Logs into your network management practices, you can achieve a more transparent and secure cloud environment, making informed decisions that optimize your operations.
+The next part, [How to enable VPC Flow Logs in AWS?](/guides/vpc-flow-logs-aws) walks you through the practical steps for: enabling flow logs via Console and CLI, querying them with CloudWatch Insights and Athena, and setting up advanced monitoring for unified observability across your entire stack.
 
 ## FAQs
 
-### What are VPC flow logs?
+### Are VPC Flow Logs free?
 
-They are detailed network traffic records in your Virtual Private Cloud (VPC).
+No. VPC Flow Logs are billed as CloudWatch Vended Logs (data ingestion + archival) regardless of destination, plus destination-specific charges (e.g., S3 storage/requests, CloudWatch Logs storage/queries, Firehose delivery stream costs). Pricing is region and tier dependent.
 
-### Where to view VPC flow logs?
+### Do VPC Flow Logs affect network performance?
 
-In the configured log destination (CloudWatch Logs, S3, or Data Firehose for AWS).
+No. Flow log data is collected outside the path of your network traffic. Enabling them has no impact on network throughput or latency.
 
-### How do you create AWS VPC flow logs?
+### Can I enable VPC Flow Logs on a peered VPC?
 
-In the Amazon VPC console, select your VPC or subnet, then choose "Create flow log" from the Actions menu. You can also do this with the AWS CLI.
+Yes, but you can only enable flow logs for a peered VPC if the peer VPC is in your own AWS account. You cannot enable flow logs for VPCs peered with VPCs in other accounts.
 
-### Is VPC flow log free?
+### How long does it take for flow logs to appear?
 
-No, you are charged for the storage and data transfer of logs.
+Typical delivery: **~5 min to CloudWatch Logs, ~10 min to S3**, best-effort and may be delayed.
 
-### What does VPC stand for?
+### Can I capture only rejected traffic?
 
-Virtual Private Cloud.
+Yes. When creating a flow log, set the filter to `Reject`. This significantly reduces data volume and cost while still providing security-relevant information.
 
-### What is VPC and its use?
+### What is the difference between srcaddr and pkt-srcaddr?
 
-A logically isolated network in the cloud for launching resources.
+`srcaddr` shows the IP address of the network interface from which traffic was captured. `pkt-srcaddr` (available in version 3+) shows the original source IP from the packet header. They differ when traffic passes through intermediate services like NAT gateways or load balancers.
 
-### What are the available fields in VPC flow logs?
+### How do VPC Flow Logs differ from VPC Traffic Mirroring?
 
-Source/destination IPs, ports, protocol, packet/byte count, timestamps, action, etc.
+VPC Flow Logs capture connection-level metadata (IP addresses, ports, protocols, and byte counts). VPC Traffic Mirroring captures actual packet contents for deep inspection. Flow logs are for monitoring and analysis; traffic mirroring is for forensic investigation and protocol analysis.
 
-### How do you enable VPC flow logs in GCP?
+### Can I modify an existing VPC Flow Log?
 
-Through the Google Cloud Console or gcloud command-line tool.
+No. Once created, you cannot change a flow log's configuration. You need to delete it and create a new one with the desired settings.
 
-### How to use NSG flow logs?
+### What traffic is not captured by VPC Flow Logs?
 
-Similar to VPC flow logs, they monitor traffic at the Network Security Group level in Azure.
+DNS queries to Amazon DNS servers, DHCP traffic, instance metadata requests (169.254.169.254), Windows license activation traffic, Amazon Time Sync Service traffic, and traffic to the VPC router reserved IP address. Queries to your own DNS servers are captured.
 
-### What is CloudWatch in AWS?
+### How do I search VPC Flow Logs?
 
-CloudWatch is an AWS service that monitors and observes AWS resources and applications, collecting data for analysis and visualization.
+If your logs are in CloudWatch, use CloudWatch Logs Insights, select the log group containing your flow logs, and use the built-in query language to filter by source IP, port, action, etc. If your logs are in S3, use Amazon Athena to run SQL queries directly against the stored files. See the action guide for example queries.
 
-### How many types of VPC endpoints are available?
-
-There are two types of VPC Endpoints: Interface Endpoints and Gateway \*\*Endpoints.
-
-### What is the difference between CloudWatch and flow logs?
-
-CloudWatch monitors AWS resources and applications, while flow logs capture detailed information about IP traffic within a VPC.
-
-### What are flow logs in Azure?
-
-Azure Flow Logs record network traffic data for monitoring, auditing, and troubleshooting network activities.
-
-### What are the use cases of flow logs in AWS?
-
-Network monitoring, security analysis, troubleshooting, compliance, and optimization.
-
-### How do you enable VPC flow logs in GCP?
-
-To enable VPC flow logs in GCP, configure flow logging on a VPC subnet or a VPC network in the Google Cloud Console.
+<ArticleSeriesBottom
+  seriesName="VPC Flow Logs - Complete Guide"
+  seriesOverviewHref="/guides/vpc-flow-logs"
+  currentPart={1}
+  totalParts={2}
+  next={{
+    title: 'How to Enable and Query VPC Flow Logs in AWS?',
+    href: '/guides/vpc-flow-logs-aws',
+  }}
+/>

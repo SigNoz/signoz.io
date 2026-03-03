@@ -20,12 +20,12 @@ export const normaliseSlug = (value) => {
 
 export const resolvePostPath = (post) => {
   const sourcePath = post._raw?.sourceFilePath ?? ''
-  if (sourcePath?.includes('faqs')) console.log("logging source file path", post._raw?.sourceFilePath, sourcePath, post)
   if (sourcePath.startsWith('docs/')) return `docs/${post.slug}`
-  if (sourcePath.startsWith('comparisons/')) return `comparisons/${post.slug}`
+  if (sourcePath.startsWith('comparisons/')) return `comparisons${post.path}`
   if (sourcePath.startsWith('guides/')) return `guides/${post.slug}`
-  if (sourcePath.startsWith('opentelemetry/')) return `opentelemetry/${post.slug}`
+  if (sourcePath.startsWith('opentelemetry/')) return `opentelemetry${post.path}`
   if (sourcePath.startsWith('faqs/')) return `faqs${post.path}`
+  if (sourcePath.startsWith('blog/')) return `blog/${post.slug}`
 
   return `/${post.slug}`
 }
@@ -58,8 +58,8 @@ export const generateRssItem = (config, post) => {
     ${config.email ? `<author>${config.email} (${config.author ?? ''})</author>` : ''}
     ${link?.includes('/docs/') ? 
       (post.docTags ? post.docTags.map((t) => `<category>${t}</category>`).join('') : '') 
-      :Array.isArray(post.tags)
-      ? post.tags.map((t) => `<category>${escape(t)}</category>`).join('')
+      : Array.isArray(post.tags)
+      ? post.tags.map((t) => typeof t === 'object' ? `<category>${escape(t?.value ?? '')}</category>` : `<category>${escape(t)}</category>`).join('')
       : ''
     }
     }
@@ -108,4 +108,3 @@ export const filterPostsByTag = (posts, tag) => {
     Array.isArray(post.tags) ? post.tags.map((t) => slug(t)).includes(tag) : false
   )
 }
-
