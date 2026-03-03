@@ -64,17 +64,16 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
     vendors: {
       signoz: {
         text: (
-          <div className="text-center text-signoz_vanilla-400 ">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">Single UI for all correlated signals </span>{' '}
-            <br className="hidden md:block" />{' '}
             <span className="text-sm">(Logs, Metrics and Traces)</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
-            <span className="text-lg">Separate consoles </span> <br className="hidden md:block" />{' '}
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+            <span className="text-lg">Separate consoles </span>
             <span className="text-sm">(CloudWatch, Logs Insights, X-Ray, Application Signals)</span>
           </div>
         ),
@@ -86,18 +85,16 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
     vendors: {
       signoz: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">Usage-based (GB ingested), </span>{' '}
-            <br className="hidden md:block" />
             <span className="text-sm">predictable scaling using cost meter</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">Per-service, per-query, per-API call charges, </span>{' '}
-            <br className="hidden md:block" />
             <span className="text-sm">unpredictable</span>
           </div>
         ),
@@ -109,14 +106,14 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
     vendors: {
       signoz: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">OpenTelemetry-native</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="text-center text-lg text-signoz_vanilla-400">
+          <div className="flex w-full flex-col text-center text-lg text-signoz_vanilla-400">
             Proprietary (migrating to OpenTelemetry via ADOT)
           </div>
         ),
@@ -128,16 +125,15 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
     vendors: {
       signoz: {
         text: (
-          <div className="text-center text-lg text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-lg text-signoz_vanilla-400">
             Supports Query builder, PromQL and ClickHouse QL
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">Different query language per signal </span>{' '}
-            <br className="hidden md:block" />
             <span className="text-sm">
               Logs Insights QL, Metrics statistics, X-Ray filter expressions, OpenSearch PPL/SQL
             </span>
@@ -151,16 +147,15 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
     vendors: {
       signoz: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">ClickHouse columnar database</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">Separate stores per service </span>{' '}
-            <br className="hidden md:block" />
             <span className="text-sm">(Metrics, Logs, X-Ray, Application Signals)</span>
           </div>
         ),
@@ -172,16 +167,15 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
     vendors: {
       signoz: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">Hot storage (15-180 days), </span>{' '}
-            <br className="hidden md:block" />
             <span className="text-lg">Cold storage (upto 2 years)</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-sm">
               Metrics: 3 hours to 15 months with auto-aggregation. Logs: $0.03/GB/month. X-Ray: 30
               days max
@@ -196,14 +190,16 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
     vendors: {
       signoz: {
         text: (
-          <div className="text-center text-signoz_vanilla-400">
+          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">SigNoz Cloud or Self-hosted</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="text-center text-lg text-signoz_vanilla-400">AWS managed per region</div>
+          <div className="flex w-full flex-col justify-center text-center text-lg text-signoz_vanilla-400">
+            AWS managed per region
+          </div>
         ),
       },
     },

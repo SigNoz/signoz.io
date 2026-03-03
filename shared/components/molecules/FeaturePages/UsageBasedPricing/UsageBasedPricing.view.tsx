@@ -17,7 +17,7 @@ const UsageBasedPricing: React.FC<{
   return (
     <SectionLayout
       variant="bordered"
-      className="!border-t-1 border-dashed border-signoz_slate-400 !px-0"
+      className="!border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">

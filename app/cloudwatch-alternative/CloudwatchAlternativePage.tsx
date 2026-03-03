@@ -137,7 +137,7 @@ const CostComparison: React.FC = () => {
         variant="bordered"
         className="flex flex-col gap-y-9 !border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
       >
-        <div className="flex flex-col gap-4 px-10 md:px-12 md:py-12">
+        <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
           <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
             You shouldn't pay to look at your own data
@@ -150,10 +150,11 @@ const CostComparison: React.FC = () => {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row">
-          <div className="!w-[100%] flex-1 md:!w-[300px]">
-            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-12">
+          <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
+            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 pl-0 md:px-0 md:pl-12">
               <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
-                CloudWatch's billing complexity
+                CloudWatch's <br className="hidden md:block" /> billing{' '}
+                <br className="hidden md:block" /> complexity
               </h2>
               <Button asChild variant="secondary" rounded="full">
                 <TrackingLink
@@ -168,19 +169,21 @@ const CostComparison: React.FC = () => {
               </Button>
             </div>
           </div>
-          <div className="flex-[2_2_0%] border-l border-dashed border-signoz_slate-400 p-10">
-            <div className="flex flex-col gap-4">
-              {CLOUDWATCH_BILLING_CARDS.map((card) => (
-                <Card
-                  key={card.title}
-                  className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
-                >
-                  <div className="p-6">
-                    <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
-                    <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
-                  </div>
-                </Card>
-              ))}
+          <div className="flex-[2_2_0%]">
+            <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+              <div className="flex flex-col gap-4 px-10 py-10">
+                {CLOUDWATCH_BILLING_CARDS.map((card) => (
+                  <Card
+                    key={card.title}
+                    className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+                  >
+                    <div className="p-6">
+                      <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
+                      <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -193,7 +196,7 @@ const ArchitectureAndApproach: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
+      <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 py-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
             <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
