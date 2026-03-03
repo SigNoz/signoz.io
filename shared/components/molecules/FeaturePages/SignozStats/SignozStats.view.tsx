@@ -3,10 +3,7 @@ import { BookOpen } from 'lucide-react'
 import ButtonGroup from '../ButtonGroup/ButtonGroup.view'
 import StatsCard from '@/components/Card/card'
 
-const SigNozStats: React.FC<{ sectionTitle?: string; sectionDescription?: string }> = ({
-  sectionTitle = '',
-  sectionDescription = '',
-}) => {
+const SigNozStats = () => {
   const STATS_LIST = [
     {
       id: 1,
@@ -75,8 +72,12 @@ const SigNozStats: React.FC<{ sectionTitle?: string; sectionDescription?: string
         <div className="flex flex-[2_2_0%] flex-col">
           <div className="border-b border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-signoz_vanilla-100">{sectionTitle}</h2>
-              <p className="text-base text-signoz_vanilla-400">{sectionDescription}</p>
+              <h2 className="text-2xl font-bold text-signoz_vanilla-100">
+                Your data stays where you want
+              </h2>
+              <p className="text-base text-signoz_vanilla-400">
+                Use SigNoz cloud with your data staying in the US, EU, or India, or self-host.
+              </p>
               <div className="flex w-full flex-col gap-4">
                 {platformFeatures.map((feature, index) => (
                   <PlatformCard

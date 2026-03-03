@@ -1,4 +1,3 @@
-import React from 'react'
 import CloudwatchAlternativePage from './CloudwatchAlternativePage'
 import { Metadata } from 'next'
 

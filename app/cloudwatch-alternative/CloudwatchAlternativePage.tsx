@@ -209,7 +209,7 @@ const ArchitectureAndApproach: React.FC = () => {
               own <br className="hidden md:block" />
               storage, console, and query language. SigNoz stores all telemetry in a single
               ClickHouse <br className="hidden md:block" />
-              database with with a unified query interface.
+              database with a unified query interface.
             </div>
           </div>
           <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
@@ -249,10 +249,7 @@ const CloudwatchAlternativePage: React.FC = () => {
         }
       />
       <DeploymentAndDataResidency />
-      <SigNozStats
-        sectionTitle="Your data stays where you want"
-        sectionDescription="Use SigNoz cloud with your data staying in the US, EU, or India, or self-host."
-      />
+      <SigNozStats />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Cloudwatch Alternative Customer Stories Button',
