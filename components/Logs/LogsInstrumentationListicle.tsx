@@ -13,6 +13,7 @@ import {
   SiAmazonwebservices,
   SiGo,
   SiCloudflare,
+  SiDeno,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaAws, FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -175,6 +176,12 @@ export default function LogsInstrumentationListicle({
             href: '/docs/logs-management/send-logs/zap-to-signoz',
             icon: <SiGo className="h-7 w-7 text-cyan-600" />,
             clickName: 'Zap Logs Link',
+          },
+          {
+            name: 'Deno',
+            href: '/docs/instrumentation/opentelemetry-deno',
+            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
+            clickName: 'Deno Logs Link',
           },
         ]}
         sectionName="Language Logs"

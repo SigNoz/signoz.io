@@ -1,8 +1,8 @@
 ---
+date: 2026-02-28
 title: Deno OpenTelemetry Instrumentation
 description: Learn how to instrument your Deno application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
-date: 2026-02-08
-id: deno
+id: deno-instrumentation
 doc_type: howto
 ---
 
@@ -19,10 +19,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 - Deno v2.0 or later
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
-## Send Traces to SigNoz
-
-<Tabs entityName="instrumentation-type">
-<TabItem value="automatic" label="No Code Auto-Instrumentation (recommended)" default>
+## Send telemetry to SigNoz
 
 Deno <a href="https://docs.deno.com/runtime/fundamentals/open_telemetry/#auto-instrumentation" target="_blank" rel="noopener noreferrer nofollow">auto-instrumentation</a> automatically captures:
 
@@ -156,135 +153,6 @@ The `OTEL_DENO=true` flag enables the built-in instrumentation for `http`, `fetc
 </TabItem>
 </Tabs>
 
-</TabItem>
-<TabItem value="code-level" label="Code Level Instrumentation (advanced)">
-
-You can create custom traces using the `@opentelemetry/api` package. Deno automatically manages the SDK configuration (exporters, resource attributes) via environment variables, so you only need to use the API to create spans and instruments.
-
-### Step 1. Add OpenTelemetry API
-
-Add the OpenTelemetry API package to your project.
-
-```bash
-deno add npm:@opentelemetry/api
-```
-
-Or import it directly in your code from `npm:` specifiers.
-
-### Step 2. Instrument your code
-
-Here is an example of creating a custom span:
-
-```ts:app.ts
-import { trace } from "npm:@opentelemetry/api";
-
-const tracer = trace.getTracer();
-
-Deno.serve(async (req) => {
-  return await tracer.startActiveSpan("handle_request", async (span) => {
-    try {
-      span.setAttribute("http.method", req.method);
-      span.setAttribute("http.url", req.url);
-      
-      // Simulate some work
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      
-      return new Response("Hello from SigNoz!");
-    } catch (err) {
-      span.recordException(err);
-      throw err;
-    } finally {
-      span.end();
-    }
-  });
-});
-```
-
-### Step 3. Run with Configuration
-
-You need to set the environment variables to configure the exporter:
-
-<Tabs entityName="platform">
-<TabItem value="vm" label="VM" default>
-
-```bash
-export OTEL_DENO=true
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-export OTEL_SERVICE_NAME="<service-name>"
-
-deno run --allow-env --allow-net app.ts
-```
-
-</TabItem>
-
-<TabItem value="k8s" label="Kubernetes">
-
-```yaml
-env:
-  - name: OTEL_DENO
-    value: "true"
-  - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: "https://ingest.<region>.signoz.cloud:443"
-  - name: OTEL_EXPORTER_OTLP_HEADERS
-    value: "signoz-ingestion-key=<your-ingestion-key>"
-  - name: OTEL_SERVICE_NAME
-    value: "<service-name>"
-```
-
-</TabItem>
-
-<TabItem value="docker" label="Docker">
-
-Create a `Dockerfile` in your project root:
-
-```dockerfile
-FROM deno:2.6.6
-
-WORKDIR /app
-
-# Copy application code
-COPY . .
-
-# Start the application
-CMD ["deno", "run", "--allow-env", "--allow-net", "app.ts"]
-```
-
-Set OpenTelemetry environment variables at runtime:
-
-```bash
-docker run \
-  -e OTEL_DENO=true \
-  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-  -e OTEL_SERVICE_NAME="<service-name>" \
-  -p 8000:8000 \
-  deno-app
-```
-
-</TabItem>
-
-<TabItem value="windows" label="Windows">
-
-```powershell
-$env:OTEL_DENO = "true"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
-$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_SERVICE_NAME = "<service-name>"
-
-deno run --allow-env --allow-net app.ts
-```
-
-</TabItem>
-</Tabs>
-
-Replace the following:
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: Name of your service (e.g., `deno-app`).
-</TabItem>
-</Tabs>
-
 ## Validate
 
 After running your Deno application with OpenTelemetry enabled, you should see traces appearing in SigNoz:
@@ -343,6 +211,7 @@ You can configure this behavior with `OTEL_DENO_CONSOLE`:
 
 ## Next Steps
 
+- Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Deno guide](https://signoz.io/docs/instrumentation/manual-instrumentation/deno/manual-instrumentation/) once the base setup is in place.
 - [Explore your traces in SigNoz](https://signoz.io/docs/product-features/trace-explorer/)
 - [Query and filter traces](https://signoz.io/docs/product-features/query-builder/)
 - [Set up alerts for your Deno service](https://signoz.io/docs/product-features/alert-management/)
