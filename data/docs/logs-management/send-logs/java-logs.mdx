@@ -1,5 +1,5 @@
 ---
-date: 2026-02-07
+date: 2026-02-21
 title: Send logs from Java to SigNoz using OpenTelemetry
 id: java-logs
 doc_type: howto
@@ -569,16 +569,120 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 <details>
 <ToggleHeading>
 
+## Advanced Configuration
+
+</ToggleHeading>
+
+The OpenTelemetry Java agent provides several configuration options to control log collection and internal agent logging. These can be set as environment variables or system properties.
+
+### Log Exporter
+
+Controls where the application logs are exported. By default, it is set to `otlp`.
+
+- `OTEL_LOGS_EXPORTER=otlp`: Exports logs via OTLP (default).
+- `OTEL_LOGS_EXPORTER=console`: Prints logs to the standard output.
+- `OTEL_LOGS_EXPORTER=none`: Disables log export entirely.
+
+### OTLP Exporter Configurations
+
+When using the `otlp` log exporter, you can further fine-tune how logs are exported via the OTLP protocol.
+
+- `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`: The specific endpoint to send logs to (e.g., `https://ingest.<region>.signoz.cloud:443`). Overrides `OTEL_EXPORTER_OTLP_ENDPOINT`.
+- `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`: The transport protocol. Options include `grpc` (default), `http/protobuf`, and `http/json`.
+- `OTEL_EXPORTER_OTLP_LOGS_TIMEOUT`: The maximum time (in milliseconds) the exporter will wait for a batch to be exported before timing out. Default is `10000` (10 seconds).
+- `OTEL_EXPORTER_OTLP_LOGS_HEADERS`: Key-value pairs separated by commas to pass as request headers (e.g., `signoz-ingestion-key=<your-ingestion-key>`). Overrides `OTEL_EXPORTER_OTLP_HEADERS`.
+
+### Batch Log Processor Configurations
+
+Logs are processed in batches before being exported to reduce network overhead. You can control this behavior using the Batch LogRecord Processor configurations:
+
+- `OTEL_BLRP_SCHEDULE_DELAY`: The interval (in milliseconds) between two consecutive exports. Default is `5000` (5 seconds).
+- `OTEL_BLRP_MAX_QUEUE_SIZE`: The maximum number of logs that are kept in the queue. Default is `2048`.
+- `OTEL_BLRP_MAX_EXPORT_BATCH_SIZE`: The maximum number of logs to export in a single batch. Must be less than or equal to the maximum queue size. Default is `512`.
+- `OTEL_BLRP_EXPORT_TIMEOUT`: The maximum time (in milliseconds) allowed to export a batch of logs. Default is `30000` (30 seconds).
+
+### Agent Internal Logging
+
+You can control the internal logging behavior of the Java agent itself using the `OTEL_JAVAAGENT_LOGGING` environment variable (or `otel.javaagent.logging` system property):
+
+- `OTEL_JAVAAGENT_LOGGING=simple`: Prints `INFO` level and above logs to standard error (default).
+- `OTEL_JAVAAGENT_LOGGING=none`: Mutes all internal agent logging.
+- `OTEL_JAVAAGENT_LOGGING=application`: Redirects agent logs to the instrumented application's SLF4J logger, allowing you to manage agent logs using your application's logging configuration (e.g., `logback.xml`).
+
+### Framework Appender Toggles
+
+The Java agent automatically enables instrumentation for popular logging frameworks by default. You can explicitly disable or enable them if needed:
+
+- `OTEL_INSTRUMENTATION_LOGBACK_APPENDER_ENABLED=false`: Disables the Logback appender instrumentation.
+- `OTEL_INSTRUMENTATION_LOG4J_APPENDER_ENABLED=false`: Disables the Log4j 2 appender instrumentation.
+- `OTEL_INSTRUMENTATION_JUL_ENABLED=false`: Disables `java.util.logging` (JUL) instrumentation.
+- `OTEL_INSTRUMENTATION_JBOSS_LOGMANAGER_APPENDER_ENABLED=false`: Disables the JBoss Log Manager appender.
+
+### Logback & Log4j Experimental Features
+
+If you are using Logback or Log4j, OpenTelemetry supports capturing various contextual attributes by enabling experimental features via environment variables.
+
+In the configurations below, `<FRAMEWORK>` can be replaced with either `LOGBACK` or `LOG4J`, depending on your logging framework.
+
+- `OTEL_INSTRUMENTATION_<FRAMEWORK>_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true`: Captures standard attributes like `thread.name` and `thread.id`.
+  - Example for Logback: `OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true`
+  - Example for Log4j: `OTEL_INSTRUMENTATION_LOG4J_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true`
+- `OTEL_INSTRUMENTATION_<FRAMEWORK>_APPENDER_EXPERIMENTAL_CAPTURE_CODE_ATTRIBUTES=true`: Captures source code attributes (e.g., class name, method name, line number). Note that this may add performance overhead.
+- `OTEL_INSTRUMENTATION_<FRAMEWORK>_APPENDER_EXPERIMENTAL_CAPTURE_MARKER_ATTRIBUTE=true`: Captures markers.
+- `OTEL_INSTRUMENTATION_<FRAMEWORK>_APPENDER_EXPERIMENTAL_CAPTURE_MDC_ATTRIBUTES`: Controls which MDC attributes to capture. Use `*` to capture all MDC attributes or provide a comma-separated list of specific keys (e.g. `tenant_id,tenant_user`).
+- `OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES=true`: Captures Logback key-value pairs as log attributes.
+- `OTEL_INSTRUMENTATION_LOG4J_APPENDER_EXPERIMENTAL_CAPTURE_MAP_MESSAGE_ATTRIBUTES=true`: Enables the capture of attributes from Log4j MapMessage instances.
+- `OTEL_INSTRUMENTATION_LOG4J_APPENDER_EXPERIMENTAL_CAPTURE_EVENT_NAME=true`: Enables the capture of the event name from the MDC attribute "event.name" and sets it as the log record's event name.
+
+<Admonition type="tip">
+**Pass configurations using `JAVA_TOOL_OPTIONS`**
+
+You can pass these system properties seamlessly by adding them to the `JAVA_TOOL_OPTIONS` environment variable before starting your application. 
+
+```bash
+export JAVA_TOOL_OPTIONS="-javaagent:/path/to/opentelemetry-javaagent.jar \
+  -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=tenant_id,tenant_user,tenant_user_id,tenantshortname \
+  -Dotel.instrumentation.logback-appender.experimental-log-attributes=true"
+```
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
+
 ## Troubleshooting
 
 </ToggleHeading>
 
-#### Why are my logs not appearing?
+### Logs are not appearing in SigNoz
 
-- Ensure `OTEL_LOGS_EXPORTER` is set to `otlp` (for Auto-Instrumentation).
-- Verify the `OTEL_EXPORTER_OTLP_ENDPOINT` is correct and reachable.
-- Check the console output for any OTel-related errors.
-- If using `logback.xml`, ensure the `OTEL` appender is added to `<root>`.
+If you don't see your application logs correctly in SigNoz, check the following common pitfalls:
+
+- **Enable Agent Debug Logging**: Run your application with `-Dotel.javaagent.debug=true` or set `OTEL_JAVAAGENT_DEBUG=true`. This will print verbose internal agent logs to the console and indicate if there are connection issues with the endpoint.
+- **Verify Exporters Setup**: Ensure `OTEL_LOGS_EXPORTER` is set to `otlp` (it is by default in Auto-Instrumentation, but double-check if explicitly set).
+- **Check Your Endpoints**: Validate that `OTEL_EXPORTER_OTLP_ENDPOINT` (or `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`) contains an accessible, valid URL without trailing slashes. Make sure your ingestion key is correctly passed in `OTEL_EXPORTER_OTLP_HEADERS`.
+- **Verify Custom Log Configurations**: If you are using a custom `logback.xml` or `log4j2.xml`, make sure the OpenTelemetry appender (`OTEL`) is bound to the root logger level you expect (e.g. `<root level="INFO"> <appender-ref ref="OTEL" /> </root>`).
+
+### MDC or ThreadContext attributes are missing
+
+Logback refers to contextual logging data as **MDC (Mapped Diagnostic Context)**, whereas Log4j2 commonly refers to it as **Thread Context**. By default, the OpenTelemetry Java agent doesn't capture these custom attributes.
+
+To make them visible in SigNoz, you need to configure the OpenTelemetry agent to capture them. You can do this by passing the appropriate system property via the `JAVA_TOOL_OPTIONS` environment variable.
+
+- **For Logback** (Capture all MDC attributes):
+  ```bash
+  export JAVA_TOOL_OPTIONS="-javaagent:/path/to/opentelemetry-javaagent.jar \
+    -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=*"
+  ```
+
+- **For Log4j** (Capture all ThreadContext/MDC attributes):
+  ```bash
+  export JAVA_TOOL_OPTIONS="-javaagent:/path/to/opentelemetry-javaagent.jar \
+    -Dotel.instrumentation.log4j-appender.experimental.capture-mdc-attributes=*"
+  ```
+
+*Note: Instead of `*`, you can also provide a comma-separated list of specific keys (e.g. `tenant_id,session_id`) to only capture certain attributes.*
 
 </details>
 

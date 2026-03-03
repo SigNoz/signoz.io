@@ -1,5 +1,5 @@
 ---
-date: 2025-08-05
+date: 2026-02-21
 id: logs_faqs
 
 title: General FAQs
@@ -78,18 +78,70 @@ A. Check your exporter and collector configuration.
 ### Q. How to increase the retention period of logs from x days to y days?  
 A. If you are using SigNoz Cloud, contact SigNoz support via the chatbox. Or if you are self-hosting, you can change the retention period in the SigNoz UI under Settings > Logs Retention.
 
-### Q. In java my mdc attributes are not visible in SigNoz  
-A. Ensure your logging configuration includes MDC pattern and OpenTelemetry is configured to capture MDC attributes.
+### Q. How do I filter logs using the Query Builder?
+A. You can use the Query Builder to filter logs by specific attributes, such as service name or severity.
 
 <details>
-<summary>Show detailed configuration steps</summary>
+<summary>Show detailed steps</summary>
 
-You can get your mdc attributes by using the [appender settings][def] and passing it as `-D<property>=<value>` format.
+1. Navigate to the **Logs** tab in the side navigation bar to open the Logs Explorer.
+2. In the query input area, click inside the text box that says **"Enter your filter query"**.
+3. Type your query using the autocomplete suggestions (e.g., `severity_text = 'ERROR'`).
+4. Alternatively, use the **Filters for** sidebar on the left to select quick filters like **Severity Text** or **Service Name**.
+5. Click the blue **Run Query** button (or press `Cmd+Enter` / `Ctrl+Enter`) at the top right to refresh the results.
 
-For example, for **logback** use:  
-`otel.instrumentation.logback-appender.experimental.capture-mdc-attributes=*`  
-For **log4j** use:  
-`otel.instrumentation.log4j-appender.experimental.capture-mdc-attributes=*`  
-See [this documentation][def] for more system properties.
+</details>
+
+### Q. How do I add or remove columns in the log table view?
+A. You can customize columns in the List or Table view using the Settings menu to focus on relevant attributes.
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. Ensure your layout view is set to **List View** or **Table**.
+2. Click the **Settings icon** (slider icon) located at the top right of the logs area.
+3. In the popover that appears, locate the **COLUMNS** section.
+4. To remove a column, click the **'x'** next to the field name.
+5. To add a new column, click the **'+'** button next to the **COLUMNS** label.
+6. Search for a field in the search box and click on the desired attribute to add it as a column in your view.
+
+</details>
+
+### Q. How can I view the full details and context of a specific log line?
+A. You can click on any log line to open the Log details drawer, which provides a detailed breakdown and surrounding context.
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. Click on any log line in the result list.
+2. A **Log details** drawer will open on the right side of the screen.
+3. Use the **Overview** tab to see a readable list of all **Attributes**.
+4. Switch to the **JSON** tab to see the raw log structure.
+5. Click the **Context** tab to view logs that occurred immediately before and after the selected log line, which is highly useful for debugging sequential events.
+
+</details>
+
+### Q. How do I save a view or query for later use?
+A. You can save your current configuration (query, filters, columns, and layout) as a View for quick access.
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. Once you have configured your query, filters, and columns, find the **Views** section or **Save View** functionality.
+2. Provide a descriptive name to save your configuration.
+3. You can access saved views from the **Views** tab or from the Explorer sidebar to quickly switch between different commonly used configurations.
+
+</details>
+
+### Q. How do I navigate from a log line to its corresponding trace?
+A. If a log has a `trace_id` associated with it, you can navigate directly to the trace details. To learn how to add `trace_id` to your logs, see our guide on [Correlating Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs).
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. In the **Logs Explorer**, click on any log line that has a `trace_id` to open the **Log details** drawer on the right side of the screen.
+2. In the **Overview** tab of the log details drawer, locate the **`trace_id`** field under the **Attributes** section.
+3. Click the **link icon** (which looks like a small chain link) immediately to the right of the `trace_id` label.
+4. Clicking this icon will navigate you directly to the corresponding **Trace Details** page.
 
 </details>

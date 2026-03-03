@@ -1,5 +1,5 @@
 ---
-date: 2025-06-11
+date: 2026-02-27
 id: ecs
 tags : [Self-Host]
 title: Deploying to ECS
@@ -297,9 +297,9 @@ Below is a single, all-in-one ECS task definition JSON that includes every SigNo
 - init-clickhouse
 - clickhouse
 - zookeeper-1
-- SigNoz 
+- SigNoz
 - Otel-collector
-- Schema-migrator-sync and schema-migrator-async.
+- signoz-telemetrystore-migrator
 
 
 Each section below shows one `containerDefinition` snippet. Replace all `<…>` placeholders with your own values.
@@ -309,7 +309,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 ```json
 {
   "name": "init-clickhouse",
-  "image": "clickhouse/clickhouse-server:24.1.2-alpine",
+  "image": "clickhouse/clickhouse-server:25.5.6",
   "cpu": 256,
   "memory": 256,
   "memoryReservation": 256,
@@ -336,7 +336,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     }
   }
 }
-````
+```
 
 ### 2. config-fetcher
 
@@ -376,7 +376,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 ```json
 {
   "name": "clickhouse",
-  "image": "clickhouse/clickhouse-server:24.1.2-alpine",
+  "image": "clickhouse/clickhouse-server:25.5.6",
   "cpu": 1024,
   "memory": 512,
   "memoryReservation": 512,
@@ -475,17 +475,16 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
   ],
   "environment": [
-    { "name": "SIGNOZ_ALERTMANAGER_PROVIDER",       "value": "signoz" },
-    { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN","value": "tcp://clickhouse:9000" },
-    { "name": "SIGNOZ_SQLSTORE_SQLITE_PATH",         "value": "/var/lib/signoz/signoz.db" },
-    { "name": "STORAGE",                             "value": "clickhouse" },
-    { "name": "TELEMETRY_ENABLED",                   "value": "true" },
-    {"name": "SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_ENABLED", "value": "false" },
-
+    { "name": "SIGNOZ_TELEMETRYSTORE_PROVIDER",            "value": "clickhouse" },
+    { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN",      "value": "tcp://clickhouse:9000" },
+    { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_CLUSTER",  "value": "cluster" },
+    { "name": "SIGNOZ_SQLSTORE_SQLITE_PATH",               "value": "/var/lib/signoz/signoz.db" },
+    { "name": "SIGNOZ_ALERTMANAGER_PROVIDER",              "value": "signoz" },
+    { "name": "SIGNOZ_EMAILING_ENABLED",                   "value": "false" },
+    { "name": "SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_ENABLED", "value": "false" }
   ],
   "mountPoints": [
-    { "sourceVolume": "signoz-config",     "containerPath": "/root/config"      },
-    { "sourceVolume": "signoz-sqlite",     "containerPath": "/var/lib/signoz" }
+    { "sourceVolume": "signoz-sqlite", "containerPath": "/var/lib/signoz" }
   ],
   "healthCheck": {
     "command": ["CMD","wget","--spider","-q","localhost:8080/api/v1/health"],
@@ -510,7 +509,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 ```json
 {
   "name": "otel-collector",
-  "image": "signoz/signoz-otel-collector:<OTELCOL_TAG>",
+  "image": "signoz/signoz-otel-collector:latest",
   "cpu": 512,
   "memory": 512,
   "memoryReservation": 256,
@@ -519,14 +518,17 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     { "containerPort": 4317, "hostPort": 4317, "protocol": "tcp" },
     { "containerPort": 4318, "hostPort": 4318, "protocol": "tcp" }
   ],
+  "entryPoint": ["/bin/sh"],
   "command": [
-    "--config=/etc/otel-collector-config.yaml",
-    "--manager-config=/etc/manager-config.yaml",
-    "--copy-path=/var/tmp/collector-config.yaml",
-    "--feature-gates=-pkg.translator.prometheus.NormalizeName"
+    "-c",
+    "/signoz-otel-collector migrate sync check && /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml"
   ],
-  "dependsOn": [
-    { "containerName": "signoz", "condition": "HEALTHY" }
+  "environment": [
+    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN",         "value": "tcp://clickhouse:9000" },
+    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER",     "value": "cluster" },
+    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION", "value": "true" },
+    { "name": "SIGNOZ_OTEL_COLLECTOR_TIMEOUT",                "value": "10m" },
+    { "name": "LOW_CARDINAL_EXCEPTION_GROUPING",              "value": "false" }
   ],
   "mountPoints": [
     { "sourceVolume": "otel-config", "containerPath": "/etc" }
@@ -542,17 +544,27 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 }
 ```
 
-### 7. schema-migrator-sync
+### 7. signoz-telemetrystore-migrator
 
 ```json
 {
-  "name": "schema-migrator-sync",
-  "image": "signoz/signoz-schema-migrator:<OTELCOL_TAG>",
+  "name": "signoz-telemetrystore-migrator",
+  "image": "signoz/signoz-otel-collector:latest",
   "cpu": 128,
   "memory": 256,
   "memoryReservation": 128,
   "essential": false,
-  "command": ["sync", "--dsn=tcp://clickhouse:9000", "--up="],
+  "entryPoint": ["/bin/sh"],
+  "command": [
+    "-c",
+    "/signoz-otel-collector migrate bootstrap && /signoz-otel-collector migrate sync up && /signoz-otel-collector migrate async up"
+  ],
+  "environment": [
+    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN",         "value": "tcp://clickhouse:9000" },
+    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER",     "value": "cluster" },
+    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION", "value": "true" },
+    { "name": "SIGNOZ_OTEL_COLLECTOR_TIMEOUT",                "value": "10m" }
+  ],
   "dependsOn": [
     { "containerName": "clickhouse", "condition": "HEALTHY" }
   ],
@@ -561,37 +573,14 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     "options": {
       "awslogs-group": "/aws/ecs/<LOG_GROUP>",
       "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "schema-migrator-sync"
+      "awslogs-stream-prefix": "signoz-telemetrystore-migrator"
     }
   }
 }
 ```
 
 
-### 8. schema-migrator-async
-
-```json
-{
-  "name": "schema-migrator-async",
-  "image": "signoz/signoz-schema-migrator:<OTELCOL_TAG>",
-  "cpu": 128,
-  "memory": 256,
-  "memoryReservation": 128,
-  "essential": false,
-  "command": ["async", "--dsn=tcp://clickhouse:9000", "--up="],
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "schema-migrator-async"
-    }
-  }
-}
-```
-
-
-### 9. Volumes
+### 8. Volumes
 
 ```json
  "volumes": [
@@ -602,7 +591,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
         ],
 ```
 
-### 10. General Task Definitions config
+### 9. General Task Definitions config
 
 ```json
   "taskDefinition": {
@@ -617,7 +606,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     },
     "cpu": "1843",
     "memory": "1536",
-    "containerDefinitions": {...}",
+    "containerDefinitions": {...},
     "volumes": {...},
   }
 

@@ -1,12 +1,18 @@
 import siteMetadata from '@/data/siteMetadata'
-import { Blog, Comparison, Guide } from 'contentlayer/generated'
+import { Blog, Guide } from 'contentlayer/generated'
 import Authors from '../../../constants/authors.json'
 import { Clock4 } from 'lucide-react'
 import Link from 'next/link'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { formatDate } from 'pliny/utils/formatDate'
+import { MDXContent } from '@/utils/strapi'
+import { type Comparison } from 'types/transformedContent'
 
-export default function BlogPostCard({ blog }: { blog: CoreContent<Blog | Comparison | Guide> }) {
+export default function BlogPostCard({
+  blog,
+}: {
+  blog: CoreContent<Blog | Guide | MDXContent | Comparison>
+}) {
   const { path, date, title, authors } = blog
 
   const getAuthorDetails = (authorID) => {
@@ -37,10 +43,10 @@ export default function BlogPostCard({ blog }: { blog: CoreContent<Blog | Compar
   }
 
   return (
-    <Link href={`/${path}`}>
+    <Link href={`/${path}`} prefetch={true}>
       <div className="flex cursor-pointer flex-col max-md:ml-0 max-md:w-full">
         <div
-          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-all hover:bg-signoz_ink-300 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300 max-md:mt-6`}
+          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-colors duration-150 hover:bg-signoz_ink-300 active:opacity-70 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300 max-md:mt-6`}
         >
           <div className="content h-[96px]">
             <div

@@ -85,7 +85,7 @@ const getReadingTimeText = (content: LayoutProps['content']) => {
 }
 
 const getFormattedDate = (content: LayoutProps['content']) => {
-  const updatedDate = content.lastmod || content.date
+  const updatedDate = content.date
   return updatedDate
     ? new Date(updatedDate).toLocaleDateString('en-US', {
         month: 'short',

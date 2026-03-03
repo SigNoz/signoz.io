@@ -264,6 +264,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.113',
+            label: 'Upgrade to v0.113',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.94',
             label: 'Upgrade to v0.94',
           },
@@ -476,6 +481,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/root-user',
+                label: 'Root User Configuration',
+                isExpanded: false,
+              },
+              {
+                type: 'doc',
                 route: '/docs/manage/administrator-guide/configuration/relational-database',
                 label: 'Relational Databases Support',
                 isExpanded: false,
@@ -526,6 +537,11 @@ const docsSideNav = [
                     type: 'doc',
                     route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
                     label: 'Setting Up SSO SAML 2.0 With Keycloak',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/oidc-keycloak',
+                    label: 'Keycloak - OIDC Authentication',
                   },
                 ],
               },
@@ -718,9 +734,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
-                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+                route: '/docs/opentelemetry-collection-agents/vm/overview',
                 type: 'doc',
                 label: 'Overview',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/vm/install',
+                type: 'doc',
+                label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/vm/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
@@ -1208,6 +1234,11 @@ const docsSideNav = [
             route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
             label: 'Telemetry Data Requirements for Infrastructure Monitoring',
           },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics',
+            label: 'Understanding CPU Utilization Metrics and Aggregation Intervals',
+          },
         ],
       },
     ],
@@ -1635,6 +1666,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/render-metrics',
+                label: 'Render',
+              },
+              {
+                type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
                 label: 'Traefik Observability',
               },
@@ -1710,6 +1746,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/dropping-metric-labels',
         label: 'Dropping Metric Labels (Attributes)',
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/reducing-costs',
+        label: 'Understanding Metrics Billing and Reducing Costs',
       },
       {
         type: 'category',
@@ -2071,6 +2112,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+            label: 'OpenRouter',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
             label: 'Pipecat',
           },
@@ -2178,9 +2224,21 @@ const docsSideNav = [
         label: 'Field Context & Data Types',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/search-troubleshooting',
-        label: 'Troubleshooting Guide',
+        type: 'category',
+        isExpanded: false,
+        label: 'Troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-troubleshooting',
+            label: 'Troubleshooting Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/query-troubleshooting-faqs',
+            label: 'Query Troubleshooting - FAQs',
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2394,6 +2452,16 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/no-data-alerts-for-groups',
+            label: 'No Data Alerts for Groups',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
+            label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
+          },
         ],
       },
       {
@@ -2602,6 +2670,11 @@ const docsSideNav = [
       {
         route: '/docs/openlit',
         label: 'OpenLIT',
+        type: 'doc',
+      },
+      {
+        route: '/docs/openrouter-observability',
+        label: 'OpenRouter',
         type: 'doc',
       },
       {
