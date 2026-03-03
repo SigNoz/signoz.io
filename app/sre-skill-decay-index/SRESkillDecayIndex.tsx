@@ -251,20 +251,22 @@ export default function SRESkillDecayIndex() {
         }
       `}</style>
 
-      {phase === 'hero' && <HeroSection onStart={handleStart} />}
+      <div className="relative z-[60]">
+        {phase === 'hero' && <HeroSection onStart={handleStart} />}
 
-      {phase === 'quiz' && (
-        <QuizSection
-          currentQuestion={currentQuestion}
-          totalQuestions={questions.length}
-          question={questions[currentQuestion]}
-          onAnswer={handleAnswer}
-        />
-      )}
+        {phase === 'quiz' && (
+          <QuizSection
+            currentQuestion={currentQuestion}
+            totalQuestions={questions.length}
+            question={questions[currentQuestion]}
+            onAnswer={handleAnswer}
+          />
+        )}
 
-      {phase === 'results' && (
-        <ResultsSection results={computeResults()} onRestart={handleRestart} />
-      )}
+        {phase === 'results' && (
+          <ResultsSection results={computeResults()} onRestart={handleRestart} />
+        )}
+      </div>
     </div>
   )
 }
