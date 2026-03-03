@@ -2224,9 +2224,21 @@ const docsSideNav = [
         label: 'Field Context & Data Types',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/search-troubleshooting',
-        label: 'Troubleshooting Guide',
+        type: 'category',
+        isExpanded: false,
+        label: 'Troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-troubleshooting',
+            label: 'Troubleshooting Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/query-troubleshooting-faqs',
+            label: 'Query Troubleshooting - FAQs',
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2439,6 +2451,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/no-data-alerts-for-groups',
+            label: 'No Data Alerts for Groups',
           },
           {
             type: 'doc',
