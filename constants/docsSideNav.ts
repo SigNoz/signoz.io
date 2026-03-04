@@ -1334,6 +1334,11 @@ const docsSideNav = [
                 route: '/docs/logs-management/send-logs/zap-to-signoz',
                 label: 'Zap',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-deno',
+                label: 'Deno',
+              },
             ],
           },
           {
@@ -1649,6 +1654,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
                 label: 'Python',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-deno',
+                label: 'Deno',
               },
             ],
           },
