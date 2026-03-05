@@ -81,8 +81,14 @@ struct SwiftExample {
         let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
         let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
+        // Replace <service_name> with the name of your service
+        let resource = Resource(attributes: [
+            ResourceAttributes.serviceName.rawValue: AttributeValue.string("<service_name>")
+        ])
+
         let tracerProvider = TracerProviderBuilder()
             .add(spanProcessor: spanProcessor)
+            .with(resource: resource)
             .build()
         OpenTelemetry.registerTracerProvider(tracerProvider: tracerProvider)
 
@@ -93,6 +99,7 @@ Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>`: A name to identify your service in SigNoz (e.g., `my-swift-app`)
 
 ### Step 3: Instrument your application
 
@@ -133,7 +140,7 @@ To ensure everything is working:
 
 1. Perform an action in your application that triggers the traced code.
 2. In SigNoz, navigate to the **[Traces](https://signoz.io/docs/userguide/traces/)** tab.
-3. Apply filters based on your `service_name` (if configured in resources) or look for spans named `doWork`.
+3. Filter by your `<service_name>` to find your traces.
 4. If you see your spans appearing in the list, the instrumentation is successfully sending data to SigNoz.
 
 
