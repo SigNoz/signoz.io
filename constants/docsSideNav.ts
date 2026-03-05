@@ -264,6 +264,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.113',
+            label: 'Upgrade to v0.113',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.94',
             label: 'Upgrade to v0.94',
           },
@@ -533,6 +538,11 @@ const docsSideNav = [
                     route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
                     label: 'Setting Up SSO SAML 2.0 With Keycloak',
                   },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/oidc-keycloak',
+                    label: 'Keycloak - OIDC Authentication',
+                  },
                 ],
               },
             ],
@@ -724,9 +734,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
-                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+                route: '/docs/opentelemetry-collection-agents/vm/overview',
                 type: 'doc',
                 label: 'Overview',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/vm/install',
+                type: 'doc',
+                label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/vm/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
@@ -743,9 +763,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
+                route: '/docs/opentelemetry-collection-agents/docker/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
+              {
                 route: '/docs/opentelemetry-collection-agents/docker/install',
                 type: 'doc',
                 label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/docker/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
@@ -754,6 +784,11 @@ const docsSideNav = [
             label: 'Swarm',
             isExpanded: false,
             items: [
+              {
+                route: '/docs/opentelemetry-collection-agents/docker-swarm/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
               {
                 route: '/docs/opentelemetry-collection-agents/docker-swarm/install',
                 type: 'doc',
@@ -1617,6 +1652,16 @@ const docsSideNav = [
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
                 label: 'Python',
               },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-rust',
+                label: 'Rust',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-ruby',
+                label: 'Ruby',
+              },
             ],
           },
           {
@@ -1643,6 +1688,20 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/envoy-metrics',
                 label: 'Envoy Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/nvidia-dcgm-metrics',
+                label: 'NVIDIA GPU (DCGM)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/slurm-metrics',
+                label: 'SLURM',
+              },
+              { type: 'doc',
+                route: '/docs/metrics-management/render-metrics',
+                label: 'Render',
               },
               {
                 type: 'doc',
@@ -1721,6 +1780,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/dropping-metric-labels',
         label: 'Dropping Metric Labels (Attributes)',
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/reducing-costs',
+        label: 'Understanding Metrics Billing and Reducing Costs',
       },
       {
         type: 'category',
@@ -2194,9 +2258,21 @@ const docsSideNav = [
         label: 'Field Context & Data Types',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/search-troubleshooting',
-        label: 'Troubleshooting Guide',
+        type: 'category',
+        isExpanded: false,
+        label: 'Troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-troubleshooting',
+            label: 'Troubleshooting Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/query-troubleshooting-faqs',
+            label: 'Query Troubleshooting - FAQs',
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2409,6 +2485,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/no-data-alerts-for-groups',
+            label: 'No Data Alerts for Groups',
           },
           {
             type: 'doc',
