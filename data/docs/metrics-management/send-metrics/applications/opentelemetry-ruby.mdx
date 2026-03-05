@@ -1,5 +1,5 @@
 ---
-date: 2026-02-23
+date: 2026-03-05
 id: opentelemetry-ruby
 title: Send Metrics from Ruby Application Using OpenTelemetry
 description: Learn how to send metrics from Ruby applications (Rails, Sinatra, Sidekiq) to SigNoz using OpenTelemetry
@@ -146,9 +146,11 @@ Verify these values:
 </Tabs>
 
 <KeyPointCallout title="Why explicitly disable traces and logs?" defaultCollapsed={true}>
-Since the OpenTelemetry Ruby SDK enables traces and logs export by default, these would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant volume and costs.
+This guide installs only metrics packages (`opentelemetry-exporter-otlp-metrics`). If `OTEL_TRACES_EXPORTER` is unset, the Ruby SDK defaults traces exporter to `otlp`. Without a traces OTLP exporter gem, the SDK shows a warning and spans are not exported.
 
-Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables traces and logs while keeping metrics working as expected. If you want traces or logs later, you can change them to `otlp` or remove these variables altogether.
+`OTEL_LOGS_EXPORTER` is also set to `none` as an explicit metrics-only guard. With the current gems and SDK behavior in this setup, logs are not exported.
+
+Keeping both `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` set to `none` avoids trace exporter warnings and keeps configuration intent clear. If you add traces/logs instrumentation and exporters later, you can set them to `otlp` or remove the env variables altogether.
 </KeyPointCallout>
 
 ### Step 2. Install OpenTelemetry packages
