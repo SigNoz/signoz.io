@@ -1,9 +1,13 @@
 import OpenTelemetryClient from './OpenTelemetryClient'
 import { Metadata } from 'next'
-import { fetchMDXContentByPath } from '@/utils/strapi'
+import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
+import { fetchAllComparisonsForPage } from '@/utils/cachedData'
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { type Comparison } from 'types/transformedContent'
 
-export const revalidate = 3600
-export const dynamicParams = true
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
   title: 'OpenTelemetry Learning Track | SigNoz',
@@ -32,20 +36,20 @@ export const metadata: Metadata = {
 export default async function OpenTelemetryHome() {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deployment_status = isProduction ? 'live' : 'staging'
-  let articles: any[] = []
+  let articles: MDXContent[] = []
+  let comparisonPosts: Comparison[] = []
 
   try {
-    const response = await fetchMDXContentByPath(
-      'opentelemetries',
-      undefined,
-      deployment_status,
-      true
-    )
+    const [articlesResponse, comparisonsResult] = await Promise.all([
+      fetchMDXContentByPath('opentelemetries', undefined, deployment_status, true),
+      fetchAllComparisonsForPage(),
+    ])
 
-    articles = (response.data || []) as any[]
+    comparisonPosts = allCoreContent(sortPosts(comparisonsResult)) as Comparison[]
+    articles = (articlesResponse.data || []) as MDXContent[]
   } catch (error) {
     console.error('Error fetching OpenTelemetry articles:', error)
   }
 
-  return <OpenTelemetryClient initialArticles={articles} />
+  return <OpenTelemetryClient initialArticles={articles} comparisonPosts={comparisonPosts} />
 }

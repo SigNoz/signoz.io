@@ -1,3 +1,5 @@
+import { IconTitleDescriptionCardVariant } from './IconTitleDescriptionCard.types'
+
 export type IconTitleDescriptionCardData = {
   icon?: React.ReactNode
   iconText?: string
@@ -9,4 +11,5 @@ export type IconTitleDescriptionCardData = {
 export type IconTitleDescriptionCardGridProps = {
   cards: IconTitleDescriptionCardData[]
   className?: string
+  variant?: IconTitleDescriptionCardVariant
 }

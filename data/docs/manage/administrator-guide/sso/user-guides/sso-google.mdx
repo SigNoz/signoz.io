@@ -1,8 +1,9 @@
 ---
-date: 2025-10-21
+date: 2026-02-22
 id: sso-google
-
+description: Set up Google Workspace SSO authentication with SigNoz, including group-based access control and role mapping.
 title: Single Sign-on Authentication With Google Workspace
+doc_type: tutorial
 ---
 
 ## Overview
@@ -43,7 +44,7 @@ Now you'll configure SigNoz to accept authentication from Google Workspace:
 
    - Go to your SigNoz dashboard
    - Click on **Settings** in the left sidebar
-   - Navigate to **Organization Settings**
+   - Navigate to **Organization Settings** → **Members & SSO**
    - Click on **Authenticated Domains**
 
 2. **Add New Domain:**
@@ -76,18 +77,115 @@ Back in the domain list, toggle **Enforce SSO**. From now on, all users with the
 
 Open a private/incognito window and visit your SigNoz URL. You will be redirected to Google for authentication and then back to SigNoz.
 
+### Step 5: Configure Group-Based Access (Optional)
+
+You can restrict SigNoz access to specific Google Workspace groups and use group membership for role mapping. This requires a Google Cloud service account with Domain-Wide Delegation.
+
+#### 5.1: Create a Service Account
+
+1. Go to [Google Cloud Console → IAM & Admin → Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts)
+2. Click **Create Service Account**
+3. Give it a name (e.g., `signoz-group-sync`) and click **Create and Continue**
+4. Skip the optional steps and click **Done**
+5. Click the newly created service account → **Keys** → **Add Key** → **Create new key** → **JSON**
+6. Save the downloaded JSON key file — you'll paste its contents into SigNoz
+
+#### 5.2: Enable Domain-Wide Delegation
+
+1. On the service account page, click **Edit** (pencil icon)
+2. Expand **Show Advanced Settings**
+3. Check **Enable Google Workspace Domain-wide Delegation**
+4. Click **Save**
+5. Note the **Client ID** (numeric) shown on the service account details page
+
+#### 5.3: Authorize Scopes in Google Workspace Admin
+
+1. Go to [Google Workspace Admin Console → Security → API Controls → Domain-wide Delegation](https://admin.google.com/ac/owl/domainwidedelegation)
+2. Click **Add new**
+3. Enter the service account **Client ID**
+4. Add the following OAuth scope:
+   ```
+   https://www.googleapis.com/auth/admin.directory.group.readonly
+   ```
+5. Click **Authorize**
+
+#### 5.4: Enable the Admin SDK API
+
+1. Go to [Google Cloud Console → APIs & Services → Library](https://console.cloud.google.com/apis/library)
+2. Search for **Admin SDK API**
+3. Click **Enable**
+
+#### 5.5: Configure Group Fetching in SigNoz
+
+1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Click on your Google Auth domain to edit it
+3. In the **Group Access** section, configure the following:
+
+| Field | Description |
+|-------|-------------|
+| **Fetch Groups** | Turn **ON** to enable group fetching from Google Workspace |
+| **Service Account JSON** | Paste the full contents of the service account JSON key file downloaded in [Step 5.1](#51-create-a-service-account) |
+| **Domain to Admin Email** | Map each workspace domain to an admin email used for Directory API impersonation. Use `*` as a wildcard key for a default admin email (e.g., `company.com` → `admin@company.com`, `*` → `global-admin@company.com`) |
+| **Allowed Groups** *(optional)* | Restrict login to users who belong to at least one of these groups. Enter group email addresses (e.g., `engineering@company.com`). Leave empty to allow all users |
+| **Fetch Transitive Group Membership** *(optional)* | Turn **ON** to recursively resolve nested group memberships (e.g., if a user is in group A which is a member of group B, both groups are included) |
+
+4. Click **Save**
+
+<Admonition type="note">
+**Domain to Admin Email** is required when **Fetch Groups** is enabled. The admin email is used to impersonate a Workspace admin for Directory API calls. The `*` wildcard key serves as a fallback for any domain not explicitly listed.
+</Admonition>
+
+### Step 6: Configure Role Mapping (Optional)
+
+Role mapping automatically assigns SigNoz roles (VIEWER, EDITOR, ADMIN) to users when they log in, based on their Google Workspace group memberships.
+
+#### Role Resolution Priority
+
+When a user logs in, SigNoz determines their role using this priority (highest to lowest):
+
+1. **Use Role Attribute** — if enabled and the IDP token contains a role claim, that role is used directly
+2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (ADMIN > EDITOR > VIEWER)
+3. **Default Role** — fallback role from configuration
+4. **VIEWER** — ultimate default if nothing else is configured
+
+#### Configure in SigNoz
+
+1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Click on your Google Auth domain to edit it
+3. In the **Role Mapping** section, configure the following:
+   - **Default Role**: Select the role assigned when no other mapping matches (e.g., `VIEWER`)
+   - **Group Mappings**: Add entries mapping Google Workspace group emails to SigNoz roles:
+
+     | Google Workspace Group | SigNoz Role |
+     |------------------------|-------------|
+     | `platform-admins@company.com` | `ADMIN` |
+     | `engineering@company.com` | `EDITOR` |
+     | `everyone@company.com` | `VIEWER` |
+
+   - **Use Role Attribute**: Turn **ON** to use a role claim directly from the IDP token instead of group-based mapping. Leave **OFF** for group-based role mapping. This option applies only if your IDP token already includes a role claim. For standard Google Workspace OAuth, this is not typically available — use group-based mapping instead.
+4. Click **Save**
+
+<Admonition type="info">
+Group-based role mapping requires **Fetch Groups** to be enabled (see [Step 5](#step-5-configure-group-based-access-optional)). Without it, only **Default Role** and **Use Role Attribute** are effective.
+</Admonition>
+
 ## Troubleshooting
 
 **Common issues and solutions:**
 
 - **"Authentication failed" error**: Check that the redirect URI exactly matches `https://${SIGNOZ_BASEURL}/api/v1/complete/google` in Google Cloud
 - **Stuck in a login loop**: Ensure **Enforce SSO** is enabled **and** the user's email domain matches the configured authenticated domain
-- **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
+- **Groups not being fetched**: Verify that the service account has Domain-Wide Delegation enabled, the `admin.directory.group.readonly` scope is authorized in Google Workspace Admin, and the Admin SDK API is enabled in Google Cloud
+- **"Insufficient permissions" error for groups**: Check that the admin email in **Domain to Admin Email** has permissions to list groups in Google Workspace. The admin must have at least the Groups Reader role
+- **User created with wrong role**: Check the [role resolution priority](#role-resolution-priority) — if **Use Role Attribute** is ON, it takes precedence over group mappings. Verify your group mappings use the full group email address (e.g., `engineering@company.com`, not just `engineering`)
+- **Allowed Groups blocking login**: If you configured **Allowed Groups**, ensure the user is a member of at least one listed group. Check with **Fetch Transitive Group Membership** ON if the user is in a nested group
+- **Locked out?**: If you're unable to login because of faulty SSO setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
 
 ## Next Steps
 
 Once Google Workspace SSO is configured:
 
 - Users with your organization's email domain can sign in without prior invites
-- Admins can manage user roles within SigNoz after they sign in
+- Configure [group-based access](#step-5-configure-group-based-access-optional) to restrict login to specific Google Workspace groups
+- Set up [role mapping](#step-6-configure-role-mapping-optional) to automatically assign SigNoz roles based on group membership
 - Consider setting up additional security policies in Google Workspace for enhanced security

@@ -1,5 +1,3 @@
-'use client'
-
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Guide, Authors } from 'contentlayer/generated'
