@@ -16,7 +16,7 @@ Manual instrumentation gives you fine-grained control when you need to capture s
 ## Prerequisites
 
 - Complete the [Rust OpenTelemetry instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-rust/) to set up the tracer provider and exporter.
-- Tested with Rust 1.75+ and OpenTelemetry Rust SDK v0.28.0.
+- Tested with Rust 1.75+ and OpenTelemetry Rust SDK v0.31.0.
 
 ## Step 1. Acquire a tracer
 
@@ -209,7 +209,7 @@ pub fn process_batch(batch_id: &str, source_contexts: Vec<SpanContext>) {
     // Create links to all source spans
     let links: Vec<Link> = source_contexts
         .into_iter()
-        .map(|ctx| Link::new(ctx, vec![]))
+        .map(|ctx| Link::new(ctx, vec![], 0))
         .collect();
 
     let span = tracer
