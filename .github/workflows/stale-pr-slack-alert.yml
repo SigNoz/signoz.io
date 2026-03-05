@@ -1,0 +1,268 @@
+name: Weekday Stale PR Slack Alert
+
+on:
+  schedule:
+    # Runs on weekdays (Mon-Fri) at 05:00 UTC.
+    - cron: '0 5 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  notify-stale-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build stale PR report
+        id: report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const STALE_DAYS = 7;
+            const MAX_MESSAGE_CHARS = 3000;
+            const MAX_TITLE_LENGTH = 160;
+            const DAY_MS = 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            const escapeSlack = (value = '') =>
+              value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            const truncate = (value = '', max = MAX_TITLE_LENGTH) =>
+              value.length > max ? `${value.slice(0, max - 1)}…` : value;
+
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+
+            const stalePulls = pulls
+              .filter((pr) => !pr.draft)
+              .map((pr) => ({
+                ...pr,
+                ageDays: Math.floor((now - new Date(pr.created_at).getTime()) / DAY_MS)
+              }))
+              .filter((pr) => pr.ageDays >= STALE_DAYS)
+              .sort((a, b) => b.ageDays - a.ageDays);
+
+            const repoName = `${context.repo.owner}/${context.repo.repo}`;
+            const prListUrl = `${context.serverUrl}/${repoName}/pulls`;
+            const payloads = [];
+
+            if (stalePulls.length === 0) {
+              payloads.push({
+                text: [
+                  ':white_check_mark: Daily stale PR check',
+                  `Repository: \`${repoName}\``,
+                  `No non-draft open PRs older than ${STALE_DAYS} days.`,
+                  `<${prListUrl}|View open PRs>`
+                ].join('\n')
+              });
+            } else {
+              const byCreator = stalePulls.reduce((acc, pr) => {
+                const login = pr.user.login;
+
+                if (!acc.has(login)) {
+                  acc.set(login, []);
+                }
+
+                acc.get(login).push(pr);
+                return acc;
+              }, new Map());
+
+              const creators = Array.from(byCreator.entries())
+                .map(([login, prs]) => ({
+                  login,
+                  prs: prs.sort((a, b) => b.ageDays - a.ageDays),
+                  count: prs.length,
+                  oldestAgeDays: prs.reduce((maxAge, pr) => Math.max(maxAge, pr.ageDays), 0)
+                }))
+                .sort(
+                  (a, b) =>
+                    b.count - a.count ||
+                    b.oldestAgeDays - a.oldestAgeDays ||
+                    a.login.localeCompare(b.login)
+                );
+
+              payloads.push({
+                text: [
+                  `:warning: Daily stale PR check: *${stalePulls.length}* non-draft open PR(s) older than ${STALE_DAYS} days`,
+                  `Repository: \`${repoName}\``,
+                  `Creators with stale PRs: *${creators.length}*`,
+                  `<${prListUrl}|View all open PRs>`
+                ].join('\n')
+              });
+
+              const buildHeading = (login, count, part) =>
+                part === 1
+                  ? `:bust_in_silhouette: *@${login}* (${count} stale PR${count > 1 ? 's' : ''})`
+                  : `:bust_in_silhouette: *@${login}* (${count} stale PR${count > 1 ? 's' : ''}, part ${part})`;
+
+              const sections = [];
+
+              for (const creator of creators) {
+                const authorSearchUrl = `${prListUrl}?q=is%3Apr+is%3Aopen+author%3A${encodeURIComponent(creator.login)}`;
+                const footer = `<${authorSearchUrl}|View open PRs by @${creator.login}>`;
+                const prLines = creator.prs.map(
+                  (pr) =>
+                    `• <${pr.html_url}|#${pr.number}> ${escapeSlack(truncate(pr.title))} (${pr.ageDays}d old)`
+                );
+
+                let part = 1;
+                let lines = [];
+
+                const flush = () => {
+                  if (lines.length === 0) {
+                    return;
+                  }
+
+                  sections.push([buildHeading(creator.login, creator.count, part), ...lines, footer].join('\n'));
+
+                  part += 1;
+                  lines = [];
+                };
+
+                for (const line of prLines) {
+                  const candidate = [
+                    buildHeading(creator.login, creator.count, part),
+                    ...lines,
+                    line,
+                    footer
+                  ].join('\n');
+
+                  if (candidate.length > MAX_MESSAGE_CHARS && lines.length > 0) {
+                    flush();
+                  }
+
+                  lines.push(line);
+                }
+
+                flush();
+              }
+
+              // Batch multiple creator sections into each Slack message.
+              let sectionBatch = [];
+
+              const flushBatch = () => {
+                if (sectionBatch.length === 0) {
+                  return;
+                }
+
+                payloads.push({
+                  text: sectionBatch.join('\n\n')
+                });
+
+                sectionBatch = [];
+              };
+
+              for (const section of sections) {
+                const candidate = [...sectionBatch, section].join('\n\n');
+
+                if (candidate.length > MAX_MESSAGE_CHARS && sectionBatch.length > 0) {
+                  flushBatch();
+                }
+
+                sectionBatch.push(section);
+              }
+
+              flushBatch();
+            }
+
+            core.setOutput('payloads', JSON.stringify(payloads));
+
+      - name: Send reports to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_PAYLOADS: ${{ steps.report.outputs.payloads }}
+        run: |
+          if [ -z "${SLACK_PAYLOADS}" ] || [ "${SLACK_PAYLOADS}" = "[]" ]; then
+            echo "No Slack payloads generated; skipping."
+            exit 0
+          fi
+
+          post_via_webhook() {
+            local payload="$1"
+            local http_code
+
+            http_code="$(curl -sS -o /tmp/slack_response.txt -w "%{http_code}" \
+              -X POST \
+              -H "Content-type: application/json" \
+              --data "${payload}" \
+              "${SLACK_WEBHOOK_URL}")"
+
+            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+              echo "Slack webhook request failed with HTTP ${http_code}"
+              cat /tmp/slack_response.txt
+              exit 1
+            fi
+          }
+
+          post_via_chat_api() {
+            local payload="$1"
+            local label="$2"
+            local http_code
+            local ok
+
+            http_code="$(curl -sS -o /tmp/slack_response.txt -w "%{http_code}" \
+              -X POST \
+              -H "Authorization: Bearer ${SLACK_BOT_TOKEN}" \
+              -H "Content-type: application/json; charset=utf-8" \
+              --data "${payload}" \
+              "https://slack.com/api/chat.postMessage")"
+
+            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+              echo "Slack chat.postMessage HTTP failure for ${label}: ${http_code}"
+              cat /tmp/slack_response.txt
+              exit 1
+            fi
+
+            ok="$(jq -r '.ok // false' /tmp/slack_response.txt)"
+            if [ "${ok}" != "true" ]; then
+              echo "Slack chat.postMessage API error for ${label}"
+              cat /tmp/slack_response.txt
+              exit 1
+            fi
+          }
+
+          # Preferred mode: Bot token + channel ID (supports threading).
+          if [ -n "${SLACK_BOT_TOKEN}" ] && [ -n "${SLACK_CHANNEL_ID}" ]; then
+            first_payload="$(echo "${SLACK_PAYLOADS}" | jq -c '.[0]')"
+            parent_body="$(echo "${first_payload}" | jq -c --arg channel "${SLACK_CHANNEL_ID}" '. + {channel: $channel}')"
+            post_via_chat_api "${parent_body}" "parent message"
+            thread_ts="$(jq -r '.ts // empty' /tmp/slack_response.txt)"
+
+            if [ -z "${thread_ts}" ]; then
+              echo "Slack chat.postMessage succeeded but did not return thread ts"
+              cat /tmp/slack_response.txt
+              exit 1
+            fi
+
+            echo "${SLACK_PAYLOADS}" | jq -c '.[1:][]' | while IFS= read -r payload; do
+              thread_body="$(echo "${payload}" | jq -c \
+                --arg channel "${SLACK_CHANNEL_ID}" \
+                --arg thread_ts "${thread_ts}" \
+                '. + {channel: $channel, thread_ts: $thread_ts, reply_broadcast: false}')"
+
+              post_via_chat_api "${thread_body}" "thread reply"
+              sleep 1
+            done
+
+            exit 0
+          fi
+
+          # Fallback mode: Incoming webhook (cannot reliably thread without a known thread_ts).
+          if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+            echo "Missing Slack configuration. Set SLACK_BOT_TOKEN + SLACK_CHANNEL_ID (threaded) or SLACK_WEBHOOK_URL (non-threaded)."
+            exit 1
+          fi
+
+          echo "${SLACK_PAYLOADS}" | jq -c '.[]' | while IFS= read -r payload; do
+            post_via_webhook "${payload}"
+            sleep 1
+          done
