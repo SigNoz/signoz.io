@@ -371,7 +371,7 @@ Note: Older version of SigNoz required timestamp to be available in the query re
 
 #### Examples
 
-##### Average duration of spans in millisecond where `method = 'POST'` , `service.name = 'sample-service'`
+##### Average duration of spans in millisecond where `method = 'POST'` , `service.name = 'frontend'`
 
 ```sql
 WITH __resource_filter AS (
@@ -389,10 +389,7 @@ WHERE
     timestamp BETWEEN $start_datetime AND $end_datetime AND
     ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
     http_method = 'POST' AND 
-    resource_fingerprint GLOBAL IN __resource_filter
-GROUP BY ts 
-ORDER BY ts ASC
-
+    resource_fingerprint GLOBAL IN __resource_filter;
 ```
 
 ##### Average count of spans per minute with resource filtering for `service.name = 'frontend'` and `environment = 'production'`
@@ -416,8 +413,8 @@ SELECT avg(value) as avg_count FROM (
         timestamp BETWEEN $start_datetime AND $end_datetime AND
         ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
     GROUP BY ts 
-    ORDER BY ts ASC;
-)
+    ORDER BY ts ASC
+);
 ```
 
 ### Table
@@ -439,7 +436,8 @@ SELECT attributes_string['example_string_attribute'] AS attribute_name,
 FROM signoz_traces.distributed_signoz_index_v3  
 WHERE timestamp BETWEEN $start_datetime AND $end_datetime
     AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
-GROUP BY (attribute_name, ts) order by (attribute_name, ts) ASC;
+GROUP BY attribute_name 
+ORDER BY attribute_name ASC;
 ```
 
 ##### Count of spans by service name with resource filtering
