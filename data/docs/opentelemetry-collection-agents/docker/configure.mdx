@@ -1,22 +1,22 @@
 ---
-date: 2026-02-27
-title: Docker Swarm Collection Agent - Configure
+date: 2026-02-25
+title: Docker Collection Agent - Configure
 id: configure
-description: Configure the OpenTelemetry Collector on your Docker Swarm cluster to customize host metrics, container metrics, and log collection for SigNoz.
+description: Configure the OpenTelemetry Collector on your Docker host to customize host metrics, container metrics, and log collection for SigNoz.
 doc_type: howto
 ---
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install) provides a working config that collects host metrics, container metrics, container logs, and forwards application traces out of the box. This page explains what each component in that config does and how to customize it for your Swarm environment.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install) provides a working config that collects host metrics, container metrics, container logs, and forwards application traces out of the box. This page explains what each component in that config does and how to customize it for your environment.
 
 ## Prerequisites
 
-- OpenTelemetry Collector installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install))
+- OpenTelemetry Collector installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install))
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Access to create and edit the collector configuration file
 
 ## Send Data from Applications to the Collector
 
-Configure the OTLP receiver so instrumented applications on the Swarm cluster can send traces, metrics, and logs to the collector.
+Configure the OTLP receiver so instrumented applications on the Docker host can send traces, metrics, and logs to the collector.
 
 ```yaml:config.yaml
 receivers:
@@ -39,13 +39,13 @@ service:
 
 ### Where and how to send data from your application
 
-Set your app's OTLP endpoint to the collector (gRPC `4317`, HTTP `4318`). With global mode and `mode=host` publishing, each Swarm node exposes the collector on `localhost`:
+Set your app's OTLP endpoint to the collector (gRPC `4317`, HTTP `4318`):
 
 ```bash
-# Same node (container on overlay network or host network)
+# Same Docker host (with --network host)
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
-# Different node
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://<NODE_IP>:4317"
+# Different host
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://<DOCKER_HOST_IP>:4317"
 # Set the service name
 export OTEL_RESOURCE_ATTRIBUTES="service.name=my-app"
 ```
@@ -54,7 +54,7 @@ See [Instrumentation](https://signoz.io/docs/instrumentation/) for language-spec
 
 ## Collect Host Metrics
 
-Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each Swarm node.
+Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from the Docker host.
 
 ```yaml:config.yaml
 receivers:
@@ -82,14 +82,14 @@ service:
       receivers: [otlp, hostmetrics]
 ```
 
-You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
 
 <KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed={true}>
 Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk metrics instead of the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
 
-In most cases you mount the host root at `/hostfs` (e.g. `--mount type=bind,source=/,target=/hostfs,readonly`). If you prefer to expose only certain paths to the collector, mount those under `/hostfs` so paths line up.
+In most cases you mount the host root at `/hostfs` (e.g. `-v /:/hostfs:ro`). If you prefer to expose only certain paths to the collector, mount those under `/hostfs` so paths line up—for example `docker run -v /proc:/hostfs/proc` for process-related metrics.
 
-- The `root_path` value in config must match the volume mount path in your `docker service create` (e.g. `/hostfs`).
+- The `root_path` value in config must match the volume mount path in your `docker run` or Compose file (e.g. `/hostfs`).
 - This applies to **Linux only**.
 - If you run multiple hostmetrics receiver instances, they must all share the same `root_path`.
 
@@ -177,28 +177,26 @@ service:
       receivers: [otlp, hostmetrics, docker_stats]
 ```
 
-The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
 
-### Map container labels to metric attributes (Swarm)
+<KeyPointCallout title="Docker socket permissions" defaultCollapsed={true}>
+The install guide runs the collector as root (`user: "0:0"`) so it can read the Docker socket and host filesystem. For production, you can avoid running as root by adding the container to the host's `docker` group: `docker run --group-add $(getent group docker | cut -d: -f3) ...`. If you see permission errors on the socket, see [Troubleshooting](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/#troubleshooting) in the install guide.
+</KeyPointCallout>
 
-Use `container_labels_to_metric_labels` on the `docker_stats` receiver to promote Docker Swarm labels into metric resource attributes. This enables filtering and grouping by stack, service, or task in SigNoz dashboards.
+### Map container labels to metric attributes
+
+Use `container_labels_to_metric_labels` on the `docker_stats` receiver to promote Docker container labels into metric resource attributes. This enables filtering and grouping by Compose service, project, or any custom label in SigNoz dashboards.
 
 ```yaml:config.yaml
 receivers:
   docker_stats:
     endpoint: unix:///var/run/docker.sock
     container_labels_to_metric_labels:
-      com.docker.stack.namespace: docker.stack.name
-      com.docker.swarm.node.id: docker.node.id
-      com.docker.swarm.service.name: docker.service.name
-      com.docker.swarm.task.name: docker.task.name
+      com.docker.compose.service: docker.compose.service
+      com.docker.compose.project: docker.compose.project
 ```
 
 The keys are Docker label names (check with `docker inspect <container> --format '{{json .Config.Labels}}'`), and the values are the metric attribute names that appear in SigNoz.
-
-<KeyPointCallout title="Docker socket permissions" defaultCollapsed={true}>
-The install guide runs the collector as root (`--user 0:0`) so it can read the Docker socket and host filesystem. For production, you can avoid running as root by adding the container to the host's `docker` group: `docker service create ... --group-add $(getent group docker | cut -d: -f3) ...`. If you see permission errors on the socket, see [Troubleshooting](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/#troubleshooting) in the install guide.
-</KeyPointCallout>
 
 ### Exclude containers from metrics
 
@@ -238,7 +236,7 @@ service:
       receivers: [otlp, filelog]
 ```
 
-The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
 
 ## Tune Batch and Memory Limiter
 
@@ -257,7 +255,7 @@ processors:
 ```
 
 <KeyPointCallout title="Setting memory limits" defaultCollapsed={false}>
-Set `limit_mib` to approximately 80% of the memory limit you assign to the collector container. If your Swarm nodes are resource-constrained, reduce both `limit_mib` and `spike_limit_mib` accordingly.
+Set `limit_mib` to approximately 80% of the memory limit you assign to the collector container. If your Docker host is resource-constrained, reduce both `limit_mib` and `spike_limit_mib` accordingly.
 </KeyPointCallout>
 
 ## Resource Detection
@@ -283,10 +281,10 @@ service:
 
 ### Custom resource attributes
 
-You can attach custom resource attributes (for example, `deployment.environment`, `team`, or any custom key) to **all telemetry** sent by the collector by setting the `OTEL_RESOURCE_ATTRIBUTES` environment variable when creating the service:
+You can attach custom resource attributes (for example, `deployment.environment`, `team`, or any custom key) to **all telemetry** sent by the collector by setting the `OTEL_RESOURCE_ATTRIBUTES` environment variable in the collector's environment.
 
 ```bash
-docker service create ... --env OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,team=backend" ...
+OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,team=backend"
 ```
 
 ## Scrape Prometheus Metrics from Containers
@@ -311,20 +309,47 @@ service:
       receivers: [prometheus]
 ```
 
-Replace `my-app-container:9090` with the hostname (or IP) and port of the Prometheus endpoint. If the collector and target share an overlay network, use the service or task name as hostname.
+Replace `my-app-container:9090` with the hostname (or IP) and port of the Prometheus endpoint. If the collector uses `--network host`, use `localhost:<port>`. If it shares a Docker network with the target container, use the container name as hostname.
 
-## Swarm Networking
+## Docker Compose Networking
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install) uses `--publish ... mode=host` so each node exposes 4317 and 4318. Application containers can reach the collector via `localhost` when on the same node, or via the node IP when on a different node.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install) uses `network_mode: host` by default. This gives the collector direct access to host ports and simplifies configuration, but exposes all collector ports on the host.
 
-For overlay networks, attach the collector to your app's network so services can reach it by service name. See the optional overlay network step in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+For environments where you need network isolation, use bridge mode with explicit port mapping:
+
+```yaml:docker-compose.yaml
+services:
+  signoz-collection-agent:
+    image: otel/opentelemetry-collector-contrib:0.139.0
+    container_name: signoz-collection-agent
+    restart: unless-stopped
+    user: "0:0"
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
+    volumes:
+      - ./config.yaml:/etc/otelcol-contrib/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/hostfs:ro
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+```
+
+With bridge mode, application containers that send OTLP data to the collector must be on the same Docker network (`monitoring` in this example) or use the published host ports.
 
 ## Validate
 
 - **Config and logs:** Check the collector logs to confirm the config is valid and the collector is running without errors.
 
   ```bash
-  docker service logs signoz-collection-agent
+  docker logs signoz-collection-agent
   ```
 
 - **In SigNoz:** Confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for host and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
@@ -333,11 +358,22 @@ For overlay networks, attach the collector to your app's network so services can
 
 After editing the config:
 
-1. Create a new Swarm config and update the service (see [Updating the config](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/#updating-the-config) in the install guide).
+1. Restart the collector to apply changes:
+
+   ```bash
+   docker restart signoz-collection-agent
+   ```
+
+   Or with Docker Compose:
+
+   ```bash
+   docker compose restart
+   ```
+
 2. View collector logs to confirm there are no configuration errors.
 
 ## Next Steps
 
-- [Docker Swarm Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/overview)
+- [Docker Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

@@ -763,9 +763,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
+                route: '/docs/opentelemetry-collection-agents/docker/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
+              {
                 route: '/docs/opentelemetry-collection-agents/docker/install',
                 type: 'doc',
                 label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/docker/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
@@ -774,6 +784,11 @@ const docsSideNav = [
             label: 'Swarm',
             isExpanded: false,
             items: [
+              {
+                route: '/docs/opentelemetry-collection-agents/docker-swarm/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
               {
                 route: '/docs/opentelemetry-collection-agents/docker-swarm/install',
                 type: 'doc',
