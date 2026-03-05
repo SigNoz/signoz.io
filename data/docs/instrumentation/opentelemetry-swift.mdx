@@ -29,6 +29,7 @@ Add the following to your `Package.swift` file:
 
 ```swift
 dependencies: [
+    .package(url: "https://github.com/open-telemetry/opentelemetry-swift-core.git", .upToNextMajor(from: "2.3.0")),
     .package(url: "https://github.com/open-telemetry/opentelemetry-swift.git", .upToNextMajor(from: "2.3.0")),
     .package(url: "https://github.com/grpc/grpc-swift", from: "1.15.0"),
 ],
@@ -36,10 +37,8 @@ targets: [
     .executableTarget(
         name: "<service_name>",
         dependencies: [
-            .product(name: "OpenTelemetryApi", package: "opentelemetry-swift"),
-            .product(name: "OpenTelemetrySdk", package: "opentelemetry-swift"),
-            .product(name: "StdoutExporter", package: "opentelemetry-swift"),
-            .product(name: "ResourceExtension", package: "opentelemetry-swift"),
+            .product(name: "OpenTelemetryApi", package: "opentelemetry-swift-core"),
+            .product(name: "OpenTelemetrySdk", package: "opentelemetry-swift-core"),
             .product(name: "OpenTelemetryProtocolExporter", package: "opentelemetry-swift"),
             .product(name: "GRPC", package: "grpc-swift")
         ],
@@ -60,38 +59,34 @@ Import the necessary OpenTelemetry modules and initialize the tracer. Insert the
 import Foundation
 import GRPC
 import NIO
-import OpenTelemetryApi
+@preconcurrency import OpenTelemetryApi
 import OpenTelemetryProtocolExporterCommon
 import OpenTelemetryProtocolExporterGrpc
 import OpenTelemetrySdk
-import ResourceExtension
-import StdoutExporter
 
-var resources = DefaultResources().get()
+@main
+struct SwiftExample {
+    static func main() async throws {
+        let instrumentationScopeName = "SwiftExample"
+        let instrumentationScopeVersion = "semver:0.1.0"
 
-let instrumentationScopeName = "SwiftExample"
-let instrumentationScopeVersion = "semver:0.1.0"
+        // Replace <your-ingestion-key> with your SigNoz Ingestion Key
+        let otlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10), headers: [("signoz-ingestion-key", "<your-ingestion-key>")])
 
-let otlpConfiguration: OtlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10), headers: [("signoz-ingestion-key", "<your-ingestion-key>")])
+        // Replace <region> with the region of your SigNoz Cloud instance
+        let grpcChannel = ClientConnection.usingPlatformAppropriateTLS(
+            for: MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        ).connect(host: "ingest.<region>.signoz.cloud", port: 443)
 
-let grpcChannel = ClientConnection.usingPlatformAppropriateTLS(
-    for: MultiThreadedEventLoopGroup(numberOfThreads: 1)
-).connect(host: "ingest.<region>.signoz.cloud", port: 443)
+        let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
+        let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
-let stdoutExporter = StdoutSpanExporter()
+        let tracerProvider = TracerProviderBuilder()
+            .add(spanProcessor: spanProcessor)
+            .build()
+        OpenTelemetry.registerTracerProvider(tracerProvider: tracerProvider)
 
-let spanExporter = MultiSpanExporter(spanExporters: [otlpTraceExporter, stdoutExporter])
-
-let spanProcessor = SimpleSpanProcessor(spanExporter: spanExporter)
-OpenTelemetry.registerTracerProvider(tracerProvider:
-    TracerProviderBuilder()
-        .add(spanProcessor: spanProcessor)
-        .with(resource: resources)
-        .build()
-)
-
-let tracer = OpenTelemetry.instance.tracerProvider.get(instrumentationName: instrumentationScopeName, instrumentationVersion: instrumentationScopeVersion)
+        let tracer = OpenTelemetry.instance.tracerProvider.get(instrumentationName: instrumentationScopeName, instrumentationVersion: instrumentationScopeVersion)
 ```
 
 Verify these values:
@@ -104,21 +99,22 @@ Verify these values:
 To send telemetry data to SigNoz, create spans around the operations you want to trace. Here is an example function:
 
 ```swift
-let sampleKey = "sampleKey"
-let sampleValue = "sampleValue"
+        let sampleKey = "sampleKey"
+        let sampleValue = "sampleValue"
 
-func doWork() {
-    let childSpan = tracer.spanBuilder(spanName: "doWork").setSpanKind(spanKind: .client).startSpan()
-    childSpan.setAttribute(key: sampleKey, value: sampleValue)
+        func doWork() {
+            let childSpan = tracer.spanBuilder(spanName: "doWork").setSpanKind(spanKind: .client).startSpan()
+            childSpan.setAttribute(key: sampleKey, value: sampleValue)
+            childSpan.end()
+        }
 
-    // Simulate some work
-    Thread.sleep(forTimeInterval: Double.random(in: 0 ..< 10) / 100)
+        // Call the function to generate a trace
+        doWork()
 
-    childSpan.end()
+        // Flush all pending spans before the process exits
+        tracerProvider.forceFlush(timeout: 15)
+    }
 }
-
-// Call the function to generate a trace
-doWork()
 ```
 
 ### Step 4: Run the application
@@ -129,11 +125,7 @@ Execute your application by running the following command in your terminal:
 swift run
 ```
 
-You should see span output from `StdoutSpanExporter` in your terminal, similar to:
-
-```
-SpanData: name=doWork kind=SpanKind.client ...
-```
+If the application exits without errors, the traces have been sent to SigNoz. Navigate to the **Traces** tab in SigNoz to verify.
 
 ## Validate
 
@@ -186,7 +178,7 @@ For more details, see <a href="https://signoz.io/docs/opentelemetry-collection-a
 Change your tracer initialization to send data without TLS to `localhost` (or your collector host) on port `4317`:
 
 ```swift
-let otlpConfiguration: OtlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10))
+let otlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10))
 
 let configuration = ClientConnection.Configuration.default(
     target: .hostAndPort("localhost", 4317),
@@ -195,17 +187,12 @@ let configuration = ClientConnection.Configuration.default(
 let grpcChannel = ClientConnection(configuration: configuration)
 
 let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
-let stdoutExporter = StdoutSpanExporter()
+let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-let spanExporter = MultiSpanExporter(spanExporters: [otlpTraceExporter, stdoutExporter])
-
-let spanProcessor = SimpleSpanProcessor(spanExporter: spanExporter)
-OpenTelemetry.registerTracerProvider(tracerProvider:
-    TracerProviderBuilder()
-        .add(spanProcessor: spanProcessor)
-        .with(resource: resources)
-        .build()
-)
+let tracerProvider = TracerProviderBuilder()
+    .add(spanProcessor: spanProcessor)
+    .build()
+OpenTelemetry.registerTracerProvider(tracerProvider: tracerProvider)
 
 let tracer = OpenTelemetry.instance.tracerProvider.get(instrumentationName: instrumentationScopeName, instrumentationVersion: instrumentationScopeVersion)
 ```
