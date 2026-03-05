@@ -1,4 +1,6 @@
 import { Atom, TextSearch } from 'lucide-react'
+import { type VendorKey } from './CloudwatchAlternativePage.types'
+import { type ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 
 export const TEAM_SWITCH_CARDS = [
   {
@@ -58,7 +60,7 @@ export const TEAM_SWITCH_CARDS = [
   },
 ]
 
-export const CLOUDWATCH_COMPARISON_TABLE_ROWS = [
+export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] = [
   {
     feature: <span className="text-xl font-bold text-signoz_amber-400">Query Interface</span>,
     vendors: {
