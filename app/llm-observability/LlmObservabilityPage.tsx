@@ -65,7 +65,7 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-      sectionLayoutVariant="no-border"
+      sectionLayoutVariant="bordered"
       sectionLayoutClassName="!mt-0 max-md:-mb-[3rem]"
       heroImageAlt="Llm observability hero"
       heroImage="/img/platform/LlmObservabilityMeta.webp"
