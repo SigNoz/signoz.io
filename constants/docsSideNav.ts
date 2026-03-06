@@ -3006,6 +3006,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/userguide/vercel-traces-to-signoz',
+        label: 'Vercel Traces',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/nomad',
         label: 'Nomad',
       },
