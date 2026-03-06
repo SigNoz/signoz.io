@@ -16,7 +16,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
 }) => {
   const heroContent =
     typeof heroImage === 'string' ? (
-      <div className="relative z-[1] mx-[-28px] w-full">
+      <div className="relative z-[1] w-full">
         <Image
           src={heroImage}
           alt={heroImageAlt}

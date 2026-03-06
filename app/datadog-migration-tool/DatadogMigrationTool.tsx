@@ -93,15 +93,13 @@ const Header: React.FC = () => {
 
       {/* Hero image */}
       <SectionLayout variant="bordered" className="!mt-0 max-md:-mb-[3rem]">
-        <div className="mx-[-28px]">
-          <Image
-            src="/img/platform/DatadogMigrationToolHero.webp"
-            alt="Datadog migration tool hero"
-            className="w-full rounded-xl"
-            width={10000}
-            height={10000}
-          />
-        </div>
+        <Image
+          src="/img/platform/DatadogMigrationToolHero.webp"
+          alt="Datadog migration tool hero"
+          className="w-full rounded-xl"
+          width={10000}
+          height={10000}
+        />
       </SectionLayout>
     </header>
   )
