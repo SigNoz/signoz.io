@@ -763,9 +763,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
+                route: '/docs/opentelemetry-collection-agents/docker/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
+              {
                 route: '/docs/opentelemetry-collection-agents/docker/install',
                 type: 'doc',
                 label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/docker/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
@@ -774,6 +784,11 @@ const docsSideNav = [
             label: 'Swarm',
             isExpanded: false,
             items: [
+              {
+                route: '/docs/opentelemetry-collection-agents/docker-swarm/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
               {
                 route: '/docs/opentelemetry-collection-agents/docker-swarm/install',
                 type: 'doc',
@@ -1657,6 +1672,16 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-rust',
+                label: 'Rust',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-ruby',
+                label: 'Ruby',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/opentelemetry-deno',
                 label: 'Deno',
               },
@@ -1689,6 +1714,15 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/nvidia-dcgm-metrics',
+                label: 'NVIDIA GPU (DCGM)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/slurm-metrics',
+                label: 'SLURM',
+              },
+              { type: 'doc',
                 route: '/docs/metrics-management/render-metrics',
                 label: 'Render',
               },

@@ -1,0 +1,32 @@
+---
+date: 2026-02-27
+title: Docker Swarm Collection Agent - Overview
+id: overview
+description: Monitor Docker Swarm nodes and containers using the OpenTelemetry Collector to send metrics, logs, and traces to SigNoz.
+doc_type: explanation
+---
+
+The Docker Swarm Collection Agent collects telemetry from Docker Swarm nodes and containers. The agent runs as a Swarm service with one replica per node.
+
+## How It Works
+
+The agent runs as a Swarm service with one replica on each node. It collects host and container metrics from the local OS and Docker Engine, tails container log files on that node, and listens for OTLP telemetry from applications, then forwards everything to SigNoz.
+
+1. **Scrapes the host**: Reads CPU, memory, disk, and network data from the mounted host filesystem on each node
+2. **Polls the Docker API**: Fetches per-container resource stats via the Docker socket on each node
+3. **Tails container logs**: Reads stdout/stderr from Docker's JSON log files in the container directory
+4. **Forwards OTLP**: Receives telemetry from instrumented apps on ports 4317/4318 and batches it to SigNoz
+
+## What You Can Collect
+
+- **Node health**: CPU, memory, disk, filesystem, network, and load averages from each Swarm node
+- **Container resource usage**: Per-container CPU, memory, and network I/O on each node
+- **Container logs**: stdout/stderr logs from all running containers across the cluster
+- **Application traces**: Distributed traces from OpenTelemetry-instrumented applications
+- **Application metrics and logs**: Any OTLP telemetry sent directly from your applications
+
+## Next Steps
+
+- [Install the Docker Swarm Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install)
+- [Configure the Docker Swarm Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
