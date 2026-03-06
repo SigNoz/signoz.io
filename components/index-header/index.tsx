@@ -15,22 +15,16 @@ export async function Header() {
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <div className="absolute left-0 top-[147px] z-[-1] h-10 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[253px] md:!w-[80vw]" />
         <Hero>
-          <>
-            <span className="md:hidden">
-              Observability on Your Terms, Powered by Open Standards.
-            </span>
-            <span className="hidden md:inline">Observability on Your Terms,</span>
-            <br className="hidden md:inline" />
-            <span className="hidden md:inline">Powered by Open Standards.</span>
-          </>
+          <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
+          <span className="hidden md:inline">Observability on Your Terms,</span>
+          <br className="hidden md:inline" />
+          <span className="hidden md:inline">Powered by Open Standards.</span>
         </Hero>
         <p className="m-0 p-3 text-base font-medium sm:p-0">
-          <>
-            Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple
-            usage-based pricing,
-            <br className="hidden lg:inline" /> no proprietary lock-in, and the freedom to run on
-            our cloud or your infrastructure.
-          </>
+          Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple usage-based
+          pricing,
+          <br className="hidden lg:inline" /> no proprietary lock-in, and the freedom to run on our
+          cloud or your infrastructure.
         </p>
       </div>
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
