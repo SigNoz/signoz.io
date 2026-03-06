@@ -7,8 +7,6 @@ description: Send traces from your Rust application to SigNoz using OpenTelemetr
 doc_type: howto
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
-
 This guide shows you how to instrument your Rust application with OpenTelemetry and send traces to SigNoz. Rust currently requires manual instrumentation because OpenTelemetry does not provide zero-code auto-instrumentation for Rust.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
@@ -71,8 +69,6 @@ The `tls-roots` feature in `opentelemetry-otlp` and `tls-native-roots` in `tonic
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
@@ -103,39 +99,22 @@ fn init_tracer() -> SdkTracerProvider {
 }
 ```
 
-### Step 4. Initialize tracing in your application
-
-Update your `main` function to initialize the tracer:
+Then initialize it in `main()`:
 
 ```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    // Initialize tracer
-    let tracer_provider = init_tracer();
-    // Clone required: set_tracer_provider takes ownership, but we need the original for shutdown
-    global::set_tracer_provider(tracer_provider.clone());
-
-    let tracer = global::tracer("my_app");
-
-    // Create a span - `cx` is the Context providing access to the current span
-    tracer.in_span("my_operation", |cx| {
-        let span = cx.span();
-        span.set_attribute(KeyValue::new("key", "value"));
-        span.add_event("event_name", vec![KeyValue::new("event.attr", "value")]);
-        
-        // Your application logic here
-    });
-
-    // Flush buffered spans and shut down the tracer provider
-    tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-}
+let tracer_provider = init_tracer();
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 ```
 
-### Step 5. Run your application
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
+
+### Step 4. Run your application
 
 ```bash
 cargo run
 ```
+
+See [Framework instrumentation](#framework-instrumentation) below for library-specific integrations.
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
@@ -176,8 +155,6 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
@@ -208,37 +185,20 @@ fn init_tracer() -> SdkTracerProvider {
 }
 ```
 
-### Step 4. Initialize tracing in your application
-
-Update your `main` function to initialize the tracer:
+Then initialize it in `main()`:
 
 ```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    // Initialize tracer
-    let tracer_provider = init_tracer();
-    // Clone required: set_tracer_provider takes ownership, but we need the original for shutdown
-    global::set_tracer_provider(tracer_provider.clone());
-
-    let tracer = global::tracer("my_app");
-
-    // Create a span - `cx` is the Context providing access to the current span
-    tracer.in_span("my_operation", |cx| {
-        let span = cx.span();
-        span.set_attribute(KeyValue::new("key", "value"));
-        span.add_event("event_name", vec![KeyValue::new("event.attr", "value")]);
-        
-        // Your application logic here
-    });
-
-    // Flush buffered spans and shut down the tracer provider
-    tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-}
+let tracer_provider = init_tracer();
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 ```
 
-### Step 5. Build and deploy
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
 
-Build your container image and deploy to your Kubernetes cluster.
+### Step 4. Run your application
+
+Build your container image and deploy it to your Kubernetes cluster.
+
+See [Framework instrumentation](#framework-instrumentation) below before you build your final image.
 
 </TabItem>
 <TabItem value="docker" label="Docker">
@@ -284,8 +244,6 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
@@ -316,35 +274,16 @@ fn init_tracer() -> SdkTracerProvider {
 }
 ```
 
-### Step 4. Initialize tracing in your application
-
-Update your `main` function to initialize the tracer:
+Then initialize it in `main()`:
 
 ```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    // Initialize tracer
-    let tracer_provider = init_tracer();
-    // Clone required: set_tracer_provider takes ownership, but we need the original for shutdown
-    global::set_tracer_provider(tracer_provider.clone());
-
-    let tracer = global::tracer("my_app");
-
-    // Create a span - `cx` is the Context providing access to the current span
-    tracer.in_span("my_operation", |cx| {
-        let span = cx.span();
-        span.set_attribute(KeyValue::new("key", "value"));
-        span.add_event("event_name", vec![KeyValue::new("event.attr", "value")]);
-        
-        // Your application logic here
-    });
-
-    // Flush buffered spans and shut down the tracer provider
-    tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-}
+let tracer_provider = init_tracer();
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 ```
 
-### Step 5. Build and run
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
+
+### Step 4. Run your application
 
 ```dockerfile:Dockerfile
 FROM rust:1.75 AS builder
@@ -369,6 +308,8 @@ docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:
     -e OTEL_SERVICE_NAME="<service-name>" \
     your-image:latest
 ```
+
+See [Framework instrumentation](#framework-instrumentation) below before you build the final image.
 
 </TabItem>
 <TabItem value="windows" label="Windows">
@@ -403,8 +344,6 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
@@ -435,42 +374,157 @@ fn init_tracer() -> SdkTracerProvider {
 }
 ```
 
-### Step 4. Initialize tracing in your application
-
-Update your `main` function to initialize the tracer:
+Then initialize it in `main()`:
 
 ```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    // Initialize tracer
-    let tracer_provider = init_tracer();
-    // Clone required: set_tracer_provider takes ownership, but we need the original for shutdown
-    global::set_tracer_provider(tracer_provider.clone());
-
-    let tracer = global::tracer("my_app");
-
-    // Create a span - `cx` is the Context providing access to the current span
-    tracer.in_span("my_operation", |cx| {
-        let span = cx.span();
-        span.set_attribute(KeyValue::new("key", "value"));
-        span.add_event("event_name", vec![KeyValue::new("event.attr", "value")]);
-        
-        // Your application logic here
-    });
-
-    // Flush buffered spans and shut down the tracer provider
-    tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-}
+let tracer_provider = init_tracer();
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 ```
 
-### Step 5. Run your application
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
+
+### Step 4. Run your application
 
 ```powershell
 cargo run
 ```
 
+See [Framework instrumentation](#framework-instrumentation) below for library-specific integrations.
+
 </TabItem>
 </Tabs>
+
+## Framework instrumentation
+
+The setup above configures OTLP export for your application. If you use `tracing`, `reqwest`, Axum, or Actix Web, add one of the integrations below to capture spans automatically.
+
+All four integrations below emit `tracing` spans. Add this bridge once to your `Cargo.toml` and startup code:
+
+```toml:Cargo.toml
+tracing-subscriber = { version = "0.3.20", features = ["fmt"] }
+tracing-opentelemetry = "0.32.0"
+```
+
+```rust:src/main.rs
+use opentelemetry::trace::TracerProvider;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+
+let tracer = tracer_provider.tracer("my-app");
+tracing_subscriber::registry()
+    .with(tracing_subscriber::fmt::layer())
+    .with(tracing_opentelemetry::layer().with_tracer(tracer))
+    .init();
+```
+
+<LibraryTabs
+    className="mb-8"
+    defaultCategory="all"
+    defaultLibrary="tracing"
+    categoryLabels={{
+        core: 'Tracing',
+        http: 'HTTP Clients',
+        web: 'Web Frameworks',
+    }}
+>
+    <LibraryTab value="tracing" label="Core tracing" category="core">
+
+        ### Additional dependency
+
+        ```toml:Cargo.toml
+        tracing = "0.1.41"
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        use tracing::instrument;
+
+        #[instrument(skip_all, fields(order.id = %order_id))]
+        async fn process_order(order_id: &str) {
+            validate_order(order_id).await;
+            charge_payment(order_id).await;
+        }
+        ```
+
+        <a href="https://crates.io/crates/tracing" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+        <br />
+
+        <a href="https://crates.io/crates/tracing-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">View OpenTelemetry bridge on crates.io</a>
+
+    </LibraryTab>
+    <LibraryTab value="reqwest" label="Reqwest" category="http">
+
+        ### Additional dependencies
+
+        ```toml:Cargo.toml
+        reqwest = { version = "0.13.2", features = ["json"] }
+        reqwest-middleware = "0.5.0"
+        reqwest-tracing = { version = "0.7.0", features = ["opentelemetry_0_31"] }
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        let client = ClientBuilder::new(reqwest::Client::new())
+            .with(TracingMiddleware::default())
+            .build();
+        ```
+
+        Use this client for outbound HTTP calls to create spans for each request automatically.
+
+        <a href="https://crates.io/crates/reqwest-tracing" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+    </LibraryTab>
+    <LibraryTab value="axum" label="Axum" category="web">
+
+        ### Additional dependencies
+
+        ```toml:Cargo.toml
+        axum = "0.8.4"
+        axum-tracing-opentelemetry = "0.33.0"
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        let app = Router::new()
+            .route("/hello", get(hello))
+            .layer(OtelInResponseLayer::default())
+            .layer(OtelAxumLayer::default());
+        ```
+
+        These layers create server spans for incoming Axum requests and attach trace context to responses.
+
+        <a href="https://crates.io/crates/axum-tracing-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+    </LibraryTab>
+    <LibraryTab value="actix-web" label="Actix Web" category="web">
+
+        ### Additional dependencies
+
+        ```toml:Cargo.toml
+        actix-web = "4.11.0"
+        tracing-actix-web = { version = "0.7.19", features = ["opentelemetry_0_31"] }
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        let server = HttpServer::new(|| {
+            App::new()
+                .wrap(TracingLogger::default())
+                .route("/health", web::get().to(health))
+        });
+        ```
+
+        `TracingLogger` creates spans for incoming Actix Web requests and propagates context through the request lifecycle.
+
+        <a href="https://crates.io/crates/tracing-actix-web" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+    </LibraryTab>
+</LibraryTabs>
 
 ## Validate
 
@@ -577,15 +631,8 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-## Sample Rust Application
-
-We have included a sample Rust application at <a href="https://github.com/SigNoz/sample-rust-app" target="_blank" rel="noopener noreferrer nofollow">Sample Rust App Github Repo</a>.
-
 ## Next Steps
 
 - [Send Metrics from your Rust application](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-rust/) to correlate traces with metrics for better observability.
-
-## Get Help
-
 - Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Rust](https://signoz.io/docs/instrumentation/rust/manual-instrumentation/) guide once the base setup is in place.
 - [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your Rust application
