@@ -154,6 +154,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Claude Code Dashboard Template',
   },
   {
+    name: 'Claude Agent SDK',
+    href: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard/',
+    icon: <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
+    clickName: 'Claude Agent SDK Dashboard Template',
+  },
+  {
     name: 'ClickHouse',
     href: '/docs/dashboards/dashboard-templates/clickhouse-monitoring',
     icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,

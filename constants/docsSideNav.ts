@@ -1699,10 +1699,7 @@ const docsSideNav = [
                 route: '/docs/metrics-management/slurm-metrics',
                 label: 'SLURM',
               },
-              { type: 'doc',
-                route: '/docs/metrics-management/render-metrics',
-                label: 'Render',
-              },
+              { type: 'doc', route: '/docs/metrics-management/render-metrics', label: 'Render' },
               {
                 type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
@@ -1987,6 +1984,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/claude-code-dashboard',
             label: 'Claude Code',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard',
+            label: 'Claude Agent SDK',
           },
           {
             type: 'doc',
