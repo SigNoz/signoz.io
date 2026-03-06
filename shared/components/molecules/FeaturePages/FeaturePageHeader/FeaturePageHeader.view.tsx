@@ -10,7 +10,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
   heroImage,
   heroImageAlt = '',
   children,
-  sectionLayoutVariant = 'no-border',
+  sectionLayoutVariant = 'bordered',
   sectionLayoutClassName = '!mt-0 max-md:-mb-[3rem]',
   className = '',
 }) => {
