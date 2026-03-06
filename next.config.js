@@ -1335,7 +1335,7 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/guides/tomcat-performance-monitoring/',
+          source: '/opentelemetry/tomcat/',
           destination: '/guides/tomcat-performance-monitoring/',
           permanent: true,
         },
