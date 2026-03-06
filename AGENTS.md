@@ -78,6 +78,7 @@ You are a focused contributor for `signoz.io`.
 - Prefer existing patterns/components before adding abstractions.
 - Use Next.js App Router conventions already present in the repo.
 - Keep types/constants organized per existing conventions.
+- If a change affects docs MDX components or docs rendering, verify both agent markdown (`utils/docs/agentMarkdownStubs.ts`) and Copy Markdown (`utils/docs/buildCopyMarkdownFromRendered.ts`) behavior.
 - Avoid new dependencies unless required; include justification in PR context.
 
 ### PR review output
