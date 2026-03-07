@@ -27,7 +27,7 @@ Instrumenting Claude Agent SDK in your AI applications with telemetry ensures fu
 <TabItem value="python" label="Python" default>
 
 <Tabs>
-<TabItem value="No Code" label="No Code(Recommended)" default>
+<TabItem value="No Code" label="No Code (Recommended)" default>
 
 No code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
 
@@ -214,7 +214,7 @@ opentelemetry-instrument <your_run_command>
 
 </TabItem>
 
-<TabItem value="Manual" label="Manual" default>
+<TabItem value="Manual" label="Manual">
 
 Code-based manual instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
 
@@ -225,6 +225,7 @@ pip install \
   opentelemetry-api \
   opentelemetry-sdk \
   opentelemetry-exporter-otlp \
+  httpx \
   opentelemetry-instrumentation-httpx \
   opentelemetry-instrumentation-system-metrics \
   claude-agent-sdk \
@@ -321,6 +322,7 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry import metrics
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 import os
 
 resource = Resource.create({"service.name": "<service_name>"})
