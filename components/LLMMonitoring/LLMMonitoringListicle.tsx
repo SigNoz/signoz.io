@@ -72,6 +72,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Claude Code Monitoring',
   },
   {
+    name: 'Claude Agent SDK',
+    href: '/docs/claude-agent-monitoring',
+    icon: <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
+    clickName: 'Claude Agent SDK Monitoring',
+  },
+  {
     name: 'Codex (OpenAI)',
     href: '/docs/codex-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-white" />,
