@@ -8,21 +8,20 @@ doc_type: howto
 
 ## Overview
 
-This guide walks you through setting up observability and monitoring for Hugging Face using [OpenTelemetry](https://opentelemetry.io/) and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe and track various metrics for your Hugging Face applications and LLM usage.
+This guide walks you through setting up observability and monitoring for Hugging Face using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe and track various metrics for your Hugging Face applications and LLM usage.
 
 Monitoring Hugging Face in your AI applications with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
 
 ## Prerequisites
 
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
-- Internet access to send telemetry data to SigNoz Cloud
 - For Python: `pip` installed for managing Python packages
 - A Hugging Face Account and  API key. You can get the API key from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer nofollow">Hugging Face platform</a>
 
 
 ## Monitoring Hugging Face
 
-For more information on getting started with Hugging Face in your Python environment, refer to the [Hugging Face quickstart guide](https://huggingface.co/inference/get-started).
+For more information on getting started with Hugging Face in your Python environment, refer to the <a href="https://huggingface.co/inference/get-started" target="_blank" rel="noopener noreferrer nofollow">Hugging Face quickstart guide</a>.
 
 <Tabs>
 <TabItem value="No Code" label="No Code(Recommended)" default>
@@ -112,11 +111,10 @@ opentelemetry-instrument <your_run_command>
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
 
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in
-  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
-</Admonition>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 
 </TabItem>
 
@@ -166,12 +164,9 @@ OpenAIInstrumentor().instrument()
 - **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in
-  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
-</Admonition>
-
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ### Step 3: Set up Metrics
 
@@ -204,11 +199,10 @@ HTTPXClientInstrumentor().instrument()
 - **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in
-  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
-</Admonition>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 
 <Admonition type="important">
    SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your Hugging Face application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
@@ -252,11 +246,10 @@ httpx_logger.addHandler(handler)
 - **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/logs`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in
-  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
-</Admonition>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 
 ### Step 5: Run an example Hugging Face application
 
