@@ -39,6 +39,7 @@ export default function NotFoundRecovery({
               <Link
                 href={item.href}
                 className="text-base leading-6 text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
+                prefetch={false}
               >
                 {item.title}
               </Link>

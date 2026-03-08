@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: 'Migrate from Datadog to SigNoz in Minutes | SigNoz',
     description:
       'LLM-powered migration tool that automatically translates your Datadog dashboards to SigNoz through a simple UI, preserving your configurations, queries, and panels.',
-    images: '/img/platform/DatadogMigrationToolHero.png',
+    images: '/img/platform/DatadogMigrationToolHero.webp',
   },
   description:
     'LLM-powered migration tool that automatically translates your Datadog dashboards to SigNoz through a simple UI, preserving your configurations, queries, and panels.',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Migrate from Datadog to SigNoz in Minutes | SigNoz',
     description:
       'LLM-powered migration tool that automatically translates your Datadog dashboards to SigNoz through a simple UI, preserving your configurations, queries, and panels.',
-    images: '/img/platform/DatadogMigrationToolHero.png',
+    images: '/img/platform/DatadogMigrationToolHero.webp',
   },
 }
 

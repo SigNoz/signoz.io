@@ -55,7 +55,8 @@ export const Testimonials = ({ page }) => {
         review: (
           <>
             <p>
-              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the tool.{' '}
+              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the
+              tool.{' '}
             </p>
           </>
         ),
@@ -174,7 +175,7 @@ export const Testimonials = ({ page }) => {
   ]
   return (
     <section>
-      <div className="section-container !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Footer_backdrop.png')] bg-[length:auto_100%] bg-[center_top_-45rem] bg-no-repeat py-24 md:!w-[80vw]">
+      <div className="section-container !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Footer_backdrop.webp')] bg-[length:auto_100%] bg-[center_top_-45rem] bg-no-repeat !py-24 md:!w-[80vw]">
         <div className="mb-16 flex flex-col items-center gap-12 text-center">
           <img src="/img/users/outplay.svg" alt="Outplay logo" className="h-7" />
           <span className="max-w-[50vw] text-center text-sm font-normal leading-10 text-signoz_sienna-200 sm:text-2xl">

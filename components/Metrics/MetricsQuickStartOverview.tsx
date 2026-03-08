@@ -25,6 +25,7 @@ import {
   SiFlydotio,
   SiEnvoyproxy,
   SiGo,
+  SiRust,
   SiDotnet,
   SiNodedotjs,
   SiPython,
@@ -199,6 +200,18 @@ export default function MetricsQuickStartOverview({
             href: '/docs/userguide/envoy-metrics',
             icon: <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
             clickName: 'Envoy Metrics Link',
+          },
+          {
+            name: 'NVIDIA GPU (DCGM)',
+            href: '/docs/metrics-management/nvidia-dcgm-metrics',
+            icon: <FaServer className="h-7 w-7 text-green-500" />,
+            clickName: 'NVIDIA DCGM Metrics Link',
+          },
+          {
+            name: 'SLURM',
+            href: '/docs/metrics-management/slurm-metrics',
+            icon: <FaServer className="h-7 w-7 text-blue-600" />,
+            clickName: 'SLURM Metrics Link',
           },
           {
             name: 'Render',
@@ -529,6 +542,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/send-metrics/applications/golang',
             icon: <SiGo className="h-7 w-7 text-cyan-500" />,
             clickName: 'Golang Metrics Link',
+          },
+          {
+            name: 'Rust',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-rust',
+            icon: <SiRust className="h-7 w-7 text-orange-600" />,
+            clickName: 'Rust Metrics Link',
           },
           {
             name: 'Java',
