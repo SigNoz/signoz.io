@@ -29,6 +29,7 @@ import {
   SiDotnet,
   SiNodedotjs,
   SiPython,
+  SiDeno,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -572,6 +573,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
             icon: <SiPython className="h-7 w-7 text-blue-500" />,
             clickName: 'Python Metrics Link',
+          },
+          {
+            name: 'Deno',
+            href: '/docs/instrumentation/opentelemetry-deno',
+            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
+            clickName: 'Deno Metrics Link',
           },
         ]}
         sectionName="Application Metrics"

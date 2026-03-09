@@ -39,13 +39,14 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
                     className="border-b border-signoz_slate-400 px-4 py-4 text-left"
                   >
                     <span className="flex items-center gap-2">
-                      {cellData.supported === 'partial' ? (
-                        <TriangleAlert size={20} className="text-yellow-400" />
-                      ) : cellData.supported ? (
-                        <Check size={20} className="text-green-400" />
-                      ) : (
-                        <X size={20} className="text-red-400" />
-                      )}
+                      {cellData.supported !== undefined &&
+                        (cellData.supported === 'partial' ? (
+                          <TriangleAlert size={20} className="text-yellow-400" />
+                        ) : cellData.supported ? (
+                          <Check size={20} className="text-green-400" />
+                        ) : (
+                          <X size={20} className="text-red-400" />
+                        ))}
                       {cellData.text}
                     </span>
                   </td>

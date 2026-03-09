@@ -55,8 +55,7 @@ export const Testimonials = ({ page }) => {
         review: (
           <>
             <p>
-              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the
-              tool.{' '}
+              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the tool.{' '}
             </p>
           </>
         ),
