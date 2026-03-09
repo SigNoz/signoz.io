@@ -9,7 +9,7 @@ export type ComparisonTableRow<VendorKey extends string> = {
 }
 
 export type ComparisonTableProps<VendorKey extends string> = {
-  vendors: { key: VendorKey; label: string | React.ReactNode }[]
+  vendors: { key: VendorKey; label: string | React.ReactNode; className?: string }[]
   rows: ComparisonTableRow<VendorKey>[]
   className?: string
 }
