@@ -1084,6 +1084,19 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            isExpanded: false,
+            label: 'Deno',
+            route: '/docs/instrumentation/opentelemetry-deno',
+            items: [
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/manual-instrumentation/deno/manual-instrumentation',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'Elixir',
             route: '/docs/instrumentation/opentelemetry-elixir',
@@ -1343,6 +1356,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/zap-to-signoz',
                 label: 'Zap',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-deno',
+                label: 'Deno',
               },
             ],
           },
@@ -1665,6 +1683,16 @@ const docsSideNav = [
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-rust',
                 label: 'Rust',
               },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-ruby',
+                label: 'Ruby',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-deno',
+                label: 'Deno',
+              },
             ],
           },
           {
@@ -1676,6 +1704,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/prometheus-metrics',
             label: 'Prometheus Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/opentelemetry-statsd',
+            label: 'StatsD Metrics',
           },
           {
             type: 'category',
@@ -1702,10 +1735,7 @@ const docsSideNav = [
                 route: '/docs/metrics-management/slurm-metrics',
                 label: 'SLURM',
               },
-              { type: 'doc',
-                route: '/docs/metrics-management/render-metrics',
-                label: 'Render',
-              },
+              { type: 'doc', route: '/docs/metrics-management/render-metrics', label: 'Render' },
               {
                 type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
@@ -2038,6 +2068,21 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+            label: 'Go Runtime',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/grok-dashboard',
+            label: 'Grok',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
+            label: 'Groq',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
             label: 'HAProxy',
           },
@@ -2061,18 +2106,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
-            label: 'Go Runtime',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/grok-dashboard',
-            label: 'Grok',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
-            label: 'Groq',
+            route: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
+            label: 'Hugging Face',
           },
           {
             type: 'doc',
@@ -2657,6 +2692,11 @@ const docsSideNav = [
       {
         route: '/docs/haystack-monitoring',
         label: 'Haystack',
+        type: 'doc',
+      },
+      {
+        route: '/docs/huggingface-observability',
+        label: 'Hugging Face',
         type: 'doc',
       },
       {

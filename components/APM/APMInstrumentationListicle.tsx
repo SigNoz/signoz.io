@@ -31,6 +31,7 @@ import {
   SiFlutter,
   SiAndroid,
   SiWordpress,
+  SiDeno,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -236,6 +237,12 @@ export default function APMInstrumentationListicle({
             href: '/docs/instrumentation/golang',
             icon: <SiGo className="h-7 w-7 text-cyan-500" />,
             clickName: 'Golang Instrumentation Link',
+          },
+          {
+            name: 'Deno',
+            href: '/docs/instrumentation/opentelemetry-deno',
+            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
+            clickName: 'Deno Instrumentation Link',
           },
           {
             name: 'PHP',

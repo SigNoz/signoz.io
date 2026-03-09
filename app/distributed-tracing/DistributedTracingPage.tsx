@@ -73,7 +73,7 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-      heroImage="/img/distributed-tracing/DistributedTracingHero.png"
+      heroImage="/img/distributed-tracing/DistributedTracingHero.webp"
       heroImageAlt="Distributed tracing hero"
     />
   )
