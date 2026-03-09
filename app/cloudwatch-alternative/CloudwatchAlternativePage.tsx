@@ -149,9 +149,9 @@ const CostComparison: React.FC = () => {
             times at no extra charge.
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row">
+        <div className="flex flex-col border-t-1 border-dashed border-signoz_slate-400 sm:flex-row">
           <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
-            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 pl-0 md:px-0 md:pl-12">
+            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
               <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
                 CloudWatch's <br className="hidden md:block" /> billing{' '}
                 <br className="hidden md:block" /> complexity
