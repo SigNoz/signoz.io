@@ -159,6 +159,11 @@ const comparisionItems = [
     url: '/product-comparison/signoz-vs-newrelic/',
     name: 'SigNoz vs New Relic',
   },
+  {
+    key: 'cloudwatch-alternative',
+    url: '/cloudwatch-alternative/',
+    name: 'SigNoz vs CloudWatch',
+  },
 ]
 
 // Sort the productDropdownItems based on the 'order' property
