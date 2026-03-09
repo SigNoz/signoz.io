@@ -26,6 +26,12 @@ test('shouldRewriteDocsToMarkdown excludes sitemap and internal markdown routes'
   assert.equal(shouldRewriteDocsToMarkdown('/api/docs-markdown/introduction', true), false)
 })
 
+test('shouldRewriteDocsToMarkdown does not rewrite non-docs paths', async () => {
+  assert.equal(shouldRewriteDocsToMarkdown('/blog/post-slug', true), false)
+  assert.equal(shouldRewriteDocsToMarkdown('/pricing', true), false)
+  assert.equal(shouldRewriteDocsToMarkdown('/', true), false)
+})
+
 test('normalizeDocsSlugFromPathname normalizes docs paths', async () => {
   assert.equal(normalizeDocsSlugFromPathname('/docs'), '')
   assert.equal(normalizeDocsSlugFromPathname('/docs/'), '')

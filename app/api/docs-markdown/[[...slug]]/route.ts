@@ -9,6 +9,16 @@ export const dynamic = 'force-static'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
+export async function generateStaticParams() {
+  return [
+    { slug: [] },
+    ...allDocs
+      .filter((doc): doc is Doc & { slug: string } => typeof doc.slug === 'string')
+      .filter((doc) => doc.slug !== 'introduction')
+      .map((doc) => ({ slug: doc.slug.split('/') })),
+  ]
+}
+
 const notFoundResponse = () =>
   new NextResponse('Not Found', {
     status: 404,

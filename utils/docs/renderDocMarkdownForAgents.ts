@@ -3,6 +3,9 @@ import type { Doc } from 'contentlayer/generated'
 import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
 
+// Next.js static generation is the primary cache for this route. This Map is only a
+// best-effort warm-process optimization, and eviction is intentionally FIFO rather than LRU
+// because each docs slug is normally rendered once under force-static.
 const markdownCache = new Map<string, string>()
 const MAX_MARKDOWN_CACHE_ENTRIES = 2000
 const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
@@ -156,6 +159,8 @@ const getMdxComponentFromCode = async (code: string) => {
     _jsx_runtime: jsxRuntime,
   }
 
+  // This is effectively eval(), but the input is Contentlayer-compiled MDX from trusted
+  // repository content at build/render time. Do not use this with untrusted input.
   const fn = new Function(...Object.keys(scope), code)
   const moduleExports = fn(...Object.values(scope)) as { default?: unknown }
 

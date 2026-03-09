@@ -38,9 +38,10 @@ const loadTsModule = (relativePath) => {
     (_match, _quote, subPath) =>
       `require(${JSON.stringify(resolveModulePath(path.join(repoRoot, subPath)))})`
   )
+  // Keep the temp file in the repo root so transpiled relative imports resolve like source imports.
   const tmpFile = path.join(
     repoRoot,
-    `.codex-test-${path.basename(relativePath)}-${process.pid}-${Date.now()}.cjs`
+    `.test-transpile-${path.basename(relativePath)}-${process.pid}-${Date.now()}.cjs`
   )
   fs.writeFileSync(tmpFile, transpiledWithAliases, 'utf8')
   try {
