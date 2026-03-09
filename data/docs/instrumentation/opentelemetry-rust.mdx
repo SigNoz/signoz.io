@@ -3,11 +3,11 @@ date: 2026-03-05
 id: rust
 
 title: Rust OpenTelemetry Instrumentation
-description: Send traces from your Rust application to SigNoz using OpenTelemetry
+description: Instrument your Rust application with OpenTelemetry and send traces to SigNoz. Auto-instrument Axum, Actix Web, reqwest, and tonic with framework integrations or add manual instrumentation for custom spans.
 doc_type: howto
 ---
 
-This guide shows you how to instrument your Rust application with OpenTelemetry and send traces to SigNoz. Rust currently requires manual instrumentation because OpenTelemetry does not provide zero-code auto-instrumentation for Rust.
+This guide shows you how to instrument your Rust application with OpenTelemetry and send traces to SigNoz. Learn how to auto-instrument frameworks like Axum, Actix Web, reqwest, and tonic, or add manual instrumentation for custom spans and attributes.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -114,7 +114,9 @@ Call `tracer_provider.shutdown()` before your process exits to flush buffered sp
 cargo run
 ```
 
-See [Framework instrumentation](#framework-instrumentation) below for library-specific integrations.
+<Admonition type="tip">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
@@ -198,7 +200,9 @@ Call `tracer_provider.shutdown()` before your process exits to flush buffered sp
 
 Build your container image and deploy it to your Kubernetes cluster.
 
-See [Framework instrumentation](#framework-instrumentation) below before you build your final image.
+<Admonition type="tip">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
 </TabItem>
 <TabItem value="docker" label="Docker">
@@ -309,7 +313,9 @@ docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:
     your-image:latest
 ```
 
-See [Framework instrumentation](#framework-instrumentation) below before you build the final image.
+<Admonition type="tip">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
 </TabItem>
 <TabItem value="windows" label="Windows">
@@ -389,7 +395,9 @@ Call `tracer_provider.shutdown()` before your process exits to flush buffered sp
 cargo run
 ```
 
-See [Framework instrumentation](#framework-instrumentation) below for library-specific integrations.
+<Admonition type="tip">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
 </TabItem>
 </Tabs>
