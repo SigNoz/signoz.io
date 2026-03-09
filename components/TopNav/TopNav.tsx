@@ -162,7 +162,7 @@ const comparisionItems = [
   {
     key: 'cloudwatch-alternative',
     url: '/cloudwatch-alternative/',
-    name: 'SigNoz vs Cloudwatch',
+    name: 'SigNoz vs CloudWatch',
   },
 ]
 
