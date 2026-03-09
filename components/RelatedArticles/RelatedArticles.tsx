@@ -14,6 +14,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ title, publishedOn, url }) =>
       href={url}
       target="_blank"
       className="flex flex-col rounded-sm dark:border-gray-900 dark:bg-signoz_ink-400 max-md:ml-0 max-md:w-full"
+      prefetch={false}
     >
       <img className="h-24 w-full object-cover" src="/img/hexagonal-pattern.webp" alt="" />
 

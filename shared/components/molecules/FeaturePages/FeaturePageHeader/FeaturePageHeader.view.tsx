@@ -10,19 +10,20 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
   heroImage,
   heroImageAlt = '',
   children,
-  sectionLayoutVariant = 'no-border',
+  sectionLayoutVariant = 'bordered',
   sectionLayoutClassName = '!mt-0 max-md:-mb-[3rem]',
   className = '',
 }) => {
   const heroContent =
     typeof heroImage === 'string' ? (
-      <div className="relative z-[1] mx-[-28px]">
+      <div className="relative z-[1] w-full">
         <Image
           src={heroImage}
           alt={heroImageAlt}
-          className="w-full rounded-xl"
-          width={10000}
-          height={10000}
+          className="w-full rounded-xl object-contain"
+          width={1440}
+          height={720}
+          sizes="(max-width: 768px) 100vw, 80vw"
           priority
         />
       </div>

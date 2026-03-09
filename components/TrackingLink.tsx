@@ -112,5 +112,9 @@ export default function TrackingLink({
     linkProps.style = style
   }
 
-  return <Link {...linkProps}>{children}</Link>
+  return (
+    <Link {...linkProps} prefetch={false}>
+      {children}
+    </Link>
+  )
 }
