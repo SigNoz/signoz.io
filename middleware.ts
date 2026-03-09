@@ -136,6 +136,12 @@ export function middleware(req: NextRequest) {
     })
   }
 
+  // Add custom headers for debugging (optional - remove in production if not needed)
+  if (isBot) {
+    res.headers.set('x-bot-detected', 'true')
+    res.headers.set('x-bot-type', botType || 'unknown')
+  }
+
   return res
 }
 
