@@ -114,7 +114,7 @@ const DeploymentAndDataResidency: React.FC = () => {
           cards={DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE}
           variant="xl"
         />
-        <div className="hidden w-full items-center gap-0 md:flex">
+        <div className="relative hidden w-full items-center gap-0 md:flex">
           <div className="h-px flex-1 border-t border-dashed border-signoz_sakura-600" />
           <div className="absolute z-[1] flex w-full items-center justify-center">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-signoz_sakura-600 text-xl font-bold text-white">
