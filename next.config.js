@@ -467,7 +467,7 @@ module.exports = () => {
         },
         {
           source: '/blog/N\\+1-query-distributed-tracing/',
-          destination: '/blog/n%2B1-query-distributed-tracing/',
+          destination: '/blog/N-1-query-distributed-tracing/',
           permanent: true,
         },
         {
