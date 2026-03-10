@@ -24,7 +24,7 @@ For more information on getting started with OpenClaw in your environment, refer
 
 <KeyPointCallout defaultCollapsed='true' title='Temporary fix to Enable Logs'>
 
-Current version of OpenClaw still has some issues with log ingestion. To enable it we have made some changes in a <a href="https://github.com/LuffySama-Dev/openclaw/tree/logsIsolationIssueFixed" rel="noopener noreferrer nofollow" target="_blank">forked repo</a> and created a <a href="https://github.com/openclaw/openclaw/pull/22478" rel="noopener noreferrer nofollow" target="_blank">PR#22478</a>. Feel free to follow below steps to enable logs. If you just want `traces` and `metrics` then you can ignore this steps.
+Current version of OpenClaw still has some issues with log ingestion. To enable it we have made some changes in a <a href="https://github.com/LuffySama-Dev/openclaw/tree/logsIsolationIssueFixed" rel="noopener noreferrer nofollow" target="_blank">forked repo</a> and created a <a href="https://github.com/openclaw/openclaw/pull/22478" rel="noopener noreferrer nofollow" target="_blank">PR#22478</a>. Feel free to follow below steps to enable logs. If you just want `traces` and `metrics` then you can ignore these steps.
 
 **Preconditions**
 
@@ -80,7 +80,7 @@ openclaw plugins enable diagnostics-otel
 
 Or add it directly to your config file (`~/.openclaw/openclaw.json`):
 
-```bash
+```json
 {
   "plugins": {
     "allow": ["diagnostics-otel"],
@@ -95,7 +95,7 @@ Or add it directly to your config file (`~/.openclaw/openclaw.json`):
 
 ### Step 2: Configure the OTEL Exporter
 
-You can configure the exporter vi CLI:
+You can configure the exporter via CLI:
 
 ```bash
 openclaw config set diagnostics.enabled true
@@ -123,7 +123,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 - **`protocol`** - OpenClaw only supports `http/protobuf` as of now. Setting `grpc` is silently ignored.
 - **`endpoint`** - SigNoz Cloud uses port 443 for both OTLP/HTTP and OTLP/gRPC, unlike the typical 4317/4318 split. If the endpoint doesn't already contain `/v1/traces` or `/v1/metrics`, the plugin appends the appropriate path automatically.
 - **`headers`** - SigNoz Cloud requires the `signoz-ingestion-key` header for authentication.
-- **`flushIntervalMs`** - Minimum 1000ms. The default (60s) means quick tasks won't show traces for up to a minute. I set mine to `5000` for near-real-time visibility.
+- **`flushIntervalMs`** - Minimum 1000ms. The default (60s) means quick tasks won't show traces for up to a minute. Set it to `5000` for near-real-time visibility.
 - **`sampleRate`** - Controls trace sampling (0.0–1.0, applied to root spans only). For personal use, `1.0` is fine.
 
 </KeyPointCallout>
@@ -138,7 +138,7 @@ openclaw config get diagnostics
 
 Your output should look like this.
 
-```bash
+```json
 {
   "enabled": true,
   "otel": {
@@ -170,7 +170,7 @@ openclaw gateway restart
 
 Your OpenClaw instance should now automatically emit traces and metrics.
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+You should be able to view traces in SigNoz Cloud under the traces tab:
 
 <Figure
   src="/img/docs/llm/openclaw/openclaw-traces.webp"
@@ -186,7 +186,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="OpenClaw Detailed Trace View"
 />
 
-You should be able to see OpenClaw related metrics in Signoz Cloud under the metrics tab:
+You should be able to see OpenClaw related metrics in SigNoz Cloud under the metrics tab:
 
 <Figure
   src="/img/docs/llm/openclaw/openclaw-metrics.webp"
