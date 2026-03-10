@@ -2755,6 +2755,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/openclaw-monitoring',
+        label: 'OpenClaw',
+        type: 'doc',
+      },
+      {
         route: '/docs/openlit',
         label: 'OpenLIT',
         type: 'doc',

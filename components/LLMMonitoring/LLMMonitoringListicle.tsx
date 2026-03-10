@@ -229,6 +229,14 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'OpenAI Monitoring',
   },
   {
+    name: 'OpenClaw',
+    href: '/docs/openclaw-monitoring',
+    icon: (
+      <img src="/img/docs/llm/openclaw/openclaw-logo.svg" alt="OpenClaw Icon" className="h-7 w-7" />
+    ),
+    clickName: 'OpenClaw Monitoring',
+  },
+  {
     name: 'OpenLIT',
     href: '/docs/openlit',
     icon: (
