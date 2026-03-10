@@ -32,6 +32,7 @@ import {
   SiDeno,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
+import { VscGraphLine } from 'react-icons/vsc'
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface MetricsQuickStartOverviewProps {
@@ -441,6 +442,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/migration/opentelemetry-datadog-receiver',
             icon: <SiDatadog className="h-7 w-7 text-purple-600" />,
             clickName: 'Datadog Receiver Link',
+          },
+          {
+            name: 'StatsD',
+            href: '/docs/userguide/opentelemetry-statsd',
+            icon: <VscGraphLine className="h-7 w-7 text-blue-500" />,
+            clickName: 'StatsD Metrics Link',
           },
         ]}
         sectionName="Collection Metrics"
