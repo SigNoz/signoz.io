@@ -16,8 +16,6 @@ interface FigureProps {
   className?: string
   figureClassName?: string
   captionClassName?: string
-  /** Cap the figure at a specific pixel width (e.g. lesser than the image's natural width) to prevent stretching */
-  maxWidth?: number
 }
 
 export default function Figure({
@@ -29,19 +27,11 @@ export default function Figure({
   className,
   figureClassName,
   captionClassName,
-  maxWidth,
 }: FigureProps) {
-  const figureStyle = maxWidth ? { maxWidth, margin: '0 auto' } : undefined
-
   return (
     <Zoom>
-      <figure className={figureClassName} style={figureStyle}>
-        <img
-          src={src}
-          alt={alt}
-          className={cn('rounded-md', className)}
-          style={{ maxWidth: '100%' }}
-        />
+      <figure className={figureClassName}>
+        <img src={src} alt={alt} className={cn('rounded-md', className)} />
         <figcaption className={captionClassName}>
           <i>
             {link && !sourceText ? (
