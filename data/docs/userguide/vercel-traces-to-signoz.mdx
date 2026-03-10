@@ -9,7 +9,7 @@ tags: [SigNoz Cloud]
 
 import GetHelp from '@/components/shared/get-help.md'
 
-Vercel supports automatic OpenTelemetry (OTel) log export to SigNoz without code changes using <a href="https://vercel.com/docs/drains" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry drains</a>.
+Vercel supports automatic OpenTelemetry (OTel) trace export to SigNoz without code changes using <a href="https://vercel.com/docs/drains" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry drains</a>.
 
 ## Prerequisites
 
@@ -20,17 +20,12 @@ Vercel supports automatic OpenTelemetry (OTel) log export to SigNoz without code
 
 Follow the steps below to send your trace data from Vercel to SigNoz Cloud:
 
-### Step 1: Open the Vercel Dashboard
+### Step 1: Create a New Trace Drain
 
-Navigate to **Team Settings** > **Drains** and click **Add Drain**. This opens a dialog to configure your new drain.
-
-### Step 2: Choose Data Type
-
-Select the type of observability data you want to drain. In this case, choose **Traces**. The configuration options for Trace drains will appear.
-
-### Step 3: Configure the Drain
-
-Provide a name for your drain, select which projects should send data to your endpoint, and configure the sampling rate. After configuring these settings, the **Next** button will be enabled.
+1. Navigate to **Team Settings** > **Drains** and click **Add Drain**. This opens a dialog to configure your new drain.
+2. Select the type of observability data you want to drain. In this case, choose **Traces**. The configuration options for Trace drains will appear.
+3. Provide a name for your drain, select which projects should send data to your endpoint, and configure the sampling rate.
+4. After configuring these settings, the **Next** button will be enabled. Click it to proceed.
 
 <Figure
   src="/img/traces/vercel/sources.webp"
@@ -38,7 +33,7 @@ Provide a name for your drain, select which projects should send data to your en
   alt="Vercel Drain Sources and Environment"
 />
 
-### Step 4: Set the Endpoint URL
+### Step 2: Set the Endpoint URL
 
 Enter the SigNoz OTLP HTTP traces ingestion endpoint:
 
@@ -48,11 +43,11 @@ https://ingest.<region>.signoz.cloud:443/v1/traces
 
 Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
-### Step 5: Configure Destination
+### Step 3: Configure Destination
 
 Choose how you want to receive your drain data. Under the **Custom Endpoint** tab, set the delivery format to `JSON` or `Protobuf` (Protobuf is recommended for performance). Vercel will now be configured to send payloads to your endpoint.
 
-### Step 6: Add Custom Headers
+### Step 4: Add Custom Headers
 
 Enable **Custom Headers** and add the following header:
 
@@ -68,9 +63,11 @@ Replace `<your-ingestion-key>` with the [ingestion key](https://signoz.io/docs/i
   alt="Vercel Custom Headers"
 />
 
-### Step 7: Test the Log Drain
+### Step 5: Test and Create the Drain
 
-Click on **Test** to ensure your endpoint receives the data correctly. If successful, you will start to see sample traces on the SigNoz UI.
+Click on **Test** to ensure your endpoint receives the data correctly. If successful, you will start to see sample traces on the SigNoz UI. After verifying the test results, click **Create Drain** in your Vercel dashboard.
+
+Your Vercel traces will now be streamed to SigNoz Cloud.
 
 <Figure
   src="/img/traces/vercel/sample-traces.webp"
@@ -82,12 +79,6 @@ Click on **Test** to ensure your endpoint receives the data correctly. If succes
   It might take some time for the traces to appear.
 </Admonition>
 
-### Step 8: Create the Drain
-
-After checking your configuration and successfully testing, click **Create Drain** in your Vercel dashboard.
-
-Your Vercel traces will now be streamed to SigNoz Cloud.
-
 ## Validate
 
 After creating the drain, verify that traces are flowing into SigNoz:
@@ -97,7 +88,11 @@ After creating the drain, verify that traces are flowing into SigNoz:
 3. Look for trace entries originating from your Vercel projects.
 4. If you see trace entries from your Vercel applications, the integration is working correctly.
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting
+</ToggleHeading>
 
 ### No traces appearing in SigNoz
 
@@ -111,6 +106,8 @@ After creating the drain, verify that traces are flowing into SigNoz:
 - **Endpoint URL format**: Ensure the URL is exactly `https://ingest.<region>.signoz.cloud:443/v1/traces` with no trailing slash or extra path segments.
 - **Missing headers**: Confirm the `signoz-ingestion-key` custom header is set and the value does not contain leading/trailing whitespace.
 - **Verification**: Once corrected, the **Test** button in Vercel should return a successful response.
+
+</details>
 
 ## Next Steps
 

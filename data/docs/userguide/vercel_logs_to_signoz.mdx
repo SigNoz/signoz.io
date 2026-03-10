@@ -20,17 +20,12 @@ If you are running your applications on <a href="https://vercel.com/" target="_b
 
 Follow the steps below to send your logs from Vercel to SigNoz Cloud:
 
-### Step 1: Open the Vercel Dashboard
+### Step 1: Create a New Log Drain
 
-Navigate to **Team Settings** > **Drains** and click **Add Drain**. This opens a dialog to configure your new log drain.
-
-### Step 2: Choose Data Type
-
-Select the type of observability data you want to drain. In this case, choose **Logs**. The configuration options for Log drains will appear.
-
-### Step 3: Configure the Drain
-
-Provide a name for your drain, select which projects should send data to your endpoint, and configure the log source, environment, and sampling rate. After configuring these settings, click the **Next** button to proceed.
+1. Navigate to **Team Settings** > **Drains** and click **Add Drain**. This opens a dialog to configure your new log drain.
+2. Select the type of observability data you want to drain. In this case, choose **Logs**. The configuration options for Log drains will appear.
+3. Provide a name for your drain, select which projects should send data to your endpoint, and configure the log source, environment, and sampling rate.
+4. After configuring these settings, click the **Next** button to proceed. The destination configuration panel will appear.
 
 <Figure
   src="/img/logs/vercel/sources.webp"
@@ -38,7 +33,7 @@ Provide a name for your drain, select which projects should send data to your en
   alt="Vercel Drain Sources, and Environment"
 />
 
-### Step 4: Set the Endpoint URL
+### Step 2: Set the Endpoint URL
 
 Enter the SigNoz logs ingestion endpoint:
 
@@ -48,11 +43,11 @@ https://ingest.<region>.signoz.cloud:443/logs/json
 
 Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
-### Step 5: Configure Destination
+### Step 3: Configure Destination
 
 Choose how you want to receive your drain data. Under the **Custom Endpoint** tab, set the delivery format to `JSON`. Vercel will now be configured to send JSON payloads to your endpoint.
 
-### Step 6: Add Custom Headers
+### Step 4: Add Custom Headers
 
 Enable **Custom Headers** and add the following header:
 
@@ -68,9 +63,11 @@ Replace `<your-ingestion-key>` with the [ingestion key](https://signoz.io/docs/i
   alt="Vercel Custom Headers"
 />
 
-### Step 7: Test the Log Drain
+### Step 5: Test and Create the Drain
 
-Click on **Test** to ensure your endpoint receives the data correctly. If successful, you will start to see sample logs on the SigNoz UI.
+Click on **Test** to ensure your endpoint receives the data correctly. If successful, you will start to see sample logs on the SigNoz UI. After verifying the test results, click **Create Drain** in your Vercel dashboard.
+
+Your Vercel logs will now be streamed to SigNoz Cloud.
 
 <Figure
   src="/img/logs/vercel/sample-logs.webp"
@@ -82,12 +79,6 @@ Click on **Test** to ensure your endpoint receives the data correctly. If succes
   It might take some time for the logs to appear.
 </Admonition>
 
-### Step 8: Create the Drain
-
-After checking your configuration and successfully testing, click **Create Drain** in your Vercel dashboard.
-
-Your Vercel logs will now be streamed to SigNoz Cloud.
-
 ## Validate
 
 After creating the drain, verify that logs are flowing into SigNoz:
@@ -97,7 +88,12 @@ After creating the drain, verify that logs are flowing into SigNoz:
 3. Look for log entries with Vercel-specific attributes such as `source`, `projectName`, and `deploymentId`.
 4. If you see log entries from your Vercel projects, the integration is working correctly.
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting
+</ToggleHeading>
+
 
 ### No logs appearing in SigNoz
 
@@ -111,6 +107,8 @@ After creating the drain, verify that logs are flowing into SigNoz:
 - **Endpoint URL format**: Ensure the URL is exactly `https://ingest.<region>.signoz.cloud:443/logs/json` with no trailing slash or extra path segments.
 - **Missing headers**: Confirm the `signoz-ingestion-key` custom header is set and the value does not contain leading/trailing whitespace.
 - **Verification**: Once corrected, the **Test** button in Vercel should return a successful response.
+
+</details>
 
 ## Next Steps
 
