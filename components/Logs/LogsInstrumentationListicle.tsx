@@ -25,6 +25,7 @@ import {
   SiRedis,
   SiMysql,
   SiDeno,
+  SiSupabase,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -133,6 +134,12 @@ export default function LogsInstrumentationListicle({
             href: '/docs/logs-management/send-logs/cloudflare-logs',
             icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
             clickName: 'Cloudflare Logs Link',
+          },
+          {
+            name: 'Supabase',
+            href: '/docs/logs-management/send-logs/supabase-logs',
+            icon: <SiSupabase className="h-7 w-7 text-emerald-500" />,
+            clickName: 'Supabase Logs Link',
           },
           {
             name: 'Convex',

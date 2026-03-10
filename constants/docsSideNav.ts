@@ -1450,6 +1450,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/logs-management/send-logs/supabase-logs',
+            label: 'Supabase',
+          },
+          {
+            type: 'doc',
             route:
               '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
             label: 'Tomcat',
