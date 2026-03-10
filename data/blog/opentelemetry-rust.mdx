@@ -236,7 +236,7 @@ fn init_tracing_subscriber(tracer: SdkTracer) {
 }
 ```
 
-As discussed above, the OTel Rust project focuses on *bridging* existing logging implementations. The `opentelemetry::global` module therefore lacks a helper like `set_tracer_provider` or `set_meter_provider` for logs.
+As discussed above, the OTel Rust project focuses on *bridging* existing logging implementations. The `opentelemetry::global` module therefore lacks a log-equivalent of the `set_tracer_provider` and `set_meter_provider` helper functions.
 
 To work around this limitation and to safely share the logging provider instance across the application, we store it in a `OnceLock`.<br />`OnceLock` guarantees that the provider initializes only once, and provides lock-free read access across all Tokio tasks.
 
