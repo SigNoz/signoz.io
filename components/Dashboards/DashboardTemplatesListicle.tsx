@@ -25,6 +25,7 @@ import {
   SiOpenai,
   SiSupabase,
   SiOllama,
+  SiHuggingface,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -152,6 +153,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/claude-code-dashboard/',
     icon: <SiClaude className="h-7 w-7 text-orange-500" />,
     clickName: 'Claude Code Dashboard Template',
+  },
+  {
+    name: 'Claude Agent SDK',
+    href: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard/',
+    icon: <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
+    clickName: 'Claude Agent SDK Dashboard Template',
   },
   {
     name: 'ClickHouse',
@@ -298,6 +305,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Host Metrics Dashboard Template',
   },
   {
+    name: 'Hugging Face',
+    href: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
+    icon: <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />,
+    clickName: 'Hugging Face Dashboard Template',
+  },
+  {
     name: 'Inkeep',
     href: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
     icon: (
@@ -404,6 +417,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Nginx Dashboard Template',
   },
   {
+    name: 'NVIDIA DCGM',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/nvidia-dcgm',
+    icon: <Cpu className="h-7 w-7 text-green-600" />,
+    clickName: 'NVIDIA DCGM Dashboard Template',
+  },
+  {
     name: 'Nomad',
     href: 'https://github.com/SigNoz/dashboards/tree/main/nomad',
     icon: <Layers className="h-7 w-7 text-purple-600" />,
@@ -486,6 +505,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
     icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
     clickName: 'SigNoz Ingestion Analysis Dashboard Template',
+  },
+  {
+    name: 'SLURM',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/slurm',
+    icon: <Server className="h-7 w-7 text-green-600" />,
+    clickName: 'SLURM Dashboard Template',
   },
   {
     name: 'Snowflake',

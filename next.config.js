@@ -1334,6 +1334,11 @@ module.exports = () => {
           destination: '/docs/opentelemetry-collection-agents/vm/install',
           permanent: true,
         },
+        {
+          source: '/opentelemetry/tomcat/',
+          destination: '/guides/tomcat-performance-monitoring/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
