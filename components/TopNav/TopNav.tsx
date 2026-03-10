@@ -164,6 +164,11 @@ const comparisionItems = [
     url: '/cloudwatch-alternative/',
     name: 'SigNoz vs CloudWatch',
   },
+  {
+    key: 'clickstack-alternative',
+    url: '/clickstack-alternative/',
+    name: 'SigNoz vs ClickStack',
+  },
 ]
 
 // Sort the productDropdownItems based on the 'order' property
