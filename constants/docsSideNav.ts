@@ -2189,6 +2189,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
+            label: 'OpenClaw',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
             label: 'OpenRouter',
           },

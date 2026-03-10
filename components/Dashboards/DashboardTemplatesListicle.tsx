@@ -441,6 +441,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'OpenAI Dashboard Template',
   },
   {
+    name: 'OpenClaw',
+    href: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openclaw-logo.svg"
+        alt="OpenClaw Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenClaw Dashboard Template',
+  },
+  {
     name: 'OpenRouter',
     href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
     icon: (
