@@ -395,6 +395,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/apis/',
+          destination: '/api-reference/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration',
           destination: '/docs/operate/upgrade',
           permanent: true,
@@ -460,6 +465,21 @@ module.exports = () => {
           destination: '/resource-center/blog/',
           permanent: true,
         },
+        {
+          source: '/blog/N\\+1-query-distributed-tracing/',
+          destination: '/blog/n%2B1-query-distributed-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/observability-user-stories/',
+          destination: '/blog/community-update-06/#observability-user-stories',
+          permanent: true,
+        },
+        {
+          source: '/monitoring-openclaw-with-opentelemetry/',
+          destination: '/blog/monitoring-openclaw-with-opentelemetry/',
+          permanent: true,
+        },
         // Keep /opentelemetry/ as the canonical hub landing instead of redirecting to the Resource Center.
         {
           source: '/opentelemetry/series/nextjs/',
@@ -469,6 +489,11 @@ module.exports = () => {
         {
           source: '/guides/',
           destination: '/resource-center/guides/',
+          permanent: true,
+        },
+        {
+          source: '/guides/cloudwatch-cost-optimization-part-2/',
+          destination: '/guides/cloudwatch-cost-optimization/',
           permanent: true,
         },
         {
