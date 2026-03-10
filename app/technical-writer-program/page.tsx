@@ -1,13 +1,11 @@
 import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
-
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Technical Writer Program',
 }
-
 
 const markdownContent = `
 
@@ -54,7 +52,7 @@ Writing is a critical skill as you grow in your career, and our team will help y
 
 ## Topics and content we're looking for
 
-You can visit our [blog section](https://signoz.io/blog/) or [topic wishlist](https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4)to get an idea of what type of content we're looking for. 
+You can visit our [blog section](https://signoz.io/resource-center/blog/) or [topic wishlist](https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4)to get an idea of what type of content we're looking for. 
 
 ### Some ideas on the kind of content that we like:
 
@@ -89,7 +87,7 @@ We're also not looking for:
 
 ## How to apply
 
-1. Check out our [blog section](https://signoz.io/blog/) and [https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4](topic wishlist) to get an idea on what we're looking for.
+1. Check out our [blog section](https://signoz.io/resource-center/blog/) and [https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4](topic wishlist) to get an idea on what we're looking for.
 
 2. You can propose an article or choose one from our topic wishlist.
 

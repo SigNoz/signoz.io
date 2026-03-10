@@ -205,7 +205,7 @@ const resourcesDropdownItems = {
     },
     {
       key: 'migrations',
-      url: '/docs/migration/migrate-from-datadog/',
+      url: '/docs/migration/migrate-from-datadog-to-signoz/',
       description: 'Guides for migrating to SigNoz',
       name: 'Migrations',
     },

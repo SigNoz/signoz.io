@@ -95,7 +95,7 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
         <div className="text-md workspace-setup-delay-message-container mt-[28px] w-full rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px] text-sm">
           Looks like it's taking a bit longer. Need help? Reach out on{' '}
           <a
-            href="https://signoz.io/slack'"
+            href="https://signoz.io/slack"
             className="text-signoz_robin-500"
             onClick={handleSlackClick}
           >

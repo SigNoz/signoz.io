@@ -30,20 +30,20 @@ function Footer() {
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
                 <div className="text-sm font-semibold uppercase leading-5 tracking-wide">Docs</div>
-                <Link href="/docs/" className="mt-5 hover:underline" prefetch={false}>
+                <Link href="/docs/introduction/" className="mt-5 hover:underline" prefetch={false}>
                   Introduction
                 </Link>
                 <Link href="/docs/contributing/" className="mt-5 hover:underline" prefetch={false}>
                   Contributing
                 </Link>
                 <Link
-                  href="/docs/migration/migrate-from-datadog"
+                  href="/docs/migration/migrate-from-datadog-to-signoz/"
                   className="mt-5 hover:underline"
                   prefetch={false}
                 >
                   Migrate from Datadog
                 </Link>
-                <Link href="/api_reference/" className="mt-5 hover:underline" prefetch={false}>
+                <Link href="/api-reference/" className="mt-5 hover:underline" prefetch={false}>
                   SigNoz API
                 </Link>
                 <div className="mt-10 text-sm font-semibold uppercase leading-5 tracking-wide">
