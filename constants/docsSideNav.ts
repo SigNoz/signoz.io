@@ -2602,80 +2602,6 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Frontend Monitoring',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/frontend-monitoring',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
-        label: 'Sending Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
-        label: 'Sending Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
-        label: 'Sending Metrics',
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
-        label: 'Web Vitals',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/frontend-monitoring/web-vitals-with-metrics',
-            label: 'Web Vitals with Metrics',
-          },
-          {
-            type: 'doc',
-            route: '/docs/frontend-monitoring/web-vitals-with-traces',
-            label: 'Web Vitals with Traces',
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/document-load',
-        label: 'Document Load',
-      },
-    ],
-  },
-  {
-    label: 'Mobile Monitoring',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/mobile-monitoring',
-    items: [
-      {
-        type: 'doc',
-        label: 'Swift UI',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
-      },
-      {
-        type: 'doc',
-        label: 'Java',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java',
-      },
-      {
-        type: 'doc',
-        label: 'Kotlin',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin',
-      },
-      {
-        type: 'doc',
-        label: 'Flutter',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
-      },
-    ],
-  },
-  {
     type: 'category',
     isExpanded: false,
     route: '/docs/llm-observability',
@@ -3022,6 +2948,80 @@ const docsSideNav = [
             label: 'FAQs',
           },
         ],
+      },
+    ],
+  },
+  {
+    label: 'Frontend Monitoring',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/frontend-monitoring',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
+        label: 'Sending Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
+        label: 'Sending Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
+        label: 'Sending Metrics',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
+        label: 'Web Vitals',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-metrics',
+            label: 'Web Vitals with Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-traces',
+            label: 'Web Vitals with Traces',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/document-load',
+        label: 'Document Load',
+      },
+    ],
+  },
+  {
+    label: 'Mobile Monitoring',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/mobile-monitoring',
+    items: [
+      {
+        type: 'doc',
+        label: 'Swift UI',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
+      },
+      {
+        type: 'doc',
+        label: 'Java',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java',
+      },
+      {
+        type: 'doc',
+        label: 'Kotlin',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin',
+      },
+      {
+        type: 'doc',
+        label: 'Flutter',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
       },
     ],
   },
