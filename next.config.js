@@ -10,7 +10,7 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
@@ -104,8 +104,48 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/feed.xml',
+          destination: '/rss',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
           source: '/docs/',
           destination: '/docs/introduction',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/severity/',
+          destination: '/docs/logs-pipelines/guides/severity-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/timestamp/',
+          destination: '/docs/logs-pipelines/guides/timestamp-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/php/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/laravel/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-laravel/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-wordpress/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
           permanent: true,
         },
         {
@@ -134,6 +174,66 @@ module.exports = () => {
         {
           source: '/security/',
           destination: 'https://trust.signoz.io/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/notification-channel/',
+          destination: '/docs/setup-alerts-notification/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/aws/',
+          destination: '/docs/integrations/aws/one-click-aws-integrations/',
+          permanent: true,
+        },
+        {
+          source: '/docs/mobile-instrumentation/',
+          destination: '/docs/mobile-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/migrate/',
+          destination: '/docs/operate/upgrade/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/breaking-changes/breaking-changes-0.76/',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/breaking-changes/breaking-changes-0.76',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/whats-new/changelog-0.76/',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/whats-new/changelog-0.76',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/create-a-custom-query/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/navigate-user-interface/',
+          destination: '/docs/what-is-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/manage-dashboards-and-panels/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/overview/',
+          destination: '/docs/what-is-signoz/',
           permanent: true,
         },
         {
@@ -239,7 +339,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3mkbiaxsz-QBhH_p84LIbzv2LkgkIGhQ',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3pdv47cad-1O4lTFY1H2E8UwQcnQ4fZg',
           basePath: false,
           permanent: true,
         },
@@ -514,16 +614,6 @@ module.exports = () => {
         {
           source: '/docs/instrumentation/opentelemetry-react-native/',
           destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
-          permanent: true,
-        },
-        {
-          source: '/docs/instrumentation/php/',
-          destination: '/docs/instrumentation/opentelemetry-php/',
-          permanent: true,
-        },
-        {
-          source: '/docs/instrumentation/laravel/',
-          destination: '/docs/instrumentation/opentelemetry-laravel/',
           permanent: true,
         },
         {
@@ -954,13 +1044,13 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/userguide/collecting-ecs-logs-and-metrics',
-          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/overview/',
+          source: '/docs/userguide/collecting-ecs-logs-and-metrics/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/install/',
           permanent: true,
         },
         {
-          source: '/docs/userguide/collecting-ecs-sidecar-infra',
-          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/overview',
+          source: '/docs/userguide/collecting-ecs-sidecar-infra/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/install/',
           permanent: true,
         },
         {
@@ -1272,6 +1362,41 @@ module.exports = () => {
         {
           source: '/docs/userguide/k8s-metrics/',
           destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_java/',
+          destination: '/docs/logs-management/send-logs/java-logs/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/open-source-datadog-alternatives/',
+          destination: '/blog/open-source-datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs/',
+          destination: '/docs/logs-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/log-export-methods/',
+          destination: '/docs/logs-management/send-logs/collection-methods/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/tomcat/',
+          destination: '/guides/tomcat-performance-monitoring/',
           permanent: true,
         },
       ]

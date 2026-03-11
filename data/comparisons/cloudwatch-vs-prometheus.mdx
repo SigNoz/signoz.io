@@ -1,0 +1,353 @@
+---
+title: "CloudWatch vs Prometheus: Setup, Cost, and Tradeoffs"
+date: "2026-02-17"
+tags: [monitoring, comparisons]
+authors: [yuvraj]
+description: "CloudWatch vs Prometheus in practice: what each tool does best, what it misses, and how to pick the right stack for your monitoring goals."
+keywords:
+  [cloudwatch-vs-prometheus, prometheus-vs-cloudwatch, cloudwatch-or-prometheus-for-aws, prometheus-cloudwatch-lambda, aws-monitoring]
+---
+
+CloudWatch and Prometheus solve overlapping problems, but they approach monitoring from very different starting points. CloudWatch provides metrics and logs for AWS resources out of the box (and for distributed tracing, provides X-Ray integration). Prometheus is an open-source metrics engine you run and configure yourself, built for flexibility and portability across any environment.
+
+If your stack is mostly AWS-native services like Lambda and managed databases, CloudWatch gets you to baseline visibility fastest. If you run Kubernetes, operate across multiple clouds, or need deep custom metric analysis with PromQL, Prometheus gives you more control. 
+
+This article compares CloudWatch and Prometheus through hands-on setup, feature coverage, cost patterns, and real practitioner feedback, so you can decide which fits your operating model.
+
+## Setting Up CloudWatch
+
+CloudWatch setup effort varies depending on which AWS service you are monitoring and what level of visibility you need.
+
+### Metrics: Built-in for AWS Services
+
+Most AWS services publish metrics to CloudWatch automatically. When a Lambda function receives its first invocation, CloudWatch starts collecting invocation count, duration, error count, and throttle metrics. EC2 instances publish CPU utilization, network traffic, and disk I/O operations by default.
+
+<Figure
+  src="/img/comparisons/2026/02/cloudwatch-lambda-metrics.webp"
+  alt="CloudWatch Lambda metrics showing invocations, duration, and error count"
+  caption="Lambda metrics appear in CloudWatch automatically once the function receives traffic."
+/>
+
+These default metrics cover infrastructure-level visibility, but they have gaps. For example in EC2, you do not get memory utilization or disk space usage without additional setup. 
+
+### Installing the CloudWatch Agent for Detailed Monitoring
+
+To collect memory, disk space, custom application metrics, and logs, you install the CloudWatch agent on your EC2 instances. The recommended approach uses AWS Systems Manager, which runs the agent installation and configuration through a wizard.
+
+The wizard walks you through what to collect (CPU, memory, disk, network, etc.), collection intervals, and which log files to ship.
+
+<Figure
+  src="/img/comparisons/2026/02/cloudwatch-agent-wizard-ec2.webp"
+  alt="CloudWatch agent configuration wizard showing log file path selection"
+  caption="The CloudWatch agent wizard guides you through metric and log collection setup."
+/>
+
+You still need an IAM role with permissions for the agent to publish metrics and logs (and SSM permissions if using Systems Manager), but the wizard handles the rest of the configuration. You select which log files to collect (application logs, system logs, custom paths), and the agent starts shipping them to CloudWatch Logs.
+
+Once the agent runs, custom metrics appear under the CWAgent namespace in CloudWatch. Memory usage, disk space percentage, and log files become queryable.
+
+CloudWatch Logs organizes log data into log groups (per service or application) and log streams (per instance or container). Lambda logs flow automatically. For EC2, the CloudWatch agent ships application and system logs once configured.
+
+<Figure
+  src="/img/comparisons/2026/02/cloudwatch-lambda-logs.webp"
+  alt="CloudWatch Logs showing Lambda function log events"
+  caption="Lambda logs flow to CloudWatch Logs automatically, organized by log group and stream."
+/>
+
+## Setting Up Prometheus (Instrumented App)
+
+Prometheus takes a different approach. It exposes its own internal metrics and supports service discovery mechanisms (like Kubernetes SD), but your application metrics require explicit instrumentation. You expose a `/metrics` endpoint, configure Prometheus to scrape it, and then query the data using PromQL.
+
+To create a comparable test, we built a minimal Python HTTP service that exposes Prometheus metrics and ran it alongside Prometheus using Docker Compose.
+
+### Step 1: Instrument the Application
+
+The sample app uses the `prometheus_client` library to define two metrics, a counter for total HTTP requests and a histogram for request duration:
+
+```python
+from prometheus_client import Counter, Histogram, generate_latest
+
+REQUEST_COUNT = Counter(
+    "sample_http_requests_total",
+    "Total HTTP requests handled by sample app",
+    ["method", "path", "status"],
+)
+
+REQUEST_LATENCY = Histogram(
+    "sample_http_request_duration_seconds",
+    "Request latency in seconds",
+    ["method", "path"],
+)
+```
+
+The counter increments on every request, tracking the HTTP method, path, and status code as labels. The histogram records how long each request took. Both metrics are exposed at the `/metrics` endpoint, which Prometheus will scrape.
+
+### Step 2: Configure Prometheus to Scrape Targets
+
+The `prometheus.yml` configuration tells Prometheus where to find metrics and how often to pull them:
+
+```yaml
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: "sample-app"
+    static_configs:
+      - targets: ["sample-app:8000"]
+```
+
+This configuration scrapes both Prometheus itself and our sample app every 5 seconds. The `static_configs` block lists the hostname and port for each target.
+
+### Step 3: Run the Stack with Docker Compose
+
+A `docker-compose.yml` file brings up both services:
+
+```yaml
+services:
+  sample-app:
+    build:
+      context: ./app
+    container_name: cw-vs-prom-sample-app
+    ports:
+      - "8000:8000"
+
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    container_name: cw-vs-prom-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-lifecycle
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+```
+
+Running `docker compose up --build` starts both containers. Prometheus begins scraping the sample app immediately.
+
+### Step 4: Verify Targets and Query Metrics
+
+After startup, the Prometheus Targets page at `http://localhost:9091/targets` shows both scrape jobs with an "UP" state and recent scrape timestamps.
+
+<Figure
+  src="/img/comparisons/2026/02/prometheus-targets-up.webp"
+  alt="Prometheus targets page showing both prometheus and sample-app jobs in UP state"
+  caption="Prometheus targets page confirming both scrape jobs are healthy and scraping every few seconds."
+/>
+
+With some traffic generated against the sample app (a simple curl loop hitting `/work`), we can query request rates using PromQL. The query `rate(sample_http_requests_total[1m])` shows the per-second request rate broken down by path and status:
+
+<Figure
+  src="/img/comparisons/2026/02/prometheus-query-rate-table.webp"
+  alt="Prometheus query results showing rate of sample_http_requests_total broken down by path and status labels"
+  caption="PromQL query results in table mode, showing per-second request rate for each path and status combination."
+/>
+
+Switching to graph mode with a 5-minute window reveals the traffic pattern clearly. The `/work` endpoint shows burst activity while the `/metrics` endpoint (scraped by Prometheus itself) stays at a steady baseline.
+
+<Figure
+  src="/img/comparisons/2026/02/prometheus-query-rate-graph.webp"
+  alt="Prometheus graph showing request rate over a 5-minute window with traffic bursts on the /work endpoint"
+  caption="Prometheus graph view with a 5-minute window. The spike and plateau correspond to our curl traffic generation."
+/>
+
+### Setup Effort Comparison
+
+CloudWatch gave us visibility for AWS services with zero setup for default metrics, and agent installation for detailed monitoring. Prometheus required us to write application instrumentation, configure scrape targets, run infrastructure, generate traffic, and compose queries.
+
+That said, the Prometheus approach gives you full control over what gets measured and how it gets queried. The PromQL query `rate(sample_http_requests_total[1m])` returned results in tens of milliseconds on our test setup, with exactly the label dimensions we defined, nothing more, nothing less.
+
+
+
+## Observability Coverage: Metrics, Logs, and Traces
+
+CloudWatch and Prometheus differ significantly in how many observability signals they cover natively.
+
+### CloudWatch Covers Three Signals
+
+CloudWatch is not just a metrics tool. It is an observability platform that handles:
+
+- **Metrics**: Native AWS service metrics (EC2, Lambda, RDS, ELB, etc.) plus custom metrics via the agent or API
+- **Logs**: CloudWatch Logs with log groups, streams, Logs Insights for querying, and live tail for real-time viewing
+- **Traces**: AWS X-Ray integration for distributed tracing across Lambda, API Gateway, and other AWS services
+
+For an AWS-native stack, this means you can go from a Lambda error spike in CloudWatch Metrics, to the error logs in CloudWatch Logs, to the trace in X-Ray without leaving the AWS console.
+
+The limitation is that CloudWatch's strength drops sharply outside AWS. Monitoring a Kubernetes cluster on GCP or an on-prem database through CloudWatch is technically possible but awkward and expensive compared to purpose-built tools.
+
+### Prometheus Covers One Signal Well
+
+Prometheus is a metrics-first system. It does one thing with depth:
+
+- **Metrics**: Pull-based collection with a rich data model (counters, gauges, histograms, summaries) and PromQL for analysis
+- **Logs**: Not supported. You need a companion system like Loki, Elasticsearch, or a centralized logging platform
+- **Traces**: Not supported. You need Jaeger, Zipkin, Tempo, or another tracing backend
+
+This single-signal focus is both a strength and a limitation. Prometheus excels at metric collection and analysis. PromQL lets you slice, aggregate, and compare time series in ways that [CloudWatch's metric math](https://docs.aws.amazon.com/efs/latest/ug/monitoring-metric-math.html) cannot match. But during an incident, you will inevitably need to context-switch to other tools for logs and traces.
+
+The broader Prometheus ecosystem fills these gaps through integrations. Grafana for visualization, Loki for logs, Tempo for traces, and Alertmanager for alert routing. The tradeoff is that you assemble and operate each of these components yourself.
+
+### Querying: Metric Math vs PromQL
+
+CloudWatch provides metric math for combining and transforming metrics using arithmetic expressions, and Logs Insights for querying log data with a SQL-like syntax. Logs Insights is particularly useful during incidents, letting you filter by field, aggregate counts, calculate percentiles, and visualize results across millions of log events.
+
+<Figure
+  src="/img/comparisons/2026/02/cloudwatch-logs-querying.webp"
+  alt="CloudWatch Logs Insights query editor with results visualization"
+  caption="CloudWatch Logs Insights lets you query and visualize log data with a SQL-like syntax."
+/>
+
+Prometheus's PromQL is purpose-built for time-series analysis. It supports label-based filtering, aggregation across dimensions, rate calculations, histogram quantiles, and subqueries. For teams doing complex metric analysis, PromQL is significantly more expressive.
+
+For example, calculating the 95th percentile request latency by endpoint in Prometheus:
+
+```promql
+histogram_quantile(0.95,
+  rate(sample_http_request_duration_seconds_bucket[5m])
+)
+```
+
+Achieving the same in CloudWatch requires using metric math with percentile statistics, which is less flexible for custom application metrics.
+
+### Alerting: CloudWatch Alarms vs Alertmanager
+
+CloudWatch metric alarms can evaluate a single metric or a metric math expression that combines multiple metrics. You configure the evaluation period, threshold, and comparison operator, then attach actions like SNS notifications, Auto Scaling policies, or EC2 instance operations.
+
+<Figure
+  src="/img/comparisons/2026/02/alarm-final-image.webp"
+  alt="CloudWatch alarm configuration showing metric selection and threshold conditions"
+  caption="CloudWatch Alarms let you define thresholds per metric and trigger SNS, Auto Scaling, or EC2 actions."
+/>
+
+For composite conditions (CPU high AND memory high), you create a composite alarm that references multiple individual alarms. The model is simple but becomes repetitive at scale since each alarm is a standalone resource.
+
+Prometheus handles alerting differently. You define alerting rules in configuration files that evaluate PromQL expressions against incoming metrics. When a rule fires, Prometheus sends the alert to Alertmanager, a separate component that handles deduplication, grouping related alerts, silencing during maintenance windows, and routing notifications to channels like Slack, PagerDuty, or email.
+
+This separation gives Prometheus teams more control over alert routing and noise reduction, but it adds another component to operate and configure.
+
+## Cost and Operational Overhead
+
+Cost is one of the most debated aspects of CloudWatch vs Prometheus, and users on Reddit consistently flag it as a deciding factor.
+
+### CloudWatch: Usage-Based, Can Creep Up
+
+CloudWatch pricing is usage-based across multiple dimensions and differs across regions:
+
+- **Metrics**: Basic monitoring metrics from AWS services are free. Custom and detailed monitoring metrics are billed per metric-month with volume tiers (e.g., first 10,000 at $0.30, then lower tiers). Each unique dimension combination counts as a separate metric
+- **API requests**: \$0.01 per 1,000 requests after the free tier (1M requests/month). GetMetricData is always charged and billed by the number of metrics requested
+- **Log ingestion**: Starts at \$0.50 per GB in US East (varies by region and log type; vended logs from services like Lambda use volume-based tiers). See the [CloudWatch pricing guide](https://signoz.io/guides/cloudwatch-pricing/) for a full breakdown
+- **Log storage**: \$0.03 per GB per month archived
+- **Dashboards**: First 3 dashboards (up to 50 metrics each) are free, then \$3.00 per dashboard per month
+- **Alarms**: \$0.10 per standard-resolution alarm metric-month. Composite alarms are \$0.50/alarm-month. Anomaly detection alarms bill 3 metrics each
+
+The most common cost surprises come from log ingestion and custom metrics. Custom metric cardinality is multiplicative, so adding a single high-cardinality tag like `customer_id` with 100 unique values can turn 90 metric combinations into 9,000, each billed separately. Log retention defaults to "never expire," meaning storage costs accumulate silently unless you set an explicit policy.
+
+A user on [r/devops](https://www.reddit.com/r/devops/comments/1r2so5d/) shared that serverless log ingestion in CloudWatch accounted for 50% of their total monthly bill:
+
+<Figure
+  src="/img/comparisons/2026/02/reddit-cloudwatch-log-ingestion-cost.webp"
+  alt="Reddit comment: Serverless Log ingestion in CloudWatch. 50% of total bill per month"
+  caption="Source: <a href='https://www.reddit.com/r/devops/comments/1r2so5d/comment/o4zedai/'>r/devops</a>"
+/>
+
+
+For a full breakdown of every pricing tier, free tier limits, and optimization strategies, see our [complete CloudWatch pricing guide](https://signoz.io/guides/cloudwatch-pricing/).
+
+### Prometheus: "Free" Has Hidden Costs
+
+Prometheus itself is open-source and has no licensing fee. But the total cost of ownership includes:
+
+- **Compute and storage**: Prometheus memory scales with active series, label cardinality, scrape interval, and query/rule load. Sizing is empirical, so load-test with your expected series count and retention before committing to hardware
+- **Long-term storage**: Prometheus's local TSDB can retain long periods of data, but it is a single-node design. For HA and large-scale retention, teams typically add Thanos, Cortex, or Mimir, each with its own infrastructure cost
+- **Operations time**: Upgrades, capacity planning, federation setup, and debugging scrape failures are ongoing responsibilities
+- **High cardinality risk**: Adding labels with many unique values (like user IDs or request IDs) causes series count to explode, degrading query performance and increasing storage costs
+
+Managed Prometheus services (Amazon Managed Service for Prometheus, Grafana Cloud) eliminate some operational overhead but introduce their own pricing based on active series and ingestion volume.
+
+
+## CloudWatch vs Prometheus: Side-by-Side
+
+| Dimension | CloudWatch | Prometheus |
+|---|---|---|
+| Best fit | AWS-native workloads (Lambda, EC2, RDS, managed services) | Kubernetes, multi-cloud, hybrid environments |
+| Setup effort | Low for AWS services (defaults); medium for detailed monitoring (agent) | High (instrumentation + scrape config + infrastructure) |
+| Metrics | AWS service metrics automatic; custom metrics via agent or API | Custom app metrics via instrumentation, PromQL query depth |
+| Logs | Native log groups/streams, Logs Insights SQL-like queries | Not a log system, needs Loki or external solution |
+| Traces | AWS X-Ray integration for Lambda and other AWS services | Not a tracing backend, needs Jaeger/Tempo/Zipkin |
+| Querying | Console-driven, metric math, Logs Insights | PromQL with label-based filtering and rich aggregation |
+| Cost model | Usage-based (metrics, logs, queries, custom metrics charged separately) | Infrastructure + storage + operations time |
+| Portability | AWS-locked | Vendor-neutral, runs anywhere |
+| Alerting | CloudWatch Alarms (per-metric thresholds, composite alarms) | Alertmanager (flexible routing, grouping, silencing) |
+| Ecosystem | Tight AWS integration, weaker outside AWS | Grafana, exporters, OpenTelemetry, broad community |
+
+
+## Hybrid Patterns: Running Both
+
+Some teams with mixed infrastructure (AWS and non-AWS) end up running CloudWatch and Prometheus together.
+
+A typical hybrid pattern looks like this:
+
+- **CloudWatch** handles AWS-native signals: Lambda metrics/logs, RDS performance insights, ELB access logs, and S3 event monitoring
+- **Prometheus** handles application and platform metrics: custom app counters, Kubernetes pod metrics, service mesh telemetry, and infrastructure running outside AWS
+- **A visualization layer** (Grafana or a unified platform) brings both data sources into one set of dashboards
+
+This works because CloudWatch and Prometheus have complementary strengths. CloudWatch's zero-setup Lambda monitoring does not conflict with Prometheus's deep PromQL-driven metric analysis for your Kubernetes services.
+
+The challenge with this pattern is correlation. When an incident involves both an AWS-native service (monitored by CloudWatch) and an application service (monitored by Prometheus), you end up switching between tools to piece together the full picture. This context-switching slows down root cause analysis.
+
+## Unified Observability and Deep Correlations with SigNoz
+
+The hybrid CloudWatch + Prometheus pattern works, but investigating incidents with it means jumping between separate consoles: CloudWatch Logs Insights for log queries, the CloudWatch Metrics console for dashboards, X-Ray for traces, Prometheus's Graph UI for PromQL analysis, and Grafana for combined visualization. Each tool uses different query syntax, and context does not carry over when you switch between them.
+
+[SigNoz](https://signoz.io/) is an all-in-one observability platform built natively on [OpenTelemetry](https://signoz.io/opentelemetry/) that eliminates this context-switching. Metrics, traces, and logs live in a single interface, so you can jump from a latency spike to the responsible trace to the related logs without leaving one screen.
+
+<Figure
+  src="/img/comparisons/2026/02/signoz-tracing.webp"
+  alt="SigNoz's distributed trace flamegraph showing POST /process latency dominated by a downstream POST /enrich call with logs and metrics correlation"
+  caption="SigNoz distributed trace flamegraph showing POST /process latency dominated by a downstream POST /enrich call with logs and metrics correlation."
+/>
+
+CloudWatch's billing adds friction on top of the fragmented experience: log ingestion charges that vary by log type and region, custom metrics at \$0.30/metric/month per dimension combination (in US East), Logs Insights charges of \$0.005/GB scanned per query, and additional `GetMetricData` API charges when third-party tools poll metrics. SigNoz uses simple, usage-based pricing (\$0.3/GB for logs and traces, \$0.1/million metric samples) with no per-host charges or per-query fees.
+
+### Getting AWS and Prometheus Data into SigNoz
+
+The most common adoption path teams follow is to keep CloudWatch as a telemetry source for AWS-managed services while making SigNoz the primary investigation and alerting layer:
+
+- **CloudWatch Metric Streams** push AWS infrastructure metrics to SigNoz via the OTel Collector.
+- **CloudWatch Log subscriptions** forward logs to SigNoz.
+- **Application-level OTel instrumentation** sends traces and metrics directly to SigNoz, replacing both Prometheus scraping and X-Ray collection with a single pipeline.
+
+SigNoz offers a [one-click AWS integration](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) that uses CloudFormation and Firehose to set up the data pipeline automatically. For specific services, there are dedicated guides for [EC2](https://signoz.io/docs/aws-monitoring/ec2/), [Lambda metrics](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/), [Lambda logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/), and [Lambda traces](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/).
+
+Since SigNoz is [built on OpenTelemetry](https://signoz.io/docs/introduction/), if you are already using OTel collectors or SDKs, the instrumentation stays the same. You point your exporter to SigNoz instead of CloudWatch or Prometheus. This also means no vendor lock-in in your instrumentation code, if you decide to switch backends later, the application-side code does not change.
+
+Start by sending a copy of your data to SigNoz while keeping CloudWatch and Prometheus active. Verify that SigNoz covers your observability needs, then gradually shift your primary monitoring over.
+
+## Get Started with SigNoz
+
+[SigNoz Cloud](https://signoz.io/teams/) is the easiest way to get started. It includes a 30-day free trial with access to all features, so you can test it against your real AWS workloads before committing.
+
+If you have data privacy or residency requirements and cannot send telemetry outside your infrastructure, check out the [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+For teams that want to start with a free, self-managed option, the [SigNoz community edition](https://signoz.io/docs/install/self-host/) is available.
+
+## Conclusion
+
+CloudWatch and Prometheus are not direct substitutes, they are complementary tools with different strengths:
+
+- **CloudWatch** = fastest path to AWS-native observability, with metrics, logs, and X-Ray traces available through a managed experience.
+- **Prometheus** = flexible, portable metrics analysis with PromQL depth that CloudWatch cannot match, ideal for Kubernetes and multi-cloud environments.
+- **SigNoz** = unified observability workspace that brings metrics, traces, and logs together across your stack with an OpenTelemetry-native approach.
+
+Your decision depends on your operating model. If your stack is mostly AWS and you need speed, start with CloudWatch. If you run multi-environment infrastructure and need PromQL depth, go with Prometheus. If you are running both and want to stop switching between fragmented consoles during incidents, SigNoz handles the observability side while letting you keep your existing telemetry sources.
+
+---
+
+Hope we answered all your questions regarding CloudWatch vs Prometheus. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

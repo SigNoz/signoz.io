@@ -43,6 +43,7 @@ const DocContent: React.FC<{
   const shouldRenderTOC =
     !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && source !== ONBOARDING_SOURCE
   const shouldReserveTocColumn = source !== ONBOARDING_SOURCE
+  const feedbackWrapperClassName = shouldRenderTOC ? 'doc-feedback-mobile-only' : undefined
   const articleRef = useRef<HTMLElement | null>(null)
 
   const docTags = useMemo(() => post?.docTags || [], [post?.docTags])
@@ -97,14 +98,20 @@ const DocContent: React.FC<{
             </Button>
           )}
         </div>
-        <PageFeedback />
+        <div className={feedbackWrapperClassName}>
+          <PageFeedback />
+        </div>
         <DocsPrevNext />
       </div>
 
       {shouldRenderTOC ? (
-        <TableOfContents toc={toc} hideTableOfContents={effectiveHideTOC} source={source || ''} />
+        <>
+          <TableOfContents toc={toc} hideTableOfContents={!shouldRenderTOC} source={source || ''} />
+        </>
       ) : shouldReserveTocColumn ? (
-        <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+        <>
+          <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+        </>
       ) : null}
     </>
   )

@@ -304,67 +304,6 @@ export const Newsroom = defineDocumentType(() => ({
   },
 }))
 
-export const Comparison = defineDocumentType(() => ({
-  name: 'Comparison',
-  filePathPattern: 'comparisons/*.mdx',
-  contentType: 'mdx',
-  fields: {
-    title: { type: 'string', required: true },
-    date: { type: 'date', required: true },
-    tags: { type: 'list', of: { type: 'string' }, default: [] },
-    lastmod: { type: 'date' },
-    draft: { type: 'boolean' },
-    summary: { type: 'string' },
-    description: { type: 'string' },
-    images: { type: 'json' },
-    image: { type: 'string' },
-    authors: { type: 'list', of: { type: 'string' } },
-    layout: { type: 'string' },
-    bibliography: { type: 'string' },
-    canonicalUrl: { type: 'string' },
-    keywords: { type: 'list', of: { type: 'string' }, required: false },
-    slug: { type: 'string', required: false },
-    hide_table_of_contents: { type: 'boolean', required: false },
-    toc_min_heading_level: { type: 'number', required: false },
-    toc_max_heading_level: { type: 'number', required: false },
-    cta_title: { type: 'string', required: false },
-    cta_text: { type: 'string', required: false },
-  },
-  computedFields: {
-    ...computedFields,
-    relatedArticles: {
-      type: 'json',
-      resolve: (doc) => getRelatedArticles(doc, comparisonsRelatedArticles),
-    },
-    structuredData: {
-      type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/comparisons/${doc.slug}`,
-        },
-        author: getAuthors(doc),
-        publisher: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-          logo: {
-            '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
-          },
-        },
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
-    },
-  },
-}))
-
 export const Guide = defineDocumentType(() => ({
   name: 'Guide',
   filePathPattern: 'guides/**/*.mdx',
@@ -516,7 +455,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Doc, Newsroom],
+  documentTypes: [Blog, Authors, Guide, Doc, Newsroom],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [

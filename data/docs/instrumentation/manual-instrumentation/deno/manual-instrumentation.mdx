@@ -1,0 +1,169 @@
+---
+date: 2026-02-28
+id: deno-manual-instrumentation
+title: How to add manual instrumentation in Deno
+description: Create custom spans, enrich them, and record errors in Deno applications with OpenTelemetry and SigNoz
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Manual instrumentation lets you track specific business logic, add custom attributes, and capture detailed error context in SigNoz.
+
+<KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed={true}>
+  Manual instrumentation steps are identical across deployments—only your OTLP endpoint and ingestion key differ.
+</KeyPointCallout>
+
+## Prerequisites
+
+- Finish the core Deno setup in the [Deno OpenTelemetry instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-deno/) so exporters and SDK are configured.
+- Deno v2.0 or later.
+
+## Step 1. Add OpenTelemetry API
+
+Add the OpenTelemetry API package to your project:
+
+```bash
+deno add npm:@opentelemetry/api
+```
+
+Or import it directly in your code using `npm:` specifiers.
+
+## Step 2. Create manual spans
+
+Use the API tracer to wrap important work inside custom spans:
+
+```ts:app.ts
+import { trace } from "npm:@opentelemetry/api";
+
+const tracer = trace.getTracer();
+
+Deno.serve(async (req) => {
+  return await tracer.startActiveSpan("handle_request", async (span) => {
+    try {
+      span.setAttribute("http.method", req.method);
+      span.setAttribute("http.url", req.url);
+
+      // Simulate some work
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      return new Response("Hello from SigNoz!");
+    } catch (err) {
+      span.recordException(err);
+      throw err;
+    } finally {
+      span.end();
+    }
+  });
+});
+```
+
+Tips:
+
+- Reuse tracer instances instead of creating a new one for each request.
+- Start spans with descriptive names that match business steps (`checkout`, `fetch-user`, etc.).
+- The `startActiveSpan` callback automatically handles span context propagation.
+
+## Step 3. Add attributes and events
+
+Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
+
+```ts:services/order.ts
+import { trace } from "npm:@opentelemetry/api";
+
+const tracer = trace.getTracer();
+
+async function processOrder(orderId: string, amount: number) {
+  return await tracer.startActiveSpan("process-order", async (span) => {
+    try {
+      span.setAttribute("order.id", orderId);
+      span.setAttribute("order.amount", amount);
+
+      // Validate the order
+      await validateOrder(orderId);
+      span.addEvent("order.validated");
+
+      // Charge payment
+      const txnId = await chargePayment(orderId, amount);
+      span.addEvent("payment.charged", { "transaction.id": txnId });
+
+      return txnId;
+    } finally {
+      span.end();
+    }
+  });
+}
+```
+
+- Keep attribute keys consistent (use <a href="https://opentelemetry.io/docs/specs/semconv/" target="_blank" rel="noopener noreferrer nofollow">semantic conventions</a> when possible).
+- Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
+
+## Step 4. Record errors
+
+Flag failures on the span so they are easy to query in SigNoz.
+
+```ts:services/risky.ts
+import { trace, SpanStatusCode } from "npm:@opentelemetry/api";
+
+const tracer = trace.getTracer();
+
+async function riskyOperation() {
+  return await tracer.startActiveSpan("risky-operation", async (span) => {
+    try {
+      await doSomethingRisky();
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (err) {
+      span.recordException(err);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
+      throw err;
+    } finally {
+      span.end();
+    }
+  });
+}
+```
+
+- `recordException` attaches stack trace and message details.
+- Setting status to `ERROR` surfaces the span in SigNoz error views and alerts.
+- Continue propagating the error upstream so calling code can respond.
+
+## Validate
+
+1. Trigger the code paths that emit manual spans.
+2. In SigNoz **Traces**, filter by `service.name` or your span name.
+3. Open a trace and verify attributes, events, and error status.
+4. Check the **Errors** view to confirm failures show up with recorded exceptions.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't I see my custom spans in SigNoz?
+
+- Confirm `OTEL_DENO=true` is set and the endpoint/ingestion key are configured correctly.
+- Verify traffic hits the functions where you inserted spans.
+- Ensure your application runs long enough for batched exports to flush.
+
+### Why are child spans missing even though I create them?
+
+- Use `startActiveSpan` to ensure the span context is propagated correctly to child operations.
+- When calling external services, the instrumentation must propagate context through request headers.
+
+### Why don't attributes or events appear on the span?
+
+- Attribute values must be strings, numbers, booleans, or arrays of these types.
+- Call `setAttribute` or `addEvent` before calling `span.end()`. Post-end mutations are ignored.
+
+</details>
+
+## Next steps
+
+- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Deno application
+- [Explore your traces in SigNoz](https://signoz.io/docs/product-features/trace-explorer/)
+
+## Get Help
+
+<GetHelp />

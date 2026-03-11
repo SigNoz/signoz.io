@@ -1,5 +1,5 @@
 ---
-date: 2026-01-17
+date: 2026-03-06
 id: opentelemetry-python
 title: Send Metrics from Python application
 description: Learn how to send metrics from Python applications (Flask, Django, FastAPI, Celery, Runtime) to SigNoz using OpenTelemetry
@@ -9,20 +9,20 @@ doc_type: howto
 
 This guide shows you how to send metrics from your Python application (Flask, Django, FastAPI, Celery, Runtime) to SigNoz using OpenTelemetry.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
     Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
 
-- Python 3.9 or later
+- <a href="https://pypi.org/project/opentelemetry-distro/" target="_blank" rel="noopener noreferrer nofollow">Python 3.9+</a>
 - A SigNoz Cloud account or self-hosted SigNoz instance
 
 ## Send metrics to SigNoz
 
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
     A VM is a virtual computer that runs on physical hardware. This includes:
     - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
     - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -41,8 +41,8 @@ export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_TRACES_EXPORTER="none"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `<export-interval>`: How often to export metrics in milliseconds (default: `60000` for 60 seconds).
@@ -67,8 +67,8 @@ env:
 - name: OTEL_METRIC_EXPORT_INTERVAL
   value: '60000'
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `<export-interval>`: How often to export metrics in milliseconds (default: `60000` for 60 seconds).
@@ -85,8 +85,8 @@ $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_TRACES_EXPORTER = "none"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
 - `<export-interval>`: How often to export metrics in milliseconds (default: `60000` for 60 seconds).
@@ -121,8 +121,8 @@ docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:
     your-image:latest
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `<export-interval>`: How often to export metrics in milliseconds (default: `60000` for 60 seconds).
@@ -130,7 +130,7 @@ Replace the following:
 </TabItem>
 </Tabs>
 
-<KeyPointCallout title="Why explicitly disable traces?" defaultCollapsed={true}>
+<KeyPointCallout title="Why explicitly disable traces?" defaultCollapsed="true">
 The bootstrap command (Step 3) installs instrumentations for all detected libraries, including web frameworks like Flask, Django, and FastAPI. These instrumentations generate traces (spans) for every incoming HTTP request.
 
 Since `opentelemetry-distro` enables traces by default, these traces would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant trace volume and costs.
@@ -235,7 +235,7 @@ Library instrumentation automatically collects metrics from supported frameworks
         Always use `--no-reload` with Flask. The reloader spawns a child process that breaks OpenTelemetry instrumentation.
         </Admonition>
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed={true}>
+        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
         - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
         - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
 
@@ -261,7 +261,7 @@ Library instrumentation automatically collects metrics from supported frameworks
         Always use `--noreload` with Django. The auto-reload mechanism spawns child processes that break OpenTelemetry instrumentation.
         </Admonition>
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed={true}>
+        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
         - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
         - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
 
@@ -279,7 +279,7 @@ Library instrumentation automatically collects metrics from supported frameworks
         Do not use `--reload` with Uvicorn when instrumenting. The reload mode spawns new processes that break instrumentation.
         </Admonition>
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed={true}>
+        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
         - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
         - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
         - `http.server.request.body.size` - Size of HTTP request body (histogram, bytes)
@@ -297,7 +297,7 @@ Library instrumentation automatically collects metrics from supported frameworks
 
         Replace `tasks` with your Celery app module name.
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed={true}>
+        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
         - `flower.task.runtime.seconds` - The time it took to run the task (histogram, seconds)
 
         <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/celery/celery.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
