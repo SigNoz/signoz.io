@@ -217,16 +217,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/userguide/collecting-ecs-logs-and-metrics/',
-          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started/',
-          permanent: true,
-        },
-        {
-          source: '/docs/userguide/collecting-ecs-sidecar-infra/',
-          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started/',
-          permanent: true,
-        },
-        {
           source: '/docs/userguide/create-a-custom-query/',
           destination: '/docs/userguide/query-builder-v5/',
           permanent: true,
@@ -1054,13 +1044,13 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/userguide/collecting-ecs-logs-and-metrics',
-          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/overview/',
+          source: '/docs/userguide/collecting-ecs-logs-and-metrics/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/install/',
           permanent: true,
         },
         {
-          source: '/docs/userguide/collecting-ecs-sidecar-infra',
-          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/overview',
+          source: '/docs/userguide/collecting-ecs-sidecar-infra/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/install/',
           permanent: true,
         },
         {
