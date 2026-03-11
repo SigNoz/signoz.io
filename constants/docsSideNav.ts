@@ -329,6 +329,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.37',
+            label: 'Upgrade to v0.37',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.36',
             label: 'Upgrade to v0.36',
           },
@@ -1325,7 +1330,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-logs',
-                label: 'Node.js',
+                label: 'Console Node.js',
               },
               {
                 type: 'doc',
@@ -1427,6 +1432,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/collection-methods',
             label: 'Collection Methods',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
+            label: 'Convex',
           },
           {
             type: 'doc',
@@ -2003,6 +2013,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/aws-elasticache-redis',
+            label: 'AWS ElastiCache Redis',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/aws-sqs-prometheus',
             label: 'AWS SQS',
           },
@@ -2015,6 +2030,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CI/CD',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/clickhouse-monitoring',
+            label: 'ClickHouse Monitoring',
           },
           {
             type: 'doc',
@@ -2055,6 +2075,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/flask-monitoring',
+            label: 'Flask Monitoring',
           },
           {
             type: 'doc',
@@ -2151,6 +2176,24 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
+          },
+          {
+            label: 'LiteLLM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
+                label: 'LiteLLM Proxy',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
+                label: 'LiteLLM SDK',
+              },
+            ],
           },
           {
             type: 'doc',
@@ -2499,6 +2542,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/troubleshooting/faqs',
             label: 'General FAQs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
+            label: 'Missing Alerts in SigNoz',
           },
           {
             type: 'doc',
