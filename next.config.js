@@ -109,6 +109,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/signoz-mcp-server/',
+          destination: '/docs/ai/signoz-mcp-server/',
+          permanent: true,
+        },
+        {
           source: '/resource-center/',
           destination: '/resource-center/blog/',
           permanent: true,

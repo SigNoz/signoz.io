@@ -2852,13 +2852,18 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'SigNoz MCP',
-
+    label: 'AI Tools and Skills',
+    route: '/docs/ai/overview',
     items: [
       {
         type: 'doc',
-        route: '/docs/signoz-mcp-server',
-        label: 'SigNoz MCP Server',
+        route: '/docs/ai/signoz-mcp-server',
+        label: 'MCP Server',
+      },
+      {
+        type: 'doc',
+        route: '/docs/ai/agent-skills',
+        label: 'Agent Skills',
       },
     ],
   },
