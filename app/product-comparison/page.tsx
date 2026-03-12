@@ -23,7 +23,7 @@ const comparisons = [
   {
     id: 2,
     title: 'SigNoz vs Dynatrace',
-    url: '/comparisons/dynatrace-vs-signoz/',
+    url: '/product-comparison/signoz-vs-dynatrace/',
     desc: (
       <>
         Dynatrace is complex to set up and use. Its host-based billing is outdated for applications
