@@ -74,12 +74,14 @@ export const RECENT_DIAGNOSTICS: RecentDiagnostic[] = [
   },
 ]
 
-export const OLLY_IMAGES: Record<string, { src: string; alt: string }> = {
+export const OLLY_IMAGES: Record<string, { src: string; alt: string; rounded?: boolean }> = {
   sleeping: { src: '/img/sre-skill-decay-index/olly-sleeping.png', alt: 'Olly sleeping on the job' },
-  welding: { src: '/img/sre-skill-decay-index/olly-welding-front.png', alt: 'Olly welding' },
+  welding: { src: '/img/sre-skill-decay-index/olly-welding-front.png', alt: 'Olly welding', rounded: true },
+  'welding-side': { src: '/img/sre-skill-decay-index/olly-welding-side.png', alt: 'Olly welding from behind' },
   thinking: { src: '/img/sre-skill-decay-index/olly-thinking.png', alt: 'Olly thinking' },
-  professor: { src: '/img/sre-skill-decay-index/olly-professor.png', alt: 'Olly evaluating' },
+  professor: { src: '/img/sre-skill-decay-index/olly-professor.png', alt: 'Olly evaluating', rounded: true },
   jedi: { src: '/img/sre-skill-decay-index/olly-jedi.png', alt: 'Jedi Olly - skills mastered' },
+  hangglider: { src: '/img/sre-skill-decay-index/olly-hangglider.png', alt: 'Olly hanggliding - things spiraling' },
   bush: {
     src: '/img/sre-skill-decay-index/olly-bush.png',
     alt: 'Olly hiding - skills fading',

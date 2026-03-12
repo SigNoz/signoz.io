@@ -47,18 +47,18 @@ export default function QuizSection({
           <Image
             src={ollyData.src}
             alt={ollyData.alt}
-            width={100}
-            height={100}
-            className="hidden md:block absolute -right-[60px] -top-[15px] h-auto max-h-[100px] w-[100px] rounded-xl object-contain drop-shadow-[0_4px_16px_rgba(68,97,215,0.2)]"
-            style={{ animation: 'ollyBob 3s ease-in-out infinite' }}
+            width={130}
+            height={130}
+            className={`hidden md:block absolute -right-[70px] -top-[20px] h-auto max-h-[130px] w-[130px] object-contain drop-shadow-[0_4px_16px_rgba(68,97,215,0.2)] ${ollyData.rounded ? 'rounded-xl' : ''}`}
+            style={{ animation: 'ollyFloat 4s ease-in-out infinite' }}
           />
           <Image
             src={ollyData.src}
             alt={ollyData.alt}
-            width={80}
-            height={80}
-            className="mx-auto mb-3 block h-auto max-h-[80px] w-20 rounded-xl object-contain md:hidden"
-            style={{ animation: 'ollyBob 3s ease-in-out infinite' }}
+            width={96}
+            height={96}
+            className={`mx-auto mb-3 block h-auto max-h-24 w-24 object-contain md:hidden ${ollyData.rounded ? 'rounded-xl' : ''}`}
+            style={{ animation: 'ollyFloat 4s ease-in-out infinite' }}
           />
         </div>
 
@@ -91,14 +91,9 @@ export default function QuizSection({
                 <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface-2)] font-[family-name:var(--font-jetbrains)] text-[11px] font-semibold text-[var(--text-dim)] transition-all duration-[250ms] group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-white">
                   {OPTION_KEYS[i]}
                 </span>
-                <div>
-                  <span className="text-[15px] leading-normal text-[var(--text)]">
-                    {option.text}
-                  </span>
-                  <span className="mt-1 block text-xs text-[var(--text-dim)]">
-                    {option.sub}
-                  </span>
-                </div>
+                <span className="text-[15px] leading-normal text-[var(--text)]">
+                  {option.text}
+                </span>
               </button>
             ))}
           </div>

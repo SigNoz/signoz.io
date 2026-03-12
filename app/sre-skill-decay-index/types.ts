@@ -2,11 +2,18 @@ export type Category = 'incident' | 'observability' | 'debugging' | 'architectur
 
 export type SeverityLevel = 'low' | 'mid' | 'high' | 'critical'
 
-export type OllyType = 'welding' | 'thinking' | 'professor'
+export type OllyType =
+  | 'welding'
+  | 'thinking'
+  | 'professor'
+  | 'hangglider'
+  | 'welding-side'
+  | 'jedi'
+  | 'sleeping'
+  | 'space'
 
 export interface QuizOption {
   text: string
-  sub: string
   score: number
   category: Category
 }
