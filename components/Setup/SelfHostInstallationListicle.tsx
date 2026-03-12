@@ -14,7 +14,6 @@ import {
   SiRedhatopenshift,
   SiRender,
 } from 'react-icons/si'
-import { HelpCircle, Store, Trash2, Calculator } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
 
 /**
