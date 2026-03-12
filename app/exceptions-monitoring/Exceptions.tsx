@@ -10,7 +10,7 @@ import ProductNav from '@/components/ProductNav/ProductNav'
 import SigNozStats from '@/components/signoz-stats'
 import { COMPANIES } from '@/components/trusted-by'
 
-function MetricsDashboards() {
+function Exceptions() {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
@@ -30,7 +30,7 @@ function MetricsDashboards() {
   )
 }
 
-export default MetricsDashboards
+export default Exceptions
 
 const PlatformCard = ({ title, description }) => {
   return (
