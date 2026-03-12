@@ -109,6 +109,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/signoz-mcp-server/',
+          destination: '/docs/ai/signoz-mcp-server/',
+          permanent: true,
+        },
+        {
           source: '/resource-center/',
           destination: '/resource-center/blog/',
           permanent: true,
@@ -174,6 +179,66 @@ module.exports = () => {
         {
           source: '/security/',
           destination: 'https://trust.signoz.io/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/notification-channel/',
+          destination: '/docs/setup-alerts-notification/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/aws/',
+          destination: '/docs/integrations/aws/one-click-aws-integrations/',
+          permanent: true,
+        },
+        {
+          source: '/docs/mobile-instrumentation/',
+          destination: '/docs/mobile-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/migrate/',
+          destination: '/docs/operate/upgrade/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/breaking-changes/breaking-changes-0.76/',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/breaking-changes/breaking-changes-0.76',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/whats-new/changelog-0.76/',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/whats-new/changelog-0.76',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/create-a-custom-query/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/navigate-user-interface/',
+          destination: '/docs/what-is-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/manage-dashboards-and-panels/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/overview/',
+          destination: '/docs/what-is-signoz/',
           permanent: true,
         },
         {
@@ -984,13 +1049,13 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/userguide/collecting-ecs-logs-and-metrics',
-          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/overview/',
+          source: '/docs/userguide/collecting-ecs-logs-and-metrics/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/install/',
           permanent: true,
         },
         {
-          source: '/docs/userguide/collecting-ecs-sidecar-infra',
-          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/overview',
+          source: '/docs/userguide/collecting-ecs-sidecar-infra/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/install/',
           permanent: true,
         },
         {

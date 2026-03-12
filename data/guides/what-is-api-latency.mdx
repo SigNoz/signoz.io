@@ -1,0 +1,347 @@
+---
+title: API Latency Explained - How to Measure, Diagnose, and Reduce It
+slug: what-is-api-latency
+date: 2026-03-09
+tags: [api-latency, opentelemetry]
+authors: [mahak_kaur]
+description: API latency is the time from request to first response byte. Learn how to measure it with percentiles, find what is causing it, and reduce it in production.
+keywords: [api latency, what is api latency, api latency vs response time, measure api latency, reduce api latency, p99 latency, api performance, opentelemetry api monitoring ]
+---
+
+An **API (Application Programming Interface)** allows different software systems to communicate with each other through structured requests and responses, most commonly over HTTP. Every API interaction involves a request being sent to a server and a response being returned to the client. **The time until the client receives the first byte of the response is commonly referred to as API latency, or Time to First Byte (TTFB).** In distributed systems, latency is closely monitored because delays can originate from several layers such as network overhead, application processing, database queries, or downstream services.
+
+This guide covers what contributes to that delay, how to measure it accurately with percentiles, and how to reduce it in production using OpenTelemetry and SigNoz.
+
+## What Is API Latency?
+
+API latency typically refers to the time between sending a request and receiving the first byte of the response (TTFB). However, many monitoring systems report total request duration, which includes both server processing time and the time required to transfer the full response body, commonly known as API response time.
+
+For a small JSON payload, both numbers are nearly the same. For a large file download or a streaming response, data transfer dominates and they diverge by seconds.
+
+<Figure src="/img/guides/2026/03/what-is-api-latency-network-trace.webp" alt="API request flow diagram showing DNS, TCP, TLS, processing, and first byte stages with TTFB and response time brackets." caption="API latency ends at the first byte; response time extends to the last byte." />
+
+API latency (TTFB) ends when the client receives the first byte of the response. Response time ends when the last byte arrives at the client. For a 2KB JSON response, the gap between them is negligible. For a 50MB payload or a streaming response, response time can exceed latency by seconds.
+The table below also introduces throughput, a third metric that teams often reach for when latency spikes, and end up scaling up instances when the actual fix is a slow query:
+
+| Metric | What it measures | Includes full response body? | Best measured from |
+| --- | --- | --- | --- |
+| API Latency (TTFB) | Time to first byte | No | Client  |
+| Response Time | Time to last byte | Yes | Client |
+| Throughput | Requests per second | N/A | Server |
+
+<KeyPointCallout defaultCollapsed="true" title="Note">
+Server-side telemetry can approximate request-handling duration, but client-observed TTFB is best measured from the client.
+</KeyPointCallout>
+
+Latency and throughput interact but respond to different fixes. More concurrent requests means more queuing time, which pushes latency up. Scaling horizontally improves throughput. A slow database query degrades latency. Adding more servers does not fix it.
+
+## Components of API Latency
+
+Before your server does any work, the request passes through several stages. Each one adds delay and points to a different fix, so separating them helps you locate where latency starts.
+
+The diagram below shows the full journey. Latency ends at the first byte, while response time continues until the full body arrives.
+
+<Figure src="/img/guides/2026/03/what-is-api-latency-request-pipeline.webp" alt="API request pipeline diagram showing stages from DNS resolution to full body transfer with duration ranges" caption=" Request pipeline from client to server showing each stage and its typical duration range" />
+
+**DNS resolution** is the step where the client finds the server’s IP address. If the result is already cached, it is usually very fast. If not, it adds extra delay before the request can even begin. 
+
+**TCP handshake** is the connection setup between client and server. Before any data can be exchanged, both sides need to establish that connection, which adds one network round trip.
+
+**TLS negotiation** is the step that secures the connection with encryption. On a new HTTPS connection, this adds another round trip before the request can be processed.
+
+**Server processing** covers everything between receiving the request and starting to send the response, including queue wait time, authentication, business logic, database queries, and downstream service calls. This is where the large majority of production latency problems live.
+
+**First byte transfer** is the time for the first response byte to travel from server to client. On an established connection, this is closer to one-way network latency than to TCP handshake cost.
+
+## What Is Good API Latency?
+
+There is no single threshold that applies to every API. A payment processing endpoint and an internal health check have completely different performance requirements. These ranges are a useful starting point:
+
+| API type | Good p50 | Acceptable p95 | Worth investigating at p99 |
+| --- | --- | --- | --- |
+| Internal service-to-service (same region) | Under 10ms | Under 50ms | Over 100ms |
+| User-facing REST API | Under 100ms | Under 300ms | Over 500ms |
+| GraphQL (single query) | Under 150ms | Under 500ms | Over 1s |
+| gRPC (unary call) | Under 50ms | Under 200ms | Over 500ms |
+| External/third-party API | Under 200ms | Under 1s | Over 2s |
+
+Treat these ranges as percentile baselines. Percentiles tell you more about API health than averages do, because they show how slow the worst-performing slice of requests is instead of hiding it inside a single blended number.
+
+## What Causes High API Latency?
+
+High API latency originates in one of two places: the network path before your code runs, or the server itself. Each needs a different fix.
+
+### Network-Layer Causes
+
+These happen outside your application and generally cannot be fixed with code changes.
+
+**DNS Resolution on Cold Clients** 
+
+DNS on cold clients adds time whenever a client encounters a domain it has not resolved recently. Short TTL (Time To Live) values force frequent cache expirations, leading to repeated lookups and added latency. Frequent callers from the same client eliminate most of this with proper DNS caching.
+
+**TCP and TLS Connection Setup**
+
+Every new TCP or TLS connection adds setup overhead. When connections are not reused, that cost repeats on every request. HTTP/2 multiplexing and TCP keep-alive eliminate most of this by keeping connections open and sharing them across multiple requests.
+
+**Geographic Distance**
+
+Cross-region requests can add hundreds of milliseconds of round-trip time depending on the path, regardless of how optimized your application is. Regional deployment or CDN edge caching is the only way to close that gap.
+
+### Server-Side Causes
+
+Once the request reaches the server, these are the most common sources of high latency.
+
+**Unindexed Queries**
+
+Unindexed queries are a common cause of severe p99 spikes. A query running against millions of rows without an index on the filtered column can go from milliseconds to seconds. Run `EXPLAIN ANALYZE` and look for expensive scans on large tables.
+
+**N+1 Patterns**
+
+N+1 patterns fetch a list of records, then trigger additional database calls inside a loop. One endpoint performing an unexpectedly high number of database queries is a strong signal of N+1 behavior or missing joins.
+
+**Synchronous External Calls**
+
+Synchronous external calls make latency dependent on whoever is being called. If an endpoint calls Stripe, Auth0, or any third-party service inline, their p99 becomes the p99 floor for that endpoint.
+
+**Cold Starts**
+
+Cold starts in serverless functions and freshly scaled containers add 500ms to several seconds on the first request after an idle period, depending on runtime and initialization work.
+
+## How to Measure API Latency
+
+There are **two** practical ways to measure API latency, and they work best in sequence.
+Start with curl, it takes 30 seconds and tells us which layer is slow without any setup. Another way is to instrument your APIs with OpenTelemetry so you can capture latency percentiles such as P50, P90, and P99 and see how performance behaves under real production load. The same instrumentation also collects distributed traces, helping you identify the exact span, database query, or downstream service responsible for the delay. 
+
+### Start with curl
+
+Before opening any monitoring tool, start with `curl`. It gives you a fast request-level timing snapshot in seconds and helps you tell whether the delay is happening during connection setup, before the first byte, or while transferring the response body. Use `curl` for spot checks and first-pass diagnosis. Use telemetry for continuous production monitoring.
+
+```bash
+curl -o /dev/null -s -w $'name_lookup:    %{time_namelookup}s\n\
+connect:        %{time_connect}s\n\
+app_connect:    %{time_appconnect}s\n\
+pre_transfer:   %{time_pretransfer}s\n\
+start_transfer: %{time_starttransfer}s\n\
+total:          %{time_total}s\n' \
+https://api.example.com/v1/endpoint
+```
+
+Sample output:
+
+```
+name_lookup:    0.012s
+connect:        0.045s
+app_connect:    0.098s
+pre_transfer:   0.102s
+start_transfer: 0.234s
+total:          0.241s
+```
+
+Read the timings this way.
+
+- **DNS lookup** = `time_namelookup`
+- **TCP connect time** ≈ `time_connect - time_namelookup`
+- **TLS handshake time** ≈ `time_appconnect - time_connect`
+- **Post-connection request-handling delay** ≈ `time_starttransfer - time_pretransfer`
+- **Response transfer time after the first byte** ≈ `time_total - time_starttransfer`
+
+Using the sample numbers above, DNS lookup is `0.012s`, TCP connect time is about `0.033s`, TLS handshake time is about `0.053s`, post-connection request-handling delay is about `0.132s`, and response transfer after the first byte is about `0.007s`.
+
+<KeyPointCallout defaultCollapsed="true" title="What this tells you?">
+
+- Repeatedly high **DNS lookup** points to DNS resolution or caching issues.
+- High **connect** or **app_connect** points to network path or TLS overhead.
+- High **start_transfer**, when earlier timings look normal, usually points to slow server processing or an upstream dependency.
+- **Total** much higher than **start_transfer** usually means the response body is taking time to transfer, often because of payload size or slower network delivery.
+
+</KeyPointCallout>
+
+`curl` tells you that something is slow and roughly where the delay is. It cannot tell you which query, function, or downstream call caused it. Tracing fills that gap by breaking a request into spans, so you can see exactly which internal step or downstream dependency is responsible for the delay.
+
+### Instrumentation with OpenTelemetry
+
+For production latency tracking, we will use [OpenTelemetry](https://signoz.io/opentelemetry/), the open, vendor-neutral standard for collecting telemetry such as metrics, traces, and logs. With auto-instrumentation, it can capture HTTP request duration metrics and send them to observability backends like [SigNoz](https://signoz.io/). 
+
+Those metrics can be used to calculate latency percentiles such as P50, P95, and P99, while distributed traces help identify the exact service, span, or database call responsible for slow requests.
+
+The example below uses FastAPI.
+
+**Prerequisites**
+
+Before you begin, ensure you have:
+
+- Python 3.8 or above installed
+- A running FastAPI application
+- A [SigNoz Cloud account](https://signoz.io/teams/) — you will need your ingestion key and region from the [Cloud ingestion settings](/docs/ingestion/signoz-cloud/keys/)
+
+**Step 1. Install packages**
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+opentelemetry-bootstrap -a install
+```
+
+The `opentelemetry-bootstrap` command scans your installed packages, such as FastAPI, SQLAlchemy, or `httpx`, and installs the matching instrumentation libraries.
+
+**Step 2. Run with OpenTelemetry instrumentation**
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=order-service \
+OTEL_SEMCONV_STABILITY_OPT_IN=http \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-key>" \
+opentelemetry-instrument uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Replace `<region>` with your SigNoz Cloud region (`us`, `in`, `eu`) and find your ingestion key in the [SigNoz Cloud ingestion settings](/docs/ingestion/signoz-cloud/keys/). If you are using another backend, only the OTLP endpoint and headers change; the instrumentation remains the same.
+
+In a supported FastAPI/Uvicorn setup, this automatically creates inbound HTTP spans and emits the telemetry needed for latency charts and trace views.
+
+**Step 3. Add custom spans for business logic**
+
+Auto-instrumentation covers the HTTP layer. To see how long specific operations inside a request take, add manual spans.
+
+```python
+# app/services/order_service.py
+from opentelemetry import trace
+
+tracer = trace.get_tracer("order-service")
+
+async def create_order(order_data: dict) -> dict:
+    with tracer.start_as_current_span("validate_inventory") as span:
+        span.set_attribute("order.item_count", len(order_data["items"]))
+        inventory = await check_inventory(order_data["items"])
+
+    with tracer.start_as_current_span("process_payment") as span:
+        span.set_attribute("payment.method", order_data["payment_method"])
+        payment = await charge_payment(order_data)
+
+    with tracer.start_as_current_span("persist_order") as span:
+        order = await save_to_database(order_data, payment)
+        span.set_attribute("order.id", order["id"])
+
+    return order
+```
+
+Each block measures its own duration and nests inside the parent HTTP span. In trace viewers such as SigNoz or Jaeger, the result appears as a waterfall view: 
+
+```
+[POST /orders - 1,500ms]
+  ├── validate_inventory:   20ms
+  ├── process_payment:     150ms
+  └── persist_order:     1,330ms  ← ~89% of time is here
+```
+
+A trace waterfall shows the full request at the top and the child spans underneath it. In this example, `persist_order` takes almost the entire request, so it is the first place to investigate.
+
+<Figure src="/img/guides/2026/03/what-is-api-latency-trace-waterfall.webp" alt="Distributed trace waterfall diagram with three child spans nested under a parent POST /orders span of 1,500ms. validate_inventory takes 20ms, process_payment takes 150ms, and persist_order takes 1,330ms, nearly the full request duration." caption="Trace waterfall diagram showing persist_order taking 1,330ms out of a 1,500ms request, making it the clear bottleneck to investigate first." />
+
+In this trace waterfall, the parent span is the full `POST /orders` request, and the child spans show where time is spent inside it. Here, `persist_order` dominates the request and is the likely bottleneck.
+
+For a detailed setup guide, see [Implementing OpenTelemetry in FastAPI](/blog/opentelemetry-fastapi/).
+
+## View Latency Percentiles and Traces in SigNoz
+
+[SigNoz](https://signoz.io/) is a full-stack observability platform for analyzing metrics, traces, and logs from your applications. Once your OpenTelemetry data starts flowing in, your instrumented service appears in the **`Services`** tab, where you can view its request rate, error rate, and latency in a built-in RED metrics dashboard. This gives you a starting point for analyzing percentile latency and drilling into traces.
+
+The latency panel below shows p50, p90, and p99 latency per service alongside request rate and error rate, updated continuously. Clicking into a service opens the **Key Operations table**, which ranks every endpoint by percentile latency. Sort by p99 to surface your worst tail-latency offenders without manual filtering.
+
+<Figure src="/img/guides/2026/03/what-is-api-latency-dashboard.webp" alt="The router flagservice egress operation in the screenshot above has a p50 of 24ms and a p99 of 6,236ms. An average-based dashboard would surface something around 80ms and flag nothing. The p99 line tells the real story." caption="SigNoz Services overview showing p50, p90, and p99 latency by service, with per-operation breakdown in the Key Operations table." />
+
+
+Click any operation in the **Key Operations** panel to open the **Traces** view filtered to that endpoint. From there, you can browse individual traces and open any trace ID to inspect the full span timeline, timing breakdown, and downstream calls in detail.
+
+<Figure src="/img/guides/2026/03/what-is-api-latency-traces.webp" alt="Screenshot of SigNoz Traces view filtered to one endpoint, showing a list of matching traces with timestamps, service name, operation name, duration, HTTP method, and response status code." caption="SigNoz Traces view filtered to a single endpoint, showing matching traces with duration and response status" />
+
+
+Click any trace to see the full span waterfall.
+
+<Figure src="/img/guides/2026/03/what-is-api-latency-span.webp" alt="Screenshot of SigNoz trace detail view with a span waterfall timeline, nested spans, execution duration bars, and a side panel showing span metadata and attributes." caption="SigNoz trace detail view showing the full span waterfall for a selected request." />
+
+### Internal vs. External Latency in One View
+
+|  | Internal API Latency | External API Latency |
+| --- | --- | --- |
+| What it covers | Calls between services you own and control | Outbound calls to third-party services: Stripe, Auth0, GitHub |
+| Can you fix it? | Yes, debug and optimize directly | No, you can only detect and work around it |
+| What to do | Query optimization, caching, async offloading | Cache responses, async-offload the call, or switch providers |
+
+SigNoz separates your own service performance (Overview tab) from your outbound calls to external services (External Metrics tab). This view separates latency inside your services from latency introduced by external providers.
+
+<Figure src="/img/guides/2026/03/what-is-api-latency-external-api.webp" alt="Screenshot of the SigNoz External API Monitoring page listing external domains called by services, with filters on the left and columns for endpoints in use, last used time, request rate, error percentage, and average latency." caption="SigNoz External API Monitoring showing outbound dependencies by domain with latency and error metrics." />
+
+[SigNoz External API Monitoring](/docs/external-api-monitoring/overview/) works automatically for properly instrumented applications and shows outbound calls captured through supported OpenTelemetry instrumentation. It shows latency and error rates broken down by external domain and maps them back to the internal service making each call.
+
+For setup details, see the [External API Monitoring overview](/docs/external-api-monitoring/overview/) and the [setup guide](/docs/external-api-monitoring/setup/).
+
+SigNoz is an all-in-one observability platform built natively on OpenTelemetry. For teams already using OTel instrumentation, latency data flows in without any additional agents. [Get started free](https://signoz.io/teams/).
+
+## How to Reduce API Latency
+
+Once the trace waterfall shows where the time is going, these are the most effective fixes, ordered by impact.
+
+### Fix Slow Database Queries First
+
+Run `EXPLAIN ANALYZE` on your slowest queries. If you see an expensive `Seq Scan` on a large table, check whether an index on the query's `WHERE`, `JOIN`, or `ORDER BY` pattern would help. Also look for N+1 query patterns and replace them with batch queries or joins where appropriate.
+
+On write-heavy tables, add indexes deliberately. Each index adds overhead to writes.
+
+### Defer Work That Doesn't Need to Block the Response
+
+Move non-critical side effects out of the response path. For small in-process tasks such as sending a confirmation email or notifying another service after the main request succeeds, FastAPI `BackgroundTasks` can defer that work until after the response is sent.
+
+### Tune Connection Pooling to Prevent Queueing Under Load
+
+Reusing pooled connections avoids the overhead of repeatedly opening new database connections and helps keep latency stable under load.
+
+Too small a pool and requests queue under load. Too large and you overwhelm the database.
+
+### Cache Read-Heavy Endpoints With Explicit TTLs
+
+Read-heavy endpoints with repeat access patterns are good candidates for caching in Redis. A cache can often serve hot data much faster than going back to the primary database, especially for repeated reads. Start with explicit TTLs, then add targeted invalidation logic only where freshness requirements justify the complexity.
+
+### Compress and Filter Payloads Before They Leave the Server
+
+Pagination, field filtering, and HTTP compression reduce transfer size and often improve client-observed latency, especially on slower networks. Compression helps most on larger text responses, but it does add some CPU overhead on the server.
+
+## FAQs
+
+### What is API latency?
+    
+API latency is the time from when a client starts a request to when it receives the first byte of the response (TTFB). It includes network transit in both directions and server processing time, but it does not include the full response body transfer. That is measured by response time.
+    
+### How do you calculate API latency?
+    
+From the client side, TTFB is `time_starttransfer` in curl. If you want an approximation of post-connection request handling delay, use `time_starttransfer - time_pretransfer`. From the server side, instrument with OpenTelemetry and track HTTP server request duration histograms. In setups using the stable HTTP semantic conventions, this metric is `http.server.request.duration`, and backends can use it to visualize latency percentiles such as p50, p95, and p99 over time.
+    
+### What is a good API response time?
+    
+For user-facing REST APIs, p50 under 100ms and p95 under 300ms is a reasonable baseline. Internal service-to-service calls should target p99 under 100ms with proper indexing and connection pooling. More important than absolute numbers is baselining your own service under normal conditions and alerting on deviation from that baseline.
+    
+### What does high API latency mean?
+    
+It means requests are taking longer than expected, but the cause depends on which stage is slow. High TTFB, when DNS/TCP/TLS timings are normal, usually points to slow server processing or an upstream dependency. Low TTFB but slow total time points to large payload transfer. Latency that affects all endpoints simultaneously suggests resource exhaustion. Latency on a single endpoint usually means a slow query or N+1 pattern.
+    
+### What is P50, P90, and P99 latency?
+    
+P50, P90, and P99 are latency percentiles that show how request times are distributed. **P50** is the median latency, meaning 50% of requests are faster and 50% are slower. **P90** means 90% of requests complete within that time, while the slowest 10% take longer. **P99** means 99% of requests finish within that threshold, and only the slowest 1% exceed it. Because it captures rare but noticeable slowdowns, **P99 is often used to track tail latency**, which is especially important for user experience, incident detection, and SLA or SLO reporting.
+    
+### What is the difference between API latency and API response time?
+    
+API latency is TTFB — time until the client receives the first byte of the response. Response time includes TTFB plus the time to transfer the full response body. For small JSON APIs the two numbers are nearly identical. For large payloads or streaming responses, response time is significantly higher than latency.
+    
+### How do I find out if my latency is caused by a third-party API I am calling?
+    
+You need visibility into outbound calls, not only your own endpoints. With properly instrumented HTTP client libraries, OpenTelemetry can create spans for outbound requests. In SigNoz, External API Monitoring uses those spans to surface per-domain latency and error rates and correlate them with your internal services and traces.
+
+## Conclusion
+
+API latency is only useful when you measure it the right way. Start with client-side timings to separate network delay from server delay, then track p50, p95, and p99 in production, and use distributed traces to find the exact span, query, or dependency causing the slowdown. Once you know which layer is responsible, the fix becomes straightforward.
+
+## Further Reading
+
+- [Complete Guide to API Monitoring](/blog/api-monitoring-complete-guide/)
+- [Third-Party API Monitoring with OpenTelemetry](/blog/third-party-api-monitoring/)
+- [Implementing OpenTelemetry in FastAPI](/blog/opentelemetry-fastapi/)
+- [OpenTelemetry Metrics with 5 Practical Examples](/blog/opentelemetry-metrics-with-examples/)
+- [Top API Monitoring Tools](/blog/api-monitoring-tools/)

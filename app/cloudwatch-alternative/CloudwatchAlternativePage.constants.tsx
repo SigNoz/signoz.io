@@ -212,10 +212,12 @@ export const VENDORS = [
   {
     key: 'signoz',
     label: <span className="text-xl text-signoz_forest-50">SigNoz</span>,
+    className: 'text-center',
   },
   {
     key: 'cloudwatch',
-    label: <span className="text-xl text-signoz_forest-50">AWS CloudWatch</span>,
+    label: <span className="text-xl text-signoz_forest-50 ">AWS CloudWatch</span>,
+    className: 'text-center',
   },
 ]
 

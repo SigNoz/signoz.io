@@ -1,5 +1,5 @@
 ---
-date: 2026-01-27
+date: 2026-02-24
 title: Monitor Celery
 description: This documentation provides a comprehensive, ready-to-use guide to set up metrics collection for Celery using OpenTelemetry and SigNoz.
 id: celery-setup
@@ -13,7 +13,7 @@ hide_table_of_contents: true
 
 {/* Description about Celery and its features */}
 
-[Celery](https://docs.celeryq.dev/en/stable/index.html) is a distributed task queue, written in Python, that allows 
+<a href="https://docs.celeryq.dev/en/stable/index.html">Celery</a> is a distributed task queue, written in Python, that allows 
 you to offload time-consuming tasks from your main application, enabling asynchronous execution and improving responsiveness. 
 Celery is a simple, flexible, and reliable distributed system to process vast amounts of messages, while providing 
 operations with the tools required to maintain such a system. It’s a task queue with focus on real-time processing, while also supporting task scheduling.
@@ -348,7 +348,7 @@ You can now proceed to your Celery application code. It is necessary that you im
 in order to instrument the metrics.
 
 <Admonition type="note">
-We are using Redis Queue in this example. However, you can choose any of the [supported brokers](https://docs.celeryq.dev/en/main/getting-started/backends-and-brokers/index.html#broker-overview) for the Celery setup.
+We are using Redis Queue in this example. However, you can choose any of the <a href="https://docs.celeryq.dev/en/main/getting-started/backends-and-brokers/index.html#broker-overview">supported brokers </a> for the Celery setup.
 </Admonition>
 
 ```python:tasks.py
@@ -386,7 +386,7 @@ For more information on instrumenting Celery worker applications, you can refer 
 
 ### Step 5: Enabling flower metrics collection (Optional)
 
-While using celery, you can optionally enable flower metrics collection. You can read about flower in the [official docs](https://flower.readthedocs.io/en/latest/).
+While using celery, you can optionally enable flower metrics collection. You can read about flower in the <a href="https://flower.readthedocs.io/en/latest/">official docs </a>.
 
 You can start flower using the following command:
 
@@ -461,3 +461,26 @@ Detailed Celery Traces
 </i>
 </figcaption>
 </figure>
+
+## Troubleshooting
+
+### Worker Online Status Shows 0
+
+If your Celery dashboard shows "Worker Online: 0" even when workers are running, this is likely because task events are disabled by default. The "Worker Online" status relies on the `flower_worker_online` metric from Flower, which requires the `worker_send_task_events` setting to be enabled.
+
+To fix this, start your Celery worker with the `-E` flag to enable task events:
+
+```bash
+celery -A your_app worker --loglevel=info -E
+```
+
+Alternatively, you can enable task events in your Celery configuration:
+
+```python
+# In your Celery configuration
+worker_send_task_events = True
+```
+
+Once enabled, the dashboard will properly track and display worker online status.
+
+For more information, refer to the <a href="https://docs.celeryq.dev/en/latest/userguide/configuration.html#worker-send-task-events"> Celery configuration documentation </a> and <a href="https://docs.celeryq.dev/en/stable/userguide/monitoring.html#worker-online"> monitoring guide </a>.
