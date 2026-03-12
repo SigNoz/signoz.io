@@ -19,7 +19,6 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 })
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
