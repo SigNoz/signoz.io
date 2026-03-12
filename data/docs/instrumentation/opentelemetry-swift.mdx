@@ -199,8 +199,14 @@ let grpcChannel = ClientConnection(configuration: configuration)
 let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
 let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
+// Replace <service_name> with the name of your service
+let resource = Resource(attributes: [
+    "service.name": AttributeValue.string("<service_name>")
+])
+
 let tracerProvider = TracerProviderBuilder()
     .add(spanProcessor: spanProcessor)
+    .with(resource: resource)
     .build()
 OpenTelemetry.registerTracerProvider(tracerProvider: tracerProvider)
 
