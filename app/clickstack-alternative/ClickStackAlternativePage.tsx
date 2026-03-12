@@ -223,8 +223,8 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
               <Image
                 src="/img/clickstack-alternative/alert-history.webp"
                 alt="Alert history"
-                width={10000}
-                height={10000}
+                width={1200}
+                height={675}
                 className="rounded-md"
               />
             </div>
@@ -292,8 +292,8 @@ const QueryYourData: React.FC = () => {
       <Image
         src="/img/log-management/logs-explorer-qb.png"
         alt="Query Builder"
-        width={10000}
-        height={10000}
+        width={1200}
+        height={675}
         className="mb-8 p-6"
       />
 
@@ -307,7 +307,7 @@ const QueryYourData: React.FC = () => {
   )
 }
 
-const CloudwatchAlternativePage: React.FC = () => {
+const ClickStackAlternativePage: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
@@ -354,4 +354,4 @@ const CloudwatchAlternativePage: React.FC = () => {
   )
 }
 
-export default CloudwatchAlternativePage
+export default ClickStackAlternativePage
