@@ -1,5 +1,5 @@
 ---
-date: 2026-03-04
+date: 2026-03-11
 id: swift
 title: Swift OpenTelemetry Instrumentation
 description: Send events from your Swift application to SigNoz
@@ -28,6 +28,9 @@ To configure your Swift application to send traces directly to SigNoz Cloud, ins
 Add the following to your `Package.swift` file:
 
 ```swift
+platforms: [
+    .macOS(.v12)
+],
 dependencies: [
     .package(url: "https://github.com/open-telemetry/opentelemetry-swift-core.git", .upToNextMajor(from: "2.3.0")),
     .package(url: "https://github.com/open-telemetry/opentelemetry-swift.git", .upToNextMajor(from: "2.3.0")),
@@ -83,7 +86,7 @@ struct SwiftExample {
 
         // Replace <service_name> with the name of your service
         let resource = Resource(attributes: [
-            ResourceAttributes.serviceName.rawValue: AttributeValue.string("<service_name>")
+            "service.name": AttributeValue.string("<service_name>")
         ])
 
         let tracerProvider = TracerProviderBuilder()
