@@ -5,7 +5,7 @@ import { Button } from '@headlessui/react'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
-const COMPANIES = [
+export const COMPANIES = [
   { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
   { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
   { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
