@@ -252,7 +252,7 @@ const BetterChoiceBanner: React.FC = () => {
     },
     {
       text: 'Read Documentation',
-      href: '/docs/alerts/',
+      href: '/docs/introduction/',
       variant: 'secondary' as const,
       className: 'flex-center',
       tracking: {
