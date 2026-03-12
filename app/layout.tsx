@@ -18,7 +18,7 @@ import { AnonymousIdSetter } from './anonymous-id-setter'
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  preload: true,
+})
 })
 
 export const metadata: Metadata = {
