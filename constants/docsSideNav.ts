@@ -442,7 +442,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
+                route: '/docs/userguide/writing-clickhouse-traces-query',
                 label: 'ClickHouse queries for building dashboards and alerts',
               },
             ],

@@ -311,7 +311,7 @@ const SigNozFeatures = () => {
       desc: 'Your metrics data is stored in ClickHouse - and we give you the ability to write ClickHouse queries directly on your data. This enables in-depth analysis when you want to dig deeper into your data.',
       image: '/img/features/metrics/clickhouse-query-metrics.webp',
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/',
+      buttonLink: 'https://signoz.io/docs/userguide/writing-clickhouse-traces-query/',
     },
     {
       title: 'PromQL Support',
