@@ -81,13 +81,13 @@ function Footer() {
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="https://signoz.io/slack" target="_blank">
+                  <Link href="https://signoz.io/slack" target="_blank" prefetch={false}>
                     Slack
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://x.com/SigNozHQ" target="_blank">
+                  <Link href="https://x.com/SigNozHQ" target="_blank" prefetch={false}>
                     X
                   </Link>
                   <ArrowUpRight size={16} />
@@ -120,7 +120,7 @@ function Footer() {
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://newsletter.signoz.io/" target="_blank">
+                  <Link href="https://newsletter.signoz.io/" target="_blank" prefetch={false}>
                     Newsletter
                   </Link>
                 </div>
@@ -170,7 +170,7 @@ function Footer() {
                 </Link>
 
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://signoz.io/careers/" target="_blank">
+                  <Link href="https://signoz.io/careers/" target="_blank" prefetch={false}>
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />
@@ -208,7 +208,7 @@ function Footer() {
                   <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
-                  <Link href="https://status.signoz.io/" target="_blank">
+                  <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
                     All systems operational
                   </Link>
                 </div>
@@ -217,6 +217,7 @@ function Footer() {
                     href={'https://github.com/SigNoz'}
                     target="_blank"
                     aria-label="SigNoz Github URL"
+                    prefetch={false}
                   >
                     <Github />
                   </Link>
@@ -225,6 +226,7 @@ function Footer() {
                     href={'https://www.linkedin.com/company/signozio/'}
                     target="_blank"
                     aria-label="SigNoz LinkedIN URL"
+                    prefetch={false}
                   >
                     <Linkedin />
                   </Link>
@@ -233,6 +235,7 @@ function Footer() {
                     href={'https://signoz.io/slack'}
                     target="_blank"
                     aria-label="SigNoz Slack Connect URL"
+                    prefetch={false}
                   >
                     <Slack />
                   </Link>
@@ -241,6 +244,7 @@ function Footer() {
                     href={'https://x.com/SigNozHQ'}
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
+                    prefetch={false}
                   >
                     <Twitter />
                   </Link>
@@ -249,6 +253,7 @@ function Footer() {
                     href={'https://www.youtube.com/@signoz'}
                     target="_blank"
                     aria-label="SigNoz Youtube Channel URL"
+                    prefetch={false}
                   >
                     <Youtube />
                   </Link>
