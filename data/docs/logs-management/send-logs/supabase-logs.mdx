@@ -8,10 +8,6 @@ doc_type: howto
 
 Supabase Log Drains can forward logs from the Supabase stack to any OpenTelemetry Protocol (OTLP) compatible endpoint. This guide shows how to send those logs to SigNoz using Supabase's built-in OTLP drain.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
-
 ## Prerequisites
 
 - A Supabase project on the Pro, Team, or Enterprise plan. Log Drains are not available on the Free plan.
@@ -49,6 +45,19 @@ Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. For self-hosted setups, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
+Supabase Log Drains support only `HTTP/Protobuf`. For self-hosted setups, use your OTLP/HTTP endpoint instead of the SigNoz Cloud ingest URL. OTLP/HTTP endpoints commonly listen on port `4318`. For the standard OTLP/HTTP endpoint format, see
+<a
+  href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlphttpexporter/README.md"
+  target="_blank"
+  rel="noopener noreferrer nofollow"
+>
+  OpenTelemetry Collector OTLP HTTP exporter docs
+</a>.
+</KeyPointCallout>
 
 Supabase sends OTLP requests with the `application/x-protobuf` content type automatically. No additional configuration is needed on the SigNoz side as long as you use the `/v1/logs` endpoint.
 
