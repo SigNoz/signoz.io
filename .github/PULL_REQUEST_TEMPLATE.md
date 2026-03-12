@@ -1,47 +1,101 @@
-## Description
++## Summary
++<!-- What does this PR do? Provide a concise overview of the change. -->
 
-<!-- Briefly describe what this PR does and why -->
++## Motivation / Problem
++<!-- Why is this change needed? What problem does it solve? -->
++<!-- Link issues if applicable (e.g. Fixes #123) -->
 
-## Type of Change
++## Changes
++<!-- Describe the key changes introduced in this PR -->
++- 
++- 
++- 
 
-<!-- Check all that apply -->
+ ## Description
+ <!-- Briefly describe what this PR does and why -->
 
-- [ ] **Docs** – Changes to `data/docs/**`
-- [ ] **Blog** – Changes to `data/blog/**`
-- [ ] **Site Code** – Changes to `app/**`, `components/**`, `hooks/**`, `utils/**`, config, etc.
-- [ ] **Redirects** – Renamed/moved docs or updated `next.config.js` redirects
-- [ ] **Other** – e.g. dependencies, scripts, CI
+ ## Type of Change
+ <!-- Check all that apply -->
 
-## Context & Screenshots
+ - [ ] **Docs** – Changes to `data/docs/**`
+ - [ ] **Blog** – Changes to `data/blog/**`
+ - [ ] **Site Code** – Changes to `app/**`, `components/**`, `hooks/**`, `utils/**`, config, etc.
+ - [ ] **Redirects** – Renamed/moved docs or updated `next.config.js` redirects
+-- [ ] **Other** – e.g. dependencies, scripts, CI
++- [ ] **Dependencies / CI / Scripts**
++- [ ] **Other** – Explain below
 
-<!-- Add screenshots for UI or docs changes when helpful -->
++## Impact
++<!-- Who or what is affected by this change? -->
++- [ ] Documentation only
++- [ ] UI changes
++- [ ] Developer workflow
++- [ ] Performance impact
++- [ ] Breaking change
++
 
-## Checklist
++If breaking change, describe migration steps:
 
-<!-- Complete the sections that apply to your changes -->
 
-### For all changes
-- [ ] Built locally (`yarn build`) with no errors
-- [ ] Ran `yarn lint` and fixed any issues
-- [ ] Pre-commit hooks passed (or ran `yarn check:doc-redirects` / `yarn check:docs-metadata` if applicable)
 
-### For docs changes (`data/docs/**`)
-- [ ] Completed the [Docs PR Checklist](CONTRIBUTING.md#docs-pr-checklist) in CONTRIBUTING.md
-- [ ] Added/updated the page in `constants/docsSideNav.ts` if adding or moving a doc
+ ## Context & Screenshots
+ <!-- Add screenshots for UI or docs changes when helpful -->
 
-### For blog changes
-- [ ] Frontmatter includes `title`, `date`, `author`, `tags` (and `canonicalUrl` if applicable)
-- [ ] Images use WebP format and live under `public/img/blog/<YYYY-MM>/`
++## Before / After (if applicable)
++<!-- Show how things changed -->
++<!-- Screenshots, gifs, or code examples -->
 
-### For site code changes
-- [ ] Follows [Site Code Guidelines](CONTRIBUTING.md#website-code-guidelines) in CONTRIBUTING.md
-- [ ] New dependencies are justified in the PR description (if any)
+ ## Checklist
 
-### For renamed or moved docs
-- [ ] Added permanent redirect in `next.config.js` under `async redirects()`
-- [ ] Updated internal links and sidebar in `constants/docsSideNav.ts`
-- [ ] Ran `yarn check:doc-redirects` to verify
+ <!-- Complete the sections that apply to your changes -->
 
----
++### General
++- [ ] Branch is up to date with `main`
++- [ ] PR title follows conventional format (`type: description`)
++- [ ] Self-reviewed the code
++- [ ] Comments added for complex logic
 
-**Note:** Submit as Draft by default. Mark "Ready for review" when checks pass and content is ready.
+ ### For all changes
+ - [ ] Built locally (`yarn build`) with no errors
+ - [ ] Ran `yarn lint` and fixed any issues
+ - [ ] Pre-commit hooks passed (or ran `yarn check:doc-redirects` / `yarn check:docs-metadata` if applicable)
+
+ ### For docs changes (`data/docs/**`)
+ - [ ] Completed the [Docs PR Checklist](CONTRIBUTING.md#docs-pr-checklist) in CONTRIBUTING.md
+ - [ ] Added/updated the page in `constants/docsSideNav.ts` if adding or moving a doc
+
+ ### For blog changes
+ - [ ] Frontmatter includes `title`, `date`, `author`, `tags` (and `canonicalUrl` if applicable)
+ - [ ] Images use WebP format and live under `public/img/blog/<YYYY-MM>/`
+
+ ### For site code changes
+ - [ ] Follows [Site Code Guidelines](CONTRIBUTING.md#website-code-guidelines) in CONTRIBUTING.md
+-- [ ] New dependencies are justified in the PR description (if any)
++- [ ] New dependencies are justified in the PR description
+
+ ### For renamed or moved docs
+ - [ ] Added permanent redirect in `next.config.js` under `async redirects()`
+ - [ ] Updated internal links and sidebar in `constants/docsSideNav.ts`
+ - [ ] Ran `yarn check:doc-redirects` to verify
+
++## Testing
++<!-- Describe how the change was tested -->
++- [ ] Tested locally
++- [ ] Edge cases considered
++- [ ] Existing functionality verified
++- [ ] New tests added (if applicable)
++
++Steps to test:
++1.
++2.
++3.
++
++## Rollout / Deployment Notes
++<!-- Any special steps required during deployment -->
+
++## Additional Context
++<!-- Anything reviewers should know -->
+
+ ---
+ 
+ **Note:** Submit as Draft by default. Mark "Ready for review" when checks pass and content is ready.
