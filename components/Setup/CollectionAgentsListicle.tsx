@@ -49,7 +49,7 @@ export default function SelfHostInstallationListicle({
           className={`inline-block rounded-full px-4 py-2 text-sm font-medium transition-colors
             ${
               activeSection === section.id
-                ? 'bg-signoz_orange-500 dark:bg-signoz_orange-400 text-white'
+                ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
             }`}
         >
