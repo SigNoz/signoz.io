@@ -284,7 +284,7 @@ const QueryYourData: React.FC = () => {
         </h2>
         <p className="mb-8 text-center leading-relaxed text-signoz_vanilla-100">
           SigNoz supports PromQL, a visual query builder, and SQL across logs, traces, and metrics.{' '}
-          <br />
+          <br className="hidden md:block" />
           ClickStack supports Lucene search and SQL only.
         </p>
       </div>
