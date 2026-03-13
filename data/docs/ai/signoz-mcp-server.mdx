@@ -346,12 +346,12 @@ Add the configuration directly to your codebase to share the MCP setup with your
 
 3. Open Copilot Chat in **Agent mode** and confirm you trust the server.
 
-<Admonition type="info">
-If you prefer to run the SigNoz MCP server in **HTTP mode** instead of `stdio` (e.g. running via Docker), change the type to `"type": "http"` and use `"url": "http://localhost:8000/mcp"`.
-</Admonition>
-
 </TabItem>
 </Tabs>
+
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** instead of `stdio` (e.g. running via Docker), change the type to `"type": "http"` and use `"url": "http://localhost:8000/mcp"`.
+</KeyPointCallout>
 
 </TabItem>
 <TabItem value="claude-code" label="Claude Code (CLI)">
@@ -388,6 +388,15 @@ claude mcp add --scope project signoz "<path-to-binary>/signoz-mcp-server" -e SI
 </TabItem>
 </Tabs>
 
+
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** (e.g. running via Docker), use the `--transport http` flag along with your preferred scope (`--scope user` or `--scope project`):
+
+```bash
+claude mcp add --scope user --transport http signoz http://localhost:8000/mcp
+```
+</KeyPointCallout>
+
 <Admonition type="info">
 To remove the server later, use `claude mcp remove signoz` (add `--scope project` if you installed it locally). You can view all active servers with `claude mcp list`.
 </Admonition>
@@ -410,6 +419,14 @@ codex mcp add signoz --env SIGNOZ_URL="<your-signoz-url>" --env SIGNOZ_API_KEY="
 - `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
 - `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
 
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** (e.g. running via Docker), you can add it via CLI:
+
+```bash
+codex mcp add signoz http://localhost:8000/mcp
+```
+</KeyPointCallout>
+
 </TabItem>
 <TabItem value="codex-config" label="config.toml Setup">
 
@@ -430,6 +447,15 @@ LOG_LEVEL = "info"
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary you built earlier
 - `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
 - `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** (e.g. running via Docker), you can add in your `config.toml`:
+
+```toml
+[mcp_servers.signoz]
+url = "http://localhost:8000/mcp"
+```
+</KeyPointCallout>
 
 </TabItem>
 </Tabs>
