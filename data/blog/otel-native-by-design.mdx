@@ -49,7 +49,7 @@ The way you add OTel export depends on **who owns the system** that produces the
 
 Your product is an application or system (e.g., an identity server, a service mesh, a database) that customers install and run in *their* environment (their data center, their cloud, their Kubernetes cluster).
 
-Here, **instrument your product** with OpenTelemetry. When the customer configures an endpoint (e.g. via a startup flag or config file), your application exports telemetry from the process they’re running.
+Here, you **instrument your product** with OpenTelemetry. When the customer configures an endpoint (e.g. via a startup flag or config file), your application exports telemetry from the process they’re running.
 
 The export happens in the customer’s environment; they control the binary and the destination. *Examples: Keycloak, Kuma.*
 
@@ -304,7 +304,7 @@ Your Collector architecture needs to handle two dimensions of growth: onboarding
 ### One Collector per Tenant
 
 If your architecture already isolates tenants at the infrastructure level, you can deploy a dedicated Collector instance for each customer. In this case, every instance has a dedicated configuration pointing directly to that specific customer’s export endpoint.<br />
-This provides strong logical isolation guarantees. Slowdowns or misconfigurations in one customer’s pipeline does not affect other customers.
+This provides strong logical isolation guarantees. Slowdowns or mis-configurations in one customer’s pipeline do not affect other customers.
 
 Although you can [optimize the Collector binary](https://signoz.io/blog/opentelemetry-collector-contrib/) by only shipping vital components, deploying hundreds or thousands of Collector instances will become resource-intensive.
 
@@ -318,7 +318,7 @@ The Collector-per-tenant architecture provides strong isolation guarantees at th
 
 In this architecture, all your platform’s telemetry funnels into a single, centralized Collector. Inside, you define separate pipelines per tenant, ensuring that the data gets routed to the correct external endpoint.
 
-This pattern is desirable for smaller scale teams because it much simpler to operate compared to the Collector-per-tenant architecture. You only have to monitor and scale one deployment, and all routing is configured in one place.
+This pattern is desirable for smaller-scale teams because it much simpler to operate compared to the Collector-per-tenant architecture. You only have to monitor and scale one deployment, and all routing is configured in one place.
 
 However, you must be comfortable managing a growing dynamic configuration file as your customer base grows.
 
