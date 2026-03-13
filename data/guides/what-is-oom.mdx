@@ -37,10 +37,13 @@ When the limit is hit, the kernel sends a `SIGKILL` (Signal 9) to the process wi
 
 ### Linux OOM Killer Example
 
-<Figure
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-physical-server.webp"
   alt="OS kills the process with the highest OOM score (usually the biggest memory hog)."
   caption="OS kills the process with the highest OOM score (usually the biggest memory hog)"
+  width={1200}
+  height={675}
+  priority
 />
 
 You have a linux server running a database (like PostgreSQL), and a backup script starts running at the same time. The physical RAM fills up completely. The OS kernel steps in to save the system.
@@ -75,10 +78,12 @@ In Kubernetes, OOM events are heavily influenced by **Cgroups** (Control Groups)
 
 ### Kubernetes OOM Example - Understanding the Limits
 
-<Figure
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-k8s-node.webp"
   alt="Container hits configured limit, runtime kills it"
   caption="Container hits configured limit, runtime kills it"
+  width={1200}
+  height={675}
 />
 
 When you define a pod, you typically set resource requests and limits:
@@ -127,7 +132,7 @@ Working Set includes resident memory plus some types of cached memory that the k
 
 ## 3. Application Runtime OOM (Java & Python)
 
-<Figure
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-application-runtime.webp"
   alt="Application exhausts it’s own internal memory allocation"
   caption="Application exhausts it’s own internal memory allocation"
@@ -282,64 +287,78 @@ python app.py
 
 You should be able to see memory getting allocated in chunks of 10 mb per 2 seconds.
 
-<Figure 
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-python-output.webp"
   alt="Memory getting allocated in chunks"
   caption="Memory getting allocated in chunks"
+  width={1200}
+  height={675}
 />
 
 ### Step 5:  Visualize, Monitor and Setup Alerting in SigNoz
 
 Once your application is running and has generated some load, you can begin monitoring it in your SigNoz Cloud account. Navigate to the **`Services`** tab, where your application should appear automatically.
 
-<Figure 
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-service-name.webp"
   alt="The application automatically appears in the Services view once telemetry is received"
   caption="The application automatically appears in the Services view once telemetry is received"
+  width={1200}
+  height={675}
 />
 
 To visualize memory consumption over time, create a custom metric panel. Navigate to **`Metrics → Explore`**, select the metric **`process.memory.rss`**, and filter by your service name.
 
 This metric represents the resident memory used by the process.
 
-<Figure 
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-custom-metrics.webp"
   alt="Upward trend in resident memory (RSS) as the application gradually allocates memory"
   caption="Upward trend in resident memory (RSS) as the application gradually allocates memory"
+  width={1200}
+  height={675}
 />
 
 You can also configure an alert on this metric to proactively detect memory pressure. Follow the [SigNoz Alert Setup Guide](https://signoz.io/docs/alerts-management/metrics-based-alerts/) to trigger alerts when memory crosses a defined threshold.
 
 Once the application reaches the maximum available memory, it crashes. This failure is captured as an exception in SigNoz. Navigate to the **`Exceptions`** tab and filter by your service name.
 
-<Figure 
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-exceptions.webp"
   alt="MemoryError captured as an exception when the process runs out of memory"
   caption="MemoryError captured as an exception when the process runs out of memory"
+  width={1200}
+  height={675}
 />
 
 Click on the `MemoryError` entry to drill down into details such as the stack trace and correlated traces. SigNoz lets you analyze what happened before and after the failure using trace context.
 
-<Figure 
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-stacktrace.webp"
   alt="Detailed stack trace for the MemoryError exception."
   caption="Detailed stack trace for the MemoryError exception."
+  width={1200}
+  height={675}
 />
 
 You can further explore the execution path by clicking **“See the error in trace graph”**, which opens the distributed trace view.
 
-<Figure 
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-traces.webp"
   alt="Trace graph showing the exact span where the OOM occur"
   caption="Trace graph showing the exact span where the OOM occur"
+  width={1200}
+  height={675}
 />
 
 From the trace, you can seamlessly pivot to logs to understand what the application was doing at that moment.
 
-<Figure 
+<NextFigure
   src="/img/guides/2025/12/what-is-oom-logs.webp"
   alt="Correlated logs view highlighting the MemoryError alongside preceding allocation logs"
   caption="Correlated logs view highlighting the MemoryError alongside preceding allocation logs"
+  width={1200}
+  height={675}
 />
 
 This log timeline shows the exact sequence that led to the OOM crash. Repeated `Allocated chunk` entries indicate sustained memory growth, followed by a terminal `MemoryError` when the process exceeds its limit.
