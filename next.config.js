@@ -1,4 +1,5 @@
 const { withContentlayer } = require('next-contentlayer2')
+const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -74,24 +75,10 @@ module.exports = () => {
     trailingSlash: true,
     swcMinify: true,
     images: {
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'picsum.photos',
-        },
-        {
-          protocol: 'https',
-          hostname: 'signoz.io',
-        },
-        {
-          protocol: 'https',
-          hostname: 'avatars.githubusercontent.com',
-        },
-        {
-          protocol: 'https',
-          hostname: 'storage.googleapis.com',
-        },
-      ],
+      remotePatterns: getAllowedImageDomains().map((domain) => ({
+        protocol: 'https',
+        hostname: domain,
+      })),
     },
     async headers() {
       return [
