@@ -203,7 +203,8 @@ function Footer() {
                     src="/img/SigNozLogo-orange.svg"
                     width={50}
                     height={50}
-                    alt=""
+                    alt="SigNoz Logo"
+                    loading="lazy"
                   />
                   <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
@@ -259,20 +260,22 @@ function Footer() {
                   </Link>
                 </div>
                 <div className="mt-5 flex flex-row gap-8">
-                  <img
+                  <Image
                     className="cursor-pointer opacity-60 hover:opacity-100"
                     src="/svgs/icons/hipaa.svg"
                     width={90}
                     height={90}
-                    alt=""
+                    alt="HIPAA"
+                    loading="lazy"
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
-                  <img
+                  <Image
                     className="cursor-pointer rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
                     src="/svgs/icons/SOC-2.svg"
                     width={60}
                     height={60}
-                    alt=""
+                    alt="SOC-2"
+                    loading="lazy"
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                 </div>
