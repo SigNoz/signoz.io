@@ -3,10 +3,12 @@
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import Button from "@/components/ui/Button"
+import Button from '@/components/ui/Button'
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
+import SigNozStats from '@/components/signoz-stats'
+import { COMPANIES } from '@/components/trusted-by'
 
 function Apm() {
   return (
@@ -143,9 +145,7 @@ const Header = () => {
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
-      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
-        <div className="absolute left-0 top-[101px] z-0 h-9 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[225px] md:!w-[80vw]" />
-
+      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
           Application Performance Monitoring <br />
           Powered by OpenTelemetry
@@ -161,14 +161,19 @@ const Header = () => {
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button variant='default' rounded='full' to="/teams/" id="btn-get-started-homepage-hero">
+        <Button variant="default" rounded="full" to="/teams/" id="btn-get-started-homepage-hero">
           <span className="flex-center">
             Get Started - Free
             <ArrowRight size={14} />
           </span>
         </Button>
 
-        <Button variant='secondary' rounded='full' to="/docs/introduction/" id="btn-read-documentation-homepage-hero">
+        <Button
+          variant="secondary"
+          rounded="full"
+          to="/docs/introduction/"
+          id="btn-read-documentation-homepage-hero"
+        >
           <span className="flex-center">
             <BookOpen size={14} />
             Read Documentation
@@ -193,21 +198,6 @@ const Header = () => {
     </header>
   )
 }
-
-const COMPANIES = [
-  { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
-  { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
-  { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
-  { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
-  { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
-  { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
-  { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
-  { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
-  { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
-]
 
 const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
@@ -238,12 +228,7 @@ const TrustedByTeams = ({ page }) => {
         `}
         >
           <div className="flex flex-col items-center text-center">
-            <Button
-              variant='secondary'
-              rounded='full'
-              to="/case-study/"
-              id={customerStoriesId}
-            >
+            <Button variant="secondary" rounded="full" to="/case-study/" id={customerStoriesId}>
               <span className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
               </span>
@@ -339,8 +324,8 @@ const SigNozFeatures = () => {
   ]
   return (
     <>
-      <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
+      <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
           <div className={`container pb-16`}>
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
@@ -369,8 +354,8 @@ const SigNozFeatures = () => {
         </div>
       </div>
 
-      <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
+      <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
           <div className={`container pb-16`}>
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
@@ -440,7 +425,13 @@ const UsageBasedPricing = () => {
               We’re here for you.
             </p>
             <UsageList />
-            <Button variant='default' rounded='full' to="/pricing/" id="btn-get-started-homepage-hero" className="mt-5">
+            <Button
+              variant="default"
+              rounded="full"
+              to="/pricing/"
+              id="btn-get-started-homepage-hero"
+              className="mt-5"
+            >
               <span className="flex-center">
                 Check Pricing
                 <ArrowRight size={14} />
@@ -472,126 +463,50 @@ const ExploreDocs = () => {
   )
 }
 
-const SigNozStats = () => {
-  const STATS_LIST = [
-    {
-      id: 1,
-      logo: '/img/index_features/download.svg',
-      name: 'OSS Downloads',
-      value: '10 million+',
-    },
-    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '22k+' },
-    { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
-    { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
-  ]
-  return (
-    <section>
-      <div className="">
-        <div className="section-container !mx-auto flex !w-[100vw] flex-col border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:flex-row md:!w-[80vw]">
-          <div className="!w-[300px] flex-1 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-            <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
-              Developers <br />
-              Love
-              <br />
-              SigNoz
-            </p>
-          </div>
-
-          <div className="flex flex-[2_2_0%] flex-col">
-            <div className="grid grid-cols-1 text-left sm:grid-cols-2">
-              {STATS_LIST.map((stat, index) => (
-                <Card
-                  logo={stat.logo}
-                  stats={stat.value}
-                  description={stat.name}
-                  logoSize={24}
-                  key={index}
-                />
-              ))}
-            </div>
-            <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
-              <Button 
-                href="https://signoz.io/slack/" 
-                variant={"default"}
-                rounded={"full"}
-                id="btn-join-community-homepage"
-              >
-                <span className="flex-center">
-                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  Join the community
-                  <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </span>
-              </Button>
-              <Button  href="https://github.com/SigNoz/signoz/" 
-                variant={"secondary"}
-                rounded={"full"}
-                id="btn-github-repo-homepage"
-              >
-                <span className="flex-center">
-                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  GitHub Repository
-                  <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 const GetStarted = ({ page }) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
   return (
-    <div className="bg-[url('/img/background_blur/Rectangle_959.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-      <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-        <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
-          <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-250px)] bg-no-repeat">
-            <div className="flex flex-col gap-16">
-              <div className="flex flex-col gap-12">
-                <p className="mb-0 mt-20 text-center text-4xl font-bold">
-                  Get started with <br /> SigNoz Cloud today
-                </p>
-                <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                  <Button 
-                    to="/teams/" 
-                    variant={"default"}
-                    rounded={"full"}
-                    id={getStartedId}
-                  >
-                    <span className="flex-center">
-                      Get Started - Free
-                      <ArrowRight size={14} />
-                    </span>
-                  </Button>
+    <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
+      <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+          <div className="flex flex-col gap-16">
+            <div className="flex flex-col gap-12">
+              <p className="mb-0 mt-20 text-center text-4xl font-bold">
+                Get started with <br /> SigNoz Cloud today
+              </p>
+              <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
+                <Button to="/teams/" variant={'default'} rounded={'full'} id={getStartedId}>
+                  <span className="flex-center">
+                    Get Started - Free
+                    <ArrowRight size={14} />
+                  </span>
+                </Button>
 
-                  <Button 
-                    to="/docs/introduction/"
-                    variant={"secondary"}
-                    rounded={"full"}
-                    id={readDocumentationId}
-                  >
-                    <span className="flex-center">
-                      <BookOpen size={14} />
-                      Read Documentation
-                    </span>
-                  </Button>
-                </div>
-              </div>
-              <div className="relative flex items-center justify-center">
-                <img
-                  src="/img/landing/landing_thumbnail.webp"
-                  alt="Custom Thumbnail"
-                  className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
-                />
+                <Button
+                  to="/docs/introduction/"
+                  variant={'secondary'}
+                  rounded={'full'}
+                  id={readDocumentationId}
+                >
+                  <span className="flex-center">
+                    <BookOpen size={14} />
+                    Read Documentation
+                  </span>
+                </Button>
               </div>
             </div>
+            <div className="relative flex items-center justify-center">
+              <img
+                src="/img/landing/landing_thumbnail.webp"
+                alt="Custom Thumbnail"
+                className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
+              />
+            </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   )
 }

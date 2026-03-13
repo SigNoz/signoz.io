@@ -1,6 +1,7 @@
 ---
-date: 2024-06-06
+date: 2026-02-16
 title: Docker Standalone
+tags : [Self-Host]
 description:  Learn how to install SigNoz on Docker Standalone. Follow our detailed, step-by-step guide to set up SigNoz on macOS or Linux. Ensure smooth installation and start monitoring your applications effectively.
 id: docker-standalone
 slug: /install/docker
@@ -15,6 +16,10 @@ SigNoz can be installed on macOS or Linux computers, and there are two ways in w
 
  - You may execute a script that checks your environment, installs Docker Engine and Docker Compose on Linux, and runs the `docker compose up` command for you. 
  - You may execute the `docker compose up` command yourself.
+
+<Admonition type="info">
+<a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> can deploy SigNoz on Docker for you using <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/docker/compose" target="_blank" rel="noopener noreferrer nofollow">Docker Compose casting</a> (a configuration file). You install the dependencies, and Foundry handles everything else, from generating the Compose file and configs to starting the containers.
+</Admonition>
 
 Both methods are provided below.
 
@@ -84,7 +89,7 @@ CONTAINER ID   IMAGE                                        COMMAND             
 afd3e434e853   signoz/signoz-otel-collector:0.111.24        "/signoz-collector -…"   47 minutes ago   Up 45 minutes             0.0.0.0:4317-4318->4317-4318/tcp         signoz-otel-collector
 c0b6e58d3d18   signoz/signoz:0.69.0                         "./query-service --c…"   47 minutes ago   Up 46 minutes (healthy)   8080/tcp                                 signoz-signoz
 69431900f6ef   clickhouse/clickhouse-server:24.1.2-alpine   "/entrypoint.sh"         47 minutes ago   Up 47 minutes (healthy)   8123/tcp, 9000/tcp, 9009/tcp             signoz-clickhouse
-8b69f876a3c7   bitnami/zookeeper:3.7.1                      "/opt/bitnami/script…"   47 minutes ago   Up 47 minutes (healthy)   2181/tcp, 2888/tcp, 3888/tcp, 8080/tcp   signoz-zookeeper-1
+8b69f876a3c7   signoz/zookeeper:3.7.1                      "/opt/bitnami/script…"   47 minutes ago   Up 47 minutes (healthy)   2181/tcp, 2888/tcp, 3888/tcp, 8080/tcp   signoz-zookeeper-1
 ```
 
 2. Wait for all the pods to be in running state, and then point your browser to `http://<IP-ADDRESS>:8080/` to access the dashboard, replacing `<IP-ADDRESS>` with the IP address of the machine where you installed SigNoz.

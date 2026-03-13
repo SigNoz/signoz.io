@@ -1,6 +1,6 @@
 import 'css/tailwind.css'
 import 'css/global.css'
-
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
 import { SearchProvider, SearchConfig } from 'pliny/search'
 import SectionContainer from '@/components/SectionContainer'
@@ -15,7 +15,10 @@ import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import { GrowthBookProvider } from '@/components/GrowthBookProvider'
 import { AnonymousIdSetter } from './anonymous-id-setter'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
@@ -91,6 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
+        <SpeedInsights />
         <Suspense fallback={null}>
           <PageViewTracker />
         </Suspense>
@@ -107,17 +111,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProviders>
           <GrowthBookProvider>
-            <Suspense>
-              <SectionContainer>
-                <div className="relative flex h-screen flex-col justify-between ">
-                  <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                    <TopNav />
-                    <main className="mb-auto mt-[48px]">{children}</main>
-                  </SearchProvider>
-                  <MainFooter />
-                </div>
-              </SectionContainer>
-            </Suspense>
+            <SectionContainer>
+              <div className="relative flex h-screen flex-col justify-between ">
+                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                  <TopNav />
+                  <main className="mb-auto mt-[48px]">{children}</main>
+                </SearchProvider>
+                <MainFooter />
+              </div>
+            </SectionContainer>
           </GrowthBookProvider>
         </ThemeProviders>
       </body>

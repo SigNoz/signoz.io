@@ -4,18 +4,21 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
+const defaultFrameAncestors =
+  "'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud"
+
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
-  connect-src * https://api.reo.dev;
+  connect-src * https://api.reo.dev https://www.clarity.ms https://*.clarity.ms;
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
-  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors ${process.env.CSP_FRAME_ANCESTORS || defaultFrameAncestors};
 `
 
 const securityHeaders = [
@@ -101,8 +104,76 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/feed.xml',
+          destination: '/rss',
+          permanent: true,
+        },
+        {
+          source: '/docs/signoz-mcp-server/',
+          destination: '/docs/ai/signoz-mcp-server/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
           source: '/docs/',
           destination: '/docs/introduction',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/severity/',
+          destination: '/docs/logs-pipelines/guides/severity-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/guides/timestamp/',
+          destination: '/docs/logs-pipelines/guides/timestamp-parsing/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/php/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/laravel/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-laravel/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-wordpress/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/jvm-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/send-metrics/runtimes/java-metrics/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/opentelemetry-datadog-receiver/',
+          destination: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/',
           permanent: true,
         },
         {
@@ -111,18 +182,93 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/alerts-management/notification-channel/',
+          destination: '/docs/setup-alerts-notification/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/aws/',
+          destination: '/docs/integrations/aws/one-click-aws-integrations/',
+          permanent: true,
+        },
+        {
+          source: '/docs/mobile-instrumentation/',
+          destination: '/docs/mobile-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/migrate/',
+          destination: '/docs/operate/upgrade/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/breaking-changes/breaking-changes-0.76/',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/breaking-changes/breaking-changes-0.76',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/whats-new/changelog-0.76/',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/overview/whats-new/changelog-0.76',
+          destination: '/changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/create-a-custom-query/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/navigate-user-interface/',
+          destination: '/docs/what-is-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/manage-dashboards-and-panels/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/overview/',
+          destination: '/docs/what-is-signoz/',
+          permanent: true,
+        },
+        {
           source: '/comparisons/signoz-vs-datadog/',
-          destination: '/product-comparison/signoz-vs-datadog/',
+          destination: '/datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-datadog/',
+          destination: '/datadog-alternative/',
           permanent: true,
         },
         {
           source: '/comparisons/signoz-vs-newrelic/',
-          destination: '/product-comparison/signoz-vs-newrelic/',
+          destination: '/newrelic-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-newrelic/',
+          destination: '/newrelic-alternative/',
           permanent: true,
         },
         {
           source: '/comparisons/signoz-vs-grafana/',
-          destination: '/product-comparison/signoz-vs-grafana/',
+          destination: '/grafana-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-grafana/',
+          destination: '/grafana-alternative/',
           permanent: true,
         },
         {
@@ -136,19 +282,69 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/getting-started-with-opentelemetry/',
+          destination: '/blog/opentelemetry-demo/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-distributed-tracing-part-2/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-distributed-tracing-part-1/',
+          destination: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/blog/introduction-to-opentelemetry-metrics/',
+          destination: '/blog/opentelemetry-metrics-with-examples/',
+          permanent: true,
+        },
+        {
+          source: '/blog/gathering-data-with-opentelemetry-collector/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-python-auto-and-manual-instrumentation/',
+          destination: '/opentelemetry/python/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubernetes-observability-with-opentelemetry/',
+          destination: '/blog/opentelemetry-kubernetes/',
+          permanent: true,
+        },
+        {
+          source: '/why-opentelemetry/',
+          destination: '/opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/blog/what-is-opentelemetry/',
+          destination: '/opentelemetry/',
+          permanent: true,
+        },
+        {
           source: '/comparisons/',
           destination: '/resource-center/comparisons/',
           permanent: true,
         },
         {
           source: '/learn/user-stories/',
-          destination: '/observability-user-stories',
+          destination: '/blog/community-update-06/#observability-user-stories',
           permanent: true,
         },
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3cy3atyr6-yjgvOm42ZqD2HeszrXuvOA',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3pdv47cad-1O4lTFY1H2E8UwQcnQ4fZg',
           basePath: false,
           permanent: true,
         },
@@ -179,8 +375,18 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/kubernetes/deployment/',
+          destination: '/docs/install/kubernetes/',
+          permanent: true,
+        },
+        {
           source: '/docs/installation/',
           destination: '/docs/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/install/cloud/',
+          destination: '/docs/cloud/',
           permanent: true,
         },
         {
@@ -194,6 +400,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/operate/',
+          destination: '/docs/manage/administrator-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/kubernetes/',
+          destination: '/docs/install/kubernetes/',
+          permanent: true,
+        },
+        {
           source: '/docs/userguide/dashboards/',
           destination: '/docs/userguide/manage-dashboards/',
           permanent: true,
@@ -201,6 +417,11 @@ module.exports = () => {
         {
           source: '/blog/signoz-benchmarks/',
           destination: '/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/',
+          permanent: true,
+        },
+        {
+          source: '/blog/monitoring-your-go-application-with-signoz/',
+          destination: '/blog/golang-monitoring/',
           permanent: true,
         },
         {
@@ -231,7 +452,7 @@ module.exports = () => {
         },
         {
           source: '/docs/operate/sqlite/reset-admin-password/',
-          destination: '/docs/operate/query-service/reset-admin-password/',
+          destination: '/docs/operate/reset-admin-password/',
           permanent: true,
         },
         {
@@ -239,9 +460,10 @@ module.exports = () => {
           destination: '/resource-center/blog/',
           permanent: true,
         },
+        // Keep /opentelemetry/ as the canonical hub landing instead of redirecting to the Resource Center.
         {
-          source: '/opentelemetry/',
-          destination: '/resource-center/opentelemetry/',
+          source: '/opentelemetry/series/nextjs/',
+          destination: '/blog/opentelemetry-nextjs/',
           permanent: true,
         },
         {
@@ -271,22 +493,27 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/angular/',
-          destination: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/celery/',
-          destination: '/docs/instrumentation/opentelemetry-celery/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/django/',
-          destination: '/docs/instrumentation/opentelemetry-django/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/dotnet/',
           destination: '/docs/instrumentation/opentelemetry-dotnet/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/manual-instrumentation/dotnet/manual-instrumentation/',
+          destination: '/docs/instrumentation/dotnet/manual-instrumentation/',
           permanent: true,
         },
         {
@@ -296,22 +523,22 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/express/',
-          destination: '/docs/instrumentation/opentelemetry-express/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/falcon/',
-          destination: '/docs/instrumentation/opentelemetry-falcon/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/fastapi/',
-          destination: '/docs/instrumentation/opentelemetry-fastapi/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/flask/',
-          destination: '/docs/instrumentation/opentelemetry-flask/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
@@ -326,7 +553,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/java/',
-          destination: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
@@ -335,28 +562,63 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-express/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/jboss/',
-          destination: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/nestjs/',
-          destination: '/docs/instrumentation/opentelemetry-nestjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nestjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/nextjs/',
-          destination: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
           permanent: true,
         },
         {
-          source: '/docs/instrumentation/php/',
-          destination: '/docs/instrumentation/opentelemetry-php/',
+          source: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
           permanent: true,
         },
         {
-          source: '/docs/instrumentation/laravel/',
-          destination: '/docs/instrumentation/opentelemetry-laravel/',
+          source: '/docs/instrumentation/opentelemetry-nuxtjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nuxtjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-reactjs/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
           permanent: true,
         },
         {
@@ -365,8 +627,79 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/opentelemetry-django/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-flask/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-fastapi/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-falcon/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-celery/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        // Python framework-specific redirects to consolidated page
+        {
+          source: '/docs/instrumentation/opentelemetry-python/django/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/flask/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/fastapi/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/falcon/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/celery/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/python/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/ruby/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/ruby-on-rails/',
-          destination: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
@@ -376,7 +709,39 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/springboot/',
-          destination: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java framework-specific redirects to new java/ folder structure
+        {
+          source: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-quarkus/',
+          destination: '/docs/instrumentation/java/opentelemetry-quarkus/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java manual instrumentation redirect
+        {
+          source: '/docs/instrumentation/manual-instrumentation/java/annotations/',
+          destination: '/docs/instrumentation/java/manual-instrumentation/',
           permanent: true,
         },
         {
@@ -386,13 +751,28 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/tomcat/',
-          destination: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
-          destination:
-            '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation/',
+          destination: '/docs/instrumentation/javascript/nodejs-selective-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-javascript/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
@@ -421,6 +801,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/frontend-monitoring/sending-logs/',
+          destination: '/docs/frontend-monitoring/sending-logs-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/sending-metrics/',
+          destination: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/sending-traces/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
           source: '/guides/unified-observability/',
           destination: '/unified-observability/',
           permanent: true,
@@ -428,6 +823,22 @@ module.exports = () => {
         {
           source: '/docs/aws-monitoring/lambda-logs',
           destination: '/docs/aws-monitoring/lambda/lambda-logs',
+          permanent: true,
+        },
+        // AWS Monitoring renamed/deleted docs
+        {
+          source: '/docs/aws-monitoring/getting-started/',
+          destination: '/docs/aws-monitoring/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/rds-logs/',
+          destination: '/docs/aws-monitoring/rds/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/vpc-logs/',
+          destination: '/docs/aws-monitoring/vpc/',
           permanent: true,
         },
         {
@@ -500,171 +911,499 @@ module.exports = () => {
           destination: '/docs/dashboards/dashboard-templates/overview/',
           permanent: true,
         },
+        // ECS and EKS folder restructuring redirects
         {
-          source: "/docs/tutorial/kubernetes-infra-metrics/",
-          destination: "/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/",
-          permanent: true
+          source: '/docs/ecs-monitoring/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
         },
         {
-          source: "/docs/metrics-management/k8s-infra-otel-config/",
-          destination: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/",
-          permanent: true
+          source: '/docs/aws-monitoring/ecs-monitoring-overview/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
         },
         {
-          source: "/docs/troubleshooting/signoz-cloud/logs-troubleshooting/",
-          destination: "/docs/logs-management/troubleshooting/troubleshooting/",
-          permanent: true
+          source: '/docs/aws-monitoring/ecs-ec2-external/',
+          destination: '/docs/aws-monitoring/ecs/ecs-ec2-external/',
+          permanent: true,
         },
         {
-          source: "/docs/userguide/logs_troubleshooting/",
-          destination: "/docs/logs-management/troubleshooting/troubleshooting/",
-          permanent: true
+          source: '/docs/aws-monitoring/ecs-fargate/',
+          destination: '/docs/aws-monitoring/ecs/ecs-fargate/',
+          permanent: true,
         },
         {
-          source: "/docs/troubleshooting/signoz-cloud/traces-troubleshooting/",
-          destination: "/docs/traces-management/troubleshooting/troubleshooting/",
-          permanent: true
+          source: '/docs/aws-monitoring/eks-monitoring-overview/',
+          destination: '/docs/aws-monitoring/eks/',
+          permanent: true,
         },
         {
-          source: "/docs/troubleshooting/signoz-cloud/metrics-troubleshooting/",
-          destination: "/docs/metrics-management/troubleshooting/troubleshooting/",
-          permanent: true
+          source: '/docs/aws-monitoring/eks-fargate/',
+          destination: '/docs/aws-monitoring/eks/eks-fargate/',
+          permanent: true,
+        },
+        // EC2 folder restructuring redirects
+        {
+          source: '/docs/ec2-monitoring/',
+          destination: '/docs/aws-monitoring/ec2/',
+          permanent: true,
         },
         {
-          source: "/docs/troubleshooting/signoz-cloud/general-troubleshooting/",
-          destination: "/docs/faqs/general/",
-          permanent: true
+          source: '/docs/aws-monitoring/ec2-logs/',
+          destination: '/docs/aws-monitoring/ec2/ec2-logs/',
+          permanent: true,
         },
         {
-          source: "/docs/instrumentation/troubleshoot-instrumentation/",
-          destination: "/docs/traces-management/troubleshooting/",
-          permanent: true
+          source: '/docs/aws-monitoring/ec2-infra-metrics/',
+          destination: '/docs/aws-monitoring/ec2/ec2-infra-metrics/',
+          permanent: true,
         },
         {
-          source: "/newsroom/launch-week-1-day-1/",
-          destination: "/blog/launch-week-1-day-1/",
-          permanent: true
+          source: '/docs/tutorial/kubernetes-infra-metrics/',
+          destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/',
+          permanent: true,
         },
         {
-          source: "/newsroom/launch-week-1-day-2/",
-          destination: "/blog/launch-week-1-day-2/",
-          permanent: true
+          source: '/docs/metrics-management/k8s-infra-otel-config/',
+          destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/',
+          permanent: true,
         },
         {
-          source: "/newsroom/launch-week-1-day-3/",
-          destination: "/blog/launch-week-1-day-3/",
-          permanent: true
+          source: '/docs/aws-monitoring/elb-logs/',
+          destination: '/docs/aws-monitoring/elb/',
+          permanent: true,
         },
         {
-          source: "/newsroom/launch-week-1-day-4/",
-          destination: "/blog/launch-week-1-day-4/",
-          permanent: true
+          source: '/docs/troubleshooting/signoz-cloud/logs-troubleshooting/',
+          destination: '/docs/logs-management/troubleshooting/troubleshooting/',
+          permanent: true,
         },
         {
-          source: "/newsroom/launch-week-1-day-5/",
-          destination: "/blog/launch-week-1-day-5/",
-          permanent: true
+          source: '/docs/userguide/logs_troubleshooting/',
+          destination: '/docs/logs-management/troubleshooting/troubleshooting/',
+          permanent: true,
         },
         {
-          source: "/newsroom/launch-week-1/",
-          destination: "/blog/launch-week-1/",
-          permanent: true
+          source: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting/',
+          destination: '/docs/traces-management/troubleshooting/troubleshooting/',
+          permanent: true,
         },
         {
-          source: "/newsroom/signoz-funding/",
-          destination: "/blog/signoz-funding/",
-          permanent: true
+          source: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting/',
+          destination: '/docs/metrics-management/troubleshooting/troubleshooting/',
+          permanent: true,
         },
         {
-          source: "/newsroom/",
-          destination: "/blog/",
-          permanent: true
+          source: '/docs/troubleshooting/signoz-cloud/general-troubleshooting/',
+          destination: '/docs/faqs/general/',
+          permanent: true,
         },
         {
-          source: "/docs/userguide/collecting-ecs-logs-and-metrics",
-          destination: "/docs/collection-agents/ecs/ec2/overview/",
-          permanent: true
+          source: '/docs/instrumentation/troubleshoot-instrumentation/',
+          destination: '/docs/traces-management/troubleshooting/troubleshooting/',
+          permanent: true,
         },
         {
-          source: "/docs/userguide/collecting-ecs-sidecar-infra",
-          destination: "/docs/collection-agents/ecs/sidecar/overview",
-          permanent: true
+          source: '/docs/userguide/query-handles-missing-values/',
+          destination: '/docs/userguide/query-builder/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/0.75.0/query-service/user-invitation-smtp",
-          destination: "/docs/manage/administrator-guide/configuration/smtp-email-invitations/#versions-less-than-or-equal-to-084x",
-          permanent:  true
+          source: '/newsroom/launch-week-1-day-1/',
+          destination: '/blog/launch-week-1-day-1/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/0.75.0/query-service/reset-admin-password",
-          destination: "docs/operate/reset-admin-password",
-          permanent: true
+          source: '/newsroom/launch-week-1-day-2/',
+          destination: '/blog/launch-week-1-day-2/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/0.75.0/configuration",
-          destination: "/docs/operate/configuration",
-          permanent: true 
+          source: '/newsroom/launch-week-1-day-3/',
+          destination: '/blog/launch-week-1-day-3/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/docker-standalone/#upgrade",
-          destination: "/docs/operate/migration/upgrade-standard/#docker-standalone",
-          permanent: true
+          source: '/newsroom/launch-week-1-day-4/',
+          destination: '/blog/launch-week-1-day-4/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
-          destination: "/docs/install/uninstall/#docker-standalone",
-          permanent: true
+          source: '/newsroom/launch-week-1-day-5/',
+          destination: '/blog/launch-week-1-day-5/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/docker-swarm/#upgrade-signoz-cluster",
-          destination: "/docs/operate/migration/upgrade-standard/#docker-swarm-cluster",
-          permanent: true
+          source: '/newsroom/launch-week-1/',
+          destination: '/blog/launch-week-1/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
-          destination: "/docs/install/uninstall/#docker-swarm",
-          permanent: true
+          source: '/newsroom/signoz-funding/',
+          destination: '/blog/signoz-funding/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/kubernetes/#upgrade-signoz",
-          destination: "/docs/operate/migration/upgrade-standard/#kubernetes-deployment",
-          permanent: true
+          source: '/newsroom/',
+          destination: '/blog/',
+          permanent: true,
         },
         {
-          source: "/docs/operate/kubernetes/#uninstall-signoz",
-          destination: "/docs/install/uninstall/#kubernetes",
-          permanent: true
+          source: '/docs/userguide/collecting-ecs-logs-and-metrics/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/install/',
+          permanent: true,
         },
         {
-          source: "/docs/tutorial/opentelemetry-operator-usage/",
-          destination: "/docs/collection-agents/k8s/otel-operator/overview",
-          permanent: true
+          source: '/docs/userguide/collecting-ecs-sidecar-infra/',
+          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/install/',
+          permanent: true,
         },
         {
-          source: "/docs/llm/opentelemetry-openai-monitoring/",
-          destination: "/docs/opentelemetry-openai-monitoring/",
-          permanent: true
+          source: '/docs/operate/0.75.0/query-service/user-invitation-smtp',
+          destination:
+            '/docs/manage/administrator-guide/configuration/smtp-email-invitations/#versions-less-than-or-equal-to-084x',
+          permanent: true,
         },
         {
-          source: "/docs/community/llm-monitoring/",
-          destination: "/docs/llm-observability/",
-          permanent: true
+          source: '/docs/operate/0.75.0/query-service/reset-admin-password',
+          destination: 'docs/operate/reset-admin-password',
+          permanent: true,
         },
         {
-          source: "/docs/llm/vercel-ai-sdk-monitoring/",
-          destination: "/docs/vercel-ai-sdk-monitoring/",
-          permanent: true
+          source: '/docs/operate/0.75.0/configuration',
+          destination: '/docs/operate/configuration',
+          permanent: true,
         },
         {
-          source: "/docs/llm/llamaindex-monitoring/",
-          destination: "/docs/llamaindex-monitoring/",
-          permanent: true
+          source: '/docs/operate/docker-standalone/#upgrade',
+          destination: '/docs/operate/migration/upgrade-standard/#docker-standalone',
+          permanent: true,
         },
         {
-          source: "/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/",
-          destination: "/guides/upstream-connect-error/",
-          permanent: true
-        }
+          source: '/docs/operate/docker-standalone/#uninstall-signoz-cluster',
+          destination: '/docs/install/uninstall/#docker-standalone',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/docker-swarm/#upgrade-signoz-cluster',
+          destination: '/docs/operate/migration/upgrade-standard/#docker-swarm-cluster',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/docker-standalone/#uninstall-signoz-cluster',
+          destination: '/docs/install/uninstall/#docker-swarm',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/kubernetes/#upgrade-signoz',
+          destination: '/docs/operate/migration/upgrade-standard/#kubernetes-deployment',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/kubernetes/#uninstall-signoz',
+          destination: '/docs/install/uninstall/#kubernetes',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-operator-usage/',
+          destination: '/docs/opentelemetry-collection-agents/k8s/otel-operator/overview',
+          permanent: true,
+        },
+        {
+          source: '/docs/llm/opentelemetry-openai-monitoring/',
+          destination: '/docs/openai-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/community/llm-monitoring/',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/llm/vercel-ai-sdk-monitoring/',
+          destination: '/docs/vercel-ai-sdk-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/llm/llamaindex-monitoring/',
+          destination: '/docs/llamaindex-observability/',
+          permanent: true,
+        },
+        // Redirects for renamed LLM observability docs (SEO edits #2090)
+        {
+          source: '/docs/opentelemetry-openai-monitoring/',
+          destination: '/docs/openai-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/crewai-monitoring/',
+          destination: '/docs/crewai-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/langchain-monitoring/',
+          destination: '/docs/langchain-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/llamaindex-monitoring/',
+          destination: '/docs/llamaindex-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/mastra-monitoring/',
+          destination: '/docs/mastra-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/vercel-ai-sdk-monitoring/',
+          destination: '/docs/vercel-ai-sdk-observability/',
+          permanent: true,
+        },
+        {
+          source:
+            '/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/',
+          destination: '/guides/upstream-connect-error/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/writing-clickhouse-queries-in-dashboard/',
+          destination: '/docs/userguide/writing-clickhouse-traces-query/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/instrumenting-angular-frontend/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/get-started',
+          destination: '/docs/opentelemetry-collection-agents/get-started',
+          permanent: true,
+        },
+        // Docker Collection Agent redirects
+        {
+          source: '/docs/collection-agents/docker/install',
+          destination: '/docs/opentelemetry-collection-agents/docker/install',
+          permanent: true,
+        },
+        // Docker Swarm Collection Agent redirects
+        {
+          source: '/docs/collection-agents/docker-swarm/configure',
+          destination: '/docs/opentelemetry-collection-agents/docker-swarm/configure',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/docker-swarm/install',
+          destination: '/docs/opentelemetry-collection-agents/docker-swarm/install',
+          permanent: true,
+        },
+        // ECS Collection Agent redirects
+        {
+          source: '/docs/collection-agents/ecs/ec2/overview',
+          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/overview',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/ecs/ec2/install',
+          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/ecs/ec2/configure',
+          destination: '/docs/opentelemetry-collection-agents/ecs/ec2/configure',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/ecs/sidecar/overview',
+          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/overview',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/ecs/sidecar/install',
+          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/ecs/sidecar/configure',
+          destination: '/docs/opentelemetry-collection-agents/ecs/sidecar/configure',
+          permanent: true,
+        },
+        // Kubernetes Collection Agent redirects
+        {
+          source: '/docs/collection-agents/k8s/k8s-infra/overview',
+          destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra',
+          destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra',
+          destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+          destination:
+            '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/otel-operator/overview',
+          destination: '/docs/opentelemetry-collection-agents/k8s/otel-operator/overview',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/otel-operator/install',
+          destination: '/docs/opentelemetry-collection-agents/k8s/otel-operator/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/otel-operator/configure',
+          destination: '/docs/opentelemetry-collection-agents/k8s/otel-operator/configure',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/serverless/overview',
+          destination: '/docs/opentelemetry-collection-agents/k8s/serverless/overview',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/serverless/install',
+          destination: '/docs/opentelemetry-collection-agents/k8s/serverless/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/k8s/serverless/configure',
+          destination: '/docs/opentelemetry-collection-agents/k8s/serverless/configure',
+          permanent: true,
+        },
+        // OpenTelemetry Collector redirects
+        {
+          source: '/docs/collection-agents/opentelemetry-collector/configuration',
+          destination:
+            '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration',
+          permanent: true,
+        },
+        // SSO redirects
+        {
+          source: '/docs/manage/administrator-guide/security-and-compliance/saml-authentication/',
+          destination: '/docs/manage/administrator-guide/sso/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/sso-authentication/',
+          destination: '/docs/manage/administrator-guide/sso/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/setting-up-sso-saml-with-keycloak/',
+          destination: '/docs/manage/administrator-guide/sso/user-guides/saml-keycloak',
+          permanent: true,
+        },
+        {
+          source: '/docs/install/troubleshooting/',
+          destination: '/docs/setup/docker/troubleshooting/faq',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics-cloud/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorials/',
+          destination: '/docs/install/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/aws/integration-template/',
+          destination: '/docs/integrations/aws/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/docker-standalone/',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-opentelemetry/cloud/',
+          destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-opentelemetry/self-hosted/',
+          destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_python/',
+          destination: '/docs/logs-management/send-logs/python-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/python-logs-auto-instrumentation/',
+          destination: '/docs/logs-management/send-logs/python-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/llm-community-integrations/',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/hostmetrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_java/',
+          destination: '/docs/logs-management/send-logs/java-logs/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/open-source-datadog-alternatives/',
+          destination: '/blog/open-source-datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs/',
+          destination: '/docs/logs-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/log-export-methods/',
+          destination: '/docs/logs-management/send-logs/collection-methods/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/opentelemetry-binary-usage/',
+          destination: '/docs/opentelemetry-collection-agents/vm/install',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/tomcat/',
+          destination: '/guides/tomcat-performance-monitoring/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {

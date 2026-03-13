@@ -1,0 +1,713 @@
+---
+date: 2026-02-23
+id: opentelemetry-rust
+title: Send Metrics from Rust Application Using OpenTelemetry
+description: Learn how to instrument your Rust application with OpenTelemetry to send metrics to SigNoz
+
+doc_type: howto
+---
+
+This guide shows you how to instrument your Rust application with OpenTelemetry to send metrics to SigNoz. You will learn how to create custom metrics using counters, histograms, gauges, and observable instruments.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+    Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Rust 1.75 or later (MSRV for OpenTelemetry Rust 0.31.x)
+- Cargo package manager
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Send metrics to SigNoz
+
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+    A VM is a virtual computer that runs on physical hardware. This includes:
+    - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+    - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+    - **Bare metal servers**: Physical servers running Linux/Unix directly
+
+    Use this section if you're deploying your Rust application directly on a server or VM without containerization.
+</KeyPointCallout>
+
+### Step 1. Set environment variables
+Set the following environment variables to configure the OpenTelemetry exporter:
+```bash
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
+export OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+# Optional: Set export interval in milliseconds (default: 60000)
+export OTEL_METRIC_EXPORT_INTERVAL="60000"
+```
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+### Step 1. Set environment variables
+Add these environment variables to your deployment manifest:
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443/v1/metrics'
+- name: OTEL_EXPORTER_OTLP_METRICS_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+# Optional: Set export interval in milliseconds (default: 60000)
+- name: OTEL_METRIC_EXPORT_INTERVAL
+  value: '60000'
+```
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+### Step 1. Set environment variables (PowerShell)
+```powershell
+$env:OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://ingest.<region>.signoz.cloud:443/v1/metrics"
+$env:OTEL_EXPORTER_OTLP_METRICS_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+# Optional: Set export interval in milliseconds (default: 60000)
+$env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
+```
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service.
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+### Step 1. Set environment variables in Dockerfile
+Add environment variables to your Dockerfile:
+```dockerfile:Dockerfile
+# ... build stages ...
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
+ENV OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service-name>"
+# Optional: Set export interval in milliseconds (default: 60000)
+ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
+
+CMD ["./your-app"]
+```
+
+Or pass them at runtime using `docker run`:
+```bash
+docker run -e OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics" \
+    -e OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
+    your-image:latest
+```
+
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+</TabItem>
+</Tabs>
+
+### Step 2. Install OpenTelemetry packages
+
+Add the following dependencies to your `Cargo.toml` file:
+
+```toml:Cargo.toml
+[dependencies]
+opentelemetry = { version = "0.31", features = ["metrics"] }
+opentelemetry_sdk = { version = "0.31", features = ["metrics", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.31", features = ["metrics", "http-proto", "reqwest-client", "tls-roots"] }
+tokio = { version = "1", features = ["full"] }
+```
+
+<Admonition type="info">
+If you want to use synchronous `Gauge` (shown in [Custom Metrics Examples](#custom-metrics-examples)), enable the experimental `otel_unstable` feature:
+```toml:Cargo.toml
+opentelemetry = { version = "0.31", features = ["metrics", "otel_unstable"] }
+```
+If you prefer stable APIs only, keep `features = ["metrics"]` and use `ObservableGauge`.
+</Admonition>
+
+<Admonition type="info">
+The `http-proto` and `reqwest-client` features enable HTTP-based OTLP export. For gRPC export, use `grpc-tonic` instead of `http-proto` and `reqwest-client`, and add `tonic` as a dependency.
+</Admonition>
+
+### Step 3. Initialize the Meter Provider
+
+Create a helper function to configure the OpenTelemetry Meter Provider. This provider is responsible for creating meters and exporting metrics.
+
+```rust:src/main.rs
+use opentelemetry::global;
+use opentelemetry::KeyValue;
+use opentelemetry_otlp::{MetricExporter, WithExportConfig, WithHttpConfig};
+use opentelemetry_sdk::metrics::{PeriodicReader, SdkMeterProvider};
+use opentelemetry_sdk::Resource;
+use std::time::Duration;
+
+fn init_meter_provider() -> Result<SdkMeterProvider, Box<dyn std::error::Error + Send + Sync>> {
+    // Read configuration from environment variables
+    let endpoint = std::env::var("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT")
+        .unwrap_or_else(|_| "https://ingest.<region>.signoz.cloud:443/v1/metrics".to_string());
+
+    let service_name = std::env::var("OTEL_SERVICE_NAME")
+        .unwrap_or_else(|_| "unknown-service".to_string());
+
+    // Read export interval from environment (default: 60000ms)
+    let export_interval = std::env::var("OTEL_METRIC_EXPORT_INTERVAL")
+        .ok()
+        .and_then(|v| v.parse::<u64>().ok())
+        .unwrap_or(60000);
+
+    // Parse headers from environment
+    let headers: Vec<(String, String)> = std::env::var("OTEL_EXPORTER_OTLP_METRICS_HEADERS")
+        .ok()
+        .map(|h| {
+            h.split(',')
+                .filter_map(|kv| {
+                    let mut parts = kv.splitn(2, '=');
+                    match (parts.next(), parts.next()) {
+                        (Some(k), Some(v)) => Some((k.to_string(), v.to_string())),
+                        _ => None,
+                    }
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    // Build the OTLP HTTP exporter
+    let exporter = MetricExporter::builder()
+        .with_http()
+        .with_endpoint(&endpoint)
+        .with_headers(headers.into_iter().collect())
+        .with_timeout(Duration::from_secs(10))
+        .build()?;
+
+    // Create resource with service name
+    let resource = Resource::builder()
+        .with_attribute(KeyValue::new("service.name", service_name))
+        .build();
+
+    // Build the MeterProvider with periodic export
+    let reader = PeriodicReader::builder(exporter)
+        .with_interval(Duration::from_millis(export_interval))
+        .build();
+
+    let meter_provider = SdkMeterProvider::builder()
+        .with_resource(resource)
+        .with_reader(reader)
+        .build();
+
+    // Set as global provider
+    global::set_meter_provider(meter_provider.clone());
+
+    Ok(meter_provider)
+}
+```
+
+### Step 4. Instrument your application
+
+Here is a complete example that tracks HTTP requests with a counter metric:
+
+```rust:src/main.rs
+use opentelemetry::global;
+use opentelemetry::metrics::Counter;
+use opentelemetry::KeyValue;
+use std::time::Duration;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // Initialize Meter Provider
+    let meter_provider = init_meter_provider()?;
+
+    // Get a meter from the global provider
+    let meter = global::meter("my-rust-app");
+
+    // Create a counter metric
+    let request_counter: Counter<u64> = meter
+        .u64_counter("http_requests_total")
+        .with_description("Total number of HTTP requests")
+        .with_unit("requests")
+        .build();
+
+    // Simulate some requests
+    for i in 0..10 {
+        // Record the metric with attributes
+        request_counter.add(
+            1,
+            &[
+                KeyValue::new("method", "GET"),
+                KeyValue::new("route", "/api/users"),
+                KeyValue::new("status", "200"),
+            ],
+        );
+
+        println!("Recorded request {}", i + 1);
+        tokio::time::sleep(Duration::from_secs(1)).await;
+    }
+
+    // Shutdown the meter provider to flush remaining metrics
+    meter_provider.shutdown()?;
+    println!("Metrics exported successfully");
+
+    Ok(())
+}
+```
+
+<Admonition type="info">
+This example shows a Counter, which only increases. OpenTelemetry supports other metric types like UpDownCounter, Histogram, and Observable Gauge. See [Custom Metrics Examples](#custom-metrics-examples) for complete examples of each type.
+</Admonition>
+
+### Step 5. Run your application
+
+Run your instrumented application:
+
+```bash
+cargo run
+```
+
+## Validate
+
+Once you have configured your application to start sending metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+<details>
+<ToggleHeading>
+## Custom Metrics Examples
+</ToggleHeading>
+
+For fine-grained control over your telemetry, you can create custom metrics using all metric types: Counter, UpDownCounter, Histogram, Gauge, and Observable instruments.
+
+### Metric Types
+
+- **Counter**: A value that only goes up (e.g., total requests, bytes sent)
+- **UpDownCounter**: A value that can go up or down (e.g., queue size, active connections)
+- **Histogram**: A distribution of values (e.g., request duration, response size)
+- **Gauge**: A current value at a point in time (e.g., temperature, CPU usage)
+
+### Synchronous Instruments
+
+Synchronous instruments are used when you know the measurement value at the time of recording.
+
+```rust:src/main.rs
+use opentelemetry::global;
+use opentelemetry::metrics::{Counter, Histogram, UpDownCounter, Gauge};
+use opentelemetry::KeyValue;
+use std::time::{Duration, Instant};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // Initialize Meter Provider (from Step 3)
+    let meter_provider = init_meter_provider()?;
+
+    // Get a meter
+    let meter = global::meter("my-rust-app");
+
+    // Counter - monotonically increasing value
+    let request_counter: Counter<u64> = meter
+        .u64_counter("http_requests_total")
+        .with_description("Total number of HTTP requests")
+        .with_unit("requests")
+        .build();
+
+    // UpDownCounter - value that can increase or decrease
+    let active_connections: UpDownCounter<i64> = meter
+        .i64_up_down_counter("active_connections")
+        .with_description("Number of active connections")
+        .with_unit("connections")
+        .build();
+
+    // Histogram - distribution of values
+    let request_duration: Histogram<f64> = meter
+        .f64_histogram("http_request_duration_seconds")
+        .with_description("HTTP request duration in seconds")
+        .with_unit("s")
+        .build();
+
+    // Gauge - instantaneous value
+    let temperature: Gauge<f64> = meter
+        .f64_gauge("temperature_celsius")
+        .with_description("Current temperature in Celsius")
+        .with_unit("Cel")
+        .build();
+
+    // Simulate application behavior
+    for i in 0..5 {
+        let start = Instant::now();
+
+        // Increment active connections
+        active_connections.add(1, &[KeyValue::new("pool", "main")]);
+
+        // Simulate request processing
+        tokio::time::sleep(Duration::from_millis(50 + (i * 20) as u64)).await;
+
+        // Record request counter
+        request_counter.add(
+            1,
+            &[
+                KeyValue::new("method", "POST"),
+                KeyValue::new("route", "/api/orders"),
+                KeyValue::new("status", "201"),
+            ],
+        );
+
+        // Record request duration
+        let duration = start.elapsed().as_secs_f64();
+        request_duration.record(
+            duration,
+            &[
+                KeyValue::new("method", "POST"),
+                KeyValue::new("route", "/api/orders"),
+            ],
+        );
+
+        // Record temperature gauge
+        temperature.record(
+            22.5 + (i as f64 * 0.5),
+            &[KeyValue::new("location", "server-room")],
+        );
+
+        // Decrement active connections
+        active_connections.add(-1, &[KeyValue::new("pool", "main")]);
+
+        println!("Processed request {} in {:.3}s", i + 1, duration);
+    }
+
+    // Shutdown to flush metrics
+    meter_provider.shutdown()?;
+    println!("All metrics exported");
+
+    Ok(())
+}
+```
+
+<Admonition type="info">
+The synchronous `Gauge` instrument is experimental and requires the `otel_unstable` feature flag in `opentelemetry`. This feature was added in OpenTelemetry Rust SDK v0.22.0. If you prefer stable APIs only, use `ObservableGauge` instead.
+</Admonition>
+
+### Observable/Asynchronous Instruments
+
+Observable (asynchronous) instruments are used when the measurement value is computed on-demand, such as reading from a system resource or external source.
+
+**Observable/Asynchronous Instrument Types:**
+- **ObservableCounter**: Async counter for values computed on-demand
+- **ObservableUpDownCounter**: Async up/down counter for bidirectional values
+- **ObservableGauge**: Async gauge for instantaneous readings
+
+```rust:src/main.rs
+use opentelemetry::global;
+use opentelemetry::KeyValue;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
+use std::time::Duration;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // Initialize Meter Provider (from Step 3)
+    let meter_provider = init_meter_provider()?;
+
+    // Get a meter
+    let meter = global::meter("my-rust-app");
+
+    // Shared state for observable instruments
+    let processed_jobs = Arc::new(AtomicU64::new(0));
+    let queue_size = Arc::new(AtomicU64::new(100));
+
+    // Observable Counter - reports cumulative value on demand
+    let jobs_counter = processed_jobs.clone();
+    let _observable_counter = meter
+        .u64_observable_counter("jobs_processed_total")
+        .with_description("Total number of processed jobs")
+        .with_unit("jobs")
+        .with_callback(move |observer| {
+            let value = jobs_counter.load(Ordering::Relaxed);
+            observer.observe(value, &[KeyValue::new("worker", "main")]);
+        })
+        .build();
+
+    // Observable UpDownCounter - reports current queue depth
+    let queue = queue_size.clone();
+    let _observable_updown = meter
+        .i64_observable_up_down_counter("queue_depth")
+        .with_description("Current number of items in queue")
+        .with_unit("items")
+        .with_callback(move |observer| {
+            let value = queue.load(Ordering::Relaxed) as i64;
+            observer.observe(value, &[KeyValue::new("queue", "default")]);
+        })
+        .build();
+
+    // Observable Gauge - reports system metrics on demand
+    let _observable_gauge = meter
+        .f64_observable_gauge("system_memory_usage_ratio")
+        .with_description("Current memory usage ratio")
+        .with_unit("1")
+        .with_callback(|observer| {
+            // In a real application, you would read actual system metrics
+            // This is a placeholder value
+            let memory_usage = 0.65; // 65% memory usage
+            observer.observe(memory_usage, &[KeyValue::new("host", "server-1")]);
+        })
+        .build();
+
+    // Simulate work that updates the shared state
+    for i in 0..10 {
+        // Simulate processing a job
+        tokio::time::sleep(Duration::from_millis(500)).await;
+
+        // Update counters
+        processed_jobs.fetch_add(1, Ordering::Relaxed);
+        queue_size.fetch_sub(10, Ordering::Relaxed);
+
+        println!("Processed job {}, queue size: {}",
+            i + 1,
+            queue_size.load(Ordering::Relaxed)
+        );
+    }
+
+    // Allow time for final metric collection
+    tokio::time::sleep(Duration::from_secs(2)).await;
+
+    // Shutdown to flush metrics
+    meter_provider.shutdown()?;
+    println!("All metrics exported");
+
+    Ok(())
+}
+```
+
+<Admonition type="info">
+Observable instruments are called by the SDK during metric collection. The callback functions should be fast and non-blocking, as they are invoked periodically by the metric reader.
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
+## HTTP Metric Example
+</ToggleHeading>
+
+Unlike languages with runtime environments (Go, Java, Python), **Rust does not have a built-in runtime metrics** package for memory usage, goroutine counts, or similar statistics. Below is a practical example of instrumenting an HTTP server with custom metrics.
+
+```rust:src/main.rs
+use opentelemetry::global;
+use opentelemetry::metrics::{Counter, Histogram, UpDownCounter};
+use opentelemetry::KeyValue;
+use std::convert::Infallible;
+use std::sync::Arc;
+use std::time::Instant;
+
+// Metrics holder for easy access
+struct Metrics {
+    request_counter: Counter<u64>,
+    request_duration: Histogram<f64>,
+    active_requests: UpDownCounter<i64>,
+}
+
+impl Metrics {
+    fn new() -> Self {
+        let meter = global::meter("http-server");
+
+        Self {
+            request_counter: meter
+                .u64_counter("http_server_requests_total")
+                .with_description("Total HTTP requests")
+                .with_unit("requests")
+                .build(),
+            request_duration: meter
+                .f64_histogram("http_server_request_duration_seconds")
+                .with_description("HTTP request duration")
+                .with_unit("s")
+                .build(),
+            active_requests: meter
+                .i64_up_down_counter("http_server_active_requests")
+                .with_description("Currently active requests")
+                .with_unit("requests")
+                .build(),
+        }
+    }
+
+    fn record_request(&self, method: &str, route: &str, status: u16, duration: f64) {
+        let attrs = [
+            KeyValue::new("method", method.to_string()),
+            KeyValue::new("route", route.to_string()),
+            KeyValue::new("status", status.to_string()),
+        ];
+
+        self.request_counter.add(1, &attrs);
+        self.request_duration.record(duration, &attrs[..2]); // Exclude status from histogram
+    }
+
+    fn track_active(&self, delta: i64) {
+        self.active_requests.add(delta, &[]);
+    }
+}
+
+// Example handler function
+async fn handle_request(
+    metrics: Arc<Metrics>,
+    method: String,
+    path: String,
+) -> Result<(u16, String), Infallible> {
+    let start = Instant::now();
+
+    // Track active request
+    metrics.track_active(1);
+
+    // Simulate processing
+    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+
+    let status = 200u16;
+    let body = format!("Hello from {}", path);
+
+    // Record metrics
+    let duration = start.elapsed().as_secs_f64();
+    metrics.record_request(&method, &path, status, duration);
+
+    // Decrement active requests
+    metrics.track_active(-1);
+
+    Ok((status, body))
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // Initialize Meter Provider
+    let meter_provider = init_meter_provider()?;
+
+    // Create metrics
+    let metrics = Arc::new(Metrics::new());
+
+    // Simulate HTTP requests
+    let routes = vec!["/api/users", "/api/orders", "/api/products", "/health"];
+    let methods = vec!["GET", "POST", "GET", "GET"];
+
+    for (route, method) in routes.iter().zip(methods.iter()) {
+        let m = metrics.clone();
+        let _ = handle_request(m, method.to_string(), route.to_string()).await;
+        println!("Handled {} {}", method, route);
+    }
+
+    // Wait for metrics to be collected
+    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+
+    // Shutdown
+    meter_provider.shutdown()?;
+    println!("Server metrics exported");
+
+    Ok(())
+}
+```
+
+<details>
+<ToggleHeading>
+### Exported Metrics
+</ToggleHeading>
+
+The HTTP server example exports the following metrics:
+
+- `http_server_requests_total` (Counter) - Total count of HTTP requests with attributes for method, route, and status code
+- `http_server_request_duration_seconds` (Histogram) - Distribution of HTTP request durations in seconds
+- `http_server_active_requests` (UpDownCounter) - Current number of requests being processed
+
+<Admonition type="info">
+When naming your custom metrics, follow the <a href="https://opentelemetry.io/docs/specs/semconv/general/metrics/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Metrics Semantic Conventions</a> for consistency and interoperability.
+</Admonition>
+
+</details>
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Metrics not appearing?
+
+1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` is set correctly:
+    - For HTTP (default in this guide): `https://ingest.<region>.signoz.cloud:443/v1/metrics`
+    - For gRPC (if using `grpc-tonic`): `https://ingest.<region>.signoz.cloud:443`
+
+2. **Check Feature Flags**: Ensure your `Cargo.toml` includes the `metrics` feature for all OpenTelemetry crates.
+
+3. **Check Console Errors**: The OpenTelemetry SDK prints errors to stderr. Run your application with `RUST_LOG=debug` to see detailed logs:
+   ```bash
+   RUST_LOG=debug cargo run
+   ```
+
+4. **Resource Attributes**: Ensure `service.name` is set. This helps you filter metrics by service in SigNoz.
+
+5. **Shutdown Properly**: Always call `meter_provider.shutdown()` before your application exits to flush any remaining metrics.
+
+### Authentication errors
+
+If you see errors like "Unauthorized" or "403 Forbidden":
+- Verify your ingestion key is correct in `OTEL_EXPORTER_OTLP_METRICS_HEADERS`
+- Ensure the header format is exactly: `signoz-ingestion-key=<your-key>` (no extra spaces)
+- Check that your ingestion key is active in the SigNoz Cloud dashboard
+
+### "Connection Refused" errors
+
+- If running locally and sending to SigNoz Cloud, check your internet connection and firewall.
+- If sending to a self-hosted collector, ensure the collector is running and listening on port 4317 (gRPC) or 4318 (HTTP).
+
+### TLS/SSL errors
+
+If you see TLS-related errors:
+- Ensure you have the `tls-roots` feature enabled in `opentelemetry-otlp`
+- For custom CA certificates, you may need to configure the HTTP client accordingly
+
+### Compilation errors
+
+Common compilation issues:
+- **Missing features**: Ensure all crates have matching versions (e.g., all `0.31`)
+- **Async runtime**: The `rt-tokio` feature requires `tokio` with the `full` feature
+- **HTTP client**: The `reqwest-client` feature requires `reqwest` to be available
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** - Filter out noisy metrics you do not care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** - Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** - The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** - Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+### Configuration for Collector
+
+When using the Collector, update your environment variables to point to the local Collector:
+
+```bash
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="http://localhost:4318/v1/metrics"
+# No headers needed when using local Collector
+unset OTEL_EXPORTER_OTLP_METRICS_HEADERS
+export OTEL_SERVICE_NAME="<service-name>"
+```
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next Steps
+
+- [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your metrics.
+- [Set up Alerts](https://signoz.io/docs/setup-alerts-notification/) on your metrics.
+- [Instrument your Rust application with traces](https://signoz.io/docs/instrumentation/opentelemetry-rust/) to correlate metrics with traces for better observability.

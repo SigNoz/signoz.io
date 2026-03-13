@@ -1,0 +1,99 @@
+---
+date: 2025-12-18
+id: migrate-from-opentelemetry-to-signoz
+
+title: Migrate from existing OpenTelemetry
+description: Migrating from OpenTelemetry to SigNoz. How to migrate metrics, traces/APM, and logs from OpenTelemetry to SigNoz.
+doc_type: howto
+---
+
+If you already have OpenTelemetry instrumentation in your applications, you can easily switch to SigNoz as your observability backend. This guide will walk you through the simple configuration changes needed to start sending your metrics, traces/APM, and logs to either SigNoz Cloud or Self-Hosted SigNoz.
+
+## Prerequisites
+
+- Applications instrumented with <a href="https://opentelemetry.io/docs/languages/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry SDKs</a> or <a href="https://opentelemetry.io/docs/collector/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collectors</a>
+- An active [SigNoz account](https://signoz.io/teams/) (for Cloud) or a running SigNoz instance (for Self-Hosted)
+- Access to modify your application configuration or environment variables
+
+## Configuration
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+### Step 1: Obtain Connection Details
+
+1. Log into your [SigNoz Cloud account](https://signoz.io/teams/).
+2. Navigate to **Settings** → **Ingestion Settings**.
+3. Note your **Ingestion Key** and **Ingestion URL**.
+
+### Step 2: Update OpenTelemetry Configuration
+
+Set the following environment variables for your application:
+
+```bash
+# Replace with your SigNoz cloud region
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# Replace with your SigNoz ingestion key
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+If you are defining the OTLP configuration directly in your code (instead of using environment variables), update the OTLP exporter settings:
+
+- **Endpoint**: `https://ingest.<region>.signoz.cloud:443`
+- **Headers**: Set `signoz-ingestion-key` to `<your-ingestion-key>`
+
+*Note: The exact syntax depends on the language SDK. Check the [SigNoz Instrumentation docs](https://signoz.io/docs/instrumentation/) for examples.*
+
+
+If you are using an **OpenTelemetry Collector**, update your exporter configuration:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+    tls:
+      insecure: false
+```
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="tip">
+  We also recommend configuring the [Resource Detection Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) to automatically detect resource attributes from the host environment.
+</Admonition>
+
+## Validate
+
+1. **Restart your application** (and Collector if applicable) with the new configuration.
+2. **Generate test data** by using your application.
+3. **Access SigNoz Dashboard**:
+   - Cloud: [SigNoz Cloud login](https://signoz.io/login/)
+   - Self-Hosted: `http://your-signoz-host:3301`
+4. **Verify data flow**:
+   - Check **Traces**, **Metrics**, **Logs** in SigNoz.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Data not appearing?
+
+1. **Check connectivity**: Ensure your application can reach the SigNoz OTLP endpoint.
+2. **Verify configuration**: Double-check endpoint URLs and Ingestion Keys (for Cloud).
+3. **Review logs**: Check application logs for OTel export errors.
+
+</details>
+
+## Next Steps
+
+- [Send Traces](https://signoz.io/docs/instrumentation)
+- [Send Logs](https://signoz.io/docs/logs-management/send-logs-to-signoz/)
+- [Send Metrics](https://signoz.io/docs/metrics-management/send-metrics/)
+- [Set up Alerts](https://signoz.io/docs/userguide/alerts-management/)
+- [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)

@@ -5,13 +5,23 @@ import { Button, Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowBigLeft, ArrowRight, BookOpenText, ChevronDown, PenSquare } from 'lucide-react'
+import {
+  ArrowBigLeft,
+  ArrowRight,
+  BookOpenText,
+  Brain,
+  ChevronDown,
+  Cone,
+  Logs,
+  PenSquare,
+  ShieldPlus,
+  WorkflowIcon,
+} from 'lucide-react'
 import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
 import { Popover, PopoverTrigger, PopoverContent } from '@nextui-org/react'
 import Accordion from '../Accordion/Accordion'
@@ -47,9 +57,17 @@ const productDropdownItems = [
     key: 'Alerts',
     url: '/alerts-management',
     icon: '/img/index_features/concierge-bell_feature.svg',
-    description: "Always know what's going on",
+    description: 'Multiple thresholds and dynamic routing at scale',
     name: 'Alerts',
     order: 5,
+  },
+  {
+    key: 'external-apis',
+    url: '/external-apis/',
+    icon: <WorkflowIcon className="text-signoz_robin-400" size={20} />,
+    description: 'Track third-party API performance',
+    name: 'External API Monitoring',
+    order: 9,
   },
   {
     key: 'DistributedTracing',
@@ -68,10 +86,18 @@ const productDropdownItems = [
     order: 6,
   },
   {
+    key: 'messaging-queues',
+    url: '/docs/messaging-queues/overview/',
+    icon: <Logs className="text-signoz_robin-400" size={20} />,
+    description: 'Monitor Kafka, Celery lag & throughput',
+    name: 'Messaging Queues',
+    order: 10,
+  },
+  {
     key: 'LogManagement',
     url: '/log-management',
     icon: '/img/index_features/logs_feature.svg',
-    description: 'Unlock key insights from logs',
+    description: 'Fast queries with columnar database',
     name: 'Log Management',
     order: 3,
   },
@@ -84,6 +110,14 @@ const productDropdownItems = [
     order: 7,
   },
   {
+    key: 'llm-observability',
+    url: '/llm-observability/',
+    icon: <Brain className="text-signoz_robin-400" size={20} />,
+    description: 'Monitor AI and LLM workflows',
+    name: 'LLM Observability',
+    order: 11,
+  },
+  {
     key: 'InfraMonitoring',
     url: '/docs/infrastructure-monitoring/overview/',
     icon: '/img/index_features/boxes.svg',
@@ -92,12 +126,20 @@ const productDropdownItems = [
     order: 4,
   },
   {
-    key: 'ingest',
-    url: '/blog/introducing-ingest-guard-feature/',
-    icon: '/img/index_features/shield-plus.svg',
-    description: 'Control your observability costs',
-    name: 'Ingest Guard',
+    key: 'trace-funnels',
+    url: '/trace-funnels/',
+    icon: <Cone className="text-signoz_sakura-400" size={20} />,
+    description: 'Track drop-offs in multi-step flows',
+    name: 'Trace Funnels',
     order: 8,
+  },
+  {
+    key: 'observability-for-ai-native-companies',
+    url: '/observability-for-ai-native-companies/',
+    icon: <ShieldPlus className="text-signoz_robin-400" size={20} />,
+    description: 'Full-stack monitoring for AI applications',
+    name: 'AI Observability',
+    order: 12,
   },
 ]
 
@@ -116,6 +158,16 @@ const comparisionItems = [
     key: 'signozvsnewrelic',
     url: '/product-comparison/signoz-vs-newrelic/',
     name: 'SigNoz vs New Relic',
+  },
+  {
+    key: 'cloudwatch-alternative',
+    url: '/cloudwatch-alternative/',
+    name: 'SigNoz vs CloudWatch',
+  },
+  {
+    key: 'clickstack-alternative',
+    url: '/clickstack-alternative/',
+    name: 'SigNoz vs ClickStack',
   },
 ]
 
@@ -246,7 +298,7 @@ export default function TopNav() {
   }, [])
 
   // Hide TopNav on teams page or if source is onboarding
-  if (isSignupRoute|| isWordleRoute || source === ONBOARDING_SOURCE) {
+  if (isSignupRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
     return null
   }
 
@@ -345,24 +397,30 @@ export default function TopNav() {
                           >
                             Product Modules
                           </div>
-                          <div className="grid grid-cols-2 gap-x-3 gap-y-5">
+                          <div className="grid grid-cols-3 gap-x-0 gap-y-4">
                             {productDropdownItems.map((item) => (
                               <TrackingLink
-                                href={item.url}
-                                className="group flex h-auto items-center gap-4"
+                                href={item.url || ''}
+                                disabled={item.url === undefined}
+                                className={`group flex h-auto items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
                                 key={item.key}
                                 clickType="Nav Click"
                                 clickName={`${item.name} Product Link`}
                                 clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
+                                prefetch={false}
                               >
-                                <Image
-                                  src={item.icon}
-                                  alt={`${item.name}`}
-                                  width={20}
-                                  height={20}
-                                />
+                                {typeof item.icon === 'string' && item.icon !== null ? (
+                                  <Image
+                                    src={item.icon}
+                                    alt={`${item.name}`}
+                                    width={20}
+                                    height={20}
+                                  />
+                                ) : (
+                                  <div className="h-5 w-5">{item.icon}</div>
+                                )}
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
                                     <span>{item.name}</span>{' '}
@@ -389,6 +447,7 @@ export default function TopNav() {
                               href={'/case-study'}
                               className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}] hover:text-[#fff]`}
                               onClick={handleProductDropdownClick}
+                              prefetch={false}
                             >
                               <span>Customer Stories</span> <ArrowRight size={14} />
                             </Link>
@@ -401,6 +460,7 @@ export default function TopNav() {
                                 clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
+                                prefetch={false}
                               >
                                 <Image
                                   src={'/img/index_features/brainfish.svg'}
@@ -435,6 +495,7 @@ export default function TopNav() {
                                   clickText={comparisionItem.name}
                                   clickLocation="Top Navbar"
                                   onClick={handleProductDropdownClick}
+                                  prefetch={false}
                                 >
                                   <span>{comparisionItem.name}</span>{' '}
                                   <ArrowRight
@@ -457,6 +518,7 @@ export default function TopNav() {
                   clickName="Docs Link"
                   clickText="Docs"
                   clickLocation="Top Navbar"
+                  prefetch={false}
                 >
                   Docs
                 </TrackingLink>
@@ -505,6 +567,7 @@ export default function TopNav() {
                                 clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleResourcesDropdownClick}
+                                prefetch={false}
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
@@ -541,6 +604,7 @@ export default function TopNav() {
                                 clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleResourcesDropdownClick}
+                                prefetch={false}
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
@@ -711,6 +775,7 @@ export default function TopNav() {
                       clickText="Documentation"
                       clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
+                      prefetch={false}
                     >
                       Documentation
                     </TrackingLink>

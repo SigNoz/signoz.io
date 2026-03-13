@@ -1,5 +1,5 @@
 import * as React from 'react'
-import Link from 'next/link'
+import Link from '@/components/Link'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from '@radix-ui/react-slot'
 
@@ -18,7 +18,8 @@ export const buttonVariants = cva(
           'bg-signoz_robin-500 text-white hover:bg-signoz_robin-600 active:bg-signoz_robin-700',
         outline:
           'border border-signoz_robin-500 bg-transparent text-signoz_robin-500 hover:bg-signoz_robin-500/10',
-        secondary: 'bg-signoz_ink-400 button-background text-signoz_vanilla-300 hover:bg-signoz_ink-300', // TODO: the bg color doesn't match any variable in tailwind, check design guidelines
+        secondary:
+          'bg-signoz_ink-400 button-background text-signoz_vanilla-300 hover:bg-signoz_ink-300', // TODO: the bg color doesn't match any variable in tailwind, check design guidelines
         tertiary: 'bg-signoz_vanilla-200 text-signoz_ink-200 hover:bg-signoz_vanilla-300',
         ghost: 'bg-transparent hover:bg-signoz_ink-400',
         link: 'text-signoz_robin-500',
@@ -39,14 +40,15 @@ export const buttonVariants = cva(
       size: 'default',
       rounded: 'default',
     },
-  },
+  }
 )
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   /**
    * When true, uses radix Slot to render children as the underlying element.
    * Useful when wrapping with Link, etc.
@@ -91,7 +93,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       rounded,
       ...props
     },
-    ref,
+    ref
   ) => {
     // -------------------------------------------------------------------------
     // Legacy prop mapping
@@ -121,7 +123,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     )
-  },
+  }
 )
 Button.displayName = 'Button'
 

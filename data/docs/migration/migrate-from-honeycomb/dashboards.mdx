@@ -1,0 +1,83 @@
+---
+date: 2025-11-30
+id: migrate-dashboard-from-honeycomb
+title: Migrate Dashboard from Honeycomb to SigNoz
+description: Learn how to migrate Honeycomb dashboards and queries to SigNoz.
+
+doc_type: howto
+---
+
+This guide helps you migrate your Honeycomb dashboards to SigNoz by translating queries and using enhanced visualization options.
+
+## Prerequisites
+
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- Access to your existing Honeycomb dashboards (for reference).
+
+## Migration Strategies
+
+### Using Dashboard Templates
+
+Start by checking if a pre-built template matches your needs.
+
+1. **Find Template**  
+   Browse the [SigNoz Dashboard Templates repository](https://signoz.io/docs/dashboards/dashboard-templates/overview/) to find a matching dashboard.
+
+2. **Import Dashboard**  
+   - Navigate to **Dashboards** in SigNoz.
+   - Click **+ New Dashboard**.
+   - Click **Import JSON**.
+   - Either paste the JSON content or upload the file from the repository.
+
+<Figure
+  src="/img/docs/metrics/docker/importing_dashboard.webp"
+  alt="Importing a dashboard in SigNoz"
+  caption="Importing a dashboard template in SigNoz"
+/>
+
+### Creating Custom Dashboards
+
+If no template fits, you can create a custom dashboard in SigNoz.
+
+- Follow the [Manage Dashboards guide](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard/) for step-by-step instructions.
+- Use the **Query Builder** to replicate your queries from Honeycomb.
+
+## Feature Comparison
+
+### Panel Types
+
+SigNoz supports various panel types. Here's how they map to Honeycomb:
+
+| Panel Type        | Honeycomb | SigNoz | Notes                                            |
+| ----------------- | --------- | ------ | ------------------------------------------------ |
+| Time Series       | ✓         | ✓      | Both platforms support time series visualization |
+| Table             | ✓         | ✓      | Both support tabular data display                |
+| Bar Chart         | -         | ✓      | Enhanced visualization option in SigNoz          |
+| Pie Chart         | -         | ✓      | Enhanced visualization option in SigNoz          |
+| Value/Single Stat | -         | ✓      | Single value display with thresholds             |
+| Heatmap           | ✓         | -      | Use histogram metrics as alternative             |
+| Text Panel        | ✓         | -      | Use dashboard descriptions or annotations        |
+| SLO Panel         | ✓         | -      | Recreate using custom alert rules                |
+
+### Query Translation
+
+Honeycomb uses a proprietary query syntax, while SigNoz supports PromQL (metrics), ClickHouse SQL (logs/traces) and Query Builder.
+
+| Honeycomb Query            | SigNoz Equivalent          | Notes                            |
+| -------------------------- | -------------------------- | -------------------------------- |
+| `COUNT`                    | `count()`                  | Total occurrences                |
+| `COUNT WHERE condition`    | `count()` with filters     | Use search syntax for conditions |
+| `AVG(field)`               | `avg(field)`               | Mean values calculation          |
+| `P95(field)`, `P99(field)` | `p95(field)`, `p99(field)` | Percentile functions             |
+| `GROUP BY field`           | Group By: `field`          | Use Group By dropdown            |
+
+Use the [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/) to construct queries visually.
+
+## Infrastructure as Code (Terraform)
+
+You can manage your dashboards as code using the [SigNoz Terraform Provider](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs). This allows you to version control your dashboards and automate their deployment.
+
+## Next Steps
+
+- [Migrate Alerts](https://signoz.io/docs/migration/migrate-from-honeycomb/alerts/)
+- [Explore Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)

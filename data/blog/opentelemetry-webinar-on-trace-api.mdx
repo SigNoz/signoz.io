@@ -30,11 +30,11 @@ Join <a href="https://github.com/serverless-mom" rel="nofollow">Nočnica Mellife
 
 Doesn't bark at anybody but just wants to go home. We're trying to get it to associate new situations with nice things, with treats, with hearing a nice sound, and being like, "Hey, come over here." If you hear a bang or see a car drive towards you, come over here, and you can get a nice treat. Come nibble on this. I just wish someone would do that for me. I wish someone would follow me around and be like, "Hey, do you have a rough day? Here, have a little piece of candy. It'll cheer you up." And I'll start to associate difficult situations with good things happening.
 
-It's time for the OpenTelemetry webinar. Thank you so much for joining us. I've started telling a little anecdote at the beginning of the show instead of saying, "I think we're streaming," because it gives me time to check that we are live, and we are live. Let me hide this for a second. I promise that we are going to talk about the OpenTelemetry Trace API. 
+It's time for the OpenTelemetry webinar. Thank you so much for joining us. I've started telling a little anecdote at the beginning of the show instead of saying, "I think we're streaming," because it gives me time to check that we are live, and we are live. Let me hide this for a second. I promise that we are going to talk about the [OpenTelemetry Trace](https://signoz.io/blog/opentelemetry-spans/) API. 
 
-We have Srikanth as our guest. Srikanth, introduce yourself and tell them what you do for the SigNoz team.
+We have Srikanth as our guest. Srikanth, introduce yourself and tell them what you do for the [SigNoz](https://signoz.io/docs/introduction/) team.
 
-**Srikanth:** Hey, everyone. I'm Srikanth. I work at SigNoz. I mostly work on the metrics and alerting parts of the signal system. Also, I spend quite an amount of time working in OpenTelemetry. I used to be a maintainer for the OpenTelemetry Python SDK and currently work with the OpAMP.
+**Srikanth:** Hey, everyone. I'm Srikanth. I work at SigNoz. I mostly work on the metrics and alerting parts of the signal system. Also, I spend quite an amount of time working in OpenTelemetry. I used to be a maintainer for the [OpenTelemetry Python](https://signoz.io/docs/instrumentation/opentelemetry-python/) SDK and currently work with the OpAMP.
 
 **Nica:** That's awesome. You're here today because we had an episode about the API in general and the division between the API and the SDK. It became obvious that we wanted to talk a little bit more in-depth about multiple aspects of this API. 
 
@@ -120,7 +120,7 @@ There are two types: in-process and out-of-process context propagation. Let's fo
 
 In in-process context propagation, when you start a span in function foo() and another in the function bar(), you want to establish a parent-child relationship. 
 
-In languages like Go, explicit context propagation is required. In languages like Python, JavaScript, and Java, implicit context propagation happens via thread locals, and you don't need to interact with the context directly.
+In languages like Go, explicit [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) is required. In languages like Python, JavaScript, and Java, implicit context propagation happens via thread locals, and you don't need to interact with the context directly.
 
 In Go, you need to interact with the context. There are two functions to be aware of: SpanFromContext and ContextWithSpan. The span from context gives you the span within a given context object. If the span doesn't exist, it returns nil. You use this object to add attributes, events, etc. Context with span is used to create a new context object with a span for in-process context propagation. 
 
@@ -171,7 +171,7 @@ The Tracer object has two primary operations: StartAsCurrentSpan and StartSpan. 
 
 In the slides, I used multiple languages just to give the audience a brief idea. I put together some examples. If you look at the example here on the first span, you have tracer.start_as_current_span. So, by using start as the current span, you don't need to manually work with the context. You don't need to worry about whether there will be a parent-child relationship preserved or not. The convenience wrapper does the work for you, creates the span, and sets it into the context. Anytime the child span starts, there's a parent-child relationship preserved.
 
-**Nica:** In Hazel Weekly's talk four weeks ago, I was just seeing and name-checking it. I'll share a link to the video once it's shared, but I didn't think you could create these parent-child relationships or connect spans after the fact like you can't do it with a collector setting in OpenTelemetry. 
+**Nica:** In Hazel Weekly's talk four weeks ago, I was just seeing and name-checking it. I'll share a link to the video once it's shared, but I didn't think you could create these parent-child relationships or connect spans after the fact like you can't do it with a collector setting in [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/). 
 
 If you're seeing orphan spans or broken traces, you need to go fix it within your code instrumentation. It's not currently practical to try and fix it afterward. 
 
@@ -224,7 +224,7 @@ When a span is a remote span, it means the span, you just have it. So let's say 
  
 What happens is, under the hood, service B creates a dummy span that has the IsRemote set to true. That indicates, "Okay, someone has already started a trace journey. I will create a dummy span with IsRemote set to true, and it also has the parent TraceID and SpanID, and it sets that span in the context and starts the span so that the trace journey continues." 
 
-This GetContext helps you get the TraceID, SpanID, and IsRemote information. For some business use cases, where you want to take this TraceID, SpanID, let's say, you started a span, and you want to give this SpanID to some external system or attach this SpanID to one of your business intelligence reports, you would use this `GetContext`. You call `GetContext` on the span object, and you get the span context. This span context has the TraceID, SpanID, TraceState, and metadata.
+This GetContext helps you get the TraceID, [SpanID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/), and IsRemote information. For some business use cases, where you want to take this TraceID, SpanID, let's say, you started a span, and you want to give this SpanID to some external system or attach this SpanID to one of your business intelligence reports, you would use this `GetContext`. You call `GetContext` on the span object, and you get the span context. This span context has the TraceID, SpanID, TraceState, and metadata.
 
 
 <figure data-zoomable align='center'>

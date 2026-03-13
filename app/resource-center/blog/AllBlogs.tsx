@@ -1,13 +1,7 @@
 import React from 'react'
-import { allBlogs } from 'contentlayer/generated'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-// import BlogPostCard from '../Shared/BlogPostCard'
-import { genPageMetadata } from 'app/seo'
 import GridLayout from '@/layouts/GridLayout'
 
 const POSTS_PER_PAGE = 9
-
-export const metadata = genPageMetadata({ title: 'Blog' })
 
 export default function AllBlogs({ blogs }) {
   const pageNumber = 1
@@ -27,7 +21,7 @@ export default function AllBlogs({ blogs }) {
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
       title="All Blogs"
-      isDarkMode = {true}
+      isDarkMode={true}
     />
   )
 }

@@ -1,0 +1,53 @@
+---
+date: 2026-02-26
+id: sso-overview
+
+title: Single Sign on (SSO) - Overview
+description: Overview of single sign-on (SSO) in SigNoz.
+doc_type: explanation
+---
+
+SigNoz supports single sign-on (SSO), allowing users to authenticate through an external identity provider (IdP) instead of maintaining SigNoz-specific passwords.
+
+## What’s supported
+
+- **SAML 2.0**: Available on `SigNoz Cloud` and `Enterprise Self-Hosted`
+- **OIDC**: Available on `SigNoz Cloud` and `Enterprise Self-Hosted`
+- **Google Workspace (OAuth2)**: Available on `Community Edition`, `SigNoz Cloud` and `Enterprise Self-Hosted`
+
+## How SSO works in SigNoz
+
+At a high level, you connect your organization’s email domain to an IdP, and SigNoz defers authentication to that IdP.
+
+1. **Authenticated Domain**: You register a domain like `example.com` under `Settings → Organization Settings → Authenticated Domains`.
+2. **Choose Method**: For that domain, select SAML, OIDC, or Google (for Workspace) and provide the IdP details.
+3. **Just‑in‑Time access**: Users with emails on that domain can sign in via your IdP without a prior invite.
+4. **Attribute/Claim Mapping**: Map IdP attributes (SAML) or token claims (OIDC/Google) to SigNoz user fields like email, display name, groups, and role.
+5. **Role Mapping**: Automatically assign SigNoz roles (VIEWER, EDITOR, ADMIN) based on IdP group memberships or a direct role attribute — no manual role assignment needed.
+
+## Setup at a glance
+
+- Go to `Settings → Organization Settings → Authenticated Domains`
+- Add your organization’s email domain (e.g., `example.com`)
+- Click **Configure SSO** and choose a method
+- Save and test from an incognito window
+- Optionally toggle **Enforce SSO** for that domain
+- If you encounter any issues, you can temporarily use password authentication by appending `?password=Y` to the login URL, e.g. `<your-instance-url>/login?password=Y`.
+
+## IdP‑Initiated SSO setup
+
+If your provider supports IdP-initiated logins, you will see an option to set the `Relay State URL` in the IdP's configuration UI.
+
+- Copy the `IdP Initiated SSO URL` from the `Authenticated Domains` section and set this as the `Relay State URL` in your IdP
+
+## Next steps
+
+Looking for step-by-step setup? See the user guides below:
+
+- [Google Workspace](/docs/manage/administrator-guide/sso/user-guides/sso-google)
+- [SAML with Microsoft Entra ID](/docs/manage/administrator-guide/sso/user-guides/saml-microsoft-entra)
+- [SAML with Okta](/docs/manage/administrator-guide/sso/user-guides/saml-okta)
+- [SAML with AWS IAM Identity Center (AWS SSO)](/docs/manage/administrator-guide/sso/user-guides/saml-awsso)
+- [SAML with JumpCloud](/docs/manage/administrator-guide/sso/user-guides/saml-jumpcloud)
+- [SAML with Keycloak](/docs/manage/administrator-guide/sso/user-guides/saml-keycloak)
+- [OIDC with Keycloak](/docs/manage/administrator-guide/sso/user-guides/oidc-keycloak)

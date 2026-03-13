@@ -20,6 +20,11 @@ export const getPageType = (pathname: string): string => {
     '/metrics-and-dashboards',
     '/exceptions-monitoring',
     '/alerts-management',
+    '/trace-funnels',
+    '/external-apis',
+    '/llm-observability',
+    '/observability-for-ai-native-companies',
+    '/cloudwatch-alternative',
   ]
   if (featurePages.includes(normalizedPath)) return 'Feature Page'
 
@@ -44,11 +49,12 @@ export const getPageType = (pathname: string): string => {
   if (normalizedPath.match(/^\/guides\/page\/\d+$/)) return 'Guide Listing Page'
 
   // OTel listing pages
-  if (normalizedPath === '/resource-center/opentelemetry' || normalizedPath === '/opentelemetry')
-    return 'OTel Listing Page'
+  if (normalizedPath === '/resource-center/opentelemetry') return 'OTel Listing Page'
   if (normalizedPath.match(/^\/resource-center\/opentelemetry\/page\/\d+$/))
     return 'OTel Listing Page'
   if (normalizedPath.match(/^\/opentelemetry\/page\/\d+$/)) return 'OTel Listing Page'
+
+  if (normalizedPath === '/opentelemetry') return 'Blog Page'
 
   // Content pages (ensure they are not listing pages)
   if (normalizedPath.startsWith('/blog/') && !normalizedPath.match(/^\/blog\/page\/\d+$/))

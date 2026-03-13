@@ -1,0 +1,182 @@
+---
+date: 2025-12-17
+title: Dropping Metric Labels (Attributes)
+description: Explains why dropping metric labels (attributes) does not reduce cardinality or sample count and provides correct alternatives.
+doc_type: explanation
+id: dropping-metric-labels
+---
+
+## Overview
+
+A common misconception when working with metrics in OpenTelemetry is that removing labels (attributes) using processors like `attributes` will reduce metric cardinality and, consequently, the number of samples ingested. This document explains why this approach doesn't work as expected and can actually lead to incorrect query results.
+
+If you are looking to drop entire metrics (not just labels), see [How to Drop and Filter OpenTelemetry Metrics](https://signoz.io/docs/userguide/drop-metrics/).
+## Understanding Samples vs. Cardinality
+
+To understand why dropping labels doesn't work as an optimization strategy, we need to distinguish between **samples** and **cardinality**:
+
+- **Sample (Data Point)**: A single measurement value at a specific timestamp. Billing and network load are typically proportional to the number of samples processed.
+- **Time Series**: A unique combination of metric name + label set. For example, `{"k8s.pod.cpu.usage", "k8s.pod.name"="nginx-abc", "k8s.node.name"="worker-1"}` is one time series.
+- **Cardinality**: The total number of unique time series for a metric.
+
+**Crucial Concept**: Samples are generated **at the source** (the application or scraper). If your scraper collects 1,000 samples per minute, your collector receives 1,000 samples per minute. Using a processor to remove a label *after* reception does not delete the sample itself, it only modifies the metadata attached to it.
+
+## Why Dropping Labels Doesn't Reduce Samples
+
+### Case 1: Removing a Specific Identifying Label
+
+Suppose you have 3 distinct pods sending network metrics. The source generates 3 samples:
+
+```text
+# Original data points (3 samples created at source)
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-420", "k8s.pod.uid"="121-426-20", interface="eth0"} 1000
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-240", "k8s.pod.uid"="132-245-23", interface="eth0"} 500
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-69", "k8s.pod.uid"="120-693-69", interface="lo"}   200
+```
+
+If you use an attributes processor to delete the `k8s.pod.uid` label:
+
+```yaml
+processors:
+  attributes/drop:
+    actions:
+      - key: k8s.pod.uid
+        action: delete
+```
+
+You now have:
+
+```text
+# After dropping the label (still 3 samples!)
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-420", interface="eth0"} 1000
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-240", interface="eth0"} 500
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-69", interface="lo"}   200
+```
+
+**Outcome**:
+- **Risk**: While `k8s.pod.name` often appears unique (e.g., in a Deployment), it is **not guaranteed** to be unique globally (e.g. across namespaces or clusters). If you rely on `k8s.pod.name` after dropping the true identifier (`k8s.pod.uid`), you risk future collisions.
+- **Samples**: You still have 3 samples. No cost is saved.
+
+### Case 2: Removing All Identifying Labels
+
+Now consider if you remove *both* the UID and the Pod Name, perhaps thinking "I just want to see network traffic by interface".
+
+If you use an attributes processor to delete both `k8s.pod.uid` and `k8s.pod.name`:
+
+```yaml
+processors:
+  attributes/drop:
+    actions:
+      - key: k8s.pod.uid
+        action: delete
+      - key: k8s.pod.name
+        action: delete
+```
+
+You now have:
+
+```text
+# Processed data points (Still 3 samples, but now colliding)
+{"k8s.pod.network.io", interface="eth0"} 1000
+{"k8s.pod.network.io", interface="eth0"} 500
+{"k8s.pod.network.io", interface="lo"}   200
+```
+
+**Outcome**:
+- **Duplicate Time Series**: You now have multiple samples (1000 and 500) that look exactly the same: `{"k8s.pod.network.io", interface="eth0"}`.
+- **Samples**: You still have 3 samples. No cost is saved.
+
+## How This Leads to Incorrect Results
+
+When multiple samples share the same label set after dropping a distinguishing label, you create **duplicate time series**. This causes several problems:
+
+### 1. Data Collision and Ambiguity
+
+The metrics backend now receives multiple values for what appears to be the same time series. Depending on the backend:
+- Values may overwrite each other
+- Values may be arbitrarily selected
+- Queries may return unpredictable results
+
+On the SigNoz backend, all values are stored, which means the result may not be correct depending on the aggregation used.
+
+### 2. Incorrect Aggregations
+
+When you query and aggregate these metrics, the math becomes meaningless:
+
+Without the `k8s.pod.*` label, you can't properly distinguish between pods. The aggregation may double-count, miss data, or produce values that don't reflect reality.
+
+## The Correct Approach: Aggregation
+
+If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. Use the [Metrics Transform Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md) for this:
+
+For example, to view network traffic *per interface* (ignoring individual pods), you should `sum` the values of all pods for each interface. 
+
+```yaml
+processors:
+  metricstransform/aggregate:
+    transforms:
+      - include: k8s.pod.network.io
+        action: update
+        operations:
+          - action: aggregate_labels
+            label_set: [interface]  # List ONLY the labels you want to KEEP
+            aggregation_type: sum
+```
+
+This produces:
+```text
+# After aggregation (2 samples with mathematically correct value)
+{"k8s.pod.network.io", "interface"="eth0"} 1500  # Sum of 1000 + 500
+{"k8s.pod.network.io", "interface"="lo"} 200     # Sum of 200
+```
+
+Now you have:
+- **Reduced Cardinality**: 2 series instead of 3.
+- **Reduced Sample Count**: 2 samples stored instead of 3 (Lower cost).
+- **Correct Data**: The sum represents the total traffic accurately.
+
+## Applying This to UID Labels
+
+For labels like `k8s.pod.uid`, `k8s.node.uid`, and similar identifiers:
+
+```yaml
+# This does NOT reduce cardinality or samples
+attributes/drop-ids:
+  actions:
+    - key: k8s.pod.uid
+      action: delete
+    - key: k8s.node.uid
+      action: delete
+```
+
+These UID labels often serve as unique identifiers. Dropping them without aggregation means:
+
+1. **Samples remain unchanged**: The collector already received N samples; removing the UID doesn't reduce N.
+
+2. **Potential data issues**: If the UID was the only distinguishing label between otherwise identical label sets, you now have duplicate series.
+
+3. **No cost savings**: Since billing is based on samples ingested, removing labels without reducing sample count has no impact on cost.
+
+## When Is It Safe to Drop Labels?
+
+Dropping labels (without aggregation) is only safe when:
+
+1. **The label is purely informational**: It doesn't distinguish between different sources of data (e.g., a `version` label that's the same across all pods).
+
+2. **The label doesn't affect uniqueness**: Removing it won't create duplicate time series.
+
+3. **You don't need the label for querying**: You're certain you'll never need to filter or group by this label.
+
+## Summary
+
+| Action | Effect on Samples | Effect on Labels | Data Correctness |
+|--------|-------------------|------------------|------------------|
+| Drop label with `attributes` processor | No change | Label removed | Potentially incorrect |
+| Aggregate with `metricstransform` | Reduced | Labels aggregated away | Correct |
+| Filter/drop entire metric | Reduced | N/A | Correct (data removed) |
+| Control at source | Reduced | Labels never created | Correct |
+
+## References
+
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md#aggregate-labels" target="_blank" rel="noopener noreferrer nofollow">MetricsTransform Processor - Aggregate Labels</a>
+- <a href="https://groups.google.com/g/prometheus-users/c/WjjWMAbLcK8/m/HQyyN2I9AgAJ" target="_blank" rel="noopener noreferrer nofollow">Prometheus Users Discussion on Label Dropping</a>

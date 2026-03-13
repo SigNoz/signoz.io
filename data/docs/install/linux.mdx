@@ -1,6 +1,7 @@
 ---
-date: 2024-06-06
+date: 2026-02-27
 title: Linux
+tags : [Self-Host]
 description: Learn how to install SigNoz on Linux
 id: linux
 slug: /install/linux
@@ -16,6 +17,10 @@ This section provides information on installing SigNoz on Linux.
 
 - A Linux machine
 - Root access to the machine
+
+<Admonition type="info">
+<a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> can deploy SigNoz on Linux for you using <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/systemd/binary" target="_blank" rel="noopener noreferrer nofollow">systemd binary casting</a> (a configuration file). You install the dependencies, and Foundry handles everything else, from service configuration to startup.
+</Admonition>
 
 ## Install Clickhouse
 
@@ -36,7 +41,7 @@ sudo apt install default-jdk -y
 2. Get and extract the latest release of Zookeeper from the [releases page](https://zookeeper.apache.org/releases.html)
 
 ```bash
-curl -L https://dlcdn.apache.org/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz -o zookeeper.tar.gz
+curl -L https://dlcdn.apache.org/zookeeper/zookeeper-3.8.5/apache-zookeeper-3.8.5-bin.tar.gz -o zookeeper.tar.gz
 tar -xzf zookeeper.tar.gz
 ```
 
@@ -46,7 +51,7 @@ tar -xzf zookeeper.tar.gz
 sudo mkdir -p /opt/zookeeper
 sudo mkdir -p /var/lib/zookeeper
 sudo mkdir -p /var/log/zookeeper
-sudo cp -r apache-zookeeper-3.8.4-bin/* /opt/zookeeper
+sudo cp -r apache-zookeeper-3.8.5-bin/* /opt/zookeeper
 ```
 
 4. Create the zookeeper config file:
@@ -170,20 +175,21 @@ sudo journalctl -u clickhouse-server.service -f
 sudo journalctl -u zookeeper.service -f
 ```
 
-## Run Clickhouse migrations 
+## Run Clickhouse migrations
 
-1. Get and extract the latest release of SigNoz Schema Migrator:.
+1. Get and extract the latest release of SigNoz Otel Collector:
 
 ```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
-tar -xzf signoz-schema-migrator.tar.gz
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+tar -xzf signoz-otel-collector.tar.gz
 ```
 
 2. Run the migrations:
 
 ```bash
-./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
-./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
+./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate bootstrap --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
+./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate sync up --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
+./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate async up --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
 ```
 
 

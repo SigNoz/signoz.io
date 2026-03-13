@@ -6,11 +6,11 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
   description:
-    'Special pricing for startups. 50% off standard pricing to help startups with limited resources.',
+    'Special pricing for startups: $19/month for the first 12 months (regularly $49) so lean teams get full-stack observability without overspending.',
   openGraph: {
     title: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
     description:
-      'Special pricing for startups. 50% off standard pricing to help startups with limited resources.',
+      'Special pricing for startups: $19/month for the first 12 months (regularly $49) so lean teams get full-stack observability without overspending.',
     url: 'https://signoz.io/startups/',
     siteName: 'SigNoz',
     locale: 'en_US',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
     description:
-      'Special pricing for startups. 50% off standard pricing to help startups with limited resources.',
+      'Special pricing for startups: $19/month for the first 12 months (regularly $49) so lean teams get full-stack observability without overspending.',
     creator: '@SigNozHQ',
   },
   alternates: {

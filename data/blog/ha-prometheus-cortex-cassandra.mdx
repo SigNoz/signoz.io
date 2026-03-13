@@ -18,7 +18,7 @@ In this blog, we explain how we enable high availability Prometheus using Cortex
 ## Why need Cortex?
 
 - Long term storage backend for Prometheus - by default Prometheus saves data to local disk and retains for 15 days. Cortex connects to DBs to store data for longer time range. DBs that can be easily integrated are Cassandra, BigTable and DynamoDB
-- Enabling HA Prometheus - Usually folks run a singe Prometheus per cluster. If that node is down or Prometheus gets killed, you will find gaps in your graph till the time k8s recreates Prometheus pod. With Cortex, you can run multiple instances of Prometheus in your cluster and Cortex will de-duplicate metrics for you.
+- Enabling HA Prometheus - Usually folks run a singe Prometheus per cluster. If that node is down or Prometheus gets killed, you will find gaps in your graph till the time k8s recreates [Prometheus pod](https://signoz.io/guides/prometheus-queries-to-get-cpu-and-memory-usage-in-kubernetes-pods/). With Cortex, you can run multiple instances of Prometheus in your cluster and Cortex will de-duplicate metrics for you.
 - Single pane of view for multi-cluster Prometheus - When you have multiple Prometheuses across multiple clusters, provisioning 1 Grafana dashboard for each cluster will quickly become a pain. Also, aggregating metrics over multiple clusters won't be possible. Cortex enables this by letting Prometheuses in each cluster write their metrics to single DB and provide a label for your cluster. A Grafana dashboard built on top of the shared DB will enable queries to any of the clusters.
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
@@ -269,7 +269,7 @@ We can set validation limits in the distributor to check:
 
 **Further Reading**
 
-Before you make Cortex production-ready, you should go through the below docs to understand the functionality better.
+Before you make Cortex [production-ready](https://signoz.io/guides/production-readiness-checklist/), you should go through the below docs to understand the functionality better.
 
 - [Cortex Arguments Explained](https://github.com/cortexproject/cortex/blob/874d48958ce436b3c71c37b01c0269aa41552d83/docs/configuration/arguments.md)
 - [Running Cortex in Production](https://cortexmetrics.io/docs/blocks-storage/production-tips//)

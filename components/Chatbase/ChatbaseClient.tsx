@@ -2,25 +2,40 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
+import { useSearchParams } from 'next/navigation'
+import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '@/utils/userUtils'
 
 interface ChatbaseClientProps {
   className?: string
   userId?: string
   userHash?: string
+  disableFloatingMessages?: boolean
 }
 
 /**
  * Client component that loads the Chatbase embed script and handles identity verification
  */
-export default function ChatbaseClient({ className, userId, userHash }: ChatbaseClientProps) {
+export default function ChatbaseClient({
+  className,
+  userId,
+  userHash,
+  disableFloatingMessages,
+}: ChatbaseClientProps) {
   const isInitialized = useRef(false)
   const [shouldLoadScript, setShouldLoadScript] = useState(false)
+  const searchParams = useSearchParams()
+  const source = searchParams?.get('source')
 
   useEffect(() => {
     // Ensure we're running in a browser environment
     if (typeof window === 'undefined') {
       console.log('Window object not available, skipping Chatbase initialization')
+      return
+    }
+
+    if (source === ONBOARDING_SOURCE) {
+      console.log('Skipping Chatbase initialization due to onboarding source param')
       return
     }
 
@@ -68,6 +83,13 @@ export default function ChatbaseClient({ className, userId, userHash }: Chatbase
       console.log('No user ID available for Chatbase configuration')
     }
 
+    if (disableFloatingMessages) {
+      window.chatbaseConfig = {
+        ...(window.chatbaseConfig || {}),
+        showFloatingInitialMessages: false,
+      }
+    }
+
     // Initialize Chatbase exactly as provided in the embed script
     if (!window.chatbase || window.chatbase('getState') !== 'initialized') {
       window.chatbase = (...args: any[]) => {
@@ -89,7 +111,7 @@ export default function ChatbaseClient({ className, userId, userHash }: Chatbase
 
     // Trigger script loading
     setShouldLoadScript(true)
-  }, [userId, userHash])
+  }, [disableFloatingMessages, source, userId, userHash])
 
   const handleScriptLoad = () => {
     console.log('Chatbase script loaded successfully')
@@ -105,7 +127,7 @@ export default function ChatbaseClient({ className, userId, userHash }: Chatbase
         <Script
           src="https://www.chatbase.co/embed.min.js"
           id="ZXMN63dnzm9r1LEY0He6U"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           onLoad={handleScriptLoad}
           onError={handleScriptError}
           data-domain="www.chatbase.co"
@@ -125,6 +147,10 @@ declare global {
       user_id: string
       user_hash?: string
       user_metadata?: Record<string, string>
+    }
+    chatbaseConfig?: {
+      showFloatingInitialMessages?: boolean
+      [key: string]: unknown
     }
   }
 }

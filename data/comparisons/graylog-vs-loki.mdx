@@ -1,6 +1,5 @@
 ---
 title: Graylog vs Loki - Choosing the Right Log Management Tool
-slug: graylog-vs-loki
 date: 2025-01-09
 tags: [graylog, loki, faq]
 authors: [nilesh_sinha]
@@ -32,7 +31,7 @@ Before we dive into the comparison, let's get a quick overview of each tool.
 
 ### Graylog Overview
 
-Graylog is a centralized log management system designed for processing, storing, and analyzing log data from various sources. It provides powerful search capabilities using Lucene-based query language and supports robust alerting and dashboards for enterprise-grade log monitoring.
+Graylog is a centralized [log management system](https://signoz.io/blog/open-source-log-management/) designed for processing, storing, and analyzing log data from various sources. It provides powerful search capabilities using Lucene-based query language and supports robust alerting and dashboards for enterprise-grade log monitoring.
 
 <Figure
   src="/img/comparisons/2025/01/graylog-vs-loki-image.webp"
@@ -63,19 +62,19 @@ Think of Graylog as a traditional library system in a large institution:
 
 **Key Features:**
 
-- Centralized Log Collection: Like gathering all books in one library to simplify access.
-- Lucene-based Search Syntax: Imagine being able to search not just for "Shakespeare" but for "books mentioning Hamlet in the first 10 pages."
-  > Lucene is an open-source library for indexing and searching text. In Graylog, Lucene-based search allows efficient indexing and quick retrieval of log data using complex queries, similar to how a library index helps find books.
-  - Versatile Input Types: Accepts books (logs) from diverse sources, whether old manuscripts (syslog) or modern PDFs (GELF).
-    > Syslog acts like a messenger that delivers log data from different sources to a central location for storage and analysis.
-  - Alerting: The librarian can send an alert if a book gets misplaced or if someone tries to borrow a restricted item.
+- **Centralized Log Collection**: Like gathering all books in one library to simplify access.
+- **Lucene-based Search Syntax**: Imagine being able to search not just for "Shakespeare" but for "books mentioning Hamlet in the first 10 pages."
+  - _Lucene is an open-source library for indexing and searching text. In Graylog, Lucene-based search allows efficient indexing and quick retrieval of log data using complex queries, similar to how a library index helps find books._
+- **Versatile Input Types**: Accepts books (logs) from diverse sources, whether old manuscripts (syslog) or modern PDFs (GELF).
+  - _Syslog acts like a messenger that delivers log data from different sources to a central location for storage and analysis._
+- **Alerting**: The librarian can send an alert if a book gets misplaced or if someone tries to borrow a restricted item.
 
 ### Loki Overview
 
 Loki is a lightweight, cloud-native log aggregation system inspired by Prometheus. It emphasizes efficient storage and querying of log data using a label-based indexing system, making it ideal for containerized and ephemeral environments.
 
 <Figure
-  src="/img/comparisons/2025/01/graylog-vs-loki-image%201.webp"
+  src="/img/comparisons/2025/01/graylog-vs-loki-image 1.webp"
   alt="Grafana Loki Dashboard"
   caption="Grafana Loki Dashboard"
 />
@@ -129,7 +128,7 @@ Protocols Supported: Graylog is versatile when it comes to ingesting log data. I
 
 - Syslog: A standard logging protocol used to send event messages over a network. It's commonly used by various systems and devices.
 - Beats: A collection of lightweight data shippers for forwarding logs. This includes Filebeat (for file logs), Metricbeat (for system metrics), and others.
-- GELF (Graylog Extended Log Format): Graylog's own format designed for structured logging with advanced features like support for compression and batch processing.
+- GELF (Graylog Extended Log Format): Graylog's own format designed for [structured logging](https://signoz.io/blog/structured-logs/) with advanced features like support for compression and batch processing.
 - Other protocols: Graylog also supports various input plugins for different log formats and sources.
 
 Log Collection: Graylog usually uses sidecar collectors (lightweight agents running alongside applications) or input plugins to collect logs from hosts. These sidecars or agents send logs from different systems or services into the Graylog server.
@@ -172,14 +171,14 @@ The ability to efficiently search and analyze logs is a key factor in choosing a
 ### Graylog's Search Language
 
 <Figure
-  src="/img/comparisons/2025/01/graylog-vs-loki-image%202.webp"
+  src="/img/comparisons/2025/01/graylog-vs-loki-image 2.webp"
   alt="Graylog's Lucene-based search"
   caption="Graylog's Lucene-based search"
 />
 
 - Lucene-based Search: Graylog uses Lucene for querying logs. Lucene is a full-text search engine that allows fast and efficient searches through large volumes of data.
 - Advanced Queries: Graylog allows for complex queries using Lucene's query language. You can filter, search using wildcards, fuzzy search, and range queries to find the data you need quickly. This is very useful when you have structured logs and need to perform detailed analysis or debugging.
-- Example: If you need to find all error logs from the past week, you could use a query like:
+- Example: If you need to find all [error logs](https://signoz.io/guides/error-log/) from the past week, you could use a query like:
   ```
   level: error AND timestamp: [now-7d TO now]
   ```
@@ -192,7 +191,7 @@ The ability to efficiently search and analyze logs is a key factor in choosing a
 
 ### Loki's LogQL
 
-- LogQL: Loki uses LogQL, a query language inspired by PromQL (Prometheus Query Language). LogQL works by combining two elements:
+- LogQL: Loki uses LogQL, a query language inspired by PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)). LogQL works by combining two elements:
   - Label Filters: Filters based on the metadata (labels) that were added to logs during ingestion.
   - Line Filters: Filtering based on the actual content of the log line itself.
 - Efficient Searching: While Loki's search capabilities are more lightweight compared to Graylog's Lucene, it excels in environments where logs are labeled well (such as in Kubernetes). However, for deeper text searching or full-text indexing, Loki may not perform as well as Graylog without additional setup or overhead.
@@ -284,7 +283,7 @@ Storage and indexing are essential components in managing logs efficiently. Both
 ### 2. Loki's Efficient Storage Approach
 
 - Loki stores log data as compressed chunks in object storage like S3 or GCS. Instead of creating full-text indexes, Loki uses minimal indexes based on labels (like `app="webapp"`).
-  > Chunks are fixed-size, compressed blocks of log data, typically representing a specific time range of logs from a single stream (defined by unique label combinations). They are immutable, compressed using algorithms, and stored in scalable object storage systems.
+  - _Chunks are fixed-size, compressed blocks of log data, typically representing a specific time range of logs from a single stream (defined by unique label combinations). They are immutable, compressed using algorithms, and stored in scalable object storage systems._
 - This makes Loki more storage-efficient and allows for faster ingestion since it doesn't need to index every log line in detail. However, it offers less powerful full-text search capabilities compared to Graylog.
 - Loki is particularly well-suited for environments like microservices, where logs are often ephemeral and have short retention periods.
 
@@ -317,7 +316,7 @@ Loki is built for cloud-native applications, and is well-suited for environments
 
 - Containerized Applications: Perfect for Kubernetes or Docker environments where logs are generated by ephemeral (short-lived) services.
 - Minimal Indexing: Unlike Graylog, Loki doesn't index the content of logs in detail. It relies on a more lightweight labeling system, making it efficient for storing high-volume logs without overloading resources.
-- Integration with Prometheus/Grafana: If you are already using Prometheus for monitoring, Loki integrates seamlessly with Grafana, offering a unified observability platform that combines metrics, logs, and traces.
+- Integration with Prometheus/Grafana: If you are already using Prometheus for monitoring, Loki integrates seamlessly with Grafana, offering a [unified observability](https://signoz.io/unified-observability/) platform that combines metrics, logs, and traces.
 
 ### 3. Integration with Existing Tools
 
@@ -377,7 +376,7 @@ When considering performance and resource utilization, both Graylog and Loki exc
 
   Example: A streaming service handling 1TB/day of logs uses object storage (e.g., S3) to offload disk I/O. The system runs on a smaller cluster with fewer ingester and distributor nodes, saving on compute costs.
 
-  - Suggestion: Leverage object storage for large-scale log retention and reduce on-premises hardware dependencies.
+  - Suggestion: Leverage object storage for large-scale [log retention](https://signoz.io/guides/log-retention/) and reduce on-premises hardware dependencies.
 
 ### 3. Scalability in High-Volume Environments:
 
@@ -399,7 +398,7 @@ When considering performance and resource utilization, both Graylog and Loki exc
 
   Example: A Kubernetes-based application scales from 5TB/day to 10TB/day by adding distributors and ingesters without overhauling the architecture. Loki's label-based indexing ensures efficient scaling.
 
-  - Suggestion: Keep labels concise and avoid high cardinality (e.g., avoid using unique request IDs as labels) to maintain query performance at scale.
+  - Suggestion: Keep labels concise and avoid [high cardinality](https://signoz.io/blog/high-cardinality-data/) (e.g., avoid using unique request IDs as labels) to maintain query performance at scale.
 
 ### 4. Optimization Techniques:
 
@@ -490,12 +489,12 @@ This table provides a structured and simplified view of the differences in syste
 
 ## Integration with Existing Tools
 
-The ability to integrate with your current tech stack is crucial for a seamless observability pipeline. Both Graylog and Loki are designed to integrate seamlessly into your existing infrastructure, making it easier to collect, manage, and visualize logs. Below is a comparison of how each tool interacts with popular logging and monitoring solutions.
+The ability to integrate with your current tech stack is crucial for a seamless [observability pipeline](https://signoz.io/guides/observability-pipeline/). Both Graylog and Loki are designed to integrate seamlessly into your existing infrastructure, making it easier to collect, manage, and visualize logs. Below is a comparison of how each tool interacts with popular logging and monitoring solutions.
 
 ### 1. Compatibility with Log Shippers:
 
 - Graylog: Graylog supports several log shippers such as Beats, Logstash, and Fluentd. While it can work with other shippers, Graylog sidecars (a small agent running alongside your application) are often used to streamline log collection.
-- Loki: Primarily uses Promtail (its own log shipper) for log collection, but it also integrates with other shippers like Fluentd and Fluent Bit, offering flexibility in different environments.
+- Loki: Primarily uses Promtail (its own [log shipper](https://signoz.io/blog/log-shipper/)) for log collection, but it also integrates with other shippers like Fluentd and Fluent Bit, offering flexibility in different environments.
 
 ### 2. Dashboard and Visualization Options:
 
@@ -523,14 +522,14 @@ SigNoz is built on popular open standards like OpenTelemetry and other CNCF (Clo
 - Advanced Log Search and Filtering: SigNoz provides robust log search and filtering capabilities, enabling users to quickly locate and analyze logs using various attributes and criteria.
   {' '}
   <Figure
-    src="/img/comparisons/2025/01/graylog-vs-loki-image%203.webp"
+    src="/img/comparisons/2025/01/graylog-vs-loki-image 3.webp"
     alt="SigNoz's filtering capabilities"
     caption="SigNoz's filtering capabilities"
   />
 - Real-Time Log Monitoring: Monitor logs in real-time to promptly detect and address issues as they occur, ensuring system reliability and performance.
   {' '}
   <Figure
-    src="/img/comparisons/2025/01/graylog-vs-loki-image%204.webp"
+    src="/img/comparisons/2025/01/graylog-vs-loki-image 4.webp"
     alt="Logs management in SigNoz"
     caption="Logs management in SigNoz"
   />
@@ -594,7 +593,7 @@ By carefully evaluating these factors, you can select the log management tool th
 
 ## Key Takeaways
 
-- Graylog is a powerful choice for enterprise-level environments requiring advanced search capabilities, but it demands heavier infrastructure (Elasticsearch and MongoDB) and incurs higher total costs of ownership.
+- [Graylog](https://signoz.io/comparisons/graylog-vs-splunk/) is a powerful choice for enterprise-level environments requiring advanced search capabilities, but it demands heavier infrastructure (Elasticsearch and MongoDB) and incurs higher total costs of ownership.
 - Loki is optimized for cloud-native and containerized environments, offering a scalable and cost-effective solution with efficient storage and horizontal scaling capabilities. However, its minimal indexing approach is better suited for label-based queries than full-text searches.
 - Scalability and Cost: Organizations with high log volumes or distributed systems should weigh the scalability and storage efficiency of Loki against the powerful analysis features of Graylog, keeping long-term infrastructure costs in mind.
 - Integration and Ecosystem Fit: Graylog integrates seamlessly with traditional enterprise stacks, while Loki shines in Kubernetes and microservices-based architectures.

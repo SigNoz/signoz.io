@@ -115,8 +115,8 @@ Limitations:
 
 Docker's built-in logging drivers automatically capture logs from containers, streamlining the process of collecting output without requiring manual intervention. Commonly used logging drivers like `json-file` or `syslog` can store and manage logs, but they focus primarily on capturing the standard output and error streams of the running containerized processes.
 
-1. Configure Docker logging driver:
-When starting a container or globally, you can configure a specific logging driver through the Docker daemon configuration file (`/etc/docker/daemon.json`). For example, to use the `json-file` logging driver with rotation options:
+1. Configure [Docker logging driver](https://signoz.io/blog/docker-logging/):
+When starting a container or globally, you can configure a specific logging driver through the [Docker daemon](https://signoz.io/guides/docker-daemon-logs/) configuration file (`/etc/docker/daemon.json`). For example, to use the `json-file` logging driver with rotation options:
     
     ```json
     {
@@ -249,7 +249,7 @@ Supervisor is a powerful tool for controlling and monitoring multiple processes 
         autorestart=true
         ```
         
-    - Log process output: Supervisor provides built-in logging features, capturing each managed process's standard output and error logs, which you can use for troubleshooting and performance analysis.
+    - Log process output: Supervisor provides built-in logging features, capturing each managed process's standard output and [error logs](https://signoz.io/guides/error-log/), which you can use for troubleshooting and performance analysis.
         
         Eg. You can configure the log files for each process in the `supervisord.conf` file:
         
@@ -353,8 +353,8 @@ Supervisor is a powerful tool for controlling and monitoring multiple processes 
 2. Implement custom logging libraries:
 While Docker provides basic logging mechanisms, integrating custom logging libraries into your application code can give you more detailed and tailored process logging. By adding logging directly into your application, you gain several benefits:
     - Granular logging: Custom logging allows you to log specific events, variables, and process states that are important for your application. This can include detailed logs about internal operations, performance metrics, or application-specific errors.
-    - Structured logging: Libraries like Logrus (for Go) or Winston (for Node.js) allow you to create structured logs, which are easier to parse and analyze. Structured logs can include key-value pairs, timestamps, and contextual information that make troubleshooting much faster.
-    - Enhanced log formats: With custom libraries, you can log in formats like JSON, making integrating with log management tools or dashboards easier.
+    - [structured logging](https://signoz.io/blog/structured-logs/): Libraries like [Logrus](https://signoz.io/guides/golang-logrus/) (for Go) or Winston (for Node.js) allow you to create structured logs, which are easier to parse and analyze. Structured logs can include key-value pairs, timestamps, and contextual information that make troubleshooting much faster.
+    - Enhanced log formats: With custom libraries, you can log in formats like JSON, making integrating with [log management tools](https://signoz.io/blog/open-source-log-management/) or dashboards easier.
     - Application-level insights: By embedding logging into your code, you can capture information unavailable through system-level logging. For example, you can track specific user actions, API calls, or business logic execution paths.
     
     Sample:
@@ -469,14 +469,14 @@ Managing and logging processes manually in large-scale deployments with multiple
     
     Key advantages of using Kubernetes for process logging include:
     
-    - Centralized logging: Kubernetes can centralize the logs from all containers across your cluster, making monitoring and analysing logs from a single location easier. This is achieved through integrations with logging solutions like ELK Stack (Elasticsearch, Logstash, Kibana) or Fluentd.
+    - [Centralized logging](https://signoz.io/blog/centralized-logging/): Kubernetes can centralize the logs from all containers across your cluster, making monitoring and analysing logs from a single location easier. This is achieved through integrations with logging solutions like ELK Stack (Elasticsearch, Logstash, Kibana) or Fluentd.
     - Advanced monitoring: Kubernetes works smoothly with monitoring tools such as Prometheus and Grafana, allowing you to gather, visualise, and analyse process information. You can configure alerts based on resource use, process failures, and other relevant data.
     - Automatic log rotation: Kubernetes helps manage logs by automatically rotating them to prevent containers from running out of disk space. This ensures that logging doesn’t become a burden on container performance.
     - Scalability: Kubernetes excels at managing containerized applications at scale. Its logging and monitoring features can scale as your deployment grows, ensuring consistent visibility across all your containers.
 
 ## Monitoring Docker Container Processes with SigNoz
 
-To effectively monitor Docker logs and overcome the limitations of the `docker logs -f` command, using an advanced observability platform like SigNoz can be highly beneficial. [SigNoz](https://signoz.io/) is an open-source observability tool that provides end-to-end monitoring, troubleshooting, and alerting capabilities for your applications and infrastructure.
+To effectively monitor Docker logs and overcome the limitations of the `docker logs -f` command, using an advanced observability platform like SigNoz can be highly beneficial. [SigNoz](https://signoz.io/) is an open-source observability tool that provides [end-to-end monitoring](https://signoz.io/comparisons/end-to-end-monitoring-tools/), troubleshooting, and alerting capabilities for your applications and infrastructure.
 
 Here's how you can leverage SigNoz for monitoring Docker logs:
 
@@ -517,7 +517,7 @@ To obtain the SigNoz ingestion key and region, navigate to the “Settings” pa
 
 <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-08-28_at_9.04.01_AM.webp" alt="SigNoz Ingestion Settings" caption="SigNoz Ingestion Settings" />
 
-1. Set Up the OpenTelemetry Collector Config
+1. Set Up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)Config
 
 An [OTel Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is a vendor-agnostic service that receives, processes, and exports telemetry data (metrics, logs, and traces) from various sources to various destinations.
 
@@ -564,7 +564,7 @@ service:
       exporters: [otlp]
 ```
 
-The above configuration sets up the OpenTelemetry Collector to listen on `0.0.0.0:2255` for incoming Docker logs over TCP and to parse and filter the logs using a regex parser. The logs are then processed in batches for optimized handling and exported securely via OTLP to the `OTEL_COLLECTOR_ENDPOINT` specified in your `.env` file.
+The above configuration sets up the OpenTelemetry Collector to listen on `0.0.0.0:2255` for incoming [Docker logs](https://signoz.io/guides/docker-logs-location/) over TCP and to parse and filter the logs using a regex parser. The logs are then processed in batches for optimized handling and exported securely via OTLP to the `OTEL_COLLECTOR_ENDPOINT` specified in your `.env` file.
 
 1. Add Services to the Docker Compose File
 
@@ -607,7 +607,7 @@ In your existing Docker Compose file, add the below configuration:
 The above Docker Compose configuration sets up two services:
 
 - `otel-collector`:
-    - Uses the Signoz OpenTelemetry Collector image.
+    - Uses the Signoz [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) image.
     - Mounts the `otel-collector-config.yaml` file into the container.
     - Uses environment variables from the `.env` file for configuration.
     - Exposes ports `4317` (OTLP gRPC receiver) and `4318` (OTLP HTTP receiver).
@@ -641,10 +641,10 @@ Configure log rotation policies in Docker using the `max-size` and `max-file` op
 Logs can unintentionally expose sensitive information such as credentials, tokens, or personal data. Ensure that your logging strategy is designed to avoid logging sensitive information or sanitize logs before they are stored or transmitted.
 Use environment variables and secrets management tools (e.g., Docker secrets, AWS Secrets Manager) to ensure that sensitive data is not logged, and enforce redaction rules if necessary.
 - Standardize logging
-Consistent logging across all containers makes it easier to aggregate and analyze logs. Establish a standardized format that includes timestamps, severity levels, service identifiers, and other relevant metadata. This consistency ensures seamless integration with monitoring and alerting tools. 
+Consistent logging across all containers makes it easier to aggregate and analyze logs. Establish a standardized format that includes timestamps, severity levels, service identifiers, and other relevant metadata. This consistency ensures seamless integration with [monitoring and alerting tools](https://signoz.io/comparisons/infrastructure-monitoring-tools/). 
 Adopt structured logging formats such as JSON, which enables more sophisticated querying and log management across distributed systems.
 - Centralized Log Management: 
-In multi-container environments, having each container manage its own logs can become chaotic. Implement a centralized log management solution like [SigNoz](http://signoz.io) to collect logs from all containers in a single location, making it easier to monitor, analyze, and troubleshoot system-wide events.
+In multi-container environments, having each container manage its own logs can become chaotic. Implement a [centralized log management solution](https://signoz.io/blog/centralized-logging/#what-is-centralized-logging) like [SigNoz](http://signoz.io) to collect logs from all containers in a single location, making it easier to monitor, analyze, and troubleshoot system-wide events.
 - Monitor and Alert on Logs:
 Logging should not be passive; actively monitor logs for errors, warnings, or other significant events. Set up automated alerts to notify you of critical issues in real time. Use log monitoring tools to create alerts based on patterns or specific events, ensuring that you can respond quickly to operational issues or security incidents.
 
@@ -721,6 +721,6 @@ You can automate process logging in Docker containers using several methods:
 1. Wrapper Scripts: Create and run scripts alongside your main application to handle logging and process monitoring tasks automatically.
 2. Process Managers: Use process management tools like Supervisor to manage and monitor processes within your container while automating logs.
 3. Container Orchestration: Leverage platforms such as Kubernetes to centralize and automate logging for all containers in your environment, providing more advanced logging options and seamless integration with monitoring tools.
-4. Monitoring Tools: Utilize logging and monitoring solutions like SigNoz or the ELK Stack to automate log collection and analysis, reducing manual effort and increasing the depth of insights you can gather.
+4. Monitoring Tools: Utilize logging and monitoring solutions like SigNoz or the ELK Stack to automate [log collection and analysis](https://signoz.io/comparisons/log-analysis-tools/#splunk), reducing manual effort and increasing the depth of insights you can gather.
 
 Automating process logging ensures consistent, real-time visibility into your container’s performance and behavior, enhancing your ability to troubleshoot and optimize your containerized applications.

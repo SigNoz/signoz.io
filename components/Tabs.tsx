@@ -19,17 +19,21 @@ const Tabs = ({ children, entityName }) => {
   }
 
   const firstValidChild = childrenArray.find(isValidElement)
-  const defaultChild = childrenArray.find((child): child is React.ReactElement => 
-    isValidElement(child) && child.props.default
+  const defaultChild = childrenArray.find(
+    (child): child is React.ReactElement => isValidElement(child) && child.props.default
   )
   const defaultActiveTab = defaultChild?.props.value ?? firstValidChild?.props.value ?? null
-  
+
   let selectedTab
   if (entityName === 'plans') {
     selectedTab = defaultActiveTab
-  } else if (environment && childrenArray.some((child): child is React.ReactElement => 
-    isValidElement(child) && child.props.value === environment
-  )) {
+  } else if (
+    environment &&
+    childrenArray.some(
+      (child): child is React.ReactElement =>
+        isValidElement(child) && child.props.value === environment
+    )
+  ) {
     // If environment matches a tab value directly, use it
     selectedTab = environment
   } else if (environment) {
@@ -43,7 +47,7 @@ const Tabs = ({ children, entityName }) => {
   const hideSelfHostTab = source === ONBOARDING_SOURCE && entityName === 'plans'
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-tabs-root>
       <div className="flex border-b border-gray-200 dark:border-gray-700">
         {childrenArray.map((child) => {
           if (!isValidElement(child)) return null
@@ -53,10 +57,11 @@ const Tabs = ({ children, entityName }) => {
           return (
             <button
               key={value}
-              className={`px-4 py-2 text-sm font-medium focus:outline-none ${
+              data-tab-value={value}
+              className={`border-b-2 px-4 py-2 text-sm font-medium focus:outline-none ${
                 activeTab === value
-                  ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
               onClick={() => setActiveTab(value)}
             >
@@ -65,15 +70,18 @@ const Tabs = ({ children, entityName }) => {
           )
         })}
       </div>
-      <div className="p-4">
+      <div className="mt-4">
         {childrenArray.map((child) => {
           if (!isValidElement(child) || (hideSelfHostTab && child.props.value === 'self-host')) {
             return null
           }
 
-          if (child.props.value === activeTab)
-            return <div key={child.props.value}>{child.props.children}</div>
-          return null
+          const isActive = child.props.value === activeTab
+          return (
+            <div key={child.props.value} data-tab-value={child.props.value} hidden={!isActive}>
+              {child.props.children}
+            </div>
+          )
         })}
       </div>
     </div>

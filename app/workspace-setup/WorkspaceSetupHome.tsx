@@ -2,10 +2,9 @@
 
 import React, { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useLogEvent } from '../../hooks/useLogEvent'
 import WorkspaceReady from './WorkspaceReady'
 import WorkspaceSetup from './WorkspaceSetup'
-
-
 
 function WorkspaceSetupHome() {
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false)
@@ -16,12 +15,22 @@ function WorkspaceSetupHome() {
   const [retryCount, setRetryCount] = useState(1)
   const [workspaceData, setWorkspaceData] = useState(null)
   const searchParams = useSearchParams()
+  const logEvent = useLogEvent()
 
   const code = searchParams.get('code')
   const email = searchParams.get('email')
   const region = searchParams.get('region')
 
   const verifyEmail = async () => {
+    logEvent({
+      eventName: 'Email Verification Started',
+      eventType: 'track',
+      attributes: {
+        email: decodeURIComponent(email || ''),
+        region: region,
+      },
+    })
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users/verify`, {
       cache: 'no-store',
       headers: {
@@ -41,12 +50,37 @@ function WorkspaceSetupHome() {
 
     if (data.status === 'error' && data.type !== 'already-exists') {
       setIsEmailVerified(false)
+      logEvent({
+        eventName: 'Email Verification Failed',
+        eventType: 'track',
+        attributes: {
+          error: data.error,
+          type: data.type,
+          email: decodeURIComponent(email || ''),
+        },
+      })
     } else if (data.status === 'success') {
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
+      logEvent({
+        eventName: 'Email Verified',
+        eventType: 'track',
+        attributes: {
+          status: 'success',
+          email: decodeURIComponent(email || ''),
+        },
+      })
     } else if (data.status === 'error' && data.type === 'already-exists') {
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
+      logEvent({
+        eventName: 'Email Verified',
+        eventType: 'track',
+        attributes: {
+          status: 'already-exists',
+          email: decodeURIComponent(email || ''),
+        },
+      })
     }
   }
 
@@ -63,6 +97,14 @@ function WorkspaceSetupHome() {
     if (data.status === 'success') {
       setIsWorkspaceReady(true)
       setWorkspaceData(data?.data)
+      logEvent({
+        eventName: 'Workspace Provisioned',
+        eventType: 'track',
+        attributes: {
+          workspaceData: data?.data,
+          email: decodeURIComponent(email || ''),
+        },
+      })
     } else if (data.status === 'error') {
       setRetryCount((currentRetryCount) => currentRetryCount + 1)
     }
@@ -83,6 +125,14 @@ function WorkspaceSetupHome() {
       setTimeout(verifyWorkspaceSetup, pollingInterval)
     } else {
       setIsWorkspaceSetupDelayed(true)
+      logEvent({
+        eventName: 'Workspace Provisioning Delayed',
+        eventType: 'track',
+        attributes: {
+          retryCount: retryCount,
+          email: decodeURIComponent(email || ''),
+        },
+      })
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,7 +155,11 @@ function WorkspaceSetupHome() {
       {isWorkspaceReady ? (
         <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
       ) : (
-        <WorkspaceSetup isWorkspaceSetupDelayed={isWorkspaceSetupDelayed} />
+        <WorkspaceSetup
+          isWorkspaceSetupDelayed={isWorkspaceSetupDelayed}
+          email={decodeURIComponent(email || '')}
+          workspaceData={workspaceData}
+        />
       )}
     </Suspense>
   )

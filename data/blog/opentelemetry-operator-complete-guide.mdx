@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry Operator Complete Guide [OTel Collector + Auto-Instrumentation Demo]
 slug: opentelemetry-operator-complete-guide
-date: 2024-08-07
+date: 2025-09-16
 tags: [OpenTelemetry]
 authors: [daniel]
 image: /img/blog/2023/11/opentelemetry-operator-cover.jpeg
@@ -16,7 +16,7 @@ keywords: [OpenTelemetry Operator, Kubernetes, observability, telemetry, auto-in
     dangerouslySetInnerHTML={{ __html: JSON.stringify({
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  "headline": "OpenTelemetry Operator Complete Guide [OTel Collector + Auto-Instrumentation Demo]",
+  "headline": "OpenTelemetry Operator Complete Guide [[OTel](https://signoz.io/blog/what-is-opentelemetry/) Collector + Auto-Instrumentation Demo]",
   "alternativeHeadline": "Learn how to use OpenTelemetry operator to deploy OpenTelemetry Collectors and auto-instrument a sample Java application",
   "author": {
     "@type": "Person",
@@ -128,22 +128,6 @@ Manually deploying and managing OpenTelemetry components in a Kubernetes environ
 
 OpenTelemetry Operators provide a solution to this problem by automating the deployment, configuration, and management of OpenTelemetry components in Kubernetes clusters, making it easier for operation teams to implement observability in their applications.
 
-In this tutorial, we will cover:
-
-- [What is OpenTelemetry?](#what-is-opentelemetry)
-- [What is a Kubernetes Operator?](#what-is-a-kubernetes-operator)
-- [OpenTelemetry Operator for Kubernetes](#opentelemetry-operator-for-kubernetes)
-- [Using an OpenTelemetry Operator to auto-instrument a Java application](#using-an-opentelemetry-operator-to-auto-instrument-a-java-application)
-  - [Prerequisite](#prerequisite)
-  - [Setting up SigNoz](#setting-up-signoz)
-  - [Setting up your Java application](#setting-up-your-java-application)
-  - [Setting up the OpenTelemetry Operator](#setting-up-the-opentelemetry-operator)
-  - [Setup the OpenTelemetry Collector instance](#setup-the-opentelemetry-collector-instance)
-- [Creating an Instrumentation Instance](#creating-an-instrumentation-instance)
-  - [Auto-instrument your Java app with OpenTelemetry](#auto-instrument-your-java-app-with-opentelemetry)
-- [Conclusion](#conclusion)
-- [Getting started with SigNoz](#getting-started-with-signoz)
-- [Further Reading](#further-reading)
 
 ## What is OpenTelemetry?
 
@@ -233,19 +217,41 @@ You can then access the running application at [localhost:8090](http://localhost
 
 ### Setting up the OpenTelemetry Operator
 
+There are two ways to install the OpenTelemetry Operator in your Kubernetes cluster,
+
+1/ Applying the release YAML directly
+2/ Using the official Helm chart
+
+For this tutorial, we'll use the direct kubectl apply method because it's fast and straightforward. This command
+installs the operator, its Custom Resource Definitions (CRDs), and all the necessary RBAC rules.
+
 To install the operator in the existing K8s cluster, run the following command:
 
 ```jsx
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+
 ```
 
-Installing the OpenTelemetry Operator sets up the necessary components and configurations to enable the observability and monitoring of applications running in the cluster.
+While the direct apply method is good for a quick start, the recommended method for production and the best practice is to use the official Helm chart. 
+Helm allows you to easily manage configuration options, set resource limits, and handle version upgrades more robustly.
+
+
+Assuming you have Helm installed, you can add the OpenTelemetry repository and install the operator with these commands:
+
+```jsx
+# 1. Add the OpenTelemetry Helm repository
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+
+# 2. Install the operator into its own namespace
+helm install opentelemetry-operator open-telemetry/opentelemetry-operator --namespace
+     opentelemetry-operator-system --create-namespace
+```
 
 ### Setup the OpenTelemetry Collector instance
 
-Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
+Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
 
-There are different <a href = "https://github.com/open-telemetry/opentelemetry-operator#deployment-modes" rel="noopener noreferrer nofollow" target="_blank">deployment modes</a> for the OpenTelemetryCollector, and you can specify them in the **`spec.mode`** section of the custom resource. The available deployment modes are:
+There are different <a href = "https://github.com/open-telemetry/opentelemetry-operator#deployment-modes" rel="noopener noreferrer nofollow" target="_blank">deployment modes</a> for the OpenTelemetry Collector, and you can specify them in the **`spec.mode`** section of the custom resource. The available deployment modes are:
 
 - Daemonset
 - Sidecar
@@ -258,7 +264,7 @@ To create a simple instance of the OpenTelemetry Collector, run the below in you
 
 ```jsx
 kubectl apply -f - <<EOF
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: simplest
@@ -293,7 +299,7 @@ To create an instance of `Instrumentation`, run the below configuration in your 
 
 ```jsx
 kubectl apply -f - <<EOF
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: Instrumentation
 metadata:
   name: my-instrumentation
@@ -323,7 +329,7 @@ spec:
 EOF
 ```
 
-This above configuration sets up the OpenTelemetry Operator to automatically instrument applications written in Java, Node.js, Python, and .NET. It defines settings for the exporter, context propagation, and sampling strategies.
+This above configuration sets up the OpenTelemetry Operator to automatically instrument applications written in Java, Node.js, Python, and .NET. It defines settings for the exporter, [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/), and sampling strategies.
 
 In essence, once you deploy an application in the specified languages, the OpenTelemetry Operator will apply the necessary instrumentation code to collect telemetry data from that application.
 
@@ -332,7 +338,7 @@ In essence, once you deploy an application in the specified languages, the OpenT
 You can find the ingestion details in the SigNoz dashboard under the `Settings` tab.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/ingestion-key-details.webp" alt=""/>
+    <img src="/img/blog/2025/09/signoz-settings.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
@@ -412,7 +418,7 @@ Now, telemetry data needs to be generated for the application. This telemetry da
 Once telemetry data has been generated, open your SigNoz cloud account, and you should see the spring-petclinic application under the Services tab.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/petclinic-service-app.webp" alt="SigNoz UI showing spring-petclinic application"/>
+    <img src="/img/blog/2025/09/signoz-petclinic.webp" alt="SigNoz UI showing spring-petclinic application"/>
     <figcaption><i>SigNoz UI showing spring-petclinic application</i></figcaption>
 </figure>
 
@@ -420,7 +426,7 @@ Once telemetry data has been generated, open your SigNoz cloud account, and you 
 You can change the duration in case the application doesn’t show up depending on the time the telemetry data was generated.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/duration-options.webp" alt="Duration options"/>
+    <img src="/img/blog/2025/09/signoz-time-filters.webp" alt="Duration options"/>
     <figcaption><i>Duration options</i></figcaption>
 </figure>
 
@@ -428,7 +434,7 @@ You can change the duration in case the application doesn’t show up depending 
 When you click on the 'Spring-Pet-Clinic' application in the 'Services' tab, you will find an overview of your application in the 'Overview' tab containing information on the Latency, Rate, Apdex, Key Operations, and Error Rate. You can also see the tabs for DB Call Metrics and External Metrics. You can select each of the charts to get more insights.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/service-list-tab.webp" alt="List of services in Services tab"/>
+    <img src="/img/blog/2025/09/signoz-services.webp" alt="List of services in Services tab"/>
     <figcaption><i>List of services in Services tab</i></figcaption>
 </figure>
 
@@ -436,7 +442,7 @@ When you click on the 'Spring-Pet-Clinic' application in the 'Services' tab, you
 By selecting and viewing the Latency chart, you gain access to crucial percentiles – p99, p90, and p50. These metrics offer valuable insights into the distribution of response times.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/latency-chart.webp" alt="Latency chart showing p99, p90 and p50 percentiles"/>
+    <img src="/img/blog/2025/09/signoz-latency.webp" alt="Latency chart showing p99, p90 and p50 percentiles"/>
     <figcaption><i>Latency chart showing p99, p90 and p50 percentiles</i></figcaption>
 </figure>
 
@@ -444,7 +450,7 @@ By selecting and viewing the Latency chart, you gain access to crucial percentil
 Beneath, you can observe the Apdex (Application Performance Index) is at 0, and the Error percentage chart has no data. This is because there was no failure in the requests sent to the application, resulting in no data for the error percentage. The Key Operations chart, on the other hand, shows all the requests made and activities carried out in the application.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/key-operation-chart.webp" alt=""/>
+    <img src="/img/blog/2025/09/signoz-operations.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
@@ -452,16 +458,8 @@ Beneath, you can observe the Apdex (Application Performance Index) is at 0, and 
 In the Traces tab, you can utilize the ‘Trace Explorer’ to filter traces by tags, choose specific services, set desired duration and status filters, and perform additional actions for refined trace viewing.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/trace-explorer-chart.webp" alt="Trace Explorer tab"/>
+    <img src="/img/blog/2025/09/signoz-trace-explorer.webp" alt="Trace Explorer tab"/>
     <figcaption><i>Trace Explorer tab</i></figcaption>
-</figure>
-
-
-Switching over to the new Traces Explorer UI, you can query metrics using the Query Builder, and you can see Root [Spans](https://signoz.io/blog/distributed-tracing-span/) under the Traces tab.
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2023/11/query-builder-petclinic.webp" alt="Query Builder in Trace Explorer"/>
-    <figcaption><i>Query Builder in Trace Explorer</i></figcaption>
 </figure>
 
 <br />

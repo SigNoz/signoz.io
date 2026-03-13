@@ -1,0 +1,102 @@
+---
+date: 2025-11-30
+id: migrate-data-from-honeycomb
+title: Migrate Data from Honeycomb to SigNoz
+description: Learn how to migrate traces/APM, logs, and metrics data from Honeycomb to SigNoz.
+
+doc_type: howto
+---
+
+This guide explains how to migrate observability data from Honeycomb to SigNoz by updating your OpenTelemetry configuration.
+
+## Prerequisites
+
+- Active [SigNoz Cloud](https://signoz.io/teams/) account or [self-hosted SigNoz](https://signoz.io/docs/install/self-host/) instance.
+- Access to your application's OpenTelemetry configuration.
+
+## Legacy SDK Migration
+
+If you are using Honeycomb's legacy SDKs (Beelines or Honeycomb Distributions), you must first migrate to OpenTelemetry:
+
+- <a href="https://docs.honeycomb.io/troubleshoot/product-lifecycle/recommended-migrations/migrate-from-beelines/" target="_blank" rel="noopener noreferrer nofollow">Migrate from Beelines</a>
+- <a href="https://docs.honeycomb.io/troubleshoot/product-lifecycle/recommended-migrations/migrate-from-honeycomb-distributions/" target="_blank" rel="noopener noreferrer nofollow">Migrate from Honeycomb Distributions</a>
+
+Once you have switched to OpenTelemetry, proceed with the configuration below.
+
+## OpenTelemetry Configuration
+
+Since both Honeycomb and SigNoz use OpenTelemetry, migrating involves pointing your OTLP endpoint to SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+### Step 1: Obtain Connection Details
+
+1. Log into your [SigNoz Cloud account](https://signoz.io/teams/).
+2. Navigate to **Settings** → **Ingestion Settings**.
+3. Note your **Ingestion Key** and **Ingestion URL**.
+
+### Step 2: Update OpenTelemetry Configuration
+
+Set the following environment variables for your application:
+
+```bash
+# Replace with your SigNoz cloud region
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# Replace with your SigNoz ingestion key
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
+```
+
+If you are using an **OpenTelemetry Collector**, update your exporter configuration:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+    tls:
+      insecure: false
+```
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz Ingestion Key.
+
+### Step 3: Verify Data
+
+Check the SigNoz dashboard to ensure traces/APM, logs, and metrics are arriving.
+
+## Configure Signal Correlation
+
+SigNoz automatically correlates logs with traces when they share `trace_id` and `span_id`.
+
+- **Automatic:** Use OpenTelemetry SDKs that inject trace context into logs.
+- **Manual:** Ensure your logging libraries include `trace_id` and `span_id` fields.
+
+## Configure Additional Metrics
+
+You may need to configure additional metrics sources if they were handled differently in Honeycomb.
+
+### Enable Prometheus Receiver
+
+To scrape existing Prometheus endpoints, enable the Prometheus receiver in your SigNoz Collector.
+
+See the [Prometheus Metrics guide](https://signoz.io/docs/userguide/prometheus-metrics/) for full details.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+- **401/403 errors when exporting**: Verify `signoz-ingestion-key` header value and that the key is active in SigNoz Cloud settings.
+- **TLS or connection errors**: Ensure the endpoint uses `https://ingest.<region>.signoz.cloud:443` and that `tls.insecure` remains `false`.
+- **Metrics or logs missing but traces present**: Confirm all three pipelines include the SigNoz exporter and that services emit those signals. Check collector logs for dropped data.
+- **High latency or backpressure**: Add the `batch` processor and enable retry queue in the exporter to prevent data loss under load.
+</details>
+## Next Steps
+
+- [Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-honeycomb/dashboards/)
+- [Migrate Alerts](https://signoz.io/docs/migration/migrate-from-honeycomb/alerts/)

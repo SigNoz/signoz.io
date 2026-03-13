@@ -9,11 +9,6 @@ image: /img/blog/2023/02/opentelemetry_architecture_cover-min.jpg
 hide_table_of_contents: false
 keywords: [opentelemetry,opentelemetry architecture,opentelemetry api,opentelemetry sdk,signoz]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-architecture/"/>
-</head>
-
 OpenTelemetry consists of several main components. But to understand the architecture, we will start by understanding some of the key design principles behind the design and architecture of OpenTelemetry.
 
 
@@ -50,7 +45,7 @@ OpenTelemetry is a cross-cutting concern that follows the execution of a transac
 </figure>
 
 
-All OpenTelemetry signals are built on top of a shared context propagation system. Other non-observability cross-cutting concerns may also use the context propagation mechanism to
+All OpenTelemetry signals are built on top of a shared [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) system. Other non-observability cross-cutting concerns may also use the context propagation mechanism to
 transport their data through a distributed system. Let's understand the key objects which form the Data transport system of OpenTelemetry.
 
 ### Context:
@@ -59,7 +54,7 @@ The context object is a key-value store associated with an execution context, su
 
 ### Propagators:
 
-In order for distributed tracing to work, the [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) must be shared by every service that participates in the transaction. Propagators accomplish this by serializing and deserializing the context object, allowing the signals to follow their transactions across network requests.
+In order for [distributed tracing](https://signoz.io/distributed-tracing/) to work, the [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) must be shared by every service that participates in the transaction. Propagators accomplish this by serializing and deserializing the context object, allowing the signals to follow their transactions across network requests.
 
 Hopefully, you must be comfortable with the basic concepts now. Let's try to understand the design of OpenTelemetry from a client perspective.
 
@@ -115,7 +110,7 @@ The applications uses an agent ( Auto instrumentation ) to produce telemetry dat
 
 **On the server side:**
 
-- All the signal data is sent to a **Collector** component which is considered to be the heart of the system. It is optional, but any matured and complex implementation will need an OpenTelemetry collector component in the architecture.
+- All the signal data is sent to a **Collector** component which is considered to be the heart of the system. It is optional, but any matured and complex implementation will need an [OpenTelemetry collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) component in the architecture.
 
 - All the data gets processed via the Collector and then sent to different observability backends. More on Collectors later, but the collector is responsible for **receiving, processing, and sending** the signal data to the target visualization tool.
 
@@ -166,7 +161,7 @@ OpenTelemetry is quietly becoming the world standard for instrumenting cloud-nat
 
 It is easy to get started with OpenTelemetry. You can check out instrumentation instructions [here](https://signoz.io/docs/instrumentation/). As OpenTelemetry does not provide a backend, you need to choose one which supports OpenTelemetry. An [OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/) can be a good choice for your observability backend.
 
-SigNoz is a full-stack open source APM that you can use as your OpenTelemetry backend. It provides logs, metrics, and traces under a single pane of glass with intelligent correlation between the telemetry signals.
+SigNoz is a full-stack [open source APM](https://signoz.io/application-performance-monitoring/) that you can use as your [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/). It provides logs, metrics, and traces under a single pane of glass with intelligent correlation between the telemetry signals.
 
 ## Getting started with SigNoz
 

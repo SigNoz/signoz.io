@@ -36,11 +36,11 @@ const BuildForDevelopers = () => {
       <div className=" h-12 w-full border !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
       <div className="overflow-hidden">
         <div
-          className={`relative bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:85%] bg-[center_top_8rem] bg-no-repeat
+          className={`relative bg-[url('/img/background_blur/Perlin_noise.webp')] bg-[length:85%] bg-[center_top_8rem] bg-no-repeat
       `}
         >
           <div className={`section-container mb-0 !px-0 pt-12`}>
-            <div className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(100px)] md:w-[80vw] ">
+            <div className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(100px)] md:w-[80vw] ">
               <div className="flex flex-col items-center border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-24 py-48 text-center sm:px-0 ">
                 <div className="text-[44px] font-semibold leading-[3.5rem] text-signoz_sienna-100">
                   Built for developers, <br />
