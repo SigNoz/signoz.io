@@ -18,7 +18,6 @@ import {
   SiFastapi,
   SiGunicorn,
   SiCelery,
-  SiSpringboot,
   SiQuarkus,
   SiApachetomcat,
   SiNodedotjs,
@@ -32,6 +31,7 @@ import {
   SiFlutter,
   SiAndroid,
   SiWordpress,
+  SiDeno,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -137,16 +137,10 @@ export default function APMInstrumentationListicle({
       <IconCardGrid
         cards={[
           {
-            name: 'Java',
-            href: '/docs/instrumentation/java',
+            name: 'Java / Spring Boot',
+            href: '/docs/instrumentation/java/opentelemetry-java',
             icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
             clickName: 'Java Instrumentation Link',
-          },
-          {
-            name: 'Spring Boot',
-            href: '/docs/instrumentation/springboot',
-            icon: <SiSpringboot className="h-7 w-7 text-green-600" />,
-            clickName: 'Spring Boot Instrumentation Link',
           },
           {
             name: 'Quarkus',
@@ -243,6 +237,12 @@ export default function APMInstrumentationListicle({
             href: '/docs/instrumentation/golang',
             icon: <SiGo className="h-7 w-7 text-cyan-500" />,
             clickName: 'Golang Instrumentation Link',
+          },
+          {
+            name: 'Deno',
+            href: '/docs/instrumentation/opentelemetry-deno',
+            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
+            clickName: 'Deno Instrumentation Link',
           },
           {
             name: 'PHP',

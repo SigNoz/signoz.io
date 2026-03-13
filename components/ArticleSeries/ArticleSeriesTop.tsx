@@ -12,10 +12,14 @@ type ArticleLink = {
 type ArticleSeriesTopProps = {
   seriesName: string
   seriesOverviewHref?: string
-  currentPart: number
-  totalParts: number
+  currentPart: number | string
+  totalParts: number | string
   previous?: ArticleLink | null
   next?: ArticleLink | null
+  previousTitle?: string
+  previousHref?: string
+  nextTitle?: string
+  nextHref?: string
   className?: string
 }
 
@@ -26,10 +30,20 @@ export default function ArticleSeriesTop({
   totalParts,
   previous,
   next,
+  previousTitle,
+  previousHref,
+  nextTitle,
+  nextHref,
   className,
 }: ArticleSeriesTopProps) {
-  const showPrevious = Boolean(previous)
-  const showNext = Boolean(next)
+  const part = Number(currentPart)
+  const total = Number(totalParts)
+  const prevLink =
+    previous ??
+    (previousTitle && previousHref ? { title: previousTitle, href: previousHref } : null)
+  const nextLink = next ?? (nextTitle && nextHref ? { title: nextTitle, href: nextHref } : null)
+  const showPrevious = Boolean(prevLink)
+  const showNext = Boolean(nextLink)
 
   return (
     <div
@@ -43,6 +57,7 @@ export default function ArticleSeriesTop({
         <Link
           href={seriesOverviewHref}
           className="group inline-flex items-center font-medium no-underline transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          prefetch={false}
         >
           <List className="mr-2 h-4 w-4 opacity-90 transition-opacity group-hover:opacity-100" />
           <span className="text-blue-600 opacity-90 transition-opacity group-hover:opacity-100 dark:text-blue-400">
@@ -57,12 +72,13 @@ export default function ArticleSeriesTop({
 
       {/* Right: Prev/Current Position/Next */}
       <div className="flex items-center space-x-4">
-        {showPrevious && previous ? (
-          <Tooltip content={`Previous: ${previous.title}`} delay={150}>
+        {showPrevious && prevLink ? (
+          <Tooltip content={`Previous: ${prevLink.title}`} delay={150}>
             <Link
-              href={previous.href}
+              href={prevLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
-              aria-label={`Previous article: ${previous.title}`}
+              aria-label={`Previous article: ${prevLink.title}`}
+              prefetch={false}
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
@@ -72,15 +88,16 @@ export default function ArticleSeriesTop({
         )}
 
         <span className="whitespace-nowrap text-gray-500 dark:text-gray-500">
-          Part {currentPart} of {totalParts}
+          Part {part} of {total}
         </span>
 
-        {showNext && next ? (
-          <Tooltip content={`Next: ${next.title}`} delay={150}>
+        {showNext && nextLink ? (
+          <Tooltip content={`Next: ${nextLink.title}`} delay={150}>
             <Link
-              href={next.href}
+              href={nextLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
-              aria-label={`Next article: ${next.title}`}
+              aria-label={`Next article: ${nextLink.title}`}
+              prefetch={false}
             >
               <ArrowRight className="h-4 w-4" />
             </Link>

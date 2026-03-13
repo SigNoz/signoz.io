@@ -605,17 +605,6 @@ const ALL_FEATURES_DATA = {
           ),
         },
         {
-          feature: 'AWS Private link',
-          inCommunity: <CrossSolid />,
-          inTeams: <CrossSolid />,
-          inEnterprise: (
-            <div className="flex items-center">
-              <CloudSolid />
-              <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE CLOUD</span>
-            </div>
-          ),
-        },
-        {
           feature: 'Audit Logs',
           inCommunity: <CrossSolid />,
           inTeams: <CrossSolid />,

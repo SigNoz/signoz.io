@@ -1,0 +1,388 @@
+---
+date: 2026-03-11
+id: signoz-mcp-server
+
+title: SigNoz MCP Server
+description: Connect AI assistants like Claude Desktop and Cursor to your SigNoz observability data using the MCP (Model Context Protocol) server.
+doc_type: howto
+---
+
+The SigNoz MCP Server implements the <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer nofollow">Model Context Protocol (MCP)</a> — an open standard that lets AI assistants interact with external tools and data sources. It connects MCP-compatible clients (Claude Desktop, Cursor, and others) to your SigNoz instance so you can query observability data in natural language.
+
+Example use cases:
+- Ask your AI assistant _"What alerts fired in the last hour?"_ and get structured results from SigNoz.
+- Debug issues by asking _"Show me error logs for the payments service"_ without writing queries.
+- Explore traces, dashboards, and metrics through conversation.
+
+<Admonition type="note">
+The SigNoz MCP Server is functional but under active development. Expect breaking changes between releases. Early feedback is welcome — file issues on the <a href="https://github.com/SigNoz/signoz-mcp-server/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub repository</a>.
+</Admonition>
+
+## Prerequisites
+
+- A running SigNoz instance — [SigNoz Cloud](https://signoz.io/teams/) or [self-hosted](https://signoz.io/docs/install/self-host/)
+- A SigNoz API key (see [Get your API key](#get-your-api-key) below)
+- An MCP-compatible client: <a href="https://claude.ai/download" target="_blank" rel="noopener noreferrer nofollow">Claude Desktop</a> or <a href="https://www.cursor.com/" target="_blank" rel="noopener noreferrer nofollow">Cursor</a>
+- **To build from source:** Go 1.25+ and `make`, or Docker
+
+## Get your API key
+
+1. Log in to your SigNoz instance.
+2. Go to **Settings** → **API Keys**.
+3. Click **Create API Key** and copy the generated key.
+
+<Admonition type="warning">
+Keep your API key secure. Never commit it to version control — use environment variables or a secrets manager.
+</Admonition>
+
+## Installation
+
+The SigNoz MCP Server is open source: <a href="https://github.com/SigNoz/signoz-mcp-server" target="_blank" rel="noopener noreferrer nofollow">github.com/SigNoz/signoz-mcp-server</a>
+
+### Build from Source
+
+1. Clone the repository and build the binary:
+
+```bash
+git clone https://github.com/SigNoz/signoz-mcp-server.git
+cd signoz-mcp-server
+make build
+```
+
+2. The binary is created at `bin/signoz-mcp-server`. Note the absolute path — you will need it when configuring your MCP client.
+
+<Admonition type="info">
+If you don't have `make` installed, you can build directly with Go:
+
+```bash
+go build -o bin/signoz-mcp-server ./cmd/server/
+```
+</Admonition>
+
+### Docker
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/SigNoz/signoz-mcp-server.git
+cd signoz-mcp-server
+```
+
+2. Create a `.env` file in the project root with your SigNoz configuration:
+
+```bash
+SIGNOZ_URL=<your-signoz-url>
+SIGNOZ_API_KEY=<your-api-key>
+LOG_LEVEL=info
+```
+
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+3. Start the server:
+
+```bash
+docker-compose up -d
+```
+
+The server starts in HTTP mode on port `8000` by default. You can override the port by adding `MCP_SERVER_PORT=<port>` to your `.env` file.
+
+<Admonition type="info">
+The Docker setup always runs in HTTP transport mode. Use the **HTTP** tab in the [Setup](#setup) section below to configure your MCP client.
+</Admonition>
+
+## Setup
+
+The MCP server supports two transport modes: **Stdio** (local binary, launched by the client) and **HTTP** (standalone server the client connects to over the network). Choose your AI client below and follow the instructions for your preferred transport.
+
+<Tabs>
+<TabItem value="claude" label="Claude Desktop" default>
+
+<Tabs>
+<TabItem value="claude-stdio" label="Stdio (Recommended)" default>
+
+1. Build or download the `signoz-mcp-server` binary (see [Installation](#installation)).
+2. In Claude Desktop, go to **Settings → Developer → Edit Config**.
+3. Add the following to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "command": "<path-to-binary>/signoz-mcp-server",
+      "args": [],
+      "env": {
+        "SIGNOZ_URL": "<your-signoz-url>",
+        "SIGNOZ_API_KEY": "<your-api-key>",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary (e.g., `/Users/you/signoz-mcp-server/bin/signoz-mcp-server`)
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+4. Restart Claude Desktop. The `signoz` server should appear in the developer console with its tools available.
+
+</TabItem>
+<TabItem value="claude-http" label="HTTP">
+
+1. Start the MCP server in HTTP mode:
+
+```bash
+SIGNOZ_URL=<your-signoz-url> \
+SIGNOZ_API_KEY=<your-api-key> \
+TRANSPORT_MODE=http \
+MCP_SERVER_PORT=8000 \
+LOG_LEVEL=info \
+./signoz-mcp-server
+```
+
+Or use `docker-compose` (see the <a href="https://github.com/SigNoz/signoz-mcp-server" target="_blank" rel="noopener noreferrer nofollow">repository</a> for examples).
+
+2. In Claude Desktop, go to **Settings → Developer → Edit Config**.
+3. Add the following to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+<Admonition type="info">
+If you omit `SIGNOZ_API_KEY` when starting the server, you can pass it via the client's `Authorization` header instead:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>"
+      }
+    }
+  }
+}
+```
+
+This is useful for hosted MCP servers or multi-tenant setups where each client authenticates independently.
+</Admonition>
+
+4. Restart Claude Desktop. The `signoz` server should appear in the developer console with its tools available.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="cursor" label="Cursor">
+
+<Tabs>
+<TabItem value="cursor-stdio" label="Stdio (Recommended)" default>
+
+You can configure this via the GUI or a project config file:
+
+- **GUI:** Open **Cursor → Settings → Cursor Settings → Tools & Integrations → + New MCP Server**
+- **Config file:** Create `.cursor/mcp.json` in your project root
+
+Use the following JSON for either method:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "command": "<path-to-binary>/signoz-mcp-server",
+      "args": [],
+      "env": {
+        "SIGNOZ_URL": "<your-signoz-url>",
+        "SIGNOZ_API_KEY": "<your-api-key>",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
+- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+Restart Cursor to activate the SigNoz tools.
+
+</TabItem>
+<TabItem value="cursor-http" label="HTTP">
+
+1. Start the MCP server in HTTP mode:
+
+```bash
+SIGNOZ_URL=<your-signoz-url> \
+SIGNOZ_API_KEY=<your-api-key> \
+TRANSPORT_MODE=http \
+MCP_SERVER_PORT=8000 \
+LOG_LEVEL=info \
+./signoz-mcp-server
+```
+
+Or use `docker-compose` (see the <a href="https://github.com/SigNoz/signoz-mcp-server" target="_blank" rel="noopener noreferrer nofollow">repository</a> for examples).
+
+2. Configure Cursor:
+   - **GUI:** Open **Cursor → Settings → Cursor Settings → Tools & Integrations → + New MCP Server**
+   - **Config file:** Create `.cursor/mcp.json` in your project root
+
+Use the following JSON for either method:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+<Admonition type="info">
+If you omit `SIGNOZ_API_KEY` when starting the server, pass it via the `Authorization` header instead:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>"
+      }
+    }
+  }
+}
+```
+</Admonition>
+
+Restart Cursor to activate the SigNoz tools.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+After setting up your MCP client, confirm the server is working:
+
+1. Open your AI assistant (Claude Desktop or Cursor).
+2. Ask: _"List all alerts"_ or _"Show me all available metrics"_.
+3. The assistant should return structured results from your SigNoz instance. If it does, the MCP server is connected and working correctly.
+
+## Configuration Reference
+
+All configuration is done via environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SIGNOZ_URL` | URL of your SigNoz instance | _(required)_ |
+| `SIGNOZ_API_KEY` | API key for authenticating with SigNoz | _(required unless passed via client header)_ |
+| `TRANSPORT_MODE` | Transport protocol: `stdio` or `http` | `stdio` |
+| `MCP_SERVER_PORT` | Port for the HTTP server (only used when `TRANSPORT_MODE=http`) | `8000` |
+| `LOG_LEVEL` | Logging verbosity: `debug`, `info`, `warn`, `error` | `info` |
+
+<details>
+<ToggleHeading>
+## Available Tools
+</ToggleHeading>
+
+The MCP server exposes the following tools to your AI assistant, grouped by domain:
+
+### Metrics
+
+| Tool | Description |
+|------|-------------|
+| List Metric Keys | Retrieve all available metric keys from SigNoz |
+| Search Metric Keys | Find specific metrics containing given text |
+| Get Metrics Field Values | Gets available field values for metric queries |
+| Get Metrics Available Fields | Gets available field names for metric queries |
+
+### Alerts
+
+| Tool | Description |
+|------|-------------|
+| List Alerts | Get all active alerts with detailed status |
+| Get Alert Details | Retrieve comprehensive information about a specific alert rule |
+| Get Alert History | Timeline of alert state changes for a specific rule |
+| Get Logs for Alert | Fetch logs related to a specific alert automatically |
+
+### Logs
+
+| Tool | Description |
+|------|-------------|
+| Get Error Logs | Retrieve logs with ERROR or FATAL severity |
+| Search Logs by Service | Search and filter logs for a specific service |
+| Search Logs | Search logs with flexible filtering across all services |
+| Aggregate Logs | Aggregate logs to provide statistics optionally grouped by fields |
+| List Log Views | Get all saved log views |
+| Get Log View | Retrieve a saved log view's complete configuration |
+| Get Logs Field Values | Gets available field values for log queries |
+| Get Logs Available Fields | Gets available field names for log queries |
+
+### Dashboards
+
+| Tool | Description |
+|------|-------------|
+| List Dashboards | Get dashboard summaries (name, UUID, description, tags) |
+| Get Dashboard | Retrieve complete dashboard configuration with panels and queries |
+| Create Dashboard | Create a new monitoring dashboard from a JSON definition |
+| Update Dashboard | Update an existing dashboard using its UUID and full JSON |
+
+### Services and Traces
+
+| Tool | Description |
+|------|-------------|
+| List Services | Discover all services within a specified time range |
+| Service Top Operations | Analyze performance metrics for a specific service |
+| Search Traces by Service | Search traces with filters (errors, duration, operation) |
+| Aggregate Traces | Aggregate traces to get statistics over spans |
+| Get Trace Details | Get comprehensive trace information with all spans and metadata |
+| Get Trace Error Analysis | Analyze error patterns across traces |
+| Get Trace Span Hierarchy | View span relationships and hierarchy within a trace |
+| Get Trace Field Values | Gets available field values for trace queries |
+| Get Trace Available Fields | Gets available field names for trace queries |
+
+### Query
+
+| Tool | Description |
+|------|-------------|
+| Query Builder | Generate and execute complex queries against SigNoz data |
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Tools not appearing in the AI client
+
+- Verify the binary path in your config is correct and the file is executable.
+- Check that `SIGNOZ_URL` and `SIGNOZ_API_KEY` are set correctly.
+- Restart the AI client after modifying the config.
+- Set `LOG_LEVEL=debug` to see detailed server logs and identify connection issues.
+
+### Authentication errors
+
+- Confirm your API key is valid and has not expired.
+- If using HTTP mode with the `Authorization` header, ensure the format is `Bearer <your-api-key>`.
+- If using Stdio mode, verify the `SIGNOZ_API_KEY` environment variable is set in the config JSON.
+
+### Server not starting (HTTP mode)
+
+- Ensure the port (default `8000`) is not already in use.
+- Check that `TRANSPORT_MODE=http` is set.
+- Review server logs for startup errors.
+
+</details>

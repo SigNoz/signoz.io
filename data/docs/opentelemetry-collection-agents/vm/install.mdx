@@ -1,0 +1,749 @@
+---
+date: 2026-02-27
+title: VM Collection Agent - Install
+id: install
+description: Install the OpenTelemetry Collector binary on your virtual machine to collect telemetry data.
+doc_type: howto
+---
+
+This guide walks you through installing the OpenTelemetry Collector **contrib** binary on your virtual machine. We use the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases" target="_blank" rel="noopener noreferrer nofollow">contrib distribution</a> and tailor the steps for sending data to SigNoz.
+
+## Prerequisites
+
+- SigNoz application up and running (SigNoz Cloud or self-hosted)
+- SigNoz ingestion endpoint accessible from the VM
+- Availability of ports: `4317`, `4318`, `8888`, `1777`, `13133`
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## OpenTelemetry Collector Installation
+
+<Tabs>
+<TabItem value="linux" label="Linux" default>
+
+<Tabs groupId="linux-method">
+<TabItem value="deb" label="DEB" default>
+
+The DEB package installs the Collector as a `systemd` service on Debian or Ubuntu. After installation, the default configuration is at `/etc/otelcol-contrib/config.yaml`.
+
+**Prerequisites**
+
+- Debian or Ubuntu (or compatible) system with `systemd`
+- `sudo` or root access
+- Network access to download packages
+
+### Step 1: Update package list
+
+```bash
+sudo apt-get update
+```
+
+### Step 2: Download the package
+
+```bash
+ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.deb"
+```
+
+### Step 3: Install the package
+
+```bash
+sudo dpkg -i otelcol-contrib_0.139.0_linux_${ARCH}.deb
+```
+
+### Step 4: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
+The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
+
+```bash
+/usr/bin/otelcol-contrib --help
+```
+</KeyPointCallout>
+### Step 5: Applying changes
+
+After modifying the configuration or environment file, restart the service:
+
+```bash
+sudo systemctl restart otelcol-contrib
+```
+
+### Step 6: Validate
+
+Check that the collector is running:
+
+```bash
+sudo journalctl -u otelcol-contrib -f
+```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
+
+</TabItem>
+<TabItem value="rpm" label="RPM">
+
+The RPM package installs the Collector as a `systemd` service on Red Hat, CentOS, or Fedora. After installation, the default configuration is at `/etc/otelcol-contrib/config.yaml`.
+
+**Prerequisites**
+
+- Red Hat, CentOS, Fedora, or compatible system with `systemd`
+- `sudo` or root access
+- Network access to download packages
+
+### Step 1: Update packages
+
+```bash
+sudo yum update
+```
+
+### Step 2: Download the package
+
+```bash
+ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.rpm"
+```
+
+### Step 3: Install the package
+
+```bash
+sudo rpm -ivh otelcol-contrib_0.139.0_linux_${ARCH}.rpm
+```
+
+### Step 4: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `/etc/otelcol-contrib/config.yaml`.
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+
+<KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
+The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
+
+```bash
+/usr/bin/otelcol-contrib --help
+```
+</KeyPointCallout>
+
+### Step 5: Applying changes
+
+After modifying the configuration or environment file, restart the service:
+
+```bash
+sudo systemctl restart otelcol-contrib
+```
+
+### Step 6: Validate
+
+Check that the collector is running:
+
+```bash
+sudo journalctl -u otelcol-contrib -f
+```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
+
+</TabItem>
+<TabItem value="manual" label="Manual">
+
+Download the Collector as a gzipped tarball and run the binary yourself. No package manager or service is used; you extract and run the binary and manage config and process yourself.
+
+**Prerequisites**
+
+- Linux (amd64 or arm64)
+- `curl` and `tar` installed
+- Network access to download the tarball
+
+### Step 1: Download the tarball
+
+```bash
+ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.tar.gz"
+```
+
+### Step 2: Extract
+
+```bash
+tar -xvf otelcol-contrib_0.139.0_linux_${ARCH}.tar.gz
+```
+
+### Step 3: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the extracted directory.
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+
+### Step 4: Run the collector
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+### Step 5: Validate
+
+Check that the collector is running:
+
+```bash
+tail -f otelcol-output.log
+```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+Download the Collector as a gzipped tarball for macOS (Intel or Apple Silicon). You extract and run the binary; there is no system service.
+
+**Prerequisites**
+
+- macOS (Intel or Apple Silicon)
+- Terminal and `curl` (included with macOS)
+- Network access to download the tarball
+
+### Step 1: Download the tarball
+
+```bash
+ARCH=$(uname -m | sed 's/x86_64/amd64/g')
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz"
+```
+
+### Step 2: Extract
+
+```bash
+tar -xvf otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz
+```
+
+### Step 3: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same directory.
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+
+### Step 4: Run the collector
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+### Step 5: Validate
+
+Check that the collector is running:
+
+```bash
+tail -f otelcol-output.log
+```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+<Tabs groupId="windows-method">
+<TabItem value="msi" label="MSI" default>
+
+The MSI installs the Collector as a Windows service (display name "OpenTelemetry Collector") and registers an Application Event Log source.
+
+**Prerequisites**
+
+- Windows (amd64)
+- Administrator rights to install the service
+- Network access to download the MSI
+
+### Step 1: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to the `config.yaml` file.
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+
+### Step 2: Run the Collector
+
+```powershell
+Start-Process msiexec -ArgumentList "/i", "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.msi", "CONFIG=config.yaml" -Wait
+```
+
+### Step 3: Validate
+
+Check that the collector is running:
+
+```powershell
+Get-EventLog -LogName Application -Source "OpenTelemetry Collector" -Newest 20
+```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
+
+</TabItem>
+<TabItem value="manual" label="Manual">
+
+Download the Collector as a gzipped tarball and run the executable yourself. No MSI or Windows service is used; you extract and run `otelcol-contrib.exe` and manage config and process yourself. Run the commands in PowerShell.
+
+**Prerequisites**
+
+- Windows (amd64), PowerShell
+- `curl` (included in Windows 10+) and `tar` (Windows 10+)
+- Network access to download the tarball
+
+### Step 1: Download the tarball
+
+```powershell
+curl -sSL -o "otelcol-contrib_0.139.0_windows_amd64.tar.gz" "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.tar.gz"
+```
+
+### Step 2: Extract
+
+```powershell
+tar -xvzf otelcol-contrib_0.139.0_windows_amd64.tar.gz
+```
+
+### Step 3: Create OpenTelemetry Collector Configuration
+
+The following config is tailored for SigNoz usage (traces, metrics, logs). Copy the config to `config.yaml` in the same folder.
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+
+### Step 4: Run the collector
+
+```powershell
+Start-Process -FilePath ".\otelcol-contrib.exe" -ArgumentList "--config", ".\config.yaml" -RedirectStandardOutput "otelcol-output.log" -RedirectStandardError "otelcol-error.log" -NoNewWindow
+```
+
+### Step 5: Validate
+
+Check that the collector is running:
+
+```powershell
+Get-Content otelcol-output.log -Wait -Tail 50
+```
+
+You should see log lines indicating the receivers started successfully:
+
+```
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. If you have instrumented applications sending data, check **Traces** and **Logs Explorer** to confirm traces and logs are flowing.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No data appears in SigNoz after installation
+
+**Symptoms:** Host does not appear in **Infrastructure Monitoring → Hosts**, or traces, metrics, or logs do not show in SigNoz despite the Collector running.
+
+**Likely causes:** Collector not receiving data; incorrect SigNoz endpoint or ingestion key; network or firewall blocking egress.
+
+**Resolution:** Add a [debug exporter](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#debug-exporter) to verify whether the Collector receives telemetry. Append the snippet below to your existing config—do not replace your full config.
+
+Add the `debug` exporter to your `exporters` section:
+
+```yaml:/etc/otelcol-contrib/config.yaml {2-3}
+exporters:
+  debug:
+    verbosity: detailed
+```
+
+Then add `debug` to each pipeline's `exporters` list (before `otlp`):
+
+```yaml:/etc/otelcol-contrib/config.yaml {4-11}
+service:
+  pipelines:
+    metrics:
+      exporters: [debug, otlp]
+    traces:
+      exporters: [debug, otlp]
+    logs:
+      exporters: [debug, otlp]
+```
+
+The `verbosity: detailed` setting logs full telemetry payloads to the Collector output.
+
+**Verification:** Restart the Collector and tail logs (`journalctl -u otelcol-contrib -f` for DEB/RPM, or `tail -f otelcol-output.log` for manual runs). If spans, metrics, or logs appear in the debug output but not in SigNoz, the issue is with the SigNoz exporter (endpoint, ingestion key, or network). Remove the debug exporter after troubleshooting.
+
+</details>
+
+## Next Steps
+
+- [Configure the Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/)
+- [VM Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/vm/overview/)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
+- [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)

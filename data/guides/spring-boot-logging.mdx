@@ -1,0 +1,477 @@
+---
+
+title: Spring Boot Logging - The Complete Guide (Logback, Log4j2 & Structured Logs)
+slug: spring-boot-logging
+date: 2026-01-23
+tags: [spring-boot, logging]
+authors: [saurabh_patil]
+description: A practical guide to Spring Boot logging - Logback, Log4j2, JSON logs, and runtime log level tweaks. Learn to configure Logback, enable structured JSON logs, manage log levels at runtime, and aggregate logs for observability.
+keywords: [spring boot logging, spring boot logback, spring boot structured logging, spring boot log4j2, java logging best practices, spring boot logging example]
+
+---
+
+Spring Boot gives you usable console logs out of the box, but that’s usually not enough for production. You typically need to control log volume, add request/trace ID correlation to follow a single user flow, and emit structured (JSON) logs that your logging pipeline can parse reliably. This guide covers configuring Logback (or switching to Log4j2), using log levels and log groups, enabling structured JSON logs, and changing log levels at runtime.
+
+## How Logging Works in Spring Boot?
+
+Spring Boot’s logging architecture is built on a facade pattern, which separates the application code from the actual logging implementation. This allows you to switch frameworks without rewriting code.
+
+**SLF4J (Simple Logging Facade for Java)** is an abstraction layer that provides an interface for logging. It then delegates the actual log processing to a logging library at runtime. If the logging library is not explicitly set, then it defaults to Logback.
+
+Logback processes the log message in the following three steps:
+
+1. **Level Check:** Logback first checks if the requested log level (e.g., `INFO`) is enabled for that specific logger. If the level is below the configured threshold, the process stops immediately to save resources.
+
+2. **Formatting:** If the log level is enabled, Logback formats the message according to the configured pattern (adding timestamp, thread name, etc.).
+
+3. **Appender Delegation:** The formatted message is passed to the configured appenders (Console, File, etc.) for final output.
+
+## Understanding Spring Boot Log Format
+
+The standard Spring Boot log entry looks like:
+
+```text
+2026-01-19T10:15:30.123Z  INFO 123456 --- [myapp] [           main] c.e.demo.DemoApplication                 : Starting DemoApplication using Java 21
+```
+
+Here’s what each part of the log line means:
+
+<Figure src="/img/guides/2026/01/spring-boot-logging-log-format.webp" alt="The Anatomy of a Spring Boot Log Line: A visual mapping of the default log pattern to its constituent fields." caption="Structure of a Spring Boot Log Entry" />
+
+- **Date and Time -** is critical for establishing the exact timeline of events during troubleshooting.
+
+- **Log Level -** `INFO`, `WARN`, `ERROR`, `DEBUG`, or `TRACE`, indicates the severity of the message to help filter noise from critical errors.
+
+- **Process ID -** is useful for distinguishing between multiple instances running on the same server.
+
+- **Separator -** is a `---` string to distinguish the start of the actual log message.
+
+- **Application Name -** is enclosed in square brackets (logged by default only if `spring.application.name` is set) and helps to identify which microservice generated the log in centralized systems.
+
+- **Application Group -** is enclosed in square brackets (logged by default only if `spring.application.group` is set) and helps to categorize logs by business domain or team ownership.
+
+- **Thread Name -** is enclosed in square brackets (e.g., `[main]`) and identifies the execution thread, which is vital for debugging concurrency issues.
+
+- **Correlation ID -** is a unique ID that links all logs for a single request across distributed services. Created if tracing is enabled (not shown in the sample above).
+
+- **Logger Name -** usually it is the class name, abbreviated to save space and pinpoints to the exact source class where the log statement was triggered.
+
+- **The Log Message -** is the actual log content. It contains the specific context or error details you intended to record.
+
+## Hands-On Demo: Using the logger in your Code
+
+In this demo, we will be adding logs to a Spring Boot application using the `LoggerFactory` from SLF4J and much more. The Spring Boot application we will use in this demo is available to clone from our [repository](https://github.com/SigNoz/examples). You can set it up by following below commands:
+
+### Quick Setup: Clone the repository and change directory to it.
+
+```bash
+git clone https://github.com/SigNoz/examples.git
+cd examples/java/spring-boot-logging/
+```
+
+### Step 1: Import the required libraries
+
+Copy paste following lines into your `SpringBootLoggingDemoApplication.java` file. You can find file in this path: `src/main/java/com/example/demo/`.
+
+```bash
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+```
+
+### Step 2: Create the logger instance
+
+Copy paste the highlighted line from below code snippet. It will create a logger instance from the LoggerFactory.
+
+```bash
+@Component
+class DemoRunner implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(DemoRunner.class);
+
+    @Override
+    public void run(String... args) {
+        System.out.println("========================================");
+        System.out.println("Spring Boot Logging Demo Application");
+        System.out.println("========================================");
+        System.out.println("Application started successfully!");
+        System.out.println("Add your logging code here...");
+        System.out.println("========================================");
+    }
+}
+```
+
+### Step 3: Add the Logging statements
+
+Copy paste the highlighted lines from below code snippet.
+
+```bash
+@Component
+class DemoRunner implements CommandLineRunner {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DemoRunner.class);
+
+    @Override
+    public void run(String... args) {
+        System.out.println("========================================");
+        System.out.println("Spring Boot Logging Demo Application");
+        System.out.println("========================================");
+        
+        logger.trace("TRACE level log - Most detailed");
+        logger.debug("DEBUG level log - Detailed diagnostic information");
+        logger.info("INFO level log - General application information");
+        logger.warn("WARN level log - Potential issues or warnings");
+        logger.error("ERROR level log - Error events");
+        
+        System.out.println("========================================");
+        System.out.println("Check the console output above!");
+        System.out.println("Notice that TRACE and DEBUG logs are not visible by default. They need to be enabled.");
+        System.out.println("========================================");
+    }
+}
+```
+
+### Step 4: Build and Run
+
+Rebuild and run the application.
+
+```bash
+mvn clean install
+mvn spring-boot:run
+```
+
+You should be able to see the logs as shared in the following screenshot.
+
+<Figure src="/img/guides/2026/01/spring-boot-logging-logger-log.webp" alt="Spring Boot logging demonstration showing the timestamp, thread, logger name, and color-coded severity levels for standard log events." caption="Spring Boot Console Logging Output Example" />
+
+If you carefully look at the screenshot above, you will notice that the Trace and Debug logs are missing. This happens because they need to be enabled when we need to log traces or debug.
+
+### Step 5: Configuring Log Levels
+
+By default, Spring Boot shows only `INFO`, `WARN`, and `ERROR` logs. To see `DEBUG` and `TRACE` logs, configure log levels in `application.properties` file. You can find the file in this path: `/src/main/resources/`.
+
+- **To enable TRACE logs for your application only (shows all log levels from `com.example.demo` package)**
+
+    ```java
+    logging.level.com.example.demo=TRACE
+    ```
+
+- **To enable DEBUG logs for your application only**
+
+    ```java
+    logging.level.com.example.demo=DEBUG
+    ```
+
+- **Set root logger to reduce noise from libraries**
+
+    ```java
+    logging.level.root=WARN
+    ```
+
+    It will only show WARN and ERROR from all libraries and the Spring Framework, keeping console output clean.
+
+- **Combine for a production-like setup**
+
+    ```java
+    # Quiet everything except your app
+    logging.level.root=WARN
+    logging.level.com.example.demo=DEBUG
+    ```
+
+    Your app shows DEBUG logs, while Spring Framework and libraries show only WARN and ERROR. After changing `application.properties`, restart the application to see the new logs.
+
+<KeyPointCallout defaultCollapsed="true" title="Why TRACE or DEBUG cannot be enabled at the same time for one package?">
+
+If you add both lines to enable TRACE and DEBUG for `com.example.demo`:
+
+```java
+logging.level.com.example.demo=DEBUG
+logging.level.com.example.demo=TRACE
+```
+
+Spring Boot will use only the last value - in this case `TRACE` . The first line (DEBUG) gets overridden and ignored.
+
+**Why it works this way:**
+
+In properties files, when the same key appears multiple times, the last occurrence wins. It's like reassigning a variable:
+
+```java
+level= DEBUG;// First assignment
+level= TRACE;// This overwrites the previous value
+```
+
+**What you should do:**
+
+Choose one based on how much detail you want to see:
+
+- Want to see DEBUG and above (DEBUG, INFO, WARN, ERROR)? → Use `DEBUG`
+- Want to see everything, including TRACE? → Use `TRACE`
+
+</KeyPointCallout>
+
+### Step 6: Using Log Groups
+
+Managing log levels for individual packages does not scale in production systems. Spring Boot addresses this by providing `Log Groups`, which lets you apply a single log level to multiple related loggers at once. This makes it practical to control logging for entire areas of the application, such as the web layer or database access, without configuring each package separately.
+
+Add the following to your `application.properties` to create a custom group named `myapp` and set its level:
+
+```java
+# Define a custom group named 'myapp'
+logging.group.myapp=com.example.demo,org.springframework.web
+
+# Set the level for the entire group
+logging.level.myapp=WARN
+```
+
+Spring Boot also comes with pre-defined groups you can use immediately:
+
+- **web:** `org.springframework.core.codec`, `org.springframework.http`, `org.springframework.web` , etc.
+
+- **sql:** Includes `org.springframework.jdbc.core`, `org.hibernate.SQL`
+
+For example, to debug all SQL queries without finding every Hibernate package name, just use:
+
+```java
+logging.level.sql=DEBUG
+```
+
+### Step 7: Outputting to Files
+
+By default, logs are ephemeral, they appear in the console and disappear when you restart the app. For production, you need to persist logs to disk. To write logs to a file, specify the `logging.file.name` or `logging.file.path` property in `application.properties`.
+
+```java
+# Write to a specific file relative to the project directory
+logging.file.name=logs/application.log
+```
+
+Spring Boot (via Logback) handles file management automatically. It uses a `RollingFileAppender` which:
+
+- Rotates log files when they reach **10 MB**.
+
+- Archive old log files.
+
+- Keeps a default history of 7 days.
+
+You can customize these defaults if your application generates heavy logs:
+
+```java
+# Rotate when file reaches 50MB
+logging.logback.rollingpolicy.max-file-size=50MB
+
+# Keep logs for 10 days
+logging.logback.rollingpolicy.max-history=10
+
+# Limit total size of all archived logs to 1GB to save disk space
+logging.logback.rollingpolicy.total-size-cap=1GB
+```
+
+### Step 8: Managing Log Levels at Runtime
+
+Changing log levels in `application.properties` requires a restart, which isn't ideal during a production incident. Spring Boot Actuator allows you to view and modify log levels on the fly without downtime. First, add the Actuator dependency and expose the `loggers` endpoint in `application.properties` file.
+
+```java
+management.endpoints.web.exposure.include=loggers
+```
+
+Now you can interact with the API using `curl` or Postman.
+
+**Check the current level of a logger:**
+
+```java
+curl http://localhost:8080/actuator/loggers/com.example.demo
+```
+
+**Change the log level to TRACE:**
+
+Send a `POST` request with the new configuration.
+
+```bash
+curl -X POST http://localhost:8080/actuator/loggers/com.example.demo \
+     -H "Content-Type: application/json" \
+     -d '{"configuredLevel": "TRACE"}'
+```
+
+The change is instantaneous. Once you have finished debugging, you can send another request to set it back to `INFO` or `null` (to inherit from the parent logger).
+
+### Step 9: Switching to Log4j2
+
+While Logback is the default, **Log4j2** is a popular alternative, often chosen for its performance benefits in high-throughput asynchronous logging scenarios. To switch, you must exclude the default logging starter and add the Log4j2 starter. Make below changes into **`pom.xml`** file.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-log4j2</artifactId>
+</dependency>
+```
+
+Once the dependencies are swapped, Spring Boot automatically detects and configures Log4j2. You can then place a `log4j2-spring.xml` file in `src/main/resources` for advanced configuration, such as async logging or custom appenders.
+
+<KeyPointCallout defaultCollapsed="true" title="Do I need to make changes in application.properties as well?">
+
+- Your existing `application.properties` logging configuration will still work, no changes needed.
+
+- The logging code in your Java classes remains unchanged.
+
+- Only the underlying implementation changes from Logback to Log4j2
+
+</KeyPointCallout>
+
+## Centralizing Spring Boot Logs with OpenTelemetry
+
+While local file logging works well for single-application development, production environments with microservices require a different approach. When the application scales to multiple instances across containers or cloud environments, SSH-ing into individual servers to grep through log files becomes impractical.
+
+OpenTelemetry provides a vendor-neutral standard for collecting logs, metrics, and traces from your Spring Boot applications and exporting them to a centralized observability backend like SigNoz. You can instrument your Spring Boot application with Java agent to emit the telemetry, which can be ingested by OpenTelemetry Collector and exported to SigNoz.
+
+SigNoz serves as a all-in-one open-source observability platform that receives this telemetry data, providing full-text search, filtering, and visualization capabilities in a single dashboard. Instead of context-switching between log files on different servers, you can query all your application logs from a unified interface, filter by time ranges or trace IDs, and quickly identify issues across your entire distributed system. You just need to add the OpenTelemetry agent to your application, configure the SigNoz endpoint, and your logs automatically flow to a centralized location without changing your existing logging code. 
+
+<Figure src="/img/guides/2026/01/spring-boot-logging-logs.webp" alt="SigNoz Logs Explorer showing centralized Spring Boot logs ingested via OpenTelemetry, filtered by log level and environment with timestamps and message details." caption="Centralized Application logs visualized in SigNoz using OpenTelemetry, with real-time filtering by severity, service, and timestamp" />
+
+For a complete step-by-step guide to integrating OpenTelemetry with Spring Boot and sending telemetry to SigNoz, including metrics, distributed tracing, and logs, see our detailed walkthrough: [**OpenTelemetry Spring Boot Integration Guide**](/blog/opentelemetry-spring-boot/).
+
+## Spring Boot Logging Best Practices for Production
+
+Poorly configured logging is a common source of noise, blind spots, and performance issues. These practices focus on the most common production failures."
+
+### 1. Use Structured Logging (JSON Format)
+
+Plain text logs are hard to parse at scale. Structured logging outputs JSON for easy ingestion by log aggregation tools.
+
+- **Spring Boot 3.4+ Native Support:**
+
+    ```java
+    # Enable structured logging
+    logging.structured.format.console=ecs
+    ```
+
+    Supported formats: `ecs` (Elastic Common Schema), `gelf`, `logstash`
+
+    **Output Example (ECS format):**
+
+    ```json
+    {
+      "@timestamp": "2026-01-19T10:30:45.123Z",
+      "log.level": "INFO",
+      "message": "User logged in",
+      "service.name": "user-service",
+      "traceId": "abc123",
+      "spanId": "def456"
+    }
+    ```
+
+- **For Logback (pre-3.4)**, add `logstash-logback-encoder`:
+
+    ```xml
+    <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>9.0</version>
+    </dependency>    
+    ```
+
+### 2. Never Log Sensitive Data
+
+Never log PII (Personally Identifiable Information), passwords, or API keys. If you log a generic `User` object, you might accidentally expose `passwordHash` or `creditCard`.
+
+- Override `toString()` methods in your DTOs to exclude sensitive fields.
+- Use Logback masks to redact patterns like credit card numbers and emails.
+
+    ```java
+    public String maskEmail(String email) {
+        return email.replaceAll("(^[^@]{3})[^@]*", "$1**");
+    }
+    
+    logger.info("User email: {}", maskEmail(user.getEmail()));
+    // Output: User email: joh**@example.com
+    ```
+
+### 3. Use MDC for Request Tracing
+
+In a microservices environment, a single user request might traverse five different services. If an error occurs in the third service, finding the logs in the first service that triggered it can be impossible without a link.
+
+Use **MDC (Mapped Diagnostic Context)** to add a unique `traceId` to every log entry associated with a request. If you are using Spring Cloud Sleuth or Micrometre Tracing (built into Spring Boot 3), this happens automatically.
+
+```java
+// Manual MDC example (if not using an auto-instrumentation agent)
+MDC.put("traceId", UUID.randomUUID().toString());
+logger.info("Action started");
+// ...
+MDC.clear();
+```
+
+### 4. Separate Dev and Prod Configurations
+
+Use **Spring Profiles** to keep your local console colourful and verbose, and your production logs structured (JSON) and concise (INFO/WARN)
+
+### 5. Monitor Log Volume
+
+Logging is I/O intensive. A runaway loop logging an error can fill up your disk or spike your ingestion bill. Set alerts on log volume and, if necessary, use sampling for high-frequency logs.
+
+### 6. Implement Log Rotation and Retention
+
+Production systems must rotate logs to prevent disk exhaustion:
+
+```java
+logging.logback.rollingpolicy.max-file-size=50MB
+logging.logback.rollingpolicy.max-history=7
+logging.logback.rollingpolicy.total-size-cap=500MB
+```
+
+## FAQs
+
+### Q1. How does logging work in Spring Boot?
+
+Spring Boot uses SLF4J (Simple Logging Facade for Java) as its logging API, with Logback as the default implementation. When you include any Spring Boot starter, the `spring-boot-starter-logging` dependency is automatically included, with Logback configured with sensible defaults. Your application logs through SLF4J, which delegates to Logback for actual output. This abstraction allows switching logging implementations without code changes.
+
+### Q2. Does Spring Boot use Log4j or Logback?
+
+Spring Boot uses **Logback by default**. Logback is included via the `spring-boot-starter-logging` dependency that's part of all Spring Boot starters. To use Log4j2, you must explicitly exclude `spring-boot-starter-logging` and add `spring-boot-starter-log4j2` to your project.
+
+### Q3. Which is better: Log4j2 or Logback?
+
+Both are excellent choices with different strengths:
+
+- **Choose Logback** for: Simplicity, zero configuration, moderate logging needs.
+
+- **Choose Log4j2** for: High-throughput applications, native async logging, JSON output, garbage-free logging.
+
+Log4j2 offers better performance in multi-threaded scenarios, but Logback's seamless Spring Boot integration makes it the practical choice for most applications.
+
+### Q4. What is the default log file in Spring Boot?
+
+By default, **Spring Boot does not create a log file**—it only logs to the console. To enable file logging, set `logging.file.name` (for a specific file) or `logging.file.path` (for a directory where Spring Boot creates `spring.log`).
+
+### Q5. How can I change log levels at runtime?
+
+**Option 1: Spring Boot Actuator**
+
+```java
+management.endpoints.web.exposure.include=loggers
+```
+
+Then use the API:
+
+```bash
+curl -X POST http://localhost:8080/actuator/loggers/com.yourcompany \
+  -H 'Content-Type: application/json' \
+  -d '{"configuredLevel": "DEBUG"}'
+```
+
+**Option 2: For Log4j2**, use JMX manipulation.
+
+---
+
+## Further Reading
+
+[**How to Log All Spring Boot Requests and Responses - A Guide**](/guides/spring-boot-how-to-log-all-requests-and-responses-with-exceptions-in-single-place/)
+
+[**How to Fix ClassCastException - SLF4J to Logback Conversion**](/guides/classcastexception-org-slf4j-impl-log4jloggeradapter-cannot-be-cast-to-ch-qos-logback-classic-logger/)

@@ -5,19 +5,19 @@ import { Button } from '@headlessui/react'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
-const COMPANIES = [
+export const COMPANIES = [
   { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
   { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
   { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
   { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
+  { image: '/svgs/icons/formance.svg', imageDesc: 'formance logo' },
   { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
   { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
+  { image: '/svgs/icons/sarvam.svg', imageDesc: 'sarvam logo' },
   { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
-  { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
-  { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
+  { image: '/svgs/icons/lovart.svg', imageDesc: 'lovart logo' },
+  { image: '/svgs/icons/blaxel.svg', imageDesc: 'blaxel logo' },
+  { image: '/img/case_study/logos/shaped-logo.svg', imageDesc: 'shaped logo' },
 ]
 
 export const TrustedByTeams = ({ page }) => {

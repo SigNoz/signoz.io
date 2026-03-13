@@ -18,6 +18,9 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      maxWidth: {
+        '8xl': '1440px',
+      },
       lineHeight: {
         11: '2.75rem',
         12: '3rem',
@@ -96,7 +99,7 @@ module.exports = {
           400: '#C0C1C3',
         },
         signoz_slate: {
-           50: '#62687C',
+          50: '#62687C',
           100: '#3C4152',
           200: '#2C3140',
           300: '#242834',
@@ -104,6 +107,7 @@ module.exports = {
           500: '#161922',
         },
         signoz_forest: {
+          50: '#E9FCF4',
           200: '#A8F3D3',
           300: '#7CEDBE',
           400: '#51E7A8',
@@ -236,10 +240,11 @@ module.exports = {
       }),
     },
     fontFamily: {
-      'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
-      'mono': ['Geist Mono', 'monospace'],
-      'satoshi': ['Satoshi', 'sans-serif'], 'satoshi-bold': ['Satoshi Bold', 'sans-serif'],
-    }
+      sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+      mono: ['Geist Mono', 'monospace'],
+      satoshi: ['Satoshi', 'sans-serif'],
+      'satoshi-bold': ['Satoshi Bold', 'sans-serif'],
+    },
   },
   plugins: [
     require('@tailwindcss/forms'),

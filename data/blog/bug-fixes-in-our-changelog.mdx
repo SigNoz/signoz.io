@@ -1,0 +1,94 @@
+---
+
+title: Why am I writing more bug fix entries in changelog every week?
+slug: bug-fixes-in-our-changelog
+date: 2026-02-03
+tags: [Engineering, Startups]
+authors: [anushka_karmakar]
+description: Observations from writing the SigNoz changelog and a conversation with our CTO on product trade-offs, UX debt, and how priorities evolve as a company grows.
+image: /img/blog/2026/why-more-bug-fixes-in-changelog.webp
+keywords: [changelog, bug fixes, product trade-offs, UX debt, open source, startup engineering]
+
+---
+
+If you follow our [changelog](https://signoz.io/changelog/), you might have noticed something recently. The list of bug fixes has been getting longer, and the list of new features, well, a bit shorter.
+
+Every week when I write it, there’s a tiny devil on my shoulder asking why these bugs existed in the first place. As a marketer, it’s easy for me to expect a flawless product. At the same time, I know products don’t reach a place like this without a history behind them.
+
+I wanted to understand that history.
+
+So I got on a call with [Ankit](https://www.linkedin.com/in/ankitnayan/), our CTO. I assumed we would talk about technical issues, refactors, and things that didn’t age well in the codebase. What I heard was a much broader explanation of how SigNoz evolved and why certain decisions made sense at the time they were made. Much of it came down to the constant balance between shipping new features and improving how the product already works.
+
+I found that perspective interesting, and I think it’s worth sharing.
+
+---
+
+Ankit began by talking about the early days of the company. Back then, the main question wasn’t about polish. It was about whether anyone would pay for the product at all.
+
+SigNoz wasn’t built in stealth. It was built in the open, with users already relying on it. That meant prioritizing the core things that made the product usable in the first place: a unified datastore for logs, metrics & traces, the ability to correlate signals and enough power for teams to actually run production systems on top of it.
+
+A finished product takes time. In the early years, time was spent proving that the product functionalities were valuable enough for customers to pay for it.
+
+*That framing helped me place many of our early trade-offs in context.*
+
+When we talked about bugs and UX, Ankit explained how expectations change as a company grows.
+
+With a small number of customers, people are often buying belief. They care more about what the product can eventually become. As the customer base grows, stability and ease of use start to matter much more. At that point, users compare you with other available alternatives.
+
+The product stayed largely the same, but the bar quietly moved as we kept building the way we knew was right at the time. That shift isn’t obvious when you’re inside the company and shipping continuously.
+
+Over time, small frictions add up simply because more people are using more parts of the product in more ways. Ankit, and by extension, the team realized that [**what got us here won’t get us there**](https://jamesclear.com/book-summaries/what-got-you-here-wont-get-you-there).
+
+*This helped me understand why the changelog looks the way it does today.*
+
+As the conversation went on, I started seeing the product’s journey more clearly, in phases rather than isolated decisions.
+
+Ankit spoke about how tolerance looks very different at different stages. When there are 20 customers, people are willing to work around rough edges if the value is strong. They are buying into an idea as much as a tool. At 50 customers, expectations rise. At a 100 and beyond, users start comparing you with products that have been around for years, aka the legacy players.
+
+Nothing dramatic changes inside the product at those moments. What changes is the scale at which friction is felt. The same small UX issue that annoyed a handful of users earlier now shows up repeatedly in support tickets simply because many more people are touching that part of the product.
+
+*Hearing this helped me understand why certain things stayed the way they did for longer than I would have expected.* 
+
+The cost of fixing them earlier would have meant delaying other work that was critical at that stage. In practice, this meant making trade-offs. [Querying the logs](https://signoz.io/blog/query-performance-improvement/) had to get faster before the [time picker](https://signoz.io/changelog/2026-01-15-flexible-time-range-input-d5hcy7m0ay04j7rmrfyqlkl5) could get more intuitive.
+
+We then spoke about feature decisions that were driven more by instinct than by immediate demand.
+
+Ankit shared how betting on OpenTelemetry early shaped many downstream choices. Aligning deeply with open standards required effort and rework at a time when it wasn’t obvious that this would become the default across the industry. That decision wasn’t validated by a spike in adoption right away. Instead, it was a belief about where the ecosystem was heading.
+
+The same instinct showed up later in trace analytics. He talked about spending time with the [Dapper paper](https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/) and studying distributed tracing in depth. That research made it clear that many real-world systems don’t fit neatly into simple request-response models. Async workflows, messaging systems, long-running background jobs, and websockets create traces that are large and hard to reason about.
+
+So the team built support for those cases even when they weren’t top feature requests. Early adoption was limited. Some of these features felt ahead of their time.
+
+Today, many AI companies ask us specifically about how we handle [very large traces](https://signoz.io/blog/traces-without-limits/) and [complex async flows](https://signoz.io/docs/messaging-queues/overview/). The features that once seemed niche are now directly relevant to the problems these teams are trying to solve.
+
+That part of the conversation stayed with me. *It was a reminder that not all meaningful work shows immediate results, and that some bets only make sense when the rest of the market catches up.*
+
+When we came back to UX and bugs, the story became more concrete.
+
+Ankit explained that UX issues were always visible in some form. With limited bandwidth (typical startup excuse, but stay with me), the team had to choose what to work on first. When users were asking for more reliable alerts, better routing policies, and visibility into alert history, those problems took priority. They directly affected whether teams could depend on the product in production.
+
+As the customer base grew, the nature of feedback changed too. People asked less for new capabilities and more for clarity and ease of use. At the same time, word of mouth started showing up as a strong acquisition channel. If users weren’t enjoying the experience, they were less likely to recommend the product, even if the feature set was solid.
+
+We ran Net Promoter Score (NPS) survey in November 2025 and that brought all of this together. Feedback that had been scattered across tickets and conversations became a single number. That made the debt visible and actionable.
+
+*Once there was a clear signal, the decision to focus on UX became much easier to align around.*
+
+But how does this phase of fixing bugs look like in practice and why is it possible now?
+
+Over the last few months, the engineering team has grown significantly and that change matters. More people on the team means there’s finally room to slow down in some areas without stalling everything else. While parts of the team focus on improving UX and fixing long-standing issues, others continue to move platform work forward. 
+
+Bug fixing, in this phase, serves a second purpose as well. New engineers are pairing with original module owners and working through issues together. That process transfers context that documentation can’t fully capture, especially the mental models behind complex systems. It requires time, effort, and often direct guidance. Over time, this helps new team members build a deeper understanding of the system and take on ownership.
+
+What also changes in this phase is how features are shaped and evaluated. Experience is now part of the PRD from the start. When a feature is proposed, the team looks beyond whether it works functionally and asks who will use it, how they will interact with it, and where friction might appear.
+
+Success, going forward, will be measured more closely at the feature level. Adoption and usability will matter as much as capability because the goal is to reduce friction incrementally and not just add surface area to the product. 
+
+*Earlier, the question was whether anyone would pay for the product at all. Today, polish is simply part of what users expect by default.*
+
+---
+
+I went into this conversation trying to understand why our changelog looks the way it does today. I’m glad that I came away with a clearer picture of how we arrived here and why the decisions made along the way weren’t careless or accidental.
+
+I’m sharing this because I think many teams find themselves in a similar place. Shipping continuously, carrying some amount of debt, balancing instinct, feedback, and limited time.
+
+And as I close, I’m starting to think that the most useful context might not always come from a roadmap (changelog in my case) or a metric. Maybe it lives in the reasoning behind the trade-offs that got you there :)

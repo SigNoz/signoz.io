@@ -1,0 +1,270 @@
+---
+date: 2026-03-05
+id: rust-manual-instrumentation
+title: Manual Instrumentation for Rust
+description: Create custom spans, add attributes, record events and errors in Rust applications with OpenTelemetry and SigNoz
+
+doc_type: howto
+---
+
+Manual instrumentation gives you fine-grained control when you need to capture specific business operations, attach custom attributes, or ensure failures surface with the right context in SigNoz.
+
+<KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed={true}>
+  Manual instrumentation steps are identical across deployments—only your OTLP endpoint and ingestion key differ.
+</KeyPointCallout>
+
+## Prerequisites
+
+- Complete the [Rust OpenTelemetry instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-rust/) to set up the tracer provider and exporter.
+- Tested with Rust 1.75+ and OpenTelemetry Rust SDK v0.31.0.
+
+## Step 1. Acquire a tracer
+
+Get a tracer instance to create spans. Reuse tracers instead of creating new ones for each request:
+
+```rust:src/main.rs
+use opentelemetry::global;
+use opentelemetry::trace::Tracer;
+
+fn get_tracer() -> impl Tracer {
+    global::tracer("my-service")
+}
+```
+
+Tips:
+- The tracer name typically matches your service or module name.
+- Store the tracer in a lazy static or pass it through your application context for reuse.
+
+## Step 2. Create manual spans
+
+Wrap important operations in spans using `in_span`:
+
+```rust:src/order_service.rs
+use opentelemetry::trace::{Tracer, TraceContextExt};
+use opentelemetry::{global, KeyValue};
+
+pub fn process_order(order_id: &str) {
+    let tracer = global::tracer("order-service");
+
+    tracer.in_span("process-order", |cx| {
+        let span = cx.span();
+        span.set_attribute(KeyValue::new("order.id", order_id.to_string()));
+        span.set_attribute(KeyValue::new("order.status", "processing"));
+
+        // Your order processing logic here
+        validate_inventory(order_id);
+        charge_payment(order_id);
+    });
+}
+```
+
+The `in_span` closure automatically ends the span when the block completes, even if an error occurs.
+
+## Step 3. Create nested spans
+
+For operations with sub-steps, create child spans that automatically link to their parent:
+
+```rust:src/checkout_service.rs
+use opentelemetry::trace::{Tracer, TraceContextExt};
+use opentelemetry::{global, KeyValue};
+
+pub fn checkout(cart_id: &str) {
+    let tracer = global::tracer("checkout-service");
+
+    tracer.in_span("checkout", |cx| {
+        let span = cx.span();
+        span.set_attribute(KeyValue::new("cart.id", cart_id.to_string()));
+
+        // Child span for validation
+        tracer.in_span("validate-cart", |cx| {
+            let span = cx.span();
+            span.set_attribute(KeyValue::new("cart.item_count", 5i64));
+            // Validation logic
+        });
+
+        // Child span for payment
+        tracer.in_span("process-payment", |cx| {
+            let span = cx.span();
+            span.set_attribute(KeyValue::new("payment.method", "credit_card"));
+            // Payment logic
+        });
+    });
+}
+```
+
+Child spans created within the parent's `in_span` closure automatically inherit the trace context.
+
+## Step 4. Add attributes
+
+Attributes are key-value pairs that provide context for filtering and analysis in SigNoz:
+
+```rust:src/payment_service.rs
+use opentelemetry::trace::TraceContextExt;
+use opentelemetry::KeyValue;
+
+pub fn handle_payment(cx: &opentelemetry::Context, amount: f64, currency: &str) {
+    let span = cx.span();
+
+    span.set_attribute(KeyValue::new("payment.amount", amount));
+    span.set_attribute(KeyValue::new("payment.currency", currency.to_string()));
+    span.set_attribute(KeyValue::new("payment.method", "credit_card"));
+    span.set_attribute(KeyValue::new("payment.success", true));
+}
+```
+
+Supported attribute value types:
+- `String` / `&str`
+- `i64`, `f64`
+- `bool`
+- Arrays of the above types
+
+## Step 5. Add events
+
+Events mark notable moments within a span, like retries, cache hits, or state transitions:
+
+```rust:src/cache_service.rs
+use opentelemetry::trace::TraceContextExt;
+use opentelemetry::KeyValue;
+
+pub fn fetch_from_cache(cx: &opentelemetry::Context, key: &str) -> Option<String> {
+    let span = cx.span();
+
+    // Check cache
+    if let Some(value) = cache_lookup(key) {
+        span.add_event("cache.hit", vec![
+            KeyValue::new("cache.key", key.to_string()),
+        ]);
+        return Some(value);
+    }
+
+    span.add_event("cache.miss", vec![
+        KeyValue::new("cache.key", key.to_string()),
+    ]);
+
+    // Fetch from database and populate cache
+    let value = fetch_from_db(key)?;
+    span.add_event("cache.populated", vec![
+        KeyValue::new("cache.key", key.to_string()),
+        KeyValue::new("cache.ttl_seconds", 3600i64),
+    ]);
+
+    Some(value)
+}
+```
+
+## Step 6. Record errors
+
+Flag failures on the span so they surface in SigNoz error views and alerts:
+
+```rust:src/risky_service.rs
+use opentelemetry::trace::{Tracer, TraceContextExt, Status};
+use opentelemetry::{global, KeyValue};
+
+pub fn risky_operation() -> Result<(), Box<dyn std::error::Error>> {
+    let tracer = global::tracer("risky-service");
+
+    tracer.in_span("risky-operation", |cx| {
+        let span = cx.span();
+
+        match do_something_risky() {
+            Ok(result) => {
+                span.set_status(Status::Ok);
+                Ok(result)
+            }
+            Err(e) => {
+                // Record the error on the span
+                span.set_status(Status::error(e.to_string()));
+                span.record_error(&*e);
+                span.set_attribute(KeyValue::new("error.type", "RiskyOperationError"));
+                Err(e)
+            }
+        }
+    })
+}
+```
+
+For recording exceptions with full details:
+
+```rust
+use opentelemetry::trace::TraceContextExt;
+
+pub fn record_exception(cx: &opentelemetry::Context, error: &dyn std::error::Error) {
+    let span = cx.span();
+    span.record_error(error);
+    span.set_status(opentelemetry::trace::Status::error(error.to_string()));
+}
+```
+
+## Step 7. Span links (optional)
+
+Use span links to connect causally related traces, such as batch processing where one span triggers multiple independent operations:
+
+```rust:src/batch_processor.rs
+use opentelemetry::trace::{Tracer, TraceContextExt, Link, SpanContext};
+use opentelemetry::global;
+
+pub fn process_batch(batch_id: &str, source_contexts: Vec<SpanContext>) {
+    let tracer = global::tracer("batch-processor");
+
+    // Create links to all source spans
+    let links: Vec<Link> = source_contexts
+        .into_iter()
+        .map(|ctx| Link::new(ctx, vec![], 0))
+        .collect();
+
+    let span = tracer
+        .span_builder("process-batch")
+        .with_links(links)
+        .start(&tracer);
+
+    // Process the batch with the span active
+    // ...
+}
+```
+
+## Validate
+
+1. Trigger the code paths that create manual spans.
+2. In SigNoz **Traces**, filter by `service.name` or your span name.
+3. Open a trace and verify:
+   - Custom span names appear in the trace waterfall
+   - Attributes show in the span details panel
+   - Events appear in the timeline
+   - Errors are flagged with the correct status
+4. Check **Services** → **Errors** to confirm failures surface with recorded exceptions.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't I see my custom spans in SigNoz?
+
+- Confirm the tracer provider is initialized before creating spans.
+- Verify `global::set_tracer_provider()` is called at application startup.
+- Check that `tracer_provider.shutdown()` is called before the application exits to flush buffered spans.
+
+### Why are child spans not linked to their parent?
+
+- Ensure child spans are created within the parent's `in_span` closure.
+- If creating spans manually, pass the context explicitly using `with_parent()`.
+
+### Why don't attributes appear on spans?
+
+- Attribute values must be supported types: `String`, `i64`, `f64`, `bool`, or arrays of these.
+- Set attributes before the span ends. Mutations after `span.end()` are ignored.
+- The `in_span` closure ends the span automatically when it returns.
+
+### Why don't errors show in SigNoz error views?
+
+- Call `span.set_status(Status::error(...))` to mark the span as failed.
+- Use `span.record_error(&error)` to attach the exception details.
+- Ensure the span is exported (check shutdown is called properly).
+
+</details>
+
+## Next steps
+
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for error rates in your Rust application
