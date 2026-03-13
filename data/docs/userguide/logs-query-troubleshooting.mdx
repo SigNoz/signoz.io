@@ -1,5 +1,5 @@
 ---
-date: 2026-02-06
+date: 2026-03-13
 id: logs-query-troubleshooting
 title: Logs Query Troubleshooting
 description: Common issues and solutions when querying logs in SigNoz.
@@ -25,15 +25,12 @@ Keys containing dots cannot be queried directly using standard syntax because th
 
 To work with fields that have dots in their key names, you can use log pipelines to transform the data:
 
-1. Create a pipeline that extracts the value from the dotted key
-2. Assign this value to a new key without dots
-3. Query the new key normally
+1. Create a pipeline that moves (or copies) result.description into attributes.result.description
+2. Query it using the attributes prefix
 
-For example, if you have a field `result.description`, you can create a pipeline that copies its value to a new field like `result_description`, which can then be queried using standard syntax like `body.result_description EXISTS`.
+For example, you can then query it like: `attributes.result.description EXISTS`
 
 See [Logs Pipeline Introduction](https://signoz.io/docs/logs-pipelines/introduction/) for more details on creating pipelines.
-
-**Note:** Support for querying keys with dots directly is currently in development and will be available soon (this will only be valid for keys inside log body).
 
 ## Getting Help
 
