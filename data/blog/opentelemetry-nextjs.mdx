@@ -48,14 +48,7 @@ Following are some key aspects where Vercel lacks the features we expect to see 
 - **No Service Correlation**: Can’t trace calls across microservices, queue workers, or other components in a distributed system.
 - **Weak Debug Context**: No slow query breakdowns. No cache hit/miss metrics. No idea why stuff is slow. This remains a persistent problem as there is no scope for custom instrumentation.
 
-At this point, you’ll research and understand [observability in detail](https://signoz.io/guides/what-is-observability/), and likely find Jaeger or Datadog. However, both come with meaningful trade-offs:
-
-- **Jaeger**: Great for tracing, lacks support for metrics and logs. You would have to juggle between multiple tools and lack correlation between traces, metrics, and logs.
-- **Datadog**: Full-featured, but don’t blink, or [*your bill will triple*](https://signoz.io/blog/datadog-pricing/).
-
-<Figure src="/img/blog/common/datadog-pricing.webp" alt="Datadog is feature-rich but prone to pricing spikes." caption="Datadog is feature-rich but prone to pricing spikes." link="https://www.reddit.com/r/devops/comments/1ok48jx/datadog_suddenly_increasing_charges/" sourceText="Reddit" />
-
-This guide walks through how to instrument a Next.js app using OpenTelemetry, explains Jaeger’s limits, and shows how SigNoz gives you a complete [observability pipeline](https://signoz.io/guides/observability-pipeline/) without breaking the bank.
+Now that we have covered the shortcomings of Vercel's observability offering, let's dive into why observability is needed for Next.js applications.
 
 ## Why is Observability Needed for Next.js Applications?
 
@@ -73,43 +66,8 @@ Checking the internals, you will see that Next.js interacts with multiple layers
 - **API Routers**: Has two options: the <a href="https://nextjs.org/docs/app" target="_blank" rel="noopener noreferrer">App Router</a> and the <a href="https://nextjs.org/docs/pages" target="_blank" rel="noopener noreferrer">Pages Router</a>, that follow distinct implementation patterns.
 - **Client/server boundaries**: Boundaries between client and server components are often blurred, dynamic, and hard to trace. Functionalities in client components might not be available in server components and vice-versa.
 
-So, when you lack instrumentation for your Next.js applications, you are essentially flying blind — prone to errors that are tough to contextualize or correlate. Let's understand the impact observability has with a few real-world scenarios.
-
-## Real Scenarios Where Tracing Saves Hours
-
-### The Mysterious Slow Page Load
-
-> User says: “The dashboard is slow.”
-
-**Without tracing**: You tail server logs and grep for errors. But it is not immediately obvious what is taking long, or whether it's an issue on the user's end.
-
-**With tracing**: You see 50ms for server rendering and a 3s wait on a third-party analytics API. You swap it for an async call, and the dashboard feels snappy again.
-
-### The Intermittent 500
-
-> An API crashes randomly without any obvious pattern.
-
-**Without tracing**: You add more logging, redeploy, and wait for it to happen again. It could happen anytime and you do not have concrete steps to take.
-
-**With tracing**: A DB connection times out after 12 retries under load. The trace shows exactly which query, which endpoint, and the load level that causes the failure.
-
-### The Deployment Regression
-
-> Site feels slower after the latest deployment. There's a regression somewhere.
-
-**Without tracing**: You diff the PRs, stare at bundle sizes, and run Lighthouse hoping for a clue.
-
-**With tracing**: A new function call inside a Server Component adds 200ms to every page load. You get a quick patch-fix out while your team optimizes the function.
-
-### The Auth Redirect Loop
-
-> You notice frequent 404 errors in the logs, but without any clear reason. It often happens when opening shared Project links.
-
-**Without tracing**: You see an erroneous API call in the network tab but can't tell where it's coming from or why it's returning 404 `Not Found` responses.
-
-**With tracing**: The application redirects users that lack access to given Project. However, a state mismatch mid-redirect triggers a second auth check. The relevant [traces](https://signoz.io/blog/distributed-tracing/) shows both calls, their order, and exactly where the state diverged.
-
-**Bottom line**: Instrumentation turns debugging from guesswork into precision diagnosis.
+Now that you understand why you need observability for Next.js applications, and where Vercel's integration can fall short, let's get hands-on with implementing OpenTelemetry in Next.js applications.<br />
+This exercise should help you understand how OTel enables you to derive deep insights from your Next.js applications.
 
 ## Implementing OpenTelemetry in Next.js
 
