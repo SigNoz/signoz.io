@@ -111,6 +111,12 @@ export default function SRESkillDecayIndex() {
       className={`${outfit.variable} ${syne.variable} ${jetbrainsMono.variable} decay-page`}
     >
       <style jsx global>{`
+        body:has(.decay-page) .fixed.left-0.right-0.z-30 {
+          display: none !important;
+        }
+        body:has(.decay-page) main {
+          margin-top: 0 !important;
+        }
         .decay-page {
           --bg: #0a0a0b;
           --surface: #111113;
@@ -219,25 +225,7 @@ export default function SRESkillDecayIndex() {
             opacity: 0.4;
           }
         }
-        @keyframes ollyFloat {
-          0%,
-          100% {
-            transform: translateY(0) rotate(-2deg);
-          }
-          50% {
-            transform: translateY(-10px) rotate(1deg);
-          }
-        }
-        @keyframes ollyBob {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-6px);
-          }
-        }
-        @keyframes ollyReveal {
+@keyframes ollyReveal {
           from {
             opacity: 0;
             transform: scale(0.6) translateY(20px);

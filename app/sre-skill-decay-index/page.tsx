@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import SRESkillDecayIndex from './SRESkillDecayIndex'
+import './animations.css'
 
 export const metadata: Metadata = {
   title: {

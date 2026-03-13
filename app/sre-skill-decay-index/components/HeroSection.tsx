@@ -28,24 +28,16 @@ export default function HeroSection({ onStart }: HeroSectionProps) {
   }, [])
 
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center relative px-6 py-[60px] text-center">
-      {/* Badge */}
-      <div
-        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-[18px] py-2 font-[family-name:var(--font-jetbrains)] text-[11px] uppercase tracking-[0.08em] text-[var(--text-dim)] mb-10"
-        style={{ animation: 'fadeDown 0.8s ease' }}
-      >
-        <span className="h-[6px] w-[6px] rounded-full bg-[var(--accent)]" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
-        <span>Incident Simulation Active</span>
-      </div>
-
+    <section className="flex min-h-screen flex-col items-center justify-center relative px-6 pb-[60px] text-center">
+    
       {/* Olly */}
-      <div className="relative flex justify-center mb-6" style={{ animation: 'fadeUp 0.8s ease 0.3s both' }}>
+      <div className="relative flex justify-center mb-4" style={{ animation: 'fadeUp 0.8s ease 0.3s both' }}>
         <Image
           src={OLLY_IMAGES.sleeping.src}
           alt={OLLY_IMAGES.sleeping.alt}
-          width={220}
-          height={180}
-          className="h-auto max-h-[180px] w-[220px] object-contain drop-shadow-[0_8px_30px_rgba(255,61,61,0.15)]"
+          width={280}
+          height={240}
+          className="h-auto max-h-[240px] w-[280px] object-contain drop-shadow-[0_8px_30px_rgba(255,61,61,0.15)]"
           style={{ animation: 'ollyFloat 4s ease-in-out infinite' }}
           priority
         />
@@ -53,10 +45,10 @@ export default function HeroSection({ onStart }: HeroSectionProps) {
 
       {/* Headline */}
       <h1
-        className="font-[family-name:var(--font-outfit)] font-extrabold leading-[0.95] tracking-[-0.03em] mb-3"
+        className="font-[family-name:var(--font-outfit)] font-extrabold leading-[0.95] tracking-[-0.03em]"
         style={{ fontSize: 'clamp(42px, 8vw, 80px)', animation: 'fadeUp 0.8s ease 0.1s both' }}
       >
-        <span className="block text-[0.45em] font-medium tracking-[0.06em] uppercase text-[var(--text-dim)] mb-3">
+        <span className="block text-[0.45em] font-medium tracking-[0.06em] uppercase text-[var(--text-dim)]">
           How much has AI
         </span>
         <span className="relative text-[var(--accent)]">
@@ -68,7 +60,7 @@ export default function HeroSection({ onStart }: HeroSectionProps) {
 
       {/* Subtitle */}
       <p
-        className="text-[17px] text-[var(--text-dim)] max-w-[500px] leading-relaxed mb-12"
+        className="text-[17px] text-[var(--text-dim)] max-w-[500px] leading-relaxed mb-12 mt-5"
         style={{ animation: 'fadeUp 0.8s ease 0.25s both' }}
       >
         7 incident scenarios. Zero AI assistance.
@@ -122,7 +114,7 @@ export default function HeroSection({ onStart }: HeroSectionProps) {
 
       {/* Scroll hint */}
       <div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[10px] uppercase tracking-[0.1em] text-[var(--text-dim)]"
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[10px] uppercase tracking-[0.1em] text-[var(--text-dim)]"
         style={{ animation: 'fadeUp 0.8s ease 0.6s both' }}
       >
         <span

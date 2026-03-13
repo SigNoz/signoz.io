@@ -47,9 +47,9 @@ export default function QuizSection({
           <Image
             src={ollyData.src}
             alt={ollyData.alt}
-            width={130}
-            height={130}
-            className={`hidden md:block absolute -right-[70px] -top-[20px] h-auto max-h-[130px] w-[130px] object-contain drop-shadow-[0_4px_16px_rgba(68,97,215,0.2)] ${ollyData.rounded ? 'rounded-xl' : ''}`}
+            width={200}
+            height={200}
+            className={`hidden md:block absolute -right-[160px] -top-[10px] z-10 h-auto max-h-[200px] w-[200px] object-contain drop-shadow-[0_4px_16px_rgba(68,97,215,0.2)] ${ollyData.rounded ? 'rounded-xl' : ''}`}
             style={{ animation: 'ollyFloat 4s ease-in-out infinite' }}
           />
           <Image
@@ -76,7 +76,7 @@ export default function QuizSection({
           </div>
 
           {/* Question text */}
-          <div className="mb-9 font-[family-name:var(--font-syne)] text-[26px] font-bold leading-[1.3] tracking-[-0.01em] max-md:text-xl">
+          <div className="mb-9 font-[family-name:var(--font-syne)] text-[22px] font-bold leading-[1.3] tracking-[-0.01em] max-md:text-xl">
             {question.question}
           </div>
 
