@@ -3,7 +3,9 @@
 import React from 'react'
 import Image from 'next/image'
 
-import ImageZoom from '../ImageZoom/ImageZoom'
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
+
 import { cn } from 'app/lib/utils'
 
 interface NextFigureProps {
@@ -35,15 +37,8 @@ export default function NextFigure({
   captionClassName,
 }: NextFigureProps) {
   return (
-    <figure className={figureClassName}>
-      <ImageZoom
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        priority={priority}
-        loading={priority ? undefined : 'lazy'}
-      >
+    <Zoom>
+      <figure className={figureClassName}>
         <Image
           src={src}
           alt={alt}
@@ -53,28 +48,28 @@ export default function NextFigure({
           loading={priority ? undefined : 'lazy'}
           className={cn('rounded-md', className)}
         />
-      </ImageZoom>
-      <figcaption className={captionClassName}>
-        <i>
-          {link && !sourceText ? (
-            <a href={link} target="_blank" rel="noopener noreferrer">
-              {caption}
-            </a>
-          ) : (
-            <>
-              {caption}{' '}
-              {link && sourceText && (
-                <>
-                  Source:{' '}
-                  <a href={link} target="_blank" rel="noopener noreferrer">
-                    {sourceText}
-                  </a>
-                </>
-              )}
-            </>
-          )}
-        </i>
-      </figcaption>
-    </figure>
+        <figcaption className={captionClassName}>
+          <i>
+            {link && !sourceText ? (
+              <a href={link} target="_blank" rel="noopener noreferrer">
+                {caption}
+              </a>
+            ) : (
+              <>
+                {caption}{' '}
+                {link && sourceText && (
+                  <>
+                    Source:{' '}
+                    <a href={link} target="_blank" rel="noopener noreferrer">
+                      {sourceText}
+                    </a>
+                  </>
+                )}
+              </>
+            )}
+          </i>
+        </figcaption>
+      </figure>
+    </Zoom>
   )
 }
