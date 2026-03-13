@@ -57,7 +57,9 @@ The export happens in the customer’s environment; they control the binary and 
 
 Your product is a platform where customers deploy their *own* apps or use your managed services (e.g. PaaS, serverless, API gateway). The workload runs on *your* infrastructure.
 
-Here, you add a **platform feature,** such as “Telemetry Drains” or “Observability Destinations”, that lets customers configure *where* to send telemetry. Your platform collects telemetry from their workload (and from your own services, like routers) and forwards it to the customer’s OTLP endpoint.<br />
+Here, you add a **platform feature,** such as “Telemetry Drains” or “Observability Destinations”, that lets customers configure *where* to send telemetry.<br />
+Your platform collects telemetry from their workload (and from your own services, like routers) and forwards it to the customer’s OTLP endpoint.
+
 The export is done by your infrastructure, not by an application binary the customer runs. *Examples: Heroku, Cloudflare.*
 
 In short, **user-deployed software** → focus on **built-in instrumentation** and an endpoint config. A **platform you operate** → focus on **configurable export destinations** that your infrastructure uses to forward data.
@@ -82,7 +84,8 @@ If your users deploy your software into their own environments, the best practic
 
 **Kuma**
 
-Whether customers run Kuma’s control and data planes on their own Kubernetes clusters or VMs, it comes pre-configured to emit traces, metrics, and logs to an OTel backend. Users configure the export, which runs from the users’ Kuma deployments, through the mesh policies:
+Whether customers run Kuma’s control and data planes on their own Kubernetes clusters or VMs, it comes pre-configured to emit traces, metrics, and logs to an OTel backend.<br />
+Users configure the export, which runs from the users’ Kuma deployments, through the mesh policies:
 
 - **MeshAccessLog:** Routes access logs to an OTel collector (endpoint + attributes such as mesh name, start time).
 - **MeshTrace:** Handles distributed traces with configurable sampling and tagging.
@@ -229,7 +232,8 @@ Because it forces users to write custom code just to convert your API responses 
 
 ### The Push Model (OTLP)
 
-This is where the industry has landed.<br />
+This is where the industry has landed.
+
 Instead of waiting to be asked, your backend (or an OpenTelemetry Collector you run) actively exports logs, traces, and metrics directly to the user’s configured endpoint using OTLP (over HTTP or gRPC).
 
 **Where it works**
