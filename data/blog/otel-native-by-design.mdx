@@ -334,13 +334,19 @@ The shared Collector pattern is easier to monitor and maintain as all exports ro
 
 To conclude, you don’t need to build bespoke integrations to let your users export telemetry to their own backends.
 
-To give your users a frictionless observability story:
+If you’re ready to implement OTel-native export in your application, here’s a summary of the key architectural and design steps to follow:
 
-- **Default to push:** Use OTLP to export every signal you generate. The same push-based architecture works for logs, traces, and metrics.
-- **Stay vendor netural:** By sticking to one standard protocol per signal, your product instantly supports any OTel-compatible backend.
-- **Document the contract:** Clearly document your endpoint formats, authentication headers, supported signals, and attribute schemas. Give your users the confidence that they can rely on your data once it lands in their backends.
+- Decide which signals to support — logs, traces, and metrics — ideally all three, but start with what your product generates.
+- Use OTLP to export those signals via the OTel SDK or a Collector. The same push-based architecture works for all three.
+- Let users configure a destination endpoint and optional auth headers. Consider per-signal endpoints for teams with more complex setups.
+- Allow users to enable or disable individual signals to control data volume and costs.
+- Document your endpoint format (gRPC/HTTP), required headers, and attribute/schema semantics per signal so users can confidently rely on the data in their backends.
+- Choose a Collector topology: one Collector per tenant for strong isolation, or a shared Collector with per-tenant pipelines for simpler operation.
+- Provide an example config or env var snippet so users can get started quickly.
 
-That’s the pattern used by Cloudflare (except for metrics), Heroku, Kuma, and Keycloak. Designing for all three signals using open standards from the start removes friction, reduces your engineering overhead, and empowers customers to best utilize their data on their own terms.
+The points above also encapsulate the golden rules that Cloudflare (except for metrics), Heroku, Kuma, and Keycloak follow: **default to push, stay vendor-neutral, and document the contract**.
+
+Designing for all three signals using open standards from the start removes friction, reduces your engineering overhead, and empowers customers to best utilize their data on their own terms.
 
 ## Further Reading
 
@@ -348,13 +354,3 @@ That’s the pattern used by Cloudflare (except for metrics), Heroku, Kuma, and 
 - <a href="https://opentelemetry.io/ecosystem/registry/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Ecosystem Registry</a>
 - <a href="https://opentelemetry.io/docs/specs/otlp/" rel="noopener noreferrer nofollow" target="_blank">OTLP Specification</a>: protocol and semantics for logs, metrics, and traces
 - <a href="https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/" rel="noopener noreferrer nofollow" target="_blank">OTLP exporter configuration</a>: endpoint and per-signal options
-
-## Checklist for Product Teams
-
-- [ ]  Decide which **signals** to support out of **logs**, **traces**, and **metrics** (ideally all three).
-- [ ]  Give users a way to set their **destination endpoint** and any optional auth headers. Consider offering **per-signal** endpoints
-- [ ]  Optionally allow users to **enable/disable signals** (e.g. `-signals traces,metrics,logs`) to control volume and cost.
-- [ ]  Emit telemetry via **OpenTelemetry SDK** or an **OTel Collector** that exports in the OTLP format for each signal.
-- [ ]  **Document** all details such as the endpoint format (gRPC/HTTP), required headers, and **attribute/schema semantics per signal** (logs, traces, metrics).
-- [ ]  Decide on collector topology: **one collector per tenant** vs **one collector with per-tenant pipelines**.
-- [ ]  Provide a small **example config** or snippet (e.g. collector config or env vars) so users can plug it in quickly.
