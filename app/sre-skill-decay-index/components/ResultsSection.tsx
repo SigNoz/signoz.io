@@ -119,7 +119,9 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
               automation fails.
             </p>
             <Link
-              href="/blog/ai-isnt-replacing-sres-its-deskilling-them"
+              href="https://newsletter.signoz.io/p/ai-isnt-replacing-sres-its-deskilling"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-md border border-[var(--accent)] px-7 py-[14px] font-[family-name:var(--font-jetbrains)] text-xs font-semibold uppercase tracking-[0.08em] text-[var(--accent)] transition-all duration-300 hover:bg-[var(--accent)] hover:text-white no-underline"
             >
               Read the Full Article &rarr;
