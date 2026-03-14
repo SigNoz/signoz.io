@@ -8,6 +8,7 @@ import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import SigNozStats from '@/components/signoz-stats'
+import { COMPANIES } from '@/components/trusted-by'
 
 function Apm() {
   return (
@@ -198,21 +199,6 @@ const Header = () => {
   )
 }
 
-const COMPANIES = [
-  { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
-  { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
-  { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
-  { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
-  { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
-  { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
-  { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
-  { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
-  { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
-]
-
 const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
   return (
@@ -338,8 +324,8 @@ const SigNozFeatures = () => {
   ]
   return (
     <>
-      <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
+      <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
           <div className={`container pb-16`}>
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
@@ -368,8 +354,8 @@ const SigNozFeatures = () => {
         </div>
       </div>
 
-      <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
+      <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
           <div className={`container pb-16`}>
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
@@ -482,47 +468,45 @@ const GetStarted = ({ page }) => {
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
   return (
-    <div className="bg-[url('/img/background_blur/Rectangle_959.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-      <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-        <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
-          <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-250px)] bg-no-repeat">
-            <div className="flex flex-col gap-16">
-              <div className="flex flex-col gap-12">
-                <p className="mb-0 mt-20 text-center text-4xl font-bold">
-                  Get started with <br /> SigNoz Cloud today
-                </p>
-                <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                  <Button to="/teams/" variant={'default'} rounded={'full'} id={getStartedId}>
-                    <span className="flex-center">
-                      Get Started - Free
-                      <ArrowRight size={14} />
-                    </span>
-                  </Button>
+    <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
+      <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+          <div className="flex flex-col gap-16">
+            <div className="flex flex-col gap-12">
+              <p className="mb-0 mt-20 text-center text-4xl font-bold">
+                Get started with <br /> SigNoz Cloud today
+              </p>
+              <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
+                <Button to="/teams/" variant={'default'} rounded={'full'} id={getStartedId}>
+                  <span className="flex-center">
+                    Get Started - Free
+                    <ArrowRight size={14} />
+                  </span>
+                </Button>
 
-                  <Button
-                    to="/docs/introduction/"
-                    variant={'secondary'}
-                    rounded={'full'}
-                    id={readDocumentationId}
-                  >
-                    <span className="flex-center">
-                      <BookOpen size={14} />
-                      Read Documentation
-                    </span>
-                  </Button>
-                </div>
-              </div>
-              <div className="relative flex items-center justify-center">
-                <img
-                  src="/img/landing/landing_thumbnail.webp"
-                  alt="Custom Thumbnail"
-                  className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
-                />
+                <Button
+                  to="/docs/introduction/"
+                  variant={'secondary'}
+                  rounded={'full'}
+                  id={readDocumentationId}
+                >
+                  <span className="flex-center">
+                    <BookOpen size={14} />
+                    Read Documentation
+                  </span>
+                </Button>
               </div>
             </div>
+            <div className="relative flex items-center justify-center">
+              <img
+                src="/img/landing/landing_thumbnail.webp"
+                alt="Custom Thumbnail"
+                className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
+              />
+            </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   )
 }

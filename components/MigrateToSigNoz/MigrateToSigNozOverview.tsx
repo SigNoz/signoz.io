@@ -19,7 +19,7 @@ interface IconCardData {
 const MigrateVendorsData: IconCardData[] = [
   {
     name: 'Migrate from Datadog',
-    href: '/docs/migration/migrate-from-datadog/',
+    href: '/docs/migration/migrate-from-datadog-to-signoz/',
     icon: <SiDatadog className="h-7 w-7 text-purple-500" />,
     clickName: 'Migrate from Datadog',
   },

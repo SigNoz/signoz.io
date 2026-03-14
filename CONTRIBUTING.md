@@ -88,6 +88,10 @@ These guidelines apply when your PR changes website code (for example: `app/**`,
   - For click handlers that do async work, prevent multiple concurrent runs (set loading state before `await` and/or guard with a ref).
 - Be deliberate about DOM cleanup/transforms
   - When cleaning up rendered DOM before transforming (for example, HTML → Markdown), avoid redundant selectors and ensure cleanup order matches the intended behavior.
+- Keep docs MDX components compatible with agent-markdown output
+  - If you add or change an MDX component used under `data/docs/**`, review its agent rendering in `utils/docs/agentMarkdownStubs.ts`.
+  - Add or update tests in `tests/agent-markdown-*.test.js`. The docs-wide component coverage test should stay green so new components are explicitly reviewed.
+  - If the component affects rendered article markup, also verify the `Copy Markdown` flow still produces clean output via `utils/docs/buildCopyMarkdownFromRendered.ts` and add/update targeted tests when practical.
 - Dependencies must be justified
   - Do not add new packages unless they are required and there is no existing dependency that fits.
   - If you add a dependency, include a short justification in the PR description and ensure it is used in code.

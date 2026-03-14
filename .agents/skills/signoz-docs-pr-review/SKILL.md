@@ -169,5 +169,6 @@ curl -sI <URL>
 
 - Do not require a dedicated "Target Persona" section unless context truly needs it.
 - Keep advanced options out of the mandatory path unless essential for first success.
+- If a PR adds or changes docs MDX components or component-driven content patterns, verify both agent markdown handling (`utils/docs/agentMarkdownStubs.ts`) and rendered Copy Markdown behavior (`utils/docs/buildCopyMarkdownFromRendered.ts`) where relevant.
 - Keep review feedback decision-oriented and immediately actionable.
 - Do not mark a review complete if mandatory JTBD checks were skipped.

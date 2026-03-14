@@ -1,9 +1,9 @@
-name: Daily Stale PR Slack Alert
+name: Weekday Stale PR Slack Alert
 
 on:
   schedule:
-    # Runs daily at 05:00 UTC.
-    - cron: '0 5 * * *'
+    # Runs on weekdays (Mon-Fri) at 05:00 UTC.
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -177,19 +177,19 @@ jobs:
       - name: Send reports to Slack
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           SLACK_PAYLOADS: ${{ steps.report.outputs.payloads }}
         run: |
-          if [ -z "${SLACK_WEBHOOK_URL}" ]; then
-            echo "Missing required secret: SLACK_WEBHOOK_URL"
-            exit 1
-          fi
-
           if [ -z "${SLACK_PAYLOADS}" ] || [ "${SLACK_PAYLOADS}" = "[]" ]; then
             echo "No Slack payloads generated; skipping."
             exit 0
           fi
 
-          echo "${SLACK_PAYLOADS}" | jq -c '.[]' | while IFS= read -r payload; do
+          post_via_webhook() {
+            local payload="$1"
+            local http_code
+
             http_code="$(curl -sS -o /tmp/slack_response.txt -w "%{http_code}" \
               -X POST \
               -H "Content-type: application/json" \
@@ -201,6 +201,68 @@ jobs:
               cat /tmp/slack_response.txt
               exit 1
             fi
+          }
 
+          post_via_chat_api() {
+            local payload="$1"
+            local label="$2"
+            local http_code
+            local ok
+
+            http_code="$(curl -sS -o /tmp/slack_response.txt -w "%{http_code}" \
+              -X POST \
+              -H "Authorization: Bearer ${SLACK_BOT_TOKEN}" \
+              -H "Content-type: application/json; charset=utf-8" \
+              --data "${payload}" \
+              "https://slack.com/api/chat.postMessage")"
+
+            if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+              echo "Slack chat.postMessage HTTP failure for ${label}: ${http_code}"
+              cat /tmp/slack_response.txt
+              exit 1
+            fi
+
+            ok="$(jq -r '.ok // false' /tmp/slack_response.txt)"
+            if [ "${ok}" != "true" ]; then
+              echo "Slack chat.postMessage API error for ${label}"
+              cat /tmp/slack_response.txt
+              exit 1
+            fi
+          }
+
+          # Preferred mode: Bot token + channel ID (supports threading).
+          if [ -n "${SLACK_BOT_TOKEN}" ] && [ -n "${SLACK_CHANNEL_ID}" ]; then
+            first_payload="$(echo "${SLACK_PAYLOADS}" | jq -c '.[0]')"
+            parent_body="$(echo "${first_payload}" | jq -c --arg channel "${SLACK_CHANNEL_ID}" '. + {channel: $channel}')"
+            post_via_chat_api "${parent_body}" "parent message"
+            thread_ts="$(jq -r '.ts // empty' /tmp/slack_response.txt)"
+
+            if [ -z "${thread_ts}" ]; then
+              echo "Slack chat.postMessage succeeded but did not return thread ts"
+              cat /tmp/slack_response.txt
+              exit 1
+            fi
+
+            echo "${SLACK_PAYLOADS}" | jq -c '.[1:][]' | while IFS= read -r payload; do
+              thread_body="$(echo "${payload}" | jq -c \
+                --arg channel "${SLACK_CHANNEL_ID}" \
+                --arg thread_ts "${thread_ts}" \
+                '. + {channel: $channel, thread_ts: $thread_ts, reply_broadcast: false}')"
+
+              post_via_chat_api "${thread_body}" "thread reply"
+              sleep 1
+            done
+
+            exit 0
+          fi
+
+          # Fallback mode: Incoming webhook (cannot reliably thread without a known thread_ts).
+          if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+            echo "Missing Slack configuration. Set SLACK_BOT_TOKEN + SLACK_CHANNEL_ID (threaded) or SLACK_WEBHOOK_URL (non-threaded)."
+            exit 1
+          fi
+
+          echo "${SLACK_PAYLOADS}" | jq -c '.[]' | while IFS= read -r payload; do
+            post_via_webhook "${payload}"
             sleep 1
           done

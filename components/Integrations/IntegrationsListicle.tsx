@@ -14,8 +14,8 @@ import {
   SiMysql,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
-import IconCardGrid from '../Card/IconCardGrid'
 import { FaAws } from 'react-icons/fa'
+import IconCardGrid from '../Card/IconCardGrid'
 
 interface IntegrationsListicleProps {
   category?: 'temporal' | 'databases' | 'aws' | 'all'

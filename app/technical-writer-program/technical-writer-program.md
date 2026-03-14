@@ -71,7 +71,7 @@ Writing is a critical skill as you grow in your career, and our team will help y
 
 ## Topics and content we're looking for
 
-You can visit our [blog section](https://signoz.io/blog/) or <a href = "https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4" rel="noopener noreferrer nofollow" target="_blank">topic wishlist</a> to get an idea of what type of content we're looking for. 
+You can visit our [blog section](https://signoz.io/resource-center/blog/) or <a href = "https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4" rel="noopener noreferrer nofollow" target="_blank">topic wishlist</a> to get an idea of what type of content we're looking for. 
 
 Some ideas on the kind of content that we like:
 
@@ -107,7 +107,7 @@ We're also not looking for:
 
 ## How to apply
 
-- Check out our [blog section](https://signoz.io/blog/) and <a href = "https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4" rel="noopener noreferrer nofollow" target="_blank">topic wishlist</a> to get an idea on what we're looking for.
+- Check out our [blog section](https://signoz.io/resource-center/blog/) and <a href = "https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4" rel="noopener noreferrer nofollow" target="_blank">topic wishlist</a> to get an idea on what we're looking for.
 
 - You can propose an article or choose one from our topic wishlist.
 
@@ -172,5 +172,4 @@ You just need to reach out to writing@signoz.io with an interesting idea and a s
 
 
 </div>
-
 

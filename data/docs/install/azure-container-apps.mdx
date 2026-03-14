@@ -1,5 +1,5 @@
 ---
-date: 2025-09-30
+date: 2026-02-27
 id: azure-container
 tags : [Self-Host]
 title: Deploying to Azure Container Apps
@@ -612,12 +612,12 @@ az containerapp logs show \
   --follow
 ```
 
-### 3. Deploy Schema Migrator Sync Job
+### 3. Deploy Telemetrystore Migrator Job
 
-Schema Migrator Sync handles the migrations needed in ClickHouse for running SigNoz.
+The telemetrystore migrator runs all ClickHouse migrations (bootstrap, sync, and async) needed.
 
 <details>
-<summary>sync-migrator.yaml (Click to expand config)</summary>
+<summary>telemetrystore-migrator.yaml (Click to expand config)</summary>
 
 ```yaml
 apiVersion: "2025-01-01"
@@ -632,314 +632,81 @@ properties:
       replicaCompletionCount: 1
   template:
     initContainers:
-      - name: schema-migrator-sync-init
-        image: docker.io/busybox:1.35
-        command: ["sh", "-c"]
+      - name: ready
+        image: docker.io/signoz/signoz-otel-collector:latest
         args:
-          - until wget --user "$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)" --spider -q
-            signoz-clickhouse:8123/ping; do echo -e "waiting for clickhouseDB"; sleep
-            5; done; echo -e "clickhouse ready, starting schema migrator now";
+          - migrate
+          - ready
         env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN
+            value: tcp://signoz-clickhouse:9000
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER
             value: cluster
-          - name: CLICKHOUSE_USER
-            value: ""
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
-      - name: schema-migrator-sync-ch-ready
-        image: docker.io/clickhouse/clickhouse-server:25.5.6
-        command: ["sh", "-c"]
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION
+            value: "true"
+          - name: SIGNOZ_OTEL_COLLECTOR_TIMEOUT
+            value: 10m
+      - name: bootstrap
+        image: docker.io/signoz/signoz-otel-collector:latest
         args:
-          - |
-            echo "Running clickhouse ready check"
-            while true
-            do
-              version="$(CLICKHOUSE_VERSION)"
-              shards="$(CLICKHOUSE_SHARDS)"
-              replicas="$(CLICKHOUSE_REPLICAS)"
-              current_version="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT version()")"
-              if [ -z "$current_version" ]; then
-                echo "waiting for clickhouse to be ready"
-                sleep 5
-                continue
-              fi
-              if [ -z "$(echo "$current_version" | grep "$version")" ]; then
-                echo "expected version: $version, current version: $current_version"
-                echo "waiting for clickhouse with correct version"
-                sleep 5
-                continue
-              fi
-              current_shards="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(shard_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
-              if [ -z "$current_shards" ]; then
-                echo "waiting for clickhouse to be ready"
-                sleep 5
-                continue
-              fi
-              if [ "$current_shards" -ne "$shards" ]; then
-                echo "expected shard count: $shards, current shard count: $current_shards"
-                echo "waiting for clickhouse with correct shard count"
-                sleep 5
-                continue
-              fi
-              current_replicas="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(replica_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
-              if [ -z "$current_replicas" ]; then
-                echo "waiting for clickhouse to be ready"
-                sleep 5
-                continue
-              fi
-              if [ "$current_replicas" -ne "$replicas" ]; then
-                echo "expected replica count: $replicas, current replica count: $current_replicas"
-                echo "waiting for clickhouse with correct replica count"
-                sleep 5
-                continue
-              fi
-              break
-            done
-            echo "clickhouse ready, starting schema migrator now"
+          - migrate
+          - bootstrap
         env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN
+            value: tcp://signoz-clickhouse:9000
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER
             value: cluster
-          - name: CLICKHOUSE_USER
-            value: ""
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
-          - name: CLICKHOUSE_VERSION
-            value: "25.5.6"
-          - name: CLICKHOUSE_SHARDS
-            value: "1"
-          - name: CLICKHOUSE_REPLICAS
-            value: "1"
-    containers:
-      - name: schema-migrator
-        image: docker.io/signoz/signoz-schema-migrator:v0.129.5
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION
+            value: "true"
+          - name: SIGNOZ_OTEL_COLLECTOR_TIMEOUT
+            value: 10m
+      - name: sync
+        image: docker.io/signoz/signoz-otel-collector:latest
         args:
+          - migrate
           - sync
-          - --cluster-name
-          - $(CLICKHOUSE_CLUSTER)
-          - --dsn
-          - tcp://$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)@signoz-clickhouse:9000
-          - --up=
+          - up
         env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN
+            value: tcp://signoz-clickhouse:9000
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER
             value: cluster
-          - name: CLICKHOUSE_USER
-            value: ""
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
-```
-
-</details>
-
-Deploy and run the sync job:
-
-```bash
-az containerapp job create \
-  --name signoz-schema-migrator-sync \
-  --resource-group $RG_NAME \
-  --environment $ENV_NAME \
-  --yaml sync-migrator.yaml
-
-# Start the job
-az containerapp job start \
-  --name signoz-schema-migrator-sync \
-  --resource-group $RG_NAME
-```
-
-Verify job execution and check logs:
-
-```bash
-# Check status
-az containerapp job show \
-  --name signoz-schema-migrator-sync \
-  --resource-group $RG_NAME \
-  --output table
-
-# View logs
-az containerapp job logs show \
-  --name signoz-schema-migrator-sync \
-  --resource-group $RG_NAME \
-  --follow
-```
-
-### 4. Deploy Schema Migrator Async Job
-
-<Admonition type="warning"> 
-Please wait for the Schema Migrator Sync job completion before running this.
-</Admonition>
-<details>
-<summary>async-migrator.yaml (Click to expand config)</summary>
-
-```yaml
-apiVersion: "2025-01-01"
-type: Microsoft.App/jobs
-properties:
-  configuration:
-    triggerType: Manual
-    replicaTimeout: 1800
-    replicaRetryLimit: 3
-    manualTriggerConfig:
-      parallelism: 1
-      replicaCompletionCount: 1
-  template:
-    initContainers:
-      - name: schema-migrator-async-init
-        image: docker.io/busybox:1.35
-        command: ["sh", "-c"]
-        args:
-          - until wget --user "$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)" --spider -q
-            signoz-clickhouse:8123/ping; do echo -e "waiting for clickhouseDB"; sleep
-            5; done; echo -e "clickhouse ready, starting schema migrator now";
-        env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
-            value: cluster
-          - name: CLICKHOUSE_USER
-            value: ""
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
-      - name: schema-migrator-async-ch-ready
-        image: docker.io/clickhouse/clickhouse-server:25.5.6
-        command: ["sh", "-c"]
-        args:
-          - |
-            echo "Running clickhouse ready check"
-            while true
-            do
-              version="$(CLICKHOUSE_VERSION)"
-              shards="$(CLICKHOUSE_SHARDS)"
-              replicas="$(CLICKHOUSE_REPLICAS)"
-              current_version="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT version()")"
-              if [ -z "$current_version" ]; then
-                echo "waiting for clickhouse to be ready"
-                sleep 5
-                continue
-              fi
-              if [ -z "$(echo "$current_version" | grep "$version")" ]; then
-                echo "expected version: $version, current version: $current_version"
-                echo "waiting for clickhouse with correct version"
-                sleep 5
-                continue
-              fi
-              current_shards="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(shard_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
-              if [ -z "$current_shards" ]; then
-                echo "waiting for clickhouse to be ready"
-                sleep 5
-                continue
-              fi
-              if [ "$current_shards" -ne "$shards" ]; then
-                echo "expected shard count: $shards, current shard count: $current_shards"
-                echo "waiting for clickhouse with correct shard count"
-                sleep 5
-                continue
-              fi
-              current_replicas="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(replica_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
-              if [ -z "$current_replicas" ]; then
-                echo "waiting for clickhouse to be ready"
-                sleep 5
-                continue
-              fi
-              if [ "$current_replicas" -ne "$replicas" ]; then
-                echo "expected replica count: $replicas, current replica count: $current_replicas"
-                echo "waiting for clickhouse with correct replica count"
-                sleep 5
-                continue
-              fi
-              break
-            done
-            echo "clickhouse ready, starting schema migrator now"
-        env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
-            value: cluster
-          - name: CLICKHOUSE_USER
-            value: ""
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
-          - name: CLICKHOUSE_VERSION
-            value: "25.5.6"
-          - name: CLICKHOUSE_SHARDS
-            value: "1"
-          - name: CLICKHOUSE_REPLICAS
-            value: "1"
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION
+            value: "true"
+          - name: SIGNOZ_OTEL_COLLECTOR_TIMEOUT
+            value: 10m
     containers:
-      - name: schema-migrator
-        image: docker.io/signoz/signoz-schema-migrator:v0.129.5
+      - name: async
+        image: docker.io/signoz/signoz-otel-collector:latest
         args:
+          - migrate
           - async
-          - --cluster-name
-          - $(CLICKHOUSE_CLUSTER)
-          - --dsn
-          - tcp://$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)@signoz-clickhouse:9000
-          - --up=
+          - up
         env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN
+            value: tcp://signoz-clickhouse:9000
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER
             value: cluster
-          - name: CLICKHOUSE_USER
-            value: ""
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION
+            value: "true"
+          - name: SIGNOZ_OTEL_COLLECTOR_TIMEOUT
+            value: 10m
 ```
 
 </details>
 
-Deploy and run the async job:
+Deploy and run the migrator job:
 
 ```bash
 az containerapp job create \
-  --name signoz-schema-migrator-async \
+  --name signoz-telemetrystore-migrator \
   --resource-group $RG_NAME \
   --environment $ENV_NAME \
-  --yaml async-migrator.yaml
+  --yaml telemetrystore-migrator.yaml
 
 # Start the job
 az containerapp job start \
-  --name signoz-schema-migrator-async \
+  --name signoz-telemetrystore-migrator \
   --resource-group $RG_NAME
 ```
 
@@ -948,22 +715,18 @@ Verify job execution and check logs:
 ```bash
 # Check status
 az containerapp job show \
-  --name signoz-schema-migrator-async \
+  --name signoz-telemetrystore-migrator \
   --resource-group $RG_NAME \
   --output table
 
 # View logs
 az containerapp job logs show \
-  --name signoz-schema-migrator-async \
+  --name signoz-telemetrystore-migrator \
   --resource-group $RG_NAME \
   --follow
 ```
 
-### 5. Deploy SigNoz Application
-
-<Admonition type="warning"> 
-Please wait for the Schema Migrator Sync job completion before running this.
-</Admonition>
+### 4. Deploy SigNoz Application
 
 <details>
 <summary>signoz.yaml (Click to expand config)</summary>
@@ -986,51 +749,14 @@ properties:
         - targetPort: 4320
           external: false
   template:
-    initContainers:
-      - name: signoz-init
-        image: docker.io/busybox:1.35
-        command: ["sh", "-c"]
-        args:
-          - until wget --user "$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)" --spider -q
-            signoz-clickhouse:8123/ping; do echo -e "waiting for clickhouseDB"; sleep
-            5; done; echo -e "clickhouse ready, starting signoz now";
-        env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
-            value: cluster
-          - name: CLICKHOUSE_USER
-            value: ""
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
     containers:
       - name: signoz
         image: docker.io/signoz/signoz:latest
         env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
-            value: cluster
-          - name: CLICKHOUSE_USER
-            value: default
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
           - name: SIGNOZ_TELEMETRYSTORE_PROVIDER
             value: clickhouse
           - name: SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN
-            value: tcp://signoz-clickhouse:9000/?username=$(CLICKHOUSE_USER)&password=$(CLICKHOUSE_PASSWORD)
+            value: tcp://signoz-clickhouse:9000
           - name: SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_CLUSTER
             value: cluster
           - name: SIGNOZ_PROMETHEUS_ACTIVE_QUERY_TRACKER_ENABLED
@@ -1101,11 +827,7 @@ az containerapp logs show \
   --follow
 ```
 
-### 6. Deploy OpenTelemetry Collector
-
-<Admonition type="warning"> 
-Please wait for the Schema Migrator Sync job completion before running this.
-</Admonition>
+### 5. Deploy OpenTelemetry Collector
 
 <details>
 <summary>otel-collector.yaml (Click to expand config)</summary>
@@ -1126,43 +848,31 @@ properties:
         - targetPort: 4318
           external: true
   template:
+    initContainers:
+      - name: check
+        image: docker.io/signoz/signoz-otel-collector:latest
+        args:
+          - migrate
+          - sync
+          - check
+        env:
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN
+            value: tcp://signoz-clickhouse:9000
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION
+            value: "true"
+          - name: SIGNOZ_OTEL_COLLECTOR_TIMEOUT
+            value: 10m
     containers:
       - name: signoz-otel-collector
-        image: docker.io/signoz/signoz-otel-collector:v0.129.5
+        image: docker.io/signoz/signoz-otel-collector:latest
         command:
           - /signoz-otel-collector
         args:
           - --config=/conf/otel-collector-config.yaml
           - --manager-config=/conf/otel-collector-opamp-config.yaml
           - --copy-path=/var/tmp/collector-config.yaml
-          - --feature-gates=-pkg.translator.prometheus.NormalizeName
-        env:
-          - name: CLICKHOUSE_HOST
-            value: signoz-clickhouse
-          - name: CLICKHOUSE_PORT
-            value: "9000"
-          - name: CLICKHOUSE_HTTP_PORT
-            value: "8123"
-          - name: CLICKHOUSE_CLUSTER
-            value: cluster
-          - name: CLICKHOUSE_DATABASE
-            value: signoz_metrics
-          - name: CLICKHOUSE_TRACE_DATABASE
-            value: signoz_traces
-          - name: CLICKHOUSE_LOG_DATABASE
-            value: signoz_logs
-          - name: CLICKHOUSE_METER_DATABASE
-            value: signoz_meter
-          - name: CLICKHOUSE_USER
-            value: default
-          - name: CLICKHOUSE_PASSWORD
-            value: ""
-          - name: CLICKHOUSE_SECURE
-            value: "false"
-          - name: CLICKHOUSE_VERIFY
-            value: "false"
-          - name: LOW_CARDINAL_EXCEPTION_GROUPING
-            value: "false"
         volumeMounts:
           - mountPath: /conf/otel-collector-config.yaml
             volumeName: signoz-otel-collector-config
@@ -1228,7 +938,7 @@ az containerapp logs show \
   --follow
 ```
 
-### 13. Verify All Deployments
+### 6. Verify All Deployments
 
 Check the status of all deployed apps:
 
