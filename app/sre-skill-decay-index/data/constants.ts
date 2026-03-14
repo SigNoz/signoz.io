@@ -1,5 +1,13 @@
 import { Category, RecentDiagnostic, SeverityLevel } from '../types'
 
+/** Single source of truth for severity-level colors */
+export const SEVERITY_COLORS: Record<SeverityLevel, string> = {
+  low: '#00ff9d',
+  mid: '#ffb020',
+  high: '#ff3d3d',
+  critical: '#ff3d3d',
+}
+
 export const CATEGORY_LABELS: Record<Category, string> = {
   incident: 'Incident Response Muscle',
   observability: 'Observability Fluency',
@@ -27,30 +35,29 @@ export const ROASTS: Record<SeverityLevel, string[]> = {
   ],
 }
 
-export const SEVERITY_CONFIG: Record<
-  SeverityLevel,
-  { label: string; color: string; scoreColor: string }
-> = {
-  low: {
-    label: 'Minimal Decay \u2014 Muscles Intact',
-    color: '#00ff9d',
-    scoreColor: 'text-[#00ff9d]',
-  },
-  mid: {
-    label: 'Moderate Decay \u2014 The Rust Is Showing',
-    color: '#ffb020',
-    scoreColor: 'text-[#ffb020]',
-  },
-  high: {
-    label: 'Significant Decay \u2014 AI-Dependent',
-    color: '#ff3d3d',
-    scoreColor: 'text-[#ff3d3d]',
-  },
-  critical: {
-    label: 'Critical Decay \u2014 Full Bainbridge Paradox',
-    color: '#ff3d3d',
-    scoreColor: 'text-[#ff3d3d]',
-  },
+export const SEVERITY_CONFIG: Record<SeverityLevel, { label: string }> = {
+  low: { label: 'Minimal Decay \u2014 Muscles Intact' },
+  mid: { label: 'Moderate Decay \u2014 The Rust Is Showing' },
+  high: { label: 'Significant Decay \u2014 AI-Dependent' },
+  critical: { label: 'Critical Decay \u2014 Full Bainbridge Paradox' },
+}
+
+/**
+ * Pre-built Tailwind class maps derived from SEVERITY_COLORS.
+ * Classes are written out in full so Tailwind's scanner can detect them.
+ */
+export const SEVERITY_TEXT: Record<SeverityLevel, string> = {
+  low: 'text-[#00ff9d]',
+  mid: 'text-[#ffb020]',
+  high: 'text-[#ff3d3d]',
+  critical: 'text-[#ff3d3d]',
+}
+
+export const SEVERITY_BG: Record<SeverityLevel, string> = {
+  low: 'bg-[#00ff9d]',
+  mid: 'bg-[#ffb020]',
+  high: 'bg-[#ff3d3d]',
+  critical: 'bg-[#ff3d3d]',
 }
 
 export const RECENT_DIAGNOSTICS: RecentDiagnostic[] = [
@@ -110,7 +117,5 @@ export function getResultOllyKey(level: SeverityLevel): string {
 }
 
 export function getScoreColor(score: number): string {
-  if (score > 7) return '#ff3d3d'
-  if (score > 5) return '#ffb020'
-  return '#00ff9d'
+  return SEVERITY_COLORS[getSeverityLevel(score)]
 }

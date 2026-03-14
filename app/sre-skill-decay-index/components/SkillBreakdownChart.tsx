@@ -2,16 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import { CategoryScore } from '../types'
+import { SEVERITY_BG } from '../data/constants'
 
 interface SkillBreakdownChartProps {
   breakdown: CategoryScore[]
-}
-
-const BAR_COLORS: Record<string, string> = {
-  low: 'bg-[#00ff9d]',
-  mid: 'bg-[#ffb020]',
-  high: 'bg-[#ff3d3d]',
-  critical: 'bg-[#ff3d3d]',
 }
 
 export default function SkillBreakdownChart({ breakdown }: SkillBreakdownChartProps) {
@@ -38,7 +32,7 @@ export default function SkillBreakdownChart({ breakdown }: SkillBreakdownChartPr
           </div>
           <div className="h-[6px] overflow-hidden rounded-[3px] bg-[var(--surface-2)]">
             <div
-              className={`h-full rounded-[3px] ${BAR_COLORS[item.level]} transition-all duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)]`}
+              className={`h-full rounded-[3px] ${SEVERITY_BG[item.level]} transition-all duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)]`}
               style={{ width: animated ? `${item.percent}%` : '0%' }}
             />
           </div>

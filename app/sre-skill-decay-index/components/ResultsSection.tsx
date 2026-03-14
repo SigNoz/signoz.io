@@ -2,8 +2,9 @@
 
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { CategoryScore, SeverityLevel } from '../types'
-import { OLLY_IMAGES, getResultOllyKey, SEVERITY_CONFIG } from '../data/constants'
+import { OLLY_IMAGES, getResultOllyKey, SEVERITY_CONFIG, SEVERITY_TEXT, SEVERITY_BG } from '../data/constants'
 import SkillBreakdownChart from './SkillBreakdownChart'
 import RecentDiagnostics from './RecentDiagnostics'
 
@@ -21,24 +22,17 @@ interface ResultsSectionProps {
 }
 
 const LEVEL_TOP_BAR: Record<SeverityLevel, string> = {
-  low: 'bg-[#00ff9d]',
-  mid: 'bg-[#ffb020]',
-  high: 'bg-[#ff3d3d]',
-  critical: 'bg-[#ff3d3d] shadow-[0_0_20px_rgba(255,61,61,0.5)]',
+  low: SEVERITY_BG.low,
+  mid: SEVERITY_BG.mid,
+  high: SEVERITY_BG.high,
+  critical: `${SEVERITY_BG.critical} shadow-[0_0_20px_rgba(255,61,61,0.5)]`,
 }
 
 const SCORE_STYLE: Record<SeverityLevel, string> = {
-  low: 'text-[#00ff9d]',
-  mid: 'text-[#ffb020]',
-  high: 'text-[#ff3d3d]',
-  critical: 'text-[#ff3d3d] [text-shadow:0_0_40px_rgba(255,61,61,0.4)]',
-}
-
-const LABEL_STYLE: Record<SeverityLevel, string> = {
-  low: 'text-[#00ff9d]',
-  mid: 'text-[#ffb020]',
-  high: 'text-[#ff3d3d]',
-  critical: 'text-[#ff3d3d]',
+  low: SEVERITY_TEXT.low,
+  mid: SEVERITY_TEXT.mid,
+  high: SEVERITY_TEXT.high,
+  critical: `${SEVERITY_TEXT.critical} [text-shadow:0_0_40px_rgba(255,61,61,0.4)]`,
 }
 
 export default function ResultsSection({ results, onRestart }: ResultsSectionProps) {
@@ -60,7 +54,7 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
             alt={ollyData.alt}
             width={250}
             height={250}
-            className={`mx-auto mb-5 block h-auto max-h-[250px] w-250 object-contain ${isCritical ? 'brightness-[0.6] grayscale-[0.4] drop-shadow-[0_0_20px_rgba(255,61,61,0.4)]' : ''}`}
+            className={`mx-auto mb-5 block h-auto max-h-[250px] w-[250px] object-contain ${isCritical ? 'brightness-[0.6] grayscale-[0.4] drop-shadow-[0_0_20px_rgba(255,61,61,0.4)]' : ''}`}
             style={{ animation: 'ollyBob 3.5s ease-in-out infinite' }}
           />
 
@@ -79,7 +73,7 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
 
           {/* Level label */}
           <div
-            className={`font-[family-name:var(--font-jetbrains)] text-[13px] font-semibold uppercase tracking-[0.1em] mb-8 ${LABEL_STYLE[results.level]}`}
+            className={`font-[family-name:var(--font-jetbrains)] text-[13px] font-semibold uppercase tracking-[0.1em] mb-8 ${SEVERITY_TEXT[results.level]}`}
           >
             {results.label}
           </div>
@@ -124,14 +118,12 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
               &mdash; the more you automate, the worse you get at the exact moments
               automation fails.
             </p>
-            <a
-              href="https://signoz.io/blog"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/blog/ai-isnt-replacing-sres-its-deskilling-them"
               className="inline-flex items-center gap-2 rounded-md border border-[var(--accent)] px-7 py-[14px] font-[family-name:var(--font-jetbrains)] text-xs font-semibold uppercase tracking-[0.08em] text-[var(--accent)] transition-all duration-300 hover:bg-[var(--accent)] hover:text-white no-underline"
             >
               Read the Full Article &rarr;
-            </a>
+            </Link>
           </div>
 
           {/* Restart button */}
