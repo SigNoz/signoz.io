@@ -679,7 +679,7 @@ const SigNozVsDatadogV2 = () => {
                       </div>
                     </Link>
                     <Link
-                      href="/docs/"
+                      href="/docs/introduction/"
                       target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
@@ -2383,7 +2383,7 @@ const SigNozVsDatadogV2 = () => {
                 </Button>
               </Link>
               <Link
-                href="https://signoz.io/docs/migration/migrate-from-datadog/"
+                href="https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/"
                 className="block max-w-md"
                 target="_blank"
               >

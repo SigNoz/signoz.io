@@ -1,0 +1,68 @@
+---
+date: 2026-03-10
+id: openclaw
+tags: [SigNoz Cloud, Self-Host]
+title: OpenClaw Dashboard
+description: Monitor OpenClaw usage and performance including token consumption, model distribution, request volumes, and latency trends for optimal AI workload observability.
+doc_type: explanation
+---
+
+<Admonition type="info">
+  Before using this dashboard, instrument your OpenClaw usage with OpenTelemetry and configure export to SigNoz. See the [OpenClaw observability guide](https://signoz.io/docs/openclaw-monitoring) for complete setup instructions.
+</Admonition>
+
+
+This dashboard offers a clear view into OpenClaw usage and performance. It highlights key metrics such as model distribution, request volumes, and latency trends. Teams can also track message queueing metrics and overall processing performance. 
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/openclaw-dashboard.webp"
+  alt="OpenClaw Dashboard"
+  caption="OpenClaw Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/openclaw/openclaw-dashboard.json"
+    dashboardName=""
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks critical performance metrics for your OpenClaw usage using OpenTelemetry to help you:
+
+- **Monitor Token Efficiency**: Track token consumption patterns across input and output, monitor cache utilization, and balance workload consumption for cost optimization.
+- **Analyze Model Adoption**: Understand which OpenClaw models are being used to track preferences and measure adoption of newer releases.
+- **Monitor Usage Patterns**: Observe token consumption, request volume trends, and queue metrics over time to spot adoption curves, peak cycles, and unusual spikes.
+- **Ensure Responsiveness**: Track message processing latency and queue wait times to surface potential slowdowns, spikes, or regressions and maintain consistent user experience.
+- **Track Message Processing**: Monitor message outcomes by channel, queue depth by lane, and session state transitions to understand system health and throughput.
+
+## Metrics Included
+
+### Token Usage Metrics
+
+- **Total Token Usage (Input & Output)**: Displays the split between input tokens (user prompts) and output tokens (model responses), showing exactly how much work the system is doing over time to monitor efficiency, spot growth in adoption, and balance consumption across workloads.
+- **Total Token Usage (Over Time)**: Time series visualization showing the total token usage over time per model to identify consumption trends, adoption patterns, and baseline activity.
+- **Cache Read & Write Util %**: Shows the percentage of tokens served from cache versus newly written, helping you understand cache efficiency and potential cost savings from prompt caching.
+- **Input vs Output Token Rate**: Displays the ratio between input tokens and output tokens over time, revealing how wordy model responses are relative to user prompts.
+- **Token Type Breakdown by Model**: Breaks down cache reads, cache writes, input tokens, and output tokens for each model to show detailed consumption patterns across token types.
+
+### Model & Request Distribution
+
+- **Request Model Distribution**: Shows which OpenClaw model variants are being called most often, helping track preferences, measure adoption of newer releases, and align usage with performance or cost goals.
+- **Token Distribution By Model**: Reveals how token usage is spread across different model variants, helping you identify which models drive the most consumption and optimize your workload distribution for cost and performance.
+- **Requests Over Time**: Captures the volume of requests/messages sent to OpenClaw over time, letting you see demand patterns, identify high-traffic windows, and plan infrastructure or cost controls accordingly.
+
+### Performance & Latency
+
+- **Message Processing Latency (Over Time)**: Tracks how long OpenClaw takes to process messages over time, helping you identify performance bottlenecks and ensure responsive user experiences.
+
+### Message Processing & Queue Metrics
+
+- **Messages Outcome by Channel**: Tracks the volume of successfully completed messages processed by OpenClaw over time, broken down by channel, useful for monitoring message throughput and comparing channel activity to spot traffic patterns or drops in processing.
+- **Queue Wait By Lane**: Tracks the 95th percentile queue wait time across different processing lanes, measuring how long tasks sit in queue before being picked up to help identify latency spikes or backpressure building up in OpenClaw's internal queues.
+- **Message Queue Rate**: Tracks the rate at which incoming messages are being queued for dispatch, broken down by channel, to help monitor inbound message load and identify surges or drop-offs in traffic hitting OpenClaw's dispatch system.
+- **Queue Depth By Lane**: Tracks the number of items sitting in each processing lane's queue at any given time, indicating how backed up each lane is.
+- **Session State Transition**: Tracks the rate of session lifecycle state transitions to show how actively OpenClaw sessions are moving through their processing stages.

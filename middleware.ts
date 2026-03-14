@@ -4,6 +4,12 @@ import { waitUntil, ipAddress } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
 import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
+import {
+  buildDocsMarkdownRewritePath,
+  shouldRewriteDocsToMarkdown,
+} from '@/utils/docs/markdownRouting'
+
+const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
 
 // Extract OS from user agent (server-side version)
 const getOSFromUserAgent = (userAgent: string): string => {
@@ -37,9 +43,7 @@ export function middleware(req: NextRequest) {
   const acceptHeader = req.headers.get('accept') || ''
   const contentTypeHeader = req.headers.get('content-type') || ''
 
-  const prefersMarkdown =
-    acceptHeader.toLowerCase().includes('text/markdown') ||
-    contentTypeHeader.toLowerCase().includes('text/markdown')
+  const prefersMarkdown = acceptHeader.toLowerCase().includes('text/markdown')
 
   // Get request details
   const pathname = req.nextUrl.pathname
@@ -77,7 +81,17 @@ export function middleware(req: NextRequest) {
   }
 
   // Prepare response
-  const res = NextResponse.next()
+  let res = NextResponse.next()
+  const shouldRewrite = shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
+
+  if (shouldRewrite) {
+    const rewriteUrl = req.nextUrl.clone()
+    rewriteUrl.pathname = buildDocsMarkdownRewritePath(pathname)
+    res = NextResponse.rewrite(rewriteUrl)
+    if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
+      res.headers.set('x-markdown-rewrite', 'true')
+    }
+  }
 
   // Preserve request path for server-rendered global not-found suggestions.
   res.headers.set(NOT_FOUND_PATHNAME_HEADER, pathname)

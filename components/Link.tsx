@@ -34,14 +34,14 @@ const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnch
         newHref = `${newHref}&cloud_region=${cloudRegionParam}`
       }
 
-      return <Link href={newHref} {...rest} target="_blank" />
+      return <Link href={newHref} {...rest} target="_blank" prefetch={false} />
     }
 
     if (href.startsWith('https://signoz.io/')) {
-      return <Link href={href} {...rest} target="_blank" />
+      return <Link href={href} {...rest} target="_blank" prefetch={false} />
     }
 
-    return <Link href={href} {...rest} />
+    return <Link href={href} {...rest} prefetch={false} />
   }
 
   if (isAnchorLink) {

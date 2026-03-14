@@ -30,31 +30,40 @@ function Footer() {
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
                 <div className="text-sm font-semibold uppercase leading-5 tracking-wide">Docs</div>
-                <Link href="/docs/" className="mt-5 hover:underline">
+                <Link href="/docs/introduction/" className="mt-5 hover:underline" prefetch={false}>
                   Introduction
                 </Link>
-                <Link href="/docs/contributing/" className="mt-5 hover:underline">
+                <Link href="/docs/contributing/" className="mt-5 hover:underline" prefetch={false}>
                   Contributing
                 </Link>
-                <Link href="/docs/migration/migrate-from-datadog" className="mt-5 hover:underline">
+                <Link
+                  href="/docs/migration/migrate-from-datadog-to-signoz/"
+                  className="mt-5 hover:underline"
+                  prefetch={false}
+                >
                   Migrate from Datadog
                 </Link>
-                <Link href="/api_reference/" className="mt-5 hover:underline">
+                <Link href="/api-reference/" className="mt-5 hover:underline" prefetch={false}>
                   SigNoz API
                 </Link>
                 <div className="mt-10 text-sm font-semibold uppercase leading-5 tracking-wide">
                   OpenTelemetry
                 </div>
-                <Link href="/opentelemetry/" className="mt-5 hover:underline">
+                <Link href="/opentelemetry/" className="mt-5 hover:underline" prefetch={false}>
                   What is OpenTelemetry
                 </Link>
                 <Link
                   href="/blog/opentelemetry-collector-complete-guide/"
                   className="mt-5 hover:underline"
+                  prefetch={false}
                 >
                   OpenTelemetry Collector Guide
                 </Link>
-                <Link href="/blog/opentelemetry-demo/" className="mt-5 hover:underline">
+                <Link
+                  href="/blog/opentelemetry-demo/"
+                  className="mt-5 hover:underline"
+                  prefetch={false}
+                >
                   OpenTelemetry Demo
                 </Link>
               </div>
@@ -66,49 +75,61 @@ function Footer() {
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="/support">Support</Link>
+                  <Link href="/support" prefetch={false}>
+                    Support
+                  </Link>
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="https://signoz.io/slack" target="_blank">
+                  <Link href="https://signoz.io/slack" target="_blank" prefetch={false}>
                     Slack
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://x.com/SigNozHQ" target="_blank">
+                  <Link href="https://x.com/SigNozHQ" target="_blank" prefetch={false}>
                     X
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/launch-week/" target="_blank">
+                  <Link href="/launch-week/" target="_blank" prefetch={false}>
                     Launch Week
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="/changelog">Changelog</Link>
+                  <Link href="/changelog" prefetch={false}>
+                    Changelog
+                  </Link>
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/docs/dashboards/dashboard-templates/overview/" target="_blank">
+                  <Link
+                    href="/docs/dashboards/dashboard-templates/overview/"
+                    target="_blank"
+                    prefetch={false}
+                  >
                     Dashboard Templates
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/todaysdevopswordle/" target="_blank">
+                  <Link href="/todaysdevopswordle/" target="_blank" prefetch={false}>
                     DevOps Wordle
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://newsletter.signoz.io/" target="_blank">
+                  <Link href="https://newsletter.signoz.io/" target="_blank" prefetch={false}>
                     Newsletter
                   </Link>
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/events/kubecon-cloudnativecon-north-america-2025/" target="_blank">
+                  <Link
+                    href="/events/kubecon-cloudnativecon-north-america-2025/"
+                    target="_blank"
+                    prefetch={false}
+                  >
                     KubeCon, Atlanta 2025
                   </Link>
                   <ArrowUpRight size={16} />
@@ -119,36 +140,49 @@ function Footer() {
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
                 <div className="text-sm font-semibold uppercase leading-5 tracking-wide">More</div>
 
-                <Link href="/datadog-alternative/" className="mt-5 hover:underline">
+                <Link
+                  href="/datadog-alternative/"
+                  className="mt-5 hover:underline"
+                  prefetch={false}
+                >
                   SigNoz vs Datadog
                 </Link>
-                <Link href="/newrelic-alternative/" className="mt-5 hover:underline">
+                <Link
+                  href="/newrelic-alternative/"
+                  className="mt-5 hover:underline"
+                  prefetch={false}
+                >
                   SigNoz vs New Relic
                 </Link>
-                <Link href="/grafana-alternative/" className="mt-5 hover:underline">
+                <Link
+                  href="/grafana-alternative/"
+                  className="mt-5 hover:underline"
+                  prefetch={false}
+                >
                   SigNoz vs Grafana
                 </Link>
                 <Link
                   href="/product-comparison/signoz-vs-dynatrace/"
                   className="mt-5 hover:underline"
+                  prefetch={false}
                 >
                   SigNoz vs Dynatrace
                 </Link>
 
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://signoz.io/careers/" target="_blank">
+                  <Link href="https://signoz.io/careers/" target="_blank" prefetch={false}>
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
 
-                <Link href="/about-us" className="mt-5 hover:underline ">
+                <Link href="/about-us" className="mt-5 hover:underline " prefetch={false}>
                   About
                 </Link>
-                <Link href="/terms-of-service" className="mt-5 hover:underline">
+                <Link href="/terms-of-service" className="mt-5 hover:underline" prefetch={false}>
                   Terms
                 </Link>
-                <Link href="/privacy" className="mt-5 hover:underline">
+                <Link href="/privacy" className="mt-5 hover:underline" prefetch={false}>
                   Privacy
                 </Link>
 
@@ -169,12 +203,13 @@ function Footer() {
                     src="/img/SigNozLogo-orange.svg"
                     width={50}
                     height={50}
-                    alt=""
+                    alt="SigNoz Logo"
+                    loading="lazy"
                   />
                   <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
-                  <Link href="https://status.signoz.io/" target="_blank">
+                  <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
                     All systems operational
                   </Link>
                 </div>
@@ -183,6 +218,7 @@ function Footer() {
                     href={'https://github.com/SigNoz'}
                     target="_blank"
                     aria-label="SigNoz Github URL"
+                    prefetch={false}
                   >
                     <Github />
                   </Link>
@@ -191,6 +227,7 @@ function Footer() {
                     href={'https://www.linkedin.com/company/signozio/'}
                     target="_blank"
                     aria-label="SigNoz LinkedIN URL"
+                    prefetch={false}
                   >
                     <Linkedin />
                   </Link>
@@ -199,6 +236,7 @@ function Footer() {
                     href={'https://signoz.io/slack'}
                     target="_blank"
                     aria-label="SigNoz Slack Connect URL"
+                    prefetch={false}
                   >
                     <Slack />
                   </Link>
@@ -207,6 +245,7 @@ function Footer() {
                     href={'https://x.com/SigNozHQ'}
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
+                    prefetch={false}
                   >
                     <Twitter />
                   </Link>
@@ -215,25 +254,28 @@ function Footer() {
                     href={'https://www.youtube.com/@signoz'}
                     target="_blank"
                     aria-label="SigNoz Youtube Channel URL"
+                    prefetch={false}
                   >
                     <Youtube />
                   </Link>
                 </div>
                 <div className="mt-5 flex flex-row gap-8">
-                  <img
+                  <Image
                     className="cursor-pointer opacity-60 hover:opacity-100"
                     src="/svgs/icons/hipaa.svg"
                     width={90}
                     height={90}
-                    alt=""
+                    alt="HIPAA"
+                    loading="lazy"
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
-                  <img
+                  <Image
                     className="cursor-pointer rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
                     src="/svgs/icons/SOC-2.svg"
                     width={60}
                     height={60}
-                    alt=""
+                    alt="SOC-2"
+                    loading="lazy"
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                 </div>

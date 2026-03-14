@@ -1,0 +1,55 @@
+---
+date: 2026-02-19
+title: How to Create a CPU Usage Alert for Kubernetes Containers
+description: Learn how to set up alerts to monitor CPU usage in your Kubernetes containers and get notified when usage exceeds specified thresholds.
+id: k8s-cpu-usage-alert
+doc_type: howto
+tags: ["alerts", "Kubernetes"]
+---
+
+You can create alerts to monitor CPU usage in your Kubernetes setup and get notified when containers exceed specified thresholds. This guide shows you how to set up an alert that triggers when CPU usage goes above 80%.
+
+## Prerequisites
+
+- SigNoz installed and configured
+- Kubernetes cluster with [kubeletstats receiver configured](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/)
+- The `k8s.container.cpu_limit_utilization` metric enabled (enabled by default in k8s-infra Helm chart v0.11.10+)
+
+## Setting up the CPU usage alert
+
+Follow these steps to create an alert for container CPU usage exceeding 80% of its limit:
+
+### Step 1: Create the metric query
+
+Navigate to **Alerts** in the SigNoz UI and create a new alert with the following configuration:
+
+- **Metric:** `k8s.container.cpu_limit_utilization`
+- **[Time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation):** `avg`
+- **[Space aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation):** `max` by (`k8s.cluster.name`, `k8s.namespace.name`, `k8s.pod.name`, `k8s.container.name`)
+
+This configuration:
+- Uses `avg` [time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation) to smooth out short CPU spikes over the evaluation window
+- Uses `max` [space aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation) to alert when any container in a pod exceeds the threshold
+- Groups by cluster, namespace, pod, and container names for granular monitoring
+
+### Step 2: Set alert condition
+
+Configure the alert evaluation:
+
+- **Evaluate:** Query A
+- **Condition:** Above
+- **Threshold:** `0.8` (represents 80%)
+- **Match type:** all the times
+
+The threshold of 0.8 corresponds to 80% because `k8s.container.cpu_limit_utilization` is a ratio metric (0.0 to 1.0).
+
+## Expected result
+
+This configuration will monitor all containers across your Kubernetes clusters and trigger an alert whenever any container's CPU usage exceeds 80% of its configured limit. The alert will include the cluster name, namespace, pod, and container name in the notification, making it easy to identify which container needs attention.
+
+## Next steps
+
+- Learn more about [Kubernetes metrics](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/)
+- Explore [time aggregation best practices](https://signoz.io/docs/alerts-management/user-guides/time-aggregation-best-practices/) for alerts
+- Set up [notification channels](https://signoz.io/docs/setup-alerts-notification/) to receive alerts via Slack, PagerDuty, or other channels
+- Create similar alerts for [memory usage](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/) using `k8s.container.memory_limit_utilization`
