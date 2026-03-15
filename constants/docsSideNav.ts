@@ -669,6 +669,12 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cronjobs',
+                    label: 'Monitor Kubernetes CronJobs',
+                  },
+                  {
+                    type: 'doc',
+                    route:
                       '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
                     label: 'Monitor Multiple Kubernetes Clusters',
                   },

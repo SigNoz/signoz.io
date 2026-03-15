@@ -1,0 +1,248 @@
+---
+date: 2026-03-16
+id: k8s-cronjobs
+title: Monitor Kubernetes CronJobs
+description: Monitor Kubernetes CronJobs in SigNoz with the k8s-infra OpenTelemetry collection agent using CronJob pod logs and Job metrics.
+doc_type: howto
+---
+
+This guide shows you how to monitor Kubernetes CronJobs with the SigNoz `k8s-infra` OpenTelemetry collection agent.
+
+## Prerequisites
+
+- `k8s-infra` is already installed in your cluster. If you have not installed it yet, follow [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+- You have `kubectl` access to the cluster where your CronJobs run.
+- You have a SigNoz backend available to receive telemetry.
+
+If you already have CronJobs running in your cluster, you can skip **Step 1** and **Step 2** and go directly to **Default telemetry from `k8s-infra`** and **Validate**.
+
+## Step 1. Create a CronJob
+
+Apply the following manifest to create a CronJob that runs every minute and writes logs to standard output:
+
+```yaml:cronjob-demo.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: batch-jobs
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reporting-demo
+  namespace: batch-jobs
+  labels:
+    app.kubernetes.io/name: reporting-demo
+spec:
+  schedule: "*/1 * * * *"
+  timeZone: "Etc/UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: reporting-demo
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: reporter
+              image: busybox:1.36
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "cronjob=reporting-demo start=$(date -Iseconds)"
+                  sleep 5
+                  echo "cronjob=reporting-demo finished=$(date -Iseconds)"
+```
+
+This example keeps the CronJob simple but still uses a few Kubernetes defaults that are useful for production:
+
+- `timeZone`: Makes the schedule explicit instead of relying on the controller's local time zone
+- `concurrencyPolicy: Forbid`: Prevents overlapping runs
+- `successfulJobsHistoryLimit` and `failedJobsHistoryLimit`: Keeps recent execution history available for debugging
+
+Apply it:
+
+```bash
+kubectl apply -f cronjob-demo.yaml
+```
+
+## Step 2. Wait for the first execution
+
+Check that Kubernetes creates a Job and a Pod for the CronJob:
+
+```bash
+kubectl -n batch-jobs get cronjob,jobs,pods
+```
+
+You should see:
+
+- The `reporting-demo` CronJob
+- A Job created from that CronJob
+- A completed Pod for that Job after the run finishes
+
+## Default telemetry from `k8s-infra`
+
+No extra CronJob-specific Helm values are required for the default monitoring flow. If `k8s-infra` is already installed with metrics and logs collection enabled, it automatically collects CronJob pod logs and Kubernetes Job metrics when the CronJob runs.
+
+### Default logs
+
+All logs emitted by CronJob pods are captured automatically in **Logs Explorer** with Kubernetes resource attributes such as:
+
+- `k8s.namespace.name`
+- `k8s.cronjob.name`
+- `k8s.job.name`
+- `k8s.pod.name`
+
+Use:
+
+- `k8s.cronjob.name` to see all executions for one CronJob
+- `k8s.job.name` to inspect one specific execution
+
+### Default metrics
+
+In the validated `k8s-infra` setup for this guide, these CronJob-related Kubernetes metrics were emitted by default:
+
+- `k8s.cronjob.active_jobs`
+- `k8s.job.active_pods`
+- `k8s.job.successful_pods`
+- `k8s.job.failed_pods`
+- `k8s.job.desired_successful_pods`
+- `k8s.job.max_parallel_pods`
+
+These metrics are attached to Kubernetes Job resources, so `k8s.job.name` is the main dimension to use when you want to inspect one CronJob run in **Metrics Explorer**.
+
+## Validate
+
+### Validate logs in SigNoz
+
+Open **Logs Explorer** and filter with these resource attributes:
+
+- `k8s.cluster.name = <your-cluster-name>`
+- `k8s.namespace.name = batch-jobs`
+- `k8s.cronjob.name = reporting-demo`
+
+Replace `<your-cluster-name>` with the `clusterName` you set when you installed `k8s-infra`.
+
+You should see log lines from every run of the CronJob.
+
+Use `k8s.job.name` when you want to inspect one specific execution, because Kubernetes creates a new Job name for every schedule.
+
+### Validate metrics in SigNoz
+
+Open **Metrics Explorer** and query one or more of these metrics:
+
+- `k8s.job.active_pods`
+- `k8s.job.successful_pods`
+- `k8s.job.failed_pods`
+- `k8s.job.desired_successful_pods`
+- `k8s.job.max_parallel_pods`
+- `k8s.cronjob.active_jobs`
+
+Filter with:
+
+- `k8s.cluster.name = <your-cluster-name>`
+- `k8s.namespace.name = batch-jobs`
+
+Replace `<your-cluster-name>` with the `clusterName` you set when you installed `k8s-infra`.
+
+Group by `k8s.job.name` to see each CronJob execution separately.
+
+<details>
+<ToggleHeading>
+## Limit log collection to CronJob namespace (Optional)
+</ToggleHeading>
+
+Prefer namespace-based filters for CronJobs. Pod names and Job names change on every run, so namespace rules are easier to maintain.
+
+### Only collect logs from your CronJob namespace
+
+If you keep CronJobs in a dedicated namespace, enable a whitelist for that namespace:
+
+```yaml:override-values.yaml
+presets:
+  logsCollection:
+    whitelist:
+      enabled: true
+      namespaces:
+        - batch-jobs
+```
+
+Apply the same Helm upgrade command shown above with the updated values file.
+
+Replace these values:
+
+- `<release-name>`: Your existing `k8s-infra` Helm release name
+- `<namespace>`: The namespace where `k8s-infra` is installed
+
+### Exclude noisy namespaces from log collection
+
+If shared cluster namespaces create too much log noise, exclude them:
+
+```yaml:override-values.yaml
+presets:
+  logsCollection:
+    blacklist:
+      enabled: true
+      namespaces:
+        - kube-system
+        - default
+```
+
+Apply the updated values to your existing release:
+
+```bash
+helm upgrade --install <release-name> signoz/k8s-infra -n <namespace> -f override-values.yaml
+```
+
+Replace these values:
+
+- `<release-name>`: Your existing `k8s-infra` Helm release name
+- `<namespace>`: The namespace where `k8s-infra` is installed
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### I can see logs, but I do not see Job metrics
+
+Verify that the cluster-level `k8s-infra` collector deployment is running. The Job metrics in this guide came from the cluster-level collector, not from the node-level daemon.
+
+For example, check the `k8s-infra` namespace where you installed the chart:
+
+```bash
+kubectl get deployments -n <k8s-infra-namespace>
+kubectl get pods -n <k8s-infra-namespace>
+```
+
+### I can see Job metrics, but I do not see CronJob logs
+
+Check these points:
+
+- `presets.logsCollection.enabled` is still enabled in your `k8s-infra` values
+- Your namespace is not excluded by a `logsCollection.blacklist` rule
+- The CronJob container writes logs to standard output or standard error
+
+### My Job names keep changing on every run
+
+That is expected Kubernetes behavior. A CronJob creates a new Job for every scheduled execution.
+
+Use:
+
+- `k8s.cronjob.name` in **Logs Explorer** to see all runs for one CronJob
+- `k8s.job.name` in **Metrics Explorer** or **Logs Explorer** to inspect one specific execution
+
+</details>
+
+## Next steps
+
+- [Use Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/) to search CronJob executions across namespaces and filter by `k8s.cronjob.name`
+- [Use Query Builder](https://signoz.io/docs/userguide/query-builder/) to group CronJob metrics by `k8s.job.name` and compare recent runs
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) to notify on failed CronJob runs or missing expected executions
