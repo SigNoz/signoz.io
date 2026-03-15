@@ -115,6 +115,12 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
             clickName: 'Clickhouse Integration Link',
           },
           {
+            name: 'Neon',
+            href: '/docs/integrations/neondb',
+            icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
+            clickName: 'Neon Integration Link',
+          },
+          {
             name: 'Microsoft SQL Server',
             href: '/docs/integrations/sql-server',
             icon: (

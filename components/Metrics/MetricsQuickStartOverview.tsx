@@ -282,6 +282,12 @@ export default function MetricsQuickStartOverview({
             clickName: 'MySQL Metrics Link',
           },
           {
+            name: 'Neon',
+            href: '/docs/integrations/neondb',
+            icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
+            clickName: 'Neon Metrics Link',
+          },
+          {
             name: 'SQL Server',
             href: '/docs/integrations/sql-server',
             icon: <FaDatabase className="h-7 w-7 text-red-600" />,

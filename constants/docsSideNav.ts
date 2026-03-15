@@ -1440,6 +1440,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/integrations/neondb',
+            label: 'NeonDB',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/send-logs-http',
             label: 'Logs via HTTP (JSON)',
           },
@@ -1762,6 +1767,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/mysql-metrics',
                 label: 'MySQL',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/neondb',
+                label: 'NeonDB',
               },
             ],
           },
@@ -3122,6 +3132,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/sql-server',
         label: 'Microsoft SQL Server',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/neondb',
+        label: 'Neon DB',
       },
       {
         type: 'doc',

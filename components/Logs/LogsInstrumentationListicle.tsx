@@ -135,6 +135,12 @@ export default function LogsInstrumentationListicle({
             clickName: 'Cloudflare Logs Link',
           },
           {
+            name: 'Neon',
+            href: '/docs/integrations/neondb',
+            icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
+            clickName: 'Neon Logs Link',
+          },
+          {
             name: 'Convex',
             href: '/docs/logs-management/send-logs/convex-log-streams-signoz',
             icon: <img src="/img/icons/convex-logo.svg" alt="Convex" className="h-9 w-9" />,

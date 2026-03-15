@@ -54,7 +54,7 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
               clickText={card.name}
               clickLocation={sectionName}
             >
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
+              <div className="mb-3 flex h-12 w-12 shrink-0 items-center justify-center rounded-md">
                 {card.icon}
               </div>
               <span className="text-sm font-medium text-signoz_vanilla-100">{card.name}</span>
