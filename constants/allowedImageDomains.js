@@ -14,4 +14,30 @@ function getAllowedImageDomains() {
   return Array.from(new Set([...defaultDomains, ...envDomains]))
 }
 
-module.exports = { DEFAULT_ALLOWED_DOMAINS, getAllowedImageDomains }
+function isSrcAllowedForNextImage(src) {
+  const trimmed = src.trim()
+
+  if (trimmed.startsWith('/') || trimmed.startsWith('./')) {
+    return true
+  }
+
+  if (trimmed.startsWith('data:')) {
+    return true
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      const url = new URL(trimmed)
+      const hostname = url.hostname.toLowerCase()
+      const allowedDomains = getAllowedImageDomains()
+
+      return allowedDomains.some((domain) => hostname === domain.toLowerCase())
+    } catch {
+      return false
+    }
+  }
+
+  return false
+}
+
+module.exports = { DEFAULT_ALLOWED_DOMAINS, getAllowedImageDomains, isSrcAllowedForNextImage }
