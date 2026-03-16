@@ -11,13 +11,11 @@ keywords: [opentelemetry,observability,instrumentation,telemetry,saas,product]
 
 If you’re building a backend or SaaS product, your users will eventually ask to send **logs, traces, and metrics** to their own observability stack, whether for compliance, cost, or to keep everything in one place.
 
-Locking them into your built-in dashboards or limiting exports to certain vendors creates unnecessary friction. Rather, supporting export to any OpenTelemetry (OTel)–compatible backend is a vendor-neutral, future-proof practice, that gives users the flexibility of choice.
+Locking them into your built-in dashboards or limiting exports to certain vendors creates unnecessary friction. Rather, supporting export to any OpenTelemetry (OTel)–compatible backend is a vendor-neutral, future-proof practice that gives users the flexibility of choice.
 
 This post outlines how to design your backend so users can export **full telemetry** (logs, traces, and metrics) to an OTel backend when they want to.
 
 <Figure src="/img/blog/2026/03/otel-native-by-design.webp" alt="Enabling telemetry export via the OTLP standard allows users to own and analyze their data on the platforms of their choosing." caption="Enabling telemetry export via the OTLP standard allows users to own and analyze their data on the platforms of their choosing." />
-
-Enabling telemetry export via the OTLP standard allows users to own and analyze their data on the platforms of their choosing.
 
 ## The Three Observability Signals
 
@@ -316,8 +314,6 @@ Given this limitation, this architecture is usually the best fit for enterprise 
 
 <Figure src="/img/blog/2026/03/otel-native-by-design-single.webp" alt="The Collector-per-tenant architecture provides strong isolation guarantees at the cost of increased resource usage." caption="The Collector-per-tenant architecture provides strong isolation guarantees at the cost of increased resource usage." />
 
-The Collector-per-tenant architecture provides strong isolation guarantees at the cost of increased resource usage.
-
 ### Shared Collector with Static Pipelines per Tenant
 
 In this architecture, all your platform’s telemetry funnels into a single, centralized Collector. Inside, you define separate pipelines per tenant, ensuring that the data gets routed to the correct external endpoint.
@@ -327,8 +323,6 @@ This pattern is desirable for smaller-scale teams because it much simpler to ope
 However, you must be comfortable managing a growing dynamic configuration file as your customer base grows.
 
 <Figure src="/img/blog/2026/03/otel-native-by-design-shared.webp" alt="The shared Collector pattern is easier to monitor and maintain as all exports route through one Collector instance." caption="The shared Collector pattern is easier to monitor and maintain as all exports route through one Collector instance." />
-
-The shared Collector pattern is easier to monitor and maintain as all exports route through one Collector instance.
 
 ## Putting It All Together
 
