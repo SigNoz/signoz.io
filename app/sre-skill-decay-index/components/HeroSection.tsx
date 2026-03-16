@@ -28,7 +28,7 @@ export default function HeroSection({ onStart }: HeroSectionProps) {
   }, [])
 
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center relative px-6 pt-16 pb-[60px] text-center md:pt-0">
+    <section className="flex min-h-screen flex-col items-center justify-center relative px-6 pt-16 pb-[60px] text-center md:pt-10">
 
       {/* Branding */}
       <div
