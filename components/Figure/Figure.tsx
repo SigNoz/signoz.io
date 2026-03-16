@@ -3,9 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 
-import Zoom from 'react-medium-image-zoom'
-import 'react-medium-image-zoom/dist/styles.css'
-
+import ClientZoom from '../ClientZoom'
 import { cn } from 'app/lib/utils'
 import { isSrcAllowedForNextImage } from '@/constants/allowedImageDomains'
 
@@ -39,7 +37,7 @@ export default function Figure({
   const useNextImage = isSrcAllowedForNextImage(src)
 
   return (
-    <Zoom>
+    <ClientZoom>
       <figure className={figureClassName}>
         {useNextImage ? (
           <Image
@@ -76,6 +74,6 @@ export default function Figure({
           </i>
         </figcaption>
       </figure>
-    </Zoom>
+    </ClientZoom>
   )
 }
