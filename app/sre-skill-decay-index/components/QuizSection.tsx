@@ -26,7 +26,7 @@ export default function QuizSection({
       <div className="fixed left-0 right-0 top-0 z-[100]">
         <div className="flex items-center justify-between px-5 py-2 bg-[var(--surface)]/80 backdrop-blur-sm border-b border-[var(--border)]">
           <span className="font-[family-name:var(--font-jetbrains)] text-[11px] font-semibold tracking-[0.08em] text-[var(--text-dim)]">
-            SigNoz
+            <a href="https://signoz.io/" target="_blank" rel="noopener noreferrer" className="text-[var(--text-dim)] hover:text-[var(--accent)] no-underline transition-colors duration-200">SigNoz</a>
           </span>
           <span className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-[0.08em] text-[var(--text-dim)]">
             {currentQuestion + 1} / {totalQuestions}

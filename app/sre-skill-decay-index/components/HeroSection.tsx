@@ -36,7 +36,7 @@ export default function HeroSection({ onStart }: HeroSectionProps) {
         style={{ animation: 'fadeDown 0.8s ease' }}
       >
         <span className="h-[6px] w-[6px] rounded-full bg-[var(--accent)]" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
-        From the incident responders at SigNoz
+        From the incident responders at <a href="https://signoz.io/" target="_blank" rel="noopener noreferrer" className="text-[var(--text)] hover:text-[var(--accent)] no-underline transition-colors duration-200">SigNoz</a>
       </div>
 
       {/* Olly */}

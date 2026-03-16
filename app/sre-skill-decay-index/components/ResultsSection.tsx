@@ -51,7 +51,7 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
     <section className="px-6 pb-[120px] pt-20 text-center">
       {/* Branding */}
       <div className="mb-8 font-[family-name:var(--font-jetbrains)] text-[9px] uppercase tracking-[0.12em] text-[var(--text-dim)] opacity-60">
-        SigNoz
+        <a href="https://signoz.io/" target="_blank" rel="noopener noreferrer" className="text-[var(--text-dim)] hover:text-[var(--accent)] no-underline transition-colors duration-200">SigNoz</a>
       </div>
 
       <div className="mx-auto max-w-[720px]">
