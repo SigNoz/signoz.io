@@ -54,7 +54,39 @@ Each component (client, worker, workflows, activities) gets instrumented to capt
 
 ## Setup
 
-### Step 1: Add Dependencies
+### Step 1: Configure the Environment
+
+Set environment variables to point to your SigNoz Cloud or self-hosted endpoint.
+
+**Verify these values:**
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Tabs>
+<TabItem value="mac-linux" label="Mac/Linux" default>
+
+```bash
+export OTEL_SERVICE_NAME="temporal-worker"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+On Windows, use PowerShell:
+```powershell
+$env:OTEL_SERVICE_NAME="temporal-worker"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+</TabItem>
+</Tabs>
+
+### Step 2: Add Dependencies
 
 Add OpenTelemetry and Temporal packages to your `package.json`:
 
@@ -85,7 +117,7 @@ Install the packages:
 npm install
 ```
 
-### Step 2: Configure OpenTelemetry SDK
+### Step 3: Configure OpenTelemetry SDK
 
 Create `src/instrumentation.ts` to set up the OpenTelemetry SDK. This file initializes tracing, metrics, and logging for your entire application.
 
@@ -157,7 +189,7 @@ console.log('[OpenTelemetry] SDK initialized successfully');
 - Must be imported first in your client and worker files
 </details>
 
-### Step 3: Instrument the Temporal Client
+### Step 4: Instrument the Temporal Client
 
 The Temporal Client starts workflows and queries their status. Add OpenTelemetry instrumentation to trace these operations.
 
@@ -197,7 +229,7 @@ run().catch(console.error);
 - Always import `instrumentation.ts` first to enable auto-instrumentation
 </details>
 
-### Step 4: Instrument the Temporal Worker
+### Step 5: Instrument the Temporal Worker
 
 The Temporal Worker executes workflow and activity code. This is where most of your business logic runs, so instrumentation here is critical.
 
@@ -304,44 +336,19 @@ export async function myWorkflow(): Promise<string> {
 - `OpenTelemetryInternalsInterceptor` traces internal workflow operations like timers and child workflows
 </details>
 
-### Step 6: Configure Logging (Optional)
-
-Connect Winston logging to OpenTelemetry to send logs to SigNoz alongside traces and metrics.
-
-```typescript:src/logger.ts
-import { otlpHeaders, resource } from './instrumentation';
-import winston from 'winston';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
-import { logs } from '@opentelemetry/api-logs';
-import { LoggerProvider, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
-import { OpenTelemetryTransportV3 } from '@opentelemetry/winston-transport';
-
-// Initialize log provider
-const loggerProvider = new LoggerProvider({ resource });
-const otlpExporter = new OTLPLogExporter({ headers: otlpHeaders });
-loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(otlpExporter));
-logs.setGlobalLoggerProvider(loggerProvider);
-
-// Create Winston logger
-export const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.Console(),
-    new OpenTelemetryTransportV3(),
-  ],
-});
+**Start the worker:**
+Make sure you exported the environment variables from Step 1 in your terminal.
+```bash
+npm run start
 ```
 
-Use this logger in your worker configuration by passing it to `Runtime.install({ logger })`.
+**Start the client (in another terminal):**
+Make sure to export environment variables in this new terminal too. You may want to set `OTEL_SERVICE_NAME` to `temporal-client` so it shows up distinctly in SigNoz.
+```bash
+npm run workflow
+```
 
-### Step 7: Configure Environment and Run
-
-**Verify these values:**
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-Choose your deployment environment and follow the corresponding instructions:
+### Step 6: Deploy and Run
 
 <Tabs>
 <TabItem value="vm" label="VM" default>
@@ -355,27 +362,7 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 Use this section if you're deploying your application directly on a server or VM without containerization.
 </KeyPointCallout>
 
-Set environment variables and start your worker and client. You must `export` the environment variables before running the application.
-
-**Start the worker:**
-
-```bash
-export OTEL_SERVICE_NAME="temporal-worker"
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
-npm run start
-```
-
-**Start the client (in another terminal):**
-
-```bash
-export OTEL_SERVICE_NAME="temporal-client"
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
-npm run workflow
-```
+See Step 1 and Step 6. Make sure environment variables are exported, then run `npm run start` to start the worker, and `npm run workflow` to start a workflow execution.
 
 </TabItem>
 <TabItem value="kubernetes" label="Kubernetes">
@@ -548,39 +535,7 @@ docker-compose up -d
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-On Windows, set environment variables using PowerShell or Command Prompt.
-
-**Using PowerShell:**
-
-```powershell
-# Start the worker
-$env:OTEL_SERVICE_NAME="temporal-worker"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
-npm run start
-```
-
-**In a separate PowerShell window, start the client:**
-
-```powershell
-$env:OTEL_SERVICE_NAME="temporal-client"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
-npm run workflow
-```
-
-**Using Command Prompt:**
-
-```cmd
-:: Start the worker
-set OTEL_SERVICE_NAME=temporal-worker
-set OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-set OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-set OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
-npm run start
-```
+See Step 1 and Step 6. Make sure environment variables are exported in PowerShell, then run `npm run start` to start the worker, and `npm run workflow` to start a workflow execution.
 
 </TabItem>
 </Tabs>
@@ -623,6 +578,44 @@ After running your application, verify that data is flowing to SigNoz:
   alt="SDK metrics from a Temporal application"
   caption="Temporal SDK metrics dashboard showing worker health and task queue metrics"
 />
+
+<details>
+<ToggleHeading>
+
+### Configure Logging (Optional)
+
+</ToggleHeading>
+
+Connect Winston logging to OpenTelemetry to send logs to SigNoz alongside traces and metrics.
+
+```typescript:src/logger.ts
+import { otlpHeaders, resource } from './instrumentation';
+import winston from 'winston';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
+import { logs } from '@opentelemetry/api-logs';
+import { LoggerProvider, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { OpenTelemetryTransportV3 } from '@opentelemetry/winston-transport';
+
+// Initialize log provider
+const loggerProvider = new LoggerProvider({ resource });
+const otlpExporter = new OTLPLogExporter({ headers: otlpHeaders });
+loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(otlpExporter));
+logs.setGlobalLoggerProvider(loggerProvider);
+
+// Create Winston logger
+export const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console(),
+    new OpenTelemetryTransportV3(),
+  ],
+});
+```
+
+Use this logger in your worker configuration by passing it to `Runtime.install({ logger })`.
+
+</details>
 
 
 <details>
