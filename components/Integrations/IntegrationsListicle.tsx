@@ -116,7 +116,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
           },
           {
             name: 'Neon',
-            href: '/docs/integrations/neondb',
+            href: '/docs/integrations/opentelemetry-neondb',
             icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
             clickName: 'Neon Integration Link',
           },
