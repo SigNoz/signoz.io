@@ -10,6 +10,7 @@ import {
   SiRust,
   SiCplusplus,
   SiSwift,
+  SiDeno,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -87,6 +88,12 @@ const instrumentationData: IconCardData[] = [
     icon: <SiSwift className="h-7 w-7 text-orange-500" />,
     clickName: 'Swift Instrumentation Link',
   },
+  {
+    name: 'Deno',
+    href: '/docs/instrumentation/opentelemetry-deno',
+    icon: <SiDeno className="h-7 w-7 text-blue-500" />,
+    clickName: 'Deno Instrumentation Link',
+  },
 ]
 
 export default function APMQuickStartOverview() {
@@ -96,7 +103,7 @@ export default function APMQuickStartOverview() {
       sectionName="Instrumentation Languages Section"
       viewAllHref="/docs/instrumentation/"
       viewAllText="View all languages and frameworks"
-      gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+      gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
     />
   )
 }

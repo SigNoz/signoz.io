@@ -57,6 +57,7 @@ export default function ArticleSeriesTop({
         <Link
           href={seriesOverviewHref}
           className="group inline-flex items-center font-medium no-underline transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          prefetch={false}
         >
           <List className="mr-2 h-4 w-4 opacity-90 transition-opacity group-hover:opacity-100" />
           <span className="text-blue-600 opacity-90 transition-opacity group-hover:opacity-100 dark:text-blue-400">
@@ -77,6 +78,7 @@ export default function ArticleSeriesTop({
               href={prevLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
               aria-label={`Previous article: ${prevLink.title}`}
+              prefetch={false}
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
@@ -95,6 +97,7 @@ export default function ArticleSeriesTop({
               href={nextLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
               aria-label={`Next article: ${nextLink.title}`}
+              prefetch={false}
             >
               <ArrowRight className="h-4 w-4" />
             </Link>

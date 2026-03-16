@@ -127,7 +127,7 @@ export default function ChatbaseClient({
         <Script
           src="https://www.chatbase.co/embed.min.js"
           id="ZXMN63dnzm9r1LEY0He6U"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           onLoad={handleScriptLoad}
           onError={handleScriptError}
           data-domain="www.chatbase.co"

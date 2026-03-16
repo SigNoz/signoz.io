@@ -4,6 +4,7 @@ import React, { useId, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '../../constants/queryParams'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
+import { cn } from 'app/lib/utils'
 
 interface AdditionalDetails {
   [key: string]: string
@@ -40,9 +41,6 @@ const positiveOptions = [
   },
   { value: 'Another reason', description: '' },
 ]
-
-const cx = (...classNames: Array<string | false | undefined>) =>
-  classNames.filter(Boolean).join(' ')
 
 interface FeedbackOption {
   value: string
@@ -175,29 +173,29 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
   const isTocPlacement = placement === 'toc'
   const helpfulQuestion = isTocPlacement ? 'Is this page helpful?' : 'Was this page helpful?'
 
-  const containerClassName = cx(
+  const containerClassName = cn(
     'font-sans text-[#edf2ff] max-w-[560px] mx-auto mt-6 mb-0 pt-[14px] pb-[10px]',
     isTocPlacement &&
       'w-full max-w-full mt-1 mb-0 pt-[2px] pb-0 shrink-0 min-h-0 overflow-visible relative z-[2]'
   )
 
-  const separatorClassName = cx(
+  const separatorClassName = cn(
     'w-full h-px mb-3 bg-[rgba(126,142,177,0.4)]',
     isTocPlacement && 'bg-[rgba(60,65,82,0.65)] mb-1'
   )
 
-  const panelBaseClassName = cx(
+  const panelBaseClassName = cn(
     'border-0 rounded-none p-0 bg-transparent',
     isTocPlacement &&
       'border border-[rgba(42,46,55,0.8)] rounded-lg bg-[rgba(11,12,14,0.5)] max-h-[min(42vh,480px)] overflow-hidden flex flex-col p-[14px] md:p-[8px_10px_6px]'
   )
 
-  const titleClassName = cx(
+  const titleClassName = cn(
     'm-0 text-[clamp(1.02rem,0.96rem+0.3vw,1.16rem)] font-semibold leading-[1.3] [text-wrap:balance] text-[#edf2ff]',
     isTocPlacement && 'text-[13px]'
   )
 
-  const helpTextClassName = cx(
+  const helpTextClassName = cn(
     'my-[8px] mb-[14px] text-[13px] leading-[1.45] text-[#c3cde6] [text-wrap:pretty]',
     isTocPlacement && 'my-[6px] mb-[8px] text-[12px] leading-[1.35]'
   )
@@ -206,41 +204,41 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
     ? 'flex w-fit self-start flex-wrap gap-1.5'
     : 'flex flex-wrap justify-stretch gap-2 md:justify-center md:gap-3'
 
-  const choiceButtonClassName = cx(
+  const choiceButtonClassName = cn(
     'inline-flex items-center justify-center gap-2 border border-[rgba(78,116,248,0.32)] rounded-[10px] cursor-pointer text-[#edf2ff] transition-colors motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.52)]',
     isTocPlacement
       ? 'px-[9px] py-[6px] text-[12px] min-w-[86px] flex-[0_0_auto] rounded-lg md:min-w-[76px]'
       : 'px-4 py-[9px] text-sm min-w-0 flex-1 md:flex-none md:min-w-[88px]'
   )
 
-  const choiceIconClassName = cx(
+  const choiceIconClassName = cn(
     'inline-flex items-center justify-center',
     isTocPlacement ? 'w-[14px] h-[14px] text-[12px]' : 'w-[18px] h-[18px] text-sm'
   )
 
-  const formClassName = cx('flex flex-col', isTocPlacement && 'h-full min-h-0 overflow-hidden')
+  const formClassName = cn('flex flex-col', isTocPlacement && 'h-full min-h-0 overflow-hidden')
 
-  const optionGroupClassName = cx(
+  const optionGroupClassName = cn(
     'grid gap-2 mb-3',
     isTocPlacement && 'flex-1 min-h-0 overflow-y-auto pr-0.5 gap-1.5 mb-1'
   )
 
-  const optionLabelClassName = cx(
+  const optionLabelClassName = cn(
     'flex items-start gap-[10px] cursor-pointer',
     isTocPlacement && 'gap-1.5'
   )
 
-  const radioClassName = cx(
+  const radioClassName = cn(
     'w-[18px] h-[18px] mt-px shrink-0 cursor-pointer accent-signoz_robin-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300',
     isTocPlacement && 'w-4 h-4 mt-0'
   )
 
-  const optionTextClassName = cx(
+  const optionTextClassName = cn(
     'text-sm font-semibold leading-[1.35] text-[#edf2ff]',
     isTocPlacement && 'text-[12px] leading-[1.3] [overflow-wrap:anywhere]'
   )
 
-  const optionDescriptionClassName = cx(
+  const optionDescriptionClassName = cn(
     'text-[12px] leading-[1.35] text-[#c3cde6] [text-wrap:pretty]',
     isTocPlacement && 'leading-[1.25]'
   )
@@ -249,18 +247,18 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
     ? 'mt-1 min-h-[68px] w-full rounded-lg border border-[rgba(78,116,248,0.32)] bg-[rgba(12,16,27,0.78)] p-1.5 text-[12px] leading-[1.35] text-[#edf2ff] placeholder:text-[#91a2c8] resize-y transition-colors motion-reduce:transition-none focus:outline-none focus:border-signoz_robin-500'
     : 'mt-1 min-h-[88px] w-full rounded-lg border border-[rgba(78,116,248,0.32)] bg-[rgba(12,16,27,0.78)] p-[10px] text-[13px] leading-[1.45] text-[#edf2ff] placeholder:text-[#91a2c8] resize-y transition-colors motion-reduce:transition-none focus:outline-none focus:border-signoz_robin-500 md:w-[calc(100%-30px)] md:ml-[30px]'
 
-  const formActionsClassName = cx(
+  const formActionsClassName = cn(
     'mt-0.5 flex flex-col items-center gap-2',
     isTocPlacement &&
       'shrink-0 mt-0 gap-1 px-0 pt-1 pb-[1px] border-t border-[rgba(60,65,82,0.45)] bg-[rgba(11,12,14,0.5)]'
   )
 
-  const submitButtonClassName = cx(
+  const submitButtonClassName = cn(
     'self-center mt-0.5 border border-signoz_robin-600 rounded-lg bg-signoz_robin-500 text-[#f5f8ff] px-4 py-[9px] text-sm font-semibold cursor-pointer transition motion-reduce:transition-none hover:bg-signoz_robin-600 hover:border-signoz_robin-600 hover:brightness-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 disabled:opacity-[0.62] disabled:cursor-not-allowed',
     isTocPlacement && 'mt-0 min-h-[30px] px-[10px] py-[5px] text-[12px] leading-[1.2]'
   )
 
-  const errorTextClassName = cx(
+  const errorTextClassName = cn(
     'm-0 text-[#ffb8c2] text-[12px] leading-[1.45] text-center',
     isTocPlacement && 'leading-[1.3]'
   )
@@ -346,7 +344,7 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
       <div className={containerClassName}>
         <div className={separatorClassName}></div>
         <section
-          className={cx(
+          className={cn(
             panelBaseClassName,
             isTocPlacement
               ? 'text-left'
@@ -366,12 +364,12 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
     <div className={containerClassName}>
       <div className={separatorClassName}></div>
       <section
-        className={cx(panelBaseClassName, helpful === null && !isTocPlacement && 'text-center')}
+        className={cn(panelBaseClassName, helpful === null && !isTocPlacement && 'text-center')}
       >
         {helpful === null && (
           <>
             <h3 className={titleClassName}>{helpfulQuestion}</h3>
-            <p className={cx(helpTextClassName, !isTocPlacement && 'mb-3')}>
+            <p className={cn(helpTextClassName, !isTocPlacement && 'mb-3')}>
               Your response helps us improve this page.
             </p>
             <div className={buttonGroupChoiceClassName}>
@@ -428,7 +426,7 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
             helpTextClassName={helpTextClassName}
             optionGroupClassName={optionGroupClassName}
             optionCardClassName={(isSelected: boolean) =>
-              cx(
+              cn(
                 'flex flex-col gap-2 rounded-[10px] border p-[10px_11px] transition-colors motion-reduce:transition-none',
                 isTocPlacement
                   ? 'rounded-lg border-[rgba(78,116,248,0.32)] bg-[rgba(18,19,23,0.72)] p-[6px_8px] hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(22,24,29,0.9)]'

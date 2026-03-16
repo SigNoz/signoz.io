@@ -14,7 +14,7 @@ const migrationLinks: MigrationLinkData[] = [
   {
     title: 'Migration Guide',
     description: 'Step-by-step guide to migrate from Datadog',
-    href: '/docs/migration/migrate-from-datadog/',
+    href: '/docs/migration/migrate-from-datadog-to-signoz/',
     icon: <BookText size={20} className="text-signoz_robin-500" />,
     clickName: 'Datadog Migration Guide Link',
   },

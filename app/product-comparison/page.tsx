@@ -6,7 +6,7 @@ const comparisons = [
   {
     id: 1,
     title: 'SigNoz vs Datadog',
-    url: '/product-comparison/signoz-vs-datadog',
+    url: '/datadog-alternative/',
     desc: (
       <>
         For 20 APM and 50 infra hosts, SigNoz can save up to 90% of your Datadog bill - check{' '}
@@ -23,7 +23,7 @@ const comparisons = [
   {
     id: 2,
     title: 'SigNoz vs Dynatrace',
-    url: '/product-comparison/signoz-vs-dynatrace',
+    url: '/product-comparison/signoz-vs-dynatrace/',
     desc: (
       <>
         Dynatrace is complex to set up and use. Its host-based billing is outdated for applications
@@ -35,7 +35,7 @@ const comparisons = [
   {
     id: 3,
     title: 'SigNoz vs Grafana',
-    url: '/product-comparison/signoz-vs-grafana',
+    url: '/grafana-alternative/',
     desc: (
       <>
         Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus.
@@ -47,7 +47,7 @@ const comparisons = [
   {
     id: 4,
     title: 'SigNoz vs NewRelic',
-    url: '/product-comparison/signoz-vs-newrelic',
+    url: '/newrelic-alternative/',
     desc: (
       <>
         Tired of New Relic’s user-based pricing? Even for teams of 10-15 devs, New Relic’s pricing

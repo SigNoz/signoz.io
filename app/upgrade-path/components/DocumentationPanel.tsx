@@ -1,66 +1,72 @@
-import React, { useState } from 'react';
-import { UpgradePath } from '../types/upgrade';
-import DocRenderer from './DocRender';
-import { Card } from '@/components/ui/Card';
-import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react'
+import { UpgradePath } from '../types/upgrade'
+import DocRenderer from './DocRender'
+import { Card } from '@/components/ui/Card'
+import Link from 'next/link'
+import { AlertTriangle } from 'lucide-react'
 
 interface DocumentationPanelProps {
-  currentStep: UpgradePath;
-  className?: string;
-  docUrl: string;
-  version: string;
+  currentStep: UpgradePath
+  className?: string
+  docUrl: string
+  version: string
 }
 
 const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ version, className, docUrl }) => {
-  const [hasError, setHasError] = useState(false);
+  const [hasError, setHasError] = useState(false)
 
   return (
     <Card className={`h-full ${className}`}>
-      <div className="flex flex-col h-full p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white m-0">
-            {version} - Full Documentation
-          </h3>
+      <div className="flex h-full flex-col p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="m-0 text-lg font-semibold text-white">{version} - Full Documentation</h3>
           <Link
             href={docUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-signoz_robin-500 hover:text-signoz_robin-400 text-sm flex items-center gap-1"
+            className="flex items-center gap-1 text-sm text-signoz_robin-500 hover:text-signoz_robin-400"
+            prefetch={false}
           >
             Open in new tab
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
             </svg>
           </Link>
         </div>
 
-        <Card className="relative flex-1 min-h-[20vh] overflow-auto"> 
-          <div className='relative flex flex-col h-full p-2 prose prose-slate max-w-none dark:prose-invert relative flex-1 min-h-[20vh] overflow-auto'>
-            {hasError ? 
+        <Card className="relative min-h-[20vh] flex-1 overflow-auto">
+          <div className="prose prose-slate relative relative flex h-full min-h-[20vh] max-w-none flex-1 flex-col overflow-auto p-2 dark:prose-invert">
+            {hasError ? (
               <div className="absolute inset-0 flex items-center justify-center bg-signoz_slate-400">
                 <div className="text-center">
                   <div className="mb-3">
-                    <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto" />
+                    <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
                   </div>
-                  <span className="text-gray-300 mb-2">Unable to load documentation</span>
+                  <span className="mb-2 text-gray-300">Unable to load documentation</span>
                   <br />
                   <Link
                     href={docUrl}
                     target="_blank"
-                    className="text-signoz_robin-500 hover:text-signoz_robin-400 text-sm"
+                    className="text-sm text-signoz_robin-500 hover:text-signoz_robin-400"
                   >
                     View in new tab instead
                   </Link>
                 </div>
-              </div> : 
-              <DocRenderer docUrl={docUrl} setHasError={setHasError} />}
-          </div>      
+              </div>
+            ) : (
+              <DocRenderer docUrl={docUrl} setHasError={setHasError} />
+            )}
+          </div>
         </Card>
 
         <div className="mt-4 text-xs text-gray-400">
           <span>
-            Documentation URL: {' '}
+            Documentation URL:{' '}
             <Link
               href={docUrl}
               target="_blank"
@@ -72,7 +78,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ version, classN
         </div>
       </div>
     </Card>
-  );
-};
+  )
+}
 
-export default DocumentationPanel;
+export default DocumentationPanel
