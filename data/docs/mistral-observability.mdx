@@ -16,7 +16,7 @@ Monitoring Mistral in your AI applications with telemetry ensures full observabi
 
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - For Python: `pip` installed for managing Python packages
-- A Mistral Account and  API key. You can get the API key from <a href="https://admin.mistral.ai/organization/api-keys" target="_blank" rel="noopener noreferrer nofollow">Mistral platform</a>
+- A Mistral Account and API key. You can get the API key from <a href="https://admin.mistral.ai/organization/api-keys" target="_blank" rel="noopener noreferrer nofollow">Mistral platform</a>
 
 
 ## Monitoring Mistral AI
@@ -133,7 +133,7 @@ pip install \
   opentelemetry-instrumentation-httpx \
   opentelemetry-instrumentation-system-metrics \
   mistralai \
-  opentelemetry-instrumentation-openai-v2
+  openinference-instrumentation-mistralai
 ```
 
 ### Step 2: Set up Traces
@@ -144,7 +144,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry import trace
-from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
+from openinference.instrumentation.mistralai import MistralAIInstrumentor
 import os
 
 
@@ -158,7 +158,7 @@ processor = BatchSpanProcessor(span_exporter)
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
-OpenAIInstrumentor().instrument()
+MistralAIInstrumentor().instrument()
 ```
 
 - **`<service_name>`** is the name of your service
@@ -178,6 +178,7 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry import metrics
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 import os
 
 resource = Resource.create({"service.name": "<service_name>"})
