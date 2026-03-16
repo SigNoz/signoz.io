@@ -330,12 +330,12 @@ To conclude, you don’t need to build bespoke integrations to let your users ex
 
 If you’re ready to implement OTel-native export in your application, here’s a summary of the key architectural and design steps to follow:
 
-- Decide which signals to support — logs, traces, and metrics — ideally all three, but start with what your product generates.
-- Use OTLP to export those signals via the OTel SDK or a Collector. The same push-based architecture works for all three.
+- Decide which telemetry signals to support out of logs, traces, and metrics. You should ideally support all three, but start with what your product generates.
+- Use OTLP to export those signals via the OTel SDK or a Collector. The same push-based architecture works for all three signals.
 - Let users configure a destination endpoint and optional auth headers. Consider per-signal endpoints for teams with more complex setups.
 - Allow users to enable or disable individual signals to control data volume and costs.
 - Document your endpoint format (gRPC/HTTP), required headers, and attribute/schema semantics per signal so users can confidently rely on the data in their backends.
-- Choose a Collector topology: one Collector per tenant for strong isolation, or a shared Collector with per-tenant pipelines for simpler operation.
+- Choose a Collector topology — one Collector per tenant for strong isolation, or a shared Collector with per-tenant pipelines for lesser operational overhead.
 - Provide an example config or env var snippet so users can get started quickly.
 
 The points above also encapsulate the golden rules that Cloudflare (except for metrics), Heroku, Kuma, and Keycloak follow: **default to push, stay vendor-neutral, and document the contract**.
