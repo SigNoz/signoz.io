@@ -4,6 +4,7 @@ id: k8s-cronjobs
 title: Monitor Kubernetes CronJobs
 description: Monitor Kubernetes CronJobs in SigNoz with the k8s-infra OpenTelemetry collection agent using CronJob pod logs and Job metrics.
 doc_type: howto
+tags: []
 ---
 
 This guide shows you how to monitor Kubernetes CronJobs with the SigNoz `k8s-infra` OpenTelemetry collection agent.
@@ -114,7 +115,7 @@ In the validated `k8s-infra` setup for this guide, these CronJob-related Kuberne
 - `k8s.job.desired_successful_pods`
 - `k8s.job.max_parallel_pods`
 
-These metrics are attached to Kubernetes Job resources, so `k8s.job.name` is the main dimension to use when you want to inspect one CronJob run in **Metrics Explorer**.
+These metrics come from the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry k8sclusterreceiver</a>. They are attached to Kubernetes Job resources, so `k8s.job.name` is the main dimension to use when you want to inspect one CronJob run in **Metrics Explorer**.
 
 ## Validate
 
@@ -172,9 +173,13 @@ presets:
         - batch-jobs
 ```
 
-Apply the same Helm upgrade command shown above with the updated values file.
+Apply the updated values to your existing release:
 
-Replace these values:
+```bash
+helm upgrade <release-name> signoz/k8s-infra -n <namespace> -f override-values.yaml
+```
+
+Verify these values:
 
 - `<release-name>`: Your existing `k8s-infra` Helm release name
 - `<namespace>`: The namespace where `k8s-infra` is installed
@@ -196,10 +201,10 @@ presets:
 Apply the updated values to your existing release:
 
 ```bash
-helm upgrade --install <release-name> signoz/k8s-infra -n <namespace> -f override-values.yaml
+helm upgrade <release-name> signoz/k8s-infra -n <namespace> -f override-values.yaml
 ```
 
-Replace these values:
+Verify these values:
 
 - `<release-name>`: Your existing `k8s-infra` Helm release name
 - `<namespace>`: The namespace where `k8s-infra` is installed
@@ -221,6 +226,8 @@ For example, check the `k8s-infra` namespace where you installed the chart:
 kubectl get deployments -n <k8s-infra-namespace>
 kubectl get pods -n <k8s-infra-namespace>
 ```
+
+You should see a running deployment such as `k8s-infra-k8s-cluster-otel-agent` with pods in `Running` status. If the deployment is missing, re-install `k8s-infra` by following [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
 
 ### I can see Job metrics, but I do not see CronJob logs
 
