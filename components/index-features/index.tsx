@@ -93,6 +93,10 @@ export const SigNozFeatures = () => {
               <div className="text-[32px] font-medium leading-[3.25rem] text-signoz_sienna-100">
                 The one-stop observability tool
               </div>
+              <p className="m-0 mt-3 text-base font-medium text-signoz_sienna-300">
+                SigNoz is an open-source Datadog or New Relic alternative for logs, metrics, traces,
+                dashboards, alerts, and more.
+              </p>
             </div>
 
             <div className="flex hidden items-center justify-center md:flex">

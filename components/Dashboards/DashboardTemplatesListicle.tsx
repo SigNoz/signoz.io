@@ -217,6 +217,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ECS Infra Metrics Dashboard Template',
   },
   {
+    name: 'Envoy Proxy',
+    href: '/docs/dashboards/dashboard-templates/envoy-dashboard',
+    icon: <Network className="h-7 w-7 text-purple-500" />,
+    clickName: 'Envoy Proxy Dashboard Template',
+  },
+  {
     name: 'Flask Monitoring',
     href: '/docs/dashboards/dashboard-templates/flask-monitoring',
     icon: <Globe className="h-7 w-7 text-black" />,
@@ -439,6 +445,18 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/openai-dashboard',
     icon: <SiOpenai className="h-7 w-7 text-white" />,
     clickName: 'OpenAI Dashboard Template',
+  },
+  {
+    name: 'OpenClaw',
+    href: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openclaw-logo.svg"
+        alt="OpenClaw Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenClaw Dashboard Template',
   },
   {
     name: 'OpenRouter',

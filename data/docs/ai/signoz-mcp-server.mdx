@@ -1,13 +1,13 @@
 ---
-date: 2026-03-11
+date: 2026-03-13
 id: signoz-mcp-server
 
 title: SigNoz MCP Server
-description: Connect AI assistants like Claude Desktop and Cursor to your SigNoz observability data using the MCP (Model Context Protocol) server.
+description: Connect AI assistants like Claude Desktop, Cursor, GitHub Copilot, Claude Code, and OpenAI Codex to your SigNoz observability data using the MCP (Model Context Protocol) server.
 doc_type: howto
 ---
 
-The SigNoz MCP Server implements the <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer nofollow">Model Context Protocol (MCP)</a> — an open standard that lets AI assistants interact with external tools and data sources. It connects MCP-compatible clients (Claude Desktop, Cursor, and others) to your SigNoz instance so you can query observability data in natural language.
+The SigNoz MCP Server implements the <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer nofollow">Model Context Protocol (MCP)</a> — an open standard that lets AI assistants interact with external tools and data sources. It connects MCP-compatible clients (Claude Code/Desktop, Cursor, GitHub Copilot, OpenAI Codex, and others) to your SigNoz instance so you can query observability data in natural language.
 
 Example use cases:
 - Ask your AI assistant _"What alerts fired in the last hour?"_ and get structured results from SigNoz.
@@ -22,7 +22,7 @@ The SigNoz MCP Server is functional but under active development. Expect breakin
 
 - A running SigNoz instance — [SigNoz Cloud](https://signoz.io/teams/) or [self-hosted](https://signoz.io/docs/install/self-host/)
 - A SigNoz API key (see [Get your API key](#get-your-api-key) below)
-- An MCP-compatible client: <a href="https://claude.ai/download" target="_blank" rel="noopener noreferrer nofollow">Claude Desktop</a> or <a href="https://www.cursor.com/" target="_blank" rel="noopener noreferrer nofollow">Cursor</a>
+- An MCP-compatible client: <a href="https://modelcontextprotocol.io/quickstart/user" target="_blank" rel="noopener noreferrer nofollow">Claude Desktop</a>, <a href="https://cursor.com/docs/mcp" target="_blank" rel="noopener noreferrer nofollow">Cursor</a>, <a href="https://code.visualstudio.com/docs/copilot/reference/mcp-configuration" target="_blank" rel="noopener noreferrer nofollow">GitHub Copilot</a>, <a href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noopener noreferrer nofollow">Claude Code</a>, or <a href="https://developers.openai.com/codex/mcp/" target="_blank" rel="noopener noreferrer nofollow">OpenAI Codex</a>
 - **To build from source:** Go 1.25+ and `make`, or Docker
 
 ## Get your API key
@@ -39,27 +39,25 @@ Keep your API key secure. Never commit it to version control — use environment
 
 The SigNoz MCP Server is open source: <a href="https://github.com/SigNoz/signoz-mcp-server" target="_blank" rel="noopener noreferrer nofollow">github.com/SigNoz/signoz-mcp-server</a>
 
-### Build from Source
+<Tabs>
+<TabItem value="build-source" label="Build from Source" default>
 
 1. Clone the repository and build the binary:
 
 ```bash
 git clone https://github.com/SigNoz/signoz-mcp-server.git
 cd signoz-mcp-server
-make build
+go build -o bin/signoz-mcp-server ./cmd/server/
 ```
 
 2. The binary is created at `bin/signoz-mcp-server`. Note the absolute path — you will need it when configuring your MCP client.
 
 <Admonition type="info">
-If you don't have `make` installed, you can build directly with Go:
-
-```bash
-go build -o bin/signoz-mcp-server ./cmd/server/
-```
+The repository also includes a `Makefile`. Running `make build` works but requires `goimports` to be installed and on your `PATH`. The `go build` command above has no extra dependencies beyond Go itself.
 </Admonition>
 
-### Docker
+</TabItem>
+<TabItem value="docker" label="Docker">
 
 1. Clone the repository:
 
@@ -90,6 +88,9 @@ The server starts in HTTP mode on port `8000` by default. You can override the p
 <Admonition type="info">
 The Docker setup always runs in HTTP transport mode. Use the **HTTP** tab in the [Setup](#setup) section below to configure your MCP client.
 </Admonition>
+
+</TabItem>
+</Tabs>
 
 ## Setup
 
@@ -140,6 +141,9 @@ MCP_SERVER_PORT=8000 \
 LOG_LEVEL=info \
 ./signoz-mcp-server
 ```
+
+- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
 
 Or use `docker-compose` (see the <a href="https://github.com/SigNoz/signoz-mcp-server" target="_blank" rel="noopener noreferrer nofollow">repository</a> for examples).
 
@@ -215,6 +219,10 @@ Use the following JSON for either method:
 
 Restart Cursor to activate the SigNoz tools.
 
+<Admonition type="info">
+The GUI method (**Cursor → Settings → Cursor Settings → Tools & Integrations**) configures the server globally across all your projects. The `.cursor/mcp.json` file is project-specific — commit it to share with your team.
+</Admonition>
+
 </TabItem>
 <TabItem value="cursor-http" label="HTTP">
 
@@ -230,6 +238,9 @@ LOG_LEVEL=info \
 ```
 
 Or use `docker-compose` (see the <a href="https://github.com/SigNoz/signoz-mcp-server" target="_blank" rel="noopener noreferrer nofollow">repository</a> for examples).
+
+- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
 
 2. Configure Cursor:
    - **GUI:** Open **Cursor → Settings → Cursor Settings → Tools & Integrations → + New MCP Server**
@@ -270,14 +281,194 @@ Restart Cursor to activate the SigNoz tools.
 </Tabs>
 
 </TabItem>
+<TabItem value="copilot" label="GitHub Copilot">
+
+GitHub Copilot supports both **global** (across all VS Code workspaces) and **project-level** (specific to one repository) configurations.
+
+<Tabs>
+<TabItem value="copilot-global" label="Global Setup" default>
+
+1. Build or download the `signoz-mcp-server` binary (see [Installation](#installation)).
+2. In VS Code, open the Command Palette (`Cmd+Shift+P` on Mac, `Ctrl+Shift+P` on Windows/Linux) and run **`MCP: Open User Configuration`**.
+3. Add the SigNoz server to the `servers` object:
+
+```json
+{
+  "servers": {
+    "signoz": {
+      "type": "stdio",
+      "command": "<path-to-binary>/signoz-mcp-server",
+      "args": [],
+      "env": {
+        "SIGNOZ_URL": "<your-signoz-url>",
+        "SIGNOZ_API_KEY": "<your-api-key>",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+4. Open Copilot Chat in **Agent mode**. When prompted, confirm that you trust the SigNoz MCP server.
+
+</TabItem>
+<TabItem value="copilot-project" label="Project-level Setup">
+
+Add the configuration directly to your codebase to share the MCP setup with your team.
+
+1. Build or download the `signoz-mcp-server` binary (see [Installation](#installation)).
+2. Create a `.vscode/mcp.json` file in your project root:
+
+```json
+{
+  "servers": {
+    "signoz": {
+      "type": "stdio",
+      "command": "<path-to-binary>/signoz-mcp-server",
+      "args": [],
+      "env": {
+        "SIGNOZ_URL": "<your-signoz-url>",
+        "SIGNOZ_API_KEY": "<your-api-key>",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+3. Open Copilot Chat in **Agent mode** and confirm you trust the server.
+
+</TabItem>
+</Tabs>
+
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** instead of `stdio` (e.g. running via Docker), change the type to `"type": "http"` and use `"url": "http://localhost:8000/mcp"`.
+</KeyPointCallout>
+
+</TabItem>
+<TabItem value="claude-code" label="Claude Code (CLI)">
+
+Claude Code is an agentic CLI tool. You can configure plugins globally or just for your current project.
+
+<Tabs>
+<TabItem value="claudecode-global" label="Global Setup" default>
+
+Run this command anywhere to make the SigNoz tools available across all your Claude Code projects:
+
+```bash
+claude mcp add --scope user signoz "<path-to-binary>/signoz-mcp-server" -e SIGNOZ_URL="<your-signoz-url>" -e SIGNOZ_API_KEY="<your-api-key>" -e LOG_LEVEL=info
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary you built earlier
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+</TabItem>
+<TabItem value="claudecode-project" label="Project-level Setup">
+
+To add the MCP tools *only* to the current folder (which updates your project's `.mcp.json`), add the `--scope project` flag:
+
+```bash
+cd your-project-folder
+claude mcp add --scope project signoz "<path-to-binary>/signoz-mcp-server" -e SIGNOZ_URL="<your-signoz-url>" -e SIGNOZ_API_KEY="<your-api-key>" -e LOG_LEVEL=info
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary you built earlier
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+</TabItem>
+</Tabs>
+
+
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** (e.g. running via Docker), use the `--transport http` flag along with your preferred scope (`--scope user` or `--scope project`):
+
+```bash
+claude mcp add --scope user --transport http signoz http://localhost:8000/mcp
+```
+</KeyPointCallout>
+
+<Admonition type="info">
+To remove the server later, use `claude mcp remove signoz` (add `--scope project` if you installed it locally). You can view all active servers with `claude mcp list`.
+</Admonition>
+
+</TabItem>
+<TabItem value="codex" label="OpenAI Codex">
+
+Codex supports both CLI command-style addition and configuration file editing via `config.toml`.
+
+<Tabs>
+<TabItem value="codex-cli" label="CLI (Recommended)" default>
+
+Run this command structure to add the SigNoz MCP server using the Codex CLI:
+
+```bash
+codex mcp add signoz --env SIGNOZ_URL="<your-signoz-url>" --env SIGNOZ_API_KEY="<your-api-key>" --env LOG_LEVEL=info -- "<path-to-binary>/signoz-mcp-server"
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary you built earlier
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** (e.g. running via Docker), you can add it via CLI:
+
+```bash
+codex mcp add signoz http://localhost:8000/mcp
+```
+</KeyPointCallout>
+
+</TabItem>
+<TabItem value="codex-config" label="config.toml Setup">
+
+1. Open your Codex configuration file. For global setup, edit `~/.codex/config.toml`. For project-specific setup, edit `.codex/config.toml` in your project root. (You can also open this via the IDE extension using **MCP settings > Open config.toml**).
+2. Add the SigNoz server block:
+
+```toml
+[mcp_servers.signoz]
+command = "<path-to-binary>/signoz-mcp-server"
+args = []
+
+[mcp_servers.signoz.env]
+SIGNOZ_URL = "<your-signoz-url>"
+SIGNOZ_API_KEY = "<your-api-key>"
+LOG_LEVEL = "info"
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary you built earlier
+- `<your-signoz-url>`: Your SigNoz instance URL (e.g., `https://your-instance.signoz.cloud`)
+- `<your-api-key>`: The API key from [Get your API key](#get-your-api-key)
+
+<KeyPointCallout title="HTTP mode" defaultCollapsed={true}>
+If you prefer to run the SigNoz MCP server in **HTTP mode** (e.g. running via Docker), you can add in your `config.toml`:
+
+```toml
+[mcp_servers.signoz]
+url = "http://localhost:8000/mcp"
+```
+</KeyPointCallout>
+
+</TabItem>
+</Tabs>
+
+</TabItem>
 </Tabs>
 
 ## Validate
 
 After setting up your MCP client, confirm the server is working:
 
-1. Open your AI assistant (Claude Desktop or Cursor).
-2. Ask: _"List all alerts"_ or _"Show me all available metrics"_.
+1. Open your AI assistant (Claude Desktop, Cursor, Copilot, Codex, or run `claude` in your terminal).
+2. Ask: _"List all alerts"_ or _"Show me all available services"_.
 3. The assistant should return structured results from your SigNoz instance. If it does, the MCP server is connected and working correctly.
 
 ## Configuration Reference

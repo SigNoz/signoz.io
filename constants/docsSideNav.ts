@@ -2083,6 +2083,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/envoy-dashboard',
+            label: 'Envoy Proxy',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/flask-monitoring',
             label: 'Flask Monitoring',
           },
@@ -2234,6 +2239,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openai-dashboard',
             label: 'OpenAI',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
+            label: 'OpenClaw',
           },
           {
             type: 'doc',
@@ -2736,6 +2746,11 @@ const docsSideNav = [
       {
         route: '/docs/openai-monitoring',
         label: 'OpenAI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/openclaw-monitoring',
+        label: 'OpenClaw',
         type: 'doc',
       },
       {
