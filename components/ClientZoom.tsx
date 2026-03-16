@@ -1,19 +1,16 @@
 'use client'
 
-import { useState, useEffect, type ReactNode } from 'react'
+import React, { forwardRef, type ReactNode } from 'react'
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 
+const ZoomDiv = forwardRef<HTMLDivElement, React.ComponentPropsWithRef<'div'>>(function ZoomDiv(
+  { 'aria-owns': _, ...props },
+  ref
+) {
+  return <div ref={ref} {...props} />
+})
+
 export default function ClientZoom({ children }: { children: ReactNode }) {
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  if (!isMounted) {
-    return <>{children}</>
-  }
-
-  return <Zoom>{children}</Zoom>
+  return <Zoom wrapElement={ZoomDiv as unknown as 'div'}>{children}</Zoom>
 }
