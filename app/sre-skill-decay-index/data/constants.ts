@@ -82,19 +82,19 @@ export const RECENT_DIAGNOSTICS: RecentDiagnostic[] = [
 ]
 
 export const OLLY_IMAGES: Record<string, { src: string; alt: string; rounded?: boolean }> = {
-  sleeping: { src: '/img/sre-skill-decay-index/olly-sleeping.png', alt: 'Olly sleeping on the job' },
-  welding: { src: '/img/sre-skill-decay-index/olly-welding-front.png', alt: 'Olly welding', rounded: true },
-  'welding-side': { src: '/img/sre-skill-decay-index/olly-welding-side.png', alt: 'Olly welding from behind' },
-  thinking: { src: '/img/sre-skill-decay-index/olly-thinking.png', alt: 'Olly thinking' },
-  professor: { src: '/img/sre-skill-decay-index/olly-professor.png', alt: 'Olly evaluating', rounded: true },
-  jedi: { src: '/img/sre-skill-decay-index/olly-jedi.png', alt: 'Jedi Olly - skills mastered' },
-  hangglider: { src: '/img/sre-skill-decay-index/olly-hangglider.png', alt: 'Olly hanggliding - things spiraling' },
+  sleeping: { src: '/img/sre-skill-decay-index/olly-sleeping.webp', alt: 'Olly sleeping on the job' },
+  welding: { src: '/img/sre-skill-decay-index/olly-welding-front.webp', alt: 'Olly welding', rounded: true },
+  'welding-side': { src: '/img/sre-skill-decay-index/olly-welding-side.webp', alt: 'Olly welding from behind' },
+  thinking: { src: '/img/sre-skill-decay-index/olly-thinking.webp', alt: 'Olly thinking' },
+  professor: { src: '/img/sre-skill-decay-index/olly-professor.webp', alt: 'Olly evaluating', rounded: true },
+  jedi: { src: '/img/sre-skill-decay-index/olly-jedi.webp', alt: 'Jedi Olly - skills mastered' },
+  hangglider: { src: '/img/sre-skill-decay-index/olly-hangglider.webp', alt: 'Olly hanggliding - things spiraling' },
   bush: {
-    src: '/img/sre-skill-decay-index/olly-bush.png',
+    src: '/img/sre-skill-decay-index/olly-bush.webp',
     alt: 'Olly hiding - skills fading',
   },
   space: {
-    src: '/img/sre-skill-decay-index/olly-space.png',
+    src: '/img/sre-skill-decay-index/olly-space.webp',
     alt: 'Space Olly - flying without control',
   },
 }

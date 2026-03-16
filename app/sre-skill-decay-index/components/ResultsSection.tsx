@@ -1,12 +1,17 @@
-'use client'
-
-import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { CategoryScore, SeverityLevel } from '../types'
 import { OLLY_IMAGES, getResultOllyKey, SEVERITY_CONFIG, SEVERITY_TEXT, SEVERITY_BG } from '../data/constants'
+import { Twitter, Linkedin } from '@/components/social-icons/SolidIcons'
 import SkillBreakdownChart from './SkillBreakdownChart'
 import RecentDiagnostics from './RecentDiagnostics'
+
+const SHARE_LABELS: Record<SeverityLevel, string> = {
+  low: 'Minimal Decay',
+  mid: 'Moderate Decay',
+  high: 'Significant Decay',
+  critical: 'Critical Decay',
+}
 
 interface ResultsData {
   display: string
@@ -40,8 +45,15 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
   const ollyData = OLLY_IMAGES[ollyKey]
   const isCritical = results.level === 'critical'
 
+  const shareText = `I just checked if my SRE brain is fried with AI by playing the SRE Skill Decay Index and scored ${results.display}/10 — ${SHARE_LABELS[results.level]}. Try it now → https://signoz.io/sre-skill-decay-index/`
+
   return (
     <section className="px-6 pb-[120px] pt-20 text-center">
+      {/* Branding */}
+      <div className="mb-8 font-[family-name:var(--font-jetbrains)] text-[9px] uppercase tracking-[0.12em] text-[var(--text-dim)] opacity-60">
+        SigNoz
+      </div>
+
       <div className="mx-auto max-w-[720px]">
         {/* Results card */}
         <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-10 pb-[60px] max-md:px-6 max-md:py-10">
@@ -84,14 +96,14 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
           </div>
 
           {/* Share CTAs */}
-          <div className="mx-auto mb-10 flex items-center justify-center gap-3">
+          <div className="mx-auto mb-10 flex flex-wrap items-center justify-center gap-3">
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I just checked if my SRE brain is fried with AI by playing this AI SRE Skill Decay Index from @SigNozHQ and scored ${results.display}. Try it now - https://signoz.io/sre-skill-decay-index/`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-5 py-[10px] font-[family-name:var(--font-jetbrains)] text-xs font-medium text-[var(--text)] no-underline transition-all duration-200 hover:border-[var(--text-dim)] hover:bg-[var(--border)]"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              <Twitter width={16} height={16} className="fill-current" />
               Share on X
             </a>
             <a
@@ -100,9 +112,16 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-5 py-[10px] font-[family-name:var(--font-jetbrains)] text-xs font-medium text-[var(--text)] no-underline transition-all duration-200 hover:border-[var(--text-dim)] hover:bg-[var(--border)]"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              <Linkedin width={16} height={16} className="fill-current" />
               Share on LinkedIn
             </a>
+            <button
+              onClick={() => navigator.clipboard.writeText(shareText)}
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-5 py-[10px] font-[family-name:var(--font-jetbrains)] text-xs font-medium text-[var(--text)] transition-all duration-200 hover:border-[var(--text-dim)] hover:bg-[var(--border)] cursor-pointer"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
           </div>
 
           {/* Skill Breakdown */}

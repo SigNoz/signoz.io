@@ -1,6 +1,3 @@
-'use client'
-
-import React from 'react'
 import { RECENT_DIAGNOSTICS, getScoreColor } from '../data/constants'
 
 export default function RecentDiagnostics() {

@@ -1,6 +1,3 @@
-'use client'
-
-import React from 'react'
 import Image from 'next/image'
 import { Category, QuizQuestion } from '../types'
 import { OLLY_IMAGES } from '../data/constants'
@@ -25,22 +22,32 @@ export default function QuizSection({
 
   return (
     <section className="pb-[120px] pt-20">
-      {/* Progress bar */}
-      <div className="fixed left-0 right-0 top-0 z-[100] h-[3px] bg-[var(--surface)]">
-        <div
-          className="h-full bg-[var(--accent)] shadow-[0_0_12px_rgba(255,61,61,0.4)]"
-          style={{
-            width: `${progress}%`,
-            transition: 'width 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
-          }}
-        />
+      {/* Branded progress bar */}
+      <div className="fixed left-0 right-0 top-0 z-[100]">
+        <div className="flex items-center justify-between px-5 py-2 bg-[var(--surface)]/80 backdrop-blur-sm border-b border-[var(--border)]">
+          <span className="font-[family-name:var(--font-jetbrains)] text-[11px] font-semibold tracking-[0.08em] text-[var(--text-dim)]">
+            SigNoz
+          </span>
+          <span className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-[0.08em] text-[var(--text-dim)]">
+            {currentQuestion + 1} / {totalQuestions}
+          </span>
+        </div>
+        <div className="h-[2px] bg-[var(--surface)]">
+          <div
+            className="h-full bg-[var(--accent)] shadow-[0_0_12px_rgba(255,61,61,0.4)]"
+            style={{
+              width: `${progress}%`,
+              transition: 'width 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+            }}
+          />
+        </div>
       </div>
 
       <div className="mx-auto max-w-[720px] px-6">
         {/* Question header */}
         <div className="relative">
           <div className="font-[family-name:var(--font-jetbrains)] text-[11px] uppercase tracking-[0.1em] text-[var(--text-dim)] mb-4">
-            Question {currentQuestion + 1} of {totalQuestions}
+            Question {currentQuestion + 1}
           </div>
 
           {/* Olly - desktop: absolute positioned, mobile: centered block */}

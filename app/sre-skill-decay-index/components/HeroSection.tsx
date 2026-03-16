@@ -29,7 +29,16 @@ export default function HeroSection({ onStart }: HeroSectionProps) {
 
   return (
     <section className="flex min-h-screen flex-col items-center justify-center relative px-6 pb-[60px] text-center">
-    
+
+      {/* Branding */}
+      <div
+        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-[18px] py-2 font-[family-name:var(--font-jetbrains)] text-[11px] uppercase tracking-[0.08em] text-[var(--text-dim)] mb-6"
+        style={{ animation: 'fadeDown 0.8s ease' }}
+      >
+        <span className="h-[6px] w-[6px] rounded-full bg-[var(--accent)]" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+        From the incident responders at SigNoz
+      </div>
+
       {/* Olly */}
       <div className="relative flex justify-center mb-4" style={{ animation: 'fadeUp 0.8s ease 0.3s both' }}>
         <Image
