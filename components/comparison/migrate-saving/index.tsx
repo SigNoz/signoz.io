@@ -13,6 +13,7 @@ const MigrateSaving = (props) => {
     portalId: PORTAL_ID,
     formId: FORM_ID,
     target: '#my-hubspot-form',
+    formName: TITLE,
   })
 
   return (

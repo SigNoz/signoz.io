@@ -7,12 +7,13 @@ import PricingForm from '../../pricing-form'
 type HeroFormProps = {
   portalId: string
   formId: string
+  formName?: string
 }
 
-export default function HeroForm({ portalId, formId }: HeroFormProps) {
+export default function HeroForm({ portalId, formId, formName }: HeroFormProps) {
   return (
     <HubspotProvider>
-      <PricingForm portalId={portalId} formId={formId} />
+      <PricingForm portalId={portalId} formId={formId} formName={formName} />
     </HubspotProvider>
   )
 }

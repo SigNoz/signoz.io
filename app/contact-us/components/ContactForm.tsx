@@ -7,13 +7,14 @@ import PricingForm from '../../pricing-form'
 type ContactFormProps = {
   portalId: string
   formId: string
+  formName?: string
 }
 
-export default function ContactForm({ portalId, formId }: ContactFormProps) {
+export default function ContactForm({ portalId, formId, formName }: ContactFormProps) {
   return (
     <div className="w-full">
       <HubspotProvider>
-        <PricingForm portalId={portalId} formId={formId} />
+        <PricingForm portalId={portalId} formId={formId} formName={formName} />
       </HubspotProvider>
     </div>
   )

@@ -1,0 +1,126 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useLogEvent } from '@/hooks/useLogEvent'
+import { extractGroupIdFromEmail } from '@/utils/userUtils'
+
+type HubspotSubmissionValues = Record<string, unknown>
+
+type HubspotFormCallbackPayload = {
+  type?: string
+  eventName?: string
+  id?: string
+  data?: {
+    conversionId?: string
+    redirectUrl?: string
+    submissionValues?: HubspotSubmissionValues
+  }
+}
+
+const seenHubspotSubmissions = new Set<string>()
+
+const normalizeFieldKey = (key: string) =>
+  key
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase()
+
+const serializeValue = (value: unknown): string => {
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (Array.isArray(value)) return value.map((item) => serializeValue(item)).join(', ')
+  if (value === null || typeof value === 'undefined') return ''
+
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
+}
+
+const flattenSubmissionValues = (values: HubspotSubmissionValues) =>
+  Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [
+      `hubspot_field_${normalizeFieldKey(key)}`,
+      serializeValue(value),
+    ])
+  )
+
+const stringifySubmissionValues = (values: HubspotSubmissionValues) => {
+  try {
+    return JSON.stringify(values)
+  } catch {
+    return '{}'
+  }
+}
+
+const extractEmailFromSubmissionValues = (values: HubspotSubmissionValues) => {
+  const emailEntry = Object.entries(values).find(([key, value]) => {
+    if (typeof value !== 'string') return false
+
+    const normalizedKey = key.toLowerCase()
+    return (
+      normalizedKey === 'email' ||
+      normalizedKey.endsWith('/email') ||
+      normalizedKey.includes('email')
+    )
+  })
+
+  return emailEntry && typeof emailEntry[1] === 'string' ? emailEntry[1] : undefined
+}
+
+const isHubspotFormSubmittedMessage = (payload: unknown): payload is HubspotFormCallbackPayload => {
+  if (!payload || typeof payload !== 'object') return false
+
+  const candidate = payload as HubspotFormCallbackPayload
+
+  return candidate.type === 'hsFormCallback' && candidate.eventName === 'onFormSubmitted'
+}
+
+export function useHubspotSubmissionTracking(formId: string, formName?: string) {
+  const logEvent = useLogEvent()
+
+  useEffect(() => {
+    const handleHubspotMessage = (event: MessageEvent<unknown>) => {
+      if (!isHubspotFormSubmittedMessage(event.data)) return
+      if (event.data.id !== formId) return
+
+      const submissionValues = event.data.data?.submissionValues ?? {}
+      const submittedEmail = extractEmailFromSubmissionValues(submissionValues)
+      const dedupeKey = `${formId}:${event.timeStamp}`
+
+      if (seenHubspotSubmissions.has(dedupeKey)) return
+
+      seenHubspotSubmissions.add(dedupeKey)
+      if (seenHubspotSubmissions.size > 500) {
+        seenHubspotSubmissions.clear()
+        seenHubspotSubmissions.add(dedupeKey)
+      }
+
+      logEvent({
+        eventName: 'HubSpot Form Submitted',
+        eventType: 'track',
+        userId: submittedEmail,
+        groupId: extractGroupIdFromEmail(submittedEmail),
+        attributes: {
+          pageLocation: window.location.pathname,
+          formName: formName || event.data.id || formId,
+          hubspot_form_id: event.data.id,
+          hubspot_form_name: formName || event.data.id || formId,
+          hubspot_event_name: event.data.eventName,
+          hubspot_conversion_id: event.data.data?.conversionId ?? '',
+          hubspot_redirect_url: event.data.data?.redirectUrl ?? '',
+          hubspot_message_origin: event.origin,
+          hubspot_page_path: window.location.pathname,
+          hubspot_page_url: window.location.href,
+          hubspot_submission_values_json: stringifySubmissionValues(submissionValues),
+          ...flattenSubmissionValues(submissionValues),
+        },
+      })
+    }
+
+    window.addEventListener('message', handleHubspotMessage)
+    return () => window.removeEventListener('message', handleHubspotMessage)
+  }, [formId, formName, logEvent])
+}
