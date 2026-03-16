@@ -1441,7 +1441,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/integrations/opentelemetry-neondb',
-            label: 'NeonDB',
+            label: 'Neon',
           },
           {
             type: 'doc',
@@ -1771,7 +1771,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/integrations/opentelemetry-neondb',
-                label: 'NeonDB',
+                label: 'Neon',
               },
             ],
           },
@@ -3136,7 +3136,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/integrations/opentelemetry-neondb',
-        label: 'Neon DB',
+        label: 'Neon',
       },
       {
         type: 'doc',
