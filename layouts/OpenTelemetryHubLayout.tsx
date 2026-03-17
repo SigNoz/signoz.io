@@ -182,6 +182,7 @@ export default function OpenTelemetryHubLayout({
                     key={path.key}
                     href={path.firstRoute}
                     target="_blank"
+                    prefetch={false}
                     className={linkClassName}
                     clickType="Nav Click"
                     clickName="OpenTelemetry Hub Quick Start Link"
