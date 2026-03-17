@@ -1,5 +1,4 @@
 import TOCInline from 'pliny/ui/TOCInline'
-import Pre from 'pliny/ui/Pre'
 import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
 import type { MDXComponents } from 'mdx/types'
 import Image from './Image'
@@ -18,6 +17,7 @@ import DocCard from './DocCard'
 import DocCardContainer from './DocCardContainer'
 import NextCarousel from './Carousel/Carousel'
 import Figure from './Figure/Figure'
+import NextImage from 'next/image'
 import PricingCTA from './PricingCTA'
 import PageFeedback from './PageFeedback/PageFeedback'
 import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
@@ -73,24 +73,34 @@ import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
 import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
 import AWSOneClickListicle from './AWS/AWSOneClickListicle'
+import Region from './Region/Region'
+import RegionTable from './Region/RegionTable'
+import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
 
-import CardinalityExplosion from './HighCardinalityData/CardinalityExplosion';
-import MemoryGauge from './HighCardinalityData/MemoryGauge';
-import QueryRace from './HighCardinalityData/QueryRace';
-import SamplingAggregation from './HighCardinalityData/SamplingAggregation';
-import UsersAnalogy from './HighCardinalityData/UsersAnalogy';
-import Tooltip from './ui/Tooltip';
-import DatabaseTable from './HighCardinalityData/DatabaseTable';
+import CardinalityExplosion from './HighCardinalityData/CardinalityExplosion'
+import MemoryGauge from './HighCardinalityData/MemoryGauge'
+import QueryRace from './HighCardinalityData/QueryRace'
+import SamplingAggregation from './HighCardinalityData/SamplingAggregation'
+import UsersAnalogy from './HighCardinalityData/UsersAnalogy'
+import Tooltip from './ui/Tooltip'
+import DatabaseTable from './HighCardinalityData/DatabaseTable'
+import dynamic from 'next/dynamic'
+const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'), { ssr: false })
 
 export const components: MDXComponents = {
+  Region,
+  region: Region,
+  RegionTable,
   ToggleHeading,
   Image,
   TOCInline,
   a: CustomLink,
-  pre: Pre,
+  pre: RegionAwarePre,
+  code: RegionAwareCode,
   table: TableWrapper,
   BlogNewsletterForm,
   YouTube,
+  IncidentCostGraphic,
   GetStartedSigNoz,
   Admonition,
   SignUps,
@@ -103,6 +113,7 @@ export const components: MDXComponents = {
   DocCardContainer,
   NextCarousel,
   Figure,
+  NextImage,
   PricingCTA,
   PageFeedback,
   CustomMetricPlayground,

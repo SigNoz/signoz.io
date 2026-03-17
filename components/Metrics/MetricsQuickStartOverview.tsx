@@ -25,10 +25,14 @@ import {
   SiFlydotio,
   SiEnvoyproxy,
   SiGo,
+  SiRust,
+  SiDotnet,
   SiNodedotjs,
   SiPython,
+  SiDeno,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
+import { VscGraphLine } from 'react-icons/vsc'
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface MetricsQuickStartOverviewProps {
@@ -198,6 +202,24 @@ export default function MetricsQuickStartOverview({
             href: '/docs/userguide/envoy-metrics',
             icon: <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
             clickName: 'Envoy Metrics Link',
+          },
+          {
+            name: 'NVIDIA GPU (DCGM)',
+            href: '/docs/metrics-management/nvidia-dcgm-metrics',
+            icon: <FaServer className="h-7 w-7 text-green-500" />,
+            clickName: 'NVIDIA DCGM Metrics Link',
+          },
+          {
+            name: 'SLURM',
+            href: '/docs/metrics-management/slurm-metrics',
+            icon: <FaServer className="h-7 w-7 text-blue-600" />,
+            clickName: 'SLURM Metrics Link',
+          },
+          {
+            name: 'Render',
+            href: '/docs/metrics-management/render-metrics',
+            icon: <FaCloud className="h-7 w-7 text-purple-500" />,
+            clickName: 'Render Metrics Link',
           },
         ]}
         sectionName="Infrastructure Metrics"
@@ -369,7 +391,7 @@ export default function MetricsQuickStartOverview({
         cards={[
           {
             name: 'JVM',
-            href: '/docs/tutorial/jvm-metrics',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
             clickName: 'JVM Metrics Link',
           },
@@ -420,6 +442,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/migration/opentelemetry-datadog-receiver',
             icon: <SiDatadog className="h-7 w-7 text-purple-600" />,
             clickName: 'Datadog Receiver Link',
+          },
+          {
+            name: 'StatsD',
+            href: '/docs/userguide/opentelemetry-statsd',
+            icon: <VscGraphLine className="h-7 w-7 text-blue-500" />,
+            clickName: 'StatsD Metrics Link',
           },
         ]}
         sectionName="Collection Metrics"
@@ -524,6 +552,24 @@ export default function MetricsQuickStartOverview({
             clickName: 'Golang Metrics Link',
           },
           {
+            name: 'Rust',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-rust',
+            icon: <SiRust className="h-7 w-7 text-orange-600" />,
+            clickName: 'Rust Metrics Link',
+          },
+          {
+            name: 'Java',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java',
+            icon: <FaJava className="h-7 w-7 text-red-600" />,
+            clickName: 'Java Metrics Link',
+          },
+          {
+            name: '.NET',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet',
+            icon: <SiDotnet className="h-7 w-7 text-blue-600" />,
+            clickName: '.NET Metrics Link',
+          },
+          {
             name: 'Node.js',
             href: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
             icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
@@ -534,6 +580,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
             icon: <SiPython className="h-7 w-7 text-blue-500" />,
             clickName: 'Python Metrics Link',
+          },
+          {
+            name: 'Deno',
+            href: '/docs/instrumentation/opentelemetry-deno',
+            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
+            clickName: 'Deno Metrics Link',
           },
         ]}
         sectionName="Application Metrics"

@@ -243,6 +243,8 @@ export type MDXContent = {
   publishedAt: string
   createdAt: string
   updatedAt: string
+  image?: string
+  layout?: string
   [key: string]: any
 }
 
@@ -273,7 +275,8 @@ export const fetchMDXContentByPath = async (
   collectionName: string,
   path?: string,
   deployment_status?: string,
-  fetchAll: boolean = false
+  fetchAll: boolean = false,
+  fields?: string[]
 ): Promise<MDXContentByIdApiResponse | MDXContentApiResponse> => {
   try {
     const queryObject: any = {
@@ -283,6 +286,10 @@ export const fetchMDXContentByPath = async (
         pageSize: 100,
       },
       sort: ['publishedAt:desc'],
+    }
+
+    if (fields && fields.length > 0) {
+      queryObject.fields = fields
     }
 
     // Add filters only if not fetching all
@@ -321,53 +328,88 @@ export const fetchMDXContentByPath = async (
 
     // If fetchAll is true, fetch all pages and combine results
     if (fetchAll) {
+      const BATCH_PAGE_SIZE = 50
       let allData: MDXContent[] = []
-      let currentPage = 1
-      let totalPages = 1
-      let finalMeta: any = {}
 
-      do {
-        queryObject.pagination.page = currentPage
+      const initialQueryObject = { ...queryObject }
+      initialQueryObject.pagination.page = 1
+      initialQueryObject.pagination.pageSize = BATCH_PAGE_SIZE
 
-        const queryParams = qs.stringify(queryObject, {
-          encode: false,
-          addQueryPrefix: true,
-          arrayFormat: 'repeat',
-        })
+      const initialQueryParams = qs.stringify(initialQueryObject, {
+        encode: false,
+        addQueryPrefix: true,
+        arrayFormat: 'repeat',
+      })
 
-        const response = await fetch(`${API_URL}/api/${collectionName}${queryParams}`, {
-          next: {
-            tags: [`${collectionName}-list`],
-          },
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
-            Pragma: 'no-cache',
-            Expires: '0',
-          },
-          cache: 'no-store',
-        })
+      const initialResponse = await fetch(`${API_URL}/api/${collectionName}${initialQueryParams}`, {
+        cache: 'force-cache',
+        next: {
+          tags: [`${collectionName}-list`, 'mdx-content-list'],
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
 
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Content not found')
+      if (!initialResponse.ok) {
+        if (initialResponse.status === 404) {
+          throw new Error('Content not found')
+        }
+        const errorMessage = await initialResponse.text()
+        throw new Error(`Network response was not ok: ${initialResponse.status} ${errorMessage}`)
+      }
+
+      const initialData: MDXContentApiResponse = await initialResponse.json()
+
+      if (initialData.data && initialData.data.length > 0) {
+        allData = initialData.data
+      }
+
+      const totalPages = initialData.meta.pagination.pageCount
+
+      if (totalPages > 1) {
+        const pagePromises: Promise<MDXContentApiResponse>[] = []
+        for (let i = 2; i <= totalPages; i++) {
+          const pageQueryObject = { ...queryObject }
+          pageQueryObject.pagination.page = i
+          pageQueryObject.pagination.pageSize = BATCH_PAGE_SIZE
+
+          const pageQueryParams = qs.stringify(pageQueryObject, {
+            encode: false,
+            addQueryPrefix: true,
+            arrayFormat: 'repeat',
+          })
+
+          pagePromises.push(
+            fetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
+              cache: 'force-cache',
+              next: {
+                tags: [`${collectionName}-list`, 'mdx-content-list'],
+              },
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }).then(async (res) => {
+              if (!res.ok) {
+                const msg = await res.text()
+                throw new Error(`Failed to fetch page ${i}: ${res.status} ${msg}`)
+              }
+              return res.json() as Promise<MDXContentApiResponse>
+            })
+          )
+        }
+
+        const pagesResults = await Promise.allSettled(pagePromises)
+        pagesResults.forEach((result, idx) => {
+          if (result.status === 'fulfilled' && result.value.data?.length > 0) {
+            allData = allData.concat(result.value.data)
+          } else if (result.status === 'rejected') {
+            console.warn(`Failed to fetch page ${idx + 2} of ${collectionName}:`, result.reason)
           }
-          const errorMessage = await response.text()
-          throw new Error(`Network response was not ok: ${response.status} ${errorMessage}`)
-        }
+        })
+      }
 
-        const data: MDXContentApiResponse = await response.json()
-
-        if (data.data && data.data.length > 0) {
-          allData = allData.concat(data.data)
-        }
-
-        totalPages = data.meta.pagination.pageCount
-        finalMeta = data.meta
-        currentPage++
-      } while (currentPage <= totalPages)
-
-      // Update the pagination meta to reflect all data
+      const finalMeta = initialData.meta
       finalMeta.pagination = {
         page: 1,
         pageSize: allData.length,
@@ -389,16 +431,13 @@ export const fetchMDXContentByPath = async (
     })
 
     const response = await fetch(`${API_URL}/api/${collectionName}${queryParams}`, {
+      cache: 'force-cache',
       next: {
-        tags: [`${collectionName}-${path}`],
+        tags: [`${collectionName}-${path}`, `mdx-content-${path}`],
       },
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-        Pragma: 'no-cache',
-        Expires: '0',
       },
-      cache: 'no-store',
     })
 
     if (!response.ok) {
@@ -423,141 +462,6 @@ export const fetchMDXContentByPath = async (
     console.error(`Error fetching MDX content for ${collectionName}:`, error)
     throw error
   }
-}
-
-// Fetch Authors by key - has path nesting
-export const fetchAuthorByKey = async (key: string): Promise<MDXContentByIdApiResponse> => {
-  try {
-    const queryObject = {
-      filters: {
-        key: {
-          $eq: key,
-        },
-      },
-    }
-
-    const queryParams = qs.stringify(queryObject, {
-      encode: false,
-      addQueryPrefix: true,
-      arrayFormat: 'repeat',
-    })
-
-    if (!API_URL) {
-      throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
-    }
-
-    const response = await fetch(`${API_URL}/api/authors${queryParams}`, {
-      next: {
-        // revalidate: 3600, // Same as export const revalidate = 3600; in the page - we need no-store, only one should be specified
-        tags: [`authors-${key}`],
-      },
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store', // Avoid caching
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-      cache: 'no-store', // For fetch requests
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Content not found')
-      }
-      const errorMessage = await response.text()
-      throw new Error(`Network response was not ok: ${response.status} ${errorMessage}`)
-    }
-
-    const data: any = await response.json()
-
-    if (!data.data || data.data.length === 0) {
-      throw new Error('Content not found')
-    }
-
-    return {
-      data: data.data[0],
-      meta: {},
-    }
-  } catch (error) {
-    console.error(`Error fetching Authors by key ${key}:`, error)
-    throw error
-  }
-}
-
-// Fetch all MDX content paths for static generation if needed
-// This is unused for now, we can remove it later if needed
-export const fetchAllMDXPaths = async (
-  collectionName: string,
-  useCache: boolean = true
-): Promise<string[]> => {
-  // Check cache first
-  if (useCache && pathsCache && Date.now() - pathsCacheTimestamp < PATHS_CACHE_TTL) {
-    return pathsCache
-  }
-
-  try {
-    const queryObject = {
-      fields: ['path'],
-      pagination: {
-        pageSize: 1000, // TODO: Adjust based on content volume
-      },
-      sort: ['publishedAt:desc'],
-    }
-
-    const queryParams = qs.stringify(queryObject, {
-      encode: false,
-      addQueryPrefix: true,
-      arrayFormat: 'repeat',
-    })
-
-    const response = await fetch(`${API_URL}/api/${collectionName}${queryParams}`, {
-      next: {
-        // revalidate: 3600, // Same as export const revalidate = 3600; in the page - we need no-store, only one should be specified
-        tags: [`${collectionName}-paths`],
-      },
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store', // Avoid caching
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-      cache: 'no-store', // For fetch requests
-    })
-
-    if (!response.ok) {
-      const errorMessage = await response.text()
-      throw new Error(`Network response was not ok: ${response.status} ${errorMessage}`)
-    }
-
-    const data: MDXContentApiResponse = await response.json()
-    const paths = data.data.map((item) => item.path)
-
-    // Update cache
-    pathsCache = paths
-    pathsCacheTimestamp = Date.now()
-
-    return paths
-  } catch (error) {
-    console.error('Error fetching all MDX paths:', error)
-    // Return cached data if available, otherwise empty array
-    return pathsCache || []
-  }
-}
-
-// Utility function to validate MDX content structure
-export const validateMDXContent = (content: any): content is MDXContent => {
-  return (
-    content &&
-    typeof content.id === 'number' &&
-    typeof content.documentId === 'string' &&
-    typeof content.title === 'string' &&
-    typeof content.slug === 'string' &&
-    typeof content.path === 'string' &&
-    typeof content.content === 'string' &&
-    typeof content.publishedAt === 'string' &&
-    typeof content.createdAt === 'string' &&
-    typeof content.updatedAt === 'string'
-  )
 }
 
 // Clear the paths cache (useful for revalidation)

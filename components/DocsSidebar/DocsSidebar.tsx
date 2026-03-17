@@ -6,7 +6,7 @@ import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import docsSideNav from 'constants/docsSideNav'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Tooltip } from '@nextui-org/react'
 
 interface DocsSidebarProps {
@@ -15,6 +15,9 @@ interface DocsSidebarProps {
 
 const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const regionParam = searchParams.get('region')
+  const cloudRegionParam = searchParams.get('cloud_region')
   const [sideNav, setSideNav] = useState(docsSideNav)
   const [isClient, setIsClient] = useState(false)
   const [activeRoute, setActiveRoute] = useState<string | null>(null)
@@ -88,28 +91,39 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         const sidebar = sidebarRef.current
         const elementRect = element.getBoundingClientRect()
         const sidebarRect = sidebar.getBoundingClientRect()
-        
+
         // Check if element is outside the visible area of the sidebar
         const isAboveView = elementRect.top < sidebarRect.top
         const isBelowView = elementRect.bottom > sidebarRect.bottom
-        
+
         if (isAboveView || isBelowView) {
           // Calculate scroll position to center the element within the sidebar
           const elementOffsetTop = element.offsetTop
           const sidebarScrollTop = sidebar.scrollTop
           const sidebarHeight = sidebar.clientHeight
           const elementHeight = element.clientHeight
-          
-          const targetScrollTop = elementOffsetTop - (sidebarHeight / 2) + (elementHeight / 2)
-          
+
+          const targetScrollTop = elementOffsetTop - sidebarHeight / 2 + elementHeight / 2
+
           sidebar.scrollTo({
             top: targetScrollTop,
-            behavior: 'smooth'
+            behavior: 'smooth',
           })
         }
       }
     })
   }, [pathname])
+
+  const constructHref = (route: string) => {
+    let href = route
+    if (regionParam) {
+      href = `${href}${href.includes('?') ? '&' : '?'}region=${regionParam}`
+      if (cloudRegionParam) {
+        href = `${href}&cloud_region=${cloudRegionParam}`
+      }
+    }
+    return href
+  }
 
   const renderDoc = (doc: Doc) => {
     // Normalize both routes for comparison
@@ -134,7 +148,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
         <Link
-          href={doc.route}
+          href={constructHref(doc.route)}
           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
             isGetStarted
               ? `font-medium ${
@@ -169,7 +183,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
     return (
       <li key={category.label} className="group mx-2 my-1">
-        <Link href={category.route || ''}>
+        <Link href={category.route ? constructHref(category.route) : ''}>
           <div
             onClick={() => toggleIsExpandedByLabel(category.label)}
             className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${

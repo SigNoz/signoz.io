@@ -1,5 +1,5 @@
 ---
-date: 2026-01-18
+date: 2026-03-06
 id: opentelemetry-ruby
 title: Ruby OpenTelemetry Instrumentation
 description: Learn how to instrument your Ruby application (Rails, Sinatra, Sidekiq, Resque, Redis, PostgreSQL) with OpenTelemetry and send telemetry data to SigNoz
@@ -8,19 +8,19 @@ doc_type: howto
 ---
 This guide shows you how to instrument your Ruby application including Rails, Sinatra, Sidekiq, Resque, Redis, and PostgreSQL with OpenTelemetry and send traces to SigNoz. The `opentelemetry-instrumentation-all` gem provides automatic instrumentation for 53+ popular Ruby libraries.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
-- Ruby 3.2 or later
+- <a href="https://rubygems.org/gems/opentelemetry-instrumentation-all" target="_blank" rel="noopener noreferrer nofollow">Ruby 3.2+</a>
 - Bundler installed
 - A SigNoz Cloud account or self-hosted SigNoz instance
 
 ## Send traces to SigNoz
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
-        <KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+        <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
             A VM is a virtual computer that runs on physical hardware. This includes:
             - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
             - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -36,8 +36,8 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
 </TabItem>
@@ -54,8 +54,8 @@ env:
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
 </TabItem>
@@ -67,8 +67,8 @@ $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
 ```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
 </TabItem>
@@ -102,8 +102,8 @@ docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:
     your-image:latest
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
 </TabItem>

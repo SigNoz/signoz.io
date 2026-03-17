@@ -1,12 +1,12 @@
 ---
-date: 2025-08-05
+date: 2026-03-13
 id: logs_faqs
 
 title: General FAQs
 description: General FAQs about logs
 ---
 
-### Q. I can't see related logs for traces.  
+### Q. I can't see related logs for traces.
 A. Make sure your logs include `trace_id` and `span_id`.
 
 <details>
@@ -17,17 +17,17 @@ A. Make sure your logs include `trace_id` and `span_id`.
 
 </details>
 
-### Q. I want to extract trace_id and span_id from my log line  
+### Q. I want to extract trace_id and span_id from my log line
 A. You can extract these using the logs pipelines trace parser. See documentation [here](https://signoz.io/docs/logs-pipelines/guides/trace/).
 
-### Q. I want to extract an attribute from my log line  
+### Q. I want to extract an attribute from my log line
 A. Use Logs Pipeline to parse and extract attributes.
 
 <details>
 <summary>Show detailed steps</summary>
 
-The best way to do this is using Logs Pipeline. Refer to:  
-- [Logs Pipeline Introduction](https://signoz.io/docs/logs-pipelines/introduction/)  
+The best way to do this is using Logs Pipeline. Refer to:
+- [Logs Pipeline Introduction](https://signoz.io/docs/logs-pipelines/introduction/)
 - [Parse JSON logs with Pipelines](https://signoz.io/docs/logs-pipelines/guides/json/)
 
 </details>
@@ -64,7 +64,7 @@ There are different ways to add a resource attribute.
     replace the value of `<host_name>` with the actual hostname
 </details>
 
-### Q. I am sending logs but my logs are not visible on SigNoz  
+### Q. I am sending logs but my logs are not visible on SigNoz
 A. Check your exporter and collector configuration.
 
 <details>
@@ -75,21 +75,120 @@ A. Check your exporter and collector configuration.
 
 </details>
 
-### Q. How to increase the retention period of logs from x days to y days?  
+### Q. How to increase the retention period of logs from x days to y days?
 A. If you are using SigNoz Cloud, contact SigNoz support via the chatbox. Or if you are self-hosting, you can change the retention period in the SigNoz UI under Settings > Logs Retention.
 
-### Q. In java my mdc attributes are not visible in SigNoz  
+### Q. In java my mdc attributes are not visible in SigNoz
 A. Ensure your logging configuration includes MDC pattern and OpenTelemetry is configured to capture MDC attributes.
 
 <details>
-<summary>Show detailed configuration steps</summary>
-
-You can get your mdc attributes by using the [appender settings][def] and passing it as `-D<property>=<value>` format.
-
-For example, for **logback** use:  
-`otel.instrumentation.logback-appender.experimental.capture-mdc-attributes=*`  
-For **log4j** use:  
-`otel.instrumentation.log4j-appender.experimental.capture-mdc-attributes=*`  
+<summary>Show detailed steps</summary>
+For example, for **logback** use:
+`otel.instrumentation.logback-appender.experimental.capture-mdc-attributes=*`
+For **log4j** use:
+`otel.instrumentation.log4j-appender.experimental.capture-mdc-attributes=*`
 See [this documentation][def] for more system properties.
+
+</details>
+
+### Q. How do I filter logs using the Query Builder?
+A. You can use the Query Builder to filter logs by specific attributes, such as service name or severity.
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. Navigate to the **Logs** tab in the side navigation bar to open the Logs Explorer.
+2. In the query input area, click inside the text box that says **"Enter your filter query"**.
+3. Type your query using the autocomplete suggestions (e.g., `severity_text = 'ERROR'`).
+4. Alternatively, use the **Filters for** sidebar on the left to select quick filters like **Severity Text** or **Service Name**.
+5. Click the blue **Run Query** button (or press `Cmd+Enter` / `Ctrl+Enter`) at the top right to refresh the results.
+
+</details>
+
+### Q. How do I add or remove columns in the log table view?
+A. You can customize columns in the List or Table view using the Settings menu to focus on relevant attributes.
+  
+<details>
+<summary>Show detailed steps</summary>
+
+1. Ensure your layout view is set to **List View** or **Table**.
+2. Click the **Settings icon** (slider icon) located at the top right of the logs area.
+3. In the popover that appears, locate the **COLUMNS** section.
+4. To remove a column, click the **'x'** next to the field name.
+5. To add a new column, click the **'+'** button next to the **COLUMNS** label.
+6. Search for a field in the search box and click on the desired attribute to add it as a column in your view.
+
+</details>
+
+### Q. My log queries are running slowly or taking several minutes to complete. How can I optimize performance?
+A. There are several strategies to improve log query performance significantly.
+
+<details>
+<summary>Show performance optimization strategies</summary>
+
+#### 1. Use Resource Attributes in Filters
+
+Moving commonly used attributes from regular attributes to resource attributes can drastically improve search performance. For example, if you're filtering by `app`, move it from `attributes.app` to `resource.app` using the [move operator](https://signoz.io/docs/logs-pipelines/processors/#move) in log pipelines.
+
+#### 2. Enable Data Flattening and Indexing
+
+For nested attributes like `body.step.<any attribute>`, you'll need to:
+
+* Enable [data flattening](https://signoz.io/docs/logs-pipelines/guides/json/) first
+* Request indexing of commonly used attributes by reaching out to SigNoz Cloud Support
+* This allows nested fields to exist as their own attributes outside of the body, making queries more performant
+
+#### 3. Reduce Query Time Range
+
+Limiting the time range of your query can significantly improve performance by reducing the amount of data that needs to be searched.
+
+#### Implementation Steps
+
+To optimize your log queries:
+
+1. Identify commonly used filter attributes in your queries
+2. Use log pipelines to move these attributes to resource attributes using the move operator (only when the attribute should be a resource attribute)
+3. If you need to query nested attributes, enable flattening and request indexing for those specific fields
+4. Adjust your query time ranges to be as narrow as possible while still capturing the data you need
+
+These optimizations work together to reduce query execution time from minutes to seconds, making your log analysis much more efficient.
+
+</details>
+### Q. How can I view the full details and context of a specific log line?
+A. You can click on any log line to open the Log details drawer, which provides a detailed breakdown and surrounding context.
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. Click on any log line in the result list.
+2. A **Log details** drawer will open on the right side of the screen.
+3. Use the **Overview** tab to see a readable list of all **Attributes**.
+4. Switch to the **JSON** tab to see the raw log structure.
+5. Click the **Context** tab to view logs that occurred immediately before and after the selected log line, which is highly useful for debugging sequential events.
+
+</details>
+
+### Q. How do I save a view or query for later use?
+A. You can save your current configuration (query, filters, columns, and layout) as a View for quick access.
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. Once you have configured your query, filters, and columns, find the **Views** section or **Save View** functionality.
+2. Provide a descriptive name to save your configuration.
+3. You can access saved views from the **Views** tab or from the Explorer sidebar to quickly switch between different commonly used configurations.
+
+</details>
+
+### Q. How do I navigate from a log line to its corresponding trace?
+A. If a log has a `trace_id` associated with it, you can navigate directly to the trace details. To learn how to add `trace_id` to your logs, see our guide on [Correlating Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs).
+
+<details>
+<summary>Show detailed steps</summary>
+
+1. In the **Logs Explorer**, click on any log line that has a `trace_id` to open the **Log details** drawer on the right side of the screen.
+2. In the **Overview** tab of the log details drawer, locate the **`trace_id`** field under the **Attributes** section.
+3. Click the **link icon** (which looks like a small chain link) immediately to the right of the `trace_id` label.
+4. Clicking this icon will navigate you directly to the corresponding **Trace Details** page.
 
 </details>

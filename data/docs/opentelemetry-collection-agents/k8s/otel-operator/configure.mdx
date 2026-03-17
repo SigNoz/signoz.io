@@ -1,5 +1,5 @@
 ---
-date: 2025-11-10
+date: 2026-02-04
 id: configure
 
 title: OpenTelemetry Operator - Configure
@@ -35,7 +35,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: signoz-collector-daemonset-collector-role
-  namespace: opentelemetery-operator-system
+  namespace: opentelemetry-operator-system
 rules:
   - apiGroups: ['']
     resources: [pods, namespaces, nodes, persistentvolumeclaims]
@@ -67,7 +67,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: signoz-collector-daemonset-collector-binding
-  namespace: opentelemetery-operator-system
+  namespace: opentelemetry-operator-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -75,7 +75,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: signoz-collector-daemonset-collector
-    namespace: opentelemetery-operator-system
+    namespace: opentelemetry-operator-system
 ```
 
 ### Collector CR
@@ -88,6 +88,7 @@ apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: signoz-collector-daemonset
+  namespace: opentelemetry-operator-system
 spec:
   mode: daemonset
   image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
@@ -151,7 +152,7 @@ spec:
       otlp:
         endpoint: https://ingest.{region}.signoz.cloud:443
         headers:
-          signoz-ingestion-key: '<SIGNOZ_INGESTION_KEY>'
+          signoz-ingestion-key: '<your-ingestion-key>'
         tls:
           insecure: false
           insecure_skip_verify: false
@@ -392,8 +393,8 @@ spec:
 ```
 
 <Admonition>
-- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
-- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+- Set your ingestion endpoint according to your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) to find the correct endpoint for your deployment.
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique identifier of the
   cluster.
 - Replace `<DEPLOYMENT_ENVIRONMENT>` with the deployment environment of your application.
@@ -408,6 +409,7 @@ apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: signoz-collector-daemonset
+  namespace: opentelemetry-operator-system
 spec:
   mode: daemonset
   image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
@@ -756,7 +758,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: signoz-collector-deployment-collector-role
-  namespace: opentelemetery-operator-system
+  namespace: opentelemetry-operator-system
 rules:
   - apiGroups: ['']
     resources:
@@ -791,7 +793,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: signoz-collector-deployment-collector-binding
-  namespace: opentelemetery-operator-system
+  namespace: opentelemetry-operator-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -799,7 +801,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: signoz-collector-deployment-collector
-    namespace: opentelemetery-operator-system
+    namespace: opentelemetry-operator-system
 ```
 
 ### Collector CR
@@ -812,6 +814,7 @@ apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: signoz-collector-deployment
+  namespace: opentelemetry-operator-system
 spec:
   mode: deployment
   image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
@@ -876,7 +879,7 @@ spec:
       otlp:
         endpoint: https://ingest.{region}.signoz.cloud:443
         headers:
-          signoz-ingestion-key: '<SIGNOZ_INGESTION_KEY>'
+          signoz-ingestion-key: '<your-ingestion-key>'
         tls:
           insecure: false
           insecure_skip_verify: false
@@ -980,8 +983,8 @@ spec:
 ```
 
 <Admonition>
-- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
-- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+- Set your ingestion endpoint according to your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) to find the correct endpoint for your deployment.
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique identifier of the
   cluster.
 - Replace `<DEPLOYMENT_ENVIRONMENT>` with the deployment environment of your application.
@@ -995,6 +998,7 @@ apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: signoz-collector-deployment
+  namespace: opentelemetry-operator-system
 spec:
   mode: deployment
   image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
@@ -1197,3 +1201,8 @@ The Operator can also inject language agents automatically into your workloads u
 
 - See the upstream guide: [Automatic instrumentation via the Operator](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/)
 - For language-specific steps, use our instrumentation docs. For example, Java: [Kubernetes (OTel Operator) section](/docs/instrumentation/opentelemetry-java#kubernetes)
+
+## Next Steps
+
+- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

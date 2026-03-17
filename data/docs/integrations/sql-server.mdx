@@ -1,5 +1,5 @@
 ---
-date: 2025-07-16
+date: 2026-03-12
 id: sql-server
 
 title: SQL Server Metrics and Logs
@@ -25,7 +25,7 @@ This documentation explains how to collect SQL Server metrics and logs using Ope
 
 ### Step 1. Setup OTel Collector
 The OpenTelemetry (OTel) Collector helps collect telemetry data such as logs, traces and metrics from your application.
-Please follow the documentation [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the OpenTelmetry Collector in your VM.
+Please follow the documentation [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to setup the OpenTelmetry Collector in your VM.
 
 ### Step 2. Setup SQL Server Receiver
 Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `sqlserver` [receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/sqlserverreceiver) under the `receivers` section.
@@ -61,7 +61,7 @@ Update the `config.yaml` file that you created in `otelcol-contrib` folder while
       otlp:
         endpoint: ingest.<region>.signoz.cloud:443
         headers:
-          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+          signoz-ingestion-key: <your-ingestion-key>
       debug:
         verbosity: detailed
 
@@ -73,7 +73,7 @@ Update the `config.yaml` file that you created in `otelcol-contrib` folder while
 - `<DatabaseName>`: Specifies the target SQL Server database that the OpenTelemetry Collector will query for collecting metrics (e.g., master, mydb)
 - `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific database
 - `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-ingestion-key>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3. Add SQL Server Receiver to pipelines
 In the `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `metrics` pipeline, add `sqlserver` to the list of receivers.
@@ -130,7 +130,7 @@ To see the complete list of metrics, refer this [link](https://github.com/open-t
 
 ### Step 1. Setup OTel Collector
 The OpenTelemetry (OTel) Collector helps collect telemetry data such as logs, traces and metrics from your application.
-Please follow the documentation [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the OpenTelmetry Collector in your VM.
+Please follow the documentation [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to setup the OpenTelmetry Collector in your VM.
 
 ### Step 2. Setup FileLog Receiver
 Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `filelog` [receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) under the `receivers` section.
@@ -162,7 +162,7 @@ You can configure this receiver to collect specific types of logs such as audit 
       otlp:
         endpoint: ingest.<region>.signoz.cloud:443
         headers:
-          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+          signoz-ingestion-key: <your-ingestion-key>
       debug:
         verbosity: detailed
 
@@ -171,7 +171,7 @@ You can configure this receiver to collect specific types of logs such as audit 
 - `<LogPath>`: Specifies the full absolute path to the SQL Server log file(s) that the OpenTelemetry Collector should monitor and ingest. This path must point to a valid file (e.g., C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Log\ERRORLOG on Windows or /var/opt/mssql/log/errorlog on Linux/Docker)
 - `<service-name>`: Specifies the service used for grouping and identifying logs, helping to organize and filter logs from a specific application or component
 - `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-ingestion-key>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3. Add FileLog Receiver to pipelines
 In the `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `logs` pipeline, add `filelog` to the list of receivers.

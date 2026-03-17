@@ -2,13 +2,12 @@
 
 import NextImage, { ImageProps } from 'next/image'
 
-import Zoom from 'react-medium-image-zoom'
-import 'react-medium-image-zoom/dist/styles.css'
+import ClientZoom from './ClientZoom'
 
 const Image = ({ ...rest }: ImageProps) => (
-  <Zoom>
+  <ClientZoom>
     <NextImage {...rest} />
-  </Zoom>
+  </ClientZoom>
 )
 
 export default Image

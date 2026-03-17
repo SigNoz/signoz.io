@@ -1,0 +1,198 @@
+---
+date: 2026-01-23
+id: codex-monitoring-with-opentelemetry
+title: OpenAI Codex Observability & Monitoring with OpenTelemetry
+description: Observability and monitoring for Codex usage and performance with OpenTelemetry instrumentation to send traces and logs to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+[OpenAI Codex](https://developers.openai.com/codex/) is an AI-powered coding assistant designed to help developers write, understand, and debug code through natural language interactions. It translates natural language into code and can work across multiple programming languages.
+
+This guide walks you through setting up observability and monitoring for OpenAI Codex using [OpenTelemetry](https://opentelemetry.io/) and exporting traces and logs to SigNoz. With this integration, you can observe and track various metrics for your Codex AI coding assistant usage.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- ChatGPT Plus, Pro, Business, Edu, or Enterprise subscription, **or** an OpenAI API key (obtainable from the [OpenAI Platform](https://platform.openai.com/api-keys))
+- Internet access to send telemetry data to SigNoz and make API calls to OpenAI
+
+
+## Monitoring Codex
+
+### Step 1: Set up Codex
+
+For more information on getting started with Codex in your environment, refer to the [Codex quickstart guide](https://developers.openai.com/codex/quickstart/).
+
+
+<Tabs>
+<TabItem value="IDE" label="IDE extension" default>
+
+Install the Codex extension for your IDE:
+
+- [Download for Visual Studio Code](vscode:extension/openai.chatgpt)
+- [Download for Cursor](cursor:extension/openai.chatgpt)
+- [Download for Windsurf](windsurf:extension/openai.chatgpt)
+- [Download for Visual Studio Code Insiders](https://marketplace.visualstudio.com/items?itemName=openai.chatgpt)
+
+Once installed, the Codex extension appears in the sidebar alongside your other extensions. It may be hidden in the collapsed section. You can move the Codex panel to the right side of the editor if you prefer.
+
+Sign in with your ChatGPT account or API key to get started.
+
+Codex starts in Agent mode by default, which lets it read files, run commands, and write changes in your project directory.
+
+Codex can modify your codebase, so consider creating Git checkpoints before and after each task so you can easily revert changes if needed.
+
+
+</TabItem>
+
+<TabItem value="CLI" label="CLI" default>
+
+The Codex CLI is supported on macOS, Windows, and Linux.
+
+Install with your preferred package manager:
+
+<Tabs>
+<TabItem value="npm" label="npm" default>
+
+Install with npm:
+
+```bash
+npm install -g @openai/codex
+```
+</TabItem>
+
+<TabItem value="Homebrew" label="Homebrew" default>
+
+Install with Homebrew:
+
+```bash
+brew install codex
+```
+</TabItem>
+</Tabs>
+
+Run codex in your terminal to get started. You’ll be prompted to sign in with your ChatGPT account or an API key.
+
+Once authenticated, you can ask Codex to perform tasks in the current directory.
+
+Codex can modify your codebase, so consider creating Git checkpoints before and after each task so you can easily revert changes if needed.
+
+</TabItem>
+</Tabs>
+
+### Step 2: Enable OpenTelemetry (OTel) export to track Codex runs 
+
+For more information on setting up telemetry for Codex, refer to the [Codex observability guide](https://developers.openai.com/codex/config-advanced#observability-and-telemetry).
+
+Codex stores its configuration at `~/.codex/config.toml`.
+
+Append the following to `~/.codex/config.toml`:
+
+```toml:~/.codex/config.toml
+[otel]
+log_user_prompt = true
+exporter = { otlp-grpc = {
+  endpoint = "https://ingest.<region>.signoz.cloud:443",
+  headers = { "signoz-ingestion-key" = "<your-ingestion-key>" }
+}}
+```
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+## View Traces and Logs in SigNoz
+
+Your Codex usage should now automatically emit traces and logs to SigNoz.
+
+You should be able to view traces in SigNoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/codex/codex-traces.webp"
+  alt="Codex Trace View"
+  caption="Codex Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/codex/codex-detailed-traces.webp"
+  alt="Codex Detailed Trace View"
+  caption="Codex Detailed Trace View"
+/>
+
+You should be able to view logs in SigNoz Cloud under the logs tab:
+
+<Figure
+  src="/img/docs/llm/codex/codex-logs.webp"
+  alt="Codex Logs View"
+  caption="Codex Logs View"
+/>
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure
+  src="/img/docs/llm/codex/codex-detailed-logs.webp"
+  alt="Codex Detailed Log View"
+  caption="Codex Detailed Logs View"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+</details>
+
+## Next Steps
+
+You can also check out our custom Codex dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/codex-dashboard/) which provides specialized visualizations for monitoring your Codex usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/codex/codex-dashboard.webp"
+  alt="Codex Dashboard"
+  caption="Codex Dashboard Template"
+/>
+
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+

@@ -18,7 +18,7 @@ This guide walks you through migrating distributed tracing and APM from Tempo (L
 
 SigNoz is built natively on OpenTelemetry, making it compatible with most existing instrumentation used with Tempo (OpenTelemetry, Jaeger, Zipkin).
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -72,12 +72,12 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
 
 ```bash
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ```
 
 Replace:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
-- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### From Grafana Agent
 
@@ -92,7 +92,7 @@ exporters:
   otlp:
     endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
-      signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
+      signoz-ingestion-key: "<your-ingestion-key>"
     tls:
       insecure: false
 

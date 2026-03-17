@@ -1,5 +1,5 @@
 ---
-date: 2025-12-29
+date: 2026-03-12
 id: aws-rds-postgresql
 title: AWS RDS (PostgreSQL) Metrics and Logs
 description: Collect AWS RDS PostgreSQL metrics and logs using OpenTelemetry Collector and send them to SigNoz for monitoring and analysis.
@@ -33,13 +33,13 @@ Before you begin, ensure you have the following:
   - Alternative: Use the [Docker image](https://github.com/prometheus/cloudwatch_exporter#docker-images).
 
 3. **OpenTelemetry Collector**: 
-  - [Install an OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) (v0.88.0+) if not already done.
+  - [Install an OTEL Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) (v0.88.0+) if not already done.
   - Ensure you can provide config files to the collector and set environment variables and command line flags used for running it.
 
 4. **PostgreSQL Server Access**: 
   - The OTEL collector must have client access to the Postgres server (optional if only collecting CloudWatch metrics).
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -337,15 +337,15 @@ export POSTGRESQL_PASSWORD="<PASSWORD>"
 export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="<SIGNOZ_INGESTION_KEY>"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 ```
 
-Replace the following placeholders:
+Verify these values:
 - `<postgres-server-endpoint>`: The hostname and port of your PostgreSQL RDS instance (e.g., `mydb.xxxx.us-east-1.rds.amazonaws.com:5432`)
 - `<username>`: Your PostgreSQL database username
 - `<PASSWORD>`: Your PostgreSQL database password
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key from [Settings > Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 4: Use the Collector Config File
 
@@ -408,12 +408,12 @@ service:
 export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="<SIGNOZ_INGESTION_KEY>"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 ```
 
-Replace the following placeholders:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key from [Settings > Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3: Run the Collector
 

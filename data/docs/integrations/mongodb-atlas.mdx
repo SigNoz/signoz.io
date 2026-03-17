@@ -1,7 +1,7 @@
 ---
-date: 2025-07-20
+date: 2026-03-12
 id: mongodb-atlas
-
+description: This documentation guides you through setting up monitoring for MongoDB Atlas—tracking key metrics, collecting logs, and visualising them through an out-of-the-box dashboard.
 title: MongoDB Atlas Metrics and Logs
 ---
 
@@ -30,15 +30,15 @@ Before you begin, ensure you have:
 
 ### Step 1: Install OpenTelemetry Collector
 
-Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+Follow [this document](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to install the OpenTelemetry Collector.
 
 ### Step 2: Configure MongoDB Atlas Receiver
 
-Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodb_atlas` receiver:
 
 ```yaml:config.yaml
 receivers:
-  mongodbatlas:
+  mongodb_atlas:
     # Authentication
     public_key: "<mongodb-atlas-public-key>"
     private_key: "<mongodb-atlas-private-key>"    
@@ -65,15 +65,15 @@ exporters:
 service:
   pipelines:
     metrics:
-      receivers: [mongodbatlas]
+      receivers: [mongodb_atlas]
       processors: [batch,resource/env]
       exporters: [otlp]
 ```
 
 - `<mongodb-atlas-public-key>` is the public key of your MongoDB Atlas project
 - `<mongodb-atlas-private-key>` is the private key of your MongoDB Atlas project
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 All the available MongoDB Atlas receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver).
 
@@ -89,15 +89,17 @@ Start the OpenTelemetry Collector using the above `config.yaml` file:
 
 Here are sample screenshots of the dashboard powered by MongoDB Atlas metrics:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/overview.webp" alt="MongoDB Atlas Overview"/>
-    <figcaption><i>MongoDB Atlas Overview</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/overview.webp"
+  alt="MongoDB Atlas Overview"
+  caption="MongoDB Atlas Overview"
+/>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/project-stats.webp" alt="MongoDB Atlas Project Stats"/>
-    <figcaption><i>MongoDB Atlas Project Stats</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/project-stats.webp"
+  alt="MongoDB Atlas Project Stats"
+  caption="MongoDB Atlas Project Stats"
+/>
 
 <details> 
 <summary> Complete list of MongoDB Atlas metrics </summary>
@@ -184,15 +186,15 @@ You can refer [this](https://github.com/open-telemetry/opentelemetry-collector-c
 
 ### Step 1: Install OpenTelemetry Collector
 
-Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+Follow [this document](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to install the OpenTelemetry Collector.
 
 ### Step 2: Configure MongoDB Atlas Receiver
 
-Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodb_atlas` receiver:
 
 ```yaml:config.yaml
 receivers:
-  mongodbatlas:
+  mongodb_atlas:
     # Authentication
     public_key: "<mongodb-atlas-public-key>"
     private_key: "<mongodb-atlas-private-key>"    
@@ -224,15 +226,15 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [mongodbatlas]
+      receivers: [mongodb_atlas]
       processors: [batch]
       exporters: [otlp]
 ```
 
 - `<mongodb-atlas-public-key>` is the public key of your MongoDB Atlas project
 - `<mongodb-atlas-private-key>` is the private key of your MongoDB Atlas project
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 All the available MongoDB Atlas receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver).
 
@@ -248,15 +250,17 @@ Start the OpenTelemetry Collector using the above `config.yaml` file:
 
 Here are sample screenshots of the MongoDB Atlas logs from SigNoz:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/logs.webp" alt="MongoDB Atlas Logs"/>
-    <figcaption><i>MongoDB Atlas Logs in SigNoz</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/logs.webp"
+  alt="MongoDB Atlas Logs"
+  caption="MongoDB Atlas Logs in SigNoz"
+/>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/detailed-log.webp" alt="MongoDB Atlas Detailed Log"/>
-    <figcaption><i>MongoDB Atlas Detailed Log in SigNoz</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/detailed-log.webp"
+  alt="MongoDB Atlas Detailed Log"
+  caption="MongoDB Atlas Detailed Log in SigNoz"
+/>
 
 </TabItem>
 </Tabs>
@@ -268,15 +272,15 @@ Here are sample screenshots of the MongoDB Atlas logs from SigNoz:
 
 ### Step 1: Install OpenTelemetry Collector
 
-Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+Follow [this document](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to install the OpenTelemetry Collector.
 
 ### Step 2: Configure MongoDB Atlas Receiver
 
-Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodb_atlas` receiver:
 
 ```yaml:config.yaml
 receivers:
-  mongodbatlas:
+  mongodb_atlas:
     # Authentication
     public_key: "<mongodb-atlas-public-key>"
     private_key: "<mongodb-atlas-private-key>"    
@@ -301,7 +305,7 @@ exporters:
 service:
   pipelines:
     metrics:
-      receivers: [mongodbatlas]
+      receivers: [mongodb_atlas]
       processors: [batch,resource/env]
       exporters: [otlp]
 ```
@@ -324,15 +328,17 @@ Start the OpenTelemetry Collector using the above `config.yaml` file:
 
 Here are sample screenshots of the dashboard powered by MongoDB Atlas metrics:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/overview.webp" alt="MongoDB Atlas Overview"/>
-    <figcaption><i>MongoDB Atlas Overview</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/overview.webp"
+  alt="MongoDB Atlas Overview"
+  caption="MongoDB Atlas Overview"
+/>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/project-stats.webp" alt="MongoDB Atlas Project Stats"/>
-    <figcaption><i>MongoDB Atlas Project Stats</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/project-stats.webp"
+  alt="MongoDB Atlas Project Stats"
+  caption="MongoDB Atlas Project Stats"
+/>
 
 <details> 
 <summary> Complete list of MongoDB Atlas metrics </summary>
@@ -419,15 +425,15 @@ You can refer [this](https://github.com/open-telemetry/opentelemetry-collector-c
 
 ### Step 1: Install OpenTelemetry Collector
 
-Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+Follow [this document](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to install the OpenTelemetry Collector.
 
 ### Step 2: Configure MongoDB Atlas Receiver
 
-Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodb_atlas` receiver:
 
 ```yaml:config.yaml
 receivers:
-  mongodbatlas:
+  mongodb_atlas:
     # Authentication
     public_key: "<mongodb-atlas-public-key>"
     private_key: "<mongodb-atlas-private-key>"    
@@ -457,7 +463,7 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [mongodbatlas]
+      receivers: [mongodb_atlas]
       processors: [batch]
       exporters: [otlp]
 ```
@@ -480,15 +486,17 @@ Start the OpenTelemetry Collector using the above `config.yaml` file:
 
 Here are sample screenshots of the MongoDB Atlas logs from SigNoz:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/logs.webp" alt="MongoDB Atlas Logs"/>
-    <figcaption><i>MongoDB Atlas Logs in SigNoz</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/logs.webp"
+  alt="MongoDB Atlas Logs"
+  caption="MongoDB Atlas Logs in SigNoz"
+/>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/mongodb-atlas/detailed-log.webp" alt="MongoDB Atlas Detailed Log"/>
-    <figcaption><i>MongoDB Atlas Detailed Log in SigNoz</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/integrations/mongodb-atlas/detailed-log.webp"
+  alt="MongoDB Atlas Detailed Log"
+  caption="MongoDB Atlas Detailed Log in SigNoz"
+/>
 
 </TabItem>
 </Tabs>
