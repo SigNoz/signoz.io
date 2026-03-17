@@ -3,5 +3,13 @@ export type SubmissionRelayPayload = {
   signupId: string
   source?: string
   createdAt?: string
-  [key: string]: unknown
+  formName?: string
+  pageLocation?: string
+  pageUrl?: string
+  formId?: string
+  conversionId?: string
+  dataRegion?: string
+  connector?: string
+  method?: string
+  details?: Record<string, unknown>
 }

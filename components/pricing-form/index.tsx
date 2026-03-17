@@ -3,7 +3,13 @@ import styles from './styles.module.css'
 import { useHubspotForm } from '@aaronhayes/react-use-hubspot-form'
 import { useHubspotSubmissionTracking } from '@/hooks/useHubspotSubmissionTracking'
 
-function PricingForm({ portalId, formId, formName }) {
+type PricingFormProps = {
+  portalId: string
+  formId: string
+  formName?: string
+}
+
+function PricingForm({ portalId, formId, formName }: PricingFormProps) {
   useHubspotSubmissionTracking(formId, formName)
 
   const { loaded, error, formCreated } = useHubspotForm({

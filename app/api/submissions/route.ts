@@ -6,17 +6,32 @@ import { relaySubmission } from '@/utils/submissionRelay'
 export const runtime = 'nodejs'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MAX_REQUEST_BYTES = 32 * 1024
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase()
+const getTrimmedString = (value: unknown) =>
+  typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined
 
 export async function POST(req: Request) {
+  let rawBody: string
+
+  try {
+    rawBody = await req.text()
+  } catch {
+    return NextResponse.json({ ok: false, message: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  if (new TextEncoder().encode(rawBody).length > MAX_REQUEST_BYTES) {
+    return NextResponse.json({ ok: false, message: 'Request body too large' }, { status: 413 })
+  }
+
   let body: unknown
 
   try {
-    body = await req.json()
+    body = JSON.parse(rawBody)
   } catch {
     return NextResponse.json({ ok: false, message: 'Invalid JSON body' }, { status: 400 })
   }
@@ -25,7 +40,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, message: 'Invalid request body' }, { status: 400 })
   }
 
-  const { email, signupId, ...rest } = body
+  const {
+    email,
+    signupId,
+    source,
+    createdAt,
+    formName,
+    pageLocation,
+    pageUrl,
+    formId,
+    conversionId,
+    dataRegion,
+    connector,
+    method,
+    details,
+  } = body
 
   if (typeof email !== 'string') {
     return NextResponse.json({ ok: false, message: 'Email is required' }, { status: 400 })
@@ -38,12 +67,22 @@ export async function POST(req: Request) {
   }
 
   const payload: SubmissionRelayPayload = {
-    ...rest,
     email: normalizedEmail,
     signupId:
       typeof signupId === 'string' && signupId.trim() !== ''
         ? signupId
         : `submission-${Date.now()}`,
+    ...(getTrimmedString(source) && { source: getTrimmedString(source) }),
+    ...(getTrimmedString(createdAt) && { createdAt: getTrimmedString(createdAt) }),
+    ...(getTrimmedString(formName) && { formName: getTrimmedString(formName) }),
+    ...(getTrimmedString(pageLocation) && { pageLocation: getTrimmedString(pageLocation) }),
+    ...(getTrimmedString(pageUrl) && { pageUrl: getTrimmedString(pageUrl) }),
+    ...(getTrimmedString(formId) && { formId: getTrimmedString(formId) }),
+    ...(getTrimmedString(conversionId) && { conversionId: getTrimmedString(conversionId) }),
+    ...(getTrimmedString(dataRegion) && { dataRegion: getTrimmedString(dataRegion) }),
+    ...(getTrimmedString(connector) && { connector: getTrimmedString(connector) }),
+    ...(getTrimmedString(method) && { method: getTrimmedString(method) }),
+    ...(isRecord(details) && Object.keys(details).length > 0 ? { details } : {}),
   }
 
   waitUntil(

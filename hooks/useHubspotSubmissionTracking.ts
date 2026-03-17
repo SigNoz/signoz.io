@@ -21,8 +21,11 @@ type HubspotFormCallbackPayload = {
   }
 }
 
+// Keep dedupe at module scope so duplicate HubSpot callbacks are suppressed across remounts
+// within the same browser page session.
 const seenHubspotSubmissions = new Set<string>()
 const EXCLUDED_SUBMISSION_FIELDS = new Set(['hs_context'])
+const EMAIL_FIELD_NAMES = new Set(['email', 'workemail', 'companyemail', 'businessemail'])
 
 const normalizeFieldKey = (key: string) =>
   key
@@ -56,16 +59,23 @@ const filterSubmissionValues = (values: HubspotSubmissionValues) =>
     Object.entries(values).filter(([key]) => !EXCLUDED_SUBMISSION_FIELDS.has(key.toLowerCase()))
   )
 
+const getHubspotKeyVariants = (key: string) => {
+  const lowerKey = key.toLowerCase().trim()
+  const lastPathSegment = lowerKey.split('/').pop() || lowerKey
+
+  return [
+    lowerKey,
+    lastPathSegment,
+    lowerKey.replace(/[^a-z0-9]/g, ''),
+    lastPathSegment.replace(/[^a-z0-9]/g, ''),
+  ]
+}
+
 const extractEmailFromSubmissionValues = (values: HubspotSubmissionValues) => {
   const emailEntry = Object.entries(values).find(([key, value]) => {
     if (typeof value !== 'string') return false
 
-    const normalizedKey = key.toLowerCase()
-    return (
-      normalizedKey === 'email' ||
-      normalizedKey.endsWith('/email') ||
-      normalizedKey.includes('email')
-    )
+    return getHubspotKeyVariants(key).some((variant) => EMAIL_FIELD_NAMES.has(variant))
   })
 
   return emailEntry && typeof emailEntry[1] === 'string' ? emailEntry[1] : undefined
