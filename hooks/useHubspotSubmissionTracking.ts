@@ -6,7 +6,6 @@ import {
   createSubmissionRelayId,
   sendSubmissionRelayInBackground,
 } from '@/utils/submissionRelayClient'
-import { extractGroupIdFromEmail } from '@/utils/userUtils'
 
 type HubspotSubmissionValues = Record<string, unknown>
 
@@ -112,8 +111,6 @@ export function useHubspotSubmissionTracking(formId: string, formName?: string) 
       logEvent({
         eventName: 'HubSpot Form Submitted',
         eventType: 'track',
-        userId: submittedEmail,
-        groupId: extractGroupIdFromEmail(submittedEmail),
         attributes: {
           pageLocation: window.location.pathname,
           formName: formName || event.data.id || formId,
