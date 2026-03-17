@@ -18,6 +18,7 @@ type HubspotFormCallbackPayload = {
 }
 
 const seenHubspotSubmissions = new Set<string>()
+const EXCLUDED_SUBMISSION_FIELDS = new Set(['hs_context'])
 
 const normalizeFieldKey = (key: string) =>
   key
@@ -41,19 +42,10 @@ const serializeValue = (value: unknown): string => {
 
 const flattenSubmissionValues = (values: HubspotSubmissionValues) =>
   Object.fromEntries(
-    Object.entries(values).map(([key, value]) => [
-      `hubspot_field_${normalizeFieldKey(key)}`,
-      serializeValue(value),
-    ])
+    Object.entries(values)
+      .filter(([key]) => !EXCLUDED_SUBMISSION_FIELDS.has(key.toLowerCase()))
+      .map(([key, value]) => [`hubspot_field_${normalizeFieldKey(key)}`, serializeValue(value)])
   )
-
-const stringifySubmissionValues = (values: HubspotSubmissionValues) => {
-  try {
-    return JSON.stringify(values)
-  } catch {
-    return '{}'
-  }
-}
 
 const extractEmailFromSubmissionValues = (values: HubspotSubmissionValues) => {
   const emailEntry = Object.entries(values).find(([key, value]) => {
@@ -114,7 +106,6 @@ export function useHubspotSubmissionTracking(formId: string, formName?: string) 
           hubspot_message_origin: event.origin,
           hubspot_page_path: window.location.pathname,
           hubspot_page_url: window.location.href,
-          hubspot_submission_values_json: stringifySubmissionValues(submissionValues),
           ...flattenSubmissionValues(submissionValues),
         },
       })
