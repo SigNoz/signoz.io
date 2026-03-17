@@ -107,20 +107,81 @@ Verify these values:
 
 ### Step 3: Instrument your application
 
-To send telemetry data to SigNoz, create spans around the operations you want to trace. Here is an example function:
+<KeyPointCallout title="No auto-instrumentation">
+OpenTelemetry Swift does not support automatic instrumentation. You must manually create spans for every operation you want to trace.
+</KeyPointCallout>
+
+To send telemetry data to SigNoz, wrap operations in **spans**. Each span represents a unit of work and can carry attributes (key-value metadata) for context.
+
+#### Create a basic span
+
+Use the tracer's `spanBuilder` to start a span, optionally set its kind and attributes, then call `.end()` when the work is done:
 
 ```swift
-        let sampleKey = "sampleKey"
-        let sampleValue = "sampleValue"
-
         func doWork() {
-            let childSpan = tracer.spanBuilder(spanName: "doWork").setSpanKind(spanKind: .client).startSpan()
-            childSpan.setAttribute(key: sampleKey, value: sampleValue)
-            childSpan.end()
+            let span = tracer.spanBuilder(spanName: "doWork")
+                .setSpanKind(spanKind: .client)
+                .startSpan()
+            // Add key-value attributes to provide context
+            span.setAttribute(key: "operation.type", value: "example")
+            span.setAttribute(key: "operation.id", value: 42)
+
+            // ... perform work here ...
+
+            span.end()
+        }
+```
+
+#### Nest spans for detailed traces
+
+Set a parent span as the active span using `OpenTelemetry.instance.contextProvider` so that any child spans created within its scope are automatically linked:
+
+```swift
+        func handleRequest() {
+            let parentSpan = tracer.spanBuilder(spanName: "handleRequest")
+                .setSpanKind(spanKind: .server)
+                .startSpan()
+            OpenTelemetry.instance.contextProvider.setActiveSpan(parentSpan)
+
+            // This child span is automatically linked to parentSpan
+            fetchData()
+
+            parentSpan.end()
         }
 
+        func fetchData() {
+            let childSpan = tracer.spanBuilder(spanName: "fetchData")
+                .setSpanKind(spanKind: .client)
+                .startSpan()
+            childSpan.setAttribute(key: "db.system", value: "sqlite")
+
+            // ... fetch data ...
+
+            childSpan.end()
+        }
+```
+
+#### Record errors
+
+Mark a span's status as `.error` and record the exception when something fails:
+
+```swift
+        func riskyOperation() {
+            let span = tracer.spanBuilder(spanName: "riskyOperation").startSpan()
+            do {
+                // ... work that might throw ...
+            } catch {
+                span.status = .error(description: error.localizedDescription)
+            }
+            span.end()
+        }
+```
+
+Once your spans are in place, flush and run the application:
+
+```swift
         // Call the function to generate a trace
-        doWork()
+        handleRequest()
 
         // Flush all pending spans before the process exits
         tracerProvider.forceFlush(timeout: 15)
