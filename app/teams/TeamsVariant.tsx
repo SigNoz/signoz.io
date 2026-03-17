@@ -902,7 +902,7 @@ const TeamsVariant: React.FC = () => {
             source: 'teams-social-signup',
             createdAt: new Date().toISOString(),
             pageLocation: window.location.pathname,
-            dataRegion: data_region,
+            dataRegion: data_region || undefined,
             connector: payload.connector,
             method: 'social_signup',
           })
