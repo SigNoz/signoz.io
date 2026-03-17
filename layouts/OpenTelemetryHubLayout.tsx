@@ -195,7 +195,12 @@ export default function OpenTelemetryHubLayout({
                     </span>
                   </TrackingLink>
                 ) : (
-                  <Link key={path.key} href={path.firstRoute} className={linkClassName}>
+                  <Link
+                    key={path.key}
+                    href={path.firstRoute}
+                    prefetch={false}
+                    className={linkClassName}
+                  >
                     <span className="flex items-center gap-1">{label}</span>
                   </Link>
                 )
