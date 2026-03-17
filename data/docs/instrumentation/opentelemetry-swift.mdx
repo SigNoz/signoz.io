@@ -1,5 +1,5 @@
 ---
-date: 2026-03-12
+date: 2026-03-16
 id: swift
 title: Swift OpenTelemetry Instrumentation
 description: Send events from your Swift application to SigNoz
@@ -16,7 +16,7 @@ This document contains instructions on how to set up OpenTelemetry instrumentati
 
 ## Prerequisites
 
-- [Swift](https://www.swift.org/getting-started/#installing-swift)
+- [Swift](https://www.swift.org/getting-started/#installing-swift) 5.x (recommended by OpenTelemetry, see <a href="https://github.com/open-telemetry/opentelemetry-swift?tab=readme-ov-file#adding-the-dependency" target="_blank" rel="noopener noreferrer nofollow">Adding the dependency</a> section)
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
 ## Setup
@@ -62,6 +62,7 @@ Import the necessary OpenTelemetry modules and initialize the tracer. Insert the
 import Foundation
 import GRPC
 import NIO
+import NIOSSL
 @preconcurrency import OpenTelemetryApi
 import OpenTelemetryProtocolExporterCommon
 import OpenTelemetryProtocolExporterGrpc
@@ -123,8 +124,6 @@ To send telemetry data to SigNoz, create spans around the operations you want to
 
         // Flush all pending spans before the process exits
         tracerProvider.forceFlush(timeout: 15)
-    }
-}
 ```
 
 ### Step 4: Run the application
@@ -143,7 +142,7 @@ To ensure everything is working:
 
 1. Perform an action in your application that triggers the traced code.
 2. In SigNoz, navigate to the **[Traces](https://signoz.io/docs/userguide/traces/)** tab.
-3. Filter by your `<service_name>` to find your traces.
+3. Filter by your `<service_name>` (e.g. `service.name` `IN` `my-swift-app`) to find your traces.
 4. If you see your spans appearing in the list, the instrumentation is successfully sending data to SigNoz.
 
 
@@ -187,9 +186,18 @@ For more details, see <a href="https://signoz.io/docs/opentelemetry-collection-a
 
 Change your tracer initialization to send data without TLS to `localhost` (or your collector host) on port `4317`:
 
-> Use the same imports from Step 2. Only the connection and provider setup changes:
+> Use the same imports from Step 2, adding `import NIOSSL`. Only the connection and provider setup changes:
 
 ```swift
+import Foundation
+import GRPC
+import NIO
+import NIOSSL
+@preconcurrency import OpenTelemetryApi
+import OpenTelemetryProtocolExporterCommon
+import OpenTelemetryProtocolExporterGrpc
+import OpenTelemetrySdk
+
 let otlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10))
 
 let configuration = ClientConnection.Configuration.default(
@@ -217,15 +225,20 @@ let tracer = OpenTelemetry.instance.tracerProvider.get(instrumentationName: inst
 
 </details>
 
-## Sample Swift Application
-
-We have included a sample Swift application at our <a href="https://github.com/SigNoz/OpenTelemetry-swift-example/" target="_blank" rel="noopener noreferrer nofollow">Sample Swift App GitHub Repo</a>.
+<KeyPointCallout title="OpenTelemetry Swift Status" defaultCollapsed={true}>
+While tracing is stable, logging and metrics in OpenTelemetry Swift are not yet. Please keep this precaution in mind.
+For more details, check the <a href="https://opentelemetry.io/docs/languages/swift/#status-and-releases" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Swift status page</a>.
+</KeyPointCallout>
 
 ## Next Steps
 
 - View your [Traces](https://signoz.io/docs/userguide/traces/) to find performance bottlenecks.
 - Create [Custom Dashboards](https://signoz.io/docs/userguide/dashboards/) to monitor application health.
 - Set up [Alerts](https://signoz.io/docs/userguide/alerts-management/) to get notified when things go wrong.
+
+#### Sample Swift Application:
+
+- [Example Swift App](https://github.com/SigNoz/OpenTelemetry-swift-example/)
 
 ## Get Help
 
