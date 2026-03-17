@@ -1,6 +1,6 @@
 import { waitUntil } from '@vercel/functions'
 import { NextResponse } from 'next/server'
-import type { SubmissionRelayPayload } from '@/types/submissionRelay'
+import type { SubmissionRelayPayload } from '../../../types/submissionRelay'
 import { relaySubmission } from '@/utils/submissionRelay'
 
 export const runtime = 'nodejs'

@@ -1,6 +1,6 @@
 'use client'
 
-import type { SubmissionRelayPayload } from '@/types/submissionRelay'
+import type { SubmissionRelayPayload } from '../types/submissionRelay'
 
 const SUBMISSION_RELAY_ROUTE = '/api/submissions'
 

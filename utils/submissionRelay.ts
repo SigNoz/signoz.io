@@ -1,6 +1,6 @@
 import 'server-only'
 
-import type { SubmissionRelayPayload } from '@/types/submissionRelay'
+import type { SubmissionRelayPayload } from '../types/submissionRelay'
 
 const RELAY_TIMEOUT_MS = 5_000
 
