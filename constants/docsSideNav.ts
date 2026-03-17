@@ -2272,6 +2272,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/render-dashboard',
+            label: 'Render',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
             label: 'Semantic Kernel',
           },

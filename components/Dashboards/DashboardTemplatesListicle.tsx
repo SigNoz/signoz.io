@@ -507,6 +507,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Redis Dashboard Template',
   },
   {
+    name: 'Render',
+    href: '/docs/dashboards/dashboard-templates/render-dashboard',
+    icon: <Cloud className="h-7 w-7 text-purple-400" />,
+    clickName: 'Render Dashboard Template',
+  },
+  {
     name: 'Semantic Kernel',
     href: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
     icon: (
