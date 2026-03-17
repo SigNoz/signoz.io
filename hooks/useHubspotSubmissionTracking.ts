@@ -2,6 +2,10 @@
 
 import { useEffect } from 'react'
 import { useLogEvent } from '@/hooks/useLogEvent'
+import {
+  createSubmissionRelayId,
+  sendSubmissionRelayInBackground,
+} from '@/utils/submissionRelayClient'
 import { extractGroupIdFromEmail } from '@/utils/userUtils'
 
 type HubspotSubmissionValues = Record<string, unknown>
@@ -45,6 +49,11 @@ const flattenSubmissionValues = (values: HubspotSubmissionValues) =>
     Object.entries(values)
       .filter(([key]) => !EXCLUDED_SUBMISSION_FIELDS.has(key.toLowerCase()))
       .map(([key, value]) => [`hubspot_field_${normalizeFieldKey(key)}`, serializeValue(value)])
+  )
+
+const filterSubmissionValues = (values: HubspotSubmissionValues) =>
+  Object.fromEntries(
+    Object.entries(values).filter(([key]) => !EXCLUDED_SUBMISSION_FIELDS.has(key.toLowerCase()))
   )
 
 const extractEmailFromSubmissionValues = (values: HubspotSubmissionValues) => {
@@ -109,6 +118,21 @@ export function useHubspotSubmissionTracking(formId: string, formName?: string) 
           ...flattenSubmissionValues(submissionValues),
         },
       })
+
+      if (submittedEmail) {
+        sendSubmissionRelayInBackground({
+          email: submittedEmail,
+          signupId: event.data.data?.conversionId || createSubmissionRelayId('hubspot'),
+          source: 'hubspot-form',
+          createdAt: new Date().toISOString(),
+          formName: formName || event.data.id || formId,
+          pageLocation: window.location.pathname,
+          pageUrl: window.location.href,
+          formId: event.data.id || formId,
+          conversionId: event.data.data?.conversionId ?? '',
+          details: filterSubmissionValues(submissionValues),
+        })
+      }
     }
 
     window.addEventListener('message', handleHubspotMessage)
