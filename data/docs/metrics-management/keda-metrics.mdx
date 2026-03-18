@@ -1,0 +1,207 @@
+---
+date: 2026-03-18
+id: keda-metrics
+title: Send KEDA Metrics to SigNoz using OpenTelemetry
+description: Send KEDA autoscaling metrics to SigNoz using OpenTelemetry to monitor scaling loop latency, scaler errors, and active triggers.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<a href="https://keda.sh/" target="_blank" rel="noopener noreferrer nofollow">KEDA (Kubernetes Event-Driven Autoscaling)</a> is a CNCF graduated project that extends Kubernetes' Horizontal Pod Autoscaler (HPA) to support event-driven scaling with 70+ built-in scalers. Since v2.12, KEDA can emit its own operational metrics via OpenTelemetry — scaling loop latency, scaler errors, active triggers, and more.
+
+<Admonition type="info">
+KEDA's OpenTelemetry metrics integration is marked as **Experimental**. It is stable enough for production monitoring but the metric names or behavior may change in future KEDA releases.
+</Admonition>
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- **KEDA v2.12 or later** installed on your Kubernetes cluster (v2.16+ recommended)
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send KEDA Metrics to SigNoz
+
+Enable OpenTelemetry metrics on the `keda-operator` Deployment and point it to your SigNoz instance.
+
+<Tabs>
+<TabItem value="helm" label="Helm" default>
+
+**New installation:**
+
+```bash
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+helm install keda kedacore/keda \
+  --namespace keda \
+  --create-namespace \
+  --set opentelemetry.operator.enabled=true \
+  --set opentelemetry.collector.uri=https://ingest.<region>.signoz.cloud:443 \
+  --set "env[0].name=OTEL_EXPORTER_OTLP_HEADERS" \
+  --set "env[0].value=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**Existing installation:**
+
+```bash
+helm upgrade keda kedacore/keda \
+  --namespace keda \
+  --set opentelemetry.operator.enabled=true \
+  --set opentelemetry.collector.uri=https://ingest.<region>.signoz.cloud:443 \
+  --set "env[0].name=OTEL_EXPORTER_OTLP_HEADERS" \
+  --set "env[0].value=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+</TabItem>
+<TabItem value="kubectl" label="kubectl">
+
+Add the following environment variables and argument to the `keda-operator` container in your KEDA operator Deployment:
+
+```yaml:keda-operator-otel.yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+args:
+  - --enable-opentelemetry-metrics=true
+```
+
+**New installation:**
+
+```bash
+kubectl create namespace keda
+kubectl apply -f keda-operator-otel.yaml
+```
+
+**Existing installation:**
+
+```bash
+kubectl apply -f keda-operator-otel.yaml
+```
+
+</TabItem>
+</Tabs>
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Verify the KEDA operator restarts successfully:
+
+```bash
+kubectl get pods -n keda
+```
+
+You should see `keda-operator`, `keda-operator-metrics-apiserver`, and `keda-admission-webhooks` pods in `Running` state.
+
+## Validate
+
+After a minute or two, confirm data is flowing in SigNoz:
+
+1. Navigate to the **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** in SigNoz
+2. Search for `keda`
+3. You should see metrics such as `keda_build_info`, `keda_resource_registered_count`, `keda_trigger_registered_count`, and `keda_internal_scale_loop_latency_seconds`
+4. If you have active ScaledObjects, you will also see `keda_scaler_active` and `keda_scaler_metrics_value`
+
+<Admonition type="note">
+KEDA emits metrics using OTel dot-delimited names (e.g., `keda.build.info`). SigNoz normalizes these to underscores (e.g., `keda_build_info`) in the Metrics Explorer.
+</Admonition>
+
+<details>
+<ToggleHeading>
+
+## KEDA Metrics Reference
+</ToggleHeading>
+
+| Metric | Type | Description |
+|---|---|---|
+| `keda.build.info` | Gauge | Build information (version, git commit, Go version) |
+| `keda.scaler.active` | Gauge | Whether a scaler is active (1) or inactive (0) |
+| `keda.scaler.metrics.value` | Gauge | Current metric value used for HPA scaling decisions |
+| `keda.scaler.metrics.latency.seconds` | Gauge | Time taken to fetch metrics from the scaler source |
+| `keda.scaler.errors` | Sum | Number of errors per scaler |
+| `keda.scaler.errors.total` | Sum | Total number of scaler errors across all scalers |
+| `keda.scaled.object.errors` | Sum | Number of errors per ScaledObject |
+| `keda.scaled.object.paused` | Gauge | Whether a ScaledObject is paused (1) or active (0) |
+| `keda.scaled.job.errors` | Sum | Number of errors per ScaledJob |
+| `keda.resource.registered.count` | Sum | Number of custom resources per namespace and type |
+| `keda.trigger.registered.count` | Sum | Number of triggers registered per trigger type |
+| `keda.internal.scale.loop.latency.seconds` | Gauge | Scaling control loop execution latency |
+| `keda.cloudeventsource.events.emitted.count` | Sum | Number of CloudEvents emitted |
+| `keda.cloudeventsource.events.queued` | Gauge | Number of CloudEvents queued |
+
+### Key Metric Attributes
+
+- **`namespace`** — Kubernetes namespace of the ScaledObject/ScaledJob
+- **`name` / `scaledObject` / `scaledJob`** — Name of the scaled resource
+- **`type`** — Trigger type (e.g., `cpu`, `prometheus`, `kafka`) or resource type (`scaled_object`, `scaled_job`)
+- **`version`**, **`git_commit`**, **`goversion`** — Build metadata (on `keda.build.info`)
+
+For the full and up-to-date list, see the <a href="https://keda.sh/docs/latest/integrations/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">KEDA OpenTelemetry Integration docs</a>.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No metrics appearing in SigNoz
+
+- **Check KEDA version**: OpenTelemetry metrics require KEDA v2.12+. Run `kubectl get deployment keda-operator -n keda -o jsonpath='{.spec.template.spec.containers[0].image}'` to verify.
+- **Verify OTel is enabled**: Check that the operator has the flag and env var set:
+  ```bash
+  kubectl get deployment keda-operator -n keda -o yaml | grep -A 2 'enable-opentelemetry\|OTEL_EXPORTER'
+  ```
+- **Check endpoint reachability**: Ensure the cluster can reach `ingest.<region>.signoz.cloud:443` over HTTPS.
+- **Verify ingestion key**: Confirm `OTEL_EXPORTER_OTLP_HEADERS` contains a valid `signoz-ingestion-key` value.
+
+### Only seeing build.info and registered.count metrics
+
+Scaler-specific metrics (`keda.scaler.active`, `keda.scaler.metrics.value`, etc.) only appear when you have at least one active ScaledObject or ScaledJob.
+
+### Deprecated metric warnings
+
+KEDA v2.12–v2.15 emits deprecated metrics (`keda.internal.scale.loop.latency`, `keda.resource.totals`, `keda.trigger.totals`) alongside their replacements. These were removed in v2.16+. Use the non-deprecated variants listed in the metrics reference above.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The OTel Collector acts as a middleman between KEDA and SigNoz. Instead of sending data directly, KEDA sends metrics to the Collector first, which then forwards them along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out metrics you don't care about before they leave your cluster.
+- **Keeping KEDA lightweight** — Let the Collector handle batching, retries, and compression instead of the KEDA operator.
+- **Adding context automatically** — The Collector can tag your data with Kubernetes metadata like pod name and namespace.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your KEDA config.
+
+To use a Collector, set `OTEL_EXPORTER_OTLP_ENDPOINT` to point at your Collector's OTLP HTTP receiver (e.g., `http://otel-collector.keda.svc:4318`) instead of the SigNoz Cloud endpoint, and remove the `OTEL_EXPORTER_OTLP_HEADERS` variable.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next Steps
+
+- **Set Alerts**: Configure alerts to get notified when scaler errors spike or scaling latency increases. [Learn more](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+- **Create Dashboards**: Build dashboards to visualize scaling loop latency, active scalers, and error rates across your ScaledObjects.
+- **Learn more about KEDA**: Visit the <a href="https://keda.sh/docs/latest/integrations/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">KEDA OpenTelemetry Integration docs</a> for additional configuration options.
+
+## Get Help
+
+<GetHelp />
