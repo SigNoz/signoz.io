@@ -54,81 +54,7 @@ Each component (client, worker, workflows, activities) gets instrumented to capt
 
 ## Setup
 
-### Step 1: Configure the Environment
-
-Set environment variables to point to your SigNoz Cloud or self-hosted endpoint.
-
-**Verify these values:**
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-<Tabs>
-<TabItem value="vm" label="VM" default>
-
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
-A VM is a virtual computer that runs on physical hardware. This includes:
-- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
-- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
-- **Bare metal servers**: Physical servers running Linux/Unix directly
-
-Use this section if you're deploying your application directly on a server or VM without containerization.
-</KeyPointCallout>
-
-On Mac/Linux, use bash:
-```bash
-export OTEL_SERVICE_NAME="temporal-worker"
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
-```
-
-</TabItem>
-<TabItem value="kubernetes" label="Kubernetes">
-
-For Kubernetes deployments, environment variables are configured via ConfigMaps and Secrets. See Step 6 for the complete Kubernetes deployment manifests.
-
-You can set these variables in your deployment YAML:
-```yaml
-env:
-  - name: OTEL_SERVICE_NAME
-    value: "temporal-worker"
-  - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: "https://ingest.<region>.signoz.cloud:443"
-  - name: OTEL_EXPORTER_OTLP_HEADERS
-    value: "signoz-ingestion-key=<your-ingestion-key>"
-  - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "deployment.environment=production"
-```
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-For Docker deployments, environment variables are configured in your `docker-compose.yml` or `Dockerfile`. See Step 6 for the complete Docker setup.
-
-You can set these variables in your `docker-compose.yml`:
-```yaml
-environment:
-  - OTEL_SERVICE_NAME=temporal-worker
-  - OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-  - OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-  - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
-```
-
-</TabItem>
-<TabItem value="windows" label="Windows">
-
-On Windows, use PowerShell:
-```powershell
-$env:OTEL_SERVICE_NAME="temporal-worker"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
-```
-
-</TabItem>
-</Tabs>
-
-### Step 2: Add Dependencies
+### Step 1: Add Dependencies
 
 Add OpenTelemetry and Temporal packages to your `package.json`:
 
@@ -159,16 +85,13 @@ Install the packages:
 npm install
 ```
 
-### Step 3: Configure OpenTelemetry SDK
+### Step 2: Configure OpenTelemetry SDK
 
 Create `src/instrumentation.ts` to set up the OpenTelemetry SDK. This file initializes tracing, metrics, and logging for your entire application.
 
 **Key concept**: This configuration must be loaded **before** any other code to ensure automatic instrumentation works correctly.
 
 ```typescript:src/instrumentation.ts
-import { config } from 'dotenv';
-config(); // Load environment variables first
-
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
@@ -225,13 +148,13 @@ console.log('[OpenTelemetry] SDK initialized successfully');
 <details>
 <ToggleHeading>What this does</ToggleHeading>
 
-- Reads your SigNoz endpoint and ingestion key from environment variables
+- Reads your SigNoz endpoint and ingestion key from environment variables (`OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`)
 - Sets up trace and metric exporters to send data to SigNoz using OTLP/gRPC
 - Enables automatic instrumentation for Node.js libraries (HTTP, DNS, etc.)
 - Must be imported first in your client and worker files
 </details>
 
-### Step 4: Instrument the Temporal Client
+### Step 3: Instrument the Temporal Client
 
 The Temporal Client starts workflows and queries their status. Add OpenTelemetry instrumentation to trace these operations.
 
@@ -271,7 +194,7 @@ run().catch(console.error);
 - Always import `instrumentation.ts` first to enable auto-instrumentation
 </details>
 
-### Step 5: Instrument the Temporal Worker
+### Step 4: Instrument the Temporal Worker
 
 The Temporal Worker executes workflow and activity code. This is where most of your business logic runs, so instrumentation here is critical.
 
@@ -378,19 +301,9 @@ export async function myWorkflow(): Promise<string> {
 - `OpenTelemetryInternalsInterceptor` traces internal workflow operations like timers and child workflows
 </details>
 
-**Start the worker:**
-Make sure you exported the environment variables from Step 1 in your terminal.
-```bash
-npm run start
-```
-
-**Start the client (in another terminal):**
-Make sure to export environment variables in this new terminal too. You may want to set `OTEL_SERVICE_NAME` to `temporal-client` so it shows up distinctly in SigNoz.
-```bash
-npm run workflow
-```
-
 ### Step 6: Deploy and Run
+
+Now that your application is instrumented, you need to configure the environment variables and run it.
 
 <Tabs>
 <TabItem value="vm" label="VM" default>
@@ -554,7 +467,6 @@ Use Docker Compose to run your Temporal worker and client with OpenTelemetry con
 **Create a `docker-compose.yml`:**
 
 ```yaml:docker-compose.yml
-version: '3.8'
 services:
   temporal-worker:
     build: .
