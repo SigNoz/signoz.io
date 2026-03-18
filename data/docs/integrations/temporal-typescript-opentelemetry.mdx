@@ -1,5 +1,5 @@
 ---
-date: 2026-03-15
+date: 2026-03-18
 id: temporal-typescript-opentelemetry
 title: Instrumenting a Temporal TypeScript application with OpenTelemetry
 description: Learn how to instrument a Temporal TypeScript application with OpenTelemetry and export data to SigNoz.
@@ -63,13 +63,55 @@ Set environment variables to point to your SigNoz Cloud or self-hosted endpoint.
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Tabs>
-<TabItem value="mac-linux" label="Mac/Linux" default>
+<TabItem value="vm" label="VM" default>
 
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+</KeyPointCallout>
+
+On Mac/Linux, use bash:
 ```bash
 export OTEL_SERVICE_NAME="temporal-worker"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+For Kubernetes deployments, environment variables are configured via ConfigMaps and Secrets. See Step 6 for the complete Kubernetes deployment manifests.
+
+You can set these variables in your deployment YAML:
+```yaml
+env:
+  - name: OTEL_SERVICE_NAME
+    value: "temporal-worker"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "deployment.environment=production"
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+For Docker deployments, environment variables are configured in your `docker-compose.yml` or `Dockerfile`. See Step 6 for the complete Docker setup.
+
+You can set these variables in your `docker-compose.yml`:
+```yaml
+environment:
+  - OTEL_SERVICE_NAME=temporal-worker
+  - OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+  - OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+  - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
 ```
 
 </TabItem>
@@ -362,7 +404,36 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 Use this section if you're deploying your application directly on a server or VM without containerization.
 </KeyPointCallout>
 
-See Step 1 and Step 6. Make sure environment variables are exported, then run `npm run start` to start the worker, and `npm run workflow` to start a workflow execution.
+**1. Set environment variables:**
+
+On Mac/Linux, export the environment variables in your terminal:
+```bash
+export OTEL_SERVICE_NAME="temporal-worker"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+**2. Start the worker:**
+
+```bash
+npm run start
+```
+
+**3. Start the client (in another terminal):**
+
+Export the environment variables in the new terminal. You may want to set `OTEL_SERVICE_NAME` to `temporal-client` so it shows up distinctly in SigNoz:
+```bash
+export OTEL_SERVICE_NAME="temporal-client"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+Then run:
+```bash
+npm run workflow
+```
 
 </TabItem>
 <TabItem value="kubernetes" label="Kubernetes">
@@ -535,7 +606,36 @@ docker-compose up -d
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-See Step 1 and Step 6. Make sure environment variables are exported in PowerShell, then run `npm run start` to start the worker, and `npm run workflow` to start a workflow execution.
+**1. Set environment variables:**
+
+On Windows, use PowerShell to set the environment variables:
+```powershell
+$env:OTEL_SERVICE_NAME="temporal-worker"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+**2. Start the worker:**
+
+```powershell
+npm run start
+```
+
+**3. Start the client (in another PowerShell window):**
+
+Set the environment variables in the new PowerShell window. You may want to set `OTEL_SERVICE_NAME` to `temporal-client` so it shows up distinctly in SigNoz:
+```powershell
+$env:OTEL_SERVICE_NAME="temporal-client"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+Then run:
+```powershell
+npm run workflow
+```
 
 </TabItem>
 </Tabs>
