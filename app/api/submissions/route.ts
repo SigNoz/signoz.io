@@ -66,22 +66,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, message: 'Invalid email' }, { status: 400 })
   }
 
+  const trimmedSignupId = getTrimmedString(signupId)
+  const trimmedSource = getTrimmedString(source)
+  const trimmedCreatedAt = getTrimmedString(createdAt)
+  const trimmedFormName = getTrimmedString(formName)
+  const trimmedPageLocation = getTrimmedString(pageLocation)
+  const trimmedPageUrl = getTrimmedString(pageUrl)
+  const trimmedFormId = getTrimmedString(formId)
+  const trimmedConversionId = getTrimmedString(conversionId)
+  const trimmedDataRegion = getTrimmedString(dataRegion)
+  const trimmedConnector = getTrimmedString(connector)
+  const trimmedMethod = getTrimmedString(method)
+
   const payload: SubmissionRelayPayload = {
     email: normalizedEmail,
-    signupId:
-      typeof signupId === 'string' && signupId.trim() !== ''
-        ? signupId
-        : `submission-${Date.now()}`,
-    ...(getTrimmedString(source) && { source: getTrimmedString(source) }),
-    ...(getTrimmedString(createdAt) && { createdAt: getTrimmedString(createdAt) }),
-    ...(getTrimmedString(formName) && { formName: getTrimmedString(formName) }),
-    ...(getTrimmedString(pageLocation) && { pageLocation: getTrimmedString(pageLocation) }),
-    ...(getTrimmedString(pageUrl) && { pageUrl: getTrimmedString(pageUrl) }),
-    ...(getTrimmedString(formId) && { formId: getTrimmedString(formId) }),
-    ...(getTrimmedString(conversionId) && { conversionId: getTrimmedString(conversionId) }),
-    ...(getTrimmedString(dataRegion) && { dataRegion: getTrimmedString(dataRegion) }),
-    ...(getTrimmedString(connector) && { connector: getTrimmedString(connector) }),
-    ...(getTrimmedString(method) && { method: getTrimmedString(method) }),
+    signupId: trimmedSignupId ?? `submission-${Date.now()}`,
+    ...(trimmedSource && { source: trimmedSource }),
+    ...(trimmedCreatedAt && { createdAt: trimmedCreatedAt }),
+    ...(trimmedFormName && { formName: trimmedFormName }),
+    ...(trimmedPageLocation && { pageLocation: trimmedPageLocation }),
+    ...(trimmedPageUrl && { pageUrl: trimmedPageUrl }),
+    ...(trimmedFormId && { formId: trimmedFormId }),
+    ...(trimmedConversionId && { conversionId: trimmedConversionId }),
+    ...(trimmedDataRegion && { dataRegion: trimmedDataRegion }),
+    ...(trimmedConnector && { connector: trimmedConnector }),
+    ...(trimmedMethod && { method: trimmedMethod }),
     ...(isRecord(details) && Object.keys(details).length > 0 ? { details } : {}),
   }
 
