@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 
 export const metadata: Metadata = {
-  title: 'Modern Datadog Alternative | SigNoz',
+  title: 'Modern Datadog Alternative',
   description:
     'SigNoz is the modern Datadog alternative. Built on OpenTelemetry, it delivers affordable, full-stack observability across logs, metrics, and traces.',
   openGraph: {

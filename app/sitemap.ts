@@ -118,6 +118,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'opentelemetry',
     'comparisons',
     'guides',
+    'datadog-alternative',
+    'grafana-alternative',
+    'newrelic-alternative',
   ].map((route) => ({
     url: `${siteUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],
