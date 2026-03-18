@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { SiKubernetes } from 'react-icons/si'
-import { Server, Container } from 'lucide-react'
+import { Server, Container, Activity, Database, Cpu } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface IconCardData {
@@ -14,12 +14,6 @@ interface IconCardData {
 
 const KubernetesDashboardsData: IconCardData[] = [
   {
-    name: 'Host Metrics',
-    href: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
-    icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
-    clickName: 'Host Metrics Dashboard Template',
-  },
-  {
     name: 'Kubernetes Cluster Metrics (Overview)',
     href: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
     icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
@@ -28,13 +22,13 @@ const KubernetesDashboardsData: IconCardData[] = [
   {
     name: 'Kubernetes Events',
     href: '/docs/dashboards/dashboard-templates/kubernetes-events',
-    icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
+    icon: <Activity className="h-7 w-7 text-orange-600" />,
     clickName: 'Kubernetes Events Dashboard Template',
   },
   {
     name: 'Kubernetes PVC Metrics',
     href: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
-    icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
+    icon: <Database className="h-7 w-7 text-indigo-600" />,
     clickName: 'Kubernetes PVC Metrics Dashboard Template',
   },
   {
@@ -48,6 +42,12 @@ const KubernetesDashboardsData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
     icon: <Server className="h-7 w-7 text-green-600" />,
     clickName: 'Kubernetes Node Metrics Detailed Dashboard Template',
+  },
+  {
+    name: 'Host Metrics',
+    href: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+    icon: <Cpu className="h-7 w-7 text-purple-600" />,
+    clickName: 'Host Metrics Dashboard Template',
   },
 ]
 
