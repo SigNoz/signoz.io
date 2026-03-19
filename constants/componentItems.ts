@@ -225,9 +225,9 @@ export const SELF_HOST_INSTALLATION_ITEMS = {
     { name: 'Local', href: '/docs/install/kubernetes/local', clickName: 'Deploy Locally' },
     { name: 'ArgoCD', href: '/docs/install/argocd', clickName: 'Deploy with ArgoCD' },
     {
-      name: 'Openshift',
+      name: 'OpenShift',
       href: '/docs/install/kubernetes/openshift',
-      clickName: 'Deploy to Openshift',
+      clickName: 'Deploy to OpenShift',
     },
   ] satisfies ComponentItem[],
   others: [

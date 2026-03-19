@@ -36,6 +36,50 @@ const GET_ALL_HELPERS = [
   'getAllMetricsQuickStartItems',
 ]
 
+// Sectioned exports intentionally reuse some hrefs across sibling sections
+// (for example, one doc can represent the AWS and Azure variants of the same
+// integration path). Validate uniqueness within each leaf array instead of the
+// flattened getAll*() results so we still catch accidental duplicates where
+// editors actually add items.
+const SECTIONED_EXPORTS = [
+  'SELF_HOST_INSTALLATION_ITEMS',
+  'COLLECTION_AGENTS_ITEMS',
+  'APM_INSTRUMENTATION_ITEMS',
+  'JAVA_INSTRUMENTATION_ITEMS',
+  'JAVASCRIPT_INSTRUMENTATION_ITEMS',
+  'LOGS_INSTRUMENTATION_ITEMS',
+  'INTEGRATIONS_ITEMS',
+  'CICD_MONITORING_ITEMS',
+  'AWS_MONITORING_ITEMS',
+  'AWS_ONE_CLICK_ITEMS',
+  'METRICS_QUICK_START_ITEMS',
+]
+
+const assertNoDuplicateHrefs = (items, name) => {
+  const hrefs = items.map((item) => item.href)
+  const uniqueHrefs = new Set(hrefs)
+
+  assert.equal(
+    hrefs.length,
+    uniqueHrefs.size,
+    `${name} has duplicate hrefs: ${hrefs.filter((h, i) => hrefs.indexOf(h) !== i).join(', ')}`
+  )
+}
+
+const walkLeafArrays = (value, path = []) => {
+  if (Array.isArray(value)) {
+    return [{ path, items: value }]
+  }
+
+  if (!value || typeof value !== 'object') {
+    return []
+  }
+
+  return Object.entries(value).flatMap(([key, nestedValue]) =>
+    walkLeafArrays(nestedValue, [...path, key])
+  )
+}
+
 test('all flat item arrays are non-empty', () => {
   for (const name of FLAT_EXPORTS) {
     const items = componentItems[name]
@@ -84,13 +128,18 @@ test('all items have valid name, href, and clickName', () => {
 
 test('no duplicate hrefs within each flat array', () => {
   for (const name of FLAT_EXPORTS) {
-    const items = componentItems[name]
-    const hrefs = items.map((item) => item.href)
-    const uniqueHrefs = new Set(hrefs)
-    assert.equal(
-      hrefs.length,
-      uniqueHrefs.size,
-      `${name} has duplicate hrefs: ${hrefs.filter((h, i) => hrefs.indexOf(h) !== i).join(', ')}`
-    )
+    assertNoDuplicateHrefs(componentItems[name], name)
+  }
+})
+
+test('no duplicate hrefs within each section leaf array', () => {
+  for (const name of SECTIONED_EXPORTS) {
+    const leafArrays = walkLeafArrays(componentItems[name], [name])
+
+    assert.ok(leafArrays.length > 0, `${name} should contain at least one leaf array`)
+
+    for (const { path, items } of leafArrays) {
+      assertNoDuplicateHrefs(items, path.join('.'))
+    }
   }
 })
