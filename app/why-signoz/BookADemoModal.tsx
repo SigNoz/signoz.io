@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useContext, useCallback } from 'react'
 import { Modal, ModalBody, ModalContent, useDisclosure } from '@nextui-org/react'
 import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import PricingForm from 'app/pricing-form'
@@ -25,23 +25,23 @@ export function BookADemoModalProvider({ children }: { children: React.ReactNode
   const openModal = useCallback(() => onOpen(), [onOpen])
 
   return (
-    <BookADemoModalContext.Provider value={{ openModal }}>
-      {children}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
-        <ModalContent className="min-h-96 max-w-2xl rounded-3xl border border-signoz_slate-200 bg-signoz_vanilla-200 text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
-          {() => (
-            <ModalBody className="p-8 text-signoz_ink-500">
-              <HubspotProvider>
+    <HubspotProvider>
+      <BookADemoModalContext.Provider value={{ openModal }}>
+        {children}
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
+          <ModalContent className="min-h-96 max-w-2xl rounded-3xl border border-signoz_slate-200 bg-signoz_vanilla-200 text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
+            {() => (
+              <ModalBody className="p-8 text-signoz_ink-500">
                 <PricingForm
                   portalId={ENTERPRISE_DEMO_HUBSPOT_DATA.portalId}
                   formId={ENTERPRISE_DEMO_HUBSPOT_DATA.formId}
                   formName="Book a demo form"
                 />
-              </HubspotProvider>
-            </ModalBody>
-          )}
-        </ModalContent>
-      </Modal>
-    </BookADemoModalContext.Provider>
+              </ModalBody>
+            )}
+          </ModalContent>
+        </Modal>
+      </BookADemoModalContext.Provider>
+    </HubspotProvider>
   )
 }

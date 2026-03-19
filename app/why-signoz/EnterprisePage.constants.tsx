@@ -79,7 +79,7 @@ export const TRUSTED_BY_LOGOS = [
 export const NUMBERS_THAT_SPEAK_CARDS = [
   {
     icon: <div className="text-4xl font-bold text-signoz_cherry-500">47%</div>,
-    title: 'Reduction in MTTR and TCO',
+    title: <div className="min-h-14">Reduction in MTTR and TCO</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         Our logs, metrics, traces work on an innovative co-related architecture so you find the
@@ -97,7 +97,7 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
   },
   {
     icon: <div className="text-4xl font-bold text-signoz_cherry-500">10 TB+/Day</div>,
-    title: 'Daily Ingest - Single Deployment',
+    title: <div className="min-h-14">Daily Ingest - Single Deployment</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         ClickHouse core handles high-cardinality Kubernetes and AI workloads at all scale. 30%
@@ -115,7 +115,7 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
   },
   {
     icon: <div className="text-4xl font-bold text-signoz_cherry-500">1,000s</div>,
-    title: 'Engineering Teams in Production',
+    title: <div className="min-h-14">Engineering Teams in Production</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         Seed-stage startups to public companies. Self-hosted, cloud, or BYOC. Your choice. With
