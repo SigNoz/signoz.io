@@ -620,6 +620,8 @@ Docs pages must be added to the sidebar navigation.
 
 If you introduced a new tag in your doc frontmatter, add its tooltip definition in `constants/tagDefinitions.ts`.
 
+If your new doc adds a new surfaced integration, data source, installation path, dashboard template, or similar item that appears in docs listicles/overview cards, also update the relevant component data in `constants/componentItems.ts` and the matching component `ICON_MAP` where needed. This is similar to the sidebar rule: if the doc should be discoverable from an existing docs surface, update that surface in the same PR.
+
 ### Step 8: Add and Commit Your Changes
 
 ```bash
@@ -673,6 +675,7 @@ Open `http://localhost:3000` and review your blog/doc page.
 - Follow the “Content Structure” and “Doc Type–Specific Guidelines” above.
 - Images go under `public/img/docs/`.
 - Add the page to `constants/docsSideNav.ts` so it appears in the left sidebar.
+- If the doc should appear in a docs listicle, quick-start overview, or similar card-based discovery surface, add/update the matching item in `constants/componentItems.ts` and the component's `ICON_MAP` when needed.
 - If you add new tags, define tooltips in `constants/tagDefinitions.ts`.
 - If you change a live doc’s URL (rename or move), add a permanent (301/308) redirect in `next.config.js` `redirects()` from the old path to the new one and update any internal links.
 
