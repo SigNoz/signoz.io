@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import { ArrowRight, Atom } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import { SourcesTabsGrid } from '@/shared/components/molecules/SourcesTabsGrid'
+import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 
 export const ENTERPRISE_DEMO_HUBSPOT_DATA = {
   portalId: '22308423',

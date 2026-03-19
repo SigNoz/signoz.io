@@ -13,7 +13,7 @@ import {
   QUERY_BUILDER_CARDS,
   STORAGE_DATA,
 } from './LogManagement.constants'
-import { SourcesTabsGrid } from '@/shared/components/molecules/SourcesTabsGrid'
+import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
