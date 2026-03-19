@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useCallback } from 'react'
 import { Modal, ModalBody, ModalContent, useDisclosure } from '@nextui-org/react'
-import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import PricingForm from 'app/pricing-form'
 import { ENTERPRISE_DEMO_HUBSPOT_DATA } from './EnterprisePage.constants'
 
@@ -31,11 +30,13 @@ export function BookADemoModalProvider({ children }: { children: React.ReactNode
         <ModalContent className="max-w-2xl rounded-3xl border border-signoz_slate-200 bg-signoz_vanilla-200 text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
           {() => (
             <ModalBody className="p-8 text-signoz_ink-500">
-              <PricingForm
-                portalId={ENTERPRISE_DEMO_HUBSPOT_DATA.portalId}
-                formId={ENTERPRISE_DEMO_HUBSPOT_DATA.formId}
-                formName="Book a demo form"
-              />
+              <div className="flex min-h-96 items-center justify-center">
+                <PricingForm
+                  portalId={ENTERPRISE_DEMO_HUBSPOT_DATA.portalId}
+                  formId={ENTERPRISE_DEMO_HUBSPOT_DATA.formId}
+                  formName="Book a demo form"
+                />
+              </div>
             </ModalBody>
           )}
         </ModalContent>
