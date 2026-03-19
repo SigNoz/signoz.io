@@ -84,6 +84,11 @@ These guidelines apply when your PR changes website code (for example: `app/**`,
   - Avoid styling overrides unless necessary; keep Tailwind classes consistent with existing patterns.
 - Keep types/constants co-located and reusable
   - Move component-local types/constants into separate files (for example `MyComponent.types.ts`, `MyComponent.constants.ts`) and export from the folder `index.ts` when needed outside the folder.
+- Add listicle items to `constants/componentItems.ts`, not inside component files
+  - `constants/componentItems.ts` is the single source of truth for icon-card grid data (APM, Logs, Dashboards, and so on). Both the UI components and the agent markdown stubs import from it.
+  - Flat list (`ComponentItem[]`): use when all items belong to one logical group with no sub-sections.
+  - Sectioned object (`{ sectionKey: ComponentItem[] }`): use when items are rendered in labelled sub-sections (for example `aws`, `azure`, `gcp`). Pair it with a `getAll*()` helper that spreads every sub-array. **Never split a flat array with hardcoded `slice()` indices** — use named sub-keys instead so adding or removing an item in one section cannot silently shift another.
+  - After adding items, add a matching entry in the component's `ICON_MAP` (keyed by `href`) and run `yarn tsc --noEmit` to verify.
 - Avoid concurrent async invocations
   - For click handlers that do async work, prevent multiple concurrent runs (set loading state before `await` and/or guard with a ref).
 - Be deliberate about DOM cleanup/transforms

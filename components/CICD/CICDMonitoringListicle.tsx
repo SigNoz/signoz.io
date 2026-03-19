@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { SiGithub, SiJenkins, SiArgo } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
+import { CICD_MONITORING_ITEMS } from '@/constants/componentItems'
 
 export default function CICDMonitoringListicle() {
   // Define all sections with their IDs and labels
@@ -35,25 +36,42 @@ export default function CICDMonitoringListicle() {
     </div>
   )
 
+  // Icon map keyed by href
+  const ICON_MAP: Record<string, React.ReactNode> = {
+    '/docs/cicd/github/github-actions-traces': (
+      <SiGithub className="h-7 w-7 text-black dark:text-white" />
+    ),
+    '/docs/cicd/github/github-metrics': <SiGithub className="h-7 w-7 text-black dark:text-white" />,
+    '/docs/cicd/jenkins/agent-node-monitoring': (
+      <SiJenkins className="h-7 w-7 text-black dark:text-white" />
+    ),
+    '/docs/cicd/jenkins/jenkins-tracing': (
+      <SiJenkins className="h-7 w-7 text-black dark:text-white" />
+    ),
+    '/docs/cicd/argocd/argocd-metrics': <SiArgo className="h-7 w-7 text-orange-500" />,
+  }
+
+  const githubCards = CICD_MONITORING_ITEMS.github.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const jenkinsCards = CICD_MONITORING_ITEMS.jenkins.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const argocdCards = CICD_MONITORING_ITEMS.argocd.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
   // GitHub Section
   const renderGitHubSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">GitHub</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'GitHub Actions Traces',
-            href: '/docs/cicd/github/github-actions-traces',
-            icon: <SiGithub className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'GitHub Actions Traces Link',
-          },
-          {
-            name: 'GitHub Metrics',
-            href: '/docs/cicd/github/github-metrics',
-            icon: <SiGithub className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'GitHub Metrics Link',
-          },
-        ]}
+        cards={githubCards}
         sectionName="GitHub Monitoring"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -65,20 +83,7 @@ export default function CICDMonitoringListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Jenkins</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Jenkins Agent Monitoring',
-            href: '/docs/cicd/jenkins/agent-node-monitoring',
-            icon: <SiJenkins className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'Jenkins Agent Monitoring Link',
-          },
-          {
-            name: 'Jenkins Tracing',
-            href: '/docs/cicd/jenkins/jenkins-tracing',
-            icon: <SiJenkins className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'Jenkins Tracing Link',
-          },
-        ]}
+        cards={jenkinsCards}
         sectionName="Jenkins Monitoring"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -90,14 +95,7 @@ export default function CICDMonitoringListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">ArgoCD</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'ArgoCD Metrics',
-            href: '/docs/cicd/argocd/argocd-metrics',
-            icon: <SiArgo className="h-7 w-7 text-orange-500" />,
-            clickName: 'ArgoCD Metrics Link',
-          },
-        ]}
+        cards={argocdCards}
         sectionName="ArgoCD Monitoring"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />

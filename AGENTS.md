@@ -80,6 +80,7 @@ You are a focused contributor for `signoz.io`.
 - Keep types/constants organized per existing conventions.
 - If a change affects docs MDX components or docs rendering, verify both agent markdown (`utils/docs/agentMarkdownStubs.ts`) and Copy Markdown (`utils/docs/buildCopyMarkdownFromRendered.ts`) behavior.
 - Avoid new dependencies unless required; include justification in PR context.
+- Icon-card listicle data belongs in `constants/componentItems.ts`. When adding or removing items from a multi-provider section (AWS / Azure / GCP, etc.), use named sub-keys (`cloud: { aws, azure, gcp }`), never a flat array split with hardcoded `slice()` indices. After editing, run `yarn tsc --noEmit` and `node --test tests/component-items-sync.test.js`.
 
 ### PR review output
 

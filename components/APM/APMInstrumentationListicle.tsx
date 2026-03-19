@@ -34,9 +34,78 @@ import {
   SiDeno,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
+import { APM_INSTRUMENTATION_ITEMS } from '@/constants/componentItems'
 
 interface APMInstrumentationListicleProps {
   language?: 'python' | 'java' | 'javascript' | 'other' | 'mobile' | 'additional' | 'all'
+}
+
+const ICON_MAP: Record<string, React.ReactNode> = {
+  // JavaScript
+  '/docs/instrumentation/opentelemetry-nodejs': <SiNodedotjs className="h-7 w-7 text-green-500" />,
+  '/docs/instrumentation/opentelemetry-nextjs': (
+    <SiNextdotjs className="h-7 w-7 rounded-full bg-white text-black" />
+  ),
+  '/docs/instrumentation/opentelemetry-reactjs': <SiReact className="h-7 w-7 text-blue-400" />,
+  '/docs/instrumentation/opentelemetry-react-native': <SiReact className="h-7 w-7 text-blue-400" />,
+  '/docs/instrumentation/opentelemetry-nuxtjs': <SiNuxtdotjs className="h-7 w-7 text-green-500" />,
+  '/docs/instrumentation/opentelemetry-cloudflare': (
+    <SiCloudflare className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/frontend-monitoring': <SiJavascript className="h-7 w-7 text-yellow-500" />,
+  // Python
+  '/docs/instrumentation/python': <SiPython className="h-7 w-7 text-blue-500" />,
+  '/docs/instrumentation/django': <SiDjango className="h-7 w-7 text-green-800" />,
+  '/docs/instrumentation/fastapi': <SiFastapi className="h-7 w-7 text-teal-500" />,
+  '/docs/instrumentation/flask': <SiFlask className="h-7 w-7 rounded-full bg-white text-black" />,
+  '/docs/instrumentation/falcon': <SiFalcon className="h-7 w-7 text-green-600" />,
+  '/docs/instrumentation/hypercorn-unicorn-support': (
+    <SiGunicorn className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/instrumentation/celery': <SiCelery className="h-7 w-7 text-green-600" />,
+  // Java
+  '/docs/instrumentation/java/opentelemetry-java': (
+    <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />
+  ),
+  '/docs/instrumentation/opentelemetry-quarkus': <SiQuarkus className="h-7 w-7 text-blue-600" />,
+  '/docs/instrumentation/tomcat': <SiApachetomcat className="h-7 w-7 text-orange-600" />,
+  '/docs/instrumentation/jboss': (
+    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+      JB
+    </span>
+  ),
+  // Other languages
+  '/docs/instrumentation/golang': <SiGo className="h-7 w-7 text-cyan-500" />,
+  '/docs/instrumentation/opentelemetry-deno': <SiDeno className="h-7 w-7 text-blue-500" />,
+  '/docs/instrumentation/php': <SiPhp className="h-7 w-7 text-purple-500" />,
+  '/docs/instrumentation/laravel': <SiLaravel className="h-7 w-7 text-purple-500" />,
+  '/docs/instrumentation/dotnet': <SiDotnet className="h-7 w-7 text-blue-600" />,
+  '/docs/instrumentation/ruby-on-rails': <SiRubyonrails className="h-7 w-7 text-red-600" />,
+  '/docs/instrumentation/elixir': <SiElixir className="h-7 w-7 text-purple-600" />,
+  '/docs/instrumentation/rust': <SiRust className="h-7 w-7 text-orange-600" />,
+  '/docs/instrumentation/opentelemetry-cpp': <SiCplusplus className="h-7 w-7 text-blue-700" />,
+  '/docs/instrumentation/swift': <SiSwift className="h-7 w-7 text-orange-500" />,
+  // Mobile
+  '/docs/instrumentation/mobile-instrumentation/opentelemetry-java': (
+    <SiAndroid className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin': (
+    <SiKotlin className="h-7 w-7 text-purple-500" />
+  ),
+  '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui': (
+    <SiSwift className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter': (
+    <SiFlutter className="h-7 w-7 text-blue-400" />
+  ),
+  // Additional
+  '/docs/instrumentation/opentelemetry-nginx': <SiNginx className="h-7 w-7 text-green-500" />,
+  '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs': (
+    <SiJavascript className="h-7 w-7 text-yellow-500" />
+  ),
+  '/docs/instrumentation/opentelemetry-wordpress': (
+    <SiWordpress className="h-7 w-7 text-blue-600" />
+  ),
 }
 
 export default function APMInstrumentationListicle({
@@ -75,55 +144,18 @@ export default function APMInstrumentationListicle({
     </div>
   )
 
+  const mapIcons = (items: readonly { name: string; href: string; clickName: string }[]) =>
+    items.map((item) => ({
+      ...item,
+      icon: ICON_MAP[item.href],
+    }))
+
   // Python frameworks
   const renderPythonSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Python</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Python',
-            href: '/docs/instrumentation/python',
-            icon: <SiPython className="h-7 w-7 text-blue-500" />,
-            clickName: 'Python Instrumentation Link',
-          },
-          {
-            name: 'Django',
-            href: '/docs/instrumentation/django',
-            icon: <SiDjango className="h-7 w-7 text-green-800" />,
-            clickName: 'Django Instrumentation Link',
-          },
-          {
-            name: 'FastAPI',
-            href: '/docs/instrumentation/fastapi',
-            icon: <SiFastapi className="h-7 w-7 text-teal-500" />,
-            clickName: 'FastAPI Instrumentation Link',
-          },
-          {
-            name: 'Flask',
-            href: '/docs/instrumentation/flask',
-            icon: <SiFlask className="h-7 w-7 rounded-full bg-white text-black" />,
-            clickName: 'Flask Instrumentation Link',
-          },
-          {
-            name: 'Falcon',
-            href: '/docs/instrumentation/falcon',
-            icon: <SiFalcon className="h-7 w-7 text-green-600" />,
-            clickName: 'Falcon Instrumentation Link',
-          },
-          {
-            name: 'Hypercorn/Unicorn',
-            href: '/docs/instrumentation/hypercorn-unicorn-support',
-            icon: <SiGunicorn className="h-7 w-7 text-green-500" />,
-            clickName: 'Hypercorn/Unicorn Instrumentation Link',
-          },
-          {
-            name: 'Celery',
-            href: '/docs/instrumentation/celery',
-            icon: <SiCelery className="h-7 w-7 text-green-600" />,
-            clickName: 'Celery Instrumentation Link',
-          },
-        ]}
+        cards={mapIcons(APM_INSTRUMENTATION_ITEMS.python)}
         sectionName="Python Frameworks"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -135,36 +167,7 @@ export default function APMInstrumentationListicle({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Java</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Java / Spring Boot',
-            href: '/docs/instrumentation/java/opentelemetry-java',
-            icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
-            clickName: 'Java Instrumentation Link',
-          },
-          {
-            name: 'Quarkus',
-            href: '/docs/instrumentation/opentelemetry-quarkus',
-            icon: <SiQuarkus className="h-7 w-7 text-blue-600" />,
-            clickName: 'Quarkus Instrumentation Link',
-          },
-          {
-            name: 'Tomcat',
-            href: '/docs/instrumentation/tomcat',
-            icon: <SiApachetomcat className="h-7 w-7 text-orange-600" />,
-            clickName: 'Tomcat Instrumentation Link',
-          },
-          {
-            name: 'JBoss',
-            href: '/docs/instrumentation/jboss',
-            icon: (
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
-                JB
-              </span>
-            ),
-            clickName: 'JBoss Instrumentation Link',
-          },
-        ]}
+        cards={mapIcons(APM_INSTRUMENTATION_ITEMS.java)}
         sectionName="Java Frameworks"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -176,50 +179,7 @@ export default function APMInstrumentationListicle({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">JavaScript</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Node.js',
-            href: '/docs/instrumentation/opentelemetry-nodejs',
-            icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'Node.js Instrumentation Link',
-          },
-          {
-            name: 'Next.js',
-            href: '/docs/instrumentation/opentelemetry-nextjs',
-            icon: <SiNextdotjs className="h-7 w-7 rounded-full bg-white text-black" />,
-            clickName: 'Next.js Instrumentation Link',
-          },
-          {
-            name: 'ReactJS',
-            href: '/docs/instrumentation/opentelemetry-reactjs',
-            icon: <SiReact className="h-7 w-7 text-blue-400" />,
-            clickName: 'ReactJS Instrumentation Link',
-          },
-          {
-            name: 'React Native',
-            href: '/docs/instrumentation/opentelemetry-react-native',
-            icon: <SiReact className="h-7 w-7 text-blue-400" />,
-            clickName: 'React Native Instrumentation Link',
-          },
-          {
-            name: 'NuxtJS',
-            href: '/docs/instrumentation/opentelemetry-nuxtjs',
-            icon: <SiNuxtdotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'Nuxt.js Instrumentation Link',
-          },
-          {
-            name: 'Cloudflare Workers',
-            href: '/docs/instrumentation/opentelemetry-cloudflare',
-            icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
-            clickName: 'Cloudflare Workers Instrumentation Link',
-          },
-          {
-            name: 'Frontend Monitoring',
-            href: '/docs/frontend-monitoring',
-            icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
-            clickName: 'Frontend Monitoring Overview Link',
-          },
-        ]}
+        cards={mapIcons(APM_INSTRUMENTATION_ITEMS.javascript)}
         sectionName="JavaScript Frameworks"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -231,68 +191,7 @@ export default function APMInstrumentationListicle({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Other Languages</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Golang (Go)',
-            href: '/docs/instrumentation/golang',
-            icon: <SiGo className="h-7 w-7 text-cyan-500" />,
-            clickName: 'Golang Instrumentation Link',
-          },
-          {
-            name: 'Deno',
-            href: '/docs/instrumentation/opentelemetry-deno',
-            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
-            clickName: 'Deno Instrumentation Link',
-          },
-          {
-            name: 'PHP',
-            href: '/docs/instrumentation/php',
-            icon: <SiPhp className="h-7 w-7 text-purple-500" />,
-            clickName: 'PHP Instrumentation Link',
-          },
-          {
-            name: 'Laravel',
-            href: '/docs/instrumentation/laravel',
-            icon: <SiLaravel className="h-7 w-7 text-purple-500" />,
-            clickName: 'Laravel Instrumentation Link',
-          },
-          {
-            name: '.NET',
-            href: '/docs/instrumentation/dotnet',
-            icon: <SiDotnet className="h-7 w-7 text-blue-600" />,
-            clickName: '.NET Instrumentation Link',
-          },
-          {
-            name: 'Ruby',
-            href: '/docs/instrumentation/ruby-on-rails',
-            icon: <SiRubyonrails className="h-7 w-7 text-red-600" />,
-            clickName: 'Ruby on Rails Instrumentation Link',
-          },
-          {
-            name: 'Elixir',
-            href: '/docs/instrumentation/elixir',
-            icon: <SiElixir className="h-7 w-7 text-purple-600" />,
-            clickName: 'Elixir Instrumentation Link',
-          },
-          {
-            name: 'Rust',
-            href: '/docs/instrumentation/rust',
-            icon: <SiRust className="h-7 w-7 text-orange-600" />,
-            clickName: 'Rust Instrumentation Link',
-          },
-          {
-            name: 'C++',
-            href: '/docs/instrumentation/opentelemetry-cpp',
-            icon: <SiCplusplus className="h-7 w-7 text-blue-700" />,
-            clickName: 'C++ Instrumentation Link',
-          },
-          {
-            name: 'Swift',
-            href: '/docs/instrumentation/swift',
-            icon: <SiSwift className="h-7 w-7 text-orange-500" />,
-            clickName: 'Swift Instrumentation Link',
-          },
-        ]}
+        cards={mapIcons(APM_INSTRUMENTATION_ITEMS.other)}
         sectionName="Other Languages"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -304,32 +203,7 @@ export default function APMInstrumentationListicle({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Mobile</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Android (Java)',
-            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java',
-            icon: <SiAndroid className="h-7 w-7 text-green-500" />,
-            clickName: 'Android (Java) Instrumentation Link',
-          },
-          {
-            name: 'Android (Kotlin)',
-            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin',
-            icon: <SiKotlin className="h-7 w-7 text-purple-500" />,
-            clickName: 'Android (Kotlin) Instrumentation Link',
-          },
-          {
-            name: 'iOS (SwiftUI)',
-            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
-            icon: <SiSwift className="h-7 w-7 text-orange-500" />,
-            clickName: 'iOS (SwiftUI) Instrumentation Link',
-          },
-          {
-            name: 'Flutter',
-            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
-            icon: <SiFlutter className="h-7 w-7 text-blue-400" />,
-            clickName: 'Flutter Instrumentation Link',
-          },
-        ]}
+        cards={mapIcons(APM_INSTRUMENTATION_ITEMS.mobile)}
         sectionName="Mobile Frameworks"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -341,26 +215,7 @@ export default function APMInstrumentationListicle({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Additional</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'NGINX',
-            href: '/docs/instrumentation/opentelemetry-nginx',
-            icon: <SiNginx className="h-7 w-7 text-green-500" />,
-            clickName: 'NGINX Instrumentation Link',
-          },
-          {
-            name: 'Manual JS',
-            href: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs',
-            icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
-            clickName: 'Manual JavaScript Instrumentation Link',
-          },
-          {
-            name: 'WordPress',
-            href: '/docs/instrumentation/opentelemetry-wordpress',
-            icon: <SiWordpress className="h-7 w-7 text-blue-600" />,
-            clickName: 'WordPress Instrumentation Link',
-          },
-        ]}
+        cards={mapIcons(APM_INSTRUMENTATION_ITEMS.additional)}
         sectionName="Additional Options"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />

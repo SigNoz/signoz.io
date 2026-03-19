@@ -45,3 +45,40 @@ test('cleanup removes presentation-only nodes from markdown output', async () =>
   assert.doesNotMatch(markdown, /screen reader only/)
   assert.doesNotMatch(markdown, /Icon/)
 })
+
+test('cleanup unwraps Next image optimizer URLs to the original asset path', async () => {
+  const html =
+    '<p><img alt="LiteLLM Detailed Trace View" src="/_next/image/?url=%2Fimg%2Fdocs%2Fllm%2Flitellm%2Flitellmproxy-detailed-traces.webp&w=3840&q=75" /></p>'
+  const markdown = await htmlToMarkdown(html, { cleanForDocsUi: true })
+
+  assert.match(
+    markdown,
+    /!\[LiteLLM Detailed Trace View\]\(\/img\/docs\/llm\/litellm\/litellmproxy-detailed-traces\.webp\)/
+  )
+  assert.doesNotMatch(markdown, /\/_next\/image/)
+})
+
+test('cleanup preserves KeyPointCallout headings while removing button chrome', async () => {
+  const html = `
+    <div class="my-8 w-full rounded-2xl border border-white/10 bg-white/5 text-gray-100 shadow-lg shadow-black/10 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10">
+      <button type="button" class="flex w-full items-center justify-between px-6 py-5 text-left">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-signoz_sakura-200">
+            <span class="inline-block h-1.5 w-6 rounded-full bg-signoz_sakura-400/70" aria-hidden="true"></span>
+            Using self-hosted SigNoz?
+          </div>
+        </div>
+        <span class="text-sm font-medium text-gray-300 transition-transform rotate-0" aria-hidden="true">
+          <svg><path d=""></path></svg>
+        </span>
+      </button>
+      <div class="overflow-hidden px-6 pb-6 text-base leading-relaxed text-gray-100/90 hidden opacity-0">
+        <p>Most steps are identical.</p>
+      </div>
+    </div>
+  `
+  const markdown = await htmlToMarkdown(html, { cleanForDocsUi: true })
+
+  assert.match(markdown, /\*\*Using self-hosted SigNoz\?\*\*/)
+  assert.match(markdown, /Most steps are identical\./)
+})

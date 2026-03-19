@@ -1,9 +1,35 @@
 import React from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import type { Doc } from 'contentlayer/generated'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkMdx from 'remark-mdx'
+import {
+  LLM_MONITORING_ITEMS,
+  K8S_INSTALLATION_ITEMS,
+  MARKETPLACE_INSTALLATION_ITEMS,
+  getAllSelfHostInstallationItems,
+  COLLECTION_AGENTS_ITEMS,
+  getAllCollectionAgentsItems,
+  getAllAPMInstrumentationItems,
+  getAllJavaInstrumentationItems,
+  getAllJavascriptInstrumentationItems,
+  getAllLogsInstrumentationItems,
+  getAllIntegrationsItems,
+  getAllCICDMonitoringItems,
+  getAllAWSMonitoringItems,
+  getAllAWSOneClickItems,
+  DASHBOARD_TEMPLATES_ITEMS,
+  APM_DASHBOARDS_ITEMS,
+  KUBERNETES_DASHBOARDS_ITEMS,
+  LITELLM_DASHBOARDS_ITEMS,
+  HOST_METRICS_DASHBOARDS_ITEMS,
+  APM_QUICK_START_ITEMS,
+  LOGS_QUICK_START_ITEMS,
+  getAllMetricsQuickStartItems,
+  MIGRATE_TO_SIGNOZ_ITEMS,
+  WEB_VITALS_ITEMS,
+  HOSTING_DECISION_ITEMS,
+} from '../../constants/componentItems'
 
 type StubProps = {
   children?: ReactNode
@@ -18,45 +44,45 @@ type MdxTreeNode = {
 }
 type AgentMdxComponentPolicy = 'custom-stub' | 'reviewed-fallback'
 
-const LLM_MONITORING_SLUGS = [
-  'codex-monitoring',
-  'anthropic-monitoring',
-  'groq-observability',
-  'openrouter-observability',
-  'vercel-ai-sdk-observability',
-  'langtrace',
-  'openlit',
-]
 export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'Admonition',
+  'APMDashboardsListicle',
   'APMInstrumentationListicle',
+  'APMQuickStartOverview',
+  'AWSMonitoringListicle',
+  'AWSOneClickListicle',
+  'CICDMonitoringListicle',
+  'CollectionAgentsListicle',
+  'DashboardTemplatesListicle',
   'DocCard',
   'DocCardContainer',
   'Figure',
   'HostingDecision',
+  'HostMetricsDashboardsListicle',
   'IntegrationsListicle',
+  'JavaInstrumentationListicle',
+  'JavascriptInstrumentationListicle',
   'K8sInstallationListicle',
   'KeyPointCallout',
+  'KubernetesDashboardsListicle',
+  'LiteLLMDashboardsListicle',
   'LLMMonitoringListicle',
   'LogsInstrumentationListicle',
+  'LogsQuickStartOverview',
   'MarketplaceInstallationListicle',
+  'MetricsQuickStartOverview',
+  'MigrateToSigNoz',
   'SelfHostInstallationListicle',
   'TabItem',
   'Tabs',
   'ToggleHeading',
+  'WebVitalsGrid',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
-  'APMDashboardsListicle',
-  'APMQuickStartOverview',
-  'AWSMonitoringListicle',
-  'AWSOneClickListicle',
   'CHClientWithOutput',
-  'CICDMonitoringListicle',
   'CloneRepo',
-  'CollectionAgentsListicle',
   'CommonPrerequisites',
   'DashboardActions',
-  'DashboardTemplatesListicle',
   'DSConfigIntro',
   'DSConfigOss',
   'DSSendDataEc2',
@@ -69,21 +95,13 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'DSTemplateIntro',
   'GetHelp',
   'GetStartedInfrastructureMonitoring',
-  'HostMetricsDashboardsListicle',
-  'JavaInstrumentationListicle',
-  'JavascriptInstrumentationListicle',
   'K8sInstall',
   'K8sNextSteps',
   'K8sOtelDemo',
-  'KubernetesDashboardsListicle',
   'LibraryTab',
   'LibraryTabs',
-  'LiteLLMDashboardsListicle',
-  'LogsQuickStartOverview',
   'MDXButton',
   'MetricsDefinition',
-  'MetricsQuickStartOverview',
-  'MigrateToSigNoz',
   'MultiNodePart1',
   'MultiNodePart2',
   'PrereqsInstrument',
@@ -93,7 +111,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'TraefikMetrics',
   'UpgradeInfo',
   'UseHotRod',
-  'WebVitalsGrid',
   'YouTube',
 ] as const
 type KnownAgentMdxComponentName = (typeof KNOWN_AGENT_MDX_COMPONENT_NAMES)[number]
@@ -108,8 +125,6 @@ export const AGENT_MDX_COMPONENT_POLICIES = {
   ...buildPolicyEntries(KNOWN_AGENT_MDX_COMPONENT_NAMES, 'custom-stub'),
   ...buildPolicyEntries(REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES, 'reviewed-fallback'),
 } as const
-
-const toDocsPath = (slug: string): string => `/docs/${slug.replace(/^\/+|\/+$/g, '')}/`
 
 const getStringProp = (props: StubProps, key: string): string | null => {
   const value = props[key]
@@ -157,67 +172,17 @@ const buildLabeledContent = (label: string | null, children?: ReactNode): ReactN
   return nodes
 }
 
-const toDocListItems = (docs: Doc[]): Array<{ slug: string; title: string; href: string }> => {
-  const seen = new Set<string>()
-  const items: Array<{ slug: string; title: string; href: string }> = []
+type StubListItem = { name: string; href: string }
 
-  for (const doc of docs) {
-    const slug = typeof doc.slug === 'string' ? doc.slug.trim() : ''
-    if (!slug || seen.has(slug)) {
-      continue
-    }
-
-    seen.add(slug)
-    const title =
-      typeof doc.title === 'string' && doc.title.trim().length > 0 ? doc.title.trim() : slug
-
-    items.push({
-      slug,
-      title,
-      href: toDocsPath(slug),
-    })
-  }
-
-  items.sort((left, right) => left.title.localeCompare(right.title))
-  return items
-}
-
-const selectDocsByRules = (
-  docs: Doc[],
-  options: {
-    prefixes?: string[]
-    exactSlugs?: string[]
-  }
-): Doc[] => {
-  const prefixes = options.prefixes || []
-  const exactSlugs = new Set(options.exactSlugs || [])
-
-  return docs.filter((doc) => {
-    const slug = doc.slug || ''
-    if (!slug) return false
-    if (exactSlugs.has(slug)) return true
-
-    return prefixes.some((prefix) => {
-      if (!prefix) return false
-      const normalizedPrefix = prefix.endsWith('/') ? prefix : `${prefix}/`
-      return slug === prefix || slug.startsWith(prefix) || slug.startsWith(normalizedPrefix)
-    })
-  })
-}
-
-const createDocListComponent = (
-  allDocs: Doc[],
-  title: string,
-  options: {
-    prefixes?: string[]
-    exactSlugs?: string[]
-  }
+const createItemListStub = (
+  items: StubListItem[] | ((props: StubProps) => StubListItem[]),
+  title: string
 ): ComponentType<StubProps> => {
-  const DocListComponent = () => {
-    const docs = toDocListItems(selectDocsByRules(allDocs, options))
+  const ItemListStub = (props: StubProps) => {
+    const resolvedItems = typeof items === 'function' ? items(props) : items
 
-    if (docs.length === 0) {
-      return React.createElement('p', null, `${title}: No guides found.`)
+    if (resolvedItems.length === 0) {
+      return React.createElement('p', null, `${title}: No items found.`)
     }
 
     return React.createElement(
@@ -227,20 +192,20 @@ const createDocListComponent = (
       React.createElement(
         'ul',
         null,
-        ...docs.map((doc) =>
+        ...resolvedItems.map((item, index) =>
           React.createElement(
             'li',
-            { key: doc.slug },
-            React.createElement('a', { href: doc.href }, doc.title)
+            { key: `${item.href}-${index}` },
+            React.createElement('a', { href: item.href }, item.name)
           )
         )
       )
     )
   }
 
-  DocListComponent.displayName = `${title.replace(/[^a-zA-Z0-9]+/g, '') || 'DocList'}Stub`
+  ItemListStub.displayName = `${title.replace(/[^a-zA-Z0-9]+/g, '') || 'ItemList'}Stub`
 
-  return DocListComponent
+  return ItemListStub
 }
 
 const createUnknownComponentStub = (name: string): ComponentType<StubProps> => {
@@ -265,9 +230,10 @@ const createUnknownComponentStub = (name: string): ComponentType<StubProps> => {
   return UnknownComponentStub
 }
 
-const createKnownComponentStubs = (
-  allDocs: Doc[]
-): Record<KnownAgentMdxComponentName, ComponentType<StubProps>> => ({
+const createKnownComponentStubs = (): Record<
+  KnownAgentMdxComponentName,
+  ComponentType<StubProps>
+> => ({
   Figure: (props) => {
     const src = getStringProp(props, 'src')
     const alt = getStringProp(props, 'alt') || ''
@@ -321,69 +287,78 @@ const createKnownComponentStubs = (
     )
   },
   ToggleHeading: (props) => React.createElement('div', null, props.children),
-  HostingDecision: () =>
-    React.createElement(
-      'ul',
-      null,
-      React.createElement(
-        'li',
-        null,
-        React.createElement(
-          'a',
-          { href: '/blog/cloud-vs-self-hosted-deployment-guide/' },
-          'Compare Self Host vs Cloud'
-        )
-      ),
-      React.createElement(
-        'li',
-        null,
-        React.createElement('a', { href: '/teams/' }, 'Get Started - Free')
-      )
-    ),
-  APMInstrumentationListicle: createDocListComponent(allDocs, 'APM Instrumentation Guides', {
-    prefixes: ['instrumentation/'],
-    exactSlugs: ['frontend-monitoring'],
-  }),
-  LogsInstrumentationListicle: createDocListComponent(allDocs, 'Logs Collection Guides', {
-    prefixes: [
-      'logs-management/send-logs/',
-      'userguide/collect_',
-      'userguide/fluent',
-      'userguide/send-logs-http',
-      'userguide/heroku_logs_to_signoz',
-      'userguide/vercel_logs_to_signoz',
-    ],
-  }),
-  SelfHostInstallationListicle: createDocListComponent(allDocs, 'Self-Host Installation Guides', {
-    exactSlugs: [
-      'install/docker',
-      'install/docker-swarm',
-      'install/docker-selinux',
-      'install/linux',
-      'install/digital-ocean',
-      'install/argocd',
-      'install/ecs',
-      'install/azure-container-apps',
-      'install/marketplaces',
-    ],
-    prefixes: ['install/kubernetes/'],
-  }),
-  K8sInstallationListicle: createDocListComponent(allDocs, 'Kubernetes Installation Guides', {
-    prefixes: ['install/kubernetes/'],
-  }),
-  MarketplaceInstallationListicle: createDocListComponent(
-    allDocs,
-    'Marketplace Installation Guides',
-    {
-      exactSlugs: ['install/marketplaces'],
-    }
+  HostingDecision: createItemListStub(HOSTING_DECISION_ITEMS, 'Hosting Options'),
+  APMDashboardsListicle: createItemListStub(APM_DASHBOARDS_ITEMS, 'APM Dashboards'),
+  APMInstrumentationListicle: createItemListStub(
+    getAllAPMInstrumentationItems(),
+    'APM Instrumentation Guides'
   ),
-  IntegrationsListicle: createDocListComponent(allDocs, 'Integrations Guides', {
-    prefixes: ['integrations/'],
-  }),
-  LLMMonitoringListicle: createDocListComponent(allDocs, 'LLM Monitoring Guides', {
-    exactSlugs: LLM_MONITORING_SLUGS,
-  }),
+  APMQuickStartOverview: createItemListStub(APM_QUICK_START_ITEMS, 'APM Quick Start'),
+  AWSMonitoringListicle: createItemListStub(getAllAWSMonitoringItems(), 'AWS Monitoring Guides'),
+  AWSOneClickListicle: createItemListStub(getAllAWSOneClickItems(), 'AWS One-Click Integrations'),
+  CICDMonitoringListicle: createItemListStub(
+    getAllCICDMonitoringItems(),
+    'CI/CD Monitoring Guides'
+  ),
+  CollectionAgentsListicle: createItemListStub((props) => {
+    const platform = getStringProp(props, 'platform')
+
+    switch (platform) {
+      case 'docker':
+        return COLLECTION_AGENTS_ITEMS.docker
+      case 'ecs':
+        return COLLECTION_AGENTS_ITEMS.ecs
+      case 'kubernetes':
+        return COLLECTION_AGENTS_ITEMS.kubernetes
+      case 'vm':
+        return COLLECTION_AGENTS_ITEMS.vm
+      default:
+        return getAllCollectionAgentsItems()
+    }
+  }, 'Collection Agents'),
+  DashboardTemplatesListicle: createItemListStub(DASHBOARD_TEMPLATES_ITEMS, 'Dashboard Templates'),
+  HostMetricsDashboardsListicle: createItemListStub(
+    HOST_METRICS_DASHBOARDS_ITEMS,
+    'Host Metrics Dashboards'
+  ),
+  IntegrationsListicle: createItemListStub(getAllIntegrationsItems(), 'Integrations Guides'),
+  JavaInstrumentationListicle: createItemListStub(
+    getAllJavaInstrumentationItems(),
+    'Java Instrumentation Guides'
+  ),
+  JavascriptInstrumentationListicle: createItemListStub(
+    getAllJavascriptInstrumentationItems(),
+    'JavaScript Instrumentation Guides'
+  ),
+  K8sInstallationListicle: createItemListStub(
+    K8S_INSTALLATION_ITEMS,
+    'Kubernetes Installation Guides'
+  ),
+  KubernetesDashboardsListicle: createItemListStub(
+    KUBERNETES_DASHBOARDS_ITEMS,
+    'Kubernetes Dashboards'
+  ),
+  LiteLLMDashboardsListicle: createItemListStub(LITELLM_DASHBOARDS_ITEMS, 'LiteLLM Dashboards'),
+  LLMMonitoringListicle: createItemListStub(LLM_MONITORING_ITEMS, 'LLM Monitoring Guides'),
+  LogsInstrumentationListicle: createItemListStub(
+    getAllLogsInstrumentationItems(),
+    'Logs Collection Guides'
+  ),
+  LogsQuickStartOverview: createItemListStub(LOGS_QUICK_START_ITEMS, 'Logs Quick Start'),
+  MarketplaceInstallationListicle: createItemListStub(
+    MARKETPLACE_INSTALLATION_ITEMS,
+    'Marketplace Installation Guides'
+  ),
+  MetricsQuickStartOverview: createItemListStub(
+    getAllMetricsQuickStartItems(),
+    'Metrics Quick Start'
+  ),
+  MigrateToSigNoz: createItemListStub(MIGRATE_TO_SIGNOZ_ITEMS, 'Migrate to SigNoz'),
+  SelfHostInstallationListicle: createItemListStub(
+    getAllSelfHostInstallationItems(),
+    'Self-Host Installation Guides'
+  ),
+  WebVitalsGrid: createItemListStub(WEB_VITALS_ITEMS, 'Web Vitals'),
 })
 
 export const extractMdxComponentNames = (rawMdx: string): string[] => {
@@ -409,9 +384,12 @@ export const extractMdxComponentNames = (rawMdx: string): string[] => {
   return Array.from(names)
 }
 
-export const buildAgentMdxComponentsForDoc = (doc: Doc, allDocs: Doc[]): DocsComponentMap => {
+export const buildAgentMdxComponentsForDoc = (doc: {
+  slug?: string
+  body: { raw: string }
+}): DocsComponentMap => {
   const componentNames = extractMdxComponentNames(doc.body.raw)
-  const knownStubs = createKnownComponentStubs(allDocs)
+  const knownStubs = createKnownComponentStubs()
   const unreviewedComponentNames = componentNames.filter(
     (componentName) =>
       !Object.prototype.hasOwnProperty.call(AGENT_MDX_COMPONENT_POLICIES, componentName)

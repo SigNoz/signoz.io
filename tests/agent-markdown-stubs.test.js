@@ -45,3 +45,19 @@ test('Admonition stubs preserve the admonition type label', async () => {
   assert.match(html, /Warning/)
   assert.match(html, /Keep existing receivers\./)
 })
+
+test('CollectionAgentsListicle stubs respect the selected platform', async () => {
+  const doc = createDoc('<CollectionAgentsListicle platform="kubernetes" />')
+  const components = buildAgentMdxComponentsForDoc(doc, [])
+  const html = renderToStaticMarkup(
+    React.createElement(components.CollectionAgentsListicle, {
+      platform: 'kubernetes',
+    })
+  )
+
+  assert.match(html, /K8s-Infra \(Helm Chart\)/)
+  assert.match(html, /OpenTelemetry Operator/)
+  assert.doesNotMatch(html, /Docker Swarm/)
+  assert.doesNotMatch(html, /ECS Serverless \(Sidecar\)/)
+  assert.doesNotMatch(html, /OpenTelemetry Binary/)
+})
