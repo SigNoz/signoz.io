@@ -28,7 +28,7 @@ export function BookADemoModalProvider({ children }: { children: React.ReactNode
     <BookADemoModalContext.Provider value={{ openModal }}>
       {children}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
-        <ModalContent className="min-h-96 max-w-2xl rounded-3xl border border-signoz_slate-200 bg-signoz_vanilla-200 text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
+        <ModalContent className="max-w-2xl rounded-3xl border border-signoz_slate-200 bg-signoz_vanilla-200 text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
           {() => (
             <ModalBody className="p-8 text-signoz_ink-500">
               <PricingForm
