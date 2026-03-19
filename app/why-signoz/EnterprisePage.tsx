@@ -22,6 +22,48 @@ import { useLogEvent } from '@/hooks/useLogEvent'
 import { usePathname } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 
+interface CTAButtonGroupProps {
+  onBookDemoClick: () => void
+  clickLocation: string
+  startTrialClickName: string
+}
+
+const CTAButtonGroup: React.FC<CTAButtonGroupProps> = ({
+  onBookDemoClick,
+  clickLocation,
+  startTrialClickName,
+}) => (
+  <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
+    <Button
+      isButton
+      variant="default"
+      rounded="full"
+      className="flex-center flex !w-fit items-center gap-2"
+      onClick={onBookDemoClick}
+    >
+      Book a demo
+      <ArrowRight size={14} />
+    </Button>
+    <Button
+      asChild
+      variant="secondary"
+      rounded="full"
+      className="flex-center flex !w-fit items-center gap-2"
+    >
+      <TrackingLink
+        href="/teams/"
+        clickType="Secondary CTA"
+        clickName={startTrialClickName}
+        clickLocation={clickLocation}
+        clickText="Get Started - Free"
+      >
+        Get Started - Free
+        <ArrowRight size={14} />
+      </TrackingLink>
+    </Button>
+  </div>
+)
+
 const Header: React.FC = () => {
   const { openModal } = useBookADemoModal()
   const logEvent = useLogEvent()
@@ -42,35 +84,11 @@ const Header: React.FC = () => {
   }
 
   const enterpriseHeaderButtonGroup = (
-    <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-      <Button
-        isButton
-        variant="default"
-        rounded="full"
-        className="flex-center flex !w-fit items-center gap-2"
-        onClick={handleBookDemoClick}
-      >
-        Book a demo
-        <ArrowRight size={14} />
-      </Button>
-      <Button
-        asChild
-        variant="secondary"
-        rounded="full"
-        className="flex-center flex !w-fit items-center gap-2"
-      >
-        <TrackingLink
-          href="/teams/"
-          clickType="Secondary CTA"
-          clickName="Why SigNoz Page Hero Start Trial"
-          clickLocation="Why SigNoz Page Hero"
-          clickText="Get Started - Free"
-        >
-          Get Started - Free
-          <ArrowRight size={14} />
-        </TrackingLink>
-      </Button>
-    </div>
+    <CTAButtonGroup
+      onBookDemoClick={handleBookDemoClick}
+      clickLocation="Why SigNoz Page Hero"
+      startTrialClickName="Why SigNoz Page Hero Start Trial"
+    />
   )
 
   return (
@@ -108,8 +126,8 @@ const TrustedByTeams: React.FC = () => {
         Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
       </div>
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-16 gap-y-10 px-4">
-        {TRUSTED_BY_LOGOS.map((logo, index) => (
-          <div key={index} className="flex h-12 items-center justify-center">
+        {TRUSTED_BY_LOGOS.map((logo) => (
+          <div key={logo.alt} className="flex h-12 items-center justify-center">
             <Image
               src={logo.src}
               alt={logo.alt}
@@ -177,8 +195,8 @@ const ObservabilityLandscape: React.FC = () => {
         Observability Landscape is changing. <br /> Are you Ready?
       </h2>
       <div className="mx-auto grid max-w-4xl grid-cols-1 gap-10 md:grid-cols-3">
-        {OBSERVABILITY_LANDSCAPE_CARDS.map((card, index) => (
-          <Card key={index} className="group h-full" variant="aqua">
+        {OBSERVABILITY_LANDSCAPE_CARDS.map((card) => (
+          <Card key={card.id} className="group h-full" variant="aqua">
             <div className="flex h-full flex-col items-start gap-4 px-8 py-6">
               <span className="inline-block bg-[linear-gradient(to_right,rgba(78,116,248)_50%,#ffffff_50%)] bg-[length:200%_100%] bg-clip-text bg-right text-transparent transition-[background-position] duration-300 ease-out group-hover:bg-left">
                 {card.title}
@@ -250,35 +268,11 @@ const EnterpriseObservability: React.FC = () => {
         unified, and give you a predictable cost model you can trust from Day Zero.
       </p>
       <div className="flex flex-col items-center justify-center gap-4">
-        <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-          <Button
-            isButton
-            variant="default"
-            rounded="full"
-            className="flex-center flex !w-fit items-center gap-2"
-            onClick={handleBookDemoClick}
-          >
-            Book a demo
-            <ArrowRight size={14} />
-          </Button>
-          <Button
-            asChild
-            variant="secondary"
-            rounded="full"
-            className="flex-center flex !w-fit items-center gap-2"
-          >
-            <TrackingLink
-              href="/teams/"
-              clickType="Secondary CTA"
-              clickName="Why SigNoz Page Enterprise Observability Section Start Trial"
-              clickLocation="Why SigNoz Page Enterprise Observability Section"
-              clickText="Get Started - Free"
-            >
-              Get Started - Free
-              <ArrowRight size={14} />
-            </TrackingLink>
-          </Button>
-        </div>
+        <CTAButtonGroup
+          onBookDemoClick={handleBookDemoClick}
+          clickLocation="Why SigNoz Page Enterprise Observability Section"
+          startTrialClickName="Why SigNoz Page Enterprise Observability Section Start Trial"
+        />
         <p className="text-center text-sm text-signoz_vanilla-400">
           No sales deck. No 45-minute intro call. <br /> Engineers talk to engineers.
         </p>

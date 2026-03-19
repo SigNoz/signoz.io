@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import { ArrowRight, Atom } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import { SourcesTabsGrid } from '../log-management/LogManagement'
+import { SourcesTabsGrid } from '@/shared/components/molecules/SourcesTabsGrid'
 export const ENTERPRISE_DEMO_HUBSPOT_DATA = {
   portalId: '22308423',
   formId: 'a908efee-9ec5-4969-9ca4-6e91d0a32b8a',
@@ -11,6 +11,7 @@ export const ENTERPRISE_DEMO_HUBSPOT_DATA = {
 
 export const OBSERVABILITY_LANDSCAPE_CARDS = [
   {
+    id: 'cost-reduction',
     title: <span className="text-2xl font-bold">99%</span>,
     description: (
       <div className="flex flex-col items-start justify-between gap-2">
@@ -28,6 +29,7 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = [
     ),
   },
   {
+    id: 'tool-consolidation',
     title: <span className="text-2xl font-bold">57%</span>,
     description: (
       <div className="flex flex-col items-start justify-between gap-2">
@@ -45,21 +47,11 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = [
     ),
   },
   {
+    id: 'observability-overages',
     title: <span className="text-2xl font-bold">71%</span>,
     description: (
       <div className="flex flex-col items-start justify-between gap-2">
         Engineering teams hit unexpected observability overages regularly
-        <Link
-          href={
-            'https://futurecio.tech/gartner-says-security-vendor-consolidation-to-improve-risk-posture/'
-          }
-          className="mt-1 block text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
-          target="_blank"
-          rel="noopener noreferrer"
-          prefetch={false}
-        >
-          Source - https://futurecio.tech/
-        </Link>
       </div>
     ),
   },
@@ -271,24 +263,34 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
   {
     description: (
       <div className="flex h-full min-h-28 w-full flex-row items-center justify-center gap-8 bg-[url('/svgs/graph-bg.svg')] bg-cover bg-center">
-        <Image
-          className="cursor-pointer opacity-60 hover:opacity-100"
-          src="/svgs/icons/hipaa.svg"
-          width={90}
-          height={90}
-          alt="HIPAA"
-          loading="lazy"
-          onClick={() => window.open('https://trust.signoz.io/', '_blank')}
-        />
-        <Image
-          className="cursor-pointer rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
-          src="/svgs/icons/SOC-2.svg"
-          width={60}
-          height={60}
-          alt="SOC-2"
-          loading="lazy"
-          onClick={() => window.open('https://trust.signoz.io/', '_blank')}
-        />
+        <a
+          href="https://trust.signoz.io/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="opacity-60 hover:opacity-100"
+        >
+          <Image
+            src="/svgs/icons/hipaa.svg"
+            width={90}
+            height={90}
+            alt="HIPAA compliance certificate"
+            loading="lazy"
+          />
+        </a>
+        <a
+          href="https://trust.signoz.io/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
+        >
+          <Image
+            src="/svgs/icons/SOC-2.svg"
+            width={60}
+            height={60}
+            alt="SOC-2 compliance certificate"
+            loading="lazy"
+          />
+        </a>
       </div>
     ),
   },
@@ -397,7 +399,7 @@ export const GETTING_STARTED_CARDS = [
         tracing, log pipeline design, cost governance. Support aligns to your business outcomes:
         reduced MTTR, high cardinality, low TCO
         <TrackingLink
-          href="/enterprise-support/"
+          href="/case-study/tableflow/"
           clickType="button"
           clickName="Getting Started Section Observability Experts and Support Plans"
           clickLocation="Why SigNoz Page"
