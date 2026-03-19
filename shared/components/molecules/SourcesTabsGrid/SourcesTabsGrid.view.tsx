@@ -16,8 +16,11 @@ import {
   EXISTING_AGENTS_ICONS,
   DIRECT_INTEGRATIONS,
 } from './SourcesTabsGrid.constants'
+import { usePathname } from 'next/navigation'
 
 const SourcesTabsGrid: React.FC = () => {
+  const pathname = usePathname()
+
   const sourcesTabContent = (
     <div className="flex min-h-52 flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
@@ -43,8 +46,8 @@ const SourcesTabsGrid: React.FC = () => {
         <TrackingLink
           href="/docs/logs-management/send-logs-to-signoz/"
           clickType="Inline Link"
-          clickName="Log Management View Sources Link"
-          clickLocation="Log Management Supported Sources Tab"
+          clickName={`View Sources Link - ${pathname}`}
+          clickLocation={`Supported Sources Tab - ${pathname}`}
           clickText="VIEW ALL 50+ SOURCES"
         >
           VIEW ALL 50+ SOURCES
@@ -101,8 +104,8 @@ const SourcesTabsGrid: React.FC = () => {
         <TrackingLink
           href="/docs/logs-management/send-logs-to-signoz/"
           clickType="Inline Link"
-          clickName="Log Management View Integration Guides Link"
-          clickLocation="Log Management Collection Methods Tab"
+          clickName={`View Integration Guides Link - ${pathname}`}
+          clickLocation={`Collection Methods Tab - ${pathname}`}
           clickText="VIEW INTEGRATION GUIDES"
         >
           VIEW INTEGRATION GUIDES
