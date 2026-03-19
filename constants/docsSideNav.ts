@@ -2142,6 +2142,11 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
                 label: 'Hostmetrics (K8s)',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
+                label: 'Hostmetrics (VM)',
+              },
             ],
           },
           {

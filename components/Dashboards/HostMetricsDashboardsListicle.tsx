@@ -21,7 +21,7 @@ const HostMetricsDashboardsData: IconCardData[] = [
   },
   {
     name: 'Host Metrics (VM)',
-    href: 'https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json',
+    href: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
     icon: <Server className="h-7 w-7 text-green-600" />,
     clickName: 'Host Metrics Dashboard Template',
   },
