@@ -61,3 +61,16 @@ test('CollectionAgentsListicle stubs respect the selected platform', async () =>
   assert.doesNotMatch(html, /ECS Serverless \(Sidecar\)/)
   assert.doesNotMatch(html, /OpenTelemetry Binary/)
 })
+
+test('HostingDecision stub matches the banner CTA destinations', async () => {
+  const doc = createDoc('<HostingDecision />')
+  const components = buildAgentMdxComponentsForDoc(doc, [])
+  const html = renderToStaticMarkup(React.createElement(components.HostingDecision))
+
+  assert.match(html, /Compare Self Host vs Cloud/)
+  assert.match(html, /\/blog\/cloud-vs-self-hosted-deployment-guide\//)
+  assert.match(html, /Get Started - Free/)
+  assert.match(html, /\/teams\//)
+  assert.doesNotMatch(html, /\/docs\/cloud\//)
+  assert.doesNotMatch(html, /\/docs\/install\//)
+})

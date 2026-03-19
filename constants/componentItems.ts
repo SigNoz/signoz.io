@@ -1987,10 +1987,18 @@ export const WEB_VITALS_ITEMS: ComponentItem[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Hosting Decision (agent markdown only — the UI component is a banner)
+// Hosting Decision
 // ---------------------------------------------------------------------------
 
 export const HOSTING_DECISION_ITEMS: ComponentItem[] = [
-  { name: 'SigNoz Cloud', href: '/docs/cloud/', clickName: 'SigNoz Cloud' },
-  { name: 'Self-Hosted', href: '/docs/install/', clickName: 'Self-Hosted Install' },
+  {
+    name: 'Compare Self Host vs Cloud',
+    href: '/blog/cloud-vs-self-hosted-deployment-guide/',
+    clickName: 'Compare Self Host vs Cloud',
+  },
+  {
+    name: 'Get Started - Free',
+    href: '/teams/',
+    clickName: 'Get Started - Free',
+  },
 ]
