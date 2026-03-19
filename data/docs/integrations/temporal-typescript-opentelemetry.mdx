@@ -14,16 +14,9 @@ Learn how to instrument a Temporal TypeScript application with OpenTelemetry and
 
 Temporal is a durable workflow execution platform that helps you build reliable distributed systems. Unlike traditional REST APIs that handle single requests, Temporal manages **long-running workflows** that can span hours, days, or even months - coordinating multiple steps, retries, and state management automatically.
 
-### Why Does Temporal Have Workers and Clients?
+### Temporal Architecture
 
-Temporal applications have a unique architecture:
-
-- **Temporal Client**: Starts workflows and queries their status. Think of this as your application's entry point that says "start this process."
-- **Temporal Worker**: Executes the actual workflow code and activities. Workers poll the Temporal server for tasks and run your business logic.
-- **Workflows**: Durable functions that define your business process (e.g., "process an order: charge card, reserve inventory, send confirmation")
-- **Activities**: Individual tasks within workflows (e.g., "call payment API," "update database")
-
-This separation allows Temporal to provide fault tolerance - if a worker crashes mid-workflow, another worker can pick up exactly where it left off.
+Temporal separates applications into **Clients** (which start workflows) and **Workers** (which execute the business logic). This separation provides fault tolerance, allowing workers to resume seamlessly if they crash mid-workflow.
 
 ## Prerequisites
 
@@ -89,7 +82,9 @@ npm install
 
 Create `src/instrumentation.ts` to set up the OpenTelemetry SDK. This file initializes tracing, metrics, and logging for your entire application.
 
-**Key concept**: This configuration must be loaded **before** any other code to ensure automatic instrumentation works correctly.
+<Admonition type="note">
+  **Key concept**: This configuration must be loaded **before** any other code to ensure automatic instrumentation works correctly.
+</Admonition>
 
 ```typescript:src/instrumentation.ts
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -743,7 +738,7 @@ Now that your Temporal application is instrumented:
 - **Set up alerts**: Create alerts for workflow failures, high activity latency, or worker health issues in [SigNoz Alerts](https://signoz.io/docs/userguide/alerts-management/)
 - **Build dashboards**: Customize the <a href="https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20SDK%20Metrics%20-%20typescript.json" target="_blank" rel="noopener noreferrer nofollow">Temporal SDK dashboard</a> or create your own
 - **Explore traces**: Use the [Traces Explorer](https://signoz.io/docs/userguide/traces/) to debug failed workflows
-- **Query logs**: Learn advanced log queries in the [Logs documentation](https://signoz.io/docs/userguide/logs/)
+- **Query logs**: Learn how to search and filter logs in the [Logs Explorer documentation](https://signoz.io/docs/product-features/logs-explorer/)
 - **Monitor activities**: Track activity execution times and error rates
 
 ## Get Help
