@@ -32,8 +32,8 @@ const Header: React.FC = () => {
       eventType: 'track',
       attributes: {
         clickType: 'Primary CTA',
-        clickName: 'Enterprise Hero Book a demo',
-        clickLocation: 'Enterprise Hero',
+        clickName: 'Why SigNoz Page Hero Book a demo',
+        clickLocation: 'Why SigNoz Page Hero',
         clickText: 'Book a demo',
         pageLocation: pathname,
       },
@@ -62,8 +62,8 @@ const Header: React.FC = () => {
         <TrackingLink
           href="/teams/"
           clickType="Secondary CTA"
-          clickName="Enterprise Hero Start Trial"
-          clickLocation="Enterprise Hero"
+          clickName="Why SigNoz Page Hero Start Trial"
+          clickLocation="Why SigNoz Page Hero"
           clickText="Get Started - Free"
         >
           Get Started - Free
@@ -226,8 +226,8 @@ const EnterpriseObservability: React.FC = () => {
       eventType: 'track',
       attributes: {
         clickType: 'Primary CTA',
-        clickName: 'Enterprise Observability Section Book a demo',
-        clickLocation: 'Enterprise Observability Section',
+        clickName: 'Why SigNoz Page Enterprise Observability Section Book a demo',
+        clickLocation: 'Why SigNoz Page Enterprise Observability Section',
         clickText: 'Book a demo',
         pageLocation: pathname,
       },
@@ -270,8 +270,8 @@ const EnterpriseObservability: React.FC = () => {
             <TrackingLink
               href="/teams/"
               clickType="Secondary CTA"
-              clickName="Enterprise Observability Section Start Trial"
-              clickLocation="Enterprise Observability Section"
+              clickName="Why SigNoz Page Enterprise Observability Section Start Trial"
+              clickLocation="Why SigNoz Page Enterprise Observability Section"
               clickText="Get Started - Free"
             >
               Get Started - Free
@@ -332,8 +332,8 @@ const PricingToScale: React.FC = () => {
             <TrackingLink
               href="/pricing/#teams"
               clickType="Secondary CTA"
-              clickName="View Pricing Button"
-              clickLocation="Why SigNoz Pricing Cloud Section"
+              clickName="Why SigNoz Page View Pricing Button"
+              clickLocation="Why SigNoz Page Pricing Cloud Section"
               clickText="View Pricing"
             >
               <Button
@@ -360,8 +360,8 @@ const PricingToScale: React.FC = () => {
             <TrackingLink
               href="/pricing/#enterprise"
               clickType="Secondary CTA"
-              clickName="View Pricing Button"
-              clickLocation="Why SigNoz Pricing Self Hosted Section"
+              clickName="Why SigNoz Page View Pricing Button"
+              clickLocation="Why SigNoz Page Pricing Self Hosted Section"
               clickText="View Pricing"
             >
               <Button
@@ -398,8 +398,8 @@ const EnterpriseDemoPage: React.FC = () => {
             </h2>
             <CustomerStoriesSection
               tracking={{
-                clickName: 'Enterprise Demo Customer Stories Button',
-                clickLocation: 'Enterprise Demo Testimonials',
+                clickName: 'Why SigNoz Page Customer Stories Button',
+                clickLocation: 'Why SigNoz Page Testimonials',
               }}
               showOverlay={false}
               showFeaturedCaseStudy={false}

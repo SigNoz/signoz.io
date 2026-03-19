@@ -152,9 +152,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         <TrackingLink
           href="/unified-observability/"
           clickType="button"
-          clickName="Unified Observability"
-          clickLocation="Enterprise Page"
-          clickText="Unified Observability"
+          clickName="High Growth Teams Section Unified Observability"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -176,9 +176,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         <TrackingLink
           href="/observability-for-ai-native-companies/"
           clickType="button"
-          clickName="AI & LLM Workload Observability"
-          clickLocation="Enterprise Page"
-          clickText="AI & LLM Workload Observability"
+          clickName="High Growth Teams Section AI & LLM Workload Observability"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -221,9 +221,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         <TrackingLink
           href="/resource-center/opentelemetry/"
           clickType="button"
-          clickName="Open Source + OpenTelemetry"
-          clickLocation="Enterprise Page"
-          clickText="Open Source + OpenTelemetry"
+          clickName="High Growth Teams Section Open Source + OpenTelemetry"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -245,9 +245,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         <TrackingLink
           href="/pricing/"
           clickType="button"
-          clickName="TCO Advantage"
-          clickLocation="Enterprise Page"
-          clickText="TCO Advantage"
+          clickName="High Growth Teams Section TCO Advantage"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -304,9 +304,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         <TrackingLink
           href="https://trust.signoz.io/"
           clickType="button"
-          clickName="Enterprise & Platform Ready"
-          clickLocation="Enterprise Page"
-          clickText="Enterprise & Platform Ready"
+          clickName="High Growth Teams Section Enterprise & Platform Ready"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -329,9 +329,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         <TrackingLink
           href="/docs/integrations/integrations-list/"
           clickType="button"
-          clickName="Integrations"
-          clickLocation="Enterprise Page"
-          clickText="Integrations"
+          clickName="High Growth Teams Section Integrations"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -357,9 +357,9 @@ export const GETTING_STARTED_CARDS = [
         <TrackingLink
           href="/docs/integrations/integrations-list/"
           clickType="button"
-          clickName="Analyze, Migrate, Instrument OTel"
-          clickLocation="Enterprise Page"
-          clickText="Analyze, Migrate, Instrument OTel"
+          clickName="Getting Started Section Analyze, Migrate, Instrument OTel"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -378,9 +378,9 @@ export const GETTING_STARTED_CARDS = [
         <TrackingLink
           href="/enterprise-cloud/"
           clickType="button"
-          clickName="Use SigNoz Cloud or host in your infrastructure"
-          clickLocation="Enterprise Page"
-          clickText="Use SigNoz Cloud or host in your infrastructure"
+          clickName="Getting Started Section Use SigNoz Cloud or host in your infrastructure"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
@@ -399,9 +399,9 @@ export const GETTING_STARTED_CARDS = [
         <TrackingLink
           href="/enterprise-support/"
           clickType="button"
-          clickName="Observability Experts and Support Plans - 24 x 7"
-          clickLocation="Enterprise Page"
-          clickText="Observability Experts and Support Plans - 24 x 7"
+          clickName="Getting Started Section Observability Experts and Support Plans"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
         >
           <Button variant="secondary" rounded="full" isButton>
             Learn more
