@@ -62,6 +62,7 @@ declare global {
 const seenHubspotSubmissions = new Set<string>()
 const EXCLUDED_SUBMISSION_FIELDS = new Set(['hs_context'])
 const EMAIL_FIELD_NAMES = new Set(['email', 'workemail', 'companyemail', 'businessemail'])
+const HUBSPOT_LEGACY_SUBMIT_EVENT = 'onFormSubmitted'
 const HUBSPOT_GLOBAL_SUCCESS_EVENT = 'hs-form-event:on-submission:success'
 
 const normalizeFieldKey = (key: string) =>
@@ -123,7 +124,7 @@ const isHubspotFormSubmittedMessage = (payload: unknown): payload is HubspotForm
 
   const candidate = payload as HubspotFormCallbackPayload
 
-  return candidate.type === 'hsFormCallback' && candidate.eventName === 'onFormSubmitted'
+  return candidate.type === 'hsFormCallback' && candidate.eventName === HUBSPOT_LEGACY_SUBMIT_EVENT
 }
 
 const isHubspotGlobalFormFieldValue = (value: unknown): value is HubspotGlobalFormFieldValue =>
@@ -209,7 +210,7 @@ export function useHubspotSubmissionTracking(formId: string, formName?: string) 
 
       trackHubspotSubmission({
         hubspotFormId: event.data.id,
-        hubspotEventName: event.data.eventName,
+        hubspotEventName: HUBSPOT_LEGACY_SUBMIT_EVENT,
         conversionId: event.data.data?.conversionId,
         redirectUrl: event.data.data?.redirectUrl,
         messageOrigin: event.origin,
@@ -221,22 +222,26 @@ export function useHubspotSubmissionTracking(formId: string, formName?: string) 
     const handleHubspotGlobalFormSuccess = async (
       event: CustomEvent<HubspotGlobalFormEventDetail>
     ) => {
-      if (event.detail?.formId !== formId) return
+      try {
+        if (event.detail?.formId !== formId) return
 
-      const form = window.HubSpotFormsV4?.getFormFromEvent?.(event)
-      if (!form) return
+        const form = window.HubSpotFormsV4?.getFormFromEvent?.(event)
+        if (!form) return
 
-      const hubspotFormId = form.getFormId() || event.detail.formId || formId
-      const submissionValues = mapHubspotGlobalFormValues(await form.getFormFieldValues())
+        const hubspotFormId = form.getFormId() || event.detail.formId || formId
+        const submissionValues = mapHubspotGlobalFormValues(await form.getFormFieldValues())
 
-      trackHubspotSubmission({
-        hubspotFormId,
-        hubspotEventName: HUBSPOT_GLOBAL_SUCCESS_EVENT,
-        conversionId: form.getConversionId(),
-        redirectUrl: form.getRedirectUrl?.(),
-        submissionValues,
-        eventTimeStamp: event.timeStamp,
-      })
+        trackHubspotSubmission({
+          hubspotFormId,
+          hubspotEventName: HUBSPOT_GLOBAL_SUCCESS_EVENT,
+          conversionId: form.getConversionId(),
+          redirectUrl: form.getRedirectUrl?.(),
+          submissionValues,
+          eventTimeStamp: event.timeStamp,
+        })
+      } catch (error) {
+        console.warn('Failed to track HubSpot global form submission', error)
+      }
     }
 
     const handleHubspotGlobalFormSuccessEvent = (event: Event) => {
