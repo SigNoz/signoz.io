@@ -2192,8 +2192,18 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
+                label: 'Kubernetes Pod Metrics (Overall)',
+              },
+              {
+                type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
                 label: 'Kubernetes Pod Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
+                label: 'Kubernetes Node Metrics (Overall)',
               },
               {
                 type: 'doc',

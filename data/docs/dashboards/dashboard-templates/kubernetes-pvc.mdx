@@ -9,7 +9,7 @@ doc_type: explanation
 Monitor the health and capacity of your Kubernetes Persistent Volume Claims (PVCs). This dashboard provides insights into volume usage, capacity, and inode consumption to help prevent storage issues.
 
 <Admonition type="note">
-  To use this dashboard, ensure you have the `kubeletMetrics` preset enabled in your k8s-infra Helm configuration.
+  To use this dashboard, ensure you have [installed the k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) and have the `kubeletMetrics` preset enabled in your configuration.
 </Admonition>
 
 ## Prerequisites
@@ -52,6 +52,11 @@ This dashboard monitors the state of Persistent Volume Claims in your cluster, h
 - **Volume Capacity**: The total capacity of the PVC.
 
 ### Inode Usage
+
+<Admonition type="note">
+  **Note on Inode Metrics Availability:** Inode support for PVCs is currently limited or not available in standard Kubernetes monitoring checks. These metrics may only be populated if your specific volume plugins or custom storage exporters support them.
+</Admonition>
+
 - **Volume Inodes**: Average inode usage.
 - **Volume Inodes Free**: Number of free inodes.
 - **Volume Inodes Used**: Number of used inodes.

@@ -26,10 +26,10 @@ const KubernetesDashboardsData: IconCardData[] = [
     clickName: 'Kubernetes Events Dashboard Template',
   },
   {
-    name: 'Kubernetes PVC Metrics',
-    href: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
-    icon: <Database className="h-7 w-7 text-indigo-600" />,
-    clickName: 'Kubernetes PVC Metrics Dashboard Template',
+    name: 'Kubernetes Pod Metrics (Overall)',
+    href: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
+    icon: <Container className="h-7 w-7 text-blue-600" />,
+    clickName: 'Kubernetes Pod Metrics Overall Dashboard Template',
   },
   {
     name: 'Kubernetes Pod Metrics (Detailed)',
@@ -38,10 +38,22 @@ const KubernetesDashboardsData: IconCardData[] = [
     clickName: 'Kubernetes Pod Metrics Detailed Dashboard Template',
   },
   {
+    name: 'Kubernetes Node Metrics (Overall)',
+    href: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
+    icon: <Server className="h-7 w-7 text-green-600" />,
+    clickName: 'Kubernetes Node Metrics Overall Dashboard Template',
+  },
+  {
     name: 'Kubernetes Node Metrics (Detailed)',
     href: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
     icon: <Server className="h-7 w-7 text-green-600" />,
     clickName: 'Kubernetes Node Metrics Detailed Dashboard Template',
+  },
+  {
+    name: 'Kubernetes PVC Metrics',
+    href: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
+    icon: <Database className="h-7 w-7 text-indigo-600" />,
+    clickName: 'Kubernetes PVC Metrics Dashboard Template',
   },
   {
     name: 'Host Metrics',
