@@ -6,23 +6,8 @@ import { ButtonGroupProps } from './ButtonGroup.types'
 const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons, className = '' }) => {
   return (
     <div className={`flex flex-col items-center justify-center gap-3 md:flex-row ${className}`}>
-      {buttons.map((button, index) => {
-        if ('onClick' in button && button.onClick) {
-          return (
-            <Button
-              key={`${button.text}-${index}`}
-              isButton
-              variant={button.variant}
-              rounded="full"
-              className={`flex !w-fit items-center gap-2 ${button.className || ''}`}
-              onClick={button.onClick}
-            >
-              {button.text}
-              {button.icon ?? <ArrowRight size={14} />}
-            </Button>
-          )
-        }
-        return button.tracking ? (
+      {buttons.map((button, index) =>
+        button.tracking ? (
           <Button
             key={`${button.text}-${index}`}
             asChild
@@ -38,7 +23,7 @@ const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons, className = '' }) =>
               clickText={button.tracking.clickText || button.text}
             >
               {button.text}
-              {button.icon ?? <ArrowRight size={14} />}
+              {button.icon || <ArrowRight size={14} />}
             </TrackingLink>
           </Button>
         ) : (
@@ -50,10 +35,10 @@ const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons, className = '' }) =>
             className={`flex !w-fit items-center gap-2 ${button.className || ''}`}
           >
             {button.text}
-            {button.icon ?? <ArrowRight size={14} />}
+            {button.icon || <ArrowRight size={14} />}
           </Button>
         )
-      })}
+      )}
     </div>
   )
 }

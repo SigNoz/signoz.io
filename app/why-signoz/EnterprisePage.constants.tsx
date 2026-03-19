@@ -78,7 +78,7 @@ export const TRUSTED_BY_LOGOS = [
 
 export const NUMBERS_THAT_SPEAK_CARDS = [
   {
-    icon: <div className="text-4xl font-bold text-signoz_cherry-500">45%</div>,
+    icon: <div className="text-4xl font-bold text-signoz_cherry-500">47%</div>,
     title: 'Reduction in MTTR and TCO',
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
@@ -97,7 +97,7 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
   },
   {
     icon: <div className="text-4xl font-bold text-signoz_cherry-500">10 TB+/Day</div>,
-    title: 'Daily Ingest — Single Deployment',
+    title: 'Daily Ingest - Single Deployment',
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         ClickHouse core handles high-cardinality Kubernetes and AI workloads at all scale. 30%
@@ -201,7 +201,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
   {
     description: (
       <Image
-        src="/img/comparisons/2024/10/opentelemetry-vs-cloudwatch-image.webp"
+        src="/img/comparisons/2024/10/opentelemetry-vs-cloudwatch-image-dark.webp"
         alt="OpenTelemetry Framework"
         width={1200}
         height={675}
@@ -348,12 +348,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
 
 export const GETTING_STARTED_CARDS = [
   {
-    title: (
-      <div className="flex items-center gap-2">
-        <Atom size={16} />
-        Analyze, Migrate, Instrument OTel
-      </div>
-    ),
+    title: <div className="min-h-10">Analyze, Migrate, Instrument OTel</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         Analyze current stack; use our connectors to migrate fast. Add OTel SDK to your services —
@@ -374,12 +369,7 @@ export const GETTING_STARTED_CARDS = [
     ),
   },
   {
-    title: (
-      <div className="flex items-center gap-2">
-        <Atom size={16} />
-        Use SigNoz Cloud or host in your infrastructure
-      </div>
-    ),
+    title: <div className="min-h-10">Use SigNoz Cloud or host in your infrastructure</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         SigNoz Cloud is fully managed, SOC 2 compliant, and is live in minutes. If you want to run
@@ -400,12 +390,7 @@ export const GETTING_STARTED_CARDS = [
     ),
   },
   {
-    title: (
-      <div className="flex items-center gap-2">
-        <Atom size={16} />
-        Observability Experts and Support Plans - 24 x 7
-      </div>
-    ),
+    title: <div className="min-h-10">Observability Experts and Support Plans - 24 x 7</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         Engineers with deep experience across observability stacks — OpenTelemetry, distributed

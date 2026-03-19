@@ -40,26 +40,38 @@ const Header: React.FC = () => {
     })
     openModal()
   }
-  const headerButtons = [
-    {
-      text: 'Book a demo',
-      variant: 'default' as const,
-      className: 'flex-center',
-      onClick: handleBookDemoClick,
-    },
-    {
-      text: 'Get Started - Free',
-      href: '/teams/',
-      variant: 'secondary' as const,
-      className: 'flex-center',
-      tracking: {
-        clickType: 'Secondary CTA',
-        clickName: 'Enterprise Hero Start Trial',
-        clickLocation: 'Enterprise Hero',
-        clickText: 'Get Started - Free',
-      },
-    },
-  ]
+
+  const enterpriseHeaderButtonGroup = (
+    <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
+      <Button
+        isButton
+        variant="default"
+        rounded="full"
+        className="flex-center flex !w-fit items-center gap-2"
+        onClick={handleBookDemoClick}
+      >
+        Book a demo
+        <ArrowRight size={14} />
+      </Button>
+      <Button
+        asChild
+        variant="secondary"
+        rounded="full"
+        className="flex-center flex !w-fit items-center gap-2"
+      >
+        <TrackingLink
+          href="/teams/"
+          clickType="Secondary CTA"
+          clickName="Enterprise Hero Start Trial"
+          clickLocation="Enterprise Hero"
+          clickText="Get Started - Free"
+        >
+          Get Started - Free
+          <ArrowRight size={14} />
+        </TrackingLink>
+      </Button>
+    </div>
+  )
 
   return (
     <FeaturePageHeader
@@ -75,7 +87,7 @@ const Header: React.FC = () => {
           scale. 100% Predictable & Transparent Pricing.
         </>
       }
-      buttons={headerButtons}
+      buttonGroup={enterpriseHeaderButtonGroup}
       sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
       heroImageAlt="Enterprise observability hero"
       heroImage="/img/platform/ClickStackAlternativeMeta.webp"
@@ -205,6 +217,23 @@ const NumbersThatSpeak: React.FC = () => {
 
 const EnterpriseObservability: React.FC = () => {
   const { openModal } = useBookADemoModal()
+  const logEvent = useLogEvent()
+  const pathname = usePathname()
+
+  const handleBookDemoClick = () => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Primary CTA',
+        clickName: 'Enterprise Observability Section Book a demo',
+        clickLocation: 'Enterprise Observability Section',
+        clickText: 'Book a demo',
+        pageLocation: pathname,
+      },
+    })
+    openModal()
+  }
 
   return (
     <SectionLayout
@@ -227,19 +256,27 @@ const EnterpriseObservability: React.FC = () => {
             variant="default"
             rounded="full"
             className="flex-center flex !w-fit items-center gap-2"
-            onClick={openModal}
+            onClick={handleBookDemoClick}
           >
             Book a demo
             <ArrowRight size={14} />
           </Button>
           <Button
-            to="/teams/"
+            asChild
             variant="secondary"
             rounded="full"
             className="flex-center flex !w-fit items-center gap-2"
           >
-            Get Started - Free
-            <ArrowRight size={14} />
+            <TrackingLink
+              href="/teams/"
+              clickType="Secondary CTA"
+              clickName="Enterprise Observability Section Start Trial"
+              clickLocation="Enterprise Observability Section"
+              clickText="Get Started - Free"
+            >
+              Get Started - Free
+              <ArrowRight size={14} />
+            </TrackingLink>
           </Button>
         </div>
         <p className="text-center text-sm text-signoz_vanilla-400">

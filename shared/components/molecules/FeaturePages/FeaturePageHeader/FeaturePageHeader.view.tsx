@@ -8,6 +8,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
   title,
   description,
   buttons,
+  buttonGroup,
   heroImage,
   heroImageAlt = '',
   children,
@@ -15,7 +16,6 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
   sectionLayoutClassName = '!mt-0 max-md:-mb-[3rem]',
   className = '',
   buttonDescription = '',
-  additionalButtons,
 }) => {
   const heroContent =
     typeof heroImage === 'string' ? (
@@ -49,10 +49,11 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
       </div>
 
       <div className="relative z-[1] !mx-auto flex max-w-8xl flex-col items-center gap-4 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:!w-[80vw]">
-        <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-          <ButtonGroup buttons={buttons} />
-          {additionalButtons}
-        </div>
+        {(buttonGroup || (buttons && buttons.length > 0)) && (
+          <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
+            {buttonGroup ?? (buttons && <ButtonGroup buttons={buttons} />)}
+          </div>
+        )}
         {buttonDescription && (
           <div className="text-center text-sm text-signoz_vanilla-400">{buttonDescription}</div>
         )}

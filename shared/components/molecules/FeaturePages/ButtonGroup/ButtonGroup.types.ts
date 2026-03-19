@@ -11,9 +11,9 @@ export interface ButtonGroupButtonBase {
   }
 }
 
-export type ButtonGroupButton =
-  | (ButtonGroupButtonBase & { href: string; onClick?: never })
-  | (ButtonGroupButtonBase & { href?: never; onClick: () => void })
+export type ButtonGroupButton = ButtonGroupButtonBase & {
+  href: string
+}
 
 export interface ButtonGroupProps {
   buttons: ButtonGroupButton[]
