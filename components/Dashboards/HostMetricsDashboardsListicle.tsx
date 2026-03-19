@@ -10,7 +10,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/hostmetrics-k8s': (
     <SiKubernetes className="h-7 w-7 text-blue-600" />
   ),
-  'https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json': (
+  '/docs/dashboards/dashboard-templates/hostmetrics-vm': (
     <Server className="h-7 w-7 text-green-600" />
   ),
 }
