@@ -155,7 +155,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         </p>
         <TrackingLink
           href="/unified-observability/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="High Growth Teams Section Unified Observability"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -179,7 +179,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         </p>
         <TrackingLink
           href="/observability-for-ai-native-companies/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="High Growth Teams Section AI & LLM Workload Observability"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -224,7 +224,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         </p>
         <TrackingLink
           href="/resource-center/opentelemetry/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="High Growth Teams Section Open Source + OpenTelemetry"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -248,7 +248,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         </p>
         <TrackingLink
           href="/pricing/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="High Growth Teams Section TCO Advantage"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -276,7 +276,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
     description: (
       <div className="flex h-full min-h-28 w-full flex-row items-center justify-center gap-8 bg-[url('/svgs/graph-bg.svg')] bg-cover bg-center">
         <TrackingLink
-          clickType="button"
+          clickType="HIPAA Image"
           clickName="High Growth Teams Section Enterprise & Platform Ready HIPAA"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -294,7 +294,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           />
         </TrackingLink>
         <TrackingLink
-          clickType="button"
+          clickType="SOC-2 Image"
           clickName="High Growth Teams Section Enterprise & Platform Ready SOC-2"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -325,7 +325,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         </p>
         <TrackingLink
           href="https://trust.signoz.io/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="High Growth Teams Section Enterprise & Platform Ready"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -350,7 +350,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
         </p>
         <TrackingLink
           href="/docs/integrations/integrations-list/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="High Growth Teams Section Integrations"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -378,7 +378,7 @@ export const GETTING_STARTED_CARDS = [
         vendor lock-in, minimal learning curve
         <TrackingLink
           href="/docs/integrations/integrations-list/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="Getting Started Section Analyze, Migrate, Instrument OTel"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -399,7 +399,7 @@ export const GETTING_STARTED_CARDS = [
         you can bring your own cloud.
         <TrackingLink
           href="/enterprise-cloud/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="Getting Started Section Use SigNoz Cloud or host in your infrastructure"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
@@ -420,7 +420,7 @@ export const GETTING_STARTED_CARDS = [
         reduced MTTR, high cardinality, low TCO
         <TrackingLink
           href="/case-study/tableflow/"
-          clickType="button"
+          clickType="Secondary CTA"
           clickName="Getting Started Section Observability Experts and Support Plans"
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
