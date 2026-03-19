@@ -179,7 +179,7 @@ const InstrumentationSupport = () => {
 
             <div className="mt-6">
               <TrackingLink
-                href="/docs/"
+                href="/docs/introduction/"
                 clickType="Primary CTA"
                 clickName="View Full Documentation Link"
                 clickLocation="Pricing Page Instrumentation Section"

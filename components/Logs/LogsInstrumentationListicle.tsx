@@ -24,6 +24,7 @@ import {
   SiGooglecloud,
   SiRedis,
   SiMysql,
+  SiDeno,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -134,6 +135,12 @@ export default function LogsInstrumentationListicle({
             clickName: 'Cloudflare Logs Link',
           },
           {
+            name: 'Neon',
+            href: '/docs/integrations/opentelemetry-neondb',
+            icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
+            clickName: 'Neon Logs Link',
+          },
+          {
             name: 'Convex',
             href: '/docs/logs-management/send-logs/convex-log-streams-signoz',
             icon: <img src="/img/icons/convex-logo.svg" alt="Convex" className="h-9 w-9" />,
@@ -205,6 +212,12 @@ export default function LogsInstrumentationListicle({
             href: '/docs/logs-management/send-logs/zap-to-signoz',
             icon: <SiGo className="h-7 w-7 text-cyan-600" />,
             clickName: 'Zap Logs Link',
+          },
+          {
+            name: 'Deno',
+            href: '/docs/instrumentation/opentelemetry-deno',
+            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
+            clickName: 'Deno Logs Link',
           },
         ]}
         sectionName="Language Logs"

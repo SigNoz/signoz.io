@@ -1,0 +1,124 @@
+---
+
+title: The observability-focused guide to SREcon26 Americas
+slug: srecon26-americas-observability-talks-guide
+date: 2026-03-13
+tags: [Observability, Events]
+authors: [anushka_karmakar]
+description: SREcon26 Americas has no way to filter talks by topic. Here's the observability-focused guide to the schedule, covering the talks worth your time if you're there to learn about monitoring, OpenTelemetry, metrics costs, and LLM observability.
+image: /img/blog/2026/03/srecon26-observability-guide.webp
+keywords: [SREcon, SREcon26, SREcon26 Americas, observability, OpenTelemetry, monitoring, SRE, site reliability engineering, Prometheus, LLM observability, metrics, SigNoz, Seattle 2026]
+
+---
+
+[SREcon26 Americas](https://www.usenix.org/conference/srecon26americas) runs March 24 to 26 at The Westin Seattle. If you're attending, you've probably already looked at the program page. It's long. Like really, really long + there's no way to filter by topic.
+
+I was going through the schedule trying to help my team pick the talks worth their time, specifically the ones relevant to observability. Figured if we need this list, others probably do too.
+
+This isn't a "top 10 talks at SREcon" list. SREcon is *already* for SREs, so every talk has value. But **If you're attending SREcon to explore and learn about observability**, here's where to spend your time.
+
+## Talks that are directly about observability
+
+Building it, scaling it, rethinking it, and keeping it from eating your budget alive.
+
+### Monitoring and Observability
+
+Tuesday, March 24 | 3:55 to 5:30 pm | Daria Barteneva (Microsoft Azure) & Liz Fong-Jones (Honeycomb)
+
+Open-format unconference session where you drive the conversation. Cardinality costs, alert fatigue, OpenTelemetry at scale. Good chance to compare notes with other teams on what's actually working (and what isn't) in their observability stacks.
+
+### Detecting Silent Failures through Mobile Client Observability
+
+Wednesday, March 25 | 4:00 to 4:45 pm | Ace Ellett & Kylan Johnson, American Express
+
+Your backend dashboards say everything is green, but users are seeing errors. This happens more than anyone likes to admit, and the gap is usually mobile. Server-side monitoring doesn't capture what's happening on the device. Network transitions, app state changes, silent crashes. This talk covers how American Express built observability into their mobile clients to catch failures that their backend instrumentation was completely blind to, and how that signal now feeds into their broader incident detection.
+
+### Precision Over Proliferation: SRE Approach for Leaner, Smarter and Data-Driven Observability
+
+Wednesday, March 25 | 4:00 to 4:45 pm | Md Shaghil, Rubrik
+
+If your observability costs are spiraling, this is the most actionable talk on the schedule. Introduces a "Dollar per Query" framework that maps each metric's cost against its actual usage, so you can find and eliminate waste. Also covers two specific strategies. Batch metrics (process non-critical data offline, load on-demand in Grafana, saved them 16%) and on-demand metrics (enable via API only when debugging, saved another 4% immediately with room to grow). Rubrik used these approaches to cut observability costs by 40% total without losing visibility. You'll walk away with a step-by-step approach for usage-tracking dashboards, cost frameworks, and self-service tools to roll this out with your own engineering teams.
+
+*Runs at the same time as the American Express talk. Pick based on what's more pressing for your team right now. Catching blind spots or cutting costs.*
+
+### Resilient Observability at the Retail Edge: A Lightweight, Scalable, and Cost-Efficient Framework
+
+Wednesday, March 25 | 4:50 to 5:35 pm | Prakash Velusamy, CVS Health
+
+A production-validated framework for running observability across distributed edge locations where bandwidth is limited and compute is constrained. Combines lightweight Kubernetes distributions, OpenTelemetry, and optimized logging to get enterprise-grade monitoring with significantly lower resource consumption. Relevant if you're running workloads at the edge or anywhere you can't just throw more infra at the problem.
+
+### Observability for LLMs: Understanding What's Happening Under the Hood
+
+Wednesday, March 25 | 4:50 to 5:35 pm | Salman Munaf, TikTok
+
+Traditional metrics like latency and error rates don't capture what matters in LLM-driven systems. The behavior is different. Unpredictable model outputs, long context chains, token drift, embedding store issues, GPU-bound execution. This talk covers the signals that actually tell you whether your LLM system is healthy (token throughput, model latency, GPU utilization, memory pressure, energy efficiency) and uses real-world examples from TikTok's infrastructure. If your team is shipping products with LLMs in the stack and you're still monitoring them like traditional web services, this will change how you think about it.
+
+*Runs at the same time as the CVS Health talk.*
+
+### Reliable OpenTelemetry at Scale: No Queue, No Problem
+
+Thursday, March 26 | 11:55 am to 12:40 pm | Tommy Li & Vlad Seliverstov, ClickHouse
+
+A queue-less OpenTelemetry pipeline built entirely on Kubernetes. No Kafka. No Pulsar. Just the OTel collector, operator, and OpAMP, handling trillions of events per day at ClickHouse Cloud (200+ petabytes of data). Covers concrete pipeline configuration, schema design choices, how they safely roll out config changes across a large fleet of collectors, and how they handle failure without data loss using backpressure, autoscaling, and object storage for overflow. This is the talk if you're evaluating or scaling an OTel pipeline and want to see a real reference architecture.
+
+### Unlock High-Frequency Deployments without Blowing Up Prometheus
+
+Thursday, March 26 | 1:55 to 2:15 pm | Ganesh Vernekar, Reddit
+
+Every time you deploy, pods churn, and Prometheus accumulates stale series in memory until it OOMs. This 20-minute talk introduces stale-series compaction, a feature that proactively flushes stale data from memory to disk. Ganesh maintains the Prometheus TSDB and has been contributing to Prometheus for 8 years, so this comes with production data from Reddit on what to expect and what the feature is *not* designed for.
+
+## Talks with a strong observability angle
+
+Not purely observability talks, but the observability tie-in is concrete enough to be worth your time.
+
+### Beyond Loss and Accuracy: Closing the Observability Gaps in AI Training with TrainCheck
+
+Wednesday, March 25 | 11:05 to 11:50 am | Yuxuan Jiang & Ryan Huang, University of Michigan
+
+AI training runs burn thousands of GPU-hours, and silent failures waste all of it. The problem is that current practices rely on coarse, noisy signals (loss curves, accuracy metrics) that are sampled periodically and don't help you catch or diagnose most training errors. TrainCheck is an open-source framework that takes a different approach. It defines "training invariants" (semantic rules like "optimizer steps should actually update parameters" or "parallel ranks should be consistent") and checks them continuously during execution. It automatically infers these invariants from execution traces, catches subtle errors early, and gives you actionable debugging hints instead of just a flatlined loss curve.
+
+### Executing Chaos Engineering in Production at a Critical Financial Institution
+
+Tuesday, March 24 | 1:50 to 2:35 pm | Luiz Siqueira & Leonardo Marques, Bradesco
+
+Chaos engineering at a bank processing thousands of transactions per second. The observability tie-in is concrete. 73% reduction in mean time to detect (MTTD), 10 hidden vulnerabilities exposed, and 5 new metrics that didn't exist before the chaos experiments. Also covers a compliance-friendly methodology for running fault injection in regulated environments, which is useful if your org's first reaction to "let's break things in production" is a hard no.
+
+### Operating Tens of Thousands of GPUs on Hyperscalers: Failure, Firmware, and the Illusion of Capacity
+
+Tuesday, March 24 | 11:50 am to 12:35 pm | Abe Hoffman & Martin Smith, NVIDIA
+
+At 10,000+ GPU scale, a 0.01% failure rate is a daily guarantee. Vendor-neutral look at hardware heterogeneity and the observability challenges of managing multi-region GPU fleets. You'll walk away with a practical "AI-scale checklist" for cluster posture. There's also a follow-up AMA on Wednesday, March 25 at 11:05 am.
+
+### Infinity Is Not a Strategy: Right-Sizing the Cloud
+
+Tuesday, March 24 | 11:00 to 11:45 am | Praval Panwar, Microsoft
+
+Borrows capacity planning frameworks from airlines, power grids, and logistics, and applies them to cloud systems. The observability connection here is about better mental models for reasoning about capacity, cost, and performance signals together, instead of oscillating between over-provisioning and panic-scaling when something spikes.
+
+## Quick hits
+
+Two observability-relevant picks from the Lightning Talks session on Thursday, March 26 at 9:00 to 9:45 am. Both are 4 minutes, low time investment for a potentially useful perspective shift.
+
+1. When AI Agents Become Your Noisiest Clients
+David O'Neill, APIContext
+2. Telemetry Debt
+Khushboo Nigam, Oracle
+
+### AMA with Alex Hidalgo
+
+Thursday, March 26 | 11:55 am to 12:40 pm | Alex Hidalgo, Nobl9
+
+He wrote [*Implementing Service Level Objectives*](https://books.google.co.in/books/about/Implementing_Service_Level_Objectives.html?id=14r1DwAAQBAJ&source=kp_book_description&redir_esc=y) and this is an off-the-record, no-slides session. Bring your questions about error budgets, SLOs, or making observability data actually useful for decision-making.
+
+---
+
+## See you there?
+
+We'll be at SREcon too. SigNoz is an open-source, OpenTelemetry-native observability platform (traces, metrics, and logs in a single backend), and a lot of the talks above touch problems we think about every day. If any of these sessions spark questions or you want to talk about OTel pipelines and cost-efficient observability, come find us at **Booth #3** in Grand Crescent.
+
+<Figure
+  src="/img/blog/2026/03/srecon26-observability-guide.webp"
+  alt="SigNoz is an open-source, OpenTelemetry-native observability platform (traces, metrics, and logs in a single backend), and a lot of the talks above touch problems we think about every day. See us at booth 3 in SREcon26 Americas."
+/>
+
+Hope this saves you some schedule-planning time. See you in Seattle.

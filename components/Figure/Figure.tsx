@@ -1,16 +1,19 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 
-import Zoom from 'react-medium-image-zoom'
-import 'react-medium-image-zoom/dist/styles.css'
-
+import ClientZoom from '../ClientZoom'
 import { cn } from 'app/lib/utils'
+import { isSrcAllowedForNextImage } from '@/constants/allowedImageDomains'
 
 interface FigureProps {
   src: string
   alt: string
   caption: string
+  width?: number
+  height?: number
+  priority?: boolean
   link?: string
   sourceText?: string
   className?: string
@@ -22,16 +25,33 @@ export default function Figure({
   src,
   alt,
   caption,
+  width = 1200,
+  height = 675,
+  priority = false,
   link,
   sourceText,
   className,
   figureClassName,
   captionClassName,
 }: FigureProps) {
+  const useNextImage = isSrcAllowedForNextImage(src)
+
   return (
-    <Zoom>
+    <ClientZoom>
       <figure className={figureClassName}>
-        <img src={src} alt={alt} className={cn('rounded-md', className)} />
+        {useNextImage ? (
+          <Image
+            src={src}
+            alt={alt}
+            width={width}
+            height={height}
+            priority={priority}
+            loading={priority ? undefined : 'lazy'}
+            className={cn('rounded-md', className)}
+          />
+        ) : (
+          <img src={src} alt={alt} className={cn('rounded-md', className)} />
+        )}
         <figcaption className={captionClassName}>
           <i>
             {link && !sourceText ? (
@@ -54,6 +74,6 @@ export default function Figure({
           </i>
         </figcaption>
       </figure>
-    </Zoom>
+    </ClientZoom>
   )
 }

@@ -60,7 +60,7 @@ const Header: React.FC = () => {
       }
       buttons={headerButtons}
       heroImageAlt="Trace funnels hero"
-      heroImage="/img/platform/TraceFunnelsMeta.png"
+      heroImage="/img/platform/TraceFunnelsMeta.webp"
     />
   )
 }

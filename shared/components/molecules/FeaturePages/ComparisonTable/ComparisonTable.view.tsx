@@ -1,5 +1,6 @@
 import { ComparisonTableProps } from './ComparisonTable.types'
 import { Check, TriangleAlert, X } from 'lucide-react'
+import { cn } from 'app/lib/utils'
 
 const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
   vendors,
@@ -8,7 +9,10 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
 }) => {
   return (
     <div
-      className={`overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50 ${className}`}
+      className={cn(
+        'overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50',
+        className
+      )}
     >
       <table className="m-0 border-collapse text-left">
         <tbody className="text-sm text-signoz_vanilla-300">
@@ -19,7 +23,10 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
             {vendors.map((vendor) => (
               <th
                 key={vendor.key}
-                className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400"
+                className={cn(
+                  'border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400',
+                  vendor.className
+                )}
               >
                 {vendor.label}
               </th>
@@ -39,13 +46,14 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
                     className="border-b border-signoz_slate-400 px-4 py-4 text-left"
                   >
                     <span className="flex items-center gap-2">
-                      {cellData.supported === 'partial' ? (
-                        <TriangleAlert size={20} className="text-yellow-400" />
-                      ) : cellData.supported ? (
-                        <Check size={20} className="text-green-400" />
-                      ) : (
-                        <X size={20} className="text-red-400" />
-                      )}
+                      {cellData.supported !== undefined &&
+                        (cellData.supported === 'partial' ? (
+                          <TriangleAlert size={20} className="text-yellow-400" />
+                        ) : cellData.supported ? (
+                          <Check size={20} className="text-green-400" />
+                        ) : (
+                          <X size={20} className="text-red-400" />
+                        ))}
                       {cellData.text}
                     </span>
                   </td>

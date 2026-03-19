@@ -1,12 +1,11 @@
 ---
 title: Beginner's Guide to OpenTelemetry & Django (2026)
 slug: opentelemetry-django
-date: 2026-01-01
+date: 2026-03-09
 tags: [Observability, Python, OpenTelemetry, Monitoring]
 authors: [ankit_anand, dhruv_ahuja]
 description: OpenTelemetry provides an open-source standard with a consistent collection mechanism and data format. In this article, learn how to set up monitoring for a Django application using OpenTelemetry.
 image: /img/blog/common/django-dashboard.webp
-hide_table_of_contents: false
 keywords: [opentelemetry,opentelemetry django,opentelemetry python,distributed tracing,observability,django monitoring,django instrumentation,signoz]
 ---
 
@@ -18,7 +17,7 @@ We will walk you through the process of implementing OpenTelemetry for Django ap
 
 ## What is OpenTelemetry Django?
 
-[OpenTelemetry Django](https://signoz.io/docs/instrumentation/django/) instrumentation enables the generation and management of telemetry data (logs, metrics, and traces) from your Django application. This data is then used to observe the application and gain insights into its performance and behavior. OpenTelemetry provides an open-source standard with a consistent data format and collection mechanism. As application owners, you will always have the freedom to choose different vendors to visualize the collected telemetry data, and can consume this data in a variety of formats.
+[OpenTelemetry Django](https://signoz.io/docs/instrumentation/opentelemetry-python/) instrumentation enables the generation and management of telemetry data (logs, metrics, and traces) from your Django application. This data is then used to observe the application and gain insights into its performance and behavior. OpenTelemetry provides an open-source standard with a consistent data format and collection mechanism. As application owners, you will always have the freedom to choose different vendors to visualize the collected telemetry data, and can consume this data in a variety of formats.
 
 Instrumentation is the biggest challenge engineering teams face when starting out with monitoring their application performance. [OpenTelemetry](https://signoz.io/why-opentelemetry/) is the leading open-source standard solving the problem of instrumentation. It is currently an incubating project under the [Cloud Native Computing Foundation](https://www.cncf.io/) and aims to make telemetry data a built-in feature of cloud-native software applications.
 
@@ -67,8 +66,8 @@ We have prepared a [sample Django application](https://github.com/SigNoz/sample-
 Clone the GitHub repository locally by running:
 
 ```bash
-git clone https://github.com/SigNoz/sample-django.git
-cd sample-django
+git clone git@github.com:SigNoz/examples.git
+cd examples/python/opentelemetry-django-demo
 ```
 
 Next, we will create and activate a Python virtual environment. Setting up virtual environments is a recommended practice to avoid dependency conflicts between different Python projects on your system.
@@ -91,10 +90,9 @@ Below is a brief explanation of the OpenTelemetry packages included in the `requ
 <KeyPointCallout title="Debugging OTel Exporter Installation">
 The `opentelemetry-exporter-otlp` is a convenient wrapper package to install all OTLP exporters. Currently, it installs:
 
-- opentelemetry-exporter-otlp-proto-http
-- opentelemetry-exporter-otlp-proto-grpc
-
-- (soon) opentelemetry-exporter-otlp-json-http
+- `opentelemetry-exporter-otlp-proto-http`
+- `opentelemetry-exporter-otlp-proto-grpc`
+- `opentelemetry-exporter-otlp-json-http` (soon)
 
 The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
 </KeyPointCallout>
@@ -187,9 +185,9 @@ The following video guides you on how the exported application data flows throug
 
 ### Troubleshooting
 
-Application hot-reload can cause inconsistent data generation by breaking OTel instrumentation. Ensure you run the application without the `--reload` flag.
+Application hot-reload can cause inconsistent data generation by breaking OTel instrumentation Ensure you run the Gunicorn web server without the `--reload` flag.
 
-If you want to run the application with a docker image, refer to the section below for instructions.
+If you want to run the application with a Docker image, refer to the section below for instructions.
 
 ### Instrument Django Application Using Docker
 
@@ -380,9 +378,8 @@ OpenTelemetry is vendor-agnostic and provides a standardized way to instrument y
 To set up OpenTelemetry instrumentation for Django:
 1. Install necessary packages ([opentelemetry-distro](https://signoz.io/opentelemetry/python-auto-instrumentation/), opentelemetry-exporter-otlp)
 2. Configure environment variables for the OTLP exporter
-3. Use the opentelemetry-instrument command to run your Django application
+3. Use the `opentelemetry-instrument` command to run your Django application
 4. Choose a backend (like SigNoz) to visualize and analyze the collected data
-
 ### Can I use OpenTelemetry with Docker for my Django application?
 Yes, you can use OpenTelemetry with Docker for your Django application. You'll need to build a Docker image of your app, set the necessary environment variables for OpenTelemetry, and run the container with these variables. The article provides specific instructions for this setup.
 
@@ -394,9 +391,21 @@ With OpenTelemetry, you can monitor various metrics for your Django application,
 - Database query performance
 - External service calls
 - Custom metrics specific to your application logic
-
 ### How does OpenTelemetry Django instrumentation affect my application's performance?
 OpenTelemetry is designed to have minimal impact on application performance. However, as with any instrumentation, there may be a slight overhead. The benefits of comprehensive monitoring and troubleshooting capabilities usually outweigh this minimal performance impact.
+
+### Why am I getting no traces from Django even though I started with opentelemetry-instrument?
+
+The most common causes are: the OTLP exporter endpoint/protocol isn’t reachable, required environment variables aren’t set, or the server’s reload/fork model prevents exporter threads from starting correctly. Start by disabling Django autoreload (via `--noreload` flag) or by removing Gunicorn `--reload` flag, and verifying endpoint/protocol values. Then use URL Inspection / logs to confirm the page and its config are being served as expected.
+
+### Do I need manual instrumentation if I already have automatic instrumentation?
+
+Automatic instrumentation is the best “quick win” for broad trace coverage (requests, framework hooks, common libraries). Manual instrumentation becomes valuable when you need domain-level spans/attributes (e.g., “checkout”, “payment authorization”), or to capture flows not covered by automatic libraries.
+
+### How do I prevent tracing health checks or noisy endpoints in Django?
+
+Use OpenTelemetry Python configuration to exclude URLs. OpenTelemetry provides [Python-specific environment variables](https://opentelemetry.io/docs/zero-code/python/configuration/#excluded-urls) for exclusions. You can set a global excluded URL pattern (`OTEL_PYTHON_EXCLUDED_URLS`) list, or set Django-specific excluded URL patterns (`OTEL_PYTHON_DJANGO_EXCLUDED_URLS`). This is a common best practice to reduce noise and cost while keeping high-value traces.
+
 
 ---
 

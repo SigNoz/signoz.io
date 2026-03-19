@@ -1,24 +1,55 @@
-## Description
+## Summary
+<!-- What does this PR do? Provide a concise overview of the change. -->
 
+## Motivation / Problem
+<!-- Why is this change needed? What problem does it solve? -->
+<!-- Link issues if applicable (e.g. Fixes #123) -->
+
+## Changes
+<!-- Describe the key changes introduced in this PR -->
+-
+-
+-
+
+## Description
 <!-- Briefly describe what this PR does and why -->
 
 ## Type of Change
-
 <!-- Check all that apply -->
 
 - [ ] **Docs** – Changes to `data/docs/**`
 - [ ] **Blog** – Changes to `data/blog/**`
 - [ ] **Site Code** – Changes to `app/**`, `components/**`, `hooks/**`, `utils/**`, config, etc.
 - [ ] **Redirects** – Renamed/moved docs or updated `next.config.js` redirects
-- [ ] **Other** – e.g. dependencies, scripts, CI
+- [ ] **Dependencies / CI / Scripts**
+- [ ] **Other** – Explain below
+
+## Impact
+<!-- Who or what is affected by this change? -->
+- [ ] Documentation only
+- [ ] UI changes
+- [ ] Developer workflow
+- [ ] Performance impact
+- [ ] Breaking change
+
+If breaking change, describe migration steps:
 
 ## Context & Screenshots
-
 <!-- Add screenshots for UI or docs changes when helpful -->
+
+## Before / After (if applicable)
+<!-- Show how things changed -->
+<!-- Screenshots, gifs, or code examples -->
 
 ## Checklist
 
 <!-- Complete the sections that apply to your changes -->
+
+### General
+- [ ] Branch is up to date with `main`
+- [ ] PR title follows conventional format (`type: description`)
+- [ ] Self-reviewed the code
+- [ ] Comments added for complex logic
 
 ### For all changes
 - [ ] Built locally (`yarn build`) with no errors
@@ -41,6 +72,24 @@
 - [ ] Added permanent redirect in `next.config.js` under `async redirects()`
 - [ ] Updated internal links and sidebar in `constants/docsSideNav.ts`
 - [ ] Ran `yarn check:doc-redirects` to verify
+
+## Testing
+<!-- Describe how the change was tested -->
+- [ ] Tested locally
+- [ ] Edge cases considered
+- [ ] Existing functionality verified
+- [ ] New tests added (if applicable)
+
+Steps to test:
+1.
+2.
+3.
+
+## Rollout / Deployment Notes
+<!-- Any special steps required during deployment -->
+
+## Additional Context
+<!-- Anything reviewers should know -->
 
 ---
 

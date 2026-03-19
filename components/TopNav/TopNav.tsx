@@ -159,6 +159,16 @@ const comparisionItems = [
     url: '/product-comparison/signoz-vs-newrelic/',
     name: 'SigNoz vs New Relic',
   },
+  {
+    key: 'cloudwatch-alternative',
+    url: '/cloudwatch-alternative/',
+    name: 'SigNoz vs CloudWatch',
+  },
+  {
+    key: 'clickstack-alternative',
+    url: '/clickstack-alternative/',
+    name: 'SigNoz vs ClickStack',
+  },
 ]
 
 // Sort the productDropdownItems based on the 'order' property
@@ -200,7 +210,7 @@ const resourcesDropdownItems = {
     },
     {
       key: 'migrations',
-      url: '/docs/migration/migrate-from-datadog/',
+      url: '/docs/migration/migrate-from-datadog-to-signoz/',
       description: 'Guides for migrating to SigNoz',
       name: 'Migrations',
     },
@@ -399,6 +409,7 @@ export default function TopNav() {
                                 clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
+                                prefetch={false}
                               >
                                 {typeof item.icon === 'string' && item.icon !== null ? (
                                   <Image
@@ -436,6 +447,7 @@ export default function TopNav() {
                               href={'/case-study'}
                               className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}] hover:text-[#fff]`}
                               onClick={handleProductDropdownClick}
+                              prefetch={false}
                             >
                               <span>Customer Stories</span> <ArrowRight size={14} />
                             </Link>
@@ -448,6 +460,7 @@ export default function TopNav() {
                                 clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
+                                prefetch={false}
                               >
                                 <Image
                                   src={'/img/index_features/brainfish.svg'}
@@ -482,6 +495,7 @@ export default function TopNav() {
                                   clickText={comparisionItem.name}
                                   clickLocation="Top Navbar"
                                   onClick={handleProductDropdownClick}
+                                  prefetch={false}
                                 >
                                   <span>{comparisionItem.name}</span>{' '}
                                   <ArrowRight
@@ -504,6 +518,7 @@ export default function TopNav() {
                   clickName="Docs Link"
                   clickText="Docs"
                   clickLocation="Top Navbar"
+                  prefetch={false}
                 >
                   Docs
                 </TrackingLink>
@@ -552,6 +567,7 @@ export default function TopNav() {
                                 clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleResourcesDropdownClick}
+                                prefetch={false}
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
@@ -588,6 +604,7 @@ export default function TopNav() {
                                 clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleResourcesDropdownClick}
+                                prefetch={false}
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
@@ -758,6 +775,7 @@ export default function TopNav() {
                       clickText="Documentation"
                       clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
+                      prefetch={false}
                     >
                       Documentation
                     </TrackingLink>

@@ -106,7 +106,7 @@ export default function LogsQuickStartOverview() {
       sectionName="Logs Sources Section"
       viewAllHref="/docs/logs-management/send-logs-to-signoz"
       viewAllText="View all log sources"
-      gridCols="grid-cols-3 sm:grid-cols-4 md:grid-cols-6"
+      gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
     />
   )
 }
