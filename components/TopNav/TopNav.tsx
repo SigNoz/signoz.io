@@ -779,6 +779,17 @@ export default function TopNav() {
                       onLinkClick={() => setMobileMenuOpen(false)}
                     />
                     <TrackingLink
+                      href="/why-signoz"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                      clickType="Nav Click"
+                      clickName="Why Signoz Link"
+                      clickText="Why Signoz"
+                      clickLocation="Mobile Menu"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Why Signoz?
+                    </TrackingLink>
+                    <TrackingLink
                       href="/docs"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                       clickType="Nav Click"
