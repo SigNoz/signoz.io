@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button'
 import { ArrowRight, Atom } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import { SourcesTabsGrid } from '@/shared/components/molecules/SourcesTabsGrid'
+
 export const ENTERPRISE_DEMO_HUBSPOT_DATA = {
   portalId: '22308423',
   formId: 'a908efee-9ec5-4969-9ca4-6e91d0a32b8a',
@@ -52,6 +53,17 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = [
     description: (
       <div className="flex flex-col items-start justify-between gap-2">
         Engineering teams hit unexpected observability overages regularly
+        <Link
+          href={
+            'https://futurecio.tech/gartner-says-security-vendor-consolidation-to-improve-risk-posture/'
+          }
+          className="mt-1 block text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
+          target="_blank"
+          rel="noopener noreferrer"
+          prefetch={false}
+        >
+          Source - https://futurecio.tech/
+        </Link>
       </div>
     ),
   },
@@ -263,7 +275,11 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
   {
     description: (
       <div className="flex h-full min-h-28 w-full flex-row items-center justify-center gap-8 bg-[url('/svgs/graph-bg.svg')] bg-cover bg-center">
-        <a
+        <TrackingLink
+          clickType="button"
+          clickName="High Growth Teams Section Enterprise & Platform Ready HIPAA"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
           href="https://trust.signoz.io/"
           target="_blank"
           rel="noopener noreferrer"
@@ -276,8 +292,12 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
             alt="HIPAA compliance certificate"
             loading="lazy"
           />
-        </a>
-        <a
+        </TrackingLink>
+        <TrackingLink
+          clickType="button"
+          clickName="High Growth Teams Section Enterprise & Platform Ready SOC-2"
+          clickLocation="Why SigNoz Page"
+          clickText="Learn more"
           href="https://trust.signoz.io/"
           target="_blank"
           rel="noopener noreferrer"
@@ -290,7 +310,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
             alt="SOC-2 compliance certificate"
             loading="lazy"
           />
-        </a>
+        </TrackingLink>
       </div>
     ),
   },
