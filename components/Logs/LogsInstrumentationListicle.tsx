@@ -107,7 +107,7 @@ export default function LogsInstrumentationListicle({
           },
           {
             name: 'Vercel',
-            href: '/docs/userguide/vercel_logs_to_signoz',
+            href: '/docs/userguide/vercel-to-signoz',
             icon: (
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black p-1">
                 <SiVercel className="h-7 w-7 text-white" />
