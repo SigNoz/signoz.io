@@ -550,7 +550,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Snowflake',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
+    href: '/docs/dashboards/dashboard-templates/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
   },

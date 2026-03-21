@@ -2332,6 +2332,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/snowflake',
+            label: 'Snowflake Dashboard',
+          },
+          {
+            type: 'doc',
             label: 'Supabase',
             route: '/docs/dashboards/dashboard-templates/supabase',
           },
