@@ -69,4 +69,5 @@ export interface GitHubReleasesResponse {
   releases: GitHubReleaseEntry[]
   patches: Record<string, PatchRelease>
   error?: string
+  partial?: boolean
 }

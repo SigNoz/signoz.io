@@ -20,6 +20,8 @@ import SectionContainer from '@/components/SectionContainer'
 import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 
+const TYPED_UPGRADE_SCHEMA = upgradeSchema as unknown as UpgradeSchema
+
 const UpgradePathTool: React.FC = () => {
   const [state, setState] = useState<UpgradePathState>({
     currentVersion: '',
@@ -33,11 +35,12 @@ const UpgradePathTool: React.FC = () => {
   const [isPathGenerated, setIsPathGenerated] = useState(false)
   const [githubData, setGithubData] = useState<GitHubReleasesResponse | null>(null)
   const [isLoadingReleases, setIsLoadingReleases] = useState(true)
+  const [releasesIncomplete, setReleasesIncomplete] = useState(false)
 
   const effectiveSchema = useMemo<UpgradeSchema>(() => {
-    if (!githubData) return upgradeSchema as unknown as UpgradeSchema
-    return mergeReleasesWithSchema(githubData, upgradeSchema as unknown as UpgradeSchema)
-  }, [githubData])
+    if (!githubData) return TYPED_UPGRADE_SCHEMA
+    return mergeReleasesWithSchema(githubData, TYPED_UPGRADE_SCHEMA)
+  }, [githubData, upgradeSchema])
 
   const availableVersions = useMemo(() => getAvailableVersions(effectiveSchema), [effectiveSchema])
 
@@ -52,6 +55,7 @@ const UpgradePathTool: React.FC = () => {
         const data: GitHubReleasesResponse = await res.json()
         if (!cancelled && data.releases?.length) {
           setGithubData(data)
+          setReleasesIncomplete(Boolean(data.partial))
         }
       } catch (err) {
         console.warn('Failed to fetch GitHub releases, using schema fallback:', err)
@@ -111,7 +115,7 @@ const UpgradePathTool: React.FC = () => {
       newCompletedSteps.add(currentStepVersion)
 
       // Store progress immediately when a step is completed
-      storeUpgradeProgress(state.currentVersion, state.targetVersion, newCompletedSteps)
+      storeUpgradeProgress(prev.currentVersion, prev.targetVersion, newCompletedSteps)
 
       const updatedPath = prev.upgradePath.map((step) => ({
         ...step,
@@ -163,6 +167,7 @@ const UpgradePathTool: React.FC = () => {
               onCalculatePath={handleCalculatePath}
               error={error}
               isLoading={isLoadingReleases}
+              releasesIncomplete={releasesIncomplete}
             />
 
             {/* General Information */}
@@ -179,12 +184,14 @@ const UpgradePathTool: React.FC = () => {
                         Pre-Upgrade Checklist
                       </h4>
                       <ul className="space-y-1 text-sm text-signoz_vanilla-400">
-                        {upgradeSchema?.general?.checklist?.preUpgrade?.map((item, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="mt-1">•</span>
-                            {item}
-                          </li>
-                        ))}
+                        {TYPED_UPGRADE_SCHEMA?.general?.checklist?.preUpgrade?.map(
+                          (item, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <span className="mt-1">•</span>
+                              {item}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </div>
 
@@ -193,21 +200,23 @@ const UpgradePathTool: React.FC = () => {
                         Post-Upgrade Checklist
                       </h4>
                       <ul className="space-y-1 text-sm text-signoz_vanilla-400">
-                        {upgradeSchema?.general?.checklist?.postUpgrade?.map((item, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="mt-1">•</span>
-                            {item}
-                          </li>
-                        ))}
+                        {TYPED_UPGRADE_SCHEMA?.general?.checklist?.postUpgrade?.map(
+                          (item, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <span className="mt-1">•</span>
+                              {item}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </div>
                   </div>
 
-                  {upgradeSchema?.general?.commonWarnings?.length > 0 && (
+                  {TYPED_UPGRADE_SCHEMA?.general?.commonWarnings?.length > 0 && (
                     <div className="mt-6">
                       <h4 className="mb-2 font-medium text-signoz_vanilla-100">Common Warnings</h4>
                       <div className="space-y-2">
-                        {upgradeSchema?.general?.commonWarnings?.map((warning, index) => (
+                        {TYPED_UPGRADE_SCHEMA?.general?.commonWarnings?.map((warning, index) => (
                           <div
                             key={index}
                             className="rounded-lg border border-signoz_amber-400/20 bg-signoz_amber-400/10 p-3"
@@ -228,7 +237,7 @@ const UpgradePathTool: React.FC = () => {
                     <span className="text-sm text-signoz_vanilla-400">
                       Need help? Check out our{' '}
                       <Link
-                        href={upgradeSchema?.general?.troubleshootingUrl ?? ''}
+                        href={TYPED_UPGRADE_SCHEMA?.general?.troubleshootingUrl ?? ''}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="rounded-lg text-signoz_robin-500 hover:text-signoz_robin-400"

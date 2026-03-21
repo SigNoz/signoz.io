@@ -19,6 +19,7 @@ interface VersionSelectorProps {
   onCalculatePath: () => void
   error?: string
   isLoading?: boolean
+  releasesIncomplete?: boolean
 }
 
 const VersionSelector: React.FC<VersionSelectorProps> = ({
@@ -30,6 +31,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
   onCalculatePath,
   error,
   isLoading,
+  releasesIncomplete,
 }) => {
   return (
     <Card className="w-full">
@@ -95,6 +97,14 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
           </div>
         )}
 
+        {releasesIncomplete && !isLoading && (
+          <div className="mb-4 rounded-md border border-signoz_amber-400/20 bg-signoz_amber-400/10 p-3">
+            <span className="text-sm text-signoz_amber-400">
+              Release list may be incomplete. Refresh later for the full list.
+            </span>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 rounded-md border border-signoz_cherry-400/20 bg-signoz_cherry-400/10 p-3">
             <span className="text-sm text-signoz_cherry-400">{error}</span>
@@ -105,7 +115,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
           <Button
             isButton={true}
             onClick={onCalculatePath}
-            disabled={!currentVersion || !targetVersion}
+            disabled={!currentVersion || !targetVersion || Boolean(isLoading)}
             rounded="full"
           >
             Calculate Upgrade Path

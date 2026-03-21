@@ -5,6 +5,7 @@ import {
   GitHubReleasesResponse,
   PatchRelease,
 } from '../types/upgrade'
+import { compareSemverTags } from '@/utils/semverTags'
 
 const STANDARD_GUIDE_URL = 'https://signoz.io/docs/operate/migration/upgrade-standard'
 
@@ -33,7 +34,7 @@ export function mergeReleasesWithSchema(
         instructions: ['This is not a breaking change release. No special actions are needed.'],
         deprecations: [],
         warnings: [],
-        ...(patchRelease ? { patchRelease } : {}),
+        patchRelease,
       }
     }
   }
@@ -56,10 +57,7 @@ export function calculateUpgradePath(
   schema: UpgradeSchema
 ): UpgradePath[] {
   const releases = schema.releases
-  const versions = Object.keys(releases).sort((a, b) => {
-    // Simple version sorting - in real implementation, use semver
-    return a.localeCompare(b, undefined, { numeric: true })
-  })
+  const versions = Object.keys(releases).sort(compareSemverTags)
 
   const currentIndex = versions.indexOf(currentVersion)
   const targetIndex = versions.indexOf(targetVersion)
@@ -94,9 +92,7 @@ export function calculateUpgradePath(
 }
 
 export function getAvailableVersions(schema: UpgradeSchema): string[] {
-  return Object.keys(schema.releases).sort((a, b) => {
-    return b.localeCompare(a, undefined, { numeric: true })
-  })
+  return Object.keys(schema.releases).sort((a, b) => compareSemverTags(b, a))
 }
 
 export function formatDate(dateString: string): string {
