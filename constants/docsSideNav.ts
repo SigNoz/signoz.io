@@ -2333,7 +2333,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/snowflake',
-            label: 'Snowflake Dashboard',
+            label: 'Snowflake',
           },
           {
             type: 'doc',
