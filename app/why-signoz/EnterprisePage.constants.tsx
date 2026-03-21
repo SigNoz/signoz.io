@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
-import { ArrowRight, Atom } from 'lucide-react'
+import { ArrowRight, Atom, Info } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 
@@ -19,12 +19,13 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = [
         Businesses actively reducing observability costs
         <Link
           href={'https://www.gartner.com/en'}
-          className="mt-1 block text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
+          className="mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
           target="_blank"
           rel="noopener noreferrer"
           prefetch={false}
         >
-          Source - https://www.gartner.com/en
+          Gartner
+          <Info className="size-3 shrink-0" />
         </Link>
       </div>
     ),
@@ -37,12 +38,13 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = [
         Teams cut costs with tool consolidation
         <Link
           href={'https://dimensionalresearch.com'}
-          className="mt-1 block text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
+          className="mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
           target="_blank"
           rel="noopener noreferrer"
           prefetch={false}
         >
-          Source - https://dimensionalresearch.com
+          Dimensional Research
+          <Info className="size-3 shrink-0" />
         </Link>
       </div>
     ),
@@ -57,12 +59,13 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = [
           href={
             'https://futurecio.tech/gartner-says-security-vendor-consolidation-to-improve-risk-posture/'
           }
-          className="mt-1 block text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
+          className="mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
           target="_blank"
           rel="noopener noreferrer"
           prefetch={false}
         >
-          Source - https://futurecio.tech/
+          FutureCIO
+          <Info className="size-3 shrink-0" />
         </Link>
       </div>
     ),

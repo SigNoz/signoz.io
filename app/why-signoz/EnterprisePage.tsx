@@ -388,7 +388,7 @@ const EnterpriseDemoPage: React.FC = () => {
 
           <div className="flex flex-col items-center justify-center gap-6 pt-12">
             <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-              What our Customers have to Say
+              What our Customers have to say
             </h2>
             <CustomerStoriesSection
               tracking={{
