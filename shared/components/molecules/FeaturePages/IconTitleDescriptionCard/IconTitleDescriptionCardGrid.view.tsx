@@ -4,6 +4,7 @@ import { IconTitleDescriptionCardGridProps } from './IconTitleDescriptionCardGri
 const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> = ({
   cards,
   className = '',
+  variant = 'lg',
 }) => {
   return (
     <div className={`grid grid-cols-1 md:grid-cols-2 ${className}`}>
@@ -11,9 +12,11 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
         <IconTitleDescriptionCard
           key={index}
           icon={card.icon}
-          iconText={card.iconText}
+          iconText={card.iconText || ''}
           title={card.title}
           description={card.description}
+          className={card.className}
+          variant={variant}
         />
       ))}
     </div>

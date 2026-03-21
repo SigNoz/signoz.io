@@ -56,9 +56,11 @@ export const useLogEvent = () => {
       attributes,
       eventType,
       groupId,
-    }: Omit<LogEventPayload, 'userId' | 'anonymousId'>) => {
-      const userId = getUserId()
-      const anonymousId = getOrCreateAnonymousId()
+      userId: explicitUserId,
+      anonymousId: explicitAnonymousId,
+    }: LogEventPayload) => {
+      const userId = explicitUserId || getUserId()
+      const anonymousId = explicitAnonymousId || getOrCreateAnonymousId()
       // Use provided groupId or extract it from userId if available
       const resolvedGroupId = groupId || extractGroupIdFromEmail(userId)
 

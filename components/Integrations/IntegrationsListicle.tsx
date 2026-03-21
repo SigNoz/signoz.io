@@ -14,8 +14,8 @@ import {
   SiMysql,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
-import IconCardGrid from '../Card/IconCardGrid'
 import { FaAws } from 'react-icons/fa'
+import IconCardGrid from '../Card/IconCardGrid'
 
 interface IntegrationsListicleProps {
   category?: 'temporal' | 'databases' | 'aws' | 'all'
@@ -113,6 +113,12 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
             href: '/docs/integrations/clickhouse',
             icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
             clickName: 'Clickhouse Integration Link',
+          },
+          {
+            name: 'Neon',
+            href: '/docs/integrations/opentelemetry-neondb',
+            icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
+            clickName: 'Neon Integration Link',
           },
           {
             name: 'Microsoft SQL Server',

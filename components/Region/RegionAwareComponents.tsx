@@ -1,6 +1,6 @@
 'use client'
 
-import React, { isValidElement, cloneElement, ReactNode } from 'react'
+import React, { Children, isValidElement, cloneElement, ReactNode } from 'react'
 import Pre from 'pliny/ui/Pre'
 import { useRegion } from './RegionContext'
 
@@ -63,7 +63,7 @@ const processCodeChildren = (children: ReactNode, replacements: Replacement[]): 
       return replaceInText(combinedText, replacements)
     }
 
-    return children.map((child) => processCodeChildren(child, replacements))
+    return Children.toArray(children.map((child) => processCodeChildren(child, replacements)))
   }
 
   if (isValidElement(children)) {
@@ -105,7 +105,11 @@ export const RegionAwarePre = (props: any) => {
     return processCodeChildren(props.children, replacements)
   }, [props.children, replacements])
 
-  return <Pre {...props}>{modifiedChildren}</Pre>
+  return (
+    <Pre {...props}>
+      {Array.isArray(modifiedChildren) ? Children.toArray(modifiedChildren) : modifiedChildren}
+    </Pre>
+  )
 }
 
 export const RegionAwareCode = (props: any) => {
@@ -124,5 +128,9 @@ export const RegionAwareCode = (props: any) => {
     return processCodeChildren(props.children, replacements)
   }, [props.children, replacements])
 
-  return <code {...props}>{modifiedChildren}</code>
+  return (
+    <code {...props}>
+      {Array.isArray(modifiedChildren) ? Children.toArray(modifiedChildren) : modifiedChildren}
+    </code>
+  )
 }

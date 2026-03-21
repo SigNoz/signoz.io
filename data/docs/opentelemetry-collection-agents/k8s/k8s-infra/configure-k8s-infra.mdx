@@ -1,5 +1,5 @@
 ---
-date: 2025-12-16
+date: 2026-02-04
 
 title: K8s Infra - Configure
 id: k8s-infra-otel-config
@@ -323,6 +323,29 @@ presets:
               environment: 'production'
 ```
 
+## Configurations
+
+The `k8s-infra` chart exposes the full OpenTelemetry Collector configuration via Helm values, so you can adapt the running agents to your needs. The following are common options you may want to adjust.
+
+### Batch Processor
+
+The [batch processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md) batches spans, metrics, and logs before export. That reduces connections and improves compression. It supports both size-based and time-based batching.
+
+Configure the batch processor by overriding [otelAgent.config.processors.batch](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L953) and [otelDeployment.config.processors.batch](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L1325) in your Helm values. Example override:
+
+```diff
+otelAgent:
+  config:
+    processors:
+      # otelAgent.config.processors.batch -- Batch processor config.
+      batch:
+-        send_batch_size: 10000
++        send_batch_size: 15000
++        send_batch_max_size: 20000 # settings can be provided as key value pairs
+```
+<Admonition type="info">
+Any setting supported by the OpenTelemetry batch processor can be set under `processors.batch` in the chart values.
+</Admonition>
 ## Common Deployment Scenarios
 
 ### Production Cluster with Full Monitoring
@@ -378,7 +401,7 @@ Telemetry data can be tagged with a "deployment environment" attribute (such as 
 
 ```yaml
 global:
-  deplymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
 ```
 
 You can specify the environment by including `deployment.environment` in the `OTEL_RESOURCE_ATTRIBUTES` environment variable of your application manifest. This will take precedence over the `global.deploymentEnvironment` setting in the `k8s-infra` chart—or, if not set, the global value will be used.
@@ -476,3 +499,9 @@ Recommended resource allocations based on preset combinations:
 | Full | 500m | 1Gi | 1000m | 2Gi |
 
 Adjust these values based on your cluster size and monitoring requirements.
+
+## Next Steps
+
+- [K8s-Infra Overview](/docs/collection-agents/k8s/k8s-infra/overview)
+- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

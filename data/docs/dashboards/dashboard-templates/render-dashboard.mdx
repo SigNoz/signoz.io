@@ -1,0 +1,58 @@
+---
+date: 2026-03-17
+id: render-dashboard
+title: Render Dashboard
+description: Monitor Render service performance including CPU usage, memory consumption, and network throughput using Render Metrics Streams.
+doc_type: explanation
+---
+
+This dashboard provides monitoring of Render service performance using <a href="https://docs.render.com/metrics-streams" target="_blank" rel="noopener noreferrer nofollow">Render Metrics Streams</a>, giving you visibility into CPU usage, memory consumption, and network throughput for your Render services.
+
+<Admonition type="info">
+To use this dashboard, you need to configure Render to send metrics to SigNoz. Follow the [Render Metrics](https://signoz.io/docs/metrics-management/render-metrics/) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/render-dashboard.webp"
+  alt="Render Dashboard Preview"
+  caption="Render Dashboard - CPU, Memory, and Network Metrics"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/render/render-dashboard.json"
+    dashboardName="Render"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard provides comprehensive monitoring of Render service performance, giving you visibility into:
+
+- **CPU usage and limits**: Track CPU time consumption and configured CPU limits per service instance
+- **Memory usage and allocation**: Monitor RSS, cache, total memory usage, and memory utilization percentage
+- **Network throughput**: Observe inbound and outbound network data transfer rates
+
+## Metrics Included
+
+### CPU
+
+- **CPU Time**: The cumulative amount of CPU time used by a particular service instance, in seconds. Uses `render.service.cpu.time` with rate aggregation, grouped by `service.name`.
+- **CPU Limit**: The maximum amount of CPU available to a particular service instance as determined by its instance type. Uses `render.service.cpu.limit` with avg aggregation, grouped by `service.name`.
+
+### Memory
+
+- **Memory Usage**: The amount of memory that a particular service instance is currently using, in bytes. Uses `render.service.memory.usage` with avg aggregation, grouped by `service.name`.
+- **Memory Breakdown**: A breakdown of memory usage into RSS (Resident Set Size) and Cache components. Uses `render.service.memory.rss` and `render.service.memory.cache`.
+- **Memory Utilization %**: The percentage of memory used relative to the memory limit. Calculated as `100 × memory.usage / memory.limit`.
+
+### Network
+
+- **Network In/Out**: The rate of bytes received and transmitted by your Render services. Uses `render.service.network.receive.bytes` and `render.service.network.transmit.bytes` with rate aggregation.
+
+## Related Docs
+
+- [Render Metrics](https://signoz.io/docs/metrics-management/render-metrics/)
+- [Host Metrics](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-dashboards/)

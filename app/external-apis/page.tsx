@@ -7,16 +7,19 @@ export const metadata: Metadata = {
     absolute: 'Monitor External APIs With Built-In Service Correlation | SigNoz',
   },
   openGraph: {
-    title: "Monitor External APIs With Built-In Service Correlation",
-    description: "Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.",
-    images: "/img/platform/ExternalApisMeta.png"
+    title: 'Monitor External APIs With Built-In Service Correlation',
+    description:
+      'Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.',
+    images: '/img/platform/ExternalApisMeta.webp',
   },
-  description: "Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.",
-  twitter:{
-    title: "Monitor External APIs With Built-In Service Correlation",
-    description: "Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.",
-    images: "/img/platform/ExternalApisMeta.png"
-  }
+  description:
+    'Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.',
+  twitter: {
+    title: 'Monitor External APIs With Built-In Service Correlation',
+    description:
+      'Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.',
+    images: '/img/platform/ExternalApisMeta.webp',
+  },
 }
 
 export default function TraceFunnels() {

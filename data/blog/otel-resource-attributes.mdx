@@ -1,19 +1,27 @@
 ---
-title: OpenTelemetry Resource Attributes - What They Are and How to Use Them
+title: OpenTelemetry Resource Attributes Explained Practically
 slug: otel-resource-attributes
-date: 2026-01-15
+date: 2026-02-11
 tags: [OpenTelemetry, Observability]
 authors: [dhruv_ahuja]
 description: "Understand OpenTelemetry Resource Attributes - Learn how to set standard keys, manage precedence between sources, and enforce data quality across teams."
 image: /img/blog/2026/01/otel-resource-attributes-logs-view.webp
-keywords: [otel resource attributes, opentelemetry, opentelemetry resource]
+keywords: [otel resource attributes, opentelemetry, opentelemetry resource, opentelemetry resources, otel resources, otel attributes]
 ---
 
-Without the right context, such as knowing which service, which version, or which environment produced the data, telemetry data (logs, metrics, and traces) loses all operational value.
+Without the right context, such as knowing which service, which version, or which environment produced the data, telemetry data (logs, metrics, and traces) loses all operational value. Even if you find the problematic data points, you would not be able to understand where they emerged from, and probably, what led to the cause.
 
-This problem is compounded when this context is present, but varies across teams, services or languages as it leaves room for mistakes and gaps in your observability systems.
+**Problem 1: Lack of Context for Telemetry**
 
-[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) resource attributes add the necessary context required to make sense of your telemetry. It also defines strict guidelines known as Semantic Conventions to ensure these attributes remain consistent across your observability pipelines.
+Consider a scenario where you have a robust CI/CD pipeline that makes the process from merging a PR to going live seamless. Your team has invested in observability as well, and you catch an error shortly after it starts occurring, and you pinpoint the service causing these issues. But since you deploy frequently, you are unable to understand the deployment that led to that issue.
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) resource attributes help resolve such problems by adding the necessary context required to make sense of your telemetry data in ways that might not always be obvious.
+
+**Problem 2: Maintaining Telemetry Context Standards**
+
+Then, there is also the problem of maintaining the guidelines you define for one team, or one service, across larger teams or across developers responsible for handling various services in an organization. Since teams work with different languages, and follow different engineering practices, they often have conflicting views on naming conventions, and configuration strategies.
+
+OpenTelemetry is well-aware of this, and OTel resource attributes leverage the strict guidelines defined by OpenTelemetry, known as Semantic Conventions, to ensure that attribute definitions remain consistent across observability pipelines, enabling observability platforms to also build features around this guarantee.
 
 This post explains how OpenTelemetry resource attributes work, how to configure them, and how teams can apply them consistently by following Semantic Conventions.
 
@@ -23,7 +31,7 @@ An OpenTelemetry resource describes the source generating telemetry data. The so
 
 In OTel SDKs, resources are represented as classes or objects that store attributes as key-value pairs. Similarly, observability backends scope attributes to a `resources` key during ingestion of telemetry data.
 
-<Figure src="/img/guides/2026/01/otel-resource-attributes-logs-view.webp" alt="SigNoz view of a log record tagged with application, host and OTel SDK resources attributes" caption="SigNoz view of a log record tagged with application, host and OTel SDK resources attributes" />
+<Figure src="/img/blog/2026/01/otel-resource-attributes-logs-view.webp" alt="SigNoz view of a log record tagged with application, host and OTel SDK resources attributes" caption="SigNoz view of a log record tagged with application, host and OTel SDK resources attributes" />
 
 As the OpenTelemetry spec mandates <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#resource-operations" rel="noopener noreferrer nofollow" target="_blank">Resources to be immutable</a>, attributes registered with an active Resource object **remain static for the lifespan of the application**.
 
@@ -175,7 +183,7 @@ This is not an exhaustive list; feel free to browse for more detectors on the <a
 
 The GCP resource detector (`opentelemetry-resourcedetector-gcp`) does not support usage through environment variables, and must be configured inside the application. Read more about it on its <a href="https://github.com/GoogleCloudPlatform/opentelemetry-operations-python/tree/main/opentelemetry-resourcedetector-gcp#usage" rel="noopener noreferrer nofollow" target="_blank">GitHub page</a>.
 
-<Figure src="/img/guides/2026/01/otel-resource-attributes-resource-detectors.webp" alt="Resource attributes containing the running process and host OS details" caption="Resource attributes containing the running process and host OS details" />
+<Figure src="/img/blog/2026/01/otel-resource-attributes-resource-detectors.webp" alt="Resource attributes containing the running process and host OS details" caption="Resource attributes containing the running process and host OS details" />
 
 We have briefly mentioned the concepts of “merging” and “precedence” in the previous section. Let’s understand what precedence actually means in the context of OpenTelemetry resource attributes.
 
@@ -255,7 +263,7 @@ SigNoz is an OpenTelemetry-native, all-in-one observability platform that utiliz
 - **Service Map:** SigNoz uses `service.name` to draw the nodes in your architecture diagram. An auto-generated graph shows how `checkout-service` talks to `payment-service`, and where the slowdowns are.
 - **Infrastructure Filtering:** You can filter telemetry by `k8s.cluster.name` or `host.type` to isolate performance issues to a specific region or instance type.
 
-<Figure src="/img/guides/2026/01/otel-resource-attributes-service-map.webp" alt="SigNoz Service Map view showcasing data flow among distributed services" caption="SigNoz Service Map view showcasing data flow among distributed services" />
+<Figure src="/img/blog/2026/01/otel-resource-attributes-service-map.webp" alt="SigNoz Service Map view showcasing data flow among distributed services" caption="SigNoz Service Map view showcasing data flow among distributed services" />
 
 You can either run a SigNoz instance yourself or use the hosted version:
 

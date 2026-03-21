@@ -25,17 +25,23 @@ const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnch
 
   if (isInternalLink) {
     const isDocsUrl = typeof href === 'string' && href.includes('/docs/')
-    let finalHref = href as string
 
     if (isDocsUrl && regionParam) {
-      const separator = finalHref.includes('?') ? '&' : '?'
-      finalHref = `${finalHref}${separator}region=${regionParam}`
+      const separator = href.includes('?') ? '&' : '?'
+      let newHref = `${href}${separator}region=${regionParam}`
+
       if (cloudRegionParam) {
-        finalHref = `${finalHref}&cloud_region=${cloudRegionParam}`
+        newHref = `${newHref}&cloud_region=${cloudRegionParam}`
       }
+
+      return <Link href={newHref} {...rest} target="_blank" prefetch={false} />
     }
 
-    return <Link href={finalHref} {...rest} />
+    if (href.startsWith('https://signoz.io/')) {
+      return <Link href={href} {...rest} target="_blank" prefetch={false} />
+    }
+
+    return <Link href={href} {...rest} prefetch={false} />
   }
 
   if (isAnchorLink) {

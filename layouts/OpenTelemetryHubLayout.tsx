@@ -3,6 +3,7 @@ import '../css/opentelemetry-hub.css'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import TrackingLink from '@/components/TrackingLink'
 import SectionContainer from '@/components/SectionContainer'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 import ArticleMetaDetailsCard, {
@@ -17,6 +18,7 @@ import type { HubPathMeta, LayoutProps } from './open-telemetry-hub/types'
 import { normalizeRoute } from './open-telemetry-hub/navigation'
 import { ExternalLink } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
+import PageFeedback from '@/components/PageFeedback/PageFeedback'
 
 const LANGUAGES_CATEGORY_KEY = 'Language and Frameworks'
 const MAIN_CONTENT_ID = 'opentelemetry-hub-main'
@@ -84,7 +86,7 @@ const getReadingTimeText = (content: LayoutProps['content']) => {
 }
 
 const getFormattedDate = (content: LayoutProps['content']) => {
-  const updatedDate = content.lastmod || content.date
+  const updatedDate = content.date
   return updatedDate
     ? new Date(updatedDate).toLocaleDateString('en-US', {
         month: 'short',
@@ -170,22 +172,35 @@ export default function OpenTelemetryHubLayout({
                       ? 'OpenTelemetry Quick Start'
                       : path.label
                 const iconColor = isActive ? 'text-white' : 'text-gray-400'
-                return (
-                  <Link
+                const linkClassName = `border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
+                  isActive
+                    ? 'border-white/60 text-white'
+                    : 'border-transparent text-gray-400 hover:text-white'
+                }`
+                return isQuickStart ? (
+                  <TrackingLink
                     key={path.key}
                     href={path.firstRoute}
-                    target={isQuickStart ? '_blank' : undefined}
-                    rel={isQuickStart ? 'noopener noreferrer' : undefined}
-                    className={`border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
-                      isActive
-                        ? 'border-white/60 text-white'
-                        : 'border-transparent text-gray-400 hover:text-white'
-                    }`}
+                    target="_blank"
+                    className={linkClassName}
+                    clickType="Nav Click"
+                    clickName="OpenTelemetry Hub Quick Start Link"
+                    clickLocation="OpenTelemetry Hub Header"
+                    clickText={label}
                   >
                     <span className="flex items-center gap-1">
                       {label}
-                      {isQuickStart && <ExternalLink size={14} className={iconColor} />}
+                      <ExternalLink size={14} className={iconColor} />
                     </span>
+                  </TrackingLink>
+                ) : (
+                  <Link
+                    key={path.key}
+                    href={path.firstRoute}
+                    prefetch={false}
+                    className={linkClassName}
+                  >
+                    <span className="flex items-center gap-1">{label}</span>
                   </Link>
                 )
               })}
@@ -219,6 +234,9 @@ export default function OpenTelemetryHubLayout({
                 )}
                 {children}
               </article>
+              <div className={hasToc ? 'lg:hidden' : ''}>
+                <PageFeedback />
+              </div>
 
               {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
                 <div className="lg:hidden">

@@ -30,10 +30,14 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
               clickText={subtopic.name}
               clickLocation={`${topic} Dropdown`}
               onClick={() => onLinkClick && onLinkClick()}
+              prefetch={false}
             >
-              {subtopic.icon && (
-                typeof subtopic.icon === 'string' ? <img src={subtopic.icon} alt={`${subtopic.name} icon`} className="h-5 w-5" /> : subtopic.icon
-              )}
+              {subtopic.icon &&
+                (typeof subtopic.icon === 'string' ? (
+                  <img src={subtopic.icon} alt={`${subtopic.name} icon`} className="h-5 w-5" />
+                ) : (
+                  subtopic.icon
+                ))}
               <div className="flex flex-col">
                 <span className="font-medium">{subtopic.name}</span>
                 <span className="text-xs text-gray-500">{subtopic.description}</span>

@@ -22,7 +22,7 @@ export default function CTASection() {
               <div className="flex flex-col gap-4 sm:flex-row">
                 <CTAButton />
 
-                <Link href="/teams/">
+                <Link href="/teams/" prefetch={false}>
                   <Button
                     type={BUTTON_TYPES.SECONDARY}
                     className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90 md:px-6 md:py-3"

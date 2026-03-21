@@ -1,0 +1,240 @@
+---
+title: "AWS X-Ray vs CloudWatch Explained: Metrics, Logs, Traces, and When to Use Each"
+date: "2026-02-18"
+tags: [aws, monitoring]
+authors: [yuvraj]
+description: "CloudWatch handles metrics, logs, and alarms. X-Ray traces request paths across services. Learn how they differ, how they work together, and when you need more."
+keywords:
+  [aws x-ray vs cloudwatch, cloudwatch vs x-ray, aws monitoring, aws observability, aws tracing, cloudwatch x-ray difference]
+---
+
+AWS CloudWatch and AWS X-Ray are both AWS-native observability tools, but they answer different questions. CloudWatch tells you *what* is unhealthy in your system. X-Ray tells you *where* in a request path the problem happened.
+
+They are complementary, not interchangeable. Many AWS teams run both - CloudWatch for metrics, logs, and alerting, and X-Ray for distributed tracing when they need to isolate latency or failures across service boundaries.
+
+Below, we cover how each tool works, where they overlap, how to use them together in practice, and when the AWS-native stack starts showing its limits.
+
+## What is Amazon CloudWatch
+
+Amazon CloudWatch is AWS's monitoring and observability service for infrastructure and applications. It collects metrics, aggregates logs, triggers alarms, and powers dashboards across virtually every AWS service.
+
+CloudWatch answers operational questions like:
+
+- Is this EC2 instance healthy right now?
+- Which Lambda function is throwing errors?
+- Did CPU utilization cross the threshold I set?
+- What do the logs say for this service in the last 30 minutes?
+
+### How CloudWatch works
+
+Most AWS services send metrics to CloudWatch automatically. EC2 instances publish CPU, disk I/O, and network metrics out of the box; for memory and filesystem-level metrics, you need the CloudWatch Agent installed on the instance. Lambda functions publish invocation count, duration, and error rate. You do not need to install anything extra for this baseline data, which makes CloudWatch the default starting point for operational monitoring on AWS.
+
+For logs, Lambda writes to CloudWatch Log Groups by default. ECS and API Gateway can do the same, but require configuration: ECS needs the `awslogs` log driver set in your task definition, and API Gateway needs logging enabled at the stage level. 
+
+Each log group contains log streams (one per function instance, container, or source), and each stream holds individual log events with timestamps. The log event detail is rich: you get exact error messages, stack traces, and runtime context without any additional instrumentation.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-cloudwatch-log-events.webp" alt="CloudWatch log events showing runtime errors and structured log data" caption="CloudWatch log events from a Lambda function. Each event includes a full timestamp and message payload." />
+
+CloudWatch also includes Logs Insights, a query engine for searching and aggregating log data across log groups. This is where CloudWatch becomes operationally useful for incidents, because raw log streams at high volume are difficult to navigate manually. With Logs Insights, you can write SQL-like queries to filter events, extract fields, and visualize patterns across time.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-cloudwatch-logs-insights-querying.webp" alt="CloudWatch Logs Insights query editor with results visualization" caption="CloudWatch Logs Insights lets you query and visualize log data with a SQL-like syntax, useful for aggregating patterns across high-volume log groups." />
+
+Alarm-based workflows are another core strength. You can set threshold-based or anomaly detection alarms on any CloudWatch metric, then trigger SNS notifications, auto-scaling actions, or Lambda-based remediation. For teams that primarily need infrastructure health monitoring and log retention, CloudWatch covers a lot of ground with minimal setup.
+
+### Where CloudWatch falls short
+
+The biggest gap shows up when you need to debug distributed latency. CloudWatch logs can tell you *that* a request took 500ms, but not *which downstream call* added the delay. If your application calls three other services before responding, the logs from each service live in separate log groups with no built-in way to stitch them into a single request timeline.
+
+Investigation during incidents also involves context switching. Logs, metrics, alarms, and traces (if you use X-Ray) live in separate sections of the CloudWatch console. Each section has its own query interface and navigation. During an outage, rebuilding your mental model as you jump between these views adds time to resolution.
+
+This is a well-documented frustration among AWS engineers. In [this r/aws thread](https://www.reddit.com/r/aws/comments/1fsyvhr/cloudwatch_logs_are_almost_useless_how_to_get/), the core complaint is not about missing data but about investigation ergonomics at scale. Teams describe jumping across many log groups and streams during incidents, struggling to piece together what happened.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-reddit-cloudwatch-logs-usability.webp" alt="Reddit thread about CloudWatch Logs usability challenges" caption="A Reddit thread where an AWS engineer describes the friction of investigating issues across CloudWatch Logs at scale." />
+
+### CloudWatch cost model
+
+CloudWatch uses pay-as-you-go pricing with no upfront commitment. The main cost levers are:
+
+- **Custom metrics**: Each unique namespace + metric name + dimension combination counts as a separate metric. High-cardinality tags can increase costs quickly.
+- **Log ingestion and storage**: Charged per GB ingested. Log groups retain data indefinitely by default, and storage costs apply for the entire retained volume. Setting shorter retention policies is a common cost optimization.
+- **Logs Insights queries**: Charged per GB of data scanned.
+- **Alarms**: Charged per alarm metric per month.
+
+The free tier (per month) includes basic monitoring metrics from AWS services, 10 metrics (custom metrics + detailed monitoring metrics), 5 GB of log data (ingestion + archive storage + Logs Insights scanned), 10 alarm metrics, and 3 dashboards. 
+
+For a detailed breakdown and optimisation techniques, see the [CloudWatch pricing guide](https://signoz.io/guides/cloudwatch-pricing/).
+
+## What is AWS X-Ray
+
+AWS X-Ray is AWS's distributed tracing service. It captures request-level data as transactions flow through your application, recording the path, timing, and status of each segment along the way. A segment represents a service's work on a request, and can contain subsegments for downstream calls like HTTP requests, database queries, or AWS SDK calls within that service.
+
+X-Ray answers questions like:
+
+- Which part of this request was slow?
+- Which downstream service call failed?
+- How are my services connected in this transaction?
+- What percentage of requests to `/enrich` take longer than 200ms?
+
+### How X-Ray works
+
+X-Ray collects trace data through instrumentation. Each incoming request gets a trace ID, and as the request passes through services (Lambda functions, API Gateway, EC2 instances, DynamoDB calls), each service adds a segment to the trace. Within a segment, subsegments capture downstream calls (HTTP requests, database queries, AWS SDK operations) with their own timing and metadata.
+
+You can instrument with the X-Ray SDK, the AWS Distro for OpenTelemetry (ADOT), or Powertools for AWS Lambda. For Lambda, enabling Active Tracing is a single toggle. For EC2 or ECS, you run the X-Ray daemon or the ADOT collector as a sidecar.
+
+The trace data flows into the X-Ray console (accessible within the CloudWatch Traces section), where you get a trace map for service dependency visualization, a filterable trace list, and a trace detail view with a waterfall timeline for each segment. The segment metadata panel is particularly useful: it exposes OTel resource attributes, HTTP route info, runtime details, and status codes for each segment.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-xray-trace-detail-metadata.webp" alt="X-Ray trace detail showing segment timeline and metadata panel" caption="X-Ray trace detail for a request through internal-service. The Segments Timeline shows /validate (70ms) and /enrich (170ms) as separate segments. The metadata panel on the right reveals OTel resource attributes, runtime version, and HTTP route information for the selected segment." />
+
+This kind of per-segment breakdown is what makes X-Ray valuable for latency investigations. Instead of guessing which service added the delay, you can see the exact time distribution across the request path. The service dependency visualization through the trace map helps teams understand how services connect and where bottlenecks form, and segment-level metadata gives debugging context (status codes, response sizes, annotations) without needing to search through logs.
+
+### Where X-Ray falls short
+
+Traces alone do not replace logs. If your investigation requires the exact error message, stack trace, or payload detail, you still need log data. X-Ray shows you *where* in the request chain something went wrong, but the *what* (the specific error text or exception) usually lives in CloudWatch Logs.
+
+Trace-to-log correlation is not automatic in the default setup. In the above X-Ray trace detail, the Logs panel can show "No logs to display for these resources" unless log association is explicitly configured. CloudWatch Application Signals can enable automatic trace-to-log correlation for supported runtimes, but it requires enabling Application Signals and using compatible instrumentation. Outside of that, the two tools are complementary by design but require setup work to link their data during investigations.
+
+Missing spans are another real operational issue. If exporters, IAM permissions, or trace propagation are misconfigured, a service may appear in CloudWatch Logs but be invisible in X-Ray. The `OTLPExporterError: Not Found` pattern observed in this workload's logs is one example: the export pipeline is broken, so traces are incomplete even though log data flows normally.
+
+### X-Ray cost model
+
+X-Ray pricing is based on traces recorded and traces retrieved/scanned:
+
+- **Free tier**: First 100,000 traces recorded and first 1,000,000 traces retrieved or scanned per month.
+- **Beyond free tier**: Charged per million traces recorded and per million traces retrieved.
+
+In practice, cost control comes down to **sampling**. X-Ray supports configurable sampling rules so you do not record every single request in high-traffic production environments. A common pattern from AWS engineers is to use a higher sampling rate in dev/staging and a lower rate in production, adjusting based on traffic volume. 
+
+## AWS X-Ray vs CloudWatch: Key Differences
+
+| Dimension | Amazon CloudWatch | AWS X-Ray |
+|---|---|---|
+| Primary purpose | Monitor metrics, logs, alarms, dashboards | Trace request paths and segment-level latency |
+| Best question answered | "What is unhealthy right now?" | "Where exactly did this request slow down or fail?" |
+| Data type | Infrastructure + application metrics, logs, events | Distributed trace data (segments, subsegments, annotations) |
+| Breadth vs depth | Broad, cross-service monitoring | Deep, per-request causality analysis |
+| Production pattern | Always-on baseline monitoring | Sampled tracing with focused investigation |
+| Setup required | Minimal for AWS services (metrics/logs sent by default) | Instrumentation required (SDK, ADOT, or Powertools) |
+| Cost drivers | Custom metrics, log ingestion/storage, Logs Insights queries, alarms | Traces recorded and retrieved, driven by sampling rate |
+| When to use alone | Infra monitoring, alerting, log retention, compliance | Root cause analysis for latency/failure in distributed systems |
+
+CloudWatch covers the "monitor everything" layer. X-Ray covers the "debug this specific request" layer. They solve different problems, and many teams benefit from running both.
+
+## Using CloudWatch and X-Ray Together
+
+In practice, CloudWatch and X-Ray form a natural workflow for understanding application behavior. Here is how they complement each other, based on a hands-on exploration of an active AWS workload running two services (`public-api` on EC2 and `internal-service` on Lambda).
+
+### Start with logs to understand application behavior
+
+CloudWatch Logs is typically where you begin. Whether you are investigating an error, verifying a deployment, or understanding request patterns, the log events give you the raw detail of what your application is doing.
+
+In this workload, filtering log events for "Enrichment complete" in the Lambda log group surfaces structured log entries with `request_id`, `path`, and `duration_ms` fields. This is useful for spotting slow requests or understanding throughput patterns at the individual event level.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-learning-log-search.webp" alt="CloudWatch log events filtered for Enrichment complete, showing structured fields" caption='CloudWatch Log events filtered for "Enrichment complete." The expanded log entry shows structured fields including request_id, path, and duration_ms, making it possible to identify specific slow requests.' />
+
+### Switch to traces for request-path context
+
+Logs tell you what happened in a single service, but they do not show you how a request flowed across services. X-Ray traces add that cross-service context.
+
+From the CloudWatch Traces section, you can query by service name. In this workload, filtering for `internal-service` returns 304 traces in a 30-minute window, with an average latency of 118ms and ~20.47 requests per minute.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-learning-trace-service-filter.webp" alt="CloudWatch Traces filtered to internal-service showing 304 traces" caption="CloudWatch Traces filtered to internal-service. The query returned 304 traces with summary statistics: average latency 118ms, 20.47 requests/min, and zero faults. The response time distribution histogram is visible below." />
+
+### Drill into a trace to see segment-level timing
+
+Clicking into an individual trace reveals the segment timeline. For this 231ms trace, the breakdown shows `internal-service` handling `/validate` in 50ms and `/enrich` in 150ms. The metadata panel on the right confirms the route and handler type.
+
+This is the kind of information that logs alone cannot provide. You can see exactly where time was spent, without guessing.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-learning-trace-detail.webp" alt="Trace detail showing segment timeline with /validate and /enrich handler timings" caption='Trace detail for a 231ms request. The Segments Timeline shows /validate took 50ms and the /enrich request handler took 150ms. The metadata panel confirms http.route: "/enrich" and express.type: "request_handler".' />
+
+### View the full cross-service request path
+
+For a complete picture, traces show the full path from `public-api` through to `internal-service`, including DNS lookups and TLS connections between services. This cross-service view is where X-Ray's value becomes clearest: you can see the entire request lifecycle across service boundaries in a single waterfall.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-learning-trace-two-services.webp" alt="Full cross-service trace showing public-api and internal-service with DNS and TLS segments" caption="Full cross-service trace showing public-api (351ms total) calling internal-service (91ms). Individual segments for DNS lookups, TLS connections, and remote HTTP calls are visible in the waterfall, giving a complete picture of where time was spent across the service boundary." />
+
+## Where SigNoz Fits If You Already Use CloudWatch and X-Ray
+
+CloudWatch and X-Ray are strong AWS-native building blocks. But the investigation friction like switching between logs, traces, and metrics in separate workflows, adds up during incidents. A unified observability platform can reduce that friction.
+
+SigNoz is an OpenTelemetry-native observability platform that brings metrics, traces, and logs into a single interface. If you are already running CloudWatch and X-Ray, SigNoz reduces the number of context switches during incident triage without requiring you to replace your existing setup.
+
+### What changes with SigNoz
+
+Instead of jumping from CloudWatch Logs to X-Ray Traces to CloudWatch Logs again, you start from the SigNoz traces explorer. The trace table shows service name, span operation, duration, and status in one queryable view. You can sort, filter, and pivot by span attributes without leaving the page.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-signoz-traces-explorer.webp" alt="SigNoz traces explorer showing service spans with duration and status" caption="SigNoz traces explorer. Root requests from public-api (~308ms) and downstream spans from internal-service (POST /enrich at ~189ms) are visible in the same table with sortable columns." />
+
+Clicking into a trace opens the flamegraph view with the full span tree. The span details panel on the right includes a Related Signals section that links directly to correlated Logs and Metrics for that span. That is the context switch that takes multiple clicks and manual correlation in CloudWatch, reduced to a single link in SigNoz.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-signoz-trace-flamegraph.webp" alt="SigNoz trace flamegraph showing public-api calling internal-service with span details" caption="SigNoz trace flamegraph for a POST /process request through public-api (306ms). The span tree shows middleware, request handler, TLS connect, and the downstream POST /enrich call to internal-service (151ms). The span details panel exposes host, HTTP, and runtime attributes alongside direct links to related Logs and Metrics." />
+
+For infrastructure context, SigNoz also provides pre-built dashboards for AWS services. The EC2 Overview dashboard shows CPU utilization, CPU credits, and EBS read/write metrics per instance, filterable by account and region.
+
+<Figure src="/img/comparisons/2026/02/aws-x-ray-vs-cloudwatch-signoz-ec2-overview.webp" alt="SigNoz EC2 Overview dashboard showing CPU and EBS metrics per instance" caption="SigNoz EC2 Overview dashboard for ap-south-1. CPU utilization, CPU credits, and EBS I/O metrics are visible per instance, with account and region filters at the top." />
+
+### Two practical adoption paths
+
+**Path A: Gradual overlay (lowest risk)**
+1. Keep your existing CloudWatch + X-Ray setup.
+2. Send a copy of AWS telemetry to SigNoz for unified analysis using [SigNoz's AWS integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/).
+3. Shift dashboards and alerts progressively as you validate the workflow.
+
+**Path B: OpenTelemetry-first for application telemetry**
+1. Instrument your applications with [OpenTelemetry](https://signoz.io/opentelemetry/) SDKs.
+2. Send OTLP data directly to SigNoz.
+3. Keep CloudWatch for AWS-managed service metrics and log retention where needed.
+
+### Cost caveat
+
+If you use one-click integration paths that route data through CloudWatch pipelines, AWS-side ingestion and storage charges still apply. For tighter cost control, use manual OpenTelemetry-based collection that sends data directly to SigNoz, bypassing CloudWatch for application telemetry. See [one-click vs manual AWS collection](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) for details.
+
+### Why OpenTelemetry matters here
+
+OpenTelemetry is the open-source standard for telemetry instrumentation, and when you instrument with OTel SDKs instead of the X-Ray SDK, your tracing code becomes portable. You can send the same trace data to SigNoz, to X-Ray via ADOT, or to any OTLP-compatible backend without changing application code.
+
+SigNoz is OpenTelemetry-native, so features like [trace funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/), [external API monitoring](https://signoz.io/docs/application-monitoring/api-monitoring/), and [messaging queue monitoring](https://signoz.io/blog/opentelemetry-powered-kafka-celery-monitoring/) work directly with OTel semantic conventions. SigNoz pricing is usage-based (per GB for logs/traces and per million metric samples). There is no separate "per-attribute" fee, but any attribute, standard or custom, that increases cardinality can increase time-series count and total samples, and therefore cost.
+
+## Frequently Asked Questions
+
+### Is X-Ray part of CloudWatch?
+
+X-Ray is a separate AWS service, but AWS has been integrating it more tightly into the CloudWatch console. The X-Ray trace map and traces list are now accessible from within CloudWatch under the "Traces" section, and AWS merged the X-Ray service map and CloudWatch ServiceLens map into a unified trace map. Architecturally, they still handle different data types (traces vs. metrics/logs), and X-Ray trace costs are metered separately.
+
+### Can CloudWatch replace X-Ray?
+
+No. CloudWatch handles metrics, logs, alarms, and dashboards. It does not provide distributed tracing. CloudWatch Logs can capture timestamps and error messages, but cannot show you the request-path breakdown across services that X-Ray provides. You need both for complete observability.
+
+### Are X-Ray traces just structured logs?
+
+No. Traces capture the causal chain of a request across services, with timing for each segment. Structured logs capture individual events with key-value fields. A trace tells you "this request spent 50ms in `/validate` and 150ms in `/enrich`." A log tells you "at 16:09:13, the `/enrich` handler returned status 200 with duration_ms 150." They solve different parts of the debugging puzzle.
+
+### Is X-Ray cost-effective for production?
+
+It depends on your traffic volume and sampling strategy. The free tier covers 100,000 traces per month. Beyond that, costs scale with trace volume. Teams commonly use sampling rates between 1% and 10% in production to keep costs manageable while maintaining enough trace coverage for incident investigation. Low-traffic services can use higher sampling rates without significant cost impact.
+
+### CloudWatch vs X-Ray vs CloudTrail: what is the difference?
+
+- **CloudWatch**: Operational monitoring. Metrics, logs, alarms, dashboards for service health.
+- **X-Ray**: Distributed tracing. Request-path analysis for latency and failure isolation.
+- **CloudTrail**: Audit logging. Records API calls made to AWS services for security, compliance, and governance. CloudTrail answers "who did what and when" at the AWS API level, not at the application request level.
+
+## Get Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+## Conclusion
+
+CloudWatch answers "what is unhealthy." X-Ray answers "where in the request path it became unhealthy." Using both together is the standard approach on AWS, and they handle different layers of observability that cannot replace each other.
+
+For many AWS teams, the recommended workflow is CloudWatch for detection and log detail, X-Ray for request-path causality and segment-level timing. If the context switching between these tools slows your team down, adding an OpenTelemetry-native platform like SigNoz can reduce investigation time without requiring you to rip out your existing AWS-native setup.
+
+---
+
+Hope we answered all your questions regarding AWS X-Ray vs CloudWatch. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

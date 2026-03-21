@@ -1,42 +1,66 @@
 ---
-date: 2026-01-27
+date: 2026-02-12
 title: Monitor HTTP Endpoints
-description: Learn how to monitor HTTP endpoints using the OpenTelemetry HTTP Check Receiver and visualize their health in SigNoz.
+description: Set up lightweight synthetic monitoring and uptime checks for HTTP endpoints using the OpenTelemetry HTTP Check Receiver in SigNoz. Track availability, response times, and SSL certificate expiry.
 id: monitor-http-endpoints
-hide_table_of_contents: true
+doc_type: howto
 ---
 
-With SigNoz, you can set up lightweight synthetic monitoring to track the health of your HTTP endpoints
-This document walks you through every step, from initial setup to creating dashboards and configuring alerts on your HTTP endpoints.
+## Overview
 
-<Tabs entityName="plans">
+When your website, API, or internal service goes down, you want to know before your users do. This guide shows you how to set up lightweight synthetic monitoring for your HTTP endpoints in SigNoz — giving you uptime/ping monitoring, response time tracking, and error detection for any HTTP(S) URL.
 
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+**What you'll achieve:**
+- Periodically check if your HTTP endpoints are reachable and returning expected responses
+- Visualize endpoint health and response times in SigNoz dashboards
+- Set up alerts that notify you when an endpoint goes down
+- Optionally track SSL/TLS certificate expiry
 
-## Basic Setup
+This works by using the OpenTelemetry (OTel) Collector — a lightweight agent that runs alongside your infrastructure. The Collector's HTTP Check Receiver makes periodic HTTP requests to your endpoints on a schedule and sends the results as metrics to SigNoz.
 
-### Step 1: Install OpenTelemetry Collector
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-Install and set up the OpenTelemetry Collector by following the [documentation](https://signoz.io/docs/collection-agents/get-started/).
+## Prerequisites
 
-### Step 2: Configure the HTTP Check Receiver
+- **A server or VM** to run the OpenTelemetry Collector (this is where the checks run from)
+- **Network access** from the Collector host to the endpoints you want to monitor
 
-Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
+## Setup
 
-```yaml:config.yaml
+### Step 1: Install the OpenTelemetry Collector
+
+The OpenTelemetry (OTel) Collector is an agent that collects, processes, and exports telemetry data. In this case, it will periodically ping your HTTP endpoints and send the results to SigNoz.
+
+Install the OTel Collector on your server by following the [Collector installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/). The guide covers setup for Docker, Kubernetes, VM, and AWS ECS environments.
+
+### Step 2: Add the HTTP Check Receiver
+
+The HTTP Check Receiver is a component that performs synthetic checks — it makes HTTP requests to your endpoints on a schedule and records whether they respond successfully.
+
+Add the following to the `receivers` section of your OTel Collector configuration file (see [where to find your config file](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)):
+
+```yaml:otel-collector-config.yaml
 receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
   httpcheck:
     targets:
-      - endpoint: http://example.com //replace with the endpoint you want to monitor
+      - endpoint: https://<your-endpoint>
         method: GET
-    collection_interval: 10s
+    collection_interval: 60s
+```
 
+- `<your-endpoint>`: The URL you want to monitor (for example, `https://api.example.com/health` or `https://yoursite.com`)
+- `collection_interval`: How often to check. Default is `60s`. Use shorter intervals (for example, `30s`) for critical endpoints
+- `method`: The HTTP method to use. `GET` is most common for health checks
+
+### Step 3: Add the SigNoz Exporter (if not already configured)
+
+If you followed the [Collector installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/), the SigNoz exporter is already configured — skip to Step 4.
+
+Otherwise, add the SigNoz OTLP exporter to the `exporters` section of your config:
+
+```yaml:otel-collector-config.yaml
 exporters:
   otlp:
     endpoint: "ingest.<region>.signoz.cloud:443"
@@ -46,14 +70,14 @@ exporters:
       "signoz-ingestion-key": "<your-ingestion-key>"
 ```
 
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-### Step 3: Configure the Service Pipeline
+### Step 4: Enable the HTTP Check in the Pipeline
 
-Configure the service pipeline to include the httpcheck receiver:
+In the `service.pipelines.metrics` section, add `httpcheck` to the list of receivers. Pipelines connect receivers, processors, and exporters — learn more in the [service pipeline documentation](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#5-service).
 
-```yaml:config.yaml
+```yaml:otel-collector-config.yaml {3}
 service:
   pipelines:
     metrics:
@@ -62,230 +86,304 @@ service:
       exporters: [otlp]
 ```
 
-### Step 4: Start the Collector
+<Admonition type="warning">
+Append `httpcheck` to your existing receivers list, do not replace your existing configuration. If you already have other receivers configured, keep them.
+</Admonition>
 
-Start the OpenTelemetry Collector to begin collecting HTTP endpoint metrics:
+### Step 5: Restart the Collector
 
-```bash
-./otelcol-contrib --config ./config.yaml
-```
+Apply the changes by restarting the OTel Collector. The restart command depends on how you deployed the Collector — refer to the environment-specific instructions in the [Collector installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
 
-</TabItem>
+## Validate
 
-<TabItem value='self-host' label='Self-Host'>
+After restarting, wait for at least one `collection_interval` (default: 60 seconds) and then verify the data is flowing:
 
-## Basic Setup
+1. Go to your **SigNoz Cloud** dashboard
+2. Navigate to **Dashboards** → **New Dashboard** → **New Panel**
+3. In the **Query Builder**, search for `httpcheck` in the metric dropdown
+4. You should see metrics like `httpcheck.status`, `httpcheck.duration`, and `httpcheck.error`
 
-### Step 1: Configure the HTTP Check Receiver
+If you see these metrics, your HTTP endpoint monitoring is working.
 
-Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your Collector configuration:
+## Enable Optional Metrics
 
-```yaml:config.yaml
+By default, the HTTP Check Receiver reports three metrics: `httpcheck.status`, `httpcheck.duration`, and `httpcheck.error`. You can enable additional metrics for deeper monitoring.
+
+### SSL/TLS Certificate Expiry
+
+Track when your HTTPS certificates are about to expire — useful for avoiding unexpected downtime from expired certificates:
+
+```yaml:otel-collector-config.yaml
 receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
   httpcheck:
-    targets:
-      - endpoint: http://example.com
-        method: GET
-    collection_interval: 10s
-```
-
-### Step 2: Configure the Service Pipeline
-
-Configure the service pipeline to include the `httpcheck` receiver:
-
-```yaml:config.yaml
-service:
-  pipelines:
     metrics:
-      receivers: [otlp, httpcheck]
-      processors: [batch]
-      exporters: [clickhousemetricswrite]
+      httpcheck.tls.cert_remaining:
+        enabled: true
+    targets:
+      - endpoint: https://yoursite.com
+        method: GET
+    collection_interval: 3600s
 ```
 
-### Step 3: Restart the Collector
+The `httpcheck.tls.cert_remaining` metric reports the number of seconds until the certificate expires. A negative value means the certificate has already expired. You can set up an alert on this metric to get notified days before expiry.
 
-Restart the OpenTelemetry Collector to begin collecting HTTP endpoint metrics.
+### Response Timing Breakdown
 
-</TabItem>
-</Tabs>
+For performance monitoring, enable detailed timing metrics to see where time is spent during the request:
 
-## Understanding HTTP Check Metrics
-
-The HTTP Check Receiver performs synthetic checks - a form of synthetic monitoring, against HTTP endpoints by making requests to specified endpoints using the configured method. It generates metrics labeled for each HTTP response status class.
-
-The receiver creates a metric named `httpcheck_status` with value 1 if the check resulted in status_code matching the status_class, otherwise 0.
-
-## Monitoring Multiple Endpoints
-
-You can configure multiple `targets` for the httpcheck receiver to monitor several endpoints simultaneously:
-
-```yaml
+```yaml:otel-collector-config.yaml
 receivers:
   httpcheck:
+    metrics:
+      httpcheck.dns.lookup.duration:
+        enabled: true
+      httpcheck.client.connection.duration:
+        enabled: true
+      httpcheck.tls.handshake.duration:
+        enabled: true
+      httpcheck.client.request.duration:
+        enabled: true
+      httpcheck.response.duration:
+        enabled: true
     targets:
-      - endpoint: http://example.com
-        method: GET
-      - endpoint: http://my-app.com
-        method: GET
-    collection_interval: 10s
-```
-
-## Multiple Collection Intervals
-
-If you need different collection intervals for different endpoints, create multiple httpcheck receiver instances. Each instance can have its own collection interval and targets:
-
-```yaml
-receivers:
-  httpcheck/rapid:
-    targets:
-      - endpoint: http://critical-service.com
-        method: GET
-    collection_interval: 30s
-  
-  httpcheck/frequent:
-    targets:
-      - endpoint: http://important-service.com
+      - endpoint: https://yoursite.com
         method: GET
     collection_interval: 60s
-  
-  httpcheck/low:
+```
+
+These metrics help identify whether slow responses are caused by DNS resolution, connection setup, TLS handshake, or server processing.
+
+<details>
+<ToggleHeading>
+## Monitor Multiple Endpoints
+</ToggleHeading>
+
+You can add multiple endpoints under the `targets` list:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  httpcheck:
     targets:
-      - endpoint: http://background-service.com
+      - endpoint: https://api.example.com/health
+        method: GET
+      - endpoint: https://yoursite.com
+        method: GET
+      - endpoint: https://internal-service.local:8080/ping
+        method: GET
+    collection_interval: 60s
+```
+
+### Use Different Check Intervals
+
+If some endpoints are more critical than others, create separate receiver instances with different intervals. Use the format `httpcheck/<name>` for additional instances:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  httpcheck/critical:
+    targets:
+      - endpoint: https://api.example.com/health
+        method: GET
+    collection_interval: 30s
+
+  httpcheck/standard:
+    targets:
+      - endpoint: https://blog.example.com
+        method: GET
+      - endpoint: https://docs.example.com
         method: GET
     collection_interval: 300s
+```
 
+Then include all instances in your pipeline:
+
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     metrics:
-      receivers: [otlp, httpcheck/rapid, httpcheck/frequent, httpcheck/low]
+      receivers: [otlp, httpcheck/critical, httpcheck/standard]
       processors: [batch]
       exporters: [otlp]
 ```
 
-**Note:** The receiver name format is `httpcheck` for the base receiver and `httpcheck/{name}` for additional instances. Using `httpchecklow` (without the slash) would return an error.
+<Admonition type="info">
+The receiver name format must use a forward slash: `httpcheck/critical`. Writing `httpcheckcritical` (without the slash) causes a configuration error.
+</Admonition>
 
-## Creating Dashboards in SigNoz
+</details>
 
-Once the collector is running and sending data to SigNoz, you can create dashboards to visualize HTTP endpoint health:
+<details>
+<ToggleHeading>
+## Available Metrics Reference
+</ToggleHeading>
 
-### Step 1: Create a New Dashboard
+For the full upstream specification, see the [HTTP Check Receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
 
-1. Navigate to your SigNoz account
-2. Go to the **Dashboard** tab
-3. Click on **New Dashboard** button
-4. Choose **New Panel** and select **Time Series** chart type for HTTP endpoint monitoring
+### Default Metrics (always enabled)
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/monitor-http-endpoints/time-series-chart.webp" alt="Selecting Time Series chart type"/>
-    <figcaption><i>Selecting Time Series chart type for HTTP monitoring</i></figcaption>
-</figure>
+| Metric | Description | Unit |
+|--------|-------------|------|
+| `httpcheck.status` | `1` if the check resulted in a status code matching the status class, `0` otherwise | 1 |
+| `httpcheck.duration` | Measures the duration of the HTTP check | ms |
+| `httpcheck.error` | Records errors occurring during HTTP check (for example, connection refused, DNS failures, timeouts) | &#123;error&#125; |
+
+### Optional Metrics (must be enabled in config)
+
+| Metric | Description | Unit |
+|--------|-------------|------|
+| `httpcheck.dns.lookup.duration` | Time spent performing DNS lookup | ms |
+| `httpcheck.client.connection.duration` | Time spent establishing TCP connection | ms |
+| `httpcheck.tls.handshake.duration` | Time spent performing TLS handshake | ms |
+| `httpcheck.client.request.duration` | Time spent sending the HTTP request | ms |
+| `httpcheck.response.duration` | Time spent receiving the HTTP response | ms |
+| `httpcheck.response.size` | Size of response body | By (bytes) |
+| `httpcheck.tls.cert_remaining` | Time until TLS certificate expires, as specified by `NotAfter` field in the x.509 certificate. Negative values mean the certificate has already expired | s (seconds) |
+| `httpcheck.validation.failed` | Number of response validations that failed | &#123;validation&#125; |
+| `httpcheck.validation.passed` | Number of response validations that passed | &#123;validation&#125; |
+
+### Key Attributes
+
+Attributes vary by metric. The table below shows all attributes and which metrics they apply to:
+
+| Attribute | Description | Applies To |
+|-----------|-------------|------------|
+| `http.url` | Full HTTP request URL | All metrics |
+| `http.status_code` | HTTP response status code | `httpcheck.status` |
+| `http.method` | HTTP request method | `httpcheck.status` |
+| `http.status_class` | HTTP response status class (`2xx`, `4xx`, `5xx`) | `httpcheck.status` |
+| `error.message` | Error message recorded during check | `httpcheck.error` |
+| `network.transport` | OSI transport layer protocol | `httpcheck.client.connection.duration` |
+| `http.tls.issuer` | Certificate issuer | `httpcheck.tls.cert_remaining` |
+| `http.tls.cn` | Certificate common name (CN) | `httpcheck.tls.cert_remaining` |
+| `http.tls.san` | Certificate Subject Alternative Name | `httpcheck.tls.cert_remaining` |
+| `validation.type` | Type of validation (`contains`, `json_path`, `size`, `regex`) | `httpcheck.validation.failed`, `httpcheck.validation.passed` |
+
+</details>
+
+<details>
+<ToggleHeading>
+## Create a Dashboard in SigNoz
+</ToggleHeading>
+
+Once metrics are flowing, create a dashboard to visualize endpoint health:
+
+### Step 1: Create a New Dashboard Panel
+
+1. In SigNoz, go to **Dashboards** → **New Dashboard**
+2. Click **New Panel** and select **Time Series** as the chart type
+
+<Figure src="/img/docs/monitor-http-endpoints/time-series-chart.webp" alt="Selecting the time series chart type when creating a new dashboard panel in SigNoz" caption="Select Time Series chart type for HTTP monitoring" />
 
 ### Step 2: Configure the Query
 
-1. In the **Query Builder** tab, enter "http" in the metric search
-2. You should see `httpcheck.status` and other HTTP-related metrics
+1. In the **Query Builder**, search for `httpcheck.status`
+2. Add a **WHERE** clause: `http.status_class = 2xx` to filter for successful responses
+3. Set **Avg By** to `http.url` to see each endpoint separately
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/monitor-http-endpoints/query-builder-metrics.webp" alt="HTTP metrics in Query Builder"/>
-    <figcaption><i>HTTP metrics available in Query Builder</i></figcaption>
-</figure>
+<Figure src="/img/docs/monitor-http-endpoints/configure-query.webp" alt="Configuring the httpcheck.status metric query with WHERE clause for 2xx status class" caption="Configure the httpcheck.status query with a WHERE clause for 2xx responses" />
 
-3. Select `httpcheck.status` as your metric
-4. Add a **WHERE** clause: `http.status_class = 2xx` to monitor successful responses
+### Step 3: Interpret the Chart
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/monitor-http-endpoints/configure-query.webp" alt="Configuring httpcheck_status query"/>
-    <figcaption><i>Configuring httpcheck.status query with WHERE clause</i></figcaption>
-</figure>
+The chart shows:
+- **Value of 1**: Endpoint is healthy (returning 2xx responses)
+- **Value of 0**: Endpoint is down or returning errors
+- **A separate line for each endpoint** when grouped by `http.url`
 
-5. You can also Average By specific endpoints using the `http.url` attribute
+<Figure src="/img/docs/monitor-http-endpoints/endpoint-health-chart.webp" alt="HTTP endpoint health visualization showing status over time with 1 for healthy and 0 for down" caption="HTTP endpoint health visualization — 1 means healthy, 0 means down" />
 
-### Step 3: Visualize Endpoint Health
+</details>
 
-The resulting chart will show:
-- Value of 1 when endpoints are healthy (returning 2xx status codes)
-- Value of 0 when endpoints are down or returning error codes
-- Different lines for each monitored endpoint
+<details>
+<ToggleHeading>
+## Set Up Alerts
+</ToggleHeading>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/monitor-http-endpoints/endpoint-health-chart.webp" alt="HTTP endpoint health visualization"/>
-    <figcaption><i>HTTP endpoint health visualization showing status over time</i></figcaption>
-</figure>
+Get notified when an endpoint goes down by creating an alert:
 
-## Available Metrics
+### Step 1: Create an Alert from the Dashboard
 
-The HTTP Check receiver provides several metrics:
-
-| Metric | Description | Type |
-|--------|-------------|------|
-| `httpcheck.status` | HTTP response status (1 for matching status class, 0 otherwise) | Sum |
-| `httpcheck.duration` | Duration of the HTTP request in milliseconds | Gauge |
-| `httpcheck.error` | Number of errors during HTTP checks | Sum |
-
-## Available Attributes
-
-Key attributes for filtering and grouping:
-
-| Attribute | Description | Example Values |
-|-----------|-------------|----------------|
-| `http.url` | Full HTTP request URL | `http://example.com`, `http://my-app.com/health` |
-| `http.status_code` | HTTP response status code | `200`, `404`, `500` |
-| `http.method` | HTTP request method | `GET`, `POST`, `PUT` |
-| `http.status_class` | HTTP response status class | `2xx`, `4xx`, `5xx` |
-
-For more details about the metrics and their related attributes, refer to the [HTTP Check Receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
-
-## Setting Up Alerts
-
-You can create alerts to get notified when endpoints go down:
-
-### Step 1: Create Alert from Dashboard
-
-1. In your dashboard panel showing HTTP endpoint health, click the dropdown menu
+1. In your dashboard panel showing endpoint health, click the **dropdown menu** (⋮)
 2. Select **Create Alerts**
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/monitor-http-endpoints/create-alert-dropdown.webp" alt="Creating alert from dashboard panel"/>
-    <figcaption><i>Creating alert from dashboard panel dropdown</i></figcaption>
-</figure>
-
-3. This will take you to the alerts configuration page
+<Figure src="/img/docs/monitor-http-endpoints/create-alert-dropdown.webp" alt="Creating an alert from the dashboard panel dropdown menu" caption="Create an alert directly from a dashboard panel" />
 
 ### Step 2: Configure Alert Conditions
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/monitor-http-endpoints/alert-configuration.webp" alt="Alert configuration page"/>
-    <figcaption><i>Alert configuration page with conditions setup</i></figcaption>
-</figure>
+Set the alert to fire when an endpoint stops returning 2xx responses:
+
+<Figure src="/img/docs/monitor-http-endpoints/alert-configuration.webp" alt="Alert configuration page showing conditions for HTTP endpoint monitoring" caption="Alert configuration — fires when an endpoint goes down" />
 
 Example alert configuration:
-```yaml
-Metrics: httpcheck.status         
-WHERE: http.status_class = 2xx 
+
+```
+Metric: httpcheck.status
+WHERE: http.status_class = 2xx
 Avg By: http.url
 
-
-condition: below the threshold at least once during the last 5 mins
-threshold: 1   
+Condition: below the threshold at least once during the last 5 mins
+Threshold: 1
 ```
 
-The alert fires when any of the monitored endpoint does not respond with 2xx (success) response (even once) during a 5-minute window.
+This alert fires when any monitored endpoint fails to respond with a 2xx (success) status code even once during a 5-minute window. You can configure the alert to send notifications to Slack, PagerDuty, email, or other [notification channels](https://signoz.io/docs/alerts-management/notification-channel/).
 
+</details>
+
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
-**Common Issues:**
+### No `httpcheck` metrics appear in SigNoz
 
-- **No metrics appearing**: Check that the httpcheck receiver is included in the metrics pipeline
-- **Permission errors**: Ensure the collector has network access to the target endpoints
-- **SSL/TLS errors**: Configure appropriate TLS settings for HTTPS endpoints
-- **High resource usage**: Reduce collection frequency for non-critical endpoints
+**Symptoms:** You configured the receiver but see no `httpcheck.*` metrics in the Query Builder.
 
-## Additional Resources
+**Likely causes and fixes:**
 
-For a more detailed guide about HTTP endpoint monitoring with OpenTelemetry, refer to our comprehensive blog post: [Health Check Monitoring with OpenTelemetry](https://signoz.io/blog/health-check-monitoring-with-opentelemetry/).
+1. **Receiver not added to the pipeline** — Make sure `httpcheck` is listed under `service.pipelines.metrics.receivers` in your config file.
+2. **Config file not loaded** — Verify you are pointing to the correct config file when starting the Collector. Check the Collector startup logs for configuration errors.
+3. **Collector not restarted** — Restart the Collector after making config changes.
+
+### Connection refused or timeout errors in Collector logs
+
+**Symptoms:** Collector logs show errors like `connection refused` or `context deadline exceeded` for the target endpoints.
+
+**Likely causes and fixes:**
+
+1. **Network access** — Ensure the Collector host can reach the target endpoint. Test with `curl <endpoint>` from the same machine.
+2. **Firewall rules** — Check that firewalls and security groups allow outbound traffic from the Collector to the target endpoint.
+3. **DNS resolution** — If using hostnames, verify DNS resolution works from the Collector host with `nslookup <hostname>`.
+
+### SSL/TLS errors for HTTPS endpoints
+
+**Symptoms:** Collector logs show TLS handshake errors or certificate-related failures.
+
+**Likely causes and fixes:**
+
+1. **Self-signed certificates** — If the target uses a self-signed certificate, add TLS configuration to skip verification (not recommended for production):
+   ```yaml
+   receivers:
+     httpcheck:
+       targets:
+         - endpoint: https://internal-service.local
+           tls:
+             insecure_skip_verify: true
+   ```
+2. **Expired certificates** — The target's certificate may have expired. Verify with `openssl s_client -connect <host>:443`.
+
+### Metrics not reaching SigNoz Cloud
+
+**Symptoms:** Collector shows successful HTTP checks in debug logs, but metrics don't appear in SigNoz.
+
+**Likely causes and fixes:**
+
+1. **Incorrect ingestion key** — Verify the `signoz-ingestion-key` header value in your exporter config. Get your key from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+2. **Wrong region** — Ensure the `<region>` in the endpoint URL matches your SigNoz Cloud region. See [available regions](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+3. **Exporter name mismatch** — The exporter name under `exporters` must match what is listed in `service.pipelines.metrics.exporters`.
+
+</details>
+
+## Next Steps
+
+- [Create custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize endpoint health, response times, and error rates
+- [Set up notification channels](https://signoz.io/docs/alerts-management/notification-channel/) (Slack, PagerDuty, email) for your HTTP endpoint alerts
+- [Learn about the OTel Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) to customize processing and filtering
+- Read the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">HTTP Check Receiver upstream documentation</a> for advanced configuration options like request bodies, custom headers, and response validation

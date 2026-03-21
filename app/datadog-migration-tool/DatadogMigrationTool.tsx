@@ -24,7 +24,7 @@ import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
 const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   return (
-    <div className={`relative z-[1] mx-2 ${className}`}>
+    <div className={`relative z-[1] mx-2 max-w-8xl ${className}`}>
       <div className="flex items-center justify-center">
         <Button
           variant="default"
@@ -44,7 +44,11 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
           {(closeHandler) => (
             <ModalBody className="px-10 py-8 text-signoz_ink-500">
               <HubspotProvider>
-                <PricingForm portalId={HUBSPOT_DATA.portalId} formId={HUBSPOT_DATA.formId} />
+                <PricingForm
+                  portalId={HUBSPOT_DATA.portalId}
+                  formId={HUBSPOT_DATA.formId}
+                  formName="Datadog Migration Tool"
+                />
               </HubspotProvider>
             </ModalBody>
           )}
@@ -71,12 +75,12 @@ const ReadyToMigrateBanner: React.FC = () => {
 // Main Component Sections
 const Header: React.FC = () => {
   return (
-    <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
+    <header className="relative !mx-auto mt-16 !w-[100vw] max-w-8xl md:!w-[80vw]">
       {/* Border decorations */}
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
       {/* Main content */}
-      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
+      <div className="relative !mx-auto flex !w-[100vw] max-w-8xl flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
           Migrate from Datadog to SigNoz <br className="hidden md:block" /> in Minutes
         </h1>
@@ -89,19 +93,17 @@ const Header: React.FC = () => {
       </div>
 
       {/* Buttons */}
-      <RequestEarlyAccessButton className="!mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]" />
+      <RequestEarlyAccessButton className="!mx-auto !w-[100vw] max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]" />
 
       {/* Hero image */}
       <SectionLayout variant="bordered" className="!mt-0 max-md:-mb-[3rem]">
-        <div className="w-100 mx-[-28px]">
-          <Image
-            src="/img/platform/DatadogMigrationToolHero.png"
-            alt="Datadog migration tool hero"
-            className="w-full rounded-xl"
-            width={10000}
-            height={10000}
-          />
-        </div>
+        <Image
+          src="/img/platform/DatadogMigrationToolHero.webp"
+          alt="Datadog migration tool hero"
+          className="w-full rounded-xl"
+          width={10000}
+          height={10000}
+        />
       </SectionLayout>
     </header>
   )
@@ -152,7 +154,7 @@ const CustomerStories: React.FC = () => {
   return (
     <>
       {/* Featured testimonial */}
-      <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
+      <section className="relative mx-auto w-[100vw] max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw]">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
 
         <div className="relative">
@@ -319,7 +321,7 @@ const WhatWeSupportSection: React.FC = () => {
               <span className="flex items-center gap-2 text-xs uppercase text-signoz_vanilla-400">
                 {item.label} {item.title}
               </span>
-              <p className="leading-relaxed">{item.description}</p>
+              <p className="m-0 leading-relaxed">{item.description}</p>
             </div>
           ))}
         </div>

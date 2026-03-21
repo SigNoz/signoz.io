@@ -7,16 +7,19 @@ export const metadata: Metadata = {
     absolute: 'High-Performance Trace Analysis Powered by Columnar Storage | SigNoz',
   },
   openGraph: {
-    title: "High-Performance Trace Analysis Powered by Columnar Storage",
-    description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
-    images: "/img/platform/DistributedTracingMeta.png"
+    title: 'High-Performance Trace Analysis Powered by Columnar Storage',
+    description:
+      'Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.',
+    images: '/img/platform/DistributedTracingMeta.webp',
   },
-  description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
-  twitter:{
-    title: "High-Performance Trace Analysis Powered by Columnar Storage",
-    description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
-    images: "/img/platform/DistributedTracingMeta.png"
-  }
+  description:
+    'Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.',
+  twitter: {
+    title: 'High-Performance Trace Analysis Powered by Columnar Storage',
+    description:
+      'Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.',
+    images: '/img/platform/DistributedTracingMeta.webp',
+  },
 }
 
 export default function DistributedTracing() {

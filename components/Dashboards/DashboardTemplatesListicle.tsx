@@ -23,6 +23,9 @@ import {
   SiGo,
   SiTemporal,
   SiOpenai,
+  SiSupabase,
+  SiOllama,
+  SiHuggingface,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -152,6 +155,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Claude Code Dashboard Template',
   },
   {
+    name: 'Claude Agent SDK',
+    href: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard/',
+    icon: <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
+    clickName: 'Claude Agent SDK Dashboard Template',
+  },
+  {
     name: 'ClickHouse',
     href: '/docs/dashboards/dashboard-templates/clickhouse-monitoring',
     icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
@@ -206,6 +215,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/ecs-infra-metrics',
     icon: <Container className="h-7 w-7 text-orange-500" />,
     clickName: 'ECS Infra Metrics Dashboard Template',
+  },
+  {
+    name: 'Envoy Proxy',
+    href: '/docs/dashboards/dashboard-templates/envoy-dashboard',
+    icon: <Network className="h-7 w-7 text-purple-500" />,
+    clickName: 'Envoy Proxy Dashboard Template',
   },
   {
     name: 'Flask Monitoring',
@@ -278,10 +293,28 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'HAProxy Dashboard Template',
   },
   {
+    name: 'Haystack',
+    href: '/docs/dashboards/dashboard-templates/haystack-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+        alt="Haystack Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Haystack Dashboard Template',
+  },
+  {
     name: 'Host Metrics',
     href: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
     icon: <Monitor className="h-7 w-7 text-blue-500" />,
     clickName: 'Host Metrics Dashboard Template',
+  },
+  {
+    name: 'Hugging Face',
+    href: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
+    icon: <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />,
+    clickName: 'Hugging Face Dashboard Template',
   },
   {
     name: 'Inkeep',
@@ -372,6 +405,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Memcached Dashboard Template',
   },
   {
+    name: 'Mistral AI',
+    href: '/docs/dashboards/dashboard-templates/mistral-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/mistral-logo.webp"
+        alt="Mistral AI Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Mistral AI Dashboard Template',
+  },
+  {
     name: 'MongoDB',
     href: 'https://github.com/SigNoz/dashboards/tree/main/mongodb',
     icon: <SiMongodb className="h-7 w-7 text-green-600" />,
@@ -390,16 +435,52 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Nginx Dashboard Template',
   },
   {
+    name: 'NVIDIA DCGM',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/nvidia-dcgm',
+    icon: <Cpu className="h-7 w-7 text-green-600" />,
+    clickName: 'NVIDIA DCGM Dashboard Template',
+  },
+  {
     name: 'Nomad',
     href: 'https://github.com/SigNoz/dashboards/tree/main/nomad',
     icon: <Layers className="h-7 w-7 text-purple-600" />,
     clickName: 'Nomad Dashboard Template',
   },
   {
+    name: 'Ollama',
+    href: '/docs/dashboards/dashboard-templates/ollama-dashboard',
+    icon: <SiOllama className="h-7 w-7 text-white" />,
+    clickName: 'Ollama Dashboard Template',
+  },
+  {
     name: 'OpenAI',
     href: '/docs/dashboards/dashboard-templates/openai-dashboard',
     icon: <SiOpenai className="h-7 w-7 text-white" />,
     clickName: 'OpenAI Dashboard Template',
+  },
+  {
+    name: 'OpenClaw',
+    href: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openclaw-logo.svg"
+        alt="OpenClaw Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenClaw Dashboard Template',
+  },
+  {
+    name: 'OpenRouter',
+    href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+        alt="OpenRouter Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenRouter Dashboard Template',
   },
   {
     name: 'Pipecat',
@@ -438,6 +519,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Redis Dashboard Template',
   },
   {
+    name: 'Render',
+    href: '/docs/dashboards/dashboard-templates/render-dashboard',
+    icon: <Cloud className="h-7 w-7 text-purple-400" />,
+    clickName: 'Render Dashboard Template',
+  },
+  {
     name: 'Semantic Kernel',
     href: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
     icon: (
@@ -456,10 +543,22 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'SigNoz Ingestion Analysis Dashboard Template',
   },
   {
+    name: 'SLURM',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/slurm',
+    icon: <Server className="h-7 w-7 text-green-600" />,
+    clickName: 'SLURM Dashboard Template',
+  },
+  {
     name: 'Snowflake',
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Supabase',
+    href: '/docs/dashboards/dashboard-templates/supabase',
+    icon: <SiSupabase className="h-7 w-7 text-green-500" />,
+    clickName: 'Supabase Dashboard Template',
   },
   {
     name: 'Temporal Agents',
