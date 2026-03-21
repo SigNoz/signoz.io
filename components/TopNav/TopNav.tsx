@@ -520,7 +520,7 @@ export default function TopNav() {
                   clickLocation="Top Navbar"
                   prefetch={false}
                 >
-                  Why SigNoz?
+                  Why SigNoz
                 </TrackingLink>
                 <TrackingLink
                   href="/docs"
@@ -787,7 +787,7 @@ export default function TopNav() {
                       clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Why Signoz?
+                      Why Signoz
                     </TrackingLink>
                     <TrackingLink
                       href="/docs"

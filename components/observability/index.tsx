@@ -22,12 +22,12 @@ const Observability = () => {
               <TrackingLink
                 href="/why-signoz/"
                 clickType="Secondary CTA"
-                clickName="Why SigNoz? Button"
+                clickName="Why SigNoz Button"
                 clickLocation="Observability Section"
-                clickText="Why SigNoz?"
+                clickText="Why SigNoz"
               >
                 <Button variant="secondary" rounded="full" isButton>
-                  Why SigNoz?
+                  Why SigNoz
                 </Button>
               </TrackingLink>
             </div>
