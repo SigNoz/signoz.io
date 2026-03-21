@@ -1,5 +1,6 @@
+import { useMemo } from 'react'
 import Image from 'next/image'
-import { Category, QuizQuestion } from '../types'
+import { Category, QuizOption, QuizQuestion } from '../types'
 import { OLLY_IMAGES } from '../data/constants'
 
 interface QuizSectionProps {
@@ -11,6 +12,17 @@ interface QuizSectionProps {
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D']
 
+function shuffleOptions(options: QuizOption[], seed: number): QuizOption[] {
+  const shuffled = [...options]
+  let s = seed
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    s = (s * 1103515245 + 12345) & 0x7fffffff
+    const j = s % (i + 1)
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 export default function QuizSection({
   currentQuestion,
   totalQuestions,
@@ -19,6 +31,10 @@ export default function QuizSection({
 }: QuizSectionProps) {
   const progress = (currentQuestion / totalQuestions) * 100
   const ollyData = OLLY_IMAGES[question.olly]
+  const shuffledOptions = useMemo(
+    () => shuffleOptions(question.options, currentQuestion + 1),
+    [question.options, currentQuestion]
+  )
 
   return (
     <section className="pb-[120px] pt-20">
@@ -89,7 +105,7 @@ export default function QuizSection({
 
           {/* Options */}
           <div className="flex flex-col gap-3">
-            {question.options.map((option, i) => (
+            {shuffledOptions.map((option, i) => (
               <button
                 key={i}
                 onClick={() => onAnswer(option.score, option.category)}

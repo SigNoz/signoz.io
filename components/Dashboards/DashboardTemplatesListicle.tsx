@@ -405,6 +405,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Memcached Dashboard Template',
   },
   {
+    name: 'Mistral AI',
+    href: '/docs/dashboards/dashboard-templates/mistral-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/mistral-logo.webp"
+        alt="Mistral AI Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Mistral AI Dashboard Template',
+  },
+  {
     name: 'MongoDB',
     href: 'https://github.com/SigNoz/dashboards/tree/main/mongodb',
     icon: <SiMongodb className="h-7 w-7 text-green-600" />,
