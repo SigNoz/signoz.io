@@ -1,0 +1,71 @@
+---
+date: 2026-03-16
+id: kubernetes-pvc
+title: Kubernetes PVC Metrics Dashboard
+description: Monitor Kubernetes Persistent Volume Claim (PVC) metrics for capacity and usage.
+doc_type: explanation
+---
+
+Monitor the health and capacity of your Kubernetes Persistent Volume Claims (PVCs). This dashboard provides insights into volume usage, capacity, and inode consumption to help prevent storage issues.
+
+<Admonition type="note">
+  To use this dashboard, ensure you have [installed the k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) and have the `kubeletMetrics` preset enabled in your configuration.
+</Admonition>
+
+## Prerequisites
+
+### Required Helm Configuration
+
+Enable volume metrics collection by adding the following to your k8s-infra Helm values:
+
+```yaml
+presets:
+  kubeletMetrics:
+    enabled: true
+```
+
+The kubeletstats receiver will collect volume metrics from all pods in your cluster.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/k8s-pvc.webp"
+  alt="Kubernetes PVC Metrics Dashboard"
+  caption="Kubernetes PVC Metrics Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/k8s-infra-metrics/kubernetes-pvc-metrics.json"
+    dashboardName="Kubernetes PVC Metrics"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard monitors the state of Persistent Volume Claims in your cluster, helping you track storage consumption and availability.
+
+## Metrics Included
+
+### Volume Capacity
+- **Volume Available**: The amount of storage space available on the PVC.
+- **Volume Capacity**: The total capacity of the PVC.
+
+### Inode Usage
+
+<Admonition type="note">
+  **Note on Inode Metrics Availability:** Inode support for PVCs is currently limited or not available in standard Kubernetes monitoring checks. These metrics may only be populated if your specific volume plugins or custom storage exporters support them.
+</Admonition>
+
+- **Volume Inodes**: Average inode usage.
+- **Volume Inodes Free**: Number of free inodes.
+- **Volume Inodes Used**: Number of used inodes.
+
+## Next Steps
+
+- **[Set Alerts](https://signoz.io/docs/userguide/alerts-management/)**: Create alerts for low disk space or high inode usage.
+
+## Related Dashboards
+
+- [Host Metrics K8s](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-k8s)
+- [Kubernetes Pod Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed)

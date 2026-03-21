@@ -217,6 +217,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Mastra Monitoring',
   },
   {
+    name: 'Mistral AI',
+    href: '/docs/mistral-observability',
+    icon: (
+      <img
+        src="/img/docs/llm/mistral/mistral-logo.webp"
+        alt="Mistral AI Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Mistral AI Monitoring',
+  },
+  {
     name: 'Ollama',
     href: '/docs/ollama-monitoring',
     icon: <SiOllama className="h-7 w-7 text-white" />,
