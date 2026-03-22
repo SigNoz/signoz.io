@@ -6,8 +6,6 @@ import ComparisonsListing from './comparisons/Comparisons'
 import Guides from './guides/Guides'
 import OpenTelemetry from './opentelemetry/OpenTelemetry'
 import Button from '@/components/ui/Button'
-import { ArrowRight, Mail } from 'lucide-react'
-import TrackingLink from '@/components/TrackingLink'
 
 const tabs = [
   {
@@ -45,22 +43,6 @@ export default function ResourceCenter() {
 
   return (
     <div className="container mx-auto py-4">
-      <TrackingLink
-        href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center&utm_campaign=newsletter"
-        className="mb-6 flex items-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-5 py-4 transition-colors hover:border-signoz_robin-500 hover:no-underline"
-        clickType="Nav Click"
-        clickName="Newsletter Banner Link"
-        clickText="Subscribe to Observability Real Talk"
-        clickLocation="Resource Center"
-        target="_blank"
-      >
-        <Mail className="h-5 w-5 flex-shrink-0 text-signoz_robin-500" />
-        <span className="text-sm text-signoz_vanilla-300">
-          Learning OpenTelemetry? Get a curated deep-dive in your inbox every week with{' '}
-          <span className="font-medium text-signoz_vanilla-100">Observability Real Talk</span>.
-        </span>
-        <ArrowRight className="ml-auto h-4 w-4 flex-shrink-0 text-signoz_vanilla-400" />
-      </TrackingLink>
       <div className="mb-8">
         <ul
           className="-mb-px flex flex-wrap pl-0 text-center text-sm font-medium"

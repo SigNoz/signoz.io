@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import React from 'react'
+import { Mail } from 'lucide-react'
 
 export default function Tabs({ activeTab }) {
   return (
     <header className='header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8 overflow-x-auto'>
 
-    <div className="container h-full" >
+    <div className="container flex h-full items-center justify-between" >
       <ul
         className="flex pl-0 text-center text-sm font-medium gap-6 text-signoz_vanilla-400 mb-0 h-full"
         id="default-tab"
@@ -69,6 +70,15 @@ export default function Tabs({ activeTab }) {
           </button>
         </Link>
       </ul>
+
+      <Link
+        href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
+        className="hidden items-center gap-1.5 text-sm text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-500 sm:flex"
+        target="_blank"
+      >
+        <Mail className="h-3.5 w-3.5" />
+        Newsletter
+      </Link>
     </div>
     </header>
   )
