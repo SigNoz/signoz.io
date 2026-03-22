@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { compareSemverParts, parseSemverTag, type SemverParts } from '@/utils/semverTags'
 import {
+  GITHUB_RELEASES_EDGE_S_MAXAGE_SECONDS,
   GITHUB_RELEASES_PARTIAL_INSTANCE_MEMO_MS,
+  GITHUB_RELEASES_PARTIAL_S_MAXAGE_SECONDS,
   GITHUB_RELEASES_REVALIDATE_SECONDS,
+  GITHUB_RELEASES_STALE_WHILE_REVALIDATE_SECONDS,
 } from '@/constants/cache'
 
 const GITHUB_API_URL = 'https://api.github.com/repos/SigNoz/signoz/releases'
@@ -187,11 +190,11 @@ function clearPartialMemo(): void {
 }
 
 function cacheControlFull(): string {
-  return 'private, no-store'
+  return `public, s-maxage=${GITHUB_RELEASES_EDGE_S_MAXAGE_SECONDS}, stale-while-revalidate=${GITHUB_RELEASES_STALE_WHILE_REVALIDATE_SECONDS}`
 }
 
 function cacheControlPartial(): string {
-  return 'private, no-store'
+  return `public, s-maxage=${GITHUB_RELEASES_PARTIAL_S_MAXAGE_SECONDS}, stale-while-revalidate=60`
 }
 
 export async function GET() {
