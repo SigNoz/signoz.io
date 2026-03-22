@@ -69,16 +69,16 @@ export default function Tabs({ activeTab }) {
             OpenTelemetry
           </button>
         </Link>
-      </ul>
 
-      <Link
-        href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
-        className="hidden items-center gap-1.5 text-sm text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-500 sm:flex"
-        target="_blank"
-      >
-        <Mail className="h-3.5 w-3.5" />
-        Newsletter
-      </Link>
+        <Link
+          href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
+          className="flex items-center gap-1.5 text-sm text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-500"
+          target="_blank"
+        >
+          <Mail className="h-3.5 w-3.5" />
+          Newsletter
+        </Link>
+      </ul>
     </div>
     </header>
   )
