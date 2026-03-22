@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
-import { ArrowRight, Atom, Info } from 'lucide-react'
+import { Info } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 
@@ -10,67 +10,58 @@ export const ENTERPRISE_DEMO_HUBSPOT_DATA = {
   formId: 'a908efee-9ec5-4969-9ca4-6e91d0a32b8a',
 }
 
-export const OBSERVABILITY_LANDSCAPE_CARDS = [
+const OBSERVABILITY_LANDSCAPE_SOURCE_LINK_CLASS_NAME =
+  'mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400'
+
+const OBSERVABILITY_LANDSCAPE_ITEM_DATA = [
   {
     id: 'cost-reduction',
-    title: <span className="text-2xl font-bold">99%</span>,
-    description: (
-      <div className="flex flex-col items-start justify-between gap-2">
-        Businesses actively reducing observability costs
-        <Link
-          href={'https://www.gartner.com/en'}
-          className="mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
-          target="_blank"
-          rel="noopener noreferrer"
-          prefetch={false}
-        >
-          Gartner
-          <Info className="size-3 shrink-0" />
-        </Link>
-      </div>
-    ),
+    stat: '99%',
+    body: 'Businesses actively reducing observability costs',
+    source: {
+      href: 'https://www.gartner.com/en',
+      label: 'Gartner',
+    },
   },
   {
     id: 'tool-consolidation',
-    title: <span className="text-2xl font-bold">57%</span>,
-    description: (
-      <div className="flex flex-col items-start justify-between gap-2">
-        Teams cut costs with tool consolidation
-        <Link
-          href={'https://dimensionalresearch.com'}
-          className="mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
-          target="_blank"
-          rel="noopener noreferrer"
-          prefetch={false}
-        >
-          Dimensional Research
-          <Info className="size-3 shrink-0" />
-        </Link>
-      </div>
-    ),
+    stat: '57%',
+    body: 'Teams cut costs with tool consolidation',
+    source: {
+      href: 'https://dimensionalresearch.com',
+      label: 'Dimensional Research',
+    },
   },
   {
     id: 'observability-overages',
-    title: <span className="text-2xl font-bold">71%</span>,
-    description: (
-      <div className="flex flex-col items-start justify-between gap-2">
-        Engineering teams hit unexpected observability overages regularly
-        <Link
-          href={
-            'https://futurecio.tech/gartner-says-security-vendor-consolidation-to-improve-risk-posture/'
-          }
-          className="mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400"
-          target="_blank"
-          rel="noopener noreferrer"
-          prefetch={false}
-        >
-          FutureCIO
-          <Info className="size-3 shrink-0" />
-        </Link>
-      </div>
-    ),
+    stat: '71%',
+    body: 'Engineering teams hit unexpected observability overages regularly',
+    source: {
+      href: 'https://futurecio.tech/gartner-says-security-vendor-consolidation-to-improve-risk-posture/',
+      label: 'FutureCIO',
+    },
   },
-]
+] as const
+
+export const OBSERVABILITY_LANDSCAPE_CARDS = OBSERVABILITY_LANDSCAPE_ITEM_DATA.map((item) => ({
+  id: item.id,
+  title: <span className="text-2xl font-bold">{item.stat}</span>,
+  description: (
+    <div className="flex flex-col items-start justify-between gap-2">
+      {item.body}
+      <Link
+        href={item.source.href}
+        className={OBSERVABILITY_LANDSCAPE_SOURCE_LINK_CLASS_NAME}
+        target="_blank"
+        rel="noopener noreferrer"
+        prefetch={false}
+      >
+        {item.source.label}
+        <Info className="size-3 shrink-0" />
+      </Link>
+    </div>
+  ),
+}))
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
@@ -345,7 +336,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
   {
     title: 'Integrations — Terraform, Kubernetes, Your Stack',
     description: (
-      <div>
+      <>
         <p>
           Native Kubernetes monitoring. Terraform provider for IaC-managed alerting and dashboards.
           100+ collector integrations via OpenTelemetry. Connects to your CI/CD, on-call tooling,
@@ -362,7 +353,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
             Learn more
           </Button>
         </TrackingLink>
-      </div>
+      </>
     ),
     className: 'flex-col items-start justify-center gap-4',
   },
