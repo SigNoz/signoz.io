@@ -34,7 +34,7 @@ const resourceLinks: ResourceLinkData[] = [
   },
   {
     title: 'Newsletter',
-    description: 'Subscribe to Observability Real Talk',
+    description: 'Curated technical content in your inbox',
     href: 'https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=docs_additional_resources&utm_campaign=newsletter',
     icon: <Mail size={20} className="text-signoz_robin-500" />,
     clickName: 'Newsletter Link',
