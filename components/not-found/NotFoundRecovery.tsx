@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Mail } from 'lucide-react'
 import type { SuggestedDoc } from './types'
 
 type NotFoundRecoveryProps = {
@@ -45,6 +46,18 @@ export default function NotFoundRecovery({
             </li>
           ))}
         </ul>
+
+        <div className="mt-10 border-t border-signoz_slate-400 pt-6">
+          <Link
+            href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=404_page&utm_campaign=newsletter"
+            className="inline-flex items-center gap-2 text-sm text-signoz_vanilla-300 transition-colors hover:text-signoz_robin-400"
+            target="_blank"
+          >
+            <Mail className="h-4 w-4" />
+            This page doesn&apos;t exist, but our newsletter does! Read Observability Real Talk while
+            you&apos;re here &rarr;
+          </Link>
+        </div>
       </section>
     </main>
   )

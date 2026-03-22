@@ -632,6 +632,17 @@ export default function TopNav() {
                 >
                   Customer Stories
                 </TrackingLink>
+                <TrackingLink
+                  href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=navbar&utm_campaign=newsletter"
+                  className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                  clickType="Nav Click"
+                  clickName="Newsletter Link"
+                  clickText="Newsletter"
+                  clickLocation="Top Navbar"
+                  target="_blank"
+                >
+                  Newsletter
+                </TrackingLink>
               </div>
             )}
           </div>
@@ -791,6 +802,18 @@ export default function TopNav() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Customer Stories
+                    </TrackingLink>
+                    <TrackingLink
+                      href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=navbar&utm_campaign=newsletter"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                      clickType="Nav Click"
+                      clickName="Newsletter Link"
+                      clickText="Newsletter"
+                      clickLocation="Mobile Menu"
+                      target="_blank"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Newsletter
                     </TrackingLink>
 
                     <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
