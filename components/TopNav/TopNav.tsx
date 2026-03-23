@@ -164,6 +164,11 @@ const comparisionItems = [
     url: '/cloudwatch-alternative/',
     name: 'SigNoz vs CloudWatch',
   },
+  {
+    key: 'clickstack-alternative',
+    url: '/clickstack-alternative/',
+    name: 'SigNoz vs ClickStack',
+  },
 ]
 
 // Sort the productDropdownItems based on the 'order' property
@@ -205,7 +210,7 @@ const resourcesDropdownItems = {
     },
     {
       key: 'migrations',
-      url: '/docs/migration/migrate-from-datadog/',
+      url: '/docs/migration/migrate-from-datadog-to-signoz/',
       description: 'Guides for migrating to SigNoz',
       name: 'Migrations',
     },
@@ -507,6 +512,17 @@ export default function TopNav() {
                   </Popover>
                 </div>
                 <TrackingLink
+                  href="/why-signoz"
+                  className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                  clickType="Nav Click"
+                  clickName="Why Signoz Link"
+                  clickText="Why Signoz"
+                  clickLocation="Top Navbar"
+                  prefetch={false}
+                >
+                  Why SigNoz
+                </TrackingLink>
+                <TrackingLink
                   href="/docs"
                   className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
                   clickType="Nav Click"
@@ -762,6 +778,17 @@ export default function TopNav() {
                       subtopics={productDropdownItemsForMobile}
                       onLinkClick={() => setMobileMenuOpen(false)}
                     />
+                    <TrackingLink
+                      href="/why-signoz"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                      clickType="Nav Click"
+                      clickName="Why Signoz Link"
+                      clickText="Why Signoz"
+                      clickLocation="Mobile Menu"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Why Signoz
+                    </TrackingLink>
                     <TrackingLink
                       href="/docs"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"

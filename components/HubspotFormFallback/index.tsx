@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useHubspotForm } from '@aaronhayes/react-use-hubspot-form'
 import Button from '@/components/ui/Button'
+import { useHubspotSubmissionTracking } from '@/hooks/useHubspotSubmissionTracking'
 
 const FORM_LOAD_TIMEOUT_MS = 10_000
 const MIN_FORM_HEIGHT_PX = 100
@@ -31,10 +32,14 @@ type UseHubspotFormFallbackProps = {
   portalId: string
   formId: string
   target: string
+  formName?: string
 }
 
 export function useHubspotFormFallback(props: UseHubspotFormFallbackProps) {
-  const { error, formCreated } = useHubspotForm(props)
+  useHubspotSubmissionTracking(props.formId, props.formName)
+
+  const { formName, ...hubspotFormProps } = props
+  const { error, formCreated } = useHubspotForm(hubspotFormProps)
 
   const formRef = useRef<HTMLDivElement>(null)
   const [showFallback, setShowFallback] = useState(false)

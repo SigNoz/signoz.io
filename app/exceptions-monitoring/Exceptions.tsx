@@ -8,8 +8,9 @@ import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import SigNozStats from '@/components/signoz-stats'
+import { COMPANIES } from '@/components/trusted-by'
 
-function MetricsDashboards() {
+function Exceptions() {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
@@ -17,19 +18,19 @@ function MetricsDashboards() {
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <Header />
-        <TrustedByTeams page="MetricsDashboards" />
+        <TrustedByTeams page="Exceptions" />
         <SigNozFeatures />
         {/* <SigNozUsage /> */}
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
         <SigNozStats />
-        <GetStarted page="MetricsDashboards" />
+        <GetStarted page="Exceptions" />
       </div>
     </main>
   )
 }
 
-export default MetricsDashboards
+export default Exceptions
 
 const PlatformCard = ({ title, description }) => {
   return (
@@ -182,21 +183,6 @@ const Header = () => {
     </header>
   )
 }
-
-const COMPANIES = [
-  { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
-  { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
-  { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
-  { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
-  { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
-  { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
-  { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
-  { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
-  { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
-]
 
 const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`

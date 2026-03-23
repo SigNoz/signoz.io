@@ -64,6 +64,8 @@ export const EXPERIMENTS = {
       VARIANT: 'observability-on-your-terms-copy',
     },
     flagName: 'homepage-header-copy-experiment',
+    concluded: true,
+    defaultVariant: 'observability-on-your-terms-copy',
   },
   TEAMS_PAGE: {
     id: 'teams-page-focused-layout-experiment',

@@ -1,6 +1,6 @@
 ---
 
-title: OpenTelemetry for Rust Developers - The Complete Implementation Guide
+title: Implementing OpenTelemetry in Rust Applications
 slug: opentelemetry-rust
 date: 2026-03-10
 tags: [OpenTelemetry, Rust]
@@ -51,7 +51,7 @@ While traces and metrics are typically introduced when actively implementing obs
 
 Recognizing this scenario, the OpenTelemetry Rust project <a href="https://github.com/open-telemetry/opentelemetry-rust?tab=readme-ov-file#project-status" rel="noopener noreferrer nofollow" target="_blank">does not expect developers to use a new logging library</a>. Instead it provides *bridge libraries* to generate OpenTelemetry `LogRecords` from log statements emitted by the <a href="https://docs.rs/log/latest/log/" rel="noopener noreferrer nofollow" target="_blank">log</a> or <a href="https://docs.rs/tracing/latest/tracing/" rel="noopener noreferrer nofollow" target="_blank">tracing</a> crates.
 
-Further, the project recommends using `tracing` for new Rust applications. Given this recommendation and `tracing`'s core <a href="https://docs.rs/tracing/latest/tracing/span/index.html" rel="noopener noreferrer nofollow" target="_blank">`Span` concept</a>, which naturally aligns with <Tooltip title="OpenTelemetry spans" content="An individual unit of work. All spans fall under a Trace, which represents all the work done for a single request." />, we have chosen it for logging events in our demo application.
+Further, the project recommends using `tracing` for new Rust applications. Given this recommendation and `tracing`'s core <a href="https://docs.rs/tracing/latest/tracing/span/index.html" rel="noopener noreferrer nofollow" target="_blank">`Span` concept</a>, which naturally aligns with <Tooltip text="OpenTelemetry spans" content="An individual unit of work. All spans fall under a Trace, which represents all the work done for a single request." />, we have chosen it for logging events in our demo application.
 
 Later, we will see how this integration actually happens within the application code.
 
@@ -254,8 +254,7 @@ fn init_logger_provider() {
 
 In contrast, we acquire the tracer explicitly within the `main` function using the global tracing provider we set up earlier, and pass it directly as a function argument to `init_tracing_subscriber`.
 
-### **Generating Telemetry Data for Visualization**
-
+### Generating Telemetry Data for Visualization
 To ensure you have enough data to experiment with, and understand how OpenTelemetry works, we have prepared a simple load generator script that calls the endpoints defined in the application. You can run it in a separate terminal instance:
 
 ```bash

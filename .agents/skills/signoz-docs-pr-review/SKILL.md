@@ -14,6 +14,7 @@ Use this skill for docs review on changes such as:
 - `data/docs/**`
 - `public/img/docs/**`
 - `constants/docsSideNav.ts`
+- `constants/componentItems.ts` and `constants/componentItems/*.ts` when new docs should also appear in docs listicles, overview cards, or similar discovery surfaces
 - `next.config.js` when docs URL paths change
 
 If a PR includes frontend code too, use this skill only for the docs part.
@@ -27,12 +28,13 @@ If a PR includes frontend code too, use this skill only for the docs part.
 ## Review Process
 
 1. Identify docs files changed in the PR.
-2. Read relevant sections in `CONTRIBUTING.md` (JTBD, patterns/components, happy path, hyperlinks, doc-type rules, docs checklist).
-3. Identify intended user personas for each changed doc (for example: OTel beginner, platform engineer, app developer, SRE) from doc context.
-4. Run a **JTBD-first pass** (mandatory) before technical verification.
-5. Verify technical accuracy when claims involve OpenTelemetry behavior/configuration.
-6. Post inline findings for concrete issues.
-7. Post exactly one concise summary comment referencing Docs PR Checklist coverage.
+2. Identify related discoverability files that should change with the docs when relevant (`constants/docsSideNav.ts` for sidebar visibility, `constants/componentItems.ts` as the public entrypoint and `constants/componentItems/*.ts` as the source modules for listicle/overview visibility).
+3. Read relevant sections in `CONTRIBUTING.md` (JTBD, patterns/components, happy path, hyperlinks, doc-type rules, docs checklist).
+4. Identify intended user personas for each changed doc (for example: OTel beginner, platform engineer, app developer, SRE) from doc context.
+5. Run a **JTBD-first pass** (mandatory) before technical verification.
+6. Verify technical accuracy when claims involve OpenTelemetry behavior/configuration.
+7. Post inline findings for concrete issues.
+8. Post exactly one concise summary comment referencing Docs PR Checklist coverage.
 
 ## JTBD Priority Rubric (Mandatory)
 
@@ -74,6 +76,10 @@ Review each changed doc against these checks in order. If any check fails, raise
    - Avoid irrelevant link dumping.
 13. Link health
    - Added/edited links resolve (no dead links). Prefer canonical production paths.
+14. Discoverability surface updates
+   - If a PR adds a new integration, data source, installation path, dashboard template, or similar doc that users should find from an existing docs listicle/overview card surface, verify the matching entry was added or updated in the relevant `constants/componentItems/*.ts` module and remains exported through `constants/componentItems.ts`.
+   - When the surfaced component uses icons, verify the relevant component `ICON_MAP` was updated too.
+   - Do not require this when no existing listicle/overview surface is relevant.
 
 If a JTBD check cannot be validated from the PR context, explicitly call out the assumption and residual risk.
 

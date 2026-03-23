@@ -7,6 +7,10 @@ import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
+import {
+  createSubmissionRelayId,
+  sendSubmissionRelayInBackground,
+} from '@/utils/submissionRelayClient'
 import { FaGithub, FaGoogle } from 'react-icons/fa'
 
 interface ErrorsProps {
@@ -770,6 +774,16 @@ const TeamsVariant: React.FC = () => {
           localStorage.setItem('workEmail', payload.email)
           localStorage.setItem('region', payload.region.name)
 
+          sendSubmissionRelayInBackground({
+            email: payload.email,
+            signupId: createSubmissionRelayId('teams-email'),
+            source: 'teams-email-signup',
+            createdAt: new Date().toISOString(),
+            pageLocation: window.location.pathname,
+            dataRegion: payload.region.name,
+            method: 'email_signup',
+          })
+
           router.push('/verify-email')
         } else {
           // To do, handle other errors apart from invalid email
@@ -881,6 +895,17 @@ const TeamsVariant: React.FC = () => {
             },
           })
           // --- End Segment Calls ---
+
+          sendSubmissionRelayInBackground({
+            email: responseData.data.email,
+            signupId: responseData.data.code || createSubmissionRelayId('teams-social'),
+            source: 'teams-social-signup',
+            createdAt: new Date().toISOString(),
+            pageLocation: window.location.pathname,
+            dataRegion: data_region || undefined,
+            connector: payload.connector,
+            method: 'social_signup',
+          })
 
           router.push(
             `/users?email=${encodeURIComponent(responseData.data.email)}&code=${responseData.data.code}&region=${data_region}`

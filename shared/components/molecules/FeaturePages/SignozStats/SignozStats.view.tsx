@@ -59,7 +59,7 @@ const SigNozStats = () => {
 
   return (
     <SectionLayout variant="bordered" className="flex flex-col !px-0 sm:flex-row">
-      <div className="!w-[300px] flex-1 border !border-b-1 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
+      <div className="flex-1 border !border-b-1 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
         <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
           Developers <br />
           Love
@@ -70,7 +70,7 @@ const SigNozStats = () => {
 
       <div className="flex flex-[2_2_0%] flex-col">
         <div className="border-b border-l border-t border-dashed border-signoz_slate-400 bg-transparent p-0">
-          <div className="p-6">
+          <div className="p-10 md:p-6">
             <h2 className="text-2xl font-bold text-signoz_vanilla-100">
               Your data stays where you want
             </h2>

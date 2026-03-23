@@ -9,6 +9,7 @@ import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import SigNozStats from '@/components/signoz-stats'
+import { COMPANIES } from '@/components/trusted-by'
 
 function MetricsDashboards() {
   return (
@@ -186,21 +187,6 @@ const Header = () => {
   )
 }
 
-const COMPANIES = [
-  { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
-  { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
-  { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
-  { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
-  { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
-  { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
-  { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
-  { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
-  { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
-]
-
 const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
   return (
@@ -311,7 +297,7 @@ const SigNozFeatures = () => {
       desc: 'Your metrics data is stored in ClickHouse - and we give you the ability to write ClickHouse queries directly on your data. This enables in-depth analysis when you want to dig deeper into your data.',
       image: '/img/features/metrics/clickhouse-query-metrics.webp',
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/',
+      buttonLink: 'https://signoz.io/docs/userguide/writing-clickhouse-traces-query/',
     },
     {
       title: 'PromQL Support',

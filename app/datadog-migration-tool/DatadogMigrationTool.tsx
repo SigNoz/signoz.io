@@ -44,7 +44,11 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
           {(closeHandler) => (
             <ModalBody className="px-10 py-8 text-signoz_ink-500">
               <HubspotProvider>
-                <PricingForm portalId={HUBSPOT_DATA.portalId} formId={HUBSPOT_DATA.formId} />
+                <PricingForm
+                  portalId={HUBSPOT_DATA.portalId}
+                  formId={HUBSPOT_DATA.formId}
+                  formName="Datadog Migration Tool"
+                />
               </HubspotProvider>
             </ModalBody>
           )}

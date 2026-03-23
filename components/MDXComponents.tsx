@@ -17,6 +17,7 @@ import DocCard from './DocCard'
 import DocCardContainer from './DocCardContainer'
 import NextCarousel from './Carousel/Carousel'
 import Figure from './Figure/Figure'
+import NextImage from 'next/image'
 import PricingCTA from './PricingCTA'
 import PageFeedback from './PageFeedback/PageFeedback'
 import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
@@ -112,6 +113,7 @@ export const components: MDXComponents = {
   DocCardContainer,
   NextCarousel,
   Figure,
+  NextImage,
   PricingCTA,
   PageFeedback,
   CustomMetricPlayground,

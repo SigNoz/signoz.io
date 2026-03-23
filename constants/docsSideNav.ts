@@ -329,6 +329,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.37',
+            label: 'Upgrade to v0.37',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.36',
             label: 'Upgrade to v0.36',
           },
@@ -437,7 +442,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
+                route: '/docs/userguide/writing-clickhouse-traces-query',
                 label: 'ClickHouse queries for building dashboards and alerts',
               },
             ],
@@ -1325,7 +1330,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-logs',
-                label: 'Node.js',
+                label: 'Console Node.js',
               },
               {
                 type: 'doc',
@@ -1430,6 +1435,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
+            label: 'Convex',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/heroku_logs_to_signoz',
             label: 'Heroku',
           },
@@ -1437,6 +1447,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/vercel_logs_to_signoz',
             label: 'Vercel',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-neondb',
+            label: 'Neon',
           },
           {
             type: 'doc',
@@ -1561,6 +1576,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/logs_query_builder',
             label: 'Logs Query Builder',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs-query-troubleshooting',
+            label: 'Logs Query Troubleshooting',
           },
           {
             type: 'doc',
@@ -1767,6 +1787,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/mysql-metrics',
                 label: 'MySQL',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-neondb',
+                label: 'Neon',
               },
             ],
           },
@@ -2008,6 +2033,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/aws-elasticache-redis',
+            label: 'AWS ElastiCache Redis',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/aws-sqs-prometheus',
             label: 'AWS SQS',
           },
@@ -2020,6 +2050,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CI/CD',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/clickhouse-monitoring',
+            label: 'ClickHouse Monitoring',
           },
           {
             type: 'doc',
@@ -2060,6 +2095,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/envoy-dashboard',
+            label: 'Envoy Proxy',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/flask-monitoring',
+            label: 'Flask Monitoring',
           },
           {
             type: 'doc',
@@ -2112,6 +2157,11 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
                 label: 'Hostmetrics (K8s)',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
+                label: 'Hostmetrics (VM)',
+              },
             ],
           },
           {
@@ -2138,12 +2188,37 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
-                label: 'Kubernetes Cluster Metrics Dashboard',
+                label: 'Kubernetes Cluster Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Host Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-events',
+                label: 'Kubernetes Events',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
+                label: 'Kubernetes PVC Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
+                label: 'Kubernetes Pod Metrics (Overall)',
               },
               {
                 type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
                 label: 'Kubernetes Pod Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
+                label: 'Kubernetes Node Metrics (Overall)',
               },
               {
                 type: 'doc',
@@ -2156,6 +2231,24 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
+          },
+          {
+            label: 'LiteLLM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
+                label: 'LiteLLM Proxy',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
+                label: 'LiteLLM SDK',
+              },
+            ],
           },
           {
             type: 'doc',
@@ -2171,6 +2264,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/memcached',
             label: 'Memcached',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/mistral-dashboard',
+            label: 'Mistral AI',
           },
           {
             type: 'doc',
@@ -2191,6 +2289,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openai-dashboard',
             label: 'OpenAI',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
+            label: 'OpenClaw',
           },
           {
             type: 'doc',
@@ -2216,6 +2319,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/rabbitmq',
             label: 'RabbitMQ',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/render-dashboard',
+            label: 'Render',
           },
           {
             type: 'doc',
@@ -2347,6 +2455,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/writing-clickhouse-traces-query',
             label: 'Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/clickhouse-faqs',
+            label: 'FAQs',
           },
         ],
       },
@@ -2507,6 +2620,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
+            label: 'Missing Alerts in SigNoz',
+          },
+          {
+            type: 'doc',
             route:
               '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
             label: 'Alerts Firing Without Visible Threshold Breach',
@@ -2550,80 +2668,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/alerts-management/apdex-alerts',
         label: 'Apdex Alerts',
-      },
-    ],
-  },
-  {
-    label: 'Frontend Monitoring',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/frontend-monitoring',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
-        label: 'Sending Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
-        label: 'Sending Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
-        label: 'Sending Metrics',
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
-        label: 'Web Vitals',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/frontend-monitoring/web-vitals-with-metrics',
-            label: 'Web Vitals with Metrics',
-          },
-          {
-            type: 'doc',
-            route: '/docs/frontend-monitoring/web-vitals-with-traces',
-            label: 'Web Vitals with Traces',
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/document-load',
-        label: 'Document Load',
-      },
-    ],
-  },
-  {
-    label: 'Mobile Monitoring',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/mobile-monitoring',
-    items: [
-      {
-        type: 'doc',
-        label: 'Swift UI',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
-      },
-      {
-        type: 'doc',
-        label: 'Java',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java',
-      },
-      {
-        type: 'doc',
-        label: 'Kotlin',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin',
-      },
-      {
-        type: 'doc',
-        label: 'Flutter',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
       },
     ],
   },
@@ -2750,6 +2794,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/mistral-observability',
+        label: 'Mistral AI',
+        type: 'doc',
+      },
+      {
         route: '/docs/ollama-monitoring',
         label: 'Ollama',
         type: 'doc',
@@ -2757,6 +2806,11 @@ const docsSideNav = [
       {
         route: '/docs/openai-monitoring',
         label: 'OpenAI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/openclaw-monitoring',
+        label: 'OpenClaw',
         type: 'doc',
       },
       {
@@ -2804,13 +2858,18 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'SigNoz MCP',
-
+    label: 'AI Tools and Skills',
+    route: '/docs/ai/overview',
     items: [
       {
         type: 'doc',
-        route: '/docs/signoz-mcp-server',
-        label: 'SigNoz MCP Server',
+        route: '/docs/ai/signoz-mcp-server',
+        label: 'MCP Server',
+      },
+      {
+        type: 'doc',
+        route: '/docs/ai/agent-skills',
+        label: 'Agent Skills',
       },
     ],
   },
@@ -2973,6 +3032,80 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Frontend Monitoring',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/frontend-monitoring',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
+        label: 'Sending Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
+        label: 'Sending Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
+        label: 'Sending Metrics',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
+        label: 'Web Vitals',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-metrics',
+            label: 'Web Vitals with Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-traces',
+            label: 'Web Vitals with Traces',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/document-load',
+        label: 'Document Load',
+      },
+    ],
+  },
+  {
+    label: 'Mobile Monitoring',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/mobile-monitoring',
+    items: [
+      {
+        type: 'doc',
+        label: 'Swift UI',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
+      },
+      {
+        type: 'doc',
+        label: 'Java',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java',
+      },
+      {
+        type: 'doc',
+        label: 'Kotlin',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin',
+      },
+      {
+        type: 'doc',
+        label: 'Flutter',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
+      },
+    ],
+  },
+  {
     label: 'Integrations',
     type: 'category',
     isExpanded: false,
@@ -3127,6 +3260,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/sql-server',
         label: 'Microsoft SQL Server',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-neondb',
+        label: 'Neon',
       },
       {
         type: 'doc',

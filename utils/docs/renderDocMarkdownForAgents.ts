@@ -1,15 +1,13 @@
-import { allDocs } from 'contentlayer/generated'
 import type { Doc } from 'contentlayer/generated'
 import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
+import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
 
 // Next.js static generation is the primary cache for this route. This Map is only a
 // best-effort warm-process optimization, and eviction is intentionally FIFO rather than LRU
 // because each docs slug is normally rendered once under force-static.
 const markdownCache = new Map<string, string>()
 const MAX_MARKDOWN_CACHE_ENTRIES = 2000
-const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
-
 type GenericNode = {
   type?: string
   name?: string
@@ -51,29 +49,16 @@ const hasMatchingLeadingH1 = (markdown: string, title: string): boolean => {
   return normalizeHeadingText(leadingH1) === normalizeHeadingText(title)
 }
 
-const buildHeader = (doc: Doc, options?: { includeTitle?: boolean }): string => {
-  const tags = getDocTags(doc)
-  const sections: string[] = []
-
-  if (options?.includeTitle !== false) {
-    sections.push(`# ${doc.title}`)
-  }
-
-  if (doc.description) {
-    sections.push(doc.description)
-  }
-
-  if (tags.length > 0) {
-    sections.push(`Tags: ${tags.join(', ')}`)
-  }
-
-  return normalizeWhitespace(sections.join('\n\n'))
-}
-
 const buildFallbackMarkdown = (doc: Doc): string => {
   const includeTitle = !hasMatchingLeadingH1(doc.body.raw, doc.title)
-  const sections = [buildHeader(doc, { includeTitle }), doc.body.raw, MORE_DOCS_POINTER]
-  return normalizeWhitespace(sections.filter(Boolean).join('\n\n'))
+  return buildMarkdownDocument({
+    title: doc.title,
+    includeTitle,
+    description: doc.description,
+    tags: getDocTags(doc),
+    bodyMarkdown: doc.body.raw,
+    footerLines: [MORE_DOCS_POINTER],
+  })
 }
 
 const sanitizeMdxForAgentRendering = () => {
@@ -174,7 +159,7 @@ const getMdxComponentFromCode = async (code: string) => {
 const convertCompiledMdxToMarkdown = async (doc: Doc): Promise<string> => {
   const React = await import('react')
   const { renderToStaticMarkup } = await import('react-dom/server')
-  const mdxComponents = buildAgentMdxComponentsForDoc(doc, allDocs as Doc[])
+  const mdxComponents = buildAgentMdxComponentsForDoc(doc)
   const MdxComponent = await getMdxComponentFromCode(doc.body.code)
   const element = React.createElement(MdxComponent as any, {
     components: mdxComponents,
@@ -223,9 +208,14 @@ export async function renderDocMarkdownForAgents(doc: Doc): Promise<string> {
 
     const includeTitle = !hasMatchingLeadingH1(bodyMarkdown, doc.title)
     const renderedMarkdown = normalizeWhitespace(
-      [buildHeader(doc, { includeTitle }), bodyMarkdown, MORE_DOCS_POINTER]
-        .filter(Boolean)
-        .join('\n\n')
+      buildMarkdownDocument({
+        title: doc.title,
+        includeTitle,
+        description: doc.description,
+        tags: getDocTags(doc),
+        bodyMarkdown,
+        footerLines: [MORE_DOCS_POINTER],
+      })
     )
     setMarkdownCache(cacheKey, renderedMarkdown)
     return renderedMarkdown

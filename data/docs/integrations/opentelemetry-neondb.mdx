@@ -1,0 +1,112 @@
+---
+date: 2026-03-14
+id: opentelemetry-neon
+title: OpenTelemetry Neon DB Integration
+description: Learn how to monitor your Neon Postgres databases in SigNoz using Neon's native OpenTelemetry integrations.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Monitor your Neon DB project's health and performance in SigNoz by directly configuring your observability pipeline using the OpenTelemetry Protocol (OTLP). Neon supports natively exporting Postgres logs and infrastructural metrics without the need for an intermediate OpenTelemetry Collector.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- A **Neon project**
+- An instance of [SigNoz Cloud](https://signoz.io/teams/)
+
+## Configure the Neon Project Integration
+
+Neon allows you to configure your OpenTelemetry endpoint directly from their web console. To start exporting metrics and logs to SigNoz Cloud:
+
+### Step 1: Add the OpenTelemetry Integration in Neon
+
+1. Log into your Neon Console and go to the **Integrations** page.
+2. Under the **Monitor** > **OpenTelemetry** section, click **Add**.
+3. Select the type of data you want to export. You can select either **Metrics** or **Logs** or both.
+
+<Figure
+  src="/img/docs/integrations/neondb/signoz-integration-1.webp"
+  caption="Neon DB Integration Setup - Select Data Type"
+  alt="Neon DB Integration Setup - Select Data Type"
+/>
+
+### Step 2: Configure Destination
+
+1. Select connection protocol as **gRPC** (recommended) or **HTTP**.
+2. Enter SigNoz Cloud ingestion endpoint in the **Endpoint URL** field:
+
+```
+https://ingest.<region>.signoz.cloud:443
+```
+
+3. Select **API Key** for authentication and set the custom header name to `signoz-ingestion-key`, and enter your `<your-ingestion-key>`.
+
+    Verify these values:
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  If you are using **self-hosted SigNoz**, update the endpoint to your self-hosted URL and port. An ingestion key is not required — since Neon requires an authentication method, keep **API Key** selected and enter any placeholder value (e.g., `not-needed`). The self-hosted collector does not validate this header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted) for details.
+</KeyPointCallout>
+
+4. Optionally, in the **Resource** section, configure the `service.name` attribute to identify your Neon project in SigNoz. You can use your actual project name. Neon will divide the metrics logically into `compute-host-metrics` for host metrics and `sql-metrics` for Postgres.
+
+<Figure
+  src="/img/docs/integrations/neondb/signoz-integration-2.webp"
+  caption="Neon DB Integration Setup - Destination"
+  alt="Neon DB Integration Setup - Destination"
+/>
+
+### Step 3: Save and Complete the Integration
+
+Click **Save** to complete the setup. If successful, the integration will be listed under the **Integrations** page in Neon, and you will start seeing metrics and logs in SigNoz within a few minutes.
+
+<Figure
+  src="/img/docs/integrations/neondb/signoz-integration-3.webp"
+  caption="Neon DB Integration - Status"
+  alt="Neon DB Integration - Status"
+/>
+
+<Figure
+  src="/img/docs/integrations/neondb/sample-metrics.webp"
+  caption="Neon DB Metrics in SigNoz"
+  alt="Neon DB Metrics in SigNoz"
+/>
+
+<Figure
+  src="/img/docs/integrations/neondb/sample-logs.webp"
+  caption="Neon DB Logs in SigNoz"
+  alt="Neon DB Logs in SigNoz"
+/>
+
+## Validate
+
+Verify the metrics are being collected by SigNoz. Neon data should start appearing in SigNoz within a few minutes.
+
+- To check for metrics, go to the **Dashboards** > **Metrics Explorer** and look for metrics prefixed with `neon_` or metrics carrying your configured `service.name` related to Postgres.
+- Go to the **Logs** tab in SigNoz and query using your configured `service.name` to see Postgres logs.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### Data is not appearing in SigNoz
+
+- **Invalid Credentials:** Ensure your `signoz-ingestion-key` is correctly populated and you have not selected "Bearer" or "Basic". 
+- **Endpoint Suffixes:** Do not append `/v1/metrics` or `/v1/logs` to your endpoint URL as Neon appends this automatically. Check that your URL ends in `.cloud:443` without trailing slashes.
+
+</details>
+
+## Next Steps
+
+- Take a look at the query builder to start [building dashboards](https://signoz.io/docs/userguide/manage-dashboards/) with your Postgres data.
+- Read how to [Set up Alerts in SigNoz](https://signoz.io/docs/userguide/alerts-management/).
+
+## Get Help
+
+<GetHelp />
