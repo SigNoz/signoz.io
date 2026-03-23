@@ -30,6 +30,7 @@ import {
   SiNodedotjs,
   SiPython,
   SiDeno,
+  SiHasura,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import { VscGraphLine } from 'react-icons/vsc'
@@ -286,6 +287,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/integrations/opentelemetry-neondb',
             icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
             clickName: 'Neon Metrics Link',
+          },
+          {
+            name: 'Hasura',
+            href: '/docs/integrations/opentelemetry-hasura',
+            icon: <SiHasura className="h-7 w-7 text-blue-600" />,
+            clickName: 'Hasura Metrics Link',
           },
           {
             name: 'SQL Server',

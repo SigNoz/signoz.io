@@ -25,6 +25,7 @@ import {
   SiRedis,
   SiMysql,
   SiDeno,
+  SiHasura,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -139,6 +140,12 @@ export default function LogsInstrumentationListicle({
             href: '/docs/integrations/opentelemetry-neondb',
             icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
             clickName: 'Neon Logs Link',
+          },
+          {
+            name: 'Hasura',
+            href: '/docs/integrations/opentelemetry-hasura',
+            icon: <SiHasura className="h-7 w-7 text-blue-600" />,
+            clickName: 'Hasura Logs Link',
           },
           {
             name: 'Convex',

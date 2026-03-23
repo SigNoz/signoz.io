@@ -12,6 +12,7 @@ import {
   SiTypescript,
   SiAmazonwebservices,
   SiMysql,
+  SiHasura,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import { FaAws } from 'react-icons/fa'
@@ -119,6 +120,12 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
             href: '/docs/integrations/opentelemetry-neondb',
             icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
             clickName: 'Neon Integration Link',
+          },
+          {
+            name: 'Hasura',
+            href: '/docs/integrations/opentelemetry-hasura',
+            icon: <SiHasura className="h-7 w-7 text-blue-600" />,
+            clickName: 'Hasura Integration Link',
           },
           {
             name: 'Microsoft SQL Server',

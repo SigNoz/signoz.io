@@ -32,6 +32,7 @@ import {
   SiAndroid,
   SiWordpress,
   SiDeno,
+  SiHasura,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -359,6 +360,12 @@ export default function APMInstrumentationListicle({
             href: '/docs/instrumentation/opentelemetry-wordpress',
             icon: <SiWordpress className="h-7 w-7 text-blue-600" />,
             clickName: 'WordPress Instrumentation Link',
+          },
+          {
+            name: 'Hasura',
+            href: '/docs/integrations/opentelemetry-hasura',
+            icon: <SiHasura className="h-7 w-7 text-blue-600" />,
+            clickName: 'Hasura Instrumentation Link',
           },
         ]}
         sectionName="Additional Options"
