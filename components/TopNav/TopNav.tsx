@@ -370,7 +370,7 @@ export default function TopNav() {
                 >
                   <Popover.Root open={isOpen} onOpenChange={setIsOpen} modal={false}>
                     <Popover.Trigger asChild>
-                      <Button className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 ">
+                      <Button className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500">
                         <div className="flex items-center">
                           Product
                           <ChevronDown
@@ -387,7 +387,7 @@ export default function TopNav() {
                         sideOffset={4}
                         onMouseEnter={handleMouseEnterProduct}
                         onMouseLeave={handleMouseLeaveProduct}
-                        className="z-50 w-[min(100vw-2rem,920px)] max-w-[min(100vw-2rem,920px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none data-[side=bottom]:animate-none"
+                        className="z-50 min-w-fit origin-top-left overflow-hidden rounded-[4px] border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
                       >
                         <div className="flex min-w-0 flex-row">
                           <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
@@ -396,12 +396,12 @@ export default function TopNav() {
                             >
                               Product Modules
                             </div>
-                            <div className="grid grid-cols-3 gap-x-3 gap-y-5">
+                            <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-x-0 gap-y-4">
                               {productDropdownItems.map((item) => (
                                 <TrackingLink
                                   href={item.url || ''}
                                   disabled={item.url === undefined}
-                                  className={`group flex h-auto items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
+                                  className={`group flex h-auto min-w-0 items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
                                   key={item.key}
                                   clickType="Nav Click"
                                   clickName={`${item.name} Product Link`}
@@ -412,20 +412,21 @@ export default function TopNav() {
                                 >
                                   {typeof item.icon === 'string' && item.icon !== null ? (
                                     <Image
+                                      className="shrink-0"
                                       src={item.icon}
                                       alt={`${item.name}`}
                                       width={20}
                                       height={20}
                                     />
                                   ) : (
-                                    <div className="h-5 w-5">{item.icon}</div>
+                                    <div className="h-5 w-5 shrink-0">{item.icon}</div>
                                   )}
-                                  <div>
+                                  <div className="min-w-0">
                                     <div className="flex flex-row items-center gap-1">
-                                      <span>{item.name}</span>{' '}
+                                      <span className="text-sm">{item.name}</span>{' '}
                                       <ArrowRight
                                         size={14}
-                                        className="opacity-0 group-hover:opacity-100"
+                                        className="shrink-0 opacity-0 group-hover:opacity-100"
                                       />
                                     </div>
                                     <div
@@ -438,9 +439,7 @@ export default function TopNav() {
                               ))}
                             </div>
                           </div>
-                          <div
-                            className={`flex w-[300px] shrink-0 flex-col gap-y-6 rounded-r-md border-l border-signoz_slate-400 bg-signoz_ink-300 p-6 sm:w-[320px]`}
-                          >
+                          <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 p-6 sm:w-[300px] lg:w-[320px]">
                             <div className="flex flex-col gap-y-4">
                               <Link
                                 href={'/case-study'}
@@ -453,7 +452,7 @@ export default function TopNav() {
                               <div>
                                 <TrackingLink
                                   href={'/case-study/brainfish/'}
-                                  className="group flex h-auto items-center gap-4"
+                                  className="group flex h-auto min-w-0 items-center gap-4"
                                   clickType="Nav Click"
                                   clickName="Customer Stories Link"
                                   clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
@@ -462,13 +461,14 @@ export default function TopNav() {
                                   prefetch={false}
                                 >
                                   <Image
+                                    className="shrink-0"
                                     src={'/img/index_features/brainfish.svg'}
                                     alt={''}
                                     width={20}
                                     height={20}
                                   />
                                   <div
-                                    className={`font-inter text-xs leading-snug text-signoz_vanilla-400 group-hover:text-[#fff]`}
+                                    className={`line-clamp-2 max-w-[274px] text-sm text-signoz_vanilla-400 group-hover:text-[#fff]`}
                                   >
                                     How Brainfish leveraged SigNoz for effective Kubernetes
                                     monitoring
@@ -483,7 +483,7 @@ export default function TopNav() {
                                 <span>Compare Signoz</span>
                               </div>
                               <div
-                                className={`font-inter flex flex-col gap-1 text-signoz_vanilla-400`}
+                                className={`flex flex-col gap-1 text-sm text-signoz_vanilla-400`}
                               >
                                 {comparisionItems.map((comparisionItem) => (
                                   <TrackingLink
@@ -546,7 +546,7 @@ export default function TopNav() {
                     modal={false}
                   >
                     <Popover.Trigger asChild>
-                      <Button className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 ">
+                      <Button className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500">
                         <div className="flex items-center">
                           Resources
                           <ChevronDown
@@ -563,7 +563,7 @@ export default function TopNav() {
                         sideOffset={4}
                         onMouseEnter={handleMouseEnterResources}
                         onMouseLeave={handleMouseLeaveResources}
-                        className="z-50 w-[min(100vw-2rem,640px)] max-w-[min(100vw-2rem,640px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none"
+                        className="z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
                       >
                         <div className="flex min-w-0 flex-row">
                           <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">

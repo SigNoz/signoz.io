@@ -15,6 +15,20 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      keyframes: {
+        'nav-popover-in': {
+          '0%': { transform: 'translateY(-8px) scale(0.7)' },
+          '100%': { transform: 'translateY(0) scale(1)' },
+        },
+        'nav-popover-out': {
+          '0%': { transform: 'translateY(0) scale(1)' },
+          '100%': { transform: 'translateY(-6px) scale(0.7)' },
+        },
+      },
+      animation: {
+        'nav-popover-in': 'nav-popover-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'nav-popover-out': 'nav-popover-out 150ms cubic-bezier(0.4, 0, 1, 1) both',
+      },
       maxWidth: {
         '8xl': '1440px',
       },
