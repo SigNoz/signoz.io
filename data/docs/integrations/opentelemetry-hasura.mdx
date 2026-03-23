@@ -150,7 +150,7 @@ Hasura exports OpenTelemetry metrics covering:
 - Event trigger performance
 - Connection pool statistics
 
-The available metrics are the same as those available via Prometheus. See [Hasura Metrics Documentation](https://hasura.io/docs/2.0/observability/enterprise-edition/prometheus/metrics/).
+The available metrics are the same as those available via Prometheus. See <a href="https://hasura.io/docs/2.0/observability/enterprise-edition/prometheus/metrics/" target="_blank" rel="noopener noreferrer nofollow">Hasura Metrics Documentation</a>.
 
 </TabItem>
 <TabItem value="logs" label="Logs">
@@ -174,7 +174,7 @@ Hasura Data Connectors run as separate services alongside the GraphQL Engine. At
 The GraphQL Data Connectors (which power Athena, MariaDB, MySQL, Oracle, Redshift, Snowflake, etc.) are built on top of Quarkus. Set the following environment variables on the connector container:
 
 ```bash
-QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/traces"
 QUARKUS_OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 QUARKUS_OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 QUARKUS_OTEL_RESOURCE_ATTRIBUTES="service.name=hasura-graphql-connector"
@@ -188,12 +188,18 @@ The Mongo Data Connector uses standard OpenTelemetry environment variables:
 ```bash
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/traces"
 OTEL_EXPORTER_OTLP_TRACES_PROTOCOL="http/protobuf"
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 OTEL_SERVICE_NAME="hasura-mongo-connector"
 OTEL_PROPAGATORS="tracecontext"
 ```
 
 </TabItem>
 </Tabs>
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ## Validate
 
