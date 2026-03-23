@@ -4,7 +4,11 @@ import FeatureCard from '../FeatureCard'
 import { SectionLayoutProps } from '../SectionLayout'
 
 const HeroCards: React.FC<{
-  cards: { icon?: React.ReactNode; title: string; description: string | React.ReactNode }[]
+  cards: {
+    icon?: React.ReactNode
+    title: string | React.ReactNode
+    description: string | React.ReactNode
+  }[]
   variant?: 'default' | 'combined'
   layoutVariant?: SectionLayoutProps['variant']
   cols?: number

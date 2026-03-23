@@ -1,10 +1,13 @@
 import ProductNav from '@/components/ProductNav/ProductNav'
 import { FeaturePageLayoutProps } from './FeaturePageLayout.types'
 
-const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({ children }) => {
+const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({
+  children,
+  showProductNav = true,
+}) => {
   return (
     <main className="!mt-[-10px] mb-auto">
-      <ProductNav />
+      {showProductNav && <ProductNav />}
 
       <div className="relative bg-signoz_ink-500">
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />

@@ -112,6 +112,11 @@ export const LLM_MONITORING_ITEMS: ComponentItem[] = [
     clickName: 'LlamaIndex Monitoring',
   },
   { name: 'Mastra', href: '/docs/mastra-observability', clickName: 'Mastra Monitoring' },
+  {
+    name: 'Mistral AI',
+    href: '/docs/mistral-observability',
+    clickName: 'Mistral AI Monitoring',
+  },
   { name: 'Ollama', href: '/docs/ollama-monitoring', clickName: 'Ollama Monitoring' },
   { name: 'OpenAI', href: '/docs/openai-monitoring', clickName: 'OpenAI Monitoring' },
   { name: 'OpenClaw', href: '/docs/openclaw-monitoring', clickName: 'OpenClaw Monitoring' },
@@ -1300,6 +1305,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Memcached',
     href: '/docs/dashboards/dashboard-templates/memcached',
     clickName: 'Memcached Dashboard Template',
+  },
+  {
+    name: 'Mistral AI',
+    href: '/docs/dashboards/dashboard-templates/mistral-dashboard',
+    clickName: 'Mistral AI Dashboard Template',
   },
   {
     name: 'MongoDB',

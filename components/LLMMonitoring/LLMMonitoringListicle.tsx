@@ -95,6 +95,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/mastra-observability': (
     <img src="/img/docs/llm/mastra/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />
   ),
+  '/docs/mistral-observability': (
+    <img src="/img/docs/llm/mistral/mistral-logo.webp" alt="Mistral AI Icon" className="h-7 w-7" />
+  ),
   '/docs/ollama-monitoring': <SiOllama className="h-7 w-7 text-white" />,
   '/docs/openai-monitoring': <SiOpenai className="h-7 w-7 text-green-400" />,
   '/docs/openclaw-monitoring': (

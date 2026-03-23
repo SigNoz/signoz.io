@@ -25,7 +25,7 @@ export default function SkillBreakdownChart({ breakdown }: SkillBreakdownChartPr
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[13px] font-medium">{item.label}</span>
             <span className="font-[family-name:var(--font-jetbrains)] text-[13px] font-semibold">
-              {item.average.toFixed(1)}/10
+              {(item.score / item.count).toFixed(1)}/3
             </span>
           </div>
           <div className="h-[6px] overflow-hidden rounded-[3px] bg-[var(--surface-2)]">

@@ -206,6 +206,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/memcached': (
     <HardDrive className="h-7 w-7 text-green-600" />
   ),
+  '/docs/dashboards/dashboard-templates/mistral-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/mistral-logo.webp"
+      alt="Mistral AI Icon"
+      className="h-7 w-7"
+    />
+  ),
   'https://github.com/SigNoz/dashboards/tree/main/mongodb': (
     <SiMongodb className="h-7 w-7 text-green-600" />
   ),
