@@ -42,7 +42,7 @@ const getClassNames = (node: HastElement): string[] => {
   return []
 }
 
-const getTextContent = (node: HastContent): string => {
+export const getTextContent = (node: HastContent): string => {
   if (isHastText(node)) {
     return node.value
   }

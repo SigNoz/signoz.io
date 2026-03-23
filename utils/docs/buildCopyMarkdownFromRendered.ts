@@ -1,5 +1,5 @@
 import type { Root as HastRoot, RootContent as HastContent, Element as HastElement } from 'hast'
-import { hastToMarkdown, normalizeWhitespace } from './markdownCore'
+import { getTextContent, hastToMarkdown, normalizeWhitespace } from './markdownCore'
 import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
 
 export type BuildCopyMarkdownOptions = {
@@ -32,18 +32,6 @@ const hasDataTabsRoot = (node: HastElement): boolean =>
 const getTabValue = (node: HastElement): string => {
   const value = getProperty(node, ['data-tab-value', 'dataTabValue'])
   return typeof value === 'string' ? value : ''
-}
-
-const getTextContent = (node: HastContent): string => {
-  if (node.type === 'text') {
-    return node.value
-  }
-
-  if (!isElement(node)) {
-    return ''
-  }
-
-  return (node.children || []).map((child) => getTextContent(child)).join('')
 }
 
 const visitElements = (node: HastParentNode, visitor: (element: HastElement) => void) => {
