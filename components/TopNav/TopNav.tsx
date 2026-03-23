@@ -387,16 +387,16 @@ export default function TopNav() {
                         sideOffset={4}
                         onMouseEnter={handleMouseEnterProduct}
                         onMouseLeave={handleMouseLeaveProduct}
-                        className="z-50 w-max max-w-[min(100vw-2rem,920px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none data-[side=bottom]:animate-none"
+                        className="z-50 w-[min(100vw-2rem,920px)] max-w-[min(100vw-2rem,920px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none data-[side=bottom]:animate-none"
                       >
-                        <div className="flex flex-row">
-                          <div className="flex flex-col gap-y-4 p-6">
+                        <div className="flex min-w-0 flex-row">
+                          <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
                             <div
                               className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
                             >
                               Product Modules
                             </div>
-                            <div className="grid grid-cols-3 gap-x-0 gap-y-4">
+                            <div className="grid grid-cols-3 gap-x-3 gap-y-5">
                               {productDropdownItems.map((item) => (
                                 <TrackingLink
                                   href={item.url || ''}
@@ -439,7 +439,7 @@ export default function TopNav() {
                             </div>
                           </div>
                           <div
-                            className={`flex flex-col gap-y-6 rounded-r-[4px] border-l border-signoz_slate-400 bg-signoz_ink-300 p-6`}
+                            className={`flex w-[300px] shrink-0 flex-col gap-y-6 rounded-r-md border-l border-signoz_slate-400 bg-signoz_ink-300 p-6 sm:w-[320px]`}
                           >
                             <div className="flex flex-col gap-y-4">
                               <Link
@@ -468,7 +468,7 @@ export default function TopNav() {
                                     height={20}
                                   />
                                   <div
-                                    className={`font-inter line-clamp-2 max-w-[274px] text-signoz_vanilla-400 group-hover:text-[#fff]`}
+                                    className={`font-inter text-xs leading-snug text-signoz_vanilla-400 group-hover:text-[#fff]`}
                                   >
                                     How Brainfish leveraged SigNoz for effective Kubernetes
                                     monitoring
@@ -563,10 +563,10 @@ export default function TopNav() {
                         sideOffset={4}
                         onMouseEnter={handleMouseEnterResources}
                         onMouseLeave={handleMouseLeaveResources}
-                        className="z-50 w-max max-w-[min(100vw-2rem,640px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none"
+                        className="z-50 w-[min(100vw-2rem,640px)] max-w-[min(100vw-2rem,640px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none"
                       >
-                        <div className="flex flex-row">
-                          <div className="flex flex-col gap-y-4 p-6">
+                        <div className="flex min-w-0 flex-row">
+                          <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
                             <div
                               className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
                             >
@@ -603,7 +603,7 @@ export default function TopNav() {
                               ))}
                             </div>
                           </div>
-                          <div className="flex flex-col gap-y-4 p-6">
+                          <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
                             <div
                               className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
                             >

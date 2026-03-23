@@ -139,23 +139,6 @@ const MetricsCostEstimation = () => {
                         tooltipText={formatNumber(metricsValue)}
                         thumbColorToken="signoz_robin-500"
                         aria-label="Datapoints per minute in a time-series"
-                        endSlot={
-                          <output>
-                            <input
-                              className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_robin-400 focus:border-signoz_robin-500"
-                              type="text"
-                              value={inputMetricsValue}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                setinputMetricsValue(e.target.value)
-                              }}
-                              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === 'Enter' && !isNaN(Number(inputMetricsValue))) {
-                                  setMetricsValue(Number(inputMetricsValue))
-                                }
-                              }}
-                            />
-                          </output>
-                        }
                       />
                     </div>
                   </div>
