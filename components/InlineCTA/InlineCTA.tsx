@@ -11,7 +11,7 @@ interface InlineCTAProps {
 
 export default function InlineCTA({
   message,
-  ctaText = 'Get Started — Free',
+  ctaText = 'Get Started - Free',
   ctaLink = '/teams/',
 }: InlineCTAProps) {
   return (
