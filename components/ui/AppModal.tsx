@@ -1,7 +1,7 @@
 'use client'
 
-import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, type ReactNode } from 'react'
+import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react'
+import { type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
 const sizeClass = {
@@ -36,50 +36,35 @@ export function AppModal({
   backdrop = 'default',
 }: AppModalProps) {
   return (
-    <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[100]" onClose={() => onOpenChange(false)}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-150"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div
-            className={cn(
-              'fixed inset-0',
-              backdrop === 'blur' ? 'bg-black/40 backdrop-blur-sm' : 'bg-black/55'
-            )}
-            aria-hidden="true"
-          />
-        </Transition.Child>
+    <Dialog
+      as="div"
+      className="relative z-[100]"
+      open={isOpen}
+      onClose={() => onOpenChange(false)}
+      transition
+    >
+      <DialogBackdrop
+        transition
+        className={cn(
+          'fixed inset-0 transition duration-200 ease-out data-[closed]:opacity-0',
+          backdrop === 'blur' ? 'bg-black/40 backdrop-blur-sm' : 'bg-black/55'
+        )}
+      />
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel
-                className={cn(
-                  'relative w-full transform overflow-hidden text-left align-middle shadow-xl transition-all',
-                  sizeClass[size],
-                  panelClassName
-                )}
-              >
-                {children}
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+      <div className="fixed inset-0 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
+          <DialogPanel
+            transition
+            className={cn(
+              'relative w-full transform overflow-hidden text-left align-middle shadow-xl transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0',
+              sizeClass[size],
+              panelClassName
+            )}
+          >
+            {children}
+          </DialogPanel>
         </div>
-      </Dialog>
-    </Transition>
+      </div>
+    </Dialog>
   )
 }

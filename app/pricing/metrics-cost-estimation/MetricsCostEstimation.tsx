@@ -6,7 +6,6 @@ import { ArrowRight } from 'lucide-react'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { AppModal } from '@/components/ui/AppModal'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
-import { AppTooltip } from '@/components/ui/AppTooltip'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
 const formatNumber = (number: number) =>
@@ -136,34 +135,28 @@ const MetricsCostEstimation = () => {
                         color="secondary"
                         minLabel="1"
                         maxLabel="6"
+                        markLabels={['1', '2', '3', '4', '5', '6']}
                         tooltipText={formatNumber(metricsValue)}
                         thumbColorToken="signoz_robin-500"
                         aria-label="Datapoints per minute in a time-series"
                         endSlot={
                           <output>
-                            <AppTooltip content="Press Enter to apply" delayDuration={300}>
-                              <input
-                                className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_robin-400 focus:border-signoz_robin-500"
-                                type="text"
-                                value={inputMetricsValue}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                  setinputMetricsValue(e.target.value)
-                                }}
-                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                  if (e.key === 'Enter' && !isNaN(Number(inputMetricsValue))) {
-                                    setMetricsValue(Number(inputMetricsValue))
-                                  }
-                                }}
-                              />
-                            </AppTooltip>
+                            <input
+                              className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_robin-400 focus:border-signoz_robin-500"
+                              type="text"
+                              value={inputMetricsValue}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                setinputMetricsValue(e.target.value)
+                              }}
+                              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                if (e.key === 'Enter' && !isNaN(Number(inputMetricsValue))) {
+                                  setMetricsValue(Number(inputMetricsValue))
+                                }
+                              }}
+                            />
                           </output>
                         }
                       />
-                      <div className="mt-1 flex justify-between px-0.5 text-[10px] text-signoz_vanilla-400">
-                        {[1, 2, 3, 4, 5, 6].map((n) => (
-                          <span key={n}>{n}</span>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </div>

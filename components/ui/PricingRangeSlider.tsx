@@ -2,7 +2,7 @@
 
 import * as SliderPrimitive from '@radix-ui/react-slider'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
 const rangeByColor = {
@@ -35,6 +35,8 @@ type PricingRangeSliderProps = {
   className?: string
   /** Renders beside the slider (e.g. manual numeric input) */
   endSlot?: ReactNode
+  /** When set (e.g. 1–6 discrete), shows one label per step under the track instead of only min/max */
+  markLabels?: string[]
 }
 
 export function PricingRangeSlider({
@@ -51,9 +53,11 @@ export function PricingRangeSlider({
   'aria-label': ariaLabel,
   className,
   endSlot,
+  markLabels,
 }: PricingRangeSliderProps) {
   const thumbBg = thumbByToken[thumbColorToken] ?? 'bg-signoz_robin-500'
   const rangeBg = rangeByColor[color]
+  const [isDragging, setIsDragging] = useState(false)
 
   const body = (
     <>
@@ -61,6 +65,8 @@ export function PricingRangeSlider({
         className="relative flex w-full touch-none select-none items-center py-2"
         value={[value]}
         onValueChange={(v) => onChange(v[0] ?? min)}
+        onPointerDown={() => setIsDragging(true)}
+        onPointerUp={() => setIsDragging(false)}
         min={min}
         max={max}
         step={step}
@@ -69,7 +75,7 @@ export function PricingRangeSlider({
         <SliderPrimitive.Track className="relative h-1.5 w-full grow rounded-full bg-signoz_slate-500">
           <SliderPrimitive.Range className={cn('absolute h-full rounded-full', rangeBg)} />
         </SliderPrimitive.Track>
-        <TooltipPrimitive.Root delayDuration={0}>
+        <TooltipPrimitive.Root open={isDragging || undefined} delayDuration={0}>
           <TooltipPrimitive.Trigger asChild>
             <SliderPrimitive.Thumb
               className={cn(
@@ -83,7 +89,7 @@ export function PricingRangeSlider({
             <TooltipPrimitive.Content
               side="top"
               sideOffset={8}
-              className="z-[110] rounded-md border border-signoz_slate-400 bg-signoz_ink-200 px-2 py-1 text-xs text-signoz_vanilla-100 shadow-md"
+              className="z-[200] rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-2 py-1 text-xs text-signoz_vanilla-100 shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
             >
               {tooltipText}
             </TooltipPrimitive.Content>
@@ -91,8 +97,14 @@ export function PricingRangeSlider({
         </TooltipPrimitive.Root>
       </SliderPrimitive.Root>
       <div className="mt-1 flex justify-between text-[10px] text-signoz_vanilla-400">
-        <span>{minLabel}</span>
-        <span>{maxLabel}</span>
+        {markLabels && markLabels.length > 0 ? (
+          markLabels.map((label, i) => <span key={i}>{label}</span>)
+        ) : (
+          <>
+            <span>{minLabel}</span>
+            <span>{maxLabel}</span>
+          </>
+        )}
       </div>
     </>
   )

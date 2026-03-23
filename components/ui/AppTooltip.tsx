@@ -28,12 +28,12 @@ export function AppTooltip({
           side={side}
           sideOffset={6}
           className={cn(
-            'z-[100] max-w-sm rounded-md border border-signoz_slate-400 bg-signoz_ink-200 px-2 py-1.5 text-xs text-signoz_vanilla-100 shadow-md',
+            'z-[200] max-w-sm rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-3 py-2 text-left text-xs leading-snug text-signoz_vanilla-100 shadow-[0_8px_30px_rgba(0,0,0,0.45)]',
             contentClassName
           )}
         >
           {content}
-          <TooltipPrimitive.Arrow className="fill-signoz_ink-200" width={10} height={5} />
+          <TooltipPrimitive.Arrow className="fill-signoz_ink-400" width={10} height={5} />
         </TooltipPrimitive.Content>
       </TooltipPrimitive.Portal>
     </TooltipPrimitive.Root>

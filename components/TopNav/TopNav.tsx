@@ -25,7 +25,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Tabs from '../../app/resource-center/Shared/Tabs'
 import * as Popover from '@radix-ui/react-popover'
 import Accordion from '../Accordion/Accordion'
-import { Color } from '@signozhq/design-tokens'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import TrackingLink from '@/components/TrackingLink'
@@ -385,15 +384,15 @@ export default function TopNav() {
                       <Popover.Content
                         side="bottom"
                         align="start"
-                        sideOffset={8}
+                        sideOffset={4}
                         onMouseEnter={handleMouseEnterProduct}
                         onMouseLeave={handleMouseLeaveProduct}
-                        className="z-50 w-max max-w-[min(100vw-2rem,920px)] rounded-[4px] border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-xl outline-none data-[side=bottom]:animate-none"
+                        className="z-50 w-max max-w-[min(100vw-2rem,920px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none data-[side=bottom]:animate-none"
                       >
                         <div className="flex flex-row">
                           <div className="flex flex-col gap-y-4 p-6">
                             <div
-                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
                             >
                               Product Modules
                             </div>
@@ -430,7 +429,7 @@ export default function TopNav() {
                                       />
                                     </div>
                                     <div
-                                      className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                      className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
                                     >
                                       {item.description}
                                     </div>
@@ -440,12 +439,12 @@ export default function TopNav() {
                             </div>
                           </div>
                           <div
-                            className={`flex flex-col gap-y-6 rounded-r-[4px] border-l border-[${Color.BG_SLATE_400}] bg-[${Color.BG_INK_300}] p-6`}
+                            className={`flex flex-col gap-y-6 rounded-r-[4px] border-l border-signoz_slate-400 bg-signoz_ink-300 p-6`}
                           >
                             <div className="flex flex-col gap-y-4">
                               <Link
                                 href={'/case-study'}
-                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}] hover:text-[#fff]`}
+                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50 hover:text-[#fff]`}
                                 onClick={handleProductDropdownClick}
                                 prefetch={false}
                               >
@@ -469,7 +468,7 @@ export default function TopNav() {
                                     height={20}
                                   />
                                   <div
-                                    className={`font-inter line-clamp-2 max-w-[274px] text-[${Color.TEXT_VANILLA_400}] group-hover:text-[#fff]`}
+                                    className={`font-inter line-clamp-2 max-w-[274px] text-signoz_vanilla-400 group-hover:text-[#fff]`}
                                   >
                                     How Brainfish leveraged SigNoz for effective Kubernetes
                                     monitoring
@@ -479,12 +478,12 @@ export default function TopNav() {
                             </div>
                             <div className="flex flex-col gap-y-4">
                               <div
-                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
                               >
                                 <span>Compare Signoz</span>
                               </div>
                               <div
-                                className={`font-inter flex flex-col gap-1 text-[${Color.TEXT_VANILLA_400}]`}
+                                className={`font-inter flex flex-col gap-1 text-signoz_vanilla-400`}
                               >
                                 {comparisionItems.map((comparisionItem) => (
                                   <TrackingLink
@@ -561,15 +560,15 @@ export default function TopNav() {
                       <Popover.Content
                         side="bottom"
                         align="start"
-                        sideOffset={8}
+                        sideOffset={4}
                         onMouseEnter={handleMouseEnterResources}
                         onMouseLeave={handleMouseLeaveResources}
-                        className="z-50 w-max max-w-[min(100vw-2rem,640px)] rounded-[4px] border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-xl outline-none"
+                        className="z-50 w-max max-w-[min(100vw-2rem,640px)] rounded-md border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none"
                       >
                         <div className="flex flex-row">
                           <div className="flex flex-col gap-y-4 p-6">
                             <div
-                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
                             >
                               Learn
                             </div>
@@ -595,7 +594,7 @@ export default function TopNav() {
                                       />
                                     </div>
                                     <div
-                                      className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                      className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
                                     >
                                       {item.description}
                                     </div>
@@ -606,7 +605,7 @@ export default function TopNav() {
                           </div>
                           <div className="flex flex-col gap-y-4 p-6">
                             <div
-                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
                             >
                               Explore
                             </div>
@@ -632,7 +631,7 @@ export default function TopNav() {
                                       />
                                     </div>
                                     <div
-                                      className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                      className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
                                     >
                                       {item.description}
                                     </div>
