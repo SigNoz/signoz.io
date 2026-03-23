@@ -2,7 +2,8 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import { useDisclosure } from '@/hooks/useDisclosure'
+import { AppModal } from '@/components/ui/AppModal'
 import VimeoPlayer from '../VimeoPlayer/VimeoPlayer'
 import TrackingButton from '@/components/TrackingButton'
 
@@ -44,23 +45,17 @@ export const VideoModalPlayer = ({ thumbnailSrc, videoId }: VideoModalPlayerProp
           </div>
         </div>
 
-        <Modal
-          size={'5xl'}
+        <AppModal
+          size="5xl"
           backdrop="blur"
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          className="self-center"
+          panelClassName="bg-transparent p-0"
         >
-          <ModalContent className="bg-transparent">
-            {() => (
-              <>
-                <ModalBody className="py-6">
-                  <VimeoPlayer videoId={videoId} />
-                </ModalBody>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
+          <div className="py-6">
+            <VimeoPlayer videoId={videoId} />
+          </div>
+        </AppModal>
       </div>
     </div>
   )

@@ -1,7 +1,9 @@
+'use client'
+
 import React from 'react'
 import { ArrowLeft, ArrowRight, List } from 'lucide-react'
 import Link from 'next/link'
-import { Tooltip } from '@nextui-org/react'
+import { AppTooltip } from '@/components/ui/AppTooltip'
 import { cn } from '../../app/lib/utils'
 
 type ArticleLink = {
@@ -73,7 +75,7 @@ export default function ArticleSeriesTop({
       {/* Right: Prev/Current Position/Next */}
       <div className="flex items-center space-x-4">
         {showPrevious && prevLink ? (
-          <Tooltip content={`Previous: ${prevLink.title}`} delay={150}>
+          <AppTooltip content={`Previous: ${prevLink.title}`} delayDuration={150}>
             <Link
               href={prevLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
@@ -82,7 +84,7 @@ export default function ArticleSeriesTop({
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
-          </Tooltip>
+          </AppTooltip>
         ) : (
           <div className="h-8 w-8" aria-hidden="true" />
         )}
@@ -92,7 +94,7 @@ export default function ArticleSeriesTop({
         </span>
 
         {showNext && nextLink ? (
-          <Tooltip content={`Next: ${nextLink.title}`} delay={150}>
+          <AppTooltip content={`Next: ${nextLink.title}`} delayDuration={150}>
             <Link
               href={nextLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
@@ -101,7 +103,7 @@ export default function ArticleSeriesTop({
             >
               <ArrowRight className="h-4 w-4" />
             </Link>
-          </Tooltip>
+          </AppTooltip>
         ) : (
           <div className="h-8 w-8" aria-hidden="true" />
         )}

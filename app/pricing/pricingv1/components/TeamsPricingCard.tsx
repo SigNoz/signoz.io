@@ -3,7 +3,7 @@ import { ArrowUpRight, CheckCircle, ChevronDown, Info } from 'lucide-react'
 import Image from 'next/image'
 import Button from 'components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
-import { Tooltip } from '@nextui-org/react'
+import { AppTooltip } from '@/components/ui/AppTooltip'
 import { Card } from '@/components/ui/Card'
 
 export default function TeamsPricingCard() {
@@ -164,8 +164,7 @@ export default function TeamsPricingCard() {
             <span className="text-signoz_vanilla-400">
               <span className="flex items-center gap-1">
                 Support via in-product Chat, Email, and Slack
-                <Tooltip
-                  className="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                <AppTooltip
                   content={
                     <div className="max-w-xs">
                       <p className="mb-1 font-medium text-signoz_vanilla-100">Support includes:</p>
@@ -177,9 +176,10 @@ export default function TeamsPricingCard() {
                       </ul>
                     </div>
                   }
+                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
                 >
                   <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
-                </Tooltip>
+                </AppTooltip>
               </span>
             </span>
           </li>
@@ -190,8 +190,7 @@ export default function TeamsPricingCard() {
             <span className="text-signoz_vanilla-400">
               <span className="flex items-center gap-1">
                 SOC2 Type II & HIPAA Compliant
-                <Tooltip
-                  className="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                <AppTooltip
                   content={
                     <div className="max-w-xs">
                       <p className="mb-1 font-medium text-signoz_vanilla-100">
@@ -204,9 +203,10 @@ export default function TeamsPricingCard() {
                       </ul>
                     </div>
                   }
+                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
                 >
                   <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
-                </Tooltip>
+                </AppTooltip>
               </span>
             </span>
           </li>
