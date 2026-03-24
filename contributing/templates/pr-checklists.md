@@ -4,10 +4,10 @@ Use the sections below as lightweight references when filling out or reviewing t
 
 ## All Changes
 
-- Build locally with `yarn build`.
 - Run the checks that match the files changed.
 - Self-review the change before requesting review.
 - Document any failures, caveats, or follow-up work.
+- If a check is currently failing for unrelated repo or environment reasons, call that out clearly in the PR.
 
 ## Docs Changes
 
