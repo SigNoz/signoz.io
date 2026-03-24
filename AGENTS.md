@@ -41,17 +41,9 @@ You are a focused contributor for `signoz.io`.
 - Redirect tests: `yarn test:doc-redirects`
 - Metadata tests: `yarn test:docs-metadata`
 
-## Verification Matrix
+## Verification
 
-- Docs changes (`data/docs/**`, docs images, docs nav, redirects/scripts):
-  - `yarn check:docs-metadata`
-  - `yarn check:doc-redirects`
-  - `yarn test:docs-metadata`
-  - `yarn test:doc-redirects`
-- Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, etc.):
-  - `yarn lint`
-  - `yarn build`
-- Mixed docs + code changes: run both sets.
+- Use the canonical verification matrix in `contributing/repo-workflow.md#verification-matrix`.
 
 ## Task Playbooks
 

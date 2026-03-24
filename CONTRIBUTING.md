@@ -20,28 +20,16 @@ Use this file as the stable entrypoint for contributing to `signoz-web`.
 - `contributing/**` contains the canonical task-level policy, checklists, and templates.
 - `AGENTS.md`, review skills, PR templates, and workflow prompts should link to those playbooks instead of duplicating them.
 
-## Verification Matrix
+## Verification
 
-- Docs changes (`data/docs/**`, docs images, docs nav, redirects/scripts):
-  - `yarn check:docs-metadata`
-  - `yarn check:doc-redirects`
-  - `yarn test:docs-metadata`
-  - `yarn test:doc-redirects`
-- Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, config):
-  - `yarn lint`
-  - `yarn build`
-- Mixed docs + code changes:
-  - run both sets
-- `constants/componentItems/*.ts` changes:
-  - `yarn tsc --noEmit`
-  - `node --test tests/component-items-sync.test.js`
+Use the canonical verification matrix in [contributing/repo-workflow.md](contributing/repo-workflow.md#verification-matrix).
 
 ## Shared PR Workflow
 
 1. Fork and clone the repo.
 2. Create a focused branch.
 3. Make task-scoped changes.
-4. Run the checks that match your files.
+4. Run the checks that match your files using the matrix in [contributing/repo-workflow.md](contributing/repo-workflow.md#verification-matrix).
 5. Open the PR as Draft by default.
 6. Mark it ready only after checks and self-review are complete.
 
