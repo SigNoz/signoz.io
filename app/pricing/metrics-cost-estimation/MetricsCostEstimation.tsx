@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { useDisclosure } from '@/hooks/useDisclosure'
 import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'

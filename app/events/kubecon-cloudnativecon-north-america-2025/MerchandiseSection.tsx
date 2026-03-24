@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { useDisclosure } from '@/hooks/useDisclosure'
 import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 
 const merchandise = {

@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { Play, ArrowRight } from 'lucide-react'
-import { useDisclosure } from '@/hooks/useDisclosure'
 import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import Button from '../Button/Button'
 import YouTube from '../VideoPlayer/VideoPlayer'

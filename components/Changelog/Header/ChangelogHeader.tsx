@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Styles from './styles.module.css'
-import { useDisclosure } from '@/hooks/useDisclosure'
 import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import { DeploymentType, DeploymentTypeColors, DeploymentTypeLabels } from '@/utils/strapi'
 import { useRouter, useSearchParams } from 'next/navigation'
