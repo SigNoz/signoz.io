@@ -53,537 +53,254 @@ import {
   Search,
 } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
+import { DASHBOARD_TEMPLATES_ITEMS } from '@/constants/componentItems'
 
-interface IconCardData {
-  name: string
-  href: string
-  icon: React.ReactNode
-  clickName: string
+const ICON_MAP: Record<string, React.ReactNode> = {
+  '/docs/dashboards/dashboard-templates/agno-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard': (
+    <SiAmazonwebservices className="h-7 w-7 text-white" />
+  ),
+  '/docs/dashboards/dashboard-templates/anthropic-dashboard': (
+    <SiAnthropic className="h-7 w-7 text-orange-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/apache-web-server': (
+    <SiApache className="h-7 w-7 text-red-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/apm-dashboards': (
+    <Activity className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/argocd-dashboard': (
+    <GitBranch className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/autogen-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/autogen-logo.webp" alt="Autogen Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/aws-elasticache-redis': (
+    <Cloud className="h-7 w-7 text-orange-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/aws-rds': (
+    <Database className="h-7 w-7 text-blue-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/aws-sqs-prometheus': (
+    <MessageSquare className="h-7 w-7 text-purple-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/azure-openai-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/azure-logo.webp"
+      alt="Azure OpenAI Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/cicd': <Settings className="h-7 w-7 text-green-600" />,
+  '/docs/dashboards/dashboard-templates/claude-code-dashboard/': (
+    <SiClaude className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard/': (
+    <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />
+  ),
+  '/docs/dashboards/dashboard-templates/clickhouse-monitoring': (
+    <SiClickhouse className="h-7 w-7 text-yellow-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/codex-dashboard': (
+    <SiOpenai className="h-7 w-7 text-white" />
+  ),
+  '/docs/dashboards/dashboard-templates/cost-meter': (
+    <BarChart3 className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/couchdb': <Database className="h-7 w-7 text-red-500" />,
+  '/docs/dashboards/dashboard-templates/crewai-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/deepseek-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/deepseek-icon.svg"
+      alt="DeepSeek Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/docker-container-metrics': (
+    <SiDocker className="h-7 w-7 text-blue-400" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/ecs-infra-metrics': (
+    <Container className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/envoy-dashboard': (
+    <Network className="h-7 w-7 text-purple-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/flask-monitoring': <Globe className="h-7 w-7 text-black" />,
+  '/docs/dashboards/dashboard-templates/frontend-monitoring': (
+    <Network className="h-7 w-7 text-white" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/gcp/compute-engine': (
+    <Cloud className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/google-adk-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+      alt="Google ADK Icon"
+      className="h-7 w-7"
+    />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/google-gemini': (
+    <SiGooglegemini className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/go-runtime-metrics': (
+    <SiGo className="h-7 w-7 text-cyan-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/grok-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/groq-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/hadoop': (
+    <Server className="h-7 w-7 text-yellow-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/haproxy-monitoring': (
+    <Shield className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/haystack-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+      alt="Haystack Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/hostmetrics-dashboards': (
+    <Monitor className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/huggingface-dashboard': (
+    <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />
+  ),
+  '/docs/dashboards/dashboard-templates/inkeep-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/jenkins': (
+    <SiJenkins className="h-7 w-7 text-blue-700" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/jmx': <Cpu className="h-7 w-7 text-red-600" />,
+  '/docs/dashboards/dashboard-templates/jvm-metrics': <Cpu className="h-7 w-7 text-orange-600" />,
+  '/docs/dashboards/dashboard-templates/kubernetes-dashboards': (
+    <SiKubernetes className="h-7 w-7 text-blue-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/keda': (
+    <Zap className="h-7 w-7 text-purple-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/key-operations': (
+    <Target className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/litellm-dashboards': (
+    <img src="/svgs/icons/LLMMonitoring/litellm-logo.webp" alt="LiteLLM Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/livekit-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/livekit-icon.svg" alt="LiveKit Icon" className="h-7 w-7" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/llm-observability': (
+    <Brain className="h-7 w-7 text-purple-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/mastra-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/memcached': (
+    <HardDrive className="h-7 w-7 text-green-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/mistral-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/mistral-logo.webp"
+      alt="Mistral AI Icon"
+      className="h-7 w-7"
+    />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/mongodb': (
+    <SiMongodb className="h-7 w-7 text-green-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/mysql': <SiMysql className="h-7 w-7 text-orange-500" />,
+  '/docs/dashboards/dashboard-templates/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
+  'https://github.com/SigNoz/dashboards/tree/main/nvidia-dcgm': (
+    <Cpu className="h-7 w-7 text-green-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/nomad': (
+    <Layers className="h-7 w-7 text-purple-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/ollama-dashboard': (
+    <SiOllama className="h-7 w-7 text-white" />
+  ),
+  '/docs/dashboards/dashboard-templates/openai-dashboard': (
+    <SiOpenai className="h-7 w-7 text-white" />
+  ),
+  '/docs/dashboards/dashboard-templates/openclaw-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/openclaw-logo.svg"
+      alt="OpenClaw Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/openrouter-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+      alt="OpenRouter Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/pipecat-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/pipecat-logo.webp" alt="Pipecat Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/postgresql': (
+    <SiPostgresql className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/pydantic-ai-dashboard': (
+    <SiPydantic className="h-7 w-7 text-pink-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/rabbitmq': (
+    <SiRabbitmq className="h-7 w-7 text-orange-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/redis': (
+    <SiRedis className="h-7 w-7 text-red-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/render-dashboard': (
+    <Cloud className="h-7 w-7 text-purple-400" />
+  ),
+  '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/sk-logo.webp"
+      alt="Semantic Kernel Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis': (
+    <BarChart3 className="h-7 w-7 text-blue-500" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/slurm': (
+    <Server className="h-7 w-7 text-green-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/snowflake': (
+    <SiSnowflake className="h-7 w-7 text-blue-400" />
+  ),
+  '/docs/dashboards/dashboard-templates/supabase': (
+    <SiSupabase className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/temporal-dashboard': (
+    <SiTemporal className="h-7 w-7 text-purple-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/temporal.io': (
+    <Clock className="h-7 w-7 text-blue-600" />
+  ),
+  'https://github.com/SigNoz/dashboards/tree/main/vercel-ai-sdk': (
+    <SiVercel className="text-black-600 h-7 w-7" />
+  ),
 }
 
-const DashboardTemplatesData: IconCardData[] = [
-  {
-    name: 'Agno',
-    href: '/docs/dashboards/dashboard-templates/agno-dashboard',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Agno Dashboard Template',
-  },
-  {
-    name: 'Amazon Bedrock',
-    href: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
-    icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
-    clickName: 'Amazon Bedrock Dashboard Template',
-  },
-  {
-    name: 'Anthropic API',
-    href: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
-    icon: <SiAnthropic className="h-7 w-7 text-orange-600" />,
-    clickName: 'Anthropic API Dashboard Template',
-  },
-  {
-    name: 'Apache Web Server',
-    href: '/docs/dashboards/dashboard-templates/apache-web-server',
-    icon: <SiApache className="h-7 w-7 text-red-600" />,
-    clickName: 'Apache Web Server Dashboard Template',
-  },
-  {
-    name: 'APM',
-    href: '/docs/dashboards/dashboard-templates/apm-dashboards',
-    icon: <Activity className="h-7 w-7 text-blue-500" />,
-    clickName: 'APM Dashboard Template',
-  },
-  {
-    name: 'ArgoCD',
-    href: '/docs/dashboards/dashboard-templates/argocd-dashboard',
-    icon: <GitBranch className="h-7 w-7 text-orange-500" />,
-    clickName: 'ArgoCD Dashboard Template',
-  },
-  {
-    name: 'Autogen',
-    href: '/docs/dashboards/dashboard-templates/autogen-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/autogen-logo.webp"
-        alt="Autogen Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Autogen Dashboard Template',
-  },
-  {
-    name: 'AWS ElastiCache Redis',
-    href: '/docs/dashboards/dashboard-templates/aws-elasticache-redis',
-    icon: <Cloud className="h-7 w-7 text-orange-600" />,
-    clickName: 'AWS ElastiCache Redis Dashboard Template',
-  },
-  {
-    name: 'AWS RDS',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/aws-rds',
-    icon: <Database className="h-7 w-7 text-blue-600" />,
-    clickName: 'AWS RDS Dashboard Template',
-  },
-  {
-    name: 'AWS SQS Prometheus',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/aws-sqs-prometheus',
-    icon: <MessageSquare className="h-7 w-7 text-purple-600" />,
-    clickName: 'AWS SQS Prometheus Dashboard Template',
-  },
-  {
-    name: 'Azure OpenAI API',
-    href: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/azure-logo.webp"
-        alt="Azure OpenAI Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Azure OpenAI API Dashboard Template',
-  },
-  {
-    name: 'CI/CD',
-    href: '/docs/dashboards/dashboard-templates/cicd',
-    icon: <Settings className="h-7 w-7 text-green-600" />,
-    clickName: 'CI/CD Dashboard Template',
-  },
-  {
-    name: 'Claude Code',
-    href: '/docs/dashboards/dashboard-templates/claude-code-dashboard/',
-    icon: <SiClaude className="h-7 w-7 text-orange-500" />,
-    clickName: 'Claude Code Dashboard Template',
-  },
-  {
-    name: 'Claude Agent SDK',
-    href: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard/',
-    icon: <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
-    clickName: 'Claude Agent SDK Dashboard Template',
-  },
-  {
-    name: 'ClickHouse',
-    href: '/docs/dashboards/dashboard-templates/clickhouse-monitoring',
-    icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
-    clickName: 'ClickHouse Dashboard Template',
-  },
-  {
-    name: 'Codex (OpenAI)',
-    href: '/docs/dashboards/dashboard-templates/codex-dashboard',
-    icon: <SiOpenai className="h-7 w-7 text-white" />,
-    clickName: 'Codex Dashboard Template',
-  },
-  {
-    name: 'Cost Meter',
-    href: '/docs/dashboards/dashboard-templates/cost-meter',
-    icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
-    clickName: 'Cost Meter Dashboard Template',
-  },
-  {
-    name: 'CouchDB',
-    href: '/docs/dashboards/dashboard-templates/couchdb',
-    icon: <Database className="h-7 w-7 text-red-500" />,
-    clickName: 'CouchDB Dashboard Template',
-  },
-  {
-    name: 'Crew AI',
-    href: '/docs/dashboards/dashboard-templates/crewai-dashboard',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Crew AI Dashboard Template',
-  },
-  {
-    name: 'DeepSeek API',
-    href: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/deepseek-icon.svg"
-        alt="DeepSeek Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'DeepSeek API Dashboard Template',
-  },
-  {
-    name: 'Docker Container Metrics',
-    href: '/docs/dashboards/dashboard-templates/docker-container-metrics',
-    icon: <SiDocker className="h-7 w-7 text-blue-400" />,
-    clickName: 'Docker Container Metrics Dashboard Template',
-  },
-  {
-    name: 'ECS Infra Metrics',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/ecs-infra-metrics',
-    icon: <Container className="h-7 w-7 text-orange-500" />,
-    clickName: 'ECS Infra Metrics Dashboard Template',
-  },
-  {
-    name: 'Envoy Proxy',
-    href: '/docs/dashboards/dashboard-templates/envoy-dashboard',
-    icon: <Network className="h-7 w-7 text-purple-500" />,
-    clickName: 'Envoy Proxy Dashboard Template',
-  },
-  {
-    name: 'Flask Monitoring',
-    href: '/docs/dashboards/dashboard-templates/flask-monitoring',
-    icon: <Globe className="h-7 w-7 text-black" />,
-    clickName: 'Flask Monitoring Dashboard Template',
-  },
-  {
-    name: 'Frontend Monitoring',
-    href: '/docs/dashboards/dashboard-templates/frontend-monitoring',
-    icon: <Network className="h-7 w-7 text-white" />,
-    clickName: 'Frontend Monitoring Dashboard Template',
-  },
-  {
-    name: 'GCP Compute Engine',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/gcp/compute-engine',
-    icon: <Cloud className="h-7 w-7 text-blue-500" />,
-    clickName: 'GCP Compute Engine Dashboard Template',
-  },
-  {
-    name: 'Google ADK',
-    href: '/docs/dashboards/dashboard-templates/google-adk-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
-        alt="Google ADK Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Google ADK Dashboard Template',
-  },
-  {
-    name: 'Google Gemini',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/google-gemini',
-    icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
-    clickName: 'Google Gemini Dashboard Template',
-  },
-  {
-    name: 'Go Runtime',
-    href: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
-    icon: <SiGo className="h-7 w-7 text-cyan-500" />,
-    clickName: 'Go Runtime Dashboard Template',
-  },
-  {
-    name: 'Grok',
-    href: '/docs/dashboards/dashboard-templates/grok-dashboard',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
-    ),
-    clickName: 'xAi Grok Dashboard Template',
-  },
-  {
-    name: 'Groq',
-    href: '/docs/dashboards/dashboard-templates/groq-dashboard',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Groq Dashboard Template',
-  },
-  {
-    name: 'Hadoop',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/hadoop',
-    icon: <Server className="h-7 w-7 text-yellow-600" />,
-    clickName: 'Hadoop Dashboard Template',
-  },
-  {
-    name: 'HAProxy',
-    href: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
-    icon: <Shield className="h-7 w-7 text-blue-600" />,
-    clickName: 'HAProxy Dashboard Template',
-  },
-  {
-    name: 'Haystack',
-    href: '/docs/dashboards/dashboard-templates/haystack-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
-        alt="Haystack Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Haystack Dashboard Template',
-  },
-  {
-    name: 'Host Metrics',
-    href: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
-    icon: <Monitor className="h-7 w-7 text-blue-500" />,
-    clickName: 'Host Metrics Dashboard Template',
-  },
-  {
-    name: 'Hugging Face',
-    href: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
-    icon: <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />,
-    clickName: 'Hugging Face Dashboard Template',
-  },
-  {
-    name: 'Inkeep',
-    href: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Inkeep Dashboard Template',
-  },
-  {
-    name: 'Jenkins',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/jenkins',
-    icon: <SiJenkins className="h-7 w-7 text-blue-700" />,
-    clickName: 'Jenkins Dashboard Template',
-  },
-  {
-    name: 'JMX',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/jmx',
-    icon: <Cpu className="h-7 w-7 text-red-600" />,
-    clickName: 'JMX Dashboard Template',
-  },
-  {
-    name: 'JVM',
-    href: '/docs/dashboards/dashboard-templates/jvm-metrics',
-    icon: <Cpu className="h-7 w-7 text-orange-600" />,
-    clickName: 'JVM Dashboard Template',
-  },
-  {
-    name: 'Kubernetes',
-    href: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
-    icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
-    clickName: 'K8s Infra Metrics Dashboard Template',
-  },
-  {
-    name: 'KEDA',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/keda',
-    icon: <Zap className="h-7 w-7 text-purple-500" />,
-    clickName: 'KEDA Dashboard Template',
-  },
-  {
-    name: 'Key Operations',
-    href: '/docs/dashboards/dashboard-templates/key-operations',
-    icon: <Target className="h-7 w-7 text-green-500" />,
-    clickName: 'Key Operations Dashboard Template',
-  },
-  {
-    name: 'LiteLLM',
-    href: '/docs/dashboards/dashboard-templates/litellm-dashboards',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/litellm-logo.webp"
-        alt="LiteLLM Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'LiteLLM Dashboard Template',
-  },
-  {
-    name: 'LiveKit',
-    href: '/docs/dashboards/dashboard-templates/livekit-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/livekit-icon.svg"
-        alt="LiveKit Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'LiveKit Dashboard Template',
-  },
-  {
-    name: 'LLM Observability',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/llm-observability',
-    icon: <Brain className="h-7 w-7 text-purple-600" />,
-    clickName: 'LLM Observability Dashboard Template',
-  },
-  {
-    name: 'Mastra',
-    href: '/docs/dashboards/dashboard-templates/mastra-dashboard',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Mastra Dashboard Template',
-  },
-  {
-    name: 'Memcached',
-    href: '/docs/dashboards/dashboard-templates/memcached',
-    icon: <HardDrive className="h-7 w-7 text-green-600" />,
-    clickName: 'Memcached Dashboard Template',
-  },
-  {
-    name: 'Mistral AI',
-    href: '/docs/dashboards/dashboard-templates/mistral-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/mistral-logo.webp"
-        alt="Mistral AI Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Mistral AI Dashboard Template',
-  },
-  {
-    name: 'MongoDB',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/mongodb',
-    icon: <SiMongodb className="h-7 w-7 text-green-600" />,
-    clickName: 'MongoDB Dashboard Template',
-  },
-  {
-    name: 'MySQL',
-    href: '/docs/dashboards/dashboard-templates/mysql',
-    icon: <SiMysql className="h-7 w-7 text-orange-500" />,
-    clickName: 'MySQL Dashboard Template',
-  },
-  {
-    name: 'Nginx',
-    href: '/docs/dashboards/dashboard-templates/nginx',
-    icon: <SiNginx className="h-7 w-7 text-green-500" />,
-    clickName: 'Nginx Dashboard Template',
-  },
-  {
-    name: 'NVIDIA DCGM',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/nvidia-dcgm',
-    icon: <Cpu className="h-7 w-7 text-green-600" />,
-    clickName: 'NVIDIA DCGM Dashboard Template',
-  },
-  {
-    name: 'Nomad',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/nomad',
-    icon: <Layers className="h-7 w-7 text-purple-600" />,
-    clickName: 'Nomad Dashboard Template',
-  },
-  {
-    name: 'Ollama',
-    href: '/docs/dashboards/dashboard-templates/ollama-dashboard',
-    icon: <SiOllama className="h-7 w-7 text-white" />,
-    clickName: 'Ollama Dashboard Template',
-  },
-  {
-    name: 'OpenAI',
-    href: '/docs/dashboards/dashboard-templates/openai-dashboard',
-    icon: <SiOpenai className="h-7 w-7 text-white" />,
-    clickName: 'OpenAI Dashboard Template',
-  },
-  {
-    name: 'OpenClaw',
-    href: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/openclaw-logo.svg"
-        alt="OpenClaw Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'OpenClaw Dashboard Template',
-  },
-  {
-    name: 'OpenRouter',
-    href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
-        alt="OpenRouter Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'OpenRouter Dashboard Template',
-  },
-  {
-    name: 'Pipecat',
-    href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
-        alt="Pipecat Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Pipecat Dashboard Template',
-  },
-  {
-    name: 'PostgreSQL',
-    href: '/docs/dashboards/dashboard-templates/postgresql',
-    icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,
-    clickName: 'PostgreSQL Dashboard Template',
-  },
-  {
-    name: 'Pydantic AI',
-    href: '/docs/dashboards/dashboard-templates/pydantic-ai-dashboard',
-    icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
-    clickName: 'Pydantic AI Dashboard Template',
-  },
-  {
-    name: 'RabbitMQ',
-    href: '/docs/dashboards/dashboard-templates/rabbitmq',
-    icon: <SiRabbitmq className="h-7 w-7 text-orange-600" />,
-    clickName: 'RabbitMQ Dashboard Template',
-  },
-  {
-    name: 'Redis',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/redis',
-    icon: <SiRedis className="h-7 w-7 text-red-600" />,
-    clickName: 'Redis Dashboard Template',
-  },
-  {
-    name: 'Render',
-    href: '/docs/dashboards/dashboard-templates/render-dashboard',
-    icon: <Cloud className="h-7 w-7 text-purple-400" />,
-    clickName: 'Render Dashboard Template',
-  },
-  {
-    name: 'Semantic Kernel',
-    href: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/sk-logo.webp"
-        alt="Semantic Kernel Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Semantic Kernel Dashboard Template',
-  },
-  {
-    name: 'SigNoz Ingestion Analysis',
-    href: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
-    icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
-    clickName: 'SigNoz Ingestion Analysis Dashboard Template',
-  },
-  {
-    name: 'SLURM',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/slurm',
-    icon: <Server className="h-7 w-7 text-green-600" />,
-    clickName: 'SLURM Dashboard Template',
-  },
-  {
-    name: 'Snowflake',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
-    icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
-    clickName: 'Snowflake Dashboard Template',
-  },
-  {
-    name: 'Supabase',
-    href: '/docs/dashboards/dashboard-templates/supabase',
-    icon: <SiSupabase className="h-7 w-7 text-green-500" />,
-    clickName: 'Supabase Dashboard Template',
-  },
-  {
-    name: 'Temporal Agents',
-    href: '/docs/dashboards/dashboard-templates/temporal-dashboard',
-    icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
-    clickName: 'Temporal Agents Dashboard Template',
-  },
-  {
-    name: 'Temporal.io',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/temporal.io',
-    icon: <Clock className="h-7 w-7 text-blue-600" />,
-    clickName: 'Temporal.io Dashboard Template',
-  },
-  {
-    name: 'Vercel AI SDK',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/vercel-ai-sdk',
-    icon: <SiVercel className="text-black-600 h-7 w-7" />,
-    clickName: 'Vercel AI SDK Dashboard Template',
-  },
-]
+const allCards = DASHBOARD_TEMPLATES_ITEMS.map((item) => ({
+  ...item,
+  icon: ICON_MAP[item.href],
+}))
 
 export default function DashboardTemplatesListicle() {
   const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredData = DashboardTemplatesData.filter((item) =>
+  const filteredData = allCards.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 

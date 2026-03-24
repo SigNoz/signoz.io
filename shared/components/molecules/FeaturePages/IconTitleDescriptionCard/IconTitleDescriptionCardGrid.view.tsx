@@ -1,5 +1,6 @@
 import IconTitleDescriptionCard from './IconTitleDescriptionCard.view'
 import { IconTitleDescriptionCardGridProps } from './IconTitleDescriptionCardGrid.types'
+import { cn } from 'app/lib/utils'
 
 const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> = ({
   cards,
@@ -7,7 +8,7 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
   variant = 'lg',
 }) => {
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 ${className}`}>
+    <div className={cn('grid grid-cols-1 md:grid-cols-2', className)}>
       {cards.map((card, index) => (
         <IconTitleDescriptionCard
           key={index}
