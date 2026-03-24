@@ -8,7 +8,7 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-Hasura provides built-in OpenTelemetry support for distributed tracing, metrics, and logs on Hasura Cloud and Enterprise editions. Starting from version v2.18.0, you can configure Hasura to export telemetry data directly to SigNoz without requiring an intermediate OpenTelemetry Collector.
+Hasura provides built-in OpenTelemetry support for distributed tracing, metrics, and logs on Hasura Cloud and Enterprise editions. Starting from version v2.18.0, you can configure Hasura to export telemetry data directly to SigNoz.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -17,7 +17,7 @@ Hasura provides built-in OpenTelemetry support for distributed tracing, metrics,
 ## Prerequisites
 
 - Hasura Cloud, or Hasura Self-Hosted Enterprise Edition
-- Hasura GraphQL Engine v2.18.0 or later (traces), v2.31.0 or later (metrics), v2.35.0 or later (logs)
+- Hasura GraphQL Engine v2.35.0 or later (recommended for all signals)
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
 ## Configure OpenTelemetry Export
@@ -166,7 +166,7 @@ All logs printed to the output stream are exported to SigNoz. Log structure foll
 
 ## Trace Data Connectors
 
-Hasura Data Connectors run as separate services alongside the GraphQL Engine. At present, data connectors only support traces. To visualize the full timeline of a GraphQL request—including the actual database execution—you must also configure OpenTelemetry for your data connectors using environment variables in their respective deployments.
+Hasura Data Connectors run as separate services alongside the GraphQL Engine. Each connector handles communication with a specific database. Data connectors only support traces. To visualize the full timeline of a GraphQL request (including the actual database execution), you must also configure OpenTelemetry for your data connectors using environment variables in their respective deployments.
 
 <Tabs>
 <TabItem value="graphql" label="GraphQL Data Connectors">
@@ -287,6 +287,7 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 - Set up [dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize Hasura performance
 - Create [alerts](https://signoz.io/docs/userguide/alerts-management/) for critical metrics like error rates or high latency
 - Explore [distributed tracing](https://signoz.io/docs/userguide/traces/) to identify performance bottlenecks
+- Query [logs](https://signoz.io/docs/userguide/logs/) to debug issues in your Hasura setup
 
 ## Get Help
 
