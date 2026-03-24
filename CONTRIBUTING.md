@@ -84,11 +84,14 @@ These guidelines apply when your PR changes website code (for example: `app/**`,
   - Avoid styling overrides unless necessary; keep Tailwind classes consistent with existing patterns.
 - Keep types/constants co-located and reusable
   - Move component-local types/constants into separate files (for example `MyComponent.types.ts`, `MyComponent.constants.ts`) and export from the folder `index.ts` when needed outside the folder.
-- Add listicle items to `constants/componentItems.ts`, not inside component files
-  - `constants/componentItems.ts` is the public entrypoint for icon-card grid data (APM, Logs, Dashboards, and so on). Source data lives in `constants/componentItems/*.ts`, with one top-level export per file, and both the UI components and the agent markdown stubs import through the barrel.
-  - Flat list (`ComponentItem[]`): use when all items belong to one logical group with no sub-sections.
-  - Sectioned object (`{ sectionKey: ComponentItem[] }`): use when items are rendered in labelled sub-sections (for example `aws`, `azure`, `gcp`). Pair it with a `getAll*()` helper that spreads every sub-array. **Never split a flat array with hardcoded `slice()` indices** — use named sub-keys instead so adding or removing an item in one section cannot silently shift another.
-  - After adding items, add a matching entry in the component's `ICON_MAP` (keyed by `href`) and run `yarn tsc --noEmit` to verify.
+- Add listicle items under `constants/componentItems/*.ts`, not inside component files
+  - Treat `constants/componentItems.ts` as the barrel/public entrypoint only. Do not define list data there beyond re-exports, and do not inline listicle data inside React components.
+  - Put the source data in the matching module under `constants/componentItems/*.ts`, with one top-level export per file. UI components, tests, and agent markdown stubs all import through `constants/componentItems.ts`.
+  - Use a flat list (`ComponentItem[]`) when the surface renders one ungrouped set of cards.
+  - Use a sectioned object (`{ sectionKey: ComponentItem[] }`) when the surface renders labelled groups or provider buckets. Example: `cloud: { aws, azure, gcp }`.
+  - When you use a sectioned object, also export a `getAll*()` helper that flattens every leaf array for shared consumers and tests.
+  - **Never split one flat array with hardcoded `slice()` indices** to fake sections. Use named keys instead, so adding or removing an item in one group cannot silently shift items into another group.
+  - After adding or removing items, update the component's `ICON_MAP` (keyed by `href`) when needed, then run `yarn tsc --noEmit` and `node --test tests/component-items-sync.test.js`.
 - Avoid concurrent async invocations
   - For click handlers that do async work, prevent multiple concurrent runs (set loading state before `await` and/or guard with a ref).
 - Be deliberate about DOM cleanup/transforms
@@ -168,6 +171,7 @@ Every docs page should be skimmable, actionable, and validated.
   - `tags: [SigNoz Cloud]` for cloud-only docs
   - `tags: []` if none apply
 - Standard sections (H2):
+
   - `## Overview` (skip if intro is already 1-2 lines)
   - `## Prerequisites`
   - `## Steps` (or clear setup sections)
@@ -176,6 +180,7 @@ Every docs page should be skimmable, actionable, and validated.
   - `## Limitations` (when relevant)
 
 - Commands and snippets:
+
   - Explain what each command does and where to run it.
   - State expected result after major steps.
   - Annotate code blocks with language and filename when useful.
@@ -195,8 +200,10 @@ Every docs page should be skimmable, actionable, and validated.
 
     This renders as:  
     ![Highlighted line example](public/img/docs/guidelines/code-highlight-example.png)
+
   - Immediately below, explain each critical field and placeholder.
   - Example with placeholders and explanations:
+
     ```yaml:/deploy/docker/otel-collector-config.yaml
     exporters:
       otlphttp:
@@ -208,11 +215,14 @@ Every docs page should be skimmable, actionable, and validated.
         traces:
           exporters: [otlphttp]
     ```
+
     This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
-    
+
     Verify these values:
+
     - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
     - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
   - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
     - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
     - ❌ "Replace your `otel-collector-config.yaml` with the following content:"
@@ -220,6 +230,7 @@ Every docs page should be skimmable, actionable, and validated.
   - Move advanced/environment-specific options into callouts or collapsed sections.
 
 - Hyperlinks:
+
   - Internal links should use absolute URLs. Use `[Text](https://signoz.io/endpoint)` rather than site-relative `[Text](/endpoint)`.
   - Add links where they directly help users finish the current step.
   - Avoid link dumping.
@@ -253,7 +264,7 @@ Every docs page should be skimmable, actionable, and validated.
 - Use `KeyPointCallout` for collapsible supplementary info:
   ```mdx
   <KeyPointCallout title="Optional details" defaultCollapsed={true}>
-  Content that users can expand if needed.
+    Content that users can expand if needed.
   </KeyPointCallout>
   ```
 - Use `Tabs`/`TabItem` to branch by platform, OS, or materially different flows. For Cloud vs Self-Host, prefer the drop-in snippet + comparison page.
@@ -354,6 +365,7 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 - **Bare metal servers**: Physical servers running Linux/Unix directly
 
 Use this section if you're deploying your application directly on a server or VM without containerization.
+
 </KeyPointCallout>
 ```
 
@@ -363,13 +375,16 @@ Include this callout near the top of each Send Data doc:
 
 ```mdx
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 ```
 
 #### Optional Collector setup section
 
 If Collector is optional, keep it in a collapsed section near the bottom. Eg:
+
 ```mdx
 <details>
 <ToggleHeading>
@@ -427,7 +442,7 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 - Include concrete logs/commands and known edge cases.
 - Titles and headings: use question-style titles or include the exact error/topic to improve search and SEO. Prefer exact error strings and component names (SDK/receiver/exporter) in headings.
 - For minor, frequently asked Q&A, add/update a concise FAQ page. Keep answers short and point to deeper guides when needed.
-`doc_type` for troubleshooting docs is `howto`. Treat each page as a focused “how to fix this specific problem” guide, with a problem-first title and concrete resolution steps.
+  `doc_type` for troubleshooting docs is `howto`. Treat each page as a focused “how to fix this specific problem” guide, with a problem-first title and concrete resolution steps.
 
 ### User guides (end-to-end flows)
 
@@ -463,7 +478,7 @@ Reference docs exist so users can **look up exact facts** quickly.
 
 - The job is "look up exact facts." Lead with the answer; keep prose minimal.
 
-- Audience: users who already know *what* they’re doing and just need details.
+- Audience: users who already know _what_ they’re doing and just need details.
 - Cover:
   - Configuration options, environment variables, CLI flags.
   - Ingestion endpoints, ports, authentication headers.
@@ -508,6 +523,7 @@ Reference docs exist so users can **look up exact facts** quickly.
 - [ ] All links were manually validated as live.
 - [ ] Images (if any) use WebP, clear alt/caption, and correct path under `public/img/docs/...`.
 - [ ] Sidebar entry is added/updated in `constants/docsSideNav.ts` when needed.
+- [ ] If the doc should appear in a listicle, quick-start overview, or similar card surface, the matching `constants/componentItems/*.ts` data, barrel export, and `ICON_MAP` entries are updated.
 - [ ] If URL changed: permanent redirect added in `next.config.js` and redirect checks were run.
 - [ ] For Send Data docs: cloud-first default path, self-hosted callout, and optional Collector section near bottom.
 - [ ] For Send Data docs: include VM/Kubernetes/Docker/Windows paths where applicable.
@@ -515,7 +531,7 @@ Reference docs exist so users can **look up exact facts** quickly.
 
 ## Contribute a Doc or Blog Post
 
-Follow the steps below to create and submit either a blog post or a documentation page. Where the flow differs, look for the Blog vs Docs notes.
+Follow the steps below to create and submit either a blog post or a documentation page. Blog-only and docs-only requirements are called out inline at the relevant steps.
 
 ### Step 1: Fork the Repository
 
@@ -603,9 +619,9 @@ git checkout -b add-new-content
   - Place under `public/img/docs/` and, when possible, follow the existing folder organization for the topic/feature.
   - Use WebP format (`.webp`) whenever possible. Conversion tips: https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74
 
-### Step 7: Add Doc to Sidebar (Docs only)
+### Step 7: Add Doc to Sidebar and Discovery Surfaces (Docs only)
 
-Docs pages must be added to the sidebar navigation.
+Docs pages must be added anywhere users are expected to discover them, not just in the left sidebar.
 
 1. Open `constants/docsSideNav.ts`.
 2. Add a new entry under the appropriate category with a route that matches your page path and a human‑readable label. Example:
@@ -620,7 +636,12 @@ Docs pages must be added to the sidebar navigation.
 
 If you introduced a new tag in your doc frontmatter, add its tooltip definition in `constants/tagDefinitions.ts`.
 
-If your new doc adds a new surfaced integration, data source, installation path, dashboard template, or similar item that appears in docs listicles/overview cards, also update the relevant component data under `constants/componentItems/*.ts` while keeping `constants/componentItems.ts` as the public entrypoint, and update the matching component `ICON_MAP` where needed. This is similar to the sidebar rule: if the doc should be discoverable from an existing docs surface, update that surface in the same PR.
+If your new doc adds a surfaced integration, data source, installation path, dashboard template, quick start, or similar item that appears in docs listicles or overview cards, update that discovery surface in the same PR:
+
+- Add or update the source data in the relevant `constants/componentItems/*.ts` file.
+- Keep `constants/componentItems.ts` as the public entrypoint/barrel export.
+- Update the matching component `ICON_MAP` where needed.
+- Run `yarn tsc --noEmit` and `node --test tests/component-items-sync.test.js` after changing those items.
 
 ### Step 8: Add and Commit Your Changes
 
@@ -663,20 +684,5 @@ Open `http://localhost:3000` and review your blog/doc page.
 3. Add a succinct title and description.
 4. Submit the PR as a Draft (default).
 5. When the page builds cleanly and vercel preview is ready, click "Ready for review".
-
-### Blog Notes
-
-- Refer to existing blogs in `data/blog` for structure.
-- Include a relevant cover image and complete metadata for SEO.
-- Place blog images under `public/img/blog/<YYYY-MM>/`.
-
-### Docs Notes
-
-- Follow the “Content Structure” and “Doc Type–Specific Guidelines” above.
-- Images go under `public/img/docs/`.
-- Add the page to `constants/docsSideNav.ts` so it appears in the left sidebar.
-- If the doc should appear in a docs listicle, quick-start overview, or similar card-based discovery surface, add/update the matching item in the relevant `constants/componentItems/*.ts` module and keep it exported through `constants/componentItems.ts`. Update the component's `ICON_MAP` when needed.
-- If you add new tags, define tooltips in `constants/tagDefinitions.ts`.
-- If you change a live doc’s URL (rename or move), add a permanent (301/308) redirect in `next.config.js` `redirects()` from the old path to the new one and update any internal links.
 
 Thanks again for contributing to SigNoz!
