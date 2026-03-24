@@ -1,5 +1,3 @@
-'use client'
-
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
@@ -24,6 +22,8 @@ export default function InlineCTA({
         clickName={ctaText}
         clickLocation="Article Body"
         clickText={ctaText}
+        target="_blank"
+        rel="noopener noreferrer"
         className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_robin-500 px-5 py-2.5 text-sm font-semibold text-white no-underline transition-colors hover:bg-signoz_robin-400 hover:text-white"
       >
         {ctaText}
