@@ -5,6 +5,36 @@ import { SiSpringboot, SiApachetomcat } from 'react-icons/si'
 import { TbCoffee } from 'react-icons/tb'
 import { FaJava } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
+import { JAVA_INSTRUMENTATION_ITEMS } from '@/constants/componentItems'
+
+const FRAMEWORKS_ICON_MAP: Record<string, React.ReactNode> = {
+  '/docs/instrumentation/java/opentelemetry-java': (
+    <SiSpringboot className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/instrumentation/java/opentelemetry-quarkus': (
+    <TbCoffee className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/instrumentation/java/opentelemetry-tomcat': (
+    <SiApachetomcat className="h-7 w-7 text-yellow-500" />
+  ),
+  '/docs/instrumentation/java/opentelemetry-jboss': <FaJava className="h-7 w-7 text-red-500" />,
+}
+
+const ADVANCED_ICON_MAP: Record<string, React.ReactNode> = {
+  '/docs/instrumentation/java/manual-instrumentation': (
+    <FaJava className="h-7 w-7 text-orange-500" />
+  ),
+}
+
+const frameworkCards = JAVA_INSTRUMENTATION_ITEMS.frameworks.map((item) => ({
+  ...item,
+  icon: FRAMEWORKS_ICON_MAP[item.href],
+}))
+
+const advancedCards = JAVA_INSTRUMENTATION_ITEMS.advanced.map((item) => ({
+  ...item,
+  icon: ADVANCED_ICON_MAP[item.href],
+}))
 
 export default function JavaInstrumentationListicle() {
   return (
@@ -12,32 +42,7 @@ export default function JavaInstrumentationListicle() {
       <div className="mb-10">
         <h2 className="mb-4 text-2xl font-semibold">Java Frameworks</h2>
         <IconCardGrid
-          cards={[
-            {
-              name: 'Java / Spring Boot',
-              href: '/docs/instrumentation/java/opentelemetry-java',
-              icon: <SiSpringboot className="h-7 w-7 text-green-500" />,
-              clickName: 'Java Spring Boot Instrumentation Link',
-            },
-            {
-              name: 'Quarkus',
-              href: '/docs/instrumentation/java/opentelemetry-quarkus',
-              icon: <TbCoffee className="h-7 w-7 text-blue-500" />,
-              clickName: 'Quarkus Instrumentation Link',
-            },
-            {
-              name: 'Tomcat',
-              href: '/docs/instrumentation/java/opentelemetry-tomcat',
-              icon: <SiApachetomcat className="h-7 w-7 text-yellow-500" />,
-              clickName: 'Tomcat Instrumentation Link',
-            },
-            {
-              name: 'JBoss / WildFly',
-              href: '/docs/instrumentation/java/opentelemetry-jboss',
-              icon: <FaJava className="h-7 w-7 text-red-500" />,
-              clickName: 'JBoss WildFly Instrumentation Link',
-            },
-          ]}
+          cards={frameworkCards}
           sectionName="Java Frameworks Section"
           gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
         />
@@ -46,14 +51,7 @@ export default function JavaInstrumentationListicle() {
       <div className="mb-10">
         <h2 className="mb-4 text-2xl font-semibold">Advanced</h2>
         <IconCardGrid
-          cards={[
-            {
-              name: 'Manual Instrumentation',
-              href: '/docs/instrumentation/java/manual-instrumentation',
-              icon: <FaJava className="h-7 w-7 text-orange-500" />,
-              clickName: 'Java Manual Instrumentation Link',
-            },
-          ]}
+          cards={advancedCards}
           sectionName="Java Advanced Section"
           gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
         />

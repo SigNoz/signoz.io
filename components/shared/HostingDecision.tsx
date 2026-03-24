@@ -1,7 +1,9 @@
-import Link from 'next/link'
-import { ArrowRight, Server, Cloud, ExternalLink, ArrowUpRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import TrackingLink from '../TrackingLink'
 import Button from '../Button/Button'
+import { HOSTING_DECISION_ITEMS } from '@/constants/componentItems'
+
+const [compareHostingOption, getStartedHostingOption] = HOSTING_DECISION_ITEMS
 
 const HostingBanner = () => {
   return (
@@ -14,29 +16,29 @@ const HostingBanner = () => {
       <div className="flex justify-end">
         <div className="flex flex-wrap items-center gap-3 whitespace-nowrap">
           <TrackingLink
-            href="/blog/cloud-vs-self-hosted-deployment-guide/"
+            href={compareHostingOption.href}
             clickType="Secondary CTA"
-            clickName="Compare Self Host vs Cloud"
+            clickName={compareHostingOption.clickName}
             clickLocation="Hosting Decision Card"
-            clickText="Compare Self Host vs Cloud"
+            clickText={compareHostingOption.name}
             className="group inline-flex items-center gap-1 text-sm font-medium text-zinc-400 no-underline hover:text-zinc-300"
           >
             <Button type={Button.TYPES.SECONDARY} className="!h-8 !px-3 !py-1">
-              Compare Self Host vs Cloud{' '}
+              {compareHostingOption.name}{' '}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </TrackingLink>
 
           <TrackingLink
-            href="/teams/"
+            href={getStartedHostingOption.href}
             clickType="Primary CTA"
-            clickName="Get Started - Free"
+            clickName={getStartedHostingOption.clickName}
             clickLocation="Hosting Decision Card"
-            clickText="Get Started - Free"
+            clickText={getStartedHostingOption.name}
             className="no-underline"
           >
             <Button type={Button.TYPES.PRIMARY} className="!h-8 !px-3 !py-1">
-              Get Started - Free
+              {getStartedHostingOption.name}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </TrackingLink>

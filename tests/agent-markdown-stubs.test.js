@@ -45,3 +45,32 @@ test('Admonition stubs preserve the admonition type label', async () => {
   assert.match(html, /Warning/)
   assert.match(html, /Keep existing receivers\./)
 })
+
+test('CollectionAgentsListicle stubs respect the selected platform', async () => {
+  const doc = createDoc('<CollectionAgentsListicle platform="kubernetes" />')
+  const components = buildAgentMdxComponentsForDoc(doc, [])
+  const html = renderToStaticMarkup(
+    React.createElement(components.CollectionAgentsListicle, {
+      platform: 'kubernetes',
+    })
+  )
+
+  assert.match(html, /K8s-Infra \(Helm Chart\)/)
+  assert.match(html, /OpenTelemetry Operator/)
+  assert.doesNotMatch(html, /Docker Swarm/)
+  assert.doesNotMatch(html, /ECS Serverless \(Sidecar\)/)
+  assert.doesNotMatch(html, /OpenTelemetry Binary/)
+})
+
+test('HostingDecision stub matches the banner CTA destinations', async () => {
+  const doc = createDoc('<HostingDecision />')
+  const components = buildAgentMdxComponentsForDoc(doc, [])
+  const html = renderToStaticMarkup(React.createElement(components.HostingDecision))
+
+  assert.match(html, /Compare Self Host vs Cloud/)
+  assert.match(html, /\/blog\/cloud-vs-self-hosted-deployment-guide\//)
+  assert.match(html, /Get Started - Free/)
+  assert.match(html, /\/teams\//)
+  assert.doesNotMatch(html, /\/docs\/cloud\//)
+  assert.doesNotMatch(html, /\/docs\/install\//)
+})

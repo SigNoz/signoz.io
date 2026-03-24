@@ -11,7 +11,10 @@ export default function EnterpriseCard() {
         <div className="flex flex-grow flex-col">
           <div className="mb-4 flex flex-col md:flex-row md:justify-between">
             <div className="w-full md:w-[60%]">
-              <h3 className="orangish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl">
+              <h3
+                id="enterprise"
+                className="orangish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl"
+              >
                 Enterprise
               </h3>
               <p className="text-base text-gray-400">
