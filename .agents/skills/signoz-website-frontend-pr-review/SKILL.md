@@ -127,6 +127,8 @@ If a PR includes docs too, use this skill for code review only.
 - Be deliberate with DOM cleanup/transforms.
 - If a PR adds or changes MDX components used in `data/docs/**`, verify `utils/docs/agentMarkdownStubs.ts` still handles them, the agent-markdown tests/coverage remain valid, and rendered Copy Markdown behavior in `utils/docs/buildCopyMarkdownFromRendered.ts` still stays clean.
 - Justify dependency additions.
+- **Listicle / icon-card items must stay exported through `constants/componentItems.ts` and source data should live in `constants/componentItems/*.ts`**, not inside component files. Flag any `{ name, href, clickName }` arrays defined inline in a component.
+- **Never use `slice()` with hardcoded indices to split a flat array into sub-sections.** If a constant has logically distinct sub-groups (for example AWS / Azure / GCP), each group must be a named sub-key (`cloud: { aws: [...], azure: [...], gcp: [...] }`). Adding or removing an item in one group silently shifts slice boundaries in others — flag this pattern as a `High` finding.
 
 ### 12) Error handling and edge cases
 

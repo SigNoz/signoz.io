@@ -1,8 +1,7 @@
 ---
-date: 2026-03-12
+date: 2026-03-21
 title: Logstash to SigNoz
 description: Send Logstash logs to SigNoz using the OpenTelemetry Collector.
-
 id: logstash_to_signoz
 hide_table_of_contents: true
 ---
@@ -44,10 +43,11 @@ OpenTelemetry collector.
    ```yaml {4}
    service:
        ...
-       logs:
-           receivers: [otlp, tcplog/logstash]
-           processors: [batch]
-           exporters: [otlp]
+       pipelines:
+           logs:
+               receivers: [otlp, tcplog/logstash]
+               processors: [batch]
+               exporters: [otlp]
    ```
 
 4. **Update Logstash Configuration**
@@ -100,10 +100,11 @@ OpenTelemetry collector.
    service:
      ...
 
-     logs:
-       receivers: [otlp, tcplog/logstash]
-       processors: [batch]
-       exporters: [clickhouselogsexporter]
+     pipelines:
+       logs:
+         receivers: [otlp, tcplog/logstash]
+         processors: [batch]
+         exporters: [clickhouselogsexporter]
    ```
 
 3. **Expose the Port**:

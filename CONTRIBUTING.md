@@ -84,6 +84,11 @@ These guidelines apply when your PR changes website code (for example: `app/**`,
   - Avoid styling overrides unless necessary; keep Tailwind classes consistent with existing patterns.
 - Keep types/constants co-located and reusable
   - Move component-local types/constants into separate files (for example `MyComponent.types.ts`, `MyComponent.constants.ts`) and export from the folder `index.ts` when needed outside the folder.
+- Add listicle items to `constants/componentItems.ts`, not inside component files
+  - `constants/componentItems.ts` is the public entrypoint for icon-card grid data (APM, Logs, Dashboards, and so on). Source data lives in `constants/componentItems/*.ts`, with one top-level export per file, and both the UI components and the agent markdown stubs import through the barrel.
+  - Flat list (`ComponentItem[]`): use when all items belong to one logical group with no sub-sections.
+  - Sectioned object (`{ sectionKey: ComponentItem[] }`): use when items are rendered in labelled sub-sections (for example `aws`, `azure`, `gcp`). Pair it with a `getAll*()` helper that spreads every sub-array. **Never split a flat array with hardcoded `slice()` indices** — use named sub-keys instead so adding or removing an item in one section cannot silently shift another.
+  - After adding items, add a matching entry in the component's `ICON_MAP` (keyed by `href`) and run `yarn tsc --noEmit` to verify.
 - Avoid concurrent async invocations
   - For click handlers that do async work, prevent multiple concurrent runs (set loading state before `await` and/or guard with a ref).
 - Be deliberate about DOM cleanup/transforms
@@ -615,6 +620,8 @@ Docs pages must be added to the sidebar navigation.
 
 If you introduced a new tag in your doc frontmatter, add its tooltip definition in `constants/tagDefinitions.ts`.
 
+If your new doc adds a new surfaced integration, data source, installation path, dashboard template, or similar item that appears in docs listicles/overview cards, also update the relevant component data under `constants/componentItems/*.ts` while keeping `constants/componentItems.ts` as the public entrypoint, and update the matching component `ICON_MAP` where needed. This is similar to the sidebar rule: if the doc should be discoverable from an existing docs surface, update that surface in the same PR.
+
 ### Step 8: Add and Commit Your Changes
 
 ```bash
@@ -668,6 +675,7 @@ Open `http://localhost:3000` and review your blog/doc page.
 - Follow the “Content Structure” and “Doc Type–Specific Guidelines” above.
 - Images go under `public/img/docs/`.
 - Add the page to `constants/docsSideNav.ts` so it appears in the left sidebar.
+- If the doc should appear in a docs listicle, quick-start overview, or similar card-based discovery surface, add/update the matching item in the relevant `constants/componentItems/*.ts` module and keep it exported through `constants/componentItems.ts`. Update the component's `ICON_MAP` when needed.
 - If you add new tags, define tooltips in `constants/tagDefinitions.ts`.
 - If you change a live doc’s URL (rename or move), add a permanent (301/308) redirect in `next.config.js` `redirects()` from the old path to the new one and update any internal links.
 

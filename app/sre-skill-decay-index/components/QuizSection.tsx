@@ -40,9 +40,16 @@ export default function QuizSection({
     <section className="pb-[120px] pt-20">
       {/* Branded progress bar */}
       <div className="fixed left-0 right-0 top-0 z-[100]">
-        <div className="flex items-center justify-between px-5 py-2 bg-[var(--surface)]/80 backdrop-blur-sm border-b border-[var(--border)]">
+        <div className="bg-[var(--surface)]/80 flex items-center justify-between border-b border-[var(--border)] px-5 py-2 backdrop-blur-sm">
           <span className="font-[family-name:var(--font-jetbrains)] text-[11px] font-semibold tracking-[0.08em] text-[var(--text-dim)]">
-            <a href="https://signoz.io/" target="_blank" rel="noopener noreferrer" className="text-[var(--text-dim)] hover:text-[var(--accent)] no-underline transition-colors duration-200">SigNoz</a>
+            <a
+              href="https://signoz.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--text-dim)] no-underline transition-colors duration-200 hover:text-[var(--accent)]"
+            >
+              SigNoz
+            </a>
           </span>
           <span className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-[0.08em] text-[var(--text-dim)]">
             {currentQuestion + 1} / {totalQuestions}
@@ -62,7 +69,7 @@ export default function QuizSection({
       <div className="mx-auto max-w-[720px] px-6">
         {/* Question header */}
         <div className="relative">
-          <div className="font-[family-name:var(--font-jetbrains)] text-[11px] uppercase tracking-[0.1em] text-[var(--text-dim)] mb-4">
+          <div className="mb-4 font-[family-name:var(--font-jetbrains)] text-[11px] uppercase tracking-[0.1em] text-[var(--text-dim)]">
             Question {currentQuestion + 1}
           </div>
 
@@ -72,7 +79,7 @@ export default function QuizSection({
             alt={ollyData.alt}
             width={200}
             height={200}
-            className={`hidden md:block absolute -right-[160px] -top-[10px] z-10 h-auto max-h-[200px] w-[200px] object-contain drop-shadow-[0_4px_16px_rgba(68,97,215,0.2)] ${ollyData.rounded ? 'rounded-xl' : ''}`}
+            className={`absolute -right-[160px] -top-[10px] z-10 hidden h-auto max-h-[200px] w-[200px] object-contain drop-shadow-[0_4px_16px_rgba(68,97,215,0.2)] md:block ${ollyData.rounded ? 'rounded-xl' : ''}`}
             style={{ animation: 'ollyFloat 4s ease-in-out infinite' }}
           />
           <Image
@@ -109,14 +116,12 @@ export default function QuizSection({
               <button
                 key={i}
                 onClick={() => onAnswer(option.score, option.category)}
-                className="group flex items-start gap-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-6 py-5 text-left transition-all duration-[250ms] hover:translate-x-1 hover:border-[var(--accent)] hover:bg-[var(--surface-2)] cursor-pointer"
+                className="group flex cursor-pointer items-start gap-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-6 py-5 text-left transition-all duration-[250ms] hover:translate-x-1 hover:border-[var(--accent)] hover:bg-[var(--surface-2)]"
               >
                 <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface-2)] font-[family-name:var(--font-jetbrains)] text-[11px] font-semibold text-[var(--text-dim)] transition-all duration-[250ms] group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-white">
                   {OPTION_KEYS[i]}
                 </span>
-                <span className="text-[15px] leading-normal text-[var(--text)]">
-                  {option.text}
-                </span>
+                <span className="text-[15px] leading-normal text-[var(--text)]">{option.text}</span>
               </button>
             ))}
           </div>

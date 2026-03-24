@@ -34,6 +34,7 @@ import {
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import { VscGraphLine } from 'react-icons/vsc'
 import IconCardGrid from '../Card/IconCardGrid'
+import { METRICS_QUICK_START_ITEMS } from '@/constants/componentItems'
 
 interface MetricsQuickStartOverviewProps {
   category?:
@@ -62,6 +63,121 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'runtimes', label: 'Runtimes' },
   { id: 'cloud-platforms', label: 'Cloud Platforms' },
 ]
+
+const ICON_MAP: Record<string, React.ReactNode> = {
+  // Infrastructure
+  '/docs/userguide/hostmetrics': <FaServer className="h-7 w-7 text-gray-700 dark:text-gray-300" />,
+  '/docs/metrics-management/docker-container-metrics': (
+    <SiDocker className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/userguide/k8s-metrics': <SiKubernetes className="h-7 w-7 text-blue-600" />,
+  '/docs/integrations/aws/ecs': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/opentelemetry-collection-agents/ecs/sidecar/overview/': (
+    <SiAmazon className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/opentelemetry-collection-agents/ecs/ec2/overview/': (
+    <SiAmazon className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/aws-monitoring/eks': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/gcp-monitoring/compute-engine/metrics': (
+    <SiGooglecloud className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/azure-monitoring/virtual-machines/vm-metrics': (
+    <FaServer className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/gcp-monitoring/vpc/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  '/docs/gcp-monitoring/gke/gke-logging-and-metrics': (
+    <SiKubernetes className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/tutorial/traefik-observability': <SiTraefikproxy className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/nomad': <SiHashicorp className="h-7 w-7 text-purple-600" />,
+  '/docs/metrics-management/fly-metrics': <SiFlydotio className="h-7 w-7 text-purple-500" />,
+  '/docs/userguide/envoy-metrics': <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
+  '/docs/metrics-management/nvidia-dcgm-metrics': <FaServer className="h-7 w-7 text-green-500" />,
+  '/docs/metrics-management/slurm-metrics': <FaServer className="h-7 w-7 text-blue-600" />,
+  '/docs/metrics-management/render-metrics': <FaCloud className="h-7 w-7 text-purple-500" />,
+  // Databases
+  '/docs/integrations/clickhouse': <SiClickhouse className="h-7 w-7 text-yellow-400" />,
+  '/docs/integrations/snowflake': <SiSnowflake className="h-7 w-7 text-blue-500" />,
+  '/docs/tutorial/mongodb-metrics': <SiMongodb className="h-7 w-7 text-green-500" />,
+  '/docs/integrations/mongodb-atlas': <SiMongodb className="h-7 w-7 text-green-500" />,
+  '/docs/integrations/postgresql': <SiPostgresql className="h-7 w-7 text-blue-400" />,
+  '/docs/gcp-monitoring/cloud-sql/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/redis': <SiRedis className="h-7 w-7 text-red-500" />,
+  '/docs/metrics-management/mysql-metrics': <SiMysql className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/opentelemetry-neondb': (
+    <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />
+  ),
+  '/docs/integrations/sql-server': <FaDatabase className="h-7 w-7 text-red-600" />,
+  '/docs/azure-monitoring/db-metrics': <FaDatabase className="h-7 w-7 text-blue-600" />,
+  '/docs/integrations/aws-rds-mysql': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/integrations/aws-rds-postgres': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/integrations/aws-elasticache-redis': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  // Web Servers
+  '/docs/metrics-management/nginx-metrics': <SiNginx className="h-7 w-7 text-green-600" />,
+  '/docs/gcp-monitoring/gcp-clb/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  // Messaging
+  '/docs/messaging-queues/kafka': <SiApachekafka className="h-7 w-7 text-black dark:text-white" />,
+  '/docs/messaging-queues/msk': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/messaging-queues/confluent-kafka': (
+    <SiApachekafka className="h-7 w-7 text-black dark:text-white" />
+  ),
+  '/docs/messaging-queues/strimzi': (
+    <SiApachekafka className="h-7 w-7 text-black dark:text-white" />
+  ),
+  '/docs/messaging-queues/celery-setup': <FaJava className="h-7 w-7 text-green-600" />,
+  // Runtimes
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics': (
+    <FaJava className="h-7 w-7 text-red-600" />
+  ),
+  '/docs/tutorial/jmx-metrics': <FaJava className="h-7 w-7 text-red-600" />,
+  // Collection
+  '/docs/userguide/otel-metrics-receivers': <SiOpentelemetry className="h-7 w-7 text-purple-500" />,
+  '/docs/userguide/prometheus-metrics': <SiPrometheus className="h-7 w-7 text-orange-500" />,
+  '/docs/gcp-monitoring/cloud-monitoring/metrics': (
+    <SiGooglecloud className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/monitor-http-endpoints': <FaServer className="h-7 w-7 text-blue-600" />,
+  '/docs/migration/opentelemetry-datadog-receiver': (
+    <SiDatadog className="h-7 w-7 text-purple-600" />
+  ),
+  '/docs/userguide/opentelemetry-statsd': <VscGraphLine className="h-7 w-7 text-blue-500" />,
+  // Cloud Platforms
+  '/docs/gcp-monitoring/cloud-run/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  '/docs/gcp-monitoring/app-engine/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  '/docs/gcp-monitoring/gcp-fns/fns-metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  '/docs/gcp-monitoring/gcs/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/temporal-cloud-metrics': <SiTemporal className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/supabase': <SiPostgresql className="h-7 w-7 text-green-500" />,
+  '/docs/cicd/argocd/argocd-metrics': <SiArgo className="h-7 w-7 text-orange-600" />,
+  '/docs/cicd/github/github-metrics': (
+    <SiGithubactions className="h-7 w-7 text-black dark:text-white" />
+  ),
+  '/docs/azure-monitoring/app-service/metrics': <FaCloud className="h-7 w-7 text-blue-600" />,
+  '/docs/azure-monitoring/az-fns/metrics': <FaCloud className="h-7 w-7 text-blue-600" />,
+  '/docs/azure-monitoring/az-container-apps/metrics': <FaCloud className="h-7 w-7 text-blue-600" />,
+  '/docs/azure-monitoring/az-blob-storage/metrics': <FaCloud className="h-7 w-7 text-blue-600" />,
+  // Applications
+  '/docs/metrics-management/send-metrics/applications/golang': (
+    <SiGo className="h-7 w-7 text-cyan-500" />
+  ),
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-rust': (
+    <SiRust className="h-7 w-7 text-orange-600" />
+  ),
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-java': (
+    <FaJava className="h-7 w-7 text-red-600" />
+  ),
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet': (
+    <SiDotnet className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs': (
+    <SiNodedotjs className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-python': (
+    <SiPython className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/instrumentation/opentelemetry-deno': <SiDeno className="h-7 w-7 text-blue-500" />,
+}
 
 export default function MetricsQuickStartOverview({
   category = 'all',
@@ -108,120 +224,17 @@ export default function MetricsQuickStartOverview({
     </div>
   )
 
+  const mapIcons = (items: readonly { name: string; href: string; clickName: string }[]) =>
+    items.map((item) => ({
+      ...item,
+      icon: ICON_MAP[item.href],
+    }))
+
   const renderInfrastructureSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Infrastructure</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Host Metrics',
-            href: '/docs/userguide/hostmetrics',
-            icon: <FaServer className="h-7 w-7 text-gray-700 dark:text-gray-300" />,
-            clickName: 'Host Metrics Link',
-          },
-          {
-            name: 'Docker',
-            href: '/docs/metrics-management/docker-container-metrics',
-            icon: <SiDocker className="h-7 w-7 text-blue-500" />,
-            clickName: 'Docker Metrics Link',
-          },
-          {
-            name: 'Kubernetes',
-            href: '/docs/userguide/k8s-metrics',
-            icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
-            clickName: 'Kubernetes Metrics Link',
-          },
-          {
-            name: 'AWS ECS',
-            href: '/docs/integrations/aws/ecs',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS ECS Metrics Link',
-          },
-          {
-            name: 'AWS ECS Fargate',
-            href: '/docs/opentelemetry-collection-agents/ecs/sidecar/overview/',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS ECS Fargate Metrics Link',
-          },
-          {
-            name: 'AWS EC2',
-            href: '/docs/opentelemetry-collection-agents/ecs/ec2/overview/',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS EC2 Metrics Link',
-          },
-          {
-            name: 'AWS EKS',
-            href: '/docs/aws-monitoring/eks',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS EKS Metrics Link',
-          },
-          {
-            name: 'GCP Compute Engine',
-            href: '/docs/gcp-monitoring/compute-engine/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP Compute Engine Metrics Link',
-          },
-          {
-            name: 'Azure VM',
-            href: '/docs/azure-monitoring/virtual-machines/vm-metrics',
-            icon: <FaServer className="h-7 w-7 text-blue-600" />,
-            clickName: 'Azure VM Metrics Link',
-          },
-          {
-            name: 'GCP VPC',
-            href: '/docs/gcp-monitoring/vpc/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP VPC Metrics Link',
-          },
-          {
-            name: 'GKE (GCP)',
-            href: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
-            icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
-            clickName: 'GKE Metrics Link',
-          },
-          {
-            name: 'Traefik',
-            href: '/docs/tutorial/traefik-observability',
-            icon: <SiTraefikproxy className="h-7 w-7 text-blue-500" />,
-            clickName: 'Traefik Metrics Link',
-          },
-          {
-            name: 'Nomad',
-            href: '/docs/integrations/nomad',
-            icon: <SiHashicorp className="h-7 w-7 text-purple-600" />,
-            clickName: 'Nomad Metrics Link',
-          },
-          {
-            name: 'Fly.io',
-            href: '/docs/metrics-management/fly-metrics',
-            icon: <SiFlydotio className="h-7 w-7 text-purple-500" />,
-            clickName: 'Fly.io Metrics Link',
-          },
-          {
-            name: 'Envoy',
-            href: '/docs/userguide/envoy-metrics',
-            icon: <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
-            clickName: 'Envoy Metrics Link',
-          },
-          {
-            name: 'NVIDIA GPU (DCGM)',
-            href: '/docs/metrics-management/nvidia-dcgm-metrics',
-            icon: <FaServer className="h-7 w-7 text-green-500" />,
-            clickName: 'NVIDIA DCGM Metrics Link',
-          },
-          {
-            name: 'SLURM',
-            href: '/docs/metrics-management/slurm-metrics',
-            icon: <FaServer className="h-7 w-7 text-blue-600" />,
-            clickName: 'SLURM Metrics Link',
-          },
-          {
-            name: 'Render',
-            href: '/docs/metrics-management/render-metrics',
-            icon: <FaCloud className="h-7 w-7 text-purple-500" />,
-            clickName: 'Render Metrics Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.infrastructure)}
         sectionName="Infrastructure Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -232,92 +245,7 @@ export default function MetricsQuickStartOverview({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Databases</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'ClickHouse',
-            href: '/docs/integrations/clickhouse',
-            icon: <SiClickhouse className="h-7 w-7 text-yellow-400" />,
-            clickName: 'ClickHouse Metrics Link',
-          },
-          {
-            name: 'Snowflake',
-            href: '/docs/integrations/snowflake',
-            icon: <SiSnowflake className="h-7 w-7 text-blue-500" />,
-            clickName: 'Snowflake Metrics Link',
-          },
-          {
-            name: 'MongoDB',
-            href: '/docs/tutorial/mongodb-metrics',
-            icon: <SiMongodb className="h-7 w-7 text-green-500" />,
-            clickName: 'MongoDB Metrics Link',
-          },
-          {
-            name: 'MongoDB Atlas',
-            href: '/docs/integrations/mongodb-atlas',
-            icon: <SiMongodb className="h-7 w-7 text-green-500" />,
-            clickName: 'MongoDB Atlas Metrics Link',
-          },
-          {
-            name: 'PostgreSQL',
-            href: '/docs/integrations/postgresql',
-            icon: <SiPostgresql className="h-7 w-7 text-blue-400" />,
-            clickName: 'PostgreSQL Metrics Link',
-          },
-          {
-            name: 'GCP Cloud SQL',
-            href: '/docs/gcp-monitoring/cloud-sql/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP Cloud SQL Metrics Link',
-          },
-          {
-            name: 'Redis',
-            href: '/docs/integrations/redis',
-            icon: <SiRedis className="h-7 w-7 text-red-500" />,
-            clickName: 'Redis Metrics Link',
-          },
-          {
-            name: 'MySQL',
-            href: '/docs/metrics-management/mysql-metrics',
-            icon: <SiMysql className="h-7 w-7 text-blue-500" />,
-            clickName: 'MySQL Metrics Link',
-          },
-          {
-            name: 'Neon',
-            href: '/docs/integrations/opentelemetry-neondb',
-            icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
-            clickName: 'Neon Metrics Link',
-          },
-          {
-            name: 'SQL Server',
-            href: '/docs/integrations/sql-server',
-            icon: <FaDatabase className="h-7 w-7 text-red-600" />,
-            clickName: 'SQL Server Metrics Link',
-          },
-          {
-            name: 'Azure SQL Database',
-            href: '/docs/azure-monitoring/db-metrics',
-            icon: <FaDatabase className="h-7 w-7 text-blue-600" />,
-            clickName: 'Azure SQL Database Metrics Link',
-          },
-          {
-            name: 'AWS RDS MySQL',
-            href: '/docs/integrations/aws-rds-mysql',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS RDS MySQL Link',
-          },
-          {
-            name: 'AWS RDS PostgreSQL',
-            href: '/docs/integrations/aws-rds-postgres',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS RDS PostgreSQL Link',
-          },
-          {
-            name: 'AWS ElastiCache',
-            href: '/docs/integrations/aws-elasticache-redis',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS ElastiCache Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.databases)}
         sectionName="Database Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -328,20 +256,7 @@ export default function MetricsQuickStartOverview({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Web Servers</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'NGINX',
-            href: '/docs/metrics-management/nginx-metrics',
-            icon: <SiNginx className="h-7 w-7 text-green-600" />,
-            clickName: 'NGINX Metrics Link',
-          },
-          {
-            name: 'GCP Cloud Load Balancer',
-            href: '/docs/gcp-monitoring/gcp-clb/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP Cloud Load Balancer Metrics Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.webServers)}
         sectionName="Web Server Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -352,38 +267,7 @@ export default function MetricsQuickStartOverview({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Messaging</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Kafka',
-            href: '/docs/messaging-queues/kafka',
-            icon: <SiApachekafka className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'Kafka Metrics Link',
-          },
-          {
-            name: 'MSK',
-            href: '/docs/messaging-queues/msk',
-            icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
-            clickName: 'MSK Metrics Link',
-          },
-          {
-            name: 'Confluent Kafka',
-            href: '/docs/messaging-queues/confluent-kafka',
-            icon: <SiApachekafka className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'Confluent Kafka Metrics Link',
-          },
-          {
-            name: 'Strimzi',
-            href: '/docs/messaging-queues/strimzi',
-            icon: <SiApachekafka className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'Strimzi Metrics Link',
-          },
-          {
-            name: 'Celery',
-            href: '/docs/messaging-queues/celery-setup',
-            icon: <FaJava className="h-7 w-7 text-green-600" />,
-            clickName: 'Celery Metrics Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.messaging)}
         sectionName="Messaging Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -394,20 +278,7 @@ export default function MetricsQuickStartOverview({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Runtimes</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'JVM',
-            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
-            icon: <FaJava className="h-7 w-7 text-red-600" />,
-            clickName: 'JVM Metrics Link',
-          },
-          {
-            name: 'JMX',
-            href: '/docs/tutorial/jmx-metrics',
-            icon: <FaJava className="h-7 w-7 text-red-600" />,
-            clickName: 'JMX Metrics Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.runtimes)}
         sectionName="Runtime Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -418,44 +289,7 @@ export default function MetricsQuickStartOverview({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Collection</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'OTel Receivers',
-            href: '/docs/userguide/otel-metrics-receivers',
-            icon: <SiOpentelemetry className="h-7 w-7 text-purple-500" />,
-            clickName: 'OTel Receivers Link',
-          },
-          {
-            name: 'Prometheus',
-            href: '/docs/userguide/prometheus-metrics',
-            icon: <SiPrometheus className="h-7 w-7 text-orange-500" />,
-            clickName: 'Prometheus Metrics Link',
-          },
-          {
-            name: 'GCP Cloud Monitoring',
-            href: '/docs/gcp-monitoring/cloud-monitoring/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP Cloud Monitoring Metrics Link',
-          },
-          {
-            name: 'HTTP Endpoints',
-            href: '/docs/monitor-http-endpoints',
-            icon: <FaServer className="h-7 w-7 text-blue-600" />,
-            clickName: 'HTTP Endpoints Link',
-          },
-          {
-            name: 'Datadog Receiver',
-            href: '/docs/migration/opentelemetry-datadog-receiver',
-            icon: <SiDatadog className="h-7 w-7 text-purple-600" />,
-            clickName: 'Datadog Receiver Link',
-          },
-          {
-            name: 'StatsD',
-            href: '/docs/userguide/opentelemetry-statsd',
-            icon: <VscGraphLine className="h-7 w-7 text-blue-500" />,
-            clickName: 'StatsD Metrics Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.collection)}
         sectionName="Collection Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -466,80 +300,7 @@ export default function MetricsQuickStartOverview({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Cloud Platforms</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'GCP Cloud Run',
-            href: '/docs/gcp-monitoring/cloud-run/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP Cloud Run Metrics Link',
-          },
-          {
-            name: 'GCP App Engine',
-            href: '/docs/gcp-monitoring/app-engine/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP App Engine Metrics Link',
-          },
-          {
-            name: 'GCP Cloud Functions',
-            href: '/docs/gcp-monitoring/gcp-fns/fns-metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP Cloud Functions Metrics Link',
-          },
-          {
-            name: 'GCP Cloud Storage',
-            href: '/docs/gcp-monitoring/gcs/metrics',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'GCP Cloud Storage Metrics Link',
-          },
-          {
-            name: 'Temporal Cloud',
-            href: '/docs/integrations/temporal-cloud-metrics',
-            icon: <SiTemporal className="h-7 w-7 text-blue-500" />,
-            clickName: 'Temporal Cloud Link',
-          },
-          {
-            name: 'Supabase',
-            href: '/docs/integrations/supabase',
-            icon: <SiPostgresql className="h-7 w-7 text-green-500" />,
-            clickName: 'Supabase Metrics Link',
-          },
-          {
-            name: 'ArgoCD',
-            href: '/docs/cicd/argocd/argocd-metrics',
-            icon: <SiArgo className="h-7 w-7 text-orange-600" />,
-            clickName: 'ArgoCD Metrics Link',
-          },
-          {
-            name: 'GitHub Actions',
-            href: '/docs/cicd/github/github-metrics',
-            icon: <SiGithubactions className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'GitHub Actions Link',
-          },
-          {
-            name: 'Azure App Service',
-            href: '/docs/azure-monitoring/app-service/metrics',
-            icon: <FaCloud className="h-7 w-7 text-blue-600" />,
-            clickName: 'Azure App Service Metrics Link',
-          },
-          {
-            name: 'Azure Functions',
-            href: '/docs/azure-monitoring/az-fns/metrics',
-            icon: <FaCloud className="h-7 w-7 text-blue-600" />,
-            clickName: 'Azure Functions Metrics Link',
-          },
-          {
-            name: 'Azure Container Apps',
-            href: '/docs/azure-monitoring/az-container-apps/metrics',
-            icon: <FaCloud className="h-7 w-7 text-blue-600" />,
-            clickName: 'Azure Container Apps Metrics Link',
-          },
-          {
-            name: 'Azure Blob Storage',
-            href: '/docs/azure-monitoring/az-blob-storage/metrics',
-            icon: <FaCloud className="h-7 w-7 text-blue-600" />,
-            clickName: 'Azure Blob Storage Metrics Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.cloudPlatforms)}
         sectionName="Cloud Platform Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -550,50 +311,7 @@ export default function MetricsQuickStartOverview({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Applications</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Golang',
-            href: '/docs/metrics-management/send-metrics/applications/golang',
-            icon: <SiGo className="h-7 w-7 text-cyan-500" />,
-            clickName: 'Golang Metrics Link',
-          },
-          {
-            name: 'Rust',
-            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-rust',
-            icon: <SiRust className="h-7 w-7 text-orange-600" />,
-            clickName: 'Rust Metrics Link',
-          },
-          {
-            name: 'Java',
-            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java',
-            icon: <FaJava className="h-7 w-7 text-red-600" />,
-            clickName: 'Java Metrics Link',
-          },
-          {
-            name: '.NET',
-            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet',
-            icon: <SiDotnet className="h-7 w-7 text-blue-600" />,
-            clickName: '.NET Metrics Link',
-          },
-          {
-            name: 'Node.js',
-            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
-            icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'Node.js Metrics Link',
-          },
-          {
-            name: 'Python',
-            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
-            icon: <SiPython className="h-7 w-7 text-blue-500" />,
-            clickName: 'Python Metrics Link',
-          },
-          {
-            name: 'Deno',
-            href: '/docs/instrumentation/opentelemetry-deno',
-            icon: <SiDeno className="h-7 w-7 text-blue-500" />,
-            clickName: 'Deno Metrics Link',
-          },
-        ]}
+        cards={mapIcons(METRICS_QUICK_START_ITEMS.applications)}
         sectionName="Application Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
