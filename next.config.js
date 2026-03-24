@@ -407,6 +407,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/vercel_logs_to_signoz/',
+          destination: '/docs/userguide/vercel-to-signoz/',
+          permanent: true,
+        },
+        {
           source: '/blog/signoz-benchmarks/',
           destination: '/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/',
           permanent: true,

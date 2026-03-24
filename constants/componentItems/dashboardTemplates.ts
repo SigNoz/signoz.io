@@ -338,7 +338,7 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
   },
   {
     name: 'Snowflake',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
+    href: '/docs/dashboards/dashboard-templates/snowflake',
     clickName: 'Snowflake Dashboard Template',
   },
   {
