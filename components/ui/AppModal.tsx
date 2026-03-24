@@ -1,6 +1,7 @@
 'use client'
 
 import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import { type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
@@ -22,9 +23,9 @@ type AppModalProps = {
   onOpenChange: (open: boolean) => void
   children: ReactNode
   size?: AppModalSize
-  /** Panel wrapper classes (width comes from size unless overridden) */
   panelClassName?: string
   backdrop?: 'blur' | 'default'
+  showCloseButton?: boolean
 }
 
 export function AppModal({
@@ -34,11 +35,12 @@ export function AppModal({
   size = '2xl',
   panelClassName,
   backdrop = 'default',
+  showCloseButton = true,
 }: AppModalProps) {
   return (
     <Dialog
       as="div"
-      className="relative z-[100]"
+      className="bg-overlay/30 fixed inset-0 z-50 h-screen w-screen backdrop-blur-md backdrop-saturate-150"
       open={isOpen}
       onClose={() => onOpenChange(false)}
       transition
@@ -61,6 +63,16 @@ export function AppModal({
               panelClassName
             )}
           >
+            {showCloseButton && (
+              <button
+                type="button"
+                aria-label="Close modal"
+                className="absolute right-3 top-3 z-10 rounded-full p-1.5 text-signoz_ink-100 transition-colors hover:bg-signoz_ink-100/30 hover:text-signoz_ink-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                onClick={() => onOpenChange(false)}
+              >
+                <XMarkIcon className="h-5 w-5" aria-hidden />
+              </button>
+            )}
             {children}
           </DialogPanel>
         </div>
