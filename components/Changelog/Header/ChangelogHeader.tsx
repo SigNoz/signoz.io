@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import Styles from './styles.module.css'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import { AppModal } from '@/components/ui/AppModal'
+import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import { DeploymentType, DeploymentTypeColors, DeploymentTypeLabels } from '@/utils/strapi'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
@@ -123,7 +123,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
           ))}
         </div>
       )}
-      <AppModal
+      <Modal
         size="xl"
         backdrop="blur"
         isOpen={isOpen}
@@ -175,7 +175,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
             </form>
           </div>
         </div>
-      </AppModal>
+      </Modal>
     </div>
   )
 }

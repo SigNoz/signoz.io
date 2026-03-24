@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import { AppModal } from '@/components/ui/AppModal'
+import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 
 const merchandise = {
   title: 'Cool merch.',
@@ -74,7 +74,7 @@ const MerchandiseSection: React.FC<MerchandiseSectionProps> = ({
         </div>
       </div>
 
-      <AppModal
+      <Modal
         size="2xl"
         backdrop="blur"
         isOpen={isOpen}
@@ -93,7 +93,7 @@ const MerchandiseSection: React.FC<MerchandiseSectionProps> = ({
             />
           </div>
         )}
-      </AppModal>
+      </Modal>
     </>
   )
 }

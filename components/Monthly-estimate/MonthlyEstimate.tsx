@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
-import { AppTooltip } from '@/components/ui/AppTooltip'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { ArrowUpRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import { ArrowRight } from 'lucide-react'
@@ -282,7 +282,7 @@ const MonthlyEstimate = () => {
               className="max-w-md"
               endSlot={
                 <output>
-                  <AppTooltip content="Press Enter to apply" delayDuration={300}>
+                  <Tooltip content="Press Enter to apply" delayDuration={300}>
                     <input
                       className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_robin-400 focus:border-signoz_robin-500"
                       type="text"
@@ -298,7 +298,7 @@ const MonthlyEstimate = () => {
                         }
                       }}
                     />
-                  </AppTooltip>
+                  </Tooltip>
                 </output>
               }
             />
@@ -348,7 +348,7 @@ const MonthlyEstimate = () => {
               className="max-w-md"
               endSlot={
                 <output>
-                  <AppTooltip content="Press Enter to apply" delayDuration={300}>
+                  <Tooltip content="Press Enter to apply" delayDuration={300}>
                     <input
                       className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_sakura-400 focus:border-signoz_sakura-500"
                       type="text"
@@ -362,7 +362,7 @@ const MonthlyEstimate = () => {
                         }
                       }}
                     />
-                  </AppTooltip>
+                  </Tooltip>
                 </output>
               }
             />
@@ -412,7 +412,7 @@ const MonthlyEstimate = () => {
               className="max-w-md"
               endSlot={
                 <output>
-                  <AppTooltip content="Press Enter to apply" delayDuration={300}>
+                  <Tooltip content="Press Enter to apply" delayDuration={300}>
                     <input
                       className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_amber-400 focus:border-signoz_amber-500"
                       type="text"
@@ -428,7 +428,7 @@ const MonthlyEstimate = () => {
                         }
                       }}
                     />
-                  </AppTooltip>
+                  </Tooltip>
                 </output>
               }
             />

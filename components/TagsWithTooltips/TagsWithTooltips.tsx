@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Badge } from '@signozhq/badge'
-import { AppTooltip } from '@/components/ui/AppTooltip'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { tagDefinitions } from '@/constants/tagDefinitions'
 
 interface TagsWithTooltipsProps {
@@ -21,7 +21,7 @@ const TagsWithTooltips: React.FC<TagsWithTooltipsProps> = ({ tags, className = '
         const tooltipContent = tagDefinitions[tag as keyof typeof tagDefinitions]
 
         return tooltipContent ? (
-          <AppTooltip
+          <Tooltip
             key={tag}
             content={tooltipContent}
             side="right"
@@ -33,7 +33,7 @@ const TagsWithTooltips: React.FC<TagsWithTooltipsProps> = ({ tags, className = '
                 <span className="sr-only"> - {tooltipContent}</span>
               </Badge>
             </div>
-          </AppTooltip>
+          </Tooltip>
         ) : (
           <Badge key={tag} color="vanilla" className="cursor-pointer text-xs transition-colors">
             {tag}

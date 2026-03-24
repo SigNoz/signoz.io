@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useCallback } from 'react'
 import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import { AppModal } from '@/components/ui/AppModal'
+import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import PricingForm from 'app/pricing-form'
 import { ENTERPRISE_DEMO_HUBSPOT_DATA } from './EnterprisePage.constants'
 
@@ -28,7 +28,7 @@ export function BookADemoModalProvider({ children }: { children: React.ReactNode
   return (
     <BookADemoModalContext.Provider value={{ openModal }}>
       {children}
-      <AppModal
+      <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         size="3xl"
@@ -43,7 +43,7 @@ export function BookADemoModalProvider({ children }: { children: React.ReactNode
             />
           </HubspotProvider>
         </div>
-      </AppModal>
+      </Modal>
     </BookADemoModalContext.Provider>
   )
 }

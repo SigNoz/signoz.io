@@ -3,8 +3,7 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { useDisclosure } from '@/hooks/useDisclosure'
-import { AppModal } from '@/components/ui/AppModal'
+import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import {
@@ -40,7 +39,7 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
         </Button>
       </div>
 
-      <AppModal
+      <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         size="3xl"
@@ -53,7 +52,7 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
             formName="Datadog Migration Tool"
           />
         </HubspotProvider>
-      </AppModal>
+      </Modal>
     </div>
   )
 }

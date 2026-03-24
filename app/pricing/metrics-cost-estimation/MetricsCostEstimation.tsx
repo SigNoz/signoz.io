@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import { AppModal } from '@/components/ui/AppModal'
+import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
@@ -261,7 +261,7 @@ const MetricsCostEstimation = () => {
         </div>
       </main>
 
-      <AppModal
+      <Modal
         size="5xl"
         backdrop="blur"
         isOpen={isOpen}
@@ -274,7 +274,7 @@ const MetricsCostEstimation = () => {
         <div className="py-6">
           {selectedVideoID ? <VimeoPlayer videoId={selectedVideoID} /> : null}
         </div>
-      </AppModal>
+      </Modal>
     </div>
   )
 }

@@ -10,7 +10,7 @@ import CountdownTimer from '@/components/Timer'
 import { Linkedin } from '@/components/social-icons/SolidIcons'
 import Youtube from '@/components/VideoPlayer/VideoPlayer'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import { AppModal } from '@/components/ui/AppModal'
+import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import { Card } from '@/components/ui/Card'
 
 const MainSection: React.FC = () => {
@@ -126,7 +126,7 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-            <AppModal
+            <Modal
               size="5xl"
               backdrop="blur"
               isOpen={isOpen}
@@ -136,7 +136,7 @@ const MainSection: React.FC = () => {
               <div className="py-10">
                 <Youtube id={videoId} />
               </div>
-            </AppModal>
+            </Modal>
           </div>
 
           <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">

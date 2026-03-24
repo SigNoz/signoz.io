@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import docsSideNav from 'constants/docsSideNav'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { AppTooltip } from '@/components/ui/AppTooltip'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 
 interface DocsSidebarProps {
   onNavItemClick?: () => void
@@ -166,9 +166,9 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
           {!isGetStarted && (
             <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
           )}
-          <AppTooltip content={doc.label} side="right" delayDuration={500}>
+          <Tooltip content={doc.label} side="right" delayDuration={500}>
             <span className="truncate font-medium">{doc.label}</span>
-          </AppTooltip>
+          </Tooltip>
         </Link>
       </li>
     )
@@ -195,16 +195,16 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
             <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
               {category.isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </div>
-            <AppTooltip content={category.label} side="right" delayDuration={500}>
+            <Tooltip content={category.label} side="right" delayDuration={500}>
               <span className="truncate font-medium">{category.label}</span>
-            </AppTooltip>
+            </Tooltip>
           </div>
         </Link>
         {category.isExpanded && (
           <div className="mt-1">
             {category.link && category.link.type === 'generated-index' && (
               <div className="mx-5 mb-2 mt-2">
-                <AppTooltip content={category.link.title} side="right" delayDuration={500}>
+                <Tooltip content={category.link.title} side="right" delayDuration={500}>
                   <h4
                     className={`truncate text-xs font-medium text-gray-400 ${
                       isActiveRoute ? 'text-blue-400' : 'hover:text-gray-300'
@@ -212,7 +212,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
                   >
                     {category.link.title}
                   </h4>
-                </AppTooltip>
+                </Tooltip>
               </div>
             )}
             <ul className="ml-4 space-y-0.5 border-l border-gray-700/50 pl-0">

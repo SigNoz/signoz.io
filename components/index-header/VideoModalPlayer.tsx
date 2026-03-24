@@ -3,7 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import { AppModal } from '@/components/ui/AppModal'
+import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
 import VimeoPlayer from '../VimeoPlayer/VimeoPlayer'
 import TrackingButton from '@/components/TrackingButton'
 
@@ -45,7 +45,7 @@ export const VideoModalPlayer = ({ thumbnailSrc, videoId }: VideoModalPlayerProp
           </div>
         </div>
 
-        <AppModal
+        <Modal
           size="5xl"
           backdrop="blur"
           isOpen={isOpen}
@@ -55,7 +55,7 @@ export const VideoModalPlayer = ({ thumbnailSrc, videoId }: VideoModalPlayerProp
           <div className="py-6">
             <VimeoPlayer videoId={videoId} />
           </div>
-        </AppModal>
+        </Modal>
       </div>
     </div>
   )
