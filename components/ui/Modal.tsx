@@ -40,7 +40,7 @@ export function AppModal({
   return (
     <Dialog
       as="div"
-      className="bg-overlay/30 fixed inset-0 z-50 h-screen w-screen backdrop-blur-md backdrop-saturate-150"
+      className="fixed inset-0 z-50 h-screen w-screen"
       open={isOpen}
       onClose={() => onOpenChange(false)}
       transition
@@ -49,7 +49,9 @@ export function AppModal({
         transition
         className={cn(
           'fixed inset-0 transition duration-200 ease-out data-[closed]:opacity-0',
-          backdrop === 'blur' ? 'bg-black/40 backdrop-blur-sm' : 'bg-black/55'
+          backdrop === 'blur'
+            ? 'bg-overlay/30 backdrop-blur-md backdrop-saturate-150'
+            : 'bg-black/55'
         )}
       />
 

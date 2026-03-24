@@ -67,6 +67,7 @@ export function PricingRangeSlider({
         onValueChange={(v) => onChange(v[0] ?? min)}
         onPointerDown={() => setIsDragging(true)}
         onPointerUp={() => setIsDragging(false)}
+        onLostPointerCapture={() => setIsDragging(false)}
         min={min}
         max={max}
         step={step}
