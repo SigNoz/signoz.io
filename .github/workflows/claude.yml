@@ -200,7 +200,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: anthropics/claude-code-action@v1
         env:
-          GITHUB_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
+          GH_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -228,7 +228,7 @@ jobs:
         if: github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
         uses: anthropics/claude-code-action@v1
         env:
-          GITHUB_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
+          GH_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         with:
