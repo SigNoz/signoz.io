@@ -1,5 +1,6 @@
-import { tagDefinitions } from '@/constants/tagDefinitions'
-import { hastToMarkdown, normalizeWhitespace } from './markdownCore'
+import type { Root as HastRoot, RootContent as HastContent, Element as HastElement } from 'hast'
+import { getTextContent, hastToMarkdown, normalizeWhitespace } from './markdownCore'
+import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
 
 export type BuildCopyMarkdownOptions = {
   title: string
@@ -7,64 +8,137 @@ export type BuildCopyMarkdownOptions = {
   includeTagDefinitions: boolean
 }
 
-const buildTagHeader = (tags: string[], includeTagDefinitions: boolean): string => {
-  if (!tags || tags.length === 0) {
-    return ''
-  }
+type HastParentNode = {
+  children?: HastContent[]
+}
 
-  const lines: string[] = [`Tags: ${tags.join(', ')}`]
+const isElement = (node: HastContent): node is HastElement => node.type === 'element'
 
-  if (includeTagDefinitions) {
-    const definitionLines = tags
-      .map((tag) => {
-        const definition = tagDefinitions[tag]
-        return definition ? `- ${tag}: ${definition}` : null
-      })
-      .filter(Boolean) as string[]
+const getProperty = (node: HastElement, keys: string[]): unknown => {
+  const properties = node.properties || {}
 
-    if (definitionLines.length > 0) {
-      lines.push('', 'Tag definitions:', ...definitionLines)
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(properties, key)) {
+      return properties[key]
     }
   }
 
-  return lines.join('\n')
+  return undefined
 }
 
-const expandTabsInClone = (clone: HTMLElement) => {
-  const tabRoots = Array.from(clone.querySelectorAll('[data-tabs-root]'))
+const hasDataTabsRoot = (node: HastElement): boolean =>
+  getProperty(node, ['data-tabs-root', 'dataTabsRoot']) !== undefined
 
-  tabRoots.forEach((root) => {
+const getTabValue = (node: HastElement): string => {
+  const value = getProperty(node, ['data-tab-value', 'dataTabValue'])
+  return typeof value === 'string' ? value : ''
+}
+
+const visitElements = (node: HastParentNode, visitor: (element: HastElement) => void) => {
+  for (const child of node.children || []) {
+    if (!isElement(child)) {
+      continue
+    }
+
+    visitor(child)
+    visitElements(child, visitor)
+  }
+}
+
+const visitElementsWithinTabsRoot = (
+  root: HastElement,
+  visitor: (element: HastElement) => void
+) => {
+  const visit = (node: HastParentNode) => {
+    for (const child of node.children || []) {
+      if (!isElement(child)) {
+        continue
+      }
+
+      // Nested tabsets are expanded in their own pass; don't let the outer
+      // tabset rewrite their labels or panels.
+      if (hasDataTabsRoot(child)) {
+        continue
+      }
+
+      visitor(child)
+      visit(child)
+    }
+  }
+
+  visit(root)
+}
+
+export const expandTabsInHast = (tree: HastRoot): HastRoot => {
+  visitElements(tree, (root) => {
+    if (!hasDataTabsRoot(root)) {
+      return
+    }
+
     const labelMap = new Map<string, string>()
-    const tabButtons = Array.from(root.querySelectorAll('button[data-tab-value]'))
 
-    tabButtons.forEach((button) => {
-      const value = button.getAttribute('data-tab-value') || ''
-      const label = button.textContent?.trim() || value
+    visitElementsWithinTabsRoot(root, (element) => {
+      if (element.tagName !== 'button') {
+        return
+      }
+
+      const value = getTabValue(element)
+      const label = getTextContent(element).trim() || value
+
       if (value) {
         labelMap.set(value, label)
       }
     })
 
-    const panels = Array.from(root.querySelectorAll('div[data-tab-value]'))
-    panels.forEach((panel) => {
-      const value = panel.getAttribute('data-tab-value') || ''
-      const label = labelMap.get(value) || value
-      panel.removeAttribute('hidden')
-      panel.removeAttribute('aria-hidden')
-      if (label) {
-        const heading = panel.ownerDocument.createElement('h3')
-        heading.textContent = label
-        panel.insertBefore(heading, panel.firstChild)
+    visitElementsWithinTabsRoot(root, (element) => {
+      if (element.tagName !== 'div') {
+        return
       }
+
+      const value = getTabValue(element)
+      if (!value) {
+        return
+      }
+
+      if (element.properties) {
+        delete element.properties.hidden
+        delete element.properties['aria-hidden']
+        delete element.properties.ariaHidden
+      }
+
+      const label = labelMap.get(value) || value
+      if (!label) {
+        return
+      }
+
+      element.children = element.children || []
+      element.children.unshift({
+        type: 'element',
+        tagName: 'h3',
+        properties: {},
+        children: [{ type: 'text', value: label }],
+      })
     })
   })
+
+  return tree
 }
 
 const cloneAndCleanArticle = (articleEl: HTMLElement): HTMLElement => {
-  const clone = articleEl.cloneNode(true) as HTMLElement
-  expandTabsInClone(clone)
-  return clone
+  return articleEl.cloneNode(true) as HTMLElement
 }
+
+export const buildCopyMarkdownDocument = (
+  bodyMarkdown: string,
+  options: BuildCopyMarkdownOptions
+): string =>
+  buildMarkdownDocument({
+    title: options.title,
+    tags: options.tags,
+    includeTagDefinitions: options.includeTagDefinitions,
+    bodyMarkdown,
+    footerLines: [MORE_DOCS_POINTER],
+  })
 
 export async function buildCopyMarkdownFromRendered(
   articleEl: HTMLElement,
@@ -73,16 +147,7 @@ export async function buildCopyMarkdownFromRendered(
   const { fromDom } = await import('hast-util-from-dom')
 
   const cleanedArticle = cloneAndCleanArticle(articleEl)
-  const hast = fromDom(cleanedArticle)
+  const hast = expandTabsInHast(fromDom(cleanedArticle) as HastRoot)
   const bodyMarkdown = await hastToMarkdown(hast as any, { cleanForDocsUi: true })
-
-  const headerLines = [`# ${options.title}`]
-  const tagsHeader = buildTagHeader(options.tags, options.includeTagDefinitions)
-  if (tagsHeader) {
-    headerLines.push('', tagsHeader)
-  }
-
-  const header = normalizeWhitespace(headerLines.join('\n'))
-
-  return normalizeWhitespace([header, bodyMarkdown].filter(Boolean).join('\n\n'))
+  return normalizeWhitespace(buildCopyMarkdownDocument(bodyMarkdown, options))
 }

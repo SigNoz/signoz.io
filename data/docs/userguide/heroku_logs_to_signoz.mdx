@@ -1,5 +1,5 @@
 ---
-date: 2026-01-27
+date: 2026-03-21
 title: Stream Logs from Heroku to SigNoz
 description: Stream application logs from Heroku to SigNoz using HTTPS drains. This guide covers setup for both Cloud and Self-Hosted SigNoz instances.
 id: heroku_logs_to_signoz
@@ -68,10 +68,11 @@ Modify the pipeline in the `otel-collector-config.yaml`](https://github.com/SigN
 ```yaml:/deploy/docker/otel-collector-config.yaml {4}
 service:
   ...
-  logs:
-    receivers: [otlp, httplogreceiver/heroku]
-    processors: [batch]
-    exporters: [clickhouselogsexporter]
+  pipelines:
+    logs:
+      receivers: [otlp, httplogreceiver/heroku]
+      processors: [batch]
+      exporters: [clickhouselogsexporter]
 ```
 
 ### 4. Restart the OTEL Collector

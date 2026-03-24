@@ -3,6 +3,7 @@ import React from 'react'
 import Heading from '../../components/ui/Heading'
 import Button from '../../components/ui/Button'
 import { ArrowRightSolid } from '@/components/homepage-icons/icons'
+import TrackingLink from '../TrackingLink'
 
 const Observability = () => {
   return (
@@ -18,7 +19,19 @@ const Observability = () => {
               <p className="text-base font-normal leading-9 text-signoz_vanilla-400">
                 Get access to observability at any scale with advanced security and compliance.
               </p>
+              <TrackingLink
+                href="/why-signoz/"
+                clickType="Secondary CTA"
+                clickName="Why SigNoz Button"
+                clickLocation="Observability Section"
+                clickText="Why SigNoz"
+              >
+                <Button variant="secondary" rounded="full" isButton>
+                  Why SigNoz
+                </Button>
+              </TrackingLink>
             </div>
+
             <div>
               <ul className="ul-no-padding flex flex-col gap-3">
                 <li className="flex flex-row items-center gap-3">

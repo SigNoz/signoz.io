@@ -13,320 +13,132 @@ import {
   SiOllama,
   SiHuggingface,
 } from 'react-icons/si'
+import { LLM_MONITORING_ITEMS } from '@/constants/componentItems'
 
-interface IconCardData {
-  name: string
-  href: string
-  icon: React.ReactNode
-  clickName: string
+const ICON_MAP: Record<string, React.ReactNode> = {
+  '/docs/agno-monitoring': (
+    <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+  ),
+  '/docs/amazon-bedrock-monitoring': <SiAmazonwebservices className="h-7 w-7 text-white" />,
+  '/docs/anthropic-monitoring': <SiAnthropic className="h-7 w-7 text-orange-500" />,
+  '/docs/autogen-observability': (
+    <img src="/svgs/icons/LLMMonitoring/autogen-logo.webp" alt="AutoGen Icon" className="h-7 w-7" />
+  ),
+  '/docs/azure-openai-monitoring': (
+    <img
+      src="/svgs/icons/LLMMonitoring/azure-logo.webp"
+      alt="Azure OpenAI Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/claude-code-monitoring': <SiClaude className="h-7 w-7 text-orange-500" />,
+  '/docs/claude-agent-monitoring': <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
+  '/docs/codex-monitoring': <SiOpenai className="h-7 w-7 text-white" />,
+  '/docs/crewai-observability': (
+    <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />
+  ),
+  '/docs/deepseek-monitoring': (
+    <img
+      src="/svgs/icons/LLMMonitoring/deepseek-icon.svg"
+      alt="DeepSeek Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/google-adk-observability': (
+    <img
+      src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+      alt="Google ADK Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/google-gemini-monitoring': <SiGooglegemini className="h-7 w-7 text-blue-500" />,
+  '/docs/grok-monitoring': (
+    <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+  ),
+  '/docs/groq-observability': (
+    <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+  ),
+  '/docs/haystack-monitoring': (
+    <img
+      src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
+      alt="Haystack Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/huggingface-observability': (
+    <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />
+  ),
+  '/docs/inkeep-monitoring': (
+    <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
+  ),
+  '/docs/langchain-observability': <SiLangchain className="h-7 w-7 text-white" />,
+  '/docs/langtrace': (
+    <img
+      src="/svgs/icons/LLMMonitoring/langtrace-logo.webp"
+      alt="Langtrace Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/litellm-observability': (
+    <img src="/img/docs/llm/litellm/litellm-logo.webp" alt="LiteLLM Icon" className="h-7 w-7" />
+  ),
+  '/docs/livekit-observability': (
+    <img src="/img/docs/llm/livekit/livekit-icon.svg" alt="LiveKit Icon" className="h-7 w-7" />
+  ),
+  '/docs/llamaindex-observability': (
+    <img
+      src="/svgs/icons/LLMMonitoring/llamaindex-icon.svg"
+      alt="LlamaIndex Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/mastra-observability': (
+    <img src="/img/docs/llm/mastra/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />
+  ),
+  '/docs/mistral-observability': (
+    <img src="/img/docs/llm/mistral/mistral-logo.webp" alt="Mistral AI Icon" className="h-7 w-7" />
+  ),
+  '/docs/ollama-monitoring': <SiOllama className="h-7 w-7 text-white" />,
+  '/docs/openai-monitoring': <SiOpenai className="h-7 w-7 text-green-400" />,
+  '/docs/openclaw-monitoring': (
+    <img src="/img/docs/llm/openclaw/openclaw-logo.svg" alt="OpenClaw Icon" className="h-7 w-7" />
+  ),
+  '/docs/openlit': (
+    <img src="/svgs/icons/LLMMonitoring/openlit-logo.webp" alt="OpenLIT Icon" className="h-7 w-7" />
+  ),
+  '/docs/openrouter-observability': (
+    <img
+      src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
+      alt="OpenRouter Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/pipecat-monitoring': (
+    <img src="/svgs/icons/LLMMonitoring/pipecat-logo.webp" alt="Pipecat Icon" className="h-7 w-7" />
+  ),
+  '/docs/pydantic-ai-observability': <SiPydantic className="h-7 w-7 text-pink-600" />,
+  '/docs/semantic-kernel-observability': (
+    <img
+      src="/img/docs/llm/semantic-kernel/sk-logo.webp"
+      alt="Semantic Kernel Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/temporal-observability': <SiTemporal className="h-7 w-7 text-purple-600" />,
+  '/docs/traceloop': (
+    <img
+      src="/svgs/icons/LLMMonitoring/traceloop-logo.webp"
+      alt="Traceloop Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/vercel-ai-sdk-observability': <SiVercel className="h-7 w-7 text-white" />,
 }
 
-const LLMMonitoringData: IconCardData[] = [
-  {
-    name: 'Agno',
-    href: '/docs/agno-monitoring',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Agno Monitoring',
-  },
-  {
-    name: 'Amazon Bedrock',
-    href: '/docs/amazon-bedrock-monitoring',
-    icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
-    clickName: 'Amazon Bedrock Monitoring',
-  },
-  {
-    name: 'Anthropic API',
-    href: '/docs/anthropic-monitoring',
-    icon: <SiAnthropic className="h-7 w-7 text-orange-500" />,
-    clickName: 'Anthropic API Monitoring',
-  },
-  {
-    name: 'AutoGen',
-    href: '/docs/autogen-observability',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/autogen-logo.webp"
-        alt="AutoGen Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'AutoGen Monitoring',
-  },
-  {
-    name: 'Azure OpenAI API',
-    href: '/docs/azure-openai-monitoring',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/azure-logo.webp"
-        alt="Azure OpenAI Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Azure OpenAI API Monitoring',
-  },
-  {
-    name: 'Claude Code',
-    href: '/docs/claude-code-monitoring',
-    icon: <SiClaude className="h-7 w-7 text-orange-500" />,
-    clickName: 'Claude Code Monitoring',
-  },
-  {
-    name: 'Claude Agent SDK',
-    href: '/docs/claude-agent-monitoring',
-    icon: <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
-    clickName: 'Claude Agent SDK Monitoring',
-  },
-  {
-    name: 'Codex (OpenAI)',
-    href: '/docs/codex-monitoring',
-    icon: <SiOpenai className="h-7 w-7 text-white" />,
-    clickName: 'Codex (OpenAI) Monitoring',
-  },
-  {
-    name: 'Crew AI',
-    href: '/docs/crewai-observability',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Crew AI Monitoring',
-  },
-  {
-    name: 'DeepSeek API',
-    href: '/docs/deepseek-monitoring',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/deepseek-icon.svg"
-        alt="DeepSeek Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'DeepSeek Monitoring',
-  },
-  {
-    name: 'Google ADK',
-    href: '/docs/google-adk-observability',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
-        alt="Google ADK Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Google ADK Monitoring',
-  },
-  {
-    name: 'Google Gemini',
-    href: '/docs/google-gemini-monitoring',
-    icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
-    clickName: 'Google Gemini Monitoring',
-  },
-  {
-    name: 'Grok',
-    href: '/docs/grok-monitoring',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Grok Monitoring',
-  },
-  {
-    name: 'Groq',
-    href: '/docs/groq-observability',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Groq Monitoring',
-  },
-  {
-    name: 'Haystack',
-    href: '/docs/haystack-monitoring',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/haystack-logo.webp"
-        alt="Haystack Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Haystack Monitoring',
-  },
-  {
-    name: 'Hugging Face',
-    href: '/docs/huggingface-observability',
-    icon: <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />,
-    clickName: 'Hugging Face Monitoring',
-  },
-  {
-    name: 'Inkeep',
-    href: '/docs/inkeep-monitoring',
-    icon: (
-      <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
-    ),
-    clickName: 'Inkeep Monitoring',
-  },
-  {
-    name: 'LangChain/LangGraph',
-    href: '/docs/langchain-observability',
-    icon: <SiLangchain className="h-7 w-7 text-white" />,
-    clickName: 'LangChain Monitoring',
-  },
-  {
-    name: 'Langtrace',
-    href: '/docs/langtrace',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/langtrace-logo.webp"
-        alt="Langtrace Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Langtrace',
-  },
-  {
-    name: 'LiteLLM',
-    href: '/docs/litellm-observability',
-    icon: (
-      <img src="/img/docs/llm/litellm/litellm-logo.webp" alt="LiteLLM Icon" className="h-7 w-7" />
-    ),
-    clickName: 'LiteLLM Monitoring',
-  },
-  {
-    name: 'LiveKit',
-    href: '/docs/livekit-observability',
-    icon: (
-      <img src="/img/docs/llm/livekit/livekit-icon.svg" alt="LiveKit Icon" className="h-7 w-7" />
-    ),
-    clickName: 'LiveKit Monitoring',
-  },
-  {
-    name: 'LlamaIndex',
-    href: '/docs/llamaindex-observability',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/llamaindex-icon.svg"
-        alt="LlamaIndex Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'LlamaIndex Monitoring',
-  },
-  {
-    name: 'Mastra',
-    href: '/docs/mastra-observability',
-    icon: <img src="/img/docs/llm/mastra/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />,
-    clickName: 'Mastra Monitoring',
-  },
-  {
-    name: 'Mistral AI',
-    href: '/docs/mistral-observability',
-    icon: (
-      <img
-        src="/img/docs/llm/mistral/mistral-logo.webp"
-        alt="Mistral AI Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Mistral AI Monitoring',
-  },
-  {
-    name: 'Ollama',
-    href: '/docs/ollama-monitoring',
-    icon: <SiOllama className="h-7 w-7 text-white" />,
-    clickName: 'Ollama Monitoring',
-  },
-  {
-    name: 'OpenAI',
-    href: '/docs/openai-monitoring',
-    icon: <SiOpenai className="h-7 w-7 text-green-400" />,
-    clickName: 'OpenAI Monitoring',
-  },
-  {
-    name: 'OpenClaw',
-    href: '/docs/openclaw-monitoring',
-    icon: (
-      <img src="/img/docs/llm/openclaw/openclaw-logo.svg" alt="OpenClaw Icon" className="h-7 w-7" />
-    ),
-    clickName: 'OpenClaw Monitoring',
-  },
-  {
-    name: 'OpenLIT',
-    href: '/docs/openlit',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/openlit-logo.webp"
-        alt="OpenLIT Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'OpenLIT',
-  },
-  {
-    name: 'OpenRouter',
-    href: '/docs/openrouter-observability',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
-        alt="OpenRouter Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'OpenRouter Monitoring',
-  },
-  {
-    name: 'Pipecat',
-    href: '/docs/pipecat-monitoring',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
-        alt="Pipecat Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Pipecat Monitoring',
-  },
-  {
-    name: 'Pydantic AI',
-    href: '/docs/pydantic-ai-observability',
-    icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
-    clickName: 'Pydantic AI Monitoring',
-  },
-  {
-    name: 'Semantic Kernel',
-    href: '/docs/semantic-kernel-observability',
-    icon: (
-      <img
-        src="/img/docs/llm/semantic-kernel/sk-logo.webp"
-        alt="Semantic Kernel Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Semantic Kernel Monitoring',
-  },
-  {
-    name: 'Temporal',
-    href: '/docs/temporal-observability',
-    icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
-    clickName: 'Temporal Monitoring',
-  },
-  {
-    name: 'Traceloop (OpenLLMetry)',
-    href: '/docs/traceloop',
-    icon: (
-      <img
-        src="/svgs/icons/LLMMonitoring/traceloop-logo.webp"
-        alt="Traceloop Icon"
-        className="h-7 w-7"
-      />
-    ),
-    clickName: 'Traceloop (OpenLLMetry)',
-  },
-  {
-    name: 'Vercel AI SDK',
-    href: '/docs/vercel-ai-sdk-observability',
-    icon: <SiVercel className="h-7 w-7 text-white" />,
-    clickName: 'Vercel AI SDK Monitoring',
-  },
-]
+const LLMMonitoringData = LLM_MONITORING_ITEMS.map((item) => ({
+  ...item,
+  icon: ICON_MAP[item.href],
+}))
 
 export default function LLMMonitoringListicle() {
   return (

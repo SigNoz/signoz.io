@@ -21,6 +21,7 @@ import {
   MdNotifications,
 } from 'react-icons/md'
 import IconCardGrid from '../Card/IconCardGrid'
+import { AWS_MONITORING_ITEMS } from '@/constants/componentItems'
 
 export default function AWSMonitoringListicle() {
   const sections = [
@@ -52,36 +53,55 @@ export default function AWSMonitoringListicle() {
     </div>
   )
 
+  // Icon map keyed by href
+  const ICON_MAP: Record<string, React.ReactNode> = {
+    '/docs/aws-monitoring/ec2/': <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/ecs/': <SiAmazonecs className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/eks': <SiAmazoneks className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/lambda': <SiAwslambda className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/rds': <SiAmazonrds className="h-7 w-7 text-blue-500" />,
+    '/docs/aws-monitoring/dynamodb': <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
+    '/docs/aws-monitoring/elasticache': <MdMemory className="h-7 w-7 text-blue-500" />,
+    '/docs/aws-monitoring/alb': <MdRouter className="h-7 w-7 text-purple-500" />,
+    '/docs/aws-monitoring/elb-logs': <MdRouter className="h-7 w-7 text-purple-500" />,
+    '/docs/aws-monitoring/vpc': <MdSecurity className="h-7 w-7 text-green-500" />,
+    '/docs/aws-monitoring/api-gateway': <MdHttp className="h-7 w-7 text-purple-500" />,
+    '/docs/aws-monitoring/msk': <MdCloudQueue className="h-7 w-7 text-black dark:text-white" />,
+    '/docs/aws-monitoring/sqs': <MdMessage className="h-7 w-7 text-pink-500" />,
+    '/docs/aws-monitoring/sns': <MdNotifications className="h-7 w-7 text-pink-500" />,
+    '/docs/aws-monitoring/s3': <SiAmazons3 className="h-7 w-7 text-green-600" />,
+  }
+
+  const computeCards = AWS_MONITORING_ITEMS.compute.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const databasesCards = AWS_MONITORING_ITEMS.databases.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const networkingCards = AWS_MONITORING_ITEMS.networking.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const messagingCards = AWS_MONITORING_ITEMS.messaging.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const storageCards = AWS_MONITORING_ITEMS.storage.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
   const renderComputeSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Compute</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'EC2',
-            href: '/docs/aws-monitoring/ec2/',
-            icon: <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
-            clickName: 'EC2 Monitoring Link',
-          },
-          {
-            name: 'ECS',
-            href: '/docs/aws-monitoring/ecs/',
-            icon: <SiAmazonecs className="h-7 w-7 text-orange-500" />,
-            clickName: 'ECS Monitoring Link',
-          },
-          {
-            name: 'EKS',
-            href: '/docs/aws-monitoring/eks',
-            icon: <SiAmazoneks className="h-7 w-7 text-orange-500" />,
-            clickName: 'EKS Monitoring Link',
-          },
-          {
-            name: 'Lambda',
-            href: '/docs/aws-monitoring/lambda',
-            icon: <SiAwslambda className="h-7 w-7 text-orange-500" />,
-            clickName: 'Lambda Monitoring Link',
-          },
-        ]}
+        cards={computeCards}
         sectionName="Compute"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -92,26 +112,7 @@ export default function AWSMonitoringListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Databases</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'RDS',
-            href: '/docs/aws-monitoring/rds',
-            icon: <SiAmazonrds className="h-7 w-7 text-blue-500" />,
-            clickName: 'RDS Monitoring Link',
-          },
-          {
-            name: 'DynamoDB',
-            href: '/docs/aws-monitoring/dynamodb',
-            icon: <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
-            clickName: 'DynamoDB Monitoring Link',
-          },
-          {
-            name: 'ElastiCache',
-            href: '/docs/aws-monitoring/elasticache',
-            icon: <MdMemory className="h-7 w-7 text-blue-500" />,
-            clickName: 'ElastiCache Monitoring Link',
-          },
-        ]}
+        cards={databasesCards}
         sectionName="Databases"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -122,32 +123,7 @@ export default function AWSMonitoringListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Networking</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'ALB',
-            href: '/docs/aws-monitoring/alb',
-            icon: <MdRouter className="h-7 w-7 text-purple-500" />,
-            clickName: 'ALB Monitoring Link',
-          },
-          {
-            name: 'ELB',
-            href: '/docs/aws-monitoring/elb-logs',
-            icon: <MdRouter className="h-7 w-7 text-purple-500" />,
-            clickName: 'ELB Monitoring Link',
-          },
-          {
-            name: 'VPC',
-            href: '/docs/aws-monitoring/vpc',
-            icon: <MdSecurity className="h-7 w-7 text-green-500" />,
-            clickName: 'VPC Monitoring Link',
-          },
-          {
-            name: 'API Gateway',
-            href: '/docs/aws-monitoring/api-gateway',
-            icon: <MdHttp className="h-7 w-7 text-purple-500" />,
-            clickName: 'API Gateway Monitoring Link',
-          },
-        ]}
+        cards={networkingCards}
         sectionName="Networking"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -158,26 +134,7 @@ export default function AWSMonitoringListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Messaging</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'MSK',
-            href: '/docs/aws-monitoring/msk',
-            icon: <MdCloudQueue className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'MSK Monitoring Link',
-          },
-          {
-            name: 'SQS',
-            href: '/docs/aws-monitoring/sqs',
-            icon: <MdMessage className="h-7 w-7 text-pink-500" />,
-            clickName: 'SQS Monitoring Link',
-          },
-          {
-            name: 'SNS',
-            href: '/docs/aws-monitoring/sns',
-            icon: <MdNotifications className="h-7 w-7 text-pink-500" />,
-            clickName: 'SNS Monitoring Link',
-          },
-        ]}
+        cards={messagingCards}
         sectionName="Messaging"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -188,14 +145,7 @@ export default function AWSMonitoringListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Storage</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'S3',
-            href: '/docs/aws-monitoring/s3',
-            icon: <SiAmazons3 className="h-7 w-7 text-green-600" />,
-            clickName: 'S3 Monitoring Link',
-          },
-        ]}
+        cards={storageCards}
         sectionName="Storage"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
