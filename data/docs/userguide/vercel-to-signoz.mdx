@@ -22,57 +22,34 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ## Configure Vercel Drains
 
-Follow the steps below to send your trace or log data from Vercel to SigNoz Cloud:
+Create a separate drain for each signal you want to export:
 
-### Step 1: Create a New Drain
+<Tabs>
+<TabItem value="logs" label="Logs" default>
+
+### Step 1: Create a New Log Drain
 
 1. Navigate to **Team Settings** > **Drains** and click **Add Drain**. This opens a dialog to configure your new drain.
-2. Select the type of observability data you want to drain. Choose **Logs** or **Traces** based on your needs. The configuration options for your selected drain type will appear.
-3. Provide a name for your drain, select which projects should send data to your endpoint, and configure the sampling rate (and log source/environment for logs).
-4. After configuring these settings, click the **Next** button to proceed.
+2. Select **Logs** as the drain type.
+3. Provide a name for your drain, select which projects should send data to your endpoint, and configure the log source and environment.
+4. Click **Next**.
 
-<Tabs>
-  <TabItem value="logs" label="Logs" default>
-    <Figure
-      src="/img/docs/vercel/logs-sources.webp"
-      caption="Vercel Log Drain Sources and Environment"
-      alt="Vercel Log Drain Sources and Environment"
-    />
-  </TabItem>
-  <TabItem value="traces" label="Traces">
-    <Figure
-      src="/img/docs/vercel/traces-sources.webp"
-      caption="Vercel Trace Drain Sources and Environment"
-      alt="Vercel Trace Drain Sources and Environment"
-    />
-  </TabItem>
-</Tabs>
+<Figure
+  src="/img/docs/vercel/logs-sources.webp"
+  caption="Vercel Log Drain Sources and Environment"
+  alt="Vercel Log Drain Sources and Environment"
+/>
 
-### Step 2: Configure Destination
+### Step 2: Configure the Log Destination
 
-Choose how you want to receive your drain data. Under the **Custom Endpoint** tab, configure the delivery format and endpoint.
+1. Under the **Custom Endpoint** tab, set the delivery format to `JSON`.
+2. Enter the SigNoz **logs** ingestion **endpoint**:
 
-<Tabs>
-  <TabItem value="logs" label="Logs" default>
-    1. Set the delivery format to `JSON`. Vercel will now be configured to send JSON payloads to your endpoint.
-    2. Enter the SigNoz **logs** ingestion **endpoint**:
+```
+https://ingest.<region>.signoz.cloud:443/logs/json
+```
 
-    ```
-    https://ingest.<region>.signoz.cloud:443/logs/json
-    ```
-    Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-  </TabItem>
-  <TabItem value="traces" label="Traces">
-    1. Set the delivery format to `JSON` or `Protobuf` (Protobuf is recommended for performance).
-    2. Enter the SigNoz **OTLP HTTP traces** ingestion **endpoint**:
-
-    ```
-    https://ingest.<region>.signoz.cloud:443/v1/traces
-    ```
-
-    Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-  </TabItem>
-</Tabs>
+Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
 3. Enable **Custom Headers** and add the following header:
 
@@ -80,47 +57,25 @@ Choose how you want to receive your drain data. Under the **Custom Endpoint** ta
 signoz-ingestion-key: <your-ingestion-key>
 ```
 
-Replace `<your-ingestion-key>` with the [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) from your SigNoz Cloud account. You can find this under **Settings > Ingestion Settings** in SigNoz. This ensures SigNoz Cloud authenticates and accepts your Vercel telemetry.
+Replace `<your-ingestion-key>` with the [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) from your SigNoz Cloud account. You can find this under **Settings > Ingestion Settings** in SigNoz.
 
-<Tabs>
-  <TabItem value="logs" label="Logs" default>
-    <Figure
-      src="/img/docs/vercel/logs-headers.webp"
-      caption="Vercel Log Drain Custom Headers"
-      alt="Vercel Log Drain Custom Headers"
-    />
-  </TabItem>
-  <TabItem value="traces" label="Traces">
-    <Figure
-      src="/img/docs/vercel/traces-headers.webp"
-      caption="Vercel Trace Drain Custom Headers"
-      alt="Vercel Trace Drain Custom Headers"
-    />
-  </TabItem>
-</Tabs>
+<Figure
+  src="/img/docs/vercel/logs-headers.webp"
+  caption="Vercel Log Drain Custom Headers"
+  alt="Vercel Log Drain Custom Headers"
+/>
 
-### Step 3: Test and Create the Drain
+### Step 3: Test and Create the Log Drain
 
-Click on **Test** to ensure your endpoint receives the data correctly. If successful, you will start to see sample telemetry on the SigNoz UI. After verifying the test results, click **Create Drain** in your Vercel dashboard.
+Click **Test** to ensure your endpoint receives the data correctly. If the test is successful, click **Create Drain**.
 
-Your Vercel telemetry will now be streamed to SigNoz Cloud.
+Your Vercel logs will now be streamed to SigNoz Cloud.
 
-<Tabs>
-  <TabItem value="logs" label="Logs" default>
-    <Figure
-      src="/img/docs/vercel/sample-logs.webp"
-      caption="Sample Logs"
-      alt="Sample Logs"
-    />
-  </TabItem>
-  <TabItem value="traces" label="Traces">
-    <Figure
-      src="/img/docs/vercel/sample-traces.webp"
-      caption="Sample Traces"
-      alt="Sample Traces"
-    />
-  </TabItem>
-</Tabs>
+<Figure
+  src="/img/docs/vercel/sample-logs.webp"
+  caption="Sample Logs"
+  alt="Sample Logs"
+/>
 
 <Admonition type="note">
   It might take some time for the data to appear.
@@ -130,19 +85,78 @@ Your Vercel telemetry will now be streamed to SigNoz Cloud.
 
 After creating the drain, verify that the data is flowing into SigNoz:
 
-<Tabs>
-  <TabItem value="logs" label="Logs" default>
-    1. Open **Logs Explorer** in your SigNoz Cloud dashboard.
-    2. Wait a few minutes for logs to arrive — there may be a short delay.
-    3. Look for log entries with Vercel-specific attributes such as `source`, `projectName`, and `deploymentId`.
-    4. If you see log entries from your Vercel projects, the integration is working correctly.
-  </TabItem>
-  <TabItem value="traces" label="Traces">
-    1. Open **Traces** in your SigNoz Cloud dashboard.
-    2. Wait a few minutes for traces to arrive — there may be a short delay.
-    3. Look for trace entries originating from your Vercel projects.
-    4. If you see trace entries from your Vercel applications, the integration is working correctly.
-  </TabItem>
+1. Open **Logs Explorer** in your SigNoz Cloud dashboard.
+2. Wait a few minutes for logs to arrive — there may be a short delay.
+3. Look for log entries with Vercel-specific attributes such as `source`, `projectName`, and `deploymentId`.
+4. If you see log entries from your Vercel projects, the integration is working correctly.
+
+</TabItem>
+<TabItem value="traces" label="Traces">
+
+### Step 1: Create a New Trace Drain
+
+1. Navigate to **Team Settings** > **Drains** and click **Add Drain**. This opens a dialog to configure your new drain.
+2. Select **Traces** as the drain type.
+3. Provide a name for your drain, select which projects should send data to your endpoint, and configure the sampling rate.
+4. Click **Next**.
+
+<Figure
+  src="/img/docs/vercel/traces-sources.webp"
+  caption="Vercel Trace Drain Sources and Environment"
+  alt="Vercel Trace Drain Sources and Environment"
+/>
+
+### Step 2: Configure the Trace Destination
+
+1. Under the **Custom Endpoint** tab, set the delivery format to `JSON` or `Protobuf` (Protobuf is recommended for performance).
+2. Enter the SigNoz **OTLP HTTP traces** ingestion **endpoint**:
+
+```
+https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
+3. Enable **Custom Headers** and add the following header:
+
+```
+signoz-ingestion-key: <your-ingestion-key>
+```
+
+Replace `<your-ingestion-key>` with the [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) from your SigNoz Cloud account. You can find this under **Settings > Ingestion Settings** in SigNoz.
+
+<Figure
+  src="/img/docs/vercel/traces-headers.webp"
+  caption="Vercel Trace Drain Custom Headers"
+  alt="Vercel Trace Drain Custom Headers"
+/>
+
+### Step 3: Test and Create the Trace Drain
+
+Click **Test** to ensure your endpoint receives the data correctly. If the test is successful, click **Create Drain**.
+
+Your Vercel traces will now be streamed to SigNoz Cloud.
+
+<Figure
+  src="/img/docs/vercel/sample-traces.webp"
+  caption="Sample Traces"
+  alt="Sample Traces"
+/>
+
+<Admonition type="note">
+  It might take some time for the data to appear.
+</Admonition>
+
+## Validate
+
+After creating the drain, verify that the data is flowing into SigNoz:
+
+1. Open **Traces** in your SigNoz Cloud dashboard.
+2. Wait a few minutes for traces to arrive — there may be a short delay.
+3. Look for trace entries originating from your Vercel projects.
+4. If you see trace entries from your Vercel applications, the integration is working correctly.
+
+</TabItem>
 </Tabs>
 
 <details>
