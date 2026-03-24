@@ -114,7 +114,41 @@ If sources conflict, prefer the most recent official OpenTelemetry docs/repo ove
 
 ## Labeling Rule
 
-If PR adds a **new** docs file (not only edits existing docs) that explains sending data to SigNoz Cloud (for example new instrumentation, new collector receiver flow, or new log collection method), add label:
+Use PR file status, not just the prose diff, to decide onboarding eligibility. Inspect files with:
+
+```bash
+gh api repos/<REPO>/pulls/<PR_NUMBER>/files --paginate
+```
+
+Apply `add-to-onboarding` only when all of these are true:
+
+1. The PR adds at least one **new** docs file (`status == "added"`), not only edits existing docs.
+2. The new page's primary job is getting traces, logs, or metrics into SigNoz.
+3. The added page contains concrete ingestion evidence, such as:
+   - SigNoz endpoint instructions
+   - `signoz-ingestion-key`
+   - OTLP exporter environment variables
+   - direct SigNoz export steps
+   - equivalent "send data to SigNoz" setup instructions
+
+Do **not** apply the label for:
+
+- edits to existing docs
+- overview or concept pages
+- dashboards or dashboard templates
+- FAQs
+- troubleshooting docs
+- reference-only pages
+- pages that mention onboarding or ingestion but are not primarily about sending data to SigNoz
+
+Examples:
+
+- Apply: a new instrumentation or observability guide that walks users through exporting telemetry to SigNoz Cloud
+- Apply: a new log collection page under `logs-management/send-logs/**` with SigNoz endpoint/auth setup
+- Skip: a new migration guide that references SigNoz ingestion but focuses on moving from another vendor
+- Skip: an edit to an existing instrumentation page
+
+When eligible, try to add:
 
 - `add-to-onboarding`
 
@@ -123,6 +157,11 @@ Command:
 ```bash
 gh issue edit <PR_NUMBER> --add-label "add-to-onboarding"
 ```
+
+If label application fails because of permissions or actor restrictions:
+
+- do not fail the review solely for that reason
+- report onboarding as `recommended but permission denied`
 
 ## Commenting Rules
 
@@ -151,7 +190,7 @@ Post one summary comment that includes:
 3. JTBD coverage summary (which mandatory JTBD checks failed or were at risk)
 4. Checklist-oriented coverage summary (what failed/needs work)
 5. Any open questions/assumptions
-6. Whether onboarding label was applied (when relevant)
+6. `Onboarding label: applied`, `skipped`, or `recommended but permission denied`
 
 ## Suggested Commands
 
@@ -159,6 +198,7 @@ Post one summary comment that includes:
 # PR context
 gh pr view <PR_NUMBER>
 gh pr diff <PR_NUMBER>
+gh api repos/<REPO>/pulls/<PR_NUMBER>/files --paginate
 
 # changed docs and policy anchors
 rg --files data/docs
