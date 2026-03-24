@@ -4,11 +4,13 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 import type { ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
+export type AppTooltipSide = 'top' | 'right' | 'bottom' | 'left'
+
 type AppTooltipProps = {
   children: ReactNode
   content: ReactNode
   contentClassName?: string
-  side?: 'top' | 'right' | 'bottom' | 'left'
+  side?: AppTooltipSide
   /** Radix delay in ms; defaults to provider (theme) value */
   delayDuration?: number
 }

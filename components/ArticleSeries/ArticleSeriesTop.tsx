@@ -73,7 +73,7 @@ export default function ArticleSeriesTop({
       {/* Right: Prev/Current Position/Next */}
       <div className="flex items-center space-x-4">
         {showPrevious && prevLink ? (
-          <Tooltip content={`Previous: ${prevLink.title}`} delayDuration={150}>
+          <Tooltip content={`Previous: ${prevLink.title}`} delayDuration={150} side="top">
             <Link
               href={prevLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
@@ -92,7 +92,7 @@ export default function ArticleSeriesTop({
         </span>
 
         {showNext && nextLink ? (
-          <Tooltip content={`Next: ${nextLink.title}`} delayDuration={150}>
+          <Tooltip content={`Next: ${nextLink.title}`} delayDuration={150} side="top">
             <Link
               href={nextLink.href}
               className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
