@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import React from 'react'
-import { Mail } from 'lucide-react'
 
 export default function Tabs({ activeTab }) {
   return (
@@ -74,11 +73,10 @@ export default function Tabs({ activeTab }) {
 
       <Link
         href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
-        className="hidden items-center gap-1.5 whitespace-nowrap text-sm text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-500 sm:flex"
+        className="hidden whitespace-nowrap text-sm font-medium text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-500 sm:block"
         target="_blank"
         prefetch={false}
       >
-        <Mail className="h-3.5 w-3.5" />
         Newsletter
       </Link>
     </div>
