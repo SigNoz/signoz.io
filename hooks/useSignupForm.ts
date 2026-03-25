@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLogEvent } from './useLogEvent'
 import {
@@ -58,13 +58,17 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
     localStorage.setItem('prevSignupEmail', payload.email)
   }, [])
 
-  const experimentAttributes = experimentId
-    ? {
-        experiment_id: experimentId,
-        variant_id: variantId,
-        is_experiment_conversion: true,
-      }
-    : {}
+  const experimentAttributes = useMemo(
+    () =>
+      experimentId
+        ? {
+            experiment_id: experimentId,
+            variant_id: variantId,
+            is_experiment_conversion: true,
+          }
+        : {},
+    [experimentId, variantId]
+  )
 
   const validatePayload = useCallback(
     (payload: { email: string; preferences: { terms_of_service_accepted: boolean } }) => {

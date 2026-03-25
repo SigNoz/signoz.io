@@ -1,10 +1,14 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { ArrowRight } from 'lucide-react'
 import { useLogEvent } from '../../hooks/useLogEvent'
-import SignupModal from '@/components/SignupModal/SignupModal'
 import TrackingLink from '@/components/TrackingLink'
+
+const SignupModal = dynamic(() => import('@/components/SignupModal/SignupModal'), {
+  ssr: false,
+})
 
 interface HeroEmailInputProps {
   experimentId?: string
