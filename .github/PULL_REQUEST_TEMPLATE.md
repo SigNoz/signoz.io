@@ -57,18 +57,20 @@ If breaking change, describe migration steps:
 - [ ] Pre-commit hooks passed (or ran `yarn check:doc-redirects` / `yarn check:docs-metadata` if applicable)
 
 ### For docs changes (`data/docs/**`)
-- [ ] Completed the [Docs PR Checklist](CONTRIBUTING.md#docs-pr-checklist) in CONTRIBUTING.md
+- [ ] Followed the docs author checklist in [contributing/docs-authoring.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/docs-authoring.md)
 - [ ] Added/updated the page in `constants/docsSideNav.ts` if adding or moving a doc
 
 ### For blog changes
+- [ ] Followed the blog workflow in [contributing/blog-workflow.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/blog-workflow.md)
 - [ ] Frontmatter includes `title`, `date`, `author`, `tags` (and `canonicalUrl` if applicable)
 - [ ] Images use WebP format and live under `public/img/blog/<YYYY-MM>/`
 
 ### For site code changes
-- [ ] Follows [Site Code Guidelines](CONTRIBUTING.md#website-code-guidelines) in CONTRIBUTING.md
+- [ ] Followed the site code playbook in [contributing/site-code.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/site-code.md)
 - [ ] New dependencies are justified in the PR description (if any)
 
 ### For renamed or moved docs
+- [ ] Followed the redirects and discovery section in [contributing/docs-authoring.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/docs-authoring.md)
 - [ ] Added permanent redirect in `next.config.js` under `async redirects()`
 - [ ] Updated internal links and sidebar in `constants/docsSideNav.ts`
 - [ ] Ran `yarn check:doc-redirects` to verify

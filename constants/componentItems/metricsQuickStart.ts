@@ -205,6 +205,11 @@ export const METRICS_QUICK_START_ITEMS = {
       href: '/docs/integrations/aws-elasticache-redis',
       clickName: 'AWS ElastiCache Link',
     },
+    {
+      name: 'Hasura',
+      href: '/docs/integrations/opentelemetry-hasura',
+      clickName: 'Hasura Metrics Link',
+    },
   ] satisfies ComponentItem[],
   webServers: [
     {
