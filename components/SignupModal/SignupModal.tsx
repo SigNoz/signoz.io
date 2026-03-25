@@ -3,13 +3,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ArrowRight, Loader2, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useLogEvent } from '../../hooks/useLogEvent'
-import {
-  createSubmissionRelayId,
-  sendSubmissionRelayInBackground,
-} from '@/utils/submissionRelayClient'
 import { FaGithub } from 'react-icons/fa'
+import { useSignupForm } from '@/hooks/useSignupForm'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 interface SignupModalProps {
   isOpen: boolean
@@ -17,12 +13,6 @@ interface SignupModalProps {
   prefillEmail?: string
   experimentId?: string
   variantId?: string
-}
-
-interface ErrorsProps {
-  workEmail?: string
-  termsOfService?: string
-  apiError?: string
 }
 
 const regions = [
@@ -43,13 +33,15 @@ const SignupModal: React.FC<SignupModalProps> = ({
     dataRegion: 'us',
     termsOfServiceAccepted: true,
   })
-  const [errors, setErrors] = useState<ErrorsProps>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitFailed, setSubmitFailed] = useState(false)
   const emailInputRef = useRef<HTMLInputElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
   const logEvent = useLogEvent()
+
+  const { errors, isSubmitting, submitFailed, handleSignUp, handleSocialSignup } = useSignupForm({
+    source: 'homepage-modal',
+    experimentId,
+    variantId,
+  })
 
   // Update email when prefillEmail changes
   useEffect(() => {
@@ -128,48 +120,9 @@ const SignupModal: React.FC<SignupModalProps> = ({
     [logEvent, formState.workEmail]
   )
 
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  const handleGTMCustomEventTrigger = useCallback((payload: Record<string, any>) => {
-    if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
-      ;(window as any).dataLayer.push({
-        event: 'signoz-cloud-signup-form-submit',
-        ...payload,
-      })
-    }
-    localStorage.setItem('prevSignupEmail', payload.email)
-  }, [])
-
   const handleSubmit = useCallback(
-    async (event: React.FormEvent) => {
+    (event: React.FormEvent) => {
       event.preventDefault()
-      setSubmitFailed(false)
-
-      const newErrors: ErrorsProps = {}
-      if (!formState.workEmail.trim()) {
-        newErrors.workEmail = 'Work email is required'
-      } else if (!isValidEmail(formState.workEmail)) {
-        newErrors.workEmail = 'Please enter a valid company email'
-      }
-      if (!formState.termsOfServiceAccepted) {
-        newErrors.termsOfService = 'You must accept the Terms of Service to continue'
-      }
-
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors)
-        logEvent({
-          eventType: 'track',
-          eventName: 'Teams Page Sign Up Validation Failed',
-          attributes: { errors: newErrors, email: formState.workEmail },
-        })
-        return
-      }
-
-      setErrors({})
-      setIsSubmitting(true)
 
       logEvent({
         eventType: 'track',
@@ -187,114 +140,30 @@ const SignupModal: React.FC<SignupModalProps> = ({
         },
       })
 
-      const payload = {
+      handleSignUp({
         email: formState.workEmail,
         region: { name: formState.dataRegion },
         preferences: {
           terms_of_service_accepted: formState.termsOfServiceAccepted,
           opted_email_updates: true,
         },
-      }
-
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-
-        if (response.ok) {
-          handleGTMCustomEventTrigger(payload)
-          localStorage.setItem('app_user_id', payload.email)
-
-          logEvent({
-            eventType: 'identify',
-            eventName: 'User Signed Up',
-            attributes: {
-              email: payload.email,
-              dataRegion: payload.region.name,
-              method: 'email_signup',
-            },
-          })
-
-          const domain = payload.email.split('@')[1] || 'unknown_domain'
-          logEvent({
-            eventType: 'group',
-            eventName: 'User Associated with Company',
-            groupId: domain,
-            attributes: { domain },
-          })
-
-          localStorage.setItem('workEmail', payload.email)
-          localStorage.setItem('region', payload.region.name)
-
-          sendSubmissionRelayInBackground({
-            email: payload.email,
-            signupId: createSubmissionRelayId('homepage-modal-email'),
-            source: 'homepage-modal-email-signup',
-            createdAt: new Date().toISOString(),
-            pageLocation: window.location.pathname,
-            dataRegion: payload.region.name,
-            method: 'email_signup',
-          })
-
-          router.push('/verify-email')
-        } else {
-          const errorData = await response.json()
-          logEvent({
-            eventType: 'track',
-            eventName: 'Teams Page Sign Up API Error',
-            attributes: {
-              error: errorData.error,
-              status: response.status,
-              email: payload.email,
-              region: payload.region.name,
-            },
-          })
-          setErrors({ apiError: errorData.error })
-          setSubmitFailed(true)
-        }
-      } catch (error) {
-        logEvent({
-          eventType: 'track',
-          eventName: 'Teams Page Sign Up Exception',
-          attributes: {
-            errorMessage: error instanceof Error ? error.message : String(error),
-            email: payload.email,
-          },
-        })
-        setSubmitFailed(true)
-      } finally {
-        setIsSubmitting(false)
-      }
+      })
     },
-    [formState, logEvent, router, handleGTMCustomEventTrigger]
+    [formState, logEvent, handleSignUp, experimentId, variantId]
   )
 
   const handleSocialSubmit = useCallback(
     (connector: string) => {
-      if (!formState.termsOfServiceAccepted) {
-        setErrors({ termsOfService: 'You must accept the Terms of Service to continue' })
-        return
-      }
-
-      logEvent({
-        eventType: 'track',
-        eventName: 'Teams Page Social Signup Redirect Initiated',
-        attributes: {
-          connector,
-          region: formState.dataRegion,
-          clickLocation: 'Signup Modal',
-          experiment_id: experimentId,
-          variant_id: variantId,
-          is_experiment_conversion: true,
+      handleSocialSignup({
+        region: { name: formState.dataRegion },
+        preferences: {
+          terms_of_service_accepted: formState.termsOfServiceAccepted,
+          opted_email_updates: true,
         },
+        connector,
       })
-
-      localStorage.setItem('region', formState.dataRegion)
-      window.location.href = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/connectors/${connector}/url`
     },
-    [formState, logEvent]
+    [formState, handleSocialSignup]
   )
 
   if (!isOpen) return null
