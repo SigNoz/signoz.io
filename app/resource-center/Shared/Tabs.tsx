@@ -76,7 +76,7 @@ export default function Tabs({ activeTab }) {
             target="_blank"
             prefetch={false}
           >
-            Newsletter ↗
+            Newsletter
           </Link>
         </li>
       </ul>
