@@ -319,7 +319,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
     >
       <div
         ref={modalRef}
-        className="relative mx-4 w-full max-w-md rounded-2xl border border-signoz_slate-200 bg-signoz_ink-400 p-8 shadow-2xl md:mx-0 md:p-10"
+        className="relative mx-4 w-full max-w-lg rounded-2xl border border-signoz_slate-200 bg-signoz_ink-400 p-8 shadow-2xl md:mx-0 md:p-10"
       >
         {/* Close button */}
         <button
@@ -495,7 +495,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
 
         {/* Sign in link */}
         <div className="mt-4 border-t border-signoz_slate-400 pt-4 text-center">
-          <p className="text-sm text-signoz_vanilla-400">
+          <p className="mb-0 text-sm text-signoz_vanilla-400">
             Already have an account?{' '}
             <a
               href="https://signoz.io/login/"

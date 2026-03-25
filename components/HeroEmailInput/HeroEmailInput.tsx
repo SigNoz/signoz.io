@@ -46,7 +46,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
 
   return (
     <>
-      <div className="flex flex-col items-center gap-3.5 pt-8">
+      <div className="flex flex-col items-center gap-3.5 pt-4">
         {/* Desktop: pill with inline button */}
         <form onSubmit={handleSubmit} className="hidden w-[500px] md:flex">
           <div className="flex w-full items-center gap-0 rounded-full border border-signoz_slate-200 bg-signoz_ink-400 py-1.5 pl-6 pr-1.5">
@@ -55,7 +55,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your work email"
-              className="flex-grow bg-transparent text-[15px] font-normal text-signoz_vanilla-100 placeholder-signoz_slate-50 outline-none"
+              className="flex-grow border-none bg-transparent text-[15px] font-normal text-signoz_vanilla-100 placeholder-signoz_slate-50 outline-none focus:ring-0"
               id="hero-email-input"
             />
             <button
@@ -70,7 +70,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
         </form>
 
         {/* Mobile: stacked pill */}
-        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2.5 px-6 md:hidden">
+        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2.5 px-2 md:hidden">
           <input
             type="email"
             value={email}
