@@ -136,7 +136,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail
         },
       })
     },
-    [formState, logEvent, handleSignUp, experimentId, variantId]
+    [formState, logEvent, handleSignUp]
   )
 
   const handleSocialSubmit = useCallback(
