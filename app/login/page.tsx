@@ -2,11 +2,12 @@
 
 import './login.styles.css'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, ArrowUpRight, Dot, Loader2, Pencil } from 'lucide-react'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import Button from '@/components/ui/Button'
+import Pagination from '@signozhq/pagination'
 
 interface ErrorsProps {
   workEmail?: string
@@ -18,12 +19,20 @@ interface Tenant {
   state: string
 }
 
+interface Pagination {
+  total: number
+  pages: number
+  page: number
+  per_page: number
+}
+
 enum TenantState {
   HEALTHY = 'HEALTHY',
   DELETED = 'DELETED',
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL
+const PER_PAGE = 5
 
 const trustBadges = [
   {
@@ -44,6 +53,16 @@ const trustBadges = [
   },
 ]
 
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+function isValidCompanyEmail(email: string): boolean {
+  const companyEmailPattern =
+    /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  return isValidEmail(email) && companyEmailPattern.test(email)
+}
+
 export default function Login() {
   const [workEmail, setWorkEmail] = useState('')
 
@@ -51,44 +70,29 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
-  const [userTenants, setUserTenants] = useState([])
+  const [userTenants, setUserTenants] = useState<Tenant[]>([])
 
   const [noDeployments, setNoDeployments] = useState(false)
+  const [pagination, setPagination] = useState<Pagination | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isFetchingPage, setIsFetchingPage] = useState(false)
+
   const router = useRouter()
   const logEvent = useLogEvent()
 
   const handleEmailUpdate = (event) => {
-    const { value } = event.target
-    setWorkEmail(value)
+    setWorkEmail(event.target.value)
   }
 
   const validateForm = () => {
-    let errors = {}
-
+    const errs: ErrorsProps = {}
     if (!workEmail.trim()) {
-      errors['workEmail'] = 'Work email is required'
+      errs.workEmail = 'Work email is required'
     } else if (!isValidCompanyEmail(workEmail)) {
-      errors['workEmail'] = 'Please enter a valid company email'
+      errs.workEmail = 'Please enter a valid company email'
     }
-
-    setErrors(errors)
-
-    return Object.keys(errors).length === 0
-  }
-
-  const isValidEmail = (email) => {
-    // Basic email validation regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  function isValidCompanyEmail(email) {
-    // Regular expression pattern to match valid company email domains
-    var companyEmailPattern =
-      /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-
-    // Check if the email matches the email format and the company email pattern
-    return isValidEmail(email) && companyEmailPattern.test(email)
+    setErrors(errs)
+    return Object.keys(errs).length === 0
   }
 
   const handleSubmit = (event) => {
@@ -109,16 +113,8 @@ export default function Login() {
     const isFormValid = validateForm()
 
     if (isFormValid) {
-      handleLogin()
+      fetchTenants(1, true)
     }
-  }
-
-  const handleError = () => {
-    setSubmitFailed(true)
-    window.scrollTo({
-      top: 100,
-      behavior: 'smooth',
-    })
   }
 
   const handleNoDeployments = () => {
@@ -132,72 +128,83 @@ export default function Login() {
     setNoDeployments(true)
   }
 
-  const handleLogin = async () => {
-    setIsSubmitting(true)
+  const fetchTenants = async (page: number, isInitial = false) => {
+    if (isInitial) {
+      setIsSubmitting(true)
+    } else {
+      setIsFetchingPage(true)
+    }
     setSubmitFailed(false)
 
-    const verifyWorkSpaceSetupURL = `${BASE_URL}/deployments/esearch?q=${encodeURIComponent(
-      workEmail
-    )}`
+    try {
+      const url = `${BASE_URL}/deployments/esearch?q=${encodeURIComponent(workEmail)}&page=${page}&per_page=${PER_PAGE}`
+      const res = await fetch(url)
+      const data = await res.json()
 
-    const res = await fetch(verifyWorkSpaceSetupURL)
-    const data = await res.json()
+      if (data.status === 'success') {
+        setSubmitSuccess(true)
+        localStorage.setItem('app_user_id', workEmail || '')
 
-    if (data.status === 'success') {
-      setSubmitSuccess(true)
-      localStorage.setItem('app_user_id', workEmail || '')
+        const tenants: Tenant[] = data?.data?.data ?? []
+        const paginationInfo: Pagination | null = data?.data?._pagination ?? null
 
-      if (data?.data?.length === 0) {
-        handleNoDeployments()
-        setIsSubmitting(false)
-        return
+        if (tenants.length === 0 && page === 1) {
+          handleNoDeployments()
+          return
+        }
+
+        // --- Segment Identify Call ---
+        logEvent({
+          eventType: 'identify',
+          eventName: 'User Logged In',
+          attributes: {
+            email: workEmail,
+            workspaceData: data?.data,
+          },
+        })
+
+        // --- Segment Group Call ---
+        const domain = workEmail.split('@')[1] || 'unknown_domain'
+        logEvent({
+          eventType: 'group',
+          eventName: 'User Associated with Company (Login)',
+          groupId: domain,
+          attributes: {
+            domain: domain,
+            workspaceData: data?.data,
+          },
+        })
+        // --- End Segment Calls ---
+
+        const sortedTenants = [...tenants].sort((a, b) => {
+          if (a.state === TenantState.HEALTHY && b.state !== TenantState.HEALTHY) return -1
+          if (a.state !== TenantState.HEALTHY && b.state === TenantState.HEALTHY) return 1
+          return a.state.localeCompare(b.state)
+        })
+
+        setUserTenants(sortedTenants)
+        setPagination(paginationInfo)
+        setCurrentPage(page)
+      } else {
+        logEvent({
+          eventName: 'Login Failed',
+          eventType: 'track',
+          attributes: {
+            email: workEmail,
+            error: 'API Error',
+          },
+        })
+        setSubmitFailed(true)
       }
-
-      // --- Segment Identify Call ---
-      logEvent({
-        eventType: 'identify',
-        eventName: 'User Logged In',
-        attributes: {
-          email: workEmail,
-          workspaceData: data?.data,
-        },
-      })
-
-      // --- Segment Group Call ---
-      const domain = workEmail.split('@')[1] || 'unknown_domain'
-      logEvent({
-        eventType: 'group',
-        eventName: 'User Associated with Company (Login)',
-        groupId: domain,
-        attributes: {
-          domain: domain,
-          workspaceData: data?.data,
-        },
-      })
-      // --- End Segment Calls ---
-
-      const sortedData = data?.data.sort((a, b) => {
-        if (a.state === TenantState.HEALTHY && b.state !== TenantState.HEALTHY) return -1
-        if (a.state !== TenantState.HEALTHY && b.state === TenantState.HEALTHY) return 1
-        return a.state.localeCompare(b.state)
-      })
-
-      setUserTenants(sortedData)
-
-      setIsSubmitting(false)
-    } else if (data.status === 'error') {
-      logEvent({
-        eventName: 'Login Failed',
-        eventType: 'track',
-        attributes: {
-          email: workEmail,
-          error: 'API Error',
-        },
-      })
+    } catch {
       setSubmitFailed(true)
+    } finally {
       setIsSubmitting(false)
+      setIsFetchingPage(false)
     }
   }
+
+  const handlePageChange = (page: number) => fetchTenants(page)
 
   const handleChangeEmail = () => {
     setWorkEmail('')
@@ -206,6 +213,8 @@ export default function Login() {
     setIsSubmitting(false)
     setNoDeployments(false)
     setErrors({})
+    setPagination(null)
+    setCurrentPage(1)
   }
 
   const handleGetStarted = () => {
@@ -229,28 +238,26 @@ export default function Login() {
               </div>
 
               {!isSubmitting && submitFailed ? (
-                <div className="welcome-container mt-[32px] flex flex-col items-center">
-                  <div className="text-md error-container rounded-[4px] border p-[24px]">
+                <div className="rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-6">
+                  <div className="error-container mb-4 rounded p-4 text-sm">
                     We couldn't complete your request. Please try refreshing the page or contact
                     cloud support for assistance.
                   </div>
-
                   <Button
                     type="submit"
                     variant={'default'}
                     rounded={'full'}
-                    className="mt-6 w-full"
+                    className="mb-3 w-full"
                     isButton={true}
                     onClick={() => window.location.reload()}
                   >
                     <span className="text-xs leading-5">Refresh page</span>
                   </Button>
-
                   <Button
                     variant={'secondary'}
                     rounded={'full'}
                     type="submit"
-                    className="mt-3 w-full"
+                    className="w-full"
                     href="mailto:cloud-support@signoz.io"
                   >
                     <span className="text-xs leading-5">Contact cloud support</span>
@@ -258,7 +265,7 @@ export default function Login() {
                   </Button>
                 </div>
               ) : (
-                <form className="w-100 mt-6">
+                <form className="w-100 mt-6" onSubmit={handleSubmit}>
                   <div className="mb-[28px] rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-8">
                     <label htmlFor="workEmail" className="mb-2 block font-medium">
                       Work email
@@ -275,7 +282,6 @@ export default function Login() {
                         placeholder="E.g. bart@simpsonmail.com"
                         className="w-full rounded-sm border border-r-0 border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
                       />
-
                       {workEmail && submitSuccess && (
                         <Button
                           variant={'secondary'}
@@ -295,43 +301,64 @@ export default function Login() {
 
                     {submitSuccess && userTenants.length > 0 && (
                       <div className="my-8">
-                        <div className="rounded-sm border border-signoz_slate-400 p-3 text-sm font-medium text-signoz_vanilla-400">
-                          Associated Teams' URLs
-                        </div>
+                        <div className="rounded-sm border border-signoz_slate-400">
+                          <div className="border-b border-signoz_slate-400 bg-signoz_ink-300 px-3 py-2 text-xs font-medium text-signoz_vanilla-400">
+                            Associated Teams&apos; URLs
+                          </div>
 
-                        <div className="tenant-list">
-                          {userTenants.map((tenant: Tenant) => (
-                            <div
-                              key={tenant.name}
-                              className="flex flex-col gap-2 border !border-t-0 border-signoz_slate-400 p-3"
-                            >
-                              <div className="flex items-center justify-between text-sm font-normal text-signoz_vanilla-400">
-                                {tenant.name}.{tenant.region.dns}
+                          {isFetchingPage ? (
+                            <div className="flex items-center justify-center py-10">
+                              <Loader2 size={18} className="animate-spin text-signoz_vanilla-400" />
+                            </div>
+                          ) : (
+                            userTenants.slice(0, PER_PAGE).map((tenant: Tenant) => (
+                              <div
+                                key={tenant.name}
+                                className="flex items-center justify-between border-b border-signoz_slate-400 px-3 py-2.5 last:border-b-0"
+                              >
+                                <div className="min-w-0 flex-1 pr-3">
+                                  <div className="truncate text-sm text-signoz_vanilla-400">
+                                    {tenant.name}.{tenant.region.dns}
+                                  </div>
+                                  <div className="mt-0.5 flex items-center">
+                                    {tenant.state !== TenantState.DELETED ? (
+                                      <span className="flex items-center text-xs text-emerald-400">
+                                        <Dot color="#25E192" size={18} className="-ml-1.5" />
+                                        Active
+                                      </span>
+                                    ) : (
+                                      <span className="flex items-center text-xs text-signoz_vanilla-400 opacity-50">
+                                        <Dot color="#3C4152" size={18} className="-ml-1.5" />
+                                        Expired
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                                 {tenant.state !== TenantState.DELETED && (
                                   <a
                                     href={`https://${tenant.name}.${tenant.region.dns}/login`}
                                     target="_blank"
-                                    className={`flex items-center justify-center rounded-sm bg-signoz_robin-500 px-2 text-[10px] font-normal text-white`}
+                                    className="shrink-0 rounded-sm bg-signoz_robin-500 px-2.5 py-1 text-xs font-normal text-white transition-opacity hover:opacity-90"
                                   >
                                     Login
                                   </a>
                                 )}
                               </div>
-
-                              <span className=" flex items-center text-xs text-signoz_vanilla-400">
-                                {tenant.state !== TenantState.DELETED ? (
-                                  <>
-                                    <Dot color="#25E192" className="-ml-2 mr-1" /> Active
-                                  </>
-                                ) : (
-                                  <>
-                                    <Dot color="#3C4152" className="-ml-2 mr-1" /> Expired
-                                  </>
-                                )}
-                              </span>
-                            </div>
-                          ))}
+                            ))
+                          )}
                         </div>
+
+                        {pagination && pagination.total > PER_PAGE && (
+                          <div className="mt-3 flex justify-end">
+                            <Pagination
+                              total={pagination.total}
+                              pageSize={PER_PAGE}
+                              current={currentPage}
+                              onPageChange={handlePageChange}
+                              align="end"
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -339,10 +366,10 @@ export default function Login() {
                   {!submitSuccess && (
                     <Button
                       isButton={true}
+                      type="submit"
                       variant={'default'}
                       rounded={'full'}
                       disabled={isSubmitting || !isValid}
-                      onClick={handleSubmit}
                       className="mb-4 w-full"
                     >
                       <span className="flex items-center gap-1.5 px-px text-sm">
