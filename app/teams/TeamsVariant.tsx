@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
-import { FaGithub, FaGoogle } from 'react-icons/fa'
+import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
 
 interface ErrorsProps {

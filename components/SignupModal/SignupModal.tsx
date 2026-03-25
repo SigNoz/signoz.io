@@ -66,7 +66,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
     }
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [isOpen])
+  }, [isOpen, handleClose])
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -182,6 +182,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
         {/* Close button */}
         <button
           onClick={handleClose}
+          aria-label="Close signup modal"
           className="absolute right-4 top-4 rounded-lg p-1 text-signoz_vanilla-400 transition-colors hover:bg-signoz_slate-400 hover:text-signoz_vanilla-100"
         >
           <X size={20} />

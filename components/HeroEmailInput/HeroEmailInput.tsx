@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { ArrowRight } from 'lucide-react'
-import { useLogEvent } from '../../hooks/useLogEvent'
+import { useLogEvent } from '@/hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
 
 const SignupModal = dynamic(() => import('@/components/SignupModal/SignupModal'), {
@@ -41,7 +41,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
 
       setIsModalOpen(true)
     },
-    [email, logEvent]
+    [email, logEvent, experimentId, variantId]
   )
 
   const handleModalClose = useCallback(() => {

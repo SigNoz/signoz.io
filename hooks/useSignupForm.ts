@@ -26,6 +26,9 @@ export interface UseSignupFormOptions {
   onError?: () => void
 }
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const isValidEmail = (email: string) => EMAIL_REGEX.test(email)
+
 export function useSignupForm({ source, experimentId, variantId, onError }: UseSignupFormOptions) {
   const [errors, setErrors] = useState<SignupErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,11 +36,6 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
   const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
   const logEvent = useLogEvent()
-
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
 
   const handleError = useCallback(() => {
     setSubmitFailed(true)
