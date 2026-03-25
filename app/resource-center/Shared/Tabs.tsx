@@ -5,7 +5,7 @@ export default function Tabs({ activeTab }) {
   return (
     <header className='header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8 overflow-x-auto'>
 
-    <div className="container flex h-full items-center justify-between" >
+    <div className="container h-full" >
       <ul
         className="flex pl-0 text-center text-sm font-medium gap-6 text-signoz_vanilla-400 mb-0 h-full"
         id="default-tab"
@@ -69,16 +69,17 @@ export default function Tabs({ activeTab }) {
           </button>
         </Link>
 
+        <li className="flex h-full items-center" role="presentation">
+          <Link
+            href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
+            className="inline-block px-1 text-sm text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-500"
+            target="_blank"
+            prefetch={false}
+          >
+            Newsletter ↗
+          </Link>
+        </li>
       </ul>
-
-      <Link
-        href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
-        className="hidden whitespace-nowrap text-sm font-medium text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-500 sm:block"
-        target="_blank"
-        prefetch={false}
-      >
-        Newsletter
-      </Link>
     </div>
     </header>
   )
