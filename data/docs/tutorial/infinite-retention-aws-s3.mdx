@@ -1,83 +1,213 @@
 ---
-date: 2026-03-12
+date: 2026-03-26
 id: infinite-retention-aws-s3
 
 title: Infinite Retention of OpenTelemetry Data in AWS S3
-description: Infinite Retention of OpenTelemetry Data in AWS S3
+description: Back up OpenTelemetry logs, metrics, and traces to AWS S3 for long-term retention using the AWS S3 Exporter in the OpenTelemetry Collector.
+doc_type: tutorial
 ---
+
+import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-It is a common practice to backup any data for longer durations due to
-compliance and audit purposes. You can use [AWS S3 Exporter][1] to
-retain the OpenTelemetry data as long as we need.
+It is a common practice to back up telemetry data for longer durations due to
+compliance and audit purposes. You can use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter" target="_blank" rel="noopener noreferrer nofollow">AWS S3 Exporter</a> to
+retain OpenTelemetry data as long as you need.
 
-## Limitation of AWS S3 Exporter
+## How It Works
 
-- Data in AWS S3 is inaccessible in SigNoz UI
-- Need to use third-party tool like **Amazon Athena** to query data
-- Due to limitation of AWS S3 Exporter, you won't be able differentiate
-  different signals like logs, metrics, and traces - hence the need of
-  including different prefixes
+The OpenTelemetry Collector supports multiple exporters per pipeline. Adding
+`awss3` alongside the existing `otlp` exporter means data fans out to both
+SigNoz and S3 independently. If one exporter fails, the other is unaffected.
+For a full overview of Collector configuration, see the
+[OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration) page.
+
+## Limitations
+
+- Data in AWS S3 is not accessible in the SigNoz UI
+- You need a third-party tool like **Amazon Athena** to query data
+- Use separate `s3_prefix` values per signal to keep logs, metrics, and traces
+  organized in S3
 
 <Admonition type="info">
 
 If you want to query data stored in AWS S3 using **SigNoz** and do not
 have the requirement for infinite or very long retention period, then use
-[SigNoz's AWS S3 Retention][4] instead.
+[SigNoz's AWS S3 Retention](https://signoz.io/docs/userguide/retention-period#configuring-cold-storage---amazon-s3) instead.
 
 </Admonition>
 
 ## Prerequisites
 
-- Running instance of OpenTelemetry Collector (if not running already, see [Installation Page][3])
+- Running instance of OpenTelemetry Collector with `otelcol-contrib` distribution (if not running already, see the [SigNoz installation guide](https://signoz.io/docs/install/) or the <a href="https://opentelemetry.io/docs/collector/installation/" target="_blank" rel="noopener noreferrer nofollow">OTel Collector installation docs</a> for standalone setups)
 - Access to AWS S3 Bucket either using AWS credentials as environment variables
-  or IAM roles for ECS tasks or EC2 instances (for more details, [see here][4])
+  or IAM roles for ECS tasks or EC2 instances (for more details, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter#aws-credential-configuration" target="_blank" rel="noopener noreferrer nofollow">AWS credential configuration docs</a>)
 
 ## Adding AWS S3 Exporter
 
-In our example, we will use `awss3` exporter for retaining logs data,
-where we will be using `us-east-1` region and `otel-data-backup` bucket.
+Add the following snippet to your existing `otel-collector-config.yaml`. This
+example exports logs to S3:
 
 ```yaml
 exporters:
   awss3/logs:
     s3uploader:
-      region: 'us-east-1'
-      s3_bucket: 'otel-data-backup'
+      region: '<region>'
+      s3_bucket: '<bucket-name>'
       s3_prefix: 'logs'
-      s3_partition: 'minute'
-service:
-  pipelines:
-    logs:
-      exporters: [otlp, awss3/logs]
+      compression: gzip
 ```
 
-Similarly, we can add it for `metrics` and `traces` pipelines as well with
-different prefixes to retain metrics and traces data respectively.
+Replace the placeholders:
 
-The above configuration needs to be added for your respective OtelCollector(s).
+- `<region>`: your AWS region (e.g., `us-east-1`)
+- `<bucket-name>`: your S3 bucket name
 
-- In case of **SigNoz Self-hosted**, you can add it in SigNoz OtelCollector
-configuration to retain all incoming data of `logs` pipelines.
-- In case of **SigNoz Cloud**, you will need to update all OtelCollector
-configuration that is sending data.
+Then add `awss3/logs` to your existing logs pipeline's `exporters` list:
+
+```yaml
+exporters: [otlp, awss3/logs]
+```
+
+### Exporting All Signals (Logs, Metrics, and Traces)
+
+To back up all three signals, use named instances with different prefixes.
+Append these exporters and update each pipeline in your existing config:
+
+```yaml
+exporters:
+  awss3/logs:
+    s3uploader:
+      region: '<region>'
+      s3_bucket: '<bucket-name>'
+      s3_prefix: 'logs'
+      compression: gzip
+
+  awss3/metrics:
+    s3uploader:
+      region: '<region>'
+      s3_bucket: '<bucket-name>'
+      s3_prefix: 'metrics'
+      compression: gzip
+
+  awss3/traces:
+    s3uploader:
+      region: '<region>'
+      s3_bucket: '<bucket-name>'
+      s3_prefix: 'traces'
+      compression: gzip
+```
+
+Then add each exporter to the corresponding pipeline in your existing `service.pipelines` section:
+
+```yaml
+logs:
+  exporters: [otlp, awss3/logs]
+metrics:
+  exporters: [otlp, awss3/metrics]
+traces:
+  exporters: [otlp, awss3/traces]
+```
+
+- Named instances (`awss3/logs`, `awss3/metrics`, `awss3/traces`) allow a different `s3_prefix` per signal
+- `compression: gzip` reduces storage costs
+- The default `marshaler` is `otlp_json`, which makes data queryable with Amazon Athena
+
+## Additional Configuration Options
+
+The exporter supports several optional fields for production use:
+
+```yaml
+exporters:
+  awss3/logs:
+    s3uploader:
+      region: '<region>'
+      s3_bucket: '<bucket-name>'
+      s3_prefix: 'logs'
+      s3_partition_format: 'year=%Y/month=%m/day=%d/hour=%H/minute=%M'
+      compression: gzip
+      storage_class: STANDARD_IA
+      role_arn: '<iam-role-arn>'
+      endpoint: '<s3-compatible-endpoint>'
+      s3_force_path_style: true
+    marshaler: otlp_json
+```
+
+Replace the placeholders:
+
+- `<iam-role-arn>`: ARN of the IAM role to assume (e.g., `arn:aws:iam::123456789012:role/otel-s3-writer`)
+- `<s3-compatible-endpoint>`: endpoint URL for non-AWS S3-compatible stores (e.g., `http://localhost:9000` for MinIO)
+
+Field reference:
+
+- `s3_partition_format`: strftime-based path for time partitioning. Default: `year=%Y/month=%m/day=%d/hour=%H/minute=%M`
+- `compression`: `none` (default), `gzip`, or `zstd`. Use `gzip` or `zstd` in production to reduce storage costs.
+- `marshaler`: output format. Default: `otlp_json` (queryable with Amazon Athena). `otlp_proto` is more compact but harder to query.
+- `storage_class`: S3 storage class. Default: `STANDARD`. Valid values: `STANDARD`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`. Use `STANDARD_IA` or `INTELLIGENT_TIERING` for archival data to reduce costs.
+- `role_arn`: IAM role ARN to assume via STS, instead of static credentials.
+- `endpoint`: custom S3-compatible endpoint URL for MinIO, LocalStack, or other stores.
+- `s3_force_path_style`: set to `true` when using non-AWS S3-compatible stores.
+
+For the full list of configuration options, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter" target="_blank" rel="noopener noreferrer nofollow">AWS S3 Exporter README</a>.
+
+## Validate
+
+After deploying your updated Collector config, verify that objects are appearing
+in S3:
+
+```bash
+aws s3 ls s3://<bucket-name>/logs/ --recursive | head
+```
+
+You should see keys following the partition pattern:
+
+```
+logs/year=2024/month=01/day=15/hour=10/minute=30/<unique-id>.json.gz
+```
+
+If no objects appear, check the Collector logs for S3 permission errors or
+configuration issues.
+
+## Deployment Notes
+
+The above configuration needs to be added for your respective OTel Collector(s).
+
+- In case of **SigNoz Self-hosted**, you can add it in SigNoz OTel Collector
+configuration to retain all incoming data.
+- In case of **SigNoz Cloud**, you will need to update all OTel Collector
+configurations that are sending data.
 - For **K8s-Infra** helm chart, you can add it in the `otelAgent` configuration.
-- For any **Standalone OtelCollector** deployments that is directly sending
-data to SigNoz, you can add it in its respective configuration.
+- For any **Standalone OTel Collector** deployments that are directly sending
+data to SigNoz, you can add it in the respective configuration.
 
-List of all supported configuration of `awss3` exporter can be found [here][1].
+## Troubleshooting
 
----
+**No objects appearing in S3**
 
-If you have any feedback or facing issues, feel free to join our slack
-community to get help!
+- Verify the exporter is listed in the pipeline's `exporters` array, not just defined in the `exporters:` section.
+- Check that the Collector is receiving data on the pipeline (e.g., logs are flowing through the `logs` pipeline).
 
-[![SigNoz Slack community][5]][6]
+**`AccessDenied` or `NoCredentialProviders` in Collector logs**
 
-[1]: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter
-[2]: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter#aws-credential-configuration
-[3]: /docs/install/
-[4]: /docs/userguide/retention-period#configuring-cold-storage---amazon-s3
-[5]: /img/blog/common/join_slack_cta.webp
-[6]: https://signoz.io/slack/
+- Verify your AWS credentials are available to the Collector process (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` environment variables, or an attached IAM role).
+- Confirm the IAM policy includes `s3:PutObject` permission on the target bucket.
+
+**`NoSuchBucket` error in Collector logs**
+
+- Verify the `s3_bucket` name and `region` match your actual S3 bucket.
+
+**Collector fails to start with config error**
+
+- Confirm you are using the `otelcol-contrib` distribution, which includes the `awss3` exporter. The core `otelcol` distribution does not include it.
+- Check YAML indentation and that exporter names use the `type/name` format with a forward slash (e.g., `awss3/logs`, not `awss3logs`).
+
+## Next Steps
+
+- Query your archived data using <a href="https://docs.aws.amazon.com/athena/latest/ug/what-is.html" target="_blank" rel="noopener noreferrer nofollow">Amazon Athena</a> with the `otlp_json` format
+- Configure <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html" target="_blank" rel="noopener noreferrer nofollow">S3 lifecycle policies</a> to transition older data to cheaper storage classes (e.g., Glacier)
+- Monitor exporter health by checking the Collector's built-in metrics or logs for export failures
+
+## Get Help
+
+<GetHelp />
