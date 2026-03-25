@@ -10,12 +10,7 @@ const SignupModal = dynamic(() => import('@/components/SignupModal/SignupModal')
   ssr: false,
 })
 
-interface HeroEmailInputProps {
-  experimentId?: string
-  variantId?: string
-}
-
-const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId }) => {
+const HeroEmailInput: React.FC = () => {
   const [email, setEmail] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const logEvent = useLogEvent()
@@ -100,8 +95,6 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
             clickName="Explore Docs Link"
             clickText="Explore the Docs"
             clickLocation="Hero Section"
-            experimentId={experimentId}
-            variantId={variantId}
             className="text-xs font-medium text-signoz_robin-300 hover:text-signoz_robin-200"
             prefetch={false}
           >
@@ -110,13 +103,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
         </div>
       </div>
 
-      <SignupModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        prefillEmail={email}
-        experimentId={experimentId}
-        variantId={variantId}
-      />
+      <SignupModal isOpen={isModalOpen} onClose={handleModalClose} prefillEmail={email} />
     </>
   )
 }

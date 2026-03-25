@@ -40,7 +40,7 @@ export async function Header() {
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <ExperimentTracker experimentId={experimentId} variantId={variantId}>
           {showEmailSignup ? (
-            <HeroEmailInput experimentId={experimentId} variantId={variantId} />
+            <HeroEmailInput />
           ) : (
             <div className="flex flex-col items-center gap-3 md:flex-row">
               <div className="group relative flex flex-col items-center">
@@ -50,8 +50,6 @@ export async function Header() {
                   clickName="Sign Up Button"
                   clickText={primaryCTA}
                   clickLocation="Hero Section"
-                  experimentId={experimentId}
-                  variantId={variantId}
                   className="block w-[220px]"
                 >
                   <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
@@ -69,8 +67,6 @@ export async function Header() {
                 clickName="Explore Docs Button"
                 clickText="Explore the Docs"
                 clickLocation="Hero Section"
-                experimentId={experimentId}
-                variantId={variantId}
                 className="block w-[220px]"
                 prefetch={false}
               >

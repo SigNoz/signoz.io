@@ -11,8 +11,6 @@ interface SignupModalProps {
   isOpen: boolean
   onClose: () => void
   prefillEmail?: string
-  experimentId?: string
-  variantId?: string
 }
 
 const regions = [
@@ -21,13 +19,7 @@ const regions = [
   { name: 'India', id: 'in', iconURL: '/svgs/icons/india.svg' },
 ]
 
-const SignupModal: React.FC<SignupModalProps> = ({
-  isOpen,
-  onClose,
-  prefillEmail = '',
-  experimentId,
-  variantId,
-}) => {
+const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail = '' }) => {
   const [formState, setFormState] = useState({
     workEmail: prefillEmail,
     dataRegion: 'us',
