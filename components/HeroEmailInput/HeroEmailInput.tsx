@@ -50,7 +50,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
       <div className="flex w-full flex-col items-center gap-3.5 pt-4">
         {/* Desktop: pill with inline button */}
         <form onSubmit={handleSubmit} className="hidden w-[500px] md:flex">
-          <div className="flex w-full items-center gap-0 rounded-full border border-signoz_slate-200 bg-signoz_ink-400 py-1.5 pl-6 pr-1.5">
+          <div className="flex w-full items-center gap-0 rounded-full border border-signoz_slate-200 bg-signoz_ink-400 py-1.5 pl-6 pr-1.5 shadow-[0_0_15px_rgba(78,116,248,0.1)]">
             <input
               type="email"
               value={email}
