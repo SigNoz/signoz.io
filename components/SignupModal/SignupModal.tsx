@@ -15,6 +15,8 @@ interface SignupModalProps {
   isOpen: boolean
   onClose: () => void
   prefillEmail?: string
+  experimentId?: string
+  variantId?: string
 }
 
 interface ErrorsProps {
@@ -29,7 +31,13 @@ const regions = [
   { name: 'India', id: 'in', iconURL: '/svgs/icons/india.svg' },
 ]
 
-const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail = '' }) => {
+const SignupModal: React.FC<SignupModalProps> = ({
+  isOpen,
+  onClose,
+  prefillEmail = '',
+  experimentId,
+  variantId,
+}) => {
   const [formState, setFormState] = useState({
     workEmail: prefillEmail,
     dataRegion: 'us',
@@ -173,6 +181,9 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail
           clickText: 'Start Your Free Trial',
           email: formState.workEmail,
           dataRegion: formState.dataRegion,
+          experiment_id: experimentId,
+          variant_id: variantId,
+          is_experiment_conversion: true,
         },
       })
 
@@ -222,6 +233,9 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail
               dataRegion: payload.region.name,
               location: 'Signup Modal',
               method: 'email_signup',
+              experiment_id: experimentId,
+              variant_id: variantId,
+              is_experiment_conversion: true,
             },
           })
 

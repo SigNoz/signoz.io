@@ -6,7 +6,12 @@ import { useLogEvent } from '../../hooks/useLogEvent'
 import SignupModal from '@/components/SignupModal/SignupModal'
 import TrackingLink from '@/components/TrackingLink'
 
-const HeroEmailInput: React.FC = () => {
+interface HeroEmailInputProps {
+  experimentId?: string
+  variantId?: string
+}
+
+const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId }) => {
   const [email, setEmail] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const logEvent = useLogEvent()
@@ -24,6 +29,9 @@ const HeroEmailInput: React.FC = () => {
           clickLocation: 'Hero Section',
           clickText: 'Start for free',
           email: email,
+          experiment_id: experimentId,
+          variant_id: variantId,
+          is_experiment_conversion: true,
         },
       })
 
@@ -91,6 +99,8 @@ const HeroEmailInput: React.FC = () => {
             clickName="Explore Docs Link"
             clickText="Explore the Docs"
             clickLocation="Hero Section"
+            experimentId={experimentId}
+            variantId={variantId}
             className="text-xs font-medium text-signoz_robin-300 hover:text-signoz_robin-200"
             prefetch={false}
           >
@@ -99,7 +109,13 @@ const HeroEmailInput: React.FC = () => {
         </div>
       </div>
 
-      <SignupModal isOpen={isModalOpen} onClose={handleModalClose} prefillEmail={email} />
+      <SignupModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        prefillEmail={email}
+        experimentId={experimentId}
+        variantId={variantId}
+      />
     </>
   )
 }
