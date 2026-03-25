@@ -6,18 +6,13 @@ import { ArrowRight, Loader2, X } from 'lucide-react'
 import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
 import { useLogEvent } from '@/hooks/useLogEvent'
+import { REGIONS } from '@/constants/regions'
 
 interface SignupModalProps {
   isOpen: boolean
   onClose: () => void
   prefillEmail?: string
 }
-
-const regions = [
-  { name: 'United States', id: 'us', iconURL: '/svgs/icons/us.svg' },
-  { name: 'Europe', id: 'eu', iconURL: '/svgs/icons/eu.svg' },
-  { name: 'India', id: 'in', iconURL: '/svgs/icons/india.svg' },
-]
 
 const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail = '' }) => {
   const [formState, setFormState] = useState({
@@ -35,9 +30,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail
 
   // Update email when prefillEmail changes
   useEffect(() => {
-    if (prefillEmail) {
-      setFormState((prev) => ({ ...prev, workEmail: prefillEmail }))
-    }
+    setFormState((prev) => ({ ...prev, workEmail: prefillEmail }))
   }, [prefillEmail])
 
   const handleClose = useCallback(() => {
@@ -199,7 +192,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose, prefillEmail
             Data region
           </label>
           <div className="grid grid-cols-3 gap-2">
-            {regions.map((region) => (
+            {REGIONS.map((region) => (
               <button
                 type="button"
                 key={region.id}

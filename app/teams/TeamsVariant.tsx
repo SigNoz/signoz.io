@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
+import { REGIONS } from '@/constants/regions'
 
 interface ErrorsProps {
   fullName?: string
@@ -24,12 +25,6 @@ interface FormState {
   dataRegion: string
   source: string
   termsOfServiceAccepted: boolean
-}
-
-interface Region {
-  name: string
-  id: string
-  iconURL: string
 }
 
 // Variant Navbar component (now integrated into layout)
@@ -305,25 +300,6 @@ const Testimonial: React.FC = () => {
   )
 }
 
-// Define regions
-const regions = [
-  {
-    name: 'United States',
-    id: 'us',
-    iconURL: '/svgs/icons/us.svg',
-  },
-  {
-    name: 'Europe',
-    id: 'eu',
-    iconURL: '/svgs/icons/eu.svg',
-  },
-  {
-    name: 'India',
-    id: 'in',
-    iconURL: '/svgs/icons/india.svg',
-  },
-]
-
 // Completely isolated signup form component with its own state management
 const SignupFormIsolated: React.FC<{
   onSignup: (payload: any) => Promise<void>
@@ -464,7 +440,7 @@ const SignupFormIsolated: React.FC<{
           </label>
 
           <div className="grid grid-cols-3 gap-3">
-            {regions.map((region) => (
+            {REGIONS.map((region) => (
               <button
                 type="button"
                 key={region.id}

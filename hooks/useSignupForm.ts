@@ -72,10 +72,11 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
       if (!isValid) {
         logEvent({
           eventType: 'track',
-          eventName: 'Teams Page Sign Up Validation Failed',
+          eventName: 'Sign Up Validation Failed',
           attributes: {
             errors: newErrors,
             email: payload.email,
+            source,
           },
         })
       }
@@ -98,10 +99,11 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
       if (!isValid) {
         logEvent({
           eventType: 'track',
-          eventName: 'Teams Page Social Sign Up Validation Failed',
+          eventName: 'Social Sign Up Validation Failed',
           attributes: {
             errors: newErrors,
             connector: payload.connector,
+            source,
           },
         })
       }
@@ -175,12 +177,13 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
 
           logEvent({
             eventType: 'track',
-            eventName: 'Teams Page Sign Up API Error',
+            eventName: 'Sign Up API Error',
             attributes: {
               error: errorData.error,
               status: response.status,
               email: payload.email,
               region: payload.region.name,
+              source,
             },
           })
 
@@ -190,10 +193,11 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
       } catch (error) {
         logEvent({
           eventType: 'track',
-          eventName: 'Teams Page Sign Up Exception',
+          eventName: 'Sign Up Exception',
           attributes: {
             errorMessage: error instanceof Error ? error.message : String(error),
             email: payload.email,
+            source,
           },
         })
         handleError()
