@@ -104,6 +104,11 @@ export const METRICS_QUICK_START_ITEMS = {
       href: '/docs/metrics-management/render-metrics',
       clickName: 'Render Metrics Link',
     },
+    {
+      name: 'KEDA',
+      href: '/docs/metrics-management/keda-metrics',
+      clickName: 'KEDA Metrics Link',
+    },
   ] satisfies ComponentItem[],
   applications: [
     {
