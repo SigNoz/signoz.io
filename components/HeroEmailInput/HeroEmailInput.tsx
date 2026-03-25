@@ -1,0 +1,107 @@
+'use client'
+
+import React, { useState, useCallback } from 'react'
+import { ArrowRight } from 'lucide-react'
+import { useLogEvent } from '../../hooks/useLogEvent'
+import SignupModal from '@/components/SignupModal/SignupModal'
+import TrackingLink from '@/components/TrackingLink'
+
+const HeroEmailInput: React.FC = () => {
+  const [email, setEmail] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const logEvent = useLogEvent()
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+
+      logEvent({
+        eventType: 'track',
+        eventName: 'Website Click',
+        attributes: {
+          clickType: 'Primary CTA',
+          clickName: 'Hero Email Input Submit',
+          clickLocation: 'Hero Section',
+          clickText: 'Start for free',
+          email: email,
+        },
+      })
+
+      setIsModalOpen(true)
+    },
+    [email, logEvent]
+  )
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false)
+  }, [])
+
+  return (
+    <>
+      <div className="flex flex-col items-center gap-3.5 pt-8">
+        {/* Desktop: pill with inline button */}
+        <form onSubmit={handleSubmit} className="hidden w-[500px] md:flex">
+          <div className="flex w-full items-center gap-0 rounded-full border border-signoz_slate-200 bg-signoz_ink-400 py-1.5 pl-6 pr-1.5">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your work email"
+              className="flex-grow bg-transparent text-[15px] font-normal text-signoz_vanilla-100 placeholder-signoz_slate-50 outline-none"
+              id="hero-email-input"
+            />
+            <button
+              type="submit"
+              className="flex flex-shrink-0 items-center gap-2 rounded-full bg-signoz_robin-500 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-signoz_robin-600"
+              id="btn-hero-email-submit"
+            >
+              Start for free
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </form>
+
+        {/* Mobile: stacked pill */}
+        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2.5 px-6 md:hidden">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your work email"
+            className="w-full rounded-full border border-signoz_slate-200 bg-signoz_ink-400 px-5 py-3.5 text-[15px] font-normal text-signoz_vanilla-100 placeholder-signoz_slate-50 outline-none focus:border-signoz_robin-500"
+            id="hero-email-input-mobile"
+          />
+          <button
+            type="submit"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-signoz_robin-500 px-7 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-signoz_robin-600"
+            id="btn-hero-email-submit-mobile"
+          >
+            Start for free
+            <ArrowRight size={14} />
+          </button>
+        </form>
+
+        {/* Helper text */}
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-signoz_slate-50">No credit card required</span>
+          <span className="h-[3px] w-[3px] rounded-full bg-signoz_slate-100" />
+          <TrackingLink
+            href="/docs/introduction/"
+            clickType="Secondary CTA"
+            clickName="Explore Docs Link"
+            clickText="Explore the Docs"
+            clickLocation="Hero Section"
+            className="text-xs font-medium text-signoz_robin-300 hover:text-signoz_robin-200"
+            prefetch={false}
+          >
+            Explore the Docs
+          </TrackingLink>
+        </div>
+      </div>
+
+      <SignupModal isOpen={isModalOpen} onClose={handleModalClose} prefillEmail={email} />
+    </>
+  )
+}
+
+export default HeroEmailInput
