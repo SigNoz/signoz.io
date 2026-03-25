@@ -62,7 +62,6 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
         ? {
             experiment_id: experimentId,
             variant_id: variantId,
-            is_experiment_conversion: true,
           }
         : {},
     [experimentId, variantId]

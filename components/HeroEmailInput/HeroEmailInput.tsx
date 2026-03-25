@@ -35,7 +35,6 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
           email: email,
           experiment_id: experimentId,
           variant_id: variantId,
-          is_experiment_conversion: true,
         },
       })
 

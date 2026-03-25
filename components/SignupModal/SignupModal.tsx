@@ -136,7 +136,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
           dataRegion: formState.dataRegion,
           experiment_id: experimentId,
           variant_id: variantId,
-          is_experiment_conversion: true,
         },
       })
 
