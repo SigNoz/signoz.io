@@ -39,8 +39,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
 
   const { errors, isSubmitting, submitFailed, handleSignUp, handleSocialSignup } = useSignupForm({
     source: 'homepage-modal',
-    experimentId,
-    variantId,
   })
 
   // Update email when prefillEmail changes
@@ -49,6 +47,20 @@ const SignupModal: React.FC<SignupModalProps> = ({
       setFormState((prev) => ({ ...prev, workEmail: prefillEmail }))
     }
   }, [prefillEmail])
+
+  const handleClose = useCallback(() => {
+    logEvent({
+      eventType: 'track',
+      eventName: 'Website Click',
+      attributes: {
+        clickType: 'Button Click',
+        clickName: 'Signup Modal Close',
+        clickLocation: 'Hero Section',
+        clickText: 'Close Modal',
+      },
+    })
+    onClose()
+  }, [logEvent, onClose])
 
   // Focus email input when modal opens
   useEffect(() => {
@@ -79,20 +91,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
       document.body.style.overflow = ''
     }
   }, [isOpen])
-
-  const handleClose = useCallback(() => {
-    logEvent({
-      eventType: 'track',
-      eventName: 'Website Click',
-      attributes: {
-        clickType: 'Button Click',
-        clickName: 'Signup Modal Close',
-        clickLocation: 'Hero Section',
-        clickText: 'Close Modal',
-      },
-    })
-    onClose()
-  }, [logEvent, onClose])
 
   const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target
@@ -134,8 +132,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
           clickText: 'Start Your Free Trial',
           email: formState.workEmail,
           dataRegion: formState.dataRegion,
-          experiment_id: experimentId,
-          variant_id: variantId,
         },
       })
 

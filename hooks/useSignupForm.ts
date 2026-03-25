@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLogEvent } from './useLogEvent'
 import {
@@ -19,9 +19,6 @@ export interface SignupErrors {
 export interface UseSignupFormOptions {
   /** Where the form is rendered, used in tracking events */
   source: string
-  /** Experiment tracking attributes */
-  experimentId?: string
-  variantId?: string
   /** Called on unrecoverable error (default: scroll to top) */
   onError?: () => void
 }
@@ -29,7 +26,7 @@ export interface UseSignupFormOptions {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const isValidEmail = (email: string) => EMAIL_REGEX.test(email)
 
-export function useSignupForm({ source, experimentId, variantId, onError }: UseSignupFormOptions) {
+export function useSignupForm({ source, onError }: UseSignupFormOptions) {
   const [errors, setErrors] = useState<SignupErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
@@ -56,17 +53,6 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
     localStorage.setItem('prevSignupEmail', payload.email)
   }, [])
 
-  const experimentAttributes = useMemo(
-    () =>
-      experimentId
-        ? {
-            experiment_id: experimentId,
-            variant_id: variantId,
-          }
-        : {},
-    [experimentId, variantId]
-  )
-
   const validatePayload = useCallback(
     (payload: { email: string; preferences: { terms_of_service_accepted: boolean } }) => {
       const newErrors: SignupErrors = {}
@@ -90,7 +76,6 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
           attributes: {
             errors: newErrors,
             email: payload.email,
-            ...experimentAttributes,
           },
         })
       }
@@ -98,7 +83,7 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
       setErrors(newErrors)
       return isValid
     },
-    [logEvent, experimentAttributes]
+    [logEvent]
   )
 
   const validateSocialSignupPayload = useCallback(
@@ -117,7 +102,6 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
           attributes: {
             errors: newErrors,
             connector: payload.connector,
-            ...experimentAttributes,
           },
         })
       }
@@ -125,7 +109,7 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
       setErrors(newErrors)
       return isValid
     },
-    [logEvent, experimentAttributes]
+    [logEvent]
   )
 
   const handleSignUp = useCallback(
@@ -197,7 +181,6 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
               status: response.status,
               email: payload.email,
               region: payload.region.name,
-              ...experimentAttributes,
             },
           })
 
@@ -211,7 +194,6 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
           attributes: {
             errorMessage: error instanceof Error ? error.message : String(error),
             email: payload.email,
-            ...experimentAttributes,
           },
         })
         handleError()
@@ -219,15 +201,7 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
         setIsSubmitting(false)
       }
     },
-    [
-      handleError,
-      handleGTMCustomEventTrigger,
-      logEvent,
-      router,
-      validatePayload,
-      source,
-      experimentAttributes,
-    ]
+    [handleError, handleGTMCustomEventTrigger, logEvent, router, validatePayload, source]
   )
 
   const handleSocialSignup = useCallback(
@@ -248,14 +222,13 @@ export function useSignupForm({ source, experimentId, variantId, onError }: UseS
         attributes: {
           connector: payload.connector,
           region: payload.region.name,
-          ...experimentAttributes,
         },
       })
 
       localStorage.setItem('region', payload.region.name)
       window.location.href = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/connectors/${payload.connector}/url`
     },
-    [validateSocialSignupPayload, logEvent, experimentAttributes]
+    [validateSocialSignupPayload, logEvent]
   )
 
   const handleSocialSignupCallback = useCallback(

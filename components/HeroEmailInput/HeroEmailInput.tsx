@@ -33,14 +33,12 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
           clickLocation: 'Hero Section',
           clickText: 'Start for free',
           email: email,
-          experiment_id: experimentId,
-          variant_id: variantId,
         },
       })
 
       setIsModalOpen(true)
     },
-    [email, logEvent, experimentId, variantId]
+    [email, logEvent]
   )
 
   const handleModalClose = useCallback(() => {
