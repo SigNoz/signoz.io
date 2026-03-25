@@ -225,20 +225,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
             attributes: { domain },
           })
 
-          logEvent({
-            eventType: 'track',
-            eventName: 'SignUp Form Submitted',
-            attributes: {
-              email: payload.email,
-              dataRegion: payload.region.name,
-              location: 'Signup Modal',
-              method: 'email_signup',
-              experiment_id: experimentId,
-              variant_id: variantId,
-              is_experiment_conversion: true,
-            },
-          })
-
           localStorage.setItem('workEmail', payload.email)
           localStorage.setItem('region', payload.region.name)
 
@@ -299,6 +285,9 @@ const SignupModal: React.FC<SignupModalProps> = ({
           connector,
           region: formState.dataRegion,
           clickLocation: 'Signup Modal',
+          experiment_id: experimentId,
+          variant_id: variantId,
+          is_experiment_conversion: true,
         },
       })
 
@@ -340,7 +329,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
         {/* Error state */}
         {submitFailed && (
           <div className="mb-4 rounded-md border border-signoz_cherry-500/30 bg-signoz_cherry-500/10 p-3">
-            <p className="text-sm text-signoz_cherry-500">
+            <p className="mb-0 text-sm text-signoz_cherry-500">
               {errors.apiError ||
                 'Something went wrong. Please try again or contact cloud-support@signoz.io'}
             </p>

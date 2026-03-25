@@ -46,7 +46,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
 
   return (
     <>
-      <div className="flex flex-col items-center gap-3.5 pt-4">
+      <div className="flex w-full flex-col items-center gap-3.5 pt-4">
         {/* Desktop: pill with inline button */}
         <form onSubmit={handleSubmit} className="hidden w-[500px] md:flex">
           <div className="flex w-full items-center gap-0 rounded-full border border-signoz_slate-200 bg-signoz_ink-400 py-1.5 pl-6 pr-1.5">
@@ -70,7 +70,7 @@ const HeroEmailInput: React.FC<HeroEmailInputProps> = ({ experimentId, variantId
         </form>
 
         {/* Mobile: stacked pill */}
-        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2.5 px-2 md:hidden">
+        <form onSubmit={handleSubmit} className="flex w-[90vw] flex-col gap-2.5 md:hidden">
           <input
             type="email"
             value={email}
