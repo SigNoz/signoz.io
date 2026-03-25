@@ -6,11 +6,12 @@ import TrackingLink from '@/components/TrackingLink'
 import { VideoModalPlayer } from './VideoModalPlayer'
 import { evaluateFeatureFlag } from '@/utils/growthbookServer'
 import HeroEmailInput from '@/components/HeroEmailInput/HeroEmailInput'
+import { EXPERIMENTS } from '@/constants/experiments'
 
 // Server component with single CTA
 export async function Header() {
   const primaryCTA = 'Get Started - Free'
-  const showEmailSignup = await evaluateFeatureFlag('homepage-email-signup')
+  const showEmailSignup = await evaluateFeatureFlag(EXPERIMENTS.HOMEPAGE_EMAIL_SIGNUP.flagName)
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
