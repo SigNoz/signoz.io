@@ -163,6 +163,16 @@ export const APM_INSTRUMENTATION_ITEMS = {
       href: '/docs/instrumentation/opentelemetry-wordpress',
       clickName: 'WordPress Instrumentation Link',
     },
+    {
+      name: 'Vercel',
+      href: '/docs/userguide/vercel-to-signoz',
+      clickName: 'Vercel Instrumentation Link',
+    },
+    {
+      name: 'Hasura',
+      href: '/docs/integrations/opentelemetry-hasura',
+      clickName: 'Hasura Instrumentation Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 

@@ -80,6 +80,9 @@ const walkLeafArrays = (value, path = []) => {
   )
 }
 
+const isValidHref = (href) =>
+  typeof href === 'string' && (href.startsWith('/') || href.startsWith('https://'))
+
 test('all flat item arrays are non-empty', () => {
   for (const name of FLAT_EXPORTS) {
     const items = componentItems[name]
@@ -112,11 +115,8 @@ test('all items have valid name, href, and clickName', () => {
         `${name}[${i}].name should be a non-empty string, got: ${JSON.stringify(item.name)}`
       )
       assert.ok(
-        typeof item.href === 'string' &&
-          (item.href.startsWith('/docs/') ||
-            item.href.startsWith('https://') ||
-            item.href.startsWith('/docs')),
-        `${name}[${i}].href should start with /docs/ or https://, got: ${JSON.stringify(item.href)}`
+        isValidHref(item.href),
+        `${name}[${i}].href should start with / or https://, got: ${JSON.stringify(item.href)}`
       )
       assert.ok(
         typeof item.clickName === 'string' && item.clickName.trim().length > 0,

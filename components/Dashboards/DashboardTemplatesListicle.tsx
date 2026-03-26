@@ -275,7 +275,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   'https://github.com/SigNoz/dashboards/tree/main/slurm': (
     <Server className="h-7 w-7 text-green-600" />
   ),
-  'https://github.com/SigNoz/dashboards/tree/main/snowflake': (
+  '/docs/dashboards/dashboard-templates/snowflake': (
     <SiSnowflake className="h-7 w-7 text-blue-400" />
   ),
   '/docs/dashboards/dashboard-templates/supabase': (

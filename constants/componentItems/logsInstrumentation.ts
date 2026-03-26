@@ -15,7 +15,7 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
     },
     {
       name: 'Vercel',
-      href: '/docs/userguide/vercel_logs_to_signoz',
+      href: '/docs/userguide/vercel-to-signoz',
       clickName: 'Vercel Logs Link',
     },
     {
@@ -38,6 +38,11 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       name: 'Convex',
       href: '/docs/logs-management/send-logs/convex-log-streams-signoz',
       clickName: 'Convex Logs Link',
+    },
+    {
+      name: 'Hasura',
+      href: '/docs/integrations/opentelemetry-hasura',
+      clickName: 'Hasura Logs Link',
     },
   ] satisfies ComponentItem[],
   languages: [

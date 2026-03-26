@@ -30,6 +30,7 @@ import {
   SiNodedotjs,
   SiPython,
   SiDeno,
+  SiHasura,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import { VscGraphLine } from 'react-icons/vsc'
@@ -177,6 +178,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <SiPython className="h-7 w-7 text-blue-500" />
   ),
   '/docs/instrumentation/opentelemetry-deno': <SiDeno className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
 }
 
 export default function MetricsQuickStartOverview({

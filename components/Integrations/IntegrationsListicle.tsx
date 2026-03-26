@@ -11,6 +11,7 @@ import {
   SiTypescript,
   SiAmazonwebservices,
   SiMysql,
+  SiHasura,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -80,6 +81,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     '/docs/integrations/aws-rds-mysql': <SiMysql className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/aws-elasticache-redis': <SiRedis className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
+    '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
   }
 
   const temporalCards = INTEGRATIONS_ITEMS.temporal.map((item) => ({
