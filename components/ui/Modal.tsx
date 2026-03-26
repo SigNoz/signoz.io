@@ -67,7 +67,7 @@ export function AppModal({
               <button
                 type="button"
                 aria-label="Close modal"
-                className="absolute right-1 top-1 z-10 rounded-full p-1.5 opacity-70 transition-[background-color,opacity] hover:bg-gray-500/20 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500"
+                className="[&]:-webkit-tap-highlight-color-transparent absolute right-1 top-1 z-10 select-none appearance-none rounded-full p-2 opacity-70 transition-[background-color,opacity] hover:bg-gray-500/20 hover:opacity-100 focus:outline-none focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-500 active:bg-gray-500/30"
                 onClick={() => onOpenChange(false)}
               >
                 <XMarkIcon className="h-5 w-5" aria-hidden />
