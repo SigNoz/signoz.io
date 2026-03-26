@@ -13,6 +13,7 @@ module.exports = {
     './layouts/**/*.{js,ts,tsx}',
     './data/**/*.mdx',
     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@signozhq/pagination/dist/**/*.{js,ts,jsx,tsx}',
     './shared/components/**/**/*.{js,ts,tsx}',
   ],
   darkMode: 'class',
