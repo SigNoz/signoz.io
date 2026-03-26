@@ -193,6 +193,11 @@ const docsSideNav = [
                 label: 'Deploying with ArgoCD',
                 route: '/docs/install/argocd',
               },
+              {
+                type: 'doc',
+                label: 'Deploying with Kustomize',
+                route: '/docs/setup/kubernetes/kustomize',
+              },
             ],
           },
           {
