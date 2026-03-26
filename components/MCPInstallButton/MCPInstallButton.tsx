@@ -16,8 +16,6 @@ const ICON_SRCS: Record<string, string> = {
   vscode: '/img/docs/vscode-icon.png',
 }
 
-const DEFAULT_REGIONS = ['us', 'eu', 'in', 'us2', 'eu2', 'in2'] as const
-
 const buildDeepLink = (client: 'cursor' | 'vscode', region: string): string => {
   const mcpUrl = `https://mcp.${region}.signoz.cloud/mcp`
 
@@ -38,57 +36,30 @@ const buildDeepLink = (client: 'cursor' | 'vscode', region: string): string => {
   }
 }
 
-const normalizeRegionList = (regions: string[]): string[] => {
-  const uniqueRegions = new Set<string>()
+const dedupeRegions = (regions: string[]): string[] => {
+  const seen = new Set<string>()
+  const result: string[] = []
 
-  for (const region of [...DEFAULT_REGIONS, ...regions]) {
-    const normalizedRegion = region.trim().toLowerCase()
-    if (!normalizedRegion) continue
-    uniqueRegions.add(normalizedRegion)
+  for (const region of regions) {
+    const normalized = region.trim().toLowerCase()
+    if (!normalized || seen.has(normalized)) continue
+    seen.add(normalized)
+    result.push(normalized)
   }
 
-  return Array.from(uniqueRegions)
+  return result
 }
-
-const formatRegionLabel = (region: string): string => region.toUpperCase()
 
 const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, icon }) => {
   const { regions, region: contextRegion } = useRegion()
-  const availableRegions = normalizeRegionList(regions.map((region) => region.name))
+  const availableRegions = dedupeRegions(regions.map((r) => r.name))
   const selectedRegion = contextRegion?.trim().toLowerCase() || null
   const hasSelectedRegion = selectedRegion ? availableRegions.includes(selectedRegion) : false
-
-  const buildRegionalLabel = (region: string): React.ReactNode => (
-    <>
-      {children} ({formatRegionLabel(region)})
-    </>
-  )
 
   const renderInstallLink = (href: string, label: React.ReactNode) => (
     <a
       href={href}
-      target="_blank"
-      rel="noopener noreferrer nofollow"
-      className="not-prose mcp-install-button"
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        borderRadius: '6px',
-        backgroundColor: '#fff',
-        padding: '6px 14px',
-        fontSize: '14px',
-        fontWeight: 600,
-        color: '#111',
-        textDecoration: 'none',
-        border: '1px solid rgba(0,0,0,0.1)',
-        cursor: 'pointer',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-        lineHeight: '1',
-        width: 'auto',
-        height: 'auto',
-      }}
+      className="not-prose inline-flex items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-3.5 py-1.5 text-sm font-semibold leading-none text-gray-900 no-underline shadow-sm transition-colors hover:bg-zinc-100 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
     >
       {icon && ICON_SRCS[icon] && (
         <img
@@ -96,45 +67,29 @@ const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, i
           alt=""
           width={18}
           height={18}
-          className="not-prose"
-          style={{
-            flexShrink: 0,
-            borderRadius: '2px',
-            margin: 0,
-            padding: 0,
-            display: 'block',
-          }}
+          className="not-prose m-0 block shrink-0 rounded-sm p-0"
         />
       )}
-      <span style={{ lineHeight: '1' }}>{label}</span>
+      <span className="leading-none">{label}</span>
     </a>
   )
 
   return (
-    <div className="not-prose" style={{ width: 'fit-content', margin: '4px 0' }}>
+    <div className="not-prose my-1 w-fit">
       {hasSelectedRegion && selectedRegion ? (
         renderInstallLink(buildDeepLink(client, selectedRegion), children)
       ) : (
         <div className="not-prose flex flex-wrap items-center gap-2">
           {availableRegions.map((region) =>
-            renderInstallLink(buildDeepLink(client, region), buildRegionalLabel(region))
+            renderInstallLink(
+              buildDeepLink(client, region),
+              <>
+                {children} ({region.toUpperCase()})
+              </>
+            )
           )}
         </div>
       )}
-      <style>{`
-        .mcp-install-button {
-          transition: background-color 0.15s, box-shadow 0.15s;
-        }
-        .mcp-install-button:hover,
-        .mcp-install-button:focus-visible {
-          background-color: #f4f4f5 !important;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
-        }
-        .mcp-install-button:focus-visible {
-          outline: 2px solid #3b82f6;
-          outline-offset: 2px;
-        }
-      `}</style>
     </div>
   )
 }
