@@ -19,7 +19,7 @@ interface Tenant {
   state: string
 }
 
-interface Pagination {
+interface PaginationInfo {
   total: number
   pages: number
   page: number
@@ -73,14 +73,14 @@ export default function Login() {
   const [userTenants, setUserTenants] = useState<Tenant[]>([])
 
   const [noDeployments, setNoDeployments] = useState(false)
-  const [pagination, setPagination] = useState<Pagination | null>(null)
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [isFetchingPage, setIsFetchingPage] = useState(false)
 
   const router = useRouter()
   const logEvent = useLogEvent()
 
-  const handleEmailUpdate = (event) => {
+  const handleEmailUpdate = (event: React.ChangeEvent<HTMLInputElement>) => {
     setWorkEmail(event.target.value)
   }
 
@@ -95,7 +95,7 @@ export default function Login() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     logEvent({
@@ -139,6 +139,22 @@ export default function Login() {
     try {
       const url = `${BASE_URL}/deployments/esearch?q=${encodeURIComponent(workEmail)}&page=${page}&per_page=${PER_PAGE}`
       const res = await fetch(url)
+
+      if (!res.ok) {
+        logEvent({
+          eventName: 'Login Failed',
+          eventType: 'track',
+          attributes: {
+            email: workEmail,
+            error: 'API Error',
+            status: res.status,
+            statusText: res.statusText,
+          },
+        })
+        setSubmitFailed(true)
+        return
+      }
+
       const data = await res.json()
 
       if (data.status === 'success') {
@@ -146,35 +162,37 @@ export default function Login() {
         localStorage.setItem('app_user_id', workEmail || '')
 
         const tenants: Tenant[] = data?.data?.data ?? []
-        const paginationInfo: Pagination | null = data?.data?._pagination ?? null
+        const paginationInfo: PaginationInfo | null = data?.data?._pagination ?? null
 
         if (tenants.length === 0 && page === 1) {
           handleNoDeployments()
           return
         }
 
-        // --- Segment Identify Call ---
-        logEvent({
-          eventType: 'identify',
-          eventName: 'User Logged In',
-          attributes: {
-            email: workEmail,
-            workspaceData: data?.data,
-          },
-        })
+        if (isInitial) {
+          // --- Segment Identify Call ---
+          logEvent({
+            eventType: 'identify',
+            eventName: 'User Logged In',
+            attributes: {
+              email: workEmail,
+              workspaceData: data?.data,
+            },
+          })
 
-        // --- Segment Group Call ---
-        const domain = workEmail.split('@')[1] || 'unknown_domain'
-        logEvent({
-          eventType: 'group',
-          eventName: 'User Associated with Company (Login)',
-          groupId: domain,
-          attributes: {
-            domain: domain,
-            workspaceData: data?.data,
-          },
-        })
-        // --- End Segment Calls ---
+          // --- Segment Group Call ---
+          const domain = workEmail.split('@')[1] || 'unknown_domain'
+          logEvent({
+            eventType: 'group',
+            eventName: 'User Associated with Company (Login)',
+            groupId: domain,
+            attributes: {
+              domain: domain,
+              workspaceData: data?.data,
+            },
+          })
+          // --- End Segment Calls ---
+        }
 
         const sortedTenants = [...tenants].sort((a, b) => {
           if (a.state === TenantState.HEALTHY && b.state !== TenantState.HEALTHY) return -1
@@ -196,7 +214,15 @@ export default function Login() {
         })
         setSubmitFailed(true)
       }
-    } catch {
+    } catch (error) {
+      logEvent({
+        eventName: 'Login Exception',
+        eventType: 'track',
+        attributes: {
+          email: workEmail,
+          errorMessage: error instanceof Error ? error.message : String(error),
+        },
+      })
       setSubmitFailed(true)
     } finally {
       setIsSubmitting(false)
@@ -314,7 +340,7 @@ export default function Login() {
                             <Loader2 size={18} className="animate-spin text-signoz_vanilla-400" />
                           </div>
                         ) : (
-                          userTenants.slice(0, PER_PAGE).map((tenant: Tenant) => (
+                          userTenants.map((tenant: Tenant) => (
                             <div
                               key={tenant.name}
                               className="flex items-center justify-between border-b border-signoz_slate-400 px-3 py-3 last:border-b-0"
