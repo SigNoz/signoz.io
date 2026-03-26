@@ -161,8 +161,8 @@ export default function Login() {
         setSubmitSuccess(true)
         localStorage.setItem('app_user_id', workEmail || '')
 
-        const tenants: Tenant[] = data?.data?.data ?? []
-        const paginationInfo: PaginationInfo | null = data?.data?._pagination ?? null
+        const tenants: Tenant[] = data?.data ?? []
+        const paginationInfo: PaginationInfo | null = data?._pagination ?? null
 
         if (tenants.length === 0 && page === 1) {
           handleNoDeployments()
@@ -176,7 +176,7 @@ export default function Login() {
             eventName: 'User Logged In',
             attributes: {
               email: workEmail,
-              workspaceData: data?.data,
+              workspaceData: data,
             },
           })
 
@@ -188,7 +188,7 @@ export default function Login() {
             groupId: domain,
             attributes: {
               domain: domain,
-              workspaceData: data?.data,
+              workspaceData: data,
             },
           })
           // --- End Segment Calls ---
