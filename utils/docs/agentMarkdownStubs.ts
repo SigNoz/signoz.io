@@ -70,8 +70,10 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'LogsInstrumentationListicle',
   'LogsQuickStartOverview',
   'MarketplaceInstallationListicle',
+  'MCPInstallButton',
   'MetricsQuickStartOverview',
   'MigrateToSigNoz',
+  'RegionTable',
   'SelfHostInstallationListicle',
   'TabItem',
   'Tabs',
@@ -105,7 +107,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'MultiNodePart1',
   'MultiNodePart2',
   'PrereqsInstrument',
-  'RegionTable',
   'RetentionInfo',
   'SigNozCloud',
   'TraefikMetrics',
@@ -150,6 +151,28 @@ const formatLabel = (value: string): string =>
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ')
+
+const MCP_INSTALL_REGIONS = ['us', 'eu', 'in', 'us2', 'eu2', 'in2'] as const
+
+const buildMcpInstallLink = (client: string, region: string): string | null => {
+  const mcpUrl = `https://mcp.${region}.signoz.cloud/mcp`
+
+  switch (client) {
+    case 'cursor': {
+      const config = Buffer.from(JSON.stringify({ url: mcpUrl }), 'utf8').toString('base64')
+      return `cursor://anysphere.cursor-deeplink/mcp/install?name=SigNoz&config=${config}`
+    }
+    case 'vscode': {
+      const json = JSON.stringify({
+        name: 'signoz',
+        config: { type: 'http', url: mcpUrl },
+      })
+      return `vscode:mcp/install?${encodeURIComponent(json)}`
+    }
+    default:
+      return null
+  }
+}
 
 const hasRenderableChildren = (children: ReactNode): boolean => {
   const nodes = React.Children.toArray(children)
@@ -276,6 +299,39 @@ const createKnownComponentStubs = (): Record<
 
     return React.createElement('section', null, ...buildLabeledContent(title, props.children))
   },
+  MCPInstallButton: (props) => {
+    const client = getStringProp(props, 'client')
+    const content = hasRenderableChildren(props.children) ? props.children : null
+
+    if (!content) {
+      return React.createElement('p', null, `Install MCP server${client ? ` in ${client}` : ''}`)
+    }
+
+    if (!client) {
+      return React.createElement('p', null, content)
+    }
+
+    return React.createElement(
+      'section',
+      null,
+      React.createElement(
+        'ul',
+        null,
+        ...MCP_INSTALL_REGIONS.map((region) => {
+          const href = buildMcpInstallLink(client, region)
+          if (!href) {
+            return null
+          }
+
+          return React.createElement(
+            'li',
+            { key: `${client}-${region}` },
+            React.createElement('a', { href }, `${content} (${region.toUpperCase()})`)
+          )
+        }).filter(Boolean)
+      )
+    )
+  },
   Tabs: (props) => React.createElement('div', null, props.children),
   TabItem: (props) => {
     const label = getStringProp(props, 'label')
@@ -287,6 +343,13 @@ const createKnownComponentStubs = (): Record<
     )
   },
   ToggleHeading: (props) => React.createElement('div', null, props.children),
+  RegionTable: () => {
+    return React.createElement(
+      'p',
+      null,
+      'SigNoz Cloud region and endpoint reference is available in the rendered docs.'
+    )
+  },
   HostingDecision: createItemListStub(HOSTING_DECISION_ITEMS, 'Hosting Options'),
   APMDashboardsListicle: createItemListStub(APM_DASHBOARDS_ITEMS, 'APM Dashboards'),
   APMInstrumentationListicle: createItemListStub(

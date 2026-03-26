@@ -59,6 +59,7 @@ If breaking change, describe migration steps:
 ### For docs changes (`data/docs/**`)
 - [ ] Followed the docs author checklist in [contributing/docs-authoring.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/docs-authoring.md)
 - [ ] Added/updated the page in `constants/docsSideNav.ts` if adding or moving a doc
+- [ ] Any added docs images use WebP format and live under `public/img/docs/<topic>/`
 
 ### For blog changes
 - [ ] Followed the blog workflow in [contributing/blog-workflow.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/blog-workflow.md)

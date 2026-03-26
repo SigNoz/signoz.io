@@ -55,3 +55,28 @@ test('renderDocMarkdownForAgents avoids duplicating the leading title heading', 
 
   assert.equal((markdown.match(/^# Test Doc$/gm) || []).length, 1)
 })
+
+test('renderDocMarkdownForAgents preserves MCP install links for agent consumers', async () => {
+  const markdown = await renderDocMarkdownForAgents(
+    createDoc({
+      _id: 'doc-mcp-links',
+      slug: 'test-doc-mcp-links',
+      body: {
+        raw: '<MCPInstallButton client="cursor">Add to Cursor</MCPInstallButton>',
+        code: `return {
+          default: function MDXContent(props) {
+            const { components } = props
+            return _jsx_runtime.jsx(components.MCPInstallButton, {
+              client: 'cursor',
+              children: 'Add to Cursor'
+            })
+          }
+        }`,
+      },
+    })
+  )
+
+  assert.match(markdown, /Add to Cursor \(US\)/)
+  assert.match(markdown, /cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install/)
+  assert.match(markdown, /Add to Cursor \(EU\)/)
+})
