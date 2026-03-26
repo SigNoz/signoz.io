@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { ArrowRight } from 'lucide-react'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
+import Button from '@/components/Button/Button'
 
 const SignupModal = dynamic(() => import('@/components/SignupModal/SignupModal'), {
   ssr: false,
@@ -54,14 +55,14 @@ const HeroEmailInput: React.FC = () => {
               className="flex-grow border-none bg-transparent text-[15px] font-normal text-signoz_vanilla-100 placeholder-signoz_slate-50 outline-none focus:ring-0"
               id="hero-email-input"
             />
-            <button
+            <Button
               type="submit"
-              className="flex flex-shrink-0 items-center gap-2 rounded-full bg-signoz_robin-500 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-signoz_robin-600"
+              className="!h-auto flex-shrink-0 !px-7 !py-3 font-semibold transition-colors hover:bg-signoz_robin-600"
               id="btn-hero-email-submit"
             >
               Start for free
               <ArrowRight size={14} />
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -75,14 +76,14 @@ const HeroEmailInput: React.FC = () => {
             className="w-full rounded-full border border-signoz_slate-200 bg-signoz_ink-400 px-5 py-3.5 text-[15px] font-normal text-signoz_vanilla-100 placeholder-signoz_slate-50 outline-none focus:border-signoz_robin-500"
             id="hero-email-input-mobile"
           />
-          <button
+          <Button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-signoz_robin-500 px-7 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-signoz_robin-600"
+            className="!h-auto w-full !py-3.5 !text-[15px] font-semibold transition-colors hover:bg-signoz_robin-600"
             id="btn-hero-email-submit-mobile"
           >
             Start for free
             <ArrowRight size={14} />
-          </button>
+          </Button>
         </form>
 
         {/* Helper text */}
