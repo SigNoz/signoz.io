@@ -1,7 +1,6 @@
 'use client'
 
 import { useRegion } from '../Region/RegionContext'
-import { useSearchParams } from 'next/navigation'
 
 interface MCPInstallButtonProps {
   /** Which MCP client to generate a deep link for. */
@@ -54,11 +53,10 @@ const normalizeRegionList = (regions: string[]): string[] => {
 const formatRegionLabel = (region: string): string => region.toUpperCase()
 
 const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, icon }) => {
-  const { regions } = useRegion()
-  const searchParams = useSearchParams()
+  const { regions, region: contextRegion } = useRegion()
   const availableRegions = normalizeRegionList(regions.map((region) => region.name))
-  const selectedRegion = searchParams.get('region')?.trim().toLowerCase() || null
-  const hasExplicitRegion = selectedRegion ? availableRegions.includes(selectedRegion) : false
+  const selectedRegion = contextRegion?.trim().toLowerCase() || null
+  const hasSelectedRegion = selectedRegion ? availableRegions.includes(selectedRegion) : false
 
   const buildRegionalLabel = (region: string): React.ReactNode => (
     <>
@@ -114,7 +112,7 @@ const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, i
 
   return (
     <div className="not-prose" style={{ width: 'fit-content', margin: '4px 0' }}>
-      {hasExplicitRegion && selectedRegion ? (
+      {hasSelectedRegion && selectedRegion ? (
         renderInstallLink(buildDeepLink(client, selectedRegion), children)
       ) : (
         <div className="not-prose flex flex-wrap items-center gap-2">
