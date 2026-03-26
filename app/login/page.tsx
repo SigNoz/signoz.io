@@ -238,7 +238,7 @@ export default function Login() {
               </div>
 
               {!isSubmitting && submitFailed ? (
-                <div className="rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-6">
+                <div className="mt-4 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-6">
                   <div className="error-container mb-4 rounded p-4 text-sm">
                     We couldn't complete your request. Please try refreshing the page or contact
                     cloud support for assistance.
@@ -266,11 +266,13 @@ export default function Login() {
                 </div>
               ) : (
                 <form className="w-100 mt-6" onSubmit={handleSubmit}>
-                  <div className="mb-[28px] rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-8">
+                  <div
+                    className={`rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-6 pt-6 ${pagination && pagination.total > PER_PAGE ? 'pb-0' : 'pb-6'}`}
+                  >
                     <label htmlFor="workEmail" className="mb-2 block font-medium">
                       Work email
                     </label>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
                       <input
                         type="email"
                         id="workEmail"
@@ -280,17 +282,19 @@ export default function Login() {
                         value={workEmail}
                         onChange={handleEmailUpdate}
                         placeholder="E.g. bart@simpsonmail.com"
-                        className="w-full rounded-sm border border-r-0 border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
+                        className="flex-1 rounded-sm border border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
                       />
                       {workEmail && submitSuccess && (
                         <Button
                           variant={'secondary'}
                           rounded={'default'}
+                          size={'sm'}
                           isButton={true}
                           type="button"
                           onClick={handleChangeEmail}
+                          className="gap-2 text-[13px]"
                         >
-                          <Pencil size={14} /> Change
+                          <Pencil size={12} /> Change
                         </Button>
                       )}
                     </div>
@@ -300,66 +304,63 @@ export default function Login() {
                     )}
 
                     {submitSuccess && userTenants.length > 0 && (
-                      <div className="my-8">
-                        <div className="rounded-sm border border-signoz_slate-400">
-                          <div className="border-b border-signoz_slate-400 bg-signoz_ink-300 px-3 py-2 text-xs font-medium text-signoz_vanilla-400">
-                            Associated Teams&apos; URLs
-                          </div>
-
-                          {isFetchingPage ? (
-                            <div className="flex items-center justify-center py-10">
-                              <Loader2 size={18} className="animate-spin text-signoz_vanilla-400" />
-                            </div>
-                          ) : (
-                            userTenants.slice(0, PER_PAGE).map((tenant: Tenant) => (
-                              <div
-                                key={tenant.name}
-                                className="flex items-center justify-between border-b border-signoz_slate-400 px-3 py-2.5 last:border-b-0"
-                              >
-                                <div className="min-w-0 flex-1 pr-3">
-                                  <div className="truncate text-sm text-signoz_vanilla-400">
-                                    {tenant.name}.{tenant.region.dns}
-                                  </div>
-                                  <div className="mt-0.5 flex items-center">
-                                    {tenant.state !== TenantState.DELETED ? (
-                                      <span className="flex items-center text-xs text-emerald-400">
-                                        <Dot color="#25E192" size={18} className="-ml-1.5" />
-                                        Active
-                                      </span>
-                                    ) : (
-                                      <span className="flex items-center text-xs text-signoz_vanilla-400 opacity-50">
-                                        <Dot color="#3C4152" size={18} className="-ml-1.5" />
-                                        Expired
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                {tenant.state !== TenantState.DELETED && (
-                                  <a
-                                    href={`https://${tenant.name}.${tenant.region.dns}/login`}
-                                    target="_blank"
-                                    className="shrink-0 rounded-sm bg-signoz_robin-500 px-2.5 py-1 text-xs font-normal text-white transition-opacity hover:opacity-90"
-                                  >
-                                    Login
-                                  </a>
-                                )}
-                              </div>
-                            ))
-                          )}
+                      <div className="mt-4 rounded-sm border border-signoz_slate-400">
+                        <div className="border-b border-signoz_slate-400 px-3 py-2 text-sm font-medium text-signoz_vanilla-100">
+                          Associated Teams&apos; URLs
                         </div>
 
-                        {pagination && pagination.total > PER_PAGE && (
-                          <div className="mt-3 flex justify-end">
-                            <Pagination
-                              total={pagination.total}
-                              pageSize={PER_PAGE}
-                              current={currentPage}
-                              onPageChange={handlePageChange}
-                              align="end"
-                            />
+                        {isFetchingPage ? (
+                          <div className="flex items-center justify-center py-10">
+                            <Loader2 size={18} className="animate-spin text-signoz_vanilla-400" />
                           </div>
+                        ) : (
+                          userTenants.slice(0, PER_PAGE).map((tenant: Tenant) => (
+                            <div
+                              key={tenant.name}
+                              className="flex items-center justify-between border-b border-signoz_slate-400 px-3 py-3 last:border-b-0"
+                            >
+                              <div className="min-w-0 flex-1 pr-3">
+                                <div className="truncate text-sm text-signoz_vanilla-100">
+                                  {tenant.name}.{tenant.region.dns}
+                                </div>
+                                <div className="mt-1 flex items-center">
+                                  {tenant.state !== TenantState.DELETED ? (
+                                    <span className="flex items-center text-xs text-emerald-400">
+                                      <Dot color="#25E192" size={16} className="-ml-1" />
+                                      Active
+                                    </span>
+                                  ) : (
+                                    <span className="flex items-center text-xs text-signoz_vanilla-400 opacity-50">
+                                      <Dot color="#3C4152" size={16} className="-ml-1" />
+                                      Expired
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {tenant.state !== TenantState.DELETED && (
+                                <a
+                                  href={`https://${tenant.name}.${tenant.region.dns}/login`}
+                                  target="_blank"
+                                  className="shrink-0 rounded-sm bg-signoz_robin-500 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+                                >
+                                  Login
+                                </a>
+                              )}
+                            </div>
+                          ))
                         )}
                       </div>
+                    )}
+
+                    {pagination && pagination.total > PER_PAGE && (
+                      <Pagination
+                        total={pagination.total}
+                        pageSize={PER_PAGE}
+                        current={currentPage}
+                        onPageChange={handlePageChange}
+                        align="end"
+                        className="mt-4"
+                      />
                     )}
                   </div>
 
@@ -370,7 +371,7 @@ export default function Login() {
                       variant={'default'}
                       rounded={'full'}
                       disabled={isSubmitting || !isValid}
-                      className="mb-4 w-full"
+                      className="mb-4 mt-6 w-full"
                     >
                       <span className="flex items-center gap-1.5 px-px text-sm">
                         Next
@@ -386,7 +387,7 @@ export default function Login() {
               )}
 
               {noDeployments && (
-                <div className="text-sm text-signoz_vanilla-400">
+                <div className="mt-4 text-sm text-signoz_vanilla-400">
                   No deployments are currently associated with this email. You can get started now
                   with a free trial account for 30 days.
                   <Button
