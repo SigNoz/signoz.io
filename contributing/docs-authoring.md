@@ -110,7 +110,7 @@ When documenting OpenTelemetry Collector changes:
 - Use descriptive anchor text instead of "here" or raw URLs in body text.
 - Validate all added internal and external links before the PR.
 - Store docs images under `public/img/docs/<topic>/...`.
-- Use WebP when possible.
+- Use WebP format for all docs images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools.
 - Use `Figure` with descriptive alt text and a concise caption.
 
 ## Patterns And Components
@@ -280,5 +280,5 @@ Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-che
 - Commands and snippets explain what to do, where to do it, and the expected result.
 - Placeholders use `<...>` format and are documented.
 - Links are helpful and validated.
-- Images, if any, use the correct location and format.
+- Images, if any, use the correct location and WebP format.
 - Redirect, sidebar, and discovery updates are handled when the doc URL changes or a new doc should appear in an existing surface.

@@ -12,8 +12,8 @@ interface MCPInstallButtonProps {
 }
 
 const ICON_SRCS: Record<string, string> = {
-  cursor: '/img/docs/cursor-icon.png',
-  vscode: '/img/docs/vscode-icon.png',
+  cursor: '/img/docs/cursor-icon.webp',
+  vscode: '/img/docs/vscode-icon.webp',
 }
 
 const buildDeepLink = (client: 'cursor' | 'vscode', region: string): string => {
