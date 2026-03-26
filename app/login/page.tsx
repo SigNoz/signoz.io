@@ -326,12 +326,12 @@ export default function Login() {
                                 <div className="mt-1 flex items-center">
                                   {tenant.state !== TenantState.DELETED ? (
                                     <span className="flex items-center text-xs text-emerald-400">
-                                      <Dot color="#25E192" size={16} className="-ml-1" />
+                                      <Dot size={16} className="-ml-1 text-signoz_forest-500" />
                                       Active
                                     </span>
                                   ) : (
                                     <span className="flex items-center text-xs text-signoz_vanilla-400 opacity-50">
-                                      <Dot color="#3C4152" size={16} className="-ml-1" />
+                                      <Dot size={16} className="-ml-1 text-signoz_slate-100" />
                                       Expired
                                     </span>
                                   )}
