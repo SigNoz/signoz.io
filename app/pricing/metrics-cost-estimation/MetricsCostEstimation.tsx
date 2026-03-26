@@ -270,7 +270,7 @@ const MetricsCostEstimation = () => {
         }}
         panelClassName="bg-transparent p-0"
       >
-        <div className="py-6">
+        <div className="px-6 py-6">
           {selectedVideoID ? <VimeoPlayer videoId={selectedVideoID} /> : null}
         </div>
       </Modal>

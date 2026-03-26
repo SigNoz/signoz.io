@@ -51,7 +51,7 @@ export const VideoModalPlayer = ({ thumbnailSrc, videoId }: VideoModalPlayerProp
           onOpenChange={onOpenChange}
           panelClassName="bg-transparent p-0"
         >
-          <div className="py-6">
+          <div className="px-6 py-6">
             <VimeoPlayer videoId={videoId} />
           </div>
         </Modal>

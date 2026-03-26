@@ -127,7 +127,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
         backdrop="blur"
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        panelClassName="overflow-hidden bg-signoz_ink-400 p-0"
+        panelClassName="overflow-hidden rounded-lg bg-signoz_ink-400 p-0"
       >
         <div className="flex flex-col">
           <p

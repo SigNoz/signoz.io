@@ -49,9 +49,7 @@ export function AppModal({
         transition
         className={cn(
           'fixed inset-0 transition duration-200 ease-out data-[closed]:opacity-0',
-          backdrop === 'blur'
-            ? 'bg-overlay/30 backdrop-blur-md backdrop-saturate-150'
-            : 'bg-black/55'
+          backdrop === 'blur' ? 'bg-black/30 backdrop-blur-md backdrop-saturate-150' : 'bg-black/55'
         )}
       />
 
@@ -69,7 +67,7 @@ export function AppModal({
               <button
                 type="button"
                 aria-label="Close modal"
-                className="absolute right-3 top-3 z-10 rounded-full p-1.5 text-signoz_ink-100 transition-colors hover:bg-signoz_ink-100/30 hover:text-signoz_ink-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                className="absolute right-1 top-1 z-10 rounded-full p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500"
                 onClick={() => onOpenChange(false)}
               >
                 <XMarkIcon className="h-5 w-5" aria-hidden />

@@ -132,7 +132,7 @@ const MainSection: React.FC = () => {
               onOpenChange={onOpenChange}
               panelClassName="bg-transparent p-0"
             >
-              <div className="py-10">
+              <div className="px-6 py-10">
                 <Youtube id={videoId} />
               </div>
             </Modal>

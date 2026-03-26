@@ -109,7 +109,7 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
         onOpenChange={onOpenChange}
         panelClassName="mx-2 bg-transparent p-0 md:mx-0"
       >
-        <div className="py-3 md:py-6">
+        <div className="px-6 py-3 md:py-6">
           {youtubeId ? (
             <YouTube id={youtubeId} />
           ) : (
