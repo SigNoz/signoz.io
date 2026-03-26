@@ -24,6 +24,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/install/kubernetes/local': <SiKubernetes className="h-7 w-7 text-blue-600" />,
   '/docs/install/argocd': <SiArgo className="h-7 w-7 text-gray-500" />,
   '/docs/install/kubernetes/openshift': <SiRedhatopenshift className="h-7 w-7 text-red-800" />,
+  '/docs/setup/kubernetes/kustomize': (
+    <img src="/img/icons/kustomize-icon.webp" width={20} height={20} alt="Kustomize" />
+  ),
 }
 
 const cards = K8S_INSTALLATION_ITEMS.map((item) => ({
