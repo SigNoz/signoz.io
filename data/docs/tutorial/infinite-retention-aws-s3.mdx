@@ -67,7 +67,10 @@ Replace the placeholders:
 Then add `awss3/logs` to your existing logs pipeline's `exporters` list:
 
 ```yaml
-exporters: [otlp, awss3/logs]
+service:
+  pipelines:
+    logs:
+      exporters: [otlp, awss3/logs]
 ```
 
 ### Exporting All Signals (Logs, Metrics, and Traces)
@@ -102,12 +105,14 @@ exporters:
 Then add each exporter to the corresponding pipeline in your existing `service.pipelines` section:
 
 ```yaml
-logs:
-  exporters: [otlp, awss3/logs]
-metrics:
-  exporters: [otlp, awss3/metrics]
-traces:
-  exporters: [otlp, awss3/traces]
+service:
+  pipelines:
+    logs:
+      exporters: [otlp, awss3/logs]
+    metrics:
+      exporters: [otlp, awss3/metrics]
+    traces:
+      exporters: [otlp, awss3/traces]
 ```
 
 - Named instances (`awss3/logs`, `awss3/metrics`, `awss3/traces`) allow a different `s3_prefix` per signal
