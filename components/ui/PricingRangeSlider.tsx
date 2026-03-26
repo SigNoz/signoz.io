@@ -17,6 +17,24 @@ const thumbByToken: Record<string, string> = {
   'signoz_amber-500': 'bg-signoz_amber-500',
 }
 
+const tooltipByToken: Record<string, { bg: string; text: string; border: string }> = {
+  'signoz_robin-500': {
+    bg: 'bg-signoz_robin-500',
+    text: 'text-white',
+    border: 'border-signoz_robin-600',
+  },
+  'signoz_sakura-500': {
+    bg: 'bg-signoz_sakura-500',
+    text: 'text-white',
+    border: 'border-signoz_sakura-600',
+  },
+  'signoz_amber-500': {
+    bg: 'bg-signoz_amber-500',
+    text: 'text-signoz_ink-500',
+    border: 'border-signoz_amber-600',
+  },
+}
+
 export type PricingSliderColor = keyof typeof rangeByColor
 
 type PricingRangeSliderProps = {
@@ -56,6 +74,7 @@ export function PricingRangeSlider({
   markLabels,
 }: PricingRangeSliderProps) {
   const thumbBg = thumbByToken[thumbColorToken] ?? 'bg-signoz_robin-500'
+  const tooltipColors = tooltipByToken[thumbColorToken] ?? tooltipByToken['signoz_robin-500']
   const rangeBg = rangeByColor[color]
   const [isDragging, setIsDragging] = useState(false)
 
@@ -90,7 +109,12 @@ export function PricingRangeSlider({
             <TooltipPrimitive.Content
               side="top"
               sideOffset={8}
-              className="z-[200] rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-2 py-1 text-xs text-signoz_vanilla-100 shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+              className={cn(
+                'z-[200] rounded-full border px-2 py-1 text-xs font-medium shadow-[0_8px_24px_rgba(0,0,0,0.45)]',
+                tooltipColors.bg,
+                tooltipColors.text,
+                tooltipColors.border
+              )}
             >
               {tooltipText}
             </TooltipPrimitive.Content>
