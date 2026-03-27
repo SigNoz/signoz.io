@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileArchive, HeartPulse, BookOpen } from 'lucide-react'
+import { FileArchive, HeartPulse, BookOpen, Mail } from 'lucide-react'
 import SingleLinkCard from '../../../components/Card/SingleLinkCard'
 
 interface ResourceLinkData {
@@ -32,6 +32,13 @@ const resourceLinks: ResourceLinkData[] = [
     icon: <BookOpen size={20} className="text-signoz_robin-500" />,
     clickName: 'Blog Link',
   },
+  {
+    title: 'Newsletter',
+    description: 'Curated technical content in your inbox',
+    href: 'https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=docs_additional_resources&utm_campaign=newsletter',
+    icon: <Mail size={20} className="text-signoz_robin-500" />,
+    clickName: 'Newsletter Link',
+  },
 ]
 
 export default function AdditionalResources() {
@@ -45,7 +52,7 @@ export default function AdditionalResources() {
         </h2>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         {resourceLinks.map((link, index) => (
           <SingleLinkCard
             key={index}

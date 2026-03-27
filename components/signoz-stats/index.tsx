@@ -5,7 +5,7 @@ import Heading from '../../components/ui/Heading'
 import SubHeading from '../../components/ui/SubHeading'
 import Button from '@/components/Button/Button'
 import Card from '@/components/Card/card'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, BookOpen, Mail } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
 const SigNozStats = () => {
@@ -78,6 +78,25 @@ const SigNozStats = () => {
                 >
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   GitHub Repository
+                  <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                </Button>
+              </TrackingLink>
+              <TrackingLink
+                href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=homepage&utm_campaign=newsletter"
+                className="inline-block"
+                clickType="Secondary CTA"
+                clickName="Newsletter Link"
+                clickText="Read Our Newsletter"
+                clickLocation="Stats Section"
+                target="_blank"
+              >
+                <Button
+                  type={Button.TYPES.SECONDARY}
+                  className="flex-center text-xs sm:text-sm"
+                  id="btn-newsletter-homepage"
+                >
+                  <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  Read Our Newsletter
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </Button>
               </TrackingLink>

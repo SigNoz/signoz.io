@@ -1,5 +1,5 @@
 import SectionLayout from '../SectionLayout/SectionLayout.view'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Mail } from 'lucide-react'
 import ButtonGroup from '../ButtonGroup/ButtonGroup.view'
 import StatsCard from '@/components/Card/card'
 
@@ -54,6 +54,12 @@ const SigNozStats = () => {
       href: 'https://github.com/SigNoz/signoz/',
       variant: 'secondary' as const,
       icon: <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />,
+    },
+    {
+      text: 'Read Our Newsletter',
+      href: 'https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=feature_page&utm_campaign=newsletter',
+      variant: 'secondary' as const,
+      icon: <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5" />,
     },
   ]
 

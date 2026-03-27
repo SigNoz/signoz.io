@@ -200,9 +200,11 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: anthropics/claude-code-action@v1
         env:
+          GH_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ steps.mint_identity_token.outputs.token || github.token }}
           track_progress: true # ✨ Enables tracking comments
           prompt: |
             REPO: ${{ github.repository }}
@@ -211,10 +213,12 @@ jobs:
             Review this pull request and use relevant project skills from `.claude/skills`.
             - Use `signoz-docs-pr-review` for docs changes.
             - Use `signoz-website-frontend-pr-review` for frontend code changes.
+            - Treat `CONTRIBUTING.md` as the entrypoint and `contributing/**` as the detailed policy source.
 
             Apply only the relevant skill(s) based on changed files.
             Leave inline comments for concrete issues and post exactly one concise summary comment.
-            Do not add praise-only comments.
+            Do not add praise comments.
+            For docs PRs, follow the onboarding-label policy and summary format in `contributing/docs-review.md` via the `signoz-docs-pr-review` skill.
 
           claude_args: |
             --model "claude-opus-4-6"
@@ -224,10 +228,12 @@ jobs:
         if: github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
         uses: anthropics/claude-code-action@v1
         env:
+          GH_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ steps.mint_identity_token.outputs.token || github.token }}
           trigger_phrase: "@claude"
           track_progress: true
           prompt: |
@@ -238,9 +244,11 @@ jobs:
 
             Instructions:
             1. Analyze the USER COMMENT to understand their intent.
-            2. IF the user is explicitly asking for a review (e.g. "review this", "review my changes", "thoughts?"):
+            2. IF the user is explicitly asking for a review (e.g. "review this", "review my changes", "thoughts?", or `@claude review`):
                - Use `signoz-docs-pr-review` for docs files (`data/docs/**`, etc).
                - Use `signoz-website-frontend-pr-review` for frontend files.
+               - Treat this as a full re-review of onboarding labeling for docs PRs.
+               - Follow the onboarding-label policy and summary format in `contributing/docs-review.md` via the `signoz-docs-pr-review` skill.
             3. IF the user is asking for specific changes or answering a question, you may skip the full review skill and just address the request.
 
             CRITICAL: If you make ANY changes to files during this interaction, you MUST review your own changes using the relevant skill(s) before finishing. Verify they are correct, follow the style guide, and match the user's intent.

@@ -21,10 +21,9 @@ const resolveModulePath = (modulePath) => {
   return modulePath
 }
 
-const loadTsModule = (relativePath) => {
+const transpileSource = (sourcePath, source) => {
   const repoRoot = path.resolve(__dirname, '..', '..')
-  const sourcePath = path.resolve(__dirname, '..', '..', relativePath)
-  const source = fs.readFileSync(sourcePath, 'utf8')
+  const sourceDir = path.dirname(sourcePath)
   const transpiled = ts.transpileModule(source, {
     compilerOptions: {
       esModuleInterop: true,
@@ -33,20 +32,62 @@ const loadTsModule = (relativePath) => {
       target: ts.ScriptTarget.ES2020,
     },
   })
-  const transpiledWithAliases = transpiled.outputText.replace(
-    /require\((['"])@\/([^'"]+)\1\)/g,
-    (_match, _quote, subPath) =>
-      `require(${JSON.stringify(resolveModulePath(path.join(repoRoot, subPath)))})`
-  )
+
+  return transpiled.outputText
+    .replace(
+      /require\((['"])@\/([^'"]+)\1\)/g,
+      (_match, _quote, subPath) =>
+        `require(${JSON.stringify(resolveModulePath(path.join(repoRoot, subPath)))})`
+    )
+    .replace(
+      /require\((['"])(\.\.?\/[^'"]+)\1\)/g,
+      (_match, _quote, relPath) =>
+        `require(${JSON.stringify(resolveModulePath(path.resolve(sourceDir, relPath)))})`
+    )
+}
+
+const loadTsModule = (relativePath) => {
+  const repoRoot = path.resolve(__dirname, '..', '..')
+  const sourcePath = path.resolve(__dirname, '..', '..', relativePath)
+  const source = fs.readFileSync(sourcePath, 'utf8')
+  const transpiledWithAliases = transpileSource(sourcePath, source)
   // Keep the temp file in the repo root so transpiled relative imports resolve like source imports.
   const tmpFile = path.join(
     repoRoot,
     `.test-transpile-${path.basename(relativePath)}-${process.pid}-${Date.now()}.cjs`
   )
   fs.writeFileSync(tmpFile, transpiledWithAliases, 'utf8')
+  const previousHooks = {
+    '.ts': require.extensions['.ts'],
+    '.tsx': require.extensions['.tsx'],
+  }
+
+  const registerHook = (extension) => {
+    require.extensions[extension] = (module, filename) => {
+      const moduleSource = fs.readFileSync(filename, 'utf8')
+      const compiled = transpileSource(filename, moduleSource)
+      module._compile(compiled, filename)
+    }
+  }
+
+  registerHook('.ts')
+  registerHook('.tsx')
+
   try {
     return require(tmpFile)
   } finally {
+    if (previousHooks['.ts']) {
+      require.extensions['.ts'] = previousHooks['.ts']
+    } else {
+      delete require.extensions['.ts']
+    }
+
+    if (previousHooks['.tsx']) {
+      require.extensions['.tsx'] = previousHooks['.tsx']
+    } else {
+      delete require.extensions['.tsx']
+    }
+
     fs.rmSync(tmpFile, { force: true })
   }
 }

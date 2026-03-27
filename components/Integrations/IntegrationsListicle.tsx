@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import {
-  SiTemporal,
   SiRedis,
   SiPostgresql,
   SiNginx,
@@ -12,10 +11,11 @@ import {
   SiTypescript,
   SiAmazonwebservices,
   SiMysql,
+  SiHasura,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
-import { FaAws } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
+import { INTEGRATIONS_ITEMS } from '@/constants/componentItems'
 
 interface IntegrationsListicleProps {
   category?: 'temporal' | 'databases' | 'aws' | 'all'
@@ -53,31 +53,63 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     </div>
   )
 
+  // Icon map keyed by href
+  const ICON_MAP: Record<string, React.ReactNode> = {
+    '/docs/integrations/temporal-cloud-metrics': <BsCloudFill className="h-7 w-7 text-blue-500" />,
+    '/docs/integrations/temporal-golang-opentelemetry': <SiGo className="h-7 w-7 text-cyan-500" />,
+    '/docs/integrations/temporal-typescript-opentelemetry': (
+      <SiTypescript className="h-7 w-7 text-blue-600" />
+    ),
+    '/docs/integrations/redis': <SiRedis className="h-7 w-7 text-red-500" />,
+    '/docs/integrations/postgresql': <SiPostgresql className="h-7 w-7 text-blue-600" />,
+    '/docs/integrations/mongodb': <SiMongodb className="h-7 w-7 text-green-600" />,
+    '/docs/integrations/clickhouse': <SiClickhouse className="h-7 w-7 text-yellow-500" />,
+    '/docs/integrations/opentelemetry-neondb': (
+      <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />
+    ),
+    '/docs/integrations/sql-server': (
+      <img
+        src="/svgs/icons/microsoft-sql-server.svg"
+        alt="Microsoft SQL Server"
+        className="h-7 w-7 object-contain"
+      />
+    ),
+    '/docs/integrations/aws/one-click-aws-integrations': (
+      <SiAmazonwebservices className="h-7 w-7 text-[#FF9900]" />
+    ),
+    '/docs/integrations/aws-rds-postgres': <SiPostgresql className="h-7 w-7 text-[#FF9900]" />,
+    '/docs/integrations/aws-rds-mysql': <SiMysql className="h-7 w-7 text-[#FF9900]" />,
+    '/docs/integrations/aws-elasticache-redis': <SiRedis className="h-7 w-7 text-[#FF9900]" />,
+    '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
+    '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
+  }
+
+  const temporalCards = INTEGRATIONS_ITEMS.temporal.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const databasesCards = INTEGRATIONS_ITEMS.databases.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const awsCards = INTEGRATIONS_ITEMS.aws.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const otherCards = INTEGRATIONS_ITEMS.other.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
   // Temporal section
   const renderTemporalSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Temporal</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Cloud Metrics',
-            href: '/docs/integrations/temporal-cloud-metrics',
-            icon: <BsCloudFill className="h-7 w-7 text-blue-500" />,
-            clickName: 'Temporal Cloud Metrics Link',
-          },
-          {
-            name: 'Golang',
-            href: '/docs/integrations/temporal-golang-opentelemetry',
-            icon: <SiGo className="h-7 w-7 text-cyan-500" />,
-            clickName: 'Temporal Golang Link',
-          },
-          {
-            name: 'Typescript',
-            href: '/docs/integrations/temporal-typescript-opentelemetry',
-            icon: <SiTypescript className="h-7 w-7 text-blue-600" />,
-            clickName: 'Temporal Typescript Link',
-          },
-        ]}
+        cards={temporalCards}
         sectionName="Temporal Integrations"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -89,50 +121,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Databases</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Redis',
-            href: '/docs/integrations/redis',
-            icon: <SiRedis className="h-7 w-7 text-red-500" />,
-            clickName: 'Redis Integration Link',
-          },
-          {
-            name: 'PostgreSQL',
-            href: '/docs/integrations/postgresql',
-            icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,
-            clickName: 'PostgreSQL Integration Link',
-          },
-          {
-            name: 'MongoDB',
-            href: '/docs/integrations/mongodb',
-            icon: <SiMongodb className="h-7 w-7 text-green-600" />,
-            clickName: 'MongoDB Integration Link',
-          },
-          {
-            name: 'Clickhouse',
-            href: '/docs/integrations/clickhouse',
-            icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
-            clickName: 'Clickhouse Integration Link',
-          },
-          {
-            name: 'Neon',
-            href: '/docs/integrations/opentelemetry-neondb',
-            icon: <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />,
-            clickName: 'Neon Integration Link',
-          },
-          {
-            name: 'Microsoft SQL Server',
-            href: '/docs/integrations/sql-server',
-            icon: (
-              <img
-                src="/svgs/icons/microsoft-sql-server.svg"
-                alt="Microsoft SQL Server"
-                className="h-7 w-7 object-contain"
-              />
-            ),
-            clickName: 'Microsoft SQL Server Integration Link',
-          },
-        ]}
+        cards={databasesCards}
         sectionName="Database Integrations"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -144,32 +133,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">AWS Integrations</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'One-Click AWS Integrations',
-            href: '/docs/integrations/aws/one-click-aws-integrations',
-            icon: <SiAmazonwebservices className="h-7 w-7 text-[#FF9900]" />,
-            clickName: 'One-Click AWS Integrations Link',
-          },
-          {
-            name: 'AWS RDS PostgreSQL (Manual)',
-            href: '/docs/integrations/aws-rds-postgres',
-            icon: <SiPostgresql className="h-7 w-7 text-[#FF9900]" />,
-            clickName: 'AWS RDS PostgreSQL Link',
-          },
-          {
-            name: 'AWS RDS MySQL (Manual)',
-            href: '/docs/integrations/aws-rds-mysql',
-            icon: <SiMysql className="h-7 w-7 text-[#FF9900]" />,
-            clickName: 'AWS RDS MySQL Link',
-          },
-          {
-            name: 'AWS Elasticache Redis (Manual)',
-            href: '/docs/integrations/aws-elasticache-redis',
-            icon: <SiRedis className="h-7 w-7 text-[#FF9900]" />,
-            clickName: 'AWS Elasticache Redis Link',
-          },
-        ]}
+        cards={awsCards}
         sectionName="AWS Integrations"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -181,14 +145,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Other Integrations</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Nginx',
-            href: '/docs/integrations/nginx',
-            icon: <SiNginx className="h-7 w-7 text-green-500" />,
-            clickName: 'Nginx Integration Link',
-          },
-        ]}
+        cards={otherCards}
         sectionName="Other Integrations"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />

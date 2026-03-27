@@ -1,6 +1,6 @@
 ---
 name: signoz-website-frontend-pr-review
-description: Review SigNoz frontend pull requests using this skill's rubric and project-specific standards from CONTRIBUTING.md. Use when asked to review JS/TS/React/Next.js changes for duplication, architecture, App Router best practices, performance, maintainability, and accessibility.
+description: Review SigNoz frontend pull requests for duplication, architecture, App Router best practices, performance, maintainability, and accessibility. Use when asked to review JS/TS/React/Next.js changes, check components or hooks, evaluate frontend code quality, or review any PR whose changed files are under app/, components/, hooks/, utils/, or similar frontend paths.
 ---
 
 # SigNoz Frontend PR Review
@@ -19,16 +19,16 @@ If a PR includes docs too, use this skill for code review only.
 
 ## Source of Truth
 
-- Use this skill file as the frontend review rubric.
-- Apply project-specific constraints from `CONTRIBUTING.md` for code standards.
+This skill file defines the review rubric (the 13 categories below). Project-specific code conventions and verification commands live in `contributing/site-code.md` — read it before reviewing so you apply the canonical rules, not stale assumptions.
 
 ## Review Process
 
 1. Get PR context and changed files.
-2. Scan for high-impact issues first (duplication, architecture, performance).
-3. Evaluate against the categories below.
-4. Leave inline comments for specific issues only.
-5. Post exactly one concise summary grouped by severity.
+2. **Read `contributing/site-code.md` in full before starting the review.** It contains the project's icon policy, UI primitive expectations, componentItems data placement rules, async/DOM safety rules, MDX rendering constraints, dependency policy, and required verification commands. Reviewing without reading it first leads to missed project-specific findings.
+3. Scan for high-impact issues first (duplication, architecture, performance).
+4. Evaluate against the categories below.
+5. Leave inline comments for specific issues only.
+6. Post exactly one concise summary grouped by severity.
 
 ## Review Categories
 
@@ -116,17 +116,13 @@ If a PR includes docs too, use this skill for code review only.
 - Check import order/organization.
 - Flag circular dependencies.
 - Avoid duplicate functionality from existing deps.
-- Ensure new deps are justified (per `CONTRIBUTING.md`).
+- Ensure new deps are justified (per `contributing/site-code.md`).
 
-### 11) Project-specific rules (`CONTRIBUTING.md`)
+### 11) Project-specific rules (`contributing/site-code.md`)
 
-- Prefer existing icon libs (`lucide-react`, `react-icons`).
-- Prefer existing UI primitives in `components/ui`.
-- Keep types/constants co-located and exported appropriately.
-- Avoid concurrent async invocations in handlers (loading/ref guards).
-- Be deliberate with DOM cleanup/transforms.
-- If a PR adds or changes MDX components used in `data/docs/**`, verify `utils/docs/agentMarkdownStubs.ts` still handles them, the agent-markdown tests/coverage remain valid, and rendered Copy Markdown behavior in `utils/docs/buildCopyMarkdownFromRendered.ts` still stays clean.
-- Justify dependency additions.
+- Apply the project-specific rules from `contributing/site-code.md`.
+- Pay extra attention to icon usage, existing UI primitives, `constants/componentItems*.ts` data placement, async handler safety, MDX rendering compatibility, and dependency justification.
+- Treat hardcoded `slice()` boundaries for logical sub-sections as a `High` finding.
 
 ### 12) Error handling and edge cases
 
@@ -179,6 +175,9 @@ Post exactly one concise summary that:
 gh pr view <PR_NUMBER>
 gh pr diff <PR_NUMBER>
 
+# project-specific standards
+cat contributing/site-code.md
+
 # find similar code
 find components shared -name "*.tsx" -type f
 rg -n "<pattern>" utils hooks app/lib components shared
@@ -193,3 +192,4 @@ rg -n "^import " app components hooks utils shared
 - For style changes, prefer Tailwind-first implementations and avoid introducing new component-level CSS systems when existing Tailwind patterns already solve the requirement.
 - Avoid speculative refactors outside PR scope unless there is clear risk reduction.
 - Keep feedback decision-oriented and implementable without ambiguity.
+- Read `contributing/site-code.md` during the review instead of relying on memory or partial summaries.

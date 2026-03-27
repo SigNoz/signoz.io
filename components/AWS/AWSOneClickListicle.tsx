@@ -8,7 +8,6 @@ import {
   SiAwslambda,
   SiAmazonrds,
   SiAmazondynamodb,
-  SiAmazons3,
 } from 'react-icons/si'
 // Using generic Material Design icons for services without Simple Icons
 import {
@@ -20,6 +19,7 @@ import {
   MdNotifications,
 } from 'react-icons/md'
 import IconCardGrid from '../Card/IconCardGrid'
+import { AWS_ONE_CLICK_ITEMS } from '@/constants/componentItems'
 
 export default function AWSOneClickListicle() {
   const sections = [
@@ -50,36 +50,47 @@ export default function AWSOneClickListicle() {
     </div>
   )
 
+  // Icon map keyed by href
+  const ICON_MAP: Record<string, React.ReactNode> = {
+    '/docs/integrations/aws/ec2': <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/ecs': <SiAmazonecs className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/eks': <SiAmazoneks className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/lambda': <SiAwslambda className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/rds': <SiAmazonrds className="h-7 w-7 text-blue-500" />,
+    '/docs/integrations/aws/dynamodb': <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
+    '/docs/integrations/aws/elasticache': <MdMemory className="h-7 w-7 text-blue-500" />,
+    '/docs/integrations/aws/alb': <MdRouter className="h-7 w-7 text-purple-500" />,
+    '/docs/integrations/aws/api-gateway': <MdHttp className="h-7 w-7 text-purple-500" />,
+    '/docs/integrations/aws/msk': <MdCloudQueue className="h-7 w-7 text-black dark:text-white" />,
+    '/docs/integrations/aws/sqs': <MdMessage className="h-7 w-7 text-pink-500" />,
+    '/docs/integrations/aws/sns': <MdNotifications className="h-7 w-7 text-pink-500" />,
+  }
+
+  const computeCards = AWS_ONE_CLICK_ITEMS.compute.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const databasesCards = AWS_ONE_CLICK_ITEMS.databases.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const networkingCards = AWS_ONE_CLICK_ITEMS.networking.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const messagingCards = AWS_ONE_CLICK_ITEMS.messaging.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
   const renderComputeSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Compute</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'EC2',
-            href: '/docs/integrations/aws/ec2',
-            icon: <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
-            clickName: 'EC2 Integration Link',
-          },
-          {
-            name: 'ECS',
-            href: '/docs/integrations/aws/ecs',
-            icon: <SiAmazonecs className="h-7 w-7 text-orange-500" />,
-            clickName: 'ECS Integration Link',
-          },
-          {
-            name: 'EKS',
-            href: '/docs/integrations/aws/eks',
-            icon: <SiAmazoneks className="h-7 w-7 text-orange-500" />,
-            clickName: 'EKS Integration Link',
-          },
-          {
-            name: 'Lambda',
-            href: '/docs/integrations/aws/lambda',
-            icon: <SiAwslambda className="h-7 w-7 text-orange-500" />,
-            clickName: 'Lambda Integration Link',
-          },
-        ]}
+        cards={computeCards}
         sectionName="Compute"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -90,26 +101,7 @@ export default function AWSOneClickListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Databases</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'RDS',
-            href: '/docs/integrations/aws/rds',
-            icon: <SiAmazonrds className="h-7 w-7 text-blue-500" />,
-            clickName: 'RDS Integration Link',
-          },
-          {
-            name: 'DynamoDB',
-            href: '/docs/integrations/aws/dynamodb',
-            icon: <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
-            clickName: 'DynamoDB Integration Link',
-          },
-          {
-            name: 'ElastiCache',
-            href: '/docs/integrations/aws/elasticache',
-            icon: <MdMemory className="h-7 w-7 text-blue-500" />,
-            clickName: 'ElastiCache Integration Link',
-          },
-        ]}
+        cards={databasesCards}
         sectionName="Databases"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -120,20 +112,7 @@ export default function AWSOneClickListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Networking</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'ALB',
-            href: '/docs/integrations/aws/alb',
-            icon: <MdRouter className="h-7 w-7 text-purple-500" />,
-            clickName: 'ALB Integration Link',
-          },
-          {
-            name: 'API Gateway',
-            href: '/docs/integrations/aws/api-gateway',
-            icon: <MdHttp className="h-7 w-7 text-purple-500" />,
-            clickName: 'API Gateway Integration Link',
-          },
-        ]}
+        cards={networkingCards}
         sectionName="Networking"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -144,26 +123,7 @@ export default function AWSOneClickListicle() {
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Messaging</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'MSK',
-            href: '/docs/integrations/aws/msk',
-            icon: <MdCloudQueue className="h-7 w-7 text-black dark:text-white" />,
-            clickName: 'MSK Integration Link',
-          },
-          {
-            name: 'SQS',
-            href: '/docs/integrations/aws/sqs',
-            icon: <MdMessage className="h-7 w-7 text-pink-500" />,
-            clickName: 'SQS Integration Link',
-          },
-          {
-            name: 'SNS',
-            href: '/docs/integrations/aws/sns',
-            icon: <MdNotifications className="h-7 w-7 text-pink-500" />,
-            clickName: 'SNS Integration Link',
-          },
-        ]}
+        cards={messagingCards}
         sectionName="Messaging"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />

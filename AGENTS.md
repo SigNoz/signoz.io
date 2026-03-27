@@ -8,7 +8,7 @@ Keep this file high-signal and task-oriented. Use skills for explicit, specializ
 If guidance conflicts, follow:
 
 1. Direct user/developer instructions in the session
-2. `CONTRIBUTING.md`
+2. `CONTRIBUTING.md` and the linked playbooks under `contributing/**`
 3. This file
 
 ## Agent Role
@@ -41,45 +41,32 @@ You are a focused contributor for `signoz.io`.
 - Redirect tests: `yarn test:doc-redirects`
 - Metadata tests: `yarn test:docs-metadata`
 
-## Verification Matrix
+## Verification
 
-- Docs changes (`data/docs/**`, docs images, docs nav, redirects/scripts):
-  - `yarn check:docs-metadata`
-  - `yarn check:doc-redirects`
-  - `yarn test:docs-metadata`
-  - `yarn test:doc-redirects`
-- Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, etc.):
-  - `yarn lint`
-  - `yarn build`
-- Mixed docs + code changes: run both sets.
+- Use the canonical verification matrix in `contributing/repo-workflow.md#verification-matrix`.
 
 ## Task Playbooks
 
 ### Docs authoring/review (`data/docs/**`)
 
-- Apply `CONTRIBUTING.md` directly for docs standards and checklist.
-- Optimize for happy/common path first; move edge cases to troubleshooting/optional sections.
-- Keep mandatory steps minimal, outcome-oriented, and in recommended defaults.
-- Add links only when they help complete the current step.
+- Use `CONTRIBUTING.md` as the entrypoint and `contributing/docs-authoring.md` plus `contributing/docs-review.md` for detailed standards.
 - If a docs path/URL changes:
   - add a permanent redirect in `next.config.js`
   - update links and `constants/docsSideNav.ts`
+  - update discovery surfaces when relevant (see the redirects and discovery section in `contributing/docs-authoring.md`)
 - For OpenTelemetry technical claims, verify against official sources first:
   1. `https://opentelemetry.io/docs/*`
   2. `https://github.com/open-telemetry/*`
 
 ### Blog changes (`data/blog/**`)
 
-- Follow blog workflow sections in `CONTRIBUTING.md` ("Contribute a Doc or Blog Post" and "Blog Notes").
+- Follow `contributing/blog-workflow.md`.
 - Do not force docs-only checklist items when they do not apply to blogs.
 
 ### Frontend/site code (`app/**`, `components/**`, `hooks/**`, `utils/**`)
 
-- Prefer existing patterns/components before adding abstractions.
-- Use Next.js App Router conventions already present in the repo.
-- Keep types/constants organized per existing conventions.
+- Follow `contributing/site-code.md`.
 - If a change affects docs MDX components or docs rendering, verify both agent markdown (`utils/docs/agentMarkdownStubs.ts`) and Copy Markdown (`utils/docs/buildCopyMarkdownFromRendered.ts`) behavior.
-- Avoid new dependencies unless required; include justification in PR context.
 
 ### PR review output
 
@@ -92,7 +79,7 @@ You are a focused contributor for `signoz.io`.
 ### Always
 
 - Keep changes focused and minimal for the task.
-- Use explicit commands from this file and `CONTRIBUTING.md`.
+- Use explicit commands from this file and the relevant `contributing/**` playbook.
 - Report what ran, what failed, and why.
 
 ### Ask First
