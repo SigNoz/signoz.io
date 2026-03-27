@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
-import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { ArrowUpRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import { ArrowRight } from 'lucide-react'
@@ -280,27 +279,6 @@ const MonthlyEstimate = () => {
               thumbColorToken="signoz_robin-500"
               aria-label="Traces data ingestion volume"
               className="max-w-md"
-              endSlot={
-                <output>
-                  <Tooltip content="Press Enter to apply" delayDuration={300}>
-                    <input
-                      className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_robin-400 focus:border-signoz_robin-500"
-                      type="text"
-                      value={inputTracesValue}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setInputTracesValue(e.target.value)
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter' && !isNaN(Number(inputTracesValue))) {
-                          setTracesValue(
-                            logToLinear(Number(inputTracesValue), MIN_VALUE, MAX_VALUE)
-                          )
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                </output>
-              }
             />
           </div>
 
@@ -346,25 +324,6 @@ const MonthlyEstimate = () => {
               thumbColorToken="signoz_sakura-500"
               aria-label="Logs data ingestion volume"
               className="max-w-md"
-              endSlot={
-                <output>
-                  <Tooltip content="Press Enter to apply" delayDuration={300}>
-                    <input
-                      className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_sakura-400 focus:border-signoz_sakura-500"
-                      type="text"
-                      value={inputLogsValue}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setInputLogsValue(e.target.value)
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter' && !isNaN(Number(inputLogsValue))) {
-                          setLogsValue(logToLinear(Number(inputLogsValue), MIN_VALUE, MAX_VALUE))
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                </output>
-              }
             />
           </div>
 
@@ -410,27 +369,6 @@ const MonthlyEstimate = () => {
               thumbColorToken="signoz_amber-500"
               aria-label="Metrics data ingestion volume"
               className="max-w-md"
-              endSlot={
-                <output>
-                  <Tooltip content="Press Enter to apply" delayDuration={300}>
-                    <input
-                      className="w-12 rounded border border-transparent bg-signoz_ink-300 px-1 py-0.5 text-right text-sm font-medium text-signoz_vanilla-100 outline-none transition-colors hover:border-signoz_amber-400 focus:border-signoz_amber-500"
-                      type="text"
-                      value={inputMetricsValue}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setInputMetricsValue(e.target.value)
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter' && !isNaN(Number(inputMetricsValue))) {
-                          setMetricsValue(
-                            logToLinear(Number(inputMetricsValue), MIN_VALUE, MAX_VALUE)
-                          )
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                </output>
-              }
             />
           </div>
 
