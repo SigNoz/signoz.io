@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useCallback } from 'react'
 import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
-import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import PricingForm from 'app/pricing-form'
 import { ENTERPRISE_DEMO_HUBSPOT_DATA } from './EnterprisePage.constants'
 

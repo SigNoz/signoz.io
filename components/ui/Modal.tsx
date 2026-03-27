@@ -2,7 +2,7 @@
 
 import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { useCallback, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
 const sizeClass = {
@@ -79,14 +79,4 @@ export function AppModal({
       </div>
     </Dialog>
   )
-}
-
-export function useDisclosure(defaultOpen = false) {
-  const [isOpen, setIsOpen] = useState(defaultOpen)
-
-  const onOpen = useCallback(() => setIsOpen(true), [])
-  const onClose = useCallback(() => setIsOpen(false), [])
-  const onOpenChange = useCallback((open: boolean) => setIsOpen(open), [])
-
-  return { isOpen, onOpen, onClose, onOpenChange }
 }

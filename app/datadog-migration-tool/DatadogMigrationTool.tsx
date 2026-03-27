@@ -3,7 +3,8 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import {

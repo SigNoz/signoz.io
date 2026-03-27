@@ -2,7 +2,8 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import VimeoPlayer from '../VimeoPlayer/VimeoPlayer'
 import TrackingButton from '@/components/TrackingButton'
 

@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 
 const merchandise = {
   title: 'Cool merch.',

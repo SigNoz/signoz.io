@@ -9,7 +9,8 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 import CountdownTimer from '@/components/Timer'
 import { Linkedin } from '@/components/social-icons/SolidIcons'
 import Youtube from '@/components/VideoPlayer/VideoPlayer'
-import { AppModal as Modal, useDisclosure } from '@/components/ui/Modal'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import { Card } from '@/components/ui/Card'
 
 const MainSection: React.FC = () => {
