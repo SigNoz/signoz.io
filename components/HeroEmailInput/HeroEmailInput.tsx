@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { ArrowRight } from 'lucide-react'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
-import Button from '@/components/Button/Button'
+import { Button } from '@/components/ui/Button'
 
 const SignupModal = dynamic(() => import('@/components/SignupModal/SignupModal'), {
   ssr: false,
@@ -57,7 +57,9 @@ const HeroEmailInput: React.FC = () => {
             />
             <Button
               type="submit"
-              className="!h-auto flex-shrink-0 !px-7 !py-3 font-semibold transition-colors hover:bg-signoz_robin-600"
+              isButton
+              rounded="full"
+              className="flex-shrink-0 gap-2 px-7 font-semibold"
               id="btn-hero-email-submit"
             >
               Start for free
@@ -78,7 +80,10 @@ const HeroEmailInput: React.FC = () => {
           />
           <Button
             type="submit"
-            className="!h-auto w-full !py-3.5 !text-[15px] font-semibold transition-colors hover:bg-signoz_robin-600"
+            isButton
+            rounded="full"
+            size="lg"
+            className="w-full gap-2 font-semibold"
             id="btn-hero-email-submit-mobile"
           >
             Start for free
