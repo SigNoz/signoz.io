@@ -40,6 +40,11 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       clickName: 'Convex Logs Link',
     },
     {
+      name: 'Supabase',
+      href: '/docs/logs-management/send-logs/supabase-logs',
+      clickName: 'Supabase Logs Link',
+    },
+    {
       name: 'Hasura',
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Logs Link',

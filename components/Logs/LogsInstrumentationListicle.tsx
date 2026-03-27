@@ -24,6 +24,7 @@ import {
   SiGooglecloud,
   SiMysql,
   SiDeno,
+  SiSupabase,
   SiHasura,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
@@ -71,6 +72,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/logs-management/send-logs/convex-log-streams-signoz': (
     <img src="/img/icons/convex-logo.svg" alt="Convex" className="h-9 w-9" />
+  ),
+  '/docs/logs-management/send-logs/supabase-logs': (
+    <SiSupabase className="h-7 w-7 text-emerald-500" />
   ),
   // Languages
   '/docs/logs-management/send-logs/python-logs': <SiPython className="h-7 w-7 text-blue-500" />,

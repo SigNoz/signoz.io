@@ -95,5 +95,13 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'with-chatbase-bubble',
   },
+  HOMEPAGE_EMAIL_SIGNUP: {
+    id: 'homepage-email-signup',
+    variants: {
+      CONTROL: 'existing-cta-buttons',
+      VARIANT: 'email-input-with-modal',
+    },
+    flagName: 'homepage-email-signup',
+  },
   // Add more experiments here as needed
 } as const

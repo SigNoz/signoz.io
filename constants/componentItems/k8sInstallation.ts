@@ -21,4 +21,9 @@ export const K8S_INSTALLATION_ITEMS: ComponentItem[] = [
     href: '/docs/install/kubernetes/openshift',
     clickName: 'Deploy to OpenShift',
   },
+  {
+    name: 'Kustomize',
+    href: '/docs/setup/kubernetes/kustomize',
+    clickName: 'Deploy with Kustomize',
+  },
 ]

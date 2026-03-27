@@ -193,6 +193,11 @@ const docsSideNav = [
                 label: 'Deploying with ArgoCD',
                 route: '/docs/install/argocd',
               },
+              {
+                type: 'doc',
+                label: 'Deploying with Kustomize',
+                route: '/docs/setup/kubernetes/kustomize',
+              },
             ],
           },
           {
@@ -1472,6 +1477,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/cloudflare-logs',
             label: 'Cloudflare',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/supabase-logs',
+            label: 'Supabase',
           },
           {
             type: 'doc',
