@@ -121,7 +121,7 @@ export function PricingRangeSlider({
           </TooltipPrimitive.Portal>
         </TooltipPrimitive.Root>
       </SliderPrimitive.Root>
-      <div className="mt-1 flex justify-between text-[10px] text-signoz_vanilla-400">
+      <div className="mt-1 flex justify-between text-sm text-signoz_vanilla-400">
         {markLabels && markLabels.length > 0 ? (
           markLabels.map((label, i) => <span key={i}>{label}</span>)
         ) : (

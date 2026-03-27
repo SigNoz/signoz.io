@@ -387,12 +387,12 @@ export default function TopNav() {
                         sideOffset={4}
                         onMouseEnter={handleMouseEnterProduct}
                         onMouseLeave={handleMouseLeaveProduct}
-                        className="z-50 min-w-fit origin-top-left overflow-hidden rounded-[4px] border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
+                        className="z-50 min-w-fit origin-top-left overflow-hidden rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
                       >
                         <div className="flex min-w-0 flex-row">
                           <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
                             <div
-                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
                             >
                               Product Modules
                             </div>
@@ -439,11 +439,11 @@ export default function TopNav() {
                               ))}
                             </div>
                           </div>
-                          <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 p-6 sm:w-[300px] lg:w-[320px]">
+                          <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 bg-[hsl(240_5.88%_10%)] p-6 sm:w-[300px] lg:w-[320px]">
                             <div className="flex flex-col gap-y-4">
                               <Link
                                 href={'/case-study'}
-                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50 hover:text-[#fff]`}
+                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100 hover:text-[#fff]`}
                                 onClick={handleProductDropdownClick}
                                 prefetch={false}
                               >
@@ -478,7 +478,7 @@ export default function TopNav() {
                             </div>
                             <div className="flex flex-col gap-y-4">
                               <div
-                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
+                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
                               >
                                 <span>Compare Signoz</span>
                               </div>
@@ -563,12 +563,12 @@ export default function TopNav() {
                         sideOffset={4}
                         onMouseEnter={handleMouseEnterResources}
                         onMouseLeave={handleMouseLeaveResources}
-                        className="z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-signoz_ink-500 p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
+                        className="z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
                       >
                         <div className="flex min-w-0 flex-row">
                           <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
                             <div
-                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
                             >
                               Learn
                             </div>
@@ -605,7 +605,7 @@ export default function TopNav() {
                           </div>
                           <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
                             <div
-                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_slate-50`}
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
                             >
                               Explore
                             </div>
