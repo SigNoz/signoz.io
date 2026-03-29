@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { ArrowRight } from 'lucide-react'
 import { useLogEvent } from '@/hooks/useLogEvent'
@@ -15,6 +15,15 @@ const HeroEmailInput: React.FC = () => {
   const [email, setEmail] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const logEvent = useLogEvent()
+  const emailInputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-focus email input on desktop
+  useEffect(() => {
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches
+    if (isDesktop && emailInputRef.current) {
+      emailInputRef.current.focus()
+    }
+  }, [])
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -27,7 +36,7 @@ const HeroEmailInput: React.FC = () => {
           clickType: 'Primary CTA',
           clickName: 'Hero Email Input Submit',
           clickLocation: 'Hero Section',
-          clickText: 'Start for free',
+          clickText: 'Get Started - Free',
           email: email,
         },
       })
@@ -54,6 +63,7 @@ const HeroEmailInput: React.FC = () => {
               placeholder="Enter your work email"
               className="flex-grow border-none bg-transparent text-[15px] font-normal text-signoz_vanilla-100 placeholder-signoz_slate-50 outline-none focus:ring-0"
               id="hero-email-input"
+              ref={emailInputRef}
             />
             <Button
               type="submit"
@@ -62,7 +72,7 @@ const HeroEmailInput: React.FC = () => {
               className="flex-shrink-0 gap-2 px-7 font-semibold"
               id="btn-hero-email-submit"
             >
-              Start for free
+              Get Started - Free
               <ArrowRight size={14} />
             </Button>
           </div>
