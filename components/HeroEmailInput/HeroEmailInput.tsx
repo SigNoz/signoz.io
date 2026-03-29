@@ -69,7 +69,7 @@ const HeroEmailInput: React.FC = () => {
               type="submit"
               isButton
               rounded="full"
-              className="flex-shrink-0 gap-2 px-7 font-semibold"
+              className="flex-shrink-0 gap-2 px-7 font-medium"
               id="btn-hero-email-submit"
             >
               Get Started - Free
@@ -93,10 +93,10 @@ const HeroEmailInput: React.FC = () => {
             isButton
             rounded="full"
             size="lg"
-            className="w-full gap-2 font-semibold"
+            className="w-full gap-2 font-medium"
             id="btn-hero-email-submit-mobile"
           >
-            Start for free
+            Get Started - Free
             <ArrowRight size={14} />
           </Button>
         </form>
