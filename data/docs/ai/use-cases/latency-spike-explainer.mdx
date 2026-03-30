@@ -1,0 +1,102 @@
+---
+date: 2026-03-30
+id: latency-spike-explainer
+title: Latency Spike Explainer
+description: Ask your AI assistant "why is this slow?" and get a full span breakdown identifying the bottleneck service.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+When an endpoint gets slow, the first question is always _"why?"_ Instead of manually clicking through traces, you can ask your AI assistant to identify the bottleneck for you. It will find the slowest service, decompose the call chain, and point to the specific operation causing the latency.
+
+## Before You Begin
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](/docs/ai/signoz-mcp-server).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](/docs/instrumentation/) if you haven't set this up.
+
+## Try These Prompts
+
+### Quick triage
+
+```
+Which service has the highest latency right now?
+```
+
+The assistant checks all services and ranks them by average and p99 latency, giving you a starting point.
+
+### Drill into a specific endpoint
+
+```
+The /api/checkout endpoint is slow. Find the slowest traces, break down the span tree, and tell me which downstream service is the bottleneck.
+```
+
+The assistant will:
+1. Find the top operations for the service that handles `/api/checkout`
+2. Locate the slowest recent traces
+3. Decompose the span tree to show where time is spent
+4. Identify the bottleneck service and operation
+
+### Compare latency across services
+
+```
+Show me the p99 latency trend by service for the last 6 hours.
+```
+
+This returns a time-series view so you can see when latency regressed and whether services are correlated.
+
+## What to Expect
+
+The assistant identifies the bottleneck by decomposing the request into its constituent spans. A typical response looks like:
+
+```
+/dispatch (frontend, 744ms total)
+  |-- /customer (customer service, 349ms) <-- BOTTLENECK
+  |     |-- SQL SELECT (mysql, 349ms) <-- All time in DB query
+  |-- driver.DriverService/FindNearest (driver, 205ms)
+  |     |-- FindDriverIDs (redis, 21ms)
+  |     |-- GetDriver (redis, 15ms avg)
+  |-- HTTP GET /route x10 (route, 51ms avg each, parallel)
+
+Bottleneck: The SQL SELECT query in the customer service takes 349ms
+(47% of total request time). Consider adding an index or caching layer.
+```
+
+The assistant traces the latency from the root span down through each downstream call, showing exactly where the time is spent.
+
+## Refine Your Results
+
+- **Specify a time window**: _"...in the last 30 minutes"_ to focus on a recent regression
+- **Filter by duration**: _"Show me traces slower than 2 seconds"_ to find outliers
+- **Compare operations**: _"What's the p50 vs p99 for each operation on the frontend service?"_
+- **Get a specific trace**: _"Show me the full span tree for trace ID abc123..."_ to inspect one request in detail
+
+<Admonition type="tip">
+If the call chain involves parallel fan-out (e.g., 10 route lookups), the assistant will note this. Wall-clock time for parallel spans is the max, not the sum - the assistant accounts for this when identifying the bottleneck.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+A latency investigation typically uses these MCP tools:
+
+| Step | MCP Tool | What It Does |
+|------|----------|-------------|
+| 1 | `signoz_list_services` | Lists all services with latency stats to find the slowest |
+| 2 | `signoz_get_service_top_operations` | Gets operations for a service with p50/p95/p99 breakdown |
+| 3 | `signoz_aggregate_traces` | Computes latency aggregations (avg, p99) grouped by service or operation |
+| 4 | `signoz_search_traces` | Finds specific traces matching duration or error filters |
+| 5 | `signoz_get_trace_details` | Returns the full span tree for a specific trace ID |
+
+The assistant chains these calls: first identify the slow service, then find a representative slow trace, then decompose the span tree to locate the bottleneck.
+
+</details>
+
+## Next Steps
+
+- [Natural Language Log Exploration](/docs/ai/use-cases/natural-language-log-exploration) - Search and analyze logs without writing queries.
+- [Reconstruct a Bug from a Trace ID](/docs/ai/use-cases/reconstruct-bug-from-trace-id) - Debug a support ticket with a trace ID.
+
+<GetHelp />

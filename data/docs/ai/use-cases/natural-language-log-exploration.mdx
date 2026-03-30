@@ -1,0 +1,111 @@
+---
+date: 2026-03-30
+id: natural-language-log-exploration
+title: Natural Language Log Exploration
+description: Search, filter, and analyze logs in SigNoz by asking questions in plain English through your AI assistant.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+You can search, filter, and analyze logs in SigNoz by asking your AI assistant questions in plain English. No need to learn query syntax - the MCP server translates your questions into structured queries and returns results directly in your editor or chat.
+
+This is especially useful when you are new to a codebase, debugging cross-team issues, or simply want to explore logs faster.
+
+## Before You Begin
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](/docs/ai/signoz-mcp-server).
+- Make sure your services are sending logs to SigNoz. See [Send Logs to SigNoz](/docs/userguide/logs) if you haven't set this up.
+
+## Try These Prompts
+
+Start broad, then narrow down. The AI assistant will discover available fields and refine queries automatically.
+
+### Explore what's available
+
+Ask your assistant:
+
+```
+What log fields are available? Which services are sending logs?
+```
+
+The assistant discovers your log schema - field names, data types, and which services are emitting logs. This bootstraps the exploration without you needing to know the schema upfront.
+
+### Search for specific errors
+
+```
+Show me logs from the payments service containing "timeout" in the last hour.
+```
+
+The assistant searches log bodies for the keyword and filters by service. You can combine text search with structured filters in a single question.
+
+### Aggregate and summarize
+
+```
+How many error logs per service in the last 6 hours?
+```
+
+This returns a ranked table showing which services produce the most errors - helpful for prioritizing investigation.
+
+### Spot trends over time
+
+```
+Show me the log volume trend for the last 24 hours, broken down by severity.
+```
+
+The assistant returns a time-series breakdown so you can see when log volume spiked or dropped.
+
+## What to Expect
+
+Your assistant will return structured results like:
+
+- **Raw log entries** with timestamp, body, severity, and attributes
+- **Aggregate tables** showing counts grouped by service, severity, or any field
+- **Time-series data** showing how log volume changes over time
+
+For example, asking about error logs might return:
+
+```
+Found 5 error logs from payments-service in the last hour:
+
+1. 10:26:53 - driver/redis.go:70 - "redis timeout" (trace_id: 9466...6137)
+2. 10:26:52 - driver/server.go:74 - "Retrying GetDriver after error" (retry_no: 1)
+3. 10:26:51 - driver/redis.go:70 - "redis timeout" (trace_id: 8a3f...2b01)
+...
+```
+
+## Refine Your Results
+
+- **Add time constraints**: _"...in the last 30 minutes"_ or _"...between 2pm and 3pm UTC"_
+- **Filter by attributes**: _"...where container_name is 'hotrod'"_ or _"...from the checkout namespace"_
+- **Combine text and structure**: _"Show me logs containing 'connection refused' from the orders service with severity ERROR"_
+- **Switch to aggregation**: _"How many of those are there per minute?"_ to go from raw logs to trends
+
+<Admonition type="tip">
+If the assistant says a field like `service.name` is not available, ask it to discover fields first: _"What resource attributes are available for logs?"_ Field availability depends on how your telemetry is instrumented.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+When you ask a log question, the MCP server typically calls these tools:
+
+| Step | MCP Tool | What It Does |
+|------|----------|-------------|
+| 1 | `signoz_get_field_keys` | Discovers available log fields and their data types |
+| 2 | `signoz_get_field_values` | Gets distinct values for a field (e.g., list of service names) |
+| 3 | `signoz_search_logs` | Searches logs with filters and text matching |
+| 4 | `signoz_aggregate_logs` | Computes counts, rates, or percentiles grouped by fields |
+
+The assistant chains these calls based on your question - it discovers the schema first, then builds the right query.
+
+</details>
+
+## Next Steps
+
+- [Latency Spike Explainer](/docs/ai/use-cases/latency-spike-explainer) - Ask "why is this slow?" and trace the bottleneck.
+- [Reconstruct a Bug from a Trace ID](/docs/ai/use-cases/reconstruct-bug-from-trace-id) - Debug a support ticket with a trace ID.
+
+<GetHelp />

@@ -1,0 +1,109 @@
+---
+date: 2026-03-30
+id: reconstruct-bug-from-trace-id
+title: Reconstruct a Bug from a Trace ID
+description: Paste a trace ID from a support ticket into your AI assistant and reconstruct the full request path with root cause analysis.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+When a support ticket arrives with a request or trace ID, you typically need to open the SigNoz UI, find the trace, read the span tree, cross-reference logs, and piece together what happened. With the MCP server, you can paste the ID into your AI assistant and get the full picture in seconds without leaving your editor.
+
+<Admonition type="info">
+In most systems, the "request ID" a user reports maps to a **trace ID** in your observability platform. If your application propagates trace IDs in HTTP response headers (e.g., `X-Trace-Id`) or includes them in error pages, the user-reported ID is the trace ID you need.
+</Admonition>
+
+## Before You Begin
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](/docs/ai/signoz-mcp-server).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](/docs/instrumentation/) if you haven't set this up.
+
+## Try These Prompts
+
+### Reconstruct the full request
+
+```
+Support sent trace ID abc123def456. Find the trace, show me the full
+request path, and tell me where it failed and why.
+```
+
+The assistant retrieves the complete span tree, identifies error spans, and correlates logs to explain what happened.
+
+### Get correlated logs
+
+```
+Show me the logs associated with trace ID abc123def456.
+```
+
+The assistant searches for log entries that contain the trace ID, showing the application-level context (error messages, retry attempts, debug info) alongside the trace spans.
+
+### Check if the failure is isolated
+
+```
+Is this a one-off failure or a pattern? How often does this operation
+fail across all requests?
+```
+
+The assistant aggregates error rates for the failing operation to determine whether this is an isolated incident or a systemic issue.
+
+## What to Expect
+
+The assistant reconstructs the request path from the span tree and correlates it with logs. A typical response looks like:
+
+```
+Trace abc123def456: Dispatch for customer 731
+
+Request path:
+  frontend /dispatch (625ms)
+    -> customer /customer (257ms) -> SQL SELECT (mysql, 257ms) OK
+    -> driver FindNearest (181ms)
+         -> FindDriverIDs (redis, 31ms) OK
+         -> GetDriver x10 (redis, 3-30ms each)
+              2 of 10 lookups timed out with "redis timeout"
+              Both retried successfully
+    -> HTTP GET /route x10 (route, 37-69ms each) OK
+
+Failure: redis-manual GetDriver timed out on 2 of 10 driver lookups.
+The driver service retried and succeeded, adding ~30ms overhead per failure.
+
+This is NOT isolated - GetDriver has a ~20% failure rate across all
+requests. Root cause: persistent Redis connectivity issue.
+```
+
+## Refine Your Results
+
+- **Dig into a specific span**: _"What's the error message on the failed GetDriver span?"_
+- **Find similar failures**: _"Show me 5 more traces with the same error in the last hour"_
+- **Check impact**: _"What's the error rate for this operation over the last 24 hours?"_
+- **Get the timeline**: _"When did this error pattern start?"_
+
+<Admonition type="tip">
+If your logs include the `trace_id` field, the assistant can correlate them directly. If trace IDs only appear in log body text, the assistant will use text search to find them. Either way works.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+Reconstructing a bug from a trace ID typically uses these MCP tools:
+
+| Step | MCP Tool | What It Does |
+|------|----------|-------------|
+| 1 | `signoz_search_traces` | Finds the trace by ID or searches for error traces |
+| 2 | `signoz_get_trace_details` | Returns the full span tree with all span attributes |
+| 3 | `signoz_search_logs` | Searches for logs correlated by trace ID |
+| 4 | `signoz_aggregate_traces` | Checks error rates to determine if the failure is isolated |
+| 5 | `signoz_get_service_top_operations` | Gets operation-level error rates for the affected service |
+
+The assistant reads the span tree to reconstruct the request path, identifies error spans (those with `hasError=true`), then cross-references logs to add application-level context.
+
+</details>
+
+## Next Steps
+
+- [Natural Language Log Exploration](/docs/ai/use-cases/natural-language-log-exploration) - Search and analyze logs without writing queries.
+- [Latency Spike Explainer](/docs/ai/use-cases/latency-spike-explainer) - Ask "why is this slow?" and trace the bottleneck.
+
+<GetHelp />
