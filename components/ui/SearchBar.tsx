@@ -79,7 +79,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
         role="button"
         aria-label="Open search and chat interface"
       >
-        <Sparkles className="mr-3 h-5 w-5 flex-shrink-0 text-signoz_vanilla-400" />
+        <Sparkles
+          strokeWidth={1.25}
+          className="mr-3 h-5 w-5 flex-shrink-0 text-signoz_vanilla-400"
+        />
         <span className="flex-1 text-left text-sm text-signoz_vanilla-400 transition-all duration-300">
           {currentPlaceholder}
         </span>
