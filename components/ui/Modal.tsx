@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { X } from 'lucide-react'
 import { type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
@@ -70,7 +70,7 @@ export function AppModal({
                 className="absolute right-1 top-1 select-none appearance-none rounded-full p-2 text-zinc-400 outline-none transition-[background-color,color] [-webkit-tap-highlight-color:transparent] hover:bg-zinc-700/40 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-500 active:bg-zinc-600/40"
                 onClick={() => onOpenChange(false)}
               >
-                <XMarkIcon className="h-5 w-5" strokeWidth={2} aria-hidden />
+                <X className="h-5 w-5" strokeWidth={2} aria-hidden />
               </button>
             )}
             {children}
