@@ -679,9 +679,9 @@ export default function TopNav() {
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
-                <X className="h-6 w-6" aria-hidden="true" />
+                <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
               ) : (
-                <Menu className="h-6 w-6" aria-hidden="true" />
+                <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
               )}
             </button>
           </div>
