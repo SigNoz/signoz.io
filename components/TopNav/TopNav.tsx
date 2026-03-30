@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button, Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Menu, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -679,9 +679,9 @@ export default function TopNav() {
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                <X className="h-6 w-6" aria-hidden="true" />
               ) : (
-                <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+                <Menu className="h-6 w-6" aria-hidden="true" />
               )}
             </button>
           </div>
