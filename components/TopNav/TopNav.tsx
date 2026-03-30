@@ -222,6 +222,17 @@ const resourcesDropdownItems = {
   ],
 }
 
+const NAV_BREAKPOINTS = {
+  SIGN_IN: 640,
+  PRODUCT: 840,
+  WHY_SIGNOZ: 900,
+  DOCS: 960,
+  RESOURCES: 1020,
+  PRICING: 1100,
+  GITHUB_STARS: 1180,
+  FULL_NAV: 1280,
+} as const
+
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
@@ -249,16 +260,15 @@ export default function TopNav() {
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const delay = 500
 
-  const showCustomerStories = windowWidth === null || windowWidth >= 1280
-  const showGithubStars = windowWidth === null || windowWidth >= 1180
-  const showPricing = windowWidth === null || windowWidth >= 1100
-  const showResources = windowWidth === null || windowWidth >= 1020
-  const showDocs = windowWidth === null || windowWidth >= 960
-  const showWhySignoz = windowWidth === null || windowWidth >= 900
-  const showProduct = windowWidth === null || windowWidth >= 840
-  const showHamburger = windowWidth !== null && windowWidth < 1280
-
-  const showSignInGetStarted = windowWidth === null || windowWidth >= 640
+  const showCustomerStories = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.FULL_NAV
+  const showGithubStars = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.GITHUB_STARS
+  const showPricing = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRICING
+  const showResources = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.RESOURCES
+  const showDocs = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.DOCS
+  const showWhySignoz = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.WHY_SIGNOZ
+  const showProduct = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRODUCT
+  const showHamburger = windowWidth !== null && windowWidth < NAV_BREAKPOINTS.FULL_NAV
+  const showSignInGetStarted = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.SIGN_IN
 
   useEffect(() => {
     const isDocsBasePath = pathname.startsWith('/docs')
@@ -291,8 +301,16 @@ export default function TopNav() {
     if (typeof window === 'undefined') return
     const update = () => setWindowWidth(window.innerWidth)
     update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
+    let rafId: number
+    const handleResize = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(update)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      cancelAnimationFrame(rafId)
+    }
   }, [])
 
   // Hide TopNav on teams page or if source is onboarding
@@ -361,7 +379,7 @@ export default function TopNav() {
             </TrackingLink>
 
             {!isLoginRoute && (
-              <div className="ml-6 flex items-center gap-x-6">
+              <div className={`flex items-center gap-x-6 ${showProduct ? 'ml-6' : ''}`}>
                 {showProduct && (
                   <div
                     onMouseEnter={handleMouseEnterProduct}
