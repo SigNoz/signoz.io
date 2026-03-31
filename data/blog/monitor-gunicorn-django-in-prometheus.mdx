@@ -134,7 +134,7 @@ The application also logs `Error sending message to statsd` because we have not 
 
 Prometheus inherits many of Borgmon's assumptions about its environment. In particular, client libraries assume that metrics come from various libraries and subsystems, in multiple threads of execution, running in a shared address space. On the server side, Prometheus assumes that one target is one (probably) multi-threaded program.
 
-These assumptions break in many non-Google deployments, particularly in the Python world. Here it is common (e.g. using  [Django](https://www.djangoproject.com/)  or  [Flask](http://flask.pocoo.org/)) to run under a  <a href="https://wsgi.readthedocs.io/en/latest/what.html" rel="noopener noreferrer nofollow" target="_blank">WSGI</a>  application server that spreads requests across multiple workers, each of which is a  **process**  rather than a thread.
+These assumptions break in many non-Google deployments, particularly in the Python world. Here it is common (e.g. using  [Django](https://www.djangoproject.com/)  or  [Flask](http://flask.pocoo.org/)) to run under a  [WSGI](https://wsgi.readthedocs.io/en/latest/what.html)  application server that spreads requests across multiple workers, each of which is a  **process**  rather than a thread.
 
 In a naive deployment of the Prometheus  [Python client](https://github.com/prometheus/client_python)  for a Flask app running under uWSGI, each request from the Prometheus server to  */metrics*  can hit a different worker process, each of which exports its own counters, histograms, etc.
 
