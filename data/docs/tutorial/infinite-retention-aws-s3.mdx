@@ -1,5 +1,5 @@
 ---
-date: 2026-03-26
+date: 2026-03-31
 id: infinite-retention-aws-s3
 
 title: Infinite Retention of OpenTelemetry Data in AWS S3
@@ -49,7 +49,7 @@ have the requirement for infinite or very long retention period, then use
 Add the following snippet to your existing `otel-collector-config.yaml`. This
 example exports logs to S3:
 
-```yaml
+```yaml:otel-collector-config.yaml
 exporters:
   awss3/logs:
     s3uploader:
@@ -66,19 +66,22 @@ Replace the placeholders:
 
 Then add `awss3/logs` to your existing logs pipeline's `exporters` list:
 
-```yaml
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     logs:
       exporters: [otlp, awss3/logs]
 ```
 
+<details>
+<ToggleHeading>
 ### Exporting All Signals (Logs, Metrics, and Traces)
+</ToggleHeading>
 
 To back up all three signals, use named instances with different prefixes.
 Append these exporters and update each pipeline in your existing config:
 
-```yaml
+```yaml:otel-collector-config.yaml
 exporters:
   awss3/logs:
     s3uploader:
@@ -104,7 +107,7 @@ exporters:
 
 Then add each exporter to the corresponding pipeline in your existing `service.pipelines` section:
 
-```yaml
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     logs:
@@ -116,14 +119,27 @@ service:
 ```
 
 - Named instances (`awss3/logs`, `awss3/metrics`, `awss3/traces`) allow a different `s3_prefix` per signal
-- `compression: gzip` reduces storage costs
-- The default `marshaler` is `otlp_json`, which makes data queryable with Amazon Athena
 
+</details>
+
+<details>
+<ToggleHeading>
 ## Additional Configuration Options
+</ToggleHeading>
 
 The exporter supports several optional fields for production use:
 
-```yaml
+- `compression`: `none` (default), `gzip`, or `zstd`. Use `gzip` or `zstd` in production to reduce storage costs.
+- `marshaler`: output format. Default: `otlp_json` (queryable with Amazon Athena). `otlp_proto` is more compact but harder to query.
+- `s3_partition_format`: strftime-based path for time partitioning. Default: `year=%Y/month=%m/day=%d/hour=%H/minute=%M`
+- `storage_class`: S3 storage class. Default: `STANDARD`. Valid values: `STANDARD`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`. Use `STANDARD_IA` or `INTELLIGENT_TIERING` for archival data to reduce costs.
+- `role_arn`: IAM role ARN to assume via STS, instead of static credentials.
+- `endpoint`: custom S3-compatible endpoint URL for MinIO, LocalStack, or other stores.
+- `s3_force_path_style`: set to `true` when using non-AWS S3-compatible stores.
+
+Example with all optional fields:
+
+```yaml:otel-collector-config.yaml
 exporters:
   awss3/logs:
     s3uploader:
@@ -144,17 +160,9 @@ Replace the placeholders:
 - `<iam-role-arn>`: ARN of the IAM role to assume (e.g., `arn:aws:iam::123456789012:role/otel-s3-writer`)
 - `<s3-compatible-endpoint>`: endpoint URL for non-AWS S3-compatible stores (e.g., `http://localhost:9000` for MinIO)
 
-Field reference:
-
-- `s3_partition_format`: strftime-based path for time partitioning. Default: `year=%Y/month=%m/day=%d/hour=%H/minute=%M`
-- `compression`: `none` (default), `gzip`, or `zstd`. Use `gzip` or `zstd` in production to reduce storage costs.
-- `marshaler`: output format. Default: `otlp_json` (queryable with Amazon Athena). `otlp_proto` is more compact but harder to query.
-- `storage_class`: S3 storage class. Default: `STANDARD`. Valid values: `STANDARD`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`. Use `STANDARD_IA` or `INTELLIGENT_TIERING` for archival data to reduce costs.
-- `role_arn`: IAM role ARN to assume via STS, instead of static credentials.
-- `endpoint`: custom S3-compatible endpoint URL for MinIO, LocalStack, or other stores.
-- `s3_force_path_style`: set to `true` when using non-AWS S3-compatible stores.
-
 For the full list of configuration options, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter" target="_blank" rel="noopener noreferrer nofollow">AWS S3 Exporter README</a>.
+
+</details>
 
 ## Validate
 
@@ -174,19 +182,10 @@ logs/year=2024/month=01/day=15/hour=10/minute=30/<unique-id>.json.gz
 If no objects appear, check the Collector logs for S3 permission errors or
 configuration issues.
 
-## Deployment Notes
-
-The above configuration needs to be added for your respective OTel Collector(s).
-
-- In case of **SigNoz Self-hosted**, you can add it in SigNoz OTel Collector
-configuration to retain all incoming data.
-- In case of **SigNoz Cloud**, you will need to update all OTel Collector
-configurations that are sending data.
-- For **K8s-Infra** helm chart, you can add it in the `otelAgent` configuration.
-- For any **Standalone OTel Collector** deployments that are directly sending
-data to SigNoz, you can add it in the respective configuration.
-
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
 **No objects appearing in S3**
 
@@ -206,6 +205,8 @@ data to SigNoz, you can add it in the respective configuration.
 
 - Confirm you are using the `otelcol-contrib` distribution, which includes the `awss3` exporter. The core `otelcol` distribution does not include it.
 - Check YAML indentation and that exporter names use the `type/name` format with a forward slash (e.g., `awss3/logs`, not `awss3logs`).
+
+</details>
 
 ## Next Steps
 
