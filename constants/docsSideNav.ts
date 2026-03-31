@@ -2894,7 +2894,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/ai/signoz-mcp-server',
-        label: 'MCP Server',
+        label: 'SigNoz MCP Server',
       },
       {
         type: 'doc',
