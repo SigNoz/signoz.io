@@ -2920,7 +2920,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
-            label: 'Bug from Trace ID',
+            label: 'Report from Trace ID',
           },
         ],
       },

@@ -8,81 +8,116 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-You can search, filter, and analyze logs in SigNoz by asking your AI assistant questions in plain English. No need to learn query syntax - the MCP server translates your questions into structured queries and returns results directly in your editor or chat.
+A product manager posts in #incidents:
 
-This is especially useful when you are new to a codebase, debugging cross-team issues, or simply want to explore logs faster.
+> Multiple sellers are complaining that products they updated hours ago still show old prices in search results. The catalog page shows the right data, but search is stale.
+
+You have SigNoz collecting logs and the MCP server connected to your AI assistant. You know search is powered by an indexing pipeline, but you don't know the internals.
 
 ## Prerequisites
 
 - Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server).
 - Make sure your services are sending logs to SigNoz. See [Send Logs to SigNoz](https://signoz.io/docs/userguide/logs) if you haven't set this up.
 
-## Try These Prompts
-
-Start broad, then narrow down. The AI assistant will discover available fields and refine queries automatically.
-
-### Explore what's available
-
-Ask your assistant:
+## Step 1: Search for the Symptom
 
 ```
-What log fields are available? Which services are sending logs?
+Show me recent error or warning logs from any service related to search indexing or index lag in the last 6 hours.
 ```
 
-The assistant discovers your log schema - field names, data types, and which services are emitting logs. This bootstraps the exploration without you needing to know the schema upfront.
-
-### Search for specific errors
-
 ```
-Show me logs from the payments service containing "timeout" in the last hour.
-```
+Found 34 logs matching across 2 services:
 
-The assistant searches log bodies for the keyword and filters by service. You can combine text search with structured filters in a single question.
-
-### Aggregate and summarize
-
-```
-How many error logs per service in the last 6 hours?
-```
-
-This returns a ranked table showing which services produce the most errors - helpful for prioritizing investigation.
-
-### Spot trends over time
-
-```
-Show me the log volume trend for the last 24 hours, broken down by severity.
-```
-
-The assistant returns a time-series breakdown so you can see when log volume spiked or dropped.
-
-## What to Expect
-
-Your assistant will return structured results like:
-
-- **Raw log entries** with timestamp, body, severity, and attributes
-- **Aggregate tables** showing counts grouped by service, severity, or any field
-- **Time-series data** showing how log volume changes over time
-
-For example, asking about error logs might return:
-
-```
-Found 5 error logs from payments-service in the last hour:
-
-1. 10:26:53 - driver/redis.go:70 - "redis timeout" (trace_id: 9466...6137)
-2. 10:26:52 - driver/server.go:74 - "Retrying GetDriver after error" (retry_no: 1)
-3. 10:26:51 - driver/redis.go:70 - "redis timeout" (trace_id: 8a3f...2b01)
+1. 14:52:11 WARN  search-indexer - "Index lag exceeds threshold: 4h12m behind head (threshold: 15m)"
+2. 14:47:03 WARN  search-indexer - "Index lag exceeds threshold: 4h07m behind head (threshold: 15m)"
+3. 14:42:01 WARN  search-indexer - "Index lag exceeds threshold: 4h02m behind head (threshold: 15m)"
+4. 14:22:18 WARN  search-indexer - "Consumer group rebalance completed, partition assignment unchanged"
+5. 13:15:44 WARN  search-indexer - "Batch processing rate: 12 events/sec (normal: ~340 events/sec)"
 ...
 ```
 
-## Refine Your Results
+The search indexer is 4+ hours behind. Processing speed has dropped from 340 events/sec to 12. That explains the stale results. But there are no errors, just slowness. Why is it crawling?
 
-- **Add time constraints**: _"...in the last 30 minutes"_ or _"...between 2pm and 3pm UTC"_
-- **Filter by attributes**: _"...where container_name is 'hotrod'"_ or _"...from the checkout namespace"_
-- **Combine text and structure**: _"Show me logs containing 'connection refused' from the orders service with severity ERROR"_
-- **Switch to aggregation**: _"How many of those are there per minute?"_ to go from raw logs to trends
+## Step 2: Understand Why Throughput Dropped
+
+```
+Show me logs from search-indexer in the last 6 hours that mention "skip", "drop", "malformed", "parse", or "invalid".
+```
+
+```
+Found 9,847 logs matching:
+
+1. 14:51:58 WARN  "Skipping malformed event: missing required field 'sku_id' (event_source: catalog-pipeline)"
+2. 14:51:57 WARN  "Skipping malformed event: field 'price' is not numeric: 'USD29.99' (event_source: catalog-pipeline)"
+3. 14:51:55 WARN  "Parse retry exhausted for event, moving to dead letter queue (event_source: catalog-pipeline)"
+...
+```
+
+Nearly 10,000 malformed events in 6 hours. The indexer is spending all its time retrying bad data and dead-lettering it. Valid events are stuck behind the flood. Every bad event comes from `catalog-pipeline`.
+
+```
+How many "Skipping malformed event" warnings has search-indexer logged per hour over the last 24 hours?
+```
+
+```
+Malformed event warnings per hour (search-indexer):
+
+  00:00 - 10:00 UTC:  0-3/hour (baseline noise)
+  10:00 - 10:59:      2
+  11:00 - 11:59:      1,847   <-- spike
+  12:00 - 12:59:      1,923
+  13:00 - 13:59:      1,812
+  14:00 - 14:59:      1,690 (ongoing)
+```
+
+The malformed events started at 11:00 UTC. Something changed in `catalog-pipeline` around that time.
+
+## Step 3: Trace the Root Cause Upstream
+
+```
+Show me INFO and WARN logs from catalog-pipeline between 10:45 and 11:15 UTC today. I am looking for deployments, config changes, or schema changes.
+```
+
+```
+Found 28 logs:
+
+1. 10:52:03 INFO  "Deployment started: catalog-pipeline v2.14.0 -> v2.15.0 (deployer: ci-bot)"
+2. 10:52:18 INFO  "Migration applied: product_event_schema_v3"
+3. 10:52:19 INFO  "Event format updated: sku_id field moved from root to nested product.identifiers.sku_id"
+4. 10:52:19 INFO  "Event format updated: price field changed from cents (int) to formatted string (e.g. 'USD29.99')"
+5. 10:52:31 INFO  "Deployment complete: catalog-pipeline v2.15.0 healthy"
+6. 10:53:01 INFO  "Backfill started: reprocessing 14,291 products with new schema"
+7. 11:01:12 INFO  "Backfill complete: 14,291 events published"
+```
+
+`catalog-pipeline` v2.15.0 changed the event schema in two breaking ways: it moved `sku_id` into a nested path and changed `price` from integer cents to a formatted string. The search indexer still expects the old schema. Every event from the new version fails validation. On top of that, the backfill re-published 14,291 products in the new format, flooding the indexer with unparseable data.
+
+## Step 4: Scope the Impact
+
+```
+How many events has search-indexer moved to the dead letter queue in the last 6 hours? What is the current index lag?
+```
+
+```
+Dead letter queue (last 6 hours):
+  - Events moved to DLQ: 9,214
+  - Estimated unique products affected: ~6,800
+
+Current index lag: 4h17m behind head
+Indexer throughput: 12 events/sec (normal: 340 events/sec)
+```
+
+~6,800 products have stale search data. The lag keeps growing because new events from v2.15.0 continue arriving in the broken format. The fix: either roll back `catalog-pipeline` to v2.14.0, or deploy a hotfix to `search-indexer` to handle both schema versions. The 9,214 dead-lettered events will need to be replayed after the fix.
+
+## Tips for Your Own Investigations
+
+1. **Start with what you know.** The Slack message, the error alert, the customer complaint. Search for that first.
+2. **Follow the thread.** When results mention another service, a timeout, or an error code, ask about that next.
+3. **Scope before you dig.** Once you know what is failing, check how many errors, when they started, and whether they are increasing.
+4. **Find the boundary.** Zoom into the moment errors started. The logs right before the first error often reveal the trigger.
 
 <Admonition type="tip">
-If the assistant says a field like `service.name` is not available, ask it to discover fields first: _"What resource attributes are available for logs?"_ Field availability depends on how your telemetry is instrumented.
+If a field like `service.name` is not available, ask the assistant to discover fields: _"What resource attributes are available for logs?"_ Field availability depends on how your services are instrumented.
 </Admonition>
 
 <details>
@@ -90,16 +125,15 @@ If the assistant says a field like `service.name` is not available, ask it to di
 ## Under the Hood
 </ToggleHeading>
 
-When you ask a log question, the MCP server typically calls these tools:
+During this investigation, the MCP server called these tools:
 
-| Step | MCP Tool | What It Does |
+| Step | MCP Tool | What It Did |
 |------|----------|-------------|
-| 1 | `signoz_get_field_keys` | Discovers available log fields and their data types |
-| 2 | `signoz_get_field_values` | Gets distinct values for a field (e.g., list of service names) |
-| 3 | `signoz_search_logs` | Searches logs with filters and text matching |
-| 4 | `signoz_aggregate_logs` | Computes counts, rates, or percentiles grouped by fields |
-
-The assistant chains these calls based on your question - it discovers the schema first, then builds the right query.
+| 1 | `signoz_search_logs` | Searched across all services for warning/error logs matching search indexing keywords |
+| 2 | `signoz_search_logs` | Found malformed event warnings in the indexer, revealing upstream data quality issue |
+| 2 | `signoz_aggregate_logs` | Computed malformed event counts per hour to pinpoint when the problem started |
+| 3 | `signoz_search_logs` | Found deployment and schema migration logs in catalog-pipeline around the start time |
+| 4 | `signoz_aggregate_logs` | Counted dead-lettered events to measure blast radius |
 
 </details>
 
