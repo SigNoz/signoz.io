@@ -183,6 +183,9 @@ export default function OpenTelemetryHubContent({
                               <Link
                                 href={author.url}
                                 className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
+                                prefetch={false}
+                                target="_blank"
+                                rel="noopener noreferrer nofollow"
                               >
                                 {author.name}
                               </Link>
