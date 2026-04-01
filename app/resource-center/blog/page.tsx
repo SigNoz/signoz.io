@@ -1,8 +1,27 @@
 import React from 'react'
 import Blogs from './Blogs'
-import { genPageMetadata } from 'app/seo'
+import siteMetadata, { description } from '@/data/siteMetadata'
+import { Metadata } from 'next'
 
-export const metadata = genPageMetadata({ title: 'Blog' })
+export const metadata: Metadata = {
+  title: 'Blog | SigNoz',
+  description: description,
+  openGraph: {
+    title: 'Blog | SigNoz',
+    description: description,
+    url: `${siteMetadata.siteUrl}/blog`,
+    siteName: siteMetadata.title,
+    locale: 'en_US',
+    type: 'website',
+    images: [siteMetadata.socialBanner],
+  },
+  twitter: {
+    title: 'Blog | SigNoz',
+    description: description,
+    images: [siteMetadata.socialBanner],
+    site: siteMetadata.twitter,
+  },
+}
 
 export default async function BlogHome() {
   return (
