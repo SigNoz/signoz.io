@@ -467,6 +467,18 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Identity & Access Management',
+            type: 'category',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/service-accounts',
+                label: 'Service Accounts',
+              },
+            ],
+          },
+          {
             type: 'category',
             label: 'Configuration',
             route: '/docs/operate/configuration',
