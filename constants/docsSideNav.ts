@@ -2365,6 +2365,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/qwen-dashboard',
+            label: 'Qwen',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/rabbitmq',
             label: 'RabbitMQ',
           },
