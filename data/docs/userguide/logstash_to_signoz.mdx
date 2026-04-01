@@ -189,7 +189,7 @@ Verify these values:
 
 <Admonition type="note">
 - `on_error: send_quiet` lets non-JSON logs pass through unparsed rather than dropping them — useful when Logstash emits plain-text startup messages alongside JSON logs.
-- The `system` detector populates `host.name` (OS hostname, DNS-resolved first) and `os.type`. If a configured detector is unavailable, the collector will refuse to start. Full detector options: [Resource Attributes for Logs](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/).
+- The `system` detector populates `host.name` (OS hostname, DNS-resolved first) and `os.type`. In Docker, `host.name` is the container's hostname, a random ID by default. To use your machine's hostname instead, add `environment: [OTEL_RESOURCE_ATTRIBUTES=host.name=<your-machine-name>]` to the `otel-collector` service. If a configured detector is unavailable, the collector will refuse to start. Full detector options: [Resource Attributes for Logs](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/).
 - For more configuration options for the `tcplog` receiver, see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/tcplogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">tcplog receiver docs</a>.
 </Admonition>
 
@@ -249,8 +249,6 @@ services:
     image: otel/opentelemetry-collector-contrib:0.148.0
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
-    ports:
-      - "2256:2256"
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.17.4
@@ -288,7 +286,7 @@ docker compose up -d
 Once the services are running:
 
 1. Open SigNoz and navigate to **Logs** > **Logs Explorer**.
-2. Search by service, for example `service.name = '<service_name>'`. Logs should start appearing within a few seconds.
+2. Filter by `resource.host.name` to confirm logs are arriving. The `system` detector populates this attribute on every log. If your Logstash pipeline sets a `service.name` field on events, filter by `service.name = '<service_name>'` to narrow by service.
 3. Click on a log entry and verify it contains:
    - `body`: the `message` value from the Logstash event
    - `attributes`: remaining Logstash JSON fields (varies by your Logstash pipeline config)
