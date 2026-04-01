@@ -10,14 +10,23 @@ import GetHelp from '@/components/shared/get-help.md'
 
 Collect AWS Lambda logs by running an OpenTelemetry Collector instance as a Lambda extension layer. The collector registers with Lambda's <a href="https://docs.aws.amazon.com/lambda/latest/dg/telemetry-api.html" target="_blank" rel="noopener noreferrer nofollow">Telemetry API</a> to receive logs. You do not need to change your function code.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. Replace the `endpoint` in the exporter with your SigNoz host and remove the `signoz-ingestion-key` header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+<Admonition type="tip">
+
+**SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/lambda/) for automated setup with pre-built dashboards. See the [comparison guide](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to choose the best approach.
+
+**AWS Lambda Logs via S3**: Prefer routing logs via CloudWatch Logs and S3? Use [AWS Lambda Logs via S3](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/) for a code-free approach to collect logs.
+
+**Application Logs**: If you want to send application logs from Node.js Lambda functions directly (to correlate with traces), refer to the [AWS Lambda Node.js Guide](https://signoz.io/docs/logs-management/send-logs/aws-lambda-nodejs/).
+</Admonition>
 
 ## Prerequisites
 
 - An AWS account with permission to create and modify Lambda functions and layers.
 - Your SigNoz Cloud region and ingestion key. Find these under **Settings → Ingestion Settings** in the SigNoz UI.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Replace the `endpoint` in the exporter with your SigNoz host and remove the `signoz-ingestion-key` header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ## How it works
 
