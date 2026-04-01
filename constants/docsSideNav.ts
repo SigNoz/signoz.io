@@ -467,7 +467,7 @@ const docsSideNav = [
             ],
           },
           {
-            label: 'Identity & Access Management',
+            label: 'Identity & Access',
             type: 'category',
             isExpanded: false,
             items: [
