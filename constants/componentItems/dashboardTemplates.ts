@@ -262,6 +262,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Nginx Dashboard Template',
   },
   {
+    name: 'n8n Cloud',
+    href: '/docs/dashboards/dashboard-templates/n8n-dashboard',
+    clickName: 'n8n Dashboard Template',
+  },
+  {
     name: 'NVIDIA DCGM',
     href: 'https://github.com/SigNoz/dashboards/tree/main/nvidia-dcgm',
     clickName: 'NVIDIA DCGM Dashboard Template',
