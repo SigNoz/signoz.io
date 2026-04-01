@@ -473,7 +473,7 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                route: '/docs/manage/administrator-guide/service-accounts',
+                route: '/docs/manage/administrator-guide/iam/service-accounts',
                 label: 'Service Accounts',
               },
             ],
