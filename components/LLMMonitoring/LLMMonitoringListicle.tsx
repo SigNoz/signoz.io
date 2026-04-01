@@ -119,6 +119,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <img src="/svgs/icons/LLMMonitoring/pipecat-logo.webp" alt="Pipecat Icon" className="h-7 w-7" />
   ),
   '/docs/pydantic-ai-observability': <SiPydantic className="h-7 w-7 text-pink-600" />,
+  '/docs/qwen-observability': (
+    <img src="/svgs/icons/LLMMonitoring/qwen-logo.webp" alt="Qwen Icon" className="h-7 w-7" />
+  ),
   '/docs/semantic-kernel-observability': (
     <img
       src="/img/docs/llm/semantic-kernel/sk-logo.webp"

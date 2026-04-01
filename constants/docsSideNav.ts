@@ -2892,6 +2892,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/qwen-observability',
+        label: 'Qwen',
+        type: 'doc',
+      },
+      {
         route: '/docs/semantic-kernel-observability',
         label: 'Semantic Kernel',
         type: 'doc',
