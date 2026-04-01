@@ -1,8 +1,37 @@
 import ListLayout from '@/layouts/ListLayoutWithTags'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
+import siteMetadata from '@/data/siteMetadata'
 
 const POSTS_PER_PAGE = 5
+
+export async function generateMetadata({ params }: { params: { page: string } }) {
+  return {
+    title: `Blog - Page ${params.page}`,
+    description: `SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool. | Blog - Page ${params.page} | SigNoz`,
+    openGraph: {
+      title: `Blog - Page ${params.page} | SigNoz`,
+      description: `SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool. | Blog - Page ${params.page} | SigNoz`,
+      url: `${siteMetadata.siteUrl}/resource-center/blog/page/${params.page}`,
+      siteName: siteMetadata.title,
+      locale: 'en_US',
+      type: 'website',
+      images: [siteMetadata.socialBanner],
+    },
+    twitter: {
+      title: `Blog - Page ${params.page}`,
+      description: `SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool. | Blog - Page ${params.page} | SigNoz`,
+      images: [siteMetadata.socialBanner],
+    },
+    alternates: {
+      canonical: `${siteMetadata.siteUrl}/resource-center/blog/page/${params.page}`,
+    },
+    robots: {
+      index: false,
+      follow: true,
+    },
+  }
+}
 
 export const generateStaticParams = async () => {
   const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
