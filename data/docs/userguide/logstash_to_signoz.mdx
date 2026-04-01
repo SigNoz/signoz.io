@@ -1,5 +1,5 @@
 ---
-date: 2026-03-24
+date: 2026-04-01
 title: Send logs from Logstash to SigNoz via OpenTelemetry
 description: Send logs from Logstash to SigNoz using OpenTelemetry Collector.
 doc_type: howto
@@ -40,13 +40,39 @@ Add the OpenTelemetry Collector binary to your VM by following the [OTel binary 
 
 ### Step 2: Configure the tcplog Receiver
 
-Append the following entries to your existing `config.yaml`. Add `tcplog/logstash` under `receivers:`, `otlp` under `exporters:`, and enable both in `service.pipelines.logs:`:
+Merge the following into your existing `config.yaml`. If your config already has a `processors:` block, add the new entries under it rather than replacing it. For more on receivers, see the [OTel Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#1-receivers).
 
 ```yaml:config.yaml
 receivers:
   tcplog/logstash:
-    max_log_size: 1MiB
+    # max_log_size: 1MiB  # default; increase if your logs exceed this size
     listen_address: '0.0.0.0:2256'
+    operators:
+      # Parse the JSON that Logstash sends via codec => json_lines
+      # Non-JSON logs pass through unparsed (on_error: send_quiet)
+      - type: json_parser
+        timestamp:
+          parse_from: attributes["@timestamp"]
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05.999Z07:00'
+        on_error: send_quiet
+      # Move Logstash's `message` field to the OTel log body
+      - type: move
+        from: attributes.message
+        to: body
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: [system, env]
+    timeout: 5s
+  transform:
+    log_statements:
+      - context: log
+        statements:
+          # Promote service.name to a resource attribute for consistent querying
+          - set(resource.attributes["service.name"], log.attributes["service.name"]) where log.attributes["service.name"] != nil
+          - delete_key(log.attributes, "service.name") where log.attributes["service.name"] != nil
 
 exporters:
   otlp:
@@ -58,7 +84,7 @@ service:
   pipelines:
     logs:
       receivers: [tcplog/logstash]
-      processors: [batch]
+      processors: [resourcedetection, transform, batch]
       exporters: [otlp]
 ```
 
@@ -66,8 +92,14 @@ Verify these values:
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="note">
+
 - Port `2256` is used here, but you can use any available port.
-- Learn more about the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver" target="_blank" rel="noopener noreferrer nofollow">tcplog receiver</a>.
+- `on_error: send_quiet` lets non-JSON logs pass through unparsed rather than dropping them — useful when Logstash emits plain-text startup messages alongside JSON logs.
+- The `system` detector populates `host.name` (OS hostname, DNS-resolved first) and `os.type`. If a configured detector is unavailable, the collector will refuse to start. Full detector options: [Resource Attributes for Logs](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/).
+- For more configuration options for the `tcplog` receiver, see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/tcplogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">tcplog receiver docs</a>.
+</Admonition>
 
 ### Step 3: Update Logstash Configuration
 
@@ -83,7 +115,7 @@ output {
 }
 ```
 
-- This config assumes Logstash is running on the same host as the Collector. Adjust the `host` value if Logstash is running elsewhere.
+- This config assumes Logstash is running on the same host as the Collector. Set the `host` value if Logstash is running elsewhere.
 
 ### Step 4: Start the Services
 
@@ -94,7 +126,7 @@ sudo systemctl restart otelcol-contrib
 sudo systemctl restart logstash
 ```
 
-Adjust the service name if you installed the Collector under a different name (e.g., `otelcol`).
+Change the service name if you installed the Collector under a different name (e.g., `otelcol`).
 
 </TabItem>
 
@@ -107,11 +139,34 @@ Create a file named `otel-collector-config.yaml` with the `tcplog` receiver:
 ```yaml:otel-collector-config.yaml
 receivers:
   tcplog/logstash:
-    max_log_size: 1MiB
+    # max_log_size: 1MiB  # default; increase if your logs exceed this size
     listen_address: '0.0.0.0:2256'
+    operators:
+      # Parse the JSON that Logstash sends via codec => json_lines
+      # Non-JSON logs pass through unparsed (on_error: send_quiet)
+      - type: json_parser
+        timestamp:
+          parse_from: attributes["@timestamp"]
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05.999Z07:00'
+        on_error: send_quiet
+      # Move Logstash's `message` field to the OTel log body
+      - type: move
+        from: attributes.message
+        to: body
 
 processors:
   batch:
+  resourcedetection:
+    detectors: [system, env]
+    timeout: 5s
+  transform:
+    log_statements:
+      - context: log
+        statements:
+          # Promote service.name to a resource attribute for consistent querying
+          - set(resource.attributes["service.name"], log.attributes["service.name"]) where log.attributes["service.name"] != nil
+          - delete_key(log.attributes, "service.name") where log.attributes["service.name"] != nil
 
 exporters:
   otlp:
@@ -123,7 +178,7 @@ service:
   pipelines:
     logs:
       receivers: [tcplog/logstash]
-      processors: [batch]
+      processors: [resourcedetection, transform, batch]
       exporters: [otlp]
 ```
 
@@ -131,7 +186,12 @@ Verify these values:
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- Learn more about the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver" target="_blank" rel="noopener noreferrer nofollow">tcplog receiver</a>.
+
+<Admonition type="note">
+- `on_error: send_quiet` lets non-JSON logs pass through unparsed rather than dropping them — useful when Logstash emits plain-text startup messages alongside JSON logs.
+- The `system` detector populates `host.name` (OS hostname, DNS-resolved first) and `os.type`. If a configured detector is unavailable, the collector will refuse to start. Full detector options: [Resource Attributes for Logs](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/).
+- For more configuration options for the `tcplog` receiver, see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/tcplogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">tcplog receiver docs</a>.
+</Admonition>
 
 ### Step 2: Create the Logstash Config
 
@@ -228,16 +288,22 @@ docker compose up -d
 Once the services are running:
 
 1. Open SigNoz and navigate to **Logs** > **Logs Explorer**.
-2. Filter logs by `host.name` or search the `body` field for a known string from your Logstash pipeline (e.g., a log message you expect). Logs should start appearing within a few seconds.
-3. Click on a log entry and verify it contains the expected fields from your Logstash pipeline (e.g., `message`, `host`, any custom fields).
+2. Search by service, for example `service.name = '<service_name>'`. Logs should start appearing within a few seconds.
+3. Click on a log entry and verify it contains:
+   - `body`: the `message` value from the Logstash event
+   - `attributes`: remaining Logstash JSON fields (varies by your Logstash pipeline config)
+   - `resource.host.name`: the OTel Collector's OS hostname
+   - `resource.service.name`: promoted from the Logstash event if your pipeline sets it
 
-<Admonition type="info">
-  Logstash logs forwarded via `tcplog` do not include `service.name` by default. Use `host.name` or a body keyword as your initial filter. To add `service.name`, use an [OTel log processor](https://signoz.io/docs/logs-pipelines/processors/) or a Logstash `mutate` filter to inject the field before forwarding.
-</Admonition>
+<Figure
+  src="/img/docs/logs-management/send-logs/logstash-sample-logs.webp"
+  caption="Sample logs in Logs Explorer"
+  alt="Sample logs in Logs Explorer"
+/>
 
 ## Transform Logs (Optional)
 
-Use OpenTelemetry processors to transform your log model into the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry log data model</a>. Learn more about [available log processors](https://signoz.io/docs/logs-pipelines/processors/).
+The config above parses Logstash's JSON output into structured attributes and populates `host.name` via resource detection. To enrich logs further, see [SigNoz Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
 
 <details>
 <ToggleHeading>
@@ -260,9 +326,9 @@ Use OpenTelemetry processors to transform your log model into the <a href="https
 
 #### Logs appear but are not parsed correctly
 
-- Ensure the Logstash `output` block uses `codec => json_lines` so logs are sent in JSON format line-by-line.
-- Use [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz to parse and transform log fields.
-- After updating, check **Logs** > **Logs Explorer** and confirm the log fields are parsed as expected.
+- Ensure the Logstash `output` block uses `codec => json_lines` so logs are sent as newline-delimited JSON.
+- If logs arrive with raw JSON in `body` and empty attributes, the `json_parser` operator may be failing silently. Check the Collector logs, the `on_error: send_quiet` option suppresses parse errors so non-JSON logs pass through unparsed.
+- Use [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz to parse and transform log fields further.
 
 </details>
 
