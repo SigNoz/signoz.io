@@ -22,7 +22,7 @@ const layouts = {
   GuidesLayout,
 }
 
-export const dynamicParams = false
+export const dynamicParams = true
 export const dynamic = 'force-static'
 
 export async function generateMetadata({

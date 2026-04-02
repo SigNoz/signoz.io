@@ -23,7 +23,7 @@ const layouts = {
   NewsroomLayout,
 }
 
-export const dynamicParams = false
+export const dynamicParams = true
 export const dynamic = 'force-static'
 
 export async function generateMetadata({
