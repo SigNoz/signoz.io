@@ -19,6 +19,11 @@ export const ProgressBar = ({ target }: ProgressBarProps) => {
     const windowScrollTop =
       window.scrollY || document.documentElement.scrollTop || document.body.scrollTop
 
+    if (totalHeight <= 0) {
+      setReadingProgress(100)
+      return
+    }
+
     if (windowScrollTop === 0) {
       return setReadingProgress(0)
     }
@@ -31,9 +36,31 @@ export const ProgressBar = ({ target }: ProgressBarProps) => {
   }, [target])
 
   useEffect(() => {
-    window.addEventListener('scroll', scrollListener)
+    let frameId: number | null = null
 
-    return () => window.removeEventListener('scroll', scrollListener)
+    const scheduleProgressUpdate = () => {
+      if (frameId !== null) {
+        return
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null
+        scrollListener()
+      })
+    }
+
+    scheduleProgressUpdate()
+
+    window.addEventListener('scroll', scheduleProgressUpdate, { passive: true })
+    window.addEventListener('resize', scheduleProgressUpdate)
+
+    return () => {
+      window.removeEventListener('scroll', scheduleProgressUpdate)
+      window.removeEventListener('resize', scheduleProgressUpdate)
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId)
+      }
+    }
   }, [scrollListener])
 
   return (

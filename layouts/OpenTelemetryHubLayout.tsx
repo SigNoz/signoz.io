@@ -244,7 +244,7 @@ export default function OpenTelemetryHubContent({
 
       {hasToc && (
         <div className="lg:hidden">
-          <FloatingTableOfContents />
+          <FloatingTableOfContents toc={toc} />
         </div>
       )}
     </>

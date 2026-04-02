@@ -320,7 +320,6 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
               <TableOfContents
                 toc={filteredToc}
                 activeSection={activeSection}
-                setActiveSection={setActiveSection}
                 scrollableContainerRef={tocItemsRef}
               />
             </div>

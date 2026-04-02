@@ -1,10 +1,8 @@
-'use client'
-
 import '../css/article-layout.css'
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors, Guide } from 'contentlayer/generated'
 import type { Comparison } from '../types/transformedContent'
@@ -12,16 +10,15 @@ import { ExternalLink } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
-import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import ArticleMetaDetailsCard, {
   type RenderedAuthor,
 } from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
 import TrackingLink from '@/components/TrackingLink'
-import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 import authorsDirectory from '@/constants/authors.json'
-import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
+import ArticleTocClient from './article/ArticleTocClient'
+import ArticleProgressBar from './article/ArticleProgressBar'
 
 const MAIN_CONTENT_ID = 'article-main'
 
@@ -121,38 +118,6 @@ export default function ArticleLayout({
   showRelatedArticles = true,
 }: LayoutProps) {
   const { title, relatedArticles } = content
-  const mainRef = useRef<HTMLElement | null>(null)
-  const tocContainerRef = useRef<HTMLDivElement>(null)
-  const [activeSection, setActiveSection] = useState<string>('')
-
-  useScrollToHash()
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries.filter((entry) => entry.isIntersecting)
-        if (visibleEntries.length > 0) {
-          const sortedEntries = visibleEntries.sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-          )
-          const id = sortedEntries[0].target.getAttribute('id')
-          if (id) setActiveSection(`#${id}`)
-        }
-      },
-      {
-        rootMargin: '-10% -20% -80% -20%',
-        threshold: 0,
-      }
-    )
-
-    const headings = document.querySelectorAll('h2, h3')
-    headings.forEach((heading) => observer.observe(heading))
-
-    return () => {
-      headings.forEach((heading) => observer.unobserve(heading))
-    }
-  }, [])
-
   const hasToc = Array.isArray(toc) && toc.length > 0
 
   const renderedAuthors = buildRenderedAuthors(
@@ -188,7 +153,7 @@ export default function ArticleLayout({
   const primaryAuthor = renderedAuthors[0]
 
   return (
-    <main id={MAIN_CONTENT_ID} ref={mainRef}>
+    <main id={MAIN_CONTENT_ID}>
       <SectionContainer>
         <div className="doc doc-no-sidebar overflow-clip px-3 pt-8 md:px-6 md:pt-12 lg:px-8">
           <div className="doc-content md:px-0 lg:px-4">
@@ -345,23 +310,7 @@ export default function ArticleLayout({
             <aside className="doc-right hidden lg:block" aria-label="On this page navigation">
               <div className="doc-right-inner">
                 {metaInfoCard}
-                {hasToc && (
-                  <div className="doc-toc">
-                    <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
-                    <div
-                      ref={tocContainerRef}
-                      className="doc-toc-items doc-toc-scroll border-l border-signoz_slate-500 pl-3"
-                    >
-                      <TableOfContents
-                        toc={toc}
-                        activeSection={activeSection}
-                        setActiveSection={setActiveSection}
-                        scrollableContainerRef={tocContainerRef}
-                      />
-                    </div>
-                    <PageFeedback placement="toc" />
-                  </div>
-                )}
+                {hasToc && <ArticleTocClient toc={toc} />}
               </div>
             </aside>
           )}
@@ -370,11 +319,11 @@ export default function ArticleLayout({
         {/* Floating TOC for mobile */}
         {hasToc && (
           <div className="lg:hidden">
-            <FloatingTableOfContents />
+            <FloatingTableOfContents toc={toc} />
           </div>
         )}
       </SectionContainer>
-      <ProgressBar target={mainRef} />
+      <ArticleProgressBar targetId={MAIN_CONTENT_ID} />
     </main>
   )
 }

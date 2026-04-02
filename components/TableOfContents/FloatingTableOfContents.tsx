@@ -3,6 +3,12 @@
 import React, { useState, useEffect } from 'react'
 import { Menu, ChevronRight } from 'lucide-react'
 
+interface TocSourceItem {
+  url: string
+  depth: number
+  value: string
+}
+
 interface TOCItem {
   id: string
   text: string
@@ -10,41 +16,104 @@ interface TOCItem {
   children?: TOCItem[]
 }
 
-const FloatingTableOfContents: React.FC = () => {
+interface FloatingTableOfContentsProps {
+  toc?: TocSourceItem[]
+}
+
+const normalizeId = (value: string) => {
+  const rawId = value.startsWith('#') ? value.slice(1) : value
+  return decodeURIComponent(rawId).replace(/-+$/g, '')
+}
+
+const buildTOCFromSource = (toc: TocSourceItem[]): TOCItem[] => {
+  const items: TOCItem[] = []
+  let currentParent: TOCItem | null = null
+
+  toc.forEach((item) => {
+    const normalizedItem: TOCItem = {
+      id: normalizeId(item.url),
+      text: item.value,
+      level: item.depth,
+    }
+
+    if (item.depth <= 2) {
+      currentParent = normalizedItem
+      items.push(normalizedItem)
+      return
+    }
+
+    if (!currentParent) {
+      items.push(normalizedItem)
+      return
+    }
+
+    if (!currentParent.children) {
+      currentParent.children = []
+    }
+
+    currentParent.children.push(normalizedItem)
+  })
+
+  return items
+}
+
+const FloatingTableOfContents: React.FC<FloatingTableOfContentsProps> = ({ toc }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [tocItems, setTocItems] = useState<TOCItem[]>([])
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
-    const handleScroll = () => {
+    let frameId: number | null = null
+
+    const updateVisibility = () => {
       const scrollPosition = window.scrollY
       const windowHeight = window.innerHeight
       const documentHeight = document.documentElement.scrollHeight
 
-      // Hide when near the bottom section (adjust 800px based on your needs)
       const hideThreshold = documentHeight - windowHeight - 800
 
       if (scrollPosition < hideThreshold) {
         setIsVisible(true)
       } else {
         setIsVisible(false)
-        setIsOpen(false) // Also close the menu if it's open
+        setIsOpen(false)
       }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const handleScroll = () => {
+      if (frameId !== null) {
+        return
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null
+        updateVisibility()
+      })
+    }
+
+    updateVisibility()
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId)
+      }
+    }
   }, [])
 
   useEffect(() => {
-    // Function to get text content without nested elements
+    if (toc && toc.length > 0) {
+      setTocItems(buildTOCFromSource(toc))
+      return
+    }
+
     const getTextContent = (element: Element): string => {
       const cloned = element.cloneNode(true) as Element
       cloned.querySelectorAll('a').forEach((link) => link.remove())
       return cloned.textContent?.trim() || ''
     }
 
-    // Function to build TOC structure
     const buildTOC = () => {
       const headings = document.querySelectorAll('h2, h3')
       const items: TOCItem[] = []
@@ -78,18 +147,14 @@ const FloatingTableOfContents: React.FC = () => {
       setTocItems(items)
     }
 
-    // Initial build
-    buildTOC()
+    if (typeof window.requestIdleCallback === 'function') {
+      const idleHandle = window.requestIdleCallback(buildTOC)
+      return () => window.cancelIdleCallback(idleHandle)
+    }
 
-    // Re-run buildTOC when the DOM changes
-    const observer = new MutationObserver(buildTOC)
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    })
-
-    return () => observer.disconnect()
-  }, [])
+    const timeoutHandle = window.setTimeout(buildTOC, 0)
+    return () => window.clearTimeout(timeoutHandle)
+  }, [toc])
 
   const handleItemClick = (id: string) => {
     const element = document.getElementById(id)

@@ -31,9 +31,9 @@ export default function GetStartedSigNoz() {
         <Image
           src="/img/launch_week/try-signoz-cloud-blog-cta.png"
           alt="Get Started - Free CTA"
-          width={0}
-          height={0}
-          sizes="100vw"
+          width={1728}
+          height={320}
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 960px"
           className="h-auto w-full"
           style={{ maxWidth: '100%' }}
         />

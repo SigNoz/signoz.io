@@ -14,16 +14,10 @@ export interface TocItemProps {
 interface TableOfContentsProps {
   toc: TocItemProps[]
   activeSection: string
-  setActiveSection: (section: string) => void
   scrollableContainerRef: RefObject<HTMLDivElement>
 }
 
-const TableOfContents = ({
-  toc,
-  activeSection,
-  setActiveSection,
-  scrollableContainerRef,
-}: TableOfContentsProps) => {
+const TableOfContents = ({ toc, activeSection, scrollableContainerRef }: TableOfContentsProps) => {
   const tocRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const logEvent = useLogEvent()

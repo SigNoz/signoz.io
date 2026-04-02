@@ -2,33 +2,41 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
-import type { TocItemProps } from './types'
+import TableOfContents from '@/components/TableOfContents/TableOfContents'
 
-interface OpenTelemetryTocClientProps {
+interface TocItemProps {
+  url: string
+  depth: number
+  value: string
+}
+
+interface ArticleTocClientProps {
   toc: TocItemProps[]
 }
 
-/**
- * Tracks the active heading inside the article and feeds it to the existing
- * TableOfContents component. This keeps the observer logic out of the server
- * layout.
- */
-export default function OpenTelemetryTocClient({ toc }: OpenTelemetryTocClientProps) {
+export default function ArticleTocClient({ toc }: ArticleTocClientProps) {
   const [activeSection, setActiveSection] = useState<string>('')
   const tocContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!toc.length) {
+      return
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visibleEntries = entries.filter((entry) => entry.isIntersecting)
-        if (visibleEntries.length > 0) {
-          const sortedEntries = visibleEntries.sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-          )
-          const id = sortedEntries[0].target.getAttribute('id')
-          if (id) setActiveSection(`#${id}`)
+        if (visibleEntries.length === 0) {
+          return
+        }
+
+        const sortedEntries = visibleEntries.sort(
+          (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
+        )
+        const id = sortedEntries[0].target.getAttribute('id')
+        if (id) {
+          setActiveSection(`#${id}`)
         }
       },
       {
@@ -43,7 +51,7 @@ export default function OpenTelemetryTocClient({ toc }: OpenTelemetryTocClientPr
     return () => {
       headings.forEach((heading) => observer.unobserve(heading))
     }
-  }, [])
+  }, [toc])
 
   if (!toc.length) {
     return null
