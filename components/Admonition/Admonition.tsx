@@ -251,7 +251,13 @@ export type AdmonitionProps = {
   children?: React.ReactNode
 }
 
-const Admonition = ({ type, title, variant, defaultCollapsed, children }: AdmonitionProps) => {
+const Admonition = ({
+  type = 'note',
+  title,
+  variant,
+  defaultCollapsed,
+  children,
+}: AdmonitionProps) => {
   const size = variant ?? 'lg'
   const kind = normalizeKind(type)
   const theme = ADMONITION_THEMES[kind]
