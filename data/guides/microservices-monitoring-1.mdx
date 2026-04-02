@@ -1,0 +1,411 @@
+---
+title: 'Microservices Monitoring 101 - Fundamentals + How to Monitor with OpenTelemetry'
+slug: microservices-monitoring
+date: '2025-11-11'
+tags: [microservices, opentelemetry]
+authors: [yuvraj]
+description: 'A complete guide to microservices monitoring. Learn the fundamentals (metrics, logs, traces) and follow a hands-on tutorial to monitor polyglot services with OpenTelemetry and SigNoz.'
+keywords:
+  [
+    microservices monitoring,
+    opentelemetry monitoring,
+    distributed tracing,
+    microservices metrics,
+    microservices logging,
+    signoz,
+  ]
+---
+
+Migrating from a monolith to a microservices architecture breaks your application into smaller, independent pieces. This improves agility and scaling, but it makes monitoring much more difficult. Instead of one application, you now have dozens or hundreds of services interacting over the network. When a request is slow or fails, finding the root cause can feel like searching for a needle in a haystack.
+
+This guide is a practical 101 on solving that problem. We'll cover the fundamentals of microservices monitoring, including the "three pillars of observability," and then walk through a hands-on tutorial to monitor a polyglot (Node.js and Python) application using OpenTelemetry and SigNoz.
+
+## What is Microservices Monitoring?
+
+Microservices monitoring is the process of tracking the health and performance of each individual service and the interactions between them. Unlike monolithic monitoring, where you observe a single application, this requires collecting telemetry (data about system behavior) from every component and analyzing it collectively.
+
+This approach provides per-service insights and cross-service correlation, which are essential for managing complex distributed systems.
+
+### Why is it Necessary?
+
+In a microservices application, problems are often isolated. A single slow service or a failing network call can cause a cascade of errors. **If you only monitor the entire application's aggregate CPU or error rate, you can't easily pinpoint which service is the culprit.**
+
+Monitoring each microservice reveals the specific component causing high latency, errors, or resource spikes so you can fix it quickly. This is especially critical as services become ephemeral, scaling up and down in containers (like in Kubernetes), where you need to discover and monitor new instances automatically.
+
+### Microservices vs. Monolith Monitoring
+
+Monitoring microservices is fundamentally different from monitoring a monolith. A monolithic application runs as a single unit, producing one set of logs and metrics. A microservices architecture has many data sources, and a single user request often spans multiple services.
+
+This introduces new challenges, like **distributed tracing**, which becomes critical to follow a request's path, and the need to correlate data across service boundaries.
+
+Here’s a simple comparison:
+
+| **Aspect**       | **Monolithic Monitoring**             | **Microservices Monitoring**                           |
+| ---------------- | ------------------------------------- | ------------------------------------------------------ |
+| **Data Sources** | Single set of logs/metrics            | Logs and metrics from **each** service (many sources)  |
+| **Tracing**      | Not typically needed (single process) | **Essential** for distributed requests across services |
+| **Interactions** | None (internal calls)                 | Must correlate issues across service boundaries        |
+| **Data Volume**  | Relatively low                        | Higher volume (each service emits its own telemetry)   |
+
+## The Pillars of Observability: Metrics, Logs, and Traces
+
+To get a complete picture, modern monitoring relies on three types of telemetry, often called the pillars of observability. Let’s understand each of them.
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_14.02.072x.webp"
+  alt="An illustration showing metrics, traces, and logs."
+  caption="An illustration showing metrics, traces, and logs."
+/>
+
+### Metrics
+
+Metrics are numeric measurements aggregated over time. Think of them as the high-level dashboard for your system's health.
+
+- **What they are:** Numbers like request rate, p99 latency, error rate, and CPU utilization.
+- **What they answer:** "Is the service's error rate increasing?" or "What is our average latency?"
+- **Primary Use:** **Health monitoring and alerting**. Metrics are efficient to store and query, making them ideal for building dashboards and triggering alerts when a threshold is breached.
+
+### Logs
+
+Logs are immutable, timestamped records of discrete events. They provide the granular, ground-truth context for a specific event.
+
+- **What they are:** A line in a file or a JSON object stating "Order 123 failed at 12:00 with error X."
+- **What they answer:** "What exact error occurred for this specific request?"
+- **Primary Use:** **Detailed debugging and root-cause analysis**. Once a metric tells you **something** is wrong, logs (ideally) tell you **why**.
+
+### Traces
+
+Distributed traces represent the end-to-end journey of a single request as it moves through multiple microservices.
+
+- **What they are:** A "story" of a request, composed of **spans**. Each span represents a unit of work (e.g., an HTTP call, a database query).
+- **What they answer:** "Why was this request slow?" or "Which service in the chain failed?"
+- **Primary Use:** **Debugging performance bottlenecks** and understanding service dependencies. It's the only way to see the full end-to-end flow.
+
+A robust monitoring setup combines all three. Metrics alert you to a problem, traces pinpoint which service is the bottleneck, and logs provide the detailed error message from that service.
+
+## How to Monitor Microservices with OpenTelemetry and SigNoz
+
+Let's move from theory to practice. We will instrument a demo application with **OpenTelemetry**, an open-source, vendor-neutral standard for collecting telemetry. We will send that data to **SigNoz**, an open-source observability platform that natively supports OpenTelemetry and unifies metrics, traces, and logs in a single application.
+
+We will use SigNoz Cloud by default, as it's the easiest way to get started with OpenTelemetry visualization.
+
+### Architecture and Demo App
+
+Our demo application consists of two services running in Docker:
+
+1. **`catalog-node` (Node.js):** A public-facing API. It receives a request, validates it, and calls the pricing service.
+2. **`pricing-fastapi` (Python):** An internal service that calculates a price, adds random latency, and sometimes returns errors to simulate real-world issues.
+
+Both services will be instrumented with OpenTelemetry and will send their telemetry to an **OpenTelemetry Collector**, which then forwards the data to SigNoz Cloud.
+
+### Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account (a 30-day free trial is available).
+- Docker and Docker Compose installed on your machine.
+- Git to clone the demo repository.
+
+### Step 1: Get the Demo Repo and Configure SigNoz
+
+First, log in to your SigNoz Cloud account. You will need two pieces of information from the "Ingestion" settings: your **Region** and your **Ingestion Key**.
+
+Now, clone the demo repo and set up your credentials:
+
+```bash
+# Clone the repository
+git clone https://github.com/yuvraajsj18/microservices-monitoring.git
+cd microservices-monitoring
+
+# Copy the example .env file
+cp .env.example .env
+```
+
+Open the new `.env` file and update it with your SigNoz details:
+
+```bash
+# .env file
+# Replace <region> and <your_ingestion_key> with your values
+SIGNOZ_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+SIGNOZ_INGESTION_KEY=<your_ingestion_key>
+DEPLOYMENT_ENVIRONMENT=demo
+```
+
+This file passes your credentials to the OpenTelemetry Collector running in Docker.
+
+> **Note:** For the complete code (Docker Compose, Collector config, and scripts), see the demo repo: <a href="https://github.com/yuvraajsj18/microservices-monitoring" rel="noopener noreferrer nofollow" target="_blank">https://github.com/yuvraajsj18/microservices-monitoring</a>
+
+### Step 2: Build and Run the Stack
+
+With the configuration in place, build and run the application using Docker Compose.
+
+```bash
+# Build the container images
+docker compose build
+
+# Start all services in the background
+docker compose up -d
+```
+
+This command starts the `catalog-node` service (on `http://localhost:3000`), the `pricing-fastapi` service (internal to Docker), and the `otel-collector`.
+
+### Step 3: Generate Traffic
+
+To see monitoring data, we need to send requests. The repository includes a simple script to generate traffic.
+
+```bash
+# Run this in your terminal
+./scripts/generate-traffic.sh
+
+# For continuous traffic, run it in a loop
+while true; do ./scripts/generate-traffic.sh; sleep 2; done
+```
+
+This script will hit the `catalog-node` API with random SKUs, which will, in turn, call the `pricing-fastapi` service. This will generate traces, metrics, and logs.
+
+### Step 4: How it Works: Instrumenting with OpenTelemetry
+
+How are the services sending data? The "magic" is [OpenTelemetry instrumentation](https://signoz.io/docs/instrumentation/), which requires just a few lines of code.
+
+### Node.js (`catalog-node`)
+
+For Node.js, we use the `@opentelemetry/sdk-node` and auto-instrumentation packages.
+
+1. **Install Dependencies:**
+
+   ```bash
+   npm install @opentelemetry/sdk-node \
+                 @opentelemetry/auto-instrumentations-node \
+                 @opentelemetry/exporter-trace-otlp-http
+   ```
+
+2. Initialize Telemetry `(src/telemetry.js)`:
+
+   We create a `telemetry.js` file that initializes the OpenTelemetry SDK. This code automatically patches common libraries (like Express and Axios) to create spans.
+
+   ```jsx
+   // src/telemetry.js
+   const { NodeSDK } = require('@opentelemetry/sdk-node')
+   const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node')
+   const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
+
+   const sdk = new NodeSDK({
+     traceExporter: new OTLPTraceExporter({
+       // value must include /v1/traces, e.g. http://otel-collector:4318/v1/traces
+       url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+     }),
+     instrumentations: [getNodeAutoInstrumentations()],
+   })
+
+   sdk.start()
+   ```
+
+   We then import and start this SDK in `index.js` **before** the application starts.
+
+> For a complete guide on instrumenting Node.js, check the [detailed setup instructions](https://signoz.io/docs/instrumentation/opentelemetry-javascript/).
+
+### Python (`pricing-fastapi`)
+
+For Python, the process is similar. We use OpenTelemetry packages to instrument the FastAPI application.
+
+1. **Install Dependencies:**
+
+   ```bash
+   pip install opentelemetry-distro \
+                 opentelemetry-exporter-otlp \
+                 opentelemetry-instrumentation-fastapi
+   ```
+
+2. Initialize Telemetry (`app/telemetry.py`):
+
+   We set up the providers for traces, metrics, and logs.
+
+3. Instrument FastAPI (`app/main.py`):
+
+   In the main application file, we instrument the FastAPI app and create custom metrics.
+
+   ```python
+   # app/main.py
+   from fastapi import FastAPI
+   from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+   from . import telemetry # Our telemetry setup file
+
+   app = FastAPI()
+
+   # Get a meter from our telemetry setup
+   meter = telemetry.get_meter("pricing-fastapi")
+
+   # Create custom metrics
+   price_requests_counter = meter.create_counter(
+       "price_requests", description="Number of price requests"
+   )
+   price_compute_histogram = meter.create_histogram(
+       "price_compute_ms", description="Time to compute price", unit="ms"
+   )
+
+   @app.get("/api/v1/price")
+   def get_price(sku: str):
+       # ... logic to compute price ...
+
+       # Record custom metrics
+       price_requests_counter.add(1, {"sku": sku})
+       price_compute_histogram.record(compute_time_ms, {"sku": sku})
+
+       return {"sku": sku, "price": price}
+
+   # Apply the instrumentation to the app
+   FastAPIInstrumentor.instrument_app(app)
+   ```
+
+   This auto-instrumentation captures all incoming requests, and we've added a `Counter` and `Histogram` to track business-specific metrics.
+
+> For a complete guide on instrumenting FastAPI, see the [detailed setup instructions](https://signoz.io/docs/instrumentation/opentelemetry-fastapi/).
+
+### Step 5: Understanding Trace Context Propagation
+
+How does SigNoz know that the `catalog-node` request is part of the same transaction as the `pricing-fastapi` request?
+
+This is handled by **Trace Context Propagation**. When `catalog-node` makes an HTTP call to `pricing-fastapi`, the OpenTelemetry instrumentation automatically injects a `traceparent` HTTP header. This header contains the unique `trace_id` and the current `span_id`.
+
+The `pricing-fastapi` service, also being instrumented, reads this header, extracts the `trace_id`, and continues the trace, creating its own spans as children of the incoming span. This is all handled automatically by the OpenTelemetry libraries using the W3C Trace Context standard.
+
+> Learn what is [Context Propagation in OpenTelemetry in this blog](https://signoz.io/blog/opentelemetry-context-propagation/).
+
+## Visualizing Your Microservices in SigNoz
+
+After letting the traffic script run for a few minute, your data will appear in SigNoz.
+
+### The Service List and Service Map
+
+Navigate to the **Services** tab in SigNoz. You will see both `catalog-node` and `pricing-fastapi` in the list, along with their key RED metrics (Rate, Error, Duration - p99 latency).
+
+Click on the **Service Map** tab to see the automatically generated dependency graph showing how `catalog-node` calls `pricing-fastapi`.
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_11.13.412x.webp"
+  alt="Service map showing the two services connected with each other"
+  caption="Service map showing the two services connected with each other"
+/>
+
+### Analyzing APM Metrics and Errors
+
+Click on the `pricing-fastapi` service in the `Services` tab from the left sidebar. SigNoz provides an out-of-the-box dashboard showing its RED metrics.
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_11.07.232x.webp"
+  alt="APM for Pricing Service Showing the RED metrics"
+  caption="APM for Pricing Service Showing the RED metrics"
+/>
+
+Because our demo app is designed to fail occasionally, you will see spikes in the **Error Rate** chart.
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_11.44.152x.webp"
+  alt="Error spiking in the pricing-fastapi service"
+  caption="Error spiking in the pricing-fastapi service"
+/>
+
+### Analyzing Distributed Traces
+
+To find out **why** errors are happening, go to the **Traces** tab. You can filter for traces that have an error status. Click on one of these traces.
+
+You will see the full end-to-end journey of the request as a flame graph.
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_13.31.102x.webp"
+  alt="Full Trace view showing the journey"
+  caption="Full Trace view showing the journey"
+/>
+
+This view clearly shows:
+
+1. The `catalog-node` service received the request.
+2. It made an HTTP call to `pricing-fastapi`.
+3. The `pricing-fastapi` service (the red span) failed with a 503 error.
+
+Now you know exactly which service caused the failure, allowing you to fix the problem without guessing.
+
+You can also use the attributes we added in the code, like `sku`, to filter and group your traces. This allows you to see if a problem is affecting a specific product or customer:
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_11.46.232x.webp"
+  alt="per-SKU attributes let you slice performance by product without adding high-cardinality labels."
+  caption="per-SKU attributes let you slice performance by product without adding high-cardinality labels."
+/>
+
+### Correlating Logs and Traces
+
+Let's find the exact log for that failed request. Go to the **Logs** tab and filter for the `pricing-fastapi` service. You will see the error logs from the application.
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_11.40.422x.webp"
+  alt="View logs for the pricing-fastapi service"
+  caption="View logs for the pricing-fastapi service"
+/>
+
+Notice that each log line includes a `trace_id`. If you find an error log, you can click the `trace_id`...
+
+<Figure
+  src="/img/guides/2025/11/microservices-monitoring-CleanShot_2025-11-11_at_11.41.042x.webp"
+  alt="Click trace_id from a logs to view the correlated trace."
+  caption="Click trace_id from a logs to view the correlated trace."
+/>
+
+...and SigNoz will immediately take you to the full distributed trace for that exact request. This powerful correlation saves you from manually searching for logs.
+
+To learn more about configuring this, see the [guide on Python logs auto-instrumentation](https://signoz.io/docs/userguide/python-logs-auto-instrumentation/).
+
+### See a More Complex Demo
+
+The two-service application in this guide is great for learning the basics. If you want to see how this scales, check out our walkthrough of the [full OpenTelemetry Demo Application](https://signoz.io/blog/opentelemetry-demo/). It explains how to set up and debug a more complex microservices environment with OpenTelemetry SigNoz.
+
+## Monitoring Other Languages and Frameworks
+
+While this guide provided a hands-on example for Node.js and Python, OpenTelemetry supports all major languages and frameworks, including:
+
+- **Java:** Using the [OpenTelemetry Java agent](https://signoz.io/docs/instrumentation/opentelemetry-java/) allows for powerful auto-instrumentation of popular frameworks like Spring Boot, Quarkus, and Micronaut with no code changes.
+- **Go:** Requires [manual instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-golang/) by adding the OpenTelemetry SDK to your code, as Go is a compiled language. (OTel Go <a href="https://opentelemetry.io/blog/2025/go-auto-instrumentation-beta/" rel="noopener noreferrer nofollow" target="_blank">auto-instrumentation (eBPF) is in beta</a> as of 2025)
+- **.NET:** Provides both auto-instrumentation and manual SDK options for [monitoring .NET applications](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/).
+- **Ruby, PHP, and more:** Each language has its own set of [OpenTelemetry instrumentation libraries](https://signoz.io/docs/instrumentation/).
+
+The core concepts remain the same regardless of the language: you initialize an OTel SDK, configure it to export telemetry (metrics, traces, and logs) to your backend (like SigNoz), and use the available instrumentation to capture data from your application's frameworks, libraries, and custom code.
+
+## Best Practices for Microservices Monitoring
+
+Now that you have a working setup, here are a few best practices to make your monitoring effective and sustainable.
+
+**Focus on SLOs and Alerts that Matter**
+
+Don't alert on every CPU spike. Define Service Level Objectives (SLOs) for what matters to your users (e.g., "99.9% of checkout requests must be faster than 1 second"). Alert on your error budget burn rate—this reduces alert fatigue and focuses your team on issues that impact users.
+
+**Use Semantic Conventions**
+
+Use the standard OpenTelemetry Semantic Conventions for naming your services (service.name) and attributes (http.method, http.status_code). This ensures your telemetry is consistent and that tools like SigNoz can automatically interpret it.
+
+**Use an Appropriate Sampling Strategy**
+
+In high-traffic systems, collecting 100% of traces can be expensive. Head sampling decides at the start of a request whether to keep a trace. Tail sampling (supported by the OTel Collector) collects all traces and decides at the end whether to keep them, allowing you to keep all error traces or slow traces.
+
+**Manage Cost and Cardinality**
+
+Be careful with high-cardinality labels, especially in metrics. A label like user_id could create millions of unique time series, bloating your storage. Use traces or logs for high-cardinality data and keep metrics aggregated.
+
+## Choosing Your Monitoring Stack
+
+Choosing the right tools is a critical step in building your monitoring strategy. While we cover this topic in-depth in our <a href="/comparisons/microservices-monitoring-tools/" target="_blank">full guide to microservices monitoring tools</a>, your options generally fall into three paths:
+
+- **The Traditional OSS Stack:** This involves combining multiple tools like Prometheus (metrics), Grafana (dashboards), and Jaeger (tracing). This is powerful but requires significant effort to integrate and maintain.
+- **All-in-One SaaS Platforms:** Tools like Datadog or New Relic offer a polished, integrated experience but can be expensive, and your data is locked in a proprietary system.
+- **OpenTelemetry-Native Platforms:** SigNoz offers a third path. It is an open-source, OpenTelemetry-native platform that unifies metrics, traces, and logs in a single tool. It provides the integration of a SaaS tool while being open-source, giving you control over your data.
+
+## Get Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+---
+
+Hope we answered all your questions regarding microservices monitoring. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

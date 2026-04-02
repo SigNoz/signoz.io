@@ -1,0 +1,686 @@
+---
+title: "Master Java Logging: From System.out.println to Production-Ready Logs"
+slug: java-log
+date: 2025-09-16
+tags: ["java", "logging"]
+authors: ["niyati_thakkar", "yuvraj"]
+description: "Move your Java application from println debugging to production-ready logging with this hands-on guide."
+keywords: ["java logging", "log4j2", "slf4j", "logging tutorial", "java logging best practices"]
+---
+
+
+If you're still debugging with `System.out.println`, this article is for you. The statement is handy for quick experiments, yet it should not be used in real applications because it hides context, timing, and severity when production issues arise.
+
+This guide shows you how to move from println-driven debugging to production-grade logging that actually speeds up incident response. We'll build the logging stack step by step, explain why each choice matters, and highlight the details you need to keep operations calm once the system goes live.
+
+## Why Java's System.out.println Fails in Production
+
+Let's start with the code every Java developer writes when they're starting out:
+
+```java
+public class PaymentService {
+    public void processPayment(String orderId, double amount) {
+        System.out.println("Processing payment");
+        
+        try {
+            // Payment logic here
+            chargeCard(orderId, amount);
+            System.out.println("Payment successful");
+        } catch (Exception e) {
+            System.out.println("Payment failed: " + e.getMessage());
+        }
+    }
+}
+```
+
+This looks fine when you're testing locally but once this code is deployed on production and payments starts to fail, you will not be able to answer critical questions like when the error occurred, which user, order, or transaction has failed. Moreover there will be a lot of noise in the log data due to no default severity level or log structure.
+
+Now that we understand the problem, let's fix it properly.
+
+## Setting Up Real Java Logging in Your Java Application
+
+First, you need the right tools. Java logging uses two key concepts: a logging facade (SLF4J) that provides a consistent API, and a logging implementation (Log4j2) that does the actual work. 
+
+<Figure src="/img/guides/2025/09/java-log-slf4jvslog4j2.webp" alt="Java Logging Setup with SLF4J and Log4j2" caption="Java Logging Setup with SLF4J and Log4j2" />
+
+This separation means you can switch logging implementations later without changing your code.
+
+Add these dependencies to your Maven `pom.xml` (check [Maven Central](https://search.maven.org/) for the latest versions):
+
+```xml
+<dependencies>
+    <!-- SLF4J API -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.17</version>
+    </dependency>
+    
+    <!-- Log4j2 Implementation -->
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>2.25.0</version>
+    </dependency>
+    
+    <!-- Bridge between SLF4J and Log4j2 -->
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-slf4j2-impl</artifactId>
+        <version>2.25.0</version>
+    </dependency>
+</dependencies>
+```
+
+For Gradle users, add this to your `build.gradle`:
+
+```gradle
+dependencies {
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'org.apache.logging.log4j:log4j-core:2.25.0'
+    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.25.0'
+}
+```
+
+Now update `PaymentService` to rely on the logger instead of println statements:
+
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class PaymentService {
+    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
+    
+    public void processPayment(String orderId, double amount) {
+        logger.info("Processing payment for order: {} with amount: ${}", orderId, amount);
+        
+        try {
+            chargeCard(orderId, amount);
+            logger.info("Payment successful for order: {}", orderId);
+        } catch (Exception e) {
+            logger.error("Payment failed for order: {}", orderId, e);
+        }
+    }
+}
+```
+
+Above code creates one logger per class. The `static final` means it's shared across all instances and never changes. The class name tells us exactly where logs come from, making debugging much easier.
+
+Each logging call declares its severity ("info", "error", and more levels we cover in the next section), so operators can dial log verbosity up or down without touching the code.
+
+Notice the `{}` placeholders? These are incredibly efficient, the string is only built if that log level is enabled. No more wasting CPU on string concatenation for disabled debug logs.
+
+The `logger.error` call with the exception (`e`) as the last parameter automatically captures the full stack trace, giving you the complete error context you need for debugging. Log4j2 recognises that trailing argument as a `Throwable`, so it prints the cause chain with line numbers without any extra formatting code.
+
+## Configuring Where Your Java Logs Go
+
+Your logger needs instructions on where to write logs and how to format them. Create a file named `log4j2.xml` in `src/main/resources`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console output for development -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
+
+This configuration tells Log4j2 WHERE to write logs (Console appender), HOW to format them (PatternLayout), and WHAT to log (info level and above). The pattern includes timestamp, thread name, log level, logger name, and the message content.
+
+Run your application now, and instead of plain text, you'll see:
+
+```
+2025-09-16 10:23:45.123 [main] INFO  com.myapp.PaymentService - Processing payment for order: ORD-12345 with amount: $99.99
+2025-09-16 10:23:45.567 [main] INFO  com.myapp.PaymentService - Payment successful for order: ORD-12345
+```
+
+Now you can see exactly when things happened, which thread was involved, the severity level, and which class logged the message. This context makes debugging significantly easier.
+
+## Making Your Java Logs Production-Ready
+
+Console output works great during development, but production systems need persistent logs that survive server restarts and can be analyzed later. Add file logging with automatic rotation to prevent disk space issues:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console for development -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        
+        <!-- Rolling file for production -->
+        <RollingFile name="RollingFile" 
+                     fileName="logs/app.log"
+                     filePattern="logs/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d{ISO8601} [%thread] %-5level %logger - %msg%n"/>
+            <Policies>
+                <!-- Roll over daily -->
+                <TimeBasedTriggeringPolicy />
+                <!-- Roll over when file reaches 100MB -->
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <!-- Keep 30 days of logs -->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
+
+This configuration writes logs to both console and file. The RollingFile appender automatically rotates logs daily at midnight or when they reach 100MB, compresses old logs to save space, and keeps 30 days of history. Your ops team will thank you for not filling up the disk.
+
+With the basics covered, take the next step and tune the configuration so production logs stay useful without overwhelming your team.
+
+## Understanding and Using Log Levels
+
+Not all logs are created equal. Log4j2 provides six log levels, each serving a specific purpose:
+
+| Level | Purpose | Example |
+|-------|---------|---------|
+| **TRACE** | Most detailed information, typically only enabled when diagnosing problems | Method entry/exit, variable values at each step |
+| **DEBUG** | Detailed information useful during development | SQL queries, configuration values, intermediate calculations |
+| **INFO** | Important business events that should be tracked | User login, payment processed, order shipped |
+| **WARN** | Potentially harmful situations that need attention | Deprecated API usage, recoverable errors, slow queries |
+| **ERROR** | Error events that might still allow the application to continue | Payment failure, external service timeout, validation errors |
+| **FATAL** | Severe errors that will likely cause the application to abort | Database connection lost, out of memory, corrupted data |
+
+Here's how to use them effectively in your code:
+
+```java
+public class PaymentService {
+    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
+    
+    public void processPayment(String orderId, double amount) {
+        logger.trace("Entering processPayment with orderId: {}, amount: {}", orderId, amount);
+        logger.debug("Validating payment request for order: {}", orderId);
+        
+        if (amount <= 0) {
+            logger.warn("Invalid amount {} for order: {}", amount, orderId);
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+        
+        logger.info("Processing payment for order: {} with amount: ${}", orderId, amount);
+        
+        try {
+            chargeCard(orderId, amount);
+            logger.info("Payment successful for order: {}", orderId);
+        } catch (PaymentException e) {
+            logger.error("Payment failed for order: {}", orderId, e);
+            throw e;
+        } catch (Exception e) {
+            logger.fatal("Unexpected error processing payment for order: {}", orderId, e);
+            throw new RuntimeException("Critical payment error", e);
+        }
+    }
+}
+```
+
+Run the method once with a valid order and once with a bad amount, and the console displays clearly separated levels:
+
+```
+2025-09-16 09:15:12.101 [main] TRACE com.myapp.PaymentService - Entering processPayment with orderId: ORD-1, amount: 42.0
+2025-09-16 09:15:12.103 [main] DEBUG com.myapp.PaymentService - Validating payment request for order: ORD-1
+2025-09-16 09:15:12.104 [main] INFO  com.myapp.PaymentService - Processing payment for order: ORD-1 with amount: $42.0
+2025-09-16 09:15:12.309 [main] INFO  com.myapp.PaymentService - Payment successful for order: ORD-1
+2025-09-16 09:15:12.311 [main] TRACE com.myapp.PaymentService - Entering processPayment with orderId: ORD-2, amount: -5.0
+2025-09-16 09:15:12.312 [main] DEBUG com.myapp.PaymentService - Validating payment request for order: ORD-2
+2025-09-16 09:15:12.312 [main] WARN  com.myapp.PaymentService - Invalid amount -5.0 for order: ORD-2
+```
+
+The key is choosing the right level for each situation. Use DEBUG for information that helps during development but would be noise in production. Use INFO for business events you want to track. Use ERROR for problems that need investigation.
+
+## Controlling Log Verbosity by Package
+
+Your application logs are important, but framework logs can be overwhelming. You want detailed logs from your code but only warnings from libraries. Here's how to achieve that balance:
+
+```xml
+<Loggers>
+    <!-- Your application: DEBUG level for detailed troubleshooting -->
+    <Logger name="com.myapp" level="debug"/>
+    
+    <!-- Database queries: Show warnings only to reduce noise -->
+    <Logger name="org.hibernate" level="warn"/>
+    
+    <!-- Spring Framework: Info level for important events -->
+    <Logger name="org.springframework" level="info"/>
+    
+    <!-- Everything else defaults to INFO level -->
+    <Root level="info">
+        <AppenderRef ref="Console"/>
+        <AppenderRef ref="RollingFile"/>
+    </Root>
+</Loggers>
+```
+
+This configuration gives you fine-grained control. Your application code logs at DEBUG level, showing detailed information. Hibernate only logs warnings and errors, hiding the verbose SQL logging. Spring logs at INFO level, showing important lifecycle events. Everything else defaults to INFO.
+
+This approach prevents log flooding while ensuring you have the details you need from your own code.
+
+## Adding Context to Java Logs with MDC (Mapped Diagnostic Context)
+
+Here's where logging becomes truly powerful. MDC lets you add contextual information that automatically appears in every log message within a request, without passing parameters everywhere:
+
+```java
+import org.slf4j.MDC;
+
+public class RequestHandler {
+    private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    
+    public void handleRequest(String requestId, String userId, String orderId) {
+        // Add context at the beginning of request processing
+        MDC.put("requestId", requestId);
+        MDC.put("userId", userId);
+        MDC.put("orderId", orderId);
+        
+        try {
+            logger.info("Starting request processing");
+            
+            // These methods don't need to know about requestId or userId
+            // but their logs will still include this context
+            validateUser();
+            processOrder();
+            sendNotification();
+            
+            logger.info("Request completed successfully");
+        } catch (Exception e) {
+            logger.error("Request failed", e);
+        } finally {
+            // Critical: Clear MDC to prevent context leaking to other requests
+            MDC.clear();
+        }
+    }
+    
+    private void processOrder() {
+        // This log automatically includes requestId, userId, and orderId
+        // even though we didn't pass them to this method
+        logger.info("Processing order");
+    }
+}
+```
+
+MDC works like thread-local storage for logging context: the `MDC.put` calls stash each identifier on the current thread, every log emitted while the request runs reads those keys, and `MDC.clear()` in the `finally` block keeps the next request from inheriting stale data. This is invaluable for tracing requests through your system.
+
+Update your log pattern to include MDC values:
+
+```xml
+<PatternLayout pattern="%d{ISO8601} [%thread] %-5level %logger - [%X{requestId}] [%X{userId}] - %msg%n"/>
+```
+
+Now your logs show the complete context:
+
+```
+2025-09-16 10:23:45.123 [http-1] INFO  RequestHandler - [REQ-123] [USER-456] - Starting request processing
+2025-09-16 10:23:45.234 [http-1] INFO  RequestHandler - [REQ-123] [USER-456] - Processing order
+2025-09-16 10:23:45.567 [http-1] INFO  RequestHandler - [REQ-123] [USER-456] - Request completed successfully
+```
+
+When debugging production issues, this context is gold. You can trace a specific request across all your services and see exactly what happened.
+
+## Structuring Logs for Modern Analysis
+
+Plain text logs work, but structured logs are searchable, filterable, and analyzable. The configuration below keeps human-readable console output for developers while also writing JSON to disk for downstream analysis, rotating the file daily or at 100MB and tagging each event with static attributes:
+
+```xml
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Human-readable console for development -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+        </Console>
+        
+        <!-- JSON format for production analysis -->
+        <RollingFile name="JsonFile" 
+                     fileName="logs/app.json"
+                     filePattern="logs/app-%d{yyyy-MM-dd}-%i.json.gz">
+            <JsonLayout compact="true" eventEol="true">
+                <KeyValuePair key="application" value="payment-service"/>
+                <KeyValuePair key="environment" value="${env:ENVIRONMENT:-dev}"/>
+            </JsonLayout>
+            <!-- Note: For Log4j2 2.17+, consider JsonTemplateLayout for better performance -->
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="JsonFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
+
+Your production logs now look like this:
+
+```json
+{
+  "timestamp": "2025-09-16T10:23:45.123Z",
+  "level": "INFO",
+  "thread": "http-1",
+  "logger": "PaymentService",
+  "message": "Payment processed",
+  "application": "payment-service",
+  "environment": "prod",
+  "requestId": "REQ-123",
+  "userId": "USER-456",
+  "orderId": "ORD-789"
+}
+```
+
+This structure makes it trivial to query your logs. Want all ERROR logs for a specific user in the last hour? That's a simple JSON query in any log aggregation system. Need to calculate average response times? Parse the JSON and analyze the timestamp fields.
+
+## Optimizing Performance: Async Logging
+
+Logging I/O can slow down your application. Every time you log, your thread might wait for disk writes. For high-throughput applications, asynchronous logging is essential:
+
+```xml
+<Configuration status="WARN">
+    <Appenders>
+        <RollingFile name="AsyncFile" fileName="logs/app.log"
+                     filePattern="logs/app-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="%d{ISO8601} [%thread] %-5level %logger - %msg%n"/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <!-- AsyncRoot makes all logging asynchronous -->
+        <AsyncRoot level="info">
+            <AppenderRef ref="AsyncFile"/>
+        </AsyncRoot>
+    </Loggers>
+</Configuration>
+```
+
+The RollingFile appender still writes to disk, but wrapping the root logger in `AsyncRoot` moves the work to Log4j2's async queue so request threads simply enqueue events. The configuration keeps the log format familiar (`PatternLayout`) while the background thread handles rotation by day through the `filePattern` rule.
+
+To put simply, with async logging, your application threads hand off log messages to a background thread and continue immediately. The background thread performs the disk I/O, so request threads stay responsive even when the filesystem is slow.
+
+To enable this configuration you must add the Disruptor dependency and start your JVM with the asynchronous context selector:
+
+```xml
+<dependency>
+    <groupId>com.lmax</groupId>
+    <artifactId>disruptor</artifactId>
+    <version>3.4.4</version>
+</dependency>
+```
+
+> **Important**: Use Disruptor 3.x series only. Disruptor 4.x is not compatible with Log4j2's async loggers. Always check [Maven Central](https://search.maven.org/artifact/com.lmax/disruptor) for the latest 3.x version.
+
+```bash
+java -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -jar app.jar
+```
+
+But async logging requires care with string building. Avoid expensive operations in your log statements:
+
+```java
+// BAD: Creates strings even when DEBUG is disabled
+logger.debug("Processing " + list.size() + " items for user " + userId);
+
+// GOOD: Only creates strings if DEBUG is enabled
+logger.debug("Processing {} items for user {}", list.size(), userId);
+
+// BEST: For expensive operations, check first
+if (logger.isDebugEnabled()) {
+    logger.debug("Cache state: {}", cache.generateExpensiveReport());
+}
+```
+
+The placeholders (`{}`) are your friends. They defer string creation until the logger knows it actually needs the message.
+
+## Handling Different Environments
+
+Development teams need verbose output on the console, while production teams need structured files that rotate predictably. Maintain two configuration files—`log4j2-dev.xml` for local debugging and `log4j2-prod.xml` for production and pick the right one at startup:
+
+```bash
+# Local run with colored console logs
+java -Dlog4j.configurationFile=log4j2-dev.xml -jar app.jar
+
+# Production run with JSON + rolling files
+java -Dlog4j.configurationFile=log4j2-prod.xml -jar app.jar
+```
+
+You can still keep shared defaults by extracting them into `log4j2-base.xml` and referencing that file with the `<include file="log4j2-base.xml"/>` feature available in Log4j2 2.10+. Within each environment-specific file, pull critical values such as log level or log directory from environment variables:
+
+```xml
+<Properties>
+    <Property name="LOG_LEVEL">${env:LOG_LEVEL:-INFO}</Property>
+    <Property name="LOG_DIR">${env:LOG_DIR:-logs}</Property>
+</Properties>
+
+<Root level="${LOG_LEVEL}">
+    <AppenderRef ref="Console"/>
+</Root>
+```
+
+This pattern keeps configuration explicit, avoids brittle conditional expressions, and lets operations teams adjust verbosity or destinations without touching the codebase.
+
+## Troubleshooting Common Java Logging Problems
+
+When logs don't appear as expected, here's how to diagnose the issue systematically.
+
+### Problem: No Logs Appearing
+
+First, verify Log4j2 found your configuration:
+
+```java
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+
+// Check where Log4j2 is loading configuration from
+LoggerContext context = (LoggerContext) LogManager.getContext(false);
+System.out.println("Config location: " + 
+    context.getConfiguration().getConfigurationSource().getLocation());
+```
+
+If the location is null or unexpected, Log4j2 didn't find your config file. Make sure `log4j2.xml` is in the classpath.
+
+Next, check for conflicting logging libraries:
+
+```bash
+# Maven: Check for multiple logging implementations
+mvn dependency:tree | grep -E "log4j|slf4j|logback"
+```
+
+If you see multiple implementations (like both Log4j2 and Logback), exclude the unwanted ones from your dependencies.
+
+### Problem: MDC Context Leaking Between Requests
+
+MDC uses thread-local storage, which can leak in application servers if you forget to clear it. Use the helper provided by SLF4J 2.x so the context automatically resets:
+
+```java
+try (MDC.MDCCloseable closeable = MDC.putCloseable("requestId", requestId)) {
+    processRequest();
+} // Context restored even when processRequest throws
+```
+
+If you're on an older SLF4J version, wrap the MDC calls in a `finally` block and clear the context yourself.
+
+## Migrating from Legacy Java Logging Systems
+
+If you have existing code using old logging frameworks, you don't need to rewrite everything. Use bridge libraries to redirect old logging to your new setup.
+
+### Migrating from Log4j 1.x
+
+Add the Log4j 1.x bridge:
+
+```xml
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-1.2-api</artifactId>
+    <version>2.25.0</version>
+</dependency>
+```
+
+Your old Log4j 1.x code continues working unchanged:
+
+```java
+// Old Log4j 1.x code - automatically uses Log4j2 now
+import org.apache.log4j.Logger;
+Logger logger = Logger.getLogger(MyClass.class);
+logger.info("This goes through Log4j2");
+```
+
+### Migrating from java.util.logging
+
+Bridge JUL to SLF4J at application startup:
+
+```java
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
+public class Application {
+    static {
+        // Remove default JUL handlers
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        // Install SLF4J bridge
+        SLF4JBridgeHandler.install();
+    }
+    
+    public static void main(String[] args) {
+        // JUL logs now go through your Log4j2 configuration
+    }
+}
+```
+
+This approach lets you modernize your logging infrastructure gradually, without a big-bang rewrite.
+
+## Production Checklist: Are You Really Ready?
+
+Before deploying to production, confirm these basics:
+
+- [structured logging](https://signoz.io/blog/structured-logs/) (JSON format) for easy parsing and analysis
+- Async logging for high-throughput applications
+- MDC for request tracing across your system
+- Log rotation to prevent disk space issues
+- Package-specific log levels to control verbosity
+- No sensitive data in logs (passwords, tokens, credit cards)
+- Correlation IDs for [distributed tracing](https://signoz.io/distributed-tracing/)
+- Separate error logs for monitoring and alerting
+
+Here's a battle-tested production configuration that implements all these practices:
+
+```xml
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{ISO8601} [%thread] %-5level %logger - %X{correlationId} - %msg%n
+        </Property>
+    </Properties>
+    
+    <Appenders>
+        <!-- Async wrapper for performance -->
+        <AsyncAppender name="AsyncFile" includeLocation="true">
+            <AppenderRef ref="RollingFile"/>
+        </AsyncAppender>
+        
+        <!-- Main application logs with rotation -->
+        <RollingFile name="RollingFile" 
+                     fileName="logs/app.log"
+                     filePattern="logs/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        
+        <!-- Separate error log for monitoring -->
+        <RollingFile name="ErrorFile" 
+                     fileName="logs/error.log"
+                     filePattern="logs/error-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <!-- Your app: Configurable via environment -->
+        <Logger name="com.myapp" level="${env:APP_LOG_LEVEL:-INFO}"/>
+        
+        <!-- Frameworks: WARN only to reduce noise -->
+        <Logger name="org.springframework" level="WARN"/>
+        <Logger name="org.hibernate" level="WARN"/>
+        
+        <Root level="INFO">
+            <AppenderRef ref="AsyncFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
+
+This configuration separates errors into their own file for easy monitoring, uses async logging for performance, and allows runtime configuration through environment variables.
+
+## Making Your Java Logging Actionable with Monitoring
+
+Logs sitting on disk do not help anyone. Once you emit structured events, wire them into monitoring rules. Stream Java logs to SigNoz, create a view that filters `level:ERROR`, and alert when the count spikes or when a service stops sending logs altogether.
+
+In a Spring Boot application, you can add a lightweight self-test by emitting a heartbeat log at startup and verifying it reaches [SigNoz](https://signoz.io/docs/introduction/) using a query such as:
+
+```
+log_type = "application" and service.name = "payment-service" and message = "logging-heartbeat"
+```
+
+If the query shows no events for a few minutes, alert the on-call engineer, because the logging pipeline may be broken.
+
+## Get Started with SigNoz
+
+SigNoz offers three deployment paths. Start quickly with the [SigNoz cloud](https://signoz.io/teams/) trial, which provides full-feature access for 30 days. Teams that must retain data on their own infrastructure can pick the [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/). If you prefer to manage the stack yourself, deploy the [community edition](https://signoz.io/docs/install/self-host/). 
+
+Once you have SigNoz running, point the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)to the structured log file you created earlier. The `filelog` receiver tails the JSON output and forwards it to SigNoz without additional changes to your application code:
+
+```yaml
+receivers:
+  filelog:
+    include:
+      - /var/log/myapp/app-*.json
+    start_at: beginning
+
+exporters:
+  otlp:
+    endpoint: https://ingest.signoz.io:443
+    headers:
+      signoz-ingestion-key: "{SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      exporters: [otlp]
+```
+
+With SigNoz, you can correlate logs with traces and metrics, search across all your services, and set up intelligent alerts for critical errors. Your logs become part of a complete observability solution.
+
+<Figure src="/img/guides/2025/09/java-log-signoz-log-dashboard.webp" alt="SigNoz log dashboard" caption="SigNoz log dashboard" />
+
+For end-to-end instructions on forwarding Java logs, follow the [SigNoz guide for collecting application logs with the OpenTelemetry Java SDK](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/).
+
+## Your Next Steps
+
+You now have a clear path from println debugging to [production-ready](https://signoz.io/guides/production-readiness-checklist/) logging. 
+
+Remember, good logging isn't about logging everything, it's about logging the right things with enough context to solve problems quickly. The difference between finding a production bug in minutes versus hours often comes down to the quality of your logs.
+
+Start implementing these practices now, before you need them. When production issues strike, the groundwork already laid in your logs keeps diagnosis fast.
+
+Need help along the way? Try the SigNoz AI chatbot or join our [Slack community](https://signoz.io/slack/). You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for observability deep dives and updates from the SigNoz team.

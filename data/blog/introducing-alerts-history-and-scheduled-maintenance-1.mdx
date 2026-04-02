@@ -1,0 +1,117 @@
+---
+
+title: Introducing Alerts History and Scheduled Maintenance - Enhancing Alert Management in SigNoz
+slug: introducing-alerts-history-and-scheduled-maintenance
+date: 2024-09-19
+tags: [product, launch-week]
+authors: [ankit_anand]
+description: Whenever an alert is triggered, developers want to examine its history. By offering a comprehensive view of past alerts, the Alerts History feature allows teams to identify patterns, understand key contributors to alerts, and make informed decisions about how to resolve issues more efficiently.
+image: /img/launch-week/launch-week-2/blog-poster.webp
+keywords: [alerts, alerts history, scheduled maintenance, SigNoz]
+
+---
+
+Today, we’re excited to introduce two key features that will help users with alerts in SigNoz - Alerts History and Scheduled Maintenance.
+
+These features are designed to help teams gain deeper insights into their alerts, better manage recurring issues, and streamline alert silencing during planned downtimes.
+
+<Figure src="/img/launch-week/launch-week-2/blog-poster.webp" alt="" caption="" />
+
+
+Let’s dig in deeper.
+
+## Why We Built the Alerts History Feature
+
+Whenever an alert is triggered, developers want to examine its history. This is especially important for multi-dimensional alerts. 
+
+Multi-dimensional alerts are alerts that trigger based on multiple dimensions or variables, such as specific hosts, services, or metrics. For example, an alert might be configured to trigger when CPU usage exceeds a certain threshold, grouped by hostnames.
+
+In these types of alerts, it's incredibly useful to identify which specific hosts are responsible for triggering alerts over a defined period, such as the last two weeks. Users can use alerts history to get more context on what’s causing alerts to trigger.
+
+By offering a comprehensive view of past alerts, the Alerts History feature allows teams to identify patterns, understand key contributors to alerts, and make informed decisions about how to resolve issues more efficiently.
+
+## How does Alerts History work?
+
+Here’s a quick demo video of Alerts History feature.
+
+<YouTube id="7mNB715Ul0Y" mute={false} />
+
+### Quick Walkthrough of Alerts History
+
+<Figure src="/img/blog/2024/09/introducing-alerts-history-and-scheduled-maintenance-alerts-history.webp" alt="Alerts History page in SigNoz" caption="Alerts History page in SigNoz" />
+
+The Alerts History page provides several key insights at a glance:
+
+- Total Trigger Count: This shows how many times an alert has been triggered over a selected period (e.g., the last 6 hours). A high trigger count indicates a persistent issue that needs attention.
+- Resolution Time: This metric tracks the time it takes to resolve an alert, from when it is triggered to when it returns to normal. Monitoring resolution times helps teams gauge their efficiency in addressing issues.
+- Top Contributors: This section highlights which hosts, services, or groups are responsible for triggering the alert. By focusing on the top contributors, teams can prioritize their efforts on fixing the most problematic areas.
+- State Transition Timeline: A visual timeline shows how an alert has changed states (triggered or resolved) over time. If an alert frequently switches between triggered and resolved states, it may indicate a misconfiguration in the alert threshold or an issue that needs deeper investigation.
+- View Logs related to a specific alert: When an alert is triggered, the feature provides the ability to go back in time and see the logs around the moment the alert was triggered. This makes it easier to investigate the root cause of the alert without manually navigating through large log data.
+
+## Key Use Cases for the Alerts History Feature
+
+Alerts History feature unlocks many key use cases to troubleshoot your application better.
+
+- Identifying Frequent Alert Contributors: 
+It can help identify frequent contributors to alerts. For instance, if you're tracking CPU usage across multiple hosts, some hosts may trigger alerts more frequently than others. The Alerts History feature enables you to see which specific hosts or groups are the primary contributors, allowing you to focus on fixing recurring issues.
+- Analyzing Alert Patterns: Alerts can fluctuate between triggered and resolved states, causing unnecessary noise and confusion for engineering teams. With Alerts History, you can track how frequently alerts change state, helping you detect “flappy” alerts—those that repeatedly trigger and resolve within short periods. This insight can prompt teams to adjust alert thresholds or address underlying issues in the system.
+- Contextual Investigation: Once an alert is triggered, you often need to go back in time to view relevant logs. The Alerts History feature provides a timeline and context around when an alert occurred, making it easier to investigate the root cause by jumping directly to related logs.
+
+This was all about the Alerts History feature. Now let’s see what we have shipped in another feature for alerts in SigNoz - Scheduled Maintenance.
+
+## How does Scheduled Maintenance feature work?
+
+In addition to Alerts History, we’re also launching the Scheduled Maintenance feature. This feature allows teams to schedule downtimes where they know their systems will be temporarily unavailable, preventing unnecessary alerts during those periods.
+
+Here’s a quick demo video of Scheduled Maintenance feature.
+
+<YouTube id="dGOmj5wev9g" mute={false} />
+
+## Quick Walkthrough of the Scheduled Maintenance Feature
+
+<Figure src="/img/blog/2024/09/introducing-alerts-history-and-scheduled-maintenance-scheduled-maintenance%201.webp" alt="Create a planned downtime to prevent unnecessary alerts" caption="Create a planned downtime to prevent unnecessary alerts" />
+
+The Scheduled Maintenance feature offers two types of downtimes:
+
+- Fixed Maintenance: Allows you to schedule one-time downtimes, specifying a start and end time. This is useful for planned updates or one-off maintenance windows.
+- Recurring Maintenance: For ongoing maintenance (e.g., a cloud provider's weekly updates), you can set up recurring downtimes on a daily, weekly, or monthly basis.
+
+Within the Scheduled Maintenance setup, you can choose to silence specific alerts or all alerts during the maintenance period. This helps avoid notification overload and prevents alert fatigue during planned downtimes.
+
+## Use Cases for Scheduled Maintenance
+
+Some use cases where you can use the scheduled maintenance feature are: 
+
+- Planned Cloud Provider Maintenance: If your cloud provider has scheduled maintenance for a specific service, you can silence alerts related to that service during the downtime, preventing irrelevant notifications and keeping engineers focused on real issues.
+- Internal Maintenance Windows: For companies that perform regular system updates, you can configure recurring downtimes and silence alerts related to systems that are expected to go down. This eliminates unnecessary alerts during expected maintenance.
+- Ongoing Issues Management: If there’s a known issue that is being worked on, you can use the Scheduled Maintenance feature to silence alerts temporarily, preventing your team from being inundated with notifications for an ongoing issue.
+
+## Future Roadmap for Alerts History and Scheduled Maintenance
+
+We’re excited to launch these features to our users and are actively looking for feedback for the next iteration. Here are a few things that we can think of:
+
+- Enhanced Correlation Across Signals: In the future, we plan to build an even deeper correlation between logs, traces, and metrics. Imagine being able to immediately pull up CPU usage, memory usage, and other metrics alongside logs for a specific container directly from the Alerts History page. This would speed up the investigation process by giving teams a complete picture of the issue.
+- Resource-Specific Scheduled Maintenance: We’re working on adding the ability to silence alerts for specific resources, such as individual machines or Kubernetes namespaces. This would allow for more granular control over which alerts are silenced during maintenance windows.
+- Flappy Alert Detection: We plan to integrate pattern recognition into the Alerts History feature, automatically identifying and flagging flappy alerts for users. This will help teams proactively resolve issues caused by overly sensitive thresholds or cyclical metric patterns.
+
+### Get Started with Alerts History and Scheduled Maintenance
+
+Both features are now live in SigNoz and are ready to help you streamline alert management and improve operational efficiency. We encourage users to try these features, provide feedback, and share any additional ideas for improvement. Join our [Slack community](https://signoz.io/slack/) or reach out to us directly with your thoughts—your feedback helps us continue to build features that solve real-world problems.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+
+## Join us for Launch Week
+
+From Sep 16 to Sep 20, we are announcing a new feature every day at 9AM PT to level up your observability.
+
+[Join Us for SigNoz Launch Week 2.0](https://signoz.io/launch-week/)
+
+[Day 1 - Ingest Guard](https://signoz.io/blog/introducing-ingest-guard-feature/)
+
+[Day 2 - Anomaly Detection](https://signoz.io/blog/introducing-anomaly-detection-for-smarter-alerts)
+
+[Day 3 - Correlated Signals](https://signoz.io/blog/introducing-correlation-of-signals/)
+
+[Day 4 - Alerts History & Scheduled Maintenance](https://signoz.io/blog/introducing-alerts-history-and-scheduled-maintenance)
+
+[Day 5 - Logs Improvement](https://signoz.io/blog/improvements-to-logs-search-and-filter/)

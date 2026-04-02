@@ -1,0 +1,211 @@
+---
+title: I Built this Dashboard with OpenTelemetry to Monitor OpenClaw
+slug: monitoring-openclaw-with-opentelemetry
+date: 2026-02-21
+tags: [openclaw, opentelemetry]
+authors: [saurabh_patil]
+description: Set up monitoring for your OpenClaw AI agent using the built-in diagnostics-otel plugin. This step-by-step guide covers traces, metrics, dashboards, and CLI configuration, no collector required.
+image: /img/blog/2026/02/openclaw-monitoring-dashboard-with-opentelemetry-meta.webp
+keywords: [openclaw monitoring, openclaw opentelemetry, openclaw diagnostics-otel, ai agent observability, openclaw signoz, openclaw traces, openclaw metrics, llm observability, genai semantic conventions]
+---
+
+OpenClaw has taken the world by storm over the last few weeks. But for people like me, who eat, sleep and breathe technology this looked like the best playground I'd stumbled into in a while.
+
+I immediately got my hands dirty, experimenting with various connectors and channels, pushing it, breaking it, putting it back together. And somewhere along the way, I got weirdly attached. These little agents were out there doing things for me, fetching, reasoning, talking to APIs, and I started feeling almost responsible for it. Like, are they okay? Are they overworking? Are they burning through tokens and nobody's telling me?
+
+Then the token limit hit annoyingly fast one day, and I realised I had no visibility into what was actually happening under the hood. I didn't just want to use my agents anymore, I wanted to look after them, know when they're struggling, know when they're stuck in a loop, catch errors before they aggravate.
+
+That's when I came across `Diagnostic-OTel`, a built-in plugin that handles telemetry collection and lets you route it to whatever observability backend you're already comfortable with. Basically, a health monitor for my little agents.
+
+This is a note on how I'm keeping an eye on my OpenClaw Agent with OpenTelemetry because if it's going to work this hard for me, the least I can do is make sure it's running well.
+
+<InlineCTA message="Track token usage, costs, and agent performance in real time. SigNoz Cloud supports OpenTelemetry-native LLM observability out of the box." />
+
+<Figure src="/img/blog/2026/02/openclaw-monitoring-dashboard-with-opentelemetry.webp" alt="OpenClaw monitoring dashboard tracking token limits and usage with OpenTelemetry (Visualization: SigNoz)" caption="OpenClaw token usage dashboard with OpenTelemetry" />
+
+## What type of Telemetry does Diagnostic-OTel provide?
+
+Understanding what telemetry Diagnostic-OTel emits will help us plan our Dashboard and Alerts more effectively beforehand. OpenClaw uses [OpenTelemetry](/opentelemetry/) internally for telemetry collection. We get the following:
+
+1. **Traces:** spans for model usage and webhook/message processing.
+2. **Metrics:** counters and histograms, token usage, cost, context size, run duration, message-flow counters, queue depth, and session state.
+3. **Logs**: the same structured records written to your Gateway log file, exported over OTLP when enabled.
+
+The practical value is immediate. You get token cost attribution (which sessions are expensive and why), latency breakdown (is it the LLM call or the tool execution?), tool failure visibility, and error detection, all without writing a single line of custom instrumentation.
+
+You can check the names and types of the exported metrics in detail in the <a href="https://docs.openclaw.ai/logging#diagnostics-%2B-opentelemetry" rel="noopener noreferrer nofollow" target="_blank">Official OpenClaw Documentation</a>.
+
+## Setting up the Diagnostic-OTel plugin in under 10 minutes
+
+This section covers the essential steps to get started quickly. For the complete reference guide covering self-hosted SigNoz setup, troubleshooting common issues, and routing telemetry through an OpenTelemetry Collector, see our [OpenClaw monitoring documentation](/docs/openclaw-monitoring/).
+
+### Prerequisites
+
+- The latest version of OpenClaw is installed and configured.
+- A backend with an endpoint to receive telemetry. In this article, we will be using [SigNoz Cloud](https://signoz.io/teams/).
+
+<KeyPointCallout defaultCollapsed='true' title='Temporary fix to Enable Logs'>
+
+Current version of OpenClaw still has some issues with log ingestion. To enable it we have made some changes in a <a href="https://github.com/LuffySama-Dev/openclaw/tree/logsIsolationIssueFixed" rel="noopener noreferrer nofollow" target="_blank">forked repo</a> and created a <a href="https://github.com/openclaw/openclaw/pull/22478" rel="noopener noreferrer nofollow" target="_blank">PR#22478</a>. Feel free to follow below steps to enable logs. If you just want `traces` and `metrics` then you can ignore this steps.
+
+**Preconditions**
+
+- Node.js and pnpm are installed.
+- Your npm global prefix is set to a user-level directory (e.g., `~/.npm-global`).
+
+**Clone the Repository & Checkout the Fix Branch**
+
+```bash
+git clone https://github.com/LuffySama-Dev/openclaw.git
+cd openclaw
+git switch logsIsolationIssueFixed
+```
+
+**Install dependencies and build**
+
+```bash
+pnpm install
+pnpm build
+```
+
+**Install globally from the local repo (important: do not use `sudo`)**
+
+```bash
+npm install -g .
+```
+
+**Ensure the user-level npm bin directory is first in your PATH**
+
+```bash
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+hash -r
+```
+
+**Verify that OpenClaw resolves to the user path (not `/usr/bin`)**
+
+```bash
+which openclaw
+openclaw --version
+npm ls -g openclaw --depth=0
+```
+
+</KeyPointCallout>
+
+### Step 1: Enable the Plugin
+
+The `diagnostics-otel` plugin ships with OpenClaw but is disabled by default. You can enable it via CLI:
+
+```bash
+openclaw plugins enable diagnostics-otel
+```
+
+Or add it directly to your config file (`~/.openclaw/openclaw.json`):
+
+```bash
+{
+  "plugins": {
+    "allow": ["diagnostics-otel"],
+    "entries": {
+      "diagnostics-otel": {
+        "enabled": true
+      }
+    }
+  }
+}
+```
+
+### Step 2: Configure the OTEL Exporter
+
+You can configure the exporter vi CLI:
+
+```bash
+openclaw config set diagnostics.enabled true
+openclaw config set diagnostics.otel.enabled true
+openclaw config set diagnostics.otel.traces true
+openclaw config set diagnostics.otel.metrics true
+openclaw config set diagnostics.otel.logs true
+openclaw config set diagnostics.otel.protocol http/protobuf
+openclaw config set diagnostics.otel.endpoint "https://ingest.<region>.signoz.cloud:443"
+openclaw config set diagnostics.otel.headers '{"signoz-ingestion-key":"<YOUR_SIGNOZ_INGESTION_KEY>"}'
+openclaw config set diagnostics.otel.serviceName "openclaw-gateway"
+```
+
+If you are following and using SigNoz Cloud, you can follow our [Ingestion Key guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to get your Ingestion Region and API Key.
+
+<KeyPointCallout defaultCollapsed='true' title='Important Note of Config'>
+
+**Important notes on this config:**
+
+- **`protocol`** - OpenClaw only supports `http/protobuf` as of now. Setting `grpc` is silently ignored.
+- **`endpoint`** - SigNoz Cloud uses port 443 for both OTLP/HTTP and OTLP/gRPC, unlike the typical 4317/4318 split. If the endpoint doesn't already contain `/v1/traces` or `/v1/metrics`, the plugin appends the appropriate path automatically.
+- **`headers`** - SigNoz Cloud requires the `signoz-ingestion-key` header for authentication.
+- **`flushIntervalMs`** - Minimum 1000ms. The default (60s) means quick tasks won't show traces for up to a minute. I set mine to `5000` for near-real-time visibility.
+- **`sampleRate`** - Controls trace sampling (0.0–1.0, applied to root spans only). For personal use, `1.0` is fine.
+
+</KeyPointCallout>
+
+### Step 3: Check your config (Optional)
+
+You can quickly check your config using the following command:
+
+```bash
+openclaw config get diagnostics
+```
+
+Your output should look like this.
+
+```bash
+{
+  "enabled": true,
+  "otel": {
+    "enabled": true,
+    "endpoint": "https://ingest.<region>.signoz.cloud:443",
+    "protocol": "http/protobuf",
+    "headers": {
+      "signoz-ingestion-key": "<YOUR_SIGNOZ_INGESTION_KEY>"
+    },
+    "serviceName": "openclaw-gateway",
+    "traces": true,
+    "metrics": true,
+    "logs": true,
+    "sampleRate": 1,
+    "flushIntervalMs": 5000
+  }
+}
+```
+
+OR you can check your `~/.openclaw/openclaw.json` config file too.
+
+### Step 4: Restart your OpenClaw gateway
+
+```bash
+openclaw gateway restart
+```
+
+### Step 5: Visualize in SigNoz
+
+Open your SigNoz Cloud and navigate to **`Service Tab`**. If you have followed everything till here service name **`openclaw-gateway`** should be visible to you.
+
+<Figure src="/img/blog/2026/02/openclaw-monitoring-opentelemetry-openclaw-service.webp" alt="Screenshot of the SigNoz Cloud Services page displaying a single-row table with the openclaw-gateway service." caption="SigNoz Services list showing the openclaw-gateway" />
+
+You can click on the service name to view the out-of-the-box dashboard provided by SigNoz.
+
+<Figure src="/img/blog/2026/02/openclaw-monitoring-opentelemetry-apm.webp" alt="Screenshot of the SigNoz Cloud Services Overview dashboard with four panels: a Latency time-series chart showing p50, p90, and p99 percentiles with a spike to 10 minutes around Feb 19; a Rate chart in ops/s showing a corresponding traffic burst; an Apdex score chart near zero with a 0.5 threshold; and a Key Operations table listing three OpenClaw spans; openclaw.model.usage with p50 of 39.676 ms, openclaw.message.processed with p50 of 50.861 ms, and openclaw.session.stuck with 100% error rate across 14 calls." caption="SigNoz APM Services Overview showing OpenClaw gateway performance" />
+
+### Step 6: Customized Dashboard
+
+You can import the <a href="https://github.com/SigNoz/examples/tree/main/dashboards/openclaw" rel="noopener noreferrer nofollow" target="_blank">custom dashboard JSON</a> to create a new customised dashboard.
+
+<video width="820" height="540" controls>
+  <source src="/img/blog/2026/02/openclaw-monitoring-opentelemetry-custom-dashboard.webm" type="video/mp4"/>
+  Your browser does not support the video tag.
+</video>
+
+Walkthrough of the OpenClaw Overview dashboard showing LLM token usage, queue and session health metrics, and error logs.
+
+## Conclusion
+
+When building autonomous workflows with OpenClaw, running blind isn't an option. Without tracking your model calls and tool executions, token budgets drain quickly and debugging agent loops is impossible. The built-in `diagnostics-otel` plugin makes fixing this straightforward. With no custom code required, you can connect it directly to SigNoz and see exactly where your tokens are going.
+
+If you run into issues getting telemetry to show up, check the [troubleshooting](/docs/openclaw-monitoring/#troubleshooting) section in our docs. And if you want to add batching, filtering, or multi-backend routing to your setup, the docs also cover [setting up the OpenTelemetry collector](/docs/openclaw-monitoring/#setup-opentelemetry-collector-optional) as an intermediary.

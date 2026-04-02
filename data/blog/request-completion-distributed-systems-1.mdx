@@ -1,0 +1,100 @@
+---
+
+title: What percentage of requests make it from checkout to payment in your microservices?
+slug: request-completion-distributed-systems
+date: 2026-01-19
+tags: [Feature]
+authors: [anushka_karmakar]
+description: A single trace shows one request. To measure how many requests complete a multi-step flow across services, you need to aggregate thousands of traces. Trace Funnels does this.
+image: /img/trace-funnels/identify-problem-traces.png
+keywords: [SigNoz, Trace Funnels, Distributed Tracing, OpenTelemetry, Observability, Microservices, Request Flow, Traces, APM, Developer Tools]
+
+---
+
+This is a specific question, but it represents a class of problems that's hard to answer with distributed tracing today.
+
+You might want to know how many requests successfully pass from order submission to payment processing to notification delivery? Where are requests dropping off? How long does the handoff between services take on average?
+
+A single trace shows you one request. You can see the spans, the timing, the errors. But to understand systemic patterns, you need to look at thousands of traces. And that's where things get tedious.
+
+The typical approach is to manually inspect traces one by one, or export span data somewhere else and write scripts to aggregate it. Some teams keep multiple browser tabs open, correlating spans across traces by hand. It works, but it doesn't scale, and it's not something you want to do during an incident.
+
+## What we noticed
+
+We saw SigNoz users trying to answer these questions repeatedly. They wanted to define a sequence of operations across their services and measure how many requests completed the full sequence versus dropped off at each step. They wanted error rates and latency percentiles for each transition, not just for individual spans.
+
+The underlying need was aggregation across traces and not just inspection of individual requests.
+
+So we built Trace Funnels, an industry-first feature for distributed tracing. You define a sequence of spans as steps, and SigNoz computes conversion rates, error percentages, and latency distributions between each step across all matching traces.
+
+<Figure src="/img/trace-funnels/analyze-request-flows-across-multiple-trace-ids-1.png" alt="You define a sequence of spans as steps, and SigNoz computes conversion rates, error percentages, and latency distributions between each step across all matching traces." caption=""/>
+
+
+If you've felt this problem, give it a try and let us know how it works for you.
+
+## What Trace Funnels does
+
+You define funnel steps by selecting service and span name combinations. For example:
+
+- Step 1: `OrderService` → `submitOrder`
+- Step 2: `PaymentService` → `processPayment`
+- Step 3: `NotificationService` → `sendConfirmation`
+
+Steps can be from different services, as long as they appear within the same trace.
+
+Once you run the funnel, [you see](https://signoz.io/trace-funnels/):
+
+<Figure src="/img/trace-funnels/see-drop-offs-between-steps.png" alt="Funnel visualization showing three-stage conversion with 1.94% overall rate. Stage 1: 100% (2254 spans). Stage 2: 60% (486.76 req/s, 678 errors). Stage 3: 33% (34.77ms avg duration, 47.8s P99 latency). Blue bars show total spans, red sections show errors." caption=""/>
+
+**Conversion rates between steps:** If 1000 traces contained Step 1 and only 850 of those also contained Step 2, that's an 85% conversion rate. A 32% drop between steps tells you something systematic is happening beyond isolated failures.
+
+**RED metrics per step transition:** For each transition (Step 1 → Step 2, Step 2 → Step 3), you get rate (requests per second), error count and percentage, and duration with p50, p90, p99 percentiles.
+
+**Drill-down to problem traces:** See the top 5 slowest traces for each transition. See all traces with errors at each step. Click any trace ID to jump to the full trace view for debugging.
+
+**Saved funnel definitions:** Save your funnels and rerun them across different time ranges. Share them with your team.
+
+## How it works under the hood
+
+The core challenge is aggregating span data across different trace IDs. Most tracing queries operate within a single trace. Trace Funnels needs to find all traces containing Span A, then check which of those also contain Span B, and compute metrics across that set.
+
+SigNoz stores trace data in ClickHouse. When you run a funnel query, the system:
+
+1. Queries for all traces containing the first step's span (filtered by service name and span name) within the selected time window
+2. For each subsequent step, filters down to traces that also contain that step's span
+3. Computes conversion by comparing trace counts between steps
+4. Calculates duration between steps using span timestamps (configurable: start-to-start, end-to-start, etc.)
+5. Aggregates error counts and latency percentiles across the matching traces
+
+This is computationally heavier than single-trace queries. We use existing indexes on span name, service name, and trace ID to keep queries performant. For the initial release, we're relying on real-time queries rather than pre-aggregated data, which means very large time windows on high-volume systems may take longer to compute.
+
+The conversion rate calculation is straightforward; if Step 1 matches 1000 traces and Step 2 matches 850 of those same traces, conversion is 85%. The "drop-off" (150 traces) represents requests that had the first span but never produced the second span within the same trace.
+
+Duration between steps is calculated per-trace, then aggregated. For each trace in the funnel, we find the relevant spans and compute the time gap (e.g., end of Span A to start of Span B). These individual durations are then aggregated into percentiles across all matching traces.
+
+## When this helps
+
+1. **Tracking critical business flows** 
+    
+    Define a funnel for your checkout process: cart → payment → confirmation. See what percentage of requests complete the full sequence. If conversion drops from 95% to 80% after a deploy, you know something broke.
+    
+2. **Validating deployments** 
+Run the same funnel definition across two time ranges like before and after a release. Compare conversion rates and latency percentiles. Did Step 2 → Step 3 latency spike? Did error rates increase at a specific step?
+3. **Finding slow handoffs between services** 
+If Step 1 → Step 2 averages 50ms but Step 2 → Step 3 averages 800ms, you know where to focus. The funnel view surfaces these bottlenecks without requiring you to inspect individual traces.
+
+## How other tools handle this
+
+Datadog has funnel analysis, but it's designed for Real User Monitoring (RUM) and Product Analytics. You can track user journeys through frontend views and actions. For backend distributed traces, Datadog offers Trace Queries to find traces based on span relationships, but not funnel-style conversion metrics or step-by-step drop-off analysis.
+
+We haven't found another observability tool that offers this capability for distributed traces. If you know of one, we'd like to hear about it.
+
+## Try it
+
+Trace Funnels is available in SigNoz Cloud and self-hosted SigNoz.
+
+To use it, go to the ‘Traces’ module and click on the ‘Funnels’ tab. Create a new funnel, define your steps, select a time range, and run it.
+
+Documentation: [Trace Funnels Overview](https://signoz.io/docs/trace-funnels/overview/)
+
+We want to hear how you use this. What funnels are you defining? What's missing? Let us know in [GitHub Discussions](https://github.com/SigNoz/signoz/discussions) or [SigNoz Community Slack](https://signoz.io/slack/).

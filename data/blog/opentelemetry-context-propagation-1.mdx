@@ -1,0 +1,183 @@
+---
+title: An overview of Context Propagation in OpenTelemetry
+slug: opentelemetry-context-propagation
+date: 2025-09-24
+tags: [OpenTelemetry]
+authors: [muskan]
+description: OpenTelemetry context propagation helps in moving data between services. Context propagation forms the basis of distributed tracing in which a trace and span context are passed along a request across network boundaries and processes...
+image: /img/blog/2023/10/opentelemetry-context-propagation-cover.jpg
+hide_table_of_contents: false
+keywords: [observability,opentelemetry,context_propagation]
+---
+
+
+To effectively manage modern applications, you need to understand how they work on the inside. [Distributed tracing](https://signoz.io/distributed-tracing/) is the key to
+this, providing a detailed picture of a request's journey across every service. OpenTelemetry has emerged as the industry-standard
+framework for implementing tracing and achieving true observability in complex, distributed systems.
+
+In this article, we embark on a journey to explore the core concept of context propagation within [Open Telemetry](https://signoz.io/opentelemetry/). We'll dissect its significance, delve into its mechanics, and uncover the mechanisms it employs.
+
+## The Fundamentals of Context Propagation
+
+**Context propagation** is fundamental to OpenTelemetry's tracing. It's the mechanism for transmitting essential
+**trace and span contexts** across services in a distributed application, ensuring every operation is linked to its origin.
+
+### Trace Context
+
+**[Trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/)** represents the overarching journey of a request or transaction across various services and components in a distributed system. It includes:
+
+- **Trace ID**: A unique identifier for the entire trace.
+- **Timestamps**: Precise timing information for trace and span creation.
+- **Baggage Items**: Optional key-value pairs for additional context.
+
+### Span Context
+
+**Span context** focuses on individual spans within a trace, representing specific operations or units of work. It includes:
+
+- **[Span ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/)**: A unique identifier for each span within the trace.
+- **Trace ID**: The same trace ID as in the trace context, linking spans to the broader trace.
+- **Timestamps**: Timing details for span creation.
+
+These contexts work together to provide a complete framework for tracing and correlating requests as they move through distributed systems. 
+You can read more about context propagation in distributed tracing [here](https://signoz.io/blog/context-propagation-in-distributed-tracing/).
+
+Now, let's delve into the inner workings of context propagation in OpenTelemetry.
+
+## The Journey of a Trace from Instrumentation to Export Explained
+
+The process of context propagation in OpenTelemetry can be broken down into several key steps:
+
+### 1. Instrumentation
+
+The first step is **instrumentation**, which involves integrating the OpenTelemetry SDK into your application. This can be done with
+auto-instrumentation libraries for many popular frameworks and languages, often requiring little to no code changes or manual instrumentation depending on the amount of telemetry data you want to collect. Instrumentation
+is the gateway for OpenTelemetry to collect telemetry data, as it captures specific events and operations as spans within a trace.
+
+### 2. Context Creation
+
+      Once your application is instrumented, OpenTelemetry automatically handles context creation. This involves generating a unique
+  trace context and span context (explained in the previous section) for each request. These contexts include unique identifiers (trace and span IDs) and timestamps,
+  which are essential for uniquely identifying every trace and span and carrying the necessary metadata.
+
+
+### 3. Propagation Mechanisms
+
+With the context created, it needs to be transmitted between services. This is where propagation mechanisms come in.
+OpenTelemetry supports various methods for this, discussed in the next section.
+
+For text-based protocols like HTTP, this process is managed by a **Trace Context Text Map Propagator**. This component is
+responsible for injecting the trace context into the headers of an outgoing request and extracting it on the receiving end.
+**Text map** is a simple key-value store where both keys and values are strings. In the context of web services, HTTP headers are
+a common example of a text map.
+
+The choice of propagation mechanism depends on your application's architecture. These mechanisms are the conduits through which
+the trace and span context travel as a request flows through your system.
+
+
+
+
+### 4. Custom Span Creation and Data Collection
+
+      As the context is propagated, developers can create custom spans to represent individual units of work within the application.
+  These spans are linked together by the propagated context, forming a complete trace. Within each span, OpenTelemetry collects a
+  wealth of telemetry data, including timing information, events, and other details that are crucial for understanding system behavior
+  and performance.
+
+### 5. Exporting Telemetry Data
+
+      The final step is exporting telemetry data. OpenTelemetry sends the collected data to a backend system, such as a tracing
+  database or an observability platform like SigNoz. This is where the data is analyzed and visualized, allowing you to troubleshoot issues,
+  optimize performance, and gain a deeper understanding of your application.
+
+
+
+
+
+## The Varied Landscape of Context Propagation Mechanisms
+
+### 1. HTTP Headers
+
+**HTTP headers** are commonly employed for context propagation in web-based applications. They offer a straightforward way to carry trace and span context between HTTP requests and responses. Two essential HTTP headers are used for this purpose:
+
+- **traceparent**: This header contains the trace and span IDs, ensuring that context is consistently transferred along with each HTTP request.
+- **tracestate**: The tracestate header is used for additional contextual information, such as baggage items. It allows developers to include custom key-value pairs to enrich the context of a trace.
+
+### 2. gRPC Metadata
+
+In systems utilizing gRPC for communication, **gRPC metadata** is the chosen mechanism for context propagation. Similar to HTTP headers, gRPC metadata includes trace and span context information. OpenTelemetry seamlessly integrates with gRPC, enabling the straightforward propagation of context within gRPC-based microservices.
+
+### 3. Message Queues
+
+In message-driven architectures, where systems communicate through message queues like Apache Kafka or RabbitMQ, context propagation is achieved by **embedding trace context within messages**. Each message carries trace and span IDs, allowing for the correlation of events and the tracing of messages as they traverse the messaging system.
+
+### 4. Custom Propagation
+
+In certain scenarios, you might find it necessary to implement **custom context propagation mechanisms** tailored to your specific requirements. OpenTelemetry's flexibility allows you to design custom approaches for transmitting context information that aligns with your application's unique needs.
+
+These mechanisms are vital for maintaining visibility and traceability in distributed systems, enhancing observability and troubleshooting capabilities across services and components.
+
+## Manual Context Propagation: Taking Control
+
+In some scenarios, you might find it necessary to take manual control of context propagation, especially when dealing with unique requirements or communication patterns. Let's explore a simplified example to illustrate how manual context propagation can be implemented:
+
+Imagine two microservices, Service A and Service B, communicating via RabbitMQ. Service A needs to propagate context information along with a message to Service B:
+
+```python
+# Service A: Sending a message with trace context
+from opentelemetry import trace
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+carrier = {}
+# Create a span for the current operation in Service A
+with trace.get_tracer(__name__).start_as_current_span("Operation in Service A") as span:
+    # Write the current context into the carrier.
+    # A TextMapPropagator works with any dict-like object as its Carrier by default.
+    TraceContextTextMapPropagator().inject(carrier)
+
+    # Attach trace context to the message
+    message = {
+        "content": "Hello, Service B!",
+        "trace_context": carrier
+    }
+
+    # Publish the message to RabbitMQ
+    rabbitmq_publisher.publish(message)
+```
+
+In Service B, upon receiving the message, we extract the trace context and continue the trace:
+
+```python
+# Service B: Receiving and extracting trace context from the message
+from opentelemetry import trace
+
+def process_message(message):
+    # Extract the trace context from the received message
+    carrier = message.get("trace_context")
+    ctx = TraceContextTextMapPropagator().extract(carrier=carrier)
+
+    # Create a new span in Service B using the extracted trace context
+    with trace.get_tracer(__name__).start_as_current_span("Operation in Service B", context=ctx):
+        # Your code for processing the message here
+```
+
+This concise example demonstrates how manual context propagation allows for precise control over tracing in distributed systems. It shows how trace context can be extracted from one service and applied to another, enabling seamless tracing continuity.
+
+## Conclusion
+
+In conclusion, context propagation in OpenTelemetry forms the basis of passing essential information with a request across network boundaries and processes. By understanding the inner workings and various propagation mechanisms, organizations can harness the power of OpenTelemetry to gain actionable insights, troubleshoot effectively, and optimize their applications for peak performance.
+
+Once you have collected data with OpenTelemetry, you can use a backend like SigNoz to store and analyze your OpenTelemetry data. SigNoz is an OpenTelemetry-native APM built to provide the best visualizations for OpenTelemetry data.
+
+<Figure src="/img/blog/2025/09/signoz-trace-explorer.webp" alt="Traces and spans as visualised in SigNoz" caption="Traces and spans as visualised in SigNoz" />
+
+## Getting started with SigNoz
+
+<GetStartedSigNoz />
+
+---
+
+**Related Posts**
+
+[Understanding OpenTelemetry spans in detail](https://signoz.io/blog/opentelemetry-spans/)
+
+[An Open-Source OpenTelemetry APM](https://signoz.io/blog/opentelemetry-apm/)
