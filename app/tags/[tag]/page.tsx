@@ -3,12 +3,11 @@ import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import siteMetadata from '@/data/siteMetadata'
 import ListLayout from '@/layouts/ListLayoutWithTags'
 import { allBlogs } from 'contentlayer/generated'
-import tagData from 'app/tag-data.json'
 import { genPageMetadata } from 'app/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-export const dynamicParams = false
+export const dynamicParams = true
 export const dynamic = 'force-static'
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
@@ -26,15 +25,7 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
 }
 
 export const generateStaticParams = async () => {
-  const tagCounts = tagData as Record<string, number>
-  const tagKeys = Object.keys(tagCounts)
-  // Only generate pages for tags that have at least one post
-  const paths = tagKeys
-    .filter((tag) => tagCounts[tag] > 0)
-    .map((tag) => ({
-      tag: encodeURI(tag),
-    }))
-  return paths
+  return []
 }
 
 export default function TagPage({ params }: { params: { tag: string } }) {
