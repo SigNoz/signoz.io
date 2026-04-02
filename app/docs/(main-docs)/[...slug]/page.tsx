@@ -43,11 +43,7 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allDocs
-    .filter((p) => p.slug !== 'introduction')
-    .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
-
-  return paths
+  return []
 }
 
 export default function Page({ params }: { params: { slug: string[] } }) {

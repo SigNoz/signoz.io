@@ -11,13 +11,7 @@ export const dynamicParams = true
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
 export async function generateStaticParams() {
-  return [
-    { slug: [] },
-    ...allDocs
-      .filter((doc): doc is Doc & { slug: string } => typeof doc.slug === 'string')
-      .filter((doc) => doc.slug !== 'introduction')
-      .map((doc) => ({ slug: doc.slug.split('/') })),
-  ]
+  return []
 }
 
 const notFoundResponse = () =>
