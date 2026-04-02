@@ -9,9 +9,9 @@ doc_type: howto
 
 This document explains how to monitor Fly.io application metrics in SigNoz by scraping Fly’s Prometheus federation endpoint with the OpenTelemetry Collector.
 
-<KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed="true">
+<Admonition title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed="true">
 If using Self-hosted SigNoz, most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Pre-requisites
 
@@ -71,14 +71,14 @@ echo '<RAW_TOKEN_AFTER_FlyV1>' > fly_federate_token
 
 <Tabs>
 <TabItem value="vm" label="VM" default>
-        <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+        <Admonition title="What classifies as VM?" defaultCollapsed="true">
             A VM is a virtual computer that runs on physical hardware. This includes:
             - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
             - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
             - **Bare metal servers**: Physical servers running Linux/Unix directly
 
             Use this section if you're deploying your Go application directly on a server or VM without containerization.
-        </KeyPointCallout>
+        </Admonition>
 Follow instructions here to install [OpenTelemetry Binary as an agent](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
 
 Update `config.yaml` in `otelcol-contrib` folder and paste the below yaml configuration code in it.
@@ -132,11 +132,11 @@ service:
       exporters: [otlphttp]
 ```
 
-<KeyPointCallout title="Important Configuration" defaultCollapsed="false">
+<Admonition title="Important Configuration" defaultCollapsed="false">
   Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by
   default. To override this, we use the transform processor `convert_gauge_to_sum`. If you want to
   convert any other metrics, add them to the transform processor.
-</KeyPointCallout>
+</Admonition>
 
 
 ### Step 4: Run the Collector
@@ -205,11 +205,11 @@ service:
       exporters: [otlphttp]
 ```
 
-<KeyPointCallout title="Important Configuration" defaultCollapsed="false">
+<Admonition title="Important Configuration" defaultCollapsed="false">
   Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by
   default. To override this, we use the transform processor `convert_gauge_to_sum`. If you want to
   convert any other metrics, add them to the transform processor.
-</KeyPointCallout>
+</Admonition>
 
 ### Step 4: Run the Collector (Docker)
 
@@ -329,11 +329,11 @@ otelAgent:
       readOnly: true
 ```
 
-<KeyPointCallout title="Important Configuration" defaultCollapsed="false">
+<Admonition title="Important Configuration" defaultCollapsed="false">
   Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by
   default. To override this, we use the transform processor `convert_gauge_to_sum`. If you want to
   convert any other metrics, add them to the transform processor.
-</KeyPointCallout>
+</Admonition>
 
 5. **Upgrade the chart:**
 

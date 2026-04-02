@@ -210,11 +210,11 @@ The AWS Console provides the most user-friendly way to enable VPC Flow Logs. The
 
 **After creation:** Typically, logs arrive in ~5 minutes to CloudWatch Logs and ~10 minutes to S3 (delays can be longer). In some cases it can take 10+ minutes for the log group/data to appear.
 
-<KeyPointCallout defaultCollapsed="true" title="Can I Modify a flow log after creation?">
+<Admonition defaultCollapsed="true" title="Can I Modify a flow log after creation?">
 
 You cannot modify a flow log after creation. To change the configuration (format, destination, filter), you need to delete the existing flow log and create a new one.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Method 2: Enable via AWS CLI
 
@@ -272,7 +272,7 @@ For below steps you will need to have <a href="https://docs.aws.amazon.com/cli/l
 aws ec2 describe-flow-logs --output table
 ```
 
-<KeyPointCallout defaultCollapsed="true" title="How to enable custom log format?">
+<Admonition defaultCollapsed="true" title="How to enable custom log format?">
 
 Omitting `--log-format` uses AWS default format (14 fields). To use custom format with additional fields, add:
 
@@ -280,7 +280,7 @@ Omitting `--log-format` uses AWS default format (14 fields). To use custom for
 --log-format '${version} ${account-id} ${interface-id} ${srcaddr} ${dstaddr} ${srcport} ${dstport} ${protocol} ${packets} ${bytes} ${start} ${end} ${action} ${log-status} ${vpc-id} ${subnet-id} ${instance-id}'
 ```
 
-</KeyPointCallout>
+</Admonition>
 
 ## How to Search VPC Flow Logs with CloudWatch Insights
 
@@ -353,11 +353,11 @@ filter srcAddr = "203.0.113.50" or dstAddr = "203.0.113.50"
 
 For flow logs stored in S3, Amazon Athena lets you run standard SQL queries against your log data. This is the most cost-effective approach for analyzing large volumes of historical flow logs.
 
-<KeyPointCallout defaultCollapsed="true" title="What is Athena?">
+<Admonition defaultCollapsed="true" title="What is Athena?">
 
 It's a serverless query service, you don't need to set up any servers or databases. You point it at your S3 data, define a table schema, and run SQL queries. You pay only for the data scanned ($5 per TB).
 
-</KeyPointCallout>
+</Admonition>
 
 ### Step 1: Open Athena
 
@@ -527,14 +527,14 @@ Then delete it:
 aws ec2 delete-flow-logs --flow-log-ids fl-01234567890abcdef
 ```
 
-<KeyPointCallout defaultCollapsed="true" title="Cleanup Reminder">
+<Admonition defaultCollapsed="true" title="Cleanup Reminder">
 
 After deleting a flow log, the data already stored in S3 or CloudWatch remains (and continues to incur storage costs). To fully clean up:
 
 - **S3:** Delete the flow log files from your bucket, or set up an <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html" rel="noopener noreferrer nofollow" target="_blank">S3 lifecycle rule</a> to auto-delete old files
 - **CloudWatch:** Delete the log group or set a retention period
 
-</KeyPointCallout>
+</Admonition>
 
 ## Limitations of CloudWatch and Athena for Flow Log Analysis
 

@@ -59,11 +59,11 @@ You can check out our [detailed write up](https://signoz.io/blog/otel-resource-a
 
 Once you have configured identity for your applications, OpenTelemetry-compatible backends can recognize where the data is coming from. To do that, you need to define **how to send telemetry data** to these backends. The `OTEL_EXPORTER_*` series of environment variables manage how OpenTelemetry-instrumented applications export telemetry data to compatible backends.
 
-<KeyPointCallout title="Per-Signal Configurability">
+<Admonition title="Per-Signal Configurability">
 
 Many exporter-related variables support **per-signal values** (separate settings for traces, metrics, and logs). We’ll see many examples of these values in the following sections.
 
-</KeyPointCallout>
+</Admonition>
 
 ### OTEL_EXPORTER_OTLP_ENDPOINT
 
@@ -85,11 +85,11 @@ If you are using multiple observability tools, you can configure different endpo
 export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="http://localhost:9090/api/v1/otlp/v1/metrics"
 ```
 
-<KeyPointCallout title="Fallback Behaviour">
+<Admonition title="Fallback Behaviour">
 
 Since we didn’t define separate endpoints for traces (via `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`) and logs (via `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` ), OpenTelemetry will continue sending them to the “global” endpoint defined through the `OTEL_EXPORTER_OTLP_ENDPOINT` value. The same behaviour is followed for all other environment variables that support per-signal configuration.
 
-</KeyPointCallout>
+</Admonition>
 
 ### OTEL_EXPORTER_OTLP_PROTOCOL
 
@@ -137,13 +137,13 @@ This variable controls how long the exporter waits for every batch of data to fi
 
 <Figure src="/img/blog/2026/01/otel-environment-variables-failure.webp" alt="For transient errors, the exporter retries data export with exponential backoff." caption="For transient errors, the exporter retries data export with exponential backoff." />
 
-<KeyPointCallout title="Export Timeout Configuration Mismatch">
+<Admonition title="Export Timeout Configuration Mismatch">
 
 The OpenTelemetry documentation (as of protocol version 1.53.0) officially states <a href="https://opentelemetry.io/docs/specs/otel/protocol/exporter/#configuration-options" rel="noopener noreferrer nofollow" target="_blank">10 seconds as the default timeout</a>, and the SDK spec uses `milliseconds` to <a href="https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#otel_exporter_otlp_timeout" rel="noopener noreferrer nofollow" target="_blank">define this value</a>. However, due to a unit value mismatch in older versions of some OpenTelemetry SDKs, this value might not be properly enforced across different languages and SDK versions, as tracked in the <a href="https://github.com/open-telemetry/opentelemetry-python/pull/4860" rel="noopener noreferrer nofollow" target="_blank">OTel Python implementation</a>.
 
 We recommend that you check the behaviour for your implementation locally before pushing changes to production.
 
-</KeyPointCallout>
+</Admonition>
 
 ```bash
 # value in milliseconds, but interpretation can vary by implementation!

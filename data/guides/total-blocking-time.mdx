@@ -20,7 +20,7 @@ Total Blocking Time (TBT) measures how much the main thread is blocked between F
 
 For instance, imagine you opened a webpage, you can see its contents are loaded, but when you try to interact, nothing happens, and the webpage feels "frozen". This is because the site is not fully responsive yet. This unresponsiveness occurs when the browser's main thread is occupied by tasks that blocks interactions (e.g., heavy JavaScript running) and the time spent in these unresponsive period contributes towards the total blocking time.
 
-<KeyPointCallout defaultCollapsed="true" title="Why is 50 ms the threshold for TBT?">
+<Admonition defaultCollapsed="true" title="Why is 50 ms the threshold for TBT?">
 
 The 50 ms rule is derived from the limits of human perception, specifically the fact that people feel an interaction is "instant" only if the visual response happens within 100 milliseconds. As the browser is single-threaded i.e., it can only do one thing at a time, it needs a limit to ensure it doesn't get clogged up.
 
@@ -28,7 +28,7 @@ Google’s RAIL model splits this 100 ms perception window in half: 50 ms is all
 
 If a background task hogs the CPU for longer than 50 ms, it eats into the time needed to respond to the user, pushing the total wait time over that critical 100 ms limit. When this happens, the illusion of instantaneity breaks, and the user perceives lag.
 
-</KeyPointCallout>
+</Admonition>
 
 ## How TBT is Calculated?
 
@@ -154,7 +154,7 @@ TBT (Total Blocking Time) is a lab metric and can be measured under a controlled
 
     It is an all-in-one performance reporter that combines "lab data" (powered by Lighthouse) with "field data" (real-world user data from the Chrome User Experience Report, or CrUX).
 
-<KeyPointCallout defaultCollapsed="true" title="Setting Up Continuous Observability In Production">
+<Admonition defaultCollapsed="true" title="Setting Up Continuous Observability In Production">
 
 As TBT (Total Blocking Time) is a lab metric, it needs to be measured under a controlled environment. Your applications don’t have any specific API, callback or webhook to measure this metric internally or export it.
 
@@ -162,7 +162,7 @@ However, browsers do provide performance entries, or Core Web Vitals, that revea
 
 You can instrument the Core Web Vitals with [OpenTelemetry](https://signoz.io/opentelemetry/) to capture this data from actual user sessions. This data can be exported to a backend like [SigNoz](https://signoz.io/), where you can visualize these metrics in dashboards. For a step-by-step guide, you can refer to [Web Vitals Monitoring with OpenTelemetry](https://signoz.io/docs/frontend-monitoring/web-vitals-with-metrics/)**.**
 
-</KeyPointCallout>
+</Admonition>
 
 ### Using Lighthouse to Measure Total Blocking Time (TBT)
 
@@ -276,11 +276,11 @@ TBT is a lab metric, whereas INP is a field metric. TBT sums the excess blocking
 
 TBT and FID both solve the same problem. However, TBT is a lab metric, and FID is a field metric. When the TBT is calculated, there is no human interaction involved. The browser measures all the blocking time the user would have faced if they had interacted during the page load. FID, on the other hand, measures the experience of real users on actual devices. It only records the value when a person actually interacts for the first time during the page load.
 
-<KeyPointCallout title="Note: FID is deprecated">
+<Admonition title="Note: FID is deprecated">
 
 As of **March 2024**, **Interaction to Next Paint (INP)** has replaced **First Input Delay (FID)** as the official **Core Web Vital** for responsiveness. FID is still a useful field metric, but Google now uses INP as the primary signal for evaluating real-world interactivity.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Summary Table: TBT vs TTI vs INP vs FID
 

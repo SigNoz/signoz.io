@@ -50,7 +50,7 @@ At the time of writing this blog, OpenTelemetry resource attributes can be confi
 
 Let’s understand these methods work and how they interact with each another. 
 
-<KeyPointCallout title="Service Identity">
+<Admonition title="Service Identity">
 
 No matter which method you decide to use, always ensure you at least define the service identity attributes: `service.name`, `service.version` and `deployment.environment.name`. These provide a unique, logical identity to your applications, ensuring they’re identifiable across telemetry pipelines, with well-defined logical separation.
 
@@ -58,7 +58,7 @@ OpenTelemetry uses `unknown_service` as the default for all applications without
 
 You should now be able to understand the severity of the problem we had described at the beginning — telemetry data serves little purpose without identity!
 
-</KeyPointCallout>
+</Admonition>
 
 ### Via Environment Variables
 
@@ -112,7 +112,7 @@ trace.set_tracer_provider(tracer_provider)
 
 The `create` method here automatically reads OpenTelemetry-specific environment variables. If you define the same attribute through environment variables and inside your application code, duplicate keys will be **merged.** This means that the value within application code will **take precedence** and overwrite the value defined in the environment. We explain more about precedence [later in this section](#how-otel-manages-resource-attributes-from-multiple-sources).
 
-<KeyPointCallout level="warning" title="SDK Initialization Sequence"> 
+<Admonition level="warning" title="SDK Initialization Sequence"> 
 
 If you choose to define resource attributes via code, you must avoid using `opentelemetry-bootstrap` (the Python [auto-instrumentation agent](https://signoz.io/blog/opentelemetry-agent/#python-monkey-patching)), as that initializes and registers its own providers. Once a provider is registered, OpenTelemetry forbids replacing it, and your changes will not be applied.
 
@@ -122,17 +122,17 @@ You will see a similar message in your logs if you already have a registered pro
 Overriding of current TracerProvider is not allowed
 ```
 
-</KeyPointCallout>
+</Admonition>
 
 ### Via Resource Detectors
 
 While you can configure and define typical resource attributes via environment variables or code, it is not feasible to hard-code attributes like the OS type, or the EC2 Instance ID. To handle such scenarios, the OpenTelemetry SDK provides mechanisms to detect and set appropriate resource attributes from the environment automatically.
 
-<KeyPointCallout title="Experimental Implementation">
+<Admonition title="Experimental Implementation">
 
 The OTel Python SDK currently <a href="https://github.com/open-telemetry/opentelemetry-python/pull/3181" rel="noopener noreferrer nofollow" target="_blank">uses an experimental environment variable</a> to register resource detectors. Since it is not a part of the default OpenTelemetry spec, it is subject to change. In case of any issues, do cross-check against the latest docs to ensure you follow the latest standards.
 
-</KeyPointCallout>
+</Admonition>
 
 The OpenTelemetry Python SDK ships with the `otel`, `process`, and `os` resource detectors out of the box. Out of these, only the `otel` detector is enabled by default.
 
@@ -228,13 +228,13 @@ resource = Resource.create(
 )
 ```
 
-<KeyPointCallout title="Stability Varies Between Attributes">
+<Admonition title="Stability Varies Between Attributes">
 
 If you are familiar with observability pipelines, you must have commonly used `deployment.environment` to define the environment the application is currently running in. While you can still use the resource attribute, Semantic Conventions <a href="https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-semantic-conventions/src/opentelemetry/semconv/_incubating/attributes/deployment_attributes.py#L20" rel="noopener noreferrer nofollow" target="_blank">have deprecated it</a> in favour of `deployment.environment.name`.
 
 Since the Conventions are being actively developed, many resource attribute namespaces can undergo changes, just like the deployment environment attribute. To indicate this development cycle, the Python package stores these namespaces under the `opentelemetry.semconv._incubating.attributes` path.
 
-</KeyPointCallout>
+</Admonition>
 
 **Managing Custom Resource Attributes**
 

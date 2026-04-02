@@ -77,11 +77,11 @@ Before starting the hands-on setup, make sure you have the following.
 - **Python 3.x:** For running the demo producer and consumer scripts. <a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank">Download Python</a>
 - **SigNoz Cloud Account:** Sign up for a free [SigNoz Cloud account](https://signoz.io/teams/). You will need your Ingestion Key and Region. If you have not generated an ingestion key yet, follow the [ingestion key guide](/docs/ingestion/signoz-cloud/overview/).
 
-<KeyPointCallout defaultCollapsed="true" title="Already have ActiveMQ running?">
+<Admonition defaultCollapsed="true" title="Already have ActiveMQ running?">
 
 If you already have ActiveMQ running and just need to add monitoring, skip to the [Configuring ActiveMQ Classic](#configuring-activemq-classic) or [Configuring ActiveMQ Artemis](#configuring-activemq-artemis) section depending on which variant you use.
 
-</KeyPointCallout>
+</Admonition>
 
 ## Setting Up the Monitoring Pipeline
 
@@ -121,11 +121,11 @@ curl -sLO https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-
 mv opentelemetry-jmx-scraper-1.53.0-alpha.jar opentelemetry-jmx-metrics.jar
 ```
 
-<KeyPointCallout defaultCollapsed="true" title="JAR version must match the OTel Collector Version" >
+<Admonition defaultCollapsed="true" title="JAR version must match the OTel Collector Version" >
 
 Use a JMX Scraper/Gatherer JAR version that’s supported by your collector build. If you see ‘jar hash does not match known versions’, download a JAR version supported by that collector release.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Step 3: Build the OTel Collector Image
 
@@ -626,14 +626,14 @@ rules:
         desc: The number of durable messages in the queue.
 ```
 
-<KeyPointCallout defaultCollapsed="true" title="YAML breakdown">
+<Admonition defaultCollapsed="true" title="YAML breakdown">
 The YAML follows a `rules`-based structure where each rule maps one MBean pattern to a set of metrics.
 
 - `bean` is a JMX ObjectName pattern with wildcards. The receiver queries the MBean server for all objects matching this pattern.
 - `metricAttribute` extracts named parameters from the ObjectName (like `broker`, `address`, `queue`) and attaches them as metric attributes, so you can filter and group by queue name in your dashboards.
 - `prefix` is prepended to every metric name in the `mapping` section. For example, with `prefix: artemis.queue.` and a mapping key of `message.count`, the final metric name becomes `artemis.queue.message.count`.
 - Each entry in `mapping` ties one MBean attribute (like `MessageCount` or `ConsumerCount`) to an OpenTelemetry metric with a specified type (`gauge`, `counter`, or `updowncounter`), unit, and description.
-</KeyPointCallout>
+</Admonition>
 
 ### Step 6: Update the OTel Collector Dockerfile
 

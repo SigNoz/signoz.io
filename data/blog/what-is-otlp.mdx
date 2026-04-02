@@ -51,11 +51,11 @@ OTLP leverages these features to efficiently transfer binary messages that are f
 
 Core OpenTelemetry libraries also enjoy the flexibility to iterate quickly on smaller changes, without being blocked by the protocol versioning. Similarly, minor <a href="https://github.com/open-telemetry/opentelemetry-java/discussions/6802#discussioncomment-11006580" rel="noopener noreferrer nofollow" target="_blank">changes to OTLP do not force dependency updates</a>, allowing libraries to develop at their own pace.
 
-<KeyPointCallout title="JSON Compatibility">
+<Admonition title="JSON Compatibility">
 
 While Protobuf is the preferred (and the default) message schema, OTLP also supports JSON encoding for messages over HTTP networks. This is particularly useful in web environments where loading a full Protobuf library can <a href="https://github.com/open-telemetry/oteps/pull/122" rel="noopener noreferrer nofollow" target="_blank">balloon the JavaScript bundle size</a>. It is also commonly used to maintain compatibility with existing ingestion solutions already on JSON, or for ease of debugging (due to JSON’s human-readable nature).
 
-</KeyPointCallout>
+</Admonition>
 
 ### Guaranteed Delivery via Request-Response
 
@@ -115,13 +115,13 @@ In this mode, clients send data to signal-specific endpoints like `/v1/traces` v
 
 Using JSON in pre-production or test environments might be ideal, as engineers can easily read the payload without any decoding.
 
-<KeyPointCallout title="JSON Serialization Nuance">
+<Admonition title="JSON Serialization Nuance">
 **Watch Out:** OTLP enforces strict rules for JSON to ensure data compatibility. Most commonly, OTLP requires `traceId` and `spanId` to be represented as **hexadecimal strings**, not base64.
 
 - **Correct:** `"traceId": "5b8efff7..."`
 - **Incorrect:** `"traceId": "W47/95gD..."` (Base64)
 
-</KeyPointCallout>
+</Admonition>
 
 ## Implementing OTLP in Your Tech Stack
 

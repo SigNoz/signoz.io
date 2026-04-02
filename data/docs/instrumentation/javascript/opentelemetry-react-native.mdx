@@ -8,9 +8,9 @@ doc_type: howto
 ---
 This guide shows you how to instrument your React Native application with OpenTelemetry and send traces to SigNoz. Your app will automatically capture network requests (fetch and XMLHttpRequest) plus any custom spans you create.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 <Admonition type="warning">
 The JS OTel packages are built for Node and web environments. As noted in <a href="https://opentelemetry.io/docs/demo/services/react-native-app/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry's React Native demo docs</a>, they can work in React Native but are not officially supported and may break with minor version updates or require workarounds. React Native support is an area of active development in the OpenTelemetry community.
@@ -179,7 +179,7 @@ After running your instrumented application, verify traces appear in SigNoz:
     caption="Traces from your React Native app appearing in SigNoz"
 />
 
-<KeyPointCallout title="Trailing slash - 404 from self-hosted collector" defaultCollapsed="true">
+<Admonition title="Trailing slash - 404 from self-hosted collector" defaultCollapsed="true">
 React Native's iOS networking layer (NSURLSession) appends a trailing slash to URLs, which is a known behavior in certain React Native versions. The OTLP exporter sends to `/v1/traces/` instead of `/v1/traces`, and the collector returns 404.
 
 **Fix:** Set `traces_url_path: /v1/traces/` in your collector's OTLP HTTP receiver config:
@@ -194,7 +194,7 @@ receivers:
 ```
 
 SigNoz Cloud handles trailing slashes, so this only affects self-hosted deployments.
-</KeyPointCallout>
+</Admonition>
 
 <details>
 <ToggleHeading>

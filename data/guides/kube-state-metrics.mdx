@@ -159,13 +159,13 @@ Now we'll install **`kube-state-metrics`** into the cluster.
       --set resources.limits.memory=400Mi
     ```
 
-    <KeyPointCallout defaultCollapsed="true" title="Explanation of the flags used">
+    <Admonition defaultCollapsed="true" title="Explanation of the flags used">
 
     - `namespace monitoring`: Deploys everything into the monitoring namespace.
     - `replicaCount=2`: Runs two instances for high availability (production-grade redundancy). Metrics from both are identical, so scraping either is fine.
     - `Resource requests/limits`: Prevents pods from consuming excessive resources in our local cluster while ensuring stable operation.
 
-    </KeyPointCallout>
+    </Admonition>
 
 3. Verify that metrics are being exposed:
 
@@ -218,13 +218,13 @@ We'll deploy it as a Deployment (single pod for simplicity in local testing, but
             exporters: [otlp]
     ```
 
-    <KeyPointCallout defaultCollapsed="true" title="Yaml File Explained">
+    <Admonition defaultCollapsed="true" title="Yaml File Explained">
 
     - `mode: deployment`: Runs as a regular Deployment.
     - `prometheus receiver`: Scrapes the kube-state-metrics service every 30 seconds.
     - `otlp exporter`: Sends metrics securely to SigNoz Cloud using your ingestion key.
 
-    </KeyPointCallout>
+    </Admonition>
 
 2. Install the OpenTelemetry Collector using Helm:
 

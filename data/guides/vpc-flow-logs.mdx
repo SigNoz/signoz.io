@@ -125,12 +125,12 @@ Let's break down each field:
 | **action** | ACCEPT | Whether traffic was accepted or rejected |
 | **log-status** | OK | Logging status (OK, NODATA, or SKIPDATA) |
 
-<KeyPointCallout defaultCollapsed="true" title="What do NODATA and SKIPDATA mean?">
+<Admonition defaultCollapsed="true" title="What do NODATA and SKIPDATA mean?">
 
 - **NODATA:** No network traffic was recorded for the ENI (Network Interface) during the aggregation interval.
 - **SKIPDATA:** Some flow log records were skipped during the aggregation interval due to an internal AWS capacity constraint. This doesn't mean the traffic was lost, it means the logging of that traffic was missed.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Custom Format Fields (Version 3+)
 
@@ -172,13 +172,13 @@ When using custom format, the `${version}` field is automatically set to the hig
 
 Version 7, introduced in 2024, adds 10 new fields specific to Amazon ECS workloads, giving you visibility into container-level traffic for the first time, including task IDs, cluster ARNs, container instance IDs, and service names.
 
-<KeyPointCallout defaultCollapsed="true" title="Why pkt-srcaddr and pkt-dstaddr matter?">
+<Admonition defaultCollapsed="true" title="Why pkt-srcaddr and pkt-dstaddr matter?">
 
 In the default format (version 2), `srcaddr` and `dstaddr` give you the IP addresses of the two interfaces that communicate directly. But if your EC2 instance sits behind a load balancer or NAT gateway, these fields show the load balancer's IP address, not the original client's IP address.
 
 The `pkt-srcaddr` and `pkt-dstaddr` fields (version 3+) preserve the original packet IPs, which is essential for tracing the actual source of traffic.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Version 8+ fields (Enhanced troubleshooting)
 

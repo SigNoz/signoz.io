@@ -28,11 +28,11 @@ Cassandra runs on the Java Virtual Machine (JVM) and uses two built-in tools to 
 
 - **`JMX (Java Management Extensions)`**: JMX is the standard interface that exposes internal Java objects (known as MBeans) over a specific network `default port: 7199`.
 
-<KeyPointCallout defaultCollapsed="true" title="JVM Heap">
+<Admonition defaultCollapsed="true" title="JVM Heap">
 
 - **JVM Heap:** It is the memory region that the JVM uses for object allocation. Its size is controlled by `-Xms` (initial heap) and `-Xmx` (max heap). Actual heap used and committed memory can vary over time and are typically ≤ the configured max.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Metrics Collection using OpenTelemetry
 
@@ -64,7 +64,7 @@ High read latency directly impacts user experience and SLOs. Focus on the P99 li
 
 Cassandra is optimized for writes, so rising write latency is a strong signal that disks, commit logs, or compaction are under pressure. A slow, steady climb here usually points to disk I/O saturation or a cluster that isn't keeping up with incoming writes.
 
-<KeyPointCallout defaultCollapsed="true" title="What do P50, P99, and hot partition mean?">
+<Admonition defaultCollapsed="true" title="What do P50, P99, and hot partition mean?">
 
 - **P50:** This is the time it takes for a request to finish. It means half of your users are getting a response faster than this.
 
@@ -72,7 +72,7 @@ Cassandra is optimized for writes, so rising write latency is a strong signal th
 
 - **Hot partition:** When everyone tries to access the exact same piece of data at the same time, overloading one single node while the rest sit idle is known as Hot Partition.
 
-</KeyPointCallout>
+</Admonition>
 
 ### 2. Request metrics (traffic profile)
 
@@ -102,13 +102,13 @@ These metrics explain whether the cluster is truly healthy or quietly compensati
 
 Hints represent writes buffered for replicas that were down or unreachable at the time. A rising count during known node outages is normal, but if this metric continues to grow while all nodes appear healthy, it often points to a network partition, misconfiguration, or a “zombie" node that looks up but is not actually accepting writes.
 
-<KeyPointCallout defaultCollapsed= "true" title= "What are compaction and hints?">
+<Admonition defaultCollapsed= "true" title= "What are compaction and hints?">
 
 - **Compaction** is a background process that merges multiple immutable SSTables into fewer ones, retaining the latest data versions, removing expired tombstones, reducing disk usage and read amplification for better performance.
 
 - **Hints** are temporarily stored as “write operations” on a coordinator node when a replica node is down. They are replayed later to ensure eventual consistency once the replica recovers
 
-</KeyPointCallout>
+</Admonition>
 
 ### 5. JVM metrics (the engine underneath)
 
@@ -156,11 +156,11 @@ curl -L -o opentelemetry-jmx-metrics.jar \
 
 Create a `docker-compose.yaml` file that starts a Cassandra container and exposes its JMX port so metrics can be scraped.
 
-<KeyPointCallout defaultCollapsed="true" title="Already running Cassandra?">
+<Admonition defaultCollapsed="true" title="Already running Cassandra?">
 
 If you already have a Cassandra service running and only want to scrape its metrics, you just need to **add the highlighted JMX-related configuration** in your environment and then continue with [Step 4](#step-4-start-cassandra).
 
-</KeyPointCallout>
+</Admonition>
 
 ```yaml {14-21}
 services:
@@ -204,7 +204,7 @@ networks:
     driver: bridge # Lets the collector reach Cassandra by container name.
 ```
 
-<KeyPointCallout defaultCollapsed=" true" title=" YAML breakdown">
+<Admonition defaultCollapsed=" true" title=" YAML breakdown">
 
 - **Remote JMX configuration**
 
@@ -228,7 +228,7 @@ networks:
 
     Verifies that Cassandra is actually queryable, not just that the container is running.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Step 4: Start Cassandra
 
@@ -300,7 +300,7 @@ ENTRYPOINT ["/otelcol-contrib-binary"]
 CMD ["--config", "/etc/otel-collector-config.yaml"]
 ```
 
-<KeyPointCallout defaultCollapsed="true" title="Docker File Breakdown**">
+<Admonition defaultCollapsed="true" title="Docker File Breakdown**">
 
 - **Base image (`eclipse-temurin:17-jre`)** – Provides a small Java 17 runtime required by the JMX receiver.
 
@@ -312,7 +312,7 @@ CMD ["--config", "/etc/otel-collector-config.yaml"]
 
 - **`ENTRYPOINT` / `CMD`** – Starts the OpenTelemetry Collector with an external config file.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Step 7: Configure the OpenTelemetry Collector
 
@@ -365,7 +365,7 @@ service:
       level: info
 ```
 
-<KeyPointCallout defaultCollapsed="true" title="Yaml Breakdown">
+<Admonition defaultCollapsed="true" title="Yaml Breakdown">
 
 - **`receivers.jmx`** - Uses the JMX receiver to scrape Cassandra + JVM metrics from the JMX endpoint.
 
@@ -385,7 +385,7 @@ service:
 
 - **`service.telemetry.logs.level`** - Controls how noisy the Collector's own logs are.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Step 8: Add the OTel Collector to docker-compose
 
@@ -418,7 +418,7 @@ networks:
     driver: bridge 
 ```
 
-<KeyPointCallout defaultCollapsed="true" title=" YAML breakdown">
+<Admonition defaultCollapsed="true" title=" YAML breakdown">
 
 - **Custom build (`Dockerfile.otel`)** - Uses your Java-enabled Collector image with the JMX receiver baked in.
 
@@ -426,7 +426,7 @@ networks:
 
 - **`depends_on`** with **`service_healthy`** - Starts the Collector only after Cassandra is healthy, avoiding noisy startup errors.
 
-</KeyPointCallout>
+</Admonition>
 
 ### Step 9: Start the Services
 
@@ -465,11 +465,11 @@ As the metrics are being sent to SigNoz, let's visualize them using the ready-ma
   caption="SigNoz Cassandra dashboard showing the Token Range Read Request Latency panel"
 />
 
-  <KeyPointCallout defaultCollapsed="true" title="Find your hostname">
+  <Admonition defaultCollapsed="true" title="Find your hostname">
     In SigNoz, open the `host.name` dropdown (or use Metrics Explorer) and select an existing `host.name` value emitted with your metrics.
 
     In this Docker demo, it might look like a container name/ID, in production, it should map to your Cassandra node hostname.
-  </KeyPointCallout>
+  </Admonition>
 
 Update the variable value with the correct hostname. Click the dropdown arrow to see available values and select yours. Once set, the dashboard panels will populate.
 

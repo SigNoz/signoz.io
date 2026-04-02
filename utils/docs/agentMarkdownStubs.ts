@@ -63,7 +63,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'JavaInstrumentationListicle',
   'JavascriptInstrumentationListicle',
   'K8sInstallationListicle',
-  'KeyPointCallout',
+  // 'KeyPointCallout',
   'KubernetesDashboardsListicle',
   'LiteLLMDashboardsListicle',
   'LLMMonitoringListicle',
@@ -293,11 +293,6 @@ const createKnownComponentStubs = (): Record<
     const label = labelParts.join(': ')
 
     return React.createElement('blockquote', null, ...buildLabeledContent(label, props.children))
-  },
-  KeyPointCallout: (props) => {
-    const title = getFirstStringProp(props, ['title', 'label', 'name'])
-
-    return React.createElement('section', null, ...buildLabeledContent(title, props.children))
   },
   MCPInstallButton: (props) => {
     const client = getStringProp(props, 'client')
