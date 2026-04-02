@@ -8,11 +8,11 @@
 <!-- Mention OpenTelemetry in the title, slug, and overview. -->
 <!-- Use direct export to SigNoz Cloud as the primary path. -->
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed={true}>
   Most steps are identical. Update the endpoint and remove the ingestion key
   header as shown in [Cloud ->
   Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Prerequisites
 

@@ -82,7 +82,7 @@ cat contributing/docs-authoring.md
 cat contributing/docs-review.md
 
 # scan for likely docs quality issues
-rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|<[^>]+>" data/docs
+rg -n "## Next steps|## Troubleshooting|Admonition|ToggleHeading|https?://|<[^>]+>" data/docs
 
 # quick link health checks for changed links
 curl -sI <URL>
