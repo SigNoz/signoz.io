@@ -28,6 +28,7 @@ type HubChapterContent = {
 
 type HubConfigArticle = {
   url: string
+  title: string
   language?: string
 }
 

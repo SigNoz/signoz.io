@@ -1,8 +1,6 @@
 // @ts-check
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const colors = require('tailwindcss/colors')
-const { nextui } = require('@nextui-org/react')
-
 /** @type {import("tailwindcss/types").Config } */
 module.exports = {
   content: [
@@ -12,13 +10,26 @@ module.exports = {
     './components/**/*.{js,ts,tsx}',
     './layouts/**/*.{js,ts,tsx}',
     './data/**/*.mdx',
-    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
     './node_modules/@signozhq/pagination/dist/**/*.{js,ts,jsx,tsx}',
     './shared/components/**/**/*.{js,ts,tsx}',
   ],
   darkMode: 'class',
   theme: {
     extend: {
+      keyframes: {
+        'nav-popover-in': {
+          '0%': { transform: 'translateY(-8px) scale(0.7)' },
+          '100%': { transform: 'translateY(0) scale(1)' },
+        },
+        'nav-popover-out': {
+          '0%': { transform: 'translateY(0) scale(1)' },
+          '100%': { transform: 'translateY(-6px) scale(0.7)' },
+        },
+      },
+      animation: {
+        'nav-popover-in': 'nav-popover-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'nav-popover-out': 'nav-popover-out 150ms cubic-bezier(0.4, 0, 1, 1) both',
+      },
       maxWidth: {
         '8xl': '1440px',
       },
@@ -247,26 +258,5 @@ module.exports = {
       'satoshi-bold': ['Satoshi Bold', 'sans-serif'],
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-    nextui({
-      themes: {
-        light: {
-          colors: {
-            secondary: '#4E74F8',
-            danger: '#F24769',
-            warning: '#FFCD56',
-          },
-        },
-        dark: {
-          colors: {
-            secondary: '#4E74F8',
-            danger: '#F24769',
-            warning: '#FFCD56',
-          },
-        },
-      },
-    }),
-  ],
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
 }

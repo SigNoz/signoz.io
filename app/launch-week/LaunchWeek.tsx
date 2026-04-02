@@ -9,7 +9,8 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 import CountdownTimer from '@/components/Timer'
 import { Linkedin } from '@/components/social-icons/SolidIcons'
 import Youtube from '@/components/VideoPlayer/VideoPlayer'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import { Card } from '@/components/ui/Card'
 
 const MainSection: React.FC = () => {
@@ -126,21 +127,15 @@ const MainSection: React.FC = () => {
               </div>
             </Link>
             <Modal
-              size={'5xl'}
+              size="5xl"
               backdrop="blur"
               isOpen={isOpen}
               onOpenChange={onOpenChange}
-              className="self-center"
+              panelClassName="bg-transparent p-0"
             >
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id={videoId} />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
+              <div className="px-6 py-10">
+                <Youtube id={videoId} />
+              </div>
             </Modal>
           </div>
 

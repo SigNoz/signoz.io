@@ -1,10 +1,5 @@
-import { unstable_cache } from 'next/cache'
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
-import { allBlogs, allGuides } from 'contentlayer/generated'
-import type { Comparison } from '../types/transformedContent'
-import { fetchAllComparisonsForPage } from './cachedData'
 
 type RawHubPath = {
   key: string
@@ -25,6 +20,8 @@ type RawHubGroup = {
 
 type RawHubArticle = {
   url: string
+  /** Sidebar label; if omitted, derived from the last path segment of the URL. */
+  title?: string
   language?: string
 }
 
@@ -63,71 +60,44 @@ type HubIndex = {
   paths: HubPathNav[]
 }
 
-type SerializedHubIndex = {
-  lookup: Record<string, HubLookupEntry>
-  paths: HubPathNav[]
-}
-
-type ContentIndexItem = {
-  prefix: string
-  collection: readonly { slug?: string; title?: string }[]
-}
-
 function normalizeRoute(route: string) {
-  // Strip domain if present
   const withoutDomain = route.replace(/^https?:\/\/[^/]+/i, '')
   let normalized = withoutDomain.startsWith('/') ? withoutDomain : `/${withoutDomain}`
-  // Remove trailing slash (not for root)
   if (normalized.length > 1 && normalized.endsWith('/')) {
     normalized = normalized.slice(0, -1)
   }
   return normalized
 }
 
-function findContentTitle(route: string, contentIndex: ContentIndexItem[]) {
-  const normalized = normalizeRoute(route)
-  const matchingCollection = contentIndex.find(({ prefix }) => normalized.startsWith(prefix))
-  if (!matchingCollection) {
-    return null
-  }
-
-  const slug = normalized.replace(matchingCollection.prefix, '')
-  const entry = matchingCollection.collection.find((doc) => doc.slug === slug)
-  return entry?.title || null
-}
-
-function fallbackLabelFromRoute(route: string, contentIndex: ContentIndexItem[]) {
+function fallbackTitleFromRoute(route: string): string {
   const slug = route.split('/').filter(Boolean).pop() || ''
-  return (
-    findContentTitle(route, contentIndex) ||
-    slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-  )
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-function articleToDoc(article: RawHubArticle, contentIndex: ContentIndexItem[]): HubNavDoc {
+function articleToDoc(article: RawHubArticle): HubNavDoc {
   const route = normalizeRoute(article.url)
-  const title = findContentTitle(route, contentIndex) || fallbackLabelFromRoute(route, contentIndex)
-
+  const explicit = article.title?.trim()
+  const label = explicit || fallbackTitleFromRoute(route)
   return {
     type: 'doc',
     route,
-    label: title,
+    label,
     language: article.language,
   }
 }
 
-function mapGroupToCategory(group: RawHubGroup, contentIndex: ContentIndexItem[]): HubNavCategory {
+function mapGroupToCategory(group: RawHubGroup): HubNavCategory {
   const items: HubNavItem[] = []
 
   if (group.sections) {
     for (const section of group.sections) {
-      items.push(mapGroupToCategory(section, contentIndex))
+      items.push(mapGroupToCategory(section))
     }
   }
 
   if (group.articles) {
     for (const article of group.articles) {
-      items.push(articleToDoc(article, contentIndex))
+      items.push(articleToDoc(article))
     }
   }
 
@@ -166,24 +136,9 @@ function collectLanguages(items: HubNavItem[], accumulator: Set<string>) {
   }
 }
 
-async function buildHubIndex(comparisons: Comparison[]): Promise<HubIndex> {
+function buildHubIndex(): HubIndex {
   const lookup = new Map<string, HubLookupEntry>()
   const paths: HubPathNav[] = []
-
-  const contentIndex: ContentIndexItem[] = [
-    {
-      prefix: '/blog/',
-      collection: allBlogs,
-    },
-    {
-      prefix: '/comparisons/',
-      collection: comparisons,
-    },
-    {
-      prefix: '/guides/',
-      collection: allGuides,
-    },
-  ]
 
   const sortedPaths = ([...hubConfig.paths] as RawHubPath[]).sort(
     (a: RawHubPath, b: RawHubPath) => {
@@ -212,19 +167,19 @@ async function buildHubIndex(comparisons: Comparison[]): Promise<HubIndex> {
 
     if (chapters) {
       for (const chapter of chapters) {
-        items.push(mapGroupToCategory(chapter, contentIndex))
+        items.push(mapGroupToCategory(chapter))
       }
     }
 
     if (rawPath.sections) {
       for (const section of rawPath.sections) {
-        items.push(mapGroupToCategory(section, contentIndex))
+        items.push(mapGroupToCategory(section))
       }
     }
 
     if (rawPath.articles) {
       for (const article of rawPath.articles) {
-        items.push(articleToDoc(article, contentIndex))
+        items.push(articleToDoc(article))
       }
     }
 
@@ -233,7 +188,6 @@ async function buildHubIndex(comparisons: Comparison[]): Promise<HubIndex> {
     collectLanguages(items, languageSet)
     const languages = Array.from(languageSet)
 
-    // Populate lookup map
     const addToLookup = (entries: HubNavItem[]) => {
       for (const entry of entries) {
         if (entry.type === 'doc') {
@@ -257,35 +211,22 @@ async function buildHubIndex(comparisons: Comparison[]): Promise<HubIndex> {
   return { lookup, paths }
 }
 
-async function fetchAndBuildHubIndex(): Promise<SerializedHubIndex> {
-  let comparisons: Comparison[] = []
-
-  try {
-    comparisons = await fetchAllComparisonsForPage()
-  } catch (e) {
-    console.error('Failed to fetch content for hub index:', e)
-  }
-
-  const { lookup, paths } = await buildHubIndex(comparisons)
-  return { lookup: Object.fromEntries(lookup), paths }
+function getHubIndex(): HubIndex {
+  return buildHubIndex()
 }
 
-async function getCachedHubIndex(): Promise<HubIndex> {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  const cachedFn = unstable_cache(fetchAndBuildHubIndex, ['hub-index', deploymentStatus], {
-    tags: ['mdx-content-list', 'comparisons-list'],
-    revalidate: CMS_REVALIDATE_INTERVAL,
-  })
-
-  const serialized = await cachedFn()
-  return { lookup: new Map(Object.entries(serialized.lookup)), paths: serialized.paths }
+const ROUTE_ALIASES: Record<string, string> = {
+  '/opentelemetry': '/blog/what-is-opentelemetry',
 }
 
-export async function getHubContextForRoute(route: string) {
-  const normalized = normalizeRoute(route)
-  const { lookup, paths } = await getCachedHubIndex()
+export function resolveHubRoute(route: string): string {
+  const norm = normalizeRoute(route)
+  return ROUTE_ALIASES[norm] ?? norm
+}
+
+export function getHubContextForRoute(route: string) {
+  const normalized = resolveHubRoute(route)
+  const { lookup, paths } = getHubIndex()
 
   const match = lookup.get(normalized)
   if (!match) {

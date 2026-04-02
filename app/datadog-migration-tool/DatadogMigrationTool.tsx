@@ -3,7 +3,8 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { Modal, ModalBody, ModalContent, useDisclosure } from '@nextui-org/react'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import {
@@ -39,20 +40,19 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
         </Button>
       </div>
 
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
-        <ModalContent className="max-w-2xl rounded-3xl border border-signoz_slate-200 bg-white text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
-          {(closeHandler) => (
-            <ModalBody className="px-10 py-8 text-signoz_ink-500">
-              <HubspotProvider>
-                <PricingForm
-                  portalId={HUBSPOT_DATA.portalId}
-                  formId={HUBSPOT_DATA.formId}
-                  formName="Datadog Migration Tool"
-                />
-              </HubspotProvider>
-            </ModalBody>
-          )}
-        </ModalContent>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        size="3xl"
+        panelClassName="max-w-2xl rounded-3xl border border-signoz_slate-200 bg-white px-10 py-8 text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]"
+      >
+        <HubspotProvider>
+          <PricingForm
+            portalId={HUBSPOT_DATA.portalId}
+            formId={HUBSPOT_DATA.formId}
+            formName="Datadog Migration Tool"
+          />
+        </HubspotProvider>
       </Modal>
     </div>
   )
@@ -62,7 +62,7 @@ const ReadyToMigrateBanner: React.FC = () => {
   return (
     <SectionLayout
       variant="no-border"
-      className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400 py-10"
+      className="!border-t-1 !border-x-0 !border-dashed !border-signoz_slate-400 py-10"
     >
       <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
         Ready to Migrate from Datadog?
@@ -304,7 +304,7 @@ const WhatWeSupportSection: React.FC = () => {
   return (
     <SectionLayout
       variant="no-border"
-      className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400"
+      className="!border-t-1 !border-x-0 !border-dashed !border-signoz_slate-400"
     >
       <div className="px-6 py-8">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">What We Support</h2>

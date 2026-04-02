@@ -1,976 +1,557 @@
 ---
-title: "Pino Logger: Complete Node.js Guide with Examples [2026]"
-slug: "pino-logger"
-date: "2026-01-01"
+title: Pino Logger - Complete Node.js Guide with Examples [2026]
+slug: pino-logger
+date: 2026-03-31
 tags: [JavaScript, Logging]
-authors: [anubhav_omar]
-description: "Master Pino logging in Node.js. Learn installation, configuration, production setup, and advanced features with practical examples. 5x faster than alternatives."
+authors: [saurabh_patil]
+description: Master Pino logging in Node.js. Learn installation, configuration, production setup, and advanced features with practical examples.
 keywords: [pino logger, nodejs logging, structured logging, pino-pretty, pino-http, child loggers, asynchronous logging, log levels, nodejs debugging, application monitoring, json logging, high performance logging]
 ---
 
-Your Node.js application logs are critical for debugging production issues, monitoring performance, and maintaining system health. But if your logging library becomes a bottleneck, it defeats the purpose.
+Logging is the process of recording timestamped, immutable records of discrete events within a system, enabling developers to diagnose failures, audit behaviour, and maintain operational visibility in production environments. Node.js ships with the built-in `console` a module, which provides methods like `console.log()`, `console.error()`, `console.warn()`, and `console.info()`.
 
-Pino solves this with a fundamentally different approach to logging:
+However, these methods fall short in several practical ways such as, there are no log levels with filterable severity, no structured (JSON) output, no log rotation or file management, and no way to route logs to external systems.  As a result, the Node.js ecosystem relies heavily on third-party libraries such as <a href="https://github.com/pinojs/pino" rel="noopener noreferrer nofollow" target="_blank">Pino</a>, [Winston](/docs/logs-management/send-logs/nodejs-winston-logs/), and [Bunyan](/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs/).
 
-- **5x faster than Winston** with minimal CPU overhead
-- **Structured JSON output** that's immediately machine-readable  
-- **Asynchronous by design** to prevent event loop blocking
-- **[Production-ready](https://signoz.io/guides/production-readiness-checklist/)** with built-in security and performance optimizations
+This article explores Pino Logger in depth, the fastest of the three (<a href="https://github.com/pinojs/pino/blob/main/docs/benchmarks.md" rel="noopener noreferrer nofollow" target="_blank">official benchmarks</a>), which outputs structured JSON by default. We'll start with basic setup and work our way through log levels, child loggers, transports, and error handling. Everything you need to go from `console.log` to a production-grade logging setup.
 
-This guide covers everything from basic setup to advanced production patterns, including integration with observability platforms for comprehensive monitoring.
+## What is Pino Logger?
 
-<InlineCTA message="Collect and analyze your Pino logs with OpenTelemetry and SigNoz — structured JSON logs, full-text search, and correlation with traces." ctaText="Go to Docs" ctaLink="/docs/instrumentation/javascript/opentelemetry-nodejs/" />
+Pino is a fast, low-overhead logging library designed for Node.js applications. It is built around a simple principle: logging should never slow down your application. Pino transport code moves log processing to a separate worker thread, keeping the main thread’s CPU usage low even when application traffic spikes.
 
-## What Makes Pino Different
+Out of the box, it ships with structured JSON output, multiple log levels, child loggers for scoped context, custom serializers for redaction or data reshaping, and pluggable transports.
 
-Pino is built around a simple principle: logging should never slow down your application. Unlike traditional loggers that perform expensive formatting operations in the main thread, Pino takes a minimalist approach.
+## Quickstart: How to set up and use Pino Logger?
 
-**Core Design Principles:**
-- **JSON-first**: Every log is structured data, not formatted text
-- **Async transports**: Heavy operations happen in worker threads
-- **Minimal serialization**: Only essential data transformation
-- **Zero-cost abstractions**: Logs below threshold level have no performance impact
+Let's set up Pino from scratch and see how its features work in practice.
 
-### Performance Comparison
+### Prerequisites
 
-Here's how Pino compares to popular alternatives in real-world scenarios:
+Before starting, make sure you have the latest stable version of <a href="https://nodejs.org/en/download/" rel="noopener noreferrer nofollow" target="_blank">Node.js</a> and `npm` installed. You can verify your version by running `node -v` in your terminal.
 
-| Library | Logs/Second | CPU Usage | Memory Overhead |
-|---------|-------------|-----------|-----------------|
-| **Pino** | 50,000+ | 2-4% | ~45MB |
-| Winston | ~10,000 | 10-15% | ~180MB |
-| Bunyan | ~15,000 | 8-12% | ~150MB |
+### Installing and Setting Up Pino
 
-These numbers translate to concrete benefits:
-- **Faster response times** under high load
-- **Lower infrastructure costs** through reduced resource usage
-- **Better application stability** with minimal logging overhead
-
-## Installation and Basic Setup
-
-Install Pino with npm:
+Set up a clean Node.js project first.
 
 ```bash
-npm install pino
+mkdir pino-demo && cd pino-demo
+npm init -y
 ```
 
-For development with readable output:
+Install <a href="https://www.npmjs.com/package/pino" rel="noopener noreferrer nofollow" target="_blank">Pino</a> using `npm`.
 
 ```bash
-npm install --save-dev pino-pretty
+npm install pino --save
 ```
 
-### First Logger Implementation
+### Basic Setup
 
-To get started, import and initialize Pino. The following code creates a basic logger instance that outputs to the console.
+Setting up a basic Pino Logger involves creating and using a logger instance to log messages. Here's a simple example:
 
-```javascript
-const pino = require('pino')
-const logger = pino()
+```jsx:index.js
+const pino = require('pino');
+const logger = pino();
 
-logger.info('Application started')
-logger.error('Database connection failed')
+logger.info('Pino logger is running');
 ```
 
-Default output is structured JSON:
-```json
-{"level":30,"time":1690747200000,"pid":12345,"hostname":"server-01","msg":"Application started"}
-{"level":50,"time":1690747201000,"pid":12345,"hostname":"server-01","msg":"Database connection failed"}
+This code initializes Pino and logs an info message. By default, the logs are output to the console in JSON format.
+
+```jsx:Output
+{"level":30,"time":1711440000000,"pid":12345,"hostname":"your-machine","msg":"Pino logger is running"}
 ```
 
-Each log includes:
-- `level`: Numeric severity (30=info, 50=error)  
-- `time`: High-precision timestamp
-- `pid`: Process ID for multi-process debugging
-- `hostname`: Server identification
+This JSON-first approach is intentional. This type of [structured JSON logs](/blog/structured-logs/) is easy to parse, filter, and ingest into [log analysis tools](/comparisons/log-analysis-tools/). Every log entry is a single JSON line.
 
-### Environment-Adaptive Configuration
+Following is its breakdown:
 
-In a real-world application, your logging needs will differ between development, testing, and production. The following configuration creates a logger that adapts based on the `NODE_ENV` environment variable, a standard Node.js convention for specifying the application's current environment.
+<Figure src="/img/guides/2026/03/pino-logger-log-breakdown.webp" alt="The structure of a Pino JSON log entry with labeled fields: level (numeric log severity), time (Unix timestamp in milliseconds), pid (process ID of the Node.js program), hostname (machine where the program is running), and msg (log message content)." caption="Breakdown of a default Pino log entry." />
 
-This setup uses a **transport**, which is a component that processes and outputs logs. For development, it uses `pino-pretty` to format logs for readability. In production, it defaults to JSON for efficient processing.
+### Printing Logs for Development
 
-```javascript
-const pino = require('pino')
+While JSON logs are great for machines, they can be difficult for humans to read. For development and debugging purposes, you can use the <a href="https://github.com/pinojs/pino-pretty" rel="noopener noreferrer nofollow" target="_blank">`pino-pretty`</a> module to format logs in a more readable way. The following are the steps to use it:
 
-function createLogger() {
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isTest = process.env.NODE_ENV === 'test'
+**Step 1: Install `pino-pretty` using npm**
 
-  return pino({
-    level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
-    
-    // Pretty output for development
-    transport: isDevelopment ? {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        ignore: 'pid,hostname',
-        translateTime: 'yyyy-mm-dd HH:MM:ss'
-      }
-    } : undefined,
-    
-    // Disable in tests unless explicitly needed
-    enabled: !isTest,
-    
-    // Add application context
-    base: {
-      env: process.env.NODE_ENV,
-      version: process.env.APP_VERSION
-    }
-  })
-}
-
-module.exports = createLogger()
+```bash
+npm install pino-pretty --save-dev
 ```
 
-## Log Levels and Strategic Usage
+<KeyPointCallout defaultCollapsed="true" title="Why use --save-dev flag?">
 
-Pino uses numeric levels that correspond to severity. Understanding when to use each level is crucial for effective monitoring and debugging.
+We use this flag to add the package under `devDependencies` in your `package.json` instead of `dependencies`.
 
-### Standard Levels
+The distinction matters: `dependencies` are the packages your application needs to run in production, while `devDependencies` are only needed during development.
 
-| Level | Numeric | Purpose | Example Use Cases |
-|-------|---------|---------|-------------------|
-| **fatal** | 60 | Application crash imminent | Database connection lost, critical service down |
-| **error** | 50 | Errors requiring investigation | API failures, validation errors, exceptions |
-| **warn** | 40 | Potential issues | Deprecated API usage, resource limits approaching |
-| **info** | 30 | Significant application events | User authentication, service starts, key operations |
-| **debug** | 20 | Detailed debugging information | Function entry/exit, variable states |
-| **trace** | 10 | Very detailed execution flow | Loop iterations, deep debugging |
+</KeyPointCallout>
 
-### Level Configuration Strategy
+**Step 2: Pipe your application output through it**
 
-Set a logging threshold to control verbosity. In this example, `level` is set to `'info'`, so only `info`, `warn`, `error`, and `fatal` logs will be processed. `trace` and `debug` messages are ignored, saving resources.
-
-```javascript
-const logger = pino({ level: 'info' })
-
-// These won't appear in logs (below threshold)
-logger.trace('Entering user validation function')
-logger.debug('Checking user permissions')
-
-// These will appear (at or above threshold)
-logger.info({ userId: 123 }, 'User login successful')
-logger.error({ err: error }, 'Payment processing failed')
+```bash
+node index.js | npx pino-pretty
 ```
 
-### Runtime Level Changes
+```bash:Output
+[10:30:00.000] INFO: Pino logger is running
+```
 
-For production debugging, you can change the log level dynamically without restarting your application. This example creates an Express.js endpoint that allows authorized users to adjust the log level on the fly.
+For the full list of configuration options, including custom colour themes, message formatting, and timestamp handling, check out the <a href="https://github.com/pinojs/pino-pretty?tab=readme-ov-file#programmatic-integration" rel="noopener noreferrer nofollow" target="_blank">official pino-pretty documentation</a>.
 
-```javascript
+### Logging HTTP requests
+
+Pino Logger can be integrated with HTTP servers to automatically log incoming requests and outgoing responses. This is particularly useful for monitoring, debugging, and analyzing the performance and behaviour of web applications.
+
+**Using Pino HTTP Middleware**
+
+You can log HTTP requests and responses using the <a href="https://github.com/pinojs/pino-http" rel="noopener noreferrer nofollow" target="_blank">`pino-http`</a> module, which integrates Pino with HTTP servers like Express. This middleware logs details about each request and response, including HTTP method, URL, status code, and response time.
+
+Step 1: Install the <a href="https://www.npmjs.com/package/pino-http" rel="noopener noreferrer nofollow" target="_blank">pino-http</a> module
+
+```bash
+npm install pino-http --save
+```
+
+Step 2: Integrate pino-http into your application
+
+Here’s an example using Express:
+
+```jsx:app.js
 const express = require('express')
-const logger = require('./logger')
-const app = express()
+const pino = require('pino')
+const pinoHttp = require('pino-http')
 
-app.post('/admin/log-level', (req, res) => {
-  const { level } = req.body
-  const validLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
-  
-  if (!validLevels.includes(level)) {
-    return res.status(400).json({ error: 'Invalid log level' })
-  }
-  
-  logger.level = level
-  logger.info({ newLevel: level }, 'Log level changed')
-  res.json({ message: `Log level changed to ${level}` })
-})
-```
-
-## Structured Logging for Observability  
-
-Structured logging makes your logs immediately useful for monitoring, alerting, and debugging. Instead of parsing text strings, you get queryable data.
-
-### Basic Structured Patterns
-
-Structured logging involves passing an object as the first argument to your log function. This approach is more powerful than simple string interpolation because it creates machine-readable data that can be easily queried and analyzed.
-
-```javascript
 const logger = pino()
-
-// Traditional string interpolation (avoid this)
-logger.info(`User ${userId} completed order ${orderId} for ${amount}`)
-
-// Structured approach (better)
-logger.info({
-  userId: 'usr_123',
-  orderId: 'ord_456', 
-  amount: 99.99,
-  currency: 'USD',
-  paymentMethod: 'credit_card'
-}, 'Order completed successfully')
-```
-
-### Error Logging with Context
-
-When logging errors, always include relevant context. This example shows how to wrap a payment processing function in a `try...catch` block. If an error occurs, the logger captures not only the error itself (`err: error`) but also contextual data like the `orderId` and `userId`, which is invaluable for debugging.
-
-```javascript
-async function processPayment(orderId, userId) {
-  try {
-    const result = await paymentService.charge(orderId)
-    
-    logger.info({
-      orderId,
-      userId,
-      paymentId: result.id,
-      amount: result.amount,
-      duration: result.processingTime
-    }, 'Payment processed successfully')
-    
-    return result
-  } catch (error) {
-    logger.error({
-      err: error,
-      orderId,
-      userId,
-      operation: 'payment_processing',
-      paymentProvider: 'stripe'
-    }, 'Payment processing failed')
-    
-    throw error
-  }
-}
-```
-
-### Performance Monitoring Through Logs
-
-You can use structured logs to monitor application performance. This function measures the duration of a database query using `process.hrtime.bigint()` for high-precision timing. The resulting duration is logged along with other metadata, allowing you to track and categorize query performance over time.
-
-```javascript
-async function performDatabaseQuery(query) {
-  const startTime = process.hrtime.bigint()
-  
-  try {
-    const result = await db.query(query)
-    const duration = Number(process.hrtime.bigint() - startTime) / 1000000 // Convert to ms
-    
-    logger.info({
-      operation: 'database_query',
-      table: query.table,
-      duration: Math.round(duration * 100) / 100,
-      recordCount: result.length,
-      performanceCategory: categorizePerformance(duration)
-    }, 'Database query completed')
-    
-    return result
-  } catch (error) {
-    const duration = Number(process.hrtime.bigint() - startTime) / 1000000
-    
-    logger.error({
-      err: error,
-      operation: 'database_query',
-      table: query.table,
-      duration: Math.round(duration * 100) / 100
-    }, 'Database query failed')
-    
-    throw error
-  }
-}
-
-function categorizePerformance(ms) {
-  if (ms < 100) return 'fast'
-  if (ms < 500) return 'normal'  
-  if (ms < 1000) return 'slow'
-  return 'critical'
-}
-```
-
-## Child Loggers for Context Management
-
-Child loggers inherit parent configuration while adding contextual information. This creates consistent context across related operations without repetitive logging.
-
-### Request-Scoped Logging
-
-In web applications, it's useful to correlate all logs generated during a single API request. This Express.js middleware creates a **child logger** for each incoming request. The child logger automatically includes a unique `requestId` and other request details in every log message, making it easy to trace the entire lifecycle of a request.
-
-```javascript
-const express = require('express')
-const { v4: uuidv4 } = require('uuid')
-const logger = require('./logger')
+const httpLogger = pinoHttp({ logger })
 
 const app = express()
 
-// Create request-scoped logger middleware
-app.use((req, res, next) => {
-  const requestId = req.headers['x-request-id'] || uuidv4()
-  
-  req.log = logger.child({
-    requestId,
-    method: req.method,
-    path: req.path,
-    userAgent: req.headers['user-agent'],
-    ip: req.ip
-  })
-  
-  req.log.info('Request started')
-  next()
+// Use Pino HTTP middleware
+app.use(httpLogger)
+
+app.get('/', (req, res) => {
+  res.send('Hello, world!')
 })
 
-// Route handlers automatically have contextual logging
-app.get('/users/:id', async (req, res) => {
-  const { id } = req.params
-  
-  req.log.debug({ userId: id }, 'Fetching user data')
-  
-  try {
-    const user = await getUserById(id)
-    req.log.info({ userId: id, fetchDuration: 45 }, 'User retrieved')
-    res.json(user)
-  } catch (error) {
-    req.log.error({ err: error, userId: id }, 'User fetch failed')
-    res.status(500).json({ error: 'Internal server error' })
-  }
+app.listen(3000, () => {
+  logger.info('Server is running on port 3000')
 })
 ```
 
-### Service-Specific Loggers
+Run using `node app.js` and visit `http://localhost:3000/`, reload page to generate the logs.
 
-For better organization, you can create child loggers for different parts of your application, such as authentication, database interactions, or payment processing. This helps you filter and analyze logs from specific services more easily.
+```jsx:Output
+{"level":30,"time":1774947711963,"pid":12345,"hostname":"your-machine","msg":"Server is running on port 3000"}
 
-```javascript
-// logger.js
-const pino = require('pino')
-const baseLogger = pino()
+{"level":30,"time":1774947742994,"pid":12345,"hostname":"your-machine","req":{"id":1,"method":"GET","url":"/","query":{},"params":{},"headers":{"host":"localhost:3000","connection":"keep-alive",....},"remoteAddress":"::1","remotePort":63275},"res":{"statusCode":200,"headers":{"x-powered-by":"Express",...}},"responseTime":6,"msg":"request completed"}
+```
 
-module.exports = {
-  auth: baseLogger.child({ service: 'auth' }),
-  database: baseLogger.child({ service: 'database' }),
-  payment: baseLogger.child({ service: 'payment' }),
-  notification: baseLogger.child({ service: 'notification' })
+In this example, the Pino HTTP middleware is added to the Express application using `app.use(httpLogger)`. This ensures that all incoming HTTP requests and outgoing responses are logged automatically.
+
+## Configuring Pino Logger for Production
+
+Now that the basic setup is working, let's configure Pino for how it's actually used in production, starting with controlling what gets logged.
+
+### Pino Log Levels
+
+Log levels let you control the level of detail in your application's output. Every log message has a severity, and Pino will only output messages at or above the level you configure. This means in production, you can set the level to `info` or `warn` to filter out noisy debug output, and in development, you can drop it to `debug` or `trace` to see everything.
+
+Pino supports six log levels in order of decreasing severity: `fatal`, `error`, `warn`, `info`, `debug`, and `trace`. Each level has a corresponding numeric value: `fatal` is 60, `trace` is 10. By default, Pino logs at `info` (30), which means `debug` and `trace` messages are silently ignored unless you explicitly lower the threshold.
+
+| Level | Numeric Value | Use Case |
+| --- | --- | --- |
+| `trace` | 10 | Fine-grained debugging (variable values, loop iterations) |
+| `debug` | 20 | Diagnostic information for development |
+| `info` | 30 | Normal operational messages (server started, request handled) |
+| `warn` | 40 | Unexpected situations that are not errors |
+| `error` | 50 | Errors that need attention but don't crash the process |
+| `fatal` | 60 | Unrecoverable errors that will crash the process |
+
+```jsx:logLevels.js
+const pino = require('pino');
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+});
+
+logger.fatal('Application crashed — unrecoverable');
+logger.error('Failed to connect to database');
+logger.warn('Deprecated API endpoint hit');
+logger.info('Server started on port 3000');
+logger.debug('Request payload: %o', { userId: 42 });
+logger.trace('Entering function parseToken()');
+```
+
+Output:
+<Figure src="/img/guides/2026/03/pino-logger-output-2.webp" alt="" caption="" />Using `process.env.LOG_LEVEL` lets you change verbosity at deploy time without touching code. Set it to `debug` in staging, `warn` in production.
+
+### Transports
+
+Pino follows the philosophy that the logger should do only one thing: write JSON to stdout. Everything else, such as sending logs to a file, forwarding them to [log management tools](/blog/best-open-source-log-management-tools/), or routing them to multiple destinations, is handled by transports. A transport is a separate worker thread that receives log data from the main thread and processes it independently, so log routing never blocks your application.
+
+You configure transports using `pino.transport()`, passing either a single target or multiple targets. Each target is an npm package (or an absolute path) that defines where and how logs are delivered.
+
+```jsx:transport.js
+const pino = require('pino');
+
+const logger = pino({
+  level: 'info',
+  transport: {
+    targets: [
+      {
+        target: 'pino/file',
+        options: { destination: './app.log' },
+        level: 'info',
+      },
+      {
+        target: 'pino-pretty',
+        options: { colorize: true },
+        level: 'debug',
+      },
+    ],
+  },
+});
+
+logger.info('This goes to both the file and the console');
+```
+
+Once you run the `transport.js` file, you will see a log in the console, and a new file named `app.log` will be created with the log.
+
+### Child Loggers
+
+In any application with multiple components or concurrent requests, a single logger instance isn't enough. You need context, like which request triggered this log, which module produced it, and which user was involved.
+
+Child loggers solve this by letting you create a new logger that inherits the parent's configuration but carries additional fields that are automatically included in every log entry it produces.
+
+You create a child logger using `logger.child()` and passing an object of key-value pairs. These fields get merged into every log line from that child, so you don't have to manually repeat them in each log call.
+
+```jsx:childLogger.js
+const pino = require('pino');
+const logger = pino();
+
+// Create a child logger with module context
+const authLogger = logger.child({ module: 'auth' });
+
+authLogger.info('User login attempted');
+// {"level":30,"time":...,"module":"auth","msg":"User login attempted"}
+
+// Create a request-scoped child logger
+function handleRequest(req) {
+  const reqLogger = logger.child({ requestId: req.id, userId: req.userId });
+
+  reqLogger.info('Processing request');
+  // {"level":30,"time":...,"requestId":"abc-123","userId":42,"msg":"Processing request"}
 }
 ```
 
-Now, your authentication service can use its dedicated logger:
-
-```javascript  
-// auth-service.js
-const { auth: logger } = require('./logger')
-
-class AuthService {
-  async authenticateUser(email, password) {
-    logger.info({ email }, 'Authentication attempt')
-    
-    try {
-      const user = await this.validateCredentials(email, password)
-      logger.info({ userId: user.id, email }, 'Authentication successful')
-      return this.generateToken(user)
-    } catch (error) {
-      logger.warn({ email, reason: error.message }, 'Authentication failed')
-      throw new AuthenticationError('Invalid credentials')
-    }
-  }
-}
+```jsx:Output
+{"level":30,"time":1774874841855,"pid":55188,"hostname":"your-machine","module":"auth","msg":"User login attempted"}
+{"level":30,"time":1774874841856,"pid":55188,"hostname":"your-machine","requestId":"abc-123","userId":42,"msg":"Processing request"}
 ```
 
-## Custom Serializers for Security and Performance
+This pattern is especially useful in Express or Fastify middleware. Create a child logger per request with a unique `requestId` attach it to the request object, and every downstream log automatically carries that ID. When something goes wrong in production, you can filter logs by `requestId` and trace the entire lifecycle of a single request.
 
-Serializers transform objects before logging, giving you control over what data appears in logs. This is essential for security, performance, and consistency.
+### Built-in and Custom Serializers
 
-### Security-Focused Serializers
+When you log objects like HTTP requests, responses, or errors, you rarely want the entire raw object in your logs. Serializers help you define how specific fields are transformed before they're written to the log output. You pass them as functions under the `serializers` option, where each key maps to a field name in the logged object.
 
-A **serializer** is a function that transforms an object before it is logged. This is crucial for security, as it allows you to redact or mask sensitive information like passwords, API keys, and personally identifiable information (PII) before it ever reaches your logs.
+```jsx {2,3,4}
+...
+  serializers: {
+    // Functions
+  },
+...
+```
 
-This example defines serializers for `user`, `request`, and `error` objects to ensure sensitive data is properly handled.
+Pino provides ready-made serializer functions for three common objects:
 
-```javascript
+1. `pino.stdSerializers.req` takes the raw Node.js incoming message object and returns only `{ method, url, headers, remoteAddress, remotePort }`. Everything else is thrown away.
+2. `pino.stdSerializers.res` takes the raw `ServerResponse` and returns only `{ statusCode, headers }`.
+3. `pino.stdSerializers.err` takes an `Error` object and returns `{ type, message, stack }`.
+
+```jsx:builtInSerializer.js
+const http = require('http');
+const pino = require('pino');
+
 const logger = pino({
   serializers: {
-    user: (user) => ({
-      id: user.id,
-      username: user.username,
-      email: user.email ? maskEmail(user.email) : undefined,
-      role: user.role,
-      // Never log password, apiKey, tokens, etc.
-      lastLogin: user.lastLogin
-    }),
-    
-    request: (req) => {
-      const safe = { ...req }
-      if (safe.headers) {
-        // Remove sensitive headers
-        delete safe.headers.authorization
-        delete safe.headers['x-api-key'] 
-        delete safe.headers.cookie
-      }
-      return safe
-    },
-    
-    error: (err) => {
-      const safeError = { ...err }
-      // Sanitize error messages that might contain sensitive data
-      if (safeError.message) {
-        safeError.message = safeError.message
-          .replace(/password=\w+/gi, 'password=***')
-          .replace(/token=[\w-]+/gi, 'token=***')
-      }
-      return safeError
-    }
-  }
-})
+    req: pino.stdSerializers.req,
+    res: pino.stdSerializers.res,
+    err: pino.stdSerializers.err,
+  },
+});
 
-function maskEmail(email) {
-  const [local, domain] = email.split('@')
-  return `${local.slice(0, 2)}***@${domain}`
-}
+const server = http.createServer((req, res) => {
+  // Log the request using built-in serializer
+  logger.info({ req }, 'Incoming request');
+
+  res.statusCode = 200;
+  res.end('Hello World');
+
+  // Log the response using built-in serializer
+  logger.info({ res }, 'Request completed');
+});
+
+server.listen(3000, () => {
+  logger.info('Server running on port 3000');
+});
 ```
 
-### Global Data Redaction
+Run the file `builtInSerializer.js`, then hit `http://localhost:3000` in your browser.
 
-Pino also provides a built-in redaction feature for a simpler way to remove sensitive data. You can specify a list of `paths` (object keys) to automatically remove from your logs. This is a more convenient alternative to writing custom serializers for common redaction needs.
+```jsx:Output
+{"level":30,"time":1711440000000,"pid":12345,"hostname":"your-machine","msg":"Server running on port 3000"}
+{"level":30,"time":1711440001000,"pid":12345,"hostname":"your-machine","req":{"method":"GET","url":"/","headers":{"host":"localhost:3000",...},"remoteAddress":"::1","remotePort":54321},"msg":"Incoming request"}
+{"level":30,"time":1711440001001,"pid":12345,"hostname":"your-machine","res":{"statusCode":200,"headers":{}},"msg":"Request completed"}
+```
 
-```javascript
+Notice the `req` field, it only contains `method`, `url`, `headers`, `remoteAddress`, and `remotePort`. Without a serializer, the raw `req`  object would dump hundreds of internal Node.js properties into your log.
+
+Try without the serializer, remove `req: pino.stdSerializers.req` from the config and run it again. You'll see the difference immediately.
+
+Even though most of the internal Node.js properties were removed by the built-in serializer, it still logs all headers, including `cookie`, which contains session tokens, tracking IDs, and other sensitive data you definitely don't want in your logs.
+
+This is exactly where the built-in serializer falls short, and a custom serializer can be used. It’s the same idea, but you write the function yourself. For example, in the following file, we have written a custom `req` function which will only log the method, url, remoteAddress and headers you explicitly chose, like `host`.
+
+```jsx:customSerializer.js
+const http = require('http');
+const pino = require('pino');
+
 const logger = pino({
-  redact: {
-    paths: [
-      'password',
-      'token', 
-      'apiKey',
-      'creditCard.number',
-      'ssn',
-      '*.password',
-      '*.token',
-      'req.headers.authorization',
-      'req.headers.cookie'
-    ],
-    remove: true // Completely remove these fields
-  }
-})
-
-// This will automatically remove sensitive fields
-logger.info({
-  user: {
-    id: 123,
-    email: 'user@example.com',
-    password: 'secret123', // This won't appear in logs
-    apiKey: 'sk_live_abc123' // This won't appear either
-  }
-}, 'User data processed')
-```
-
-## HTTP Request Logging
-
-Effective HTTP logging provides insights into API performance, user behavior, and system issues.
-
-### Express.js Integration
-
-For web applications, `pino-http` is an essential middleware that automates the logging of incoming requests and outgoing responses. It provides rich, contextual information about each HTTP transaction with minimal configuration.
-
-```bash
-npm install pino-http
-```
-
-This example demonstrates how to use `pino-http` with Express.js, including custom log levels based on HTTP status codes and custom success messages.
-
-```javascript
-const express = require('express')
-const pinoHttp = require('pino-http')
-const logger = require('./logger')
-
-const app = express()
-
-app.use(pinoHttp({
-  logger,
-  
-  // Custom log levels based on response status
-  customLogLevel: (req, res, err) => {
-    if (res.statusCode >= 400 && res.statusCode < 500) return 'warn'
-    if (res.statusCode >= 500 || err) return 'error'
-    if (res.statusCode >= 300 && res.statusCode < 400) return 'silent'
-    return 'info'
-  },
-  
-  // Custom success message with timing
-  customSuccessMessage: (req, res) => {
-    return `${req.method} ${req.url} completed in ${res.responseTime}ms`
-  }
-}))
-
-app.get('/api/users/:id', async (req, res) => {
-  // req.log is automatically available with request context
-  req.log.info({ userId: req.params.id }, 'Processing user request')
-  
-  try {
-    const user = await getUserById(req.params.id)
-    res.json(user)
-  } catch (error) {
-    req.log.error({ err: error }, 'User retrieval failed') 
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-```
-
-### Performance-Optimized HTTP Logging
-
-For high-traffic APIs where every millisecond counts, you can optimize `pino-http` to reduce its overhead. This example shows how to skip logging for common, low-value endpoints like health checks and static assets. It also uses minimal serializers to log only the most essential request and response data, further improving performance.
-
-```javascript
-const pinoHttp = require('pino-http')
-
-const httpLogger = pinoHttp({
-  logger: pino({ level: 'info' }),
-  
-  // Skip logging for health checks and static assets
-  autoLogging: {
-    ignore: (req) => {
-      return req.url === '/health' || 
-             req.url.startsWith('/static/') ||
-             req.url.match(/\.(css|js|png|jpg|ico)$/)
-    }
-  },
-  
-  // Minimal serialization for performance
   serializers: {
     req: (req) => ({
       method: req.method,
       url: req.url,
-      id: req.id
-    }),
-    res: (res) => ({
-      statusCode: res.statusCode
-    })
-  }
-})
-
-app.use(httpLogger)
-```
-
-## Production Configuration Best Practices
-
-Production logging requires careful configuration for performance, security, and reliability.
-
-### Environment-Specific Setup
-
-This function demonstrates a robust, environment-aware logger configuration. It combines several best practices:
-
-- **Environment-based levels**: Uses `'debug'` for development and `'info'` for production.
-- **Custom formatters**: Standardizes the appearance of log levels and adds application context like `env` and `version`.
-- **Conditional transports**: Uses `pino-pretty` in development for readability and standard JSON output in production for efficiency.
-- **Production redaction**: Automatically removes sensitive data in production environments.
-
-```javascript
-function createProductionLogger() {
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isProduction = process.env.NODE_ENV === 'production'
-  
-  const config = {
-    level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
-    formatters: {
-      level: (label) => ({ level: label.toUpperCase() }),
-      bindings: (bindings) => ({
-        pid: bindings.pid,
-        hostname: bindings.hostname,
-        env: process.env.NODE_ENV,
-        version: process.env.APP_VERSION
-      })
-    }
-  }
-  
-  if (isDevelopment) {
-    config.transport = {
-      target: 'pino-pretty',
-      options: { colorize: true, translateTime: 'yyyy-mm-dd HH:MM:ss' }
-    }
-  } else if (isProduction) {
-    // Production optimizations
-    config.redact = {
-      paths: ['password', 'token', 'apiKey', '*.password', '*.token'],
-      remove: true
-    }
-  }
-  
-  return pino(config)
-}
-
-module.exports = createProductionLogger()
-```
-
-### High-Performance Async Logging
-
-For maximum performance, especially in high-throughput applications, you can use `sonic-boom`, a specialized, high-speed file writer. By setting `sync: false`, you enable fully asynchronous logging, where log messages are written to a buffer and flushed to the file system in the background. This minimizes I/O wait time in your application's main thread.
-
-```javascript
-const pino = require('pino')
-const SonicBoom = require('sonic-boom')
-
-// High-performance file destination
-const dest = new SonicBoom({
-  dest: '/var/log/app/application.log',
-  sync: false, // Async writes
-  append: true,
-  mkdir: true
-})
-
-const logger = pino({
-  level: 'info',
-  timestamp: pino.stdTimeFunctions.epochTime, // Faster timestamps
-}, dest)
-
-// Graceful shutdown handling
-process.on('SIGTERM', () => {
-  dest.flush()
-  dest.end()
-  process.exit(0)
-})
-```
-
-### Error Handling and Crash Safety
-
-It is critical that your application logs fatal errors right before it crashes. This code sets up global error handlers for `uncaughtException` and `unhandledRejection`. It uses `pino.final` to create a special logger that performs a synchronous, blocking write operation. This ensures that the final, critical log message is written before the process exits, which is essential for post-mortem debugging.
-
-```javascript
-const logger = pino()
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  const finalLogger = pino.final(logger)
-  finalLogger.fatal({ err: error }, 'Uncaught exception')
-  process.exit(1)
-})
-
-// Handle unhandled promise rejections  
-process.on('unhandledRejection', (reason, promise) => {
-  const finalLogger = pino.final(logger)
-  finalLogger.fatal({ reason }, 'Unhandled promise rejection')
-  process.exit(1)
-})
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('Received SIGTERM, shutting down gracefully')
-  pino.final(logger, (err, finalLogger) => {
-    if (err) finalLogger.error(err, 'Shutdown error')
-    finalLogger.info('Application shutdown complete')
-    process.exit(0)
-  })
-})
-```
-
-## Integration with SigNoz for Complete Observability
-
-[SigNoz](https://signoz.io/docs/introduction/) provides a unified platform for logs, metrics, and traces, making it ideal for comprehensive [Node.js application monitoring](https://signoz.io/blog/nodejs-opensource-application-monitoring/) with Pino.
-
-### Why SigNoz with Pino
-
-SigNoz offers several advantages for Pino integration:
-
-- **Unified Dashboard**: View logs alongside traces and metrics
-- **[OpenTelemetry](https://signoz.io/opentelemetry/) Native**: Seamless integration with modern observability standards
-- **SQL-like Querying**: Query structured log data with familiar syntax
-- **Real-time Monitoring**: Live log streaming and alerting
-- **Open Source**: Cost-effective alternative to commercial solutions
-
-### Setup with OpenTelemetry Transport
-
-To send logs to SigNoz, you need to use the `pino-opentelemetry-transport`. This transport converts Pino log entries into the OpenTelemetry format and sends them to your SigNoz instance.
-
-```bash
-npm install pino-opentelemetry-transport
-```
-
-This configuration sets up a multi-transport logger. In production, it sends `info`-level logs to SigNoz. In development, it also sends `debug`-level logs to the console in a human-readable format using `pino-pretty`.
-
-```javascript
-const pino = require('pino')
-
-const logger = pino({
-  transport: {
-    targets: [
-      {
-        target: 'pino-opentelemetry-transport',
-        options: {
-          resourceAttributes: {
-            'service.name': 'nodejs-api',
-            'service.version': process.env.APP_VERSION || '1.0.0',
-            'deployment.environment': process.env.NODE_ENV || 'development'
-          }
-        },
-        level: 'info'
+      remoteAddress: req.remoteAddress,
+      // only pick the headers you actually need
+      headers: {
+        host: req.headers.host,
       },
-      // Keep console output for development
-      ...(process.env.NODE_ENV === 'development' ? [{
-        target: 'pino-pretty',
-        level: 'debug',
-        options: { colorize: true }
-      }] : [])
-    ]
-  }
-})
+    }),
+  },
+});
 
-module.exports = logger
+const server = http.createServer((req, res) => {
+  // Log the request using built-in serializer
+  logger.info({ req }, 'Incoming request');
+
+  res.statusCode = 200;
+  res.end('Hello World');
+
+});
+
+server.listen(3000, () => {
+  logger.info('Server running on port 3000');
+});
 ```
 
-### Environment Configuration for SigNoz
+```jsx:Output
+{"level":30,"time":1774939188325,"pid":12345,"hostname":"your-machine","msg":"Server running on port 3000"}
+{"level":30,"time":1774939190368,"pid":12345,"hostname":"your-machine","req":{"method":"GET","url":"/","headers":{"host":"localhost:3000"}},"msg":"Incoming request"}
+{"level":30,"time":1774939190402,"pid":12345,"hostname":"your-machine","req":{"method":"GET","url":"/favicon.ico","headers":{"host":"localhost:3000"}},"msg":"Incoming request"}
+```
 
-To connect your application to SigNoz, you need to set a few environment variables. These variables tell the OpenTelemetry transport where to send the logs and what metadata to include.
+### Redaction
 
-- `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`: The URL of your SigNoz log ingestion endpoint.
-- `OTEL_EXPORTER_OTLP_HEADERS`: Your SigNoz access token for authentication (for SigNoz Cloud).
-- `OTEL_RESOURCE_ATTRIBUTES`: Metadata that identifies your service, such as its name and version.
+Serializers let you reshape objects before logging, but sometimes you just need to hide specific fields across your entire log output, such as passwords, tokens, credit card numbers, etc, without writing a serializer for every object. Redaction handles this at the logger level. You pass an array of key paths, and Pino replaces their values with `[Redacted]` in every log entry, regardless of where they appear.
+
+```jsx:redact.js
+const pino = require('pino');
+
+const logger = pino({
+  redact: ['password', 'creditCard', 'headers.cookie', 'headers.authorization'],
+});
+
+logger.info({
+  username: 'Olly',
+  password: 'super-secret',
+  creditCard: '4111-1111-1111-1111',
+}, 'User signup');
+// {"level":30,"time":...,"username":"olly","password":"[Redacted]","creditCard":"[Redacted]","msg":"User signup"}
+```
+
+```jsx:Output
+{"level":30,"time":1774940121873,"pid":12345,"hostname":"your-machine","username":"Olly","password":"[Redacted]","creditCard":"[Redacted]","msg":"User signup"}
+```
+
+You can also change the placeholder value or remove the field entirely instead of showing `[Redacted]`:
+
+```jsx:customRedacted.js
+const pino = require('pino');
+
+const logger = pino({
+  redact: {
+    paths: ['password', 'creditCard'],
+    censor: '**',       // replaces with '**' instead of '[Redacted]'
+    // remove: true,         // uncomment to remove the field entirely from the output
+  },
+});
+
+logger.info({
+  username: 'Olly',
+  password: 'super-secret',
+  creditCard: '4111-1111-1111-1111',
+}, 'User signup');
+```
+
+```jsx:Output
+{"level":30,"time":1774940321495,"pid":12345,"hostname":"your-machine","username":"Olly","password":"**","creditCard":"**","msg":"User signup"}
+```
+
+The difference between serializers and redaction lies in scope: serializers transform a specific field's shape, while redaction blanks out sensitive values wherever they appear. In practice, you'll often use both together. For the full list of path syntax options, see the <a href="https://github.com/pinojs/pino/blob/main/docs/redaction.md" rel="noopener noreferrer nofollow" target="_blank">official Redaction documentation</a>.
+
+### Asynchronous Logging
+
+Asynchronous logging helps to offload logging operations to a separate process, reducing the impact on the main application thread and improving performance. This is particularly useful in high-performance applications where logging must be performed without blocking the main execution flow. Pino offers two ways to make logging asynchronous.
+
+1. **Using `pino.destination()` with `sync: false`:** This buffers log messages in memory and flushes them to the destination in larger chunks, reducing the number of I/O operations.
+
+    ```jsx:asyncLogging.js
+    const pino = require('pino');
+    
+    const logger = pino(
+      pino.destination({
+        dest: './app.log',
+        minLength: 4096,  // buffer 4KB before writing
+        sync: false,
+      })
+    );
+    
+    logger.info('Server started');
+    logger.info({ userId: 42 }, 'User logged in');
+    logger.error('Something went wrong');
+    
+    // periodically flush the buffer during low-traffic periods
+    setInterval(() => {
+      logger.flush();
+    }, 10000).unref();
+    ```
+
+2. **Using `pino.transport()`:** This moves log processing entirely to a separate worker thread, which reduces work on the main thread during traffic spikes. It’s covered in the Transports section above.
+
+Buffered messages can be lost if the process crashes before a flush, and there's no one-to-one relationship between a log call and a write. Pino mitigates the first issue by automatically flushing on `exit`, `SIGINT`, `SIGTERM`, and other shutdown signals.
+
+## Integrating Pino with Fastify
+
+<a href="https://fastify.dev/" rel="noopener noreferrer nofollow" target="_blank">Fastify</a> has built-in Pino integration and does not require a separate dedicated Pino integration package. However, it’s disabled by default, and you need to <a href="https://fastify.dev/docs/latest/Reference/Logging/" rel="noopener noreferrer nofollow" target="_blank">enable it</a> when creating a Fastify instance.
+
+**Step 1: Install Fastify using npm**
 
 ```bash
-# For SigNoz Cloud
-export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://ingest.{region}.signoz.cloud:443/v1/logs"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
-export OTEL_RESOURCE_ATTRIBUTES="service.name=nodejs-api,service.version=1.0.0"
-
-# For self-hosted SigNoz
-export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://your-signoz-instance:4318/v1/logs"
-export OTEL_RESOURCE_ATTRIBUTES="service.name=nodejs-api,service.version=1.0.0"
+npm install fastify --save
 ```
 
-### Complete Application Example
+**Step 2: Enable pino logger and create a basic server**
 
-This example ties everything together, showing a complete Express.js application that uses `pino-http` for automated request logging and sends all logs to SigNoz. It demonstrates how to add rich, structured context to your logs, including performance metrics like `fetchDuration` and business-relevant data like `userEmail` and `cacheHit`.
+```jsx:fastifyApp.js
+const fastify = require('fastify')({
+  logger: true,
+});
 
-```javascript
-// app.js
-const express = require('express')
-const pinoHttp = require('pino-http')
-const logger = require('./logger')
+fastify.get('/', async (request, reply) => {
+  request.log.info('Handling root route');
+  return { hello: 'world' };
+});
 
-const app = express()
-
-// Add request logging middleware
-app.use(pinoHttp({ logger }))
-
-app.get('/api/users/:id', async (req, res) => {
-  const { id } = req.params
-  const startTime = Date.now()
-  
-  req.log.info({ userId: id }, 'Fetching user data')
-  
-  try {
-    const user = await getUserById(id)
-    const duration = Date.now() - startTime
-    
-    req.log.info({ 
-      userId: id,
-      userEmail: user.email,
-      fetchDuration: duration,
-      cacheHit: user.fromCache
-    }, 'User data retrieved')
-    
-    res.json(user)
-  } catch (error) {
-    const duration = Date.now() - startTime
-    
-    req.log.error({ 
-      err: error,
-      userId: id,
-      duration,
-      operation: 'user_fetch'
-    }, 'Failed to retrieve user data')
-    
-    res.status(500).json({ error: 'Internal server error' })
+fastify.listen({ port: 3000 }, (err) => {
+  if (err) {
+    fastify.log.error(err);
+    process.exit(1);
   }
-})
-
-app.listen(3000, () => {
-  logger.info({
-    port: 3000,
-    env: process.env.NODE_ENV,
-    version: process.env.APP_VERSION
-  }, 'Server started successfully')
-})
+});
 ```
+
+Passing `{ logger: true }` enables Pino with its default configuration, with log level set to `info`, JSON output to stdout, and standard serializers for `req`, `res`, and `err` objects.
+
+Fastify automatically logs every incoming request and outgoing response, and attaches a request-scoped child logger to `request.log` with a unique `reqId` for tracing. `fastify.log` is the server-level logger available outside of request context. In the above code, we use it to log startup errors before the server is ready to handle requests.
+
+**Step 3: Run and check `http://localhost:3000`.** 
+
+```bash
+node fastifyApp.js
+```
+
+**Step 4: Check Output**
+
+```bash:Output
+{"level":30,"time":1774948769144,"pid":12345,"hostname":"your-machine","msg":"Server listening at http://127.0.0.1:3000"}
+{"level":30,"time":1774948773716,"pid":12345,"hostname":"your-machine","reqId":"req-1","req":{"method":"GET","url":"/","host":"localhost:3000","remoteAddress":"::1","remotePort":63608},"msg":"incoming request"}
+{"level":30,"time":1774948773717,"pid":12345,"hostname":"your-machine","reqId":"req-1","msg":"Handling root route"}
+{"level":30,"time":1774948773721,"pid":12345,"hostname":"your-machine","reqId":"req-1","res":{"statusCode":200},"responseTime":4.095916986465454,"msg":"request completed"}
+```
+
+## Centralizing and Monitoring Logs in an Observability Backend
+
+Everything we have configured so far writes logs to stdout or a local file. That works on a single server, but production applications typically run across multiple containers or instances. When something breaks, you need to check logs from the right container, on the right server, at the right time. If that container has already been killed and restarted, those logs are gone.
+
+Centralizing your logs solves this. Instead of writing only to local destinations, you configure an exporter that sends logs to a backend over the network in real time. All your logs end up in one place, searchable across every service, and they persist regardless of what happens to individual containers.
+
+For this guide, we will use [SigNoz](https://signoz.io/) as our observability backend and [OpenTelemetry](/opentelemetry/) as the export layer. OpenTelemetry is the open-source standard for collecting telemetry data, and SigNoz is an OpenTelemetry-native observability platform that lets you search, filter, and correlate your logs with traces and metrics in a single interface.
+
+The setup uses OpenTelemetry auto-instrumentation, which automatically captures Pino logs along with trace correlation and HTTP request data. You don't need to change your logging code. Your existing `logger.info()`, `logger.error()` calls continue to work as-is.
+
+Install the required packages:
+
+```bash
+npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
+```
+
+Set the environment variables pointing to your SigNoz instance and run your application:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node index.js
+```
+
+That's it. Your Pino logs will start appearing in SigNoz.
+
+<Figure src="/img/guides/2026/03/pino-logger-logs-explorer.webp" alt="SigNoz Logs Explorer showing filtered log entries for the consumer-svc-2 service, with severity levels, deployment environment, and service name filters visible in the left sidebar, and timestamped Kafka consumer log lines in the main panel." caption="Viewing Node.js application logs in SigNoz Logs Explorer" />
+
+The complete walkthrough, including deployment options for VMs, Docker, Kubernetes, and Windows, along with the advanced code-level instrumentation approach, is available in the official SigNoz guide:
+
+
+[Send logs from Node.js Pino logger to SigNoz using OpenTelemetry](/docs/logs-management/send-logs/nodejs-pino-logs/).
 
 ### Get Started with SigNoz
 
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz Cloud](/teams/). We offer a 30-day free trial account with access to all features.
 
-Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+Those with data privacy concerns who can't send their data outside their infrastructure can sign up for either the [enterprise self-hosted or BYOC offering](/contact-us/).
 
-Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+Those who have the expertise to manage SigNoz themselves, or who just want to start with a free self-hosted option, can use our [community edition](/docs/install/self-host/).
 
-Hope we answered all your questions regarding Pino logging in Node.js. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+## Conclusion
 
-## Common Issues and Troubleshooting
+In Pino's official benchmarks, 10,000 basic log operations complete in ~115ms, compared to ~270ms for Winston and ~377ms for Bunyan. Combined with structured JSON output, worker-thread transports, and child loggers for request context, it's the right default choice for production Node.js logging.
 
-### Logs Stop Writing Suddenly
+To get the most out of Pino, pair it with an observability platform. Using OpenTelemetry auto-instrumentation you can send structured logs directly to [SigNoz Cloud](/teams/), where they become searchable and correlated with traces and metrics, turning fast logging into actionable visibility.
 
-**Problem**: Pino stops logging without errors, requiring application restart.
+## FAQs
 
-**Solution**: This can happen if the underlying log destination (like a file) encounters an error. To prevent this, always attach an error handler to your destination stream. This example also ensures the log directory exists before attempting to write to it, preventing a common source of errors.
+### What is Pino in Node.js?
 
-```javascript
-const pino = require('pino')
-const fs = require('fs')
-const path = require('path')
+Pino is a high-performance, low-overhead logging library for Node.js that outputs structured JSON logs. It is designed to minimize the impact of logging on application performance by deferring heavy processing like log formatting and transport to worker threads. Pino supports six log levels (trace, debug, info, warn, error, fatal), child loggers to add contextual metadata, and a transport system to route logs to files, remote services, or observability platforms. It is roughly 2.4x faster than Winston in benchmarks, making it one of the most popular choices for production Node.js applications.
 
-// Ensure log directory exists
-const logDir = path.dirname('./logs/app.log')
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true })
-}
+### Which is better, Pino or Winston?
 
-const dest = pino.destination({
-  dest: './logs/app.log',
-  sync: false,
-  mkdir: true
-})
+Pino is better suited for performance-sensitive applications. According to Pino's official benchmarks, it completes 10,000 basic log operations in about 115ms, while Winston takes roughly 270ms for the same workload, making Pino about 2.4x faster for basic logging. Pino achieves this by outputting minimal JSON synchronously and offloading all formatting and transport work to separate worker threads. The Pino README claims it is "over 2.4x faster than alternatives" in many real-world cases, particularly when accounting for HTTP request throughput.
 
-// Handle destination errors
-dest.on('error', (err) => {
-  console.error('Log destination error:', err)
-  // Implement fallback logging mechanism
-})
+Winston offers more built-in flexibility for formatting and in-process transports, and its API may feel more familiar if you're coming from other logging ecosystems. It has a larger plugin ecosystem for direct integrations, such as logging to databases or cloud services.
 
-const logger = pino(dest)
-```
+For most production Node.js services handling significant traffic, Pino is the suitable because logging overhead directly affects response latency under load. You can pair Pino with `pino-pretty` during development to get a readable output without sacrificing production performance.
 
-### Memory Leaks Under High Load
+| Library | 10K Basic Logs | 10K Object Logs | Relative Speed |
+| --- | --- | --- | --- |
+| **Pino** | ~115ms | ~119ms | **Baseline (fastest)** |
+| Winston | ~270ms | ~273ms | ~2.4x slower |
+| Bunyan | ~377ms | ~410ms | ~3.3x slower |
 
-**Problem**: Memory usage increases continuously under high logging volume.
+### What does Pino do?
 
-**Solution**: This is often caused by backpressure, where logs are generated faster than they can be written. `SonicBoom` provides fine-grained control over buffering to manage this. By tuning `minLength` (the buffer size) and `maxWrite` (the maximum amount written at once), you can optimize for your specific workload. The `drain` event lets you know when the buffer has been successfully flushed.
-
-```javascript
-const SonicBoom = require('sonic-boom')
-
-const dest = new SonicBoom({
-  dest: './app.log',
-  sync: false,
-  minLength: 4096, // Buffer before writing
-  maxWrite: 16384  // Maximum write size
-})
-
-// Monitor backpressure
-dest.on('drain', () => {
-  console.log('Log buffer drained')
-})
-
-const logger = pino(dest)
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  await dest.flush()
-  dest.end()
-})
-```
-
-### Transport Configuration Issues
-
-**Problem**: Complex transport setups fail silently.
-
-**Solution**: When creating a logger with multiple or conditional transports, wrap the initialization in a `try...catch` block. If the configuration fails for any reason (e.g., a missing dependency or incorrect options), you can catch the error and fall back to a simple, reliable logger. This ensures that your application can still start and log critical errors, even if your primary logging setup is broken.
-
-```javascript
-function createSafeLogger() {
-  try {
-    return pino({
-      transport: process.env.NODE_ENV === 'development' 
-        ? { target: 'pino-pretty', options: { colorize: true } }
-        : { target: 'pino/file', options: { destination: './logs/app.log' } }
-    })
-  } catch (error) {
-    console.error('Logger creation failed, falling back to console:', error)
-    return pino({ transport: { target: 'pino-pretty' } })
-  }
-}
-```
-
-## Migration from Other Loggers
-
-### From Winston to Pino
-
-Winston and Pino have different philosophies, but migrating is straightforward. This example shows how to replicate a common Winston setup—logging to two different files based on level—using Pino's multi-transport configuration.
-
-```javascript
-// Winston pattern
-const winston = require('winston')
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
-})
-
-// Pino equivalent
-const pino = require('pino')
-const logger = pino({
-  level: 'info',
-  transport: {
-    targets: [
-      { target: 'pino/file', options: { destination: './combined.log' }, level: 'info' },
-      { target: 'pino/file', options: { destination: './error.log' }, level: 'error' }
-    ]
-  }
-})
-```
-
-### Migration Strategy
-
-1. **Replace logger creation** with Pino initialization
-2. **Convert string interpolation** to [structured logging](https://signoz.io/blog/structured-logs/)  
-3. **Update [error logging](https://signoz.io/guides/error-log/)** to use Pino's error serializers
-4. **Test performance impact** and adjust configuration
-5. **Update monitoring configurations** to handle new log format
-
-## Key Takeaways
-
-Pino represents a fundamental shift in Node.js logging philosophy, prioritizing performance without sacrificing the structured data needed for modern observability.
-
-**Performance Benefits:**
-- 5x faster than traditional loggers with minimal CPU overhead
-- Asynchronous architecture prevents event loop blocking
-- Memory-efficient design maintains stability under load
-
-**Production Readiness:**
-- Structured JSON output enables powerful querying and analysis
-- Child loggers provide excellent context management
-- Built-in security features protect sensitive data
-
-**Modern Integration:**
-- Native OpenTelemetry support enables trace correlation  
-- Seamless integration with observability platforms like SigNoz
-- Extensive ecosystem of transports and plugins
-
-For new projects, start with Pino from day one using the patterns demonstrated in this guide. For existing applications, the performance benefits justify gradual migration, starting with new features and high-traffic endpoints.
-
-As Node.js applications continue to scale, Pino's combination of speed, structure, and extensibility makes it the ideal logging solution for performance-critical applications.
-
-## Frequently Asked Questions
-
-### What is Pino package?
-
-Pino is a high-performance Node.js logging library optimized for speed and structured output. It produces [JSON logs](https://signoz.io/blog/json-logs/) by default, uses asynchronous I/O, and focuses on minimal overhead to prevent logging from becoming an application bottleneck.
-
-### What is the common log format in Pino?
-
-Pino uses NDJSON (Newline Delimited JSON) format by default. Each log entry includes standard fields like `level`, `time`, `pid`, `hostname`, and `msg`, making logs immediately machine-readable for automated processing and analysis.
-
-### What is Pino pretty?
-
-`pino-pretty` is a development tool that transforms Pino's JSON output into human-readable, colorized text. Use it during development for easier log reading, but avoid it in production as it adds overhead and defeats Pino's performance advantages.
+Pino is a Node.js logging library that generates structured JSON log output with minimal performance overhead. When you call a Pino log method like `logger.info()`, it serializes your log data into a single JSON line containing the log level, a high-resolution timestamp, the process ID, hostname, and your message or data object. This JSON output can then be piped to files, forwarded to log aggregation services, or sent to observability platforms like SigNoz via OpenTelemetry transports. Pino's core design principle is that log processing should happen outside the main application thread.
 
 ### What are the benefits of Pino logger?
 
-Key benefits include: 5x faster performance than Winston, minimal CPU and memory overhead, structured JSON logging by default, child logger support for context management, built-in security features with data redaction, and seamless integration with modern observability platforms.
-
-### Can Pino handle asynchronous logging?
-
-Yes, Pino excels at asynchronous logging through worker threads and non-blocking I/O operations. This prevents logging from blocking the main event loop, maintaining application performance even under high logging volume.
-
-### Is it possible to change the log level in Pino dynamically?
-
-Yes, you can change Pino's log level at runtime using `logger.level = 'newLevel'`. This is valuable in production for temporarily increasing verbosity to debug issues without restarting the application.
-
-### What is a child logger?
-
-A child logger inherits parent configuration while adding consistent context fields to every log message. Perfect for request-scoped logging, service-specific logging, or adding persistent context like user IDs or request IDs.
-
-### What is Pino transport?
-
-Pino transport handles where and how logs are processed and output. Transports can send logs to files, external services, or format them for different purposes. Pino 7+ uses worker threads for transports to minimize performance impact.
-
-### What is Pino HTTP?
-
-`pino-http` is Express.js middleware that automatically logs HTTP requests and responses. It provides detailed request/response logging with minimal setup and integrates with Pino's performance optimizations.
-
-### What are the three main log levels in Pino?
-
-While Pino supports six levels, the three most commonly used are: `info` for general application information and significant events, `warn` for potential issues requiring attention, and `error` for actual failures requiring investigation.
+The benefits of Pino logger are high throughput (10,000+ logs/second), low CPU and memory overhead, structured JSON output that is machine-parseable, and asynchronous transport support via worker threads. Pino also provides child loggers for attaching request-scoped context, built-in redaction for sensitive fields like passwords and tokens, and native integration with frameworks like Express, Fastify, and NestJS through companion packages like `pino-http`. Its structured JSON format makes it particularly well-suited for centralized log management with observability tools, where logs need to be queried, filtered, and correlated with traces and metrics.
