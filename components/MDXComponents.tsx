@@ -87,7 +87,6 @@ import DatabaseTable from './HighCardinalityData/DatabaseTable'
 import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
 import dynamic from 'next/dynamic'
 const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'), { ssr: false })
-// import KeyPointCalloutWrapper from './KeyPointCalloutWrapper'
 
 export const components: MDXComponents = {
   Region,
@@ -127,7 +126,6 @@ export const components: MDXComponents = {
   GrafanaVsSigNoz,
   NewRelicVsSigNoz,
   DatadogAlternativesFinder,
-  // KeyPointCallout: KeyPointCalloutWrapper,
   GetStartedOpenTelemetryButton,
   InterlinkCard,
   InArticleVideoShowcaseModal,
