@@ -29,6 +29,7 @@ import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
 import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
 import NewRelicVsSigNoz from './NewRelicVsSigNoz/NewRelicVsSigNoz'
 import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
+import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 import InterlinkCard from './InterlinkCard/InterlinkCard'
 import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
@@ -126,15 +127,7 @@ export const components: MDXComponents = {
   GrafanaVsSigNoz,
   NewRelicVsSigNoz,
   DatadogAlternativesFinder,
-  KeyPointCallout: (props) => {
-    const title = props.title || 'Note'
-    const type = props.type || 'info'
-    return (
-      <Admonition title={title} type={type} {...props}>
-        {props.children}
-      </Admonition>
-    )
-  },
+  KeyPointCallout,
   GetStartedOpenTelemetryButton,
   InterlinkCard,
   InArticleVideoShowcaseModal,
