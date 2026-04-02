@@ -24,7 +24,7 @@ The official <a href="https://prometheus.io/docs/practices/pushing/" rel="noopen
 
 They recommend Pushgateway for a single valid scenario, i.e., capturing the outcome of a service-level batch job.
 
-<Admonition defaultCollapsed="true" title="What is Service-Level Batch Job?">
+<KeyPointCallout defaultCollapsed="true" title="What is Service-Level Batch Job?">
 
 Service-level batch jobs are configured or managed at the **service** (or application/module) level. These are not hardcoded at the database or individual component level.
 
@@ -35,7 +35,7 @@ For Example:
 - Nightly data cleanup / archiving job (configured at service level, e.g., "Cancel aged orders" or "Re-tag Fulfilment").
 - Scheduled report generation or ETL jobs in SaaS/microservices platforms.
 
-</Admonition>
+</KeyPointCallout>
 
 ## How does the Prometheus Pushgateway work?
 
@@ -137,11 +137,11 @@ ts=2026-01-14T04:19:07.717Z level=info caller=tls_config.go:354 msg="Listening o
 ts=2026-01-14T04:19:07.717Z level=info caller=tls_config.go:357 msg="TLS is disabled." http2=false address=[::]:9091
 ```
 
-<Admonition defaultCollapsed="true" title="Already have Batch Job?">
+<KeyPointCallout defaultCollapsed="true" title="Already have Batch Job?">
 
 If you already have a batch job, feel free to skip to [Step 6: Configure the Batch Job to send Metrics](#step-6-configure-the-batch-job-to-send-metrics).
 
-</Admonition>
+</KeyPointCallout>
 
 ### Step 5: Create Batch Job
 
@@ -245,7 +245,7 @@ if __name__ == '__main__':
     main()
 ```
 
-<Admonition defaultCollapsed="true" title="What does script do?">
+<KeyPointCallout defaultCollapsed="true" title="What does script do?">
 
 For demo convenience, this container loops and pushes periodically. In production, a CronJob / scheduled task should run once, push metrics, and exit.
 
@@ -253,7 +253,7 @@ This script acts as a database backup job that runs at certain intervals, mimick
 
 Finally, it logs a single clean, human-readable line summarizing the outcome, which includes the database name, status, duration, size in GB, and number of tables, before printing a wait message and sleeping until the next scheduled run.
 
-</Admonition>
+</KeyPointCallout>
 
 ### Step 6: Configure the Batch Job to send Metrics
 
@@ -274,7 +274,7 @@ To configure the batch job to send the metrics, we will need to update our scrip
     INSTANCE_NAME = os.getenv('INSTANCE_NAME', 'db-primary')
     ```
 
-    <Admonition defaultCollapsed="true" title="Code Breakdown">
+    <KeyPointCallout defaultCollapsed="true" title="Code Breakdown">
 
     - **`PUSHGATEWAY_URL`** reads the Pushgateway address from an environment variable, falling back to `http://localhost:9091` if not set.
 
@@ -282,7 +282,7 @@ To configure the batch job to send the metrics, we will need to update our scrip
 
     - **`INSTANCE_NAME`** reads a custom instance label from the environment (e.g., server name or pod name), defaulting to 'db-primary' to help distinguish metrics across different backup instances.
 
-    </Admonition>
+    </KeyPointCallout>
 
 3. Add function `push_metrics()`, it creates a fresh set of Prometheus Gauge metrics for a single backup run (duration, size, status, last success time, table count), labels them with the database name and instance, and pushes them to the Prometheus Pushgateway for scraping and monitoring.
 
@@ -455,7 +455,7 @@ Create a `Dockerfile` & `requirements.txt` file under `prometheus-pushgateway-de
             condition: service_healthy
     ```
 
-    <Admonition defaultCollapsed="true" title="Code Breakdown">
+    <KeyPointCallout defaultCollapsed="true" title="Code Breakdown">
 
     **`build`**: Builds the job’s image from the local `./sample-jobs` directory using the specified Dockerfile so the job code is packaged into a container.
 
@@ -469,7 +469,7 @@ Create a `Dockerfile` & `requirements.txt` file under `prometheus-pushgateway-de
 
     **`depends_on`**: Ensures the backup job starts only after Pushgateway is healthy, preventing metric push failures at startup.
 
-    </Admonition>
+    </KeyPointCallout>
 
 2. Bring up the service.
 

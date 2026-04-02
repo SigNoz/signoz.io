@@ -52,13 +52,13 @@ Key metrics to track:
 | **`container_network_receive_bytes_total` / `container_network_transmit_bytes_total`** | Cumulative network bytes received/transmitted per container. |
 | **`container_fs_writes_bytes_total`** | Cumulative bytes written to filesystem by the container. |
 
-<Admonition defaultCollapsed="true" title="Getting OOMKilled even though container_memory_usage_bytes is under the limit?">
+<KeyPointCallout defaultCollapsed="true" title="Getting OOMKilled even though container_memory_usage_bytes is under the limit?">
 
 A common mistake is monitoring `container_memory_usage_bytes` and assuming you are safe because it is below the limit. In Kubernetes, two separate mechanisms can terminate your container for memory reasons. Kubelet's node-pressure eviction kicks in when node-level signals like `memory.available` drop below configured thresholds, and it evicts pods to reclaim memory for the node as a whole. Separately, a container is marked OOMKilled when it exceeds its cgroup memory limit and the kernel terminates the process directly.
 
 `container_memory_working_set_bytes` is a useful proxy for memory pressure because it reflects the portion of memory that the kernel considers not easily reclaimable. However, it does not map 1:1 to the exact enforcement threshold for either mechanism. An [OOM-killed](/guides/what-is-oom/) container will show exit code 137, which indicates SIGKILL (128+9). OOM is the most common cause of exit code 137, but not the only one, any SIGKILL will produce the same code.
 
-</Admonition>
+</KeyPointCallout>
 
 ### Application-Level Metrics (RED Metrics)
 

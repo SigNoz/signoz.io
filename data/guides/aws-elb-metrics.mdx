@@ -138,23 +138,23 @@ Instead of building custom pipelines or managing multiple tools, you can stream 
 
 **Step 3:** Click "Launch CloudFormation Stack" to open the AWS Console with the template preloaded. Review the parameters, acknowledge the IAM resource creation checkbox, and click Create Stack.  
 
-<Admonition defaultCollapsed="true" title="New tab didn't open?">
+<KeyPointCallout defaultCollapsed="true" title="New tab didn't open?">
 
 If clicking the button didn't open a new tab, your browser may be blocking the pop-up. Look for a blocked pop-up icon in your address bar, allow redirects from SigNoz, and try again.
 
-</Admonition>
+</KeyPointCallout>
 
 Provisioning typically takes several minutes, depending on region and account conditions.
 
 <Figure src="/img/guides/2026/02/aws-elb-metrics-cloudformation-stacks.webp" alt="AWS CloudFormation Quick create stack page with the SigNoz integration template pre-loaded, showing stack name set to signoz-integration and parameters including IngestionKey, IngestionUrl pointing to ingest.in.signoz.cloud, and IntegrationConfigSyncPeriodSeconds." caption="The Quick create stack page in AWS CloudFormation showing the pre-configured SigNoz integration template with ingestion parameters ready for deployment" />
 
-<Admonition defaultCollapsed="true" title="What Gets Deployed?">
+<KeyPointCallout defaultCollapsed="true" title="What Gets Deployed?">
 
 The CloudFormation template provisions several resources in your AWS account. The stack provisions **IAM roles**, **CloudWatch Metric Streams**,**Kinesis Firehose**, and deploys an **AWS Integration Agent** to configure/auto-discover selected services. A CloudWatch Metric Stream captures metrics from the ApplicationELB namespace in real-time. A Kinesis Data Firehose delivery stream buffers and forwards the metrics to the SigNoz OTLP endpoint over HTTPS.
 
 No agents run on your EC2 instances. The integration deploys an AWS Integration Agent in your account/region plus AWS-native resources.
 
-</Admonition>
+</KeyPointCallout>
 
 **Step 4:** Once the stack reaches CREATE_COMPLETE status, return to SigNoz and configure which AWS services you want to monitor. Select ALB from the available services, enable it, and metrics will start flowing within minutes.
 

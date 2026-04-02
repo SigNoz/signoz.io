@@ -8,10 +8,10 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-<Admonition title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
 header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
+</KeyPointCallout>
 
 ## Overview
 
@@ -46,7 +46,7 @@ The following steps guide you through configuring the `filelog` receiver on diff
 <Tabs>
 <TabItem value="vm" label="VM" default>
 
-<Admonition title="What classifies as VM?" defaultCollapsed="true">
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
 - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
 - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -54,7 +54,7 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 
 Use this section if you're deploying your application directly on a server or VM without containerization.
 
-</Admonition>
+</KeyPointCallout>
 
 ### 1. Install OpenTelemetry Collector
 
@@ -112,14 +112,14 @@ The [SigNoz Kubernetes Infra Chart](https://signoz.io/docs/opentelemetry-collect
 The default configuration collects logs from all pods in the cluster. To filter specific namespaces or pods, you'll need to customize the filelog receiver configuration.
 </Admonition>
 
-<Admonition title="Collecting from custom file paths" defaultCollapsed="true">
+<KeyPointCallout title="Collecting from custom file paths" defaultCollapsed="true">
 
 If your application writes logs to a specific file instead of `stdout` or `stderr`, you have two options:
 
 1.  **Sidecar Pattern**: Deploy an OTel Collector as a sidecar container within the pod and use a shared volume to access the log files. See the <a href="https://opentelemetry.io/docs/kubernetes/collector/components/#deployment-pattern" target="_blank" rel="noopener noreferrer nofollow">OTel Collector documentation</a> for sidecar deployment patterns.
 2.  **hostPath Mount**: Mount the log directory from the node into the SigNoz Collector DaemonSet and configure the `filelog` receiver to read from that path.
 
-</Admonition>
+</KeyPointCallout>
 
 </TabItem>
 
@@ -272,7 +272,7 @@ Go to the **SigNoz UI** -> **Logs** tab. You should see your new log entries app
 
 ## Advanced Configuration
 
-<Admonition title="Storage extension for production deployments" defaultCollapsed="true">
+<KeyPointCallout title="Storage extension for production deployments" defaultCollapsed="true">
 
 For production use, especially when using `start_at: beginning`, configure a <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/storage/filestorage/README.md" target="_blank" rel="noopener noreferrer nofollow">storage extension</a> to prevent log duplication on collector restarts. The storage extension saves the read position for each file to disk.
 
@@ -298,7 +298,7 @@ service:
 
 Without a storage extension, using `start_at: beginning` will cause the collector to re-read all files from the beginning after each restart, potentially creating duplicate logs in SigNoz.
 
-</Admonition>
+</KeyPointCallout>
 
 ## Next Steps
 

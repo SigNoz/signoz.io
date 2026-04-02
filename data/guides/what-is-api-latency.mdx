@@ -29,9 +29,9 @@ The table below also introduces throughput, a third metric that teams often reac
 | Response Time | Time to last byte | Yes | Client |
 | Throughput | Requests per second | N/A | Server |
 
-<Admonition defaultCollapsed="true" title="Note">
+<KeyPointCallout defaultCollapsed="true" title="Note">
 Server-side telemetry can approximate request-handling duration, but client-observed TTFB is best measured from the client.
-</Admonition>
+</KeyPointCallout>
 
 Latency and throughput interact but respond to different fixes. More concurrent requests means more queuing time, which pushes latency up. Scaling horizontally improves throughput. A slow database query degrades latency. Adding more servers does not fix it.
 
@@ -147,14 +147,14 @@ Read the timings this way.
 
 Using the sample numbers above, DNS lookup is `0.012s`, TCP connect time is about `0.033s`, TLS handshake time is about `0.053s`, post-connection request-handling delay is about `0.132s`, and response transfer after the first byte is about `0.007s`.
 
-<Admonition defaultCollapsed="true" title="What this tells you?">
+<KeyPointCallout defaultCollapsed="true" title="What this tells you?">
 
 - Repeatedly high **DNS lookup** points to DNS resolution or caching issues.
 - High **connect** or **app_connect** points to network path or TLS overhead.
 - High **start_transfer**, when earlier timings look normal, usually points to slow server processing or an upstream dependency.
 - **Total** much higher than **start_transfer** usually means the response body is taking time to transfer, often because of payload size or slower network delivery.
 
-</Admonition>
+</KeyPointCallout>
 
 `curl` tells you that something is slow and roughly where the delay is. It cannot tell you which query, function, or downstream call caused it. Tracing fills that gap by breaking a request into spans, so you can see exactly which internal step or downstream dependency is responsible for the delay.
 

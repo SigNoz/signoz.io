@@ -29,11 +29,11 @@ In this write-up, we will explore how to use OpenTelemetry (OTel) to instrument 
 
 ## What is OpenTelemetry?
 
-<Admonition title="Familiar with OpenTelemetry?">
+<KeyPointCallout title="Familiar with OpenTelemetry?">
 
 This section gives a brief overview of OpenTelemetry. Feel free to skip ahead to [the next section](#state-of-logging-and-opentelemetry) that dives into technical decisions.
 
-</Admonition>
+</KeyPointCallout>
 
 To start, we must understand what OpenTelemetry is, and why it’s vital for our purpose: understanding application behaviour across its lifespan and development cycle.
 
@@ -55,21 +55,21 @@ Further, the project recommends using `tracing` for new Rust applications. Given
 
 Later, we will see how this integration actually happens within the application code.
 
-<Admonition title="Powered by Tokio">
+<KeyPointCallout title="Powered by Tokio">
 
 The entire application runs on <a href="https://tokio.rs/" rel="noopener noreferrer nofollow" target="_blank">Tokio</a>, which is often regarded as <a href="https://corrode.dev/blog/async/#one-true-runtime" rel="noopener noreferrer nofollow" target="_blank">the one true async runtime</a>, and powers much of Rust’s networking ecosystem. The web server uses Tokio for async execution, while the telemetry and logging layer is implemented via `tracing` — another project <a href="https://github.com/tokio-rs/tracing" rel="noopener noreferrer nofollow" target="_blank">within the Tokio ecosystem</a>.
 
-</Admonition>
+</KeyPointCallout>
 
 ## Implementing OpenTelemetry in Rust Applications
 
 Now let’s set up the demo application, configure SigNoz as the backend to receive and visualize its telemetry data, and understand how we can use it to delve deep into application behaviour.<br />We’ll also go over key implementation details that will help you wrap your head around the moving parts involved in the instrumentation process.
 
-<Admonition title="Ease of Instrumentation via Agents">
+<KeyPointCallout title="Ease of Instrumentation via Agents">
 
 Because of Rust’s compiled nature, the OTel implementation isn’t as straightforward as something like Python, which typically relies on [auto-instrumentation agents](https://signoz.io/blog/opentelemetry-agent/) to make things easy. These agents patch objects during start-up to enable applications to emit telemetry.<br />Here, we have implemented the instrumentation logic manually.
 
-</Admonition>
+</KeyPointCallout>
 
 ### Prerequisites
 

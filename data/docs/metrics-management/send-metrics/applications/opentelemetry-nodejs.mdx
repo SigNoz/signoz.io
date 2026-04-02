@@ -9,9 +9,9 @@ doc_type: howto
 
 This guide shows you how to send metrics from your Node.js application (Express, Fastify, Koa, NestJS, Runtime) to SigNoz using OpenTelemetry.
 
-<Admonition title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
     Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
+</KeyPointCallout>
 
 ## Prerequisites
 
@@ -23,14 +23,14 @@ This guide shows you how to send metrics from your Node.js application (Express,
 
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
-<Admonition title="What classifies as VM?" defaultCollapsed="true">
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
     A VM is a virtual computer that runs on physical hardware. This includes:
     - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
     - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
     - **Bare metal servers**: Physical servers running Linux/Unix directly
 
     Use this section if you're deploying your Node.js application directly on a server or VM without containerization.
-</Admonition>
+</KeyPointCallout>
 
 ### Step 1. Set environment variables
 Set the following environment variables to configure the OpenTelemetry exporter:
@@ -143,13 +143,13 @@ Verify these values:
 </TabItem>
 </Tabs>
 
-<Admonition title="Why explicitly disable traces and logs?" defaultCollapsed="true">
+<KeyPointCallout title="Why explicitly disable traces and logs?" defaultCollapsed="true">
 The auto-instrumentation package (`@opentelemetry/auto-instrumentations-node`) includes instrumentations for web frameworks like Express, Fastify, and Koa. These instrumentations generate traces (spans) for every incoming HTTP request.
 
 Since OpenTelemetry Node.js enables traces and logs export by default, these would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant volume and costs.
 
 Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables traces and logs while keeping metrics working as expected. If you want traces or logs later, you can change them to `otlp` or remove these variables altogether.
-</Admonition>
+</KeyPointCallout>
 
 ### Step 2. Install OpenTelemetry packages
 
