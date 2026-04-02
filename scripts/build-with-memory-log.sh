@@ -189,7 +189,7 @@ monitor_loop() {
 }
 
 run_build_plain() {
-  export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=16384}"
+  export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=8192}"
   "$ROOT/node_modules/.bin/cross-env" INIT_CWD="$ROOT" "$ROOT/node_modules/.bin/next" build
   "$ROOT/node_modules/.bin/cross-env" NODE_OPTIONS='--experimental-json-modules' node ./scripts/postbuild.mjs
 }
@@ -197,7 +197,7 @@ run_build_plain() {
 run_build_monitored() {
   print_host_mem
 
-  export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=16384}"
+  export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=8192}"
 
   echo "[build-memory] starting: next build (memory samples every ${INTERVAL_SEC}s)"
   "$ROOT/node_modules/.bin/cross-env" INIT_CWD="$ROOT" "$ROOT/node_modules/.bin/next" build &
