@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
 
-export const dynamicParams = false
+export const dynamicParams = true
 export const dynamic = 'force-static'
 
 export async function generateMetadata({

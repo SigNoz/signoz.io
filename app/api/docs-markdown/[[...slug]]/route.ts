@@ -6,6 +6,7 @@ import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-static'
+export const dynamicParams = true
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
