@@ -16,12 +16,13 @@ Use the sections below as lightweight references when filling out or reviewing t
 - `## Validate` shows where success appears in SigNoz.
 - `## Troubleshooting` maps symptom -> cause -> fix -> verification.
 - Links, images, redirects, and discovery updates are handled where needed.
+- Any added docs images use WebP format.
 - Relevant docs checks were run.
 
 ## Blog Changes
 
 - Frontmatter includes `title`, `date`, `author`, and `tags`.
-- Images live under `public/img/blog/<YYYY-MM>/`.
+- Images live under `public/img/blog/<YYYY-MM>/` and use WebP format.
 - Internal links use canonical production URLs.
 
 ## Site Code Changes

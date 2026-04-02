@@ -1,7 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Styles from './styles.module.css'
-import { Modal, ModalContent, ModalBody, useDisclosure, ModalHeader } from '@nextui-org/react'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import { DeploymentType, DeploymentTypeColors, DeploymentTypeLabels } from '@/utils/strapi'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
@@ -127,61 +128,53 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
         backdrop="blur"
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        className="bg-signoz_ink-400"
+        panelClassName="overflow-hidden rounded-lg bg-signoz_ink-400 p-0"
       >
-        <ModalContent className="p-0">
-          {() => (
-            <>
-              <ModalBody className="px-0">
-                <div className="flex flex-col">
-                  <p
-                    className={`p-4 text-sm text-signoz_vanilla-100 ${Styles['subscription-modal-header']}`}
-                  >
-                    Get notified when we ship something new
-                  </p>
-                  <span className="block h-px w-full bg-signoz_slate-500"></span>
-                  <div className="px-4 pb-4 pt-3">
-                    <form className="flex flex-col gap-2" onSubmit={handleEmailSubmit}>
-                      <label htmlFor="email" className="text-sm text-signoz_vanilla-100">
-                        Enter your email
-                      </label>
-                      <div className="flex">
-                        <input
-                          type="text"
-                          id="email"
-                          disabled={isSubmitting}
-                          name="email"
-                          autoComplete="off"
-                          value={email}
-                          onChange={handleEmailChange}
-                          placeholder="Eg. johndoe@example.com"
-                          className="w-full rounded-l-sm border border-r-0 border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
-                        />
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="flex w-32 items-center justify-center gap-1 rounded-r-sm bg-signoz_robin-500 px-4 text-xs text-signoz_vanilla-100 active:bg-signoz_robin-600"
-                        >
-                          {isSubmitting ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <>
-                              <Check size={16} />
-                              Subscribe
-                            </>
-                          )}
-                        </button>
-                      </div>
-                      {errors.email && (
-                        <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
-                      )}
-                    </form>
-                  </div>
-                </div>
-              </ModalBody>
-            </>
-          )}
-        </ModalContent>
+        <div className="flex flex-col">
+          <p
+            className={`p-4 text-sm text-signoz_vanilla-100 ${Styles['subscription-modal-header']}`}
+          >
+            Get notified when we ship something new
+          </p>
+          <span className="block h-px w-full bg-signoz_slate-500"></span>
+          <div className="px-4 pb-4 pt-3">
+            <form className="flex flex-col gap-2" onSubmit={handleEmailSubmit}>
+              <label htmlFor="email" className="text-sm text-signoz_vanilla-100">
+                Enter your email
+              </label>
+              <div className="flex">
+                <input
+                  type="text"
+                  id="email"
+                  disabled={isSubmitting}
+                  name="email"
+                  autoComplete="off"
+                  value={email}
+                  onChange={handleEmailChange}
+                  placeholder="Eg. johndoe@example.com"
+                  className="w-full rounded-l-sm border border-r-0 border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex w-32 items-center justify-center gap-1 rounded-r-sm bg-signoz_robin-500 px-4 text-xs text-signoz_vanilla-100 active:bg-signoz_robin-600"
+                >
+                  {isSubmitting ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Check size={16} />
+                      Subscribe
+                    </>
+                  )}
+                </button>
+              </div>
+              {errors.email && (
+                <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
+              )}
+            </form>
+          </div>
+        </div>
       </Modal>
     </div>
   )

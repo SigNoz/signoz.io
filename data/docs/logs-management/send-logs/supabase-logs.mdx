@@ -1,0 +1,145 @@
+---
+date: 2026-03-24
+id: supabase-logs
+title: Send Supabase Logs to SigNoz
+description: Learn how to send Supabase platform logs to SigNoz using Supabase Log Drains and the OTLP endpoint.
+doc_type: howto
+---
+
+Supabase Log Drains can forward logs from the Supabase stack to any OpenTelemetry Protocol (OTLP) compatible endpoint. This guide shows how to send those logs to SigNoz using Supabase's built-in OTLP drain.
+
+## Prerequisites
+
+- A Supabase project on the Pro, Team, or Enterprise plan. Log Drains are not available on the Free plan.
+- Access to **Project Settings** -> **Log Drains** in the Supabase dashboard
+- A SigNoz endpoint for logs and, for SigNoz Cloud, an [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+## Step 1: Open Log Drains in Supabase
+
+1. Open your project in the Supabase dashboard.
+2. Go to **Project Settings** -> **Log Drains**.
+3. Click **Add destination**.
+
+## Step 2: Select the OTLP destination
+
+On the **Log Drains** screen, click **OpenTelemetry Protocol (OTLP)**.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/supabase-log-drains-overview.webp"
+  alt="Supabase Log Drains screen with OpenTelemetry Protocol (OTLP) available as a destination"
+  caption="Supabase Log Drains screen"
+/>
+
+## Step 3: Configure the destination
+
+Create a new destination with the following values:
+
+- **Name**: Choose a name such as `signoz-logs`
+- **Type**: `OpenTelemetry Protocol (OTLP)`
+- **OTLP Endpoint**: `https://ingest.<region>.signoz.cloud/v1/logs`
+- **Protocol**: `HTTP/Protobuf`
+- **Gzip Compression**: Enabled
+- **Custom Header**: `signoz-ingestion-key: <your-ingestion-key>`
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. For self-hosted setups, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
+Supabase Log Drains support only `HTTP/Protobuf`. For self-hosted setups, use your OTLP/HTTP endpoint instead of the SigNoz Cloud ingest URL. OTLP/HTTP endpoints commonly listen on port `4318`. For the standard OTLP/HTTP endpoint format, see <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlphttpexporter/README.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector OTLP HTTP exporter docs</a>.
+</KeyPointCallout>
+
+Supabase sends OTLP requests with the `application/x-protobuf` content type automatically. No additional configuration is needed on the SigNoz side as long as you use the `/v1/logs` endpoint.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/supabase-otlp-destination.webp"
+  alt="Supabase OTLP destination form configured to send logs to SigNoz"
+  caption="Supabase OTLP destination configuration"
+/>
+
+## Step 4: Save the destination
+
+Click **Save destination**. Supabase will start forwarding new log events to SigNoz.
+
+<Admonition type="tip">
+Supabase batches outbound requests for log drains. According to the official docs, OTLP drains send up to 250 log events per request or flush once per second, whichever happens first.
+</Admonition>
+
+## Validate
+
+After saving the destination, verify that logs are flowing into SigNoz:
+
+1. Navigate to **Logs > Explorer** in your SigNoz dashboard.
+2. Generate fresh activity in your Supabase project (API requests, auth flows, Postgres queries, etc.).
+3. Within about a minute, new Supabase log entries should appear.
+
+**Expected behavior**: You should see fresh log entries coming from Supabase services. The exact fields depend on the originating product, such as Auth, API/Edge, Postgres, Realtime, Storage, or Edge Functions.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/supabase-logs.webp"
+  alt="Supabase logs in the SigNoz Logs view"
+  caption="Supabase logs in the SigNoz Logs view"
+/>
+
+You can click on a particular log entry in the `Logs` view to open the expanded log details.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/supabase-logs-detailed-view.webp"
+  alt="Supabase log entry details in SigNoz"
+  caption="Supabase log entry details in SigNoz"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Logs not appearing in SigNoz
+
+**Symptom**: No Supabase logs are visible in SigNoz after saving the drain.
+
+**Things to investigate**:
+
+1. **Incorrect OTLP endpoint**
+
+   - The endpoint must be the full OTLP logs URL and typically ends with `/v1/logs`
+   - For SigNoz Cloud, check the correct region-specific ingest URL here: [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+
+2. **Wrong protocol selected**
+
+   - Supabase OTLP drains currently support only `HTTP/Protobuf`
+   - This issue typically applies to self-hosted SigNoz setups with a custom endpoint, not SigNoz Cloud
+   - Reopen the destination and confirm the protocol is set correctly
+
+3. **Missing or invalid authentication header**
+
+   - Verify the `signoz-ingestion-key` header value
+   - If you are using self-hosted SigNoz, remove the ingestion key header unless your setup requires custom auth
+
+4. **No recent Supabase events**
+
+   - Log drains forward new events, not historical logs
+   - Generate fresh traffic in the products you want to observe
+
+5. **OTLP endpoint is not publicly reachable**
+
+   - Verify your SigNoz endpoint accepts OTLP log traffic from external services
+   - If you are sending to a self-hosted collector behind a proxy or firewall, confirm it is reachable over HTTPS
+
+</details>
+
+## Next steps
+
+- **Monitor Supabase metrics**: Add the [Supabase metrics integration](https://signoz.io/docs/integrations/supabase/)
+- **Use the Supabase dashboard**: Import the [Supabase Monitoring Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/supabase/)
+- **Query logs**: Use the [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/) to search and filter Supabase logs
+- **Create alerts**: Set up [log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for repeated errors or unusual log patterns
+
+## Limitations
+
+- **Plan availability**: Supabase Log Drains are available only on Pro, Team, and Enterprise plans
+- **OTLP protocol support**: Supabase OTLP drains currently support only `HTTP/Protobuf`
+- **Batched delivery**: Logs are delivered in batches rather than one event per request

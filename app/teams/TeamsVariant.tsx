@@ -4,14 +4,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useLogEvent } from '../../hooks/useLogEvent'
+import { useSearchParams } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
-import {
-  createSubmissionRelayId,
-  sendSubmissionRelayInBackground,
-} from '@/utils/submissionRelayClient'
-import { FaGithub, FaGoogle } from 'react-icons/fa'
+import { FaGithub } from 'react-icons/fa'
+import { useSignupForm } from '@/hooks/useSignupForm'
+import { REGIONS } from '@/constants/regions'
 
 interface ErrorsProps {
   fullName?: string
@@ -28,12 +25,6 @@ interface FormState {
   dataRegion: string
   source: string
   termsOfServiceAccepted: boolean
-}
-
-interface Region {
-  name: string
-  id: string
-  iconURL: string
 }
 
 // Variant Navbar component (now integrated into layout)
@@ -309,25 +300,6 @@ const Testimonial: React.FC = () => {
   )
 }
 
-// Define regions
-const regions = [
-  {
-    name: 'United States',
-    id: 'us',
-    iconURL: '/svgs/icons/us.svg',
-  },
-  {
-    name: 'Europe',
-    id: 'eu',
-    iconURL: '/svgs/icons/eu.svg',
-  },
-  {
-    name: 'India',
-    id: 'in',
-    iconURL: '/svgs/icons/india.svg',
-  },
-]
-
 // Completely isolated signup form component with its own state management
 const SignupFormIsolated: React.FC<{
   onSignup: (payload: any) => Promise<void>
@@ -468,7 +440,7 @@ const SignupFormIsolated: React.FC<{
           </label>
 
           <div className="grid grid-cols-3 gap-3">
-            {regions.map((region) => (
+            {REGIONS.map((region) => (
               <button
                 type="button"
                 key={region.id}
@@ -627,327 +599,20 @@ const SignupFormIsolated: React.FC<{
 
 // TeamsVariant component with its own state management
 const TeamsVariant: React.FC = () => {
-  const [errors, setErrors] = useState<ErrorsProps>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [_, setSubmitSuccess] = useState(false)
-  const [submitFailed, setSubmitFailed] = useState(false)
-  const router = useRouter()
-  const logEvent = useLogEvent()
   const searchParams = useSearchParams()
   const authCode = searchParams.get('code')
   const ssoError = searchParams.get('has_sso_error')
 
-  const isValidEmail = (email) => {
-    // Basic email validation regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  const validatePayload = useCallback(
-    (payload) => {
-      let newErrors = {}
-
-      if (!payload.email.trim()) {
-        newErrors['workEmail'] = 'Work email is required'
-      } else if (!isValidEmail(payload.email)) {
-        newErrors['workEmail'] = 'Please enter a valid company email'
-      }
-
-      if (!payload.preferences.terms_of_service_accepted) {
-        newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
-      }
-
-      const isValid = Object.keys(newErrors).length === 0
-
-      if (!isValid) {
-        logEvent({
-          eventType: 'track',
-          eventName: 'Teams Page Sign Up Validation Failed',
-          attributes: {
-            errors: newErrors,
-            email: payload.email,
-          },
-        })
-      }
-
-      setErrors(newErrors)
-      return isValid
-    },
-    [logEvent]
-  )
-
-  const validateSocialSignupPayload = useCallback(
-    (payload) => {
-      let newErrors = {}
-      if (!payload.preferences.terms_of_service_accepted) {
-        newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
-      }
-
-      const isValid = Object.keys(newErrors).length === 0
-
-      if (!isValid) {
-        logEvent({
-          eventType: 'track',
-          eventName: 'Teams Page Social Sign Up Validation Failed',
-          attributes: {
-            errors: newErrors,
-            connector: payload.connector,
-          },
-        })
-      }
-
-      setErrors(newErrors)
-      return isValid
-    },
-    [logEvent]
-  )
-
-  const handleError = useCallback(() => {
-    setSubmitFailed(true)
-    window.scrollTo({
-      top: 100,
-      behavior: 'smooth',
-    })
-  }, [])
-
-  const handleGTMCustomEventTrigger = useCallback((payload) => {
-    if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
-      ;(window as any).dataLayer.push({
-        event: 'signoz-cloud-signup-form-submit',
-        ...payload,
-      })
-    }
-    // Store current email for future comparison
-    localStorage.setItem('prevSignupEmail', payload.email)
-  }, [])
-
-  const handleSignUp = useCallback(
-    async (payload) => {
-      setSubmitFailed(false)
-      const isValid = validatePayload(payload)
-
-      if (!isValid) return
-
-      setIsSubmitting(true)
-
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
-
-        if (response.ok) {
-          setSubmitSuccess(true)
-          handleGTMCustomEventTrigger(payload)
-
-          // Set user ID in local storage *before* logging events
-          localStorage.setItem('app_user_id', payload.email)
-
-          // --- Segment Identify Call ---
-          logEvent({
-            eventType: 'identify',
-            eventName: 'User Signed Up', // Optional: Add an event name for clarity
-            attributes: {
-              // These become Segment traits
-              email: payload.email,
-              dataRegion: payload.region.name,
-              method: 'email_signup',
-            },
-          })
-
-          // --- Segment Group Call ---
-          const domain = payload.email.split('@')[1] || 'unknown_domain'
-          logEvent({
-            eventType: 'group',
-            eventName: 'User Associated with Company', // Optional: Add an event name
-            groupId: domain,
-            attributes: {
-              // These become Group traits
-              domain: domain,
-            },
-          })
-          // --- End Segment Calls ---
-
-          localStorage.setItem('workEmail', payload.email)
-          localStorage.setItem('region', payload.region.name)
-
-          sendSubmissionRelayInBackground({
-            email: payload.email,
-            signupId: createSubmissionRelayId('teams-email'),
-            source: 'teams-email-signup',
-            createdAt: new Date().toISOString(),
-            pageLocation: window.location.pathname,
-            dataRegion: payload.region.name,
-            method: 'email_signup',
-          })
-
-          router.push('/verify-email')
-        } else {
-          // To do, handle other errors apart from invalid email
-          const errorData = await response.json()
-
-          logEvent({
-            eventType: 'track',
-            eventName: 'Teams Page Sign Up API Error',
-            attributes: {
-              error: errorData.error,
-              status: response.status,
-              email: payload.email,
-              region: payload.region.name,
-            },
-          })
-
-          setErrors({
-            apiError: errorData.error,
-          })
-          handleError()
-        }
-      } catch (error) {
-        logEvent({
-          eventType: 'track',
-          eventName: 'Teams Page Sign Up Exception',
-          attributes: {
-            errorMessage: error instanceof Error ? error.message : String(error),
-            email: payload.email,
-          },
-        })
-        handleError()
-      } finally {
-        setIsSubmitting(false)
-      }
-    },
-    [handleError, handleGTMCustomEventTrigger, logEvent, router, validatePayload]
-  )
-
-  const handleSocialSignup = useCallback(
-    async (payload) => {
-      setSubmitFailed(false)
-      if (!validateSocialSignupPayload(payload)) {
-        return
-      }
-      setIsSubmitting(true)
-
-      logEvent({
-        eventType: 'track',
-        eventName: 'Teams Page Social Signup Redirect Initiated',
-        attributes: {
-          connector: payload.connector,
-          region: payload.region.name,
-        },
-      })
-
-      localStorage.setItem('region', payload.region.name)
-      window.location.href = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/connectors/${payload.connector}/url`
-    },
-    [validateSocialSignupPayload, logEvent]
-  )
-
-  const handleSocialSignupCallback = useCallback(
-    async (payload) => {
-      setSubmitFailed(false)
-      setIsSubmitting(true)
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/connectors/me/users`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-          }
-        )
-
-        if (response.ok) {
-          const responseData = await response.json()
-
-          const data_region = localStorage.getItem('region')
-          setSubmitSuccess(true)
-          handleGTMCustomEventTrigger({ ...responseData?.data, region: data_region })
-
-          // Set user ID in local storage *before* logging events
-          localStorage.setItem('app_user_id', responseData.data.email)
-
-          // --- Segment Identify Call ---
-          logEvent({
-            eventType: 'identify',
-            eventName: 'User Signed Up', // Optional: Add an event name for clarity
-            attributes: {
-              // These become Segment traits
-              email: responseData.data.email,
-              dataRegion: data_region,
-              method: 'social_signup',
-            },
-          })
-
-          // --- Segment Group Call ---
-          const domain = responseData.data.email.split('@')[1] || 'unknown_domain'
-          logEvent({
-            eventType: 'group',
-            eventName: 'User Associated with Company', // Optional: Add an event name
-            groupId: domain,
-            attributes: {
-              // These become Group traits
-              domain: domain,
-            },
-          })
-          // --- End Segment Calls ---
-
-          sendSubmissionRelayInBackground({
-            email: responseData.data.email,
-            signupId: responseData.data.code || createSubmissionRelayId('teams-social'),
-            source: 'teams-social-signup',
-            createdAt: new Date().toISOString(),
-            pageLocation: window.location.pathname,
-            dataRegion: data_region || undefined,
-            connector: payload.connector,
-            method: 'social_signup',
-          })
-
-          router.push(
-            `/users?email=${encodeURIComponent(responseData.data.email)}&code=${responseData.data.code}&region=${data_region}`
-          )
-        } else {
-          const errorData = await response.json()
-
-          logEvent({
-            eventName: 'Social Signup Error',
-            eventType: 'track',
-            attributes: {
-              errorData: errorData,
-              errorType: 'API Error',
-              status: response.status,
-              ...payload,
-            },
-          })
-
-          setErrors({
-            apiError: errorData.error,
-          })
-          handleError()
-        }
-      } catch (error) {
-        logEvent({
-          eventName: 'Social Signup Error',
-          eventType: 'track',
-          attributes: {
-            errorType: 'Catch Block Error',
-            error,
-            errorMessage: error instanceof Error ? error.message : String(error),
-            ...payload,
-          },
-        })
-
-        handleError()
-      } finally {
-        setIsSubmitting(false)
-      }
-    },
-    [handleError, handleGTMCustomEventTrigger, logEvent, router]
-  )
+  const {
+    errors,
+    isSubmitting,
+    submitFailed,
+    handleSignUp,
+    handleSocialSignup,
+    handleSocialSignupCallback,
+    handleError,
+    logEvent,
+  } = useSignupForm({ source: 'teams' })
 
   useEffect(() => {
     if (authCode) {

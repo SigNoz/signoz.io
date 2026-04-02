@@ -1,6 +1,5 @@
 'use client'
 
-import { Card, CardHeader, CardBody, Button } from '@nextui-org/react'
 import { ArrowRight } from 'lucide-react'
 import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
 import MonthlyEstimateMobile from '@/components/Monthly-estimate/MonthlyEstimateMobile'
@@ -45,15 +44,13 @@ const EnterprisePricing = () => {
                     environment. <br /> Prevent Data Spikes with Second-Level Limits.
                   </p>
 
-                  <Button className="mt-4 gap-2 rounded-full bg-signoz_ink-300" size="sm">
-                    <Link
-                      href="/blog/introducing-ingest-guard-feature"
-                      className="flex-center"
-                      prefetch={false}
-                    >
-                      Learn more <ArrowRight size={16} />
-                    </Link>
-                  </Button>
+                  <Link
+                    href="/blog/introducing-ingest-guard-feature"
+                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-signoz_ink-300 px-4 py-2 text-sm font-medium text-white no-underline hover:bg-signoz_ink-200"
+                    prefetch={false}
+                  >
+                    Learn more <ArrowRight size={16} />
+                  </Link>
                 </div>
 
                 <div>
@@ -79,31 +76,29 @@ const EnterprisePricing = () => {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                  <Card className="rounded-md border-signoz_slate-500 bg-signoz_ink-400">
-                    <CardHeader className="text-base text-signoz_vanilla-100">
-                      No user-based pricing
-                    </CardHeader>
-                    <CardBody className="-mt-4 text-sm font-light leading-9 text-signoz_vanilla-400">
+                  <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
+                    <div className="text-base text-signoz_vanilla-100">No user-based pricing</div>
+                    <div className="-mt-1 text-sm font-light leading-9 text-signoz_vanilla-400">
                       Add as many team members as you want.
-                    </CardBody>
-                  </Card>
+                    </div>
+                  </div>
 
-                  <Card className="rounded-md border-signoz_slate-500 bg-signoz_ink-400">
-                    <CardHeader className="text-base text-signoz_vanilla-100">
+                  <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
+                    <div className="text-base text-signoz_vanilla-100">
                       No host (container or node) based pricing
-                    </CardHeader>
-                    <CardBody className="-mt-4 text-sm font-light leading-9 text-signoz_vanilla-400">
+                    </div>
+                    <div className="-mt-1 text-sm font-light leading-9 text-signoz_vanilla-400">
                       No need to worry about auto-scaling during peak hours. Suitable for
                       architectures that requires lots of nodes/machines but less data from each
                       machine. For example, IoT & robotics applications.
-                    </CardBody>
-                  </Card>
+                    </div>
+                  </div>
 
-                  <Card className="rounded-md border-signoz_slate-500 bg-signoz_ink-400">
-                    <CardHeader className="text-base text-signoz_vanilla-100">
+                  <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
+                    <div className="text-base text-signoz_vanilla-100">
                       No special pricing for custom metrics
-                    </CardHeader>
-                    <CardBody className="-mt-4 text-sm font-light leading-9 text-signoz_vanilla-400">
+                    </div>
+                    <div className="-mt-1 text-sm font-light leading-9 text-signoz_vanilla-400">
                       All metrics charged simply at $0.1 per million samples. Estimate your metrics
                       cost with the{' '}
                       <a
@@ -113,8 +108,8 @@ const EnterprisePricing = () => {
                       >
                         Metrics Price Calculator.
                       </a>
-                    </CardBody>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

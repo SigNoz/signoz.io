@@ -21,7 +21,7 @@ At minimum, include:
 ## Images
 
 - Store blog images under `public/img/blog/<YYYY-MM>/`.
-- Use WebP when possible.
+- Use WebP format for all blog images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools.
 
 ## Authoring Notes
 

@@ -193,6 +193,11 @@ const docsSideNav = [
                 label: 'Deploying with ArgoCD',
                 route: '/docs/install/argocd',
               },
+              {
+                type: 'doc',
+                label: 'Deploying with Kustomize',
+                route: '/docs/setup/kubernetes/kustomize',
+              },
             ],
           },
           {
@@ -458,6 +463,18 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/authentication',
                 label: 'Authentication',
+              },
+            ],
+          },
+          {
+            label: 'Identity & Access',
+            type: 'category',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/service-accounts',
+                label: 'Service Accounts',
               },
             ],
           },
@@ -906,6 +923,12 @@ const docsSideNav = [
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
           },
+          {
+            type: 'doc',
+            label: 'Routing Connector',
+            route:
+              '/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector',
+          },
         ],
       },
     ],
@@ -1015,6 +1038,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/instrumentation/javascript/nodejs-selective-instrumentation',
                 label: 'Selective Instrumentation',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/javascript/nodejs-exclude-http-endpoints',
+                label: 'Exclude HTTP Endpoints',
               },
             ],
           },
@@ -1472,6 +1500,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/cloudflare-logs',
             label: 'Cloudflare',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/supabase-logs',
+            label: 'Supabase',
           },
           {
             type: 'doc',
@@ -2292,6 +2325,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/n8n-dashboard',
+            label: 'n8n Cloud',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/ollama-dashboard',
             label: 'Ollama',
           },
@@ -2814,6 +2852,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/n8n-monitoring',
+        label: 'n8n Cloud',
+        type: 'doc',
+      },
+      {
         route: '/docs/ollama-monitoring',
         label: 'Ollama',
         type: 'doc',
@@ -2879,12 +2922,35 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/ai/signoz-mcp-server',
-        label: 'MCP Server',
+        label: 'SigNoz MCP Server',
       },
       {
         type: 'doc',
         route: '/docs/ai/agent-skills',
         label: 'Agent Skills',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/ai/use-cases',
+        label: 'MCP Use Cases',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/natural-language-log-exploration',
+            label: 'Log Exploration',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/latency-spike-explainer',
+            label: 'Latency Spike Explainer',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
+            label: 'Report from Trace ID',
+          },
+        ],
       },
     ],
   },

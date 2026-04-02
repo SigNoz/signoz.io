@@ -237,7 +237,7 @@ Detailed overview of the particular log
                        
 That's it! You have successfully set up monitoring for your Cloud Load Balancer logs with SigNoz Cloud.
 
-# Troubleshooting
+## Troubleshooting
 
 If you encounter any issues while setting up monitoring for your Cloud Load Balancer logs with SigNoz cloud, here are a few troubleshooting steps you can try:
 
@@ -249,21 +249,21 @@ By following this guide, you should be able to easily send the logs from your Go
 </TabItem>
 <TabItem value='self-host' label='Self-Host'>
 
-## Prerequisites
+### Prerequisites
 
 1. [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or load balancer Admin privilege.
 2. Cloud Load Balancer (logging should be enabled)
 3. [Google Cloud Monitoring API](https://console.cloud.google.com/apis/api/monitoring.googleapis.com) enabled
 
-## Setup
+### Setup
 
-### Create a Pub/Sub topic
+#### Create a Pub/Sub topic
 
-Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.iohttps://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation//) document to create the Pub/Sub topic.
+Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation/) document to create the Pub/Sub topic.
 
-### Create Log Router to Pub/Sub Topic
+#### Create Log Router to Pub/Sub Topic
 
-Follow the steps mentioned in the [Log Router Setup](https://signoz.iohttps://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup//) document to create the Log Router.
+Follow the steps mentioned in the [Log Router Setup](https://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup/) document to create the Log Router.
 
 To ensure you filter out only the Load Balancer logs, use the following filter conditions:
 
@@ -278,7 +278,7 @@ resource.type="load balancer"
 resource.labels.service_name="<FORWARDING RULE NAME>"
 ```
 
-### Provide permissions to Log Router Sink
+#### Provide permissions to Log Router Sink
 
 * On the GCP console, search for _Log Router_, and navigate to Logs Router in the GCP Logging service.
 * Click on the 3 dots to the right of the Log Router sink that we created in the earlier steps, and select _View sink details_ from the dropdown.
@@ -341,10 +341,10 @@ Verify log router getting volume upon any trigger of CLB.
 
 After the log router configuration and permission, let’s configure the OTel collector to receive these logs.
 
-### OTel Collector Configuration
+#### OTel Collector Configuration
 Follow the steps mentioned in the [Creating Compute Engine](https://signoz.io/docs/gcp-monitoring/bootstrapping/gce-creation/) document to create the Compute Engine instance. 
 
-#### Install OTel Collector as agent
+##### Install OTel Collector as agent
 
 Firstly, we will establish the authentication using the following commands:
 
@@ -405,7 +405,7 @@ systemctl restart otelcol-contrib
 
 You can now trigger the Load Balancer a few times, and see the logs from the GCP Cloud Load Balancer on SigNoz.
 
-### Visualize the logs in Self-Hosted SigNoz
+#### Visualize the logs in Self-Hosted SigNoz
 <figure data-zoomable align="center">
     <img
         src="/img/docs/gcp-monitoring/clb-logs/logs-in-dashboard-self-hosted.webp"
@@ -432,7 +432,7 @@ Detailed overview of the particular log
 
 That's it! You have successfully set up monitoring for your Cloud Load Balancer logs with Self-Hosted SigNoz.   
 
-## Troubleshooting      
+### Troubleshooting
 
 If you encounter any issues while setting up monitoring for your Cloud Load Balancer logs with Self-Hosted SigNoz, here are a few troubleshooting steps you can try:
 
@@ -447,7 +447,6 @@ By following this guide, you should be able to easily send the logs from your Go
 
 </TabItem>
 </Tabs>
-
 
 
 

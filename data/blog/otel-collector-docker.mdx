@@ -1,0 +1,462 @@
+---
+title: OpenTelemetry Collector in Docker - Minimal Setup with Docker Compose
+slug: otel-collector-docker
+date: 2026-03-25
+tags: [opentelemetry, docker]
+authors: [mahak_kaur]
+description: Run the OpenTelemetry Collector in Docker Compose with a minimal config, validate it with telemetrygen, and send data to SigNoz.
+keywords: [opentelemetry collector docker, opentelemetry collector in docker, opentelemetry collector docker compose, telemetrygen, signoz]
+---
+
+The [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) sits directly between your applications and your observability backend. Instead of configuring every app to send data to different places, your apps just send data to the Collector, which receives, batches, and exports it.
+
+As your architecture grows, host-based Collector setups tend to drift, so running the Collector in Docker gives you one standard package and Docker Compose keeps the config, ports, and environment in one place.
+
+In this guide, we will set up a minimal OpenTelemetry Collector using Docker Compose. We will:
+
+1. Create a minimal Collector configuration.
+2. Start the Collector using Docker Compose.
+3. Verify the data pipeline works end-to-end using `telemetrygen`.
+4. Connect the Collector to [SigNoz](https://signoz.io/).
+
+## Prerequisites
+
+Before starting, make sure you have:
+
+- Docker Engine on Linux, or Docker Desktop on macOS or Windows.
+- Docker Compose v2.
+- A terminal with permission to run Docker commands.
+- A [SigNoz Cloud account](https://signoz.io/teams/) for the final visualization step.
+
+## Step 1: Create the Minimal Collector Configuration
+
+Create a file named `otel-collector-config.yaml`
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      exporters: [debug]
+    logs:
+      receivers: [otlp]
+      exporters: [debug]
+```
+
+**This config does three things.**
+
+- **`receivers`**: Opens up ports `4317` (gRPC) and `4318` (HTTP) so the Collector can listen for incoming OpenTelemetry data. Setting the endpoint to `0.0.0.0` ensures the Collector accepts traffic from outside its own Docker container.
+- **`exporters`**: Tells the Collector to blindly print everything it receives straight to your terminal screen (`stdout`) using the `debug` exporter so we can verify it's working.
+- **`service`**: Connects the receiver to the exporter, turning on the pipeline for traces, metrics, and logs.
+
+<KeyPointCallout title="Production Recommendation" defaultCollapsed={true}>
+While this minimal configuration is perfect for local testing, the <a href="https://opentelemetry.io/docs/collector/configuration/#processors" target="_blank" rel="noopener noreferrer nofollow">official OpenTelemetry documentation</a> highly recommends that production deployments always include the <code>memory_limiter</code> and <code>batch</code> processors to prevent memory leaks and optimize network usage.
+</KeyPointCallout>
+
+## Step 2: Create the Docker Compose File
+
+Create a file named `docker-compose.yaml` in the same directory:
+
+```yaml
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.148.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - otel-demo
+
+networks:
+  otel-demo:
+    name: otel-demo
+```
+
+**What did this Compose file do?**
+
+This Compose file creates an isolated Docker network (`otel-demo`), pulls the official Collector image, maps the ports we need, and cleanly mounts the config.yaml file we just wrote directly into the container.
+
+We use the [OpenTelemetry Collector Contrib](https://signoz.io/blog/opentelemetry-collector-contrib/) image instead of the Core version. The Contrib distribution includes hundreds of community-built receivers, processors, and exporters, making it much easier to drop in new integrations as your observability needs grow.
+
+Watch the volume mount path carefully! The Contrib image specifically expects its config file to be located at `/etc/otelcol-contrib/config.yaml`, which is different from the path used by the Core image.
+
+## Step 3: Run the Stack and Test the Setup
+
+Start the Collector:
+
+```bash
+docker compose up -d
+```
+
+This command starts the Collector container in the background. To confirm it is actually running (and did not crash silently), check its status:
+
+```bash
+docker compose ps
+```
+
+You should see your `otel-collector` service listed with a `STATUS` of `running`. If the status is blank or shows `Exit 1`, the Collector crashed—run `docker compose logs otel-collector` to see the exact error message causing the crash. The most common cause is a YAML indentation error in `otel-collector-config.yaml`.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-running.webp" 
+  alt="Terminal output of the docker compose ps command showing the open telemetry collector container with a status of Up." 
+  caption="Terminal showing the service otel-collector up and running." 
+/>
+
+We are going to use <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/cmd/telemetrygen" rel="noopener noreferrer nofollow" target="_blank">`telemetrygen`</a> to test the pipeline without bringing up a real application. It is an official OpenTelemetry tool that generates dummy telemetry data purely for testing connections.
+
+Run this command to send a quick burst of [distributed traces](https://signoz.io/blog/distributed-tracing/):
+
+```bash
+docker run --rm \
+  --network otel-demo \
+  ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.148.0 \
+  traces \
+  --otlp-endpoint=otel-collector:4317 \
+  --otlp-insecure \
+  --duration=5s
+```
+
+**What is each flag doing here?**
+
+- `--network otel-demo`: Places this container on the same Docker network as the Collector so it can reach it using the hostname `otel-collector`.
+- `--otlp-endpoint=otel-collector:4317`: Tells `telemetrygen` to send data to our Collector over gRPC.
+- `--otlp-insecure`: Disables TLS since this is a local test (no certificates needed).
+- `--duration=5s`: Generates a 5-second burst of dummy traces and then stops automatically.
+
+Now, inspect the Collector logs to see what came through:
+
+```bash
+docker compose logs -f otel-collector
+```
+
+If everything is working, you will see the Collector printing the raw span data it received.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-exporter.webp" 
+  alt="Terminal output showing OpenTelemetry Collector debug logs displaying raw trace data, including spans named lets-go and okey-dokey received from telemetrygen." 
+  caption="The Collector's debug exporter printing the raw traces received from telemetrygen." 
+/>
+
+Look for the line `service.name: Str(telemetrygen)` in the output. This confirms that your OTLP receiver accepted the incoming traces, the pipeline processed them, and the debug exporter printed them. End to end, it works.
+
+<KeyPointCallout title="A quick note on the span names" defaultCollapsed={false}>
+You will see span names like <code>okey-dokey</code> and <code>lets-go</code> in the debug output. These are just the hardcoded dummy names that <code>telemetrygen</code> generates. They have no real meaning—they are purely there to give you something to look at.
+</KeyPointCallout>
+
+## Step 4: Connect to SigNoz
+
+The `debug` exporter confirms data is flowing, but you cannot meaningfully query traces from your terminal logs. We now add a second exporter pointing to SigNoz so the data gets stored and becomes queryable in a real dashboard.
+
+[SigNoz](https://signoz.io/) is an all-in-one, OpenTelemetry-native observability platform that unifies traces, metrics, and logs in one UI. This guide uses SigNoz Cloud.
+
+If you use [self-hosted SigNoz](https://signoz.io/docs/install/self-host/) instead, the exporter endpoint and authentication settings will differ from the Cloud setup shown below.
+
+### 1. Create a '.env' file
+
+In the same directory as your docker-compose.yaml, create a new file called `.env` (just the extension, no filename before the dot). Add this single line to it:
+
+```
+SIGNOZ_INGESTION_KEY=YOUR_REAL_KEY_HERE
+```
+
+Replace `YOUR_REAL_KEY_HERE` with your actual SigNoz ingestion key. You can find it in your SigNoz Cloud dashboard under **Settings → Ingestion Keys**.
+
+Do not surround the key with quotes. Do not add spaces around the `=` sign. That is the only line this file needs.
+
+<KeyPointCallout title="Why a .env file?" defaultCollapsed={true}>
+This keeps your secret API key outside of your YAML config files. When Docker Compose starts, it automatically reads the .env file and injects the value into the container as an environment variable. Your YAML file never directly contains the secret.
+</KeyPointCallout>
+
+### 2. Update `otel-collector-config.yaml`
+
+Replace the entire contents of your `otel-collector-config.yaml` with the following block:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+
+  otlp:
+    endpoint: ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+    tls:
+      insecure: false
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug, otlp]
+    metrics:
+      receivers: [otlp]
+      exporters: [debug, otlp]
+    logs:
+      receivers: [otlp]
+      exporters: [debug, otlp]
+```
+
+**(Replace `<region>` with your SigNoz Cloud region: `us`, `in`, or `eu`.)**
+
+Notice that `${SIGNOZ_INGESTION_KEY}` is written exactly as shown. Do not replace it with your actual key here. Docker will automatically inject the real value from your `.env` file at startup.
+
+### 3. Update `docker-compose.yaml`
+
+Replace the entire contents of your `docker-compose.yaml` with this:
+
+```yaml
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.148.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    environment:
+      SIGNOZ_INGESTION_KEY: ${SIGNOZ_INGESTION_KEY}
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - otel-demo
+
+networks:
+  otel-demo:
+    name: otel-demo
+```
+
+The only change from Step 2 is the new `environment` block, which explicitly passes the ingestion key into the container.
+
+### 4. Restart the Collector
+
+Run:
+
+```bash
+docker compose up -d --force-recreate
+```
+
+The `--force-recreate` flag tells Docker to rebuild the container from scratch, ensuring it picks up the updated config and environment variables. Without this flag, Docker might reuse the cached container and ignore your changes.
+
+Now rerun the `telemetrygen` traces command from Step 3.
+
+### Viewing traces in SigNoz:
+
+If everything is wired up correctly, navigate to your SigNoz dashboard. On the left sidebar, click **Services**. You should see `telemetrygen` listed as an active service. Click on it.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-telemetrygen.webp" 
+  alt="The SigNoz APM Services dashboard highlighting telemetrygen as an active application in the services table." 
+  caption="The telemetrygen service appearing in the SigNoz APM Services dashboard after the pipeline is connected." 
+/>
+
+You will be taken to the **Service Overview** page. This page automatically takes the raw incoming spans and generates RED metrics (Rate, Errors, Duration) for you!
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-Trace.webp" 
+  alt="SigNoz Service Overview dashboard automatically populated with Latency and Rate charts, highlighting the lets-go and okey-dokey key operations." 
+  caption="The telemetrygen Service Overview dashboard, automatically populated with RED metrics derived from the raw traces." 
+/>
+
+To see the actual individual traces that generated these metrics, look at the **Key Operations** table at the bottom right and click on **`lets-go`**.
+
+This will open the Trace Explorer. By default, it opens in List View, but click the **Trace View** toggle button near the top left. This switches the layout to show the Root Spans with their blue, clickable `TraceIDs` on the right side.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-trace-view.webp" 
+  alt="SigNoz Trace Explorer interface showing a chronological list of root spans for the lets-go operation alongside their unique clickable Trace IDs." 
+  caption="The Trace Explorer view showing individual traced requests generated by telemetrygen." 
+/>
+
+If you click on any of those blue `TraceID` links, you will be taken to the ultimate Trace Details page, where you can see a Gantt/waterfall chart showing exactly how long `lets-go` took versus `okey-dokey`.
+
+<KeyPointCallout title="My service disappeared!" defaultCollapsed={false}>
+This is normal. <code>telemetrygen</code> only sends a 5-second burst of data and then stops. The SigNoz dashboard defaults to showing only services active in the last 5 or 15 minutes. If your service disappeared, change the time picker in the top-right corner to <strong>Last 1 Hour</strong> and it will reappear.
+</KeyPointCallout>
+
+<KeyPointCallout title="Security Recommendation" defaultCollapsed={true}>
+Docker recommends using Docker Secrets instead of environment variables for things like API keys in production.
+</KeyPointCallout>
+
+## Optional: Test metrics and logs with telemetrygen
+
+You can also verify your metrics and logs pipelines using `telemetrygen`.
+
+### Testing metrics
+
+Run:
+
+```bash
+docker run --rm \
+  --network otel-demo \
+  ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.148.0 \
+  metrics \
+  --otlp-endpoint=otel-collector:4317 \
+  --otlp-insecure \
+  --duration=5s
+```
+
+Inspect the Collector logs:
+
+```bash
+docker compose logs -f otel-collector
+```
+
+In the output, look for a line showing `DataType: Gauge`. This confirms the Collector received a metric and processed it through the pipeline.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-metrics.webp" 
+  alt="Terminal output showing OpenTelemetry Collector debug logs displaying a metric with DataType Gauge received from telemetrygen." 
+  caption="The Collector's debug log showing a 'Gauge metric' received from telemetrygen." 
+/>
+
+**What does `DataType: Gauge` mean?**
+
+Notice that `telemetrygen` generates a basic dummy metric called `gen`. While OpenTelemetry provides [7 different types of metrics](https://signoz.io/blog/opentelemetry-metrics-with-examples/) to handle various use cases, a **Gauge** is a metric type that captures an instantaneous value at a specific point in time (like a temperature reading or memory usage). The `gen` metric simply counts up by 1 every second while `telemetrygen` is running. It is not measuring anything meaningful, it exists purely to provide sample data we can query in our backend.
+
+
+**Viewing metrics in SigNoz:**
+
+Go to your SigNoz dashboard and click **Dashboards** on the left sidebar. Click **+ New dashboard → Create dashboard**. Inside the new dashboard, click **Add Panel** and select **Time Series**. In the query builder that opens, type `gen` in the metric name field and click **Stage & Run Query**.
+
+You should see a flat line plotted on the graph with a value that corresponds to how many seconds `telemetrygen` ran. For a 5-second run, expect to see values climbing from 0 to around 3-5.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-Pasted.webp" 
+  alt="SigNoz Dashboard showing a Time Series panel querying the gen metric, displaying a plotted line graph that holds steady at a value of 3." 
+  caption="The gen metric from telemetrygen visualized as a Time Series panel in SigNoz Dashboards." 
+/>
+
+<KeyPointCallout title="Why is the value &quot;3&quot; and not &quot;5&quot;?" defaultCollapsed={false}>
+The <code>gen</code> metric reports the value of its gauge counter at each 1-second interval. The final recorded value depends on how many data points were flushed before the container stopped—it simply held at <code>3</code> (or whatever your last flush was) rather than reaching <code>5</code>. This is expected behavior from a Gauge metric type.
+</KeyPointCallout>
+
+### Testing logs
+
+Run:
+
+```bash
+docker run --rm \
+  --network otel-demo \
+  ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.148.0 \
+  logs \
+  --otlp-endpoint=otel-collector:4317 \
+  --otlp-insecure \
+  --duration=5s
+```
+
+Inspect the Collector logs:
+
+```bash
+docker compose logs -f otel-collector
+```
+
+Look for lines showing `SeverityText: Info` and `Body: Str(the message)`. This confirms the Collector received log records and exported them.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-logs.webp" 
+  alt="Terminal output showing OpenTelemetry Collector debug logs displaying raw log records with SeverityText Info and a body content of 'the message'." 
+  caption="The Collector's debug log showing raw log records received from telemetrygen with 'SeverityText: Info'." 
+/>
+
+**What does `SeverityText: Info` mean?**
+It means the log record was tagged with a severity level of `Info`, equivalent to a standard informational log line in any application. The body of the log (`the message`) is the literal dummy text that `telemetrygen` generates. In a real application, this is where your actual log message would appear (e.g., `"User login successful"`).
+
+You may also notice that `Trace ID` and `Span ID` are blank in the log records. This is expected behavior from `telemetrygen`. In a real instrumented application, the OpenTelemetry SDK automatically injects the active request's Trace ID into every log line, which lets SigNoz link your logs directly to traces. Since `telemetrygen` generates standalone dummy logs without processing any real requests, there is no trace context to inject.
+
+**Viewing logs in SigNoz:**
+
+Navigate to **Logs** on the left sidebar. The log records from this test will appear directly in the log explorer. Look for entries where the message body says `the message`, those are the dummy log records generated by `telemetrygen`. In your real application, this view will show your actual application logs.
+
+<Figure 
+  src="/img/blog/2026/03/otel-collector-docker-image.webp" 
+  alt="SigNoz Logs Explorer dashboard displaying a chronological list of incoming log records where the body column displays the dummy text 'the message'." 
+  caption="The dummy log records generated by telemetrygen appearing in the SigNoz Log Explorer." 
+/>
+
+## Troubleshooting Common Issues
+
+### Container exits immediately
+
+This usually means the config file has a YAML formatting error or the file path is wrong. Validate the Collector config with:
+
+```bash
+docker run --rm \
+  -v $(pwd)/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro \
+  otel/opentelemetry-collector-contrib:0.148.0 \
+  validate --config=/etc/otelcol-contrib/config.yaml
+```
+
+You can also check how Docker is parsing your Compose file with:
+
+```bash
+docker compose config
+```
+
+### Connection refused on port 4317
+
+If the Collector is bound exclusively to `localhost`, external traffic cannot reach it. Check your OTLP receiver to ensure you are using:
+
+```yaml
+endpoint: 0.0.0.0:4317
+```
+
+### Port 4317 already in use
+
+Find the exact process using the port:
+
+```bash
+lsof -i :4317
+```
+
+Then stop that process or change the published port in docker-compose.yaml.
+
+## FAQs
+
+### What is the difference between the Core and Contrib Collector images?
+
+The official `Core` distribution only includes baseline receivers and exporters (like pure OTLP). We heavily recommend using the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib" rel="noopener noreferrer nofollow" target="_blank">`Contrib`</a> distribution in Docker environments because it comes pre-packaged with hundreds of community integrations. This allows you to easily plug in receivers for Redis, MySQL, or AWS without having to build a custom Collector image yourself.
+
+### Why does an external app report `Connection Refused` on port 4317?
+
+This is the most common pitfall when running the Collector in Docker. By default, many quick-start configs bind the OTLP receivers to `localhost:4317`. Inside a Docker container, `localhost` strictly means the container's own internal loopback interface, meaning the Collector drops all traffic coming from outside the container. You must bind to `0.0.0.0:4317` so Docker can route external traffic into the container.
+
+### Do I need an ingestion key for self-hosted SigNoz?
+
+No. You only need to configure the `SIGNOZ_INGESTION_KEY` if you are shipping data to [SigNoz Cloud](https://signoz.io/docs/cloud/). If you are running the open-source self-hosted edition, the platform accepts telemetry without requiring security keys by default.
+
+### Can the Collector route data to more than one observability backend?
+
+Absolutely. This is the primary architectural benefit of the Collector. You can configure multiple exporters (e.g., SigNoz via `otlp`, a logging service via `syslog`, and Prometheus via `prometheus`) and add them all to the `exporters: []` array in your pipeline configuration to duplicate and fork your telemetry streams.
+
+## Conclusion
+
+You have successfully deployed an OpenTelemetry Collector inside a Docker Compose network, structured a minimal `config.yaml`, and proven the pipeline works end-to-end by pushing telemetry from `telemetrygen` into SigNoz.
+
+By standardizing this setup in Docker Compose, your observability infrastructure is fully isolated, reproducible, and easily stored alongside your application code in Git.
+
+At this point, the next step is to point a real instrumented app at the Collector. If your app runs in the same Docker Compose network, send OTLP to `otel-collector:4317` or `otel-collector:4318`, depending on the protocol you use. If your app runs on the host machine instead, use the published host ports.

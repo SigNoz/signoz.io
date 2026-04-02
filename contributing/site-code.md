@@ -23,6 +23,12 @@ Use this playbook when changing frontend or site code such as `app/**`, `compone
 - Export shared pieces through folder `index.ts` files when that matches the existing pattern.
 - Keep constants and helper shapes organized according to nearby code conventions.
 
+## OpenTelemetry resource hub
+
+- Hub navigation structure lives in [`constants/opentelemetry_hub.json`](../constants/opentelemetry_hub.json).
+- Each article entry should include a `title` string (sidebar label). If omitted, the label is derived from the last URL segment (slug, hyphenated words title-cased). Hub nav is built from this JSON plus URLs.
+- When you change the visible title of a linked page, update both the page frontmatter (or CMS fields where applicable) **and** the `title` field in the JSON.
+
 ## Listicle And Discovery Data
 
 - Keep listicle and icon-card source data in `constants/componentItems/*.ts`, not inside React components.

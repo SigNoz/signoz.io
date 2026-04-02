@@ -11,13 +11,13 @@ keywords: []
 ---
 
 
-# 📌 Overview
+## 📌 Overview
 
 This is a step-by-step guide to help you migrate from normalized, underscore-based metric names (e.g., `system_memory_usage`) to unnormalized naming conventions (e.g., `system.memory.usage`). This change aligns with the OpenTelemetry semantic conventions and enables better namespacing, and cross-signal compatibility.
 
 Currently, the [SigNoz](https://signoz.io/docs/introduction/) OpenTelemetry Collector normalizes metric names by replacing dots (`.`) with underscores (`_`)—both in metric names and attributes. This guide will help you adopt the dot notation consistently throughout your observability pipeline.
 
-## 🔍 Why We Are Migrating
+### 🔍 Why We Are Migrating
 
 Previously, PromQL did not support the dot (`.`) character in metric names, which required us to normalize all metric names in the OpenTelemetry Collector by replacing dots with underscores (`_`). This ensured compatibility with PromQL queries and prevented query failures.
 
@@ -25,9 +25,9 @@ However, recent updates to PromQL now support a broader set of UTF-8 characters�
 
 GitHub Issue - https://github.com/prometheus/prometheus/issues/13095
 
-## 📦 Migration Plan
+### 📦 Migration Plan
 
-### 1. Dual Export Phase (Transition Period)
+#### 1. Dual Export Phase (Transition Period)
 
 We have introduced a new exporter: `signozclickhousemetrics`, that doesn't normalizes the metric names and the labels (`system.memory.usage`).
 
@@ -35,13 +35,13 @@ Both exporters (the existing ClickHouse metrics exporter and the new `signozclic
 
 This allows time for dashboard and alert migration while ensuring no data loss or query breakage.
 
-### 2. Dashboard and Alert Migration
+#### 2. Dashboard and Alert Migration
 
 During the transition phase, we will provide scripts and tools to help you migrate your dashboards and alerts from normalized (`_`) metrics to unnormalized (`.`) metrics.
 
 We will also offer community support and documentation to assist with this process.
 
-### 3. Cutover and Deprecation
+#### 3. Cutover and Deprecation
 
 Once the data for both naming formats has existed in your system for at least one full default retention cycle, we will deprecate and remove the old exporter.
 
@@ -51,7 +51,7 @@ At this point:
 - All dashboards, alerts, and custom queries should use the unnormalized exclusively.
 - For those community users who have higher retention in metrics data, we will help with the scripts to converts the old (_) data to new non normalized data.
 
-## ⚙️ Resource Impact
+### ⚙️ Resource Impact
 
 Running both exporters simultaneously will result in a temporary increase in CPU and memory usage:
 

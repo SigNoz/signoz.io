@@ -26,6 +26,7 @@ import {
   SiSupabase,
   SiOllama,
   SiHuggingface,
+  SiN8N,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -224,6 +225,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   'https://github.com/SigNoz/dashboards/tree/main/nomad': (
     <Layers className="h-7 w-7 text-purple-600" />
   ),
+  '/docs/dashboards/dashboard-templates/n8n-dashboard': <SiN8N className="h-7 w-7 text-gray-500" />,
   '/docs/dashboards/dashboard-templates/ollama-dashboard': (
     <SiOllama className="h-7 w-7 text-white" />
   ),
