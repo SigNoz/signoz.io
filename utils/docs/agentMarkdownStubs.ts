@@ -63,6 +63,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'JavaInstrumentationListicle',
   'JavascriptInstrumentationListicle',
   'K8sInstallationListicle',
+  // 'KeyPointCallout',
   'KubernetesDashboardsListicle',
   'LiteLLMDashboardsListicle',
   'LLMMonitoringListicle',
