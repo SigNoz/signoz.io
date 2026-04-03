@@ -17,10 +17,10 @@ This guide shows two ways to recombine multiline logs in OpenTelemetry Collector
 
 ## Sample Multiline Logs
 
-Here is an example of multiline logs
+Here is an example of multiline logs:
 
 ```text
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
+2024-06-20 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
 File "python-logger.py", line 9, in make_log
   return area[10]
@@ -187,6 +187,6 @@ After applying either approach, verify in SigNoz that:
 
 **All logs combined into one entry** — Check that `is_first_entry` or `line_start_pattern` matches the correct pattern. If the regex is too broad or too narrow, entries will not split correctly.
 
-**`logstransform` processor causes collector startup error in k8s-infra** — The `logstransformprocessor` is not included in the official `otelcol-contrib` image used by the k8s-infra chart. You will see `unknown type: logstransform` in the collector logs. Use `presets.logsCollection.multiline` in your Helm values instead (see the receiver section above).
+**`logstransform` processor causes collector startup error in k8s-infra** — The `logstransform` processor is not included in the official `otelcol-contrib` image used by the k8s-infra chart. You will see `unknown type: logstransform` in the collector logs. Use `presets.logsCollection.multiline` in your Helm values instead (see the receiver section above).
 
 **Processor defined but not applied** — Ensure the processor is listed in `service.pipelines.logs.processors`. Defining a processor alone does not enable it.
