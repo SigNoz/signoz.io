@@ -19,7 +19,7 @@ This guide shows two ways to recombine multiline logs in OpenTelemetry Collector
 
 Here is an example of multiline logs
 
-```python
+```text
 2024-20-06 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
 File "python-logger.py", line 9, in make_log
@@ -28,7 +28,7 @@ IndexError: string index out of range
 2024-20-06 18:58:05,898 DEBUG:Query Started
 ```
 
-In the above example there there are two log lines spread over multiple line, but since by default each newline is treated as end of log line, multiple log lines will be created as seen in the image below.
+The example above has two log entries spread over multiple lines. Since each newline is treated as the end of a log entry by default, the collector creates separate entries for each line:
 
 <figure data-zoomable align="center">
   <img src="/img/logs/multiline/multiline_broken.png" alt="Multiline logs broken" />
@@ -39,13 +39,13 @@ In the above example there there are two log lines spread over multiple line, bu
 
 ## Parse Multiline Logs at Receiver
 
-The [filelog receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md) has a built-in `multiline` configuration block. This is the recommended approach because it recombines logs before they enter the pipeline.
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">filelog receiver</a> has a built-in `multiline` configuration block. This is the recommended approach because it recombines logs before they enter the pipeline.
 
 ### Step 1: Identify the start or end pattern
 
 Look at your log format and find a regex that matches the beginning (or end) of each log entry.
 
-```python
+```text
 2024-20-06 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
 File "python-logger.py", line 9, in make_log
@@ -102,7 +102,7 @@ After deployment, the logs will appear as single entries in SigNoz:
 
 ### Using multiline in the SigNoz k8s-infra Helm chart
 
-If you are running SigNoz on Kubernetes with the [k8s-infra Helm chart](https://github.com/SigNoz/charts/tree/main/charts/k8s-infra), use the `presets.logsCollection.multiline` key in your Helm values instead of editing the raw receiver config:
+If you are running SigNoz on Kubernetes with the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra Helm chart</a>, use the `presets.logsCollection.multiline` key in your Helm values instead of editing the raw receiver config:
 
 ```yaml
 presets:
@@ -115,7 +115,7 @@ The preset propagates this directly to the `filelog` receiver's `multiline` bloc
 
 ## Use Recombine Operator to Combine Multiline Logs
 
-If you cannot use the receiver-level multiline configuration, you can use the [recombine](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md) operator inside a `logstransform` processor.
+If you cannot use the receiver-level multiline configuration, you can use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md" target="_blank" rel="noopener noreferrer nofollow">recombine</a> operator inside a `logstransform` processor.
 
 <Admonition type="warning">
   The `logstransform` processor has development stability and is **not included in the official
@@ -128,7 +128,7 @@ If you cannot use the receiver-level multiline configuration, you can use the [r
 
 Using the same example logs:
 
-```python
+```text
 2024-20-06 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
 File "python-logger.py", line 9, in make_log
