@@ -1,132 +1,95 @@
 ---
-date: 2024-06-20
-title: Parsing Multiline Logs
-
+date: 2026-04-05
+title: How to Parse Multiline Logs
 id: parse-multiline-logs
+description: Combine log lines that span multiple lines — such as stack traces — into a single log record using the filelog receiver or the recombine operator.
+doc_type: howto
 ---
 
 ## Overview
 
-By default when you use the filelog receiver each newline in the log line creates a new log line. 
+By default, the filelog receiver treats each newline as the end of a log record. Stack traces, exception logs, and other multiline output get split into dozens of individual records, making them hard to read and correlate.
 
-This doc goes through different ways to solve this problem where you can parse/recombine multiline logs.
+This guide covers two approaches to fix that:
+1. **Receiver-level** — configure `multiline` in the filelog receiver (simplest)
+2. **Processor-level** — use the `recombine` operator in logstransform (more flexible)
 
+:::info Prerequisites
+- You are collecting logs with the [filelog receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md).
+- You have access to your OpenTelemetry Collector `config.yaml`.
+:::
 
+## The problem
 
-## Sample Multiline Logs
-Here is an example of multiline logs
+Consider this Python traceback spread across multiple lines:
 
-  ```python
+```
 2024-20-06 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
   File "python-logger.py", line 9, in make_log
     return area[10]
 IndexError: string index out of range
 2024-20-06 18:58:05,898 DEBUG:Query Started
-  ```
+```
 
-In the above example there there are two log lines spread over multiple line, but since by default each newline is treated as end of log line, multiple log lines will be created as seen in the image below.
+Without multiline handling, the collector creates one log record per line:
 
 <figure data-zoomable align="center">
   <img
     src="/img/logs/multiline/multiline_broken.png"
-    alt="Multiline logs broken"
+    alt="Multiline logs split into individual records"
   />
   <figcaption>
-    <i>
-        Multiline logs as multiple individual log lines
-    </i>
+    <i>Each line becomes a separate log record — the stack trace is fragmented</i>
   </figcaption>
 </figure>
 
-There are two ways you can combine these logs 
-1) Parse the logs lines as multiline at the receiver itself.
-2) Recombine the multiline logs later at processor level
+## Approach 1: Receiver-level multiline (recommended)
 
-## Parse Multiline Logs at Receiver
+Configure the `multiline` option directly on the filelog receiver. This is the simplest approach — the receiver combines lines before passing them to processors.
 
-Since we are using the [filelog](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md) receiver. It has a
-multiline configuration option.
+### Step 1: Identify the boundary pattern
 
-In order to parse these type of logs we will have to identify a start or end pattern.
-
-Let's understand with example
-
-  ```python
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
-Traceback (most recent call last):
-  File "python-logger.py", line 9, in make_log
-    return area[10]
-IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
-  ```
-
-For the above log lines we can see that the new log line starts with `Date`, so our `line_start_pattern` will be 
+Determine what marks the start (or end) of each log entry. In the Python example, each new log starts with a date in `YYYY-DD-MM` format.
 
 ```
 line_start_pattern: ^\d{4}-\d{2}-\d{2}
 ```
 
-Once you have your `line_start_pattern` or `line_end_pattern` this is how you configuration of filelog receiver will look like
+### Step 2: Add the multiline configuration
 
 ```yaml
 receivers:
   filelog:
     include:
-    - /var/log/example/multiline.log
+      - /var/log/example/app.log
     multiline:
       line_start_pattern: ^\d{4}-\d{2}-\d{2}
 ```
 
-Once it is deployed correctly this is how your log lines will look 
+Use `line_end_pattern` instead if it's easier to match the end of an entry.
+
+### Step 3: Restart the collector
+
+After restarting, each multiline entry appears as a single log record:
 
 <figure data-zoomable align="center">
   <img
     src="/img/logs/multiline/multiline_python.png"
-    alt="Multiline logs fixed"
+    alt="Multiline logs combined into a single record"
   />
   <figcaption>
-    <i>
-        Multiline logs as a single individual log line
-    </i>
+    <i>The full stack trace is now one log record</i>
   </figcaption>
 </figure>
 
+## Approach 2: Processor-level recombine
 
+Use the [recombine operator](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md) in `logstransform` when you cannot change the receiver configuration, or when you need more control over how lines are combined.
 
-## Use Recombine Operator to Combine Multiline Logs
+### Step 1: Add the recombine processor
 
-In case the above configuration is not feasible for you, you can use the [recombine](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md) 
-operator to join back the multiline logs.
-
-Let's take the same example again
-
-  ```python
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
-Traceback (most recent call last):
-  File "python-logger.py", line 9, in make_log
-    return area[10]
-IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
-  ```
-
-
-Here we know that log lines is splitted into multiple individual log lines by default
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/multiline/multiline_broken.png"
-    alt="Multiline logs broken"
-  />
-  <figcaption>
-    <i>
-        Multiline logs as multiple individual log lines
-    </i>
-  </figcaption>
-</figure>
-
-Since we know the start pattern of the new log line, here is how we will recombine it
-
-```
+```yaml
 processors:
   logstransform/multiline:
     operators:
@@ -136,22 +99,27 @@ processors:
         source_identifier: attributes["log.file.path"]
 ```
 
-Here we are matching the first line of a multiline log using `is_first_entry` and then combining the `body` field for each unique `log.file.path` value 
+- `combine_field: body` — join lines into the `body` field
+- `is_first_entry` — regex that identifies the first line of each entry
+- `source_identifier` — groups lines from the same source file
 
+### Step 2: Add the processor to your pipeline
 
-once the above is deployed this is what it will look like on the UI
+```yaml
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [logstransform/multiline, batch]
+      exporters: [otlp]
+```
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/multiline/multiline_python.png"
-    alt="Multiline logs fixed"
-  />
-  <figcaption>
-    <i>
-        Multiline logs as a single individual log line
-    </i>
-  </figcaption>
-</figure>
+### Step 3: Restart the collector
 
+The recombine operator joins matching lines into a single log record, identical in appearance to the receiver-level approach.
 
-There are more options to play around with the recombine operator which can be checked [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md) 
+## Next steps
+
+- [Log Pipelines](/docs/logs-pipelines/introduction) — Further parse and enrich the combined log body
+- [Parse JSON Logs](/docs/logs-pipelines/guides/json) — Extract structured fields after combining lines
+- [filelog receiver multiline options](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md) — Full reference for `line_start_pattern`, `line_end_pattern`, and flush options

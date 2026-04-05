@@ -1526,15 +1526,48 @@ const docsSideNav = [
           },
         ],
       },
+      // ─── Logs Explorer ────────────────────────────────────────────────
       {
         type: 'category',
         isExpanded: false,
-        label: 'Preprocess Logs',
-        route: '/docs/logs-pipelines/introduction',
-        // link: {
-        // type: 'doc',
-        // },
+        label: 'Logs Explorer',
+        route: '/docs/logs-management/logs-explorer/overview',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-explorer/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs_query_builder',
+            label: 'How to Query Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/features/logs-quick-filters',
+            label: 'How to Use Quick Filters',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs_fields',
+            label: 'Fields Reference',
+          },
+        ],
+      },
+
+      // ─── Log Pipelines ────────────────────────────────────────────────
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Log Pipelines',
+        route: '/docs/logs-pipelines/introduction',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-pipelines/introduction',
+            label: 'Overview',
+          },
           {
             type: 'doc',
             route: '/docs/logs-pipelines/concepts',
@@ -1546,36 +1579,24 @@ const docsSideNav = [
             label: 'Logs Parsing',
           },
           {
-            type: 'doc',
-            route: '/docs/logs-pipelines/processors',
-            label: 'Log Processors',
-          },
-          {
             type: 'category',
             isExpanded: false,
             label: 'Guides',
-            route: '/docs/category/guides',
-            // link: {
-            // type: 'generated-index',
-            // title: 'Logs Pipeline Guides',
-            // description:
-            // 'See these guides for detailed walkthroughs on creating Log Pipelines for specific purposes.',
-            // },
             items: [
               {
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/json',
-                label: 'Parse JSON logs',
+                label: 'Parse JSON Logs',
               },
               {
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/grok-parser',
-                label: 'Parse Logs with Grok Parser',
+                label: 'Parse with Grok Parser',
               },
               {
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/regex-parser',
-                label: 'Parse Logs with Regex Parser',
+                label: 'Parse with Regex Parser',
               },
               {
                 type: 'doc',
@@ -1600,44 +1621,23 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/timestamp-parsing',
-                label: 'Parse Timestamp',
+                label: 'Timestamp Parsing',
               },
             ],
           },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Features',
-        // route: '',
-        items: [
           {
             type: 'doc',
-            route: '/docs/userguide/logs_fields',
-            label: 'Fields in Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs_query_builder',
-            label: 'Logs Query Builder',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs-query-troubleshooting',
-            label: 'Logs Query Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/features/logs-quick-filters',
-            label: 'Logs Quick Filters',
+            route: '/docs/logs-pipelines/processors',
+            label: 'Processors Reference',
           },
         ],
       },
+
+      // ─── Guides ───────────────────────────────────────────────────────
       {
         type: 'category',
-        label: 'User Guide',
         isExpanded: false,
+        label: 'Guides',
         items: [
           {
             type: 'doc',
@@ -1666,6 +1666,43 @@ const docsSideNav = [
           },
         ],
       },
+
+      // ─── Logs API ─────────────────────────────────────────────────────
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Logs API',
+        route: '/docs/logs-management/logs-api/overview',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/search-logs',
+            label: 'Search Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/aggregate-logs',
+            label: 'Aggregate Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/logs-url-for-explorer-page',
+            label: 'Create Explorer URL',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/payload-model',
+            label: 'Payload Reference',
+          },
+        ],
+      },
+
+      // ─── Storage & Troubleshooting ────────────────────────────────────
       {
         type: 'doc',
         route: '/docs/logs-management/long-term-storage',
@@ -1682,13 +1719,13 @@ const docsSideNav = [
             route: '/docs/logs-management/troubleshooting/faqs',
             label: 'General FAQs',
           },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs-query-troubleshooting',
+            label: 'Query Troubleshooting',
+          },
         ],
       },
-      // {
-      //   type: 'doc',
-      //   route: '/docs/logs-management/guides/drop-logs',
-      //   label: 'Guide to drop logs',
-      // },
     ],
   },
   {

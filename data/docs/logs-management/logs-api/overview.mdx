@@ -1,46 +1,47 @@
 ---
-date: 2024-06-06
-title: Logs API 
-
-id: overview
+date: 2026-04-05
+title: Logs API
+id: logs-api-overview
+description: Query, search, paginate, and aggregate logs programmatically using the SigNoz Logs API.
+doc_type: explanation
 ---
 
-## Overview
+The SigNoz Logs API lets you query log data programmatically — search by attribute, paginate through large result sets, and run aggregations. Use it to build integrations, export data, or embed log queries in your own tooling.
 
-The SigNoz Logs API is a robust interface which enables developers to manage and analyze log data efficiently. This API facilitates various operations:
+## What you can do with the Logs API
 
-- **Searching Logs:** Allows users to search through log data based on specific criteria. For example, finding all logs where the error code is 500.
+- **Search logs** — Filter by any attribute, resource, or log field with the same filter expressions used in the Logs Explorer.
+- **Paginate results** — Retrieve logs in batches using `offset` and `limit`.
+- **Aggregate logs** — Count, group, and summarize log data (e.g., error counts by service over time).
+- **Deep link to Explorer** — Construct URLs that open the Logs Explorer with a pre-filled query.
 
-- **Paginating Logs:** Helps in navigating through large sets of log data in a manageable way. For instance, retrieving logs in batches of 100 for easy viewing.
+## API endpoint
 
-- **Aggregating Logs:** Enables summarizing log data to extract meaningful insights, such as aggregating logs to count the number of errors per day.
+All Logs API requests use:
 
-## API Endpoint
+```
+POST https://{your-signoz-domain}/api/v5/query_range
+```
 
-Endpoint for Logs API:
-
-`POST` `https://{URL}/api/v5/query_range`
-
-Replace `{URL}` with your instance URL, e.g., example.signoz.io.
-
-## Prerequisites
-
-API key: To access this API, you need an API key. Navigate to the `Settings` page in the SigNoz UI and create a new API key.
-
-
-<img width="1101" alt="api keys" src="/img/docs/signoz-api-keys.webp" />
-
-
-API keys can only be created/managed by users with the `Admin` role. If you don't have the `Admin` role, contact your organization's admin to create an API key for you.
+Replace `{your-signoz-domain}` with your instance URL (e.g., `example.signoz.io`).
 
 ## Authentication
 
-Using the API key: Add the API key to your request header as follows: 
+Every request requires an API key in the header:
 
-```bash
-SIGNOZ-API-KEY:{YOUR_API_KEY}
+```
+SIGNOZ-API-KEY: {YOUR_API_KEY}
 ```
 
-<Admonition type="tip">
-Secure storage and handling of your API key is crucial to prevent unauthorized access.
-</Admonition>
+To create an API key: go to **Settings → API Keys** in SigNoz. Only users with the **Admin** role can create or manage API keys.
+
+:::tip
+Store your API key in a secrets manager or environment variable — never hardcode it in source code.
+:::
+
+## Related pages
+
+- [Payload Reference](/docs/logs-management/logs-api/payload-model) — Full schema for query payloads
+- [Search Logs](/docs/logs-management/logs-api/search-logs) — Example: filter and paginate logs
+- [Aggregate Logs](/docs/logs-management/logs-api/aggregate-logs) — Example: count and group logs
+- [Create Explorer URL](/docs/logs-management/logs-api/logs-url-for-explorer-page) — Generate deep links into the Logs Explorer
