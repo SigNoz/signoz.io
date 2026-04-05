@@ -1,25 +1,52 @@
 ---
 date: 2026-04-01
 id: api-monitoring
-title: Monitoring APIs in SigNoz
-description: Monitor API performance in SigNoz using Key Operations views and pre-built dashboards for latency, request counts, and error rates.
+title: How to Monitor APIs in SigNoz
+description: Use the Key Operations view and pre-built dashboards to track API latency, request rate, and error rate over time.
+doc_type: howto
 ---
 
-### Key Operations Section in Service Page
+## Overview
 
-Get details on API performance over time and filter based on different facets
+SigNoz gives you two complementary ways to monitor API performance: the **Key Operations** view inside a service, which shows per-endpoint metrics in real time, and **pre-built dashboards** you can import for historical trend analysis across P95/P99 latency and request counts.
+
+:::info Prerequisites
+- Your application is instrumented and sending trace data to SigNoz
+- Services are visible in the **Services** section
+:::
+
+## Steps
+
+### Step 1: View API performance in Key Operations
+
+**Action:** Go to **Services** in the SigNoz sidebar, select your service, and scroll to the **Key Operations** table.
+
+The Key Operations table shows every endpoint your service serves, sortable by latency, call rate, or error rate. This is the fastest way to identify which API endpoint is slow or failing.
 
 <YouTube id="mQIbBqRgTY8" mute={false} />
 
-### Create Dashboards for Monitoring your Application on SigNoz
+:::tip
+Enable the **Entry Point Spans** toggle to filter the Key Operations table to only show endpoints that received inbound traffic from upstream services — removing internal spans from the list. See [Entry Point Spans reference](/docs/traces-management/guides/entry-point-spans-service-overview).
+:::
 
-Monitor key metrics like P95, p99 latecies and number of requests made for APIs of a service over time
+---
+
+### Step 2: Import a pre-built API monitoring dashboard
+
+**Action:** Import one of the pre-built dashboard templates to track API metrics over time.
+
+Go to **Dashboards** in SigNoz, click **Import**, and paste the JSON from the template you need:
+
+| Dashboard | What it tracks | JSON |
+|---|---|---|
+| APM Metrics | Latency, request rate, error %, top operations, DB calls, external calls | [apm-metrics.json](https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json) |
+| HTTP API Monitoring | P90 latency per endpoint, HTTP status code distribution, top endpoints, external HTTP APIs | [http-api-monitoring.json](https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json) |
+| Key Operations | P95/P99 latencies and request counts per API over time | [key-operations](https://github.com/SigNoz/dashboards/tree/main/key-operations) |
 
 <YouTube id="f65qhHqHjv0" mute={false} />
 
+## Next steps
 
-
-
-Pre-built [dashboards](https://github.com/SigNoz/dashboards/tree/main/key-operations) for monitoring key APIs
-
-
+- [Set Up APM Dashboards & Alerts](/docs/userguide/custom-apm-dashboards-alerts)
+- [Entry Point Spans reference](/docs/traces-management/guides/entry-point-spans-service-overview)
+- [APM Metrics reference](/docs/traces-management/guides/apm-metrics)

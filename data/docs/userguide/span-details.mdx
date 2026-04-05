@@ -1,134 +1,102 @@
 ---
 date: 2025-12-26
 id: span-details
-
 title: Trace Details
-description: Explanation of the trace detail page
+description: Reference for the Trace Details interface — flame graph, waterfall chart, span inspection, span percentile, and search filters.
+doc_type: reference
 ---
 
-## Overview
-
-The **Trace Details** interface in SigNoz offers a powerful and intuitive interface to visualize and analyze the journey of a request through your system. 
-By displaying detailed trace information, it enables you to quickly diagnose performance issues, pinpoint errors, and understand the intricate flow of operations 
-in your systems. It is engineered to handle massive trace data supporting more than a **million spans per trace** making it an ideal solution for high-volume environments.
-
-The Trace Details Page enables you to:
-
-- **Visualizes the Entire Trace:**  
-  Render large traces seamlessly using synchronized flame graphs and waterfall charts.
-  
-- **Drills Down Into Details:**  
-  Inspect individual spans to view metadata, span percentile, context, attributes and events associated with each span.
-  
-- **Efficient Navigation and Search:**  
-  Use the dynamic search bar and filtering options to quickly jump to specific spans or error events making it easier to analyze and troubleshoot.
-  
-- **Responsive and Scalable:**  
-  Handle traces from your architectures (monolithic or microservices) without performance lag, ensuring smooth and real-time analysis.
+The **Trace Details** page visualizes the complete journey of a single request through your system. It renders synchronized flame graphs and waterfall charts for traces with up to a **million spans**, and lets you inspect individual spans to diagnose latency and errors in real time.
 
 <YouTube id="oQdjfhzz5oQ" mute={false} />
 
-## Key Concepts
+## Opening a trace
 
-Understanding the following concepts is essential for effectively using the Trace Detail feature:
-
-- **Trace:**  
-  A trace represents the complete path a request takes through your system, helping you understand its flow across various components and services.
-
-- **Span:**  
-    Spans are the building blocks of a trace, representing individual units of work performed by an application or service during the request’s lifecycle.
-    Each span is essentially a structured log message enriched with context, hierarchy, and correlations to help you pinpoint specific operations.
-    Key components of a span includes:
-  - **Span Context:**  
-    Metadata that links spans across services, enabling distributed tracing and hierarchical structuring.
-  - **Span Attributes:**  
-    Key-value pairs that store additional metadata about the operation performed by the span.
-  - **Span Links:**  
-    References that establish causal relationships between spans, useful for correlating asynchronous operations or background tasks with the main trace.
-  - **Span Events:**  
-    Structured log messages that record important events at specific timestamps during the span's execution.
-
-## Navigating the Trace Detail Interface
-
-### Opening a Trace
-
-**Select a Trace:**  
-Choose a trace from your list of traces in the trace explorer which will open the Trace Detail page with the spans.
-  
-**Initial Visualization:**  
-Once loaded, you will see two synchronized views:
-- **Flame Graph:**  
-Displays a hierarchical representation of the trace, showing the nested relationships between spans.
-- **Waterfall Chart:**  
-Provides a detailed timeline view, illustrating the sequence and duration of each span.
+Select any trace from the [Traces Explorer](/docs/userguide/traces). The Trace Details page opens with two synchronized views.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/tarce-details-overview.webp" alt="Trace Details Interface"/>
-    <figcaption><i>Trace Details Interface</i></figcaption>
+    <figcaption><i>Trace Details — flame graph (top) and waterfall chart (bottom)</i></figcaption>
 </figure>
 
-### Detailed Span Inspection
+## Key concepts
 
-#### Expand Span Details: 
-Click on a specific span in either the flame graph or waterfall view to inspect detailed information, including:
-- Span context and attributes.
-- Related span links and events.
-- The kind of the span (e.g., client, server, service, producer, or consumer etc.).
+| Term | Definition |
+|---|---|
+| **Trace** | The complete path a request takes through your system, from the first service to the last |
+| **Span** | A single unit of work within a trace — a structured log enriched with context, hierarchy, and timing |
+| **Root span** | The first span in a trace; has no Parent Span ID |
+| **Span Context** | Metadata that links spans across services: trace ID, span ID, parent span ID, and flags |
+| **Span Attributes** | Key-value pairs storing operation metadata (e.g., `http.method`, `db.statement`) |
+| **Span Links** | References that establish causal relationships between spans, useful for async operations |
+| **Span Events** | Timestamped structured log messages recorded during the span's execution |
 
+## Views
 
-#### Span Percentile:
-  When you view a span's details, you can see its percentile compared to other spans from the same service over the past hour (for example, p50, p90, p95, p99).
-  The percentile information may take a few seconds to appear after opening the span details.
-  This helps you quickly identify performance outliers and understand where the span falls within the typical latency distribution.
-  
-  <Figure src="/img/docs/apm-and-distributed-tracing/span-percentile.webp" alt="span-percentile" caption="Span Percentile" />
+### Flame graph
 
-  Click on the percentile to view more details, including the exact p50, p90, and p99 values for the matching spans
-  <Figure src="/img/docs/apm-and-distributed-tracing/span-percentile-details.webp" alt="span-percentile-details" caption="Span Percentile Details" />
+Displays spans as a hierarchical tree — wider bars indicate longer duration. Child spans appear nested under their parent. Selecting a span in the flame graph highlights it in the waterfall, and vice versa.
 
+### Waterfall chart
 
-  You can further refine this analysis by adding more resource attributes to narrow down the set of similar spans, 
-  or by increasing the time range to observe percentile behavior over a longer period. 
-  This flexibility enables deeper, more targeted performance analysis.
-  <Figure src="/img/docs/apm-and-distributed-tracing/span-percentile-custom.webp" alt="span-percentile-with-custom-attribute" caption="Span Percentile With Custom Attribute" />
+Provides a timeline view showing the start time, duration, and sequence of every span. Synchronized with the flame graph at all times.
 
-#### Synchronized Navigation:
-The flame graph and waterfall views remain perfectly synchronized. Navigating in one view automatically updates the other, so you can always see where a span fits 
-into the overall trace timeline.
+### Resizable anchor
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-span-details.webp" alt="Span Details"/>
-    <figcaption><i>Span Details</i></figcaption>
-</figure>
-
-### Using the Search Filter Feature
-
-The Trace Detail interface allows you to filter spans on basis of different for quick analysis while dynamically loading additional spans as you scroll, ensuring 
-smooth navigation even in large traces.
-
-For example, to debug errors:
-    - Enable the `has_error = true` filter to highlight **error spans**.
-    - Click on an error span to view associated **error messages and logs**.
-    - Analyze the affected services and identify bottlenecks causing failures.
-
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-filters.webp" alt="Filtering for error spans"/>
-    <figcaption><i>Filtering for error spans</i></figcaption>
-</figure>
-
-
-### Adjusting the Interface for Better Visibility
-
-**Resizable Span Names Anchor:**  
-If span names or details appear cramped, use the draggable window to adjust the size of the display area. This ensures that you can comfortably read and analyze 
-all information.
+Drag the divider between span names and the timeline to widen or narrow the name column if span names appear truncated.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-ui-adjustments.webp" alt="Resize Span names and Jump through spans"/>
-    <figcaption><i>Resize anchor to see complete span names</i></figcaption>
+    <figcaption><i>Drag the anchor to resize the span name column</i></figcaption>
 </figure>
 
-The Trace Detail feature in SigNoz empowers you to effortlessly navigate, analyze, and debug complex traces across your systems—providing the insights necessary to 
-debug issues, optimize performance, and understand your system's behavior in real time. Upcoming updates will introduce more detailed performance metrics, 
-integrated span event visualizations, and granular filtering options for even deeper trace analysis.
+## Span details panel
+
+Click any span in the flame graph or waterfall to open its details panel.
+
+| Field | Description |
+|---|---|
+| **Span Kind** | `SERVER`, `CLIENT`, `PRODUCER`, `CONSUMER`, or `INTERNAL` |
+| **Span Context** | Trace ID, Span ID, Parent Span ID, and propagation flags |
+| **Attributes** | All key-value metadata attached to the span |
+| **Events** | Timestamped log messages recorded during the span's execution |
+| **Span Links** | References to other spans, used for async or batch correlation |
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-span-details.webp" alt="Span Details"/>
+    <figcaption><i>Span details panel</i></figcaption>
+</figure>
+
+### Span percentile
+
+Each span shows its latency percentile (p50, p90, p95, p99) compared to spans from the same service over the past hour. The percentile badge may take a few seconds to appear after opening the panel.
+
+<Figure src="/img/docs/apm-and-distributed-tracing/span-percentile.webp" alt="span-percentile" caption="Span percentile badge" />
+
+Click the badge to see exact p50, p90, and p99 values.
+
+<Figure src="/img/docs/apm-and-distributed-tracing/span-percentile-details.webp" alt="span-percentile-details" caption="Span percentile detail breakdown" />
+
+Add resource attributes to narrow the comparison set, or expand the time range for a longer baseline.
+
+<Figure src="/img/docs/apm-and-distributed-tracing/span-percentile-custom.webp" alt="span-percentile-with-custom-attribute" caption="Span percentile with a custom resource attribute filter" />
+
+## Search and filter
+
+Use the search bar in Trace Details to filter visible spans by attribute, status, or name. Spans load dynamically as you scroll, keeping large traces navigable.
+
+**Example — debug errors:**
+1. Enable the `has_error = true` filter to highlight all error spans.
+2. Click an error span to view its error message and associated events.
+3. Check upstream callers to identify the root cause.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-filters.webp" alt="Filtering for error spans"/>
+    <figcaption><i>Filter for error spans</i></figcaption>
+</figure>
+
+## Related pages
+
+- [Traces Explorer](/docs/userguide/traces)
+- [Calculated Fields in Spans](/docs/traces-management/guides/derived-fields-spans)
+- [Correlate Traces and Logs](/docs/traces-management/guides/correlate-traces-and-logs)

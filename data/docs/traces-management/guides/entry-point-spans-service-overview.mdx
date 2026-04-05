@@ -1,18 +1,44 @@
 ---
 date: 2025-06-24
 id: entry-point-spans-service-overview
-
-title: Entry Point spans of service in Key Operations Table
-description: Learn how to toggle Entry Point Spans in Keyb Operations Table
+title: Entry Point Spans Reference
+description: Reference for the Entry Point Spans toggle in the Key Operations table — what it shows and how it filters spans.
+doc_type: reference
 ---
 
-The Key Operations table surfaces the most important spans in a service, letting you quickly spot which calls contribute most to latency or errors. 
+The **Key Operations** table in the service detail view surfaces the most important spans for a service, displaying P50, P95, and P99 latencies, call count, and error rate so you can compare performance at a glance.
 
-For every span it lists P50, P95, and P99 latencies, the call count, and error rate, so you can compare performance at a glance. Because a busy service can generate thousands of spans, we added a “Entry Point Spans” toggle that filters the list down to spans where the serviceName changes, i.e., the first span when a request enters this service from any upstream service. 
+## What are Entry Point Spans?
 
-Switching on the toggle hides the internal, downstream spans and shows only these entry-point spans, giving you a concise, high-level view of how external traffic is behaving without losing sight of latency outliers or error hotspots.
+An **entry-point span** is the first span created when a request enters a service from any upstream service — the point where the `serviceName` changes in the trace hierarchy. It represents the service's view of an inbound operation, independent of any internal or downstream work the service subsequently performs.
+
+## Key Operations table
+
+| Column | Description |
+|---|---|
+| Operation | Span name (typically an HTTP route or RPC method) |
+| P50 | Median latency for this operation |
+| P95 | 95th-percentile latency |
+| P99 | 99th-percentile latency |
+| Rate | Calls per second |
+| Error Rate | Percentage of calls with `STATUS_CODE_ERROR` |
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/KeyOperationsTable.webp" alt="SigNoz UI showing Entry Point Spans in Key Operations Table "/>
-    <figcaption><i>Services Section</i></figcaption>
+    <img src="/img/docs/KeyOperationsTable.webp" alt="SigNoz UI showing Entry Point Spans in Key Operations Table"/>
+    <figcaption><i>Key Operations table with Entry Point Spans toggle</i></figcaption>
 </figure>
+
+## Entry Point Spans toggle
+
+| Toggle state | What the table shows |
+|---|---|
+| **Off** (default) | All spans for the service, including internal and downstream spans |
+| **On** | Only entry-point spans — the first span when a request enters this service from an upstream |
+
+Enabling the toggle hides internal and downstream child spans, giving a concise, high-level view of how external traffic is behaving. This is useful for identifying latency outliers or error hotspots caused by inbound calls, without noise from internal processing.
+
+## Related pages
+
+- [Services Overview](/docs/userguide/metrics)
+- [APM Metrics reference](/docs/traces-management/guides/apm-metrics)
+- [Traces Explorer](/docs/userguide/traces)

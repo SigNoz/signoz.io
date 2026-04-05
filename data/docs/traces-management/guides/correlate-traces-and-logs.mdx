@@ -1,60 +1,85 @@
 ---
 date: 2025-07-01
-title: Correlate Traces and Logs
-
 id: correlate-traces-and-logs
-description: Learn how to establish correlation between logs and traces in SigNoz to enable seamless navigation from traces to logs and vice versa.
+title: How to Correlate Traces and Logs
+description: Establish trace-log correlation in SigNoz so you can navigate from any trace directly to its related logs and vice versa.
+doc_type: howto
 ---
 
-When you navigate from traces to logs and see "No logs found for this trace," it means your logs and traces are not properly correlated. This guide will help you establish the connection.
+## Overview
 
-## Automatic Correlation with OpenTelemetry SDK
+When you click **"Go to related logs"** from a trace and see "No logs found for this trace," it means your logs and traces are not yet correlated. This guide shows you how to link them by injecting `trace_id` and `span_id` into your log records.
 
-If you're using OpenTelemetry SDKs for instrumentation, they automatically inject trace context (trace_id and span_id) into your logs. Simply enable the logging instrumentation for your language and your existing logs will include trace correlation.
+:::info Prerequisites
+- Your application is instrumented and sending traces to SigNoz
+- Your application is emitting logs that are collected by SigNoz
+:::
 
-Auto-instrumentation is available for these languages - Java, .NET, Python, Go, Node.js, and PHP. Check out our [instrumentation documentation](https://signoz.io/docs/instrumentation/) for auto-instrumenting your application.
+## Steps
 
-This is the recommended approach as it requires minimal configuration and provides consistent trace context across all your logs.
+### Step 1: Choose your correlation method
 
-## Manual Correlation for File-based and Kubernetes Logs
+| Method | When to use |
+|---|---|
+| **Automatic (OpenTelemetry SDK)** | Your application already uses an OTel SDK for tracing — this is the recommended path |
+| **Manual (Log Pipelines)** | Your logs come from files, Kubernetes log agents (FluentBit, FluentD), or log to a format that does not include OTel trace context automatically |
 
-If your logs contain trace information but it's not in the standard OpenTelemetry format, you need to use SigNoz log pipelines to extract it.
+---
 
-This applies when:
-- Your application logs to files that are read by log collectors
-- You're using Kubernetes and logs are collected by agents like FluentBit or FluentD
-- Your logs contain trace IDs and span IDs in the message body or custom attributes
+### Step 2A: Automatic correlation with the OpenTelemetry SDK
 
-### Setting Up Log Pipelines
+**Action:** Enable logging instrumentation in your OTel SDK setup.
 
-Follow our detailed guide on parsing trace information from logs:
+OpenTelemetry SDKs automatically inject `trace_id` and `span_id` into log records when logging instrumentation is enabled. Supported languages: **Java, .NET, Python, Go, Node.js, PHP**.
 
-**[Parse Trace Information for your Logs](https://signoz.io/docs/logs-pipelines/guides/trace/)**
+Refer to the [instrumentation documentation](/docs/instrumentation/) for your language to enable the logging bridge or log appender.
 
-This guide shows you how to:
-1. Create a log pipeline in SigNoz
-2. Use the Trace Parser processor to extract trace_id and span_id
-3. Configure regex or JSON parsers if needed
-4. Test and deploy your pipeline
+Once enabled, every log emitted within a traced request will automatically include the active trace context — no further configuration needed.
 
-## Verification
+---
 
-After setting up log-trace correlation:
+### Step 2B: Manual correlation for file-based and Kubernetes logs
 
-1. Generate some traffic in your application
-2. Go to the **Traces** section in SigNoz
-3. Click on a trace to view its details
-4. Click **"Go to related logs"** button which will take you to the related logs
-5. In the **Logs** section, you should see `trace_id` and `span_id` fields populated
+**Action:** Use SigNoz Log Pipelines to extract `trace_id` and `span_id` from your log records.
+
+This path applies when:
+- Your application logs to files read by a log collector
+- You use Kubernetes and logs are collected by agents like FluentBit or FluentD
+- Your logs contain trace IDs and span IDs in the message body or in custom fields
+
+Follow the detailed guide: **[Parse Trace Information from Logs](https://signoz.io/docs/logs-pipelines/guides/trace/)**
+
+That guide covers:
+1. Creating a log pipeline in SigNoz
+2. Using the Trace Parser processor to extract `trace_id` and `span_id`
+3. Configuring regex or JSON parsers if the fields are embedded in the log message
+4. Testing and deploying the pipeline
+
+---
+
+## Verify
+
+**Action:** Generate traffic in your application, then check correlation end-to-end.
+
+1. Go to **Traces** in SigNoz.
+2. Click any trace to open Trace Details.
+3. Click **"Go to related logs"**.
+4. In the Logs Explorer, confirm that `trace_id` and `span_id` fields are present and populated.
 
 <figure data-zoomable align='center'>
 <img src="/img/docs/traces-management/correlate-traces-with-logs.gif" alt="Related logs of a trace in Logs Explorer"/>
-<figcaption><i>Related logs of a trace in Logs Explorer</i></figcaption>
+<figcaption><i>Navigating from a trace to its related logs in the Logs Explorer</i></figcaption>
 </figure>
 
-## Best Practices
+:::tip Best practices
+- Use OpenTelemetry SDKs when possible — automatic correlation requires no pipeline configuration.
+- Use structured logging (JSON) for easier parsing in log pipelines.
+- Include relevant context like user IDs and request IDs in your logs for richer correlation.
+- Ensure consistent trace context propagation across all services so every log entry in a request chain shares the same `trace_id`.
+:::
 
-- **Use OpenTelemetry SDKs** when possible for automatic correlation
-- **Use structured logging** (JSON format) for easier parsing
-- **Include relevant context** like user IDs, request IDs, and other identifiers in your logs
-- **Ensure consistent trace propagation** across all services in your application
+## Next steps
+
+- [Traces Explorer](/docs/userguide/traces)
+- [Control Trace Volume](/docs/traces-management/guides/drop-spans)
+- [Scrub PII from Traces](/docs/traces-management/guides/pii-scrubbing/)

@@ -1,102 +1,104 @@
 ---
 date: 2024-06-06
 id: custom-apm-dashboards-alerts
-
-title: APM Dashboards and Alerts
+title: How to Set Up APM Dashboards & Alerts
+description: Import pre-built APM dashboard templates into SigNoz to track latency, error rate, database calls, and external API performance over time.
+doc_type: howto
 ---
 
-## Auto Generated APM Metrics
+## Overview
 
-SigNoz automatically generates the following APM/RED (Rate, Error, Duration) metrics from traces:
+SigNoz automatically generates RED metrics from your trace data and provides ready-made dashboard templates you can import with a single click. This guide walks through importing each template and explains what metrics it exposes.
 
-1. `signoz_calls_total`
-   - Information on all calls to your services
-   - Used to calculate Request Rate and Error Rate for each service, operation, environment, etc.
+:::info Prerequisites
+- Your application is instrumented and sending trace data to SigNoz
+- Services are visible in the **Services** section
+:::
 
-2. `signoz_latency_sum`
-   - Tracks the **total sum of all latency values** recorded
-   - Example: If three requests took 1s, 2s, and 3s, the sum would be 6s
+## Auto-generated APM metrics
 
-3. `signoz_latency_count`
-   - Tracks the **number of latency measurements** recorded
-   - Example: If 100 requests have been processed, this count would be 100
-   - Used in conjunction with `signoz_latency_sum` to calculate average latency (average request duration) by dividing `signoz_latency_sum` by `signoz_latency_count`
+Before importing dashboards, it helps to know what metrics are available. SigNoz generates the following from span data automatically:
 
-4. `signoz_latency_bucket`
-   - Tracks how many requests fall into specific latency ranges (buckets)
-   - Default buckets: [2ms, 4ms, 6ms, 8ms, 10ms, ... 15s]
-   - Counts requests with latency less than or equal to each bucket's value
-   - Helps understand how request latencies are distributed across various ranges
+| Metric | Description |
+|---|---|
+| `signoz_calls_total` | Count of all calls per service/operation, used to calculate request rate and error rate |
+| `signoz_latency_sum` | Total sum of all recorded request durations |
+| `signoz_latency_count` | Number of requests measured; divide into sum for average latency |
+| `signoz_latency_bucket` | Histogram buckets for latency distribution (default: 2ms–15s) |
+| `signoz_db_latency_sum` | Total latency for all database operations |
+| `signoz_db_latency_count` | Number of database operations measured |
+| `signoz_external_call_latency_sum` | Total latency for all external (outbound) calls |
+| `signoz_external_call_latency_count` | Number of external calls measured |
 
-5. `signoz_db_latency_sum`
-   - Represents the **total sum of all latencies** for database-related operations
-   - Helps track the total time spent on database operations
+Common dimensions on all metrics: `operation`, `service_name`, `span_kind`, `http_status_code`, `status_code`, `deployment_environment`, `service_namespace`.
 
-6. `signoz_db_latency_count`
-   - Counts the **number of database operations** measured
-   - When combined with `signoz_db_latency_sum`, allows calculation of average latency per database operation
+See [APM Metrics reference](/docs/traces-management/guides/apm-metrics) for full detail.
 
-7. `signoz_external_call_latency_sum`
-   - Tracks the **total sum of latencies** for all external calls
-   - Helps track the total time spent waiting for external services
+## Steps
 
-8. `signoz_external_call_latency_count`
-   - Counts the **number of external calls** made
-   - Combined with `signoz_external_call_latency_sum`, helps calculate the average latency of external calls
+### Step 1: Import the APM Metrics dashboard
 
-Common attributes across these metrics:
-- `operation`
-- `service_name`
-- `span_kind`
-- `http_status_code`
-- `status_code`
-- `deployment_environment`
-- `service_namespace`
+**Action:** Go to **Dashboards** in SigNoz, click **New Dashboard > Import JSON**, and paste the content from [apm-metrics.json](https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json).
 
-## APM Metrics Dashboard
+This dashboard includes:
 
-SigNoz provides a dashboard template based on the auto-generated metrics. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json) into your SigNoz instance.
-
-The dashboard includes the following charts:
-- Latency
-- Request Rate
-- Error Percentage
-- Top operations
-- DB Calls RPS
-- DB Calls Avg Duration
-- Top External Calls
+| Chart | What it shows |
+|---|---|
+| Latency | P50/P95/P99 request latency |
+| Request Rate | Requests per second |
+| Error Percentage | Error rate over time |
+| Top Operations | Slowest operations by latency |
+| DB Calls RPS | Database calls per second |
+| DB Calls Avg Duration | Average database operation latency |
+| Top External Calls | External services with highest call volume |
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/dashboards/templates/apm-metrics.png" alt="APM Metrics dashboard"/>
-    <figcaption><i> APM Metrics dashboard </i></figcaption>
+    <figcaption><i>APM Metrics dashboard</i></figcaption>
 </figure>
 
-## HTTP API Monitoring Dashboard
+---
 
-This dashboard template is built on top of available [HTTP attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/http/) from OpenTelemetry. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json) into your SigNoz instance.
+### Step 2: Import the HTTP API Monitoring dashboard
 
-The dashboard includes the following charts:
-- Latency(P90) chart for each Endpoint
-- HTTP Status code distribution
-- Top HTTP Endpoints
-- External HTTP APIs
+**Action:** Import [http-api-monitoring.json](https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json).
+
+This template is built on [OTel HTTP semantic convention attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/http/) and includes:
+
+| Chart | What it shows |
+|---|---|
+| Latency (P90) per Endpoint | P90 latency broken down by API route |
+| HTTP Status Code Distribution | Breakdown of 2xx, 4xx, 5xx responses |
+| Top HTTP Endpoints | Highest-traffic routes |
+| External HTTP APIs | Latency and error rate for external API calls |
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/dashboards/templates/http-api-monitoring.png" alt="HTTP API Monitoring Dashboard"/>
-    <figcaption><i> HTTP API Monitoring Dashboard </i></figcaption>
+    <figcaption><i>HTTP API Monitoring dashboard</i></figcaption>
 </figure>
 
-## DB Calls Monitoring Dashboard
+---
 
-This dashboard template is built on top of available [DB client call attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/db/) from OpenTelemetry. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json) into your SigNoz instance.
+### Step 3: Import the DB Calls Monitoring dashboard
 
-The dashboard includes the following charts:
-- DB Transaction Rate
-- Top DB calls
-- Slowest DB calls
-- DB Call error rate
+**Action:** Import [db-calls-monitoring.json](https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json).
+
+Built on [OTel DB client call attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/db/), this dashboard includes:
+
+| Chart | What it shows |
+|---|---|
+| DB Transaction Rate | Database calls per second |
+| Top DB Calls | Most frequently called queries or operations |
+| Slowest DB Calls | Operations with highest average latency |
+| DB Call Error Rate | Percentage of database calls resulting in errors |
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/dashboards/templates/db-calls-monitoring.png" alt="DB Calls Monitoring Dashboard"/>
-    <figcaption><i> DB Calls Monitoring Dashboard </i></figcaption>
+    <figcaption><i>DB Calls Monitoring dashboard</i></figcaption>
 </figure>
+
+## Next steps
+
+- [Monitor APIs](/docs/application-monitoring/api-monitoring)
+- [APM Metrics reference](/docs/traces-management/guides/apm-metrics)
+- [Services Overview](/docs/userguide/metrics)

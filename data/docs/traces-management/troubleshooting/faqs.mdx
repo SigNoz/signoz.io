@@ -1,41 +1,106 @@
 ---
 date: 2026-02-24
 id: faqs
-title: General FAQs
-description: General FAQs about traces
+title: Troubleshooting FAQs
+description: Answers to common questions about APM and distributed tracing in SigNoz.
+doc_type: reference
 ---
 
-### Q. I can't see related logs for traces.  
-A. Make sure your logs include `trace_id` and `span_id`.
+## Logs and traces
+
+### I can't see related logs for a trace
+
+**Cause:** Your logs do not include `trace_id` and `span_id`, so SigNoz cannot link them to the trace.
+
+**Fix:**
 
 <details>
-<summary>Show detailed steps</summary>
+<summary>Step-by-step resolution</summary>
 
-* If you are collecting application logs from file, ensure you emit the `trace_id` and `span_id` to those logs.
-* Once you have `trace_id` and `span_id` in your logs, parse them using the pipelines trace parser. See documentation [here](https://signoz.io/docs/logs-pipelines/guides/trace/).
+1. If you are using an OpenTelemetry SDK, enable the logging bridge or log appender for your language. The SDK will inject `trace_id` and `span_id` automatically.
+2. If you collect logs from files or via Kubernetes agents (FluentBit, FluentD), use a SigNoz log pipeline to extract `trace_id` and `span_id` from the log body. See [Parse Trace Information from Logs](https://signoz.io/docs/logs-pipelines/guides/trace/).
 
 </details>
 
+For the full guide, see [How to Correlate Traces and Logs](/docs/traces-management/guides/correlate-traces-and-logs).
 
-### Q. Why do my custom rate queries differ from the Services dashboard?
-A. If you're trying to recreate the rate metrics shown in the Services dashboard using custom queries in the Metrics section, you may notice that your numbers don't match. This is because the Services dashboard has specific filtering that affects the calculations.
+---
+
+## Services metrics
+
+### My custom rate queries differ from the Services dashboard numbers
+
+**Cause:** The Services dashboard filters to **top-level (entry-point) spans** only. A direct query on `signoz_calls_total` includes all spans — child and internal spans — resulting in higher values.
+
+**Fix:**
 
 <details>
+<summary>Detailed explanation</summary>
 
-<summary>Show detailed explanation</summary>
+When you query `signoz_calls_total` in the Metrics section with Rate and Sum functions, you get data from every span across all operations, including nested and internal child spans.
 
-**Understanding the difference**
+The Services dashboard applies an additional filter to show only **top-level operations** — the first span where a request enters each service. This is why the values are typically lower than a raw `signoz_calls_total` query.
 
-The rate table under Services only considers **top-level operations**, which is why there's a discrepancy between what you see in the Services dashboard and what you get when querying `signoz_calls_total` directly with Rate and Sum functions.
-
-When you query `signoz_calls_total` in the Metrics section, you're getting data from all operations, including nested or child operations. However, the Services dashboard filters this data to show only top-level operations, resulting in different (typically lower) values.
-
-**Getting accurate Service-level metrics**
-
-To recreate the same metrics you see in the Services dashboard, you'll need to use queries that filter for top-level operations only.
-
-For reference queries and examples, you can import the official [APM Metrics dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics) from the SigNoz documentation. This will provide you with the proper query structure to match the Services dashboard calculations.
-
-For more information about how APM metrics are generated from span data, see [Guide to APM metrics](https://signoz.io/docs/traces-management/guides/apm-metrics).
+To recreate the exact metrics shown in the Services dashboard, use the official [APM Metrics dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics) as a reference for the correct query structure.
 
 </details>
+
+For the full explanation of how APM metrics are generated, see [APM Metrics reference](/docs/traces-management/guides/apm-metrics).
+
+---
+
+## Trace data issues
+
+### I see "missing spans" in my traces
+
+**Cause:** A span's parent span was not collected, so the child span has no parent to attach to.
+
+**Common causes:**
+- **Tail sampling** — the sampler kept some spans but dropped others, leaving orphaned children
+- **Network issues** — spans dropped in transit between your app and the Collector, or between the Collector and SigNoz
+- **Uninstrumented services** — a service in the call chain is not sending spans; downstream services reference a parent ID that was never collected
+
+<Figure
+  src="/img/docs/missing-spans-diagram.webp"
+  alt="Diagram showing a normal trace with all spans present vs a trace with a missing span"
+  caption="Normal trace vs trace with a missing span"
+/>
+
+<details>
+<summary>How parent-child span relationships work</summary>
+
+Every span carries a **Span ID** and a **Parent Span ID**. When service A calls service B, it passes its Span ID in the `traceparent` header; service B uses that as its Parent Span ID. A span is "missing" when no collected span matches a referenced Parent Span ID.
+
+**Example:** If `Auth` fails to export its span (ID `def2`), the `Database` span that references `def2` as its parent will appear as a missing span.
+
+Learn more: [How traces work in OpenTelemetry](https://opentelemetry.io/docs/concepts/signals/traces/).
+
+</details>
+
+---
+
+### I see gaps between spans in the waterfall
+
+**Cause:** Code executed during that time is not instrumented. OpenTelemetry auto-instrumentation does not cover custom functions or methods by default.
+
+**Fix:** Add [manual instrumentation](/docs/instrumentation/) to the untraced code paths.
+
+![Span Gap](/img/docs/span-gap.png)
+
+---
+
+### The trace duration in the list differs from the Trace Details view
+
+**Cause:** The duration column in the Traces list shows the **root span duration**, not the total trace duration. If the root span returns before async child spans finish, the listed duration will be shorter than the full trace duration shown in Trace Details.
+
+**Example:** A trace listed as **38.9 s** may show **1 min** in Trace Details because background jobs continued running after the root span returned.
+
+This is expected behavior. To measure specific service-to-service latencies, see [querying for specific service latencies](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/#querying-for-specific-service-latencies).
+
+---
+
+## Related pages
+
+- [How to Correlate Traces and Logs](/docs/traces-management/guides/correlate-traces-and-logs)
+- [APM Metrics reference](/docs/traces-management/guides/apm-metrics)
+- [Traces Explorer](/docs/userguide/traces)

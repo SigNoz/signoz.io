@@ -944,18 +944,12 @@ const docsSideNav = [
         route: '/docs/instrumentation/overview',
         label: 'Get Started',
       },
+      // ── Send Data ──────────────────────────────────────────────────
       {
-        label: 'Instrument Application',
+        label: 'Send Data',
         type: 'category',
         isExpanded: false,
         route: '/docs/instrumentation',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Instrument your Application',
-        // description:
-        // 'To instrument your application with OpenTelemetry and send data to SigNoz, follow the instructions in the sections below.',
-        // slug: '/docs/instrumentation/index',
-        // },
         items: [
           {
             type: 'category',
@@ -1175,16 +1169,92 @@ const docsSideNav = [
           // },
         ],
       },
+      // ── Feature areas ──────────────────────────────────────────────
       {
         type: 'category',
         isExpanded: false,
-        label: 'APM Product Overview',
-        // route: '',
+        label: 'Services',
+        route: '/docs/userguide/metrics',
         items: [
           {
             type: 'doc',
-            label: 'View Services',
+            label: 'Overview',
             route: '/docs/userguide/metrics',
+          },
+          {
+            type: 'doc',
+            label: 'Service Map',
+            route: '/docs/userguide/service-map',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Traces',
+        route: '/docs/userguide/traces',
+        items: [
+          {
+            type: 'doc',
+            label: 'Overview',
+            route: '/docs/userguide/traces',
+          },
+          {
+            type: 'doc',
+            label: 'Trace Details',
+            route: '/docs/userguide/span-details',
+          },
+        ],
+      },
+      // ── How-to Guides ──────────────────────────────────────────────
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'How-to Guides',
+        route: '/docs/traces-management/guides/overview',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/application-monitoring/api-monitoring',
+            label: 'Monitor APIs',
+          },
+          {
+            type: 'doc',
+            label: 'Set Up APM Dashboards & Alerts',
+            route: '/docs/userguide/custom-apm-dashboards-alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/drop-spans',
+            label: 'Control Trace Volume',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/pii-scrubbing/',
+            label: 'Scrub PII from Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/correlate-traces-and-logs',
+            label: 'Correlate Traces and Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/long-term-storage',
+            label: 'Configure Long-term Storage',
+          },
+        ],
+      },
+      // ── Reference ──────────────────────────────────────────────────
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Reference',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/apm-metrics',
+            label: 'APM Metrics',
           },
           {
             type: 'doc',
@@ -1196,67 +1266,9 @@ const docsSideNav = [
             label: 'Entry Point Spans',
             route: '/docs/traces-management/guides/entry-point-spans-service-overview',
           },
-          {
-            type: 'doc',
-            label: 'APM Dashboards/Alerts',
-            route: '/docs/userguide/custom-apm-dashboards-alerts',
-          },
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'View Traces',
-            route: '/docs/userguide/traces',
-            // link: {
-            // type: 'doc',
-            // },
-            items: [
-              {
-                type: 'doc',
-                label: 'Trace Details',
-                route: '/docs/userguide/span-details',
-              },
-            ],
-          },
-          {
-            type: 'doc',
-            label: 'Service Map (Beta)',
-            route: '/docs/userguide/service-map',
-          },
         ],
       },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'User Guides',
-        route: '/docs/traces-management/guides/overview',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/application-monitoring/api-monitoring',
-            label: 'API Monitoring',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/guides/apm-metrics',
-            label: 'APM Metrics',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/guides/drop-spans',
-            label: 'Control Traces Volume',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/guides/pii-scrubbing/',
-            label: 'PII Scrubbing',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/guides/correlate-traces-and-logs',
-            label: 'Correlate Traces and Logs',
-          },
-        ],
-      },
+      // ── Troubleshooting ────────────────────────────────────────────
       {
         type: 'category',
         route: '/docs/traces-management/troubleshooting/troubleshooting',
@@ -1269,11 +1281,6 @@ const docsSideNav = [
             label: 'General FAQs',
           },
         ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/traces-management/long-term-storage',
-        label: 'Long Term Storage',
       },
     ],
   },
