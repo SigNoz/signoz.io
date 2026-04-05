@@ -25,17 +25,16 @@ Traceback (most recent call last):
 File "python-logger.py", line 9, in make_log
   return area[10]
 IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
+2024-06-20 18:58:05,898 DEBUG:Query Started
 ```
 
 The example above has two log entries spread over multiple lines. Since each newline is treated as the end of a log entry by default, the collector creates separate entries for each line:
 
-<figure data-zoomable align="center">
-  <img src="/img/logs/multiline/multiline_broken.png" alt="Multiline logs broken" />
-  <figcaption>
-    <i>Multiline logs as multiple individual log lines</i>
-  </figcaption>
-</figure>
+<Figure 
+  src="/img/logs/multiline/multiline_broken.png"
+  caption="Multiline logs as multiple individual log lines"
+  alt="Multiline logs as multiple individual log lines"
+/>
 
 ## Parse Multiline Logs at Receiver
 
@@ -46,12 +45,12 @@ The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/b
 Look at your log format and find a regex that matches the beginning (or end) of each log entry.
 
 ```text
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
+2024-06-20 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
 File "python-logger.py", line 9, in make_log
   return area[10]
 IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
+2024-06-20 18:58:05,898 DEBUG:Query Started
 ```
 
 For the above log lines, each new entry starts with a date. The `line_start_pattern` would be:
@@ -93,12 +92,11 @@ service:
 
 After deployment, the logs will appear as single entries in SigNoz:
 
-<figure data-zoomable align="center">
-  <img src="/img/logs/multiline/multiline_python.png" alt="Multiline logs fixed" />
-  <figcaption>
-    <i>Multiline logs as a single individual log line</i>
-  </figcaption>
-</figure>
+<Figure 
+  src="/img/logs/multiline/multiline_python.png"
+  caption="Multiline logs as a single individual log line"
+  alt="Multiline logs as a single individual log line"
+/>
 
 ### Using multiline in the SigNoz k8s-infra Helm chart
 
@@ -129,12 +127,12 @@ If you cannot use the receiver-level multiline configuration, you can use the <a
 Using the same example logs:
 
 ```text
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
+2024-06-20 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
 File "python-logger.py", line 9, in make_log
   return area[10]
 IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
+2024-06-20 18:58:05,898 DEBUG:Query Started
 ```
 
 Since each new log line starts with a date, configure `is_first_entry` to match that pattern:
@@ -168,12 +166,11 @@ service:
 
 After deployment, multiline logs will appear as single entries in SigNoz:
 
-<figure data-zoomable align="center">
-  <img src="/img/logs/multiline/multiline_python.png" alt="Multiline logs fixed" />
-  <figcaption>
-    <i>Multiline logs as a single individual log line</i>
-  </figcaption>
-</figure>
+<Figure 
+  src="/img/logs/multiline/multiline_python.png"
+  caption="Multiline logs as a single individual log line"
+  alt="Multiline logs as a single individual log line"
+/>
 
 ## Validate
 
