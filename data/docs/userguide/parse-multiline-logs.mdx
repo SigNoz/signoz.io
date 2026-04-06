@@ -6,16 +6,11 @@ id: parse-multiline-logs
 doc_type: howto
 ---
 
+import GetHelp from '@/components/shared/get-help.md'
+
 ## Overview
 
 By default, the filelog receiver treats each newline as the end of a log entry. This breaks stack traces, multi-line error messages, and other logs that span multiple lines into separate entries.
-
-This guide shows two ways to recombine multiline logs in OpenTelemetry Collector:
-
-1. **At the receiver** — use the `multiline` configuration on the filelog receiver (recommended for all setups).
-2. **At the processor** — use the `recombine` operator in a `logstransform` processor (requires a custom OTel Collector build; not available in `otelcol-contrib` or the k8s-infra chart).
-
-## Sample Multiline Logs
 
 Here is an example of multiline logs:
 
@@ -30,11 +25,14 @@ IndexError: string index out of range
 
 The example above has two log entries spread over multiple lines. Since each newline is treated as the end of a log entry by default, the collector creates separate entries for each line:
 
-<Figure 
+<Figure
   src="/img/logs/multiline/multiline_broken.png"
   caption="Multiline logs as multiple individual log lines"
   alt="Multiline logs as multiple individual log lines"
 />
+
+<Tabs entityName="multiline-approach">
+<TabItem value="receiver" label="Receiver (Recommended)" default>
 
 ## Parse Multiline Logs at Receiver
 
@@ -90,14 +88,6 @@ service:
       exporters: [otlp]
 ```
 
-After deployment, the logs will appear as single entries in SigNoz:
-
-<Figure 
-  src="/img/logs/multiline/multiline_python.png"
-  caption="Multiline logs as a single individual log line"
-  alt="Multiline logs as a single individual log line"
-/>
-
 ### Using multiline in the SigNoz k8s-infra Helm chart
 
 If you are running SigNoz on Kubernetes with the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra Helm chart</a>, use the `presets.logsCollection.multiline` key in your Helm values instead of editing the raw receiver config:
@@ -110,6 +100,10 @@ presets:
 ```
 
 The preset propagates this directly to the `filelog` receiver's `multiline` block on the `otelAgent` DaemonSet. You do not need to touch `otelAgent.config` directly.
+
+</TabItem>
+
+<TabItem value="processor" label="Processor">
 
 ## Use Recombine Operator to Combine Multiline Logs
 
@@ -162,11 +156,12 @@ service:
       exporters: [otlp]
 ```
 
-### Step 3: Verify the recombined logs
+</TabItem>
+</Tabs>
 
-After deployment, multiline logs will appear as single entries in SigNoz:
+After deployment, multiline logs appear as single entries in SigNoz:
 
-<Figure 
+<Figure
   src="/img/logs/multiline/multiline_python.png"
   caption="Multiline logs as a single individual log line"
   alt="Multiline logs as a single individual log line"
@@ -180,10 +175,29 @@ After applying either approach, verify in SigNoz that:
 2. Search for logs from the service you configured.
 3. Confirm that stack traces and multi-line entries appear as single log entries instead of fragmented lines.
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting
+
+</ToggleHeading>
 
 **All logs combined into one entry** — Check that `is_first_entry` or `line_start_pattern` matches the correct pattern. If the regex is too broad or too narrow, entries will not split correctly.
 
 **`logstransform` processor causes collector startup error in k8s-infra** — The `logstransform` processor is not included in the official `otelcol-contrib` image used by the k8s-infra chart. You will see `unknown type: logstransform` in the collector logs. Use `presets.logsCollection.multiline` in your Helm values instead (see the receiver section above).
 
 **Processor defined but not applied** — Ensure the processor is listed in `service.pipelines.logs.processors`. Defining a processor alone does not enable it.
+
+</details>
+
+## Next steps
+
+Now that multiline logs are recombined properly, explore related log management features:
+
+- [Logs management overview](https://signoz.io/docs/logs-management/overview/) - Query, filter, and analyze your logs in SigNoz
+- [Log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) - Create alerts based on log patterns
+- [Collect Kubernetes pod logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) - Collect logs from Kubernetes workloads
+
+## Get Help
+
+<GetHelp />
