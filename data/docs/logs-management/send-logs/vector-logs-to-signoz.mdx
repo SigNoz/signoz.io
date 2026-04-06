@@ -5,7 +5,7 @@ id: vector-logs-to-signoz
 doc_type: howto
 description: Learn how to send logs from Vector to SigNoz. Covers SigNoz Cloud (HTTP sink) and self-hosted (OpenTelemetry sink) for VM, Kubernetes, and Docker.
 toc_min_heading_level: 3
-toc_max_heading_level: 1
+toc_max_heading_level: 3
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -177,17 +177,18 @@ docker run -d \
 ```
 
 </TabItem>
+
 </Tabs>
 
 </TabItem>
-
-To send logs from Vector to self-hosted SigNoz, you need to use the `opentelemetry` sink with a `remap` transform.
 
 <TabItem value="self-hosted" label="Self-Hosted">
 
 <Admonition type="note">
   The `opentelemetry` sink used here is in beta. The configuration schema may change before it
   reaches stable.
+
+  This documentation was tested with Vector version `0.54.0`.
 </Admonition>
 
 Vector's `opentelemetry` sink requires events to be pre-structured as OTLP — raw log events from sources like `file` or `docker_logs` are not. The `remap` transform below builds the required OTLP structure and maps source metadata to <a href="https://opentelemetry.io/docs/specs/semconv/resource/" target="_blank" rel="noopener noreferrer nofollow">OTel semantic conventions</a>.
@@ -415,13 +416,20 @@ docker run -d \
   -v /var/lib/docker:/var/lib/docker:ro \
   -v $(pwd)/vector.yaml:/etc/vector/vector.yaml \
   --name vector \
-  timberio/vector:latest
+  timberio/vector:0.54.0-debian
 ```
 
+<Admonition type="note">
+  This documentation was tested with Vector `0.54.0-debian`. As `opentelemetry` sink is in beta, other versions may work but are not
+  actively tested.
+</Admonition>
+
 </TabItem>
+
 </Tabs>
 
 </TabItem>
+
 </Tabs>
 
 <details>
