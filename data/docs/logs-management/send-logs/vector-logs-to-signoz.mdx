@@ -1,6 +1,6 @@
 ---
 date: 2026-04-05
-tags : [SigNoz Cloud]
+tags: [SigNoz Cloud]
 title: Send Logs from Vector to SigNoz
 id: vector-logs-to-signoz
 doc_type: howto
@@ -49,7 +49,7 @@ sudo nano /etc/vector/vector.yaml
 
 Add the following configuration to collect logs from system log files and send them to SigNoz:
 
-```yaml
+```yaml:vector.yaml
 # Read logs from system log files
 sources:
   system_logs:
@@ -58,7 +58,7 @@ sources:
       - /var/log/syslog
       - /var/log/messages
       - /var/log/*.log
-    read_from: beginning
+    read_from: end
 
 # Send logs to SigNoz Cloud
 sinks:
@@ -93,16 +93,16 @@ sudo systemctl status vector
 
 </TabItem>
 
+<TabItem value="kubernetes" label="Kubernetes">
 ### Step 1: Deploy Vector
 
 Deploy Vector in your Kubernetes cluster using the official [Vector Helm chart](https://vector.dev/docs/setup/installation/package-managers/helm/). The Helm chart automatically configures a `kubernetes_logs` source that collects logs from all pods.
 
 ### Step 2: Configure Vector
-### Step 2: Configure Vector
 
 Add the following sink configuration to your Vector `values.yaml` or ConfigMap:
 
-```yaml
+```yaml:values.yaml
 sinks:
   signoz_sink:
     type: http
@@ -135,7 +135,7 @@ helm upgrade --install vector vector/vector -f values.yaml
 
 Create a `vector.yaml` file:
 
-```yaml
+```yaml:vector.yaml
 sources:
   docker_logs:
     type: docker_logs
@@ -163,6 +163,7 @@ Verify these values:
 ```bash
 docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /var/lib/docker:/var/lib/docker:ro \
   -v $(pwd)/vector.yaml:/etc/vector/vector.yaml \
   --name vector \
   timberio/vector:latest
@@ -223,6 +224,20 @@ Example of a transformed log entry:
 
 If you prefer not to transform logs at Vector level, you can use SigNoz [pipelines](https://signoz.io/docs/logs-pipelines/introduction/) for processing the logs.
 
+
+## Validate
+
+After configuring Vector, navigate to **Logs → Logs Explorer** in SigNoz. You should see incoming log entries within a few minutes. Filter by `source_type` to confirm the logs are from Vector.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/vector-logs.webp"
+  caption="Vector logs in SigNoz Logs Explorer"
+  alt="Vector logs in SigNoz Logs Explorer"
+/>
+
+For more details on querying logs, see the [Logs Explorer documentation](https://signoz.io/docs/product-features/logs-explorer/).
+
+
 <details>
 <ToggleHeading>
 
@@ -246,12 +261,6 @@ See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetr
 For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 
 </details>
-
-## Validate
-
-After configuring Vector, navigate to **Logs → Logs Explorer** in SigNoz. You should see incoming log entries within a few minutes. Filter by `source_type` to confirm the logs are from Vector.
-
-For more details on querying logs, see the [Logs Explorer documentation](https://signoz.io/docs/logs-management/overview/).
 
 <details>
 <ToggleHeading>
