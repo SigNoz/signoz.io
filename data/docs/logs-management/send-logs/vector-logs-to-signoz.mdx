@@ -101,26 +101,46 @@ sudo systemctl status vector
 
 <TabItem value="kubernetes" label="Kubernetes">
 
-### Step 1: Deploy Vector
+### Step 1: Install the Vector Helm chart
 
-Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods.
+Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods. 
+
+Add the Vector Helm repo and install the chart:
+
+```bash
+helm repo add vector https://helm.vector.dev
+helm repo update
+```
 
 ### Step 2: Configure Vector
 
-Add the following sink configuration to your Vector `values.yaml` or ConfigMap:
+Create a `values.yaml` file with `customConfig` for the Vector configuration:
 
 ```yaml:values.yaml
-sinks:
-  signoz_sink:
-    type: http
-    inputs:
-      - kubernetes_logs
-    uri: https://ingest.<region>.signoz.cloud/logs/vector
-    encoding:
-      codec: json
-    request:
-      headers:
-        signoz-ingestion-key: '<your-ingestion-key>'
+role: Agent
+
+customConfig:
+  data_dir: /vector-data-dir
+  sources:
+    kubernetes_logs:
+      type: kubernetes_logs
+  sinks:
+    signoz_sink:
+      type: http
+      inputs:
+        - kubernetes_logs
+      uri: https://ingest.<region>.signoz.cloud/logs/vector
+      encoding:
+        codec: json
+      request:
+        headers:
+          signoz-ingestion-key: '<your-ingestion-key>'
+
+service:
+  enabled: false
+
+serviceHeadless:
+  enabled: false
 ```
 
 Verify these values:
@@ -131,7 +151,10 @@ Verify these values:
 ### Step 3: Apply Configuration
 
 ```bash
-helm upgrade --install vector vector/vector -f values.yaml
+helm install vector vector/vector \
+  --namespace vector \
+  --create-namespace \
+  --values values.yaml
 ```
 
 </TabItem>
@@ -289,57 +312,80 @@ sudo systemctl status vector
 
 <TabItem value="kubernetes" label="Kubernetes">
 
-### Step 1: Deploy Vector
+### Step 1: Install the Vector Helm chart
 
-Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods.
+Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods. 
+
+Add the Vector Helm repo and install the chart:
+
+```bash
+helm repo add vector https://helm.vector.dev
+helm repo update
+```
 
 ### Step 2: Configure Vector
 
-Add the following to your Vector `values.yaml`:
+Create a `values.yaml` file with `customConfig` for the Vector configuration:
 
 ```yaml:values.yaml
-transforms:
-  to_otlp:
-    type: remap
-    inputs:
-      - kubernetes_logs
-    source: |
-      msg = del(.message)
-      ts  = del(.timestamp)
-      . = {
-        "resourceLogs": [{
-          "resource": {
-            "attributes": [
-              {"key": "k8s.pod.name",      "value": {"stringValue": del(.kubernetes.pod_name) || ""}},
-              {"key": "k8s.namespace.name", "value": {"stringValue": del(.kubernetes.pod_namespace) || ""}},
-              {"key": "k8s.container.name", "value": {"stringValue": del(.kubernetes.container_name) || ""}},
-              {"key": "k8s.node.name",      "value": {"stringValue": del(.kubernetes.node_name) || ""}}
-            ]
-          },
-          "scopeLogs": [{
-            "logRecords": [{
-              "timeUnixNano": to_string(to_unix_timestamp!(ts, unit: "nanoseconds")),
-              "body": {"stringValue": msg},
+role: Agent
+
+customConfig:
+  data_dir: /vector-data-dir
+  api:
+    enabled: true
+    address: 127.0.0.1:8686
+    playground: false
+  sources:
+    kubernetes_logs:
+      type: kubernetes_logs
+  transforms:
+    to_otlp:
+      type: remap
+      inputs:
+        - kubernetes_logs
+      source: |
+        msg = del(.message)
+        ts  = del(.timestamp)
+        . = {
+          "resourceLogs": [{
+            "resource": {
               "attributes": [
-                {"key": "stream",      "value": {"stringValue": del(.stream) || ""}},
-                {"key": "source_type", "value": {"stringValue": del(.source_type) || ""}}
+                {"key": "k8s.pod.name",       "value": {"stringValue": del(.kubernetes.pod_name) || ""}},
+                {"key": "k8s.namespace.name",  "value": {"stringValue": del(.kubernetes.pod_namespace) || ""}},
+                {"key": "k8s.container.name",  "value": {"stringValue": del(.kubernetes.container_name) || ""}},
+                {"key": "k8s.node.name",       "value": {"stringValue": del(.kubernetes.pod_node_name) || ""}}
               ]
+            },
+            "scopeLogs": [{
+              "logRecords": [{
+                "timeUnixNano": to_string(to_unix_timestamp!(ts, unit: "nanoseconds")),
+                "body": {"stringValue": msg},
+                "attributes": [
+                  {"key": "stream",      "value": {"stringValue": del(.stream) || ""}},
+                  {"key": "source_type", "value": {"stringValue": del(.source_type) || ""}}
+                ]
+              }]
             }]
           }]
-        }]
-      }
+        }
+  sinks:
+    signoz_sink:
+      type: opentelemetry
+      inputs:
+        - to_otlp
+      protocol:
+        type: http
+        uri: http://<signoz-host>:4318/v1/logs
+        method: post
+        encoding:
+          codec: otlp
 
-sinks:
-  signoz_sink:
-    type: opentelemetry
-    inputs:
-      - to_otlp
-    protocol:
-      type: http
-      uri: http://<signoz-host>:4318/v1/logs
-      method: post
-      encoding:
-        codec: otlp
+service:
+  enabled: false
+
+serviceHeadless:
+  enabled: false
 ```
 
 Replace `<signoz-host>` with the hostname or IP of your SigNoz instance.
@@ -347,7 +393,10 @@ Replace `<signoz-host>` with the hostname or IP of your SigNoz instance.
 ### Step 3: Apply Configuration
 
 ```bash
-helm upgrade --install vector vector/vector -f values.yaml
+helm install vector vector/vector \
+  --namespace vector \
+  --create-namespace \
+  --values values.yaml
 ```
 
 </TabItem>
