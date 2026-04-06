@@ -1,22 +1,33 @@
 ---
-date: 2026-04-01
+date: 2026-04-07
 id: troubleshooting
-title: Troubleshooting
-description: Troubleshoot common SigNoz dashboard issues including empty panels, migration problems, and display configuration.
+title: Troubleshooting Dashboards
+description: Diagnose and fix common SigNoz dashboard problems — empty panels, missing data, chart display issues, and sharing problems.
+doc_type: reference
 ---
 
-<DocCardContainer>
+Use this page to identify and resolve common dashboard problems. For detailed Q&A, see [General FAQs](https://signoz.io/docs/dashboards/troubleshooting/faqs/).
 
-<DocCard
-    title="📄️ General FAQs"
-    description="General FAQs about migrations..."
-    href="/docs/dashboards/troubleshooting/faqs"
-/>
+## Symptom → solution
 
-{/* <DocCard
-    title="📄️ Schema Migrator - Dirty database version"
-    description="Instructions to resolve the dirty database version error during migration"
-    href="/docs/operate/troubleshooting/dirty-migration"
-/> */}
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Dashboard loads but all panels show no data | Time range is too narrow or variables are unset | Widen the time range; set all required variables (try **ALL** to rule out filter issues) |
+| A specific panel shows no data | Missing timestamp column in query | Add a timestamp column to your SELECT and a time-based GROUP BY |
+| Time series or bar chart shows no data but table view works | Chart types require a timestamp column; table does not | Add `timestamp` (or equivalent) to your SELECT query |
+| Panel shows stale data after changing a variable | Panel is not referencing the variable in its query | Edit the panel and add the variable using `$var_name` in the filter |
+| Grafana dashboard import fails | SigNoz does not support Grafana dashboard format | Rebuild the panels using the Query Builder, or import from [Dashboard Templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/) |
+| Legend colours are hard to read | Default colour assignment | Edit the panel → right-side panel → **Legend Colors** to reassign colours per series |
+| Cannot download CSV | CSV export is only available in dashboard view mode | Save the dashboard, exit edit mode, then use the three-dot menu on the table panel |
+| Public dashboard link shows wrong time range | Default time range was not set before publishing | Open **Configure** → **Publish**, set the **Default time range**, and republish |
+| Variables dropdown shows no options | Dynamic variable has no data for the selected field/source | Verify the field exists in your signal; try changing the **Source** to **All sources** |
 
-</DocCardContainer>
+<details>
+<ToggleHeading>
+## Still stuck?
+</ToggleHeading>
+
+- See [General FAQs](https://signoz.io/docs/dashboards/troubleshooting/faqs/) for detailed step-by-step answers.
+- Join the [SigNoz Slack community](https://signoz.io/slack) or open an issue on [GitHub](https://github.com/SigNoz/signoz/issues).
+
+</details>

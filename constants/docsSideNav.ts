@@ -1933,41 +1933,59 @@ const docsSideNav = [
     label: 'Dashboards',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/dashboards/overview',
     items: [
       {
-        label: 'Manage',
+        label: 'Overview',
         type: 'category',
         isExpanded: false,
+        route: '/docs/dashboards/overview',
         items: [
           {
             type: 'doc',
             route: '/docs/userguide/manage-dashboards',
-            label: 'Manage Dashboards',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/manage-panels',
-            label: 'Manage Panels',
+            label: 'How to manage dashboards',
           },
           {
             type: 'doc',
             route: '/docs/userguide/manage-variables',
-            label: 'Manage Variables',
+            label: 'How to use variables',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/import-dashboard',
+            label: 'How to import a dashboard',
           },
           {
             type: 'doc',
             route: '/docs/dashboards/terraform-provider-signoz',
-            label: 'Terraform Provider',
+            label: 'How to use Terraform',
           },
         ],
       },
+
+      // ─── Panel Types ──────────────────────────────────────────────────────
       {
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/panel-types',
         label: 'Panel Types',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-panels',
+            label: 'How to add a panel',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/timeseries',
+            label: 'Timeseries',
+          },
           {
             type: 'doc',
             route: '/docs/dashboards/panel-types/bar',
@@ -1980,13 +1998,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/panel-types/list',
-            label: 'List',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/pie',
-            label: 'Pie',
+            route: '/docs/dashboards/panel-types/value',
+            label: 'Value',
           },
           {
             type: 'doc',
@@ -1995,31 +2008,38 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/panel-types/timeseries',
-            label: 'Timeseries',
+            route: '/docs/dashboards/panel-types/pie',
+            label: 'Pie Chart',
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/panel-types/value',
-            label: 'Value',
+            route: '/docs/dashboards/panel-types/list',
+            label: 'List',
           },
         ],
       },
+
+      // ─── Reference ───────────────────────────────────────────────────────
       {
-        type: 'doc',
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
         route: '/docs/dashboards/interactivity',
-        label: 'Interactivity',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/interactivity',
+            label: 'Interactivity',
+          },
+        ],
       },
-      {
-        type: 'doc',
-        route: '/docs/dashboards/import-dashboard',
-        label: 'Import Dashboard',
-      },
+
+      // ─── Dashboard Templates ──────────────────────────────────────────────
       {
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/dashboard-templates/overview',
-        label: 'Out of Box Dashboards',
+        label: 'Dashboard Templates',
         items: [
           {
             type: 'doc',
@@ -2410,6 +2430,7 @@ const docsSideNav = [
           },
         ],
       },
+      // ─── Troubleshooting ──────────────────────────────────────────────────
       {
         type: 'category',
         route: '/docs/dashboards/troubleshooting/troubleshooting',

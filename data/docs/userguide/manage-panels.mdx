@@ -1,61 +1,50 @@
 ---
-date: 2024-06-06
+date: 2026-04-07
 id: manage-panels
-
-title: Manage Panels
+title: How to Add Panels
+description: Add, configure, update, and remove panels in SigNoz dashboards using the Query Builder, ClickHouse SQL, or PromQL.
+doc_type: howto
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
-import PrereqsInstrument from '@/components/shared/prereqs-instrument.md'
 
-This section shows how you can create, update, and remove a panel.
+Panels are the building blocks of a dashboard. Each panel queries a signal (metrics, traces, or logs) and renders it in a chosen [panel type](https://signoz.io/docs/dashboards/panel-types/).
 
-## Prerequisites
+## Add a panel
 
-<PrereqsInstrument />
+1. From the sidebar, choose **Dashboards** and open the dashboard where you want to add a panel.
+2. Select **Add Panel**.
+3. Choose a [panel type](https://signoz.io/docs/dashboards/panel-types/) — **Timeseries**, **Bar**, **Histogram**, **Value**, **Table**, **Pie**, or **List**.
+4. Enter:
+   - **Panel Title** — a descriptive name.
+   - **Description** — a brief summary of what the panel shows.
+   - _(Optional)_ **Panel Time Preference** — overrides the global dashboard time range for this panel only.
+   - _(Optional)_ **Y Axis Unit** — unit label for the y-axis (where applicable).
+5. Write your query using one of:
+   - **Query Builder** — graphical interface. See [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
+   - **ClickHouse SQL** — for advanced queries. See the [ClickHouse SQL Reference](https://clickhouse.com/docs/en/sql-reference/).
+   - **PromQL** — for Prometheus-style queries. See [Prometheus Querying Language](https://prometheus.io/docs/prometheus/latest/querying/basics/).
+6. _(Optional)_ Apply mathematical functions to transform query results (exp, log, sqrt, sin, cos, etc.).
+7. _(Optional)_ Add up to 10 queries on the same panel using **+ Query**.
+8. Select **Save** when done.
 
-## Steps to Add a Panel to a Dashboard
+<Admonition type="info">
 
-SigNoz supports two types of panels: time series, which displays a metric over a time interval, and value, which displays only the most recent value. To add a panel to a dashboard, follow the steps below:
+After adding or modifying a function or formula, select **Stage & Run Query** before saving. Unsaved changes appear as an orange dot on the affected tab.
 
-1. From the sidebar, choose **Dashboards**.
-2. Find the dashboard to which you want to add a new panel.
-3. Select **Add Panel**.
-4. Select either **Time Series** or **Value**.
-5. Populate the following fields:
-    1. **Panel Title**: Enter a descriptive name for your panel.
-    2. **Description**: Enter a brief and meaningful description of your new panel.
-    3. _(Optional)_ **Panel Time Preference**: You can use the the drop-down list to specify the time range for which you want to view data. The time range you specify here overrides the global value.
-    4. _(Optional)_ **Y Axis Unit**: Specify the unit of measurement for the y-axis.
-6. To specify the data displayed on your panel, you can use:
-    - The query builder. The query builder provides an easy-to-use graphical interface that allows you create custom queries. For instructions, see the [Create a Custom Query](/docs/userguide/create-a-custom-query) page.
-    - The declarative query language based on SQL that ClickHouse supports. For details, see the [SQL Reference](https://clickhouse.com/docs/en/sql-reference/) page of the ClickHouse documentation.
-    - PromQL. For details see the [Prometheus Querying Language](https://prometheus.io/docs/prometheus/latest/querying/basics/) page of the Prometheus documentation.
-7. _(Optional)_ If you’re using the query builder, you can also transform your data by adding mathematical functions. For example, you can divide the value that a query returns by a number. The following mathematical functions are supported: *exp*, *log*, *ln*, *exp2*, *log2*, *exp10*, *log10*, *sqrt*, *cbrt*, *erf*, *erfc*, *lgamma*, *tgamma*, *sin*, *cos*, *tan*, *asin*, *acos*, *atan*, *degrees*, *radians.*
-8. _(Optional)_ The result of the panel query returns a timestamp, float value, and optional set of attributes. The attributes from the response can be used in legend formatting.
-9. _(Optional)_ You can plot up to ten queries on the same panel. To plot a new query, select the **+ Query** button.
-10.  When you’ve finished, select the **Save** button.
+</Admonition>
 
-Note the following about panels:
-- The total number of queries and functions you can plot on a single panel must be less or equal to ten.
-- Every time you add or modify a function or formula, you must select the **Stage & Run Query** button. If you do not select this button, the panel will not be updated and your changes will be lost whenever you move to a different tab. When you have unsaved changes, the system will display an orange circle next to the name of the tab that you've modified:
+## Update a panel
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/orange-circle.webp" width="80%" alt="Orange Circle Showing Unsaved Changes"/>
-    <figcaption><i>Orange Circle Showing Unsaved Changes.</i></figcaption>
-</figure>
+1. From the sidebar, choose **Dashboards** and open the dashboard containing the panel.
+2. Select the **pencil icon** at the top right of the panel.
+3. Make your changes.
+4. Select **Save**.
 
+## Next steps
 
-- You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
-- When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](/docs/userguide/send-metrics) section.
-
-## Steps to Update a Panel
-
-1. From the sidebar, choose **Dashboard**.
-2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
-3. Make the changes.
-4. When you’ve finished, select the **Save** button.
-
-## Get Help
+- [Panel Types](https://signoz.io/docs/dashboards/panel-types/)
+- [Use Variables](https://signoz.io/docs/userguide/manage-variables/)
+- [Interactivity](https://signoz.io/docs/dashboards/interactivity/)
 
 <GetHelp />
