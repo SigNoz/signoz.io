@@ -129,7 +129,7 @@ const Admonition = ({ type, title, variant, defaultCollapsed, children }: Admoni
         size === 'sm' ? 'p-3' : 'p-4',
         theme.root
       )}
-      open={!isDefaultCollapsed}
+      open={!isDefaultCollapsed || undefined}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
