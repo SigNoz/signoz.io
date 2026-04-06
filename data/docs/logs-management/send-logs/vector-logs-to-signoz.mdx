@@ -12,7 +12,7 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-This guide explains how to forward logs from [Vector](https://vector.dev/) to SigNoz using Vector's HTTP sink. Vector collects, transforms, and ships logs from various sources (syslog, files, Docker, Kubernetes, and more) directly to SigNoz.
+This guide explains how to forward logs from <a href="https://vector.dev/" target="_blank" rel="noopener noreferrer nofollow">Vector</a> to SigNoz using Vector's HTTP sink. Vector collects, transforms, and ships logs from various sources (syslog, files, Docker, Kubernetes, and more) directly to SigNoz.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   The self-hosted path uses Vector's `opentelemetry` sink with a `remap` transform instead of the `http` sink. Select the **Self-Hosted** tab in the [Configure Vector](#configure-vector) section below.
@@ -45,7 +45,7 @@ Use this section if you're deploying Vector directly on a server or VM without c
 
 ### Step 1: Install Vector
 
-Install Vector on your VM or bare metal server. See the [official Vector installation guide](https://vector.dev/docs/setup/installation/) for your platform.
+Install Vector on your VM or bare metal server. See the <a href="https://vector.dev/docs/setup/installation/" target="_blank" rel="noopener noreferrer nofollow">official Vector installation guide</a> for your platform.
 
 ### Step 2: Configure Vector
 
@@ -103,7 +103,7 @@ sudo systemctl status vector
 
 ### Step 1: Deploy Vector
 
-Deploy Vector in your Kubernetes cluster using the official [Vector Helm chart](https://vector.dev/docs/setup/installation/package-managers/helm/). The Helm chart automatically configures a `kubernetes_logs` source that collects logs from all pods.
+Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods.
 
 ### Step 2: Configure Vector
 
@@ -190,7 +190,7 @@ To send logs from Vector to self-hosted SigNoz, you need to use the `opentelemet
   reaches stable.
 </Admonition>
 
-Vector's `opentelemetry` sink requires events to be pre-structured as OTLP — raw log events from sources like `file` or `docker_logs` are not. The `remap` transform below builds the required OTLP structure and maps source metadata to [OTel semantic conventions](https://opentelemetry.io/docs/specs/semconv/resource/).
+Vector's `opentelemetry` sink requires events to be pre-structured as OTLP — raw log events from sources like `file` or `docker_logs` are not. The `remap` transform below builds the required OTLP structure and maps source metadata to <a href="https://opentelemetry.io/docs/specs/semconv/resource/" target="_blank" rel="noopener noreferrer nofollow">OTel semantic conventions</a>.
 
 <Tabs>
 <TabItem value="vm" label="VM / Bare Metal" default>
@@ -207,7 +207,7 @@ Use this section if you're deploying Vector directly on a server or VM without c
 
 ### Step 1: Install Vector
 
-Install Vector on your VM or bare metal server. See the [official Vector installation guide](https://vector.dev/docs/setup/installation/) for your platform.
+Install Vector on your VM or bare metal server. See the <a href="https://vector.dev/docs/setup/installation/" target="_blank" rel="noopener noreferrer nofollow">official Vector installation guide</a> for your platform.
 
 ### Step 2: Configure Vector
 
@@ -290,7 +290,7 @@ sudo systemctl status vector
 
 ### Step 1: Deploy Vector
 
-Deploy Vector in your Kubernetes cluster using the official [Vector Helm chart](https://vector.dev/docs/setup/installation/package-managers/helm/). The Helm chart automatically configures a `kubernetes_logs` source that collects logs from all pods.
+Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods.
 
 ### Step 2: Configure Vector
 
@@ -473,7 +473,7 @@ SigNoz expects logs in a specific JSON format. You can either transform logs at 
 
 ### Self-Hosted
 
-The Vector `remap` transform in the config above already maps fields to OTel format. Resource attributes (like `host.name`, `k8s.pod.name`) follow [OTel semantic conventions](https://opentelemetry.io/docs/specs/semconv/resource/).
+The Vector `remap` transform in the config above already maps fields to OTel format. Resource attributes (like `host.name`, `k8s.pod.name`) follow <a href="https://opentelemetry.io/docs/specs/semconv/resource/" target="_blank" rel="noopener noreferrer nofollow">OTel semantic conventions</a>.
 
 </details>
 
@@ -522,13 +522,19 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 ### Logs are not appearing in SigNoz
 
-- **Verify Vector is running**: Check Vector status with `sudo systemctl status vector` (VM) or `docker ps` (Docker).
-- **Check Vector logs**: Run `sudo journalctl -u vector -f` (VM) or `docker logs vector` (Docker) to see if Vector is emitting errors.
-- **Verify endpoint**:
-  - Cloud: `https://ingest.<region>.signoz.cloud/logs/vector`
-  - Self-Hosted: `http://<signoz-host>:4318/v1/logs`
-- **Verify credentials**: Double-check `<region>` and `<your-ingestion-key>` for Cloud, or that the SigNoz collector is reachable on port `4318` for self-hosted.
-- **Check network connectivity**: Ensure Vector can reach the SigNoz endpoint (no firewall blocking).
+- **Symptom**: No log entries in Logs Explorer after configuring Vector.
+- **Likely cause**: Vector is not running, or endpoint/key is misconfigured.
+- **Fix**:
+  1. Check Vector status: `sudo systemctl status vector` (VM) or `docker ps` (Docker)
+  2. Check Vector logs: `sudo journalctl -u vector -f` (VM) or `docker logs vector` (Docker)
+  3. Verify endpoint and credentials (see below)
+- **Verify**: After fixing, confirm new logs appear in **Logs → Logs Explorer** within a few minutes.
+
+**Endpoint and credentials check**:
+
+- Cloud: `https://ingest.<region>.signoz.cloud/logs/vector` with valid `<your-ingestion-key>`
+- Self-Hosted: `http://<signoz-host>:4318/v1/logs` with collector reachable on port 4318
+- Ensure no firewall is blocking the connection.
 
 ### Self-Hosted: OTLP serialization error
 
