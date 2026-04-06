@@ -1,0 +1,107 @@
+---
+date: 2026-04-07
+id: meter-explorer-examples
+title: Meter Explorer Examples
+description: Ready-to-use query patterns for analyzing observability costs in SigNoz Meter Explorer — by service, environment, host, and ingestion key.
+doc_type: reference
+---
+
+These examples show common cost-analysis queries in Meter Explorer. All queries use meter metrics in the `signoz.meter` namespace and require a time range of at least 1 hour.
+
+For the full list of available metrics and labels, see the [Metrics Reference](https://signoz.io/docs/cost-meter/meter-metrics-reference/).
+
+## Log size by service
+
+Find the total size of log records ingested by a specific service:
+
+```
+signoz.meter.log.size{service.name="demo-app"}
+```
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/meter-explorer/usecase-1.webp"
+    alt="Log size analysis for demo-app service over the last day"
+  />
+  <figcaption>
+    <i>Log size for demo-app service — ingestion patterns over time</i>
+  </figcaption>
+</figure>
+
+## Span count by environment
+
+Analyze span ingestion across a specific deployment environment:
+
+```
+signoz.meter.span.count{deployment.environment="otel-demo"}
+```
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/meter-explorer/usecase-2.webp"
+    alt="Span count analysis for otel-demo environment over the last day"
+  />
+  <figcaption>
+    <i>Span count for otel-demo environment over the last day</i>
+  </figcaption>
+</figure>
+
+## Multi-service log comparison
+
+Compare log ingestion across all services using a group-by:
+
+```
+signoz.meter.log.size{group-by:service.name}
+```
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/meter-explorer/usecase-3.webp"
+    alt="Log size grouped by service.name over the last day"
+  />
+  <figcaption>
+    <i>Log size grouped by service — identify which services contribute most</i>
+  </figcaption>
+</figure>
+
+## Log size by host
+
+Identify which hosts are generating the most log data:
+
+```
+signoz.meter.log.size{host.name = "x"}
+```
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/meter-explorer/usecase-4.webp"
+    alt="Log size analysis for a specific host over the last day"
+  />
+  <figcaption>
+    <i>Log size for a specific host — useful for detecting noisy nodes</i>
+  </figcaption>
+</figure>
+
+## Log size by ingestion key
+
+Analyze telemetry data attributed to a specific ingestion key:
+
+```
+signoz.meter.log.size{signoz.workspace.key.id = "01963e56-0bbb-7df5-b26c-2c4aa48b291a"}
+```
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/meter-explorer/usecase-5.webp"
+    alt="Log size for a specific ingestion key over the last day"
+  />
+  <figcaption>
+    <i>Log size scoped to a single ingestion key — useful for per-team quota tracking</i>
+  </figcaption>
+</figure>
+
+## Related pages
+
+- [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/) — overview of how Meter Explorer works
+- [Metrics Reference](https://signoz.io/docs/cost-meter/meter-metrics-reference/) — all available metrics and label dimensions
+- [Meter Alerts Examples](https://signoz.io/docs/cost-meter/alerts-examples/) — set alerts based on these same meter metrics
