@@ -1702,6 +1702,7 @@ const docsSideNav = [
         route: '/docs/metrics-management/overview',
         label: 'Overview',
       },
+      // ─── Send Metrics ────────────────────────────────────────────────
       {
         label: 'Send Metrics',
         type: 'category',
@@ -1784,11 +1785,12 @@ const docsSideNav = [
             type: 'category',
             label: 'Infrastructure',
             isExpanded: false,
+            route: '/docs/metrics-management/docker-container-metrics',
             items: [
               {
                 type: 'doc',
                 route: '/docs/metrics-management/docker-container-metrics',
-                label: 'Docker container metrics',
+                label: 'Docker Container Metrics',
               },
               {
                 type: 'doc',
@@ -1805,7 +1807,11 @@ const docsSideNav = [
                 route: '/docs/metrics-management/slurm-metrics',
                 label: 'SLURM',
               },
-              { type: 'doc', route: '/docs/metrics-management/render-metrics', label: 'Render' },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/render-metrics',
+                label: 'Render',
+              },
               {
                 type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
@@ -1814,7 +1820,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/metrics-management/fly-metrics',
-                label: 'Fly.io metrics',
+                label: 'Fly.io Metrics',
               },
             ],
           },
@@ -1822,6 +1828,7 @@ const docsSideNav = [
             type: 'category',
             label: 'Databases',
             isExpanded: false,
+            route: '/docs/metrics-management/mysql-metrics',
             items: [
               {
                 type: 'doc',
@@ -1849,6 +1856,7 @@ const docsSideNav = [
             type: 'category',
             label: 'Web Servers',
             isExpanded: false,
+            route: '/docs/metrics-management/nginx-metrics',
             items: [
               {
                 type: 'doc',
@@ -1859,52 +1867,82 @@ const docsSideNav = [
           },
         ],
       },
+      // ─── Metrics Explorer ────────────────────────────────────────────
       {
         type: 'doc',
         route: '/docs/metrics-management/metrics-explorer',
         label: 'Metrics Explorer',
       },
+      // ─── Guides ──────────────────────────────────────────────────────
       {
-        type: 'doc',
-        route: '/docs/metrics-management/types-and-aggregation',
-        label: 'Types and Aggregation',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/data-storage',
-        label: 'Metrics Tables',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/cloud-provider-metric-delay',
-        label: 'Cloud provider metric delay',
-      },
-      {
-        type: 'doc',
+        type: 'category',
+        label: 'Guides',
+        isExpanded: false,
         route: '/docs/metrics-management/configure-custom-buckets',
-        label: 'Configure custom buckets for histograms',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/configure-custom-buckets',
+            label: 'Configure Custom Histogram Buckets',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/drop-metrics',
+            label: 'Drop Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/dropping-metric-labels',
+            label: 'Manage Metric Labels',
+          },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/reducing-costs',
+            label: 'Reduce Metrics Costs',
+          },
+        ],
       },
+      // ─── Reference ───────────────────────────────────────────────────
       {
-        type: 'doc',
-        route: '/docs/userguide/drop-metrics',
-        label: 'Drop Metrics',
+        type: 'category',
+        label: 'Reference',
+        isExpanded: false,
+        route: '/docs/metrics-management/types-and-aggregation',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/types-and-aggregation',
+            label: 'Metric Types and Aggregation',
+          },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/data-storage',
+            label: 'Metrics Storage',
+          },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/cloud-provider-metric-delay',
+            label: 'Cloud Provider Metric Delays',
+          },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/query-range-api',
+            label: 'Metrics Query API',
+          },
+        ],
       },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/dropping-metric-labels',
-        label: 'Dropping Metric Labels (Attributes)',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/reducing-costs',
-        label: 'Understanding Metrics Billing and Reducing Costs',
-      },
+      // ─── Troubleshooting ─────────────────────────────────────────────
       {
         type: 'category',
         route: '/docs/metrics-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',
         isExpanded: false,
         items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/troubleshooting/troubleshooting',
+            label: 'Troubleshooting Metrics',
+          },
           {
             type: 'doc',
             route: '/docs/metrics-management/troubleshooting/faqs',

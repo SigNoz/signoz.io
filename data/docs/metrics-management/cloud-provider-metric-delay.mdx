@@ -1,21 +1,30 @@
 ---
-date: 2024-11-03
-title: Cloud provider metric delay
-tags : [SigNoz Cloud]
+date: 2026-04-06
+title: Cloud Provider Metric Delays
 id: cloud-provider-metric-delay
+description: Reference for expected delays when collecting metrics from cloud provider APIs such as AWS CloudWatch.
+doc_type: reference
+tags: [SigNoz Cloud]
 ---
 
-When using cloud provider metrics, you might notice a delay in the metrics being reflected in SigNoz. This is because the metrics are collected from the cloud provider's API and there is a delay in the metrics being available in the API.
+When using cloud provider metrics, you may notice a delay between when a metric is generated and when it appears in SigNoz. This is because metrics are fetched from the cloud provider's API, which introduces its own reporting lag before the data is available to scrape.
 
-### AWS
+## AWS CloudWatch
 
-AWS provides metrics in two resolutions:
+AWS CloudWatch provides metrics in two resolutions:
 
-1. 5-minute metrics
-2. 1-minute metrics
+| Resolution | Expected delay in SigNoz |
+|---|---|
+| 5-minute metrics | 5–15 minutes |
+| 1-minute metrics | 2–3 minutes |
 
-- If you send 5-minute metrics from CloudWatch, there can be ~5-15 minute delay in receiving your metrics. This is because CloudWatch makes your data available with a 5-10 minute delay. Additionally, CloudWatch API limitations can introduce another 5 minutes of delay.
-- If you send 1-minute metrics with CloudWatch, there can be ~2-3 minute delay in receiving your metrics.
+**Why the delay occurs:**
 
+- CloudWatch makes 5-minute data available with a 5–10 minute lag after the measurement window closes.
+- The CloudWatch API allows only one metric per request. Collecting multiple metrics requires multiple sequential requests, adding further delay.
+- The availability of metrics can also vary by account level and service.
 
-The CloudWatch API only enables you to collect one metric for each request. This means that if you are collecting multiple metrics, this means that multiple requests are made to the CloudWatch API. This can introduce additional delay. The availability of the metrics also depends on the account level.
+## Related pages
+
+- [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/) — Overview of supported ingestion methods
+- [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) — Verify metrics are arriving and inspect last-received timestamps

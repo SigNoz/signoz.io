@@ -1,22 +1,26 @@
 ---
-date: 2026-04-01
+date: 2026-04-06
 id: troubleshooting
-title: Troubleshooting
-description: Troubleshoot common SigNoz metrics issues including missing metrics, temporality mismatches, and query configuration.
+title: Troubleshooting Metrics
+description: Diagnose and resolve common issues with metrics ingestion, visibility, and query results in SigNoz.
+doc_type: reference
 ---
 
-<DocCardContainer>
+Use this page to quickly identify the cause of a metrics problem and find the relevant resolution.
 
-<DocCard
-    title="📄️ General FAQs"
-    description="General FAQs about metrics management..."
-    href="/docs/metrics-management/troubleshooting/faqs"
-/>
+## Symptom → Resolution
 
-{/* <DocCard
-    title="📄️ Schema Migrator - Dirty database version"
-    description="Instructions to resolve the dirty database version error during migration"
-    href="/docs/operate/troubleshooting/dirty-migration"
-/> */}
+| Symptom | Likely cause | Resolution |
+|---|---|---|
+| Metric not visible in Metrics Explorer | Temporality mismatch (delta and cumulative sent for same metric) | Keep temporality consistent; use ClickHouse query as a workaround. See [General FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/). |
+| Metric visible but value looks wrong | Incorrect temporal or spatial aggregation function selected | Review [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/). |
+| Cloud metrics delayed by 5–15 minutes | CloudWatch API reporting lag | Expected behavior — see [Cloud Provider Metric Delays](https://signoz.io/docs/metrics-management/cloud-provider-metric-delay/). |
+| Histogram percentiles look incorrect | Default bucket boundaries don't match the metric's unit | Reconfigure bucket boundaries — see [Configure Custom Histogram Buckets](https://signoz.io/docs/metrics-management/configure-custom-buckets/). |
+| Dropping labels doesn't reduce cost | Attribute processor only removes metadata, not data points | Use `metricstransform` processor to aggregate instead — see [Manage Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/). |
+| High cardinality driving up costs | Unique IDs or per-request attributes included in metric labels | Review and remove high-cardinality attributes — see [Reduce Metrics Costs](https://signoz.io/docs/metrics-management/reducing-costs/). |
 
-</DocCardContainer>
+## Related pages
+
+- [General FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/)
+- [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)
+- [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/)
