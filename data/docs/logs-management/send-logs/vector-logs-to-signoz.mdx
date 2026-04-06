@@ -93,12 +93,11 @@ sudo systemctl status vector
 
 </TabItem>
 
-<TabItem value="kubernetes" label="Kubernetes">
-
 ### Step 1: Deploy Vector
 
-Deploy Vector in your Kubernetes cluster using the official [Vector Helm chart](https://vector.dev/docs/setup/installation/package-managers/helm/).
+Deploy Vector in your Kubernetes cluster using the official [Vector Helm chart](https://vector.dev/docs/setup/installation/package-managers/helm/). The Helm chart automatically configures a `kubernetes_logs` source that collects logs from all pods.
 
+### Step 2: Configure Vector
 ### Step 2: Configure Vector
 
 Add the following sink configuration to your Vector `values.yaml` or ConfigMap:
@@ -250,7 +249,9 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 ## Validate
 
-Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/logs-management/overview/) section.
+After configuring Vector, navigate to **Logs → Logs Explorer** in SigNoz. You should see incoming log entries within a few minutes. Filter by `source_type` to confirm the logs are from Vector.
+
+For more details on querying logs, see the [Logs Explorer documentation](https://signoz.io/docs/logs-management/overview/).
 
 <details>
 <ToggleHeading>
