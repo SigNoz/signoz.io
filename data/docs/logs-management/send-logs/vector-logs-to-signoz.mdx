@@ -12,7 +12,7 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-This guide explains how to forward logs from <a href="https://vector.dev/" target="_blank" rel="noopener noreferrer nofollow">Vector</a> to SigNoz using Vector's HTTP sink. Vector collects, transforms, and ships logs from various sources (syslog, files, Docker, Kubernetes, and more) directly to SigNoz.
+<a href="https://vector.dev/" target="_blank" rel="noopener noreferrer nofollow">Vector</a> collects, transforms, and ships logs from various sources (syslog, files, Docker, Kubernetes) to SigNoz. SigNoz Cloud uses Vector's `http` sink; self-hosted SigNoz uses the `opentelemetry` sink.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   The self-hosted path uses Vector's `opentelemetry` sink with a `remap` transform instead of the `http` sink. Select the **Self-Hosted** tab in the [Configure Vector](#configure-vector) section below.
@@ -103,7 +103,7 @@ sudo systemctl status vector
 
 ### Step 1: Install the Vector Helm chart
 
-Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods. 
+Deploy Vector using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. Set `role: Agent` to run Vector as a DaemonSet so every node collects logs. Define the full pipeline in `customConfig`.
 
 Add the Vector Helm repo and install the chart:
 
@@ -314,7 +314,7 @@ sudo systemctl status vector
 
 ### Step 1: Install the Vector Helm chart
 
-Deploy Vector in your Kubernetes cluster using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. The Helm chart automatically configures a <a href="https://vector.dev/docs/reference/configuration/sources/kubernetes_logs/" target="_blank" rel="noopener noreferrer nofollow">kubernetes_logs</a> source that collects logs from all pods. 
+Deploy Vector using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. Set `role: Agent` to run Vector as a DaemonSet so every node collects logs. Define the full pipeline in `customConfig`.
 
 Add the Vector Helm repo and install the chart:
 
