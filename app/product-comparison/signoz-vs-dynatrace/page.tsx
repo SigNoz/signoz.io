@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: `${siteMetadata.siteUrl}/product-comparison/signoz-vs-dynatrace`,
+  },
 }
 
 export default function SigNozVSDynatracePage() {

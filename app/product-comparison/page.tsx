@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: `${siteMetadata.siteUrl}/product-comparison`,
+  },
 }
 
 const comparisons = [

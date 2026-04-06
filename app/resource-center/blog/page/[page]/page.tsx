@@ -2,9 +2,7 @@ import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import GridLayout from '@/layouts/GridLayout'
 import { allBlogs } from 'contentlayer/generated'
 import React from 'react'
-import { genPageMetadata } from 'app/seo'
 import siteMetadata from '@/data/siteMetadata'
-import { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return {

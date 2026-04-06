@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: `${siteMetadata.siteUrl}/product-comparison/migrate-from-newrelic`,
+  },
 }
 
 export default function MigrateFromNewRelicPage() {

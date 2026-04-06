@@ -1,15 +1,15 @@
 import React from 'react'
 import Blogs from './Blogs'
-import siteMetadata, { description } from '@/data/siteMetadata'
+import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Blog | SigNoz',
-  description: description,
+  description: siteMetadata.description,
   openGraph: {
     title: 'Blog | SigNoz',
-    description: description,
-    url: `${siteMetadata.siteUrl}/blog`,
+    description: siteMetadata.description,
+    url: `${siteMetadata.siteUrl}/resource-center/blog`,
     siteName: siteMetadata.title,
     locale: 'en_US',
     type: 'website',
@@ -17,12 +17,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Blog | SigNoz',
-    description: description,
+    description: siteMetadata.description,
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },
   robots: {
-    index: false,
+    index: true,
     follow: true,
   },
 }

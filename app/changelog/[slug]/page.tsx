@@ -18,12 +18,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     notFound()
   }
 
+  if (!changelogResponse?.data?.release_date || !changelogResponse?.data?.version) {
+    notFound()
+  }
+
   return {
-    title: changelogResponse?.data?.release_date + ' - ' + changelogResponse?.data?.version,
+    title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
     description:
-      changelogResponse?.data?.release_date +
+      changelogResponse.data.release_date +
       ' - ' +
-      changelogResponse?.data?.version +
+      changelogResponse.data.version +
       ' - SigNoz Changelog',
     robots: {
       index: true,
@@ -33,11 +37,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       canonical: `${siteMetadata.siteUrl}/changelog/${params.slug}`,
     },
     openGraph: {
-      title: changelogResponse?.data?.release_date + ' - ' + changelogResponse?.data?.version,
+      title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
       description:
-        changelogResponse?.data?.release_date +
+        changelogResponse.data.release_date +
         ' - ' +
-        changelogResponse?.data?.version +
+        changelogResponse.data.version +
         ' - SigNoz Changelog',
       url: `${siteMetadata.siteUrl}/changelog/${params.slug}`,
       siteName: siteMetadata.title,
@@ -46,11 +50,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       images: [siteMetadata.socialBanner],
     },
     twitter: {
-      title: changelogResponse?.data?.release_date + ' - ' + changelogResponse?.data?.version,
+      title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
       description:
-        changelogResponse?.data?.release_date +
+        changelogResponse.data.release_date +
         ' - ' +
-        changelogResponse?.data?.version +
+        changelogResponse.data.version +
         ' - SigNoz Changelog',
       images: [siteMetadata.socialBanner],
       site: siteMetadata.twitter,
