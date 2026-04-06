@@ -1,524 +1,353 @@
 ---
-title: Implementing OpenTelemetry in Spring Boot - A Practical Guide
+
+title: How to Instrument Spring Boot Applications with OpenTelemetry
 slug: opentelemetry-spring-boot
-date: 2024-12-12
-tags: [OpenTelemetry, Spring Boot, Distributed Tracing, Java]
-authors: [ankit_anand]
-description: Learn how to implement OpenTelemetry in Spring Boot applications. This guide covers setup, tracing, metrics, and advanced techniques for effective observability.
-image: /img/blog/2024/12/opentelemetry-springboot-cover.webp
-hide_table_of_contents: false
-toc_min_heading_level: 2
-toc_max_heading_level: 2
-keywords:
-  [
-    OpenTelemetry,
-    opentelemetry spring boot,
-    OpenTelemetry java,
-    Spring Boot,
-    distributed tracing,
-    jvm metrics,
-    apm,
-    application monitoring,
-  ]
-cta_title: "Set Up OpenTelemetry with Spring Boot in 15 min with Our Guided Onboarding"
-cta_text: "Monitor Sprint Boot with OTel"
+date: 2026-04-06
+tags: [OpenTelemetry, Java]
+authors: [dhruv_ahuja]
+description: Learn how to instrument a Spring Boot application with the OpenTelemetry Java agent, generate traces and metrics, and visualize them in SigNoz.
+image: /img/blog/2026/04/opentelemetry-spring-boot-p99-histogram.webp
+keywords: [opentelemetry,spring boot,opentelemetry spring boot,apm tools,application performance monitoring, instrumentation, otel spring boot, observability]
+
 ---
 
-OpenTelemetry can auto-instrument your Java Spring Boot application to capture telemetry data from a number of popular libraries and frameworks that your application might be using. It can be used to collect logs, metrics, and traces from your Spring Boot application. In this tutorial, we will integrate OpenTelemetry with a Spring Boot application for traces and logs.
+Spring Boot has become the de facto standard web framework for Java, serving as the technical backbone for businesses of all sizes across all domains.
 
-<InlineCTA message="Send your Spring Boot traces to SigNoz Cloud in 15 minutes — auto-instrumentation with the Java agent, JVM metrics, and pre-built dashboards included." />
+Startups rely on it to quickly scaffold applications and—as all startups hope—scale to handle diverse workloads. Meanwhile, enterprises value its security, its proven reliability serving millions of users, and its ability to bridge modern, cloud-native architecture with legacy stacks.
 
-Before the demo begins, let's have a brief overview of OpenTelemetry.
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-popularity.webp" alt="Spring Boot remains the popular choice among Java developers." caption="Spring Boot remains the popular choice among Java developers." sourceText="Reddit" link="https://www.reddit.com/r/SpringBoot/comments/108n1iq/comment/j3tn1us/" />
+
+It becomes critical to monitor your Spring Boot applications as they run in production, to understand system behaviour, diagnose errors, and prevent application downtime.<br />
+This is where OpenTelemetry comes into the picture.
+
+In this article, we’ll start by briefly covering what OpenTelemetry is and why it matters. Then, we will dive into a hands-on demo to:
+
+- Set up a Spring Boot application instrumented with the OpenTelemetry Java Agent.
+- Generate live telemetry data, including distributed traces across service boundaries.
+- Visualize this data in SigNoz while dissecting the underlying code to understand exactly how our application behaves under the hood.
 
 ## What is OpenTelemetry?
 
-<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations aiming to standardize the generation,
-collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud
-Native Computing Foundation project created after the merger of OpenCensus(from Google) and
-OpenTracing(From Uber).
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is a Cloud Native Computing Foundation (CNCF) project that standardizes the way we <Tooltip text="instrument applications" content="the process of configuring applications to emit telemetry data" /> to generate and export telemetry data.
 
-It consists of three core components:
+Before OTel, the three telemetry signals—traces, metrics, and logs—lived in isolated silos. OpenTelemetry standardizes telemetry generation and context propagation, which helps observability backends correlate data across signals.<br />
+This allows you to track exactly which request caused a specific log error or a spike in CPU usage, giving you a complete picture of your application's health.
 
-1. Traces: Detailed records of request flows through your system
-2. Metrics: Quantitative measurements of your application's performance
-3. Logs: Timestamped records of discrete events
+**Driven by Open Standards**
 
-The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical to observe the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
+OpenTelemetry follows a <a href="https://github.com/open-telemetry/opentelemetry-specification?tab=readme-ov-file" rel="noopener noreferrer nofollow" target="_blank">specification-driven development</a> model.
 
-There are two important components in OpenTelemetry that comes in handy to collect telemetry data:
+These open standards mean **there is no vendor lock-in.** If your application emits standard OTel data, any compatible backend can process and visualize it.
 
-- **Client Libraries**<br></br>
-  For Java applications, OpenTelemetry provides a JAR agent that can be attached to any Java 8+ application. It can detect a number of popular libraries and frameworks and instrument applications right out of the box for generating telemetry data.
-- **[OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/)**<br></br>
-  It is a stand-alone service provided by OpenTelemetry. It can be used as a telemetry-processing system with a lot of flexible configurations to collect and manage telemetry data.
+Now that we understand why OpenTelemetry is important to the observability landscape, let’s get hands-on with our demo application, generate some live traffic, and see OpenTelemetry in action.
 
-Typically, here's how an application architecture instrumented with OpenTelemetry looks like.
+## Setting Up the Spring Boot Demo Application
 
-<figure data-zoomable align="center">
-  <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture" />
-  <figcaption>
-    <i>
-      Architecture - How OpenTelemetry fits in an application architecture. [OTel](https://signoz.io/opentelemetry/) collector refers to
-      OpenTelemetry Collector
-    </i>
-  </figcaption>
-</figure>
+Let’s go ahead and set up the demo application that we’ve prepared to showcase OpenTelemetry instrumentation with Spring Boot.
 
-OpenTelemetry provides client libraries and agents for most of the popular programming languages. There are two types of instrumentation:
+### Prerequisites
 
-- **Auto-instrumentation**<br></br>
-  OpenTelmetry can collect data for many popular frameworks and libraries automatically. You don’t have to make any code changes.
-- **Manual instrumentation**<br></br>
-  If you want more application-specific data, OpenTelemetry SDK provides you with the capabilities to capture that data using OpenTelemetry APIs and SDKs.
+Before cloning the demo application repo, ensure you have:
 
-For a Java Spring Boot application, we can use the OpenTelemetry Java Jar agent to instrument the application. The agent is capable of capturing telemetry data from various popular libraries and frameworks used in the application.
+- Java 21 installed. (<a href="https://www.oracle.com/in/java/technologies/downloads/#java21" rel="noopener noreferrer nofollow" target="_blank">Download here</a>).
+- Maven version 3.6.3 or later (<a href="https://maven.apache.org/download.cgi" rel="noopener noreferrer nofollow" target="_blank">Download here</a>).
+- uv installed (<a href="https://docs.astral.sh/uv/getting-started/installation/#installation-methods" rel="noopener noreferrer nofollow" target="_blank">Download here</a>).
+- A [SigNoz Cloud account](https://signoz.io/teams/) for visualizing the telemetry data.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/opentelemetry_java_instrument.webp"
-    alt="OpenTelemetry helps to generate and collect telemetry data from your application which is then sent to an observability backend like SigNoz"
-  />
-  <figcaption>
-    <i>
-      OpenTelemetry helps generate and collect telemetry data from Spring Boot applications which
-      can then be sent to SigNoz for storage, visualization, and analysis.
-    </i>
-  </figcaption>
-</figure>
+**`uv`** is required to run the Python script that emulates an upstream service to showcase [trace context propagation](https://signoz.io/blog/context-propagation-in-distributed-tracing/).
 
-OpenTelemetry does not provide storage and visualization layer for the collected data. The advantage of using OpenTelemetry is that it can export the collected data in many different formats. So you're free to choose your telemetry backend.
+**Setting up SigNoz**
 
-In this tutorial, we will use [SigNoz](https://signoz.io/docs/introduction/), an OpenTelemetry-native APM as the backend and visualization layer.
+SigNoz is an all-in-one, OpenTelemetry-native observability platform for traces, metrics, and logs.
 
-Steps to integrate OpenTelemetry with your Spring Boot application.
+- [Sign up](https://signoz.io/teams/) for a free SigNoz Cloud account.
+- [Follow this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to create ingestion keys for your account.
+- Ensure the region and ingestion key values are readily accessible for the following steps.
 
-1. [Setting up SigNoz](#step-1-setting-up-signoz)
-2. [Setting up Sample Spring Boot Application](#step-2-setting-up-sample-spring-boot-application)
-3. [Downloading OpenTelemetry Java Agent Jar](#step-3-downloading-opentelemetry-java-agent-jar)
-4. [Running the application with Java Agent Jar](#step-4-running-the-application-with-relevant-environment-variables)
-5. [Monitoring application with SigNoz](#step-5-monitoring-your-spring-boot-application-in-signoz)
+Once done, you’re ready to set up the demo application.
 
-### Why should you use OpenTelemetry with Spring Boot?
+### Running the Demo Application
 
-Here are the key benefits:
-
-- **Standardization**: OpenTelemetry offers a vendor-neutral approach, allowing you to switch between different observability backends easily.
-- **Comprehensive visibility**: It provides a holistic view of your application's performance across distributed systems.
-- **Easy integration**: OpenTelemetry seamlessly integrates with Spring Boot, requiring minimal configuration.
-- **Extensibility**: You can easily extend OpenTelemetry to capture custom metrics and traces specific to your business needs.
-
-Compared to other observability solutions like Micrometer, OpenTelemetry offers broader language support and a more comprehensive approach to telemetry data collection. While Micrometer focuses primarily on metrics, OpenTelemetry provides a unified solution for traces, metrics, and logs.
-
-## Prerequisites
-
-- [SigNoz Cloud account](https://signoz.io/teams/)
-- Java 8 or Higher (<a href = "https://www.java.com/en/" rel="noopener noreferrer nofollow" target="_blank" >Download here</a>)
-
-## Step 1: Setting up SigNoz
-
-You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
-
-<GetStartedSigNoz />
-
-## Step 2: Setting up Sample Spring Boot application
-
-For this tutorial, we will use the popular <a href = "https://github.com/SigNoz/spring-petclinic" rel="noopener noreferrer nofollow" target="_blank" >Spring PetClinic application</a> and integrate it with OpenTelemetry.
-
-The Spring PetClinic application is a well-known sample application used to demonstrate the capabilities of the Spring Framework in Java. It is a web application that uses Spring MVC (Model-View-Controller) to handle web requests, manage controllers, and render views. You can read more about it [here](https://spring-petclinic.github.io/).
-
-**Git clone the repository and go to the root folder:**
+Clone the SigNoz Examples repository and navigate to the application folder:
 
 ```bash
-git clone https://github.com/SigNoz/spring-petclinic.git
-cd spring-petclinic
-
+git clone https://github.com/SigNoz/examples.git
+cd examples/java/opentelemetry-spring-boot-demo
 ```
 
-**Run the application using the following commands:**
+Next, ensure that you set the OpenTelemetry exporter endpoint and the SigNoz ingestion key environment variables.
 
 ```bash
-./mvnw package
-java -jar target/*.jar
-
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<your-region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 ```
 
-If your application runs successfully, you will be able to access the application UI here: http://localhost:8090/
+We have included a [Makefile](https://github.com/SigNoz/examples/blob/main/java/opentelemetry-spring-boot-demo/Makefile) to simplify the setup. Run the `make run` command, which will download the <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Auto-Instrumentation Agent</a> JAR file, and start the Spring Boot application—with the agent attached—on port 8085.
 
-<figure data-zoomable>
-  <img
-    src="/img/blog/2024/12/spring_boot_app.webp"
-    alt="Spring PetClinic app accessed at port:8090"
-  />
-  <figcaption>
-    <i>Sample Spring Boot application running in your local host.</i>
-  </figcaption>
-</figure>
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-make-run.webp" alt="The included Makefile automates the OTel agent JAR file download and the application setup." caption="The included Makefile automates the OTel agent JAR file download and the application setup." />
 
-Once you ensure that your application runs fine, stop it with `ctrl + c` on mac, as we will be launching the application with the Java agent downloaded from OpenTelemetry.
-
-## Step 3: Downloading OpenTelemetry Java Agent JAR
-
-Download the [latest Java agent JAR](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar). You will need the path of this file, so note it down somewhere. You can also use the terminal to get this file using the following command:
+Make a curl request or visit the `http://127.0.0.1:8085` URL to validate that the web server is up and running:
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+❯ curl -i http://127.0.0.1:8085  
+HTTP/1.1 200 
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 13
+Date: Tue, 31 Mar 2026 06:20:00 GMT
 
+Hello, World!
 ```
 
-Note: You will need the path to this file while running your application. A good practice is to create a folder named 'java-agent' inside your project and save the agent there.
+### Generating Data for Visualization
 
-OpenTelemetry Java agent JAR can be attached to any Java 8+ application. The agent JAR can detect a number of <a href = "https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md" rel="noopener noreferrer nofollow" target="_blank" >popular libraries and frameworks</a> and instrument it right out of the box. You don't need to add any code for that.
+To ensure you have enough data to experiment with and understand how OpenTelemetry works, we have prepared a simple load generator script that calls endpoints from our application.<br />
+The script also calls an undefined endpoint and the fibonacci endpoint with invalid data. This helps us visualize telemetry beyond just the happy path.
 
-The auto-instrumentation takes care of generating traces and logs from the application. SigNoz uses the trace data to report key application metrics like p99 latency, request rates, and error rates with out-of-box charts and visualization.
-
-You will also be able to capture logs with it and send it to SigNoz.
-
-## Step 4: Running the application with relevant environment variables
-
-You need to run your Spring Boot application along with the instrumentation agent. The below command will auto-instrument your application for traces and logs.
+Run the script in a separate terminal instance:
 
 ```bash
-OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \
-OTEL_LOGS_EXPORTER=otlp \
-java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
+chmod +x ./scripts/load_gen.sh
+./scripts/load_gen.sh
 ```
 
-You can get SigNoz ingestion key and region from your SigNoz cloud account in Settings --> Ingestion Settings.
-
-<figure data-zoomable align="center">
-  <img src="/img/blog/2024/12/ingestion-settings.webp" alt="ingestion settings" />
-  <figcaption>
-    <i>Ingestion details for your SigNoz cloud account</i>
-  </figcaption>
-</figure>
-
-Your final command might look like this:
+Next, start the Python script to generate data for the external API. This script calls the Spring Boot `/external` endpoint, which in turn calls an `httpbin` endpoint.
 
 ```bash
-OTEL_LOGS_EXPORTER=otlp \
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.in.signoz.cloud:443 \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=7XXXXX7-6XXxX-45ff-9XX1-3bXxXXf9cdc3" \
-OTEL_RESOURCE_ATTRIBUTES=service.name=sample_java_app \
-java -javaagent:/java-agent/opentelemetry-javaagent.jar -jar  target/*.jar
+OTEL_SERVICE_NAME="py-springboot-client" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<your-region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-signoz-key>" \
+uv run \
+  --with opentelemetry-distro \
+  --with opentelemetry-exporter-otlp \
+  --with opentelemetry-instrumentation-requests \
+  opentelemetry-instrument python scripts/python_client.py
 ```
 
-<Admonition>
-  You would need to use the environment variables from your SigNoz cloud account.
-</Admonition>
+You will be prompted to enter the number of requests you’d like to make to the application. For now, you can just enter **`1`**. To generate more data points, enter a large value like `50` and let the script run.
 
-## Step 5: Monitoring your Spring Boot Application in SigNoz
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-traceparent-response.webp" alt="httpbin.org/anything reflects request headers, making it ideal for understanding trace context propagation." caption="httpbin.org/anything reflects request headers, making it ideal for understanding trace context propagation." />
 
-Check out the Spring Pet Clinic app at: http://localhost:8090/ and play around with it to generate some load. You can try refreshing the endpoint multiple times to generate load. Now you open the `Services` tab of SigNoz dashboard to see your Spring Boot Application being monitored.
+Notice the `traceparent` header in that response? That contains the `trace_id` originally generated by our Python script. It successfully passed through our Spring Boot application and made its way to the external `httpbin` service.
 
-When you sign up, you will get an onboarding flow for Java application. You can follow it to instrument your own Spring Boot application too.
+With telemetry now actively flowing into your SigNoz dashboard, let’s look under the hood.
 
-Below you can find your Spring Boot application in the list of applications being monitored.
+## Anatomy of the OpenTelemetry Spring Boot Demo Application
 
-<figure data-zoomable>
-  <img
-    className="box-shadowed-image"
-    src="/img/blog/2024/12/opentelemetry-spring-boot-apm.webp"
-    alt="Spring Boot application monitoring with OpenTelemetry"
-  />
-  <figcaption>
-    <i>
-      Spring Boot application monitoring in SigNoz with p99 latency, error rate, and ops per second
-    </i>
-  </figcaption>
-</figure>
+It’s vital that you understand the various nuances of the demo application. Wrapping your head around exactly how our application captures spans, generates metrics, and propagates that `traceparent` context will prepare you for implementing OpenTelemetry in your own applications.
 
-## Application Metrics and Traces of the Spring Boot application
+<KeyPointCallout title="Choosing an OpenTelemetry Integration">
 
-SigNoz makes it easy to visualize metrics and traces captured through OpenTelemetry instrumentation.
+We will use the OpenTelemetry Java agent for this guide, as we believe it’s the practical default for standard JVM deployments. It requires minimal code changes, supports a broad range of Java libraries and frameworks, and keeps your telemetry model aligned with OpenTelemetry across the rest of your distributed system.
 
-SigNoz comes with out of box RED metrics charts and visualization based on your trace data. You get following out-of-box charts for your Spring Boot application:
+For Spring Boot native image applications, use the OpenTelemetry Spring Boot starter instead, since the Java agent does not generally work there.
 
-- Rate of requests
-- Error rate of requests
-- Duration taken by requests
-- Apdex
-- Top endpoints in your application
+</KeyPointCallout>
 
-And you can monitor all of this without any code change, just by integrating your Spring Boot application with OpenTelemetry Java agent JAR.
+### Dissecting the Included Makefile
 
-<figure data-zoomable>
-  <img
-    className="box-shadowed-image"
-    src="/img/blog/2024/12/opentelemetry-spring-boot-red-metrics.webp"
-    alt="SigNoz dashboard showing application latency, requests per sec, error percentage, Apdex and top endpoints"
-  />
-  <figcaption>
-    <i>
-      Measure things like application latency, requests per sec, error percentage, apdex and see
-      your top endpoints with SigNoz.
-    </i>
-  </figcaption>
-</figure>
+Our Makefile’s first major task is to download the agent JAR file into the `agent/` directory at the `AGENT_JAR` path.
 
-The best thing about OpenTelemetry is correlated signals for getting better context while troubleshooting. From application metrics, you can jump directly to logs and traces for troubleshooting.
+```makefile:Makefile
+AGENT_JAR := agent/opentelemetry-javaagent.jar
 
-<Figure
-  src="/img/blog/2024/12/apm-metric-to-logs-and-traces.webp"
-  alt="APM metrics to logs and traces in SigNoz"
-  caption="To investigate any potential issues highlighted in RED metrics, you can directly jump to logs and traces to get more context"
-/>
+download-agent: ## Download the OTel Java Agent JAR (run once)
+	@bash scripts/download_agent.sh
 
-SigNoz provides a trace explorer where you can analyze spans in great detail with the help of quick filters and an advanced query builder.
-
-<Figure
-  src="/img/blog/2024/12/java-app-traces.webp"
-  alt="Trace Explorer showing data from Spring Boot Application"
-  caption="Using the trace explorer, you can analyze spans collected from your Spring Boot application"
-/>
-
-You can also visualize your trace data with [flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to see the flow of requests. This comes in very handy while debugging performance related issues.
-
-<figure data-zoomable>
-  <img
-    className="box-shadowed-image"
-    src="/img/blog/2024/12/java-app-flamegraphs.webp"
-    alt="OpenTelemetry Spring Boot Monitoring with trace data visualized as flamegraphs"
-  />
-  <figcaption>
-    <i>
-      See how requests flow through your Spring Boot application with flamegraphs and Gantt charts
-      in SigNoz dashboard
-    </i>
-  </figcaption>
-</figure>
-
-## Spring Boot application logs with OpenTelemetry Java agent JAR
-
-The OpenTelemetry Java agent JAR also captures logs from Java applications. You can also configure popular Java logging libraries like <a href = "https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-context-data/log4j-context-data-2.17/library-autoconfigure" rel="noopener noreferrer nofollow" target="_blank" >Log4j2</a> and <a href = "https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/logback/logback-mdc-1.0/library/README.md" rel="noopener noreferrer nofollow" target="_blank" >logback</a> to work with OpenTelemetry Java agent JAR.
-
-For getting logs, you need an environment variable `OTEL_LOGS_EXPORTER` to your run command.
-
-```bash
-OTEL_LOGS_EXPORTER=otlp \
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.in.signoz.cloud:443 \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=7XXXXX7-6XXxX-45ff-9XX1-3bXxXXf9cdc3" \
-OTEL_RESOURCE_ATTRIBUTES=service.name=sample_java_app \
-java -javaagent:/java-agent/opentelemetry-javaagent.jar -jar  target/*.jar
+## associate the AGENT_JAR file's existence with the download-agent target
+$(AGENT_JAR): download-agent
 ```
 
-Since we already added this to our run command, you can see logs from your Spring Boot application in the Logs explorer by using a filter for service.name.
+To ensure that the JAR file exists before the application starts, the `run` target defines it as a dependency, which ensures `download-agent` always runs first if there is no file at `AGENT_JAR`.
 
-You can go to the logs tab of SigNoz and apply filter for your `service.name` to see logs from your Spring Boot application.
+```makefile:Makefile
+run: $(AGENT_JAR) ## Start the demo app with the OTel Java Agent attached
+	@: $${OTEL_EXPORTER_OTLP_ENDPOINT:?'OTEL_EXPORTER_OTLP_ENDPOINT is not set. Example: https://ingest.us.signoz.cloud:443'}
+	@: $${SIGNOZ_INGESTION_KEY:?'SIGNOZ_INGESTION_KEY is not set. Get it from your SigNoz Cloud ingestion keys page.'}
+	OTEL_SERVICE_NAME=opentelemetry-spring-boot-demo \
+	OTEL_EXPORTER_OTLP_ENDPOINT=$(OTEL_EXPORTER_OTLP_ENDPOINT) \
+	OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=$(SIGNOZ_INGESTION_KEY)" \
+	OTEL_RESOURCE_ATTRIBUTES="service.version=0.1.0,deployment.environment=dev" \
+	OTEL_METRIC_EXPORT_INTERVAL=10000 \
+	OTEL_JAVA_DISABLED_RESOURCE_PROVIDERS=io.opentelemetry.instrumentation.resources.ProcessResourceProvider \
+	OTEL_INSTRUMENTATION_HTTP_CLIENT_EMIT_EXPERIMENTAL_TELEMETRY=true \
+	OTEL_INSTRUMENTATION_HTTP_SERVER_EMIT_EXPERIMENTAL_TELEMETRY=true \
+	mvn spring-boot:run \
+	  -Dspring-boot.run.jvmArguments="-javaagent:$(AGENT_JAR)"
+```
 
-<figure data-zoomable align="center">
-  <img
-    className="box-shadowed-image"
-    src="/img/blog/2024/12/java-app-logs.webp"
-    alt="Logs collected automatically from your Spring boot application"
-  />
-  <figcaption>
-    <i>Logs collected automatically from your Spring boot application</i>
-  </figcaption>
-</figure>
+The `OTEL_METRIC_EXPORT_INTERVAL=10000` variable defines a regular 10-second interval for exporting metrics. This is a lower value than the default, and will help us capture application trends faster for this demo.
 
-The logs explorer of SigNoz provides a lot of features like quick filters, [query builder](https://signoz.io/blog/query-builder-v5/), and different visualizations.
+To learn how to better configure this interval and other properties, check out our detailed guide on [OpenTelemetry environment variables](https://signoz.io/blog/otel-environment-variables/).
 
-## Choosing Between Agent and Starter
+We also have several Java-specific variables, such as:
 
-When implementing OpenTelemetry in Spring Boot, you have two main options: using the OpenTelemetry Java agent or the OpenTelemetry Spring Boot starter.
+- `OTEL_JAVA_DISABLED_RESOURCE_PROVIDERS` which disables the overly verbose <a href="https://github.com/open-telemetry/semantic-conventions/blob/main/docs/resource/process.md#process" rel="noopener noreferrer nofollow" target="_blank">`ProcessResourceProvider`</a>.
+- `OTEL_INSTRUMENTATION_HTTP_*` experimental variables that enable the collection of certain telemetry data attributes and metrics undergoing active development.
 
-The OpenTelemetry Java agent is the default choice for instrumenting Spring Boot applications:
+<KeyPointCallout title="Cutting Down on Excess Telemetry" defaultCollapsed={true}>
+Excluding verbose providers and attributes like the `ProcessResourceProvider` helps reduce telemetry payload sizes. Not only does this reduce CPU and network overhead within the instrumented application, but it also helps control observability bills.
 
-- Provides more out-of-the-box instrumentation compared to the OpenTelemetry starter
-- Uses bytecode instrumentation for automatic monitoring
+Alternatively, you can also modify or drop telemetry at the [OTel Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) level.
+</KeyPointCallout>
 
-The OpenTelemetry Spring Boot starter is recommended when:
+### Exporting Traces, Metrics, and Logs
 
-- Building Spring Boot Native image applications where the OpenTelemetry Java agent doesn't work.
-- The startup overhead of the OpenTelemetry Java agent exceeds your requirements.
-- You're already using another [Java monitoring](https://signoz.io/guides/monitoring-java-applications/) agent that may conflict with the OpenTelemetry Java agent.
-- You need to configure OpenTelemetry using Spring Boot configuration files which doesn't work with the Java agent.
+On application startup, the Java agent reads these environment variables and dynamically configures its export pipeline.<br />
+Without requiring any additional code, the agent automatically captures all generated telemetry and routes it directly to your specified OpenTelemetry backend.
 
-While the default choice of instrumentation is the OpenTelemetry Java agent, you can use the starter in case it fits your requirement. You can read more about it [here](https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/)
+<KeyPointCallout title="Configuring Agent Behaviour">
 
-## Advanced OpenTelemetry Techniques for Spring Boot
+You can configure the agent’s behaviour by modifying the environment variables in the Makefile’s `run` target.<br />
+For example, to capture detailed client and server data, we’ve included the Java-specific environment variables: `OTEL_INSTRUMENTATION_HTTP_CLIENT_EMIT_EXPERIMENTAL_TELEMETRY` and `OTEL_INSTRUMENTATION_HTTP_SERVER_EMIT_EXPERIMENTAL_TELEMETRY`.
 
-For more advanced use cases, consider these techniques:
+A common scenario when debugging telemetry export failures is to visualize the raw telemetry data locally. You can do so by setting the [per-signal exporter environment variable](https://signoz.io/blog/otel-environment-variables/#selecting-exporters-per-signal) to `otlp,console`.
 
-1. Implement custom instrumentations for Spring Boot components:
+Check out the OpenTelemetry <a href="https://opentelemetry.io/docs/zero-code/java/agent/instrumentation/" rel="noopener noreferrer nofollow" target="_blank">Java agent's instrumentation configuration</a> documentation to find all possible configuration options. 
 
-```java
-@Aspect
-@Component
-public class CustomInstrumentation {
+</KeyPointCallout>
 
-    private final Tracer tracer;
+### Understanding OpenTelemetry: Custom Logic, System Metrics, and Context      
 
-    public CustomInstrumentation(OpenTelemetry openTelemetry) {
-        this.tracer = openTelemetry.getTracer("com.example.CustomInstrumentation");
-    }
+The application features an index (served at `/`), `/fibonacci` and `/external` endpoints. It also exports a custom business metric to our OTel backend. Let’s start understanding each aspect one-by-one.
 
-    @Around("execution(* com.example.service.*.*(..))")
-    public Object traceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
-        Span span = tracer.spanBuilder(joinPoint.getSignature().getName()).startSpan();
-        try (Scope scope = span.makeCurrent()) {
-            return joinPoint.proceed();
-        } catch (Throwable t) {
-            span.recordException(t);
-            throw t;
-        } finally {
-            span.end();
-        }
-    }
+**Manual Instrumentation: Spans** 
+
+The fibonacci endpoint calculates Fibonacci sequences of numbers between 0 and 92, using a random sleep duration to mock the behaviour of complex processing logic.<br />
+We have restricted the maximum input value to 92 to prevent `long` integer overflows and resource exhaustion.
+
+By manually instrumenting the `fibonacci.compute` function, we encapsulate the actual calculation logic and measure the exact time taken, and log the input and output values as span attributes.
+
+We also record the output with our metrics service, we’ll go over what it does shortly.
+
+```java:FibonacciService.java
+@WithSpan("fibonacci.compute")
+public long compute(@SpanAttribute("fibonacci.number") int n) {
+    ...
+    long result = fib(n);
+    metricsService.recordFibonacciCalculation(result);
+    // manually set a span attribute for the result
+    Span.current().setAttribute("fibonacci.result", result);
+    log.debug("fibonacci({}) = {}", n, result);
+    return result;
+}
+```
+
+Visualizing the span in the detail view, we can see the function name, the input number, and the result calculation alongside the Gantt chart.
+
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-span-attributes.webp" alt="Adding custom span attributes adds critical context that is readily accessible within the trace detail view." caption="Adding custom span attributes adds critical context that is readily accessible within the trace detail view." />
+
+As part of the auto-instrumentation, each log record gets injected with the current trace context. This means we can directly access log statements for the entire trace directly from the same view.
+
+Click on the parent `POST /fibonacci` span and scroll to the top on the right panel. Then, click on the `Logs` button under the `Related Signals` section. You will now see a split view listing all the log statements generated during that trace.<br />
+You can open the entries in the Logs Explorer view if you wish to inspect them in detail.
+
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-trace-logs.webp" alt="Access all the logs for a trace from the trace details view in SigNoz." caption="Access all the logs for a trace from the trace details view in SigNoz." />
+
+**Manual Instrumentation: Metrics**
+
+Custom metrics allow you to draw insights from application behaviour that is not covered as part of the agent’s auto-instrumentation.
+
+Here, we have implemented an `app.fibonacci.calculations` counter that tracks successful Fibonacci calculations and “tags” them based on the result value band.
+
+```java:MetricsService.java
+@PostConstruct
+public void init() {
+    Meter meter = GlobalOpenTelemetry.getMeter("opentelemetry-spring-boot-demo");
+
+    fibonacciCalculations = meter
+            .counterBuilder("app.fibonacci.calculations")
+            .setDescription("Count of successful Fibonacci calculations by result band")
+            .setUnit("1")
+            .build();
 }
 
-```
-
-1. Use OpenTelemetry SDK for fine-grained control:
-
-```java
-@Configuration
-public class OpenTelemetryConfig {
-
-    @Bean
-    public OpenTelemetry openTelemetry() {
-        Resource resource = Resource.getDefault()
-            .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "your-service-name")));
-
-        SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
-            .setResource(resource)
-            .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder().build()).build())
-            .setSampler(Sampler.parentBased(Sampler.traceIdRatioBased(0.1)))
-            .build();
-
-        SdkMeterProvider sdkMeterProvider = SdkMeterProvider.builder()
-            .setResource(resource)
-            .registerMetricReader(PeriodicMetricReader.builder(OtlpGrpcMetricExporter.builder().build()).build())
-            .build();
-
-        return OpenTelemetrySdk.builder()
-            .setTracerProvider(sdkTracerProvider)
-            .setMeterProvider(sdkMeterProvider)
-            .buildAndRegisterGlobal();
-    }
+public void recordFibonacciCalculation(long result) {
+    fibonacciCalculations.add(1, Attributes.of(
+            FIBONACCI_RESULT_BAND, toResultBand(result)));
 }
 
+private String toResultBand(long result) {
+    if (result < 10) {
+        return "single_digit";
+    }
+    if (result < 100) {
+        return "double_digit";
+    }
+    if (result < 1_000_000) {
+        return "medium";
+    }
+    if (result < 1_000_000_000_000L) {
+        return "large";
+    }
+    return "huge";
+}
 ```
 
-1. Handle OpenTelemetry in Spring Boot native images:
-   - Ensure all OpenTelemetry classes are included in the native image
-   - Use reflection configuration to allow access to OpenTelemetry classes
-   - Test thoroughly to ensure all instrumentations work correctly in the native image
-2. Performance tuning and optimization strategies:
-   - Use sampling to reduce the volume of traces in high-traffic systems
-   - Implement batching for trace and metric exports to reduce network overhead
-   - Monitor the impact of OpenTelemetry on your application's performance and adjust accordingly
+Using this metric, you can quickly understand the data patterns related to each result band. Here, we can see that single digit calculations are the most common, before inputs skew towards larger number sets.
 
-## Troubleshooting Common Issues
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-fibonacci-metrics.webp" alt="Using custom metrics, you can analyze data trends and understand their impact on the business." caption="Using custom metrics, you can analyze data trends and understand their impact on the business." />
 
-When implementing OpenTelemetry in Spring Boot, you may encounter some challenges. Here are solutions to common issues:
+Any significant change in these data patterns would mean a change in the user behaviour. In the real world, you could use this data for capacity planning or configuring dynamic rate limits per-band.
 
-1. Instrumentation conflicts:
-   - Ensure you're using compatible versions of OpenTelemetry and Spring Boot
-   - Check for conflicting instrumentations and disable them if necessary
-2. Data export problems:
-   - Verify network connectivity to your backend (e.g., SigNoz, Jaeger)
-   - Check exporter configuration, including endpoints and authentication
-3. OpenTelemetry version incompatibilities:
-   - Keep all OpenTelemetry dependencies on the same version
-   - Follow the OpenTelemetry versioning guidelines when upgrading
-4. Trace [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) issues:
-   - Ensure proper configuration of context propagation between services
-   - Use OpenTelemetry's built-in propagators (e.g., W3CTraceContextPropagator)
+**Monitoring System Health**
 
-## Conclusion
+Metrics are a foundational pillar of observability—and as seen above, for good reason. By tracking key metrics, you can understand overall system health at a glance, or derive deeper insights to understand how your application behaves at the different stages of its lifecycle.
 
-OpenTelemetry makes it very convenient to instrument your Spring Boot application and collect telemetry data like logs, metrics, and traces. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. With OpenTelemetry and SigNoz, you can implement full-stack observability for your Spring Boot applications.
+Beyond the custom Fibonacci counter, the OTel agent provides a massive baseline of system metrics out of the box—such as JVM memory usage, garbage collection times, and thread counts.<br />
+Today, we’ll focus on the core metric that every team understands and deeply cares about: **request duration** percentiles.
+Let’s see what we find after our load generator has been running for some time.
 
-If your Spring Boot application is based on microservices architecture, check out this tutorial 👇
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-p99-histogram.webp" alt="Request duration histograms track system health by monitoring p99 (and other) latencies." caption="Request duration histograms track system health by monitoring p99 (and other) latencies." />
 
-[Implementing Distributed Tracing in a Java application](https://signoz.io/blog/distributed-tracing-java/)
+During peak load, we can see that the invalid endpoint (`/**` which returns a 404), the index, and the fibonacci endpoints all maintain consistent latencies. The external endpoint has a dip, but otherwise stays above the 1.5-second mark.
 
-## FAQs
+In a production environment, an engineer would be tasked with investigating this latency behaviour. Is the downstream service rate-limiting us? Are we exhausting web server thread counts? And so on.
 
-### How does OpenTelemetry differ from Spring Boot Actuator?
+**Trace Context Propagation**
 
-OpenTelemetry offers a more comprehensive observability solution, including distributed tracing and standardized telemetry data collection. Spring Boot Actuator focuses primarily on application health monitoring and basic metrics. OpenTelemetry provides greater flexibility and interoperability across different observability backends.
+As we discussed briefly earlier, the Python script generates distributed traces by calling the `/external` endpoint, which in turn calls [httpbin.org/anything](http://httpbin.org/anything).
 
-### Can I use OpenTelemetry with older versions of Spring Boot?
+Because we also instrumented the Python code using the OpenTelemetry SDK (`opentelemetry-instrument`), all of its outgoing API calls to our Spring Boot application include the `traceparent` header, which has the `trace_id` and `span_id`.<br />
+On receiving this request, our application parses the header and integrates these IDs into its own context.
 
-Yes, OpenTelemetry can be used with older versions of Spring Boot. However, you may need to adjust your configuration and dependencies based on the specific Spring Boot version. It's recommended to use the latest compatible versions of both OpenTelemetry and Spring Boot for the best experience.
+Next, when our Spring Boot handler function calls the `httpbin` service, our application attaches its own trace context *to that outgoing request*. This chaining mechanism ensures that all operations are recorded as part of the exact same request.
 
-### What's the performance impact of using OpenTelemetry in Spring Boot?
+```java:DemoController.java
+@GetMapping("/external")
+public ResponseEntity<JsonNode> external() {
+    try {
+        String body = restClient.get()
+                .uri(HTTPBIN_PATH)
+                .retrieve()
+                .body(String.class);
 
-The performance impact of OpenTelemetry is generally minimal, especially when using sampling strategies. However, the exact impact depends on your application's complexity and the volume of telemetry data collected. Monitor your application's performance after implementing OpenTelemetry and adjust configurations if needed.
+        JsonNode httpbinResponse = objectMapper.readTree(body);
+        JsonNode response = objectMapper.createObjectNode()
+                .put("note", "This endpoint calls httpbin with propagated trace context.")
+                .set("httpbin_response", httpbinResponse);
 
-### How do I migrate from Micrometer to OpenTelemetry in my Spring Boot app?
+        return ResponseEntity.ok(response);
 
-To migrate from Micrometer to OpenTelemetry:
+    } catch (Exception e) {
+        Span.current().setStatus(StatusCode.ERROR, e.getMessage());
+        Span.current().setAttribute("error.type", e.getClass().getSimpleName());
+        throw new IllegalStateException("httpbin request failed", e);
+    }
+}
+```
 
-1. Add OpenTelemetry dependencies to your project
-2. Replace Micrometer configurations with OpenTelemetry equivalents
-3. Update custom metrics to use OpenTelemetry's API
-4. Configure OpenTelemetry exporters for your preferred backend
-5. Gradually phase out Micrometer dependencies and configurations
+The resulting distributed trace captures the flow of data across three distinct boundaries: Python script → Spring Boot application → httpbin.<br />
+This visualization ensures you always have complete context of the data flow and the complex interactions among multiple components for any given request.
 
-### What is OpenTelemetry and why is it important for Spring Boot applications?
+<Figure src="/img/blog/2026/04/opentelemetry-spring-boot-distributed-trace.webp" alt="A distributed trace in SigNoz. Notice how each external call creates a child span under the caller service's span." caption="A distributed trace in SigNoz. Notice how each external call creates a child span under the caller service's span." />
 
-OpenTelemetry is a set of APIs, SDKs, and tools for generating, collecting, and managing telemetry data (logs, metrics, and traces). It's important for Spring Boot applications because it provides standardized observability, comprehensive visibility across distributed systems, easy integration, and extensibility for custom metrics and traces.
+## What’s Next
 
-### How does OpenTelemetry differ from other observability solutions like Micrometer?
+By now, you’ve instrumented a Spring Boot application with the OpenTelemetry Java agent, generated traces and metrics, and verified trace propagation across services.
 
-OpenTelemetry offers broader language support and a more comprehensive approach to telemetry data collection. While Micrometer focuses primarily on metrics, OpenTelemetry provides a unified solution for traces, metrics, and logs. It also allows for easier switching between different observability backends.
-
-### What are the steps to integrate OpenTelemetry with a Spring Boot application?
-
-The main steps are:
-
-1. Set up a compatible backend like SigNoz
-2. Download the [OpenTelemetry Java Agent](https://signoz.io/docs/instrumentation/opentelemetry-java/) JAR
-3. Run the Spring Boot application with the Java Agent and necessary environment variables
-4. Configure any additional settings for logs or custom instrumentation
-5. Monitor the application using the chosen backend (e.g., SigNoz dashboard)
-
-### Can OpenTelemetry collect logs from Spring Boot applications?
-
-Yes, OpenTelemetry can collect logs from Spring Boot applications. The OpenTelemetry Java agent JAR captures logs automatically, and you can configure popular Java logging libraries like Log4j2 and logback to work with it. You need to add the `OTEL_LOGS_EXPORTER=otlp` environment variable when running your application.
-
-### What's the difference between using the OpenTelemetry Java agent and the OpenTelemetry Spring Boot starter?
-
-The OpenTelemetry Java agent provides easy setup with minimal code changes and automatic instrumentation for many libraries. However, it offers less flexibility for custom instrumentation. The [OpenTelemetry Spring Boot](https://signoz.io/blog/opentelemetry-spring-boot/#step-1-setting-up-signoz) starter requires more configuration but allows for more control over instrumentation and easier custom implementations.
-
-### How can I implement custom instrumentations in my Spring Boot application with OpenTelemetry?
-
-You can implement custom instrumentations using aspect-oriented programming (AOP) in Spring Boot. Create an aspect that uses the [OpenTelemetry API](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) to create and manage spans for specific method executions. This allows you to add custom metrics and traces to your application's telemetry data.
-
-### What are some advanced techniques for using OpenTelemetry in Spring Boot?
-
-Advanced techniques include:
-
-1. Implementing custom instrumentations for specific Spring Boot components
-2. Using the OpenTelemetry SDK for fine-grained control over tracers, meters, and exporters
-3. Handling OpenTelemetry in Spring Boot native images
-4. Implementing performance tuning and optimization strategies like sampling and batching
-
-### How do I troubleshoot common issues when implementing OpenTelemetry in Spring Boot?
-
-Common troubleshooting steps include:
-
-1. Ensuring compatibility between OpenTelemetry and Spring Boot versions
-2. Checking for and resolving instrumentation conflicts
-3. Verifying network connectivity and exporter configurations
-4. Keeping all OpenTelemetry dependencies on the same version
-5. Properly configuring context propagation between services
-
-### Can OpenTelemetry be used with older versions of Spring Boot?
-
-Yes, OpenTelemetry can be used with older versions of Spring Boot, but you may need to adjust configurations and dependencies. It's recommended to use the latest compatible versions of both OpenTelemetry and Spring Boot for the best experience and support.
-
-### What's the performance impact of using OpenTelemetry in a Spring Boot application?
-
-The performance impact of OpenTelemetry is generally minimal, especially when using sampling strategies. However, the exact impact depends on your application's complexity and the volume of telemetry data collected. It's important to monitor your application's performance after implementing OpenTelemetry and adjust configurations if needed.
+You are now ready to integrate OpenTelemetry with your Spring Boot stack. Start with auto-instrumentation, then identify key business logic flows to manually instrument.<br />
+Further, build custom dashboards and configure alerts to track errors and unexpected application behaviour.
 
 ---
 
-**Further Reading**
-
-[OpenTelemetry Collector Complete Guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+[SigNoz](https://signoz.io/) is an all-in-one, OpenTelemetry-native platform for traces, metrics, and logs. If you’re interested in trying out SigNoz for your applications, [sign up](https://signoz.io/teams/) for a 30-day free trial (no credit card required).

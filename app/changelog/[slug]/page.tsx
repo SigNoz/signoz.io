@@ -5,8 +5,62 @@ import { ArrowLeft } from 'lucide-react'
 import { fetchChangelogById } from 'utils/strapi'
 import { notFound } from 'next/navigation'
 import { ChangelogByIdApiResponse } from 'utils/strapi'
+import siteMetadata from '@/data/siteMetadata'
 
 export const dynamicParams = false
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const changelogId = params.slug.split('-').pop()
+  let changelogResponse: ChangelogByIdApiResponse | null = null
+  try {
+    changelogResponse = await fetchChangelogById(changelogId as string)
+  } catch (error) {
+    notFound()
+  }
+
+  if (!changelogResponse?.data?.release_date || !changelogResponse?.data?.version) {
+    notFound()
+  }
+
+  return {
+    title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
+    description:
+      changelogResponse.data.release_date +
+      ' - ' +
+      changelogResponse.data.version +
+      ' - SigNoz Changelog',
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: `${siteMetadata.siteUrl}/changelog/${params.slug}`,
+    },
+    openGraph: {
+      title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
+      description:
+        changelogResponse.data.release_date +
+        ' - ' +
+        changelogResponse.data.version +
+        ' - SigNoz Changelog',
+      url: `${siteMetadata.siteUrl}/changelog/${params.slug}`,
+      siteName: siteMetadata.title,
+      locale: 'en_US',
+      type: 'website',
+      images: [siteMetadata.socialBanner],
+    },
+    twitter: {
+      title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
+      description:
+        changelogResponse.data.release_date +
+        ' - ' +
+        changelogResponse.data.version +
+        ' - SigNoz Changelog',
+      images: [siteMetadata.socialBanner],
+      site: siteMetadata.twitter,
+    },
+  }
+}
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const changelogId = params.slug.split('-').pop()
