@@ -1,5 +1,5 @@
 ---
-date: 2026-03-15
+date: 2026-04-06
 id: what-is-opentelemetry-and-why-it-matters
 title: What Is OpenTelemetry and Why It Matters
 description: What OpenTelemetry is, what problem it solves, what you actually get from adopting it, and where its rough edges are. A concrete, honest overview for teams evaluating or starting with OTel.
@@ -36,11 +36,11 @@ OpenTracing and OpenCensus tried this separately. Neither got broad adoption. Op
 
 ## What you get in practice
 
-**Instrument once, send anywhere.** Where your data goes (SigNoz, Jaeger, a cloud provider, all three at once) is a Collector config change. No code rewrite. Want to evaluate a new backend? Add a second exporter and compare side by side.
+If you adopt OpenTelemetry, you are usually choosing to depend less on one vendor's SDK. If you want to test a different backend, run two backends in parallel, or migrate later, you usually do not have to re-instrument every service. In many cases, the change happens in your export or Collector configuration instead.
 
-**Consistent naming across your stack.** `http.request.method` is `http.request.method` whether it comes from Go or Python. Follow a single trace from frontend to database without remapping attributes at every hop.
+OpenTelemetry gives you a shared format and common attribute names across services and languages. That makes traces easier to follow and reduces the usual naming drift between teams.
 
-**Pipeline control without code changes.** Drop debug spans? Filter processor. Redact PII? Transform processor. Split traces and metrics to different backends? Second exporter. App teams own instrumentation, platform teams own routing.
+Using the Collector lets you move some decisions out of application code: sampling, filtering, redaction, batching, and routing can often be handled centrally. That is useful for larger teams, especially when platform and application responsibilities are separate.
 
 ## Complexity, performance, and maturity
 
