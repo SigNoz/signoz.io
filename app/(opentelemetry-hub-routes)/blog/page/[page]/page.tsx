@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
     },
     twitter: {
       title: `Blog - Page ${params.page}`,
-      description: `SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool. | Blog - Page ${params.page} | SigNoz`,
+      description: `${siteMetadata.description} | Blog - Page ${params.page} | SigNoz`,
       images: [siteMetadata.socialBanner],
     },
     alternates: {
