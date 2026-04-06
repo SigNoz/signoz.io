@@ -21,6 +21,10 @@ export const metadata: Metadata = {
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },
+  robots: {
+    index: false,
+    follow: true,
+  },
 }
 
 export default async function BlogHome() {
