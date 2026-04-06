@@ -8,10 +8,10 @@ const POSTS_PER_PAGE = 5
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return {
     title: `Guides - Page ${params.page}`,
-    description: `Guides - Page ${params.page} | SigNoz`,
+    description: `${siteMetadata.description} | Guides - Page ${params.page} | SigNoz`,
     openGraph: {
       title: `Guides - Page ${params.page} | SigNoz`,
-      description: `Guides - Page ${params.page} | SigNoz`,
+      description: `${siteMetadata.description} | Guides - Page ${params.page} | SigNoz`,
       url: `${siteMetadata.siteUrl}/guides/page/${params.page}`,
       siteName: siteMetadata.title,
       locale: 'en_US',
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
     },
     twitter: {
       title: `Guides - Page ${params.page} | SigNoz`,
-      description: `Guides - Page ${params.page} | SigNoz`,
+      description: `${siteMetadata.description} | Guides - Page ${params.page} | SigNoz`,
       images: [siteMetadata.socialBanner],
     },
     alternates: {

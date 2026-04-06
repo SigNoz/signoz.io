@@ -8,10 +8,10 @@ const POSTS_PER_PAGE = 5
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return {
     title: `Blog - Page ${params.page}`,
-    description: `SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool. | Blog - Page ${params.page} | SigNoz`,
+    description: `${siteMetadata.description} | Blog - Page ${params.page} | SigNoz`,
     openGraph: {
       title: `Blog - Page ${params.page} | SigNoz`,
-      description: `SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool. | Blog - Page ${params.page} | SigNoz`,
+      description: `${siteMetadata.description} | Blog - Page ${params.page} | SigNoz`,
       url: `${siteMetadata.siteUrl}/resource-center/blog/page/${params.page}`,
       siteName: siteMetadata.title,
       locale: 'en_US',

@@ -4,11 +4,11 @@ import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Blog | SigNoz',
-  description: siteMetadata.description,
+  title: 'Blog',
+  description: `${siteMetadata.description} | Blog | SigNoz`,
   openGraph: {
     title: 'Blog | SigNoz',
-    description: siteMetadata.description,
+    description: `${siteMetadata.description} | Blog | SigNoz`,
     url: `${siteMetadata.siteUrl}/resource-center/blog`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Blog | SigNoz',
-    description: siteMetadata.description,
+    description: `${siteMetadata.description} | Blog | SigNoz`,
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },

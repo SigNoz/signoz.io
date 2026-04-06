@@ -8,10 +8,10 @@ const POSTS_PER_PAGE = 5
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return {
     title: `OpenTelemetry - Page ${params.page}`,
-    description: `OpenTelemetry - Page ${params.page} | SigNoz`,
+    description: `${siteMetadata.description} | OpenTelemetry - Page ${params.page} | SigNoz`,
     openGraph: {
       title: `OpenTelemetry - Page ${params.page} | SigNoz`,
-      description: `OpenTelemetry - Page ${params.page} | SigNoz`,
+      description: `${siteMetadata.description} | OpenTelemetry - Page ${params.page} | SigNoz`,
       url: `${siteMetadata.siteUrl}/opentelemetry/page/${params.page}`,
       siteName: siteMetadata.title,
       locale: 'en_US',
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
     },
     twitter: {
       title: `OpenTelemetry - Page ${params.page} | SigNoz`,
-      description: `OpenTelemetry - Page ${params.page} | SigNoz`,
+      description: `${siteMetadata.description} | OpenTelemetry - Page ${params.page} | SigNoz`,
       images: [siteMetadata.socialBanner],
     },
     alternates: {
