@@ -9,9 +9,7 @@ description: Learn how to send logs from the Go Logrus logger to SigNoz using th
 import GetHelp from '@/components/shared/get-help.md'
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
-  header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
@@ -21,10 +19,129 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Send logs to SigNoz
 
-<Tabs>
-<TabItem value="manual" label="Code Level Instrumentation" default>
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
 
-### Step 1: Install dependencies
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+### Step 1. Set environment variables
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service_name>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+### Step 1. Set environment variables
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: '<service_name>'
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+<Admonition type="warning">
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 1. Set environment variables in Dockerfile
+
+Add environment variables to your Dockerfile:
+
+```dockerfile:Dockerfile
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o main .
+
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/main .
+
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service_name>"
+
+CMD ["./main"]
+```
+
+Or pass them at runtime:
+
+```bash
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service_name>" \
+    your-image:latest
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+### Step 1. Set environment variables (PowerShell)
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service_name>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+</Tabs>
+
+### Step 2. Install dependencies
 
 In the root folder of your Go application, run:
 
@@ -36,7 +153,7 @@ go get \
   go.opentelemetry.io/otel/sdk/log
 ```
 
-### Step 2: Instrument your application
+### Step 3. Instrument your application
 
 Add the following code to your `main.go` file:
 
@@ -56,13 +173,11 @@ import (
 func main() {
 	ctx := context.Background()
 
-	// Create an OTLP log exporter
 	logExporter, err := otlploghttp.New(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Create a LoggerProvider with a batch processor
 	logProvider := otel_log.NewLoggerProvider(
 		otel_log.WithProcessor(
 			otel_log.NewBatchProcessor(logExporter),
@@ -70,11 +185,9 @@ func main() {
 	)
 	defer logProvider.Shutdown(ctx)
 
-	// Create a Logrus hook that sends logs through OpenTelemetry
 	hook := otellogrus.NewHook("signoz-golang", otellogrus.WithLoggerProvider(logProvider))
 	logrus.AddHook(hook)
 
-	// Your application code here
 	logrus.Info("Hello from Logrus via OpenTelemetry")
 }
 ```
@@ -84,28 +197,24 @@ func main() {
 3. Creates a Logrus hook via `otellogrus.NewHook` and registers it globally with `logrus.AddHook`.
 4. Every `logrus.Info`, `logrus.Warn`, `logrus.Error`, etc. call is now captured and exported as OpenTelemetry logs.
 
-### Step 3: Run your application
+### Step 4. Run your application
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-OTEL_SERVICE_NAME="<service_name>" \
 go run main.go
 ```
 
-Verify these values:
+The environment variables you set in Step 1 are automatically read by the OTLP exporter.
 
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>`: Your service name.
+<details>
+<ToggleHeading>
 
-</TabItem>
+## With Trace Correlation (Advanced)
 
-<TabItem value="advanced" label="With Trace Correlation (advanced)">
+</ToggleHeading>
 
 Correlate Logrus logs with OpenTelemetry traces by injecting `trace_id` and `span_id` fields into your structured logs.
 
-### Step 1: Install dependencies
+### Install additional dependencies
 
 ```bash
 go get \
@@ -119,7 +228,7 @@ go get \
   go.opentelemetry.io/otel/trace
 ```
 
-### Step 2: Instrument your application
+### Instrument your application
 
 Add the following code to your `main.go` file:
 
@@ -140,8 +249,6 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
-// LogrusFields extracts Span and Trace IDs from the active span
-// and returns them as Logrus structured log fields.
 func LogrusFields(span oteltrace.Span) logrus.Fields {
 	return logrus.Fields{
 		"span_id":  span.SpanContext().SpanID().String(),
@@ -152,7 +259,6 @@ func LogrusFields(span oteltrace.Span) logrus.Fields {
 func main() {
 	ctx := context.Background()
 
-	// --- Logs setup ---
 	logExporter, err := otlploghttp.New(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -168,7 +274,6 @@ func main() {
 	hook := otellogrus.NewHook("signoz-golang", otellogrus.WithLoggerProvider(logProvider))
 	logrus.AddHook(hook)
 
-	// --- Traces setup ---
 	traceExporter, err := otlptracehttp.New(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -182,15 +287,11 @@ func main() {
 
 	otel.SetTracerProvider(tp)
 
-	// --- Create a span and log with trace correlation ---
 	tracer := otel.GetTracerProvider().Tracer("signoz-tracer")
 	ctx, span := tracer.Start(ctx, "signoz-span")
 	defer span.End()
 
-	// Log with trace IDs attached as structured fields
 	logrus.WithContext(ctx).WithFields(LogrusFields(span)).Info("Logrus log with trace correlation")
-
-	// Log without trace IDs
 	logrus.Info("Logrus log without trace correlation")
 }
 ```
@@ -201,46 +302,24 @@ func main() {
 4. Starts a span and extracts its `trace_id` and `span_id` via `LogrusFields`.
 5. Uses `logrus.WithContext(ctx).WithFields(...)` to attach trace IDs as structured fields to the log entry.
 
-### Step 3: Run your application
+### Run your application
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-OTEL_SERVICE_NAME="<service_name>" \
 go run main.go
 ```
 
-Verify these values:
+The environment variables you set in Step 1 are automatically read by the OTLP exporter.
 
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>`: Your service name.
-
-</TabItem>
-</Tabs>
-
-<Admonition type="info">
-
-If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
-
-[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
-
-</Admonition>
+</details>
 
 ## Validate
 
 Open the **Logs** section in your SigNoz dashboard. You should see log entries from your Logrus logger.
 
+If you followed the **With Trace Correlation** section, the `trace_id` and `span_id` fields appear as indexed attributes on each log entry, letting you jump from a log to its corresponding trace.
+
 <Figure
   src="/img/docs/logs-management/send-logs/logrus-logs.webp"
-  caption="Logrus logs visible in the SigNoz Logs Explorer"
-  alt="Logrus logs in SigNoz Logs Explorer"
-/>
-
-If you enabled trace correlation, the `trace_id` and `span_id` fields appear as indexed attributes on each log entry, letting you jump from a log to its corresponding trace.
-
-<Figure
-  src="/img/docs/logs-management/send-logs/logrus-trace-correlation.webp"
   caption="Logrus log entry with trace_id and span_id fields for trace correlation"
   alt="Logrus log with trace correlation in SigNoz"
 />
