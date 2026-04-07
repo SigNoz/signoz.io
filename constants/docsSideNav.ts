@@ -1159,6 +1159,11 @@ const docsSideNav = [
             route: '/docs/integrations/opentelemetry-hasura',
             label: 'Hasura',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
+          },
           // {
           //   type: 'category',
           //   isExpanded: false,
