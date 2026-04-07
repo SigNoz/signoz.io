@@ -77,20 +77,7 @@ const Card: React.FC<CardProps> = ({
           ? `SigNoz ${iconTag.replace(/_/g, ' ')} interface`
           : 'SigNoz product interface')
 
-  const firstDescriptionString =
-    typeof description === 'string'
-      ? description
-      : Array.isArray(description) && typeof description[0] === 'string'
-        ? description[0]
-        : null
-
-  const logoAlt = iconTag?.trim()
-    ? `${iconTag} icon`
-    : firstDescriptionString
-      ? `${firstDescriptionString} icon`
-      : title
-        ? `${title} icon`
-        : 'Feature icon'
+  const logoAlt = iconTag?.trim() ? `${iconTag} icon` : title ? `${title} icon` : 'Feature icon'
 
   return (
     <div

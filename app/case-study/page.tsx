@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 type CardProps = {
   logo?: string
-  logoAlt?: string
+  logoAlt: string
   title?: string
   name?: string
   position?: string
