@@ -51,7 +51,7 @@ go get go.opentelemetry.io/contrib/bridges/otelslog@latest
 ```
 
 <Admonition type="note">
-  `go.temporal.io/sdk/contrib/opentelemetry` and `go.temporal.io/sdk/contrib/envconfig` are separate Go modules from the main Temporal SDK. All three `go get` calls are required.
+  `go.temporal.io/sdk/contrib/opentelemetry` and `go.temporal.io/sdk/contrib/envconfig` are separate Go modules from the main Temporal SDK. All three `go get` calls are required. These modules are versioned independently — check the <a href="https://github.com/temporalio/sdk-go/releases" target="_blank" rel="noopener noreferrer nofollow">Temporal SDK releases</a> for compatible version combinations if you pin specific versions.
 </Admonition>
 
 ### Step 2: Configure OpenTelemetry Providers
@@ -64,7 +64,6 @@ package telemetry
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
@@ -82,14 +81,9 @@ import (
 // InitProviders initializes OTel trace, metric, and log providers.
 // Call the returned shutdown function before your process exits to flush buffered telemetry.
 func InitProviders(ctx context.Context) (shutdown func(context.Context) error, err error) {
-	serviceName := os.Getenv("OTEL_SERVICE_NAME")
-	if serviceName == "" {
-		serviceName = "temporal-go-app"
-	}
-
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceName(serviceName),
+			semconv.ServiceName("temporal-go-app"),
 		),
 		resource.WithFromEnv(),
 		resource.WithTelemetrySDK(),
@@ -153,8 +147,8 @@ func InitProviders(ctx context.Context) (shutdown func(context.Context) error, e
 <details>
 <ToggleHeading>What this does</ToggleHeading>
 
-- Reads `OTEL_SERVICE_NAME` to set the service name; falls back to `temporal-go-app`
-- `resource.WithFromEnv()` picks up `OTEL_RESOURCE_ATTRIBUTES` automatically; `WithTelemetrySDK()`, `WithProcess()`, and `WithHost()` add SDK version, process, and host attributes to every signal
+- Sets a default service name of `temporal-go-app`; `resource.WithFromEnv()` overwrites it when `OTEL_SERVICE_NAME` is set, and also picks up `OTEL_RESOURCE_ATTRIBUTES`
+- `WithTelemetrySDK()`, `WithProcess()`, and `WithHost()` add SDK version, process, and host attributes to every signal
 - Creates OTLP/gRPC exporters for traces, metrics, and logs — `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are read automatically by the exporters
 - Sets global OTel providers so all instrumentation in the process picks them up
 - Returns a `shutdown` function — call it with `defer` to flush all buffered data before exit

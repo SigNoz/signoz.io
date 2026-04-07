@@ -220,6 +220,10 @@ run().catch(console.error);
 - `OpenTelemetryPlugin` automatically configures interceptors and sinks for tracing workflow, activity, and client calls
 - The `metricsExportInterval: '1s'` setting ensures metrics reach SigNoz quickly during development
 - `makeTelemetryFilterString` controls the log level for Temporal's native runtime logs
+
+<Admonition type="warning">
+  The `Runtime.install` metrics exporter only supports OTLP over gRPC (port 4317). OTLP over HTTP (port 4318) is not supported. The SigNoz Cloud endpoint (`https://ingest.<region>.signoz.cloud:443`) uses gRPC, so the default setup works correctly — but do not switch to an HTTP-based endpoint here.
+</Admonition>
 </details>
 
 ### Step 4: Instrument the Temporal Client
@@ -582,20 +586,20 @@ After running your application, verify that data is flowing to SigNoz:
      - Map log levels: [Severity parser docs](https://signoz.io/docs/logs-pipelines/processors/#severity-parser)
 
 <Figure
-  src="/img/docs/integrations/temporal/golang/distributed-trace.webp"
-  alt="Distributed trace from a Temporal application"
+  src="/img/docs/integrations/temporal/typescript/distributed-trace.webp"
+  alt="Distributed trace from a Temporal TypeScript application"
   caption="Distributed trace showing workflow execution across client, worker, and activities"
 />
 
 <Figure
-  src="/img/docs/integrations/temporal/golang/logs.webp"
-  alt="JSON logs from a Temporal application"
+  src="/img/docs/integrations/temporal/typescript/logs.webp"
+  alt="Logs from a Temporal TypeScript application"
   caption="Application logs from your Temporal worker in SigNoz"
 />
 
 <Figure
-  src="/img/docs/integrations/temporal/golang/sdk-metrics.webp"
-  alt="SDK metrics from a Temporal application"
+  src="/img/docs/integrations/temporal/typescript/sdk-metrics.webp"
+  alt="SDK metrics from a Temporal TypeScript application"
   caption="Temporal SDK metrics dashboard showing worker health and task queue metrics"
 />
 
@@ -613,13 +617,13 @@ import { resource, otlpHeaders } from './instrumentation';
 import winston from 'winston';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { logs } from '@opentelemetry/api-logs';
-import { LoggerProvider, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OpenTelemetryTransportV3 } from '@opentelemetry/winston-transport';
 
 // Initialize log provider
 const loggerProvider = new LoggerProvider({ resource });
 const otlpExporter = new OTLPLogExporter({ headers: otlpHeaders });
-loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(otlpExporter));
+loggerProvider.addLogRecordProcessor(new BatchLogRecordProcessor(otlpExporter));
 logs.setGlobalLoggerProvider(loggerProvider);
 
 // Create Winston logger
@@ -632,6 +636,8 @@ export const logger = winston.createLogger({
   ],
 });
 ```
+
+This creates a **separate** `LoggerProvider` from the one in `instrumentation.ts` — the SDK initialized by `setupOtelSdk()` does not include a log provider, so this file manages its own. `BatchLogRecordProcessor` buffers log records and exports them in batches, which avoids blocking on every log call.
 
 Pass this logger to `Runtime.install({ logger })` in your worker configuration.
 
@@ -726,22 +732,6 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 **Cause**: Temporal emits metrics with labels that include workflow type names, activity type names, and task queue names. In large deployments with many unique values, this creates high cardinality.
 
 **Fix**: Use an OpenTelemetry Collector with a `filter` or `transform` processor to drop or aggregate high-cardinality label values before they reach SigNoz. See [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) for details.
-
-Alternatively, reduce the verbosity of Temporal's internal runtime logging (which can contribute additional metric dimensions) by adjusting the filter in `Runtime.install()`:
-
-```typescript
-Runtime.install({
-  telemetryOptions: {
-    logging: {
-      forward: {},
-      filter: makeTelemetryFilterString({
-        core: 'WARN',
-        other: 'WARN',
-      }),
-    },
-  },
-})
-```
 
 </details>
 
