@@ -56,7 +56,7 @@ export const GetStarted = ({ page }) => {
               <div className="relative -mb-36 aspect-[1200/630] w-3/5 max-sm:-mb-8">
                 <Image
                   src="/img/landing/landing_thumbnail.webp"
-                  alt=""
+                  alt="SigNoz dashboard with application performance metrics - Get Started"
                   className="z-[0] rounded-lg"
                   fill
                   sizes="60vw"
