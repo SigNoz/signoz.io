@@ -1,5 +1,5 @@
 ---
-date: 2026-02-02
+date: 2026-03-26
 id: lambda-logs
 title: Send your AWS Lambda logs to SigNoz
 description: Collect AWS Lambda logs from S3 and forward them to SigNoz using a Lambda function.
@@ -8,13 +8,16 @@ doc_type: howto
 
 ## Overview
 
-This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect AWS Lambda logs stored in an AWS S3 bucket and forward them to 
-SigNoz. By integrating with SigNoz, you can efficiently collect, monitor, and analyze your Lambda function logs for better insights into your serverless applications.
+This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect AWS Lambda logs stored in an AWS S3 bucket and forward them to SigNoz. By integrating with SigNoz, you can efficiently collect, monitor, and analyze your Lambda function logs for better insights into your serverless applications.
 
 <Admonition type="tip">
-**SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/lambda/) for automated setup with pre-built dashboards. See the [comparison guide](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to choose the best approach.
-</Admonition>
 
+**SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/lambda/) for automated setup with pre-built dashboards. See the [comparison guide](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to choose the best approach.
+
+**OTel Collector Extension Layer**: For a code-free approach to collect logs, use the [OTel Collector Extension Layer](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/).
+
+**Application Logs**: If you want to send application logs from Node.js Lambda functions directly (to correlate with traces), refer to the [AWS Lambda Node.js Guide](https://signoz.io/docs/logs-management/send-logs/aws-lambda-nodejs/).
+</Admonition>
 
 ## Prerequisites
 
@@ -29,11 +32,12 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 To accomplish the task described, please follow these steps:
 
 1. **Creating an S3 Bucket:**
-   - Sign in to the AWS Management Console.
-   - Navigate to the Amazon S3 service.
-   - Click on **Create bucket**.
-   - Enter a unique bucket name, select the region, and configure any additional settings if needed (such as versioning, logging, etc.).
-   - Click **Create bucket** to finalize the creation process.
+
+- Sign in to the AWS Management Console.
+- Navigate to the Amazon S3 service.
+- Click on **Create bucket**.
+- Enter a unique bucket name, select the region, and configure any additional settings if needed (such as versioning, logging, etc.).
+- Click **Create bucket** to finalize the creation process.
 
 <Figure
   src="/img/docs/elb/elb-logs-create_bucket_2.webp"
@@ -42,30 +46,31 @@ To accomplish the task described, please follow these steps:
   className="box-shadowed-image"
 />
 
-
-
 2. **Uploading Data to the S3 Bucket:**
+
 <Admonition type="info">
-Refer [this link](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/) to know how to automatically collect Lambda logs in S3.
+See the <a href="https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/" target="_blank" rel="noopener noreferrer nofollow">AWS Lambda extensions blog post</a> to know how to automatically collect Lambda logs in S3.
 </Admonition>
-   - After creating the bucket, navigate to the S3 Management Console.
-   - Click on the **Upload** button.
-   - Select the files you wish to upload from your local machine.
-   - Optionally, configure settings like encryption, permissions, etc.
-   - Click **Upload** to upload the selected files to the bucket.
+
+- After creating the bucket, navigate to the S3 Management Console.
+- Click on the **Upload** button.
+- Select the files you wish to upload from your local machine.
+- Optionally, configure settings like encryption, permissions, etc.
+- Click **Upload** to upload the selected files to the bucket.
 
 3. **File Formats:**
-   - You can upload files in various formats such as .json, .csv, .log, .gz, .zip, etc.
-   - If you have configured Lambda logging, Lambda logs are automatically saved in `.log` format in your S3 bucket.
 
-
+- You can upload files in various formats such as .json, .csv, .log, .gz, .zip, etc.
+- If you have configured Lambda logging, Lambda logs are automatically saved in `.log` format in your S3 bucket.
 
 To move forward, we assume that you already have some data in your S3 bucket.
 
 <Admonition type="info">
-For the scope of this documentation, we assume that all the data in S3 bucket is in the same format. For example, if one file is in `.csv` format (say), then all files within the bucket will be in `.csv` format.  For files in different formats, you will have to use different parsing functions for each format or update the existing function accordingly.
+  For the scope of this documentation, we assume that all the data in S3 bucket is in the same
+  format. For example, if one file is in `.csv` format (say), then all files within the bucket will
+  be in `.csv` format. For files in different formats, you will have to use different parsing
+  functions for each format or update the existing function accordingly.
 </Admonition>
-
 
 The general header(table) format of Lambda logs is:
 
@@ -73,28 +78,28 @@ The general header(table) format of Lambda logs is:
 lambda_headers= ["time","type","record"]
 ```
 
-There can be nested log data as described below. Modify the code [below](#the-lambda-function) according to your needs to capture and send only the required info. 
+There can be nested log data as described below. Modify the code [below](#the-lambda-function) according to your needs to capture and send only the required info.
 
 ```json
 // a single lambda log record
 {
-    "time": "2020-11-12T14:55:06.780Z",
-    "type": "platform.report",
-    "record": {
-      "requestId": "49e64413-fd42-47ef-b130-6fd16f30148d",
-      "metrics": {
-        "durationMs": 4.96,
-        "billedDurationMs": 100,
-        "memorySizeMB": 128,
-        "maxMemoryUsedMB": 87,
-        "initDurationMs": 792.41
-      },
-      "tracing": {
-        "type": "X-Amzn-Trace-Id",
-        "value": "Root=1-5fad4cc9-70259536495de84a2a6282cd;Parent=67286c49275ac0ad;Sampled=1"
-      }
+  "time": "2020-11-12T14:55:06.780Z",
+  "type": "platform.report",
+  "record": {
+    "requestId": "49e64413-fd42-47ef-b130-6fd16f30148d",
+    "metrics": {
+      "durationMs": 4.96,
+      "billedDurationMs": 100,
+      "memorySizeMB": 128,
+      "maxMemoryUsedMB": 87,
+      "initDurationMs": 792.41
+    },
+    "tracing": {
+      "type": "X-Amzn-Trace-Id",
+      "value": "Root=1-5fad4cc9-70259536495de84a2a6282cd;Parent=67286c49275ac0ad;Sampled=1"
     }
   }
+}
 ```
 
 ## Understanding how lambda function work
@@ -109,7 +114,7 @@ The below attached screenshots are repurposed here (previously for load balancer
 
 Follow these steps to create the lambda function:
 
-**Step 1:** Go to your AWS console and search for AWS Lambda, go to **Functions** and click on **Create Function**. 
+**Step 1:** Go to your AWS console and search for AWS Lambda, go to **Functions** and click on **Create Function**.
 
 <Figure
   src="/img/docs/elb/elb-logs-lambda_1.webp"
@@ -118,8 +123,7 @@ Follow these steps to create the lambda function:
   className="box-shadowed-image"
 />
 
-
-**Step 2:** Choose the `Author from scratch` checkbox and proceed to fill in the function name. 
+**Step 2:** Choose the `Author from scratch` checkbox and proceed to fill in the function name.
 
 <Figure
   src="/img/docs/lambda-docs/create_function.webp"
@@ -128,9 +132,7 @@ Follow these steps to create the lambda function:
   className="box-shadowed-image"
 />
 
-
-
-**Step 3:** Choose `Python 3.x` as the Runtime version, `x86_64` as Architecture (preferably), and keep other settings as default. Select `Create a new role with basic Lambda permissions`for now, we’ll requiring more permissions down the lane. So for now, select this option. 
+**Step 3:** Choose `Python 3.x` as the Runtime version, `x86_64` as Architecture (preferably), and keep other settings as default. Select `Create a new role with basic Lambda permissions`for now, we’ll requiring more permissions down the lane. So for now, select this option.
 
 <Figure
   src="/img/docs/elb/elb-logs-lambda_3.webp"
@@ -138,7 +140,6 @@ Follow these steps to create the lambda function:
   caption="Choose Create a new role here"
   className="box-shadowed-image"
 />
-
 
 **Step 4:** Once you are done configuring the lambda function, your Lambda function is created.
 
@@ -149,13 +150,11 @@ Follow these steps to create the lambda function:
   className="box-shadowed-image"
 />
 
-
-
 ### Configuring Policies for Lambda function
 
-As said in Step 3 previously, we need extra permissions in order to access the S3 Bucket for execution of our Lambda code, follow along to set it up. 
+As said in Step 3 previously, we need extra permissions in order to access the S3 Bucket for execution of our Lambda code, follow along to set it up.
 
-**Step 1:** Scroll down from your Lambda page, you’ll see a few tabs there. Go to `Configurations` and select `Permissions` from the left sidebar. 
+**Step 1:** Scroll down from your Lambda page, you’ll see a few tabs there. Go to `Configurations` and select `Permissions` from the left sidebar.
 
 <Figure
   src="/img/docs/lambda-docs/execution_role.webp"
@@ -164,8 +163,7 @@ As said in Step 3 previously, we need extra permissions in order to access the S
   className="box-shadowed-image"
 />
 
-
-**Step 2:** Click on the `Execution Role name` link just under Role name, it will take us to AWS IAM page. Here we will add policies to get full S3 access. Once here, click on the `Add permissions` button and select `Attach policies` from the drop down list. 
+**Step 2:** Click on the `Execution Role name` link just under Role name, it will take us to AWS IAM page. Here we will add policies to get full S3 access. Once here, click on the `Add permissions` button and select `Attach policies` from the drop down list.
 
 <Figure
   src="/img/docs/lambda-docs/lamba_roles.webp"
@@ -174,8 +172,7 @@ As said in Step 3 previously, we need extra permissions in order to access the S
   className="box-shadowed-image"
 />
 
-
-**Step 3:** Search “S3” and you’ll a policy named `AmazonS3FullAccess`select that and proceed. 
+**Step 3:** Search “S3” and you’ll a policy named `AmazonS3FullAccess`select that and proceed.
 
 <Figure
   src="/img/docs/elb/elb-logs-lambda_7.webp"
@@ -184,8 +181,7 @@ As said in Step 3 previously, we need extra permissions in order to access the S
   className="box-shadowed-image"
 />
 
-
-<Admonition type="warning" >
+<Admonition type="warning">
 It's advisable to proceed with caution when granting full S3 access, particularly in a production environment. Before deploying your Lambda function with such extensive permissions, it's essential to consult with your system administrator or designated authority to ensure compliance with security protocols and best practices. This step helps mitigate potential risks and ensures that access permissions align with organizational guidelines and requirements.
 </Admonition>
 
@@ -196,16 +192,15 @@ It's advisable to proceed with caution when granting full S3 access, particularl
   className="box-shadowed-image"
 />
 
-
 <Admonition type="info">
 Please refer to the image above as a comprehensive guide to the policy names that you may consider adding to your Lambda function. Failure to include these policies could result in insufficient privileges, potentially hindering the function's ability to perform necessary operations within the AWS environment.
 </Admonition>
 
-Congrats, you are just done with one of the major hurdles in running your code. Now, let’s add a trigger. 
+Congrats, you are just done with one of the major hurdles in running your code. Now, let’s add a trigger.
 
 ### Adding Triggers
 
-You need to use the Lambda console to build a trigger so that your function can be called immediately by another AWS service (S3, in our case). A trigger is a resource you set up to enable your function to be called by another AWS service upon the occurrence of specific events or conditions. 
+You need to use the Lambda console to build a trigger so that your function can be called immediately by another AWS service (S3, in our case). A trigger is a resource you set up to enable your function to be called by another AWS service upon the occurrence of specific events or conditions.
 
 <Admonition>
 A function may have more than one trigger. Every trigger functions as a client, independently calling your method, and Lambda transfers data from a single trigger to each event it passes to your function.
@@ -213,7 +208,7 @@ A function may have more than one trigger. Every trigger functions as a client, 
 
 To setup the trigger, follow these steps:
 
-**Step 1:** Click on the `+ Add trigger` button from the Lambda console. 
+**Step 1:** Click on the `+ Add trigger` button from the Lambda console.
 
 <Figure
   src="/img/docs/lambda-docs/add_trigger.webp"
@@ -222,10 +217,9 @@ To setup the trigger, follow these steps:
   className="box-shadowed-image"
 />
 
+**Step 2:** Select `S3` from the first drop down of AWS services list. Pick your S3 bucket for the second field.
 
-**Step 2:** Select `S3` from the first drop down of AWS services list. Pick your S3 bucket for the second field. 
-
-**Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected. 
+**Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected.
 
 <Figure
   src="/img/docs/lambda-docs/add_trigger_2.webp"
@@ -233,7 +227,6 @@ To setup the trigger, follow these steps:
   caption="Choose event types from the drop down menu"
   className="box-shadowed-image"
 />
-
 
 Verify the settings and click on `Add` button at bottom right to add this trigger.
 
@@ -245,9 +238,9 @@ To utilize Python's `requests` module within a Lambda function, it's necessary t
 
 **Step 1:** Follow the steps below to create a zip of the request module and add it as a layer to make it work on AWS lambda.
 
-The commands you’d need:
+The commands you need to run:
 
-```py
+```bash
 # make a new directory
 mkdir python
 # move into that directory
@@ -256,11 +249,10 @@ cd python
 # install requests module
 pip install --target . requests
 # zip the contents under the name dependencies.zip
-zip -r dependencies.zip ../python 
-
+zip -r dependencies.zip ../python
 ```
 
-**Step 2:** To upload your zip file, go to AWS Lambda > Layers and click on `Create Layer`. [Not inside your specific Lambda function, just the landing page of AWS Lambda]. 
+**Step 2:** To upload your zip file, go to AWS Lambda > Layers and click on `Create Layer`. [Not inside your specific Lambda function, just the landing page of AWS Lambda].
 
 <Figure
   src="/img/docs/elb/elb-logs-layer_3.webp"
@@ -269,10 +261,9 @@ zip -r dependencies.zip ../python
   className="box-shadowed-image"
 />
 
+**Step 3:** You’ll be redirected to Layer configurations page, here, give a name to your layer, an optional description, select `Upload a .zip file` , click on `Upload` and locate the requirements.zip file.
 
-**Step 3:** You’ll be redirected to Layer configurations page, here, give a name to your layer, an optional description, select `Upload a .zip file` , click on `Upload` and locate the requirements.zip file. 
-
-**Step 4:** Select your desired architecture and pick `Python 3.x` as your runtime. Hit `Create`. Your layer has now been created. Now lets connect it to our Lambda function which we created to send logs to SigNoz. 
+**Step 4:** Select your desired architecture and pick `Python 3.x` as your runtime. Hit `Create`. Your layer has now been created. Now lets connect it to our Lambda function which we created to send logs to SigNoz.
 
 <Figure
   src="/img/docs/elb/elb-logs-layer_4.webp"
@@ -281,8 +272,7 @@ zip -r dependencies.zip ../python
   className="box-shadowed-image"
 />
 
-
-**Step 5:** Go to your Lambda function, scroll down to Layers section and on the right of it, you’ll find a button that says `Add a layer` to click on. 
+**Step 5:** Go to your Lambda function, scroll down to Layers section and on the right of it, you’ll find a button that says `Add a layer` to click on.
 
 <Figure
   src="/img/docs/elb/elb-logs-layer_5.webp"
@@ -291,8 +281,7 @@ zip -r dependencies.zip ../python
   className="box-shadowed-image"
 />
 
-
-**Step 6:** Pick `Custom layers` from the checkbox and select your custom layer from the given drop down below and then click on the button `Add`. 
+**Step 6:** Pick `Custom layers` from the checkbox and select your custom layer from the given drop down below and then click on the button `Add`.
 
 <Figure
   src="/img/docs/elb/elb-logs-layer_6.webp"
@@ -301,25 +290,24 @@ zip -r dependencies.zip ../python
   className="box-shadowed-image"
 />
 
-
 Congratulations, the `requests` module has been successfully integrated into your code area. By adding this layer, you have resolved the `request module not found error` that would have otherwise occurred.
 
 ---
 
 ### The Lambda Function
 
-Now, we come to the pivotal section of this document: the code implementation. 
+Now, we come to the pivotal section of this document: the code implementation.
 
 The Python script's primary function revolves around retrieving log files stored within an Amazon S3 bucket and send data to a predetermined HTTP endpoint.
 
-<Admonition type="warning" >
+<Admonition type="warning">
 The provided code is functional, but exercise caution when copying and pasting it in its entirety. Incorrect configuration could result in the unintentional ingestion of a large volume of data.
 </Admonition>
 
 Below is the comprehensive code along with detailed comments for clarity:
 
 ```python
-import boto3 
+import boto3
 import requests
 
 # Create an S3 client
@@ -343,7 +331,7 @@ def lambda_handler(event, context):
             file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
             file_content = file_obj['Body'].read()
             log_data = file_content.decode('utf-8').replace("'", '"')
-            
+
             req_headers = {
                      'signoz-ingestion-key': '<your-ingestion-key>',
                      'Content-Type': 'application/json'
@@ -360,22 +348,22 @@ def lambda_handler(event, context):
 
 Replace `<region>` in the URL with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). You can find ingestion details (REGION and SIGNOZ_INGESTION_KEY) in the SigNoz dashboard.
 
-Other than the above explanation and the code comments, in a nutshell, what this code does is: 
+Other than the above explanation and the code comments, in a nutshell, what this code does is:
 
-Sends the parsable content of **ENTIRE** S3 bucket whenever the lambda function gets triggered. It gets triggered by the condition you set above. Let’s mention that again here. 
+Sends the parsable content of **ENTIRE** S3 bucket whenever the lambda function gets triggered. It gets triggered by the condition you set above. Let’s mention that again here.
 
-> **Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected.
+**Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected.
 
-Lets say you add something to your S3 bucket, it may / may not trigger this lambda function or if you have setup your s3 as if it automatically stores all your Lambda logs, segregated in different folders, so whenever any new log gets added, the function will get triggered and send all the S3 data. 
+Lets say you add something to your S3 bucket, it may / may not trigger this lambda function or if you have setup your s3 as if it automatically stores all your Lambda logs, segregated in different folders, so whenever any new log gets added, the function will get triggered and send all the S3 data.
 
-This is obviously not what everyone expects, ideal case would be to have a mass log transfer once the first connection is made to SigNoz otel-collector (which then they later get stored in gp2/gp3 storageClass of EBS), and then send logs lines of only the recently logged one. 
+This is obviously not what everyone expects, ideal case would be to have a mass log transfer once the first connection is made to SigNoz otel-collector (which then they later get stored in gp2/gp3 storageClass of EBS), and then send logs lines of only the recently logged one.
 
-To achieve this functionality, you need to add few conditions to the code. 
+To achieve this functionality, you need to add few conditions to the code.
 
 1. Assuming all standard log lines have a timestamp field.
-2. Parse and select the timestamp field from the log line and add it before the `response = requests.post(http_url, data=log_data, headers=req_headers)` line as a if else condition to only send logs which are x days older (say 3 days). 
+2. Parse and select the timestamp field from the log line and add it before the `response = requests.post(http_url, data=log_data, headers=req_headers)` line as a if else condition to only send logs which are x days older (say 3 days).
 
-So, the function now will first check the log timestamp and only send those logs which are 3 days older (say) or even a few hours old. 
+So, the function now will first check the log timestamp and only send those logs which are 3 days older (say) or even a few hours old.
 
 Let’s consider the below pseudo code for better understanding:
 
@@ -408,7 +396,7 @@ Feel free to modify any part of the code according to your requirements.
 
 ### Running the code locally
 
-If you want to run the entire setup locally in your laptop for testing purposes. Here’s the reference code for you: 
+If you want to run the entire setup locally in your laptop for testing purposes. Here’s the reference code for you:
 
 ```python
 import os
@@ -418,7 +406,7 @@ def send_log(file_path, url):
     with open(file_path, 'r') as file:
         data = file.read()
         log_data = data.replace("'", '"')
-        
+
     headers = {'Content-Type': 'application/json'}
     requests.post(url, data=log_data, headers=headers)
 
@@ -460,7 +448,6 @@ By adjusting the timeout setting, you ensure that your Lambda function has suffi
   className="box-shadowed-image"
 />
 
-
 Once you've finished adjusting the timeout setting, navigate to the code editor for your Lambda function. Locate the 'test' button, and from the dropdown menu, select the option labeled 'Configure test events.' Create a new test case by specifying it as an S3 PUT event, then save your configuration.
 
 <Figure
@@ -471,8 +458,6 @@ Once you've finished adjusting the timeout setting, navigate to the code editor 
 />
 
 You're now prepared to proceed. Whenever you make alterations to the code and wish to evaluate them, follow these steps: Deploy the code first (equivalent to pressing 'Save'), and once it's fully deployed, proceed to click on the 'Test' button.
-
-
 
 ### Test Case and Output
 
@@ -485,7 +470,6 @@ If the logs are sent successfully, here's how they'll be transmitted. The follow
   className="box-shadowed-image"
 />
 
-
 ## Validate
 
 Upon accessing the SigNoz logs section, you will notice a considerable influx of logs. You have the option to seamlessly transition to live monitoring of logs as well. Simply click on any log line to view its detailed information.
@@ -497,9 +481,9 @@ Upon accessing the SigNoz logs section, you will notice a considerable influx of
   className="box-shadowed-image"
 />
 
-
 ## Related Resources
 
+- [Collect AWS Lambda Logs via OTel Collector Extension Layer](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/)
 - [One-Click AWS Integration for Lambda](https://signoz.io/docs/integrations/aws/lambda/)
 - [Collect Lambda Metrics](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)
 - [Collect Lambda Traces](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)

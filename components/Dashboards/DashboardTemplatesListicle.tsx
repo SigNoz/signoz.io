@@ -255,6 +255,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/pydantic-ai-dashboard': (
     <SiPydantic className="h-7 w-7 text-pink-600" />
   ),
+  '/docs/dashboards/dashboard-templates/qwen-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/qwen-logo.webp" alt="Qwen Icon" className="h-7 w-7" />
+  ),
   '/docs/dashboards/dashboard-templates/rabbitmq': (
     <SiRabbitmq className="h-7 w-7 text-orange-600" />
   ),

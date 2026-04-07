@@ -90,6 +90,11 @@ export const LLM_MONITORING_ITEMS: ComponentItem[] = [
     clickName: 'Pydantic AI Monitoring',
   },
   {
+    name: 'Qwen',
+    href: '/docs/qwen-observability',
+    clickName: 'Qwen Monitoring',
+  },
+  {
     name: 'Semantic Kernel',
     href: '/docs/semantic-kernel-observability',
     clickName: 'Semantic Kernel Monitoring',

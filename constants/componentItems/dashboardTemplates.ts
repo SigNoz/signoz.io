@@ -312,6 +312,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Pydantic AI Dashboard Template',
   },
   {
+    name: 'Qwen',
+    href: '/docs/dashboards/dashboard-templates/qwen-dashboard',
+    clickName: 'Qwen Dashboard Template',
+  },
+  {
     name: 'RabbitMQ',
     href: '/docs/dashboards/dashboard-templates/rabbitmq',
     clickName: 'RabbitMQ Dashboard Template',

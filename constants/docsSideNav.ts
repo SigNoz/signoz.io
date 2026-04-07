@@ -2365,6 +2365,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/qwen-dashboard',
+            label: 'Qwen',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/rabbitmq',
             label: 'RabbitMQ',
           },
@@ -2892,6 +2897,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/qwen-observability',
+        label: 'Qwen',
+        type: 'doc',
+      },
+      {
         route: '/docs/semantic-kernel-observability',
         label: 'Semantic Kernel',
         type: 'doc',
@@ -3053,7 +3063,12 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/aws-monitoring/lambda/lambda-logs',
-            label: 'Logs',
+            label: 'Logs (S3)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-logs-otel-extension',
+            label: 'Logs (OTel Extension)',
           },
           {
             type: 'doc',

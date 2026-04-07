@@ -2,9 +2,33 @@ import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
 import { Metadata } from 'next'
+import siteMetadata from '@/data/siteMetadata'
 
 export const metadata: Metadata = {
   title: 'Terms of Reference',
+  description: 'Terms of Reference | SigNoz',
+  openGraph: {
+    title: 'Terms of Reference | SigNoz',
+    description: 'Terms of Reference | SigNoz',
+    url: `${siteMetadata.siteUrl}/terms-of-reference`,
+    siteName: siteMetadata.title,
+    locale: 'en_US',
+    type: 'website',
+    images: [siteMetadata.socialBanner],
+  },
+  twitter: {
+    title: 'Terms of Reference | SigNoz',
+    description: 'Terms of Reference | SigNoz',
+    images: [siteMetadata.socialBanner],
+    site: siteMetadata.twitter,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: `${siteMetadata.siteUrl}/terms-of-reference`,
+  },
 }
 
 const markdownContent = `**TERMS OF REFERENCE**
