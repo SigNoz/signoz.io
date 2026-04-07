@@ -49,6 +49,11 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Logs Link',
     },
+    {
+      name: 'DBOS',
+      href: '/docs/integrations/opentelemetry-dbos',
+      clickName: 'DBOS Logs Link',
+    },
   ] satisfies ComponentItem[],
   languages: [
     {

@@ -1498,6 +1498,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/send-logs-http',
             label: 'Logs via HTTP (JSON)',
           },

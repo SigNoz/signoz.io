@@ -159,6 +159,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/gcp-monitoring/cloud-run/logging/': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
   '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
+  '/docs/integrations/opentelemetry-dbos': (
+    <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />
+  ),
 }
 
 // AKS uses the same href as EKS but needs a different icon — override for Azure context
