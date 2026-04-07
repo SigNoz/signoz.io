@@ -19,6 +19,7 @@ type CardProps = {
   logoSize?: number
   subTitleSize?: number
   img?: string
+  imgAlt?: string
   border?: Boolean
   sectionName?: string
 }
@@ -35,6 +36,7 @@ const Card: React.FC<CardProps> = ({
   buttonLink,
   logo,
   img,
+  imgAlt,
   logoSize = 16,
   subTitleSize = 1,
   sectionName = 'Features',
@@ -65,14 +67,37 @@ const Card: React.FC<CardProps> = ({
       ? [description]
       : []
 
+  const featureImageAlt =
+    imgAlt ??
+    (subTitle
+      ? `${subTitle} in SigNoz`
+      : title
+        ? `${title} in SigNoz`
+        : iconTag
+          ? `SigNoz ${iconTag.replace(/_/g, ' ')} interface`
+          : 'SigNoz product interface')
+
+  const firstDescriptionString =
+    typeof description === 'string'
+      ? description
+      : Array.isArray(description) && typeof description[0] === 'string'
+        ? description[0]
+        : null
+
+  const logoAlt = iconTag?.trim()
+    ? `${iconTag} icon`
+    : firstDescriptionString
+      ? `${firstDescriptionString} icon`
+      : title
+        ? `${title} icon`
+        : 'Feature icon'
+
   return (
     <div
       className={`col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-9 sm:col-span-1`}
     >
       <div className="mb-4 flex items-center">
-        {logo ? (
-          <img src={logo} alt={`${iconTag} Logo`} className={`${logoSizeClassnames} mr-2.5`} />
-        ) : null}
+        {logo ? <img src={logo} alt={logoAlt} className={`${logoSizeClassnames} mr-2.5`} /> : null}
         <span className="text-sm font-medium uppercase tracking-[0.05em] text-signoz_vanilla-400">
           {iconTag}
         </span>
@@ -110,7 +135,13 @@ const Card: React.FC<CardProps> = ({
           {desc}
         </p>
       ))}
-      {img ? <img src={img} className="card-background h-auto w-auto border-none" /> : null}
+      {img ? (
+        <img
+          src={img}
+          alt={featureImageAlt}
+          className="card-background h-auto w-auto border-none"
+        />
+      ) : null}
 
       {buttonText ? (
         buttonLink ? (
