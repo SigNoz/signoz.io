@@ -19,7 +19,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ title, publishedOn, url }) =>
       <img
         className="h-24 w-full object-cover"
         src="/img/hexagonal-pattern.webp"
-        alt="Hexagonal Pattern"
+        alt=""
       />
 
       <article className="mx-auto flex w-full grow flex-col rounded px-4 py-8  max-md:mt-6">

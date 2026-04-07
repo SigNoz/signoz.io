@@ -372,7 +372,7 @@ export default function TopNav() {
                 src="/img/SigNozLogo-orange.svg"
                 width={160}
                 height={60}
-                alt="SigNoz Logo"
+                alt=""
               />
 
               <span className="text-[17.111px] font-medium">SigNoz</span>

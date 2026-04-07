@@ -64,7 +64,7 @@ const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, i
       {icon && ICON_SRCS[icon] && (
         <img
           src={ICON_SRCS[icon]}
-          alt={icon}
+          alt=""
           width={18}
           height={18}
           className="not-prose m-0 block shrink-0 rounded-sm p-0"
