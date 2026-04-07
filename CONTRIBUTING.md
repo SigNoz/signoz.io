@@ -41,6 +41,7 @@ See [contributing/repo-workflow.md](contributing/repo-workflow.md) for Git hooks
 - Use existing patterns before creating new abstractions.
 - Do not bypass failing checks silently.
 - If a docs URL changes, also handle redirects, sidebar updates, and any discovery surfaces.
+- **Docs MDX filenames:** do not use `.` in the basename (except `.mdx`). Use hyphens instead (for example `upgrade-0-8-1.mdx`, not `upgrade-0.8.1.mdx`) so URLs stay consistent with `trailingSlash` and Next.js routing. See [contributing/docs-authoring.md](contributing/docs-authoring.md#docs-file-and-url-names).
 - For OpenTelemetry technical claims, verify against official OpenTelemetry docs or repositories.
 
 ## Need More Detail?

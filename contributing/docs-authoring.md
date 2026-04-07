@@ -2,6 +2,11 @@
 
 Use this playbook for product documentation under `data/docs/**`.
 
+## Docs file and URL names
+
+- **Do not put `.` in the MDX filename**
+- Encode version-like segments with hyphens instead, for example `upgrade-0-8-1.mdx` → slug `operate/migration/upgrade-0-8-1`, and align the frontmatter `id` with that slug (for example `id: upgrade-0-8-1`).
+
 ## Core Writing Principles
 
 - Assume readers know their language or framework basics, but may not know OpenTelemetry concepts.

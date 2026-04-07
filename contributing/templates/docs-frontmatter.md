@@ -14,5 +14,6 @@ doc_type: <howto|tutorial|reference|explanation>
 
 Notes:
 
+- Use an `id` that matches the URL slug (no `.` in the id; use hyphens for version segments).
 - Omit `tags` when the doc applies to both Cloud and Self-Host.
 - Use `tags: [Self-Host]` or `tags: [SigNoz Cloud]` only when the page is environment-specific.

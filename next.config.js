@@ -91,6 +91,250 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/docs/operate/migration/upgrade-0.113/',
+          destination: '/docs/operate/migration/upgrade-0-113/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.113',
+          destination: '/docs/operate/migration/upgrade-0-113/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.94/',
+          destination: '/docs/operate/migration/upgrade-0-94/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.94',
+          destination: '/docs/operate/migration/upgrade-0-94/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.92/',
+          destination: '/docs/operate/migration/upgrade-0-92/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.92',
+          destination: '/docs/operate/migration/upgrade-0-92/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.88/',
+          destination: '/docs/operate/migration/upgrade-0-88/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.88',
+          destination: '/docs/operate/migration/upgrade-0-88/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.86/',
+          destination: '/docs/operate/migration/upgrade-0-86/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.86',
+          destination: '/docs/operate/migration/upgrade-0-86/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.76/',
+          destination: '/docs/operate/migration/upgrade-0-76/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.76',
+          destination: '/docs/operate/migration/upgrade-0-76/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.70/',
+          destination: '/docs/operate/migration/upgrade-0-70/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.70',
+          destination: '/docs/operate/migration/upgrade-0-70/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.64/',
+          destination: '/docs/operate/migration/upgrade-0-64/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.64',
+          destination: '/docs/operate/migration/upgrade-0-64/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.55/',
+          destination: '/docs/operate/migration/upgrade-0-55/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.55',
+          destination: '/docs/operate/migration/upgrade-0-55/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.51/',
+          destination: '/docs/operate/migration/upgrade-0-51/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.51',
+          destination: '/docs/operate/migration/upgrade-0-51/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.49/',
+          destination: '/docs/operate/migration/upgrade-0-49/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.49',
+          destination: '/docs/operate/migration/upgrade-0-49/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.45/',
+          destination: '/docs/operate/migration/upgrade-0-45/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.45',
+          destination: '/docs/operate/migration/upgrade-0-45/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.38/',
+          destination: '/docs/operate/migration/upgrade-0-38/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.38',
+          destination: '/docs/operate/migration/upgrade-0-38/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.37/',
+          destination: '/docs/operate/migration/upgrade-0-37/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.37',
+          destination: '/docs/operate/migration/upgrade-0-37/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.36/',
+          destination: '/docs/operate/migration/upgrade-0-36/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.36',
+          destination: '/docs/operate/migration/upgrade-0-36/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.27/',
+          destination: '/docs/operate/migration/upgrade-0-27/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.27',
+          destination: '/docs/operate/migration/upgrade-0-27/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.23/',
+          destination: '/docs/operate/migration/upgrade-0-23/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.23',
+          destination: '/docs/operate/migration/upgrade-0-23/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.19/',
+          destination: '/docs/operate/migration/upgrade-0-19/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.19',
+          destination: '/docs/operate/migration/upgrade-0-19/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.12/',
+          destination: '/docs/operate/migration/upgrade-0-12/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.12',
+          destination: '/docs/operate/migration/upgrade-0-12/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.10/',
+          destination: '/docs/operate/migration/upgrade-0-10/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.10',
+          destination: '/docs/operate/migration/upgrade-0-10/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.9/',
+          destination: '/docs/operate/migration/upgrade-0-9/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.9',
+          destination: '/docs/operate/migration/upgrade-0-9/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.8.1/',
+          destination: '/docs/operate/migration/upgrade-0-8-1/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.8.1',
+          destination: '/docs/operate/migration/upgrade-0-8-1/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.8.0/',
+          destination: '/docs/operate/migration/upgrade-0-8-0/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.8.0',
+          destination: '/docs/operate/migration/upgrade-0-8-0/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0.15/',
+          destination:
+            '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0-15/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0.15',
+          destination:
+            '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0-15/',
+          permanent: true,
+        },
+        {
           source: '/feed.xml',
           destination: '/rss',
           permanent: true,
