@@ -691,6 +691,62 @@ After running your application, verify that data is flowing to SigNoz:
 <details>
 <ToggleHeading>
 
+## Route Temporal SDK Logs to SigNoz (Optional)
+
+</ToggleHeading>
+
+By default, Temporal SDK internal logs (`Started Worker`, `ExecuteActivity`, etc.) only appear on stderr. To send them to SigNoz, implement a small adapter that satisfies the `go.temporal.io/sdk/log.Logger` interface and delegates to `slog`.
+
+**1. Create `telemetry/logger.go`:**
+
+```go:telemetry/logger.go
+package telemetry
+
+import (
+	"log/slog"
+
+	temporallog "go.temporal.io/sdk/log"
+)
+
+type SlogTemporalLogger struct {
+	l *slog.Logger
+}
+
+// NewTemporalLogger wraps a *slog.Logger so it can be set on client.Options.Logger.
+func NewTemporalLogger(l *slog.Logger) temporallog.Logger {
+	return &SlogTemporalLogger{l: l}
+}
+
+func (s *SlogTemporalLogger) Debug(msg string, keyvals ...interface{}) { s.l.Debug(msg, keyvals...) }
+func (s *SlogTemporalLogger) Info(msg string, keyvals ...interface{})  { s.l.Info(msg, keyvals...) }
+func (s *SlogTemporalLogger) Warn(msg string, keyvals ...interface{})  { s.l.Warn(msg, keyvals...) }
+func (s *SlogTemporalLogger) Error(msg string, keyvals ...interface{}) { s.l.Error(msg, keyvals...) }
+```
+
+**2. Update `worker/main.go` and `starter/main.go`:**
+
+Create the OTel logger before configuring client options, set it on `clientOpts.Logger`, and move `slog.SetDefault` to after `client.Dial`:
+
+```go
+// Create the OTel-backed logger before client options
+otelLogger := slog.New(otelslog.NewHandler("temporal-worker")) // or "temporal-client"
+
+clientOpts.Logger = telemetry.NewTemporalLogger(otelLogger)
+
+c, err := client.Dial(clientOpts)
+// ...
+
+// Set as default after Dial so log.Fatalf above still reaches stderr
+slog.SetDefault(otelLogger)
+```
+
+With this in place, SDK logs like `Started Worker` and `ExecuteActivity` appear in SigNoz as structured `DEBUG`/`INFO` records with fields such as `WorkflowID`, `ActivityType`, and `TaskQueue`.
+
+</details>
+
+<details>
+<ToggleHeading>
+
 ## Setup OpenTelemetry Collector (Optional)
 
 </ToggleHeading>
