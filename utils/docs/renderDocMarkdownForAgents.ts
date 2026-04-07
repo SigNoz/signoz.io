@@ -138,7 +138,7 @@ const getMdxComponentFromCode = async (code: string) => {
   const ReactDOM = await import('react-dom')
   const jsxRuntime = await import('react/jsx-runtime')
 
-  const AdmonitionStub = (props: { type?: string; title?: string; children?: unknown }) => {
+  const AdmonitionStub = (props: { type?: string; title?: string; children?: React.ReactNode }) => {
     const label = [props.type, props.title].filter(Boolean).join(': ')
     return React.createElement(
       'blockquote',
