@@ -1,6 +1,7 @@
 'use client'
 
 import { useMDXComponent } from 'pliny/mdx-components'
+import { components as mdxComponents } from '@/components/MDXComponents'
 import Admonition from '@/components/Admonition/Admonition'
 
 const MDX_GLOBALS = { AdmonitionGlobal: Admonition }
@@ -11,9 +12,9 @@ export default function MDXRenderer({
   ...rest
 }: {
   code: string
-  components: Record<string, any>
+  components?: Record<string, any>
   [key: string]: any
 }) {
   const Mdx = useMDXComponent(code, MDX_GLOBALS)
-  return <Mdx components={components} {...rest} />
+  return <Mdx components={components ?? mdxComponents} {...rest} />
 }

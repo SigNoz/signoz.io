@@ -3,7 +3,6 @@
 import React, { useCallback, useMemo, useRef } from 'react'
 import { Edit } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { components } from '@/components/MDXComponents'
 import MDXRenderer from '@/components/MDXRenderer'
 import PageFeedback from '../PageFeedback/PageFeedback'
 import DocsPrevNext from '../DocsPrevNext/DocsPrevNext'
@@ -85,7 +84,7 @@ const DocContent: React.FC<{
           )}
         </div>
         <article ref={articleRef} className="prose prose-slate max-w-none pb-6 dark:prose-invert">
-          <MDXRenderer code={post.body.code} components={components} toc={post.toc || []} />
+          <MDXRenderer code={post.body.code} toc={post.toc || []} />
         </article>
         <div className="mt-8 flex items-center justify-between text-sm">
           {formattedDate && (

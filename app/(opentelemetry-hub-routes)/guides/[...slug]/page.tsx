@@ -1,5 +1,4 @@
 import 'css/prism.css'
-import { components } from '@/components/MDXComponents'
 import MDXRenderer from '@/components/MDXRenderer'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allGuides, allAuthors } from 'contentlayer/generated'
@@ -124,7 +123,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
         >
-          <MDXRenderer code={post.body.code} components={components} toc={post.toc} />
+          <MDXRenderer code={post.body.code} toc={post.toc} />
           {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
         </OpenTelemetryHubContent>
       </>
@@ -168,7 +167,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authors={authorList}
         toc={post.toc}
       >
-        <MDXRenderer code={post.body.code} components={components} toc={post.toc} />
+        <MDXRenderer code={post.body.code} toc={post.toc} />
       </Layout>
 
       {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}
