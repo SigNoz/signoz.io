@@ -33,7 +33,10 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
               </div>
             )}
           </div>
-          <img src="/img/graphics/homepage/feature-graphic-data-protection.webp" alt="" />
+          <img
+            src="/img/graphics/homepage/feature-graphic-data-protection.webp"
+            alt="Data Protection Laws"
+          />
           {!isInPricingPage ? (
             <div className="mt-[18px] flex flex-col gap-3 sm:flex-row">
               <TrackingLink

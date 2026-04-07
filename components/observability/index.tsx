@@ -56,7 +56,10 @@ const Observability = () => {
             </div>
           </div>
           <div className="hidden aspect-[272/404] w-[272px] max-w-[50vw] md:block">
-            <img src="/img/graphics/homepage/feature-graphic-enterprise-2.webp" alt="" />
+            <img
+              src="/img/graphics/homepage/feature-graphic-enterprise-2.webp"
+              alt="Enterprise-grade Observability"
+            />
           </div>
         </div>
       </div>

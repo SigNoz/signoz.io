@@ -447,7 +447,7 @@ export default function Login() {
                   <img
                     loading="lazy"
                     src={badge.icon}
-                    alt=""
+                    alt={badge.text}
                     className="aspect-[1.93] w-[29px] shrink-0 object-contain"
                   />
                 )}

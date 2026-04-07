@@ -372,7 +372,7 @@ export default function TopNav() {
                 src="/img/SigNozLogo-orange.svg"
                 width={160}
                 height={60}
-                alt=""
+                alt="SigNoz Logo"
               />
 
               <span className="text-[17.111px] font-medium">SigNoz</span>
@@ -481,7 +481,7 @@ export default function TopNav() {
                                     <Image
                                       className="shrink-0"
                                       src={'/img/index_features/brainfish.svg'}
-                                      alt={''}
+                                      alt="Brainfish"
                                       width={20}
                                       height={20}
                                     />
