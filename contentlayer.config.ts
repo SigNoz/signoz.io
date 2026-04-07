@@ -192,6 +192,8 @@ export const Blog = defineDocumentType(() => ({
     tags: { type: 'list', of: { type: 'string' }, default: [] },
     lastmod: { type: 'date' },
     draft: { type: 'boolean' },
+    /** When true, omit this post from sitemap.xml (e.g. /blog/what-is-opentelemetry redirects to /opentelemetry but uses the same blog slug and params, /opentelemetry/ is added to sitemap. */
+    excludeFromSitemap: { type: 'boolean', required: false },
     summary: { type: 'string' },
     description: { type: 'string' },
     images: { type: 'json' },

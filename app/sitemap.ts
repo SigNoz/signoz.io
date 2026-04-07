@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 
   const blogRoutes = allBlogs
-    .filter((post) => !post.draft)
+    .filter((post) => !post.draft && !post?.excludeFromSitemap)
     .map((post) => ({
       url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
