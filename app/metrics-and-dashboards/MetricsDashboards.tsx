@@ -174,7 +174,7 @@ const Header = () => {
           <div className="product-explainer-video hero-figure rounded-none p-0 md:rounded-lg md:p-3">
             <Image
               src="/img/features/metrics/metrics-overview1.webp"
-              alt="Custom Thumbnail"
+              alt="SigNoz metrics dashboard showing CPU and memory usage charts by namespace and pod"
               className="h-auto w-full rounded-none md:rounded-lg"
               height={10000}
               width={10000}
@@ -484,7 +484,7 @@ const GetStarted = ({ page }) => {
             <div className="relative flex items-center justify-center">
               <img
                 src="/img/landing/landing_thumbnail.webp"
-                alt="Custom Thumbnail"
+                alt=""
                 className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
               />
             </div>

@@ -9,10 +9,11 @@ import TrackingButton from '@/components/TrackingButton'
 
 interface VideoModalPlayerProps {
   thumbnailSrc: string
+  thumbnailAlt: string
   videoId: string
 }
 
-export const VideoModalPlayer = ({ thumbnailSrc, videoId }: VideoModalPlayerProps) => {
+export const VideoModalPlayer = ({ thumbnailSrc, thumbnailAlt, videoId }: VideoModalPlayerProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (
@@ -21,7 +22,7 @@ export const VideoModalPlayer = ({ thumbnailSrc, videoId }: VideoModalPlayerProp
         <div className="relative aspect-video w-full">
           <Image
             src={thumbnailSrc}
-            alt="Product Explainer Thumbnail"
+            alt={thumbnailAlt}
             className="rounded-lg"
             fill
             sizes="(max-width: 768px) 100vw, 80vw"

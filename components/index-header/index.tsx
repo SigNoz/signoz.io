@@ -83,6 +83,7 @@ export async function Header() {
         <div className="w-100 mx-[-28px]">
           <VideoModalPlayer
             thumbnailSrc="/img/landing/landing_thumbnail.webp"
+            thumbnailAlt="SigNoz product demo video thumbnail showing the traces explorer"
             videoId="944340217"
           />
         </div>

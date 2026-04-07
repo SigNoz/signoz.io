@@ -28,7 +28,7 @@ export const SignozDatalog = () => {
           </div>
           <img
             src="/img/graphics/homepage/feature-graphic-data-protection-2.webp"
-            alt="Data Protection Laws"
+            alt="Bar chart comparing observability costs for small, mid-sized, and large teams"
           />
           <div className="mt-[18px] flex flex-row gap-3"></div>
         </div>

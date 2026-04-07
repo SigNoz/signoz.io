@@ -172,7 +172,7 @@ const Header = () => {
               <div className="absolute">
                 <img
                   src="/img/features/exceptions/exceptions-overview.webp"
-                  alt="Custom Thumbnail"
+                  alt="SigNoz exception details view with a stack trace and related trace graph"
                   className="w-full rounded-lg"
                 />
               </div>
@@ -444,7 +444,7 @@ const GetStarted = ({ page }) => {
             <div className="relative flex items-center justify-center">
               <img
                 src="/img/landing/landing_thumbnail.webp"
-                alt="Custom Thumbnail"
+                alt=""
                 className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
               />
             </div>

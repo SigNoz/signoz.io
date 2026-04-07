@@ -187,7 +187,7 @@ const Header = () => {
               <div className="absolute">
                 <img
                   src="/img/features/apm/apm-cover.webp"
-                  alt="Custom Thumbnail"
+                  alt="SigNoz APM service overview with latency, rate, and apdex charts"
                   className="w-full rounded-lg"
                 />
               </div>
@@ -500,7 +500,7 @@ const GetStarted = ({ page }) => {
             <div className="relative flex items-center justify-center">
               <img
                 src="/img/landing/landing_thumbnail.webp"
-                alt="Custom Thumbnail"
+                alt=""
                 className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
               />
             </div>

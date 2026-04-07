@@ -35,7 +35,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
           </div>
           <img
             src="/img/graphics/homepage/feature-graphic-data-protection.webp"
-            alt="Data Protection Laws"
+            alt="Map showing SigNoz cloud regions in the United States, European Union, and India"
           />
           {!isInPricingPage ? (
             <div className="mt-[18px] flex flex-col gap-3 sm:flex-row">

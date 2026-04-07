@@ -48,7 +48,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
             <div className="mx-auto aspect-[272/352] w-[272px] max-w-[50vw]">
               <img
                 src="/img/graphics/homepage/feature-graphic-enterprise.webp"
-                alt="Illustration of engineering teams using SigNoz for observability"
+                alt="Illustration of SigNoz connecting observability, security, and data controls"
               />
             </div>
           </div>
