@@ -1,5 +1,5 @@
 ---
-date: 2026-03-26
+date: 2026-04-07
 id: signoz-mcp-server
 
 title: SigNoz MCP Server
@@ -231,10 +231,10 @@ If you run into authentication issues, open the command palette and run **Authen
 
 When you add the hosted MCP URL to your client, the MCP client will initiate an authentication flow. You will be prompted to enter:
 1. Your **SigNoz instance URL** (e.g., `https://your-instance.signoz.cloud`)
-2. Your **API key** — go to **Settings → API Keys** in SigNoz to create one (requires **Admin** role)
+2. Your **API key** — go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key (requires **Admin** role). See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
 
 <Admonition type="warning">
-Only **Admin** users can create API keys. If you don't see the option, contact your workspace administrator.
+Only **Admin** users can create service account keys. If you don't see the option, contact your workspace administrator.
 </Admonition>
 
 </TabItem>
@@ -245,11 +245,11 @@ For self-hosted SigNoz, you run the MCP server locally. The server supports two 
 ### Fetch your API key
 
 1. Log in to your SigNoz instance.
-2. Go to **Settings** → **API Keys**.
-3. Click **Create API Key** and copy the generated key.
+2. Go to **Settings** → **Service Accounts**.
+3. Create a service account, open its **Keys** tab, click **Add Key**, and copy the generated key. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
 
 <Admonition type="warning">
-Only **Admin** users can create API keys. Keep your API key secure — never commit it to version control.
+Only **Admin** users can create service account(API) keys. Keep your key secure — never commit it to version control.
 </Admonition>
 
 ### Install the MCP server
@@ -299,12 +299,12 @@ docker run -p 8000:8000 \
   -e TRANSPORT_MODE=http \
   -e MCP_SERVER_PORT=8000 \
   -e SIGNOZ_URL=<your-signoz-url> \
-  -e SIGNOZ_API_KEY=<your-api-key> \
+  -e SIGNOZ_API_KEY=<YOUR_SERVICE_ACCOUNT_KEY> \
   signoz/signoz-mcp-server:latest
 ```
 
 - `<your-signoz-url>`: Your self-hosted SigNoz instance URL (e.g., `http://localhost:3301`)
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 <Admonition type="info">
 Docker always runs in HTTP transport mode. Use the **HTTP** tabs in the client setup below.
@@ -342,7 +342,7 @@ Add the following to `.cursor/mcp.json` in your project root, or use **Cursor �
       "args": [],
       "env": {
         "SIGNOZ_URL": "<your-signoz-url>",
-        "SIGNOZ_API_KEY": "<your-api-key>",
+        "SIGNOZ_API_KEY": "<YOUR_SERVICE_ACCOUNT_KEY>",
         "LOG_LEVEL": "info"
       }
     }
@@ -352,7 +352,7 @@ Add the following to `.cursor/mcp.json` in your project root, or use **Cursor �
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
 <TabItem value="sh-cursor-http" label="HTTP">
@@ -361,7 +361,7 @@ Add the following to `.cursor/mcp.json` in your project root, or use **Cursor �
 
 ```bash
 SIGNOZ_URL=<your-signoz-url> \
-SIGNOZ_API_KEY=<your-api-key> \
+SIGNOZ_API_KEY=<YOUR_SERVICE_ACCOUNT_KEY> \
 TRANSPORT_MODE=http \
 MCP_SERVER_PORT=8000 \
 LOG_LEVEL=info \
@@ -400,7 +400,7 @@ Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) → **`MCP: Open User Conf
       "args": [],
       "env": {
         "SIGNOZ_URL": "<your-signoz-url>",
-        "SIGNOZ_API_KEY": "<your-api-key>",
+        "SIGNOZ_API_KEY": "<YOUR_SERVICE_ACCOUNT_KEY>",
         "LOG_LEVEL": "info"
       }
     }
@@ -410,7 +410,7 @@ Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) → **`MCP: Open User Conf
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 Open Copilot Chat in **Agent mode** and confirm you trust the server.
 
@@ -452,7 +452,7 @@ Go to **Settings → Developer → Edit Config** and add to `claude_desktop_conf
       "args": [],
       "env": {
         "SIGNOZ_URL": "<your-signoz-url>",
-        "SIGNOZ_API_KEY": "<your-api-key>",
+        "SIGNOZ_API_KEY": "<YOUR_SERVICE_ACCOUNT_KEY>",
         "LOG_LEVEL": "info"
       }
     }
@@ -462,7 +462,7 @@ Go to **Settings → Developer → Edit Config** and add to `claude_desktop_conf
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
 <TabItem value="sh-claude-http" label="HTTP">
@@ -471,7 +471,7 @@ Go to **Settings → Developer → Edit Config** and add to `claude_desktop_conf
 
 ```bash
 SIGNOZ_URL=<your-signoz-url> \
-SIGNOZ_API_KEY=<your-api-key> \
+SIGNOZ_API_KEY=<YOUR_SERVICE_ACCOUNT_KEY> \
 TRANSPORT_MODE=http \
 MCP_SERVER_PORT=8000 \
 LOG_LEVEL=info \
@@ -502,13 +502,13 @@ LOG_LEVEL=info \
 ```bash
 claude mcp add --scope user signoz "<path-to-binary>/signoz-mcp-server" \
   -e SIGNOZ_URL="<your-signoz-url>" \
-  -e SIGNOZ_API_KEY="<your-api-key>" \
+  -e SIGNOZ_API_KEY="<YOUR_SERVICE_ACCOUNT_KEY>" \
   -e LOG_LEVEL=info
 ```
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 <Admonition type="info">
 Use `--scope project` to limit to the current project. Remove with `claude mcp remove signoz`.
@@ -536,14 +536,14 @@ claude mcp add --scope user --transport http signoz http://localhost:8000/mcp
 ```bash
 codex mcp add signoz \
   --env SIGNOZ_URL="<your-signoz-url>" \
-  --env SIGNOZ_API_KEY="<your-api-key>" \
+  --env SIGNOZ_API_KEY="<YOUR_SERVICE_ACCOUNT_KEY>" \
   --env LOG_LEVEL=info \
   -- "<path-to-binary>/signoz-mcp-server"
 ```
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
 <TabItem value="sh-codex-config" label="config.toml">
@@ -557,7 +557,7 @@ args = []
 
 [mcp_servers.signoz.env]
 SIGNOZ_URL = "<your-signoz-url>"
-SIGNOZ_API_KEY = "<your-api-key>"
+SIGNOZ_API_KEY = "<YOUR_SERVICE_ACCOUNT_KEY>"
 LOG_LEVEL = "info"
 ```
 
@@ -593,7 +593,7 @@ Add this configuration to `~/.codeium/windsurf/mcp_config.json`
       "args": [],
       "env": {
         "SIGNOZ_URL": "<your-signoz-url>",
-        "SIGNOZ_API_KEY": "<your-api-key>",
+        "SIGNOZ_API_KEY": "<YOUR_SERVICE_ACCOUNT_KEY>",
         "LOG_LEVEL": "info"
       }
     }
@@ -603,7 +603,7 @@ Add this configuration to `~/.codeium/windsurf/mcp_config.json`
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
 <TabItem value="sh-windsurf-http" label="HTTP">
@@ -640,7 +640,7 @@ Add to `~/.gemini/settings.json`:
       "args": [],
       "env": {
         "SIGNOZ_URL": "<your-signoz-url>",
-        "SIGNOZ_API_KEY": "<your-api-key>",
+        "SIGNOZ_API_KEY": "<YOUR_SERVICE_ACCOUNT_KEY>",
         "LOG_LEVEL": "info"
       }
     }
@@ -650,7 +650,7 @@ Add to `~/.gemini/settings.json`:
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
 <TabItem value="sh-gemini-http" label="HTTP">
@@ -684,7 +684,7 @@ Open Zed settings (`Cmd+,`) and add:
       "args": [],
       "env": {
         "SIGNOZ_URL": "<your-signoz-url>",
-        "SIGNOZ_API_KEY": "<your-api-key>",
+        "SIGNOZ_API_KEY": "<YOUR_SERVICE_ACCOUNT_KEY>",
         "LOG_LEVEL": "info"
       }
     }
@@ -694,7 +694,7 @@ Open Zed settings (`Cmd+,`) and add:
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 
 </TabItem>
@@ -713,7 +713,7 @@ Add to `mcp_config.json` (open via `...` menu → **MCP Servers** → **Manage M
       "args": [],
       "env": {
         "SIGNOZ_URL": "<your-signoz-url>",
-        "SIGNOZ_API_KEY": "<your-api-key>",
+        "SIGNOZ_API_KEY": "<YOUR_SERVICE_ACCOUNT_KEY>",
         "LOG_LEVEL": "info"
       }
     }
@@ -723,7 +723,7 @@ Add to `mcp_config.json` (open via `...` menu → **MCP Servers** → **Manage M
 
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
 - `<your-signoz-url>`: Your SigNoz instance URL
-- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+- `<YOUR_SERVICE_ACCOUNT_KEY>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
 <TabItem value="sh-antigravity-http" label="HTTP">
@@ -754,7 +754,7 @@ Environment variables for the self-hosted MCP server. SigNoz Cloud users do not 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SIGNOZ_URL` | URL of your SigNoz instance | _(required for stdio; optional for http with OAuth)_ |
-| `SIGNOZ_API_KEY` | API key for authenticating with SigNoz | _(required for stdio; optional for http with OAuth)_ |
+| `SIGNOZ_API_KEY` | Service account key for authenticating with SigNoz — see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) | _(required for stdio; optional for http with OAuth)_ |
 | `TRANSPORT_MODE` | Transport protocol: `stdio` or `http` | `stdio` |
 | `MCP_SERVER_PORT` | Port for HTTP server (when `TRANSPORT_MODE=http`) | `8000` |
 | `LOG_LEVEL` | Logging verbosity: `debug`, `info`, `warn`, `error` | `info` |
@@ -826,7 +826,7 @@ For detailed parameter reference, see the <a href="https://github.com/SigNoz/sig
 
 - For SigNoz Cloud: ensure you are using the correct [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) in the MCP URL.
 - Confirm your API key is valid and has not expired.
-- For self-hosted HTTP mode, ensure the `Authorization` header format is `Bearer <your-api-key>`.
+- For self-hosted HTTP mode, ensure the `Authorization` header format is `Bearer <YOUR_SERVICE_ACCOUNT_KEY>`.
 
 ### SigNoz Cloud connection issues
 
