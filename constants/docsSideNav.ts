@@ -2535,44 +2535,71 @@ const docsSideNav = [
       },
     ],
   },
+  // ─── Alerts ───────────────────────────────────────────────────────────────
   {
     label: 'Alerts',
     type: 'category',
     isExpanded: false,
     route: '/docs/alerts',
-    // link: {
-    //   type: 'generated-index',
-    //   title: 'Alert Management in SigNoz',
-    //   description:
-    //     'This documentation helps you in understanding the Alerts feature in SigNoz and how you can create different types of alerts.',
-    //   slug: '/docs/alerts',
-    // },
     items: [
       {
         type: 'doc',
-        route: '/docs/userguide/alerts-management',
-        label: 'Alert Management',
+        route: '/docs/alerts',
+        label: 'Overview',
       },
-      // {
-      //   type: 'doc',
-      //   route: 'product-features/alerts/alerts-notification-channel',
-      //   label: 'Notification Channel',
-      // },
       {
-        label: 'Setup Alerts Notification',
+        type: 'doc',
+        route: '/docs/userguide/alerts-management',
+        label: 'Managing Alerts',
+      },
+
+      // ─── Alert Types ──────────────────────────────────────────────────────
+      {
+        label: 'Alert Types',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/alerts-management/metrics-based-alerts',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/metrics-based-alerts',
+            label: 'Metrics-based Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/log-based-alerts',
+            label: 'Log-based Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/trace-based-alerts',
+            label: 'Trace-based Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/exceptions-based-alerts',
+            label: 'Exceptions-based Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/anomaly-based-alerts',
+            label: 'Anomaly Detection',
+          },
+        ],
+      },
+
+      // ─── Notification Channels ────────────────────────────────────────────
+      {
+        label: 'Notification Channels',
         type: 'category',
         isExpanded: false,
         route: '/docs/setup-alerts-notification',
-        // link: {
-        //   type: 'generated-index',
-        //   title: 'Setup Alerts Notifications Channel',
-        //   description:
-        //     'You can setup notification channel for sending the generated alerts to other applications. Currently, the following channels are supported.',
-        //   slug: '/docs/setup-alerts-notification',
-        // type: "doc",
-        // route: "product-features/alerts/alerts-notification-channel",
-        // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/setup-alerts-notification',
+            label: 'Set Up Notification Channels',
+          },
           {
             type: 'doc',
             route: '/docs/alerts-management/notification-channel/slack',
@@ -2582,21 +2609,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/notification-channel/webhook',
             label: 'Webhook',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/notification-channel/incident-io',
-            label: 'Incident.io (Prometheus Alertmanager Webhook)',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/notification-channel/rootly',
-            label: 'Rootly (Prometheus Alertmanager Webhook)',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/notification-channel/zenduty',
-            label: 'Zenduty (Prometheus Alertmanager Webhook)',
           },
           {
             type: 'doc',
@@ -2618,97 +2630,70 @@ const docsSideNav = [
             route: '/docs/alerts-management/notification-channel/email',
             label: 'Email',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/incident-io',
+            label: 'Incident.io',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/rootly',
+            label: 'Rootly',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/zenduty',
+            label: 'Zenduty',
+          },
         ],
       },
+
+      // ─── Manage ───────────────────────────────────────────────────────────
       {
-        type: 'doc',
-        route: '/docs/alerts-management/anomaly-based-alerts',
-        label: 'Anomaly based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/metrics-based-alerts',
-        label: 'Metrics based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/log-based-alerts',
-        label: 'Log based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/trace-based-alerts',
-        label: 'Trace based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/exceptions-based-alerts',
-        label: 'Exceptions based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/planned-maintenance',
-        label: 'Planned Maintenance',
-      },
-      {
-        type: 'doc',
+        label: 'Manage',
+        type: 'category',
+        isExpanded: false,
         route: '/docs/alerts-management/routing-policy',
-        label: 'Routing Policies',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/alerts-history',
-        label: 'Alerts History',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/terraform-provider-signoz',
-        label: 'Terraform Provider',
-      },
-      {
-        type: 'category',
-        route: '/docs/alerts-management/troubleshooting/troubleshooting',
-        label: 'Troubleshooting',
-        isExpanded: false,
         items: [
           {
             type: 'doc',
-            route: '/docs/alerts-management/troubleshooting/faqs',
-            label: 'General FAQs',
+            route: '/docs/alerts-management/routing-policy',
+            label: 'Routing Policies',
           },
           {
             type: 'doc',
-            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
-            label: 'Missing Alerts in SigNoz',
+            route: '/docs/alerts-management/planned-maintenance',
+            label: 'Planned Maintenance',
           },
           {
             type: 'doc',
-            route:
-              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
-            label: 'Alerts Firing Without Visible Threshold Breach',
+            route: '/docs/alerts-management/alerts-history',
+            label: 'Alert History',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/terraform-provider-signoz',
+            label: 'Terraform Provider',
           },
         ],
       },
+
+      // ─── Guides ───────────────────────────────────────────────────────────
       {
+        label: 'Guides',
         type: 'category',
-        route: '/docs/alerts-management/user-guides/user-guides',
-        label: 'User Guides',
         isExpanded: false,
+        route: '/docs/alerts-management/user-guides/user-guides',
         items: [
           {
             type: 'doc',
-            route: '/docs/alerts-management/user-guides/understanding-alert-evaluation-patterns',
-            label: 'Understanding Alert Evaluation Patterns',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
-            label: 'Time Aggregation Best Practices',
+            route: '/docs/alerts-management/apdex-alerts',
+            label: 'Apdex Score Alert',
           },
           {
             type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
-            label: 'How to Configure Alerts for Missing Data',
+            label: 'Configure Alerts for Missing Data',
           },
           {
             type: 'doc',
@@ -2717,15 +2702,51 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/alerts-management/user-guides/k8s-cpu-usage-alert',
+            label: 'K8s Container CPU Usage Alert',
+          },
+          {
+            type: 'doc',
             route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
-            label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
+            label: 'K8s Pod Startup Alerts',
           },
         ],
       },
+
+      // ─── Troubleshooting ──────────────────────────────────────────────────
       {
-        type: 'doc',
-        route: '/docs/alerts-management/apdex-alerts',
-        label: 'Apdex Alerts',
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/alerts-management/troubleshooting/troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/understanding-alert-evaluation-patterns',
+            label: 'Alert Evaluation Patterns',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
+            label: 'Time Aggregation Best Practices',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
+            label: 'Missing Alerts',
+          },
+          {
+            type: 'doc',
+            route:
+              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
+            label: 'Alerts Firing Without Visible Breach',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/faqs',
+            label: 'FAQs',
+          },
+        ],
       },
     ],
   },

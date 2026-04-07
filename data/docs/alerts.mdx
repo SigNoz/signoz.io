@@ -1,98 +1,50 @@
 ---
-date: 2026-04-01
-title: Alert Management in SigNoz
-description: Explore SigNoz alert types including metrics-based, log-based, trace-based, exceptions-based, and anomaly detection alerts.
+date: 2026-04-07
+title: Alerts
 id: alerts
+description: Monitor your applications and infrastructure with SigNoz alerts — set thresholds, detect anomalies, and route notifications to your team.
+doc_type: explanation
 ---
 
-This documentation helps you in understanding the Alerts feature in SigNoz and how you can create different types of alerts.
+Use SigNoz alerts to define conditions on your metrics, logs, and traces data, and get notified when those conditions are met. Alerts help you detect and respond to issues before they affect your users.
 
-<DocCardContainer>
+## What you can do with Alerts
 
-<DocCard
-    title="Alert Management"
-    description="Alerts in SigNoz can help you to define which data to monitor, set thresholds to detect potential problems..."
-    href="/docs/userguide/alerts-management"
-/>
+- Create threshold-based alerts on metrics, logs, traces, or exceptions
+- Detect anomalies automatically using historical patterns and seasonality
+- Route alert notifications to Slack, PagerDuty, MS Teams, email, and more
+- Suppress alerts during planned maintenance windows
+- Analyze alert history to understand frequency, resolution time, and top contributors
+- Manage alerts as code using the Terraform provider
 
-<DocCard
-    title="Setup Alerts Notifications"
-    description="You can setup notification channel for sending the generated alerts to other applications. Currently, the following channels are ..."
-    href="/docs/setup-alerts-notification"
-/>
+## Where to find it
 
-<DocCard
-    title="📄️ Anomaly based alerts"
-    description="An Anomaly-based alert in SigNoz allows you to define conditions based on metric data..."
-    href="/docs/alerts-management/anomaly-based-alerts"
-/>
+Go to **Alerts** in the left navigation menu in SigNoz.
 
-<DocCard
-    title="📄️ Metrics based alerts"
-    description="A Metric-based alert in SigNoz allows you to define conditions based on metric data..."
-    href="/docs/alerts-management/metrics-based-alerts"
-/>
+## Alert types
 
+| Alert type | Use when |
+|---|---|
+| [Metrics-based](https://signoz.io/docs/alerts-management/metrics-based-alerts/) | Monitor numeric metrics: CPU, memory, error rates, latency |
+| [Log-based](https://signoz.io/docs/alerts-management/log-based-alerts/) | Alert on log patterns, keywords, or aggregated log counts |
+| [Trace-based](https://signoz.io/docs/alerts-management/trace-based-alerts/) | Alert on span attributes, latency percentiles, or trace error rates |
+| [Exceptions-based](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) | Alert when specific application exceptions are detected |
+| [Anomaly detection](https://signoz.io/docs/alerts-management/anomaly-based-alerts/) | Alert when a metric deviates from its historical seasonal pattern |
 
-<DocCard
-    title="📄️ Log based alerts"
-    description="A Log-based alert allows you to define conditions based on log data,..."
-    href="/docs/alerts-management/log-based-alerts"
-/>
+## How alerts work
 
-<DocCard
-    title="📄️ Trace based alerts"
-    description="A Trace-based alert in SigNoz allows you to define conditions based on trace data..."
-    href="/docs/alerts-management/trace-based-alerts"
-/>
+Every alert has three parts:
 
+1. **Query** — defines what data to evaluate using the Query Builder (metrics, logs, traces) or a ClickHouse SQL query
+2. **Conditions** — defines when to fire: threshold value, match type (at least once, all the time, on average, in total, last), and evaluation window
+3. **Configuration** — sets severity, name, description, labels, and which notification channels to use
 
-<DocCard
-    title="📄️ Exceptions based alerts"
-    description="An Exceptions-based alert in SigNoz allows you to define conditions..."
-    href="/docs/alerts-management/exceptions-based-alerts"
-/>
+SigNoz evaluates each alert on a configurable frequency (default: every 1 minute). When the condition is met for the specified window, notifications are dispatched to the configured channels.
 
-<DocCard
-    title="📄️ Planned Maintenance"
-    description="Planned Maintenance in SigNoz allows you to schedule maintenance windows for your application..."
-    href="/docs/alerts-management/planned-maintenance"
-/>
+## Related pages
 
-<DocCard
-    title="📄️ Routing Policies"
-    description="Routing Policies in SigNoz allows you to route notifications dynamically based on labels..."
-    href="/docs/alerts-management/routing-policy"
-/>
-
-<DocCard
-    title="📄️ Alerts History"
-    description="The Alerts History feature helps you analyze and understand the behavior of your alerts over time..."
-    href="/docs/alerts-management/alerts-history"
-/>
-
-<DocCard
-    title="📄️ Terraform Provider"
-    description="Terraform provider `SigNoz/signoz` helps you manage SigNoz Alertz as code..."
-    href="/docs/alerts-management/terraform-provider-signoz"
-/>
-
-<DocCard
-    title="📄️ User Guides"
-    description="Guides to help you navigate and utilize the alerting features in SigNoz."
-    href="/docs/alerts-management/user-guides/user-guides/"
-/>
-
-<DocCard
-    title="📄️ Troubleshooting"
-    description="Common issues and solutions related to alerts in SigNoz."
-    href="/docs/alerts-management/troubleshooting/troubleshooting/"
-/>
-
-<DocCard
-    title="📄️ Setup Apdex Alert"
-    description="Setup alerts to evaluate and monitor your application's Apdex Score."
-    href="/docs/alerts-management/apdex-alerts"
-/>
-
-</DocCardContainer>
+- [Managing Alerts](https://signoz.io/docs/userguide/alerts-management/)
+- [Set Up Notification Channels](https://signoz.io/docs/setup-alerts-notification/)
+- [Routing Policies](https://signoz.io/docs/alerts-management/routing-policy/)
+- [Planned Maintenance](https://signoz.io/docs/alerts-management/planned-maintenance/)
+- [Alert History](https://signoz.io/docs/alerts-management/alerts-history/)
