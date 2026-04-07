@@ -108,6 +108,7 @@ const MainSection: React.FC = () => {
             >
               <img
                 src="/img/blog/2025/09/interactive-dashboards.webp"
+                alt="Line chart with a context menu to view traces or logs for a selected data point"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -172,6 +173,7 @@ const MainSection: React.FC = () => {
             >
               <img
                 src="/img/blog/2025/09/query-builder-v5.webp"
+                alt="Query builder with SQL-like autocomplete for service_name and matching log results"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -225,6 +227,7 @@ const MainSection: React.FC = () => {
             >
               <img
                 src="/img/blog/2025/09/oss-improvements.webp"
+                alt="SigNoz Community Edition graphic highlighting PostgreSQL, SQLite, and multi-region support"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -278,6 +281,7 @@ const MainSection: React.FC = () => {
             >
               <img
                 src="/img/blog/2025/09/trace-operators.webp"
+                alt="Service dependency graphic showing direct and indirect relationships between distributed services"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -331,6 +335,7 @@ const MainSection: React.FC = () => {
             >
               <img
                 src="/img/blog/2025/09/cost-meter.webp"
+                alt="Usage cost dashboard with stacked bars grouped by deployment environment"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">

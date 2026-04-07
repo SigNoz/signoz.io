@@ -181,7 +181,7 @@ const CustomerCard: React.FC<CardProps> = ({ logo, title, name, position, href }
       <div className="group min-h-[19rem] cursor-pointer rounded border border-signoz_slate-400 bg-signoz_ink-400 p-12 hover:bg-signoz_ink-300">
         <div className="flex flex-col gap-3">
           <div className="mb-4 flex h-12 items-start">
-            <img src={logo} className="max-h-10 max-w-32 object-contain" />
+            <img src={logo} alt="" className="max-h-10 max-w-32 object-contain" />
           </div>
           <div className="text-base font-semibold">{title}</div>
           <div>

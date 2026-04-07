@@ -35,6 +35,7 @@ export default function BlogPostCard({
         <img
           loading="lazy"
           src={authorData.image_url}
+          alt=""
           className="my-auto inline-block aspect-square h-6 w-6 shrink-0 rounded-full"
         />
         <div className="text-xs capitalize">{authorData.name}</div>
