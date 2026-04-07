@@ -39,6 +39,7 @@ We've published a complete example application at <a href="https://github.com/Si
 ```bash
 go get go.temporal.io/sdk@latest
 go get go.temporal.io/sdk/contrib/opentelemetry@latest
+go get go.temporal.io/sdk/contrib/envconfig@latest
 go get go.opentelemetry.io/otel@latest
 go get go.opentelemetry.io/otel/sdk@latest
 go get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc@latest
@@ -50,7 +51,7 @@ go get go.opentelemetry.io/contrib/bridges/otelslog@latest
 ```
 
 <Admonition type="note">
-  `go.temporal.io/sdk/contrib/opentelemetry` is a separate Go module from the main Temporal SDK. Both `go get` calls are required.
+  `go.temporal.io/sdk/contrib/opentelemetry` and `go.temporal.io/sdk/contrib/envconfig` are separate Go modules from the main Temporal SDK. All three `go get` calls are required.
 </Admonition>
 
 ### Step 2: Configure OpenTelemetry Providers
@@ -86,10 +87,18 @@ func InitProviders(ctx context.Context) (shutdown func(context.Context) error, e
 		serviceName = "temporal-go-app"
 	}
 
-	res := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.ServiceName(serviceName),
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceName(serviceName),
+		),
+		resource.WithFromEnv(),
+		resource.WithTelemetrySDK(),
+		resource.WithProcess(),
+		resource.WithHost(),
 	)
+	if err != nil {
+		return nil, fmt.Errorf("resource: %w", err)
+	}
 
 	// Traces
 	traceExp, err := otlptracegrpc.New(ctx)
@@ -144,21 +153,74 @@ func InitProviders(ctx context.Context) (shutdown func(context.Context) error, e
 <details>
 <ToggleHeading>What this does</ToggleHeading>
 
-- Reads `OTEL_SERVICE_NAME` to set the service name on all telemetry; falls back to `temporal-go-app`
+- Reads `OTEL_SERVICE_NAME` to set the service name; falls back to `temporal-go-app`
+- `resource.WithFromEnv()` picks up `OTEL_RESOURCE_ATTRIBUTES` automatically; `WithTelemetrySDK()`, `WithProcess()`, and `WithHost()` add SDK version, process, and host attributes to every signal
 - Creates OTLP/gRPC exporters for traces, metrics, and logs — `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are read automatically by the exporters
 - Sets global OTel providers so all instrumentation in the process picks them up
 - Returns a `shutdown` function — call it with `defer` to flush all buffered data before exit
 </details>
 
-### Step 3: Instrument the Temporal Worker
+### Step 3: Configure Temporal Connection
+
+Create `config/config.go` to handle Temporal connection options. Without `TEMPORAL_PROFILE` set it connects to `localhost:7233` (local dev server). With `TEMPORAL_PROFILE=cloud` it loads address, namespace, and TLS settings from `~/.config/temporalio/temporal.toml`.
+
+```go:config/config.go
+package config
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/contrib/envconfig"
+)
+
+// CreateClientOptions returns Temporal client options.
+// If TEMPORAL_PROFILE is set, it loads connection settings (address, namespace, TLS)
+// from the profile in ~/.config/temporalio/temporal.toml.
+// Otherwise it returns empty options, which connect to localhost:7233.
+func CreateClientOptions() (client.Options, error) {
+	profileName := os.Getenv("TEMPORAL_PROFILE")
+	if profileName == "" {
+		return client.Options{}, nil
+	}
+
+	userDir, err := os.UserConfigDir()
+	if err != nil {
+		return client.Options{}, fmt.Errorf("failed to get user config dir: %w", err)
+	}
+	configFilePath := filepath.Join(userDir, "temporalio", "temporal.toml")
+
+	opts, err := envconfig.LoadClientOptions(envconfig.LoadClientOptionsRequest{
+		ConfigFilePath:    configFilePath,
+		ConfigFileProfile: profileName,
+	})
+	if err != nil {
+		return client.Options{}, fmt.Errorf("failed to load profile %q: %w", profileName, err)
+	}
+
+	return opts, nil
+}
+```
+
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
+- With no `TEMPORAL_PROFILE` env var, returns empty `client.Options{}` — the Temporal SDK defaults to `localhost:7233`
+- With `TEMPORAL_PROFILE=cloud` (or any profile name), reads connection settings from `~/.config/temporalio/temporal.toml` — the same config file used by the Temporal CLI
+- This lets the same binary work for local dev and Temporal Cloud without code changes
+</details>
+
+### Step 4: Instrument the Temporal Worker
 
 ```go:worker/main.go
 package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
-	"os"
 
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.temporal.io/sdk/client"
@@ -167,6 +229,7 @@ import (
 	"go.temporal.io/sdk/worker"
 
 	"your-module/activities"
+	"your-module/config"
 	"your-module/telemetry"
 	"your-module/workflows"
 )
@@ -176,39 +239,41 @@ func main() {
 
 	shutdown, err := telemetry.InitProviders(ctx)
 	if err != nil {
-		slog.Error("failed to init OTel", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to init OTel: %v", err)
 	}
 	defer shutdown(ctx)
 
-	// Route slog output to SigNoz via OTel log bridge
-	slog.SetDefault(slog.New(otelslog.NewHandler("temporal-worker")))
-
 	tracingInterceptor, err := temporalotel.NewTracingInterceptor(temporalotel.TracerOptions{})
 	if err != nil {
-		slog.Error("failed to create tracing interceptor", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to create tracing interceptor: %v", err)
 	}
 
 	metricsHandler := temporalotel.NewMetricsHandler(temporalotel.MetricsHandlerOptions{})
 
-	c, err := client.Dial(client.Options{
-		Interceptors:   []interceptor.ClientInterceptor{tracingInterceptor},
-		MetricsHandler: metricsHandler,
-	})
+	clientOpts, err := config.CreateClientOptions()
 	if err != nil {
-		slog.Error("failed to create Temporal client", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to create client options: %v", err)
+	}
+	clientOpts.Interceptors = []interceptor.ClientInterceptor{tracingInterceptor}
+	clientOpts.MetricsHandler = metricsHandler
+
+	c, err := client.Dial(clientOpts)
+	if err != nil {
+		log.Fatalf("failed to create Temporal client: %v", err)
 	}
 	defer c.Close()
 
-	w := worker.New(c, "my-task-queue", worker.Options{})
+	// Route slog output to SigNoz via OTel log bridge (set after all setup so log.Fatalf above still reaches stderr)
+	slog.SetDefault(slog.New(otelslog.NewHandler("temporal-worker")))
+
+	w := worker.New(c, "my-task-queue", worker.Options{
+		Interceptors: []interceptor.WorkerInterceptor{tracingInterceptor},
+	})
 	w.RegisterWorkflow(workflows.MyWorkflow)
 	w.RegisterActivity(activities.Greet)
 
 	if err := w.Run(worker.InterruptCh()); err != nil {
-		slog.Error("worker exited with error", "error", err)
-		os.Exit(1)
+		log.Fatalf("worker exited with error: %v", err)
 	}
 }
 ```
@@ -222,21 +287,22 @@ func main() {
 - Both `NewTracingInterceptor` and `NewMetricsHandler` use the global OTel providers set up in `telemetry.InitProviders`
 </details>
 
-### Step 4: Instrument the Temporal Client
+### Step 5: Instrument the Temporal Client
 
 ```go:starter/main.go
 package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
-	"os"
 
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.temporal.io/sdk/client"
 	temporalotel "go.temporal.io/sdk/contrib/opentelemetry"
 	"go.temporal.io/sdk/interceptor"
 
+	"your-module/config"
 	"your-module/telemetry"
 	"your-module/workflows"
 )
@@ -246,38 +312,39 @@ func main() {
 
 	shutdown, err := telemetry.InitProviders(ctx)
 	if err != nil {
-		slog.Error("failed to init OTel", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to init OTel: %v", err)
 	}
 	defer shutdown(ctx)
 
-	slog.SetDefault(slog.New(otelslog.NewHandler("temporal-client")))
-
 	tracingInterceptor, err := temporalotel.NewTracingInterceptor(temporalotel.TracerOptions{})
 	if err != nil {
-		slog.Error("failed to create tracing interceptor", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to create tracing interceptor: %v", err)
 	}
 
 	metricsHandler := temporalotel.NewMetricsHandler(temporalotel.MetricsHandlerOptions{})
 
-	c, err := client.Dial(client.Options{
-		Interceptors:   []interceptor.ClientInterceptor{tracingInterceptor},
-		MetricsHandler: metricsHandler,
-	})
+	clientOpts, err := config.CreateClientOptions()
 	if err != nil {
-		slog.Error("failed to create Temporal client", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to create client options: %v", err)
+	}
+	clientOpts.Interceptors = []interceptor.ClientInterceptor{tracingInterceptor}
+	clientOpts.MetricsHandler = metricsHandler
+
+	c, err := client.Dial(clientOpts)
+	if err != nil {
+		log.Fatalf("failed to create Temporal client: %v", err)
 	}
 	defer c.Close()
+
+	// Route slog output to SigNoz via OTel log bridge (set after all setup so log.Fatalf above still reaches stderr)
+	slog.SetDefault(slog.New(otelslog.NewHandler("temporal-client")))
 
 	handle, err := c.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
 		ID:        "my-workflow-id",
 		TaskQueue: "my-task-queue",
 	}, workflows.MyWorkflow, "World")
 	if err != nil {
-		slog.Error("failed to start workflow", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to start workflow: %v", err)
 	}
 
 	slog.Info("workflow started", "workflowID", handle.GetID(), "runID", handle.GetRunID())
@@ -287,12 +354,13 @@ func main() {
 <details>
 <ToggleHeading>What this does</ToggleHeading>
 
-- Same interceptor and metrics handler setup as the worker — every `c.ExecuteWorkflow` call produces a trace span linked to the workflow execution
-- `defer shutdown(ctx)` flushes telemetry before the client process exits; skipping this drops the last batch of spans
-- Set `OTEL_SERVICE_NAME=temporal-client` when running this so it appears as a distinct service in SigNoz
+- Same interceptor, metrics handler, and connection config as the worker — every `c.ExecuteWorkflow` call produces a trace span linked to the workflow execution
+- `config.CreateClientOptions()` connects to `localhost:7233` by default, or loads Temporal Cloud settings from `~/.config/temporalio/temporal.toml` when `TEMPORAL_PROFILE` is set
+- `slog.SetDefault` is called after `client.Dial` so any `log.Fatalf` during setup still writes to stderr rather than silently going to OTel
+- `defer shutdown(ctx)` flushes telemetry before the process exits; skipping this drops the last batch of spans
 </details>
 
-### Step 5: Define Workflows and Activities
+### Step 6: Define Workflows and Activities
 
 The tracing interceptor registered in `client.Options` handles all span creation automatically. Workflow and activity code needs no OTel setup for basic tracing.
 
@@ -338,7 +406,7 @@ func Greet(ctx context.Context, name string) (string, error) {
 - To add custom spans inside an activity, use `trace.SpanFromContext(ctx)` from `go.opentelemetry.io/otel/trace`
 </details>
 
-### Step 6: Deploy and Run
+### Step 7: Deploy and Run
 
 <Tabs>
 <TabItem value="vm" label="VM" default>
@@ -697,9 +765,10 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 **Fix**:
 
-1. Verify `slog.SetDefault(slog.New(otelslog.NewHandler(...)))` is called before any log output
-2. Confirm `telemetry.InitProviders` completes successfully — a failed log provider setup will silently drop log records
-3. Set up a log parsing pipeline in SigNoz (see Validate section above)
+1. Verify `slog.SetDefault(slog.New(otelslog.NewHandler(...)))` runs before any `slog.*` calls in application code
+2. Confirm `telemetry.InitProviders` completed successfully — a failed log provider silently drops log records
+3. Note that startup errors use `log.Fatalf` (stdlib `log` package) which writes to stderr, not to SigNoz — this is intentional so errors are always visible in the terminal
+4. Set up a log parsing pipeline in SigNoz (see Validate section above)
 
 ### High cardinality warning
 
