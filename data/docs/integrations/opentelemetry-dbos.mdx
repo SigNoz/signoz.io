@@ -17,12 +17,12 @@ This guide shows you how to instrument your DBOS application with OpenTelemetry 
 ## Prerequisites
 
 - <a href="https://pypi.org/project/dbos/" target="_blank" rel="noopener noreferrer nofollow">
-    Python 3.9+
+    Python 3.10+
   </a>
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - A DBOS application
 
-Tested with Python 3.14 and DBOS version 2.17.0.
+Tested with Python 3.13 and DBOS version 2.17.0.
 
 ## Send telemetry to SigNoz
 
@@ -71,7 +71,7 @@ Use this section if you're deploying your DBOS application directly on a server 
 
 ### Step 3.1 Set the ingestion key environment variable
 
-Set the ingestion key in your shell before you start the application. DBOS reads OTLP authentication headers from this variable at runtime:
+Set the ingestion key in your shell before you start the application. The OpenTelemetry SDK used by DBOS reads authentication headers from this environment variable at runtime:
 
 ```bash
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
@@ -301,7 +301,7 @@ After you start the application and generate traffic, confirm that SigNoz receiv
 </ToggleHeading>
 
 Use the OpenTelemetry Collector when you need to process, filter, or route telemetry before
-it reaches SigNoz. Follow the [Switch to Collector](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted)
+it reaches SigNoz. Follow the [OpenTelemetry Collector setup](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted)
 guide for setup instructions.
 
 For DBOS, point the OTLP endpoints to your collector:
