@@ -83,7 +83,7 @@ To enter a container and execute commands, use `docker exec.`
     docker exec -it <container_name> /bin/bash
     ```
     
-    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-c19803cc-03d2-4707-afe7-f6e8c85e20af.webp" alt="" caption="" />`/bin/bash` provides an interactive shell interface and script execution environment within Docker containers, enabling command execution and process control.
+    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-c19803cc-03d2-4707-afe7-f6e8c85e20af.webp" alt="Interactive bash shell inside a Docker container" caption="" />`/bin/bash` provides an interactive shell interface and script execution environment within Docker containers, enabling command execution and process control.
     
 2. Run the 'ps' command:
 Once inside the container, execute the following:
@@ -92,7 +92,7 @@ Once inside the container, execute the following:
     ps -eaf
     ```
     
-    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.26.01_AM.webp" alt="" caption="" />The `ps -eaf` command provides a comprehensive view of all processes running inside the Docker container, including detailed process information, which aids in monitoring and performance optimization.
+    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.26.01_AM.webp" alt="Process list inside a Docker container" caption="" />The `ps -eaf` command provides a comprehensive view of all processes running inside the Docker container, including detailed process information, which aids in monitoring and performance optimization.
     
 
 This will list all active processes within the container, including important details such as:
@@ -144,7 +144,7 @@ To view the logs from a running container, use the `docker logs` command:
     docker logs <container_name>
     ```
     
-    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.28.29_AM.webp" alt="" caption="" />This command will display the logs from the container’s standard output and standard error streams.
+    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.28.29_AM.webp" alt="Docker container stdout and stderr logs" caption="" />This command will display the logs from the container’s standard output and standard error streams.
     
 
 Key Considerations:
@@ -328,13 +328,14 @@ Supervisor is a powerful tool for controlling and monitoring multiple processes 
         docker build -t python-supervisor-app .
         ```
         
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.45.40_AM.webp" alt="" caption="" />- Run the Docker container:
+        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.45.40_AM.webp" alt="Docker container startup command" caption="" />- Run the Docker container:
         
         ```bash
         docker run -d python-supervisor-app
         ```
         
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.47.03_AM.webp" alt="" caption="" />5. Where to See Supervisor Logs: 
+        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.47.03_AM.webp" alt="Supervisor logs inside a Docker container" caption="" />
+        5. Where to See Supervisor Logs:
     You can access Supervisor logs directly within the container:
         1. Application logs:
             
@@ -342,13 +343,13 @@ Supervisor is a powerful tool for controlling and monitoring multiple processes 
             docker exec -it <container_id> cat /var/log/supervisor/python_app.out.log
             ```
             
-            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.17.41_PM.webp" alt="" caption="" />2. Process status:
+            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.17.41_PM.webp" alt="Supervisor process status inside the container" caption="" />2. Process status:
             
             ```bash
             docker exec -it <container_id> supervisorctl status
             ```
             
-            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.19.32_PM.webp" alt="" caption="" />Using a process manager like Supervisor is particularly useful in environments requiring high reliability and more granular control over process execution within containers.
+            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.19.32_PM.webp" alt="Supervisor managing container processes" caption="" />Using a process manager like Supervisor is particularly useful in environments requiring high reliability and more granular control over process execution within containers.
     
 2. Implement custom logging libraries:
 While Docker provides basic logging mechanisms, integrating custom logging libraries into your application code can give you more detailed and tailored process logging. By adding logging directly into your application, you gain several benefits:
@@ -455,14 +456,15 @@ While Docker provides basic logging mechanisms, integrating custom logging libra
         docker run -d -p 5002:5002 python-loguru-app
         ```
         
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.14.41_PM.webp" alt="" caption="" />1. Accessing Logs: 
+        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.14.41_PM.webp" alt="Loguru log output from a Docker container" caption="" />
+        1. Accessing Logs:
     To view the logs generated by `loguru`, Access container logs: 
         
         ```bash
         docker exec -it <container_id> cat /code/logs/app.log
         ```
         
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.23.26_PM.webp" alt="" caption="" />Integrating logging libraries into your applications is a good approach for teams that need precise control over their logs and want to capture application-specific data.
+        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.23.26_PM.webp" alt="Application logging output from within a Docker container" caption="" />Integrating logging libraries into your applications is a good approach for teams that need precise control over their logs and want to capture application-specific data.
     
 3. Leverage container orchestration
 Managing and logging processes manually in large-scale deployments with multiple containers can quickly become overwhelming. This is where container orchestration platforms like Kubernetes come into play. Kubernetes offers advanced features for managing and monitoring containerized environments, including robust logging capabilities.

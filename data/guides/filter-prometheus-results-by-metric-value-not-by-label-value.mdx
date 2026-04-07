@@ -111,7 +111,7 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     jvm_memory_used_bytes > 10000000
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.08.06_PM.webp" alt="" caption="" />2. Dynamic Analysis
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.08.06_PM.webp" alt="JVM memory usage query showing dynamic analysis" caption="" />2. Dynamic Analysis
     
     Adapt your queries to reflect changing system behaviors without modifying label structures. For example, if you want to monitor the JVM memory usage and focus on instances where the committed memory exceeds 50 MB, you can use:
     
@@ -119,7 +119,7 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     jvm_memory_committed_bytes > 50 * 1024 * 1024
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.10.29_PM.webp" alt="" caption="" />3. Complex Conditions
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.10.29_PM.webp" alt="JVM memory usage query showing complex conditions" caption="" />3. Complex Conditions
     
     Value-based filtering allows you to create sophisticated queries that combine multiple conditions. This capability is particularly useful for analyzing several metrics simultaneously. For example, you might want to identify instances where both the live threads and CPU usage are above certain thresholds:
     
@@ -127,7 +127,7 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     jvm_threads_live_threads > 20 and system_cpu_usage > 0.04
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.54.21_PM.webp" alt="" caption="" />This query provides a comprehensive view of resource utilization, allowing you to pinpoint potential issues that could affect system performance. However, if the values do not meet the conditions during the time of the query, it may return an `Empty Query result`.
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.54.21_PM.webp" alt="Prometheus query result showing an empty result when conditions are not met" caption="" />This query provides a comprehensive view of resource utilization, allowing you to pinpoint potential issues that could affect system performance. However, if the values do not meet the conditions during the time of the query, it may return an `Empty Query result`.
     
 4. Efficient Alerting
     
@@ -137,7 +137,7 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     increase(jvm_gc_pause_seconds_count[5m]) >= 0
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.57.53_PM.webp" alt="" caption="" />This alert will only activate if there are more than 10 HTTP 500 errors in the last 5 minutes, allowing for a focused response to real issues.
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.57.53_PM.webp" alt="Prometheus alert rule for HTTP 500 errors" caption="" />This alert will only activate if there are more than 10 HTTP 500 errors in the last 5 minutes, allowing for a focused response to real issues.
     
 5. Monitoring CPU Usage
     
@@ -147,7 +147,7 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     system_cpu_usage > 0.13
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.39.50_PM.webp" alt="" caption="" />This query directly retrieves all instances where CPU utilization exceeds 80%, providing immediate insights into servers that may require scaling or optimization.
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.39.50_PM.webp" alt="Prometheus query showing value-based CPU utilization filtering" caption="" />This query directly retrieves all instances where CPU utilization exceeds 80%, providing immediate insights into servers that may require scaling or optimization.
     
 
 ### Comparison Between Label-Based and Value-Based Filtering
@@ -391,17 +391,17 @@ Grafana, a popular visualization tool for Prometheus, supports value-based filte
 
 1. Design Your Dashboard Layout: Start by outlining the layout of your dashboard. Identify the key metrics you want to visualize, such as CPU usage, memory consumption, or request latency. A well-organized layout enhances readability and makes it easier to spot trends.
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-bf9f3868-dab0-4127-b9e2-eedec9c9662e.webp" alt="" caption="" />2. Add Panels for Key Metrics: Use Grafana panels to display different metrics. Each panel can represent a specific value-based query. For instance, a panel showing high CPU usage might use the query:
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-bf9f3868-dab0-4127-b9e2-eedec9c9662e.webp" alt="Grafana dashboard panel showing value-based CPU usage" caption="" />2. Add Panels for Key Metrics: Use Grafana panels to display different metrics. Each panel can represent a specific value-based query. For instance, a panel showing high CPU usage might use the query:
     
     ```
     process_cpu_usage > 0.002
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-2b99dc90-14c7-48a6-9bfe-c83b2d2e2c68.webp" alt="" caption="" />By displaying these metrics side-by-side, you can quickly assess the overall system health.
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-2b99dc90-14c7-48a6-9bfe-c83b2d2e2c68.webp" alt="Grafana dashboard panels comparing key metrics side by side" caption="" />By displaying these metrics side-by-side, you can quickly assess the overall system health.
     
 3. Utilize Graphs and Alerts: Choose appropriate visualization types for your metrics. Use time-series graphs for metrics that change over time, such as CPU and memory utilization. Set up alerts for any value-based filters you define. For example, configure alerts for CPU utilization exceeding a certain threshold, ensuring your team can respond proactively.
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_11.39.18_PM.webp" alt="" caption="" />4. Interactive Controls: Grafana allows for interactive controls, such as sliders or dropdown menus, to adjust filter values dynamically. This interactivity enables users to tweak thresholds on the fly, facilitating real-time analysis without needing to modify queries manually.
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_11.39.18_PM.webp" alt="Grafana dashboard with interactive value threshold controls" caption="" />4. Interactive Controls: Grafana allows for interactive controls, such as sliders or dropdown menus, to adjust filter values dynamically. This interactivity enables users to tweak thresholds on the fly, facilitating real-time analysis without needing to modify queries manually.
 
 ### Using Template Variables for Flexible Value Thresholds
 
