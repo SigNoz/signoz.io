@@ -1,5 +1,9 @@
-import React from 'react'
+'use client'
+
+import { ChevronDown, Info } from 'lucide-react'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from 'app/lib/utils'
+import { useState } from 'react'
 
 type AdmonitionKind = 'note' | 'tip' | 'warning' | 'danger' | 'info' | 'important' | 'default'
 
@@ -86,31 +90,78 @@ const getTitle = (type?: string) => {
   }
 }
 
-const InfoIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-  </svg>
+const admonitionRootVariants = cva(
+  'admonition not-prose my-4 rounded-[4px] border border-solid shadow-none',
+  {
+    variants: {
+      size: {
+        sm: 'p-3',
+        lg: 'p-4',
+      },
+    },
+    defaultVariants: {
+      size: 'lg',
+    },
+  }
 )
 
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
+const admonitionIconCircleVariants = cva(
+  'flex shrink-0 items-center justify-center font-medium leading-none',
+  {
+    variants: {
+      size: {
+        sm: 'h-6 w-6 text-xs',
+        lg: 'h-7 w-7 text-sm',
+      },
+    },
+    defaultVariants: {
+      size: 'lg',
+    },
+  }
 )
+
+const admonitionTitleVariants = cva('min-w-0 font-semibold leading-snug tracking-tight', {
+  variants: {
+    size: {
+      sm: 'text-sm',
+      lg: 'text-base',
+    },
+  },
+  defaultVariants: {
+    size: 'lg',
+  },
+})
+
+const admonitionChevronVariants = cva('shrink-0 opacity-50', {
+  variants: {
+    size: {
+      sm: 'h-4 w-4',
+      lg: 'h-[18px] w-[18px]',
+    },
+  },
+  defaultVariants: {
+    size: 'lg',
+  },
+})
+
+const admonitionContentVariants = cva('admonition-content max-w-none leading-relaxed', {
+  variants: {
+    size: {
+      sm: 'pl-[34px] text-sm',
+      lg: 'pl-[38px] text-base',
+    },
+  },
+  defaultVariants: {
+    size: 'lg',
+  },
+})
+
+export type AdmonitionSizeVariant = NonNullable<VariantProps<typeof admonitionRootVariants>['size']>
 
 export type AdmonitionProps = {
   type?: string
   title?: string
-  variant?: 'sm' | 'lg'
+  variant?: AdmonitionSizeVariant
   defaultCollapsed?: boolean | 'true' | 'false'
   children?: React.ReactNode
 }
@@ -120,56 +171,54 @@ const Admonition = ({ type, title, variant, defaultCollapsed, children }: Admoni
   const kind = normalizeKind(type)
   const theme = ADMONITION_THEMES[kind]
   const displayTitle = title ?? getTitle(type)
+
   const isDefaultCollapsed = defaultCollapsed === true || defaultCollapsed === 'true'
+  const [isCollapsed, setIsCollapsed] = useState(isDefaultCollapsed)
+
+  const iconAndTitle = (
+    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <span className={cn(admonitionIconCircleVariants({ size }))} aria-hidden>
+        <Info className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', theme.iconColor)} />
+      </span>
+      <span className={cn(admonitionTitleVariants({ size }), theme.title)}>{displayTitle}</span>
+    </div>
+  )
 
   return (
-    <details
-      className={cn(
-        'group/admonition admonition not-prose my-4 rounded-[4px] border border-solid shadow-none',
-        size === 'sm' ? 'p-3' : 'p-4',
-        theme.root
-      )}
-      open={!isDefaultCollapsed || undefined}
-    >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
-          <span
-            className={cn(
-              'flex shrink-0 items-center justify-center font-medium leading-none',
-              size === 'sm' ? 'h-6 w-6 text-xs' : 'h-7 w-7 text-sm'
-            )}
-            aria-hidden
-          >
-            <InfoIcon className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', theme.iconColor)} />
-          </span>
-          <span
-            className={cn(
-              'min-w-0 font-semibold leading-snug tracking-tight',
-              size === 'sm' ? 'text-sm' : 'text-base',
-              theme.title
-            )}
-          >
-            {displayTitle}
-          </span>
-        </div>
-        <ChevronDownIcon
-          className={cn(
-            'shrink-0 opacity-50 transition-transform duration-200',
-            size === 'sm' ? 'h-4 w-4' : 'h-[18px] w-[18px]',
-            'rotate-0 group-open/admonition:rotate-180'
-          )}
-        />
-      </summary>
+    <div className={cn(admonitionRootVariants({ size }), theme.root)}>
       <div
         className={cn(
-          'admonition-content mt-3 max-w-none leading-relaxed',
-          size === 'sm' ? 'pl-[34px] text-sm' : 'pl-[38px] text-base',
-          theme.bodyMuted
+          'flex items-center justify-between gap-3',
+          !isCollapsed && (size === 'sm' ? 'mb-2' : 'mb-3')
+        )}
+      >
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-3"
+          onClick={() => setIsCollapsed((prev) => !prev)}
+          aria-expanded={!isCollapsed}
+        >
+          {iconAndTitle}
+          <ChevronDown
+            className={cn(
+              admonitionChevronVariants({ size }),
+              'transition-transform duration-200',
+              isCollapsed ? 'rotate-0' : 'rotate-180'
+            )}
+            aria-hidden
+          />
+        </button>
+      </div>
+      <div
+        className={cn(
+          admonitionContentVariants({ size }),
+          theme.bodyMuted,
+          isCollapsed && 'hidden'
         )}
       >
         {children}
       </div>
-    </details>
+    </div>
   )
 }
 

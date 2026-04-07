@@ -138,10 +138,21 @@ const getMdxComponentFromCode = async (code: string) => {
   const ReactDOM = await import('react-dom')
   const jsxRuntime = await import('react/jsx-runtime')
 
+  const AdmonitionStub = (props: { type?: string; title?: string; children?: unknown }) => {
+    const label = [props.type, props.title].filter(Boolean).join(': ')
+    return React.createElement(
+      'blockquote',
+      null,
+      label ? React.createElement('strong', null, label) : null,
+      props.children
+    )
+  }
+
   const scope = {
     React,
     ReactDOM,
     _jsx_runtime: jsxRuntime,
+    AdmonitionGlobal: AdmonitionStub,
   }
 
   // This is effectively eval(), but the input is Contentlayer-compiled MDX from trusted

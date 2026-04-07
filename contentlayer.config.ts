@@ -480,6 +480,26 @@ export default makeSource({
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
       rehypePresetMinify,
     ],
+    esbuildOptions: (opts) => {
+      opts.plugins = [
+        ...(opts.plugins ?? []),
+        {
+          name: 'externalize-admonition',
+          setup(build) {
+            build.onResolve({ filter: /Admonition\/Admonition/ }, () => ({
+              path: 'admonition-external',
+              namespace: 'admonition-global',
+            }))
+            build.onLoad({ filter: /.*/, namespace: 'admonition-global' }, () => ({
+              contents: 'module.exports = AdmonitionGlobal',
+              loader: 'js',
+            }))
+          },
+        },
+      ]
+      opts.target = 'es2020'
+      return opts
+    },
   },
   onSuccess: async (importData) => {
     const { allBlogs } = await importData()

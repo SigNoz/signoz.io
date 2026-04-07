@@ -1,7 +1,7 @@
 import 'css/prism.css'
 
 import { components } from '@/components/MDXComponents'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
+import MDXRenderer from '@/components/MDXRenderer'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allBlogs, allAuthors } from 'contentlayer/generated'
 import type { Authors, Blog } from 'contentlayer/generated'
@@ -128,7 +128,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
         >
-          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          <MDXRenderer code={post.body.code} components={components} toc={post.toc} />
         </OpenTelemetryHubContent>
       </>
     )
@@ -160,7 +160,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
         authors={authorList}
         toc={post.toc}
       >
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        <MDXRenderer code={post.body.code} components={components} toc={post.toc} />
         {/* NewsroomLayout is the only layout that needs inline PageFeedback here
             because it doesn't extend ArticleLayout, which handles feedback placement internally
             for BlogLayout and OpenTelemetryLayout. */}
