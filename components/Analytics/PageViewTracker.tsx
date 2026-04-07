@@ -11,7 +11,12 @@ const FLAGGED_TIMEZONES = (process.env.NEXT_PUBLIC_PAGEVIEW_FLAGGED_TIMEZONES ||
   .map((timezone) => timezone.trim())
   .filter(Boolean)
 const FLAGGED_TIMEZONE_SET = new Set(FLAGGED_TIMEZONES)
-const FLAGGED_USER_AGENT = (process.env.NEXT_PUBLIC_PAGEVIEW_FLAGGED_USER_AGENT || '').trim()
+const FLAGGED_USER_AGENTS = new Set(
+  (process.env.NEXT_PUBLIC_PAGEVIEW_FLAGGED_USER_AGENT || '')
+    .split(',')
+    .map((ua) => ua.trim())
+    .filter(Boolean)
+)
 
 export default function PageViewTracker() {
   const pathname = usePathname()
@@ -36,7 +41,7 @@ export default function PageViewTracker() {
     const timezoneOffsetMinutes = new Date().getTimezoneOffset()
     const isFlaggedTimeZone = resolvedTimeZone ? FLAGGED_TIMEZONE_SET.has(resolvedTimeZone) : false
     const isFlaggedPageView =
-      FLAGGED_USER_AGENT !== '' && userAgent === FLAGGED_USER_AGENT && isFlaggedTimeZone
+      FLAGGED_USER_AGENTS.size > 0 && FLAGGED_USER_AGENTS.has(userAgent) && isFlaggedTimeZone
 
     if (isFlaggedPageView) {
       logEvent({

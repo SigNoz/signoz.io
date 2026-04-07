@@ -1,6 +1,33 @@
-import Hero from '@/components/ui/Hero'
+import siteMetadata from '@/data/siteMetadata'
+import { Metadata } from 'next'
 import Link from 'next/link'
-import { Children } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Product Comparisons',
+  description: 'Product Comparisons | SigNoz',
+  openGraph: {
+    title: 'Product Comparisons | SigNoz',
+    description: 'Product Comparisons | SigNoz',
+    url: `${siteMetadata.siteUrl}/product-comparison`,
+    siteName: siteMetadata.title,
+    locale: 'en_US',
+    type: 'website',
+    images: [siteMetadata.socialBanner],
+  },
+  twitter: {
+    title: 'Product Comparisons | SigNoz',
+    description: 'Product Comparisons | SigNoz',
+    images: [siteMetadata.socialBanner],
+    site: siteMetadata.twitter,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: `${siteMetadata.siteUrl}/product-comparison`,
+  },
+}
 
 const comparisons = [
   {

@@ -1,13 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { clearPathsCache } from '@/utils/strapi'
+import { getStrapiDocumentCacheTags, parseCmsUrlPath } from '@/utils/cmsRevalidatePaths'
+
+type PathInput = string | { urlPath: string; contentKey?: string }
 
 interface RevalidationResult {
   path?: string
   tag?: string
+  tags?: string[]
   revalidated: boolean
-  type: 'route' | 'path' | 'tag'
+  type: 'route' | 'path' | 'tag' | 'cmsPath'
   timestamp: string
+}
+
+function normalizePathInput(input: PathInput): { urlPath: string; contentKey?: string } {
+  if (typeof input === 'string') {
+    return { urlPath: input }
+  }
+  return { urlPath: input.urlPath, contentKey: input.contentKey }
+}
+
+function revalidateCmsUrlPath(
+  urlPath: string,
+  explicitContentKey: string | undefined,
+  results: RevalidationResult[]
+) {
+  const normalized = urlPath.startsWith('/') ? urlPath : `/${urlPath}`
+  revalidatePath(normalized)
+
+  const contentKey =
+    explicitContentKey?.replace(/^\/+/, '').replace(/\/$/, '') ||
+    parseCmsUrlPath(normalized)?.contentKey
+
+  const tags: string[] = []
+  if (contentKey) {
+    const parsed = parseCmsUrlPath(normalized)
+    if (parsed) {
+      const strapiTags = getStrapiDocumentCacheTags({
+        ...parsed,
+        contentKey,
+      })
+      for (const t of strapiTags) {
+        revalidateTag(t)
+        tags.push(t)
+      }
+    }
+  }
+
+  results.push({
+    path: normalized,
+    tags,
+    revalidated: true,
+    type: 'cmsPath',
+    timestamp: new Date().toISOString(),
+  })
 }
 
 export async function POST(request: NextRequest) {
@@ -22,15 +69,15 @@ export async function POST(request: NextRequest) {
     const results: RevalidationResult[] = []
 
     if (clearCache) {
+      // Clears in-memory Strapi paths list only for this serverless instance; safe no-op across cold starts.
       clearPathsCache()
-      console.log('Cleared paths cache')
+      console.log('Cleared paths cache (instance-local)')
     }
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
       revalidateTag('comparisons-list')
-      revalidateTag('mdx-paths')
 
       results.push({
         path: '/',
@@ -41,28 +88,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (path) {
-      revalidatePath(path)
-      revalidateTag(`mdx-content-${path}`)
-
-      results.push({
-        path,
-        revalidated: true,
-        type: 'path',
-        timestamp: new Date().toISOString(),
-      })
+      const { urlPath, contentKey } = normalizePathInput(path as PathInput)
+      revalidateCmsUrlPath(urlPath, contentKey, results)
     }
 
     if (paths && Array.isArray(paths)) {
-      for (const p of paths) {
-        revalidatePath(p)
-        revalidateTag(`mdx-content-${p}`)
-
-        results.push({
-          path: p,
-          revalidated: true,
-          type: 'path',
-          timestamp: new Date().toISOString(),
-        })
+      for (const item of paths) {
+        const { urlPath, contentKey } = normalizePathInput(item as PathInput)
+        revalidateCmsUrlPath(urlPath, contentKey, results)
       }
     }
 
@@ -90,12 +123,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('Revalidation completed:', results)
+    console.log('Revalidation completed:', JSON.stringify(results))
 
     return NextResponse.json({
       revalidated: true,
       results,
       timestamp: new Date().toISOString(),
+      vercelEnv: process.env.VERCEL_ENV ?? null,
     })
   } catch (error) {
     console.error('Revalidation error:', error)
@@ -112,6 +146,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const path = searchParams.get('path')
+  const contentKey = searchParams.get('contentKey') || undefined
   const tag = searchParams.get('tag')
   const secret = searchParams.get('secret')
   const revalidateAll = searchParams.get('revalidateAll') === 'true'
@@ -126,14 +161,13 @@ export async function GET(request: NextRequest) {
 
     if (clearCache) {
       clearPathsCache()
-      console.log('Cleared paths cache')
+      console.log('Cleared paths cache (instance-local)')
     }
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
       revalidateTag('comparisons-list')
-      revalidateTag('mdx-paths')
 
       results.push({
         path: '/',
@@ -144,15 +178,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (path) {
-      revalidatePath(path)
-      revalidateTag(`mdx-content-${path}`)
-
-      results.push({
-        path,
-        revalidated: true,
-        type: 'path',
-        timestamp: new Date().toISOString(),
-      })
+      revalidateCmsUrlPath(path, contentKey, results)
     }
 
     if (tag) {
@@ -170,6 +196,7 @@ export async function GET(request: NextRequest) {
       revalidated: true,
       results,
       timestamp: new Date().toISOString(),
+      vercelEnv: process.env.VERCEL_ENV ?? null,
     })
   } catch (error) {
     console.error('Revalidation error:', error)

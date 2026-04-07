@@ -262,6 +262,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Nginx Dashboard Template',
   },
   {
+    name: 'n8n Cloud',
+    href: '/docs/dashboards/dashboard-templates/n8n-dashboard',
+    clickName: 'n8n Dashboard Template',
+  },
+  {
     name: 'NVIDIA DCGM',
     href: 'https://github.com/SigNoz/dashboards/tree/main/nvidia-dcgm',
     clickName: 'NVIDIA DCGM Dashboard Template',
@@ -305,6 +310,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Pydantic AI',
     href: '/docs/dashboards/dashboard-templates/pydantic-ai-dashboard',
     clickName: 'Pydantic AI Dashboard Template',
+  },
+  {
+    name: 'Qwen',
+    href: '/docs/dashboards/dashboard-templates/qwen-dashboard',
+    clickName: 'Qwen Dashboard Template',
   },
   {
     name: 'RabbitMQ',

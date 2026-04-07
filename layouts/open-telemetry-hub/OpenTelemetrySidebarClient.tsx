@@ -58,7 +58,7 @@ export default function OpenTelemetrySidebarClient({
   useEffect(() => {
     setTriggerContainer(document.getElementById(mobileTriggerId))
     setOverlayContainer(document.getElementById(mobileOverlayId))
-  }, [mobileOverlayId, mobileTriggerId])
+  }, [mobileOverlayId, mobileTriggerId, normalizedRoute])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -83,11 +83,11 @@ export default function OpenTelemetrySidebarClient({
       setSelectedLanguage(defaultLanguage)
       return
     }
-    if (!defaultLanguage && !selectedLanguage && availableLanguages.length > 0) {
+    if (!defaultLanguage && availableLanguages.length > 0) {
       setSelectedLanguage('ALL')
       return
     }
-    if (!defaultLanguage && !selectedLanguage) {
+    if (!defaultLanguage) {
       setSelectedLanguage(null)
     }
   }, [availableLanguages, defaultLanguage, selectedLanguage])

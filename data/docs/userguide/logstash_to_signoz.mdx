@@ -1,143 +1,341 @@
 ---
-date: 2026-03-21
-title: Logstash to SigNoz
-description: Send Logstash logs to SigNoz using the OpenTelemetry Collector.
+date: 2026-04-01
+title: Send logs from Logstash to SigNoz via OpenTelemetry
+description: Send logs from Logstash to SigNoz using OpenTelemetry Collector.
+doc_type: howto
 id: logstash_to_signoz
-hide_table_of_contents: true
 ---
 
-If you use Logstash to collect logs in your stack, this tutorial will help you send logs from Logstash to SigNoz.
+import GetHelp from '@/components/shared/get-help.md'
 
-At SigNoz, we use the OpenTelemetry collector to receive logs, which supports the TCP protocol. You can forward your logs from your Logstash agent to the 
-OpenTelemetry collector.
+If you use Logstash to collect logs in your stack, you can forward them to SigNoz via the OpenTelemetry Collector using the TCP protocol.
 
-<Tabs entityName="plans">
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+## Prerequisites
 
-### Collect Logs Using Logstash in SigNoz Cloud
+- A running Logstash instance
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
-1. **Add OpenTelemetry Collector Binary**
+## Send Logs to SigNoz
 
-   Add the OpenTelemetry collector binary to your VM by following this [guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+<Tabs>
+<TabItem value="vm" label="VM" default>
 
-2. **Configure the Receiver**
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
 
-   Add the receiver to your `config.yaml`.
-   ```yaml
-   receivers:
-     tcplog/logstash:
-       max_log_size: 1MiB
-       listen_address: "0.0.0.0:2255"
-       attributes: {}
-       resource: {}
-       add_attributes: false
-       operators: []
-   ```
-   - Port `2255` is used here for listening via the TCP protocol, but you can use a port of your choice.
-   - Learn more about the `tcplog` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver).
+Use this section if you're deploying your application directly on a server or VM without containerization.
 
-3. **Modify the `config.yaml`**
+</KeyPointCallout>
 
-   Update your service configuration to include the receiver:
-   ```yaml {4}
-   service:
-       ...
-       pipelines:
-           logs:
-               receivers: [otlp, tcplog/logstash]
-               processors: [batch]
-               exporters: [otlp]
-   ```
+### Step 1: Add OpenTelemetry Collector Binary
 
-4. **Update Logstash Configuration**
+Add the OpenTelemetry Collector binary to your VM by following the [OTel binary setup guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
 
-   Change the Logstash config to forward logs to the OpenTelemetry collector:
-   ```
-   output {
-     tcp {
-       codec => json_lines # Ensures logs are sent in JSON format line-by-line
-       host => "localhost"
-       port => 2255
-     }
-   }
-   ```
-   - This config assumes the Logstash binary is running on the same host. Adjust the `host` value if Logstash is running elsewhere.
+### Step 2: Configure the tcplog Receiver
 
-5. **Start the Services**
+Merge the following into your existing `config.yaml`. If your config already has a `processors:` block, add the new entries under it rather than replacing it. For more on receivers, see the [OTel Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#1-receivers).
 
-   Once the changes are made, start the OpenTelemetry binary and Logstash. You should see the logs in SigNoz.
+```yaml:config.yaml
+receivers:
+  tcplog/logstash:
+    # max_log_size: 1MiB  # default; increase if your logs exceed this size
+    listen_address: '0.0.0.0:2256'
+    operators:
+      # Parse the JSON that Logstash sends via codec => json_lines
+      # Non-JSON logs pass through unparsed (on_error: send_quiet)
+      - type: json_parser
+        timestamp:
+          parse_from: attributes["@timestamp"]
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05.999Z07:00'
+        on_error: send_quiet
+      # Move Logstash's `message` field to the OTel log body
+      - type: move
+        from: attributes.message
+        to: body
 
-6. **Transform Logs**
+processors:
+  batch:
+  resourcedetection:
+    detectors: [system, env]
+    timeout: 5s
+  transform:
+    log_statements:
+      - context: log
+        statements:
+          # Promote service.name to a resource attribute for consistent querying
+          - set(resource.attributes["service.name"], log.attributes["service.name"]) where log.attributes["service.name"] != nil
+          - delete_key(log.attributes, "service.name") where log.attributes["service.name"] != nil
 
-   Use OpenTelemetry processors to transform your log model into the [OpenTelemetry log data model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md). Learn more about available processors [here](/docs/userguide/logs#processors-available-for-processing-logs).
+exporters:
+  otlp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "<your-ingestion-key>"
 
-</TabItem>
+service:
+  pipelines:
+    logs:
+      receivers: [tcplog/logstash]
+      processors: [resourcedetection, transform, batch]
+      exporters: [otlp]
+```
 
-<TabItem value='self-host' label='Self-Host'>
+Verify these values:
 
-### Collect Logs Using Logstash in Self-Hosted SigNoz
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-1. **Configure the Receiver**:
-   Add the receiver to your `otel-collector-config.yaml` located in `deploy/docker`:
-   ```yaml
-   receivers:
-     tcplog/logstash:
-       max_log_size: 1MiB
-       listen_address: "0.0.0.0:2255"
-       attributes: {}
-       resource: {}
-       add_attributes: false
-       operators: []
-   ```
-   - Port `2255` is used here for listening via the TCP protocol, but you can use a port of your choice.
-   - Learn more about the `tcplog` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver).
+<Admonition type="note">
 
-2. **Update the Log Pipeline**
+- Port `2256` is used here, but you can use any available port.
+- `on_error: send_quiet` lets non-JSON logs pass through unparsed rather than dropping them — useful when Logstash emits plain-text startup messages alongside JSON logs.
+- The `system` detector populates `host.name` (OS hostname, DNS-resolved first) and `os.type`. If a configured detector is unavailable, the collector will refuse to start. Full detector options: [Resource Attributes for Logs](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/).
+- For more configuration options for the `tcplog` receiver, see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/tcplogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">tcplog receiver docs</a>.
+</Admonition>
 
-   Modify the `otel-collector-config.yaml` to include the receiver in the logs pipeline:
-   ```yaml
-   service:
-     ...
+### Step 3: Update Logstash Configuration
 
-     pipelines:
-       logs:
-         receivers: [otlp, tcplog/logstash]
-         processors: [batch]
-         exporters: [clickhouselogsexporter]
-   ```
+Add the following `output` block to your Logstash configuration:
 
-3. **Expose the Port**:
-   Update the `docker-compose.yaml` file in `deploy/docker` to expose the port:
-   ```yaml
-   otel-collector:
-     ...
-     ports:
-       - "2255:2255"
-   ```
+```ruby:logstash.conf
+output {
+  tcp {
+    codec => json_lines # Ensures logs are sent in JSON format line-by-line
+    host => "localhost"
+    port => 2256
+  }
+}
+```
 
-4. **Update Logstash Configuration**
+- This config assumes Logstash is running on the same host as the Collector. Set the `host` value if Logstash is running elsewhere.
 
-   Modify the Logstash config to forward logs to the OpenTelemetry collector:
-   ```
-   output {
-     tcp {
-       codec => json_lines # Ensures logs are sent in JSON format line-by-line
-       host => "<otel-collector-host>"
-       port => 2255
-     }
-   }
-   ```
-   - Replace `<otel-collector-host>` with the actual host where the OpenTelemetry collector is running. Refer to the [troubleshooting guide](/docs/install/troubleshooting#signoz-otel-collector-address-grid) for details.
+### Step 4: Start the Services
 
-5. **Start the Services**
+Restart the OpenTelemetry Collector and Logstash:
 
-   Restart Logstash and SigNoz. You should see the logs in SigNoz.
+```bash
+sudo systemctl restart otelcol-contrib
+sudo systemctl restart logstash
+```
 
-6. **Transform Logs**
-
-   Use OpenTelemetry processors to transform your log model into the [OpenTelemetry log data model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md). Learn more about available processors [here](/docs/userguide/logs#processors-available-for-processing-logs).
+Change the service name if you installed the Collector under a different name (e.g., `otelcol`).
 
 </TabItem>
 
+<TabItem value="docker" label="Docker">
+
+### Step 1: Create the OTel Collector Config
+
+Create a file named `otel-collector-config.yaml` with the `tcplog` receiver:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  tcplog/logstash:
+    # max_log_size: 1MiB  # default; increase if your logs exceed this size
+    listen_address: '0.0.0.0:2256'
+    operators:
+      # Parse the JSON that Logstash sends via codec => json_lines
+      # Non-JSON logs pass through unparsed (on_error: send_quiet)
+      - type: json_parser
+        timestamp:
+          parse_from: attributes["@timestamp"]
+          layout_type: gotime
+          layout: '2006-01-02T15:04:05.999Z07:00'
+        on_error: send_quiet
+      # Move Logstash's `message` field to the OTel log body
+      - type: move
+        from: attributes.message
+        to: body
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: [system, env]
+    timeout: 5s
+  transform:
+    log_statements:
+      - context: log
+        statements:
+          # Promote service.name to a resource attribute for consistent querying
+          - set(resource.attributes["service.name"], log.attributes["service.name"]) where log.attributes["service.name"] != nil
+          - delete_key(log.attributes, "service.name") where log.attributes["service.name"] != nil
+
+exporters:
+  otlp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "<your-ingestion-key>"
+
+service:
+  pipelines:
+    logs:
+      receivers: [tcplog/logstash]
+      processors: [resourcedetection, transform, batch]
+      exporters: [otlp]
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="note">
+- `on_error: send_quiet` lets non-JSON logs pass through unparsed rather than dropping them — useful when Logstash emits plain-text startup messages alongside JSON logs.
+- The `system` detector populates `host.name` (OS hostname, DNS-resolved first) and `os.type`. In Docker, `host.name` is the container's hostname, a random ID by default. To use your machine's hostname instead, add `environment: [OTEL_RESOURCE_ATTRIBUTES=host.name=<your-machine-name>]` to the `otel-collector` service. If a configured detector is unavailable, the collector will refuse to start. Full detector options: [Resource Attributes for Logs](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/).
+- For more configuration options for the `tcplog` receiver, see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/tcplogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">tcplog receiver docs</a>.
+</Admonition>
+
+### Step 2: Create the Logstash Config
+
+Create a `logstash.conf` file with an `input` to receive logs and an `output` to forward them to the OTel Collector:
+
+```ruby:logstash.conf
+input {
+  gelf {
+    port => 12201
+  }
+}
+
+output {
+  tcp {
+    codec => json_lines
+    host => "otel-collector"
+    port => 2256
+  }
+}
+```
+
+- The `gelf` input above listens on port `12201` for incoming logs.
+- `otel-collector` is the Docker service name defined in the next step. Docker networking resolves this to the correct container automatically.
+
+<KeyPointCallout title="Other common Logstash inputs" defaultCollapsed="true">
+While GELF is recommended for Docker, you can replace the input block with whichever source suits your environment:
+
+```ruby
+# Receive logs from Filebeat agents
+input { beats { port => 5044 } }
+
+# Receive logs over TCP from an application
+input { tcp { port => 5000 codec => json_lines } }
+
+# Receive syslog messages
+input { syslog { port => 514 } }
+
+# Read from stdin (useful for quick testing)
+input { stdin { } }
+```
+
+See the <a href="https://www.elastic.co/docs/reference/logstash/plugins/input-plugins" target="_blank" rel="noopener noreferrer nofollow">Logstash input plugins</a> documentation for the full list.
+</KeyPointCallout>
+
+### Step 3: Create/Update the Docker Compose file
+
+```yaml:docker-compose.yaml
+x-logging: &default-logging
+  driver: "gelf"
+  options:
+    gelf-address: "udp://localhost:12201"
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.148.0
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.17.4
+    ports:
+      - "12201:12201/udp" # GELF input port
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - otel-collector
+
+  # Example application sending logs to Logstash
+  example-app:
+    image: busybox
+    command: sh -c "while true; do echo 'Hello from example app!'; sleep 5; done"
+    logging: *default-logging
+    depends_on:
+      - logstash
+```
+
+<Admonition>
+  Do **not** apply the `*default-logging` anchor to the `logstash` or `otel-collector` services if they share the same Compose file. Doing so will cause an infinite logging loop where Logstash attempts to ingest its own logs.
+</Admonition>
+
+### Step 4: Start the Services
+
+```bash
+docker compose up -d
+```
+
+</TabItem>
 </Tabs>
+
+## Validate
+
+Once the services are running:
+
+1. Open SigNoz and navigate to **Logs** > **Logs Explorer**.
+2. Filter by `resource.host.name` to confirm logs are arriving. The `system` detector populates this attribute on every log. If your Logstash pipeline sets a `service.name` field on events, filter by `service.name = '<service_name>'` to narrow by service.
+3. Click on a log entry and verify it contains:
+   - `body`: the `message` value from the Logstash event
+   - `attributes`: remaining Logstash JSON fields (varies by your Logstash pipeline config)
+   - `resource.host.name`: the OTel Collector's OS hostname
+   - `resource.service.name`: promoted from the Logstash event if your pipeline sets it
+
+<Figure
+  src="/img/docs/logs-management/send-logs/logstash-sample-logs.webp"
+  caption="Sample logs in Logs Explorer"
+  alt="Sample logs in Logs Explorer"
+/>
+
+## Transform Logs (Optional)
+
+The config above parses Logstash's JSON output into structured attributes and populates `host.name` via resource detection. To enrich logs further, see [SigNoz Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+#### Logs are not appearing in SigNoz
+
+- Verify that the OpenTelemetry Collector is running and the `tcplog/logstash` receiver is enabled in both the `receivers` section and the `service.pipelines.logs` pipeline.
+- Confirm that Logstash is sending logs to the correct host and port (e.g., `localhost:2256`).
+- Check the OpenTelemetry Collector logs for errors related to the `tcplog` receiver.
+- After fixing, restart both services and check **Logs** > **Logs Explorer** in SigNoz to confirm logs appear.
+
+#### Port conflict
+
+- If port `2256` is already in use, choose a different port. Update the port in both the Collector `config.yaml` and the Logstash output configuration.
+- After updating, restart both services and verify logs appear in **Logs** > **Logs Explorer**.
+
+#### Logs appear but are not parsed correctly
+
+- Ensure the Logstash `output` block uses `codec => json_lines` so logs are sent as newline-delimited JSON.
+- If logs arrive with raw JSON in `body` and empty attributes, the `json_parser` operator may be failing silently. Check the Collector logs, the `on_error: send_quiet` option suppresses parse errors so non-JSON logs pass through unparsed.
+- Use [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz to parse and transform log fields further.
+
+</details>
+
+## Next Steps
+
+- [Log query and filtering](https://signoz.io/docs/logs-management/overview/)
+- [Set up alerts on logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+- [Log Pipelines for preprocessing](https://signoz.io/docs/logs-pipelines/introduction/)
+
+## Get Help
+
+<GetHelp />

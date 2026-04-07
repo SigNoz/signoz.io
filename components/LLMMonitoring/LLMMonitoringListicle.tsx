@@ -12,6 +12,7 @@ import {
   SiTemporal,
   SiOllama,
   SiHuggingface,
+  SiN8N,
 } from 'react-icons/si'
 import { LLM_MONITORING_ITEMS } from '@/constants/componentItems'
 
@@ -98,6 +99,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/mistral-observability': (
     <img src="/img/docs/llm/mistral/mistral-logo.webp" alt="Mistral AI Icon" className="h-7 w-7" />
   ),
+  '/docs/n8n-monitoring': <SiN8N className="h-7 w-7 text-gray-400" />,
   '/docs/ollama-monitoring': <SiOllama className="h-7 w-7 text-white" />,
   '/docs/openai-monitoring': <SiOpenai className="h-7 w-7 text-green-400" />,
   '/docs/openclaw-monitoring': (
@@ -117,6 +119,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <img src="/svgs/icons/LLMMonitoring/pipecat-logo.webp" alt="Pipecat Icon" className="h-7 w-7" />
   ),
   '/docs/pydantic-ai-observability': <SiPydantic className="h-7 w-7 text-pink-600" />,
+  '/docs/qwen-observability': (
+    <img src="/svgs/icons/LLMMonitoring/qwen-logo.webp" alt="Qwen Icon" className="h-7 w-7" />
+  ),
   '/docs/semantic-kernel-observability': (
     <img
       src="/img/docs/llm/semantic-kernel/sk-logo.webp"
