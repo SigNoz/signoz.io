@@ -3389,6 +3389,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/opentelemetry-dbos',
+        label: 'DBOS',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/nomad',
         label: 'Nomad',
       },
