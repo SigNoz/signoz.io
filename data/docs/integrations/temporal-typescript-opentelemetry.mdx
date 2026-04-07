@@ -94,7 +94,7 @@ Create `src/instrumentation.ts` to set up the OpenTelemetry SDK. This file initi
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { Resource } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
@@ -166,7 +166,7 @@ The Temporal Worker executes workflow and activity code. Configure it to send tr
 ```typescript:src/worker.ts {1,12-24}
 import { DefaultLogger, Worker, Runtime, makeTelemetryFilterString } from '@temporalio/worker';
 import { OpenTelemetryPlugin } from '@temporalio/interceptors-opentelemetry';
-import { setupOtelSdk, resource, spanProcessor } from './instrumentation';
+import { setupOtelSdk, resource, spanProcessor, otlpHeaders } from './instrumentation';
 import * as activities from './activities';
 
 // Configure Temporal's runtime telemetry
@@ -227,32 +227,35 @@ run().catch(console.error);
 The Temporal Client starts workflows and queries their status.
 
 ```typescript:src/client.ts {1}
-import { setupOtelSdk } from './instrumentation';
+import { setupOtelSdk, resource, spanProcessor } from './instrumentation';
 import { Connection, Client } from '@temporalio/client';
 import { loadClientConnectConfig } from '@temporalio/envconfig';
 import { OpenTelemetryPlugin } from '@temporalio/interceptors-opentelemetry';
-import { resource, spanProcessor } from './instrumentation';
 
 async function run() {
   const otelSdk = setupOtelSdk();
 
-  const config = loadClientConnectConfig();
-  const connection = await Connection.connect(config.connectionOptions);
+  try {
+    const config = loadClientConnectConfig();
+    const connection = await Connection.connect(config.connectionOptions);
 
-  // OpenTelemetryPlugin registers tracing interceptors for client calls
-  const plugins = spanProcessor ? [new OpenTelemetryPlugin({ resource, spanProcessor })] : [];
+    // OpenTelemetryPlugin registers tracing interceptors for client calls
+    const plugins = spanProcessor ? [new OpenTelemetryPlugin({ resource, spanProcessor })] : [];
 
-  const client = new Client({
-    connection,
-    plugins,
-  });
+    const client = new Client({
+      connection,
+      plugins,
+    });
 
-  const handle = await client.workflow.start('myWorkflow', {
-    taskQueue: 'my-task-queue',
-    workflowId: 'my-workflow-id',
-  });
+    const handle = await client.workflow.start('myWorkflow', {
+      taskQueue: 'my-task-queue',
+      workflowId: 'my-workflow-id',
+    });
 
-  console.log(`Started workflow: ${handle.workflowId}`);
+    console.log(`Started workflow: ${handle.workflowId}`);
+  } finally {
+    await otelSdk.shutdown();
+  }
 }
 
 run().catch(console.error);
@@ -720,9 +723,11 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 **Symptom**: SigNoz shows warnings about high cardinality metrics.
 
-**Cause**: Temporal generates metrics with many unique label combinations.
+**Cause**: Temporal emits metrics with labels that include workflow type names, activity type names, and task queue names. In large deployments with many unique values, this creates high cardinality.
 
-**Fix**: Adjust the log level filter in `Runtime.install()`:
+**Fix**: Use an OpenTelemetry Collector with a `filter` or `transform` processor to drop or aggregate high-cardinality label values before they reach SigNoz. See [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) for details.
+
+Alternatively, reduce the verbosity of Temporal's internal runtime logging (which can contribute additional metric dimensions) by adjusting the filter in `Runtime.install()`:
 
 ```typescript
 Runtime.install({
@@ -730,7 +735,7 @@ Runtime.install({
     logging: {
       forward: {},
       filter: makeTelemetryFilterString({
-        core: 'INFO',
+        core: 'WARN',
         other: 'WARN',
       }),
     },
