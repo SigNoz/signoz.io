@@ -2960,6 +2960,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
             label: 'Report from Trace ID',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/error-rate-spike-explainer',
+            label: 'Error Rate Spike Explainer',
+          },
         ],
       },
     ],
