@@ -42,7 +42,7 @@ export default function OpenTelemetryHubShellClient({ children }: { children: Re
   const showSidebar = pathKey !== 'quick-start' && items.length > 0
   const orderedPathMeta = orderPathMeta(firstRouteByPath)
   const docClasses = [
-    'box-border flex mx-auto h-full w-full min-w-0 max-w-ot-hub items-start gap-4 overflow-x-hidden px-3 md:px-6 lg:px-8 max-lg:flex-col max-lg:gap-3',
+    'box-border flex h-full w-full min-w-0 items-start gap-4 overflow-x-hidden px-3 md:px-6 lg:px-8 max-lg:flex-col max-lg:gap-3',
     !showSidebar ? 'justify-center' : '',
   ]
     .filter(Boolean)
@@ -56,7 +56,7 @@ export default function OpenTelemetryHubShellClient({ children }: { children: Re
           <OpenTelemetryProgressBar targetId={MAIN_CONTENT_ID} />
 
           <div className="mb-4 hidden flex-wrap items-center justify-between gap-3 border-b border-signoz_ink-300 px-4 pb-3 pt-6 md:px-6 lg:flex lg:px-8">
-            <div className="mx-auto box-border flex w-full max-w-ot-hub flex-wrap items-center gap-6 px-12">
+            <div className="box-border flex w-full flex-wrap items-center gap-6">
               {orderedPathMeta.map((path) => {
                 if (!path.firstRoute) return null
                 const isActive = path.key === pathKey

@@ -139,11 +139,11 @@ export default function OpenTelemetryHubContent({
   return (
     <>
       <div
-        className={`box-border w-full min-w-0 max-w-full flex-1 md:px-0 lg:px-4 ${!showSidebar ? 'mx-auto max-w-ot-narrow' : ''}`}
+        className={`box-border w-full min-w-0 max-w-full flex-1 ${!showSidebar ? 'mx-auto max-w-ot-narrow' : ''}`}
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
-        <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:box-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:w-full [&_table]:min-w-0 max-lg:[&_table]:table-fixed max-lg:[&_td]:break-words max-lg:[&_th]:break-words [&_video]:max-w-full">
+        <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-0 py-6 dark:prose-invert [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:box-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:w-full [&_table]:min-w-0 max-lg:[&_table]:table-fixed max-lg:[&_td]:break-words max-lg:[&_th]:break-words [&_video]:max-w-full">
           <h1 className="text-3xl font-bold">{title}</h1>
           {(formattedUpdatedDate || readingTimeText) && (
             <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
@@ -235,7 +235,7 @@ export default function OpenTelemetryHubContent({
 
       {(hasMetaInfo || hasToc) && (
         <aside
-          className="box-border hidden w-full min-w-0 max-w-none shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:top-[120px] lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-start"
+          className="box-border hidden w-full min-w-0 max-w-none shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-start"
           aria-label="On this page navigation"
         >
           <div className="flex h-full flex-col gap-3">
