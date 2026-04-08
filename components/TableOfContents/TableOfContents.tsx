@@ -92,7 +92,7 @@ const TableOfContents = ({
               href={tocItem.url}
               onClick={handleClick}
               className={`line-clamp-2 inline-block w-full text-xs transition-colors hover:text-signoz_robin-400 focus-visible:text-signoz_robin-400 focus-visible:outline-none ${
-                isActive ? 'font-medium text-signoz_robin-500' : 'text-signoz_vanilla-300'
+                isActive ? 'text-signoz_robin-500' : 'text-signoz_vanilla-300'
               }`}
             >
               {tocItem.value}
