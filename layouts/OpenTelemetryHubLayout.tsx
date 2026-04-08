@@ -235,7 +235,7 @@ export default function OpenTelemetryHubContent({
 
       {(hasMetaInfo || hasToc) && (
         <aside
-          className="box-border hidden w-full min-w-0 max-w-none shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-start"
+          className="box-border hidden w-full min-w-0 max-w-none shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:top-[120px] lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-start"
           aria-label="On this page navigation"
         >
           <div className="flex h-full flex-col gap-3">
