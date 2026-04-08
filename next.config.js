@@ -1518,11 +1518,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/faq',
-          destination: '/docs/faqs/',
-          permanent: true,
-        },
-        {
           source: '/docs/dashboards/dashboard-templates/redis',
           destination: '/docs/dashboards/dashboard-templates/overview/',
           permanent: true,
@@ -1569,7 +1564,7 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/trac',
-          destination: '/docs/instrumentation/overview/',
+          destination: '/docs/userguide/traces/',
           permanent: true,
         },
         {
@@ -1585,17 +1580,6 @@ module.exports = () => {
         {
           source: '/heroku-alternatives',
           destination: '/comparisons/heroku-alternatives/',
-          permanent: true,
-        },
-        {
-          source:
-            '/docs/openrouter-observability/\\)\u0e41\u0e25\u0e30\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e2a\u0e23\u0e49\u0e32\u0e07\u0e41\u0e14\u0e0a\u0e1a\u0e2d\u0e23\u0e4c\u0e14\u0e19\u0e35\u0e49\u0e02\u0e36\u0e49\u0e19\u0e21\u0e32\u0e44\u0e14\u0e49',
-          destination: '/docs/openrouter-observability/',
-          permanent: true,
-        },
-        {
-          source: '/docs/openrouter-observability/\\)y',
-          destination: '/docs/openrouter-observability/',
           permanent: true,
         },
         {
@@ -1666,12 +1650,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source:
-            '/docs/anthropic-monitoring/\\)\u0e41\u0e25\u0e30\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e17\u0e33\u0e41\u0e14\u0e0a\u0e1a\u0e2d\u0e23\u0e4c\u0e14\u0e44\u0e14\u0e49',
-          destination: '/docs/anthropic-monitoring/',
-          permanent: true,
-        },
-        {
           source: '/docs/logs-management/send-logs/docker-logs/',
           destination: '/docs/userguide/collect_docker_logs/',
           permanent: true,
@@ -1687,11 +1665,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/openrouter-observability/\\)gefolgt',
-          destination: '/docs/openrouter-observability/',
-          permanent: true,
-        },
-        {
           source: '/docs/configuration/deep_storage',
           destination: '/docs/logs-management/long-term-storage/',
           permanent: true,
@@ -1702,7 +1675,7 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/justifying-a-million-dollar-observability-bill',
+          source: '/justifying-a-million-dollar-observability-bill/',
           destination: '/blog/justifying-a-million-dollar-observability-bill/',
           permanent: true,
         },
@@ -1718,27 +1691,12 @@ module.exports = () => {
         },
         {
           source: '/docs/operate/migration/upgrade-0\\.112',
-          destination: '/docs/manage/administrator-guide/',
+          destination: '/docs/operate/migration/upgrade-standard/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/kafka/',
           destination: '/docs/messaging-queues/overview/',
-          permanent: true,
-        },
-        {
-          source: '/docs/anthropic-monitoring/\\)dan',
-          destination: '/docs/anthropic-monitoring/',
-          permanent: true,
-        },
-        {
-          source: '/docs/anthropic-monitoring/\\)y',
-          destination: '/docs/anthropic-monitoring/',
-          permanent: true,
-        },
-        {
-          source: '/docs/anthropic-monitoring/\\)e',
-          destination: '/docs/anthropic-monitoring/',
           permanent: true,
         },
         {
@@ -1914,11 +1872,6 @@ module.exports = () => {
         {
           source: '/docs/dashboards/',
           destination: '/docs/dashboards/dashboard-templates/overview/',
-          permanent: true,
-        },
-        {
-          source: '/docs/anthropic-monitoring/\\)et',
-          destination: '/docs/anthropic-monitoring/',
           permanent: true,
         },
         {
@@ -2256,16 +2209,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/can-signoz-handle-large-scale-production-environments-effectively',
-          destination: '/faqs/can-signoz-handle-large-scale-production-environments-effectively/',
-          permanent: true,
-        },
-        {
-          source: '/blog/sig-noz-hiring-across-roles',
-          destination: 'https://jobs.ashbyhq.com/SigNoz',
-          permanent: true,
-        },
-        {
           source: '/docs/operate/docker-swarm/',
           destination: '/docs/install/docker/',
           permanent: true,
@@ -2290,12 +2233,6 @@ module.exports = () => {
             '/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis',
           destination:
             '/faqs/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
-          permanent: true,
-        },
-        {
-          source: '/how-signozs-integration-with-opentelemetry-simplifies-instrumentation',
-          destination:
-            '/faqs/how-signozs-integration-with-opentelemetry-simplifies-instrumentation/',
           permanent: true,
         },
         {
