@@ -221,7 +221,9 @@ export default function ArticleLayout({
                             alt={primaryAuthor.name}
                             width={36}
                             height={36}
-                            className="h-9 w-9 rounded-full border border-white/10 object-cover"
+                            objectPosition="center"
+                            objectFit="cover"
+                            className="h-9 w-9 rounded-full border border-white/10 object-cover object-center"
                           />
                         )}
                         <div className="flex flex-col gap-1">
