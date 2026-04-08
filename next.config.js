@@ -1611,7 +1611,8 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/clickhouse',
-          destination: '/docs/metrics-management/docker-container-metrics/',
+          destination:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {
@@ -1672,7 +1673,7 @@ module.exports = () => {
         },
         {
           source: '/docs/logs-management/send-logs/docker-logs/',
-          destination: '/docs/metrics-management/docker-container-metrics/',
+          destination: '/docs/userguide/collect_docker_logs/',
           permanent: true,
         },
         {
@@ -1998,7 +1999,8 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/zookeeper/',
-          destination: '/docs/metrics-management/docker-container-metrics/',
+          destination:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {
