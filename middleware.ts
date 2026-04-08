@@ -127,6 +127,16 @@ export function middleware(req: NextRequest) {
     })
   }
 
+  const vercelId = req.headers.get('x-vercel-id')
+  if (vercelId) {
+    res.cookies.set('x-vercel-id', vercelId, {
+      path: '/',
+      httpOnly: false,
+      sameSite: 'lax',
+      maxAge: 60 * 60,
+    })
+  }
+
   // Set cookie if it wasn't already set
   if (shouldSetCookie && anonymousId) {
     res.cookies.set('gb_anonymous_id', anonymousId, {

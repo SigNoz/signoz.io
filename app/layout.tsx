@@ -1,6 +1,6 @@
 import 'css/tailwind.css'
 import 'css/global.css'
-import { SpeedInsights } from '@vercel/speed-insights/next'
+import SpeedInsightsWithDebug from '@/components/SpeedInsightsWithDebug'
 import { GoogleTagManager } from '@next/third-parties/google'
 import { SearchProvider, SearchConfig } from 'pliny/search'
 import SectionContainer from '@/components/SectionContainer'
@@ -94,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
-        <SpeedInsights />
+        <SpeedInsightsWithDebug />
         <Suspense fallback={null}>
           <PageViewTracker />
         </Suspense>
