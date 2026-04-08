@@ -2367,7 +2367,7 @@ module.exports = () => {
         },
         {
           source: '/docs/logs-management/send-logs/deno-logs/',
-          destination: '/docs/logs-management/send-logs-to-signoz/',
+          destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
       ]
