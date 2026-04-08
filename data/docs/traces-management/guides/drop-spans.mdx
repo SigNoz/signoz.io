@@ -61,16 +61,16 @@ Three approaches at the collector level:
 2. Drop entire traces with the tail or probabilistic sampling processor
 3. Drop individual spans with the filter processor
 
-Dropping at the collector is TAIL sampling. The decision happens at the end of the trace.
+Sampling processors (tail, probabilistic) evaluate complete traces at the collector — this is TAIL sampling. The filter and attribute processors operate on individual spans as they arrive.
 
 ### Drop certain attributes from spans
 
 Two processors handle attribute removal:
 
-- **Attributes processor** — removes span-level attributes
-- **Resource processor** — removes resource-level attributes
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/attributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">**Attributes processor**</a> — removes span-level attributes
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourceprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">**Resource processor**</a> — removes resource-level attributes
 
-Add the processor to your traces pipeline in `otel-collector-config.yaml`:
+Add the attributes processor to your traces pipeline in `otel-collector-config.yaml`, for example:
 
 ```yaml
 service:
@@ -78,6 +78,17 @@ service:
     traces:
       receivers: [otlp]
       processors: [attributes/drop_span_attributes, batch]
+      exporters: [otlp]
+```
+
+Or for the resource attributes:
+
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource/drop_span_resource_attributes, batch]
       exporters: [otlp]
 ```
 
@@ -90,6 +101,10 @@ processors:
       - key: http.method
         action: delete
 ```
+
+<Admonition type="info">
+`http.method` is the legacy HTTP attribute name. SDKs on stable HTTP semantic conventions use `http.request.method` instead. Check which name your SDK emits — both work with the attributes processor.
+</Admonition>
 
 **Drop multiple resource attributes**:
 
@@ -278,6 +293,12 @@ service:
 This output is verbose. Use it to verify conditions, then remove it.
 
 </details>
+
+## Next Steps
+
+- [PII Scrubbing in Traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/) — remove sensitive attribute values from spans before they reach SigNoz
+- [APM Metrics](https://signoz.io/docs/traces-management/guides/apm-metrics/) — monitor request rate, error rate, and latency after controlling trace volume
+- [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) — navigate between traces and logs once your trace data is clean
 
 ## Get Help
 
