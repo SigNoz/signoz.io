@@ -83,7 +83,7 @@ const TableOfContents = ({
 
         return (
           <div
-            className="min-h-6 w-full font-medium leading-normal"
+            className="min-h-6 w-full font-medium leading-none"
             key={tocItem.url}
             style={{ paddingLeft: `${(tocItem.depth - 1) * 12}px` }}
           >
