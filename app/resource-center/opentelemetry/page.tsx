@@ -5,6 +5,7 @@ import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { type Comparison } from 'types/transformedContent'
+import { getResourceCenterBlogs, getResourceCenterGuides } from '../content'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamic = 'force-static'
@@ -51,5 +52,12 @@ export default async function OpenTelemetryHome() {
     console.error('Error fetching OpenTelemetry articles:', error)
   }
 
-  return <OpenTelemetryClient initialArticles={articles} comparisonPosts={comparisonPosts} />
+  return (
+    <OpenTelemetryClient
+      initialArticles={articles}
+      comparisonPosts={comparisonPosts}
+      blogPosts={getResourceCenterBlogs()}
+      guidePosts={getResourceCenterGuides()}
+    />
+  )
 }

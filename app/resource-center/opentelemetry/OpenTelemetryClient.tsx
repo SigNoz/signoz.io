@@ -5,28 +5,35 @@ import Blogs from '../blog/Blogs'
 import Comparisons from '../comparisons/Comparisons'
 import Guides from '../guides/Guides'
 import OpenTelemetry from './OpenTelemetry'
-import { MDXContent } from '@/utils/strapi'
-import { Comparison } from 'types/transformedContent'
+import type { MDXContent } from '@/utils/strapi'
+import type { Comparison } from 'types/transformedContent'
+import type { ResourceCenterBlog, ResourceCenterGuide } from '../content'
 
 export default function OpenTelemetryClient({
   initialArticles,
   comparisonPosts,
+  blogPosts,
+  guidePosts,
 }: {
   initialArticles?: MDXContent[]
   comparisonPosts?: Comparison[]
+  blogPosts: ResourceCenterBlog[]
+  guidePosts: ResourceCenterGuide[]
 }) {
   const [activeTab, setActiveTab] = useState('openTelemetry-tab')
 
   return (
     <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
       <div className="tab-content pt-6">
-        {activeTab === 'blog-tab' && <Blogs />}
+        {activeTab === 'blog-tab' && <Blogs posts={blogPosts} />}
 
         {activeTab === 'comparisons-tab' && <Comparisons posts={comparisonPosts} />}
 
-        {activeTab === 'guides-tab' && <Guides />}
+        {activeTab === 'guides-tab' && <Guides posts={guidePosts} />}
 
-        {activeTab === 'openTelemetry-tab' && <OpenTelemetry articles={initialArticles} />}
+        {activeTab === 'openTelemetry-tab' && (
+          <OpenTelemetry articles={initialArticles} blogPosts={blogPosts} guidePosts={guidePosts} />
+        )}
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import React from 'react'
 import Blogs from './Blogs'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
+import { getResourceCenterBlogs } from '../content'
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -28,10 +29,12 @@ export const metadata: Metadata = {
 }
 
 export default async function BlogHome() {
+  const posts = getResourceCenterBlogs()
+
   return (
     <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
       <div className="tab-content pt-6">
-        <Blogs />
+        <Blogs posts={posts} />
       </div>
     </div>
   )

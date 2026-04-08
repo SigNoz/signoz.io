@@ -2,7 +2,6 @@
 
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
-import { allBlogs, allGuides, type Blog, type Guide } from 'contentlayer/generated'
 import { coreContent, type CoreContent } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
 import BlogPostCard from '../Shared/BlogPostCard'
@@ -11,8 +10,21 @@ import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
 import { type Comparison } from 'types/transformedContent'
+import type { ResourceCenterBlog, ResourceCenterGuide } from '../content'
 
-type HubDoc = CoreContent<Blog | Comparison | Guide | MDXContent>
+type TransformedStrapiArticle = CoreContent<MDXContent> & {
+  path: string
+  date: string
+  readingTime: {
+    text: string
+  }
+  authors: Record<string, unknown>[]
+  title: string
+  description?: string
+  summary?: string
+}
+
+type HubDoc = ResourceCenterBlog | Comparison | ResourceCenterGuide | TransformedStrapiArticle
 
 type HubChapterGroup = {
   key: string
@@ -66,7 +78,7 @@ function formatLanguageLabel(label: string) {
   return label
 }
 
-function transformStrapiArticle(article: any): HubDoc {
+function transformStrapiArticle(article: any): TransformedStrapiArticle {
   let path = article.path || ''
   if (path.startsWith('/')) {
     path = path.slice(1)
@@ -116,9 +128,15 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 
 interface OpenTelemetryProps {
   articles?: MDXContent[]
+  blogPosts: ResourceCenterBlog[]
+  guidePosts: ResourceCenterGuide[]
 }
 
-export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
+export default function OpenTelemetry({
+  articles = [],
+  blogPosts,
+  guidePosts,
+}: OpenTelemetryProps) {
   const [searchValue, setSearchValue] = React.useState('')
   const [activeLanguageKey, setActiveLanguageKey] = React.useState('ALL')
   const trimmedSearch = searchValue.trim()
@@ -131,7 +149,7 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
       const normalizedDocMap = new Map<string, HubDoc>()
 
       // Merge collections
-      const allDocs: (Blog | Comparison | Guide | HubDoc)[] = [...allBlogs, ...allGuides]
+      const allDocs: HubDoc[] = [...blogPosts, ...guidePosts]
 
       // Add Strapi opentelemetry articles
       articles.forEach((article) => {
@@ -246,7 +264,7 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
         AVAILABLE_LANGUAGES: languages,
         getDocLanguage: (doc: HubDoc) => docLanguageMap.get(doc.path),
       }
-    }, [articles])
+    }, [articles, blogPosts, guidePosts])
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value)

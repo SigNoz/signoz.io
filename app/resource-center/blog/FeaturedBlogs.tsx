@@ -1,15 +1,13 @@
 import React from 'react'
 import BlogPostCard from '../Shared/BlogPostCard'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
+import type { ResourceCenterBlog } from '../content'
 
 interface FeaturedBlogsProps {
   isDarkMode: boolean
+  posts: ResourceCenterBlog[]
 }
 
-function FeaturedBlogs({ isDarkMode }: FeaturedBlogsProps) {
-  const posts = allCoreContent(sortPosts(allBlogs))
-
+function FeaturedBlogs({ isDarkMode, posts }: FeaturedBlogsProps) {
   const primaryFeaturedBlogs = posts.slice(0, 2)
   const secondaryFeaturedBlogs = posts.slice(2, 5)
 

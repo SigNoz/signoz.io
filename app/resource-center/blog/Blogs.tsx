@@ -2,11 +2,10 @@
 
 import React, { useState } from 'react'
 import { filterData } from 'app/utils/common'
-import { allBlogs } from 'contentlayer/generated'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import SearchInput from '../Shared/Search'
 import FeaturedBlogs from './FeaturedBlogs'
 import AllBlogs from './AllBlogs'
+import type { ResourceCenterBlog } from '../content'
 
 interface BlogPageHeaderProps {
   onSearch: (e) => void
@@ -31,8 +30,7 @@ const BlogsPageHeader: React.FC<BlogPageHeaderProps> = ({ onSearch }) => {
   )
 }
 
-export default function Blogs() {
-  const posts = allCoreContent(sortPosts(allBlogs))
+export default function Blogs({ posts }: { posts: ResourceCenterBlog[] }) {
   const [blogs, setBlogs] = useState(posts)
   const [searchValue, setSearchValue] = useState('')
 
@@ -45,7 +43,7 @@ export default function Blogs() {
   return (
     <div>
       <BlogsPageHeader onSearch={handleSearch} />
-      {searchValue.length === 0 && <FeaturedBlogs isDarkMode={true} />}
+      {searchValue.length === 0 && <FeaturedBlogs isDarkMode={true} posts={posts} />}
       <AllBlogs blogs={blogs} />
     </div>
   )
