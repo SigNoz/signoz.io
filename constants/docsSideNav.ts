@@ -2091,6 +2091,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/baseten-dashboard',
+            label: 'Baseten',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CI/CD',
           },
