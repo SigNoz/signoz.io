@@ -143,7 +143,7 @@ export default function OpenTelemetryHubContent({
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
-        <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
+        <article className="prose prose-slate min-w-0 max-w-none break-words px-3 py-6 dark:prose-invert">
           <h1 className="text-3xl font-bold">{title}</h1>
           {(formattedUpdatedDate || readingTimeText) && (
             <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">

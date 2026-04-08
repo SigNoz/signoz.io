@@ -6,5 +6,5 @@ interface Props {
 }
 
 export default function SectionContainer({ children }: Props) {
-  return <section className="relative mx-auto">{children}</section>
+  return <section className="relative mx-auto w-full min-w-0">{children}</section>
 }
