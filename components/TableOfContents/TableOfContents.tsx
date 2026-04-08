@@ -83,7 +83,7 @@ const TableOfContents = ({
 
         return (
           <div
-            className="post-toc-item"
+            className="min-h-6 w-full text-[13px] font-medium leading-normal"
             key={tocItem.url}
             style={{ paddingLeft: `${(tocItem.depth - 1) * 12}px` }}
           >
@@ -91,7 +91,7 @@ const TableOfContents = ({
               data-level={tocItem.depth}
               href={tocItem.url}
               onClick={handleClick}
-              className={`line-clamp-2 text-xs transition-colors hover:text-signoz_robin-400 focus-visible:text-signoz_robin-400 focus-visible:outline-none ${
+              className={`line-clamp-2 block w-full text-[13px] transition-colors hover:text-signoz_robin-400 focus-visible:text-signoz_robin-400 focus-visible:outline-none ${
                 isActive ? 'font-medium text-signoz_robin-500' : 'text-signoz_vanilla-300'
               }`}
             >
