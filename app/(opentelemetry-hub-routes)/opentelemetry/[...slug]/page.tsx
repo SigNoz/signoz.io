@@ -256,7 +256,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           toc={toc}
           showSidebar={showSidebar}
         >
-          <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
+          <div className="prose w-full min-w-0 max-w-none break-words dark:prose-invert prose-headings:scroll-mt-16 [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_pre]:box-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_table]:w-full [&_table]:min-w-0 max-lg:[&_table]:table-fixed max-lg:[&_td]:break-words max-lg:[&_th]:break-words [&_video]:max-w-full">
             {compiledContent}
           </div>
         </OpenTelemetryHubContent>

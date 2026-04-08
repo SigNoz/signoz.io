@@ -42,7 +42,7 @@ export default function OpenTelemetryHubShellClient({ children }: { children: Re
   const showSidebar = pathKey !== 'quick-start' && items.length > 0
   const orderedPathMeta = orderPathMeta(firstRouteByPath)
   const docClasses = [
-    'flex mx-auto h-full w-full min-w-0 max-w-ot-hub items-start gap-4 px-3 md:px-6 lg:px-8 max-lg:flex-col max-lg:gap-3 max-lg:overflow-x-auto',
+    'box-border flex mx-auto h-full w-full min-w-0 max-w-ot-hub items-start gap-4 overflow-x-hidden px-3 md:px-6 lg:px-8 max-lg:flex-col max-lg:gap-3',
     !showSidebar ? 'justify-center' : '',
   ]
     .filter(Boolean)
@@ -50,7 +50,7 @@ export default function OpenTelemetryHubShellClient({ children }: { children: Re
 
   return (
     <RegionProvider>
-      <main id={MAIN_CONTENT_ID} className="w-full min-w-0">
+      <main id={MAIN_CONTENT_ID} className="w-full min-w-0 overflow-x-hidden">
         <ScrollToHashClient />
         <SectionContainer>
           <OpenTelemetryProgressBar targetId={MAIN_CONTENT_ID} />
