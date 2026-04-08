@@ -256,7 +256,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           toc={toc}
           showSidebar={showSidebar}
         >
-          <div className="prose w-full min-w-0 max-w-none break-words dark:prose-invert prose-headings:scroll-mt-16">
+          <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
             {compiledContent}
           </div>
         </OpenTelemetryHubContent>
