@@ -44,7 +44,7 @@ export default function BlogPostCard({
   }
 
   return (
-    <Link href={`/${path}`} prefetch={true}>
+    <Link href={`/${path}`} prefetch={false}>
       <div className="flex cursor-pointer flex-col max-md:ml-0 max-md:w-full">
         <div
           className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-colors duration-150 hover:bg-signoz_ink-300 active:opacity-70 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300 max-md:mt-6`}
