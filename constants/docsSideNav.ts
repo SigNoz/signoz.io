@@ -2762,6 +2762,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/baseten-monitoring',
+        label: 'Baseten',
+        type: 'doc',
+      },
+      {
         route: '/docs/claude-code-monitoring',
         label: 'Claude Code',
         type: 'doc',

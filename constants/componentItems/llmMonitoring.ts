@@ -19,6 +19,11 @@ export const LLM_MONITORING_ITEMS: ComponentItem[] = [
     clickName: 'Azure OpenAI API Monitoring',
   },
   {
+    name: 'Baseten',
+    href: '/docs/baseten-monitoring',
+    clickName: 'Baseten Monitoring',
+  },
+  {
     name: 'Claude Code',
     href: '/docs/claude-code-monitoring',
     clickName: 'Claude Code Monitoring',
