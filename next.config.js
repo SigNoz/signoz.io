@@ -1670,6 +1670,11 @@ module.exports = () => {
           destination: '/guides/tomcat-performance-monitoring/',
           permanent: true,
         },
+        {
+          source: '/guides/pino-logger/',
+          destination: '/guides/pino-logger-nodejs-logging-library/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
