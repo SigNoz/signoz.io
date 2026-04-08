@@ -1544,7 +1544,7 @@ module.exports = () => {
         },
         {
           source: '/learn/kubernetes-tools/',
-          destination: '/resource-center/guides/',
+          destination: '/blog/kubernetes-monitoring-tools/',
           permanent: true,
         },
         {
@@ -1554,7 +1554,7 @@ module.exports = () => {
         },
         {
           source: '/learn/why-is-observability-critical-for-cloud-native-applications/',
-          destination: '/blog/otel-native-by-design/',
+          destination: '/guides/cloud-native-monitoring/',
           permanent: true,
         },
         {
@@ -1932,7 +1932,7 @@ module.exports = () => {
         },
         {
           source: '/bug-fixes-in-our-changelog',
-          destination: '/changelog/',
+          destination: '/blog/bug-fixes-in-our-changelog/',
           permanent: true,
         },
         {
@@ -2204,12 +2204,12 @@ module.exports = () => {
         },
         {
           source: '/kubecon-atlanta-2025-observability-guide',
-          destination: '/events/kubecon-cloudnativecon-north-america-2025/',
+          destination: '/blog/kubecon-atlanta-2025-observability-guide/',
           permanent: true,
         },
         {
           source: '/guides/cloud-nativemonitoring/',
-          destination: '/guides/hybrid-cloud-monitoring/',
+          destination: '/guides/cloud-native-monitoring/',
           permanent: true,
         },
         {
