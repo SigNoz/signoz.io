@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid'
-import crypto from 'crypto'
 
 const ANONYMOUS_ID_KEY = 'app_anonymous_id'
 const USER_ID_KEY = 'app_user_id'
@@ -35,13 +34,6 @@ export const getUserId = (): string | undefined => {
   } catch (error) {
     return undefined
   }
-}
-
-/**
- * Generate user hash for identity verification (server-side only)
- */
-export const generateUserHash = (userId: string, secret: string): string => {
-  return crypto.createHmac('sha256', secret).update(userId).digest('hex')
 }
 
 /**

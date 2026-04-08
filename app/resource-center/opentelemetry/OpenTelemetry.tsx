@@ -2,29 +2,18 @@
 
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import { LEARN_CHAPTER_ORDER } from '@/constants/opentelemetryHub'
-import { coreContent, type CoreContent } from 'pliny/utils/contentlayer'
-import type { MDXContent } from '@/utils/strapi'
 import BlogPostCard from '../Shared/BlogPostCard'
 import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
-import { type Comparison } from 'types/transformedContent'
-import type { ResourceCenterBlog, ResourceCenterGuide } from '../content'
+import type {
+  ResourceCenterBlog,
+  ResourceCenterGuide,
+  ResourceCenterOpenTelemetryArticle,
+} from '../content'
 
-type TransformedStrapiArticle = CoreContent<MDXContent> & {
-  path: string
-  date: string
-  readingTime: {
-    text: string
-  }
-  authors: Record<string, unknown>[]
-  title: string
-  description?: string
-  summary?: string
-}
-
-type HubDoc = ResourceCenterBlog | Comparison | ResourceCenterGuide | TransformedStrapiArticle
+type HubDoc = ResourceCenterBlog | ResourceCenterGuide | ResourceCenterOpenTelemetryArticle
 
 type HubChapterGroup = {
   key: string
@@ -78,32 +67,6 @@ function formatLanguageLabel(label: string) {
   return label
 }
 
-function transformStrapiArticle(article: any): TransformedStrapiArticle {
-  let path = article.path || ''
-  if (path.startsWith('/')) {
-    path = path.slice(1)
-  }
-  if (!path.startsWith('opentelemetry/')) {
-    path = `opentelemetry/${path}`
-  }
-
-  return {
-    ...article,
-    path,
-    date: article.publishedAt,
-    readingTime: { text: article.readingTime?.text || '5 min read' },
-    authors:
-      article.authors?.map((author: any) => ({
-        ...author,
-        name: author.name,
-        image_url: author.image_url || author.avatar,
-      })) || [],
-    title: article.title,
-    description: article.description,
-    summary: article.summary || article.description,
-  }
-}
-
 interface OpenTelemetryPageHeaderProps {
   onSearch: (e) => void
 }
@@ -127,7 +90,7 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 }
 
 interface OpenTelemetryProps {
-  articles?: MDXContent[]
+  articles?: ResourceCenterOpenTelemetryArticle[]
   blogPosts: ResourceCenterBlog[]
   guidePosts: ResourceCenterGuide[]
 }
@@ -149,17 +112,11 @@ export default function OpenTelemetry({
       const normalizedDocMap = new Map<string, HubDoc>()
 
       // Merge collections
-      const allDocs: HubDoc[] = [...blogPosts, ...guidePosts]
-
-      // Add Strapi opentelemetry articles
-      articles.forEach((article) => {
-        allDocs.push(transformStrapiArticle(article))
-      })
+      const allDocs: HubDoc[] = [...blogPosts, ...guidePosts, ...articles]
 
       allDocs.forEach((doc) => {
-        const content = ('path' in doc ? doc : coreContent(doc)) as HubDoc
-        const normalizedPath = normalizeRoute(`/${content.path}`)
-        normalizedDocMap.set(normalizedPath, content)
+        const normalizedPath = normalizeRoute(`/${doc.path}`)
+        normalizedDocMap.set(normalizedPath, doc)
       })
 
       function setDocLanguage(doc: HubDoc | null, language?: string) {
@@ -239,9 +196,8 @@ export default function OpenTelemetry({
       quickStartDocs.forEach((doc) => docRegistry.set(doc.path, doc))
 
       articles.forEach((article) => {
-        const transformed = transformStrapiArticle(article)
-        if (!docRegistry.has(transformed.path)) {
-          docRegistry.set(transformed.path, transformed)
+        if (!docRegistry.has(article.path)) {
+          docRegistry.set(article.path, article)
         }
       })
 

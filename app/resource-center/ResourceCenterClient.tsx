@@ -6,9 +6,12 @@ import ComparisonsListing from './comparisons/Comparisons'
 import Guides from './guides/Guides'
 import OpenTelemetry from './opentelemetry/OpenTelemetry'
 import Button from '@/components/ui/Button'
-import type { MDXContent } from '@/utils/strapi'
-import type { Comparison } from 'types/transformedContent'
-import type { ResourceCenterBlog, ResourceCenterGuide } from './content'
+import type {
+  ResourceCenterBlog,
+  ResourceCenterComparison,
+  ResourceCenterGuide,
+  ResourceCenterOpenTelemetryArticle,
+} from './content'
 
 const tabs = [
   {
@@ -45,8 +48,8 @@ export default function ResourceCenterClient({
 }: {
   blogPosts: ResourceCenterBlog[]
   guidePosts: ResourceCenterGuide[]
-  openTelemetryArticles?: MDXContent[]
-  comparisonPosts?: Comparison[]
+  openTelemetryArticles?: ResourceCenterOpenTelemetryArticle[]
+  comparisonPosts?: ResourceCenterComparison[]
 }) {
   const [activeTab, setActiveTab] = useState('blog-tab')
 

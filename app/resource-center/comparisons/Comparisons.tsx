@@ -5,6 +5,7 @@ import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
+import type { ResourceCenterComparison } from '../content'
 
 interface ComparisonsPageHeaderProps {
   onSearch: (e) => void
@@ -29,7 +30,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
   )
 }
 
-export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
+export default function ComparisonsListing({ posts = [] }: { posts?: ResourceCenterComparison[] }) {
   const primaryFeaturedBlogs = posts.slice(0, 2)
   const secondaryFeaturedBlogs = posts.slice(0)
 

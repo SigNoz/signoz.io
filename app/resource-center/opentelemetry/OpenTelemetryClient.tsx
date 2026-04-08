@@ -5,9 +5,12 @@ import Blogs from '../blog/Blogs'
 import Comparisons from '../comparisons/Comparisons'
 import Guides from '../guides/Guides'
 import OpenTelemetry from './OpenTelemetry'
-import type { MDXContent } from '@/utils/strapi'
-import type { Comparison } from 'types/transformedContent'
-import type { ResourceCenterBlog, ResourceCenterGuide } from '../content'
+import type {
+  ResourceCenterBlog,
+  ResourceCenterComparison,
+  ResourceCenterGuide,
+  ResourceCenterOpenTelemetryArticle,
+} from '../content'
 
 export default function OpenTelemetryClient({
   initialArticles,
@@ -15,8 +18,8 @@ export default function OpenTelemetryClient({
   blogPosts,
   guidePosts,
 }: {
-  initialArticles?: MDXContent[]
-  comparisonPosts?: Comparison[]
+  initialArticles?: ResourceCenterOpenTelemetryArticle[]
+  comparisonPosts?: ResourceCenterComparison[]
   blogPosts: ResourceCenterBlog[]
   guidePosts: ResourceCenterGuide[]
 }) {
