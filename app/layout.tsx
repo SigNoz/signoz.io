@@ -94,7 +94,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
-        <SpeedInsightsWithDebug />
+        <Suspense fallback={null}>
+          <SpeedInsightsWithDebug />
+        </Suspense>
         <Suspense fallback={null}>
           <PageViewTracker />
         </Suspense>
