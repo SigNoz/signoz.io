@@ -102,6 +102,8 @@ export const EXPERIMENTS = {
       VARIANT: 'email-input-with-modal',
     },
     flagName: 'homepage-email-signup',
+    concluded: true,
+    defaultVariant: 'existing-cta-buttons',
   },
   // Add more experiments here as needed
 } as const

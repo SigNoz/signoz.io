@@ -2091,6 +2091,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/baseten-dashboard',
+            label: 'Baseten',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CI/CD',
           },
@@ -2762,6 +2767,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/baseten-monitoring',
+        label: 'Baseten',
+        type: 'doc',
+      },
+      {
         route: '/docs/claude-code-monitoring',
         label: 'Claude Code',
         type: 'doc',
@@ -2959,6 +2969,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
             label: 'Report from Trace ID',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/error-rate-spike-explainer',
+            label: 'Error Rate Spike Explainer',
           },
         ],
       },
