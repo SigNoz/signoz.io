@@ -632,32 +632,7 @@ const TeamsVariant: React.FC = () => {
     <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
       <VariantNavbar />
 
-      {/* Trust bar — fixed below navbar, desktop only */}
-      <div className="fixed left-0 right-0 top-[56px] z-[29] hidden h-[52px] items-center justify-center border-b border-signoz_slate-400 bg-signoz_ink-500 px-12 lg:flex">
-        <span className="mr-7 text-[11px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
-          Trusted by
-        </span>
-        <div className="mr-8 flex items-center gap-8">
-          {TRUST_BAR_LOGOS.map((logo) => (
-            <Image
-              key={logo.src}
-              src={logo.src}
-              alt={logo.alt}
-              width={80}
-              height={20}
-              className="h-4 w-[72px] object-contain"
-            />
-          ))}
-        </div>
-        <div className="mr-7 h-5 w-px bg-signoz_slate-400" />
-        <div className="flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-3 py-1">
-          <Github className="h-3 w-3 flex-shrink-0 fill-signoz_vanilla-400" />
-          <span className="text-xs font-semibold text-signoz_vanilla-400">25,000+</span>
-          <span className="text-xs text-signoz_slate-50">GitHub Stars</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row lg:mt-[60px] lg:h-[calc(100vh-108px)]">
+      <div className="flex flex-col lg:flex-row lg:mt-[8px] lg:h-[calc(100vh-56px)]">
         {/* Left section — copy + checkmarks + testimonial */}
         <div className="flex w-full flex-col justify-between bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-10">
           <div>
@@ -680,10 +655,32 @@ const TeamsVariant: React.FC = () => {
             </div>
           </div>
           <div className="mt-8 lg:mt-0">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
-              What teams are saying
-            </p>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="mb-0 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
+                What teams are saying
+              </p>
+              <div className="flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-2.5 py-0.5">
+                <Github className="h-3 w-3 flex-shrink-0 fill-signoz_vanilla-400" />
+                <span className="text-xs font-semibold text-signoz_vanilla-400">25,000+</span>
+                <span className="text-xs text-signoz_slate-50">GitHub Stars</span>
+              </div>
+            </div>
             <Testimonial />
+            <div className="mt-6 flex items-center gap-6">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
+                Trusted by
+              </span>
+              {TRUST_BAR_LOGOS.map((logo) => (
+                <Image
+                  key={logo.src}
+                  src={logo.src}
+                  alt={logo.alt}
+                  width={60}
+                  height={16}
+                  className="h-3.5 w-[56px] object-contain"
+                />
+              ))}
+            </div>
           </div>
         </div>
 
