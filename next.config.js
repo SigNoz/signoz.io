@@ -1670,6 +1670,11 @@ module.exports = () => {
           destination: '/guides/tomcat-performance-monitoring/',
           permanent: true,
         },
+        {
+          source: '/guides/pino-logger/',
+          destination: '/guides/pino-logger-nodejs-logging-library/',
+          permanent: true,
+        },
         // April 2026 tech SEO 404 remediation redirects
         {
           source: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting/',
@@ -1839,8 +1844,7 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/clickhouse',
-          destination:
-            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {
@@ -2196,8 +2200,7 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/zookeeper/',
-          destination:
-            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {
