@@ -104,7 +104,7 @@ Your assistant will fetch a complete trace showing the full call chain. Here's a
 Error: "Payment request failed. Invalid token. app.loyalty.level=gold"
 ```
 
-The trace structure confirms the cascading error from the `Payment` service to the `Checkout` service. We also see in this example that `frontend` is also inheriting these errors(`frontend` may also be erroring from the cascade).
+The trace structure confirms the cascading error from the `Payment` service to the `Checkout` service. We also see in this example that `Frontend` is also inheriting these errors(`Frontend` may also be erroring from the cascade).
 
 ## Step 4: Quantify the Impact
 
@@ -141,19 +141,19 @@ However, the trace in Step 3 showed Frontend errors propagating from the Checkou
 Verify whether there's any meaningful connection:
 
 ```text
-In the last 15 minutes, what percent of frontend errors were due to the payment gold tier error cascading through checkout?
+In the last 15 minutes, what percent of Frontend errors were due to the payment gold tier error cascading through checkout?
 ```
 
-Your assistant will analyze frontend error spans:
+Your assistant will analyze Frontend error spans:
 
 ```text
 In the last 15 minutes:
-- Total frontend error spans: 429
+- Total Frontend error spans: 429
 - Frontend error spans in traces containing the gold-tier payment error: 18
 - Share: ~4%
 
-The gold-tier payment cascade is a tiny fraction of frontend errors.
-The vast majority of frontend errors come from other sources.
+The gold-tier payment cascade is a tiny fraction of Frontend errors.
+The vast majority of Frontend errors come from other sources.
 ```
 
 **Result**: Only 4% of Frontend errors are caused by the Payment cascade. This means:
@@ -162,13 +162,13 @@ The vast majority of frontend errors come from other sources.
 - Fixing Payment will reduce Frontend errors slightly, but won't clear the alert
 - You need to investigate Frontend independently
 
-## Final summary 
+## Final Summary 
 You started with 3 alerts. Investigation reveals:
 - **Payment**: Root cause (gold-tier token validation bug)
 - **Checkout**: 85% cascade from Payment. Will clear when Payment error is fixed
 - **Frontend**: Independent incident (only 4% overlap). Needs separate investigation
 
-You plan of action is to now focus on `Payment` first to clear 2 of 3 alerts, then investigate `Frontend` separately.
+Your plan of action is to now focus on `Payment` first to clear 2 of 3 alerts, then investigate `Frontend` separately.
 
 ## Tips for Your Own Investigations
 
