@@ -41,7 +41,7 @@ export const WhyOpenTelemetry = () => {
   return (
     <>
       <section className="mx-auto w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80%]">
-        <div className="container bg-[url('/img/background_blur/Ellipse_207.webp')] bg-[center_top_calc(-600px)]">
+        <div className="bg-blur-ellipse-207 container">
           <div className="grid place-items-center py-8 text-center md:py-28">
             <p className="text-center text-sm font-medium uppercase tracking-[.05em] text-signoz_vanilla-400">
               SigNoz is OpenTelemetry-Native

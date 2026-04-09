@@ -186,8 +186,8 @@ export const Testimonials = ({ page }) => {
   ]
   return (
     <section>
-      <div className="section-container mx-auto flex w-full flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Footer_backdrop.webp')] bg-[length:auto_100%] bg-[center_top_-45rem] bg-no-repeat !py-8 md:w-[80%] md:!py-24">
-        <div className="mb-16 flex flex-col items-center gap-12 text-center">
+      <div className="section-container bg-blur-footer-backdrop relative mx-auto flex w-full flex-col items-center overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 !py-8 md:w-[80%] md:!py-24">
+        <div className="z-10 mb-16 flex flex-col items-center gap-12 text-center">
           <OutplayLogo className="h-7 w-auto" aria-label="Outplay logo" />
           <span className="max-w-[min(42rem,90%)] text-center text-sm font-normal leading-10 text-signoz_sienna-200 sm:text-2xl">
             We optimized all our top endpoints and fine-tuned database calls to improve our backend
@@ -205,7 +205,7 @@ export const Testimonials = ({ page }) => {
           </div>
         </div>
 
-        <div className="row max-w-screen-md">
+        <div className="row z-10 max-w-screen-md">
           {TESTIMONIALS_LIST.map((column, idx) => (
             <div key={idx} className="col col--6">
               {column.map((testimonial, i) => (
@@ -251,7 +251,7 @@ export const Testimonials = ({ page }) => {
             </div>
           ))}
         </div>
-        <div className="mx-auto flex w-full justify-center shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
+        <div className="z-10 mx-auto flex w-full justify-center shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
           <TrackingLink
             href="/case-study/"
             className="inline-block"

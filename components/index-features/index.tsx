@@ -104,7 +104,7 @@ const sections = [
 export const SigNozFeatures = () => {
   return (
     <>
-      <section className="mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80%]">
+      <section className="bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80%]">
         <div className={`container pb-16`}>
           <div className="flex flex-col gap-6 pb-24 md:pb-32 ">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center sm:mt-[50px]">
