@@ -14,13 +14,13 @@ Is the bug in your service, or is a downstream dependency failing and propagatin
 
 ## Prerequisites
 
-- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server).
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
 - Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
 
 ## Step 1: Group By Error
 
 ```text
-Show me errors for the frontend service in the last 15 minutes grouped by error. 
+Show me errors for the frontend service in the last 15 minutes grouped by operation. 
 ```
 
 The results show these error patterns:
@@ -53,14 +53,9 @@ Here are the error traces for the frontend service in the last 15 minutes, group
 
 Total errors: 811
 Error rate: 18.4% (811 errors / 4,408 requests)
-
-Key observations:
-
-ProductCatalogService/GetProduct is the dominant error source at 288 — far ahead of
-everything else. Worth investigating that downstream dependency first.
 ```
 
-The majority of errors (288 out of 811) are coming from `ProductCatalogService/GetProduct`. That is 35% of all failures. This points to a issue with the product catalog service, not a bug in the frontend itself.
+The majority of errors (288 out of 811) are coming from `ProductCatalogService/GetProduct`. That is 35% of all failures. This points to an issue with the product catalog service, not a bug in the frontend itself.
 
 ## Step 2: Find Where in the Call Chain Errors Occur
 
@@ -95,20 +90,13 @@ Key observations:
 - The real story is latency, not a missing product. GetProduct took 13s before
   returning NOT_FOUND — that's not a normal "product doesn't exist" response.
   Something downstream of productcatalog is slow or timing out.
-
-- The flow is recommendations → GetProduct loop. The frontend calls
-  ListRecommendations, which returns product IDs, and then the frontend loops
-  and calls GetProduct for each one. One of those product IDs is coming back
-  NOT_FOUND. This explains why you saw 288 GetProduct errors vs only 133
-  /api/recommendations errors — each failing recommendations request produces
-  multiple failing GetProduct calls.
 ```
 
 The error originates in `productcatalog` service. The frontend and recommendation service are working correctly. The problem is that `productcatalog` is returning `NOT_FOUND` after a 13-second timeout for specific product IDs.
 
 ## Step 3: Investigate Downstream Dependencies
 
-The trace shows `productcatalog` is failing, but you still don't know why. A 13-second timeout before returning `NOT_FOUND` suggests something downstream of `productcatalog` is slow or unavailable. You need to check what dependencies `productcatalog` calls and whether they're healthy.
+The trace shows `productcatalog` is failing, but you still don't know why. A 13 second timeout before returning `NOT_FOUND` suggests something downstream of `productcatalog` is slow or unavailable. You need to check what dependencies `productcatalog` calls and whether they're healthy.
 
 ```text
 Show me what downstream services or databases productcatalog calls during GetProduct. Check if there are any slow queries or timeouts.
@@ -169,9 +157,9 @@ Starting from a `frontend error rate >= 10%` alert, the investigation revealed:
 3. **The actual failure point** was the `productcatalog` service calling Postgres, with a 13-second timeout returning `NOT_FOUND`
 4. **Postgres metrics confirmed** the root cause: 27.5% error rate, p99 latency of 25+ seconds, and the sign of connection pool exhaustion (failed requests completing faster than successful ones)
 
-**Root Cause:** Postgres connection pool exhaustion in the `productcatalog` service. The frontend service itself had no bugs—it was correctly propagating errors from a failing downstream dependency.
+**Root Cause:** Postgres connection pool exhaustion in the `productcatalog` service. The frontend service itself had no bugs. It was correctly propagating errors from a failing downstream dependency.
 
-With this information, you can now escalate to the database team with specific evidence: which service is affected (`productcatalog`), what the dependency is (`postgresql`), and the failure pattern (connection pool exhaustion, not query logic issues).
+With this information, you can now escalate to the relavant team with specific evidence: which service is affected (`productcatalog`), what the dependency is (`postgresql`), and the failure pattern (connection pool exhaustion, not query logic issues).
 
 
 ## Tips for Your Own Investigations
@@ -199,8 +187,8 @@ During this investigation, the MCP server called these tools:
 
 ## Next Steps
 
-- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer) - Ask "why is this slow?" and trace the bottleneck.
-- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id) - Deep-dive into a specific failing request by pasting its trace ID.
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Ask "why is this slow?" and trace the bottleneck.
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/) - Deep-dive into a specific failing request by pasting its trace ID.
 
 <GetHelp />
 
