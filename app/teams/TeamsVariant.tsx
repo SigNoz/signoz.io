@@ -9,6 +9,23 @@ import TrackingLink from '@/components/TrackingLink'
 import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
 import { REGIONS } from '@/constants/regions'
+import { Github } from '@/components/social-icons/SolidIcons'
+
+const TRUST_BAR_LOGOS = [
+  { src: '/img/users/netapp.svg', alt: 'NetApp' },
+  { src: '/img/users/samsung.svg', alt: 'Samsung' },
+  { src: '/img/users/comcast.svg', alt: 'Comcast' },
+  { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
+  { src: '/svgs/icons/sarvam.svg', alt: 'Sarvam AI' },
+  { src: '/svgs/icons/blaxel.svg', alt: 'Blaxel' },
+]
+
+const VALUE_PROPS = [
+  'Pre-built APM, Kubernetes & infra dashboards. No config required.',
+  '$0.30/GB logs & traces. No per-host fees. Ever.',
+  'One click from trace → log → infra. Fully correlated signals.',
+  'OTel-native. Your instrumentation, your data. No lock-in.',
+]
 
 interface ErrorsProps {
   fullName?: string
@@ -33,7 +50,7 @@ export const VariantNavbar = ({ className }: { className?: string }) => {
     <div
       className={`fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px] ${className}`}
     >
-      <div className="bg-signoz_ink-600 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
+      <div className="bg-signoz_ink-500 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
             <Image
@@ -47,7 +64,7 @@ export const VariantNavbar = ({ className }: { className?: string }) => {
           </Link>
         </div>
       </div>
-      <div className="hidden h-full items-center justify-end bg-signoz_ink-300 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
+      <div className="hidden h-full items-center justify-end bg-signoz_ink-500 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
         <TrackingLink
           target="_blank"
           clickType="Nav Click"
@@ -72,7 +89,7 @@ export const VariantNavbar = ({ className }: { className?: string }) => {
           Pricing
         </TrackingLink>
       </div>
-      <div className="bg-signoz_ink-600 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
+      <div className="bg-signoz_ink-500 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
         <TrackingLink
           target="_blank"
           clickType="Nav Click"
@@ -227,74 +244,59 @@ const Testimonial: React.FC = () => {
   }
 
   return (
-    <div className="relative flex h-[calc(100vh-56px)] max-w-md flex-col items-center justify-center p-8">
-      <blockquote className="space-y-6 border-0">
-        <div className="text-4xl text-signoz_vanilla-100/30">"</div>
-        <p className="text-2xl font-medium text-signoz_vanilla-100">{currentTestimonial.quote}</p>
-        <footer className="flex items-center space-x-4 pt-4">
+    <div className="rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-5">
+      <p className="mb-4 text-sm italic leading-relaxed text-signoz_vanilla-100">
+        &ldquo;{currentTestimonial.quote}&rdquo;
+      </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
           <Image
             src={currentTestimonial.avatar}
             alt={currentTestimonial.author}
-            className="h-12 w-12 rounded-full"
-            width={48}
-            height={48}
+            className="h-8 w-8 rounded-full"
+            width={32}
+            height={32}
           />
-          <div>
-            <TrackingLink
-              href={currentTestimonial.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-base font-medium text-signoz_robin-500"
-              clickType="Nav Click"
-              clickName="Testimonial Author Click"
-              clickLocation="teams_variant"
-              clickText={currentTestimonial.author}
-            >
-              {currentTestimonial.author}
-            </TrackingLink>
-          </div>
-        </footer>
-      </blockquote>
-
-      {/* Progress indicators with linear fill */}
-      <div className="absolute bottom-0 left-0 right-0 mb-6 flex justify-center gap-1.5">
-        {indicatorsToShow.map((index) => (
-          <div
-            key={index}
-            className={cn(
-              'h-[4px] overflow-hidden rounded-full transition-all duration-300',
-              index === currentIndex ? 'w-12' : 'w-3',
-              'bg-signoz_vanilla-100/20'
-            )}
+          <TrackingLink
+            href={currentTestimonial.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-signoz_robin-500"
+            clickType="Nav Click"
+            clickName="Testimonial Author Click"
+            clickLocation="teams_variant"
+            clickText={currentTestimonial.author}
           >
+            {currentTestimonial.author}
+          </TrackingLink>
+        </div>
+        <div className="flex items-center gap-1">
+          {indicatorsToShow.map((index) => (
             <div
+              key={index}
               className={cn(
-                'h-full bg-signoz_robin-500',
-                index === currentIndex
-                  ? 'opacity-100'
-                  : index < currentIndex
-                    ? 'opacity-60'
-                    : 'opacity-0',
-                // Remove transition for current item to avoid stuttering
-                index === currentIndex ? '' : 'transition-all duration-100'
+                'h-[3px] overflow-hidden rounded-full transition-all duration-300 bg-signoz_vanilla-100/20',
+                index === currentIndex ? 'w-4' : 'w-2'
               )}
-              style={{
-                width:
-                  index === currentIndex ? `${progress}%` : index < currentIndex ? '100%' : '0%',
-              }}
-            />
-          </div>
-        ))}
-
-        {/* If we're using a sliding window, show ellipsis indicators */}
-        {testimonials.length > 5 && indicatorsToShow[0] > 0 && (
-          <div className="mx-1 h-[4px] w-1.5 rounded-full bg-signoz_vanilla-100/30" />
-        )}
-
-        {testimonials.length > 5 &&
-          indicatorsToShow[indicatorsToShow.length - 1] < testimonials.length - 1 && (
-            <div className="mx-1 h-[4px] w-1.5 rounded-full bg-signoz_vanilla-100/30" />
-          )}
+            >
+              <div
+                className={cn(
+                  'h-full bg-signoz_robin-500',
+                  index === currentIndex
+                    ? 'opacity-100'
+                    : index < currentIndex
+                      ? 'opacity-60'
+                      : 'opacity-0',
+                  index === currentIndex ? '' : 'transition-all duration-100'
+                )}
+                style={{
+                  width:
+                    index === currentIndex ? `${progress}%` : index < currentIndex ? '100%' : '0%',
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -627,12 +629,66 @@ const TeamsVariant: React.FC = () => {
   }, [handleError, ssoError])
 
   return (
-    <div className="variant-teams-container bg-signoz_ink-600 flex flex-col">
+    <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
       <VariantNavbar />
 
-      <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
-        {/* Left section - Sign up form */}
-        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+5vh)]">
+      {/* Trust bar — fixed below navbar, desktop only */}
+      <div className="fixed left-0 right-0 top-[56px] z-[29] hidden h-[52px] items-center justify-center border-b border-signoz_slate-400 bg-signoz_ink-500 px-12 lg:flex">
+        <span className="mr-7 text-[11px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
+          Trusted by
+        </span>
+        <div className="mr-8 flex items-center gap-8">
+          {TRUST_BAR_LOGOS.map((logo) => (
+            <Image
+              key={logo.src}
+              src={logo.src}
+              alt={logo.alt}
+              width={80}
+              height={20}
+              className="h-4 w-[72px] object-contain"
+            />
+          ))}
+        </div>
+        <div className="mr-7 h-5 w-px bg-signoz_slate-400" />
+        <div className="flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-3 py-1">
+          <Github className="h-3 w-3 flex-shrink-0 fill-signoz_vanilla-400" />
+          <span className="text-xs font-semibold text-signoz_vanilla-400">25,000+</span>
+          <span className="text-xs text-signoz_slate-50">GitHub Stars</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row lg:mt-[60px] lg:h-[calc(100vh-108px)]">
+        {/* Left section — copy + checkmarks + testimonial */}
+        <div className="flex w-full flex-col justify-between bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-10">
+          <div>
+            <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
+              Stop firefighting.
+              <br />
+              Start shipping.
+            </h1>
+            <p className="mb-8 text-sm leading-relaxed text-signoz_slate-50">
+              Get full observability in under an hour — logs, traces, metrics, and LLM monitoring
+              all correlated in one place.
+            </p>
+            <div className="space-y-3.5">
+              {VALUE_PROPS.map((prop) => (
+                <div key={prop} className="flex items-start gap-2.5">
+                  <span className="mt-0.5 flex-shrink-0 text-sm text-signoz_forest-500">✓</span>
+                  <span className="text-sm text-signoz_vanilla-400">{prop}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mt-8 lg:mt-0">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
+              What teams are saying
+            </p>
+            <Testimonial />
+          </div>
+        </div>
+
+        {/* Right section — sign up form */}
+        <div className="relative flex w-full flex-col items-center justify-center border-l border-signoz_slate-500 bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:p-12 lg:pt-12">
           <div className="w-full">
             {(!isSubmitting && submitFailed) || ssoError ? (
               <ErrorState error={errors.apiError || ''} />
@@ -645,21 +701,6 @@ const TeamsVariant: React.FC = () => {
                 logEvent={logEvent}
               />
             )}
-          </div>
-
-          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block [@media(max-height:790px)]:lg:hidden">
-            <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
-              <span>OpenTelemetry Native.</span>
-              <span>Unfied Signals.</span>
-              <span>Predictable Pricing.</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Right section - Testimonials */}
-        <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
-          <div className="flex w-full items-center justify-center">
-            <Testimonial />
           </div>
         </div>
       </div>
