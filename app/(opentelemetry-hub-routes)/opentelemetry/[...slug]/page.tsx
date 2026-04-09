@@ -1,5 +1,4 @@
 import 'css/prism.css'
-import 'css/post.css'
 import 'css/doc.css'
 import 'katex/dist/katex.css'
 

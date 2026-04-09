@@ -1,5 +1,4 @@
 import 'css/prism.css'
-import 'css/post.css'
 import 'css/doc.css'
 import { components } from '@/components/MDXComponents'
 import FAQLayout from '@/layouts/FAQLayout'

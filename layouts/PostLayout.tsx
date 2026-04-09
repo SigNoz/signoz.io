@@ -1,7 +1,5 @@
 'use client'
 
-import '../css/post.css'
-
 import { ReactNode, useRef, useState, useEffect } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
@@ -83,9 +81,9 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
               readingTime={readingTime.text}
               key={slug}
             />
-            <div className="post container flex flex-row-reverse overflow-clip">
+            <div className="container mx-auto flex h-full flex-row-reverse gap-4 overflow-clip">
               <div
-                className={`post-toc ml-4 w-1/4 transition-opacity duration-1000 ${
+                className={`sticky top-[88px] ml-4 box-border flex h-[calc(100vh-156px)] w-1/4 flex-col gap-1 overflow-y-auto p-4 pl-8 transition-opacity duration-1000 max-lg:hidden ${
                   isTocVisible ? 'opacity-100' : 'opacity-30'
                 } hover:opacity-100`}
               >
@@ -100,7 +98,7 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
                 })}
               </div>
 
-              <div className="post-content w-3/4 pr-4">
+              <div className="box-border w-3/4 overflow-y-auto pl-6 pr-4 max-lg:w-full max-lg:pl-0">
                 <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
                   {children}
                 </article>
