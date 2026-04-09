@@ -40,6 +40,9 @@ export const metadata: Metadata = {
   },
 }
 
+const blogPosts = getResourceCenterBlogs()
+const guidePosts = getResourceCenterGuides()
+
 export default async function OpenTelemetryHome() {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deployment_status = isProduction ? 'live' : 'staging'
@@ -62,8 +65,8 @@ export default async function OpenTelemetryHome() {
     <OpenTelemetryClient
       initialArticles={articles}
       comparisonPosts={comparisonPosts}
-      blogPosts={getResourceCenterBlogs()}
-      guidePosts={getResourceCenterGuides()}
+      blogPosts={blogPosts}
+      guidePosts={guidePosts}
     />
   )
 }

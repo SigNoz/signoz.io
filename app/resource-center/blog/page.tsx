@@ -28,13 +28,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function BlogHome() {
-  const posts = getResourceCenterBlogs()
+const blogPosts = getResourceCenterBlogs()
 
+export default async function BlogHome() {
   return (
     <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
       <div className="tab-content pt-6">
-        <Blogs posts={posts} />
+        <Blogs posts={blogPosts} />
       </div>
     </div>
   )
