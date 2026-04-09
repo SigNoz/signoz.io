@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Dialog } from '@headlessui/react'
 import { Menu, X } from 'lucide-react'
 import Image from 'next/image'
@@ -246,8 +246,8 @@ export default function TopNav() {
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpenResources, setIsOpenResources] = useState(false)
-  const [timeoutId, setTimeoutId] = useState<any>(null)
-  const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const timeoutRefResources = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Track viewport width for progressive nav item hiding
   const [windowWidth, setWindowWidth] = useState<number | null>(null)
 
@@ -313,39 +313,57 @@ export default function TopNav() {
     }
   }, [])
 
+  // Clean up hover timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (timeoutRefResources.current) clearTimeout(timeoutRefResources.current)
+    }
+  }, [])
+
+  // Product dropdown handlers — refs avoid stale-closure issues with timeouts
+  const handleMouseEnterProduct = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setIsOpen(true)
+  }, [])
+
+  const handleMouseLeaveProduct = useCallback(() => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false)
+      timeoutRef.current = null
+    }, delay)
+  }, [delay])
+
+  // Resources dropdown handlers
+  const handleMouseEnterResources = useCallback(() => {
+    if (timeoutRefResources.current) {
+      clearTimeout(timeoutRefResources.current)
+      timeoutRefResources.current = null
+    }
+    setIsOpenResources(true)
+  }, [])
+
+  const handleMouseLeaveResources = useCallback(() => {
+    timeoutRefResources.current = setTimeout(() => {
+      setIsOpenResources(false)
+      timeoutRefResources.current = null
+    }, delay)
+  }, [delay])
+
+  const handleProductDropdownClick = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const handleResourcesDropdownClick = useCallback(() => {
+    setIsOpenResources(false)
+  }, [])
+
   // Hide TopNav on teams page or if source is onboarding
   if (isSignupRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
     return null
-  }
-
-  // Product dropdown handlers
-  const handleMouseEnterProduct = () => {
-    clearTimeout(timeoutId)
-    setIsOpen(true)
-  }
-
-  const handleMouseLeaveProduct = () => {
-    const id = setTimeout(() => setIsOpen(false), delay)
-    setTimeoutId(id)
-  }
-
-  // Resources dropdown handlers
-  const handleMouseEnterResources = () => {
-    clearTimeout(timeoutIdResources)
-    setIsOpenResources(true)
-  }
-
-  const handleMouseLeaveResources = () => {
-    const id = setTimeout(() => setIsOpenResources(false), delay)
-    setTimeoutIdResources(id)
-  }
-
-  const handleProductDropdownClick = () => {
-    setIsOpen(false)
-  }
-
-  const handleResourcesDropdownClick = () => {
-    setIsOpenResources(false)
   }
 
   return (
@@ -386,7 +404,13 @@ export default function TopNav() {
                     onMouseLeave={handleMouseLeaveProduct}
                     className="flex items-center"
                   >
-                    <Popover.Root open={isOpen} onOpenChange={setIsOpen} modal={false}>
+                    <Popover.Root
+                      open={isOpen}
+                      onOpenChange={(open) => {
+                        if (!open) setIsOpen(false)
+                      }}
+                      modal={false}
+                    >
                       <Popover.Trigger asChild>
                         <Button className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500">
                           <div className="flex items-center">
@@ -566,7 +590,9 @@ export default function TopNav() {
                   >
                     <Popover.Root
                       open={isOpenResources}
-                      onOpenChange={setIsOpenResources}
+                      onOpenChange={(open) => {
+                        if (!open) setIsOpenResources(false)
+                      }}
                       modal={false}
                     >
                       <Popover.Trigger asChild>
