@@ -54,7 +54,7 @@ export const GetStarted = ({ page }) => {
               </div>
             </div>
             <div className="relative flex items-center justify-center">
-              <div className="relative -mb-36 aspect-[1200/630] w-full max-sm:-mb-8 xl:w-3/5">
+              <div className="relative -mb-36 aspect-[2400/1194] w-full max-sm:-mb-8 xl:w-3/5">
                 <Image
                   src={landingThumbnail}
                   alt="SigNoz dashboard with application performance metrics - Get Started"

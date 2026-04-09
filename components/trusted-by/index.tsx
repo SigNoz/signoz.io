@@ -1,5 +1,4 @@
 import React from 'react'
-import { Button } from '@headlessui/react'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import NetAppLogo from '@/public/img/users/netapp.svg'
@@ -57,15 +56,14 @@ export const TrustedByTeams = ({ page }) => {
           <div className="mb-5 flex flex-col items-center text-center">
             <TrackingLink
               href="/case-study/"
+              id={customerStoriesId}
               clickType="Secondary CTA"
               clickName="Customer Stories Link"
               clickText="Read customer stories"
               clickLocation="Trusted By Section"
-              className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+              className="button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
-              <Button className="flex-center z-[1] mx-2" id={customerStoriesId}>
-                Read customer stories <ArrowRight size={14} />
-              </Button>
+              Read customer stories <ArrowRight size={14} />
             </TrackingLink>
           </div>
         </div>

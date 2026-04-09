@@ -24,7 +24,7 @@ export const VideoModalPlayer = ({
   return (
     <div className="product-explainer-video hero-figure rounded-lg">
       <div className="embed-container">
-        <div className="relative aspect-video w-full">
+        <div className="relative aspect-[2400/1194] w-full">
           <Image
             src={thumbnailSrc}
             alt={thumbnailAlt}
@@ -41,6 +41,7 @@ export const VideoModalPlayer = ({
               clickText="Play Video"
               clickLocation="Hero Section"
               onClick={onOpen}
+              aria-label="Play product demo video"
             >
               <PlayIcon className="h-6 w-6 md:h-20 md:w-20" aria-hidden="true" />
             </TrackingButton>

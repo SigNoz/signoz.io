@@ -11,6 +11,8 @@ type SearchButtonDeferredProps = {
   disableShortcut?: boolean
 }
 
+const HYDRATE_SEARCH_AFTER_MS = 3000
+
 const loadSearchButton = () => import('./SearchButton')
 
 const DeferredSearchButton = dynamic(loadSearchButton, {
@@ -31,30 +33,16 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
   }, [])
 
   useEffect(() => {
-    if (shouldHydrate) {
+    if (shouldHydrate || !hasAlgoliaConfig) {
       return
     }
 
-    let idleCallbackId: number | undefined
-    let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined
-    const supportsIdleCallback = typeof window.requestIdleCallback === 'function'
-
-    if (supportsIdleCallback) {
-      idleCallbackId = window.requestIdleCallback(() => hydrateSearch())
-    } else {
-      timeoutId = globalThis.setTimeout(hydrateSearch, 0)
-    }
+    const timeoutId = globalThis.setTimeout(hydrateSearch, HYDRATE_SEARCH_AFTER_MS)
 
     return () => {
-      if (idleCallbackId !== undefined && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(idleCallbackId)
-      }
-
-      if (timeoutId !== undefined) {
-        globalThis.clearTimeout(timeoutId)
-      }
+      globalThis.clearTimeout(timeoutId)
     }
-  }, [hydrateSearch, shouldHydrate])
+  }, [hasAlgoliaConfig, hydrateSearch, shouldHydrate])
 
   useEffect(() => {
     if (disableShortcut) {

@@ -254,19 +254,14 @@ export const Testimonials = ({ page }) => {
         <div className="z-10 mx-auto flex w-full justify-center shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
           <TrackingLink
             href="/case-study/"
-            className="inline-block"
+            id={customerStoriesId}
             clickType="Secondary CTA"
             clickName="Customer Stories Link"
             clickText="Read customer stories"
-            clickLocation="Testimonials Section"
+            clickLocation="Trusted By Section"
+            className="button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
           >
-            <Button
-              id={customerStoriesId}
-              className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
-            >
-              Read customer stories
-              <ArrowRight size={14} />
-            </Button>
+            Read customer stories <ArrowRight size={14} />
           </TrackingLink>
         </div>
       </div>

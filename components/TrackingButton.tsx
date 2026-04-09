@@ -18,6 +18,7 @@ interface TrackingButtonProps {
   disabled?: boolean
   id?: string
   title?: string
+  'aria-label'?: string
 }
 
 /**
