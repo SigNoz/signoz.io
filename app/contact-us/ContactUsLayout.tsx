@@ -1,61 +1,77 @@
 import React from 'react'
-import { CheckCircle } from 'lucide-react'
+import Image from 'next/image'
 import ContactForm from './components/ContactForm'
 import { contactUsData } from './data'
-import Heading from '../../components/ui/Heading'
-import Hero from '@/components/ui/Hero'
+import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
+
+const TRUST_BAR_LOGOS = [
+  { src: '/img/users/netapp.svg', alt: 'NetApp' },
+  { src: '/img/users/samsung.svg', alt: 'Samsung' },
+  { src: '/img/users/comcast.svg', alt: 'Comcast' },
+  { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
+  { src: '/svgs/icons/sarvam.svg', alt: 'Sarvam AI' },
+  { src: '/svgs/icons/blaxel.svg', alt: 'Blaxel' },
+]
+
+const OPTIONS = [
+  'Enterprise Cloud — dedicated environment with security & compliance',
+  'BYOC — SigNoz managed in your own cloud infrastructure',
+  'Enterprise Self-Hosted — with dedicated support contract',
+]
 
 export default function ContactUsLayout() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-signoz_ink-500">
-      {/* Background elements without the gradient */}
-      <div className="bg-dot-pattern masked-dots absolute inset-0 overflow-hidden opacity-20"></div>
-      <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
-
-      <div className="py-18 container mx-auto px-4 md:px-6 md:py-20 lg:px-8">
-        <div className="mb-24 text-center">
-          <Hero>{contactUsData.TITLE}</Hero>
-
-          {/* Features section like in PricingFeatures.tsx */}
-          <div className="mx-auto mb-6 mt-2 flex w-full max-w-4xl flex-col items-center gap-3 font-bold md:flex-row md:justify-center md:gap-8">
-            {contactUsData.FEATURES.map((feature, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <CheckCircle className="text-green-500" size={16} />
-                <span className="text-base text-signoz_vanilla-400">{feature.title}</span>
-              </div>
-            ))}
+    <div className="ml-[calc(100%-100vw)] flex w-screen flex-col overflow-hidden bg-signoz_ink-500">
+      <FocusedNavbar />
+      <div className="flex flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
+        {/* Left col — desktop only */}
+        <div className="hidden flex-col justify-between bg-signoz_ink-500 p-12 pt-[120px] lg:flex lg:w-5/12">
+          <div>
+            <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
+              See SigNoz
+              <br />
+              in action.
+            </h1>
+            <p className="mb-8 text-sm leading-relaxed text-signoz_slate-50">
+              30 minutes. No pitch deck. Just your stack,
+              <br />
+              your questions, and a real demo.
+            </p>
+            <div className="space-y-3.5">
+              {OPTIONS.map((opt) => (
+                <div key={opt} className="flex items-start gap-2.5">
+                  <span className="mt-0.5 flex-shrink-0 text-sm text-signoz_forest-500">✓</span>
+                  <span className="text-sm text-signoz_vanilla-400">{opt}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
+              Trusted by
+            </p>
+            <div className="flex items-center gap-6">
+              {TRUST_BAR_LOGOS.map((logo) => (
+                <Image
+                  key={logo.src}
+                  src={logo.src}
+                  alt={logo.alt}
+                  width={60}
+                  height={16}
+                  className="h-3.5 w-[56px] object-contain"
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="grid items-start gap-12 md:grid-cols-2 lg:gap-16">
-          {/* Left column: text content */}
-          <div className="max-w-xl md:sticky md:top-24 md:self-start">
-            <h2 className="mb-6 text-2xl font-bold text-signoz_vanilla-100/70">
-              Choose between any of the following options:
-            </h2>
-
-            <div className="space-y-6">
-              {contactUsData.OPTIONS.map((option, idx) => (
-                <div key={idx} className="py-2 first:pt-0 last:pb-0">
-                  <h3 className="text-xl font-semibold text-signoz_vanilla-100">{option.title}</h3>
-                  <p className="mt-2 text-base leading-relaxed text-signoz_vanilla-100/70">
-                    {option.description}
-                  </p>
-                </div>
-              ))}
-
-              <div className="my-5 w-full border-t border-solid border-signoz_slate-300"></div>
-
-              <div className="pt-6 text-base text-signoz_vanilla-100/70">
-                {contactUsData.FOOTER}
-              </div>
-            </div>
-          </div>
-
-          {/* Right column: contact form */}
-          <div className="rounded-xl border border-signoz_slate-400 bg-[rgb(244_242_250)] p-6 shadow-xl backdrop-blur-sm">
-            {' '}
-            {/* TODO: colour not present in design guidelines, see if can be changed */}
+        {/* Right col — form */}
+        <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:overflow-y-auto lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pt-12">
+          <div className="w-full max-w-lg rounded-xl border border-signoz_slate-400 bg-signoz_ink-500 p-8">
+            <h2 className="mb-1 text-xl font-semibold text-white">Book a Demo</h2>
+            <p className="mb-6 text-sm text-signoz_vanilla-100/60">
+              30-min call with a SigNoz observability expert.
+            </p>
             <ContactForm
               portalId={contactUsData.PORTAL_ID}
               formId={contactUsData.FORM_ID}
