@@ -1,23 +1,28 @@
 'use client'
 
 import React from 'react'
-import Image from 'next/image'
+import Image, { type StaticImageData } from 'next/image'
 import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import VimeoPlayer from '../VimeoPlayer/VimeoPlayer'
 import TrackingButton from '@/components/TrackingButton'
+import PlayIcon from '@/public/svgs/icons/play-icon.svg'
 
 interface VideoModalPlayerProps {
-  thumbnailSrc: string
+  thumbnailSrc: string | StaticImageData
   thumbnailAlt: string
   videoId: string
 }
 
-export const VideoModalPlayer = ({ thumbnailSrc, thumbnailAlt, videoId }: VideoModalPlayerProps) => {
+export const VideoModalPlayer = ({
+  thumbnailSrc,
+  thumbnailAlt,
+  videoId,
+}: VideoModalPlayerProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (
-    <div className="product-explainer-video hero-figure rounded-lg p-3">
+    <div className="product-explainer-video hero-figure rounded-lg">
       <div className="embed-container">
         <div className="relative aspect-video w-full">
           <Image
@@ -37,11 +42,7 @@ export const VideoModalPlayer = ({ thumbnailSrc, thumbnailAlt, videoId }: VideoM
               clickLocation="Hero Section"
               onClick={onOpen}
             >
-              <img
-                src="/svgs/icons/play-icon.svg"
-                alt="signoz-video-play-btn"
-                className="h-6 w-6 md:h-20 md:w-20"
-              />
+              <PlayIcon className="h-6 w-6 md:h-20 md:w-20" aria-hidden="true" />
             </TrackingButton>
           </div>
         </div>

@@ -1,7 +1,8 @@
 import React from 'react'
-import styles from './styles.module.css'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
+import homepageDataProtectionGraphic2 from '@/public/img/graphics/homepage/feature-graphic-data-protection-2.webp'
 
 export const SignozDatalog = () => {
   return (
@@ -26,9 +27,10 @@ export const SignozDatalog = () => {
               </span>
             </p>
           </div>
-          <img
-            src="/img/graphics/homepage/feature-graphic-data-protection-2.webp"
+          <Image
+            src={homepageDataProtectionGraphic2}
             alt="Bar chart comparing observability costs for small, mid-sized, and large teams"
+            sizes="(max-width: 768px) 100vw, 80vw"
           />
           <div className="mt-[18px] flex flex-row gap-3"></div>
         </div>

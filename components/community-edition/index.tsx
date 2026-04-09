@@ -1,7 +1,7 @@
 import React from 'react'
-import styles from './styles.module.css'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import SignozIcon from '@/public/svgs/icons/signoz.svg'
 
 export const CommunityEdition = () => {
   return (
@@ -19,8 +19,8 @@ export const CommunityEdition = () => {
             </p>
           </div>
           <div className="h-[72px] md:h-[250px]">
-            <TrackingLink 
-              href="https://github.com/SigNoz/signoz" 
+            <TrackingLink
+              href="https://github.com/SigNoz/signoz"
               clickType="External Click"
               clickName="GitHub Repository Link"
               clickText="SigNoz / signoz"
@@ -28,7 +28,7 @@ export const CommunityEdition = () => {
             >
               <div className="group flex items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
                 <div className="mr-4">
-                  <img src="/svgs/icons/signoz.svg" alt="SigNoz Icon" />
+                  <SignozIcon className="h-10 w-10" role="img" aria-label="SigNoz Icon" />
                 </div>
                 <div className="flex-grow">
                   <div className="text-sm font-medium text-signoz_vanilla-400 sm:text-base">

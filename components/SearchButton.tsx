@@ -29,6 +29,7 @@ import { cn } from 'app/lib/utils'
 
 type SearchButtonProps = {
   disableShortcut?: boolean
+  initiallyOpen?: boolean
 }
 
 type SearchModalProps = {
@@ -66,7 +67,7 @@ type SearchResultsHandle = {
   hasHits: () => boolean
 }
 
-const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
+const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: SearchButtonProps) => {
   const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
   const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
   const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
@@ -141,6 +142,14 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [disableShortcut, hasAlgoliaConfig])
+
+  useEffect(() => {
+    if (!initiallyOpen) {
+      return
+    }
+
+    setIsOpen(true)
+  }, [initiallyOpen])
 
   const handleSelect = useCallback(
     (itemUrl: string) => {

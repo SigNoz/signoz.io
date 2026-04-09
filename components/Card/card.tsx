@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react'
+import Image, { type StaticImageData } from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
+import { cn } from '../../app/lib/utils'
 
 type CardProps = {
   number?: string
@@ -15,13 +17,15 @@ type CardProps = {
   info?: string
   buttonText?: string
   buttonLink?: string
-  logo?: string
+  logo?: string | StaticImageData | React.ReactNode
   logoSize?: number
   subTitleSize?: number
-  img?: string
+  img?: string | StaticImageData
+  imgClassName?: string
   imgAlt?: string
   border?: Boolean
   sectionName?: string
+  className?: string
 }
 
 const Card: React.FC<CardProps> = ({
@@ -36,10 +40,12 @@ const Card: React.FC<CardProps> = ({
   buttonLink,
   logo,
   img,
+  imgClassName,
   imgAlt,
   logoSize = 16,
   subTitleSize = 1,
   sectionName = 'Features',
+  className = '',
 }) => {
   const logoSizeClassnames = useMemo(() => {
     if (logoSize === 16) {
@@ -78,13 +84,30 @@ const Card: React.FC<CardProps> = ({
           : 'SigNoz product interface')
 
   const logoAlt = iconTag?.trim() ? `${iconTag} icon` : title ? `${title} icon` : 'Feature icon'
+  const isRenderableLogo = React.isValidElement(logo)
+  const isStringLogo = typeof logo === 'string'
+  const isStaticImage = typeof img !== 'string'
 
   return (
     <div
-      className={`col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-9 sm:col-span-1`}
+      className={cn(
+        'col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-9 sm:col-span-1',
+        className
+      )}
     >
       <div className="mb-4 flex items-center">
-        {logo ? <img src={logo} alt={logoAlt} className={`${logoSizeClassnames} mr-2.5`} /> : null}
+        {logo ? (
+          isRenderableLogo ? (
+            <span className={`${logoSizeClassnames} mr-2.5`}>{logo}</span>
+          ) : (
+            <Image
+              src={logo as string | StaticImageData}
+              alt={logoAlt}
+              {...(isStringLogo ? { width: logoSize, height: logoSize } : {})}
+              className={`${logoSizeClassnames} mr-2.5`}
+            />
+          )
+        ) : null}
         <span className="text-sm font-medium uppercase tracking-[0.05em] text-signoz_vanilla-400">
           {iconTag}
         </span>
@@ -123,10 +146,12 @@ const Card: React.FC<CardProps> = ({
         </p>
       ))}
       {img ? (
-        <img
+        <Image
           src={img}
           alt={featureImageAlt}
-          className="card-background h-auto w-auto border-none"
+          {...(isStaticImage ? {} : { width: 1200, height: 900 })}
+          sizes="(max-width: 1900px) 100vw"
+          className={`card-background h-auto w-auto border-none ${imgClassName || ''}`}
         />
       ) : null}
 

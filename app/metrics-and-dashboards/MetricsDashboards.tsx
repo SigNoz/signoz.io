@@ -201,11 +201,12 @@ const TrustedByTeams = ({ page }) => {
         </div>
         <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
           {COMPANIES.map((company, idx) => (
-            <div key={`${idx}-${company.image}`} className="flex items-center justify-center">
-              <img
+            <div key={`${idx}-${company.imageDesc}`} className="flex items-center justify-center">
+              <company.Logo
+                key={`${idx}-${company.imageDesc}`}
                 className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-                src={company.image}
-                alt={company.imageDesc}
+                role="img"
+                aria-label={company.imageDesc}
               />
             </div>
           ))}

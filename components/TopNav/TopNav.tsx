@@ -17,7 +17,7 @@ import {
   ShieldPlus,
   WorkflowIcon,
 } from 'lucide-react'
-import SearchButton from '../SearchButton'
+import SearchButton from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'

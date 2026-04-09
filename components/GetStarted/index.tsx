@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Button from '@/components/Button/Button'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
 export const GetStarted = ({ page }) => {
   const getStartedId = `btn-get-started-${page}-bottom`
@@ -10,7 +11,7 @@ export const GetStarted = ({ page }) => {
 
   return (
     <div className="bg-[width:50%] bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat">
-      <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+      <section className="mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80%]">
         <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
@@ -53,13 +54,13 @@ export const GetStarted = ({ page }) => {
               </div>
             </div>
             <div className="relative flex items-center justify-center">
-              <div className="relative -mb-36 aspect-[1200/630] w-3/5 max-sm:-mb-8">
+              <div className="relative -mb-36 aspect-[1200/630] w-full max-sm:-mb-8 xl:w-3/5">
                 <Image
-                  src="/img/landing/landing_thumbnail.webp"
+                  src={landingThumbnail}
                   alt="SigNoz dashboard with application performance metrics - Get Started"
                   className="z-[0] rounded-lg"
                   fill
-                  sizes="60vw"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1536px) 60vw, 900px"
                   priority
                 />
               </div>
