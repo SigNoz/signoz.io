@@ -60,8 +60,8 @@ export const GetStarted = ({ page }) => {
                   alt="SigNoz dashboard with application performance metrics - Get Started"
                   className="z-[0] rounded-lg"
                   fill
+                  loading="lazy"
                   sizes="(max-width: 768px) 100vw, (max-width: 1536px) 60vw, 900px"
-                  priority
                 />
               </div>
             </div>
