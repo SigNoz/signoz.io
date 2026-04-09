@@ -10,6 +10,7 @@ import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
 import { REGIONS } from '@/constants/regions'
 import { Github } from '@/components/social-icons/SolidIcons'
+import { ExperimentTracker } from '@/components/ExperimentTracker'
 
 const TRUST_BAR_LOGOS = [
   { src: '/img/users/netapp.svg', alt: 'NetApp' },
@@ -130,7 +131,7 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   )
 }
 
-// Testimonial component
+// Shared testimonials data
 const testimonials = [
   {
     quote:
@@ -168,80 +169,125 @@ const testimonials = [
   },
 ]
 
-const DISPLAY_DURATION = 4000 // 4 seconds exactly
+const DISPLAY_DURATION = 4000
 
-const Testimonial: React.FC = () => {
+const cn = (...classes: (string | boolean | undefined)[]) => classes.filter(Boolean).join(' ')
+
+const useTestimonialTimer = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const startTimeRef = useRef<number | null>(null)
   const timerRef = useRef<number | null>(null)
 
-  // Use a simpler, more reliable approach with setInterval for linear progress
   useEffect(() => {
-    // Reset progress on testimonial change
     setProgress(0)
     startTimeRef.current = Date.now()
 
-    // Clear existing timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-    }
+    if (timerRef.current) clearInterval(timerRef.current)
 
-    // Update progress every 50ms for smooth animation
-    const updateInterval = 50 // ms
     timerRef.current = window.setInterval(() => {
       if (!startTimeRef.current) return
-
       const elapsed = Date.now() - startTimeRef.current
       const newProgress = (elapsed / DISPLAY_DURATION) * 100
 
       if (newProgress >= 100) {
-        // Complete this testimonial and move to next
         setProgress(100)
         clearInterval(timerRef.current as number)
-
-        // Small delay before next testimonial
         setTimeout(() => {
-          setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length)
+          setCurrentIndex((prev) => (prev + 1) % testimonials.length)
         }, 100)
       } else {
         setProgress(newProgress)
       }
-    }, updateInterval)
+    }, 50)
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
+      if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [currentIndex])
 
-  const currentTestimonial = testimonials[currentIndex]
-
-  // Handle display for large number of testimonials
-  // Only show a maximum of 5 indicators, with the current one in the middle when possible
   const getIndicatorsToShow = () => {
-    if (testimonials.length <= 5) {
-      return testimonials.map((_, i) => i)
-    }
-
-    // Sliding window of 5 indicators, with current in the middle when possible
+    if (testimonials.length <= 5) return testimonials.map((_, i) => i)
     let start = Math.max(0, currentIndex - 2)
     let end = Math.min(testimonials.length - 1, start + 4)
-
-    // Adjust if we're at the end
-    if (end === testimonials.length - 1 && end - start < 4) {
-      start = Math.max(0, end - 4)
-    }
-
+    if (end === testimonials.length - 1 && end - start < 4) start = Math.max(0, end - 4)
     return Array.from({ length: end - start + 1 }, (_, i) => start + i)
   }
 
-  const indicatorsToShow = getIndicatorsToShow()
+  return { currentIndex, progress, indicatorsToShow: getIndicatorsToShow() }
+}
 
-  const cn = (...classes: (string | boolean | undefined)[]) => {
-    return classes.filter(Boolean).join(' ')
-  }
+// Control: full-height carousel (original layout)
+const ControlTestimonial: React.FC = () => {
+  const { currentIndex, progress, indicatorsToShow } = useTestimonialTimer()
+  const currentTestimonial = testimonials[currentIndex]
+
+  return (
+    <div className="relative flex h-[calc(100vh-56px)] max-w-md flex-col items-center justify-center p-8">
+      <blockquote className="space-y-6 border-0">
+        <div className="text-4xl text-signoz_vanilla-100/30">"</div>
+        <p className="text-2xl font-medium text-signoz_vanilla-100">{currentTestimonial.quote}</p>
+        <footer className="flex items-center space-x-4 pt-4">
+          <Image
+            src={currentTestimonial.avatar}
+            alt={currentTestimonial.author}
+            className="h-12 w-12 rounded-full"
+            width={48}
+            height={48}
+          />
+          <div>
+            <TrackingLink
+              href={currentTestimonial.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base font-medium text-signoz_robin-500"
+              clickType="Nav Click"
+              clickName="Testimonial Author Click"
+              clickLocation="teams_variant"
+              clickText={currentTestimonial.author}
+            >
+              {currentTestimonial.author}
+            </TrackingLink>
+          </div>
+        </footer>
+      </blockquote>
+
+      <div className="absolute bottom-0 left-0 right-0 mb-6 flex justify-center gap-1.5">
+        {indicatorsToShow.map((index) => (
+          <div
+            key={index}
+            className={cn(
+              'h-[4px] overflow-hidden rounded-full transition-all duration-300',
+              index === currentIndex ? 'w-12' : 'w-3',
+              'bg-signoz_vanilla-100/20'
+            )}
+          >
+            <div
+              className={cn(
+                'h-full bg-signoz_robin-500',
+                index === currentIndex
+                  ? 'opacity-100'
+                  : index < currentIndex
+                    ? 'opacity-60'
+                    : 'opacity-0',
+                index === currentIndex ? '' : 'transition-all duration-100'
+              )}
+              style={{
+                width:
+                  index === currentIndex ? `${progress}%` : index < currentIndex ? '100%' : '0%',
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Variant: compact card testimonial
+const VariantTestimonial: React.FC = () => {
+  const { currentIndex, progress, indicatorsToShow } = useTestimonialTimer()
+  const currentTestimonial = testimonials[currentIndex]
 
   return (
     <div className="rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-5">
@@ -291,7 +337,11 @@ const Testimonial: React.FC = () => {
                 )}
                 style={{
                   width:
-                    index === currentIndex ? `${progress}%` : index < currentIndex ? '100%' : '0%',
+                    index === currentIndex
+                      ? `${progress}%`
+                      : index < currentIndex
+                        ? '100%'
+                        : '0%',
                 }}
               />
             </div>
@@ -319,7 +369,6 @@ const SignupFormIsolated: React.FC<{
   const searchParams = useSearchParams()
   const workEmailFromParams = searchParams.get('q')
 
-  // Set the work email from the URL params to the form data
   useEffect(() => {
     if (workEmailFromParams) {
       setFormState((prev) => ({
@@ -329,11 +378,8 @@ const SignupFormIsolated: React.FC<{
     }
   }, [workEmailFromParams])
 
-  // Focus email input when component mounts
   useEffect(() => {
-    if (emailInputRef.current) {
-      emailInputRef.current.focus()
-    }
+    if (emailInputRef.current) emailInputRef.current.focus()
   }, [])
 
   const handleInputChange = useCallback((event) => {
@@ -367,8 +413,6 @@ const SignupFormIsolated: React.FC<{
   const handleSubmit = useCallback(
     (event) => {
       event.preventDefault()
-
-      // Log click event for debugging
       logEvent({
         eventType: 'track',
         eventName: 'Website Click',
@@ -381,12 +425,9 @@ const SignupFormIsolated: React.FC<{
           dataRegion: formState.dataRegion,
         },
       })
-
       onSignup({
         email: formState.workEmail,
-        region: {
-          name: formState.dataRegion,
-        },
+        region: { name: formState.dataRegion },
         preferences: {
           terms_of_service_accepted: formState.termsOfServiceAccepted,
           opted_email_updates: true,
@@ -398,7 +439,6 @@ const SignupFormIsolated: React.FC<{
 
   const handleSocialSubmit = useCallback(
     (connector: string) => {
-      // Log click event for debugging
       logEvent({
         eventType: 'track',
         eventName: 'Website Click',
@@ -411,11 +451,8 @@ const SignupFormIsolated: React.FC<{
           dataRegion: formState.dataRegion,
         },
       })
-
       onSocialSignup({
-        region: {
-          name: formState.dataRegion,
-        },
+        region: { name: formState.dataRegion },
         preferences: {
           terms_of_service_accepted: formState.termsOfServiceAccepted,
           opted_email_updates: true,
@@ -440,7 +477,6 @@ const SignupFormIsolated: React.FC<{
           <label className="block text-sm font-medium text-signoz_vanilla-100" htmlFor="dataRegion">
             Data region{' '}
           </label>
-
           <div className="grid grid-cols-3 gap-3">
             {REGIONS.map((region) => (
               <button
@@ -599,8 +635,14 @@ const SignupFormIsolated: React.FC<{
   )
 }
 
+interface TeamsVariantProps {
+  showVariant: boolean
+  experimentId: string
+  variantId: string
+}
+
 // TeamsVariant component with its own state management
-const TeamsVariant: React.FC = () => {
+const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, variantId }) => {
   const searchParams = useSearchParams()
   const authCode = searchParams.get('code')
   const ssoError = searchParams.get('has_sso_error')
@@ -617,91 +659,120 @@ const TeamsVariant: React.FC = () => {
   } = useSignupForm({ source: 'teams' })
 
   useEffect(() => {
-    if (authCode) {
-      handleSocialSignupCallback({ code: authCode })
-    }
+    if (authCode) handleSocialSignupCallback({ code: authCode })
   }, [authCode, handleSocialSignupCallback])
 
   useEffect(() => {
-    if (ssoError) {
-      handleError()
-    }
+    if (ssoError) handleError()
   }, [handleError, ssoError])
 
-  return (
-    <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
-      <VariantNavbar />
+  const formSection = (
+    <div className="w-full">
+      {(!isSubmitting && submitFailed) || ssoError ? (
+        <ErrorState error={errors.apiError || ''} />
+      ) : (
+        <SignupFormIsolated
+          onSignup={handleSignUp}
+          onSocialSignup={handleSocialSignup}
+          isSubmitting={isSubmitting}
+          errors={errors}
+          logEvent={logEvent}
+        />
+      )}
+    </div>
+  )
 
-      <div className="flex flex-col lg:flex-row lg:mt-[8px] lg:h-[calc(100vh-56px)]">
-        {/* Left section — copy + checkmarks + testimonial */}
-        <div className="hidden w-full flex-col justify-between bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:flex lg:w-5/12 lg:p-12 lg:pt-10">
-          <div>
-            <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
-              Stop firefighting.
-              <br />
-              Start shipping.
-            </h1>
-            <p className="mb-8 text-sm leading-relaxed text-signoz_slate-50">
-              Get full observability in under an hour — logs, traces, metrics, and LLM monitoring
-              all correlated in one place.
-            </p>
-            <div className="space-y-3.5">
-              {VALUE_PROPS.map((prop) => (
-                <div key={prop} className="flex items-start gap-2.5">
-                  <span className="mt-0.5 flex-shrink-0 text-sm text-signoz_forest-500">✓</span>
-                  <span className="text-sm text-signoz_vanilla-400">{prop}</span>
+  return (
+    <ExperimentTracker experimentId={experimentId} variantId={variantId}>
+      {showVariant ? (
+        // Variant: value props + compact testimonials on left, form on right
+        <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
+          <VariantNavbar />
+          <div className="flex flex-col lg:flex-row lg:mt-[8px] lg:h-[calc(100vh-56px)]">
+            {/* Left section — copy + checkmarks + testimonial (desktop only) */}
+            <div className="hidden w-full flex-col justify-between bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:flex lg:w-5/12 lg:p-12 lg:pt-10">
+              <div>
+                <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
+                  Stop firefighting.
+                  <br />
+                  Start shipping.
+                </h1>
+                <p className="mb-8 text-sm leading-relaxed text-signoz_slate-50">
+                  Get full observability in under an hour — logs, traces, metrics, and LLM
+                  monitoring all correlated in one place.
+                </p>
+                <div className="space-y-3.5">
+                  {VALUE_PROPS.map((prop) => (
+                    <div key={prop} className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex-shrink-0 text-sm text-signoz_forest-500">✓</span>
+                      <span className="text-sm text-signoz_vanilla-400">{prop}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-          <div className="mt-8 lg:mt-0">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="mb-0 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
-                What teams are saying
-              </p>
-              <div className="flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-2.5 py-0.5">
-                <Github className="h-3 w-3 flex-shrink-0 fill-signoz_vanilla-400" />
-                <span className="text-xs font-semibold text-signoz_vanilla-400">25,000+</span>
-                <span className="text-xs text-signoz_slate-50">GitHub Stars</span>
+              </div>
+              <div className="mt-8 lg:mt-0">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="mb-0 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
+                    What teams are saying
+                  </p>
+                  <div className="flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-2.5 py-0.5">
+                    <Github className="h-3 w-3 flex-shrink-0 fill-signoz_vanilla-400" />
+                    <span className="text-xs font-semibold text-signoz_vanilla-400">25,000+</span>
+                    <span className="text-xs text-signoz_slate-50">GitHub Stars</span>
+                  </div>
+                </div>
+                <VariantTestimonial />
+                <div className="mt-6 flex items-center gap-6">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
+                    Trusted by
+                  </span>
+                  {TRUST_BAR_LOGOS.map((logo) => (
+                    <Image
+                      key={logo.src}
+                      src={logo.src}
+                      alt={logo.alt}
+                      width={60}
+                      height={16}
+                      className="h-3.5 w-[56px] object-contain"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-            <Testimonial />
-            <div className="mt-6 flex items-center gap-6">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
-                Trusted by
-              </span>
-              {TRUST_BAR_LOGOS.map((logo) => (
-                <Image
-                  key={logo.src}
-                  src={logo.src}
-                  alt={logo.alt}
-                  width={60}
-                  height={16}
-                  className="h-3.5 w-[56px] object-contain"
-                />
-              ))}
+
+            {/* Right section — sign up form */}
+            <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pt-12">
+              {formSection}
             </div>
           </div>
         </div>
+      ) : (
+        // Control: form on left, testimonials on right (original layout)
+        <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
+          <VariantNavbar />
+          <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row lg:mt-[8px]">
+            {/* Left section — sign up form */}
+            <div className="relative flex w-full flex-col p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+5vh)]">
+              {formSection}
+              <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block [@media(max-height:790px)]:lg:hidden">
+                <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
+                  <span>OpenTelemetry Native.</span>
+                  <span>Unfied Signals.</span>
+                  <span>Predictable Pricing.</span>
+                </p>
+              </div>
+            </div>
 
-        {/* Right section — sign up form */}
-        <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pt-12">
-          <div className="w-full">
-            {(!isSubmitting && submitFailed) || ssoError ? (
-              <ErrorState error={errors.apiError || ''} />
-            ) : (
-              <SignupFormIsolated
-                onSignup={handleSignUp}
-                onSocialSignup={handleSocialSignup}
-                isSubmitting={isSubmitting}
-                errors={errors}
-                logEvent={logEvent}
-              />
-            )}
+            {/* Right section — testimonials (desktop only) */}
+            <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
+              <div className="flex w-full items-center justify-center">
+                <ControlTestimonial />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </ExperimentTracker>
   )
 }
 
