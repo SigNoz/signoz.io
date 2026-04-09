@@ -50,7 +50,7 @@ export default function OpenTelemetryTocClient({ toc }: OpenTelemetryTocClientPr
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-1 px-4">
       <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
       <div
         ref={tocContainerRef}

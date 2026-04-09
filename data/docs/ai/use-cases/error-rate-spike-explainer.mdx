@@ -1,0 +1,194 @@
+---
+date: 2026-04-07
+id: error-rate-spike-explainer
+title: Error Rate Spike Explainer
+description: Find where errors originate in the call chain when error rates spike on a service.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Your alert fires: `frontend error rate >= 10%, triggered 6 min ago`. You know something is broken. You need to know where.
+
+Is the bug in your service, or is a downstream dependency failing and propagating errors upstream? You open your AI assistant, connected to SigNoz via the MCP server, and start investigating.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Group By Error
+
+```text
+Show me errors for the frontend service in the last 15 minutes grouped by operation. 
+```
+
+The results show these error patterns:
+
+```text
+Here are the error traces for the frontend service in the last 15 minutes, grouped by operation:
+
+# | Operation                                                            | Error Count
+--|----------------------------------------------------------------------|------------
+1 | oteldemo.ProductCatalogService/GetProduct                            | 288
+2 | GET /api/recommendations                                             | 133
+3 | executing api route (pages) /api/recommendations                     | 133
+4 | GET /api/products/index                                              | 39
+5 | executing api route (pages) /api/products/index                      | 39
+6 | oteldemo.ProductCatalogService/ListProducts                          | 39
+7 | oteldemo.RecommendationService/ListRecommendations                   | 37
+8 | GET /api/products/[productId]/index                                  | 25
+9 | executing api route (pages) /api/products/[productId]/index          | 25
+10| GET                                                                  | 16
+11| POST /api/checkout                                                   | 8
+12| executing api route (pages) /api/checkout                            | 7
+13| oteldemo.CheckoutService/PlaceOrder                                  | 6
+14| POST /api/product-ask-ai-assistant/[productId]/index                 | 3
+15| executing api route (pages) /api/product-ask-ai-assistant/[productId]| 3
+16| oteldemo.ProductReviewService/AskProductAIAssistant                  | 3
+17| GET /api/product-reviews-avg-score/[productId]/index                 | 2
+18| executing api route (pages) /api/product-reviews/[productId]/index   | 2
+19| GET /api/products/{productId}                                        | 2
+20| oteldemo.ProductReviewService/GetAverageProductReviewScore           | 2
+
+Total errors: 811
+Error rate: 18.4% (811 errors / 4,408 requests)
+```
+
+The majority of errors (288 out of 811) are coming from `ProductCatalogService/GetProduct`. That is 35% of all failures. This points to an issue with the product catalog service, not a bug in the frontend itself.
+
+## Step 2: Find Where in the Call Chain Errors Occur
+
+Now you know which operation is failing most frequently, but you don't know where in the call chain the actual failure occurs. Is it the frontend making a bad request, or is a downstream service returning an error? You need to examine a trace to see the full span hierarchy.
+
+```text
+Show me the span breakdown for a trace with the ProductCatalogService/GetProduct error. I want to see where in the call chain it failed.
+```
+
+The assistant pulls trace `1d67e93963c40ca811b85ec850d79265` and reconstructs the full call chain:
+
+```text
+Call chain (reconstructed from parent/child links):
+
+frontend-proxy: GET (8.7s, ok)
+ └─ frontend-proxy: router frontend egress (8.7s, ok)
+     └─ frontend: GET /api/recommendations [server] (8.7s, ok)   ← upstream retry boundary
+         └─ frontend: GET /api/recommendations [server] (243.3s, ❌ 500)
+             └─ frontend: executing api route /api/recommendations (243.3s, ❌)
+                 ├─ frontend → recommendation: ListRecommendations (230.3s, ok)
+                 │   └─ recommendation: ListRecommendations [server] (21.0s, ok)
+                 │       └─ recommendation: get_product_list (21.0s, ok)
+                 │           └─ recommendation → productcatalog: ListProducts (21.0s, ok)
+                 └─ frontend → productcatalog: GetProduct (13.1s, ❌ gRPC 5 NOT_FOUND)
+
+Where it failed:
+The error bubbles up from frontend → ProductCatalogService/GetProduct, which took
+13.06s and returned gRPC status 5 (NOT_FOUND). That failure turned the parent
+executing api route /api/recommendations into a 500, which propagated back out.
+
+Key observations:
+- The real story is latency, not a missing product. GetProduct took 13s before
+  returning NOT_FOUND — that's not a normal "product doesn't exist" response.
+  Something downstream of productcatalog is slow or timing out.
+```
+
+The error originates in `productcatalog` service. The frontend and recommendation service are working correctly. The problem is that `productcatalog` is returning `NOT_FOUND` after a 13-second timeout for specific product IDs.
+
+## Step 3: Investigate Downstream Dependencies
+
+The trace shows `productcatalog` is failing, but you still don't know why. A 13 second timeout before returning `NOT_FOUND` suggests something downstream of `productcatalog` is slow or unavailable. You need to check what dependencies `productcatalog` calls and whether they're healthy.
+
+```text
+Show me what downstream services or databases productcatalog calls during GetProduct. Check if there are any slow queries or timeouts.
+```
+
+The assistant analyzes productcatalog spans and reveals the bottleneck:
+
+```text
+Downstream dependencies:
+productcatalog has exactly one downstream dependency during GetProduct:
+  - postgresql (server.address = postgresql, span kind = Client)
+
+No other services, caches, or APIs. It's a straight gRPC → Postgres path:
+  frontend → productcatalog.GetProduct (server) → postgresql (client)
+
+Error rates (last 30 minutes):
+
+Operation                                 | Total | Errors | Error rate
+------------------------------------------|-------|--------|------------
+ProductCatalogService/GetProduct          | 1,243 | 428    | 34.4%
+ProductCatalogService/ListProducts        | 539   | 124    | 23.0%
+postgresql (client)                       | 1,804 | 496    | 27.5%
+
+Roughly 1 in 4 postgres calls is failing, and that tracks almost 1:1 with the
+GetProduct error rate. Postgres is the source.
+
+Latency — this is the real alarm:
+
+Span                    | p99 (all) | p99 (errors only)
+------------------------|-----------|------------------
+GetProduct (server)     | ~200.6s   | ~188.8s
+ListProducts (server)   | ~201.2s   | ~174.0s
+postgresql (client)     | ~25.4s    | ~3.2s
+
+Key observations:
+- Postgres p99 is ~25 seconds on successful calls. For a point lookup on a
+  product catalog, that's catastrophic — a healthy p99 should be single-digit
+  milliseconds.
+
+- GetProduct p99 (~200s) is ~8× the postgres p99 (~25s). This suggests either
+  connection pool exhaustion (requests queueing before the postgresql span
+  even opens), or retries happening inside productcatalog without separate spans.
+
+- Errored postgres calls are FASTER than successful ones (p99 3.2s vs 25.4s).
+  This is the classic pattern of connection timeout / pool exhaustion /
+  "too many connections" error kicking in early, while the calls that do get
+  through then crawl.
+```
+
+The problem was identified: **Postgres is the bottleneck**. Queries that should take milliseconds are taking 25+ seconds, and ~27% are failing outright. The fact that failures are faster than successes points to connection pool exhaustion.
+
+## Root Cause Summary
+
+Starting from a `frontend error rate >= 10%` alert, the investigation revealed:
+
+1. **288 out of 811 errors** (35%) originated from `ProductCatalogService/GetProduct` calls
+2. **Trace analysis showed** the error propagated up the call: `postgres → productcatalog → frontend`
+3. **The actual failure point** was the `productcatalog` service calling Postgres, with a 13-second timeout returning `NOT_FOUND`
+4. **Postgres metrics confirmed** the root cause: 27.5% error rate, p99 latency of 25+ seconds, and the sign of connection pool exhaustion (failed requests completing faster than successful ones)
+
+**Root Cause:** Postgres connection pool exhaustion in the `productcatalog` service. The frontend service itself had no bugs. It was correctly propagating errors from a failing downstream dependency.
+
+With this information, you can now escalate to the relavant team with specific evidence: which service is affected (`productcatalog`), what the dependency is (`postgresql`), and the failure pattern (connection pool exhaustion, not query logic issues).
+
+
+## Tips for Your Own Investigations
+
+- **Group errors first.** If you have multiple error messages, find the most frequent one and investigate that pattern. Fixing the most common error often resolves the majority of the spike.
+- **Follow the trace chain to find the failing component.** A 500 error in your frontend doesn't mean your frontend is broken. Trace the spans to see where the actual failure occurs. It's often a downstream dependency.
+- **Look at latency patterns, not just error rates.** When successful requests are slower than failed ones, you're looking at resource exhaustion (connection pools, memory, CPU), not logic bugs.
+- **Investigate downstream dependencies when errors spike.** If your service is failing, check what databases, caches, or other services it depends on. Database connection exhaustion and third-party API failures are common causes.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_search_traces` | Found error traces matching the service and time range filter |
+| 1 | `signoz_aggregate_traces` | Grouped errors by operation name to identify the most frequent failure pattern |
+| 2 | `signoz_get_trace_details` | Retrieved the full span tree with parent/child relationships showing where in the call chain the error occurred |
+| 3 | `signoz_aggregate_traces` | Analyzed downstream service error rates and latency percentiles by operation and span kind (client) to identify the Postgres bottleneck |
+
+</details>
+
+## Next Steps
+
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Ask "why is this slow?" and trace the bottleneck.
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/) - Deep-dive into a specific failing request by pasting its trace ID.
+
+<GetHelp />
+
