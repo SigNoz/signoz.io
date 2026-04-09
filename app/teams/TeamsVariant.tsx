@@ -9,8 +9,8 @@ import TrackingLink from '@/components/TrackingLink'
 import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
 import { REGIONS } from '@/constants/regions'
-import { Github } from '@/components/social-icons/SolidIcons'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
+import { Github } from '@/components/social-icons/SolidIcons'
 
 const TRUST_BAR_LOGOS = [
   { src: '/img/users/netapp.svg', alt: 'NetApp' },
@@ -45,6 +45,28 @@ interface FormState {
   termsOfServiceAccepted: boolean
 }
 
+const NavGitHubStars: React.FC = () => {
+  const [stars, setStars] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/SigNoz/signoz')
+      .then((r) => r.json())
+      .then((d) => setStars(d.stargazers_count))
+      .catch(() => {})
+  }, [])
+
+  if (!stars) return null
+
+  const formatted = stars >= 1000 ? (stars / 1000).toFixed(1) + 'k' : stars.toString()
+
+  return (
+    <span className="flex items-center gap-1.5 px-1.5 py-1 text-sm font-normal text-gray-400">
+      <Github className="h-3.5 w-3.5 fill-gray-400" />
+      {formatted} Stars
+    </span>
+  )
+}
+
 // Variant Navbar component (now integrated into layout)
 export const VariantNavbar = ({ className }: { className?: string }) => {
   return (
@@ -65,7 +87,8 @@ export const VariantNavbar = ({ className }: { className?: string }) => {
           </Link>
         </div>
       </div>
-      <div className="hidden h-full items-center justify-end bg-signoz_ink-500 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
+      <div className="hidden h-full items-center justify-end gap-3 bg-signoz_ink-500 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
+        <NavGitHubStars />
         <TrackingLink
           target="_blank"
           clickType="Nav Click"
@@ -711,16 +734,9 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
                 </div>
               </div>
               <div className="mt-8 lg:mt-0">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="mb-0 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
-                    What teams are saying
-                  </p>
-                  <div className="flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-2.5 py-0.5">
-                    <Github className="h-3 w-3 flex-shrink-0 fill-signoz_vanilla-400" />
-                    <span className="text-xs font-semibold text-signoz_vanilla-400">25,000+</span>
-                    <span className="text-xs text-signoz_slate-50">GitHub Stars</span>
-                  </div>
-                </div>
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
+                  What teams are saying
+                </p>
                 <VariantTestimonial />
                 <div className="mt-6 flex items-center gap-6">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
