@@ -713,7 +713,7 @@ module.exports = () => {
         },
         {
           source: '/observability-user-stories/',
-          destination: '/blog/community-update-06/#observability-user-stories',
+          destination: '/case-study/',
           permanent: true,
         },
         {
@@ -1668,6 +1668,950 @@ module.exports = () => {
         {
           source: '/opentelemetry/tomcat/',
           destination: '/guides/tomcat-performance-monitoring/',
+          permanent: true,
+        },
+        // April 2026 tech SEO 404 remediation redirects
+        {
+          source: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting/',
+          destination: '/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/query-service/',
+          destination: '/docs/operate/configuration/',
+          permanent: true,
+        },
+        {
+          source: '/home',
+          destination: '/',
+          permanent: true,
+        },
+        {
+          source: '/docs/us',
+          destination: '/docs/introduction/',
+          permanent: true,
+        },
+        {
+          source: '/docs/in',
+          destination: '/docs/introduction/',
+          permanent: true,
+        },
+        {
+          source: '/docs/shared/k8s-common-prerequisites/',
+          destination: '/docs/install/kubernetes/',
+          permanent: true,
+        },
+        {
+          source: '/docs/getting-started/',
+          destination: '/docs/introduction/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/query-service/reset-admin-password/',
+          destination: '/docs/operate/reset-admin-password/',
+          permanent: true,
+        },
+        {
+          source: '/docs/gemini-observability/',
+          destination: '/docs/google-gemini-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/',
+          destination: '/docs/userguide/alerts-management/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/query-service/reset-admin-password',
+          destination: '/docs/operate/reset-admin-password/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/0\\.75\\.0/query-service/',
+          destination: '/docs/operate/configuration/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/feature-flags/',
+          destination: '/docs/operate/configuration/',
+          permanent: true,
+        },
+        {
+          source: '/blog/unified-observability',
+          destination: '/unified-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs_clickhouse_queries/\\|here',
+          destination: '/docs/userguide/logs_clickhouse_queries/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/',
+          destination: '/docs/introduction/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/',
+          destination: '/docs/introduction/',
+          permanent: true,
+        },
+        {
+          source: '/docs/dashboards/dashboard-templates/aws-rds/',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/dashboards/dashboard-templates/redis',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/dashboards/dashboard-templates/redis/',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting',
+          destination: '/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/',
+          permanent: true,
+        },
+        {
+          source: '/careers/senior-frontend-engineer-in/',
+          destination: 'https://jobs.ashbyhq.com/SigNoz',
+          permanent: true,
+        },
+        {
+          source: '/learn/kubernetes-tools/',
+          destination: '/blog/kubernetes-monitoring-tools/',
+          permanent: true,
+        },
+        {
+          source: '/autoinstrumented-tracing-nodejs',
+          destination: '/opentelemetry/autoinstrumented-tracing-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/learn/why-is-observability-critical-for-cloud-native-applications/',
+          destination: '/guides/cloud-native-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/faq/',
+          destination: '/docs/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/trac',
+          destination: '/docs/userguide/traces/',
+          permanent: true,
+        },
+        {
+          source: '/firebase-alternatives',
+          destination: '/comparisons/firebase-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/appdynamics-competitors',
+          destination: '/comparisons/appdynamics-competitors/',
+          permanent: true,
+        },
+        {
+          source: '/heroku-alternatives',
+          destination: '/comparisons/heroku-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/kubernetes-alternatives',
+          destination: '/comparisons/kubernetes-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/datadog-vs-elasticstack',
+          destination: '/comparisons/datadog-vs-elasticstack/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/clickhouse',
+          destination:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          permanent: true,
+        },
+        {
+          source: '/azure-alternatives',
+          destination: '/comparisons/azure-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/zabbix-alternatives',
+          destination: '/comparisons/zabbix-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_collector/',
+          destination: '/docs/userguide/collect_logs_from_file/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/',
+          destination: '/docs/logs-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics/',
+          destination: '/docs/metrics-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces/',
+          destination: '/docs/instrumentation/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/install/linux/signoz-otel-collector_linux_',
+          destination: '/docs/install/linux/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs/',
+          destination: '/docs/logs-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/',
+          destination: '/docs/infrastructure-monitoring/overview/',
+          permanent: true,
+        },
+        {
+          source: '/platform-engineering-vs-DevOps',
+          destination: '/comparisons/platform-engineering-vs-DevOps/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/docker-logs/',
+          destination: '/docs/userguide/collect_docker_logs/',
+          permanent: true,
+        },
+        {
+          source: '/what-is-signoz/',
+          destination: '/docs/what-is-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry-vs-newrelic',
+          destination: '/comparisons/opentelemetry-vs-newrelic/',
+          permanent: true,
+        },
+        {
+          source: '/docs/configuration/deep_storage',
+          destination: '/docs/logs-management/long-term-storage/',
+          permanent: true,
+        },
+        {
+          source: '/guides/claude\u2011api\u2011latency/',
+          destination: '/guides/claude-api-latency/',
+          permanent: true,
+        },
+        {
+          source: '/justifying-a-million-dollar-observability-bill/',
+          destination: '/blog/justifying-a-million-dollar-observability-bill/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-and-mobile-monitoring/',
+          destination: '/docs/frontend-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/work',
+          destination: 'https://jobs.ashbyhq.com/SigNoz',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0\\.112',
+          destination: '/docs/operate/migration/upgrade-standard/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/kafka/',
+          destination: '/docs/messaging-queues/overview/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry-vs-logstash',
+          destination: '/comparisons/opentelemetry-vs-logstash/',
+          permanent: true,
+        },
+        {
+          source: '/newrelic-vs-sentry',
+          destination: '/comparisons/newrelic-vs-sentry/',
+          permanent: true,
+        },
+        {
+          source: '/datadog-vs-sentry',
+          destination: '/comparisons/datadog-vs-sentry/',
+          permanent: true,
+        },
+        {
+          source: '/dynatrace-vs-newrelic',
+          destination: '/comparisons/dynatrace-vs-newrelic/',
+          permanent: true,
+        },
+        {
+          source: '/datadog-vs-dynatrace',
+          destination: '/comparisons/datadog-vs-dynatrace/',
+          permanent: true,
+        },
+        {
+          source: '/dynatrace-vs-appdynamics',
+          destination: '/comparisons/dynatrace-vs-appdynamics/',
+          permanent: true,
+        },
+        {
+          source: '/platform-engineering-tools',
+          destination: '/comparisons/platform-engineering-tools/',
+          permanent: true,
+        },
+        {
+          source: '/datadog-vs-appdynamics',
+          destination: '/comparisons/datadog-vs-appdynamics/',
+          permanent: true,
+        },
+        {
+          source: '/log-analysis-tools',
+          destination: '/comparisons/log-analysis-tools/',
+          permanent: true,
+        },
+        {
+          source: '/docker-alternatives',
+          destination: '/comparisons/docker-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/aws-vs-gcp-vs-azure',
+          destination: '/comparisons/aws-vs-gcp-vs-azure/',
+          permanent: true,
+        },
+        {
+          source: '/network-security-monitoring-tools',
+          destination: '/comparisons/network-security-monitoring-tools/',
+          permanent: true,
+        },
+        {
+          source: '/cloud-monitoring-tools',
+          destination: '/comparisons/cloud-monitoring-tools/',
+          permanent: true,
+        },
+        {
+          source: '/new-relic-vs-grafana',
+          destination: '/comparisons/new-relic-vs-grafana/',
+          permanent: true,
+        },
+        {
+          source: '/new-relic-vs-appdynamics',
+          destination: '/comparisons/new-relic-vs-appdynamics/',
+          permanent: true,
+        },
+        {
+          source: '/solarwinds-alternatives',
+          destination: '/comparisons/solarwinds-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/aws-monitoring-tools',
+          destination: '/comparisons/aws-monitoring-tools/',
+          permanent: true,
+        },
+        {
+          source: '/aws-alternatives',
+          destination: '/comparisons/aws-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/newrelic-vs-prometheus',
+          destination: '/comparisons/newrelic-vs-prometheus/',
+          permanent: true,
+        },
+        {
+          source: '/prometheus-alternatives',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/digitalocean-alternatives',
+          destination: '/comparisons/digitalocean-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/infrastructure-monitoring-tools',
+          destination: '/comparisons/infrastructure-monitoring-tools/',
+          permanent: true,
+        },
+        {
+          source: '/prometheus-vs-grafana',
+          destination: '/comparisons/prometheus-vs-grafana/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry-vs-cloudwatch',
+          destination: '/comparisons/opentelemetry-vs-cloudwatch/',
+          permanent: true,
+        },
+        {
+          source: '/datadog-vs-splunk',
+          destination: '/comparisons/datadog-vs-splunk/',
+          permanent: true,
+        },
+        {
+          source: '/graylog-alternatives',
+          destination: '/comparisons/graylog-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/splunk-vs-prometheus',
+          destination: '/comparisons/splunk-vs-prometheus/',
+          permanent: true,
+        },
+        {
+          source: '/log-aggregation-tools',
+          destination: '/comparisons/log-aggregation-tools/',
+          permanent: true,
+        },
+        {
+          source: '/newrelic-vs-splunk',
+          destination: '/comparisons/newrelic-vs-splunk/',
+          permanent: true,
+        },
+        {
+          source: '/kibana-vs-splunk',
+          destination: '/comparisons/kibana-vs-splunk/',
+          permanent: true,
+        },
+        {
+          source: '/splunk-vs-dynatrace',
+          destination: '/comparisons/splunk-vs-dynatrace/',
+          permanent: true,
+        },
+        {
+          source: '/open-source-datadog-alternatives',
+          destination: '/blog/open-source-datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/building-a-high-performance-log-store',
+          destination: '/blog/building-a-high-performance-log-store/',
+          permanent: true,
+        },
+        {
+          source: '/install/docker-swarm',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/docs/dashboards/',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
+        {
+          source: '/reduce-telemetry-volume-by-40-percent',
+          destination: '/blog/reduce-telemetry-volume-by-40-percent/',
+          permanent: true,
+        },
+        {
+          source: '/Pranay',
+          destination: '/about-us/',
+          permanent: true,
+        },
+        {
+          source: '/bug-fixes-in-our-changelog',
+          destination: '/blog/bug-fixes-in-our-changelog/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/sqlite/',
+          destination: '/docs/operate/reset-admin-password/',
+          permanent: true,
+        },
+        {
+          source: '/docs/undefined',
+          destination: '/docs/introduction/',
+          permanent: true,
+        },
+        {
+          source: '/install/docker',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/signoz\\.io',
+          destination: '/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry-serilog',
+          destination: '/blog/opentelemetry-serilog/',
+          permanent: true,
+        },
+        {
+          source: '/careers/technical-content-writer-in/',
+          destination: 'https://jobs.ashbyhq.com/SigNoz',
+          permanent: true,
+        },
+        {
+          source: '/reset-password',
+          destination: '/support/',
+          permanent: true,
+        },
+        {
+          source: '/manually-configuring-opentelemetry-agent',
+          destination: '/opentelemetry/manually-configuring-opentelemetry-agent/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/kubernetes/',
+          destination: '/docs/userguide/collect_kubernetes_pod_logs/',
+          permanent: true,
+        },
+        {
+          source: '/careers/site-reliability-engineer/',
+          destination: 'https://jobs.ashbyhq.com/SigNoz',
+          permanent: true,
+        },
+        {
+          source: '/cost-effective-datadog-alternative',
+          destination: '/blog/cost-effective-datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/datadog-vs-grafana',
+          destination: '/blog/datadog-vs-grafana/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/zookeeper/',
+          destination:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/infrastructure-monitoring/',
+          destination: '/docs/infrastructure-monitoring/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/dashboard-templates/',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
+        {
+          source: '/learn/',
+          destination: '/resource-center/guides/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry-llamaindex',
+          destination: '/blog/opentelemetry-llamaindex/',
+          permanent: true,
+        },
+        {
+          source: '/collector-nodejs',
+          destination: '/opentelemetry/collector-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/setting-up-signoz',
+          destination: '/opentelemetry/setting-up-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          permanent: true,
+        },
+        {
+          source: '/correlating-traces-logs-metrics-nodejs',
+          destination: '/opentelemetry/correlating-traces-logs-metrics-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/can-signoz-handle-large-scale-production-environments-effectively/',
+          destination: '/faqs/can-signoz-handle-large-scale-production-environments-effectively/',
+          permanent: true,
+        },
+        {
+          source: '/metrics-nodejs',
+          destination: '/opentelemetry/metrics-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/python',
+          destination: '/opentelemetry/python/',
+          permanent: true,
+        },
+        {
+          source: '/python-custom-metrics',
+          destination: '/opentelemetry/python-custom-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/manual-spans-in-python-application',
+          destination: '/opentelemetry/manual-spans-in-python-application/',
+          permanent: true,
+        },
+        {
+          source: '/nodejs-clone-application',
+          destination: '/opentelemetry/nodejs-clone-application/',
+          permanent: true,
+        },
+        {
+          source: '/docs/collection-agents/overview/',
+          destination: '/docs/opentelemetry-collection-agents/get-started/',
+          permanent: true,
+        },
+        {
+          source: '/nodejs-tutorial-overview',
+          destination: '/opentelemetry/nodejs-tutorial-overview/',
+          permanent: true,
+        },
+        {
+          source: '/error-log',
+          destination: '/guides/error-log/',
+          permanent: true,
+        },
+        {
+          source: '/java-auto-instrumentation',
+          destination: '/opentelemetry/java-auto-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/python-auto-instrumentation',
+          destination: '/opentelemetry/python-auto-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/add-manual-span-to-traces-nodejs',
+          destination: '/opentelemetry/add-manual-span-to-traces-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/customize-metrics-streams-produced-by-opentelemetry-python-sdk',
+          destination:
+            '/opentelemetry/customize-metrics-streams-produced-by-opentelemetry-python-sdk/',
+          permanent: true,
+        },
+        {
+          source: '/logging-in-python',
+          destination: '/opentelemetry/logging-in-python/',
+          permanent: true,
+        },
+        {
+          source: '/go',
+          destination: '/opentelemetry/go/',
+          permanent: true,
+        },
+        {
+          source: '/nodejs',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/setting-up-flask-application',
+          destination: '/opentelemetry/setting-up-flask-application/',
+          permanent: true,
+        },
+        {
+          source: '/nodejs-docker-setup',
+          destination: '/opentelemetry/nodejs-docker-setup/',
+          permanent: true,
+        },
+        {
+          source: '/new-relic-ccu-pricing-unpredictable-costs',
+          destination: '/blog/new-relic-ccu-pricing-unpredictable-costs/',
+          permanent: true,
+        },
+        {
+          source: '/datadog-pricing',
+          destination: '/blog/datadog-pricing/',
+          permanent: true,
+        },
+        {
+          source: '/java-agent',
+          destination: '/opentelemetry/java-agent/',
+          permanent: true,
+        },
+        {
+          source: '/logging-nodejs',
+          destination: '/opentelemetry/logging-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/golang-monitoring',
+          destination: '/blog/golang-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/tomcat',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
+          permanent: true,
+        },
+        {
+          source: '/python-overview',
+          destination: '/opentelemetry/python-overview/',
+          permanent: true,
+        },
+        {
+          source: '/custom-metrics-nodejs',
+          destination: '/opentelemetry/custom-metrics-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/install/linux',
+          destination: '/docs/install/linux/',
+          permanent: true,
+        },
+        {
+          source: '/parsing-logs-with-the-opentelemetry-collector',
+          destination: '/blog/parsing-logs-with-the-opentelemetry-collector/',
+          permanent: true,
+        },
+        {
+          source: '/sending-and-filtering-python-logs-with-opentelemetry',
+          destination: '/blog/sending-and-filtering-python-logs-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry-deployment-patterns',
+          destination: '/blog/opentelemetry-deployment-patterns/',
+          permanent: true,
+        },
+        {
+          source: '/what-is-ebpf-and-what-does-it-mean-for-observability',
+          destination: '/blog/what-is-ebpf-and-what-does-it-mean-for-observability/',
+          permanent: true,
+        },
+        {
+          source: '/developer-marketing-at-signoz',
+          destination: '/blog/developer-marketing-at-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/kubecon-atlanta-2025-observability-guide',
+          destination: '/blog/kubecon-atlanta-2025-observability-guide/',
+          permanent: true,
+        },
+        {
+          source: '/guides/cloud-nativemonitoring/',
+          destination: '/guides/cloud-native-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/how-signoz-ensures-data-security-and-privacy/',
+          destination: '/faqs/how-signoz-ensures-data-security-and-privacy/',
+          permanent: true,
+        },
+        {
+          source: '/quantile-aggregation-for-statsd-exporter',
+          destination: '/blog/quantile-aggregation-for-statsd-exporter/',
+          permanent: true,
+        },
+        {
+          source: '/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india',
+          destination:
+            '/blog/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india/',
+          permanent: true,
+        },
+        {
+          source: '/out-of-box-application-monitoring-prometheus',
+          destination: '/blog/out-of-box-application-monitoring-prometheus/',
+          permanent: true,
+        },
+        {
+          source: '/ha-prometheus-cortex-cassandra',
+          destination: '/blog/ha-prometheus-cortex-cassandra/',
+          permanent: true,
+        },
+        {
+          source: '/distributed-tracing-tools',
+          destination: '/blog/distributed-tracing-tools/',
+          permanent: true,
+        },
+        {
+          source: '/how-signoz-ensures-data-security-and-privacy',
+          destination: '/faqs/how-signoz-ensures-data-security-and-privacy/',
+          permanent: true,
+        },
+        {
+          source: '/openfeature',
+          destination: '/blog/openfeature/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/docker-swarm/',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/are-there-any-hidden-costs-associated-with-using-signoz',
+          destination: '/faqs/are-there-any-hidden-costs-associated-with-using-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/does-signoz-work-well-with-existing-prometheus-setups',
+          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          permanent: true,
+        },
+        {
+          source: '/how-signozs-columnar-datastore-enhances-query-performance',
+          destination: '/faqs/how-signozs-columnar-datastore-enhances-query-performance/',
+          permanent: true,
+        },
+        {
+          source:
+            '/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis',
+          destination:
+            '/faqs/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
+          permanent: true,
+        },
+        {
+          source: '/how-signozs-columnar-datastore-enhances-query-performance/',
+          destination: '/faqs/how-signozs-columnar-datastore-enhances-query-performance/',
+          permanent: true,
+        },
+        {
+          source: '/who-uses-signoz-in-production',
+          destination: '/faqs/who-uses-signoz-in-production/',
+          permanent: true,
+        },
+        {
+          source: '/who-uses-signoz-in-production/',
+          destination: '/faqs/who-uses-signoz-in-production/',
+          permanent: true,
+        },
+        {
+          source: '/can-i-integrate-signoz-with-other-tools',
+          destination: '/faqs/can-i-integrate-signoz-with-other-tools/',
+          permanent: true,
+        },
+        {
+          source: '/can-i-integrate-signoz-with-other-tools/',
+          destination: '/faqs/can-i-integrate-signoz-with-other-tools/',
+          permanent: true,
+        },
+        {
+          source:
+            '/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
+          destination:
+            '/faqs/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
+          permanent: true,
+        },
+        {
+          source: '/cloud-infrastructure',
+          destination: '/blog/cloud-infrastructure/',
+          permanent: true,
+        },
+        {
+          source: '/what-is-platform-engineering',
+          destination: '/blog/what-is-platform-engineering/',
+          permanent: true,
+        },
+        {
+          source: '/open-source-apm-tools',
+          destination: '/blog/open-source-apm-tools/',
+          permanent: true,
+        },
+        {
+          source: '/how-signozs-integration-with-opentelemetry-simplifies-instrumentation/',
+          destination:
+            '/faqs/how-signozs-integration-with-opentelemetry-simplifies-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/blog/claude-code-opentelemetry-monitoring/',
+          destination: '/blog/claude-code-monitoring-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/alerts',
+          destination: '/alerts-management/',
+          permanent: true,
+        },
+        {
+          source: '/observability-user-stories',
+          destination: '/case-study/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm/data/zookeeper',
+          destination:
+            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm/',
+          permanent: true,
+        },
+        {
+          source: '/docs/install/docker-n\u00e1l',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/metrics',
+          destination: '/metrics-and-dashboards/',
+          permanent: true,
+        },
+        {
+          source: '/docs/install/docker\uc5d0',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/docker-standalone',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/guides/sending-and-filtering-python-logs-with-opentelemetry/',
+          destination: '/blog/sending-and-filtering-python-logs-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/technical-writer-prog',
+          destination: '/technical-writer-program/',
+          permanent: true,
+        },
+        {
+          source: '/contact',
+          destination: '/contact-us/',
+          permanent: true,
+        },
+        {
+          source: '/docs/troubleshooting/',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/docker-swarm',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/docs/install/dockeradresinde/',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/docs/dashboards/dashboard-templates/claude-agent-dashboard/',
+          destination: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/send-logs/deno-logs/',
+          destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
       ]

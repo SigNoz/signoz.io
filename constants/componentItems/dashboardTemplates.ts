@@ -57,6 +57,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Azure OpenAI API Dashboard Template',
   },
   {
+    name: 'Baseten',
+    href: '/docs/dashboards/dashboard-templates/baseten-dashboard',
+    clickName: 'Baseten Dashboard Template',
+  },
+  {
     name: 'CI/CD',
     href: '/docs/dashboards/dashboard-templates/cicd',
     clickName: 'CI/CD Dashboard Template',

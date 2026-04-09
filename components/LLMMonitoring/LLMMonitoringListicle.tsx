@@ -32,6 +32,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       className="h-7 w-7"
     />
   ),
+  '/docs/baseten-monitoring': (
+    <img src="/svgs/icons/LLMMonitoring/baseten-logo.webp" alt="Baseten Icon" className="h-7 w-7" />
+  ),
   '/docs/claude-code-monitoring': <SiClaude className="h-7 w-7 text-orange-500" />,
   '/docs/claude-agent-monitoring': <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
   '/docs/codex-monitoring': <SiOpenai className="h-7 w-7 text-white" />,
