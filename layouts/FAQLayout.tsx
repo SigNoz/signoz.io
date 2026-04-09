@@ -111,7 +111,6 @@ export default function FAQLayout({
 
               <div
                 className="box-border w-3/4 overflow-y-auto pr-4 max-lg:w-full"
-                style={{ paddingLeft: '0px' }}
               >
                 <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
                   {children}
