@@ -1,7 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
-import ContactForm from './components/ContactForm'
-import { contactUsData } from './data'
+import ContactFormCustom from './components/ContactFormCustom'
 import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
 
 const TRUST_BAR_LOGOS = [
@@ -25,7 +24,7 @@ export default function ContactUsLayout() {
       <FocusedNavbar />
       <div className="flex flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
         {/* Left col — desktop only */}
-        <div className="hidden flex-col justify-between bg-signoz_ink-500 p-12 pt-[120px] lg:flex lg:w-5/12">
+        <div className="hidden flex-col justify-between bg-signoz_ink-500 p-12 pt-[120px] lg:flex lg:w-5/12 lg:pl-16">
           <div>
             <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
               See SigNoz
@@ -66,17 +65,13 @@ export default function ContactUsLayout() {
         </div>
 
         {/* Right col — form */}
-        <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:overflow-y-auto lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pt-12">
-          <div className="w-full max-w-lg rounded-xl border border-signoz_slate-400 bg-signoz_ink-500 p-8">
-            <h2 className="mb-1 text-xl font-semibold text-white">Book a Demo</h2>
-            <p className="mb-6 text-sm text-signoz_vanilla-100/60">
+        <div className="relative flex w-full flex-col items-center justify-center bg-[#111318] p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:overflow-y-auto lg:border-l lg:border-[#1D2026] lg:px-16 lg:py-14">
+          <div className="w-full max-w-[560px] rounded-[12px] border border-[#1D2026] bg-[#0B0C0E] px-10 py-10">
+            <h2 className="mb-[6px] text-xl font-semibold text-[#ECE8E1]">Book a Demo</h2>
+            <p className="mb-7 text-[13px] leading-4 text-[#6B7280]">
               30-min call with a SigNoz observability expert.
             </p>
-            <ContactForm
-              portalId={contactUsData.PORTAL_ID}
-              formId={contactUsData.FORM_ID}
-              formName={contactUsData.TITLE}
-            />
+            <ContactFormCustom />
           </div>
         </div>
       </div>

@@ -627,7 +627,7 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
           <FocusedNavbar />
           <div className="flex flex-col lg:flex-row lg:mt-[8px] lg:h-[calc(100vh-56px)]">
             {/* Left section — copy + checkmarks + testimonial (desktop only) */}
-            <div className="hidden w-full flex-col justify-between bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:flex lg:w-5/12 lg:p-12 lg:pt-10">
+            <div className="hidden w-full flex-col justify-between bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:flex lg:w-5/12 lg:p-12 lg:pl-16 lg:pt-10">
               <div>
                 <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
                   Stop firefighting.
@@ -671,7 +671,7 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
             </div>
 
             {/* Right section — sign up form */}
-            <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pt-12">
+            <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pr-16 lg:pt-12">
               {formSection}
             </div>
           </div>
