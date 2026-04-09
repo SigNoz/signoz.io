@@ -91,6 +91,16 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/docs/cost-meter/query-setup-guides/',
+          destination: '/docs/cost-meter/meter-examples/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/query-setup-guides',
+          destination: '/docs/cost-meter/meter-examples/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,
@@ -1808,7 +1818,37 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/trac',
-          destination: '/docs/userguide/traces/',
+          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/traces',
+          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/traces/',
+          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer/',
+          destination: '/docs/userguide/logs_query_builder/',
           permanent: true,
         },
         {
@@ -1839,8 +1879,7 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/clickhouse',
-          destination:
-            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {
@@ -2196,8 +2235,7 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/zookeeper/',
-          destination:
-            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {

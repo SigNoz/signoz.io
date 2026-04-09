@@ -1,19 +1,20 @@
 ---
-date: 2026-03-12
+date: 2026-04-10
 id: meter-explorer
 
 title: Meter Explorer
 description: Monitor and control observability costs with SigNoz Meter Explorer. Drill deeper into meter metrics with powerful query capabilities and gain actionable insights for cost optimization.
+doc_type: explanation
 ---
 
 The **Meter Explorer** provides advanced capabilities to analyze and understand your observability costs through detailed meter metrics. With the powerful SigNoz query interface, you can drill deeper into each meter metric to extract meaningful insights about your ingested telemetry data and optimize your observability spend.
 
 **What you'll learn:**
 
-- How to query and analyze meter metrics for cost insights
 - Understanding the structure and components of meter data
 - How to break down signal meter data by specific label dimensions
-- Creating saved views for recurring cost analysis
+- How Cost Meter data is retained for longer-term analysis
+- Where to go next for example queries and setup workflows
 
 ## Overview
 
@@ -63,128 +64,7 @@ These labels allow you to analyze your metering data across multiple dimensions,
 Meter data is retained for a period of 1 year. This retention policy ensures that you have access to historical data for long-term analysis and trend identification.
 By maintaining a year-long history, you can make more informed decisions about your observability strategy and cost optimization efforts over time.
 
-## Querying Meter Data
+## Next steps
 
-Meter Explorer uses the same powerful query interface as other SigNoz components, making it easy to analyze your cost data with familiar patterns and syntax.
-
-### Time Range Considerations
-
-<Admonition type="info">
-  **Important**: Meter data is aggregated over hourly intervals. Queries with time ranges under 1
-  hour will not return any data. For real-time analysis, use time ranges of 1 hour or greater.
-</Admonition>
-
-### Query Patterns
-
-The querying patterns for meter data are identical to standard metric querying patterns. You can use the same operators, functions, and syntax that you're familiar with from other SigNoz metrics.
-
-For detailed information about metric querying, refer to our [Metrics Management Guide](https://signoz.io/docs/metrics-management/types-and-aggregation/).
-
-### Example Queries
-
-#### 1. Log Size Analysis by Service
-
-To find the total size of log records ingested by a specific service over the last day:
-
-```
-signoz.meter.log.size{service.name="demo-app"}
-```
-
-This query will show you the total log size for the `demo-app` service, helping you understand which services are generating the most log data.
-
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/meter-explorer/usecase-1.webp"
-    alt="Log size analysis for demo-app service over the last day"
-  />
-  <figcaption>
-    <i>Example: Log size analysis for demo-app service showing ingestion patterns over time</i>
-  </figcaption>
-</figure>
-
-#### 2. Span Count by Environment
-
-To analyze span ingestion across different environments:
-
-```
-signoz.meter.span.count{deployment.environment="otel-demo"}
-```
-
-This helps you understand the volume of trace data being generated in your environment.
-
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/meter-explorer/usecase-2.webp"
-    alt="Span count analysis for otel-demo environment over the last day"
-  />
-  <figcaption>
-    <i>Example: Span count analysis for otel-demo environment over the last day</i>
-  </figcaption>
-</figure>
-
-#### 3. Multi-Service Cost Comparison
-
-To compare log ingestion across multiple services:
-
-```
-signoz.meter.log.size{group-by:service.name}
-```
-
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/meter-explorer/usecase-3.webp"
-    alt="Log size analysis group by service.name over the last day"
-  />
-  <figcaption>
-    <i>Example: Log size analysis group by service.name over the last day</i>
-  </figcaption>
-</figure>
-
-#### 4. Host-Level Analysis
-
-To identify which hosts are generating the most telemetry data:
-
-```
-signoz.meter.log.size{host.name = "x"}
-```
-
-This aggregation helps you identify hosts that might be generating excessive log data.
-
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/meter-explorer/usecase-4.webp"
-    alt="Log size analysis host name: x over the last day"
-  />
-  <figcaption>
-    <i>Example: Log size analysis host name: x over the last day</i>
-  </figcaption>
-</figure>
-
-#### 5. Ingestion ID-Based Analysis
-
-To analyze telemetry data based on specific ingestion IDs:
-
-```
-signoz.meter.log.size{signoz.workspace.key.id = "01963e56-0bbb-7df5-b26c-2c4aa48b291a"}
-```
-
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/meter-explorer/usecase-5.webp"
-    alt="Log size analysis for ingestion key id: 01963e56-0bbb-7df5-b26c-2c4aa48b291a over the last day"
-  />
-  <figcaption>
-    <i>
-      Example: Log size analysis for ingestion key id: 01963e56-0bbb-7df5-b26c-2c4aa48b291a over the
-      last day
-    </i>
-  </figcaption>
-</figure>
-
-## Creating Saved Views
-
-Meter Explorer supports saved views, allowing you to create and reuse common queries for recurring cost analysis. 
-
-You can checkout the [Saved View Documentation](https://signoz.io/docs/product-features/saved-view/#how-to-use-saved-views) for more details on creating and managing saved views.
-
-For additional support and discussion, visit our [Community Forum](https://github.com/SigNoz/signoz/discussions). For advanced topics and comprehensive guides, explore our [Documentation](https://signoz.io/docs/introduction/).
+- Follow the [Meter Examples](https://signoz.io/docs/cost-meter/meter-examples/) for example queries, saved views, and common analysis workflows.
+- Use the [Working with Cost Meter overview](https://signoz.io/docs/cost-meter/working-with-cost-meter/overview/) to understand how Meter Explorer fits into the broader Cost Meter experience.

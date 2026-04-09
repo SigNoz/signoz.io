@@ -1,0 +1,29 @@
+---
+date: 2026-04-09
+id: database-calls
+title: Database Calls
+description: Monitor database call metrics for your services in SigNoz — call rate, latency, and required span attributes.
+doc_type: concept
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The **Database Calls** pane in the service details page shows metrics for all database operations made by your application.
+
+## Required span attributes
+
+For a span to appear in this pane:
+
+- `span.kind != 2` — spans of any kind except `SERVER`. See [SpanKind](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind) for details.
+- `db.system` must be present as a span attribute.
+
+If your services are making DB calls but the Database Calls panel is empty, verify that:
+1. Your spans include the attributes above.
+2. You are using instrumentation libraries that capture DB call spans (e.g., the OTel SQL or MongoDB instrumentation packages).
+
+## Metrics displayed
+
+- **Database calls per second** — throughput of DB operations over time.
+- **Average call duration (ms)** — mean latency of DB operations over the selected time range.
+
+<GetHelp />

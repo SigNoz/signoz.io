@@ -1,5 +1,5 @@
 ---
-date: 2024-06-06
+date: 2026-04-10
 id: metrics
 
 title: View Services
@@ -210,48 +210,9 @@ You can change the Threshold value by going to Settings on top-right corner of y
 </figure>
 
 
-### Database Calls in SigNoz
+For details on database call metrics and required span attributes, see [Database Calls](/docs/apm-and-distributed-tracing/database-calls).
 
-This pane shows details about the database calls that your application makes. The spans should have the following span attributes to be counted in this panel
-
-- `span.kind!=2` which means these are spans of kind anything except `SERVER`. You can read more details on SpanKinds [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind)
-- `db.system` should be present as span attribute
-
-If your services are making DB calls and your Database Call panels show as empty, please make sure that:
-1. Your spans have the above attributes.
-2. You have used appropriate libraries for instrumenting packages which you use to make DB calls from your application
-
-The graphs in this pane provide the following information:
-- The number of database calls per second
-- The average duration of your database calls. expressed in milliseconds
-
-### External Calls in SigNoz
-
-The external calls pane allows you to track the external services your applications depend on.
-
-The spans should have the following span attributes to be counted in this panel
-
-- `span.kind=3` which means these are spans of kind [`CLIENT`](https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/trace/v1/trace.proto#L139). You can read more details on SpanKinds [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind)
-- One of the following sets of attributes
-    * rpc.system, rpc.service, rpc.method
-    * rpc.system, net.peer.name, net.peer.port
-    * rpc.system, net.peer.ip, net.peer.port
-    * http.host
-    * net.peer.name, net.peer.port
-    * net.peer.ip, net.peer.port
-    * http.url
-    * peer.service
-
-The remote host address is constructed from one of the attribute sets in the order listed above. This
-includes any database calls that have transport other than unix domain socket or pipe, or a call to another http host, or an aws lambda function and generally any out of process call over the network.
-
-If your services are making external calls but External Call panels show as empty, please make sure that your spans have the above attributes.
-
-The graphs in this pane provide the following information:
-- The percentage of external calls that resulted in errors.
-- The average duration of all your external calls.
-- The number of external calls per second by address.
-- The average duration of your external calls by address.
+For details on external call metrics and required span attributes, see [External Calls](/docs/apm-and-distributed-tracing/external-calls).
 
 
 ## Get Help
