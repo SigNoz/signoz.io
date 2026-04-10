@@ -82,7 +82,10 @@ export default function ContactFormCustom() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fields,
-          context: { pageUri: `https://signoz.io${pathname}`, pageName: 'Contact Us' },
+          context: {
+            pageUri: `https://signoz.io${pathname}${window.location.search}`,
+            pageName: 'Contact Us',
+          },
         }),
       })
 

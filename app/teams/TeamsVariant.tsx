@@ -672,7 +672,9 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
 
             {/* Right section — sign up form */}
             <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pr-16 lg:pt-12">
-              {formSection}
+              <div className="w-full max-w-[560px] rounded-[12px] border border-[#1D2026] bg-[#0B0C0E] px-8 py-8">
+                {formSection}
+              </div>
             </div>
           </div>
         </div>
