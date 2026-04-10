@@ -38,7 +38,7 @@ const CTAButtonGroup: React.FC<CTAButtonGroupProps> = ({
       className="flex-center flex !w-fit items-center gap-2"
     >
       <TrackingLink
-        href="/contact-us/"
+        href="/contact-us/?source=why-signoz"
         clickType="Primary CTA"
         clickName={bookDemoClickName}
         clickLocation={clickLocation}
