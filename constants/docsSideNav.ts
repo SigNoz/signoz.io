@@ -2436,106 +2436,98 @@ const docsSideNav = [
     isExpanded: false,
     // route: '',
     items: [
-      // {
-      //   type: 'doc',
-      //   route: '/docs/userguide/create-a-custom-query',
-      //   label: 'Create a Custom Query',
-      // },
       {
         type: 'doc',
-        route: '/docs/userguide/query-builder',
+        route: '/docs/querying/overview',
+        label: 'Overview',
+      },
+      {
         label: 'Query Builder',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/query-builder-v5',
-        label: 'Query Builder (new)',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/search-syntax',
-        label: 'Search Syntax',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/operators-reference',
-        label: 'Operators Reference',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/full-text-search',
-        label: 'Full-Text Search Guide',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/functions-reference',
-        label: 'Functions Reference',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/field-context-data-types',
-        label: 'Field Context & Data Types',
-      },
-      {
         type: 'category',
         isExpanded: false,
+        route: '/docs/userguide/query-builder-v5',
+        items: [
+          { type: 'doc', route: '/docs/userguide/query-builder-v5', label: 'Query Builder' },
+          {
+            label: 'ClickHouse',
+            type: 'category',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/userguide/write-a-metrics-clickhouse-query',
+                label: 'Metrics',
+              },
+              { type: 'doc', route: '/docs/userguide/logs_clickhouse_queries', label: 'Logs' },
+              {
+                type: 'doc',
+                route: '/docs/userguide/writing-clickhouse-traces-query',
+                label: 'Traces',
+              },
+              { type: 'doc', route: '/docs/userguide/clickhouse-faqs', label: 'FAQs' },
+            ],
+          },
+          {
+            label: 'PromQL',
+            type: 'category',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/userguide/write-a-prom-query-with-new-format',
+                label: 'PromQL Guide',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          { type: 'doc', route: '/docs/userguide/search-syntax', label: 'Search Syntax' },
+          {
+            type: 'doc',
+            route: '/docs/userguide/operators-reference',
+            label: 'Operators Reference',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/functions-reference',
+            label: 'Functions Reference',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/field-context-data-types',
+            label: 'Field Context & Data Types',
+          },
+        ],
+      },
+      {
+        label: 'User Guides',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          { type: 'doc', route: '/docs/userguide/full-text-search', label: 'Full-Text Search' },
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-advanced-examples',
+            label: 'Advanced Examples',
+          },
+        ],
+      },
+      {
         label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
         items: [
           {
             type: 'doc',
             route: '/docs/userguide/search-troubleshooting',
             label: 'Troubleshooting Guide',
           },
-          {
-            type: 'doc',
-            route: '/docs/userguide/query-troubleshooting-faqs',
-            label: 'Query Troubleshooting - FAQs',
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/search-advanced-examples',
-        label: 'Advanced Examples',
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        // route: '',
-        label: 'ClickHouse Query',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/write-a-metrics-clickhouse-query',
-            label: 'Metrics',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs_clickhouse_queries',
-            label: 'Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/writing-clickhouse-traces-query',
-            label: 'Traces',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/clickhouse-faqs',
-            label: 'FAQs',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'PromQl Query',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/write-a-prom-query-with-new-format',
-            label: 'PromQl Query New Format',
-          },
+          { type: 'doc', route: '/docs/userguide/query-troubleshooting-faqs', label: 'FAQs' },
         ],
       },
     ],
