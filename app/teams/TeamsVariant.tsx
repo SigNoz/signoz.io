@@ -444,10 +444,10 @@ const SignupFormIsolated: React.FC<{
           <div className="text-center text-sm text-signoz_vanilla-100/70">
             Sign up with your work account
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-3">
             <button
               type="button"
-              className="flex items-center justify-center gap-3 rounded-md border border-blue-600 bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-[#1D2026] bg-[#111318] px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
               onClick={() => handleSocialSubmit('google')}
             >
               <Image
@@ -457,15 +457,15 @@ const SignupFormIsolated: React.FC<{
                 height={20}
                 className="h-5 w-5"
               />
-              Google
+              Continue with Google
             </button>
             <button
               type="button"
-              className="flex items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-signoz_ink-400"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-[#1D2026] bg-[#111318] px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
               onClick={() => handleSocialSubmit('github')}
             >
               <FaGithub className="h-5 w-5" />
-              GitHub
+              Continue with GitHub
             </button>
           </div>
         </div>
@@ -516,45 +516,27 @@ const SignupFormIsolated: React.FC<{
           )}
         </button>
 
-        <div className="space-y-3">
-          <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="termsOfServiceAccepted"
-              name="termsOfServiceAccepted"
-              checked={formState.termsOfServiceAccepted}
-              onChange={handleInputChange}
-              className="mt-1 h-4 w-4 rounded border border-signoz_slate-400 bg-signoz_ink-300 accent-signoz_robin-500"
-            />
-            <label
-              htmlFor="termsOfServiceAccepted"
-              className="text-xs leading-relaxed text-signoz_vanilla-100/70"
-            >
-              I agree to the{' '}
-              <a
-                href="https://signoz.io/terms-of-service/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-signoz_robin-500 hover:underline"
-              >
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a
-                href="https://signoz.io/privacy/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-signoz_robin-500 hover:underline"
-              >
-                Privacy Policy
-              </a>
-              .
-            </label>
-          </div>
-          {errors?.termsOfService && (
-            <div className="text-xs text-red-400">{errors.termsOfService}</div>
-          )}
-        </div>
+        <p className="text-center text-xs text-signoz_vanilla-100/50">
+          By signing up, you agree to our{' '}
+          <a
+            href="https://signoz.io/terms-of-service/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-signoz_robin-500 hover:underline"
+          >
+            Terms of Service
+          </a>{' '}
+          and{' '}
+          <a
+            href="https://signoz.io/privacy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-signoz_robin-500 hover:underline"
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
 
         <div className="text-center">
           <p className="text-sm text-signoz_vanilla-100/70">
@@ -627,45 +609,43 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
           <FocusedNavbar />
           <div className="flex flex-col lg:flex-row lg:mt-[8px] lg:h-[calc(100vh-56px)]">
             {/* Left section — copy + checkmarks + testimonial (desktop only) */}
-            <div className="hidden w-full flex-col justify-between bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:flex lg:w-5/12 lg:p-12 lg:pl-16 lg:pt-10">
-              <div>
-                <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
-                  Stop firefighting.
-                  <br />
-                  Start shipping.
-                </h1>
-                <p className="mb-8 text-sm leading-relaxed text-signoz_slate-50">
-                  Get full observability in under an hour — logs, traces, metrics, and LLM
-                  monitoring all correlated in one place.
-                </p>
-                <div className="space-y-3.5">
+            <div className="hidden w-full flex-col justify-center bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
+              <div className="flex max-w-[420px] flex-col gap-6">
+                <div className="flex flex-col gap-3">
+                  <h1 className="text-[40px] font-bold leading-[1.15] tracking-[-1.2px] text-white">
+                    Stop firefighting.
+                    <br />
+                    Start shipping.
+                  </h1>
+                  <p className="text-[14px] leading-[1.6] text-[#9CA3AF]">
+                    Get full observability in under an hour — logs, traces, metrics, and LLM
+                    monitoring all correlated in one place.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3">
                   {VALUE_PROPS.map((prop) => (
                     <div key={prop} className="flex items-start gap-2.5">
-                      <span className="mt-0.5 flex-shrink-0 text-sm text-signoz_forest-500">✓</span>
-                      <span className="text-sm text-signoz_vanilla-400">{prop}</span>
+                      <span className="mt-px flex-shrink-0 text-[14px] text-[#22C55E]">✓</span>
+                      <span className="text-[14px] leading-[1.5] text-[#9CA3AF]">{prop}</span>
                     </div>
                   ))}
                 </div>
-              </div>
-              <div className="mt-8 lg:mt-0">
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-signoz_slate-100">
-                  What teams are saying
-                </p>
-                <VariantTestimonial />
-                <div className="mt-6 flex items-center gap-6">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
+                <div className="flex flex-col gap-2.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[1.5px] text-[#4B5563]">
                     Trusted by
-                  </span>
-                  {TRUST_BAR_LOGOS.map((logo) => (
-                    <Image
-                      key={logo.src}
-                      src={logo.src}
-                      alt={logo.alt}
-                      width={60}
-                      height={16}
-                      className="h-3.5 w-[56px] object-contain"
-                    />
-                  ))}
+                  </p>
+                  <div className="flex items-center gap-6 opacity-50">
+                    {TRUST_BAR_LOGOS.map((logo) => (
+                      <Image
+                        key={logo.src}
+                        src={logo.src}
+                        alt={logo.alt}
+                        width={60}
+                        height={16}
+                        className="h-3.5 w-[56px] object-contain"
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

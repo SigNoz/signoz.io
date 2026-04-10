@@ -24,42 +24,42 @@ export default function ContactUsLayout() {
       <FocusedNavbar />
       <div className="flex flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
         {/* Left col — desktop only */}
-        <div className="hidden flex-col justify-between bg-signoz_ink-500 p-12 pt-[120px] lg:flex lg:w-5/12 lg:pl-16">
-          <div>
-            <h1 className="mb-3 text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white">
-              See SigNoz
-              <br />
-              in action.
-            </h1>
-            <p className="mb-8 text-sm leading-relaxed text-signoz_slate-50">
-              30 minutes. No pitch deck. Just your stack,
-              <br />
-              your questions, and a real demo.
-            </p>
-            <div className="space-y-3.5">
+        <div className="hidden w-full flex-col justify-center bg-signoz_ink-500 p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
+          <div className="flex max-w-[420px] flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <h1 className="text-[40px] font-bold leading-[1.15] tracking-[-1.2px] text-white">
+                See SigNoz in action.
+              </h1>
+              <p className="text-[14px] leading-[1.6] text-[#9CA3AF]">
+                30 minutes. No pitch deck. Just your stack,
+                <br />
+                your questions, and a real demo.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
               {OPTIONS.map((opt) => (
                 <div key={opt} className="flex items-start gap-2.5">
-                  <span className="mt-0.5 flex-shrink-0 text-sm text-signoz_forest-500">✓</span>
-                  <span className="text-sm text-signoz_vanilla-400">{opt}</span>
+                  <span className="mt-px flex-shrink-0 text-[14px] text-[#22C55E]">✓</span>
+                  <span className="text-[14px] leading-[1.5] text-[#9CA3AF]">{opt}</span>
                 </div>
               ))}
             </div>
-          </div>
-          <div>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_slate-100">
-              Trusted by
-            </p>
-            <div className="flex items-center gap-6">
-              {TRUST_BAR_LOGOS.map((logo) => (
-                <Image
-                  key={logo.src}
-                  src={logo.src}
-                  alt={logo.alt}
-                  width={60}
-                  height={16}
-                  className="h-3.5 w-[56px] object-contain"
-                />
-              ))}
+            <div className="flex flex-col gap-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[1.5px] text-[#4B5563]">
+                Trusted by
+              </p>
+              <div className="flex items-center gap-6 opacity-50">
+                {TRUST_BAR_LOGOS.map((logo) => (
+                  <Image
+                    key={logo.src}
+                    src={logo.src}
+                    alt={logo.alt}
+                    width={60}
+                    height={16}
+                    className="h-3.5 w-[56px] object-contain"
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
