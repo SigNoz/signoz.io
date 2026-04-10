@@ -1214,23 +1214,6 @@ const docsSideNav = [
               { type: 'doc', route: '/docs/trace-funnels/setup', label: 'Setup' },
             ],
           },
-          {
-            label: 'User Guides',
-            type: 'category',
-            isExpanded: false,
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/traces-management/guides/correlate-traces-and-logs',
-                label: 'Correlate Traces & Logs',
-              },
-              {
-                type: 'doc',
-                route: '/docs/traces-management/guides/pii-scrubbing',
-                label: 'PII Scrubbing',
-              },
-            ],
-          },
         ],
       },
       {
@@ -1248,6 +1231,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/correlate-traces-and-logs',
+            label: 'Correlate Traces & Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/pii-scrubbing',
+            label: 'PII Scrubbing',
           },
         ],
       },
