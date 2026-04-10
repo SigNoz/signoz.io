@@ -2281,6 +2281,11 @@ const docsSideNav = [
             label: 'Key Operations',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kong-gateway',
+            label: 'Kong Gateway',
+          },
+          {
             label: 'LiteLLM',
             type: 'category',
             isExpanded: false,
