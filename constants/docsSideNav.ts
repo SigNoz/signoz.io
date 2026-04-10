@@ -945,7 +945,7 @@ const docsSideNav = [
         label: 'Overview',
       },
       {
-        label: 'Send Data',
+        label: 'Send Traces and APM Data',
         type: 'category',
         isExpanded: false,
         route: '/docs/instrumentation',
@@ -1155,7 +1155,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Services',
+        label: 'Services / APM',
         type: 'category',
         isExpanded: false,
         route: '/docs/userguide/metrics',
@@ -1177,21 +1177,9 @@ const docsSideNav = [
             label: 'Entry Point Spans',
           },
           {
-            label: 'User Guides',
-            type: 'category',
-            isExpanded: false,
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/application-monitoring/api-monitoring',
-                label: 'API Monitoring',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/custom-apm-dashboards-alerts',
-                label: 'APM Metrics, Dashboards & Alerts',
-              },
-            ],
+            type: 'doc',
+            route: '/docs/application-monitoring/api-monitoring',
+            label: 'API Monitoring',
           },
         ],
       },
@@ -1254,11 +1242,24 @@ const docsSideNav = [
         label: 'User Guides',
         type: 'category',
         isExpanded: false,
+        route: '/docs/traces-management/guides/overview',
         items: [
           {
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
+          },
+        ],
+      },
+      {
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/custom-apm-dashboards-alerts',
+            label: 'APM Metrics, Dashboards & Alerts',
           },
           {
             type: 'doc',
@@ -1268,7 +1269,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/apm-and-distributed-tracing/traces-api',
-            label: 'Traces API',
+            label: 'Using Traces API',
           },
         ],
       },
@@ -1276,7 +1277,7 @@ const docsSideNav = [
         label: 'Troubleshooting',
         type: 'category',
         isExpanded: false,
-        route: '/docs/traces-management/troubleshooting/faqs',
+        route: '/docs/traces-management/troubleshooting/troubleshooting',
         items: [
           { type: 'doc', route: '/docs/traces-management/troubleshooting/faqs', label: 'FAQs' },
         ],
