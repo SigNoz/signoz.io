@@ -30,6 +30,7 @@ export const VideoModalPlayer = ({
             alt={thumbnailAlt}
             className="rounded-lg"
             fill
+            loading="eager"
             sizes="(max-width: 768px) 100vw, 80vw"
             priority
           />

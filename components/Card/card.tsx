@@ -23,6 +23,9 @@ type CardProps = {
   img?: string | StaticImageData
   imgClassName?: string
   imgAlt?: string
+  imgSizes?: string
+  imgWidth?: number
+  imgHeight?: number
   border?: Boolean
   sectionName?: string
   className?: string
@@ -42,6 +45,9 @@ const Card: React.FC<CardProps> = ({
   img,
   imgClassName,
   imgAlt,
+  imgSizes,
+  imgWidth,
+  imgHeight,
   logoSize = 16,
   subTitleSize = 1,
   sectionName = 'Features',
@@ -149,8 +155,9 @@ const Card: React.FC<CardProps> = ({
         <Image
           src={img}
           alt={featureImageAlt}
-          {...(isStaticImage ? {} : { width: 1200, height: 900 })}
-          sizes="(max-width: 1900px) 100vw"
+          {...(isStaticImage ? {} : { width: imgWidth, height: imgHeight })}
+          sizes={imgSizes ?? '(max-width: 640px) 100vw, (max-width: 1280px) 80vw, 600px'}
+          quality={90}
           className={`card-background h-auto w-auto border-none ${imgClassName || ''}`}
         />
       ) : null}

@@ -9,13 +9,6 @@ import LayoutGridIcon from '@/public/img/index_features/layout-grid.svg'
 import BugIcon from '@/public/img/index_features/bug.svg'
 import LlmObservabilityIcon from '@/public/img/index_features/llm-observability.svg'
 import ConciergeBellIcon from '@/public/img/index_features/concierge-bell.svg'
-import homepageFeatureGraphic1 from '@/public/img/graphics/homepage/feature-graphic-1.webp'
-import homepageFeatureGraphic2 from '@/public/img/graphics/homepage/feature-graphic-2.webp'
-import homepageFeatureGraphic3 from '@/public/img/graphics/homepage/feature-graphic-3.webp'
-import homepageFeatureGraphic4 from '@/public/img/graphics/homepage/feature-graphic-4.webp'
-import homepageFeatureGraphic6 from '@/public/img/graphics/homepage/feature-graphic-6.webp'
-import homepageFeatureGraphic7 from '@/public/img/graphics/homepage/feature-graphic-7.webp'
-import homepageFeatureGraphic8 from '@/public/img/graphics/homepage/feature-graphic-8.webp'
 
 const icons = [
   {
@@ -48,8 +41,10 @@ const sections = [
     text: 'Ingest data from 50+ sources — send your data and start monitoring.',
     // buttonText: 'Explore',
     logo: <BarChart2Icon aria-hidden="true" />,
-    img: homepageFeatureGraphic1,
-    imgClassName: 'w-full',
+    img: '/img/graphics/homepage/feature-graphic-1.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 1128,
+    imgHeight: 360,
   },
   {
     iconTag: 'APPLICATION PERFORMANCE MONITORING',
@@ -57,7 +52,10 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/application-performance-monitoring/',
     logo: <BarChart2Icon aria-hidden="true" />,
-    img: homepageFeatureGraphic2,
+    img: '/img/graphics/homepage/feature-graphic-2.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 320,
   },
   {
     iconTag: 'DISTRIBUTED TRACING',
@@ -65,7 +63,10 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/distributed-tracing/',
     logo: <DraftingCompassIcon aria-hidden="true" />,
-    img: homepageFeatureGraphic3,
+    img: '/img/graphics/homepage/feature-graphic-3.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 320,
   },
   {
     iconTag: 'LOG MANAGEMENT',
@@ -73,7 +74,10 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/log-management/',
     logo: <LogsIcon aria-hidden="true" />,
-    img: homepageFeatureGraphic4,
+    img: '/img/graphics/homepage/feature-graphic-4.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 320,
   },
   {
     iconTag: 'METRICS & DASHBOARDS',
@@ -81,7 +85,10 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/metrics-and-dashboards/',
     logo: <LayoutGridIcon aria-hidden="true" />,
-    img: homepageFeatureGraphic6,
+    img: '/img/graphics/homepage/feature-graphic-6.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 320,
   },
   {
     iconTag: 'LLM/AI OBSERVABILITY',
@@ -89,7 +96,10 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/llm-observability/',
     logo: <LlmObservabilityIcon aria-hidden="true" />,
-    img: homepageFeatureGraphic8,
+    img: '/img/graphics/homepage/feature-graphic-8.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 320,
   },
   {
     iconTag: 'ALERTS',
@@ -97,7 +107,10 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/alerts-management/',
     logo: <ConciergeBellIcon aria-hidden="true" />,
-    img: homepageFeatureGraphic7,
+    img: '/img/graphics/homepage/feature-graphic-5.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 320,
   },
 ]
 
@@ -117,11 +130,10 @@ export const SigNozFeatures = () => {
               </p>
             </div>
 
-            <div className="flex hidden items-center justify-center md:flex">
+            <div className="hidden items-center justify-center md:flex">
               {icons.map((icon, index) => (
-                <>
+                <React.Fragment key={index}>
                   <div
-                    key={index}
                     className={`text-center ${icon.label === 'Dashboards' ? 'homepage-dashboard-icon' : ''}`}
                   >
                     <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
@@ -130,40 +142,36 @@ export const SigNozFeatures = () => {
                     <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
                   </div>
                   {index !== icons.length - 1 ? <div className="homepage-separator" /> : null}
-                </>
+                </React.Fragment>
               ))}
             </div>
 
             <div className="flex flex-col gap-6 px-8 md:hidden md:gap-0">
               <div className="flex justify-between">
                 {icons.slice(0, 3).map((icon, index) => (
-                  <>
-                    <div
-                      key={index}
-                      className={`w-[120px] text-center ${icon.label === 'Dashboards' ? 'homepage-dashboard-icon' : ''}`}
-                    >
-                      <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
-                        {icon.icon}
-                      </div>
-                      <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
+                  <div
+                    key={index}
+                    className={`w-[120px] text-center ${icon.label === 'Dashboards' ? 'homepage-dashboard-icon' : ''}`}
+                  >
+                    <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
+                      {icon.icon}
                     </div>
-                  </>
+                    <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
+                  </div>
                 ))}
               </div>
 
               <div className="flex justify-between">
                 {icons.slice(3, 6).map((icon, index) => (
-                  <>
-                    <div
-                      key={index}
-                      className={`w-[120px] text-center ${icon.label === 'Dashboards' ? 'homepage-dashboard-icon' : ''}`}
-                    >
-                      <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
-                        {icon.icon}
-                      </div>
-                      <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
+                  <div
+                    key={index}
+                    className={`w-[120px] text-center ${icon.label === 'Dashboards' ? 'homepage-dashboard-icon' : ''}`}
+                  >
+                    <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
+                      {icon.icon}
                     </div>
-                  </>
+                    <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
+                  </div>
                 ))}
               </div>
             </div>
@@ -180,6 +188,8 @@ export const SigNozFeatures = () => {
             logo={section.logo}
             img={section.img}
             imgClassName={section.imgClassName}
+            imgWidth={section.imgWidth}
+            imgHeight={section.imgHeight}
             key={section.text}
             sectionName="Features Section"
           />

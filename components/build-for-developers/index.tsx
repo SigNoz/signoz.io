@@ -1,41 +1,50 @@
 import React from 'react'
-import Heading from '../../components/ui/Heading'
 import Card from '../Card/card'
-import Divider from '@/components/ui/Divider'
-import homepageSingleToolGraphic from '@/public/img/graphics/homepage/feature-graphic-single-tool.webp'
-import homepageFlexibleDeploymentGraphic from '@/public/img/graphics/homepage/feature-graphic-flexible-deployment.webp'
-import homepageColumnarDbGraphic from '@/public/img/graphics/homepage/feature-graphic-columnar-db.webp'
-import homepageFlexibleQueryingGraphic from '@/public/img/graphics/homepage/feature-graphic-flexible-querying.webp'
-import homepageCorrelationGraphic from '@/public/img/graphics/homepage/feature-graphic-correlation.webp'
+
+const REASONS = [
+  {
+    title: 'Single tool for observability',
+    desc: 'No need of using disparate tools for observability. Get everything in a single platform. ',
+    figure: '/img/graphics/homepage/feature-graphic-single-tool.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 302,
+  },
+  {
+    title: 'Flexible deployment options',
+    desc: 'You can self-host SigNoz or use our cloud services, or use both depending on your use-cases.',
+    figure: '/img/graphics/homepage/feature-graphic-flexible-deployment.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 302,
+  },
+  {
+    title: 'Columnar database',
+    desc: 'SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore - an extremely fast and highly optimized storage for observability data.',
+    figure: '/img/graphics/homepage/feature-graphic-columnar-db.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 302,
+  },
+  {
+    title: 'Flexible Querying',
+    desc: 'DIY Query builder, PromQL, and ClickHouse queries to fulfill all your use-cases around querying observability data.',
+    figure: '/img/graphics/homepage/feature-graphic-flexible-querying.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 528,
+    imgHeight: 302,
+  },
+  {
+    title: 'Correlated Signals',
+    desc: 'Correlated logs, metrics and traces for much richer context while debugging.',
+    figure: '/img/graphics/homepage/feature-graphic-correlation.svg',
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 1128,
+    imgHeight: 337,
+  },
+]
 
 const BuildForDevelopers = () => {
-  const REASONS = [
-    {
-      title: 'Single tool for observability',
-      desc: 'No need of using disparate tools for observability. Get everything in a single platform. ',
-      figure: homepageSingleToolGraphic,
-    },
-    {
-      title: 'Flexible deployment options',
-      desc: 'You can self-host SigNoz or use our cloud services, or use both depending on your use-cases.',
-      figure: homepageFlexibleDeploymentGraphic,
-    },
-    {
-      title: 'Columnar database',
-      desc: 'SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore - an extremely fast and highly optimized storage for observability data.',
-      figure: homepageColumnarDbGraphic,
-    },
-    {
-      title: 'Flexible Querying',
-      desc: 'DIY Query builder, PromQL, and ClickHouse queries to fulfill all your use-cases around querying observability data.',
-      figure: homepageFlexibleQueryingGraphic,
-    },
-    {
-      title: 'Correlated Signals',
-      desc: 'Correlated logs, metrics and traces for much richer context while debugging.',
-      figure: homepageCorrelationGraphic,
-    },
-  ]
   return (
     <section className="mx-auto w-full border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80%]">
       <div className=" h-12 w-full border !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
@@ -56,6 +65,9 @@ const BuildForDevelopers = () => {
                   title={section.title}
                   description={section.desc}
                   img={section.figure}
+                  imgClassName={section.imgClassName}
+                  imgWidth={section.imgWidth}
+                  imgHeight={section.imgHeight}
                   key={section.title}
                   sectionName="Built for Developers"
                 />

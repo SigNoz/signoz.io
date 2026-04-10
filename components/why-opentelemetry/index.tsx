@@ -1,5 +1,4 @@
 import React from 'react'
-import Image from 'next/image'
 import Card from '../Card/card'
 import { BookOpen, ArrowRight } from 'lucide-react'
 import { ArrowRightSolid } from '@/components/homepage-icons/icons'
@@ -8,31 +7,27 @@ import KeyIcon from '@/public/img/index_features/key.svg'
 import FutureIcon from '@/public/img/index_features/future.svg'
 import CasesIcon from '@/public/img/index_features/cases.svg'
 import EasyToUseIcon from '@/public/img/index_features/easy-to-use.svg'
-import homepageOtelGraphic from '@/public/img/graphics/homepage/feature-graphic-otel.webp'
+import Image from 'next/image'
 
 const REASONS = [
   {
     title: 'No vendor lock-in',
     desc: 'Get free of vendor-based agents inside your codebase.',
-    figure: '/img/landing/property-no-vendor-lock-in.webp',
     logo: <KeyIcon className="h-6 w-6" aria-hidden="true" />,
   },
   {
     title: 'Futureproof',
     desc: "OpenTelemetry's extensibility ensures support for any evolving technologies.",
-    figure: '/img/landing/property-ease-of-use.webp',
     logo: <FutureIcon className="h-6 w-6" aria-hidden="true" />,
   },
   {
     title: 'Covers all use-cases',
     desc: 'OpenTelemetry is a one-stop solution for all your telemetry needs. Generate logs, metrics, and traces with one SDK.',
-    figure: '/img/landing/property-covers-all-use-cases.webp',
     logo: <CasesIcon className="h-6 w-6" aria-hidden="true" />,
   },
   {
     title: 'Standardize Observability',
     desc: 'A single standard for all telemetry signals means increased developer productivity, consistency across teams.',
-    figure: '/img/landing/property-standardize-observability.webp',
     logo: <EasyToUseIcon className="h-6 w-6" aria-hidden="true" />,
   },
 ]
@@ -131,10 +126,15 @@ export const WhyOpenTelemetry = () => {
                   </li>
                 </ul>
               </div>
-              <div className="mb-6 hidden aspect-[449/352] shrink-0 sm:h-[300px] 2xl:block">
+              <div className="mx-auto mb-6 aspect-[449/352] h-[400px] shrink-0 sm:h-[300px] 2xl:block">
                 <Image
-                  src={homepageOtelGraphic}
+                  className="w-full"
+                  src="/img/graphics/homepage/feature-graphic-otel.svg"
                   alt="Illustration showing SigNoz built on top of OpenTelemetry"
+                  width={449}
+                  height={352}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

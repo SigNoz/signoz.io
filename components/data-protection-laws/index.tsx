@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
-import homepageDataProtectionGraphic from '@/public/img/graphics/homepage/feature-graphic-data-protection.webp'
 
 const DataProtectionLaws = ({ isInPricingPage = false }) => {
   return (
@@ -35,9 +34,10 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
           </div>
           <Image
             className="w-full"
-            src={homepageDataProtectionGraphic}
+            src="/img/graphics/homepage/feature-graphic-data-protection.svg"
             alt="Map showing SigNoz cloud regions in the United States, European Union, and India"
-            sizes="(max-width: 768px) 100vw, 80vw"
+            width={720}
+            height={400}
           />
           {!isInPricingPage ? (
             <div className="mt-[18px] grid grid-cols-1 gap-3 xl:grid-cols-[repeat(3,max-content)]">

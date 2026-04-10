@@ -1,7 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 import OutplayLogo from '@/public/img/users/outplay.svg'
 import subomiAvatar from '@/public/img/users/subomi-oluwalana.webp'
@@ -225,8 +224,6 @@ export const Testimonials = ({ page }) => {
                         <div className="avatar">
                           <Image
                             className="avatar__photo"
-                            loading="lazy"
-                            placeholder="blur"
                             src={testimonial.avatar}
                             alt={`Profile of ${testimonial.name}`}
                           />

@@ -1,11 +1,10 @@
 import React from 'react'
-import Image from 'next/image'
 import Observability from '@/components/observability'
 import DataProtectionLaws from '@/components/data-protection-laws'
 import PricingStructure from '@/components/pricing-structure'
 import { CommunityEdition } from '@/components/community-edition'
 import { SignozDatalog } from '@/components/signoz-datalog'
-import homepageEnterpriseGraphic from '@/public/img/graphics/homepage/feature-graphic-enterprise.webp'
+import Image from 'next/image'
 
 const WhySelectSignoz = ({ isInPricingPage = false }) => {
   return (
@@ -47,10 +46,13 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
                 </p>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[50%]">
+            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80%]">
               <Image
-                src={homepageEnterpriseGraphic}
+                className="w-full"
+                src="/img/graphics/homepage/feature-graphic-enterprise.svg"
                 alt="Illustration of SigNoz connecting observability, security, and data controls"
+                width={272}
+                height={352}
               />
             </div>
           </div>
