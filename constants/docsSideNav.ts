@@ -1520,7 +1520,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Log Explorer',
+        label: 'Working with Log Explorer',
         type: 'category',
         isExpanded: false,
         route: '/docs/userguide/logs_query_builder',
@@ -1564,48 +1564,17 @@ const docsSideNav = [
         items: [
           { type: 'doc', route: '/docs/logs-pipelines/introduction', label: 'Introduction' },
           { type: 'doc', route: '/docs/logs-pipelines/concepts', label: 'Concepts' },
-          { type: 'doc', route: '/docs/logs-pipelines/parsing', label: 'Logs Parsing' },
+          { type: 'doc', route: '/docs/logs-pipelines/parsing', label: 'How to Parse Logs' },
           {
             label: 'Log Processors',
             type: 'category',
             isExpanded: false,
             route: '/docs/logs-pipelines/processors',
             items: [
-              { type: 'doc', route: '/docs/logs-pipelines/guides/json', label: 'Parse JSON Logs' },
               {
                 type: 'doc',
-                route: '/docs/logs-pipelines/guides/grok-parser',
-                label: 'Parse with Grok Parser',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-pipelines/guides/regex-parser',
-                label: 'Parse with Regex Parser',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-pipelines/guides/trace',
-                label: 'Parse Trace Information',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-pipelines/guides/resource',
-                label: 'Parse Container Name',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-pipelines/guides/nested-json',
-                label: 'Parse Nested JSON',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-pipelines/guides/severity-parsing',
-                label: 'Severity Parsing',
-              },
-              {
-                type: 'doc',
-                route: '/docs/logs-pipelines/guides/timestamp-parsing',
-                label: 'Parse Timestamp',
+                route: '/docs/logs-pipelines/processor-types',
+                label: 'Types of Log Processors',
               },
             ],
           },
