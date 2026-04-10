@@ -2611,38 +2611,55 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     route: '/docs/alerts',
-    // link: {
-    //   type: 'generated-index',
-    //   title: 'Alert Management in SigNoz',
-    //   description:
-    //     'This documentation helps you in understanding the Alerts feature in SigNoz and how you can create different types of alerts.',
-    //   slug: '/docs/alerts',
-    // },
     items: [
       {
         type: 'doc',
-        route: '/docs/userguide/alerts-management',
-        label: 'Alert Management',
+        route: '/docs/alerts-management/overview',
+        label: 'Overview',
       },
-      // {
-      //   type: 'doc',
-      //   route: 'product-features/alerts/alerts-notification-channel',
-      //   label: 'Notification Channel',
-      // },
       {
-        label: 'Setup Alerts Notification',
+        label: 'Alert Types',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          { type: 'doc', route: '/docs/alerts-management/metrics-based-alerts', label: 'Metrics' },
+          { type: 'doc', route: '/docs/alerts-management/log-based-alerts', label: 'Logs' },
+          { type: 'doc', route: '/docs/alerts-management/trace-based-alerts', label: 'Traces' },
+          { type: 'doc', route: '/docs/alerts-management/anomaly-based-alerts', label: 'Anomaly' },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/exceptions-based-alerts',
+            label: 'Exceptions',
+          },
+          { type: 'doc', route: '/docs/alerts-management/apdex-alerts', label: 'Apdex' },
+        ],
+      },
+      {
+        label: 'Alert Management',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/userguide/alerts-management',
+        items: [
+          { type: 'doc', route: '/docs/userguide/alerts-management', label: 'Alert Management' },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/planned-maintenance',
+            label: 'Planned Maintenance',
+          },
+          { type: 'doc', route: '/docs/alerts-management/alerts-history', label: 'Alert History' },
+          { type: 'doc', route: '/docs/alerts-management/routing-policy', label: 'Routing Policy' },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/terraform-provider-signoz',
+            label: 'Terraform Provider',
+          },
+        ],
+      },
+      {
+        label: 'Setup Notifications',
         type: 'category',
         isExpanded: false,
         route: '/docs/setup-alerts-notification',
-        // link: {
-        //   type: 'generated-index',
-        //   title: 'Setup Alerts Notifications Channel',
-        //   description:
-        //     'You can setup notification channel for sending the generated alerts to other applications. Currently, the following channels are supported.',
-        //   slug: '/docs/setup-alerts-notification',
-        // type: "doc",
-        // route: "product-features/alerts/alerts-notification-channel",
-        // },
         items: [
           {
             type: 'doc',
@@ -2692,79 +2709,10 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/alerts-management/anomaly-based-alerts',
-        label: 'Anomaly based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/metrics-based-alerts',
-        label: 'Metrics based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/log-based-alerts',
-        label: 'Log based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/trace-based-alerts',
-        label: 'Trace based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/exceptions-based-alerts',
-        label: 'Exceptions based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/planned-maintenance',
-        label: 'Planned Maintenance',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/routing-policy',
-        label: 'Routing Policies',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/alerts-history',
-        label: 'Alerts History',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/terraform-provider-signoz',
-        label: 'Terraform Provider',
-      },
-      {
+        label: 'User Guides',
         type: 'category',
-        route: '/docs/alerts-management/troubleshooting/troubleshooting',
-        label: 'Troubleshooting',
         isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/troubleshooting/faqs',
-            label: 'General FAQs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
-            label: 'Missing Alerts in SigNoz',
-          },
-          {
-            type: 'doc',
-            route:
-              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
-            label: 'Alerts Firing Without Visible Threshold Breach',
-          },
-        ],
-      },
-      {
-        type: 'category',
         route: '/docs/alerts-management/user-guides/user-guides',
-        label: 'Alerts User Guides',
-        isExpanded: false,
         items: [
           {
             type: 'doc',
@@ -2779,7 +2727,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
-            label: 'How to Configure Alerts for Missing Data',
+            label: 'Configure Alerts for Missing Data',
           },
           {
             type: 'doc',
@@ -2789,14 +2737,34 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
-            label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
+            label: 'Kubernetes Pod Startup Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/k8s-cpu-usage-alert',
+            label: 'Kubernetes CPU Usage Alert',
           },
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/alerts-management/apdex-alerts',
-        label: 'Apdex Alerts',
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/alerts-management/troubleshooting/troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
+            label: 'Missing Alerts',
+          },
+          {
+            type: 'doc',
+            route:
+              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
+            label: 'Alerts Firing Without Threshold Breach',
+          },
+          { type: 'doc', route: '/docs/alerts-management/troubleshooting/faqs', label: 'FAQs' },
+        ],
       },
     ],
   },
