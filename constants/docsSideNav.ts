@@ -1565,18 +1565,11 @@ const docsSideNav = [
           { type: 'doc', route: '/docs/logs-pipelines/introduction', label: 'Introduction' },
           { type: 'doc', route: '/docs/logs-pipelines/concepts', label: 'Concepts' },
           { type: 'doc', route: '/docs/logs-pipelines/parsing', label: 'How to Parse Logs' },
+          { type: 'doc', route: '/docs/logs-pipelines/processors', label: 'Log Processors' },
           {
-            label: 'Log Processors',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/logs-pipelines/processors',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/logs-pipelines/processor-types',
-                label: 'Types of Log Processors',
-              },
-            ],
+            type: 'doc',
+            route: '/docs/logs-pipelines/processor-types',
+            label: 'Types of Log Processors',
           },
         ],
       },
@@ -1584,6 +1577,7 @@ const docsSideNav = [
         label: 'User Guides',
         type: 'category',
         isExpanded: false,
+        route: '/docs/logs-management/user-guides',
         items: [
           { type: 'doc', route: '/docs/logs-management/guides/drop-logs', label: 'Drop Logs' },
           {
@@ -1596,6 +1590,14 @@ const docsSideNav = [
             route: '/docs/logs-management/guides/remove-resource-attributes',
             label: 'Remove Resource Attributes',
           },
+        ],
+      },
+      {
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/logs-management/reference',
+        items: [
           { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
           {
             type: 'doc',
@@ -1614,11 +1616,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/logs-query-troubleshooting',
             label: 'Logs Query Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/troubleshooting/troubleshooting',
-            label: 'Troubleshooting',
           },
           { type: 'doc', route: '/docs/logs-management/troubleshooting/faqs', label: 'FAQs' },
         ],
