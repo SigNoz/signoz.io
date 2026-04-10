@@ -307,7 +307,7 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
   return (
     <>
       <div
-        className="sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4"
+        className="sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4 max-lg:!hidden"
         ref={tocContainerRef}
       >
         <div className="mb-4">

@@ -55,7 +55,7 @@ export default function DocLayout({ children }: LayoutProps) {
 
           <div className="mx-auto flex h-full w-full max-w-[1504px] items-start gap-4 overflow-clip max-sm:px-4">
             {source !== ONBOARDING_SOURCE && (
-              <div className="box-border w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500">
+              <div className="box-border w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500 max-md:hidden">
                 <DocsSidebar />
               </div>
             )}

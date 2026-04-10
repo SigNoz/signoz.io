@@ -38,7 +38,7 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
         <ProgressBar target={mainRef} />
         <SectionContainer>
           <div className="mx-auto flex h-full w-full max-w-[1504px] items-start gap-4 overflow-clip">
-            <div className="box-border w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500">
+            <div className="box-border w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500 max-md:hidden">
               <DocsSidebar />
             </div>
 
@@ -80,7 +80,7 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
             </div>
 
             {toc && Array.isArray(toc) && toc.length > 0 && (
-              <div className="sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4">
+              <div className="sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4 max-lg:!hidden">
                 <div className="mb-3 text-xs uppercase"> On this page </div>
 
                 <div className="relative z-[1] min-h-0 flex-[1_1_auto] border-l border-signoz_slate-500 pl-3">
