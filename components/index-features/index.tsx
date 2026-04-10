@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import Card from '@/components/Card/card'
 import BarChart2Icon from '@/public/img/index_features/bar-chart-2.svg'

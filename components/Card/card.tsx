@@ -158,6 +158,7 @@ const Card: React.FC<CardProps> = ({
           {...(isStaticImage ? {} : { width: imgWidth, height: imgHeight })}
           sizes={imgSizes ?? '(max-width: 640px) 100vw, (max-width: 1280px) 80vw, 600px'}
           quality={90}
+          loading="lazy"
           className={`card-background h-auto w-auto border-none ${imgClassName || ''}`}
         />
       ) : null}

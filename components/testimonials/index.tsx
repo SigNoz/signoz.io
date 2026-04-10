@@ -181,7 +181,6 @@ export const Testimonials = ({ page }) => {
         href: 'https://twitter.com/Iamfarisology/status/1553787074339381249',
       },
     ],
-    [],
   ]
   return (
     <section>

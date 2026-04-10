@@ -53,6 +53,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
                 alt="Illustration of SigNoz connecting observability, security, and data controls"
                 width={272}
                 height={352}
+                loading="lazy"
               />
             </div>
           </div>

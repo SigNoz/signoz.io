@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import Button from '@/components/Button/Button'
 import { cn } from '../../app/lib/utils'
