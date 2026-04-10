@@ -13,6 +13,7 @@ import docsSideNav from '@/constants/docsSideNav'
 import Link from 'next/link'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
+import { DOC_TOC_CLASSES, DOC_SIDENAV_CLASSES } from '@/constants/docLayoutClasses'
 
 export interface tocItemProps {
   url: string
@@ -37,8 +38,8 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
       <main ref={mainRef} className="">
         <ProgressBar target={mainRef} />
         <SectionContainer>
-          <div className="mx-auto flex h-full w-full max-w-[1504px] items-start gap-4 overflow-clip">
-            <div className="box-border w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500 max-md:hidden">
+          <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 overflow-clip">
+            <div className={DOC_SIDENAV_CLASSES}>
               <DocsSidebar />
             </div>
 
@@ -80,10 +81,10 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
             </div>
 
             {toc && Array.isArray(toc) && toc.length > 0 && (
-              <div className="sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4 max-lg:!hidden">
+              <div className={DOC_TOC_CLASSES}>
                 <div className="mb-3 text-xs uppercase"> On this page </div>
 
-                <div className="relative z-[1] min-h-0 flex-[1_1_auto] border-l border-signoz_slate-500 pl-3">
+                <div className="relative z-[1] min-h-0 flex-[1_1_auto] overflow-y-auto border-l border-signoz_slate-500 pl-3">
                   {toc.map((tocItem: tocItemProps) => {
                     return (
                       <div className="w-full text-[13px] font-medium" key={tocItem.url}>

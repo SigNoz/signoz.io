@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
+import { DOC_TOC_CLASSES } from '../../constants/docLayoutClasses'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import { RegionDropdown } from '../Region/RegionDropdown'
 import PageFeedback from '../PageFeedback/PageFeedback'
@@ -306,10 +307,7 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
 
   return (
     <>
-      <div
-        className="sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4 max-lg:!hidden"
-        ref={tocContainerRef}
-      >
+      <div className={DOC_TOC_CLASSES} ref={tocContainerRef}>
         <div className="mb-4">
           <RegionDropdown />
         </div>

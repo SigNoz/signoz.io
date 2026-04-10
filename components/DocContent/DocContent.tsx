@@ -11,6 +11,7 @@ import TableOfContents from '../DocsTOC/DocsTOC'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { DOC_TOC_CLASSES } from '@/constants/docLayoutClasses'
 import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
@@ -112,10 +113,7 @@ const DocContent: React.FC<{
         </>
       ) : shouldReserveTocColumn ? (
         <>
-          <div
-            className="invisible sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4 max-lg:!hidden"
-            aria-hidden="true"
-          />
+          <div className={`${DOC_TOC_CLASSES} invisible`} aria-hidden="true" />
         </>
       ) : null}
     </>

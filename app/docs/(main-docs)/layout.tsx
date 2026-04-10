@@ -8,6 +8,7 @@ import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { DOC_SIDENAV_CLASSES } from '@/constants/docLayoutClasses'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
@@ -53,9 +54,9 @@ export default function DocLayout({ children }: LayoutProps) {
         <SectionContainer>
           {source !== ONBOARDING_SOURCE && <ProgressBar target={mainRef} />}
 
-          <div className="mx-auto flex h-full w-full max-w-[1504px] items-start gap-4 overflow-clip max-sm:px-4">
+          <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 overflow-clip max-sm:px-4">
             {source !== ONBOARDING_SOURCE && (
-              <div className="box-border w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500 max-md:hidden">
+              <div className={DOC_SIDENAV_CLASSES}>
                 <DocsSidebar />
               </div>
             )}
