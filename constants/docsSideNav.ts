@@ -1952,7 +1952,7 @@ const docsSideNav = [
         label: 'User Guides',
         type: 'category',
         isExpanded: false,
-        route: '/docs/cost-meter/alerts-examples',
+        route: '/docs/cost-meter/user-guides',
         items: [
           { type: 'doc', route: '/docs/cost-meter/alerts-examples', label: 'Alerts Examples' },
           { type: 'doc', route: '/docs/cost-meter/meter-examples', label: 'Meter Examples' },
