@@ -1,0 +1,204 @@
+---
+date: 2026-04-09
+id: alert-correlation-analysis
+title: Alert Correlation Analysis
+description: When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Your pager explodes. Alerts from multiple services are firing within minutes: `Payment Service error rate >= 5%`, `Checkout Service error rate >= 5%`, `Frontend Service error rate >= 10%`. All these services are related. Before you escalate to all of them, you need to know: is this 3 separate problems, or one cascading failure?
+
+You open your AI assistant, connected to SigNoz via the MCP server, to find the issue.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Find All Currently Firing Alerts
+
+Start by asking your AI assistant to check what's firing right now:
+
+```text
+Find all currently firing alerts
+```
+
+Your assistant will use the SigNoz MCP server to fetch active alerts. Here's an example response:
+
+```text
+There are 3 currently firing alerts, all severity error:
+
+1. Frontend Service error rate ≥ 10% — firing since Apr 8, 21:21 UTC (~22 hours)
+2. Checkout Service error rate ≥ 5% — firing since Apr 9, 19:42 UTC
+3. Payment Service error rate ≥ 5% — firing since Apr 9, 19:43 UTC
+
+The Checkout and Payment alerts started within seconds of each other,
+which suggests they may share a common cause.
+```
+
+You now know what's firing. Checkout and Payment both started alerting within seconds of each other. That's the priority. They likely share a root cause. Next, confirm whether they're truly related or just coincidentally timed.
+
+## Step 2: Investigate If These Alerts Are Related
+
+Ask your assistant to check the relationship between the services:
+
+```text
+Check if Checkout and Payment share a common dependency or if one service calls the other.
+Pull recent error traces to see if they're related.
+```
+
+Your assistant will analyze error traces and service dependencies. Here's what you might see:
+
+```text
+Findings: Checkout and Payment are directly coupled
+
+Checkout calls Payment. The error traces show service.name = checkout making
+client-kind gRPC calls to oteldemo.PaymentService/Charge, and when those fail,
+the parent CheckoutService/PlaceOrder span fails with:
+
+  "failed to charge card: could not charge the card: rpc error...
+   Payment request failed. Invalid token. app.loyalty.level=gold"
+
+This isn't a shared dependency — it's a direct call. Same trace IDs link them
+(e.g. b0263667e66d3a3fd1fbb0d8be54d792 contains both the checkout PlaceOrder
+span and its child PaymentService/Charge span).
+
+Root cause signal: gold-tier loyalty users
+
+Every Payment failure has the same status message:
+"Payment request failed. Invalid token. app.loyalty.level=gold"
+
+This is a very specific pattern — it's not random infrastructure failure.
+Payment is rejecting tokens specifically for gold-tier customers.
+```
+
+## Step 3: Pull a Trace to Verify the Cascade
+
+Now that you know the alerts are correlated, examine the trace structure to see exactly how the error propagates:
+
+```text
+Show me a trace that contains both the Checkout and Payment failures.
+I want to see the full span tree to confirm how the error propagates.
+```
+
+Your assistant will fetch a complete trace showing the full call chain. Here's an abbreviated view:
+
+```text
+✓ load-generator    user_checkout_single                                  13.42s
+└─ ✗ load-generator    POST → frontend-proxy:8080/api/checkout             10.44s  500
+   └─ ✗ frontend-proxy POST (server)                                       10.43s  500
+      └─ ✗ frontend       POST /api/checkout (server)                      10.43s  500
+         └─ ✗ frontend       oteldemo.CheckoutService/PlaceOrder           10.42s
+            └─ ✗ checkout      CheckoutService/PlaceOrder (server)         10.34s
+               ├─ ✓ checkout      prepareOrderItemsAndShippingQuoteFromCart 10.08s
+               │  ├─ ✓ checkout       → CartService/GetCart                  48ms
+               │  ├─ ✓ checkout       → ProductCatalogService/GetProduct   9.07s
+               │  ├─ ✓ checkout       → CurrencyService/Convert             99ms
+               │  └─ ✓ checkout       → shipping POST /get-quote           271ms
+               └─ ✗ checkout      → PaymentService/Charge                   66ms  ← FAILS
+                  └─ ✗ payment       PaymentService/Charge (server)          2ms
+                     └─ ✓ payment       charge (internal)                    1ms
+
+Error: "Payment request failed. Invalid token. app.loyalty.level=gold"
+```
+
+The trace structure confirms the cascading error from the `Payment` service to the `Checkout` service. We also see in this example that `Frontend` is also inheriting these errors(`Frontend` may also be erroring from the cascade).
+
+## Step 4: Quantify the Impact
+
+The cascade is confirmed, but are all Checkout errors caused by Payment? If only 10% of Checkout errors come from Payment, fixing it won't clear the alert.
+
+```text
+In the last 15 minutes, what percent of checkout related errors were due to this payment gold tier error?
+```
+
+Your assistant will analyze recent error spans and break them down by cause:
+
+```text
+In the last 15 minutes, about 85% (18 of 21) of checkout-related error spans
+were due to the payment gold-tier invalid token issue.
+
+Breakdown of the 21 error spans from the checkout service:
+
+Cause                                                          Spans    %
+Payment "Invalid token, gold tier" (client + PlaceOrder)      18       85%
+Cart / Redis connection failure                               1        5%
+Other propagation spans                                       2        10%
+```
+
+**Verdict**: 85% of Checkout errors are caused by Payment's gold-tier token issue. This means:
+- Fixing the Payment token validation will clear the Checkout alert
+- The Checkout alert is a secondary failure, not an independent incident
+
+## Step 5: Confirm Frontend Is a Separate Incident
+
+The Frontend alert started 22 hours ago, well before the Payment and Checkout alerts began firing. This timing already suggests Frontend has an independent, pre-existing problem.
+
+However, the trace in Step 3 showed Frontend errors propagating from the Checkout → Payment failure. Does this mean the Payment cascade is making Frontend's existing problem worse?
+
+Verify whether there's any meaningful connection:
+
+```text
+In the last 15 minutes, what percent of Frontend errors were due to the payment gold tier error cascading through checkout?
+```
+
+Your assistant will analyze Frontend error spans:
+
+```text
+In the last 15 minutes:
+- Total Frontend error spans: 429
+- Frontend error spans in traces containing the gold-tier payment error: 18
+- Share: ~4%
+
+The gold-tier payment cascade is a tiny fraction of Frontend errors.
+The vast majority of Frontend errors come from other sources.
+```
+
+**Result**: Only 4% of Frontend errors are caused by the Payment cascade. This means:
+- The Frontend alert is **NOT** primarily caused by the Payment issue
+- Frontend has a separate, unrelated problem causing most of its errors
+- Fixing Payment will reduce Frontend errors slightly, but won't clear the alert
+- You need to investigate Frontend independently
+
+## Final Summary 
+You started with 3 alerts. Investigation reveals:
+- **Payment**: Root cause (gold-tier token validation bug)
+- **Checkout**: 85% cascade from Payment. Will clear when Payment error is fixed
+- **Frontend**: Independent incident (only 4% overlap). Needs separate investigation
+
+Your plan of action is to now focus on `Payment` first to clear 2 of 3 alerts, then investigate `Frontend` separately.
+
+## Tips for Your Own Investigations
+
+- **Look for timing correlations first.** If multiple alerts fire within minutes of each other, they likely share a root cause. Start by finding the common dependency.
+- **Map the dependency graph.** Use trace data to see which services call which dependencies. The service that calls the failing dependency directly is where the error originates. Everything upstream is a cascade.
+- **Verify the cascade with trace chains.** Pull a full trace showing how the failure propagates from the root cause up through dependent services. This confirms your hypothesis and provides evidence for incident reports.
+- **Quantify primary vs. secondary failures.** If majority of errors in a service are caused by upstream failures, it's not an independent incident. Focus on the root cause.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_list_alerts` | Retrieved all currently firing alerts with their severity, start times, and conditions to identify which services are affected |
+| 2 | `signoz_search_traces` | Found error traces from Checkout and Payment services to identify the relationship and common error patterns (gold-tier token failures) |
+| 3 | `signoz_get_trace_details` | Retrieved the full span tree for trace ID `b0263667e66d3a3fd1fbb0d8be54d792` showing how Payment failures cascade through Checkout to Frontend |
+| 4 | `signoz_search_traces` | Queried error spans from Checkout service filtered by error message patterns to calculate what percentage were caused by Payment failures |
+| 5 | `signoz_search_traces` | Queried error spans from Frontend service and cross-referenced with traces containing the gold-tier Payment error to determine cascade overlap |
+
+</details>
+
+## Related Use Cases
+
+- [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Investigate where errors originate in the call chain when a single service starts failing.
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Trace the bottleneck when latency spikes on one service.
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/) - Deep-dive into a specific failing request by pasting its trace ID.
+
+
+<GetHelp />
