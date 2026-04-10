@@ -84,7 +84,7 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
   }, [hasAlgoliaConfig, hydrateSearch, shouldHydrate])
 
   useEffect(() => {
-    if (disableShortcut) {
+    if (disableShortcut || (shouldHydrate && LoadedSearchButton)) {
       return
     }
 
@@ -101,7 +101,7 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [disableShortcut, hydrateSearch])
+  }, [disableShortcut, hydrateSearch, shouldHydrate, LoadedSearchButton])
 
   const handlePreviewClick = () => {
     setShouldOpenOnMount(true)
