@@ -2614,6 +2614,16 @@ module.exports = () => {
           destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
+        {
+          source: '/docs/cost-meter/query-setup-guides/',
+          destination: '/docs/cost-meter/meter-examples/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/query-setup-guides',
+          destination: '/docs/cost-meter/meter-examples/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
