@@ -1808,7 +1808,17 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/trac',
-          destination: '/docs/userguide/traces/',
+          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/traces',
+          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/traces/',
+          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
           permanent: true,
         },
         {
@@ -1839,8 +1849,7 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/clickhouse',
-          destination:
-            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {
@@ -2196,8 +2205,7 @@ module.exports = () => {
         {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/zookeeper/',
-          destination:
-            '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
+          destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
           permanent: true,
         },
         {
