@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { Button, Dialog } from '@headlessui/react'
 import { Menu, X } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowBigLeft,
@@ -29,6 +28,15 @@ import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
+import BarChartFeatureIcon from '@/public/img/index_features/bar-chart-2_feature.svg'
+import BoxesIcon from '@/public/img/index_features/boxes.svg'
+import BrainfishIcon from '@/public/img/index_features/brainfish.svg'
+import BugFeatureIcon from '@/public/img/index_features/bug_feature.svg'
+import ConciergeBellFeatureIcon from '@/public/img/index_features/concierge-bell_feature.svg'
+import DraftingCompassFeatureIcon from '@/public/img/index_features/drafting-compass_feature.svg'
+import LayoutGridFeatureIcon from '@/public/img/index_features/layout-grid_feature.svg'
+import LogsFeatureIcon from '@/public/img/index_features/logs_feature.svg'
 
 enum TABS {
   BLOG = 'blog-tab',
@@ -43,11 +51,14 @@ enum TAB_PATHNAMES {
   GUIDES = '/resource-center/guides',
   OPENTELEMETRY = '/resource-center/opentelemetry',
 }
+
+const PRODUCT_ICON_CLASSNAME = 'h-5 w-5 shrink-0'
+
 const productDropdownItems = [
   {
     key: 'apm',
     url: '/application-performance-monitoring',
-    icon: '/img/index_features/bar-chart-2_feature.svg',
+    icon: <BarChartFeatureIcon className={PRODUCT_ICON_CLASSNAME} aria-hidden="true" />,
     description: 'Monitor your applications',
     name: 'APM',
     order: 1,
@@ -55,7 +66,7 @@ const productDropdownItems = [
   {
     key: 'Alerts',
     url: '/alerts-management',
-    icon: '/img/index_features/concierge-bell_feature.svg',
+    icon: <ConciergeBellFeatureIcon className={PRODUCT_ICON_CLASSNAME} aria-hidden="true" />,
     description: 'Multiple thresholds and dynamic routing at scale',
     name: 'Alerts',
     order: 5,
@@ -63,7 +74,7 @@ const productDropdownItems = [
   {
     key: 'external-apis',
     url: '/external-apis/',
-    icon: <WorkflowIcon className="text-signoz_robin-400" size={20} />,
+    icon: <WorkflowIcon className={`${PRODUCT_ICON_CLASSNAME} text-signoz_robin-400`} />,
     description: 'Track third-party API performance',
     name: 'External API Monitoring',
     order: 9,
@@ -71,7 +82,7 @@ const productDropdownItems = [
   {
     key: 'DistributedTracing',
     url: '/distributed-tracing',
-    icon: '/img/index_features/drafting-compass_feature.svg',
+    icon: <DraftingCompassFeatureIcon className={PRODUCT_ICON_CLASSNAME} aria-hidden="true" />,
     description: 'Track requests across your services',
     name: 'Distributed Tracing',
     order: 2,
@@ -79,7 +90,7 @@ const productDropdownItems = [
   {
     key: 'MetricsDashboards',
     url: '/metrics-and-dashboards',
-    icon: '/img/index_features/layout-grid_feature.svg',
+    icon: <LayoutGridFeatureIcon className={PRODUCT_ICON_CLASSNAME} aria-hidden="true" />,
     description: 'Monitor key metrics and build dashboards',
     name: 'Metrics & Dashboards',
     order: 6,
@@ -87,7 +98,7 @@ const productDropdownItems = [
   {
     key: 'messaging-queues',
     url: '/docs/messaging-queues/overview/',
-    icon: <Logs className="text-signoz_robin-400" size={20} />,
+    icon: <Logs className={`${PRODUCT_ICON_CLASSNAME} text-signoz_robin-400`} />,
     description: 'Monitor Kafka, Celery lag & throughput',
     name: 'Messaging Queues',
     order: 10,
@@ -95,7 +106,7 @@ const productDropdownItems = [
   {
     key: 'LogManagement',
     url: '/log-management',
-    icon: '/img/index_features/logs_feature.svg',
+    icon: <LogsFeatureIcon className={PRODUCT_ICON_CLASSNAME} aria-hidden="true" />,
     description: 'Fast queries with columnar database',
     name: 'Log Management',
     order: 3,
@@ -103,7 +114,7 @@ const productDropdownItems = [
   {
     key: 'Exceptions',
     url: '/exceptions-monitoring',
-    icon: '/img/index_features/bug_feature.svg',
+    icon: <BugFeatureIcon className={PRODUCT_ICON_CLASSNAME} aria-hidden="true" />,
     description: 'Record exceptions automatically',
     name: 'Exceptions',
     order: 7,
@@ -111,7 +122,7 @@ const productDropdownItems = [
   {
     key: 'llm-observability',
     url: '/llm-observability/',
-    icon: <Brain className="text-signoz_robin-400" size={20} />,
+    icon: <Brain className={`${PRODUCT_ICON_CLASSNAME} text-signoz_robin-400`} />,
     description: 'Monitor AI and LLM workflows',
     name: 'LLM Observability',
     order: 11,
@@ -119,7 +130,7 @@ const productDropdownItems = [
   {
     key: 'InfraMonitoring',
     url: '/docs/infrastructure-monitoring/overview/',
-    icon: '/img/index_features/boxes.svg',
+    icon: <BoxesIcon className={PRODUCT_ICON_CLASSNAME} aria-hidden="true" />,
     description: 'Monitor your infrastructure',
     name: 'Infrastructure Monitoring',
     order: 4,
@@ -127,7 +138,7 @@ const productDropdownItems = [
   {
     key: 'trace-funnels',
     url: '/trace-funnels/',
-    icon: <Cone className="text-signoz_sakura-400" size={20} />,
+    icon: <Cone className={`${PRODUCT_ICON_CLASSNAME} text-signoz_sakura-400`} />,
     description: 'Track drop-offs in multi-step flows',
     name: 'Trace Funnels',
     order: 8,
@@ -135,7 +146,7 @@ const productDropdownItems = [
   {
     key: 'observability-for-ai-native-companies',
     url: '/observability-for-ai-native-companies/',
-    icon: <ShieldPlus className="text-signoz_robin-400" size={20} />,
+    icon: <ShieldPlus className={`${PRODUCT_ICON_CLASSNAME} text-signoz_robin-400`} />,
     description: 'Full-stack monitoring for AI applications',
     name: 'AI Observability',
     order: 12,
@@ -337,13 +348,7 @@ export default function TopNav() {
               clickLocation="Top Navbar"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Image
-                className="h-5 w-auto"
-                src="/img/SigNozLogo-orange.svg"
-                width={160}
-                height={60}
-                alt=""
-              />
+              <SigNozLogo className="h-5 w-auto shrink-0" aria-hidden="true" />
 
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
@@ -401,17 +406,7 @@ export default function TopNav() {
                                   onClick={handleProductDropdownClick}
                                   prefetch={false}
                                 >
-                                  {typeof item.icon === 'string' && item.icon !== null ? (
-                                    <Image
-                                      className="shrink-0"
-                                      src={item.icon}
-                                      alt={`${item.name}`}
-                                      width={20}
-                                      height={20}
-                                    />
-                                  ) : (
-                                    <div className="h-5 w-5 shrink-0">{item.icon}</div>
-                                  )}
+                                  {item.icon}
                                   <div className="min-w-0">
                                     <div className="flex flex-row items-center gap-1">
                                       <span className="text-sm">{item.name}</span>{' '}
@@ -451,12 +446,9 @@ export default function TopNav() {
                                   onClick={handleProductDropdownClick}
                                   prefetch={false}
                                 >
-                                  <Image
-                                    className="shrink-0"
-                                    src={'/img/index_features/brainfish.svg'}
-                                    alt="Brainfish"
-                                    width={20}
-                                    height={20}
+                                  <BrainfishIcon
+                                    className="h-5 w-5 shrink-0 rounded-sm"
+                                    aria-hidden="true"
                                   />
                                   <div
                                     className={`line-clamp-2 max-w-[274px] text-sm text-signoz_vanilla-400 group-hover:text-[#fff]`}
