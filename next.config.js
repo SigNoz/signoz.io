@@ -91,6 +91,16 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/docs/querying/querying-data/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,
