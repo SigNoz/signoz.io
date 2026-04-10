@@ -3,6 +3,28 @@ import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import {
+  CANONICAL_SITEMAP_STATIC_ROUTES,
+  normalizeSeoPath,
+  shouldExcludeFromSitemap,
+  shouldUseTrailingSlash,
+} from '@/utils/canonicalRoutes'
+
+const toSitemapUrl = (siteUrl: string, rawPath: string) => {
+  const path = normalizeSeoPath(rawPath)
+
+  return `${siteUrl}/${path}${shouldUseTrailingSlash(path) ? '/' : ''}`
+}
+
+const dedupeRoutes = (routes: MetadataRoute.Sitemap) => {
+  const byUrl = new Map<string, (typeof routes)[number]>()
+
+  for (const route of routes) {
+    byUrl.set(route.url, route)
+  }
+
+  return Array.from(byUrl.values())
+}
 
 const mapChangeFrequency = (
   frequency: string
@@ -28,27 +50,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 
   const blogRoutes = allBlogs
-    .filter((post) => !post.draft && !post?.excludeFromSitemap)
+    .filter((post) => !post.draft && !shouldExcludeFromSitemap(post.path))
     .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
+      url: toSitemapUrl(siteUrl, post.path),
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
     }))
 
   const docRoutes = allDocs
-    .filter((post) => !post.draft)
+    .filter((post) => !post.draft && !shouldExcludeFromSitemap(post.path))
     .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
+      url: toSitemapUrl(siteUrl, post.path),
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
     }))
 
   const guideRoutes = allGuides
-    .filter((post) => !post.draft)
+    .filter((post) => !post.draft && !shouldExcludeFromSitemap(post.path))
     .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
+      url: toSitemapUrl(siteUrl, post.path),
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.7,
@@ -64,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (faqs) {
     const data = faqs
     faqRoutes = data.data.map((faq) => ({
-      url: `${siteUrl}/faqs${faq.path}/`,
+      url: toSitemapUrl(siteUrl, `faqs${faq.path}`),
       lastModified: faq.date || faq.updatedAt || faq.publishedAt,
     }))
   }
@@ -73,7 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (caseStudies) {
     const data = caseStudies
     caseStudyRoutes = data.data.map((caseStudy) => ({
-      url: `${siteUrl}/case-study${caseStudy.path}/`,
+      url: toSitemapUrl(siteUrl, `case-study${caseStudy.path}`),
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
       lastModified: caseStudy.updatedAt || caseStudy.publishedAt,
@@ -83,50 +105,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let opentelemetryRoutes: MetadataRoute.Sitemap = []
   if (opentelemetries) {
     const data = opentelemetries
-    opentelemetryRoutes = data.data.map((opentelemetry) => ({
-      url: `${siteUrl}/opentelemetry${opentelemetry.path}/`,
-      lastModified: opentelemetry.date || opentelemetry.updatedAt || opentelemetry.publishedAt,
-      changeFrequency: mapChangeFrequency('weekly'),
-      priority: 0.5,
-    }))
+    opentelemetryRoutes = data.data
+      .filter((opentelemetry) => !shouldExcludeFromSitemap(`opentelemetry${opentelemetry.path}`))
+      .map((opentelemetry) => ({
+        url: toSitemapUrl(siteUrl, `opentelemetry${opentelemetry.path}`),
+        lastModified: opentelemetry.date || opentelemetry.updatedAt || opentelemetry.publishedAt,
+        changeFrequency: mapChangeFrequency('weekly'),
+        priority: 0.5,
+      }))
   }
 
   let comparisonRoutes: MetadataRoute.Sitemap = []
   if (comparisons) {
     const data = comparisons
-    comparisonRoutes = data.data.map((comparison) => ({
-      url: `${siteUrl}/comparisons${comparison.path}/`,
-      lastModified: comparison.date || comparison.updatedAt || comparison.publishedAt,
-      changeFrequency: mapChangeFrequency('weekly'),
-      priority: 0.5,
-    }))
+    comparisonRoutes = data.data
+      .filter((comparison) => !shouldExcludeFromSitemap(`comparisons${comparison.path}`))
+      .map((comparison) => ({
+        url: toSitemapUrl(siteUrl, `comparisons${comparison.path}`),
+        lastModified: comparison.date || comparison.updatedAt || comparison.publishedAt,
+        changeFrequency: mapChangeFrequency('weekly'),
+        priority: 0.5,
+      }))
   }
 
-  const routes = [
-    '',
-    'tags',
-    'pricing',
-    'case-study',
-    'about-us',
-    'terms-of-service',
-    'privacy',
-    'security',
-    'support',
-    'teams',
-    'faqs', // Add the main FAQs page
-    'opentelemetry',
-    'comparisons',
-    'guides',
-    'datadog-alternative',
-    'grafana-alternative',
-    'newrelic-alternative',
-  ].map((route) => ({
-    url: `${siteUrl}/${route}${route ? '/' : ''}`,
+  const routes = CANONICAL_SITEMAP_STATIC_ROUTES.map((route) => ({
+    url: toSitemapUrl(siteUrl, route),
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: mapChangeFrequency('weekly'),
   }))
 
-  return [
+  return dedupeRoutes([
     ...routes,
     ...blogRoutes,
     ...opentelemetryRoutes,
@@ -135,5 +143,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...faqRoutes,
     ...caseStudyRoutes,
     ...comparisonRoutes,
-  ]
+  ])
 }
