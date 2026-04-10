@@ -39,7 +39,7 @@ const SigNozStats = () => {
     <section>
       <div className="section-container mx-auto grid w-full grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)] md:w-[80%]">
         <div className="min-w-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-          <p className="pl-4 pt-4 text-left text-3xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] lg:pl-12 lg:pt-10">
+          <p className="px-4 pt-4 text-left text-3xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[36px] lg:px-8 lg:pt-10">
             Developers <br className="hidden sm:block" />
             Love <br className="hidden sm:block" />
             SigNoz

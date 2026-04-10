@@ -12,7 +12,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
     <div className="section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:w-[80%]">
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] md:grid-cols-[300px_1fr]">
         <div className="min-w-0">
-          <p className="sticky top-[100px] px-8 pt-4 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[32px] md:pl-12 md:text-[44px] lg:px-8 lg:pt-10">
+          <p className="sticky top-[3rem] px-8 pt-4 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:px-4 sm:text-[36px] lg:px-8 lg:pt-10">
             Why <br className="hidden md:block" /> select <br className="hidden md:block" /> SigNoz?{' '}
           </p>
         </div>
