@@ -2975,6 +2975,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/error-rate-spike-explainer',
             label: 'Error Rate Spike Explainer',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-correlation-analysis',
+            label: 'Alert Correlation Analysis',
+          },
         ],
       },
     ],
