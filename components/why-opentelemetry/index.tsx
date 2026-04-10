@@ -8,6 +8,7 @@ import FutureIcon from '@/public/img/index_features/future.svg'
 import CasesIcon from '@/public/img/index_features/cases.svg'
 import EasyToUseIcon from '@/public/img/index_features/easy-to-use.svg'
 import Image from 'next/image'
+import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-otel.svg?url'
 
 const REASONS = [
   {
@@ -129,7 +130,7 @@ export const WhyOpenTelemetry = () => {
               <div className="mx-auto mb-6 aspect-[449/352] h-[400px] shrink-0 sm:h-[300px] 2xl:block">
                 <Image
                   className="w-full"
-                  src="/img/graphics/homepage/feature-graphic-otel.svg"
+                  src={featureGraphicOtel}
                   alt="Illustration showing SigNoz built on top of OpenTelemetry"
                   width={449}
                   height={352}

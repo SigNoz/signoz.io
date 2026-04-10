@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Button from '../../components/ui/Button'
 import { ArrowRightSolid } from '@/components/homepage-icons/icons'
 import TrackingLink from '../TrackingLink'
+import featureGraphicEnterprise2 from '@/public/img/graphics/homepage/feature-graphic-enterprise-2.svg?url'
 
 const Observability = () => {
   return (
@@ -53,7 +54,7 @@ const Observability = () => {
           </div>
           <div className="mx-auto aspect-[272/404] w-[272px] max-w-[min(272px,50%)]">
             <Image
-              src="/img/graphics/homepage/feature-graphic-enterprise-2.svg"
+              src={featureGraphicEnterprise2}
               alt="Enterprise-grade Observability"
               width={272}
               height={404}

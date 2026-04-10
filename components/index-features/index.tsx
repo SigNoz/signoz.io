@@ -7,6 +7,14 @@ import LayoutGridIcon from '@/public/img/index_features/layout-grid.svg'
 import BugIcon from '@/public/img/index_features/bug.svg'
 import LlmObservabilityIcon from '@/public/img/index_features/llm-observability.svg'
 import ConciergeBellIcon from '@/public/img/index_features/concierge-bell.svg'
+// Feature graphics as URLs (cacheable with content hash)
+import featureGraphic1 from '@/public/img/graphics/homepage/feature-graphic-1.svg?url'
+import featureGraphic2 from '@/public/img/graphics/homepage/feature-graphic-2.svg?url'
+import featureGraphic3 from '@/public/img/graphics/homepage/feature-graphic-3.svg?url'
+import featureGraphic4 from '@/public/img/graphics/homepage/feature-graphic-4.svg?url'
+import featureGraphic5 from '@/public/img/graphics/homepage/feature-graphic-5.svg?url'
+import featureGraphic6 from '@/public/img/graphics/homepage/feature-graphic-6.svg?url'
+import featureGraphic8 from '@/public/img/graphics/homepage/feature-graphic-8.svg?url'
 
 const icons = [
   {
@@ -39,7 +47,7 @@ const sections = [
     text: 'Ingest data from 50+ sources — send your data and start monitoring.',
     // buttonText: 'Explore',
     logo: <BarChart2Icon aria-hidden="true" />,
-    img: '/img/graphics/homepage/feature-graphic-1.svg',
+    img: featureGraphic1,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
     imgHeight: 360,
@@ -50,7 +58,7 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/application-performance-monitoring/',
     logo: <BarChart2Icon aria-hidden="true" />,
-    img: '/img/graphics/homepage/feature-graphic-2.svg',
+    img: featureGraphic2,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -61,7 +69,7 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/distributed-tracing/',
     logo: <DraftingCompassIcon aria-hidden="true" />,
-    img: '/img/graphics/homepage/feature-graphic-3.svg',
+    img: featureGraphic3,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -72,7 +80,7 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/log-management/',
     logo: <LogsIcon aria-hidden="true" />,
-    img: '/img/graphics/homepage/feature-graphic-4.svg',
+    img: featureGraphic4,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -83,7 +91,7 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/metrics-and-dashboards/',
     logo: <LayoutGridIcon aria-hidden="true" />,
-    img: '/img/graphics/homepage/feature-graphic-6.svg',
+    img: featureGraphic6,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -94,7 +102,7 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/llm-observability/',
     logo: <LlmObservabilityIcon aria-hidden="true" />,
-    img: '/img/graphics/homepage/feature-graphic-8.svg',
+    img: featureGraphic8,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -105,7 +113,7 @@ const sections = [
     buttonText: 'Explore More',
     buttonLink: '/alerts-management/',
     logo: <ConciergeBellIcon aria-hidden="true" />,
-    img: '/img/graphics/homepage/feature-graphic-5.svg',
+    img: featureGraphic5,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,

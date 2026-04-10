@@ -5,6 +5,7 @@ import PricingStructure from '@/components/pricing-structure'
 import { CommunityEdition } from '@/components/community-edition'
 import { SignozDatalog } from '@/components/signoz-datalog'
 import Image from 'next/image'
+import featureGraphicEnterprise from '@/public/img/graphics/homepage/feature-graphic-enterprise.svg?url'
 
 const WhySelectSignoz = ({ isInPricingPage = false }) => {
   return (
@@ -49,7 +50,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
             <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80%]">
               <Image
                 className="w-full"
-                src="/img/graphics/homepage/feature-graphic-enterprise.svg"
+                src={featureGraphicEnterprise}
                 alt="Illustration of SigNoz connecting observability, security, and data controls"
                 width={272}
                 height={352}

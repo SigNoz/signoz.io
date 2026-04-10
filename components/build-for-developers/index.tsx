@@ -1,11 +1,16 @@
 import React from 'react'
 import Card from '../Card/card'
+import featureGraphicSingleTool from '@/public/img/graphics/homepage/feature-graphic-single-tool.svg?url'
+import featureGraphicFlexibleDeployment from '@/public/img/graphics/homepage/feature-graphic-flexible-deployment.svg?url'
+import featureGraphicColumnarDb from '@/public/img/graphics/homepage/feature-graphic-columnar-db.svg?url'
+import featureGraphicFlexibleQuerying from '@/public/img/graphics/homepage/feature-graphic-flexible-querying.svg?url'
+import featureGraphicCorrelation from '@/public/img/graphics/homepage/feature-graphic-correlation.svg?url'
 
 const REASONS = [
   {
     title: 'Single tool for observability',
     desc: 'No need of using disparate tools for observability. Get everything in a single platform. ',
-    figure: '/img/graphics/homepage/feature-graphic-single-tool.svg',
+    figure: featureGraphicSingleTool,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
@@ -13,7 +18,7 @@ const REASONS = [
   {
     title: 'Flexible deployment options',
     desc: 'You can self-host SigNoz or use our cloud services, or use both depending on your use-cases.',
-    figure: '/img/graphics/homepage/feature-graphic-flexible-deployment.svg',
+    figure: featureGraphicFlexibleDeployment,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
@@ -21,7 +26,7 @@ const REASONS = [
   {
     title: 'Columnar database',
     desc: 'SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore - an extremely fast and highly optimized storage for observability data.',
-    figure: '/img/graphics/homepage/feature-graphic-columnar-db.svg',
+    figure: featureGraphicColumnarDb,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
@@ -29,7 +34,7 @@ const REASONS = [
   {
     title: 'Flexible Querying',
     desc: 'DIY Query builder, PromQL, and ClickHouse queries to fulfill all your use-cases around querying observability data.',
-    figure: '/img/graphics/homepage/feature-graphic-flexible-querying.svg',
+    figure: featureGraphicFlexibleQuerying,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
@@ -37,7 +42,7 @@ const REASONS = [
   {
     title: 'Correlated Signals',
     desc: 'Correlated logs, metrics and traces for much richer context while debugging.',
-    figure: '/img/graphics/homepage/feature-graphic-correlation.svg',
+    figure: featureGraphicCorrelation,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
     imgHeight: 337,
@@ -60,7 +65,7 @@ const BuildForDevelopers = () => {
               </div>
             </div>
             <div className="homepage-build-dev-container grid grid-cols-1 sm:grid-cols-2">
-              {REASONS.map((section, index) => (
+              {REASONS.map((section) => (
                 <Card
                   title={section.title}
                   description={section.desc}
