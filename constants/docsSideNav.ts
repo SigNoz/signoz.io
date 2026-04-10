@@ -2442,10 +2442,10 @@ const docsSideNav = [
         label: 'Overview',
       },
       {
-        label: 'Query Builder',
+        label: 'Querying Data',
         type: 'category',
         isExpanded: false,
-        route: '/docs/userguide/query-builder-v5',
+        route: '/docs/querying/querying-data',
         items: [
           { type: 'doc', route: '/docs/userguide/query-builder-v5', label: 'Query Builder' },
           {
@@ -2485,6 +2485,7 @@ const docsSideNav = [
         label: 'Reference',
         type: 'category',
         isExpanded: false,
+        route: '/docs/querying/reference',
         items: [
           { type: 'doc', route: '/docs/userguide/search-syntax', label: 'Search Syntax' },
           {
@@ -2508,6 +2509,7 @@ const docsSideNav = [
         label: 'User Guides',
         type: 'category',
         isExpanded: false,
+        route: '/docs/querying/user-guides',
         items: [
           { type: 'doc', route: '/docs/userguide/full-text-search', label: 'Full-Text Search' },
           {
@@ -2521,6 +2523,7 @@ const docsSideNav = [
         label: 'Troubleshooting',
         type: 'category',
         isExpanded: false,
+        route: '/docs/querying/troubleshooting',
         items: [
           {
             type: 'doc',
