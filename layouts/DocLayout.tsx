@@ -13,7 +13,7 @@ import docsSideNav from '@/constants/docsSideNav'
 import Link from 'next/link'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import { DOC_TOC_CLASSES, DOC_SIDENAV_CLASSES } from '@/constants/docLayoutClasses'
+import { DOC_TOC_CLASSES, DOC_SIDENAV_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 
 export interface tocItemProps {
   url: string

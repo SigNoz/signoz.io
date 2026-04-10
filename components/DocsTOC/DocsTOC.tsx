@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
-import { DOC_TOC_CLASSES } from '../../constants/docLayoutClasses'
+import { DOC_TOC_CLASSES } from './docLayoutClasses'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import { RegionDropdown } from '../Region/RegionDropdown'
 import PageFeedback from '../PageFeedback/PageFeedback'

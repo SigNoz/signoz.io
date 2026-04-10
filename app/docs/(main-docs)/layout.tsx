@@ -8,7 +8,7 @@ import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
-import { DOC_SIDENAV_CLASSES } from '@/constants/docLayoutClasses'
+import { DOC_SIDENAV_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
