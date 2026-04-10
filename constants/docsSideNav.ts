@@ -1936,84 +1936,56 @@ const docsSideNav = [
     // route: '',
     items: [
       {
-        label: 'Manage',
+        type: 'doc',
+        route: '/docs/dashboards/overview',
+        label: 'Overview',
+      },
+      {
+        label: 'Manage Dashboards',
         type: 'category',
         isExpanded: false,
+        route: '/docs/userguide/manage-dashboards',
         items: [
+          { type: 'doc', route: '/docs/userguide/manage-dashboards', label: 'Manage Dashboards' },
           {
-            type: 'doc',
-            route: '/docs/userguide/manage-dashboards',
-            label: 'Manage Dashboards',
+            label: 'Panels',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/panels/overview',
+            items: [
+              { type: 'doc', route: '/docs/dashboards/panels/overview', label: 'Overview' },
+              {
+                label: 'Panel Types',
+                type: 'category',
+                isExpanded: false,
+                route: '/docs/dashboards/panel-types',
+                items: [
+                  { type: 'doc', route: '/docs/dashboards/panel-types/bar', label: 'Bar Chart' },
+                  {
+                    type: 'doc',
+                    route: '/docs/dashboards/panel-types/histogram',
+                    label: 'Histogram',
+                  },
+                  { type: 'doc', route: '/docs/dashboards/panel-types/list', label: 'List' },
+                  { type: 'doc', route: '/docs/dashboards/panel-types/pie', label: 'Pie' },
+                  { type: 'doc', route: '/docs/dashboards/panel-types/table', label: 'Table' },
+                  {
+                    type: 'doc',
+                    route: '/docs/dashboards/panel-types/timeseries',
+                    label: 'Timeseries',
+                  },
+                  { type: 'doc', route: '/docs/dashboards/panel-types/value', label: 'Value' },
+                ],
+              },
+            ],
           },
-          {
-            type: 'doc',
-            route: '/docs/userguide/manage-panels',
-            label: 'Manage Panels',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/manage-variables',
-            label: 'Manage Variables',
-          },
+          { type: 'doc', route: '/docs/userguide/manage-variables', label: 'Variables' },
           {
             type: 'doc',
             route: '/docs/dashboards/terraform-provider-signoz',
             label: 'Terraform Provider',
           },
         ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        route: '/docs/dashboards/panel-types',
-        label: 'Panel Types',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/bar',
-            label: 'Bar Chart',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/histogram',
-            label: 'Histogram',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/list',
-            label: 'List',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/pie',
-            label: 'Pie',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/table',
-            label: 'Table',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/timeseries',
-            label: 'Timeseries',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/value',
-            label: 'Value',
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/dashboards/interactivity',
-        label: 'Interactivity',
-      },
-      {
-        type: 'doc',
-        route: '/docs/dashboards/import-dashboard',
-        label: 'Import Dashboard',
       },
       {
         type: 'category',
@@ -2416,16 +2388,33 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'User Guides',
         type: 'category',
-        route: '/docs/dashboards/troubleshooting/troubleshooting',
-        label: 'Troubleshooting',
         isExpanded: false,
+        route: '/docs/dashboards/interactivity',
+        items: [
+          { type: 'doc', route: '/docs/dashboards/interactivity', label: 'Interactivity' },
+          { type: 'doc', route: '/docs/dashboards/import-dashboard', label: 'Import Dashboard' },
+          { type: 'doc', route: '/docs/dashboards/public-sharing', label: 'Public Sharing' },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/using-variables-in-queries',
+            label: 'Using Variables in Queries',
+          },
+        ],
+      },
+      {
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/dashboards/troubleshooting/troubleshooting',
         items: [
           {
             type: 'doc',
-            route: '/docs/dashboards/troubleshooting/faqs',
-            label: 'General FAQs',
+            route: '/docs/dashboards/troubleshooting/troubleshooting',
+            label: 'Troubleshooting',
           },
+          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
         ],
       },
     ],
