@@ -306,7 +306,10 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
 
   return (
     <>
-      <div className="doc-toc" ref={tocContainerRef}>
+      <div
+        className="sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4"
+        ref={tocContainerRef}
+      >
         <div className="mb-4">
           <RegionDropdown />
         </div>
@@ -315,7 +318,7 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
             <div className="mb-3 text-xs uppercase"> On this page </div>
             <div
               ref={tocItemsRef}
-              className="doc-toc-items doc-toc-scroll border-l border-signoz_slate-500 pl-3"
+              className="relative z-[1] min-h-0 flex-[1_1_auto] overflow-y-auto border-l border-signoz_slate-500 pl-3"
             >
               <TableOfContents
                 toc={filteredToc}

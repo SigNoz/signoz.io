@@ -1,6 +1,5 @@
 'use client'
 
-import '../css/doc.css'
 import React, { useState, useEffect } from 'react'
 import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 import { Menu, X } from 'lucide-react'
@@ -71,7 +70,7 @@ const HoverableSidebar: React.FC = () => {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        <div className="doc-sidenav h-full border-r border-signoz_slate-500 bg-black">
+        <div className="box-border h-full w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500 bg-black">
           <DocsSidebar />
         </div>
       </div>

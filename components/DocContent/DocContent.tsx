@@ -43,7 +43,7 @@ const DocContent: React.FC<{
   const shouldRenderTOC =
     !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && source !== ONBOARDING_SOURCE
   const shouldReserveTocColumn = source !== ONBOARDING_SOURCE
-  const feedbackWrapperClassName = shouldRenderTOC ? 'doc-feedback-mobile-only' : undefined
+  const feedbackWrapperClassName = shouldRenderTOC ? 'block lg:hidden' : undefined
   const articleRef = useRef<HTMLElement | null>(null)
 
   const docTags = useMemo(() => post?.docTags || [], [post?.docTags])
@@ -66,7 +66,9 @@ const DocContent: React.FC<{
 
   return (
     <>
-      <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
+      <div
+        className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${source === ONBOARDING_SOURCE ? '!w-full px-4' : ''}`}
+      >
         <div className="doc-title-row mb-4 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-2">
             {!isOnboarding && post.docTags && post.docTags.length > 0 && (
@@ -110,7 +112,10 @@ const DocContent: React.FC<{
         </>
       ) : shouldReserveTocColumn ? (
         <>
-          <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+          <div
+            className="invisible sticky top-[50px] box-border flex h-[calc(100vh-156px)] w-80 min-w-[320px] max-w-[320px] flex-[0_0_320px] flex-col gap-1 overflow-x-hidden overflow-y-hidden px-4"
+            aria-hidden="true"
+          />
         </>
       ) : null}
     </>
