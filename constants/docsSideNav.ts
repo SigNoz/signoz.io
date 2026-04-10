@@ -1872,6 +1872,7 @@ const docsSideNav = [
             label: 'User Guides',
             type: 'category',
             isExpanded: false,
+            route: '/docs/metrics-management/working-with-metrics-guides',
             items: [
               {
                 type: 'doc',
@@ -1891,6 +1892,7 @@ const docsSideNav = [
         label: 'User Guides',
         type: 'category',
         isExpanded: false,
+        route: '/docs/metrics-management/user-guides',
         items: [
           { type: 'doc', route: '/docs/userguide/drop-metrics', label: 'Drop Metrics' },
           {
