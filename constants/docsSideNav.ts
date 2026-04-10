@@ -2391,7 +2391,7 @@ const docsSideNav = [
         label: 'User Guides',
         type: 'category',
         isExpanded: false,
-        route: '/docs/dashboards/interactivity',
+        route: '/docs/dashboards/user-guides',
         items: [
           { type: 'doc', route: '/docs/dashboards/interactivity', label: 'Interactivity' },
           { type: 'doc', route: '/docs/dashboards/import-dashboard', label: 'Import Dashboard' },
@@ -2409,11 +2409,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/dashboards/troubleshooting/troubleshooting',
-            label: 'Troubleshooting',
-          },
           { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
         ],
       },
