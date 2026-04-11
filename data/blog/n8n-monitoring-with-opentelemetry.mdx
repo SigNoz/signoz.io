@@ -10,9 +10,9 @@ keywords: [monitor, observe, opentelemetry, n8n, integrations, SigNoz]
 
 n8n has become a major workflow automation platform for teams that want powerful automation with the speed of a visual builder. It’s used to automate various use cases like moving data between services, replacing manual ops work, or chaining together multiple API calls into a single workflow. However, as your workflows grow in number and complexity, a silent problem starts to emerge. You have no real visibility into what's actually happening during executions.
 
-A workflow failed. Did something go wrong with the third party API? Or did a node a node time out? In n8n Cloud, the built in execution logs give you a starting point, but they’re not good for deeper monitoring and debugging. You're stuck clicking through the execution view, reading output manually, with no timing data and no way to spot patterns.
+A workflow failed. Did something go wrong with the third party API? Or did a node time out? In n8n Cloud, the built in execution logs give you a starting point, but they’re not good for deeper monitoring and debugging. You're stuck clicking through the execution view, reading output manually, with no timing data and no way to spot patterns.
 
-In this blog, we'll walk through how to wire your n8n Cloud workflows with OpenTelemetry and export that telemetry to SigNoz, giving you traces, node level timing, error information, and a dashboard that helps you visualize these trends. By the end, you'll have a observability setup running to give you insight on all your n8n workflow executions.
+In this blog, we'll walk through how to wire your n8n Cloud workflows with OpenTelemetry and export that telemetry to SigNoz, giving you traces, node level timing, error information, and a dashboard that helps you visualize these trends. By the end, you'll have an observability setup running to give you insight on all your n8n workflow executions.
 
 <figure data-zoomable align='center'>
     <img
@@ -35,7 +35,7 @@ n8n exposes an API that gives you full execution data: status, timing, node leve
 
 #### What is OpenTelemetry?
 
-**OpenTelemetry** (OTel) is an open source observability framework for collecting telemetry data(traces, metrics, and logs) from across your stack. It's a CNCF project, widely adopted, and built with flexibility in mind. All you have to do is instrument once, and your telemetry can flow to any compatible backend. No more vendor lock in and complicated integrations.
+**OpenTelemetry** (OTel) is an open source observability framework for collecting telemetry data(traces, metrics, and logs) from across your stack. It's a CNCF project, widely adopted, and built with flexibility in mind. All you have to do is instrument once, and your telemetry can flow to any compatible backend. No more vendor lock-in and complicated integrations.
 
 For n8n, this means we can capture execution signals at a granular level. Every workflow run, every node execution, every error and retry can be traced and exported via OpenTelemetry. Instead of your workflows being a black box, you get visibility into things like how long each node took, which workflows are failing, and where your execution time is actually going. Overall, setting up OpenTelemetry is the best move for serious monitoring since the native n8n execution logs get pretty heavy to sift through. 
 
@@ -84,7 +84,7 @@ Each workflow execution is represented with a structured trace with enough detai
 
 Every workflow execution becomes a trace in SigNoz. At the top level, you get a parent span named `n8n.{workflow_name}` that represents the entire execution from start to finish. Nested inside that are child spans, one per node, named `n8n.node.{node_name}`. This gives you a full timeline of the execution: which nodes ran, in what order, and how long each one took.
 
-If a workflow has a long execution time, you can open the trace and immediately see which node was responsible. You don’t have to guessing and click through output manually.
+If a workflow has a long execution time, you can open the trace and immediately see which node was responsible. You don’t have to guess and click through output manually.
 
 **Attributes**
 
