@@ -1216,7 +1216,11 @@ const docsSideNav = [
             route: '/docs/trace-funnels/overview',
             items: [
               { type: 'doc', route: '/docs/trace-funnels/overview', label: 'Overview' },
-              { type: 'doc', route: '/docs/trace-funnels/setup', label: 'Setup' },
+              {
+                type: 'doc',
+                route: '/docs/trace-funnels/working-with-trace-funnels',
+                label: 'Working with Trace Funnels',
+              },
             ],
           },
         ],
@@ -1246,6 +1250,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/guides/pii-scrubbing',
             label: 'PII Scrubbing',
+          },
+          {
+            type: 'doc',
+            route: '/docs/trace-funnels/setup',
+            label: 'Setup Trace Funnels',
           },
         ],
       },
