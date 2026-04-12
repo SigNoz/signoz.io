@@ -1163,6 +1163,11 @@ const docsSideNav = [
           { type: 'doc', route: '/docs/userguide/metrics', label: 'Service Details' },
           {
             type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/application-details',
+            label: 'Application Details',
+          },
+          {
+            type: 'doc',
             route: '/docs/apm-and-distributed-tracing/database-calls',
             label: 'Database Calls',
           },
