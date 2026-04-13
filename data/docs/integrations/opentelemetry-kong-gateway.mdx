@@ -45,7 +45,7 @@ plugins:
       headers:
         signoz-ingestion-key: "<your-ingestion-key>"
       resource_attributes:
-        service.name: "kong-gateway"
+        service.name: "<service_name>"
       batch_span_count: 200
       batch_flush_delay: 3
 ```
@@ -54,6 +54,7 @@ Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>`: The name of your service
 
 Sync your state via Kong's Admin API:
 
@@ -93,13 +94,14 @@ config:
   headers:
     signoz-ingestion-key: "<your-ingestion-key>"
   resource_attributes:
-    service.name: "kong-gateway"
+    service.name: "<service_name>"
 ```
 
 Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>`: The name of your service
 
 Apply the file to your cluster:
 
@@ -114,23 +116,49 @@ kubectl apply -f kong-plugin-otel.yaml
 <Tabs>
 <TabItem value="traces" label="Traces" default>
 
-Kong traces operations across the gateway, capturing latency added by the proxy, internal plugin execution time, and DNS resolution, alongside upstream service latency. 
+Kong instruments each proxied request as an OTel span with child spans for each phase:
+
+- **Proxy latency**: time Kong spends routing the request before forwarding it upstream
+- **Plugin execution**: time spent inside each enabled plugin (e.g. auth, rate-limiting)
+- **DNS resolution**: upstream hostname lookup time
+- **Upstream latency**: time waiting for the upstream service to respond
+
+Each span carries standard HTTP attributes: `http.method`, `http.url`, `http.host`, `http.scheme`, `http.flavor`, and `net.peer.ip`.
+
+Kong supports W3C TraceContext, B3/B3-single (Zipkin), Jaeger, OpenTracing, Datadog, AWS X-Ray, and GCP propagation formats. Existing distributed traces from upstream or downstream services pass through without extra configuration.
 
 </TabItem>
 <TabItem value="metrics" label="Metrics">
 
-Kong exports the following metrics natively:
-- `kong.latency.total`, `kong.latency.upstream`, `kong.latency.internal`
-- `kong.bandwidth.bytes`
-- `kong.requests.count` (tagged by HTTP status, route, and upstream)
-- `kong.nginx.connection.count`, `kong.upstream.target.status`
+*Requires Kong Gateway Enterprise v3.13+.*
 
-*Note: You must run Kong Gateway Enterprise v3.13+ to export metrics via the OpenTelemetry plugin.*
+| Metric | Type | What it measures |
+|---|---|---|
+| `kong.latency.total` | Histogram | End-to-end request duration |
+| `kong.latency.upstream` | Histogram | Time waiting for the upstream service |
+| `kong.latency.internal` | Histogram | Kong's own processing time (plugins, routing) |
+| `http.server.request.count` | Sum | Incoming requests, tagged by service, route, consumer, and HTTP status |
+| `http.server.request.size` | Histogram | Request body size in bytes |
+| `http.server.response.size` | Histogram | Response body size in bytes |
+| `kong.nginx.connection.count` | Gauge | Active Nginx connections by state |
+| `kong.upstream.target.status` | Gauge | Health status of each upstream target |
+
+Kong pushes all metrics over OTLP on the `push_interval` you configure (default: 10 seconds). The `enable_bandwidth_metrics`, `enable_latency_metrics`, `enable_request_metrics`, and `enable_upstream_health_metrics` flags in the plugin config control which metric groups Kong collects.
 
 </TabItem>
 <TabItem value="logs" label="Logs">
 
-Kong translates access logs into the OpenTelemetry Log format. You no longer need separate log forwarders like Fluent Bit to parse Kong access logs.
+Kong emits two categories of logs over OTLP:
+
+- **Access logs**: one log record per proxied request. Each record includes the request method, URI, status code, response size, and latency.
+- **Runtime logs**: internal Kong and plugin execution messages (errors, warnings, debug output).
+
+Every log record includes:
+- `Timestamp`, `ObservedTimestamp`, `SeverityText`, and `SeverityNumber`
+- `request.id` to correlate logs to a specific request
+- `TraceID` and `SpanID` when tracing is enabled, so you can jump from a log line to the corresponding trace in SigNoz
+
+You no longer need a separate log forwarder like Fluent Bit to parse Kong access logs. The plugin handles formatting and delivery.
 
 </TabItem>
 </Tabs>
@@ -139,10 +167,22 @@ Kong translates access logs into the OpenTelemetry Log format. You no longer nee
 
 Verify your data appears in SigNoz:
 
-1. Click **Services** to view `kong-gateway` in the list.
-2. Click **Traces** to browse distributed traces matching your defined routes. 
-3. Click **Dashboards** > **Metrics Explorer** and query `kong.latency.total` or `kong.nginx.connection.count`.
-4. Click **Logs** and filter by `service.name: kong-gateway` to read access logs.
+1. Go to **Services** section in SigNoz to see your Kong service listed.
+2. Navigate to **Traces** section to browse distributed traces matching your defined routes. 
+3. Use **Metrics Explorer** and query `kong.latency.total` or `kong.nginx.connection.count`.
+4. Use **Logs** and filter by `service.name` to read access logs.
+
+<Figure
+  src="/img/docs/integrations/kong-gateway/sample-traces.webp"
+  caption="Kong Gateway - Sample Traces"
+  alt="Kong Gateway - Sample Traces"
+/>
+
+<Figure
+  src="/img/docs/integrations/kong-gateway/service-details.webp"
+  caption="Kong Gateway - Services Page"
+  alt="Kong Gateway - Services Page"
+/>
 
 <details>
 <ToggleHeading>
