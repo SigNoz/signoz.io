@@ -1,6 +1,7 @@
 import Guides from '@/components/ResourceCenter/Guides'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
+import { getResourceCenterGuides } from '../content'
 
 export const metadata: Metadata = {
   title: 'Guides',
@@ -26,11 +27,13 @@ export const metadata: Metadata = {
   },
 }
 
+const guidePosts = getResourceCenterGuides()
+
 export default function GuidesHome() {
   return (
     <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
       <div className="tab-content pt-6">
-        <Guides />
+        <Guides posts={guidePosts} />
       </div>
     </div>
   )

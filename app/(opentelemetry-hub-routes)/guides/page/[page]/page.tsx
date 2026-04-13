@@ -1,6 +1,7 @@
 import Guides from '@/components/ResourceCenter/Guides'
 import { allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
+import { getResourceCenterGuides } from '../../../content'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return {
@@ -38,13 +39,15 @@ export const generateStaticParams = async () => {
   return paths
 }
 
+const guidePosts = getResourceCenterGuides()
+
 export default function Page({ params }: { params: { page: string } }) {
   const pageNumber = parseInt(params.page as string)
 
   return (
     <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
       <div className="tab-content pt-6">
-        <Guides pageNumber={pageNumber} />
+        <Guides posts={guidePosts} pageNumber={pageNumber} />
       </div>
     </div>
   )

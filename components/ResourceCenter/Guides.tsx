@@ -1,12 +1,11 @@
 'use client'
 
-import { allGuides } from 'contentlayer/generated'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import React, { useState, useEffect, useMemo } from 'react'
 import { filterData } from 'app/utils/common'
 import SearchInput from './Search'
 import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
 import GridLayout from '@/layouts/GridLayout'
+import type { ResourceCenterGuide } from '../../app/(opentelemetry-hub-routes)/content'
 
 const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
   return (
@@ -27,8 +26,13 @@ const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
 
 const POSTS_PER_PAGE = 12
 
-export default function Guides({ pageNumber = 1 }: { pageNumber?: number }) {
-  const posts = allCoreContent(sortPosts(allGuides))
+export default function Guides({
+  posts,
+  pageNumber = 1,
+}: {
+  posts: ResourceCenterGuide[]
+  pageNumber?: number
+}) {
   const [activeItem, setActiveItem] = useState(GUIDES_TOPICS.ALL)
   const [searchQuery, setSearchQuery] = useState('')
 

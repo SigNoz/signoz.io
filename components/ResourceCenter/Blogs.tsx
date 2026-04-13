@@ -2,11 +2,10 @@
 
 import { useState } from 'react'
 import { filterData } from 'app/utils/common'
-import { allBlogs } from 'contentlayer/generated'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import SearchInput from './Search'
 import FeaturedBlogs from './FeaturedBlogs'
 import AllBlogs from './AllBlogs'
+import type { ResourceCenterBlog } from '../../app/(opentelemetry-hub-routes)/content'
 
 interface BlogPageHeaderProps {
   onSearch: (e) => void
@@ -32,13 +31,14 @@ const BlogsPageHeader = ({ onSearch }: BlogPageHeaderProps) => {
 }
 
 export default function Blogs({
+  posts,
   pageNumber = 1,
   pageRoute = 'blog',
 }: {
+  posts: ResourceCenterBlog[]
   pageNumber?: number
   pageRoute?: string
 }) {
-  const posts = allCoreContent(sortPosts(allBlogs))
   const [blogs, setBlogs] = useState(posts)
   const [searchValue, setSearchValue] = useState('')
 
@@ -51,7 +51,9 @@ export default function Blogs({
   return (
     <div>
       <BlogsPageHeader onSearch={handleSearch} />
-      {searchValue.length === 0 && pageNumber === 1 && <FeaturedBlogs isDarkMode={true} />}
+      {searchValue.length === 0 && pageNumber === 1 && (
+        <FeaturedBlogs isDarkMode={true} posts={posts} />
+      )}
       <AllBlogs blogs={blogs} pageNumber={searchValue ? 1 : pageNumber} pageRoute={pageRoute} />
     </div>
   )

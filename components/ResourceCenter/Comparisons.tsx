@@ -4,6 +4,7 @@ import SearchInput from './Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import GridLayout from '@/layouts/GridLayout'
+import type { ResourceCenterComparison } from '../../app/(opentelemetry-hub-routes)/content'
 
 interface ComparisonsPageHeaderProps {
   onSearch: (e) => void
@@ -34,7 +35,7 @@ export default function ComparisonsListing({
   posts = [],
   pageNumber = 1,
 }: {
-  posts?: any[]
+  posts?: ResourceCenterComparison[]
   pageNumber?: number
 }) {
   const [blogs, setBlogs] = React.useState(posts)
