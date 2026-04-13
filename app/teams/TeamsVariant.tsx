@@ -44,7 +44,6 @@ interface FormState {
   termsOfServiceAccepted: boolean
 }
 
-
 // Error state component
 const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   return (
@@ -258,7 +257,7 @@ const VariantTestimonial: React.FC = () => {
             <div
               key={index}
               className={cn(
-                'h-[3px] overflow-hidden rounded-full transition-all duration-300 bg-signoz_vanilla-100/20',
+                'h-[3px] overflow-hidden rounded-full bg-signoz_vanilla-100/20 transition-all duration-300',
                 index === currentIndex ? 'w-4' : 'w-2'
               )}
             >
@@ -274,11 +273,7 @@ const VariantTestimonial: React.FC = () => {
                 )}
                 style={{
                   width:
-                    index === currentIndex
-                      ? `${progress}%`
-                      : index < currentIndex
-                        ? '100%'
-                        : '0%',
+                    index === currentIndex ? `${progress}%` : index < currentIndex ? '100%' : '0%',
                 }}
               />
             </div>
@@ -447,7 +442,7 @@ const SignupFormIsolated: React.FC<{
           <div className="flex flex-col gap-3">
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-3 rounded-md border border-[#1D2026] bg-[#111318] px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
               onClick={() => handleSocialSubmit('google')}
             >
               <Image
@@ -461,7 +456,7 @@ const SignupFormIsolated: React.FC<{
             </button>
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-3 rounded-md border border-[#1D2026] bg-[#111318] px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
               onClick={() => handleSocialSubmit('github')}
             >
               <FaGithub className="h-5 w-5" />
@@ -607,42 +602,41 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
         // Variant: value props + compact testimonials on left, form on right
         <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
           <FocusedNavbar />
-          <div className="flex flex-col lg:flex-row lg:mt-[8px] lg:h-[calc(100vh-56px)]">
-            {/* Left section — copy + checkmarks + testimonial (desktop only) */}
-            <div className="hidden w-full flex-col justify-center bg-signoz_ink-500 p-8 pt-[calc(56px+5vh)] lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
-              <div className="flex max-w-[420px] flex-col gap-6">
-                <div className="flex flex-col gap-3">
-                  <h1 className="text-[40px] font-bold leading-[1.15] tracking-[-1.2px] text-white">
-                    Stop firefighting.
-                    <br />
-                    Start shipping.
-                  </h1>
-                  <p className="text-[14px] leading-[1.6] text-[#9CA3AF]">
-                    Get full observability in under an hour — logs, traces, metrics, and LLM
-                    monitoring all correlated in one place.
-                  </p>
-                </div>
+          <div className="flex flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
+            {/* Left section — copy + checkmarks + logos (desktop only) */}
+            <div className="hidden w-full flex-col justify-center bg-signoz_ink-500 p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
+              <div className="flex max-w-[420px] flex-col gap-8">
+                {/* Headline */}
+                <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
+                  What's included in the FREE Trial
+                </h1>
+
+                {/* Value props */}
                 <div className="flex flex-col gap-3">
                   {VALUE_PROPS.map((prop) => (
                     <div key={prop} className="flex items-start gap-2.5">
-                      <span className="mt-px flex-shrink-0 text-[14px] text-[#22C55E]">✓</span>
-                      <span className="text-[14px] leading-[1.5] text-[#9CA3AF]">{prop}</span>
+                      <span className="mt-0.5 flex-shrink-0 text-[13px] text-signoz_forest-500">
+                        ✓
+                      </span>
+                      <span className="text-[14px] leading-[1.5] text-gray-400">{prop}</span>
                     </div>
                   ))}
                 </div>
-                <div className="flex flex-col gap-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[1.5px] text-[#4B5563]">
+
+                {/* Trust bar */}
+                <div className="flex flex-col gap-3">
+                  <p className="mb-0 text-[11px] font-semibold uppercase tracking-[1.2px] text-gray-500">
                     Trusted by
                   </p>
-                  <div className="flex items-center gap-6 opacity-50">
+                  <div className="grid grid-cols-3 gap-x-12 gap-y-6 opacity-60">
                     {TRUST_BAR_LOGOS.map((logo) => (
                       <Image
                         key={logo.src}
                         src={logo.src}
                         alt={logo.alt}
-                        width={60}
-                        height={16}
-                        className="h-3.5 w-[56px] object-contain"
+                        width={100}
+                        height={28}
+                        className="h-6 w-[88px] object-contain"
                       />
                     ))}
                   </div>
@@ -651,8 +645,8 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
             </div>
 
             {/* Right section — sign up form */}
-            <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-300 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-500 lg:p-12 lg:pr-16 lg:pt-12">
-              <div className="w-full max-w-[560px] rounded-[12px] border border-[#1D2026] bg-[#0B0C0E] px-8 py-8">
+            <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-400 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-400 lg:px-16 lg:py-14">
+              <div className="w-full max-w-[560px] rounded-[12px] border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-10">
                 {formSection}
               </div>
             </div>
@@ -662,7 +656,7 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
         // Control: form on left, testimonials on right (original layout)
         <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
           <FocusedNavbar />
-          <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row lg:mt-[8px]">
+          <div className="flex h-[calc(100vh-56px)] flex-col lg:mt-[8px] lg:flex-row">
             {/* Left section — sign up form */}
             <div className="relative flex w-full flex-col p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+5vh)]">
               {formSection}

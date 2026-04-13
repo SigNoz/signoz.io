@@ -251,9 +251,11 @@ export default function TopNav() {
 
   const loginRoute = '/login/'
   const signupRoute = '/teams/'
+  const contactUsRoute = '/contact-us/'
   const wordleRoute = '/todaysdevopswordle/'
   const isLoginRoute = pathname === loginRoute
   const isSignupRoute = pathname === signupRoute
+  const isContactUsRoute = pathname === contactUsRoute
   const isWordleRoute = pathname === wordleRoute
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
@@ -310,11 +312,11 @@ export default function TopNav() {
     }
   }, [])
 
-  const handleProductDropdownClick = () => setIsOpen(false)
+const handleProductDropdownClick = () => setIsOpen(false)
   const handleResourcesDropdownClick = () => setIsOpenResources(false)
 
-  // Hide TopNav on teams page or if source is onboarding
-  if (isSignupRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
+  // Hide TopNav on teams, contact-us page or if source is onboarding
+  if (isSignupRoute || isContactUsRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
     return null
   }
 

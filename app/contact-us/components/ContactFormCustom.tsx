@@ -25,7 +25,9 @@ const TOOLS = [
 ]
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <span className="block text-[11px] font-medium uppercase tracking-wide text-[#6B7280]">{children}</span>
+  <span className="block text-[11px] font-medium uppercase tracking-wide text-gray-500">
+    {children}
+  </span>
 )
 
 const Field = ({ children }: { children: React.ReactNode }) => (
@@ -47,9 +49,7 @@ export default function ContactFormCustom() {
   const [hostingError, setHostingError] = useState(false)
 
   const toggleTool = (value: string) =>
-    setTools((prev) =>
-      prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value],
-    )
+    setTools((prev) => (prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,7 +66,9 @@ export default function ContactFormCustom() {
       { objectTypeId: '0-1', name: 'email', value: email },
       { objectTypeId: '0-2', name: 'teams_deployment_option', value: hosting },
       ...(scale ? [{ objectTypeId: '0-2', name: 'current_scale', value: scale }] : []),
-      ...(tools.length ? [{ objectTypeId: '0-2', name: 'existing_tools', value: tools.join(';') }] : []),
+      ...(tools.length
+        ? [{ objectTypeId: '0-2', name: 'existing_tools', value: tools.join(';') }]
+        : []),
       ...(description ? [{ objectTypeId: '0-2', name: 'description', value: description }] : []),
     ]
 
@@ -110,9 +112,9 @@ export default function ContactFormCustom() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-        <div className="text-2xl text-[#4E74F8]">✓</div>
-        <h3 className="text-lg font-semibold text-[#ECE8E1]">We'll be in touch soon.</h3>
-        <p className="text-sm text-[#6B7280]">
+        <div className="text-2xl text-signoz_robin-500">✓</div>
+        <h3 className="text-lg font-semibold text-signoz_vanilla-300">We'll be in touch soon.</h3>
+        <p className="text-sm text-gray-500">
           A SigNoz expert will reach out within one business day.
         </p>
       </div>
@@ -130,7 +132,7 @@ export default function ContactFormCustom() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@company.com"
-          className="w-full rounded-md border border-[#1D2026] bg-[#111318] px-4 py-3 text-sm text-[#ECE8E1] placeholder-[#6B7280]/50 outline-none transition focus:border-[#4E74F8] focus:ring-1 focus:ring-[#4E74F8]"
+          className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm text-signoz_vanilla-300 placeholder-gray-500/50 outline-none transition focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500"
         />
       </Field>
 
@@ -142,20 +144,21 @@ export default function ContactFormCustom() {
             <button
               key={opt.value}
               type="button"
-              onClick={() => { setHosting(opt.value); setHostingError(false) }}
+              onClick={() => {
+                setHosting(opt.value)
+                setHostingError(false)
+              }}
               className={`rounded-full border px-4 py-2 text-sm transition ${
                 hosting === opt.value
-                  ? 'border-[#4E74F8] bg-[#4E74F8]/10 text-[#4E74F8]'
-                  : 'border-[#1D2026] bg-[#111318] text-[#9CA3AF] hover:border-[#2D3036] hover:text-[#ECE8E1]'
+                  ? 'border-signoz_robin-500 bg-signoz_robin-500/10 text-signoz_robin-500'
+                  : 'border-signoz_slate-400 bg-signoz_ink-400 text-gray-400 hover:border-signoz_slate-200 hover:text-signoz_vanilla-300'
               }`}
             >
               {opt.label}
             </button>
           ))}
         </div>
-        {hostingError && (
-          <p className="text-xs text-red-400">Please select a hosting option.</p>
-        )}
+        {hostingError && <p className="text-xs text-red-400">Please select a hosting option.</p>}
       </Field>
 
       {/* Current scale */}
@@ -166,27 +169,44 @@ export default function ContactFormCustom() {
           value={scale}
           onChange={(e) => setScale(e.target.value)}
           placeholder="e.g. 5B logs/month, 10K requests/sec"
-          className="w-full rounded-md border border-[#1D2026] bg-[#111318] px-4 py-3 text-sm text-[#ECE8E1] placeholder-[#6B7280]/50 outline-none transition focus:border-[#4E74F8] focus:ring-1 focus:ring-[#4E74F8]"
+          className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm text-signoz_vanilla-300 placeholder-gray-500/50 outline-none transition focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500"
         />
       </Field>
 
-      {/* Observability tools - 3x2 grid */}
+      {/* Observability tools - checklist style */}
       <Field>
-        <Label>Current Tools</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="flex items-baseline justify-between">
+          <Label>Current Tools</Label>
+          <span className="text-[10px] text-gray-500">choose as many as you like</span>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
           {TOOLS.map((tool) => (
-            <button
+            <label
               key={tool.value}
-              type="button"
+              className="flex cursor-pointer items-center gap-2.5"
               onClick={() => toggleTool(tool.value)}
-              className={`rounded-md border px-3 py-2 text-sm transition ${
-                tools.includes(tool.value)
-                  ? 'border-[#4E74F8] bg-[#4E74F8]/10 text-[#4E74F8]'
-                  : 'border-[#1D2026] bg-[#111318] text-[#9CA3AF] hover:border-[#2D3036] hover:text-[#ECE8E1]'
-              }`}
             >
-              {tool.label}
-            </button>
+              <span
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                  tools.includes(tool.value)
+                    ? 'border-signoz_robin-500 bg-signoz_robin-500'
+                    : 'border-signoz_slate-100 bg-transparent'
+                }`}
+              >
+                {tools.includes(tool.value) && (
+                  <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 10 10" fill="none">
+                    <path
+                      d="M1.5 5l2.5 2.5 5-5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span className="text-sm text-signoz_vanilla-300">{tool.label}</span>
+            </label>
           ))}
         </div>
       </Field>
@@ -198,7 +218,7 @@ export default function ContactFormCustom() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
-          className="w-full resize-none rounded-md border border-[#1D2026] bg-[#111318] px-4 py-3 text-sm text-[#ECE8E1] placeholder-[#6B7280]/50 outline-none transition focus:border-[#4E74F8] focus:ring-1 focus:ring-[#4E74F8]"
+          className="w-full resize-none rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm text-signoz_vanilla-300 placeholder-gray-500/50 outline-none transition focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500"
         />
       </Field>
 
@@ -211,10 +231,10 @@ export default function ContactFormCustom() {
       <button
         type="submit"
         disabled={loading}
-        className="flex h-[44px] w-full items-center justify-center gap-2 rounded-md bg-[#4E74F8] text-sm font-semibold text-white transition hover:bg-[#4E74F8]/90 disabled:opacity-60"
+        className="flex h-[44px] w-full items-center justify-center gap-2 rounded-md bg-signoz_robin-500 text-sm font-semibold text-white transition hover:bg-signoz_robin-500/90 disabled:opacity-60"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        {loading ? 'Submitting…' : 'Book a Demo →'}
+        {loading ? 'Submitting…' : 'Book a Demo'}
       </button>
     </form>
   )
