@@ -28,7 +28,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
   )
 }
 
-const POSTS_PER_PAGE = 9
+const POSTS_PER_PAGE = 12
 
 export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
   const [blogs, setBlogs] = React.useState(posts)

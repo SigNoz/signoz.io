@@ -38,7 +38,7 @@ export function Pagination({
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
   const DEFAULT_POSTS_PER_PAGE = 10
-  const DEFAULT_POSTS_IN_FIRST_PAGE = 9
+  const DEFAULT_POSTS_IN_FIRST_PAGE = 12
 
   const startPost = useMemo(() => {
     if (currentPage === 1) {
