@@ -173,6 +173,11 @@ export const APM_INSTRUMENTATION_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Instrumentation Link',
     },
+    {
+      name: 'Kong Gateway',
+      href: '/docs/integrations/opentelemetry-kong-gateway',
+      clickName: 'Kong Gateway Instrumentation Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 

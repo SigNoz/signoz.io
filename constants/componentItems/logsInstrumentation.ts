@@ -49,6 +49,11 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Logs Link',
     },
+    {
+      name: 'Kong Gateway',
+      href: '/docs/integrations/opentelemetry-kong-gateway',
+      clickName: 'Kong Gateway Logs Link',
+    },
   ] satisfies ComponentItem[],
   languages: [
     {

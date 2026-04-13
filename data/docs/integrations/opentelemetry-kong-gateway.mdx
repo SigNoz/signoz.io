@@ -1,0 +1,191 @@
+---
+date: 2026-04-13
+id: opentelemetry-kong-gateway
+title: OpenTelemetry Kong Gateway Integration
+description: Monitor Kong Gateway by exporting OpenTelemetry traces, metrics, and logs natively to SigNoz.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Kong Gateway provides a native OpenTelemetry plugin to capture proxy latencies, upstream traces, traffic metrics, and access logs. By configuring this plugin, you send your telemetry data directly to SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps remain identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud vs Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- For OpenTelemetry **Traces and Logs**: Kong Gateway version 3.0+ (Enterprise or OSS).
+- For OpenTelemetry **Metrics**: Kong Gateway Enterprise version 3.13+. (The open-source community edition branch is currently paused at version 3.9.x, which predates native OpenTelemetry metrics support).
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## Configure OpenTelemetry Export
+
+Configure the <a href="https://developer.konghq.com/plugins/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">opentelemetry plugin</a> either via your declarative Configuration (<a href="https://github.com/kong/deck" target="_blank" rel="noopener noreferrer nofollow">decK</a>) or via the Kong Ingress Controller in Kubernetes.
+
+### Using Declarative Config (deck)
+
+```yaml
+_format_version: "3.0"
+_transform: true
+
+plugins:
+  - name: opentelemetry
+    config:
+      traces_endpoint: "https://ingest.<region>.signoz.cloud:443/v1/traces"
+      logs_endpoint: "https://ingest.<region>.signoz.cloud:443/v1/logs"
+      metrics:
+        endpoint: "https://ingest.<region>.signoz.cloud:443/v1/metrics"
+        push_interval: 10
+        enable_bandwidth_metrics: true
+        enable_latency_metrics: true
+        enable_request_metrics: true
+        enable_upstream_health_metrics: true
+      headers:
+        signoz-ingestion-key: "<your-ingestion-key>"
+      resource_attributes:
+        service.name: "kong-gateway"
+      batch_span_count: 200
+      batch_flush_delay: 3
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Sync your state via Kong's Admin API:
+
+```bash
+deck gateway sync kong-state.yaml --kong-addr <YOUR-KONG-ADMIN-URL>
+```
+
+
+<details>
+<ToggleHeading>
+
+### Using Kong Ingress Controller (CRD)
+</ToggleHeading>
+
+Apply a `KongClusterPlugin` to enable the plugin globally across all services managed by the Ingress Controller. 
+
+```yaml
+apiVersion: configuration.konghq.com/v1
+kind: KongClusterPlugin
+metadata:
+  name: opentelemetry-global
+  annotations:
+    kubernetes.io/ingress.class: kong
+  labels:
+    global: "true"
+plugin: opentelemetry
+config:
+  traces_endpoint: "https://ingest.<region>.signoz.cloud:443/v1/traces"
+  logs_endpoint: "https://ingest.<region>.signoz.cloud:443/v1/logs"
+  metrics:
+    endpoint: "https://ingest.<region>.signoz.cloud:443/v1/metrics"
+    push_interval: 10
+    enable_bandwidth_metrics: true
+    enable_latency_metrics: true
+    enable_request_metrics: true
+    enable_upstream_health_metrics: true
+  headers:
+    signoz-ingestion-key: "<your-ingestion-key>"
+  resource_attributes:
+    service.name: "kong-gateway"
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Apply the file to your cluster:
+
+```bash
+kubectl apply -f kong-plugin-otel.yaml
+```
+
+</details>
+
+## Available Telemetry
+
+<Tabs>
+<TabItem value="traces" label="Traces" default>
+
+Kong traces operations across the gateway, capturing latency added by the proxy, internal plugin execution time, and DNS resolution, alongside upstream service latency. 
+
+</TabItem>
+<TabItem value="metrics" label="Metrics">
+
+Kong exports the following metrics natively:
+- `kong.latency.total`, `kong.latency.upstream`, `kong.latency.internal`
+- `kong.bandwidth.bytes`
+- `kong.requests.count` (tagged by HTTP status, route, and upstream)
+- `kong.nginx.connection.count`, `kong.upstream.target.status`
+
+*Note: You must run Kong Gateway Enterprise v3.13+ to export metrics via the OpenTelemetry plugin.*
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+Kong translates access logs into the OpenTelemetry Log format. You no longer need separate log forwarders like Fluent Bit to parse Kong access logs.
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+Verify your data appears in SigNoz:
+
+1. Click **Services** to view `kong-gateway` in the list.
+2. Click **Traces** to browse distributed traces matching your defined routes. 
+3. Click **Dashboards** > **Metrics Explorer** and query `kong.latency.total` or `kong.nginx.connection.count`.
+4. Click **Logs** and filter by `service.name: kong-gateway` to read access logs.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Metrics do not appear in SigNoz
+
+Verify your Kong Gateway version and edition. Kong Open-Source (CE) presently terminates at version 3.9 and lacks the `config.metrics` object. Using the metrics configuration against Kong 3.12 or older produces a schema validation error.
+
+### Schema Validation Error on "metrics" 
+
+Ensure you pass `metrics` as an object containing `endpoint`, rather than a flat string. Earlier plugin schema versions rejected the `metrics` map entirely. See [Kong OpenTelemetry plugin schema](https://docs.konghq.com/hub/kong-inc/opentelemetry/reference/#schema).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+Avoid hardcoding the SigNoz cloud endpoints in your Kong instance by configuring Kong to point to a local OpenTelemetry Collector instead.
+
+1. Ensure your OpenTelemetry Collector instance exposes the `otlp` HTTP receiver on port `4318`.
+2. Update the Kong Plugin configuration to point to your collector:
+   - `traces_endpoint: http://<your-collector-ip>:4318/v1/traces`
+   - `logs_endpoint: http://<your-collector-ip>:4318/v1/logs`
+   - `endpoint: http://<your-collector-ip>:4318/v1/metrics`
+3. Remove the `signoz-ingestion-key` header from the Kong configuration, and let your Collector append the authentication header to SigNoz.
+
+Read the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) for implementation details.
+
+</details>
+
+## Next Steps
+
+- Import the [Kong Gateway Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/kong-gateway/) template to monitor traffic in real-time.
+- Set up [Alerts](https://signoz.io/docs/userguide/alerts-management/) for routing anomalies or upstream timeouts.
+
+## Get Help
+
+<GetHelp />

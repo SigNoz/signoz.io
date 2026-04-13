@@ -222,6 +222,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Key Operations Dashboard Template',
   },
   {
+    name: 'Kong Gateway',
+    href: '/docs/dashboards/dashboard-templates/kong-gateway',
+    clickName: 'Kong Gateway Dashboard Template',
+  },
+  {
     name: 'LiteLLM',
     href: '/docs/dashboards/dashboard-templates/litellm-dashboards',
     clickName: 'LiteLLM Dashboard Template',

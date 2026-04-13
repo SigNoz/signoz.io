@@ -71,6 +71,11 @@ export const INTEGRATIONS_ITEMS = {
   ] satisfies ComponentItem[],
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
+    {
+      name: 'Kong Gateway',
+      href: '/docs/integrations/opentelemetry-kong-gateway',
+      clickName: 'Kong Gateway Integration Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 
