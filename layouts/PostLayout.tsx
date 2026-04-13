@@ -89,8 +89,15 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
               >
                 {toc.map((tocItem: tocItemProps) => {
                   return (
-                    <div className="post-toc-item" key={tocItem.url}>
-                      <a data-level={tocItem.depth} href={tocItem.url} className="line-clamp-2">
+                    <div
+                      className="min-h-6 w-full text-[13px] font-medium leading-normal"
+                      key={tocItem.url}
+                    >
+                      <a
+                        data-level={tocItem.depth}
+                        href={tocItem.url}
+                        className="line-clamp-2 inline-block w-full"
+                      >
                         {tocItem.value}
                       </a>
                     </div>

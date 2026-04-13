@@ -34,8 +34,15 @@ export default function CaseStudyLayout({ content, children, toc }: CaseStudyLay
           <div className="sticky top-[88px] box-border flex h-[calc(100vh-156px)] w-80 flex-col gap-1 overflow-y-auto p-4 pl-8 max-lg:hidden">
             {toc.map((tocItem: tocItemProps) => {
               return (
-                <div className="post-toc-item" key={tocItem.url}>
-                  <a data-level={tocItem.depth} href={tocItem.url} className="line-clamp-2">
+                <div
+                  className="min-h-6 w-full text-[13px] font-medium leading-normal"
+                  key={tocItem.url}
+                >
+                  <a
+                    data-level={tocItem.depth}
+                    href={tocItem.url}
+                    className="line-clamp-2 inline-block w-full"
+                  >
                     {tocItem.value}
                   </a>
                 </div>

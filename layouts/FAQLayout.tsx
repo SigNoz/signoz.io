@@ -100,8 +100,15 @@ export default function FAQLayout({
               >
                 {toc.map((tocItem: tocItemProps) => {
                   return (
-                    <div className="post-toc-item" key={tocItem.url}>
-                      <a data-level={tocItem.depth} href={tocItem.url} className="line-clamp-2">
+                    <div
+                      className="min-h-6 w-full text-[13px] font-medium leading-normal"
+                      key={tocItem.url}
+                    >
+                      <a
+                        data-level={tocItem.depth}
+                        href={tocItem.url}
+                        className="line-clamp-2 inline-block w-full"
+                      >
                         {tocItem.value}
                       </a>
                     </div>
@@ -109,9 +116,7 @@ export default function FAQLayout({
                 })}
               </div>
 
-              <div
-                className="box-border w-3/4 overflow-y-auto pr-4 max-lg:w-full"
-              >
+              <div className="box-border w-3/4 overflow-y-auto pr-4 max-lg:w-full">
                 <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
                   {children}
                 </article>

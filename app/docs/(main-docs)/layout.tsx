@@ -1,7 +1,5 @@
 'use client'
 
-import '../../../css/doc.css'
-
 import { ReactNode, useRef } from 'react'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
@@ -10,6 +8,7 @@ import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { DOC_SIDENAV_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
@@ -55,16 +54,16 @@ export default function DocLayout({ children }: LayoutProps) {
         <SectionContainer>
           {source !== ONBOARDING_SOURCE && <ProgressBar target={mainRef} />}
 
-          <div className="doc overflow-clip max-sm:px-4">
+          <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 overflow-clip max-sm:px-4">
             {source !== ONBOARDING_SOURCE && (
-              <div className="doc-sidenav border-r border-signoz_slate-500">
+              <div className={DOC_SIDENAV_CLASSES}>
                 <DocsSidebar />
               </div>
             )}
 
             <div
-              className={`doc-content py-6 md:px-0 lg:px-4 ${
-                source === ONBOARDING_SOURCE ? 'product-onboarding' : ''
+              className={`box-border min-w-0 flex-[1_1_auto] py-6 md:px-0 lg:px-4 [&_details+details]:mt-8 ${
+                source === ONBOARDING_SOURCE ? '!w-full px-4' : ''
               }`}
             >
               {children}

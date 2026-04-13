@@ -9,34 +9,33 @@ keywords: [signoz foundry, deployment, self-hosted signoz, observability, docker
 image: /img/blog/2026/04/introducing-signoz-foundry.webp
 ---
 
-At SigNoz, we’re always trying to democratize observability as part of our open-source efforts. Previously, we had launched SigNoz [as a single binary](https://signoz.io/blog/launching-signoz-single-binary/) around this time to reduce the sprawl and maintenance overhead for self-hosted SigNoz.
+Our open source version of SigNoz powers mission-critical observability for thousands of engineering teams across the globe. We're constantly shipping things that make it easier to adopt, run, and trust SigNoz in production.
 
-<Figure src="/img/blog/2026/04/introducing-signoz-foundry.webp" alt="SigNoz Foundry is the one config, one command CLI for deploying SigNoz, from local installs to production k8s clusters." caption="SigNoz Foundry is the one config, one command CLI for deploying SigNoz, from local installs to production k8s clusters." />
+Installation is the first impression users have of your software. We've always wanted ours to match the quality of the product itself — and today, we're taking it several notches up. We're proud to announce [Foundry](https://github.com/SigNoz/foundry), a centralized hub for deploying and managing self-hosted SigNoz across all supported platforms.
 
-Building on the same effort, we are proud to announce [Foundry](https://github.com/SigNoz/foundry), a centralized hub for managing and deploying self-hosted SigNoz instances across all supported platforms. 
+<Figure src="/img/blog/2026/04/introducing-signoz-foundry.webp" alt="SigNoz Foundry is the one config, one command CLI for deploying SigNoz, from local installs to production k8s clusters." />
+
 
 ## Why Was Foundry Needed?
 
-Even after we shipped a single binary for the core application, installing SigNoz on Linux took roughly 50 commands and required configuring 9 files by hand. A single typo, a misconfiguration, or a silent failure meant losing precious developer time.
+Self-hosting SigNoz, depending on your platform, could involve dozens of commands and configuring multiple files by hand. Take Linux as an example — installing SigNoz on it required roughly 50 commands and configuring 9 files by hand. A single typo, a misconfiguration, or a silent failure meant losing precious developer time.
 
 <Figure src="/img/blog/2026/04/introducing-signoz-foundry-setup-complexity.webp" alt="Self-hosting SigNoz on a Linux distro meant dealing with multiple moving parts, and the complexity that comes with that setup." caption="Self-hosting SigNoz on a Linux distro meant dealing with multiple moving parts, and the complexity that comes with that setup." />
 
-On the other hand, our engineering team faced its own share of problems. We currently maintain 15 installation sources, each of which became a potential point of failure each time the application evolved or the source platform underwent changes.
+On the other hand, our engineering team faced its own share of problems. We maintained 15 installation surfaces, each of which became a potential point of failure each time the application evolved, or the source platform underwent changes.
 
-Further, there was no central schema—changes had to be manually integrated because there was no automatic propagation mechanism in place.<br />
+Further, there was no central schema — changes had to be manually integrated because there was no automatic propagation mechanism in place.<br />
 As we continued to expand on the deployment targets, managing releases and preventing configuration drifts took significant developer bandwidth and became an ever-increasing burden.
 
-To resolve the frequent challenges faced by users relying on open-source SigNoz, and to untangle the growing complexity of distributing to multiple platforms, Nagesh and Miguel (aka Mike, we have two Miguels in our team) from the platform team built Foundry.
+To resolve the frequent challenges faced by users relying on open-source SigNoz, and to untangle the growing complexity of distributing to multiple platforms, our platform team conceptualized Foundry: a single CLI to deploy to 10 curated deployment targets, replacing the sprawl of disparate installation surfaces.
 
 ## What is SigNoz Foundry?
 
-Foundry is a CLI tool that allows you to write a single configuration file (`foundry.yaml`, also known as a *casting*). From this single file, Foundry generates all the required deployment files and brings SigNoz online. Think of it as Terraform, but purpose-built for managing SigNoz deployments.
+Foundry is a CLI tool that lets you declare your entire SigNoz deployment — across any supported platform — in a single configuration file (`casting.yaml`). From that one file, Foundry generates all the required platform-specific manifests and brings SigNoz online. Think of it as Terraform, but purpose-built for managing SigNoz deployments.
 
 Instead of manually installing dependencies, editing ClickHouse configurations, OpenTelemetry Collector pipelines, and systemd units, you define your intent and platform-specific overrides in one place. Foundry handles the complexity of translating that intent into the correct platform-specific manifests.
 
 <Figure src="https://raw.githubusercontent.com/SigNoz/foundry/refs/heads/main/docs/assets/cli.gif" alt="Foundry simplifies the SigNoz setup process, so you can spend time actually using SigNoz." caption="Foundry simplifies the SigNoz setup process, so you can spend time actually using SigNoz." />
-
-Foundry simplifies the SigNoz setup process, so you can spend time *actually using* SigNoz.
 
 ## "Couldn't this just be a Docker Compose file?"
 
@@ -44,7 +43,7 @@ We already distribute Docker Compose manifests for SigNoz, so building a new dep
 
 Users operate under different constraints, require specific architectural patterns, and deploy on varied platforms. Supporting all these variations manually adds massive maintenance overhead. By centralizing the logic into Foundry, we reduce setup friction.
 
-This is also a structural improvement for our open-source roadmap. Centralizing our deployment logic means we save time on debugging edge cases across 15 different platforms. That translates directly to more engineering bandwidth for shipping new observability features.
+This is also a structural improvement for our open-source roadmap. Centralizing our deployment logic means we save time on debugging edge cases across 10 deployment targets. That translates directly to more engineering bandwidth for shipping new observability features.
 
 Further, users now have the flexibility to generate the configuration for any target platform or deployment method from a single CLI. Simply update the existing config, or point Foundry to a new YAML manifest and you’re good to go.
 
@@ -86,9 +85,9 @@ Earlier, you would have to follow each step in our [comprehensive installation g
 
 With Foundry, all you need is a minimal configuration and one command to get a locally running SigNoz instance with the correct permissions, restart policies, and ClickHouse migrations all taken care of!
 
-Compared to the massive requirement of 9 config files, the Foundry-equivalent is an minimal as it gets:
+Compared to the massive requirement of 9 config files, the Foundry-equivalent is as minimal as it gets:
 
-```yaml
+```yaml:casting.yaml
 apiVersion: v1alpha1
 metadata:
   name: signoz
