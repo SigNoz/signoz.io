@@ -14,10 +14,22 @@ import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
 import { cn } from '../lib/utils'
 
 const VALUE_PROPS = [
-  'Out-of-the-box APM + ready-to-import dashboard templates.',
-  '$0.30/GB logs & traces. $0.10/mn metrics. No per-host fees.',
-  'One click from trace → log → infra. Fully correlated signals.',
-  'OTel-native. Your instrumentation, your data. No lock-in.',
+  {
+    title: 'Open-Source, OTel-native, No lock-in.',
+    description: 'OTel-native means your instrumentation stays yours, whatever you decide.',
+  },
+  {
+    title: 'Pricing you can predict',
+    description: '$0.30/GB logs & traces. $0.10/mn metrics. No per-host fees. No surprises.',
+  },
+  {
+    title: 'Every signal in one place',
+    description: 'Logs, metrics, traces, LLM observability — fully correlated.',
+  },
+  {
+    title: 'First dashboard in under an hour',
+    description: '100+ integrations with pre-built dashboards.',
+  },
 ]
 
 interface ErrorsProps {
@@ -636,11 +648,16 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
                 {/* Value props */}
                 <div className="flex flex-col gap-3">
                   {VALUE_PROPS.map((prop) => (
-                    <div key={prop} className="flex items-start gap-2.5">
+                    <div key={prop.title} className="flex items-start gap-2.5">
                       <span className="mt-0.5 flex-shrink-0 text-[13px] text-signoz_forest-500">
                         ✓
                       </span>
-                      <span className="text-[14px] leading-[1.5] text-gray-400">{prop}</span>
+                      <div className="flex flex-col">
+                        <span className="text-[14px] font-semibold text-white">{prop.title}</span>
+                        <span className="text-[13px] leading-[1.5] text-gray-500">
+                          {prop.description}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
