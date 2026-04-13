@@ -1,5 +1,5 @@
 ---
-date: 2026-04-03
+date: 2026-04-13
 title: Send logs from Logrus to SigNoz using OpenTelemetry
 id: logrus-to-signoz
 doc_type: howto
@@ -173,11 +173,13 @@ import (
 func main() {
 	ctx := context.Background()
 
+	// Reads OTEL_EXPORTER_OTLP_ENDPOINT from env and initializes the OTLP HTTP log exporter
 	logExporter, err := otlploghttp.New(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Wraps the exporter in a LoggerProvider with a batch processor
 	logProvider := otel_log.NewLoggerProvider(
 		otel_log.WithProcessor(
 			otel_log.NewBatchProcessor(logExporter),
@@ -185,6 +187,7 @@ func main() {
 	)
 	defer logProvider.Shutdown(ctx)
 
+	// Registers the hook globally. All logrus.Info/Warn/Error calls are exported as OTel logs
 	hook := otellogrus.NewHook("signoz-golang", otellogrus.WithLoggerProvider(logProvider))
 	logrus.AddHook(hook)
 
@@ -212,7 +215,7 @@ The environment variables you set in Step 1 are automatically read by the OTLP e
 
 </ToggleHeading>
 
-Correlate Logrus logs with OpenTelemetry traces by injecting `trace_id` and `span_id` fields into your structured logs.
+Correlate Logrus logs with [OpenTelemetry traces](https://signoz.io/docs/instrumentation/golang/) by injecting `trace_id` and `span_id` fields into your structured logs.
 
 ### Install additional dependencies
 
