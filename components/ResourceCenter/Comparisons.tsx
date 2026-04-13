@@ -30,7 +30,13 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
 
 const POSTS_PER_PAGE = 12
 
-export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
+export default function ComparisonsListing({
+  posts = [],
+  pageNumber = 1,
+}: {
+  posts?: any[]
+  pageNumber?: number
+}) {
   const [blogs, setBlogs] = React.useState(posts)
   const [searchValue, setSearchValue] = React.useState('')
 
@@ -40,10 +46,13 @@ export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
     setBlogs(filteredPosts)
   }
 
-  const pageNumber = 1
-  const initialDisplayPosts = blogs.slice(0, POSTS_PER_PAGE)
+  const currentPage = searchValue ? 1 : pageNumber
+  const initialDisplayPosts = blogs.slice(
+    POSTS_PER_PAGE * (currentPage - 1),
+    POSTS_PER_PAGE * currentPage
+  )
   const pagination = {
-    currentPage: pageNumber,
+    currentPage,
     totalPages: Math.ceil(blogs.length / POSTS_PER_PAGE),
     pageRoute: 'comparisons',
   }

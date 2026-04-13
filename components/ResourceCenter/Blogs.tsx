@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { filterData } from 'app/utils/common'
 import { allBlogs } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
@@ -12,7 +12,7 @@ interface BlogPageHeaderProps {
   onSearch: (e) => void
 }
 
-const BlogsPageHeader: React.FC<BlogPageHeaderProps> = ({ onSearch }) => {
+const BlogsPageHeader = ({ onSearch }: BlogPageHeaderProps) => {
   return (
     <section className="mb-[72px] flex max-w-[697px] flex-col leading-[143%]">
       <h2 className="mb-0 self-start text-sm font-medium uppercase tracking-wider text-signoz_sakura-500 dark:text-signoz_sakura-400">
@@ -31,7 +31,7 @@ const BlogsPageHeader: React.FC<BlogPageHeaderProps> = ({ onSearch }) => {
   )
 }
 
-export default function Blogs() {
+export default function Blogs({ pageNumber = 1 }: { pageNumber?: number }) {
   const posts = allCoreContent(sortPosts(allBlogs))
   const [blogs, setBlogs] = useState(posts)
   const [searchValue, setSearchValue] = useState('')
@@ -45,8 +45,8 @@ export default function Blogs() {
   return (
     <div>
       <BlogsPageHeader onSearch={handleSearch} />
-      {searchValue.length === 0 && <FeaturedBlogs isDarkMode={true} />}
-      <AllBlogs blogs={blogs} />
+      {searchValue.length === 0 && pageNumber === 1 && <FeaturedBlogs isDarkMode={true} />}
+      <AllBlogs blogs={blogs} pageNumber={searchValue ? 1 : pageNumber} />
     </div>
   )
 }

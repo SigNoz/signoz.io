@@ -1,6 +1,6 @@
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import GridLayout from '@/layouts/GridLayout'
+import Comparisons from '@/components/ResourceCenter/Comparisons'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import siteMetadata from '@/data/siteMetadata'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
@@ -35,29 +35,16 @@ export async function generateMetadata({ params }: { params: { page: string } })
   }
 }
 
-const POSTS_PER_PAGE = 12
-
 export default async function Page({ params }: { params: { page: string } }) {
   const comparisons = await fetchAllComparisonsForPage()
   const posts = allCoreContent(sortPosts(comparisons))
   const pageNumber = parseInt(params.page as string)
-  const initialDisplayPosts = posts.slice(
-    POSTS_PER_PAGE * (pageNumber - 1),
-    POSTS_PER_PAGE * pageNumber
-  )
-  const pagination = {
-    currentPage: pageNumber,
-    totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
-    pageRoute: 'comparisons',
-  }
 
   return (
-    <GridLayout
-      posts={posts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
-      title="All Posts"
-      isDarkMode={true}
-    />
+    <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
+      <div className="tab-content pt-6">
+        <Comparisons posts={posts} pageNumber={pageNumber} />
+      </div>
+    </div>
   )
 }

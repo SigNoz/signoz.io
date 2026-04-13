@@ -8,13 +8,6 @@ import SearchInput from './Search'
 import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
 import GridLayout from '@/layouts/GridLayout'
 
-interface GuidesHeaderProps {
-  title: string
-  description: string
-  searchPlaceholder?: string
-  onSearch: (e) => void
-}
-
 const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
   return (
     <section className="mb-[16px] flex max-w-[697px] flex-col leading-[143%]">
@@ -34,7 +27,7 @@ const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
 
 const POSTS_PER_PAGE = 12
 
-export default function Guides() {
+export default function Guides({ pageNumber = 1 }: { pageNumber?: number }) {
   const posts = allCoreContent(sortPosts(allGuides))
   const [activeItem, setActiveItem] = useState(GUIDES_TOPICS.ALL)
   const [searchQuery, setSearchQuery] = useState('')
@@ -78,10 +71,13 @@ export default function Guides() {
   }
 
   const isFiltering = searchQuery || activeItem !== GUIDES_TOPICS.ALL
-  const pageNumber = 1
-  const initialDisplayPosts = blogs.slice(0, POSTS_PER_PAGE)
+  const currentPage = isFiltering ? 1 : pageNumber
+  const initialDisplayPosts = blogs.slice(
+    POSTS_PER_PAGE * (currentPage - 1),
+    POSTS_PER_PAGE * currentPage
+  )
   const pagination = {
-    currentPage: pageNumber,
+    currentPage,
     totalPages: Math.ceil(blogs.length / POSTS_PER_PAGE),
     pageRoute: 'guides',
   }

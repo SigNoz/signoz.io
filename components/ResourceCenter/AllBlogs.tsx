@@ -2,8 +2,7 @@ import GridLayout from '@/layouts/GridLayout'
 
 const POSTS_PER_PAGE = 12
 
-export default function AllBlogs({ blogs }) {
-  const pageNumber = 1
+export default function AllBlogs({ blogs, pageNumber = 1 }) {
   const initialDisplayPosts = blogs.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
     POSTS_PER_PAGE * pageNumber

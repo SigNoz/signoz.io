@@ -1,5 +1,4 @@
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import GridLayout from '@/layouts/GridLayout'
+import Blogs from '@/components/ResourceCenter/Blogs'
 import { allBlogs } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 
@@ -36,30 +35,17 @@ const POSTS_PER_PAGE = 12
 export const generateStaticParams = async () => {
   const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
   const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
-
   return paths
 }
 
 export default function Page({ params }: { params: { page: string } }) {
-  const posts = allCoreContent(sortPosts(allBlogs))
   const pageNumber = parseInt(params.page as string)
-  const initialDisplayPosts = posts.slice(
-    POSTS_PER_PAGE * (pageNumber - 1),
-    POSTS_PER_PAGE * pageNumber
-  )
-  const pagination = {
-    currentPage: pageNumber,
-    totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
-    pageRoute: 'opentelemetry',
-  }
 
   return (
-    <GridLayout
-      posts={posts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
-      title="All Posts"
-      isDarkMode={true}
-    />
+    <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
+      <div className="tab-content pt-6">
+        <Blogs pageNumber={pageNumber} />
+      </div>
+    </div>
   )
 }
