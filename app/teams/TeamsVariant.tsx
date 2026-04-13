@@ -8,17 +8,10 @@ import TrackingLink from '@/components/TrackingLink'
 import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
 import { REGIONS } from '@/constants/regions'
+import { TRUST_BAR_LOGOS } from '@/constants/trustBarLogos'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
 import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
-
-const TRUST_BAR_LOGOS = [
-  { src: '/img/users/netapp.svg', alt: 'NetApp' },
-  { src: '/img/users/samsung.svg', alt: 'Samsung' },
-  { src: '/img/users/comcast.svg', alt: 'Comcast' },
-  { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
-  { src: '/svgs/icons/sarvam.svg', alt: 'Sarvam AI' },
-  { src: '/svgs/icons/blaxel.svg', alt: 'Blaxel' },
-]
+import { cn } from '../lib/utils'
 
 const VALUE_PROPS = [
   'Out-of-the-box APM + ready-to-import dashboard templates.',
@@ -56,7 +49,6 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => {
       </div>
 
       <a
-        type="submit"
         className="flex w-full items-center justify-center gap-2 rounded-md bg-signoz_cherry-500 py-3 text-sm font-medium"
         href="mailto:cloud-support@signoz.io"
       >
@@ -106,8 +98,6 @@ const testimonials = [
 ]
 
 const DISPLAY_DURATION = 4000
-
-const cn = (...classes: (string | boolean | undefined)[]) => classes.filter(Boolean).join(' ')
 
 const useTestimonialTimer = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -284,14 +274,44 @@ const VariantTestimonial: React.FC = () => {
   )
 }
 
-// Completely isolated signup form component with its own state management
-const SignupFormIsolated: React.FC<{
-  onSignup: (payload: any) => Promise<void>
-  onSocialSignup: (payload: any) => Promise<void>
+interface SignupPayload {
+  email: string
+  region: { name: string }
+  preferences: {
+    terms_of_service_accepted: boolean
+    opted_email_updates: boolean
+  }
+}
+
+interface SocialSignupPayload {
+  region: { name: string }
+  preferences: {
+    terms_of_service_accepted: boolean
+    opted_email_updates: boolean
+  }
+  connector: string
+}
+
+interface SignupFormIsolatedProps {
+  onSignup: (payload: SignupPayload) => Promise<void>
+  onSocialSignup: (payload: SocialSignupPayload) => Promise<void>
   isSubmitting: boolean
   errors: ErrorsProps
-  logEvent: (event: any) => void
-}> = ({ onSignup, onSocialSignup, isSubmitting, errors, logEvent }) => {
+  logEvent: (event: {
+    eventType: 'track'
+    eventName: string
+    attributes: Record<string, unknown>
+  }) => void
+}
+
+// Completely isolated signup form component with its own state management
+const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
+  onSignup,
+  onSocialSignup,
+  isSubmitting,
+  errors,
+  logEvent,
+}) => {
   const [formState, setFormState] = useState({
     workEmail: '',
     dataRegion: 'us',
@@ -314,7 +334,7 @@ const SignupFormIsolated: React.FC<{
     if (emailInputRef.current) emailInputRef.current.focus()
   }, [])
 
-  const handleInputChange = useCallback((event) => {
+  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target
     const newValue = type === 'checkbox' ? checked : value
     setFormState((prev) => ({ ...prev, [name]: newValue }))
@@ -339,11 +359,11 @@ const SignupFormIsolated: React.FC<{
       })
       setFormState((prev) => ({ ...prev, dataRegion: selectedRegion }))
     },
-    [logEvent]
+    [logEvent, formState.termsOfServiceAccepted, formState.workEmail]
   )
 
   const handleSubmit = useCallback(
-    (event) => {
+    (event: React.MouseEvent<HTMLButtonElement> | React.FormEvent<HTMLFormElement>) => {
       event.preventDefault()
       logEvent({
         eventType: 'track',
@@ -608,7 +628,9 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
               <div className="flex max-w-[420px] flex-col gap-8">
                 {/* Headline */}
                 <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
-                  What's included in the FREE Trial
+                  One Stop Observability
+                  <br />
+                  at Scale
                 </h1>
 
                 {/* Value props */}
@@ -663,7 +685,7 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
               <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block [@media(max-height:790px)]:lg:hidden">
                 <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
                   <span>OpenTelemetry Native.</span>
-                  <span>Unfied Signals.</span>
+                  <span>Unified Signals.</span>
                   <span>Predictable Pricing.</span>
                 </p>
               </div>

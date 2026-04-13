@@ -178,11 +178,13 @@ export default function ContactFormCustom() {
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-2">
           {TOOLS.map((tool) => (
-            <label
-              key={tool.value}
-              className="flex cursor-pointer items-center gap-2.5"
-              onClick={() => toggleTool(tool.value)}
-            >
+            <label key={tool.value} className="flex cursor-pointer items-center gap-2.5">
+              <input
+                type="checkbox"
+                checked={tools.includes(tool.value)}
+                onChange={() => toggleTool(tool.value)}
+                className="sr-only"
+              />
               <span
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                   tools.includes(tool.value)
