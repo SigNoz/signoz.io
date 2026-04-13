@@ -1540,6 +1540,7 @@ const docsSideNav = [
             label: 'User Guides',
             type: 'category',
             isExpanded: false,
+            route: '/docs/logs-management/features/logs-explorer-guides',
             items: [
               { type: 'doc', route: '/docs/userguide/logs_fields', label: 'Fields in Logs' },
               {
@@ -1565,11 +1566,49 @@ const docsSideNav = [
           { type: 'doc', route: '/docs/logs-pipelines/introduction', label: 'Introduction' },
           { type: 'doc', route: '/docs/logs-pipelines/concepts', label: 'Concepts' },
           { type: 'doc', route: '/docs/logs-pipelines/parsing', label: 'How to Parse Logs' },
-          { type: 'doc', route: '/docs/logs-pipelines/processors', label: 'Log Processors' },
           {
-            type: 'doc',
-            route: '/docs/logs-pipelines/processor-types',
             label: 'Types of Log Processors',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/logs-pipelines/processor-types',
+            items: [
+              { type: 'doc', route: '/docs/logs-pipelines/guides/json', label: 'Parse JSON Logs' },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/grok-parser',
+                label: 'Grok Parser',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/regex-parser',
+                label: 'Regex Parser',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/trace',
+                label: 'Parse Trace Information',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/resource',
+                label: 'Parse Container Name',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/nested-json',
+                label: 'Parse Nested JSON',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/severity-parsing',
+                label: 'Severity Parsing',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/timestamp-parsing',
+                label: 'Parse Timestamp',
+              },
+            ],
           },
         ],
       },
@@ -1598,6 +1637,12 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/logs-management/reference',
         items: [
+          { type: 'doc', route: '/docs/logs-pipelines/processors', label: 'Log Processors' },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/features/logs-quick-filters-reference',
+            label: 'Available Quick Filters',
+          },
           { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
           {
             type: 'doc',

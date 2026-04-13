@@ -35,22 +35,15 @@ attributes/clientid:
         action: insert
 ```
 
-Adding this mapping, however, isn’t enough to add the attribute, we haven’t yet added this processor to our pipeline, check the `pipelines` mapping for `logs`:
+Adding this mapping, however, isn’t enough to add the attribute, we haven’t yet added this processor to our pipeline. 
+To actually affect our data, we must add it to the pipeline. The revised version looks like this:
+
 
 ```yaml
 logs:
       receivers: [otlp, tcplog/docker]
       processors: [logstransform/internal, batch]
       exporters: [clickhouselogsexporter]'
-```
-
-To actually affect our data, we must add it to the pipeline. The revised version looks like this:
-
-```yaml
-logs:
-      receivers: [otlp, tcplog/docker]
-      processors: [attributes/clientid, logstransform/internal, batch]
-      exporters: [clickhouselogsexporter]
 ```
 
 ## Creating Log Fields
