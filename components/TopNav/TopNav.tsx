@@ -289,6 +289,9 @@ export default function TopNav() {
     } else if (isListingOrPagination(TAB_PATHNAMES.GUIDES)) {
       setActiveTab(TABS.GUIDES)
       setShouldShowTabs(true)
+    } else if (isListingOrPagination(TAB_PATHNAMES.OPENTELEMETRY)) {
+      setActiveTab(TABS.OPENTELEMETRY)
+      setShouldShowTabs(true)
     } else {
       setShouldShowTabs(false)
     }
