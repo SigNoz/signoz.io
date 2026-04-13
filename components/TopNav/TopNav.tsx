@@ -246,8 +246,6 @@ export default function TopNav() {
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpenResources, setIsOpenResources] = useState(false)
-  const [timeoutId, setTimeoutId] = useState<any>(null)
-  const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
   // Track viewport width for progressive nav item hiding
   const [windowWidth, setWindowWidth] = useState<number | null>(null)
 
@@ -258,7 +256,6 @@ export default function TopNav() {
   const isSignupRoute = pathname === signupRoute
   const isWordleRoute = pathname === wordleRoute
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
-  const delay = 500
 
   const showCustomerStories = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.FULL_NAV
   const showGithubStars = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.GITHUB_STARS
@@ -313,39 +310,12 @@ export default function TopNav() {
     }
   }, [])
 
+  const handleProductDropdownClick = () => setIsOpen(false)
+  const handleResourcesDropdownClick = () => setIsOpenResources(false)
+
   // Hide TopNav on teams page or if source is onboarding
   if (isSignupRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
     return null
-  }
-
-  // Product dropdown handlers
-  const handleMouseEnterProduct = () => {
-    clearTimeout(timeoutId)
-    setIsOpen(true)
-  }
-
-  const handleMouseLeaveProduct = () => {
-    const id = setTimeout(() => setIsOpen(false), delay)
-    setTimeoutId(id)
-  }
-
-  // Resources dropdown handlers
-  const handleMouseEnterResources = () => {
-    clearTimeout(timeoutIdResources)
-    setIsOpenResources(true)
-  }
-
-  const handleMouseLeaveResources = () => {
-    const id = setTimeout(() => setIsOpenResources(false), delay)
-    setTimeoutIdResources(id)
-  }
-
-  const handleProductDropdownClick = () => {
-    setIsOpen(false)
-  }
-
-  const handleResourcesDropdownClick = () => {
-    setIsOpenResources(false)
   }
 
   return (
@@ -382,11 +352,17 @@ export default function TopNav() {
               <div className={`flex items-center gap-x-6 ${showProduct ? 'ml-6' : ''}`}>
                 {showProduct && (
                   <div
-                    onMouseEnter={handleMouseEnterProduct}
-                    onMouseLeave={handleMouseLeaveProduct}
+                    onPointerEnter={() => setIsOpen(true)}
+                    onPointerLeave={() => setIsOpen(false)}
                     className="flex items-center"
                   >
-                    <Popover.Root open={isOpen} onOpenChange={setIsOpen} modal={false}>
+                    <Popover.Root
+                      open={isOpen}
+                      onOpenChange={(open) => {
+                        if (!open) setIsOpen(false)
+                      }}
+                      modal={false}
+                    >
                       <Popover.Trigger asChild>
                         <Button className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500">
                           <div className="flex items-center">
@@ -398,136 +374,132 @@ export default function TopNav() {
                           </div>
                         </Button>
                       </Popover.Trigger>
-                      <Popover.Portal>
-                        <Popover.Content
-                          side="bottom"
-                          align="start"
-                          sideOffset={4}
-                          onMouseEnter={handleMouseEnterProduct}
-                          onMouseLeave={handleMouseLeaveProduct}
-                          className="z-50 min-w-fit origin-top-left overflow-hidden rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
-                        >
-                          <div className="flex min-w-0 flex-row">
-                            <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
-                              <div
-                                className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
+                      <Popover.Content
+                        side="bottom"
+                        align="start"
+                        sideOffset={4}
+                        className="z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform before:absolute before:-top-[4px] before:left-0 before:right-0 before:h-[4px] before:content-[''] data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
+                      >
+                        <div className="flex min-w-0 flex-row">
+                          <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
+                            <div
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
+                            >
+                              Product Modules
+                            </div>
+                            <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-x-0 gap-y-4">
+                              {productDropdownItems.map((item) => (
+                                <TrackingLink
+                                  href={item.url || ''}
+                                  disabled={item.url === undefined}
+                                  className={`group flex h-auto min-w-0 items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
+                                  key={item.key}
+                                  clickType="Nav Click"
+                                  clickName={`${item.name} Product Link`}
+                                  clickText={item.name}
+                                  clickLocation="Top Navbar"
+                                  onClick={handleProductDropdownClick}
+                                  prefetch={false}
+                                >
+                                  {typeof item.icon === 'string' && item.icon !== null ? (
+                                    <Image
+                                      className="shrink-0"
+                                      src={item.icon}
+                                      alt={`${item.name}`}
+                                      width={20}
+                                      height={20}
+                                    />
+                                  ) : (
+                                    <div className="h-5 w-5 shrink-0">{item.icon}</div>
+                                  )}
+                                  <div className="min-w-0">
+                                    <div className="flex flex-row items-center gap-1">
+                                      <span className="text-sm">{item.name}</span>{' '}
+                                      <ArrowRight
+                                        size={14}
+                                        className="shrink-0 opacity-0 group-hover:opacity-100"
+                                      />
+                                    </div>
+                                    <div
+                                      className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
+                                    >
+                                      {item.description}
+                                    </div>
+                                  </div>
+                                </TrackingLink>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 bg-[hsl(240_5.88%_10%)] p-6 sm:w-[300px] lg:w-[320px]">
+                            <div className="flex flex-col gap-y-4">
+                              <Link
+                                href={'/case-study'}
+                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100 hover:text-[#fff]`}
+                                onClick={handleProductDropdownClick}
+                                prefetch={false}
                               >
-                                Product Modules
+                                <span>Customer Stories</span> <ArrowRight size={14} />
+                              </Link>
+                              <div>
+                                <TrackingLink
+                                  href={'/case-study/brainfish/'}
+                                  className="group flex h-auto min-w-0 items-center gap-4"
+                                  clickType="Nav Click"
+                                  clickName="Customer Stories Link"
+                                  clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
+                                  clickLocation="Top Navbar"
+                                  onClick={handleProductDropdownClick}
+                                  prefetch={false}
+                                >
+                                  <Image
+                                    className="shrink-0"
+                                    src={'/img/index_features/brainfish.svg'}
+                                    alt="Brainfish"
+                                    width={20}
+                                    height={20}
+                                  />
+                                  <div
+                                    className={`line-clamp-2 max-w-[274px] text-sm text-signoz_vanilla-400 group-hover:text-[#fff]`}
+                                  >
+                                    How Brainfish leveraged SigNoz for effective Kubernetes
+                                    monitoring
+                                  </div>
+                                </TrackingLink>
                               </div>
-                              <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-x-0 gap-y-4">
-                                {productDropdownItems.map((item) => (
+                            </div>
+                            <div className="flex flex-col gap-y-4">
+                              <div
+                                className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
+                              >
+                                <span>Compare Signoz</span>
+                              </div>
+                              <div
+                                className={`flex flex-col gap-1 text-sm text-signoz_vanilla-400`}
+                              >
+                                {comparisionItems.map((comparisionItem) => (
                                   <TrackingLink
-                                    href={item.url || ''}
-                                    disabled={item.url === undefined}
-                                    className={`group flex h-auto min-w-0 items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
-                                    key={item.key}
+                                    key={comparisionItem.key}
+                                    href={comparisionItem.url}
+                                    className="group flex flex-row items-center gap-1 hover:text-[#fff]"
                                     clickType="Nav Click"
-                                    clickName={`${item.name} Product Link`}
-                                    clickText={item.name}
+                                    clickName={`${comparisionItem.name} Comparison Link`}
+                                    clickText={comparisionItem.name}
                                     clickLocation="Top Navbar"
                                     onClick={handleProductDropdownClick}
                                     prefetch={false}
                                   >
-                                    {typeof item.icon === 'string' && item.icon !== null ? (
-                                      <Image
-                                        className="shrink-0"
-                                        src={item.icon}
-                                        alt={`${item.name}`}
-                                        width={20}
-                                        height={20}
-                                      />
-                                    ) : (
-                                      <div className="h-5 w-5 shrink-0">{item.icon}</div>
-                                    )}
-                                    <div className="min-w-0">
-                                      <div className="flex flex-row items-center gap-1">
-                                        <span className="text-sm">{item.name}</span>{' '}
-                                        <ArrowRight
-                                          size={14}
-                                          className="shrink-0 opacity-0 group-hover:opacity-100"
-                                        />
-                                      </div>
-                                      <div
-                                        className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
-                                      >
-                                        {item.description}
-                                      </div>
-                                    </div>
+                                    <span>{comparisionItem.name}</span>{' '}
+                                    <ArrowRight
+                                      className="opacity-0 group-hover:opacity-100"
+                                      size={14}
+                                    />
                                   </TrackingLink>
                                 ))}
                               </div>
                             </div>
-                            <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 bg-[hsl(240_5.88%_10%)] p-6 sm:w-[300px] lg:w-[320px]">
-                              <div className="flex flex-col gap-y-4">
-                                <Link
-                                  href={'/case-study'}
-                                  className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100 hover:text-[#fff]`}
-                                  onClick={handleProductDropdownClick}
-                                  prefetch={false}
-                                >
-                                  <span>Customer Stories</span> <ArrowRight size={14} />
-                                </Link>
-                                <div>
-                                  <TrackingLink
-                                    href={'/case-study/brainfish/'}
-                                    className="group flex h-auto min-w-0 items-center gap-4"
-                                    clickType="Nav Click"
-                                    clickName="Customer Stories Link"
-                                    clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
-                                    clickLocation="Top Navbar"
-                                    onClick={handleProductDropdownClick}
-                                    prefetch={false}
-                                  >
-                                    <Image
-                                      className="shrink-0"
-                                      src={'/img/index_features/brainfish.svg'}
-                                      alt="Brainfish"
-                                      width={20}
-                                      height={20}
-                                    />
-                                    <div
-                                      className={`line-clamp-2 max-w-[274px] text-sm text-signoz_vanilla-400 group-hover:text-[#fff]`}
-                                    >
-                                      How Brainfish leveraged SigNoz for effective Kubernetes
-                                      monitoring
-                                    </div>
-                                  </TrackingLink>
-                                </div>
-                              </div>
-                              <div className="flex flex-col gap-y-4">
-                                <div
-                                  className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
-                                >
-                                  <span>Compare Signoz</span>
-                                </div>
-                                <div
-                                  className={`flex flex-col gap-1 text-sm text-signoz_vanilla-400`}
-                                >
-                                  {comparisionItems.map((comparisionItem) => (
-                                    <TrackingLink
-                                      key={comparisionItem.key}
-                                      href={comparisionItem.url}
-                                      className="group flex flex-row items-center gap-1 hover:text-[#fff]"
-                                      clickType="Nav Click"
-                                      clickName={`${comparisionItem.name} Comparison Link`}
-                                      clickText={comparisionItem.name}
-                                      clickLocation="Top Navbar"
-                                      onClick={handleProductDropdownClick}
-                                      prefetch={false}
-                                    >
-                                      <span>{comparisionItem.name}</span>{' '}
-                                      <ArrowRight
-                                        className="opacity-0 group-hover:opacity-100"
-                                        size={14}
-                                      />
-                                    </TrackingLink>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
                           </div>
-                        </Popover.Content>
-                      </Popover.Portal>
+                        </div>
+                      </Popover.Content>
                     </Popover.Root>
                   </div>
                 )}
@@ -560,13 +532,15 @@ export default function TopNav() {
 
                 {showResources && (
                   <div
-                    onMouseEnter={handleMouseEnterResources}
-                    onMouseLeave={handleMouseLeaveResources}
+                    onPointerEnter={() => setIsOpenResources(true)}
+                    onPointerLeave={() => setIsOpenResources(false)}
                     className="flex items-center"
                   >
                     <Popover.Root
                       open={isOpenResources}
-                      onOpenChange={setIsOpenResources}
+                      onOpenChange={(open) => {
+                        if (!open) setIsOpenResources(false)
+                      }}
                       modal={false}
                     >
                       <Popover.Trigger asChild>
@@ -580,93 +554,89 @@ export default function TopNav() {
                           </div>
                         </Button>
                       </Popover.Trigger>
-                      <Popover.Portal>
-                        <Popover.Content
-                          side="bottom"
-                          align="start"
-                          sideOffset={4}
-                          onMouseEnter={handleMouseEnterResources}
-                          onMouseLeave={handleMouseLeaveResources}
-                          className="z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
-                        >
-                          <div className="flex min-w-0 flex-row">
-                            <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
-                              <div
-                                className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
-                              >
-                                Learn
-                              </div>
-                              <div className="grid grid-cols-1 gap-x-3 gap-y-5">
-                                {resourcesDropdownItems.learn.map((item) => (
-                                  <TrackingLink
-                                    href={item.url}
-                                    className="group flex h-auto items-center gap-4"
-                                    key={item.key}
-                                    clickType="Nav Click"
-                                    clickName={`${item.name} Link`}
-                                    clickText={item.name}
-                                    clickLocation="Top Navbar"
-                                    onClick={handleResourcesDropdownClick}
-                                    prefetch={false}
-                                  >
-                                    <div>
-                                      <div className="flex flex-row items-center gap-1">
-                                        <span>{item.name}</span>{' '}
-                                        <ArrowRight
-                                          size={14}
-                                          className="opacity-0 group-hover:opacity-100"
-                                        />
-                                      </div>
-                                      <div
-                                        className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
-                                      >
-                                        {item.description}
-                                      </div>
-                                    </div>
-                                  </TrackingLink>
-                                ))}
-                              </div>
+                      <Popover.Content
+                        side="bottom"
+                        align="start"
+                        sideOffset={4}
+                        className="z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform before:absolute before:-top-[4px] before:left-0 before:right-0 before:h-[4px] before:content-[''] data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
+                      >
+                        <div className="flex min-w-0 flex-row">
+                          <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
+                            <div
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
+                            >
+                              Learn
                             </div>
-                            <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
-                              <div
-                                className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
-                              >
-                                Explore
-                              </div>
-                              <div className="grid grid-cols-1 gap-x-3 gap-y-5">
-                                {resourcesDropdownItems.explore.map((item) => (
-                                  <TrackingLink
-                                    href={item.url}
-                                    className="group flex h-auto items-center gap-4"
-                                    key={item.key}
-                                    clickType="Nav Click"
-                                    clickName={`${item.name} Link`}
-                                    clickText={item.name}
-                                    clickLocation="Top Navbar"
-                                    onClick={handleResourcesDropdownClick}
-                                    prefetch={false}
-                                  >
-                                    <div>
-                                      <div className="flex flex-row items-center gap-1">
-                                        <span>{item.name}</span>{' '}
-                                        <ArrowRight
-                                          size={14}
-                                          className="opacity-0 group-hover:opacity-100"
-                                        />
-                                      </div>
-                                      <div
-                                        className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
-                                      >
-                                        {item.description}
-                                      </div>
+                            <div className="grid grid-cols-1 gap-x-3 gap-y-5">
+                              {resourcesDropdownItems.learn.map((item) => (
+                                <TrackingLink
+                                  href={item.url}
+                                  className="group flex h-auto items-center gap-4"
+                                  key={item.key}
+                                  clickType="Nav Click"
+                                  clickName={`${item.name} Link`}
+                                  clickText={item.name}
+                                  clickLocation="Top Navbar"
+                                  onClick={handleResourcesDropdownClick}
+                                  prefetch={false}
+                                >
+                                  <div>
+                                    <div className="flex flex-row items-center gap-1">
+                                      <span>{item.name}</span>{' '}
+                                      <ArrowRight
+                                        size={14}
+                                        className="opacity-0 group-hover:opacity-100"
+                                      />
                                     </div>
-                                  </TrackingLink>
-                                ))}
-                              </div>
+                                    <div
+                                      className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
+                                    >
+                                      {item.description}
+                                    </div>
+                                  </div>
+                                </TrackingLink>
+                              ))}
                             </div>
                           </div>
-                        </Popover.Content>
-                      </Popover.Portal>
+                          <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
+                            <div
+                              className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100`}
+                            >
+                              Explore
+                            </div>
+                            <div className="grid grid-cols-1 gap-x-3 gap-y-5">
+                              {resourcesDropdownItems.explore.map((item) => (
+                                <TrackingLink
+                                  href={item.url}
+                                  className="group flex h-auto items-center gap-4"
+                                  key={item.key}
+                                  clickType="Nav Click"
+                                  clickName={`${item.name} Link`}
+                                  clickText={item.name}
+                                  clickLocation="Top Navbar"
+                                  onClick={handleResourcesDropdownClick}
+                                  prefetch={false}
+                                >
+                                  <div>
+                                    <div className="flex flex-row items-center gap-1">
+                                      <span>{item.name}</span>{' '}
+                                      <ArrowRight
+                                        size={14}
+                                        className="opacity-0 group-hover:opacity-100"
+                                      />
+                                    </div>
+                                    <div
+                                      className={`line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400  group-hover:text-[#FFF]`}
+                                    >
+                                      {item.description}
+                                    </div>
+                                  </div>
+                                </TrackingLink>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </Popover.Content>
                     </Popover.Root>
                   </div>
                 )}

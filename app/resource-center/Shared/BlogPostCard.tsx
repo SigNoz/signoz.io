@@ -2,6 +2,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { Blog, Guide } from 'contentlayer/generated'
 import Authors from '../../../constants/authors.json'
 import { Clock4 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { formatDate } from 'pliny/utils/formatDate'
@@ -32,19 +33,24 @@ export default function BlogPostCard({
 
     return (
       <div className="flex items-center gap-2">
-        <img
-          loading="lazy"
-          src={authorData.image_url}
-          alt=""
-          className="my-auto inline-block aspect-square h-6 w-6 shrink-0 rounded-full"
-        />
+        {authorData.image_url ? (
+          <Image
+            src={authorData.image_url}
+            alt={authorData.name || ''}
+            width={24}
+            height={24}
+            objectPosition="center"
+            objectFit="cover"
+            className="my-auto inline-block aspect-square h-6 w-6 shrink-0 rounded-full object-center"
+          />
+        ) : null}
         <div className="text-xs capitalize">{authorData.name}</div>
       </div>
     )
   }
 
   return (
-    <Link href={`/${path}`} prefetch={true}>
+    <Link href={`/${path}`} prefetch={false}>
       <div className="flex cursor-pointer flex-col max-md:ml-0 max-md:w-full">
         <div
           className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-colors duration-150 hover:bg-signoz_ink-300 active:opacity-70 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300 max-md:mt-6`}

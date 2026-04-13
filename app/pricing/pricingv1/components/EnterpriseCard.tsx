@@ -28,7 +28,7 @@ export default function EnterpriseCard() {
           </div>
 
           <TrackingLink
-            href="/contact-us/"
+            href="/contact-us/?source=pricing"
             clickType="Secondary CTA"
             clickName="Enterprise Contact Button"
             clickText="Contact Us"
@@ -114,7 +114,7 @@ export default function EnterpriseCard() {
 
           <div className="mt-auto">
             <TrackingLink
-              href="/contact-us/"
+              href="/contact-us/?source=pricing"
               clickType="Secondary CTA"
               clickName="Enterprise Contact Button"
               clickText="Contact Us"
