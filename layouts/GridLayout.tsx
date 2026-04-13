@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import Link from '@/components/Link'
-import React from 'react'
 import BlogPostCard from '@/components/ResourceCenter/BlogPostCard'
 import { Frown, HeartCrack, ChevronLeft, ChevronRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'

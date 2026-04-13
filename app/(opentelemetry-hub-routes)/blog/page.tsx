@@ -1,4 +1,3 @@
-import React from 'react'
 import Blogs from '@/components/ResourceCenter/Blogs'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'

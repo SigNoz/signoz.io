@@ -1,4 +1,3 @@
-import React from 'react'
 import GridLayout from '@/layouts/GridLayout'
 
 const POSTS_PER_PAGE = 12

@@ -1,7 +1,6 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import GridLayout from '@/layouts/GridLayout'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
-import React from 'react'
 import siteMetadata from '@/data/siteMetadata'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 

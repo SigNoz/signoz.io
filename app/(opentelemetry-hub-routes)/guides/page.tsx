@@ -1,4 +1,3 @@
-import React from 'react'
 import Guides from '@/components/ResourceCenter/Guides'
 
 export default function GuidesHome() {

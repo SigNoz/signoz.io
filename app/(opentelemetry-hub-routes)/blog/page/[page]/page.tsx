@@ -1,7 +1,6 @@
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import GridLayout from '@/layouts/GridLayout'
 import { allBlogs } from 'contentlayer/generated'
-import React from 'react'
 import siteMetadata from '@/data/siteMetadata'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {

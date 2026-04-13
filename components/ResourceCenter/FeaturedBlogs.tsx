@@ -1,4 +1,3 @@
-import React from 'react'
 import BlogPostCard from './BlogPostCard'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'

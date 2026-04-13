@@ -1,4 +1,3 @@
-import React from 'react'
 import Comparisons from '@/components/ResourceCenter/Comparisons'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
