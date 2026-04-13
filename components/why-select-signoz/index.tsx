@@ -53,7 +53,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
                 </p>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80%]">
+            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80vw]">
               <Image
                 className="w-full"
                 src={featureGraphicEnterprise}

@@ -51,12 +51,12 @@ const REASONS = [
 
 const BuildForDevelopers = () => {
   return (
-    <section className="mx-auto w-full border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80%]">
+    <section className="mx-auto w-full border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
       <div className=" h-12 w-full border !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
       <div className="overflow-hidden">
         <div className="bg-blur-perlin-noise relative">
           <div className={`section-container mb-0 !px-0 pt-12`}>
-            <div className="relative mx-auto w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400">
+            <div className="relative mx-auto w-full">
               <div className="bg-blur-ellipse-388-with-dots flex flex-col items-center border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-24 py-48 text-center sm:px-0">
                 <div className="text-[44px] font-semibold leading-[3.5rem] text-signoz_sienna-100">
                   Built for developers, <br />

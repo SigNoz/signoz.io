@@ -11,7 +11,7 @@ export const GetStarted = ({ page }) => {
 
   return (
     <>
-      <section className="mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80%]">
+      <section className="mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
         <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">

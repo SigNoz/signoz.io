@@ -33,7 +33,7 @@ export const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
 
   return (
-    <section className="m-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6 md:w-[80%]">
+    <section className="m-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6 md:w-[80vw]">
       <div className="section-container">
         <div className="mb-2 flex flex-col items-center text-center md:mb-12">
           <div className="text-sm font-semibold uppercase leading-5 tracking-[0.05em] text-signoz_vanilla-400">
