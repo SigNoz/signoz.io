@@ -143,7 +143,7 @@ Kong supports W3C TraceContext, B3/B3-single (Zipkin), Jaeger, OpenTracing, Data
 | `kong.nginx.connection.count` | Gauge | Active Nginx connections by state |
 | `kong.upstream.target.status` | Gauge | Health status of each upstream target |
 
-Kong pushes all metrics over OTLP on the `push_interval` you configure (default: 10 seconds). The `enable_bandwidth_metrics`, `enable_latency_metrics`, `enable_request_metrics`, and `enable_upstream_health_metrics` flags in the plugin config control which metric groups Kong collects.
+Kong pushes all metrics over OTLP on the `push_interval` you configure (default: 60 seconds, set to 10 in the example above for faster feedback). The `enable_bandwidth_metrics`, `enable_latency_metrics`, `enable_request_metrics`, and `enable_upstream_health_metrics` flags in the plugin config control which metric groups Kong collects.
 
 </TabItem>
 <TabItem value="logs" label="Logs">
@@ -167,10 +167,10 @@ You no longer need a separate log forwarder like Fluent Bit to parse Kong access
 
 Verify your data appears in SigNoz:
 
-1. Go to **Services** section in SigNoz to see your Kong service listed.
-2. Navigate to **Traces** section to browse distributed traces matching your defined routes. 
-3. Use **Metrics Explorer** and query `kong.latency.total` or `kong.nginx.connection.count`.
-4. Use **Logs** and filter by `service.name` to read access logs.
+1. Open **Services** to confirm `<service_name>` appears in the list.
+2. Head to **Traces** to browse distributed traces for your Kong routes.
+3. Open **Metrics Explorer** and query `kong.latency.total` or `kong.nginx.connection.count`.
+4. Head to **Logs** and filter by `service.name = <service_name>` to read access logs.
 
 <Figure
   src="/img/docs/integrations/kong-gateway/sample-traces.webp"
