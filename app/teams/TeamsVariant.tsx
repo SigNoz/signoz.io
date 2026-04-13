@@ -22,7 +22,7 @@ const TRUST_BAR_LOGOS = [
 
 const VALUE_PROPS = [
   'Out-of-the-box APM + ready-to-import dashboard templates.',
-  '$0.30/GB logs & traces. No per-host fees. Ever.',
+  '$0.30/GB logs & traces. $0.10/mn metrics. No per-host fees.',
   'One click from trace → log → infra. Fully correlated signals.',
   'OTel-native. Your instrumentation, your data. No lock-in.',
 ]
