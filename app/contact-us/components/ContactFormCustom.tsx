@@ -114,9 +114,6 @@ export default function ContactFormCustom() {
       <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
         <div className="text-2xl text-signoz_robin-500">✓</div>
         <h3 className="text-lg font-semibold text-signoz_vanilla-300">We'll be in touch soon.</h3>
-        <p className="text-sm text-gray-500">
-          A SigNoz expert will reach out within one business day.
-        </p>
       </div>
     )
   }
