@@ -174,6 +174,11 @@ export const APM_INSTRUMENTATION_ITEMS = {
       clickName: 'Hasura Instrumentation Link',
     },
     {
+      name: 'DBOS',
+      href: '/docs/integrations/opentelemetry-dbos',
+      clickName: 'DBOS Instrumentation Link',
+    },
+    {
       name: 'Kong Gateway',
       href: '/docs/integrations/opentelemetry-kong-gateway',
       clickName: 'Kong Gateway Instrumentation Link',

@@ -40,6 +40,10 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
         </Button>
       </div>
 
+      <p className="mt-3 text-center text-xs text-signoz_vanilla-400">
+        Available on SigNoz Cloud paid plans
+      </p>
+
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}

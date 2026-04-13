@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import Authors from '../constants/authors.json';
-import React from 'react';
+import Authors from '../constants/authors.json'
+import React from 'react'
 
 export default function AuthorInfo({ author }: { author: string }) {
   const handelAuthorClick = () => {
@@ -10,7 +10,7 @@ export default function AuthorInfo({ author }: { author: string }) {
   }
 
   return (
-    <div className="author-info my-2 flex items-center gap-4" onClick={handelAuthorClick}>
+    <div className="my-2 flex h-9 cursor-pointer items-center gap-4" onClick={handelAuthorClick}>
       <Image
         className="m-0 rounded-full"
         src={Authors[author]?.image_url}
@@ -19,7 +19,7 @@ export default function AuthorInfo({ author }: { author: string }) {
         height={30}
       />
 
-      <div className="author-name-team">
+      <div className="flex flex-col">
         <h4 className="m-0 text-sm font-medium capitalize text-stone-700 dark:text-white">
           {Authors[author]?.name}
         </h4>

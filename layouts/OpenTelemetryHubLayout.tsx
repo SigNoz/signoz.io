@@ -1,5 +1,3 @@
-import '../css/opentelemetry-hub.css'
-
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -140,10 +138,12 @@ export default function OpenTelemetryHubContent({
 
   return (
     <>
-      <div className="doc-content md:px-0 lg:px-4">
+      <div
+        className={`box-border w-full min-w-0 max-w-full flex-1 lg:px-4 ${!showSidebar ? 'mx-auto max-w-ot-narrow' : ''}`}
+      >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
-        <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
+        <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert">
           <h1 className="text-3xl font-bold">{title}</h1>
           {(formattedUpdatedDate || readingTimeText) && (
             <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
@@ -234,8 +234,11 @@ export default function OpenTelemetryHubContent({
       </div>
 
       {(hasMetaInfo || hasToc) && (
-        <aside className="doc-right hidden lg:block" aria-label="On this page navigation">
-          <div className="doc-right-inner">
+        <aside
+          className="box-border hidden w-full min-w-0 max-w-none shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:top-[120px] lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-start"
+          aria-label="On this page navigation"
+        >
+          <div className="flex h-full flex-col gap-3">
             {metaInfoCard}
             {hasToc && <OpenTelemetryTocClient toc={toc} />}
           </div>

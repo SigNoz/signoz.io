@@ -64,7 +64,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
   return (
     <>
-      <div className="doc">
+      <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
           title={title}
           post={post}
