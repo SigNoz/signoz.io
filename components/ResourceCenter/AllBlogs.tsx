@@ -1,7 +1,7 @@
 import React from 'react'
 import GridLayout from '@/layouts/GridLayout'
 
-const POSTS_PER_PAGE = 9
+const POSTS_PER_PAGE = 12
 
 export default function AllBlogs({ blogs }) {
   const pageNumber = 1

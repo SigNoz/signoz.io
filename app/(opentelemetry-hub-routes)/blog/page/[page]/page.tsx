@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
   }
 }
 
-const POSTS_PER_PAGE = 10
+const POSTS_PER_PAGE = 12
 
 export const generateStaticParams = async () => {
   const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)

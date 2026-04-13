@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
   }
 }
 
-const POSTS_PER_PAGE = 10
+const POSTS_PER_PAGE = 12
 
 export default async function Page({ params }: { params: { page: string } }) {
   const comparisons = await fetchAllComparisonsForPage()
