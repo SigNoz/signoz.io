@@ -14,7 +14,7 @@ export function Header() {
     <header className="relative mx-auto mt-16 max-w-8xl md:w-[80%]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
-      <div className="relative mx-auto flex w-full flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 pt-12 text-center md:pt-[4rem]">
+      <div className="relative mx-auto flex w-full flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 pt-12 text-center md:pt-16">
         <Hero>
           <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
           <span className="hidden md:inline">Observability on Your Terms,</span>

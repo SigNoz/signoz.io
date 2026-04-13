@@ -6,7 +6,7 @@ import SignozIcon from '@/public/svgs/icons/signoz.svg'
 export const CommunityEdition = () => {
   return (
     <section>
-      <div className="section-container flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400  px-4 py-10 md:px-10">
+      <div className="section-container !md:px-10 flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !px-10 !py-10">
         <div className="flex w-full flex-col">
           <div>
             <p className="text-2xl font-semibold text-signoz_vanilla-100">
