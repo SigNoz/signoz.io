@@ -277,13 +277,16 @@ export default function TopNav() {
       setShowMainMenu(false)
     }
 
-    if (pathname.startsWith(TAB_PATHNAMES.BLOG)) {
+    const isListingOrPagination = (base: string) =>
+      pathname === base || pathname.startsWith(`${base}/page/`)
+
+    if (isListingOrPagination(TAB_PATHNAMES.BLOG)) {
       setActiveTab(TABS.BLOG)
       setShouldShowTabs(true)
-    } else if (pathname.startsWith(TAB_PATHNAMES.COMPARISONS)) {
+    } else if (isListingOrPagination(TAB_PATHNAMES.COMPARISONS)) {
       setActiveTab(TABS.COMPARISONS)
       setShouldShowTabs(true)
-    } else if (pathname.startsWith(TAB_PATHNAMES.GUIDES)) {
+    } else if (isListingOrPagination(TAB_PATHNAMES.GUIDES)) {
       setActiveTab(TABS.GUIDES)
       setShouldShowTabs(true)
     } else {
