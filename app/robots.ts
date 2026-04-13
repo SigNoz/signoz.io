@@ -3,23 +3,22 @@ import siteMetadata from '@/data/siteMetadata'
 
 export default function robots(): MetadataRoute.Robots {
   const isProduction = process.env.VERCEL_ENV === 'production'
-  const currentUrl = isProduction 
-    ? siteMetadata.siteUrl 
-    : `https://staging.signoz.io`
-  
+  const currentUrl = isProduction ? siteMetadata.siteUrl : `https://staging.signoz.io`
+
   if (!isProduction) {
     return {
       rules: {
         userAgent: '*',
         disallow: '/',
-      }
+      },
     }
   }
-  
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
+      disallow: '/resource-center',
     },
     sitemap: `${currentUrl}/sitemap.xml`,
     host: currentUrl,
