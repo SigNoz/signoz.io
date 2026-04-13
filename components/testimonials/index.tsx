@@ -14,8 +14,9 @@ import anselmAvatar from '@/public/img/users/anselm.jpg'
 import apoorvaAvatar from '@/public/img/users/apoorva-kumar.webp'
 import pawanAvatar from '@/public/img/users/pawan-outplay.webp'
 import farisAvatar from '@/public/img/users/faris.jpeg'
+import { cn } from '../../app/lib/utils'
 
-export const Testimonials = ({ page }) => {
+export const Testimonials = ({ page, className }: { page: string; className?: string }) => {
   const customerStoriesId = `btn-customer-stories-testimonials-${page}`
   const TESTIMONIALS_LIST = [
     [
@@ -184,7 +185,12 @@ export const Testimonials = ({ page }) => {
   ]
   return (
     <section>
-      <div className="section-container bg-blur-footer-backdrop relative mx-auto flex w-full flex-col items-center overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 !py-8 md:w-[80vw] md:!py-24">
+      <div
+        className={cn(
+          'section-container bg-blur-footer-backdrop relative mx-auto flex w-full flex-col items-center overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 !py-8 md:w-[80vw] md:!py-24',
+          className
+        )}
+      >
         <div className="z-10 mb-16 flex flex-col items-center gap-12 text-center">
           <OutplayLogo className="h-7 w-auto" aria-label="Outplay logo" />
           <span className="max-w-[min(42rem,90%)] text-center text-sm font-normal leading-10 text-signoz_sienna-200 sm:text-2xl">

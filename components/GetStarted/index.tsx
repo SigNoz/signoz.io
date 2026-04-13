@@ -4,14 +4,20 @@ import Button from '@/components/Button/Button'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
+import { cn } from '../../app/lib/utils'
 
-export const GetStarted = ({ page }) => {
+export const GetStarted = ({ page, className }: { page: string; className?: string }) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
   return (
     <>
-      <section className="mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
+      <section
+        className={cn(
+          'mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      >
         <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">

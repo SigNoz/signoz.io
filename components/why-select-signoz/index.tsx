@@ -8,9 +8,20 @@ import Image from 'next/image'
 import featureGraphicEnterprise from '@/public/img/graphics/homepage/feature-graphic-enterprise.svg?url'
 import { cn } from '../../app/lib/utils'
 
-const WhySelectSignoz = ({ isInPricingPage = false }) => {
+const WhySelectSignoz = ({
+  isInPricingPage = false,
+  className,
+}: {
+  isInPricingPage?: boolean
+  className?: string
+}) => {
   return (
-    <div className="section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:w-[80vw]">
+    <div
+      className={cn(
+        'section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:w-[80vw]',
+        className
+      )}
+    >
       <div
         className={cn(
           `grid grid-cols-1 sm:grid-cols-[1fr_2fr]`,

@@ -15,6 +15,7 @@ import featureGraphic4 from '@/public/img/graphics/homepage/feature-graphic-4.sv
 import featureGraphic5 from '@/public/img/graphics/homepage/feature-graphic-5.svg?url'
 import featureGraphic6 from '@/public/img/graphics/homepage/feature-graphic-6.svg?url'
 import featureGraphic8 from '@/public/img/graphics/homepage/feature-graphic-8.svg?url'
+import { cn } from '../../app/lib/utils'
 
 const icons = [
   {
@@ -120,10 +121,15 @@ const sections = [
   },
 ]
 
-export const SigNozFeatures = () => {
+export const SigNozFeatures = ({ className }: { className?: string }) => {
   return (
     <>
-      <section className="bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
+      <section
+        className={cn(
+          'bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      >
         <div className={`container pb-16`}>
           <div className="flex flex-col gap-6 pb-24 md:pb-32 ">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center sm:mt-[50px]">
@@ -184,7 +190,12 @@ export const SigNozFeatures = () => {
           </div>
         </div>
       </section>
-      <div className="homepage-observability-container mx-auto grid w-full grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:w-[80vw]">
+      <div
+        className={cn(
+          'homepage-observability-container mx-auto grid w-full grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:w-[80vw]',
+          className
+        )}
+      >
         {sections.map((section) => (
           <Card
             iconTag={section.iconTag}

@@ -8,7 +8,7 @@ import GithubIcon from '@/public/img/index_features/github.svg'
 import ContributionsIcon from '@/public/img/index_features/contributions.svg'
 import CommunityIcon from '@/public/img/index_features/community.svg'
 
-const SigNozStats = () => {
+const SigNozStats = ({ className }: { className?: string }) => {
   const STATS_LIST = [
     {
       id: 1,
@@ -37,7 +37,12 @@ const SigNozStats = () => {
   ]
   return (
     <section>
-      <div className="section-container mx-auto grid w-full grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)] md:w-[80vw]">
+      <div
+        className={cn(
+          'section-container mx-auto grid w-full grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)] md:w-[80vw]',
+          className
+        )}
+      >
         <div className="min-w-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
           <p className="px-4 pt-4 text-left text-3xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[36px] lg:px-8 lg:pt-10">
             Developers <br className="hidden sm:block" />

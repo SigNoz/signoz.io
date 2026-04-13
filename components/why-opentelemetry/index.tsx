@@ -9,6 +9,7 @@ import CasesIcon from '@/public/img/index_features/cases.svg'
 import EasyToUseIcon from '@/public/img/index_features/easy-to-use.svg'
 import Image from 'next/image'
 import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-otel.svg?url'
+import { cn } from '../../app/lib/utils'
 
 const REASONS = [
   {
@@ -33,10 +34,15 @@ const REASONS = [
   },
 ]
 
-export const WhyOpenTelemetry = () => {
+export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
   return (
     <>
-      <section className="mx-auto w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
+      <section
+        className={cn(
+          'mx-auto w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      >
         <div className="bg-blur-ellipse-207 container">
           <div className="grid place-items-center py-8 text-center md:py-28">
             <p className="text-center text-sm font-medium uppercase tracking-[.05em] text-signoz_vanilla-400">
@@ -65,7 +71,12 @@ export const WhyOpenTelemetry = () => {
           </div>
         </div>
       </section>
-      <div className="mx-auto grid w-full grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:w-[80vw]">
+      <div
+        className={cn(
+          'mx-auto grid w-full grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:w-[80vw]',
+          className
+        )}
+      >
         {REASONS.map((section) => (
           <Card
             logo={section.logo}
@@ -77,10 +88,15 @@ export const WhyOpenTelemetry = () => {
           />
         ))}
       </div>
-      <section className="mx-auto w-full border border-dashed border-signoz_slate-400 md:w-[80vw] ">
+      <section
+        className={cn(
+          'mx-auto w-full border border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      >
         <div className="mb-16 px-0">
           <div className="grid gap-9 p-9">
-            <div className="grid grid-cols-1 items-start gap-8 2xl:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[minmax(0,1fr)_auto]">
               <div className="min-w-0">
                 <p className="text-2xl font-semibold text-signoz_vanilla-100">
                   {' '}
@@ -159,7 +175,12 @@ export const WhyOpenTelemetry = () => {
           </div>
         </div>
       </section>
-      <div className="mx-auto h-12 w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]" />
+      <div
+        className={cn(
+          'mx-auto h-12 w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      />
     </>
   )
 }

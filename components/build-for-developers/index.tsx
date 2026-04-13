@@ -5,6 +5,7 @@ import featureGraphicFlexibleDeployment from '@/public/img/graphics/homepage/fea
 import featureGraphicColumnarDb from '@/public/img/graphics/homepage/feature-graphic-columnar-db.svg?url'
 import featureGraphicFlexibleQuerying from '@/public/img/graphics/homepage/feature-graphic-flexible-querying.svg?url'
 import featureGraphicCorrelation from '@/public/img/graphics/homepage/feature-graphic-correlation.svg?url'
+import { cn } from '../../app/lib/utils'
 
 const REASONS = [
   {
@@ -49,9 +50,14 @@ const REASONS = [
   },
 ]
 
-const BuildForDevelopers = () => {
+const BuildForDevelopers = ({ className }: { className?: string }) => {
   return (
-    <section className="mx-auto w-full border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
+    <section
+      className={cn(
+        'mx-auto w-full border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+        className
+      )}
+    >
       <div className=" h-12 w-full border !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
       <div className="overflow-hidden">
         <div className="bg-blur-perlin-noise relative">

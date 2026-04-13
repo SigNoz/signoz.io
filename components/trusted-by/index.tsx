@@ -13,6 +13,7 @@ import GoKiwiLogo from '@/public/img/users/gokiwi.svg'
 import LovartLogo from '@/public/svgs/icons/lovart.svg'
 import BlaxelLogo from '@/public/svgs/icons/blaxel.svg'
 import ShapedLogo from '@/public/img/case_study/logos/shaped-logo.svg'
+import { cn } from '../../app/lib/utils'
 
 export const COMPANIES = [
   { Logo: NetAppLogo, imageDesc: 'netapp logo' },
@@ -29,11 +30,16 @@ export const COMPANIES = [
   { Logo: ShapedLogo, imageDesc: 'shaped logo' },
 ]
 
-export const TrustedByTeams = ({ page }) => {
+export const TrustedByTeams = ({ page, className }: { page?: string; className?: string }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
 
   return (
-    <section className="m-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6 md:w-[80vw]">
+    <section
+      className={cn(
+        'm-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6 md:w-[80vw]',
+        className
+      )}
+    >
       <div className="section-container">
         <div className="mb-2 flex flex-col items-center text-center md:mb-12">
           <div className="text-sm font-semibold uppercase leading-5 tracking-[0.05em] text-signoz_vanilla-400">
