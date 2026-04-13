@@ -1,12 +1,16 @@
 'use client'
 
 import React from 'react'
+import dynamic from 'next/dynamic'
 import Image, { type StaticImageData } from 'next/image'
 import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import VimeoPlayer from '../VimeoPlayer/VimeoPlayer'
 import TrackingButton from '@/components/TrackingButton'
 import PlayIcon from '@/public/svgs/icons/play-icon.svg'
+
+const VimeoPlayer = dynamic(() => import('../VimeoPlayer/VimeoPlayer'), {
+  ssr: false,
+})
 
 interface VideoModalPlayerProps {
   thumbnailSrc: string | StaticImageData
@@ -57,7 +61,7 @@ export const VideoModalPlayer = ({
           panelClassName="p-0"
         >
           <div className="rounded bg-signoz_ink-400 px-6 py-6">
-            <VimeoPlayer videoId={videoId} />
+            {isOpen ? <VimeoPlayer videoId={videoId} /> : null}
           </div>
         </Modal>
       </div>

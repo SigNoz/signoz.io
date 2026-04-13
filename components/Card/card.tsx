@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import Image, { type StaticImageData } from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
@@ -53,25 +53,11 @@ const Card: React.FC<CardProps> = ({
   sectionName = 'Features',
   className = '',
 }) => {
-  const logoSizeClassnames = useMemo(() => {
-    if (logoSize === 16) {
-      return 'w-4 h-4 fill-signoz_vanilla-400'
-    }
+  const logoSizeClassnames =
+    logoSize === 24 ? 'w-6 h-6 fill-signoz_vanilla-400' : 'w-4 h-4 fill-signoz_vanilla-400'
 
-    if (logoSize === 24) {
-      return 'w-6 h-6 fill-signoz_vanilla-400'
-    }
-  }, [logoSize])
-
-  const subTitleSizeClassnames = useMemo(() => {
-    if (subTitleSize === 1) {
-      return 'text-base font-semibold'
-    }
-
-    if (subTitleSize === 2) {
-      return 'text-2xl font-semibold'
-    }
-  }, [subTitleSize])
+  const subTitleSizeClassnames =
+    subTitleSize === 2 ? 'text-2xl font-semibold' : 'text-base font-semibold'
 
   const descriptionArray = Array.isArray(description)
     ? description
