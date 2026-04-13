@@ -620,11 +620,11 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
     <ExperimentTracker experimentId={experimentId} variantId={variantId}>
       {showVariant ? (
         // Variant: value props + compact testimonials on left, form on right
-        <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
+        <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-400">
           <FocusedNavbar />
           <div className="flex flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
             {/* Left section — copy + checkmarks + logos (desktop only) */}
-            <div className="hidden w-full flex-col justify-center bg-signoz_ink-500 p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
+            <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
               <div className="flex max-w-[420px] flex-col gap-8">
                 {/* Headline */}
                 <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
@@ -666,8 +666,13 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
               </div>
             </div>
 
+            {/* Divider */}
+            <div className="hidden lg:flex lg:items-center lg:py-16">
+              <div className="h-full w-px bg-signoz_slate-400" />
+            </div>
+
             {/* Right section — sign up form */}
-            <div className="relative flex w-full flex-col items-center justify-center bg-signoz_ink-400 p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:border-l lg:border-signoz_slate-400 lg:px-16 lg:py-14">
+            <div className="relative flex w-full flex-col items-center justify-center p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:px-16 lg:py-14">
               <div className="w-full max-w-[560px] rounded-[12px] border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-10">
                 {formSection}
               </div>
