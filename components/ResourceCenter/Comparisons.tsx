@@ -1,10 +1,9 @@
 'use client'
 
-import BlogPostCard from './BlogPostCard'
 import SearchInput from './Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
-import { Frown } from 'lucide-react'
+import GridLayout from '@/layouts/GridLayout'
 
 interface ComparisonsPageHeaderProps {
   onSearch: (e) => void
@@ -29,11 +28,10 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
   )
 }
 
-export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
-  const primaryFeaturedBlogs = posts.slice(0, 2)
-  const secondaryFeaturedBlogs = posts.slice(0)
+const POSTS_PER_PAGE = 9
 
-  const [blogs, setBlogs] = React.useState(secondaryFeaturedBlogs)
+export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
+  const [blogs, setBlogs] = React.useState(posts)
   const [searchValue, setSearchValue] = React.useState('')
 
   const handleSearch = (e) => {
@@ -42,31 +40,25 @@ export default function ComparisonsListing({ posts = [] }: { posts?: any[] }) {
     setBlogs(filteredPosts)
   }
 
+  const pageNumber = 1
+  const initialDisplayPosts = blogs.slice(0, POSTS_PER_PAGE)
+  const pagination = {
+    currentPage: pageNumber,
+    totalPages: Math.ceil(blogs.length / POSTS_PER_PAGE),
+    pageRoute: 'comparisons',
+  }
+
   return (
     <div className="comparisons">
       <ComparisonsPageHeader onSearch={handleSearch} />
 
-      {searchValue && searchValue.length == 0 && (
-        <div className="mt-5 w-full max-md:max-w-full">
-          <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-            {primaryFeaturedBlogs.map((featuredBlog, index) => {
-              return <BlogPostCard blog={featuredBlog} key={index} />
-            })}
-          </div>
-        </div>
-      )}
-
-      {blogs && Array.isArray(blogs) && blogs.length <= 0 && (
-        <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
-          <Frown size={16} /> No Comparisons found
-        </div>
-      )}
-
-      <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {blogs.map((post, index) => {
-          return <BlogPostCard blog={post} key={index} />
-        })}
-      </div>
+      <GridLayout
+        posts={blogs}
+        initialDisplayPosts={searchValue ? blogs : initialDisplayPosts}
+        pagination={searchValue ? undefined : pagination}
+        title="All Comparisons"
+        isDarkMode={true}
+      />
     </div>
   )
 }

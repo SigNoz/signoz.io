@@ -3,22 +3,10 @@
 import { allGuides } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import React, { useState, useEffect, useMemo } from 'react'
-import BlogPostCard from './BlogPostCard'
 import { filterData } from 'app/utils/common'
 import SearchInput from './Search'
-import { Frown } from 'lucide-react'
 import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
-
-interface HeadingProps {
-  tag: string
-  text: string
-  className?: string
-}
-
-const Heading: React.FC<HeadingProps> = ({ tag, text, className = '' }) => {
-  const Tag = tag as keyof JSX.IntrinsicElements
-  return <Tag className={className}>{text}</Tag>
-}
+import GridLayout from '@/layouts/GridLayout'
 
 interface GuidesHeaderProps {
   title: string
@@ -44,12 +32,12 @@ const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
   )
 }
 
+const POSTS_PER_PAGE = 12
+
 export default function Guides() {
   const posts = allCoreContent(sortPosts(allGuides))
   const [activeItem, setActiveItem] = useState(GUIDES_TOPICS.ALL)
   const [searchQuery, setSearchQuery] = useState('')
-  const POST_PER_PAGE = 20
-  const pageNumber = 1
 
   useEffect(() => {
     if (!window) {
@@ -89,10 +77,13 @@ export default function Guides() {
     setActiveItem(GUIDES_TOPICS.ALL)
   }
 
+  const isFiltering = searchQuery || activeItem !== GUIDES_TOPICS.ALL
+  const pageNumber = 1
+  const initialDisplayPosts = blogs.slice(0, POSTS_PER_PAGE)
   const pagination = {
     currentPage: pageNumber,
-    totalPages: Math.ceil(posts.length / POST_PER_PAGE),
-    pageRoute: 'guide',
+    totalPages: Math.ceil(blogs.length / POSTS_PER_PAGE),
+    pageRoute: 'guides',
   }
 
   return (
@@ -107,17 +98,13 @@ export default function Guides() {
       <div className="relative mt-8 flex flex-col gap-8 xl:-mr-16 xl:pr-16">
         <SideBar onCategoryClick={handleCategoryClick} activeItem={activeItem} />
         <div className="flex-1">
-          {blogs && Array.isArray(blogs) && blogs.length <= 0 && (
-            <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
-              <Frown size={16} /> No Guides found
-            </div>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {blogs.map((post) => {
-              return <BlogPostCard key={post.slug} blog={post} />
-            })}
-          </div>
+          <GridLayout
+            posts={blogs}
+            initialDisplayPosts={isFiltering ? blogs : initialDisplayPosts}
+            pagination={isFiltering ? undefined : pagination}
+            title="All Guides"
+            isDarkMode={true}
+          />
         </div>
       </div>
     </div>

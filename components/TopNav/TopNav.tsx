@@ -286,9 +286,6 @@ export default function TopNav() {
     } else if (pathname.startsWith(TAB_PATHNAMES.GUIDES)) {
       setActiveTab(TABS.GUIDES)
       setShouldShowTabs(true)
-    } else if (pathname.startsWith(TAB_PATHNAMES.OPENTELEMETRY)) {
-      setActiveTab(TABS.OPENTELEMETRY)
-      setShouldShowTabs(true)
     } else {
       setShouldShowTabs(false)
     }
