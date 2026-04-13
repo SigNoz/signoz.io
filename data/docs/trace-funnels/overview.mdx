@@ -10,6 +10,26 @@ Trace Funnels provides visibility into the step-by-step progression of requests 
 
 Unlike traditional monitoring that shows only aggregate metrics, Trace Funnels correlates span data with your internal services and traces, helping you identify the root cause of issues faster by tracking how requests flow through your system.
 
+## How It Works
+
+Trace Funnels leverages OpenTelemetry [semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) to automatically detect and analyze sequential spans from your instrumented services. The feature works by using the span attributes mentioned below:
+
+| Attribute | Description | Example |
+|-----------|-------------|---------|
+| `service.name` | Name of the service emitting the span | `frontend`, `backend`, `database` |
+| `span.name` | Name of the specific operation | `HTTP GET /orders`, `ProcessOrder`, `WriteOrderRecord` |
+| `trace.id` | Unique identifier for the trace | `1234567890abcdef` |
+
+These attributes are used to automatically correlate spans within the same trace, identify sequential operations, and calculate conversion rates between steps.
+
+## When to Use & Key Benefits
+
+Trace Funnels can deliver specific benefits in these common scenarios:
+
+- **During performance analysis:** Quickly identify which steps in your request flow are causing bottlenecks through conversion rate analysis and transition timing.
+- **When investigating user journeys:** Determine if users are dropping off at specific points in your application flow using step-by-step conversion tracking.
+- **For proactive monitoring:** Keep an eye on critical business flows with comprehensive performance insights that track conversion rates and error patterns across your system.
+
 ## Accessing Trace Funnels
 
 To access the Trace Funnels feature:
@@ -23,26 +43,6 @@ The Trace Funnels button appears beside the main search bar.
     <img src="/img/docs/trace-funnels/navigating_to_trace_funnels.gif" alt="Accessing Trace Funnels"/>
     <figcaption><i>Accessing Trace Funnels from the Traces page</i></figcaption>
 </figure>
-
-## When to Use & Key Benefits
-
-Trace Funnels can deliver specific benefits in these common scenarios:
-
-- **During performance analysis:** Quickly identify which steps in your request flow are causing bottlenecks through conversion rate analysis and transition timing.
-- **When investigating user journeys:** Determine if users are dropping off at specific points in your application flow using step-by-step conversion tracking.
-- **For proactive monitoring:** Keep an eye on critical business flows with comprehensive performance insights that track conversion rates and error patterns across your system.
-
-## How It Works
-
-Trace Funnels leverages OpenTelemetry [semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) to automatically detect and analyze sequential spans from your instrumented services. The feature works by using the span attributes mentioned below:
-
-| Attribute | Description | Example |
-|-----------|-------------|---------|
-| `service.name` | Name of the service emitting the span | `frontend`, `backend`, `database` |
-| `span.name` | Name of the specific operation | `HTTP GET /orders`, `ProcessOrder`, `WriteOrderRecord` |
-| `trace.id` | Unique identifier for the trace | `1234567890abcdef` |
-
-These attributes are used to automatically correlate spans within the same trace, identify sequential operations, and calculate conversion rates between steps.
 
 ## Feature Walkthrough
 
@@ -101,30 +101,8 @@ Further filter spans by attributes (e.g., `http.status_code = 200`, `error = fal
     <figcaption><i>Defining Funnel Steps</i></figcaption>
 </figure>
 
-## Best Practices
-
-### Keep Funnels Focused
-- Limit to three essential steps to maintain clarity
-- Focus on critical business flows that directly impact user experience
-- Avoid creating funnels for every possible path through your system
-
-### Use Where Clauses Sparingly
-- Only filter when necessary to reduce computation time
-- Use specific attributes that clearly define the step (e.g., `http.method = "GET"`)
-- Avoid overly complex filtering that might exclude valid requests
-
-### Review Transitions Regularly
-- Set a cadence (e.g., weekly) to analyze slow or error-prone transitions
-- Monitor conversion rate trends to identify degradation early
-- Investigate traces with the slowest transitions to understand bottlenecks
-
-### Naming Conventions
-- Use descriptive funnel names that clearly indicate the business flow
-- Choose span names that are specific and meaningful
-- Consider including the business context in funnel names (e.g., "User Registration Flow")
-
 ## Related Resources
 
-- [Trace Explorer Documentation](/docs/userguide/traces)
-- [Span Details Documentation](/docs/userguide/span-details)
-- [APM & Distributed Tracing Overview](/docs/instrumentation/overview) 
+- [Working with Trace Funnels](https://signoz.io/docs/trace-funnels/working-with-trace-funnels/) — Funnel analysis, transitions, and examples
+- [Setup Trace Funnels](https://signoz.io/docs/trace-funnels/setup/) — Prerequisites and required span attributes
+- [Trace Explorer](https://signoz.io/docs/apm-and-distributed-tracing/trace-explorer/) — Search and filter traces

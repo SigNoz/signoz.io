@@ -1206,16 +1206,19 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/apm-and-distributed-tracing/trace-anomalies',
-            label: 'Understanding Traces',
+            route: '/docs/trace-funnels/overview',
+            label: 'Trace Funnels',
           },
           {
-            label: 'Trace Funnels',
+            label: 'User Guides',
             type: 'category',
             isExpanded: false,
-            route: '/docs/trace-funnels/overview',
             items: [
-              { type: 'doc', route: '/docs/trace-funnels/overview', label: 'Overview' },
+              {
+                type: 'doc',
+                route: '/docs/apm-and-distributed-tracing/trace-anomalies',
+                label: 'Understanding Traces',
+              },
               {
                 type: 'doc',
                 route: '/docs/trace-funnels/working-with-trace-funnels',
@@ -1277,6 +1280,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/apm-and-distributed-tracing/traces-api',
             label: 'Using Traces API',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/apm-metrics',
+            label: 'Understanding APM Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/derived-fields-spans',
+            label: 'Derived Fields for Spans',
           },
         ],
       },
