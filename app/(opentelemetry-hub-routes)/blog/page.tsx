@@ -1,5 +1,5 @@
 import React from 'react'
-import Blogs from './Blogs'
+import Blogs from '@/components/ResourceCenter/Blogs'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Blog | SigNoz',
     description: `${siteMetadata.description} | Blog | SigNoz`,
-    url: `${siteMetadata.siteUrl}/resource-center/blog`,
+    url: `${siteMetadata.siteUrl}/blog`,
     siteName: siteMetadata.title,
     locale: 'en_US',
     type: 'website',

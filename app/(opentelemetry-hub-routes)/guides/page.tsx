@@ -1,5 +1,5 @@
 import React from 'react'
-import Guides from './Guides'
+import Guides from '@/components/ResourceCenter/Guides'
 
 export default function GuidesHome() {
   return (

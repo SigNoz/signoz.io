@@ -30,28 +30,18 @@ export const getPageType = (pathname: string): string => {
 
   // Listing pages (including pagination)
   // Blog listing pages
-  if (normalizedPath === '/resource-center/blog' || normalizedPath === '/blog')
-    return 'Blog Listing Page'
-  if (normalizedPath.match(/^\/resource-center\/blog\/page\/\d+$/)) return 'Blog Listing Page'
+  if (normalizedPath === '/blog') return 'Blog Listing Page'
   if (normalizedPath.match(/^\/blog\/page\/\d+$/)) return 'Blog Listing Page'
 
   // Comparison listing pages
-  if (normalizedPath === '/resource-center/comparisons' || normalizedPath === '/comparisons')
-    return 'Comparison Listing Page'
-  if (normalizedPath.match(/^\/resource-center\/comparisons\/page\/\d+$/))
-    return 'Comparison Listing Page'
+  if (normalizedPath === '/comparisons') return 'Comparison Listing Page'
   if (normalizedPath.match(/^\/comparisons\/page\/\d+$/)) return 'Comparison Listing Page'
 
   // Guide listing pages
-  if (normalizedPath === '/resource-center/guides' || normalizedPath === '/guides')
-    return 'Guide Listing Page'
-  if (normalizedPath.match(/^\/resource-center\/guides\/page\/\d+$/)) return 'Guide Listing Page'
+  if (normalizedPath === '/guides') return 'Guide Listing Page'
   if (normalizedPath.match(/^\/guides\/page\/\d+$/)) return 'Guide Listing Page'
 
   // OTel listing pages
-  if (normalizedPath === '/resource-center/opentelemetry') return 'OTel Listing Page'
-  if (normalizedPath.match(/^\/resource-center\/opentelemetry\/page\/\d+$/))
-    return 'OTel Listing Page'
   if (normalizedPath.match(/^\/opentelemetry\/page\/\d+$/)) return 'OTel Listing Page'
 
   if (normalizedPath === '/opentelemetry') return 'Blog Page'

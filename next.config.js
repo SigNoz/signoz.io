@@ -345,8 +345,58 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/resource-center',
+          destination: '/blog',
+          permanent: true,
+        },
+        {
           source: '/resource-center/',
-          destination: '/resource-center/blog/',
+          destination: '/blog/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/blog',
+          destination: '/blog',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/blog/',
+          destination: '/blog/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/blog/page/:page',
+          destination: '/blog/page/:page',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/comparisons',
+          destination: '/comparisons',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/comparisons/',
+          destination: '/comparisons/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/guides',
+          destination: '/guides',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/guides/',
+          destination: '/guides/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/opentelemetry',
+          destination: '/opentelemetry',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/opentelemetry/',
+          destination: '/opentelemetry/',
           permanent: true,
         },
         {
@@ -563,11 +613,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/comparisons/',
-          destination: '/resource-center/comparisons/',
-          permanent: true,
-        },
-        {
           source: '/learn/user-stories/',
           destination: '/blog/community-update-06/#observability-user-stories',
           permanent: true,
@@ -697,11 +742,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/blog/',
-          destination: '/resource-center/blog/',
-          permanent: true,
-        },
-        {
           source: '/blog/open-source-log-management/',
           destination: '/blog/best-open-source-log-management-tools',
           permanent: true,
@@ -725,11 +765,6 @@ module.exports = () => {
         {
           source: '/opentelemetry/series/nextjs/',
           destination: '/blog/opentelemetry-nextjs/',
-          permanent: true,
-        },
-        {
-          source: '/guides/',
-          destination: '/resource-center/guides/',
           permanent: true,
         },
         {
@@ -2215,7 +2250,7 @@ module.exports = () => {
         },
         {
           source: '/learn/',
-          destination: '/resource-center/guides/',
+          destination: '/guides/',
           permanent: true,
         },
         {

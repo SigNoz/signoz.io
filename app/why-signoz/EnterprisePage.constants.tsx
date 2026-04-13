@@ -212,7 +212,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           flexible, no learning curve.
         </p>
         <TrackingLink
-          href="/resource-center/opentelemetry/"
+          href="/opentelemetry/"
           clickType="Secondary CTA"
           clickName="High Growth Teams Section Open Source + OpenTelemetry"
           clickLocation="Why SigNoz Page"

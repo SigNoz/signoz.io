@@ -22,7 +22,7 @@ import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import Tabs from '../../app/resource-center/Shared/Tabs'
+import Tabs from '@/components/ResourceCenter/Tabs'
 import * as Popover from '@radix-ui/react-popover'
 import Accordion from '../Accordion/Accordion'
 import { QUERY_PARAMS } from '@/constants/queryParams'
@@ -38,10 +38,10 @@ enum TABS {
 }
 
 enum TAB_PATHNAMES {
-  BLOG = '/resource-center/blog',
-  COMPARISONS = '/resource-center/comparisons',
-  GUIDES = '/resource-center/guides',
-  OPENTELEMETRY = '/resource-center/opentelemetry',
+  BLOG = '/blog',
+  COMPARISONS = '/comparisons',
+  GUIDES = '/guides',
+  OPENTELEMETRY = '/opentelemetry',
 }
 const productDropdownItems = [
   {
@@ -177,25 +177,25 @@ const resourcesDropdownItems = {
   learn: [
     {
       key: 'blog',
-      url: '/resource-center/blog',
+      url: '/blog',
       description: 'News, ideas, and insights on observability',
       name: 'Blog',
     },
     {
       key: 'comparisons',
-      url: '/resource-center/comparisons',
+      url: '/comparisons',
       description: 'Compare observability tools',
       name: 'Comparisons',
     },
     {
       key: 'guides',
-      url: '/resource-center/guides',
+      url: '/guides',
       description: 'How-to guides and tutorials',
       name: 'Guides',
     },
     {
       key: 'opentelemetry',
-      url: '/resource-center/opentelemetry',
+      url: '/opentelemetry',
       description: 'OpenTelemetry concepts and its use cases',
       name: 'OpenTelemetry',
     },

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { filterData } from 'app/utils/common'
 import { allBlogs } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import SearchInput from '../Shared/Search'
+import SearchInput from './Search'
 import FeaturedBlogs from './FeaturedBlogs'
 import AllBlogs from './AllBlogs'
 

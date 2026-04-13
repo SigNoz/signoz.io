@@ -11,7 +11,7 @@ export default function Tabs({ activeTab }) {
           data-tabs-toggle="#default-tab-content"
           role="tablist"
         >
-          <Link className="me-2 h-full" role="presentation" href="/resource-center/blog">
+          <Link className="me-2 h-full" role="presentation" href="/blog">
             <button
               className={`inline-block h-full rounded-t-lg px-1 py-1.5 pb-3.5 ${activeTab === 'blog-tab' ? ' border-b-2 border-signoz_robin-500 text-signoz_vanilla-100' : ''}`}
               id="blog-tab"
@@ -25,7 +25,7 @@ export default function Tabs({ activeTab }) {
               Blog
             </button>
           </Link>
-          <Link className="me-2" role="presentation" href="/resource-center/comparisons">
+          <Link className="me-2" role="presentation" href="/comparisons">
             <button
               className={`inline-block h-full rounded-t-lg px-1 py-1.5 pb-3.5 ${activeTab === 'comparisons-tab' ? ' border-b-2 border-signoz_robin-500 text-signoz_vanilla-100' : ''}`}
               id="comparisons-tab"
@@ -39,7 +39,7 @@ export default function Tabs({ activeTab }) {
               Comparisons
             </button>
           </Link>
-          <Link className="me-2" role="presentation" href="/resource-center/guides">
+          <Link className="me-2" role="presentation" href="/guides">
             <button
               className={`inline-block h-full rounded-t-lg px-1 py-1.5 pb-3.5 ${activeTab === 'guides-tab' ? ' border-b-2 border-signoz_robin-500 text-signoz_vanilla-100' : ''}`}
               id="guides-tab"
@@ -53,7 +53,7 @@ export default function Tabs({ activeTab }) {
             </button>
           </Link>
 
-          <Link role="presentation" href="/resource-center/opentelemetry">
+          <Link role="presentation" href="/opentelemetry">
             <button
               className={`inline-block h-full rounded-t-lg px-1 py-1.5 pb-3.5 ${activeTab === 'openTelemetry-tab' ? ' border-b-2 border-signoz_robin-500 text-signoz_vanilla-100' : ''}`}
               id="openTelemetry-tab"

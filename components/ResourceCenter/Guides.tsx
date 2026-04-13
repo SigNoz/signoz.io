@@ -3,9 +3,9 @@
 import { allGuides } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import React, { useState, useEffect, useMemo } from 'react'
-import BlogPostCard from '../Shared/BlogPostCard'
+import BlogPostCard from './BlogPostCard'
 import { filterData } from 'app/utils/common'
-import SearchInput from '../Shared/Search'
+import SearchInput from './Search'
 import { Frown } from 'lucide-react'
 import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
 

@@ -1,9 +1,8 @@
-import ListLayout from '@/layouts/ListLayoutWithTags'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import GridLayout from '@/layouts/GridLayout'
 import { allBlogs } from 'contentlayer/generated'
+import React from 'react'
 import siteMetadata from '@/data/siteMetadata'
-
-const POSTS_PER_PAGE = 5
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return {
@@ -12,7 +11,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
     openGraph: {
       title: `Blog - Page ${params.page} | SigNoz`,
       description: `${siteMetadata.description} | Blog - Page ${params.page} | SigNoz`,
-      url: `${siteMetadata.siteUrl}/resource-center/blog/page/${params.page}`,
+      url: `${siteMetadata.siteUrl}/blog/page/${params.page}`,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'website',
@@ -24,7 +23,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
       images: [siteMetadata.socialBanner],
     },
     alternates: {
-      canonical: `${siteMetadata.siteUrl}/resource-center/blog/page/${params.page}`,
+      canonical: `${siteMetadata.siteUrl}/blog/page/${params.page}`,
     },
     robots: {
       index: false,
@@ -32,6 +31,8 @@ export async function generateMetadata({ params }: { params: { page: string } })
     },
   }
 }
+
+const POSTS_PER_PAGE = 10
 
 export const generateStaticParams = async () => {
   const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
@@ -50,14 +51,16 @@ export default function Page({ params }: { params: { page: string } }) {
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
+    pageRoute: 'blog',
   }
 
   return (
-    <ListLayout
+    <GridLayout
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
       title="All Posts"
+      isDarkMode={true}
     />
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
-import BlogPostCard from '../Shared/BlogPostCard'
-import SearchInput from '../Shared/Search'
+import BlogPostCard from './BlogPostCard'
+import SearchInput from './Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
