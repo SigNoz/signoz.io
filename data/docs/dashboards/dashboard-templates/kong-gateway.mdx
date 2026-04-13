@@ -9,7 +9,7 @@ doc_type: explanation
 Monitor Kong Gateway performance and connection management. Track request processing, latency, and error rates.
 
 <Admonition type="info">
-  To use this dashboard, configure Kong Gateway to send metrics to SigNoz using the OpenTelemetry plugin.
+  To use this dashboard, configure Kong Gateway to send metrics to SigNoz using the [OpenTelemetry plugin](https://docs.konghq.com/hub/kong-inc/opentelemetry/).
 </Admonition>
 
 ## Dashboard Preview
@@ -18,12 +18,6 @@ Monitor Kong Gateway performance and connection management. Track request proces
   src="/img/docs/dashboards/dashboard-templates/kong-gateway-1.webp"
   alt="Kong Gateway Dashboard - Overview"
   caption="Kong Gateway Dashboard - Overview"
-/>
-
-<Figure
-  src="/img/docs/dashboards/dashboard-templates/kong-gateway-2.webp"
-  alt="Kong Gateway Dashboard - Details"
-  caption="Kong Gateway Dashboard - Details"
 />
 
 <div className="flex justify-center">
@@ -36,9 +30,9 @@ Monitor Kong Gateway performance and connection management. Track request proces
 ## Tracked Metrics
 
 - **Request Traffic**: Track incoming requests and request rates.
-- **Latency**: Monitor request and upstream latencies (p50, p90, p99) to find bottlenecks.
+- **Latency**: Monitor request, upstream, and Kong internal latencies (p50, p90, p99) to find bottlenecks.
 - **Error Tracking**: View 5xx error rates by service and 4xx errors by status code.
-- **Server Performance**: Track active connections and datastore reachability.
+- **Server Performance**: Track active connections and database connectivity.
 - **Upstream Health**: Monitor upstream target status.
 - **Resource Management**: Check bandwidth usage by service and Lua shared dictionary memory utilization.
 
@@ -49,7 +43,7 @@ Monitor Kong Gateway performance and connection management. Track request proces
 - **Total Requests**: Complete count of requests.
 - **Request Rate (req/s)**: Incoming requests per second.
 - **Active Connections**: Active network connections.
-- **Datastore Reachable**: Connection status of the configured datastore.
+- **DB Connected**: Connection status of the configured database.
 
 ### Request Metrics
 
@@ -60,6 +54,13 @@ Monitor Kong Gateway performance and connection management. Track request proces
 
 - **Request Latency (p50 / p90 / p99)**: End-to-end request latency distribution.
 - **Upstream Latency (p50 / p90 / p99)**: Latency distribution for upstream requests.
+- **Kong Internal Latency (p50 / p90 / p99)**: Latency introduced by Kong's internal processing.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/kong-gateway-2.webp"
+  alt="Kong Gateway Dashboard - Performance metrics"
+  caption="Kong Gateway Dashboard - Performance metrics"
+/>
 
 ### Error Metrics
 
@@ -69,7 +70,13 @@ Monitor Kong Gateway performance and connection management. Track request proces
 ### Traffic & Network
 
 - **Bandwidth by Service (bytes/s)**: Network throughput consumed by each service.
-- **Nginx Connections by State**: Connections grouped by active, reading, writing, and waiting states.
+- **Active Nginx Connections**: Live NGINX connection counts.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/kong-gateway-3.webp"
+  alt="Kong Gateway Dashboard - Error & Traffic Metrics"
+  caption="Kong Gateway Dashboard - Error & Traffic Metrics"
+/>
 
 ### Health & Resources
 
@@ -79,6 +86,11 @@ Monitor Kong Gateway performance and connection management. Track request proces
 ## OpenTelemetry Integration
 
 The OpenTelemetry plugin in Kong collects standardized metrics. Metric naming conforms to OpenTelemetry conventions for integration with observability stacks.
+
+## Next Steps
+
+- Set up [alerts](/docs/alerts/) to notify you of high upstream latency or error rates.
+- Use [Query Builder](/docs/product-features/query-builder) to explore your Kong metrics in detail.
 
 ## Related Dashboards
 
