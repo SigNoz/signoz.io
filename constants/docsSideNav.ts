@@ -1213,6 +1213,7 @@ const docsSideNav = [
             label: 'User Guides',
             type: 'category',
             isExpanded: false,
+            route: '/docs/apm-and-distributed-tracing/traces-user-guides',
             items: [
               {
                 type: 'doc',
@@ -1265,6 +1266,7 @@ const docsSideNav = [
         label: 'Reference',
         type: 'category',
         isExpanded: false,
+        route: '/docs/apm-and-distributed-tracing/reference',
         items: [
           {
             type: 'doc',
