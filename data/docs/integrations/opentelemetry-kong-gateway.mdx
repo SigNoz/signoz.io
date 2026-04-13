@@ -16,8 +16,9 @@ Kong Gateway provides a native OpenTelemetry plugin to capture proxy latencies, 
 
 ## Prerequisites
 
-- For OpenTelemetry **Traces and Logs**: Kong Gateway version 3.0+ (Enterprise or OSS).
-- For OpenTelemetry **Metrics**: Kong Gateway Enterprise version 3.13+. (The open-source community edition branch is currently paused at version 3.9.x, which predates native OpenTelemetry metrics support).
+- For OpenTelemetry **Traces**: Kong Gateway version 3.0+ (Enterprise or OSS).
+- For OpenTelemetry **Logs**: Kong Gateway version 3.8+ (Enterprise or OSS).
+- For OpenTelemetry **Metrics**: Kong Gateway Enterprise version 3.13+. (The latest open-source community edition release is 3.9.x, which predates native OpenTelemetry metrics support).
 - An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
 
 ## Configure OpenTelemetry Export
@@ -46,8 +47,9 @@ plugins:
         signoz-ingestion-key: "<your-ingestion-key>"
       resource_attributes:
         service.name: "<service_name>"
-      batch_span_count: 200
-      batch_flush_delay: 3
+      queue:
+        max_batch_size: 200
+        max_coalescing_delay: 3
 ```
 
 Verify these values:
