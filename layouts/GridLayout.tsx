@@ -1,8 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import React from 'react'
 import BlogPostCard from '@/components/ResourceCenter/BlogPostCard'
@@ -21,9 +19,9 @@ interface PaginationInternalProps extends PaginationProps {
 }
 
 interface GridLayoutProps {
-  posts: CoreContent<Blog>[]
+  posts: any[]
   title: string
-  initialDisplayPosts?: CoreContent<Blog>[]
+  initialDisplayPosts?: any[]
   pagination?: PaginationProps
   isDarkMode: boolean
 }

@@ -1,9 +1,12 @@
-import ListLayout from '@/layouts/ListLayoutWithTags'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
+import GridLayout from '@/layouts/GridLayout'
+import { fetchAllComparisonsForPage } from '@/utils/cachedData'
+import React from 'react'
 import siteMetadata from '@/data/siteMetadata'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-const POSTS_PER_PAGE = 5
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamic = 'force-static'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return {
@@ -33,15 +36,11 @@ export async function generateMetadata({ params }: { params: { page: string } })
   }
 }
 
-export const generateStaticParams = async () => {
-  const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
-  const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
+const POSTS_PER_PAGE = 10
 
-  return paths
-}
-
-export default function Page({ params }: { params: { page: string } }) {
-  const posts = allCoreContent(sortPosts(allBlogs))
+export default async function Page({ params }: { params: { page: string } }) {
+  const comparisons = await fetchAllComparisonsForPage()
+  const posts = allCoreContent(sortPosts(comparisons))
   const pageNumber = parseInt(params.page as string)
   const initialDisplayPosts = posts.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
@@ -50,14 +49,16 @@ export default function Page({ params }: { params: { page: string } }) {
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
+    pageRoute: 'comparisons',
   }
 
   return (
-    <ListLayout
+    <GridLayout
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
       title="All Posts"
+      isDarkMode={true}
     />
   )
 }
