@@ -1,0 +1,81 @@
+---
+date: 2026-04-13
+id: deployment-regression-check
+title: Post Deployment Regression Check
+description: Compare key metrics before and after a deployment to detect performance regressions or unexpected changes.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Your team just deployed a new version of the `frontend` service to production at 10 AM (PST). Before routing all traffic to it, you want to verify there are no performance regressions or unexpected behavior changes. You need to compare key metrics before and after the deployment to ensure everything looks healthy.
+
+You open your AI assistant, connected to SigNoz via the MCP server, to run the health check.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Compare Metrics Before and After Deployment
+
+```text
+Show me the top operations for the frontend service. For each endpoint, compare p99 latency and error rate from the 30 minutes before 10:00 AM PST vs the 30 minutes after. Flag anything that degraded.
+```
+
+The assistant analyzes the deployment window and returns a comparison table:
+
+```text
+Frontend service - Top operations comparison (30 min before vs after 18:00 UTC)
+
+Operation                              | Calls (before → after) | p99 Latency (before) | p99 Latency (after) | Change  | Error Rate (before) | Error Rate (after) | Assessment
+---------------------------------------|------------------------|----------------------|---------------------|---------|---------------------|--------------------|-----------------------
+GET /api/recommendations               | 1020 → 1150            | 112 ms               | 170 ms              | +52%    | 3.6%                | 4.0%               | ⚠️ p99 degraded
+GET /api/products/index                | 380 → 410              | 77 ms                | 103 ms              | +33%    | 4.5%                | 3.0%               | ⚠️ p99 degraded
+GET /api/products/[productId]/index    | 390 → 430              | 78 ms                | 105 ms              | +35%    | 4.5%                | 3.0%               | ⚠️ p99 degraded
+GET /api/cart                          | 1186 → 1268            | 3.78 ms              | 4.23 ms             | +12%    | 0.08%               | 0%                 | minor
+GET /api/currency                      | 390 → 430              | 210 ms               | 250 ms              | +19%    | 0%                  | 0%                 | minor
+GET /api/data                          | 285 → 273              | 104 ms               | 98 ms               | −6%     | 0%                  | 0%                 | ok
+GET /api/shipping                      | —                      | 154 ms               | 120 ms              | −22%    | 0%                  | 0%                 | improved
+GET / (homepage)                       | —                      | 459 ms               | 389 ms              | −15%    | 0%                  | 0%                 | improved
+
+Things that degraded after 18:00 UTC:
+
+- GET /api/recommendations — p99 jumped from ~112 s to ~170 s (+52%). This is the biggest regression and it's on a high-traffic endpoint (~1k calls/30min). Error rate also nudged up slightly (3.6% → 4.0%).
+- GET /api/products/index — p99 went from ~77 s to ~103 s (+33%).
+- GET /api/products/[productId]/index — p99 went from ~78 s to ~105 s (+35%). Error rate actually improved here (4.5% → 3.0%), so it looks latency-only.
+```
+
+## Final Summary 
+The assistant found that three endpoints show significant p99 latency regressions (30-52% slower), with `GET /api/recommendations` being the most concerning due to magnitude of degradation and high traffic volume. While some endpoints improved, the regressions show that investigation is needed before proceeding with the deployment.
+
+
+## Tips for Your Own Investigations
+
+- **Pick a consistent time window.** Use equal windows before and after the deployment timestamp (e.g., 30 minutes each) to ensure fair comparison. Avoid comparing different time ranges or durations.
+- **Focus on high-traffic endpoints first.** A 50% regression on a low-traffic endpoint may be less critical than a 20% regression on your busiest API. Prioritize investigations based on request volume and business impact.
+- **Watch for correlated degradation patterns.** If multiple endpoints that share a dependency (database, cache, downstream service) all degrade together, the root cause is likely in that shared component, not in each individual endpoint.
+- **Verify improvements are real.** If traffic dropped significantly for an endpoint, lower latency might just mean fewer requests, not better performance. Check request counts alongside metrics.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_get_service_top_operations` | Retrieved the list of top operations for the frontend service to identify which endpoints to compare |
+| 1 | `signoz_aggregate_traces` | Computed p99 latency, error rates, and request counts for each operation in the 30-minute window before deployment (before 18:00 UTC) |
+| 1 | `signoz_aggregate_traces` | Computed p99 latency, error rates, and request counts for each operation in the 30-minute window after deployment (after 18:00 UTC) |
+</details>
+
+## Related Use Cases
+
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Investigate which service or dependency is causing slowdowns when latency spikes on an endpoint.
+- [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Find where errors originate in the call chain when error rates spike unexpectedly.
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) - Search deployment logs and error messages to identify what changed during the deployment window.
+
+
+<GetHelp />

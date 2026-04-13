@@ -2990,6 +2990,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/alert-correlation-analysis',
             label: 'Alert Correlation Analysis',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/deployment-regression-check',
+            label: 'Post-Deployment Regression Check',
+          },
         ],
       },
     ],
