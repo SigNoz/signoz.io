@@ -23,7 +23,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
         of popular options to determine the best fit for your needs.
       </p>
 
-      <SearchInput placeholder={'Search for a blog...'} onSearch={onSearch} />
+      <SearchInput placeholder={'Search for a comparison...'} onSearch={onSearch} />
     </section>
   )
 }

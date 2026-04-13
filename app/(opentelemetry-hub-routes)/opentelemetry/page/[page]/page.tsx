@@ -44,7 +44,7 @@ export default function Page({ params }: { params: { page: string } }) {
   return (
     <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
       <div className="tab-content pt-6">
-        <Blogs pageNumber={pageNumber} />
+        <Blogs pageNumber={pageNumber} pageRoute="opentelemetry" />
       </div>
     </div>
   )

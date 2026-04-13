@@ -2,6 +2,32 @@ import Comparisons from '@/components/ResourceCenter/Comparisons'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import siteMetadata from '@/data/siteMetadata'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Comparisons',
+  description: `${siteMetadata.description} | Comparisons | SigNoz`,
+  openGraph: {
+    title: 'Comparisons | SigNoz',
+    description: `${siteMetadata.description} | Comparisons | SigNoz`,
+    url: `${siteMetadata.siteUrl}/comparisons`,
+    siteName: siteMetadata.title,
+    locale: 'en_US',
+    type: 'website',
+    images: [siteMetadata.socialBanner],
+  },
+  twitter: {
+    title: 'Comparisons | SigNoz',
+    description: `${siteMetadata.description} | Comparisons | SigNoz`,
+    images: [siteMetadata.socialBanner],
+    site: siteMetadata.twitter,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamic = 'force-static'

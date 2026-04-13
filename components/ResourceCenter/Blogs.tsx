@@ -31,7 +31,13 @@ const BlogsPageHeader = ({ onSearch }: BlogPageHeaderProps) => {
   )
 }
 
-export default function Blogs({ pageNumber = 1 }: { pageNumber?: number }) {
+export default function Blogs({
+  pageNumber = 1,
+  pageRoute = 'blog',
+}: {
+  pageNumber?: number
+  pageRoute?: string
+}) {
   const posts = allCoreContent(sortPosts(allBlogs))
   const [blogs, setBlogs] = useState(posts)
   const [searchValue, setSearchValue] = useState('')
@@ -46,7 +52,7 @@ export default function Blogs({ pageNumber = 1 }: { pageNumber?: number }) {
     <div>
       <BlogsPageHeader onSearch={handleSearch} />
       {searchValue.length === 0 && pageNumber === 1 && <FeaturedBlogs isDarkMode={true} />}
-      <AllBlogs blogs={blogs} pageNumber={searchValue ? 1 : pageNumber} />
+      <AllBlogs blogs={blogs} pageNumber={searchValue ? 1 : pageNumber} pageRoute={pageRoute} />
     </div>
   )
 }

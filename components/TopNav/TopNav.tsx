@@ -278,7 +278,7 @@ export default function TopNav() {
     }
 
     const isListingOrPagination = (base: string) =>
-      pathname === base || pathname.startsWith(`${base}/page/`)
+      pathname === base || pathname === `${base}/` || pathname.startsWith(`${base}/page/`)
 
     if (isListingOrPagination(TAB_PATHNAMES.BLOG)) {
       setActiveTab(TABS.BLOG)

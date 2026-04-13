@@ -37,7 +37,7 @@ export function Pagination({
 }: PaginationInternalProps) {
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
-  const DEFAULT_POSTS_PER_PAGE = 10
+  const DEFAULT_POSTS_PER_PAGE = 12
   const DEFAULT_POSTS_IN_FIRST_PAGE = 12
 
   const startPost = useMemo(() => {

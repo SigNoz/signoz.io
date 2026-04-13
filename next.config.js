@@ -380,6 +380,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/resource-center/comparisons/page/:page',
+          destination: '/comparisons/page/:page',
+          permanent: true,
+        },
+        {
           source: '/resource-center/guides',
           destination: '/guides',
           permanent: true,
@@ -390,6 +395,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/resource-center/guides/page/:page',
+          destination: '/guides/page/:page',
+          permanent: true,
+        },
+        {
           source: '/resource-center/opentelemetry',
           destination: '/opentelemetry',
           permanent: true,
@@ -397,6 +407,11 @@ module.exports = () => {
         {
           source: '/resource-center/opentelemetry/',
           destination: '/opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/opentelemetry/page/:page',
+          destination: '/opentelemetry/page/:page',
           permanent: true,
         },
         {
