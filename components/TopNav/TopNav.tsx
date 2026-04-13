@@ -289,7 +289,7 @@ export default function TopNav() {
     } else if (isListingOrPagination(TAB_PATHNAMES.GUIDES)) {
       setActiveTab(TABS.GUIDES)
       setShouldShowTabs(true)
-    } else if (isListingOrPagination(TAB_PATHNAMES.OPENTELEMETRY)) {
+    } else if (pathname.startsWith(`${TAB_PATHNAMES.OPENTELEMETRY}/page/`)) {
       setActiveTab(TABS.OPENTELEMETRY)
       setShouldShowTabs(true)
     } else {
