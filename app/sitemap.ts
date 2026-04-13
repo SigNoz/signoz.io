@@ -114,6 +114,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'support',
     'teams',
     'faqs', // Add the main FAQs page
+    'blog',
     'opentelemetry',
     'comparisons',
     'guides',
