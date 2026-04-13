@@ -4,7 +4,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'APM | SigNoz',
+    absolute: 'Application Performance Monitoring (APM) with OpenTelemetry | SigNoz',
   },
   openGraph: {
     title: 'Application Performance Monitoring (APM) with OpenTelemetry | SigNoz',
