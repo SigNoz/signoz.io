@@ -319,9 +319,9 @@ export default function TopNav() {
   }
 
   return (
-    <div className="fixed left-0 right-0 z-30">
+    <div className="fixed left-0 right-0 z-[50]">
       <header
-        className={`header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
+        className={`header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
       >
         <nav
           className="container flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"

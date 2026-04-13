@@ -1,157 +1,203 @@
 ---
-date: 2024-06-20
+date: 2026-04-02
 title: Parsing Multiline Logs
-
+description: Learn how to parse and recombine multiline logs using the filelog receiver or the recombine operator in OpenTelemetry Collector.
 id: parse-multiline-logs
+doc_type: howto
 ---
+
+import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-By default when you use the filelog receiver each newline in the log line creates a new log line. 
+By default, the filelog receiver treats each newline as the end of a log entry. This breaks stack traces, multi-line error messages, and other logs that span multiple lines into separate entries.
 
-This doc goes through different ways to solve this problem where you can parse/recombine multiline logs.
+Here is an example of multiline logs:
 
-
-
-## Sample Multiline Logs
-Here is an example of multiline logs
-
-  ```python
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
+```text
+2024-06-20 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
-  File "python-logger.py", line 9, in make_log
-    return area[10]
+File "python-logger.py", line 9, in make_log
+  return area[10]
 IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
-  ```
+2024-06-20 18:58:05,898 DEBUG:Query Started
+```
 
-In the above example there there are two log lines spread over multiple line, but since by default each newline is treated as end of log line, multiple log lines will be created as seen in the image below.
+The example above has two log entries spread over multiple lines. Since each newline is treated as the end of a log entry by default, the collector creates separate entries for each line:
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/multiline/multiline_broken.png"
-    alt="Multiline logs broken"
-  />
-  <figcaption>
-    <i>
-        Multiline logs as multiple individual log lines
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/multiline/multiline_broken.png"
+  caption="Multiline logs as multiple individual log lines"
+  alt="Multiline logs as multiple individual log lines"
+/>
 
-There are two ways you can combine these logs 
-1) Parse the logs lines as multiline at the receiver itself.
-2) Recombine the multiline logs later at processor level
+<Tabs entityName="multiline-approach">
+<TabItem value="receiver" label="Receiver (Recommended)" default>
 
 ## Parse Multiline Logs at Receiver
 
-Since we are using the [filelog](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md) receiver. It has a
-multiline configuration option.
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">filelog receiver</a> has a built-in `multiline` configuration block. This is the recommended approach because it recombines logs before they enter the pipeline.
 
-In order to parse these type of logs we will have to identify a start or end pattern.
+### Step 1: Identify the start or end pattern
 
-Let's understand with example
+Look at your log format and find a regex that matches the beginning (or end) of each log entry.
 
-  ```python
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
+```text
+2024-06-20 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
-  File "python-logger.py", line 9, in make_log
-    return area[10]
+File "python-logger.py", line 9, in make_log
+  return area[10]
 IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
-  ```
-
-For the above log lines we can see that the new log line starts with `Date`, so our `line_start_pattern` will be 
-
-```
-line_start_pattern: ^\d{4}-\d{2}-\d{2}
+2024-06-20 18:58:05,898 DEBUG:Query Started
 ```
 
-Once you have your `line_start_pattern` or `line_end_pattern` this is how you configuration of filelog receiver will look like
+For the above log lines, each new entry starts with a date. The `line_start_pattern` would be:
+
+```
+^\d{4}-\d{2}-\d{2}
+```
+
+### Step 2: Add the multiline configuration to your receiver
 
 ```yaml
 receivers:
   filelog:
     include:
-    - /var/log/example/multiline.log
+      - /var/log/example/multiline.log
     multiline:
       line_start_pattern: ^\d{4}-\d{2}-\d{2}
+    force_flush_period: 5s
 ```
 
-Once it is deployed correctly this is how your log lines will look 
+The `multiline` block must contain exactly one of `line_start_pattern` or `line_end_pattern`. You can also set `omit_pattern: true` to exclude the matched pattern from the combined entry.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/multiline/multiline_python.png"
-    alt="Multiline logs fixed"
-  />
-  <figcaption>
-    <i>
-        Multiline logs as a single individual log line
-    </i>
-  </figcaption>
-</figure>
+<Admonition type="info">
+  The filelog receiver waits for more content before flushing the last multiline entry. If your last
+  log line never appears in SigNoz, set `force_flush_period` at the receiver level (default is
+  `500ms`). Example: `force_flush_period: 5s`.
+</Admonition>
 
+### Step 3: Enable the receiver in your logs pipeline
 
+```yaml
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: []
+      exporters: [otlp]
+```
+
+### Using multiline in the SigNoz k8s-infra Helm chart
+
+If you are running SigNoz on Kubernetes with the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra Helm chart</a>, use the `presets.logsCollection.multiline` key in your Helm values instead of editing the raw receiver config:
+
+```yaml
+presets:
+  logsCollection:
+    multiline:
+      line_start_pattern: '^\d{4}-\d{2}-\d{2}'
+```
+
+The preset propagates this directly to the `filelog` receiver's `multiline` block on the `otelAgent` DaemonSet. You do not need to touch `otelAgent.config` directly.
+
+</TabItem>
+
+<TabItem value="processor" label="Processor">
 
 ## Use Recombine Operator to Combine Multiline Logs
 
-In case the above configuration is not feasible for you, you can use the [recombine](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md) 
-operator to join back the multiline logs.
+If you cannot use the receiver-level multiline configuration, you can use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md" target="_blank" rel="noopener noreferrer nofollow">recombine</a> operator inside a `logstransform` processor.
 
-Let's take the same example again
+<Admonition type="warning">
+  The `logstransform` processor has development stability and is **not included in the official
+  `otelcol-contrib` distribution** or the SigNoz k8s-infra Helm chart. Using it on a standard
+  k8s-infra installation results in a collector startup error (`unknown type: logstransform`). If
+  you are on k8s-infra, use the `presets.logsCollection.multiline` approach above instead.
+</Admonition>
 
-  ```python
-2024-20-06 18:58:05,898 ERROR:Exception on main handler
+### Step 1: Define the recombine processor
+
+Using the same example logs:
+
+```text
+2024-06-20 18:58:05,898 ERROR:Exception on main handler
 Traceback (most recent call last):
-  File "python-logger.py", line 9, in make_log
-    return area[10]
+File "python-logger.py", line 9, in make_log
+  return area[10]
 IndexError: string index out of range
-2024-20-06 18:58:05,898 DEBUG:Query Started
-  ```
-
-
-Here we know that log lines is splitted into multiple individual log lines by default
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/multiline/multiline_broken.png"
-    alt="Multiline logs broken"
-  />
-  <figcaption>
-    <i>
-        Multiline logs as multiple individual log lines
-    </i>
-  </figcaption>
-</figure>
-
-Since we know the start pattern of the new log line, here is how we will recombine it
-
+2024-06-20 18:58:05,898 DEBUG:Query Started
 ```
+
+Since each new log line starts with a date, configure `is_first_entry` to match that pattern:
+
+```yaml
 processors:
   logstransform/multiline:
     operators:
       - type: recombine
         combine_field: body
-        is_first_entry: body matches "^\\d{4}-\\d{2}-\\d{2}"
+        is_first_entry: body matches '^\d{4}-\d{2}-\d{2}'
         source_identifier: attributes["log.file.path"]
 ```
 
-Here we are matching the first line of a multiline log using `is_first_entry` and then combining the `body` field for each unique `log.file.path` value 
+This matches the first line of each multiline entry and combines the `body` field for each unique `log.file.path` value.
 
+### Step 2: Add the processor to your logs pipeline
 
-once the above is deployed this is what it will look like on the UI
+The processor must be enabled in the `service.pipelines.logs.processors` list:
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/multiline/multiline_python.png"
-    alt="Multiline logs fixed"
-  />
-  <figcaption>
-    <i>
-        Multiline logs as a single individual log line
-    </i>
-  </figcaption>
-</figure>
+```yaml
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [logstransform/multiline]
+      exporters: [otlp]
+```
 
+</TabItem>
+</Tabs>
 
-There are more options to play around with the recombine operator which can be checked [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/recombine.md) 
+After deployment, multiline logs appear as single entries in SigNoz:
+
+<Figure
+  src="/img/logs/multiline/multiline_python.png"
+  caption="Multiline logs as a single individual log line"
+  alt="Multiline logs as a single individual log line"
+/>
+
+## Validate
+
+After applying either approach, verify in SigNoz that:
+
+1. Navigate to the **Logs** tab.
+2. Search for logs from the service you configured.
+3. Confirm that stack traces and multi-line entries appear as single log entries instead of fragmented lines.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+**All logs combined into one entry** — Check that `is_first_entry` or `line_start_pattern` matches the correct pattern. If the regex is too broad or too narrow, entries will not split correctly.
+
+**`logstransform` processor causes collector startup error in k8s-infra** — The `logstransform` processor is not included in the official `otelcol-contrib` image used by the k8s-infra chart. You will see `unknown type: logstransform` in the collector logs. Use `presets.logsCollection.multiline` in your Helm values instead (see the receiver section above).
+
+**Processor defined but not applied** — Ensure the processor is listed in `service.pipelines.logs.processors`. Defining a processor alone does not enable it.
+
+</details>
+
+## Next steps
+
+Now that multiline logs are recombined properly, explore related log management features:
+
+- [Logs management overview](https://signoz.io/docs/logs-management/overview/) - Query, filter, and analyze your logs in SigNoz
+- [Log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) - Create alerts based on log patterns
+- [Collect Kubernetes pod logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) - Collect logs from Kubernetes workloads
+
+## Get Help
+
+<GetHelp />

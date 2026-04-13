@@ -173,6 +173,11 @@ export const APM_INSTRUMENTATION_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Instrumentation Link',
     },
+    {
+      name: 'DBOS',
+      href: '/docs/integrations/opentelemetry-dbos',
+      clickName: 'DBOS Instrumentation Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 

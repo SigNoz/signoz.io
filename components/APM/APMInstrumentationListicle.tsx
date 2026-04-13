@@ -114,6 +114,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     </span>
   ),
   '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
+  '/docs/integrations/opentelemetry-dbos': (
+    <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />
+  ),
 }
 
 export default function APMInstrumentationListicle({
