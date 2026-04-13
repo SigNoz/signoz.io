@@ -93,7 +93,9 @@ export default function FAQLayout({
               key={slug}
             />
             <div className="container mx-auto flex h-full flex-row-reverse gap-4 overflow-clip">
+            <div className="container mx-auto flex h-full flex-row-reverse gap-4 overflow-clip">
               <div
+                className={`sticky top-[88px] ml-4 box-border flex h-[calc(100vh-156px)] w-1/4 flex-col gap-1 overflow-y-auto p-4 pl-8 transition-opacity duration-1000 max-lg:hidden ${
                 className={`sticky top-[88px] ml-4 box-border flex h-[calc(100vh-156px)] w-1/4 flex-col gap-1 overflow-y-auto p-4 pl-8 transition-opacity duration-1000 max-lg:hidden ${
                   isTocVisible ? 'opacity-100' : 'opacity-30'
                 } hover:opacity-100`}

@@ -1,6 +1,6 @@
 import React from 'react'
 import Hero from '@/components/ui/Hero'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, Calendar } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { VideoModalPlayer } from './VideoModalPlayer'
@@ -48,17 +48,17 @@ export function Header() {
             </p>
           </div>
           <TrackingLink
-            href="/docs/introduction/"
+            href="/contact-us/?source=homepage"
             clickType="Secondary CTA"
-            clickName="Explore Docs Button"
-            clickText="Explore the Docs"
+            clickName="Book a Demo Button"
+            clickText="Book a Demo"
             clickLocation="Hero Section"
             className="block w-[220px]"
             prefetch={false}
           >
             <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
-              <BookOpen size={14} />
-              Explore the Docs
+              <Calendar size={14} />
+              Book a Demo
             </Button>
           </TrackingLink>
         </div>

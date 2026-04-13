@@ -17,32 +17,36 @@ import {
 import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
-import { BookADemoModalProvider, useBookADemoModal } from './BookADemoModal'
-import { useLogEvent } from '@/hooks/useLogEvent'
-import { usePathname } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 
 interface CTAButtonGroupProps {
-  onBookDemoClick: () => void
   clickLocation: string
+  bookDemoClickName: string
   startTrialClickName: string
 }
 
 const CTAButtonGroup: React.FC<CTAButtonGroupProps> = ({
-  onBookDemoClick,
   clickLocation,
+  bookDemoClickName,
   startTrialClickName,
 }) => (
   <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
     <Button
-      isButton
+      asChild
       variant="default"
       rounded="full"
       className="flex-center flex !w-fit items-center gap-2"
-      onClick={onBookDemoClick}
     >
-      Book a demo
-      <ArrowRight size={14} />
+      <TrackingLink
+        href="/contact-us/?source=why-signoz"
+        clickType="Primary CTA"
+        clickName={bookDemoClickName}
+        clickLocation={clickLocation}
+        clickText="Book a demo"
+      >
+        Book a demo
+        <ArrowRight size={14} />
+      </TrackingLink>
     </Button>
     <Button
       asChild
@@ -65,28 +69,10 @@ const CTAButtonGroup: React.FC<CTAButtonGroupProps> = ({
 )
 
 const Header: React.FC = () => {
-  const { openModal } = useBookADemoModal()
-  const logEvent = useLogEvent()
-  const pathname = usePathname()
-  const handleBookDemoClick = () => {
-    logEvent({
-      eventName: 'Website Click',
-      eventType: 'track',
-      attributes: {
-        clickType: 'Primary CTA',
-        clickName: 'Why SigNoz Page Hero Book a demo',
-        clickLocation: 'Why SigNoz Page Hero',
-        clickText: 'Book a demo',
-        pageLocation: pathname,
-      },
-    })
-    openModal()
-  }
-
   const enterpriseHeaderButtonGroup = (
     <CTAButtonGroup
-      onBookDemoClick={handleBookDemoClick}
       clickLocation="Why SigNoz Page Hero"
+      bookDemoClickName="Why SigNoz Page Hero Book a demo"
       startTrialClickName="Why SigNoz Page Hero Start Trial"
     />
   )
@@ -234,25 +220,6 @@ const NumbersThatSpeak: React.FC = () => {
 }
 
 const EnterpriseObservability: React.FC = () => {
-  const { openModal } = useBookADemoModal()
-  const logEvent = useLogEvent()
-  const pathname = usePathname()
-
-  const handleBookDemoClick = () => {
-    logEvent({
-      eventName: 'Website Click',
-      eventType: 'track',
-      attributes: {
-        clickType: 'Primary CTA',
-        clickName: 'Why SigNoz Page Enterprise Observability Section Book a demo',
-        clickLocation: 'Why SigNoz Page Enterprise Observability Section',
-        clickText: 'Book a demo',
-        pageLocation: pathname,
-      },
-    })
-    openModal()
-  }
-
   return (
     <SectionLayout
       variant="bordered"
@@ -269,8 +236,8 @@ const EnterpriseObservability: React.FC = () => {
       </p>
       <div className="flex flex-col items-center justify-center gap-4">
         <CTAButtonGroup
-          onBookDemoClick={handleBookDemoClick}
           clickLocation="Why SigNoz Page Enterprise Observability Section"
+          bookDemoClickName="Why SigNoz Page Enterprise Observability Section Book a demo"
           startTrialClickName="Why SigNoz Page Enterprise Observability Section Start Trial"
         />
         <p className="text-center text-sm text-signoz_vanilla-400">
@@ -377,7 +344,6 @@ const PricingToScale: React.FC = () => {
 
 const EnterpriseDemoPage: React.FC = () => {
   return (
-    <BookADemoModalProvider>
       <FeaturePageLayout showProductNav={false}>
         <Header />
         <TrustedByTeams />
@@ -407,7 +373,6 @@ const EnterpriseDemoPage: React.FC = () => {
           <EnterpriseObservability />
         </SectionLayout>
       </FeaturePageLayout>
-    </BookADemoModalProvider>
   )
 }
 
