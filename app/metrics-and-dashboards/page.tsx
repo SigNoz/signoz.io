@@ -4,20 +4,22 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Metrics & Dashboards | SigNoz',
+    absolute: 'Metrics Monitoring & Customized Dashboards | SigNoz',
   },
   openGraph: {
-    title: 'Metrics & Dashboards | SigNoz',
-    description: 'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
-    images:"/img/features/metrics/metrics-overview1.webp"
+    title: 'Metrics Monitoring & Customized Dashboards | SigNoz',
+    description:
+      'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
+    images: '/img/features/metrics/metrics-overview1.webp',
   },
   description:
     'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
-  twitter:{
-    title: 'Metrics & Dashboards | SigNoz',
-    description: 'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
-    images:"/img/features/metrics/metrics-overview1.webp",
-  }
+  twitter: {
+    title: 'Metrics Monitoring & Customized Dashboards | SigNoz',
+    description:
+      'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
+    images: '/img/features/metrics/metrics-overview1.webp',
+  },
 }
 
 export default function MetricsDashboardsPage() {

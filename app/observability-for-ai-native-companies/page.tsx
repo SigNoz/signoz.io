@@ -4,23 +4,20 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute:
-      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces | SigNoz',
+    absolute: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz',
   },
   openGraph: {
-    title:
-      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces | SigNoz',
+    title: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz',
     description:
-      'Track token usage, latency, and costs alongside your microservices, databases, and GPU clusters. Handle high-cardinality data at scale with usage-based pricing and span-level alerting for traces.',
+      'SigNoz AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage and costs with OpenTelemetry in one unified platform.',
     images: '/img/platform/ObservabilityForAiNativeCompaniesMeta.webp',
   },
   description:
-    'Track token usage, latency, and costs alongside your microservices, databases, and GPU clusters. Handle high-cardinality data at scale with usage-based pricing and span-level alerting for traces.',
+    'SigNoz AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage and costs with OpenTelemetry in one unified platform.',
   twitter: {
-    title:
-      'Monitor AI Workloads Across LLM Layer and Infrastructure with Correlated Logs, Metrics, and Traces | SigNoz',
+    title: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz',
     description:
-      'Track token usage, latency, and costs alongside your microservices, databases, and GPU clusters. Handle high-cardinality data at scale with usage-based pricing and span-level alerting for traces.',
+      'SigNoz AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage and costs with OpenTelemetry in one unified platform.',
     images: '/img/platform/ObservabilityForAiNativeCompaniesMeta.webp',
   },
 }

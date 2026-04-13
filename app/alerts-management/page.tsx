@@ -4,20 +4,20 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Alerts with multiple thresholds and dynamic routing | SigNoz',
+    absolute: 'Alert Management | SigNoz',
   },
   openGraph: {
-    title: 'Alerts with multiple thresholds and dynamic routing | SigNoz',
+    title: 'Alert Management | SigNoz',
     description:
-      'Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.',
+      'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
     images: '/img/platform/AlertsManagementMeta.webp',
   },
   description:
-    'Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.',
+    'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
   twitter: {
-    title: 'Alerts with multiple thresholds and dynamic routing | SigNoz',
+    title: 'Alert Management | SigNoz',
     description:
-      'Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.',
+      'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
     images: '/img/platform/AlertsManagementMeta.webp',
   },
 }
