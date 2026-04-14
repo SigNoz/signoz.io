@@ -1,5 +1,5 @@
 ---
-date: 2026-04-10
+date: 2026-04-14
 title: Working with Cost Meter
 id: working-with-cost-meter-overview
 description: Use the main Cost Meter dashboard in SigNoz to analyze total, logs, traces, and metrics ingestion.
@@ -8,26 +8,49 @@ doc_type: explanation
 
 The Cost Meter dashboard is the main view for understanding how your observability usage is distributed across logs, traces, and metrics. Use it to compare total ingestion, identify expensive signals, and decide where to drill deeper with Meter Explorer or alerts.
 
-## Overview
+<Admonition type="info">
+Meter data is aggregated over hourly intervals. Queries with time ranges under 1 hour will not return any data.
+</Admonition>
 
-The Cost Meter dashboard is organized into four sections:
+## Total Overview
 
-- **Total overview** — a combined view of all cost contributors: log record size, span size, and metric datapoints
-- **Logs analysis** — log record count and total log data size ingested over the selected time range
-- **Traces analysis** — span count and total span data size, useful for identifying high-volume services
-- **Metrics analysis** — metric datapoint count, which directly maps to cardinality and billing
+The Total overview provides a combined view of all cost contributors — log record size, span size, and metric datapoints — in a single chart. Use it to understand the overall ingestion trend for the selected time range.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/cost-meter/total-meter.webp" alt="Total Cost Meter overview"/>
+    <figcaption><i>Total overview showing aggregate ingestion across all signal types</i></figcaption>
+</figure>
+
+## Logs
+
+The Logs section provides detailed insights into your log telemetry costs and consumption patterns. It shows log record count and total log data size ingested over the selected time range.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/cost-meter/logs-meter.webp" alt="Logs Cost Meter"/>
+    <figcaption><i>Logs analysis showing record count and data size</i></figcaption>
+</figure>
+
+## Traces
+
+The Traces section shows span ingestion patterns including span count and total span data size. Use it to identify high-volume services driving trace costs.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/cost-meter/traces-meter.webp" alt="Traces Cost Meter"/>
+    <figcaption><i>Traces analysis showing span count and data size</i></figcaption>
+</figure>
+
+## Metrics
+
+The Metrics section displays metric datapoint count, which directly maps to cardinality and billing. Monitor this to understand your metrics cost footprint.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/cost-meter/metrics-meter.webp" alt="Metrics Cost Meter"/>
+    <figcaption><i>Metrics analysis showing datapoint count</i></figcaption>
+</figure>
 
 ## How to use the dashboard
 
-- Start with **Total overview** to understand the overall ingestion trend for the selected time range.
-- Use the signal-specific sections to see whether logs, traces, or metrics are driving the largest share of ingestion.
-- Move from the dashboard into [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/) when you need more detailed breakdowns by service, environment, host, or ingestion key.
-- Set up [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) when you want to monitor a threshold instead of checking the dashboard manually.
-
-## Quick links
-
-- [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/) — Drill into cost drivers with filters and groupings
-- [Meter Examples](https://signoz.io/docs/cost-meter/meter-examples/) — Use example queries for common investigations
-- [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) — Understand how alerts work for meter metrics
-- [Alert Setup Guide](https://signoz.io/docs/cost-meter/alert-setup-guides/) — Configure cost and quota alerts
-- [Alerts Examples](https://signoz.io/docs/cost-meter/alerts-examples/) — Review common alerting scenarios and formulas
+1. Start with **Total overview** to understand the overall ingestion trend for the selected time range.
+2. Use the signal-specific sections to see whether logs, traces, or metrics are driving the largest share of ingestion.
+3. Move into [Meter Explorer](/docs/cost-meter/meter-explorer/) when you need more detailed breakdowns by service, environment, host, or ingestion key.
+4. Set up [Meter Alerts](/docs/cost-meter/alerts/) when you want to monitor a threshold instead of checking the dashboard manually.
