@@ -188,15 +188,14 @@ Datadog creates a **separate metric per operation** — the span name (e.g. `rai
 
 SigNoz uses **one metric with multiple dimensions**, and additionally breaks out DB and external call latency into dedicated metrics. All SigNoz APM metrics carry labels, and you filter/group by them instead of querying different metric names.
 
-
 **Request and Error Counts**
 
 | Datadog Metric | SigNoz Equivalent |
 | --- | --- |
 | `trace.<SPAN_NAME>.hits` | `signoz_calls_total{operation="<SPAN_NAME>"}` |
 | `trace.<SPAN_NAME>.hits.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>", http.status_code="200"}` |
-| `trace.<SPAN_NAME>.errors` | `signoz_calls_total{status.code="STATUS_CODE_ERROR"}` |
-| `trace.<SPAN_NAME>.errors.by_http_status` | `signoz_calls_total{status.code="STATUS_CODE_ERROR", http.status_code="503"}` |
+| `trace.<SPAN_NAME>.errors` | `signoz_calls_total{operation="<SPAN_NAME>", status.code="STATUS_CODE_ERROR"}` |
+| `trace.<SPAN_NAME>.errors.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>", status.code="STATUS_CODE_ERROR", http.status_code="503"}` |
 
 **Latency**
 
@@ -204,8 +203,8 @@ SigNoz uses **one metric with multiple dimensions**, and additionally breaks out
 | --- | --- |
 | `trace.<SPAN_NAME>` (DDSketch distribution) | `signoz_latency.bucket{operation="<SPAN_NAME>"}` — supports p50/p75/p90/p95/p99 |
 | `trace.<SPAN_NAME>.duration` (legacy) | `signoz_latency.bucket{operation="<SPAN_NAME>"}` |
-| `trace.<SPAN_NAME>.duration.by_http_status` (legacy) | `signoz_latency.bucket{status.code="..."}` |
-| `trace.<SPAN_NAME>.duration.by_service` (legacy) | `signoz_latency.bucket{service.name="..."}` |
+| `trace.<SPAN_NAME>.duration.by_http_status` (legacy) | No equivalent metric |
+| `trace.<SPAN_NAME>.duration.by_service` (legacy) | `signoz_latency.bucket{operation="<SPAN_NAME>", service.name="..."}` |
 | `trace.<SPAN_NAME>.apdex` | No separate metric — compute via ClickHouse query |
 
 **DB and External Call Latency**
