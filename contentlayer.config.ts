@@ -170,10 +170,14 @@ const getAuthorDetails = (authorID) => {
 function getAuthors(doc) {
   const authorsArr = doc?.authors._array || ['SigNoz Team']
 
-  return authorsArr.map((author) => ({
-    '@type': 'Person',
-    name: getAuthorDetails(author).name || 'SigNoz Team',
-  }))
+  return authorsArr.map((author) => {
+    const details = getAuthorDetails(author)
+    return {
+      '@type': 'Person',
+      name: details.name || 'SigNoz Team',
+      ...(details.url && { url: details.url }),
+    }
+  })
 }
 
 export const Page = defineDocumentType(() => ({
@@ -219,29 +223,52 @@ export const Blog = defineDocumentType(() => ({
     },
     structuredData: {
       type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/blog/${doc.slug}`,
-        },
-        author: getAuthors(doc),
-        publisher: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-          logo: {
+      resolve: (doc) => {
+        const postUrl = `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`
+        const tags = Array.isArray(doc.tags) ? doc.tags : []
+        return {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          '@id': `${postUrl}#article`,
+          headline: doc.title,
+          description: doc.description,
+          image: {
             '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+            url: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+            width: 1200,
+            height: 630,
           },
-        },
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': postUrl,
+          },
+          url: postUrl,
+          datePublished: doc.date,
+          dateModified: doc.lastmod || doc.date,
+          inLanguage: siteMetadata.language,
+          wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
+          author: getAuthors(doc),
+          publisher: {
+            '@type': 'Organization',
+            '@id': `${siteMetadata.siteUrl}/#organization`,
+            name: siteMetadata.title,
+            logo: {
+              '@type': 'ImageObject',
+              url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
+              width: 600,
+              height: 60,
+            },
+            sameAs: [
+              siteMetadata.linkedin,
+              siteMetadata.x,
+              siteMetadata.github,
+              siteMetadata.youtube,
+              siteMetadata.hackernews,
+            ],
+          },
+          ...(tags.length > 0 && { articleSection: tags[0] }),
+        }
+      },
     },
   },
 }))
@@ -335,29 +362,52 @@ export const Guide = defineDocumentType(() => ({
     },
     structuredData: {
       type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/guides/${doc.slug}`,
-        },
-        author: getAuthors(doc),
-        publisher: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-          logo: {
+      resolve: (doc) => {
+        const postUrl = `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`
+        const tags = Array.isArray(doc.tags) ? doc.tags : []
+        return {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          '@id': `${postUrl}#article`,
+          headline: doc.title,
+          description: doc.description,
+          image: {
             '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+            url: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+            width: 1200,
+            height: 630,
           },
-        },
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': postUrl,
+          },
+          url: postUrl,
+          datePublished: doc.date,
+          dateModified: doc.lastmod || doc.date,
+          inLanguage: siteMetadata.language,
+          wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
+          author: getAuthors(doc),
+          publisher: {
+            '@type': 'Organization',
+            '@id': `${siteMetadata.siteUrl}/#organization`,
+            name: siteMetadata.title,
+            logo: {
+              '@type': 'ImageObject',
+              url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
+              width: 600,
+              height: 60,
+            },
+            sameAs: [
+              siteMetadata.linkedin,
+              siteMetadata.x,
+              siteMetadata.github,
+              siteMetadata.youtube,
+              siteMetadata.hackernews,
+            ],
+          },
+          ...(tags.length > 0 && { articleSection: tags[0] }),
+        }
+      },
     },
   },
 }))

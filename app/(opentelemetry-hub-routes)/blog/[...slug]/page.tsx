@@ -118,7 +118,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
         {!suppressStructuredData && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
           />
         )}
         <OpenTelemetryHubContent
@@ -151,7 +151,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
       {!suppressStructuredData && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
       )}
       <Layout
