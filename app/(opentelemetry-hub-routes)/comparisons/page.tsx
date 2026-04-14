@@ -1,30 +1,29 @@
-import ListLayout from '@/layouts/ListLayoutWithTags'
+import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
+import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
+import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
-import { genPageMetadata } from 'app/seo'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { buildListingMetadata } from '../metadata'
 
-const POSTS_PER_PAGE = 5
+export const metadata = buildListingMetadata('Comparisons')
 
-export const metadata = genPageMetadata({ title: 'Blog' })
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamic = 'force-static'
 
-export default function BlogPage() {
-  const posts = allCoreContent(sortPosts(allBlogs))
-  const pageNumber = 1
-  const initialDisplayPosts = posts.slice(
-    POSTS_PER_PAGE * (pageNumber - 1),
-    POSTS_PER_PAGE * pageNumber
-  )
-  const pagination = {
-    currentPage: pageNumber,
-    totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
-  }
+export default async function ComparisonsHome() {
+  const comparisons = await fetchAllComparisonsForPage()
+  const posts = allCoreContent(sortPosts(comparisons))
 
   return (
-    <ListLayout
-      posts={posts}
-      initialDisplayPosts={initialDisplayPosts}
-      pagination={pagination}
-      title="All Posts"
-    />
+    <ListingPageLayout>
+      <ListingWithSearch
+        posts={posts}
+        pageRoute="comparisons"
+        title="Comparisons"
+        description="Stay informed about the latest tools in the observability domain with in-depth comparisons of popular options to determine the best fit for your needs."
+        searchPlaceholder="Search for a comparison..."
+        gridTitle="All Comparisons"
+      />
+    </ListingPageLayout>
   )
 }

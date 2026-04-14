@@ -22,7 +22,7 @@ import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import Tabs from '../../app/resource-center/Shared/Tabs'
+import Tabs from '@/components/ResourceCenter/Tabs'
 import * as Popover from '@radix-ui/react-popover'
 import Accordion from '../Accordion/Accordion'
 import { QUERY_PARAMS } from '@/constants/queryParams'
@@ -38,10 +38,10 @@ enum TABS {
 }
 
 enum TAB_PATHNAMES {
-  BLOG = '/resource-center/blog',
-  COMPARISONS = '/resource-center/comparisons',
-  GUIDES = '/resource-center/guides',
-  OPENTELEMETRY = '/resource-center/opentelemetry',
+  BLOG = '/blog',
+  COMPARISONS = '/comparisons',
+  GUIDES = '/guides',
+  OPENTELEMETRY = '/opentelemetry',
 }
 const productDropdownItems = [
   {
@@ -177,25 +177,25 @@ const resourcesDropdownItems = {
   learn: [
     {
       key: 'blog',
-      url: '/resource-center/blog',
+      url: '/blog',
       description: 'News, ideas, and insights on observability',
       name: 'Blog',
     },
     {
       key: 'comparisons',
-      url: '/resource-center/comparisons',
+      url: '/comparisons',
       description: 'Compare observability tools',
       name: 'Comparisons',
     },
     {
       key: 'guides',
-      url: '/resource-center/guides',
+      url: '/guides',
       description: 'How-to guides and tutorials',
       name: 'Guides',
     },
     {
       key: 'opentelemetry',
-      url: '/resource-center/opentelemetry',
+      url: '/opentelemetry',
       description: 'OpenTelemetry concepts and its use cases',
       name: 'OpenTelemetry',
     },
@@ -251,9 +251,11 @@ export default function TopNav() {
 
   const loginRoute = '/login/'
   const signupRoute = '/teams/'
+  const contactUsRoute = '/contact-us/'
   const wordleRoute = '/todaysdevopswordle/'
   const isLoginRoute = pathname === loginRoute
   const isSignupRoute = pathname === signupRoute
+  const isContactUsRoute = pathname === contactUsRoute
   const isWordleRoute = pathname === wordleRoute
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
@@ -277,16 +279,19 @@ export default function TopNav() {
       setShowMainMenu(false)
     }
 
-    if (pathname.startsWith(TAB_PATHNAMES.BLOG)) {
+    const isListingOrPagination = (base: string) =>
+      pathname === base || pathname === `${base}/` || pathname.startsWith(`${base}/page/`)
+
+    if (isListingOrPagination(TAB_PATHNAMES.BLOG)) {
       setActiveTab(TABS.BLOG)
       setShouldShowTabs(true)
-    } else if (pathname.startsWith(TAB_PATHNAMES.COMPARISONS)) {
+    } else if (isListingOrPagination(TAB_PATHNAMES.COMPARISONS)) {
       setActiveTab(TABS.COMPARISONS)
       setShouldShowTabs(true)
-    } else if (pathname.startsWith(TAB_PATHNAMES.GUIDES)) {
+    } else if (isListingOrPagination(TAB_PATHNAMES.GUIDES)) {
       setActiveTab(TABS.GUIDES)
       setShouldShowTabs(true)
-    } else if (pathname.startsWith(TAB_PATHNAMES.OPENTELEMETRY)) {
+    } else if (pathname.startsWith(`${TAB_PATHNAMES.OPENTELEMETRY}/page/`)) {
       setActiveTab(TABS.OPENTELEMETRY)
       setShouldShowTabs(true)
     } else {
@@ -310,11 +315,11 @@ export default function TopNav() {
     }
   }, [])
 
-  const handleProductDropdownClick = () => setIsOpen(false)
+const handleProductDropdownClick = () => setIsOpen(false)
   const handleResourcesDropdownClick = () => setIsOpenResources(false)
 
-  // Hide TopNav on teams page or if source is onboarding
-  if (isSignupRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
+  // Hide TopNav on teams, contact-us page or if source is onboarding
+  if (isSignupRoute || isContactUsRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
     return null
   }
 

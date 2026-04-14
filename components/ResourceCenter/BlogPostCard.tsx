@@ -1,5 +1,5 @@
 import siteMetadata from '@/data/siteMetadata'
-import Authors from '../../../constants/authors.json'
+import Authors from '../../constants/authors.json'
 import { Clock4 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'

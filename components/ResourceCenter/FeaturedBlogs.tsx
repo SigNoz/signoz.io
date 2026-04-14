@@ -1,6 +1,5 @@
-import React from 'react'
-import BlogPostCard from '../Shared/BlogPostCard'
-import type { ResourceCenterBlog } from '../content'
+import BlogPostCard from './BlogPostCard'
+import type { ResourceCenterBlog } from '../../app/(opentelemetry-hub-routes)/content'
 
 interface FeaturedBlogsProps {
   isDarkMode: boolean

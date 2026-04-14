@@ -1,10 +1,15 @@
-import React from 'react'
 import GridLayout from '@/layouts/GridLayout'
+import { POSTS_PER_PAGE } from '../../app/(opentelemetry-hub-routes)/constants'
 
-const POSTS_PER_PAGE = 9
-
-export default function AllBlogs({ blogs }) {
-  const pageNumber = 1
+export default function AllBlogs({
+  blogs,
+  pageNumber = 1,
+  pageRoute = 'blog',
+}: {
+  blogs: any[]
+  pageNumber?: number
+  pageRoute?: string
+}) {
   const initialDisplayPosts = blogs.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
     POSTS_PER_PAGE * pageNumber
@@ -12,7 +17,7 @@ export default function AllBlogs({ blogs }) {
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(blogs.length / POSTS_PER_PAGE),
-    pageRoute: 'blog',
+    pageRoute,
   }
 
   return (
