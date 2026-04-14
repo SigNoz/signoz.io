@@ -2509,7 +2509,7 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/querying/user-guides',
         items: [
-          { type: 'doc', route: '/docs/userguide/full-text-search', label: 'Full-Text Search' },
+          { type: 'doc', route: '/docs/userguide/full-text-search', label: 'Full-Text Log Search' },
           {
             type: 'doc',
             route: '/docs/userguide/search-advanced-examples',
@@ -2524,6 +2524,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/querying/multi-query-analysis',
             label: 'Multi-Query Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/functions-extended-analysis',
+            label: 'Functions for Extended Analysis',
           },
         ],
       },
