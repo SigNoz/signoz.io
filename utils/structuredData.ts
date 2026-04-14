@@ -17,7 +17,6 @@ type ImageObject = {
 type StructuredData = {
   '@context': 'https://schema.org'
   '@type': 'BlogPosting' | 'TechArticle' | 'Article'
-  '@id': string
   headline: string
   description: string
   image: ImageObject
@@ -33,7 +32,6 @@ type StructuredData = {
   author: Author | Author[]
   publisher: {
     '@type': 'Organization'
-    '@id': string
     name: string
     logo: ImageObject
     sameAs: string[]
@@ -62,7 +60,6 @@ const getDefaultAuthor = (): Author => ({
 
 const getDefaultPublisher = (): StructuredData['publisher'] => ({
   '@type': 'Organization',
-  '@id': `${siteMetadata.siteUrl}`,
   name: siteMetadata.title,
   logo: {
     '@type': 'ImageObject',
@@ -155,7 +152,6 @@ export const generateStructuredData = (
   return {
     '@context': 'https://schema.org',
     '@type': schemaType,
-    '@id': `${fullUrl}`,
     headline: content.title,
     description: content.description || `Read about ${content.title}`,
     image: getDefaultImage(content),

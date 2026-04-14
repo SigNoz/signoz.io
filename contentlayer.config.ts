@@ -229,7 +229,6 @@ export const Blog = defineDocumentType(() => ({
         return {
           '@context': 'https://schema.org',
           '@type': 'BlogPosting',
-          '@id': `${postUrl}`,
           headline: doc.title,
           description: doc.description,
           image: {
@@ -250,7 +249,6 @@ export const Blog = defineDocumentType(() => ({
           author: getAuthors(doc),
           publisher: {
             '@type': 'Organization',
-            '@id': `${siteMetadata.siteUrl}`,
             name: siteMetadata.title,
             logo: {
               '@type': 'ImageObject',
@@ -368,7 +366,6 @@ export const Guide = defineDocumentType(() => ({
         return {
           '@context': 'https://schema.org',
           '@type': 'BlogPosting',
-          '@id': `${postUrl}`,
           headline: doc.title,
           description: doc.description,
           image: {
@@ -389,7 +386,6 @@ export const Guide = defineDocumentType(() => ({
           author: getAuthors(doc),
           publisher: {
             '@type': 'Organization',
-            '@id': `${siteMetadata.siteUrl}`,
             name: siteMetadata.title,
             logo: {
               '@type': 'ImageObject',
