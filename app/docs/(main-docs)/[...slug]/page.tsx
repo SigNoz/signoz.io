@@ -61,9 +61,14 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = mainContent
+  const jsonLd = post.structuredData
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
           title={title}
