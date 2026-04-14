@@ -1,0 +1,531 @@
+---
+
+title: OpenTelemetry Collector Processors Explained
+slug: opentelemetry-collector-processors
+date: 2026-04-13
+tags: [opentelemetry]
+authors: [mahak_kaur]
+description: OpenTelemetry Collector processors are pipeline components that modify, enrich, filter, batch, and sample telemetry between receivers and exporters. Learn how they work, how ordering affects behavior, and which ones to start with in production.
+keywords: [opentelemetry processors, otel processors, opentelemetry collector processors, otel collector configuration, OpenTelemetry pipeline, OpenTelemetry processor order, batch processor, filter processor, transform processor, tail sampling processor, memory limiter processor, k8sattributes processor, OTTL]
+
+---
+
+OpenTelemetry Collector processors are the pipeline components that enrich, filter, transform, sample, and batch telemetry between receivers and exporters. This is where teams remove noise, add infrastructure context, and protect sensitive data. It is also the central layer for controlling cost before telemetry leaves the Collector. This guide explains how processors work, how ordering changes behavior, and which processors to start with in production.
+
+This article covers **OpenTelemetry Collector processors only**. SDK span processors, which are a separate concept in language-level instrumentation libraries, are not covered here.
+
+*Version-specific behavior and processor maturity can change across Collector releases. Always check the processor registry and component READMEs for the Collector version you run.*
+
+## What Are OpenTelemetry Processors?
+
+OpenTelemetry processors are Collector pipeline components that modify, enrich, filter, batch, sample, or otherwise handle telemetry between receivers and exporters. The [official processor registry](https://opentelemetry.io/docs/collector/components/processor/) describes them as components that **"transform, filter, and enrich telemetry data as it flows through the pipeline."**
+That definition is intentionally narrow. Processors are not storage, not querying, not visualization. They are in-flight telemetry handlers that operate inside the Collector process, with access to the full telemetry payload before it leaves.
+
+Two things hold true for every processor regardless of type. First, processors only operate on the signals (traces, metrics, logs) supported by the specific processor. Not every processor supports all three. Second, and more practically: configuring a processor does not enable it. A processor defined in the `processors:` section of a Collector config is completely inactive until it is referenced inside a `service.pipelines` entry.
+
+Many commonly used processors, including `filter`, `transform`, `k8sattributes`, and `tail_sampling`, are available in the Contrib distribution. Check the current processor registry before assuming a processor is available in core or contrib.
+
+## Where Processors Fit in the Collector Pipeline
+
+A Collector pipeline is a typed signal path defined under `service.pipelines`. Each pipeline is either `traces`, `metrics`, or `logs`. It consists of receivers, a sequence of processors, and exporters. Data flows from receivers to the first processor, through each processor in order, then to exporters.
+
+<Figure src="/img/blog/2026/04/opentelemetry-collector-processors-image.webp" alt="OpenTelemetry Collector pipeline diagram with receivers, processors, and exporters arranged in sequence" caption="OpenTelemetry Collector pipeline showing receivers, a processor chain, and exporters in execution order" />
+
+Processors form a linear chain. There is no branching or merging within a single pipeline's processor list. When branching is needed, that is handled by [connectors](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector/), which sit between pipelines.
+
+One behavior worth understanding early: when the same processor type is referenced in multiple pipelines, each pipeline gets its own independent runtime instance. A `batch` processor in the `traces` pipeline and a `batch` processor in the `logs` pipeline are two separate instances with their own buffers and state. This matters significantly for stateful processors like `tail_sampling`.
+
+## How Processor Configuration Works
+
+Processors follow the same configuration model as all Collector components. They are declared in the top-level `processors:` map and activated by listing them inside a pipeline under `service.pipelines`.
+
+### Configured is not the same as enabled
+
+This is the most common misconfiguration in Collector setups. Defining a processor in `processors:` creates its configuration but does not start it. The processor only runs when it appears in a pipeline's processor list.
+
+```yaml
+processors:
+  batch: {}             # declared but not yet active
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 1500
+
+exporters:
+  otlp/signoz:
+    endpoint: "ingest.<region>.signoz.cloud:443" # region-specific ingestion endpoint shown in SigNoz Cloud Settings → Ingestion
+    headers:
+      signoz-ingestion-key: "${SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]  # both are now active
+      exporters: [otlp/signoz]
+```
+
+<KeyPointCallout title="Finding your SigNoz ingestion key" defaultCollapsed={true}>
+To send telemetry to SigNoz Cloud, you need a valid ingestion key. You can find your region-specific endpoint and generate ingestion keys in your SigNoz Cloud Settings under the **Ingestion** tab. For full details, see the [SigNoz Ingestion Keys documentation](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+</KeyPointCallout>
+
+If `batch` were removed from the pipeline list but kept in `processors:`, it would silently do nothing.
+
+### Multiple named instances with `type[/name]`
+
+Component identifiers follow a `type[/name]` pattern. This lets teams define multiple instances of the same processor with different configurations. Two filter processors with different rules, for example:
+
+```yaml
+processors:
+  filter/drop-health:
+    error_mode: ignore
+    trace_conditions:
+      - 'span.attributes["http.route"] == "/health"'
+  filter/drop-debug-logs:
+    error_mode: ignore
+    log_conditions:
+      - 'log.severity_number < SEVERITY_NUMBER_INFO'
+```
+
+Both can be referenced independently in different pipelines or at different positions in the same pipeline.
+
+## Why Processor Order Changes Pipeline Behavior
+
+Processor order in a pipeline list is execution order. This is semantic, not cosmetic. The Collector applies processors in the exact sequence they appear, and changing that sequence changes behavior. In some cases, incorrect ordering causes data loss or incorrect sampling decisions.
+
+The [official docs](https://opentelemetry.io/docs/collector/configuration/#processors) establish a few recurring placement rules that are worth treating as defaults unless there is a strong reason to do otherwise.
+
+### `memory_limiter` belongs first
+
+`memory_limiter` should be the first processor in every pipeline. Its job is to push back on upstream receivers when the Collector is under memory pressure. If it appears late in the chain, other processors have already consumed memory processing data that will then be refused and potentially lost.
+
+When `memory_limiter` refuses data, it returns a non-permanent error signaling upstream components to buffer and retry. If the component upstream does not retry correctly, refused data is permanently lost. Placing it first minimizes the processing that happens before backpressure kicks in.
+
+### `batch` belongs after dropping stages
+
+`batch` groups telemetry before sending it to exporters. Batching should happen after any stage that drops data, such as sampling or filtering. If `batch` runs before a `filter` processor, it groups spans that will later be dropped, wasting memory and CPU on records that will never be exported.
+
+The rule from the batch processor docs is direct: "batching should happen after any data drops such as sampling."
+
+### `tail_sampling` must come after context-enrichment processors
+
+`tail_sampling` reassembles spans into new batches by `trace_id` when making sampling decisions. In doing so, spans lose the original request context that earlier processors attached. If `k8sattributes` runs after `tail_sampling`, the Kubernetes metadata will not be present when the sampling policy evaluates the trace.
+
+The practical ordering for a pipeline using tail sampling: `memory_limiter` → enrichment processors (`k8sattributes`, `resourcedetection`) → filtering/transformation → `tail_sampling` → `batch`.
+
+### A practical default ordering pattern
+
+The diagram below contrasts a misleading processor order with the recommended one: protect memory first, add context before making filtering or sampling decisions, and batch only the telemetry that will actually be exported.
+
+<Figure src="/img/blog/2026/04/opentelemetry-collector-processors-image-ordering.webp" alt="Comparison diagram showing wrong processor ordering with memory_limiter, batch, and tail_sampling, and recommended ordering with memory_limiter, enrichment, filter or transform, tail_sampling, and batch" caption="Incorrect and recommended processor ordering in an OpenTelemetry Collector pipeline" />
+
+Because processors run in sequence, placing `batch` before `tail_sampling` can make sampling behavior harder to understand and debug.
+
+## Core Processors Every Production Pipeline Needs
+
+Before getting to signal-specific processors, two processors belong in virtually every pipeline regardless of use case.
+
+### `memory_limiter`: Protecting the Collector from Memory Pressure
+
+The `memory_limiter` processor prevents OOM crashes on the Collector. It monitors heap usage at a configurable `check_interval` and operates on two thresholds: a soft limit and a hard limit.
+
+When memory exceeds the soft limit (calculated as `limit_mib` minus `spike_limit_mib`), the processor starts refusing incoming data. When memory exceeds the hard limit, it forces a garbage collection cycle. In containerized environments, `limit_percentage` is preferable over `limit_mib` because it scales with the actual memory allocated to the pod.
+
+In Go-based Collector deployments, it can also be useful to review Go runtime memory settings such as `GOMEMLIMIT` alongside `memory_limiter` configuration.
+
+```yaml
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 1500
+    spike_limit_mib: 300
+```
+
+<KeyPointCallout title="Warning: data can be permanently lost without correct retry behavior" defaultCollapsed={true} >
+When `memory_limiter` refuses data, it returns a non-permanent error expecting upstream components to retry. If a receiver or agent does not implement retry on this error, the refused data is gone. This is one reason `memory_limiter` should always be first: it gives receivers the maximum opportunity to handle backpressure correctly.
+</KeyPointCallout>
+
+### `batch`: Reducing Network Overhead Before Export
+
+The `batch` processor groups spans, metric data points, or log records into batches before passing them to exporters. This reduces the number of outgoing network connections, improves compression ratios, and prevents individual records from arriving at backends as a stream of tiny requests.
+
+Batching triggers on two conditions: `send_batch_size` (number of items) and `timeout` (elapsed time). Whichever threshold is reached first triggers a batch send. `send_batch_max_size` sets an absolute ceiling on any single batch, regardless of how fast data is arriving.
+
+```yaml
+processors:
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+    send_batch_max_size: 2048
+```
+
+For high-throughput pipelines, increasing `send_batch_size` to 4096 or 8192 and extending `timeout` to 10s or 30s reduces per-request overhead significantly. For low-latency scenarios, smaller batches and shorter timeouts keep data moving to the backend quickly.
+
+## Enriching Telemetry Without Touching Application Code
+
+A Collector can add infrastructure context to every span, metric, and log without any changes to application code. This is one of the most practical uses of processors: teams get consistent, queryable resource attributes across all telemetry without instrumenting each service individually.
+
+### `resource`: Setting Resource-Level Metadata
+
+The `resource` processor modifies attributes at the resource level: the fields that describe the entity producing telemetry (service name, environment, cluster, region). It uses the same action model as `attributes` but operates only on resource fields.
+
+Common use: enforcing a `deployment.environment` tag that applications may not set themselves.
+
+```yaml
+processors:
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: production
+        action: upsert
+      - key: k8s.cluster.name
+        value: prod-us-east-1
+        action: insert
+```
+
+Actions: `insert` (add if missing), `update` (modify if exists), `upsert` (add or modify), `delete` (remove).
+
+### `attributes`: Modifying Span, Log, and Metric Attributes
+
+The `attributes` processor modifies non-resource attributes on spans, logs, and metrics. It supports the same action model as `resource` but operates at the signal level rather than the resource level.
+
+`resource` uses the same attribute action model as `attributes`, but applies it to resource attributes instead of span/log/datapoint attributes.
+
+```yaml
+processors:
+  attributes:
+    actions:
+      - key: db.statement
+        action: delete
+      - key: user.email
+        action: hash
+      - key: http.request.header.authorization
+        action: delete
+```
+
+### `resourcedetection`: Auto-detecting Host and Cloud Identity
+
+The `resourcedetection` processor queries local metadata APIs to detect the environment the Collector is running in and attaches standard OpenTelemetry resource attributes automatically. Supported detectors include `env`, `system`, `docker`, `ec2`, `ecs`, `gcp`, `azure`, and `k8s_node`.
+
+`override: false` preserves attribute values already set by the SDK, which is the correct default for production. Set it to `true` only when the Collector should be the authoritative source for those fields.
+
+```yaml
+processors:
+  resourcedetection:
+    detectors: [env, system, ec2]
+    timeout: 2s
+    override: false
+```
+
+### `k8sattributes`: Attaching Kubernetes Context to Every Signal
+
+The `k8sattributes` processor queries the Kubernetes API to associate incoming telemetry with pod metadata: `k8s.pod.name`, `k8s.namespace.name`, `k8s.deployment.name`, `k8s.node.name`, and custom labels or annotations. This association is based on the source IP of the telemetry request or on resource attributes already present (like `k8s.pod.ip`).
+
+The processor requires RBAC permissions to read from the Kubernetes API. RBAC depends on what you extract. Cross-namespace enrichment needs `get/watch/list` on `pods` and `namespaces`; extracting `k8s.deployment.name` also requires access to `deployments`/`replicasets` unless `deployment_name_from_replicaset` is enabled.
+
+```yaml
+processors:
+  k8sattributes:
+    auth_type: serviceAccount
+    passthrough: false
+    extract:
+      metadata:
+        - k8s.pod.name
+        - k8s.namespace.name
+        - k8s.deployment.name
+        - k8s.node.name
+    pod_association:
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+      - sources:
+          - from: connection
+```
+
+<KeyPointCallout title="Warning for Gateway deployments" defaultCollapsed={true}>
+<code>k8sattributes</code> matches telemetry to pods using the sender's IP. This works when the Collector runs as a DaemonSet or sidecar because the pod sends directly. In gateway mode, the gateway sees the agent's IP instead of the original pod's IP, so the lookup fails silently. Fix: have agents attach pod metadata as resource attributes before forwarding to the gateway.
+</KeyPointCallout>
+
+Once `k8sattributes` enriches telemetry with Kubernetes metadata, backends like SigNoz can filter and group traces, metrics, and logs by namespace, deployment, or pod name. In practice, that makes it much easier to isolate a noisy pod or trace a latency spike to a specific replica.
+
+## `attributes` vs `resource` vs `transform`: Choosing the Right Scope
+
+When modifying telemetry, the main decision is scope. `attributes`, `resource`, and `transform` overlap in capability, but they differ in where they operate, how much logic they support, and how much risk they add.
+
+| Processor | Operates on | Best used for | Strengths | Tradeoffs / Risks | Example |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `attributes` | Signal-level attributes on spans, logs, and metric data points | Changing what an individual span, log, or metric carries | Simple, action-based, predictable | Limited for multi-step or conditional logic | Delete `db.statement` from spans with `delete` |
+| `resource` | Resource-level attributes that describe the producing entity | Setting service identity, environment tags, cluster/host metadata | Simple, action-based, good for infrastructure metadata | Only works on resource fields | Set `deployment.environment` on all telemetry with `upsert` |
+| `transform` | Telemetry processed through OTTL statements | Conditional logic, multi-field changes, regex extraction, reshaping data | Most flexible and expressive | Adds CPU overhead and semantic risk, especially for metrics | Extract a user ID from a URL path into a new attribute conditionally |
+
+The right mental model is to start with the narrowest processor that solves the problem. `attributes` and `resource` are usually the better default because they are simpler and more predictable. Use `transform` when the logic is conditional, multi-step, or too complex for the action-based model.
+
+## Filtering and Transforming Telemetry in the Pipeline
+
+### `filter`: Dropping Unwanted Telemetry
+
+The `filter` processor drops telemetry based on OTTL conditions. If any condition in the list matches, the telemetry item is dropped. It supports spans, span events, metrics, metric data points, and log records.
+
+In production, `error_mode: ignore` is usually the safer default. Without it, an OTTL expression that encounters a missing attribute returns an error and can cause unexpected drops. With `ignore`, the expression is skipped and the telemetry continues.
+
+```yaml
+processors:
+  filter/drop-noise:
+    error_mode: ignore
+    trace_conditions:
+      - 'span.attributes["http.route"] == "/health"'
+      - 'span.attributes["http.route"] == "/readyz"'
+      - 'span.attributes["http.route"] == "/metrics"'
+    log_conditions:
+      - 'log.severity_number < SEVERITY_NUMBER_INFO'
+```
+
+**Watch out for orphaned spans:** dropping a parent span without its children creates broken trace trees in the backend. Filter at the trace level or drop only leaf spans, and verify the resulting structure before deploying.
+
+### `transform`: Conditional Telemetry Reshaping
+
+The `transform` processor executes ordered OTTL statements against telemetry. It handles tasks that `attributes` and `resource` do not handle cleanly: conditional logic, multi-field operations, regex extraction, type conversion, and cross-context reads.
+
+A practical example: redacting sensitive attributes from spans before they reach the backend, and normalizing span names to reduce cardinality in trace queries.
+
+```yaml
+processors:
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - delete_key(attributes, "http.request.header.authorization")
+          - delete_key(attributes, "user.password")
+          - replace_pattern(attributes["http.target"], "/users/[0-9]+", "/users/{id}")
+          - set(name, Concat([attributes["http.method"], " ", attributes["http.route"]], ""))
+            where attributes["http.route"] != nil
+```
+
+For teams sending traces to SigNoz, the [PII scrubbing guide](https://signoz.io/docs/traces-management/guides/pii-scrubbing/) covers additional `transform` processor patterns for common sensitive fields.
+
+**Metric identity risk:** modifying attributes that form part of a metric's unique identity can cause backends to interpret it as a new series. Apply metric transformations carefully and verify output before production use.
+
+## How OTTL Works in OpenTelemetry Processors
+
+OTTL (OpenTelemetry Transformation Language) is the expression language behind the `filter` and `transform` processors. Understanding it conceptually makes processor configuration much clearer, even for teams who never write complex statements.
+
+OTTL operates in typed contexts that map to the OpenTelemetry data model. Current transform/filter docs use hierarchical contexts: traces = `resource`, `scope`, `span`, `spanevent`; metrics = `resource`, `scope`, `metric`, `datapoint`; logs = `resource`, `scope`, `log`. The transform processor can infer context automatically from prefixed paths. Each context gives access to a specific set of fields, so attempting to access `span.name` inside a `log_statements` block causes a startup error.
+
+OTTL provides built-in functions for setting values, deleting keys, pattern replacement, JSON parsing, map operations, and string composition. Conditions are attached to any statement using `where`.
+
+```yaml
+# With explicit context (always works)
+transform:
+  trace_statements:
+    - context: span
+      statements:
+        - set(attributes["env"], resource.attributes["deployment.environment"])
+
+# With context inference
+transform:
+  trace_statements:
+    - set(attributes["env"], resource.attributes["deployment.environment"])
+```
+
+Both `filter` and `transform` apply `error_mode` globally. In production, `ignore` is the safe choice. In `propagate` mode, any OTTL expression error halts the pipeline, which can cause cascading failures when telemetry arrives with unexpected attribute shapes. Two practical risks to watch for are orphaned spans after filtering and metric identity changes after transformation.
+
+## Sampling Telemetry at the Collector
+
+Sampling is a legitimate cost-control and signal-to-noise mechanism. But it changes what data survives, and that has consequences. Before applying sampling, teams should think about which traces they would regret not having during an incident.
+
+### `probabilistic_sampler`: Simple, Stateless Volume Reduction
+
+`probabilistic_sampler` applies a fixed sampling percentage to incoming traces. It is stateless and simpler to operate than tail sampling, which makes it a good fit when percentage-based volume reduction is enough.
+
+```yaml
+processors:
+  probabilistic_sampler:
+    sampling_percentage: 10
+```
+
+### `tail_sampling`: Keeping the Traces That Matter
+
+`tail_sampling` buffers spans by `trace_id` and makes a decision after the trace has had time to complete. That enables policies like "keep all error traces" or "keep traces slower than 2 seconds."
+
+```yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    expected_new_traces_per_sec: 500
+    policies:
+      - name: keep-errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      - name: keep-slow-traces
+        type: latency
+        latency:
+          threshold_ms: 2000
+      - name: sample-rest
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 5
+```
+
+**Key constraints:** all spans for a trace must reach the same Collector instance (use trace-aware routing in multi-instance setups), and `num_traces` must be large enough to avoid premature eviction. If the pipeline generates span-based metrics, aggregate them *before* `tail_sampling`. For more detail, see our guide on [OpenTelemetry Collector deployment patterns](https://signoz.io/blog/opentelemetry-deployment-patterns/).
+
+## A Production Pipeline Example (SigNoz exporter variant)
+
+This example shows a practical ordering pattern. Adapt values and processor choices to your workload and Collector version.
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 1500
+    spike_limit_mib: 300
+
+  k8sattributes:
+    auth_type: serviceAccount
+    passthrough: false
+    extract:
+      metadata:
+        - k8s.pod.name
+        - k8s.namespace.name
+        - k8s.deployment.name
+        - k8s.node.name
+    pod_association:
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+      - sources:
+          - from: connection
+
+  resourcedetection:
+    detectors: [env, system]
+    timeout: 2s
+    override: false
+
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: production
+        action: upsert
+
+  filter/drop-health:
+    error_mode: ignore
+    trace_conditions:
+      - 'span.attributes["http.route"] == "/health"'
+      - 'span.attributes["http.route"] == "/readyz"'
+    log_conditions:
+      - 'log.severity_number < SEVERITY_NUMBER_INFO'
+
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - delete_key(attributes, "http.request.header.authorization")
+          - replace_pattern(attributes["http.target"], "/users/[0-9]+", "/users/{id}")
+
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+    send_batch_max_size: 2048
+
+exporters:
+  otlp/signoz:
+    endpoint: "ingest.<region>.signoz.cloud:443" # region-specific ingestion endpoint shown in SigNoz Cloud Settings → Ingestion
+    headers:
+      signoz-ingestion-key: "${SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors:
+        - memory_limiter
+        - k8sattributes
+        - resourcedetection
+        - resource
+        - filter/drop-health
+        - transform
+        - batch
+      exporters: [otlp/signoz]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, resource, batch]
+      exporters: [otlp/signoz]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, resource, filter/drop-health, batch]
+      exporters: [otlp/signoz]
+```
+
+With this config, the backend receives telemetry already enriched with Kubernetes and environment metadata, stripped of health-check noise and sensitive headers, and batched for efficient ingestion. When traces, metrics, and logs share consistent resource attributes such as `service.name`, `deployment.environment`, and Kubernetes metadata, backends such as SigNoz can correlate them more effectively.
+
+<KeyPointCallout title="Processor stability varies" defaultCollapsed={true}>
+OpenTelemetry Collector processors do not all carry the same maturity level. The <a href="https://opentelemetry.io/docs/collector/components/processor/" target="_blank" rel="noopener noreferrer nofollow">official processor registry</a> tracks stability per signal using levels such as <code>development</code>, <code>alpha</code>, <code>beta</code>, and <code>stable</code>.<br /><br />Processor stability varies by component and by signal. Check the processor registry and CHANGELOG for every processor your pipeline depends on before upgrading.
+</KeyPointCallout>
+
+## Common Mistakes That Break Processor Pipelines
+
+These are the mistakes that make pipelines harder to trust:
+
+- Defining a processor but forgetting to add it to a pipeline. The processor is silently inactive. No error, no warning. Particularly easy to miss when copying config snippets from documentation.
+- Placing `batch` before sampling or filtering. Batching groups data that will later be dropped, wasting memory. In the case of `tail_sampling`, it can also split a trace across multiple batches, causing incorrect sampling decisions.
+- Using `transform` where `attributes` or `resource` would work. `transform` adds OTTL parsing overhead and semantic risk. For straightforward add, delete, or hash operations, `attributes` is cleaner and faster.
+- Dropping a parent span without dropping its children. This creates orphaned spans in the backend, rendering as broken trace trees. Filter at the trace level or drop only leaf spans.
+- Running `tail_sampling` across multiple Collector instances without a routing layer. Spans from the same trace land on different instances, each making a decision on partial data. The sampling policy produces incorrect results.
+- Assuming every contrib processor has the same stability level. Stability varies by component and by signal, so check the processor registry and CHANGELOG before upgrading.
+- Ignoring Go runtime memory behavior when tuning memory_limiter. Consider setting `GOMEMLIMIT` alongside `memory_limiter` in Go-based Collector deployments, and validate memory behavior under load for your runtime and deployment model.
+
+## Which Processors Should Most Teams Start With?
+
+For teams getting started with Collector processors, a practical first set covers most production needs:
+
+`memory_limiter` and `batch` are the usual baseline in production pipelines. Add `resourcedetection` and `resource` to attach environment and host metadata. Add `filter` to drop health check and metrics-scrape spans that add noise without adding signal.
+
+Once that baseline is stable, `k8sattributes` is the natural next addition for Kubernetes environments. `attributes` comes in when there are specific span fields to delete or hash for privacy compliance. `transform` is for when conditional logic or regex-based operations become necessary. `tail_sampling` is worth introducing when trace volume becomes a significant cost driver and the team needs outcome-based trace retention.
+
+The [official OpenTelemetry processor registry](https://opentelemetry.io/docs/collector/components/processor/) is the right place to verify availability, stability level, and supported signals for any processor before adding it to a production pipeline.
+
+## Conclusion
+
+Processors are where the Collector shifts from simple transport to active telemetry handling. They are the layer where teams shape data for quality, cost, security, and downstream usefulness before it reaches a backend.
+
+The most important things to get right are the underlying mechanics: configured is not the same as enabled, ordering is semantic not cosmetic, and the right processor for a job is the narrowest one that solves it cleanly. A small, well-ordered set of processors covers most of what production pipelines actually need. Understanding scope, order, and tradeoffs is more durable than memorizing the full processor registry.
+
+## Next step: sending processor-enriched telemetry to SigNoz
+
+Using a backend such as SigNoz, these processors make it easier to query traces, metrics, and logs with shared resource attributes. For a broader Collector walkthrough that also covers receivers and exporters, see the [complete OpenTelemetry Collector guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
+
+## Frequently Asked Questions
+
+### Are processors required in the OpenTelemetry Collector?
+
+Processors are optional in configuration terms, but `memory_limiter` and `batch` are common production defaults. Without `batch`, many backends will receive smaller, less efficient payloads.
+
+### Why should `memory_limiter` come first in a pipeline?
+
+`memory_limiter` applies backpressure to upstream receivers when memory is constrained. If it appears later in the chain, processors ahead of it consume memory on data that will then be refused, increasing the risk of an OOM crash before backpressure takes effect.
+
+### Why should `batch` come after sampling processors?
+
+Batching should only group data that will actually be exported. If `batch` runs before `tail_sampling` or `filter`, it groups records that will later be dropped. It also makes tail-sampling behavior harder to reason about.
+
+### What is the difference between tail sampling and probabilistic sampling?
+
+Probabilistic sampling applies a fixed percentage to each trace independently and is stateless. Tail sampling buffers all spans for a trace and makes a policy-based decision after the trace completes, enabling rules like "keep all error traces." Tail sampling is more capable but requires all spans for a trace to reach the same Collector instance, which adds routing complexity in multi-instance deployments.
+
+### Can processors break telemetry semantics?
+
+Yes. `filter` can create orphaned spans if parent spans are dropped without their children. `transform` can break metric identity if attributes that are part of a metric's unique identity are modified. Both include official warnings about these risks in their documentation.
+
+### What is `error_mode: ignore` in the filter and transform processors?
+
+`error_mode: ignore` tells the processor to skip an OTTL expression silently when it encounters an error, such as when an expected attribute is missing. Without it, expression errors can cause unexpected drops or pipeline halts. In production, `ignore` is the safe default.
