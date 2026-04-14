@@ -185,6 +185,51 @@ function getAuthors(doc) {
   })
 }
 
+function buildArticleStructuredData(doc) {
+  const postUrl = `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`
+  const tags = Array.isArray(doc.tags) ? doc.tags : []
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: doc.title,
+    description: doc.description || doc.summary || `Read about ${doc.title}`,
+    image: {
+      '@type': 'ImageObject',
+      url: getImageUrl(doc),
+      width: 1200,
+      height: 630,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl,
+    },
+    url: postUrl,
+    datePublished: doc.date,
+    dateModified: doc.lastmod || doc.date,
+    inLanguage: siteMetadata.language,
+    wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
+    author: getAuthors(doc),
+    publisher: {
+      '@type': 'Organization',
+      name: siteMetadata.title,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
+        width: 600,
+        height: 60,
+      },
+      sameAs: [
+        siteMetadata.linkedin,
+        siteMetadata.x,
+        siteMetadata.github,
+        siteMetadata.youtube,
+        siteMetadata.hackernews,
+      ],
+    },
+    ...(tags.length > 0 ? { articleSection: tags[0] } : {}),
+  }
+}
+
 export const Page = defineDocumentType(() => ({
   name: 'Page',
   filePathPattern: 'blog/**/*.mdx',
@@ -228,50 +273,7 @@ export const Blog = defineDocumentType(() => ({
     },
     structuredData: {
       type: 'json',
-      resolve: (doc) => {
-        const postUrl = `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`
-        const tags = Array.isArray(doc.tags) ? doc.tags : []
-        return {
-          '@context': 'https://schema.org',
-          '@type': 'BlogPosting',
-          headline: doc.title,
-          description: doc.description,
-          image: {
-            '@type': 'ImageObject',
-            url: getImageUrl(doc),
-            width: 1200,
-            height: 630,
-          },
-          mainEntityOfPage: {
-            '@type': 'WebPage',
-            '@id': postUrl,
-          },
-          url: postUrl,
-          datePublished: doc.date,
-          dateModified: doc.lastmod || doc.date,
-          inLanguage: siteMetadata.language,
-          wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
-          author: getAuthors(doc),
-          publisher: {
-            '@type': 'Organization',
-            name: siteMetadata.title,
-            logo: {
-              '@type': 'ImageObject',
-              url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
-              width: 600,
-              height: 60,
-            },
-            sameAs: [
-              siteMetadata.linkedin,
-              siteMetadata.x,
-              siteMetadata.github,
-              siteMetadata.youtube,
-              siteMetadata.hackernews,
-            ],
-          },
-          ...(tags.length > 0 && { articleSection: tags[0] }),
-        }
-      },
+      resolve: (doc) => buildArticleStructuredData(doc),
     },
   },
 }))
@@ -365,50 +367,7 @@ export const Guide = defineDocumentType(() => ({
     },
     structuredData: {
       type: 'json',
-      resolve: (doc) => {
-        const postUrl = `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`
-        const tags = Array.isArray(doc.tags) ? doc.tags : []
-        return {
-          '@context': 'https://schema.org',
-          '@type': 'BlogPosting',
-          headline: doc.title,
-          description: doc.description,
-          image: {
-            '@type': 'ImageObject',
-            url: getImageUrl(doc),
-            width: 1200,
-            height: 630,
-          },
-          mainEntityOfPage: {
-            '@type': 'WebPage',
-            '@id': postUrl,
-          },
-          url: postUrl,
-          datePublished: doc.date,
-          dateModified: doc.lastmod || doc.date,
-          inLanguage: siteMetadata.language,
-          wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
-          author: getAuthors(doc),
-          publisher: {
-            '@type': 'Organization',
-            name: siteMetadata.title,
-            logo: {
-              '@type': 'ImageObject',
-              url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
-              width: 600,
-              height: 60,
-            },
-            sameAs: [
-              siteMetadata.linkedin,
-              siteMetadata.x,
-              siteMetadata.github,
-              siteMetadata.youtube,
-              siteMetadata.hackernews,
-            ],
-          },
-          ...(tags.length > 0 && { articleSection: tags[0] }),
-        }
-      },
+      resolve: (doc) => buildArticleStructuredData(doc),
     },
   },
 }))

@@ -106,12 +106,9 @@ const getWordCount = (content: MDXContent): number => {
 }
 
 const getArticleSection = (content: MDXContent): string | undefined => {
-  if (!content.tags) return undefined
-  if (Array.isArray(content.tags) && content.tags.length > 0) {
-    const first = content.tags[0]
-    return typeof first === 'string' ? first : first?.value || first?.name
-  }
-  return undefined
+  if (!Array.isArray(content.tags) || content.tags.length === 0) return undefined
+  const first = content.tags[0]
+  return typeof first === 'string' ? first : first?.value || first?.name
 }
 
 export const generateStructuredData = (
@@ -169,6 +166,6 @@ export const generateStructuredData = (
     wordCount: getWordCount(content),
     author: collectionType === 'docs' ? getDefaultAuthor() : getAuthors(content),
     publisher: getDefaultPublisher(),
-    ...(articleSection && { articleSection }),
+    ...(articleSection ? { articleSection } : {}),
   }
 }
