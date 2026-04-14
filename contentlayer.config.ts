@@ -431,7 +431,7 @@ export const Doc = defineDocumentType(() => ({
         },
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': `${siteMetadata.siteUrl}/docs/${doc.slug}`,
+          '@id': `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
         },
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
         inLanguage: siteMetadata.language,
