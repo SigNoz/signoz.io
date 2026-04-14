@@ -2445,7 +2445,7 @@ const docsSideNav = [
         label: 'Querying Data',
         type: 'category',
         isExpanded: false,
-        route: '/docs/querying/querying-data',
+        route: '/docs/userguide/query-builder-v5',
         items: [
           { type: 'doc', route: '/docs/userguide/query-builder-v5', label: 'Query Builder' },
           {
@@ -2482,6 +2482,20 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'User Guides',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/querying/user-guides',
+        items: [
+          { type: 'doc', route: '/docs/userguide/full-text-search', label: 'Full-Text Search' },
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-advanced-examples',
+            label: 'Advanced Examples',
+          },
+        ],
+      },
+      {
         label: 'Reference',
         type: 'category',
         isExpanded: false,
@@ -2502,20 +2516,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/field-context-data-types',
             label: 'Field Context & Data Types',
-          },
-        ],
-      },
-      {
-        label: 'User Guides',
-        type: 'category',
-        isExpanded: false,
-        route: '/docs/querying/user-guides',
-        items: [
-          { type: 'doc', route: '/docs/userguide/full-text-search', label: 'Full-Text Search' },
-          {
-            type: 'doc',
-            route: '/docs/userguide/search-advanced-examples',
-            label: 'Advanced Examples',
           },
         ],
       },
