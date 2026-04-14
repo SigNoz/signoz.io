@@ -8,6 +8,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 
 export const dynamicParams = false
 export const dynamic = 'force-static'
@@ -67,7 +68,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
       />
       <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent

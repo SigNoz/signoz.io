@@ -15,6 +15,7 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import React from 'react'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const defaultLayout = 'GuidesLayout'
 const layouts = {
@@ -114,7 +115,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
 
         <OpenTelemetryHubContent
@@ -146,7 +147,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
       />
 
       <div className="container mx-auto">
