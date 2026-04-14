@@ -1,0 +1,108 @@
+---
+date: 2026-04-14
+id: time-aggregation
+title: Time Aggregation Windows
+description: Understand how SigNoz manages step intervals for time series queries across traces, logs, and metrics data.
+---
+
+When querying time series data (traces, logs, or metrics), the system automatically manages the step interval (also known as aggregation interval) to ensure optimal performance and visualization. The step interval determines how data points are aggregated over time.
+
+## Automatic Step Interval Assignment
+
+If you don't specify a step interval in your query, the system automatically calculates an optimal value based on:
+- The time range of your query (end time - start time)
+- The type of data you're querying (traces/logs vs metrics)
+- A target of approximately 300 data points for optimal visualization
+
+## Step Interval Limits
+
+To prevent performance issues and ensure responsive queries, the system enforces a maximum of 1,500 data points per series. If your specified step interval would result in more than 1,500 points, it will be automatically adjusted upward. The behavior is different by telemetry data type
+
+### Traces and Logs
+
+**Minimum step interval:** 5 seconds
+
+**Calculation rules:**
+- For automatic assignment: `(time_range / 300) rounded down to nearest 5 seconds`
+- For limit enforcement: `(time_range / 1500) rounded down to nearest 5 seconds`
+- The step interval is always a multiple of 5 seconds
+
+**Examples:**
+- 1 hour query → 12 second steps (300 points) → rounded down 10 second steps
+- 24 hour query → 288 second steps (~5 minute steps, 300 points)
+- If you set 1 second steps for a 1 hour query (3,600 points), it adjusts to 2.4 seconds → 5 seconds
+
+### Metrics
+
+**Minimum step interval:** 60 seconds
+
+Note: The 60-second minimum for metrics is being updated. Soon, you'll be able to set step intervals matching your collection interval, as long as the query stays within the 1,500 point limit. Follow progress on [issue #7248](https://github.com/SigNoz/signoz/issues/7248)
+
+**Calculation rules:**
+- Base calculation same as traces/logs but with additional adjustments:
+  - For time ranges < 1 day: Multiple of 60 seconds
+  - For time ranges 1-7 days: Multiple of 5 minutes (300 seconds)
+  - For time ranges > 7 days: Multiple of 30 minutes (1,800 seconds)
+
+**Examples:**
+- 6 hour query → 72 seconds → 60 seconds (360 points)
+- 3 day query → 864 seconds → 900 seconds (15 minutes, 288 points)
+- 2 week query → 4,032 seconds → 3,600 seconds (1 hour, 336 points)
+
+## Best Practices
+
+1. **Let the system choose:** For most use cases, don't specify a step interval. The automatic calculation provides a good balance between detail and performance.
+
+2. **Adjusting for more detail:** If you need more granular data:
+   - Reduce your time range
+   - Or specify a smaller step interval (keeping in mind the 1,500 point limit)
+
+### Impact on Your Queries
+
+- **Filters:** Applied regardless of step interval
+- **Group By:** Each group counts toward the series limit
+- **Aggregations:** Applied within each step interval window
+
+## Troubleshooting & Performance
+
+### Common Query Issues
+
+**Query Performance Problems**
+- **Symptom**: Slow query execution
+- **Potential Solutions**:
+  - Check time range selection
+  - Use resource attributes in WHERE clauses
+  - Reduce GROUP BY cardinality
+  - Increase aggregation intervals
+
+**No Results Returned**
+- **Check**: Filter syntax and attribute names
+- **Verify**: Time range includes expected data
+- **Confirm**: Service/attribute existence in the time period
+
+**Unexpected Results**
+- **Review**: Filter combinations (AND vs OR logic)
+- **Validate**: Aggregation functions match your intent
+- **Check**: Group By attributes for proper categorization
+
+### Performance Optimization
+
+**Query**
+1. **Filter early**: Apply restrictive filters first
+2. **Limit scope**: Use specific time ranges
+3. **Resource attribute awareness**: Leverage resource attributes to speed up queries
+4. **Aggregation efficiency**: Choose appropriate time windows
+
+**Dashboard Performance**
+1. **Adjust refresh frequency**: Balance freshness with performance
+2. **Optimize time ranges**: Avoid unnecessarily wide windows
+3. **Limit concurrent queries**: Stagger dashboard loads
+
+### Step Interval Troubleshooting
+
+**"My specified step interval was ignored"**
+- Check if it would exceed 1,500 points
+- Ensure it meets the minimum requirements (5s for traces/logs, 60s for metrics)
+
+**"I need more than 1,500 data points"**
+- Leave a comment [here](https://github.com/SigNoz/signoz/issues/7248) explaining your use case.

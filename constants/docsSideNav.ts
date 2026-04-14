@@ -2447,7 +2447,29 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/userguide/query-builder-v5',
         items: [
-          { type: 'doc', route: '/docs/userguide/query-builder-v5', label: 'Query Builder' },
+          {
+            label: 'Query Builder',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/userguide/query-builder-v5',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/userguide/query-builder-v5',
+                label: 'Overview',
+              },
+              {
+                type: 'doc',
+                route: '/docs/querying/aggregation-grouping',
+                label: 'Aggregation & Grouping',
+              },
+              {
+                type: 'doc',
+                route: '/docs/querying/result-manipulation',
+                label: 'Result Manipulation',
+              },
+            ],
+          },
           {
             label: 'ClickHouse',
             type: 'category',
@@ -2492,6 +2514,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/search-advanced-examples',
             label: 'Advanced Examples',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/time-aggregation',
+            label: 'Time Aggregation Windows',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/multi-query-analysis',
+            label: 'Multi-Query Analysis',
           },
         ],
       },

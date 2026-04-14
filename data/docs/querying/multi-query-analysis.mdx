@@ -1,0 +1,114 @@
+---
+date: 2026-04-14
+id: multi-query-analysis
+title: Multi-Query Analysis
+description: Combine multiple queries with formulas and trace operators for advanced comparisons like error rates, SLA monitoring, and parent-child trace relationships.
+---
+
+Combine multiple queries to perform sophisticated analysis that single queries cannot achieve.
+
+## Advanced Comparisons
+
+### Use Cases for Multiple Queries
+
+**Error Rate Calculation**
+- Query A: Count of error requests
+- Query B: Count of all requests
+- Formula: `(A/B) * 100` (error percentage)
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/error-percentage.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Formula feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+**SLA Monitoring**
+- Query A: Requests under 200ms
+- Query B: Total requests
+- Formula: `(A/B) * 100` (SLA compliance percentage)
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/sla-monitoring-with-duration.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Formula feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+### Available Mathematical Functions in Formula
+
+- **Basic Operations**: `+`, `-`, `*`, `/`
+- **Logarithmic**: `log`, `ln`, `log2`, `log10`
+- **Exponential**: `exp`, `exp2`, `exp10`
+- **Trigonometric**: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
+- **Mathematical**: `sqrt`, `cbrt`, `abs`
+- **Utility**: `now`, `degrees`, `radians`
+
+### Multi-Query Best Practices
+
+1. **Align time ranges**: Ensure all queries use the same time window
+2. **Consistent grouping**: Use identical `Group By` clauses for meaningful comparisons
+
+---
+
+## Trace Operators
+
+Combine Multiple Trace Queries to perform sophisticated analysis within a trace (Parent Child Relationships)
+
+### Use Cases for Trace Operators
+
+**Direct Descendants**
+- Query A: Span with service.name = 'frontend' being the root span
+- Query B: Span with service.name = 'customer' as the direct descendant of the 'frontend' span
+- Trace Matching: `A => B` (Direct Descendant)
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/direct-descedant-operator.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Direct Descendant Trace Operator</i></figcaption>
+</figure>
+
+**InDirect Descendants**
+- Query A: Span with service.name = 'frontend' as the root span
+- Query B: Span with service.name = 'customer' and 'has_error = true' anywhere in the same trace as nth descendant
+- Trace Matching: `A -> B` (InDirect Descendant)
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/indirect-descedant-operator.webp" alt="SigNoz UI showing Indirect Descendant Trace Operator"/>
+    <figcaption><i>Trace Explorer</i></figcaption>
+</figure>
+
+**AND (Within a Trace)**
+- Query A: Span with service.name = 'cartservice'
+- Query B: Any span in the trace with status_code != 200
+- Trace Matching: `A && B` (AND Operation)
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/and-operator.webp" alt="SigNoz UI showing AND Trace Operator "/>
+    <figcaption><i>Trace Explorer</i></figcaption>
+</figure>
+
+
+### Available Trace Operators
+
+- **Direct Descendant**: `=>`
+- **InDirect Descendant**: `->`
+- **AND**: `&&`
+- **OR**: `||`
+- **NOT**: `NOT`
