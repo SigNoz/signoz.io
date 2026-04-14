@@ -1974,7 +1974,7 @@ const docsSideNav = [
                     route: '/docs/dashboards/panel-types/timeseries',
                     label: 'Timeseries',
                   },
-                  { type: 'doc', route: '/docs/dashboards/panel-types/value', label: 'Value' },
+                  { type: 'doc', route: '/docs/dashboards/panel-types/value', label: 'Number' },
                 ],
               },
             ],
