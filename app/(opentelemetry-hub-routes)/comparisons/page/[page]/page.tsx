@@ -1,50 +1,32 @@
-import Comparisons from '@/components/ResourceCenter/Comparisons'
+import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
+import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import siteMetadata from '@/data/siteMetadata'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { buildListingMetadata } from '../../../metadata'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamic = 'force-static'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
-  return {
-    title: `Comparisons - Page ${params.page}`,
-    description: `${siteMetadata.description} | Comparisons - Page ${params.page} | SigNoz`,
-    openGraph: {
-      title: `Comparisons - Page ${params.page} | SigNoz`,
-      description: `${siteMetadata.description} | Comparisons - Page ${params.page} | SigNoz`,
-      url: `${siteMetadata.siteUrl}/comparisons/page/${params.page}`,
-      siteName: siteMetadata.title,
-      locale: 'en_US',
-      type: 'website',
-      images: [siteMetadata.socialBanner],
-    },
-    twitter: {
-      title: `Comparisons - Page ${params.page} | SigNoz`,
-      description: `${siteMetadata.description} | Comparisons - Page ${params.page} | SigNoz`,
-      images: [siteMetadata.socialBanner],
-    },
-    alternates: {
-      canonical: `${siteMetadata.siteUrl}/comparisons/page/${params.page}`,
-    },
-    robots: {
-      index: false,
-      follow: true,
-    },
-  }
+  return buildListingMetadata('Comparisons', params.page)
 }
 
 export default async function Page({ params }: { params: { page: string } }) {
   const comparisons = await fetchAllComparisonsForPage()
   const posts = allCoreContent(sortPosts(comparisons))
-  const pageNumber = parseInt(params.page as string)
 
   return (
-    <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
-      <div className="tab-content pt-6">
-        <Comparisons posts={posts} pageNumber={pageNumber} />
-      </div>
-    </div>
+    <ListingPageLayout>
+      <ListingWithSearch
+        posts={posts}
+        pageNumber={parseInt(params.page)}
+        pageRoute="comparisons"
+        title="Comparisons"
+        description="Stay informed about the latest tools in the observability domain with in-depth comparisons of popular options to determine the best fit for your needs."
+        searchPlaceholder="Search for a comparison..."
+        gridTitle="All Comparisons"
+      />
+    </ListingPageLayout>
   )
 }

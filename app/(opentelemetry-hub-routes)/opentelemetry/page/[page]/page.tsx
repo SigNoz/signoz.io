@@ -1,10 +1,11 @@
-import OpenTelemetryListing from '@/components/ResourceCenter/OpenTelemetryListing'
-import siteMetadata from '@/data/siteMetadata'
+import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
+import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import {
   getOpenTelemetryHubContentLayerArticles,
   pickOpenTelemetryArticleFields,
   type ResourceCenterCard,
 } from '../../../content'
+import { buildListingMetadata, buildStaticPaginationParams } from '../../../metadata'
 import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } from '@/utils/strapi'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
@@ -12,46 +13,15 @@ export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamic = 'force-static'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
-  return {
-    title: `OpenTelemetry - Page ${params.page}`,
-    description: `${siteMetadata.description} | OpenTelemetry - Page ${params.page} | SigNoz`,
-    openGraph: {
-      title: `OpenTelemetry - Page ${params.page} | SigNoz`,
-      description: `${siteMetadata.description} | OpenTelemetry - Page ${params.page} | SigNoz`,
-      url: `${siteMetadata.siteUrl}/opentelemetry/page/${params.page}`,
-      siteName: siteMetadata.title,
-      locale: 'en_US',
-      type: 'website',
-      images: [siteMetadata.socialBanner],
-    },
-    twitter: {
-      title: `OpenTelemetry - Page ${params.page} | SigNoz`,
-      description: `${siteMetadata.description} | OpenTelemetry - Page ${params.page} | SigNoz`,
-      images: [siteMetadata.socialBanner],
-    },
-    alternates: {
-      canonical: `${siteMetadata.siteUrl}/opentelemetry/page/${params.page}`,
-    },
-    robots: {
-      index: false,
-      follow: true,
-    },
-  }
+  return buildListingMetadata('OpenTelemetry', params.page)
 }
-
-const POSTS_PER_PAGE = 12
 
 const contentLayerArticles = getOpenTelemetryHubContentLayerArticles()
 
-export const generateStaticParams = async () => {
-  const totalPages = Math.ceil(contentLayerArticles.length / POSTS_PER_PAGE)
-  const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
-  return paths
-}
+export const generateStaticParams = async () =>
+  buildStaticPaginationParams(contentLayerArticles.length)
 
 export default async function Page({ params }: { params: { page: string } }) {
-  const pageNumber = parseInt(params.page as string)
-
   // Fetch CMS opentelemetries articles
   let cmsArticles: ResourceCenterCard[] = []
   try {
@@ -83,14 +53,19 @@ export default async function Page({ params }: { params: { page: string } }) {
     }
   }
 
-  // Sort by date descending
   allArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   return (
-    <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
-      <div className="tab-content pt-6">
-        <OpenTelemetryListing posts={allArticles} pageNumber={pageNumber} />
-      </div>
-    </div>
+    <ListingPageLayout>
+      <ListingWithSearch
+        posts={allArticles}
+        pageNumber={parseInt(params.page)}
+        pageRoute="opentelemetry"
+        title="OpenTelemetry"
+        description="Articles on OpenTelemetry concepts, implementation, and its use cases."
+        searchPlaceholder="Search for an article..."
+        gridTitle="All Articles"
+      />
+    </ListingPageLayout>
   )
 }

@@ -1,54 +1,21 @@
 import Blogs from '@/components/ResourceCenter/Blogs'
+import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { allBlogs } from 'contentlayer/generated'
-import siteMetadata from '@/data/siteMetadata'
+import { buildListingMetadata, buildStaticPaginationParams } from '../../../metadata'
 import { getResourceCenterBlogs } from '../../../content'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
-  return {
-    title: `Blog - Page ${params.page}`,
-    description: `${siteMetadata.description} | Blog - Page ${params.page} | SigNoz`,
-    openGraph: {
-      title: `Blog - Page ${params.page} | SigNoz`,
-      description: `${siteMetadata.description} | Blog - Page ${params.page} | SigNoz`,
-      url: `${siteMetadata.siteUrl}/blog/page/${params.page}`,
-      siteName: siteMetadata.title,
-      locale: 'en_US',
-      type: 'website',
-      images: [siteMetadata.socialBanner],
-    },
-    twitter: {
-      title: `Blog - Page ${params.page}`,
-      description: `${siteMetadata.description} | Blog - Page ${params.page} | SigNoz`,
-      images: [siteMetadata.socialBanner],
-    },
-    alternates: {
-      canonical: `${siteMetadata.siteUrl}/blog/page/${params.page}`,
-    },
-    robots: {
-      index: false,
-      follow: true,
-    },
-  }
+  return buildListingMetadata('Blog', params.page)
 }
 
-const POSTS_PER_PAGE = 12
-
-export const generateStaticParams = async () => {
-  const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
-  const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
-  return paths
-}
+export const generateStaticParams = async () => buildStaticPaginationParams(allBlogs.length)
 
 const blogPosts = getResourceCenterBlogs()
 
 export default function Page({ params }: { params: { page: string } }) {
-  const pageNumber = parseInt(params.page as string)
-
   return (
-    <div className="container mx-auto !mt-[48px] py-16 sm:py-8">
-      <div className="tab-content pt-6">
-        <Blogs posts={blogPosts} pageNumber={pageNumber} />
-      </div>
-    </div>
+    <ListingPageLayout>
+      <Blogs posts={blogPosts} pageNumber={parseInt(params.page)} />
+    </ListingPageLayout>
   )
 }

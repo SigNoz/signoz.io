@@ -1,6 +1,5 @@
 import GridLayout from '@/layouts/GridLayout'
-
-const POSTS_PER_PAGE = 12
+import { POSTS_PER_PAGE } from '../../app/(opentelemetry-hub-routes)/constants'
 
 export default function AllBlogs({
   blogs,

@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import Link from '@/components/Link'
 import BlogPostCard from '@/components/ResourceCenter/BlogPostCard'
-import { Frown, HeartCrack, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Frown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
 export interface PaginationProps {
@@ -13,7 +13,6 @@ export interface PaginationProps {
 }
 
 interface PaginationInternalProps extends PaginationProps {
-  postsPerPage: number
   totalPosts: number
 }
 
@@ -32,33 +31,14 @@ export function Pagination({
   totalPages,
   currentPage,
   pageRoute,
-  postsPerPage,
   totalPosts,
 }: PaginationInternalProps) {
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
-  const DEFAULT_POSTS_PER_PAGE = 12
-  const DEFAULT_POSTS_IN_FIRST_PAGE = 12
+  const PAGE_SIZE = 12
 
-  const startPost = useMemo(() => {
-    if (currentPage === 1) {
-      return 1
-    }
-
-    return Math.max(DEFAULT_POSTS_IN_FIRST_PAGE + 1 + (currentPage - 2) * DEFAULT_POSTS_PER_PAGE, 0)
-  }, [currentPage])
-
-  const endPost = useMemo(() => {
-    if (currentPage === 1) {
-      return 9
-    }
-
-    if (currentPage === totalPages) {
-      return totalPosts
-    }
-
-    return Math.max(DEFAULT_POSTS_IN_FIRST_PAGE + (currentPage - 1) * DEFAULT_POSTS_PER_PAGE, 0)
-  }, [currentPage, totalPages])
+  const startPost = (currentPage - 1) * PAGE_SIZE + 1
+  const endPost = Math.min(currentPage * PAGE_SIZE, totalPosts)
 
   const shouldRenderTwoPrevPages = currentPage === totalPages
   const shouldRenderPrevPage = currentPage - 1 > 1
@@ -180,7 +160,6 @@ export default function GridLayout({
   }
 
   const totalPosts = posts.length
-  const postsPerPage = displayPosts.length
 
   return (
     <RegionProvider>
@@ -205,7 +184,6 @@ export default function GridLayout({
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}
             pageRoute={pagination.pageRoute}
-            postsPerPage={postsPerPage}
             totalPosts={totalPosts}
           />
         )}

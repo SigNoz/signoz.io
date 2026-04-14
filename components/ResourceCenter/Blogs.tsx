@@ -2,33 +2,10 @@
 
 import { useState } from 'react'
 import { filterData } from 'app/utils/common'
-import SearchInput from './Search'
+import SectionHeader from './SectionHeader'
 import FeaturedBlogs from './FeaturedBlogs'
 import AllBlogs from './AllBlogs'
 import type { ResourceCenterBlog } from '../../app/(opentelemetry-hub-routes)/content'
-
-interface BlogPageHeaderProps {
-  onSearch: (e) => void
-}
-
-const BlogsPageHeader = ({ onSearch }: BlogPageHeaderProps) => {
-  return (
-    <section className="mb-[72px] flex max-w-[697px] flex-col leading-[143%]">
-      <h2 className="mb-0 self-start text-sm font-medium uppercase tracking-wider text-signoz_sakura-500 dark:text-signoz_sakura-400">
-        resources
-      </h2>
-      <h1 className="my-0 mt-3 self-start text-3xl font-semibold text-indigo-500 dark:text-indigo-200">
-        The SigNoz Blog
-      </h1>
-      <p className="my-4 w-full text-lg leading-8 tracking-normal text-gray-700 dark:text-stone-300 max-md:max-w-full">
-        Stay updated with SigNoz product updates, company news, and articles on OpenTelemetry,
-        observability, monitoring, and open-source tools.
-      </p>
-
-      <SearchInput placeholder={'Search for a blog...'} onSearch={onSearch} />
-    </section>
-  )
-}
 
 export default function Blogs({
   posts,
@@ -50,7 +27,12 @@ export default function Blogs({
 
   return (
     <div>
-      <BlogsPageHeader onSearch={handleSearch} />
+      <SectionHeader
+        title="The SigNoz Blog"
+        description="Stay updated with SigNoz product updates, company news, and articles on OpenTelemetry, observability, monitoring, and open-source tools."
+        searchPlaceholder="Search for a blog..."
+        onSearch={handleSearch}
+      />
       {searchValue.length === 0 && pageNumber === 1 && (
         <FeaturedBlogs isDarkMode={true} posts={posts} />
       )}
