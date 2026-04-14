@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import { FaGithub } from 'react-icons/fa'
@@ -649,11 +649,11 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
                 <div className="flex flex-col gap-3">
                   {VALUE_PROPS.map((prop) => (
                     <div key={prop.title} className="flex items-start gap-2.5">
-                      <span className="mt-0.5 flex-shrink-0 text-[13px] text-signoz_forest-500">
-                        ✓
-                      </span>
+                      <CheckCircle className="mt-[3px] h-3.5 w-3.5 flex-shrink-0 text-signoz_forest-500" />
                       <div className="flex flex-col">
-                        <span className="text-[14px] font-semibold text-white">{prop.title}</span>
+                        <span className="text-[14px] font-semibold leading-[1.4] text-white">
+                          {prop.title}
+                        </span>
                         <span className="text-[13px] leading-[1.5] text-gray-500">
                           {prop.description}
                         </span>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLogEvent } from '@/hooks/useLogEvent'
-import { Loader2 } from 'lucide-react'
+import { Check, CheckCircle, Loader2 } from 'lucide-react'
 
 const PORTAL_ID = '22308423'
 const FORM_ID = 'cf4128d5-51f1-46aa-ae4a-552bcff20f8c'
@@ -112,7 +112,7 @@ export default function ContactFormCustom() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-        <div className="text-2xl text-signoz_robin-500">✓</div>
+        <CheckCircle className="h-7 w-7 text-signoz_robin-500" />
         <h3 className="text-lg font-semibold text-signoz_vanilla-300">We'll be in touch soon.</h3>
       </div>
     )
@@ -193,15 +193,7 @@ export default function ContactFormCustom() {
                 }`}
               >
                 {tools.includes(tool.value) && (
-                  <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 10 10" fill="none">
-                    <path
-                      d="M1.5 5l2.5 2.5 5-5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <Check className="h-3 w-3 text-white" strokeWidth={2.5} />
                 )}
               </span>
               <span className="text-sm text-signoz_vanilla-300">{tool.label}</span>

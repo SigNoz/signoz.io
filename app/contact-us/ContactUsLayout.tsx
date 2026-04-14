@@ -1,5 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
+import { CheckCircle } from 'lucide-react'
 import ContactFormCustom from './components/ContactFormCustom'
 import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
 import { TRUST_BAR_LOGOS } from '@/constants/trustBarLogos'
@@ -47,11 +48,11 @@ export default function ContactUsLayout() {
               <div className="flex flex-col gap-3">
                 {OPTIONS.map((opt) => (
                   <div key={opt.title} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex-shrink-0 text-[13px] text-signoz_forest-500">
-                      ✓
-                    </span>
+                    <CheckCircle className="mt-[3px] h-3.5 w-3.5 flex-shrink-0 text-signoz_forest-500" />
                     <div className="flex flex-col">
-                      <span className="text-[14px] font-semibold text-white">{opt.title}</span>
+                      <span className="text-[14px] font-semibold leading-[1.4] text-white">
+                        {opt.title}
+                      </span>
                       <span className="text-[13px] leading-[1.5] text-gray-500">
                         {opt.description}
                       </span>
