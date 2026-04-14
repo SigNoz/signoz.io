@@ -252,6 +252,7 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 )
 
+// Extracts trace correlation details from an OpenTelemetry span
 func LogrusFields(span oteltrace.Span) logrus.Fields {
 	return logrus.Fields{
 		"span_id":  span.SpanContext().SpanID().String(),
@@ -262,11 +263,13 @@ func LogrusFields(span oteltrace.Span) logrus.Fields {
 func main() {
 	ctx := context.Background()
 
+	// Reads OTEL_EXPORTER_OTLP_ENDPOINT from env and initializes the OTLP HTTP log exporter
 	logExporter, err := otlploghttp.New(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Wraps the exporter in a LoggerProvider with a batch processor
 	logProvider := otel_log.NewLoggerProvider(
 		otel_log.WithProcessor(
 			otel_log.NewBatchProcessor(logExporter),
@@ -274,26 +277,32 @@ func main() {
 	)
 	defer logProvider.Shutdown(ctx)
 
+	// Registers the hook globally. All logrus.Info/Warn/Error calls are exported as OTel logs
 	hook := otellogrus.NewHook("signoz-golang", otellogrus.WithLoggerProvider(logProvider))
 	logrus.AddHook(hook)
 
+	// Initializes the OTLP HTTP trace exporter
 	traceExporter, err := otlptracehttp.New(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Configures the TracerProvider with a batch processor and always sample
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithBatcher(traceExporter),
 	)
 	defer tp.Shutdown(ctx)
 
+	// Registers the TracerProvider globally
 	otel.SetTracerProvider(tp)
 
+	// Starts a sample span
 	tracer := otel.GetTracerProvider().Tracer("signoz-tracer")
 	ctx, span := tracer.Start(ctx, "signoz-span")
 	defer span.End()
 
+	// Injects trace correlation details into structured log fields
 	logrus.WithContext(ctx).WithFields(LogrusFields(span)).Info("Logrus log with trace correlation")
 	logrus.Info("Logrus log without trace correlation")
 }
