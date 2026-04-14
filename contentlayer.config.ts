@@ -426,6 +426,7 @@ export const Doc = defineDocumentType(() => ({
             siteMetadata.x,
             siteMetadata.github,
             siteMetadata.youtube,
+            siteMetadata.hackernews,
           ],
         },
         mainEntityOfPage: {
