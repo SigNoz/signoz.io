@@ -28,7 +28,7 @@ The assistant analyzes both time windows and identifies new error patterns:
 ```text
 Error comparison for frontend service:
 
-Before deploy (2:00 PM - 2:30 PM):
+Before deploy (9:30 PM - 10:00 PM):
 # | Error Type                                    | Count
 --|-----------------------------------------------|-------
 1 | RPC exception with status code: UNAVAILABLE   | 12
@@ -38,7 +38,7 @@ Before deploy (2:00 PM - 2:30 PM):
 Total errors: 25
 Error rate: 1.2% (25 errors / 2,083 requests)
 
-After deploy (2:30 PM - 3:00 PM):
+After deploy (10:00 PM - 10:30 PM):
 # | Error Type                                    | Count
 --|-----------------------------------------------|-------
 1 | RPC exception with status code: UNAVAILABLE   | 15
@@ -112,10 +112,10 @@ During this investigation, the MCP server called these tools:
 
 | Step | MCP Tool | What It Did |
 |------|----------|-------------|
-| 1 | `signoz_get_trace_error_analysis` | Analyzed error patterns in traces across two time windows (before/after deploy) to identify new error types and their frequencies |
-| 1 | `signoz_aggregate_traces` | Aggregated error counts and calculated error rates for both time periods to quantify the impact |
+| 1 | `signoz_search_traces` | Searched for error traces in both time windows (before/after deploy) |
+| 1 | `signoz_aggregate_traces` | Aggregated error counts by error message and calculated error rates for both time periods to quantify the impact |
 | 2 | `signoz_aggregate_traces` | Grouped the new error type by operation name to find which endpoints are affected |
-| 2 | `signoz_search_traces` | Searched for traces with the specific error to get representative examples |
+| 2 | `signoz_get_trace_details` | Retrieved full trace details with span hierarchy to show where the error occurred in the request flow |
 
 </details>
 
