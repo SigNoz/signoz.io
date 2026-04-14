@@ -62,7 +62,7 @@ const getDefaultAuthor = (): Author => ({
 
 const getDefaultPublisher = (): StructuredData['publisher'] => ({
   '@type': 'Organization',
-  '@id': `${siteMetadata.siteUrl}/#organization`,
+  '@id': `${siteMetadata.siteUrl}`,
   name: siteMetadata.title,
   logo: {
     '@type': 'ImageObject',
@@ -155,7 +155,7 @@ export const generateStructuredData = (
   return {
     '@context': 'https://schema.org',
     '@type': schemaType,
-    '@id': `${fullUrl}#article`,
+    '@id': `${fullUrl}`,
     headline: content.title,
     description: content.description || `Read about ${content.title}`,
     image: getDefaultImage(content),
