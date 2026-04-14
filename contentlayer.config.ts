@@ -437,7 +437,7 @@ export const Doc = defineDocumentType(() => ({
         inLanguage: siteMetadata.language,
         wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
         datePublished: doc.date || '2025-06-06', // Setting it Jun 06, 2025 as date metadata doesn't exist for docs, TODO: add date to all existing doc files
-        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2025',
+        dateModified: doc.lastmod || doc.date || '2025-06-06',
       }),
     },
   },
