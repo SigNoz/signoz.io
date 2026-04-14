@@ -1,0 +1,127 @@
+---
+date: 2026-04-14
+id: deploy-error-detection
+title: Deployment Error Detection
+description: Did this deploy introduce new errors that didn't exist before? Compare error patterns before and after deployment.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+You just deployed a new version of your service 30 minutes ago. Now you need to know: did this deploy introduce new errors that didn't exist before?
+
+Instead of manually comparing dashboards or writing complex queries, you can ask your AI assistant connected to SigNoz via the MCP server to analyze error patterns before and after the deployment.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Compare Error Patterns Before and After Deploy
+
+```text
+Compare errors for the frontend service in the 30 minutes before my deploy (around 10 AM PST) versus the 30 minutes after. Show me if any new error types appeared.
+```
+
+The assistant analyzes both time windows and identifies new error patterns:
+
+```text
+Error comparison for frontend service:
+
+Before deploy (2:00 PM - 2:30 PM):
+# | Error Type                                    | Count
+--|-----------------------------------------------|-------
+1 | RPC exception with status code: UNAVAILABLE   | 12
+2 | Connection timeout to payment-service         | 8
+3 | Product not found                             | 5
+
+Total errors: 25
+Error rate: 1.2% (25 errors / 2,083 requests)
+
+After deploy (2:30 PM - 3:00 PM):
+# | Error Type                                    | Count
+--|-----------------------------------------------|-------
+1 | RPC exception with status code: UNAVAILABLE   | 15
+2 | TypeError: Cannot read property 'price' of undefined | 87
+3 | Connection timeout to payment-service         | 11
+4 | Product not found                             | 6
+
+Total errors: 119
+Error rate: 5.8% (119 errors / 2,052 requests)
+
+🚨 NEW ERROR DETECTED:
+- "TypeError: Cannot read property 'price' of undefined" (87 occurrences)
+  This error did not exist before the deploy.
+
+Error rate increased from 1.2% to 5.8% (4.8× increase).
+The new error accounts for 73% of all post-deploy errors.
+```
+
+The deploy clearly introduced a new `TypeError` that didn't exist before, and it's now responsible for the majority of errors.
+
+## Step 2: Find Which Operation Introduced the Error
+
+You know there's a new error type, but you need to know which specific operation or endpoint is affected.
+
+```text
+Show me which operations are throwing the "Cannot read property 'price' of undefined" error. Group by operation name.
+```
+
+The assistant breaks down where the new error is occurring:
+
+```text
+Operations throwing "TypeError: Cannot read property 'price' of undefined":
+
+# | Operation                                          | Error Count | % of Total
+--|---------------------------------------------------|-------------|------------
+1 | GET /api/products/[productId]/index               | 62          | 71.3%
+2 | executing api route (pages) /api/products/[productId] | 62       | 71.3%
+3 | GET /api/cart                                     | 25          | 28.7%
+
+The error is concentrated in two areas:
+1. Product detail page endpoint (71%)
+2. Shopping cart endpoint (29%)
+
+Both operations share a common data structure: product information with pricing.
+```
+
+The error is primarily affecting the product detail page, with some impact on the cart endpoint. Both endpoints deal with product pricing data.
+
+## Final Summary
+
+Starting from "did this deploy introduce new errors?", the investigation revealed:
+
+1. **A new error appeared after deploy**: `TypeError: Cannot read property 'price' of undefined` (87 occurrences in 30 minutes)
+2. **Error rate increased 4.8×**: From 1.2% to 5.8%
+3. **Affected operations**: Primarily product detail pages (71%) and shopping cart (29%)
+
+You can now conclude that the deploy did introduce a new error and investigate it further to identify the root cause.
+
+## Tips for Your Own Investigations
+
+- **Always compare before/after windows when validating deploys.** Look for new error types, not just error rate increases.
+- **Group errors by operation immediately.** This helps you identify which specific endpoints or code paths are affected by the deploy.
+- **Examine traces to get stack traces and exact error locations.** Error messages alone don't tell you where in the code the failure occurs.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_get_trace_error_analysis` | Analyzed error patterns in traces across two time windows (before/after deploy) to identify new error types and their frequencies |
+| 1 | `signoz_aggregate_traces` | Aggregated error counts and calculated error rates for both time periods to quantify the impact |
+| 2 | `signoz_aggregate_traces` | Grouped the new error type by operation name to find which endpoints are affected |
+| 2 | `signoz_search_traces` | Searched for traces with the specific error to get representative examples |
+
+</details>
+
+## Related Use Cases
+
+- [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Investigate sudden error rate increases and find the root cause in the call chain.
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/) - Deep-dive into a specific failing request by pasting its trace ID.
+
+<GetHelp />
