@@ -67,7 +67,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
