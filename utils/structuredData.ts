@@ -77,9 +77,12 @@ const getDefaultPublisher = (): StructuredData['publisher'] => ({
 })
 
 const getDefaultImage = (content: MDXContent): ImageObject => {
+  const raw = content.image || (content.images ? content.images[0] : siteMetadata.socialBanner)
+  const url = raw.startsWith('http') ? raw : `${siteMetadata.siteUrl}${raw}`
+
   return {
     '@type': 'ImageObject',
-    url: `${siteMetadata.siteUrl}${content.image || (content.images ? content.images[0] : siteMetadata.socialBanner)}`,
+    url,
     width: 1200,
     height: 630,
   }

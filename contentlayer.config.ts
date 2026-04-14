@@ -159,6 +159,11 @@ function getRelatedArticles(doc, relatedArticles) {
   }
 }
 
+function getImageUrl(doc) {
+  const raw = doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)
+  return raw.startsWith('http') ? raw : `${siteMetadata.siteUrl}${raw}`
+}
+
 const getAuthorDetails = (authorID) => {
   if (allAuthors[authorID]) {
     return allAuthors[authorID]
@@ -233,7 +238,7 @@ export const Blog = defineDocumentType(() => ({
           description: doc.description,
           image: {
             '@type': 'ImageObject',
-            url: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+            url: getImageUrl(doc),
             width: 1200,
             height: 630,
           },
@@ -324,7 +329,7 @@ export const Newsroom = defineDocumentType(() => ({
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+        image: getImageUrl(doc),
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -370,7 +375,7 @@ export const Guide = defineDocumentType(() => ({
           description: doc.description,
           image: {
             '@type': 'ImageObject',
-            url: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+            url: getImageUrl(doc),
             width: 1200,
             height: 630,
           },
@@ -455,7 +460,7 @@ export const Doc = defineDocumentType(() => ({
         '@type': 'TechArticle',
         headline: doc.title,
         description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+        image: getImageUrl(doc),
         author: {
           '@type': 'Organization',
           name: siteMetadata.title,
