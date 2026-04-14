@@ -1,6 +1,7 @@
 import { allBlogs, allGuides } from 'contentlayer/generated'
 import { sortPosts } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
+import hubConfig from '@/constants/opentelemetry_hub.json'
 
 type ResourceCenterCardSource = {
   slug?: string | null
@@ -93,8 +94,6 @@ export function getResourceCenterBlogs(): ResourceCenterBlog[] {
 export function getResourceCenterGuides(): ResourceCenterGuide[] {
   return sortPosts(allGuides).map(pickResourceCenterCardFields)
 }
-
-import hubConfig from '@/constants/opentelemetry_hub.json'
 
 type HubConfigNode = {
   url?: string
