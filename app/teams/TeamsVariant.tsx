@@ -1,14 +1,36 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
+import { ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import { FaGithub } from 'react-icons/fa'
 import { useSignupForm } from '@/hooks/useSignupForm'
 import { REGIONS } from '@/constants/regions'
+import { TRUST_BAR_LOGOS } from '@/constants/trustBarLogos'
+import { ExperimentTracker } from '@/components/ExperimentTracker'
+import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
+import { cn } from '../lib/utils'
+
+const VALUE_PROPS = [
+  {
+    title: 'Open-Source, OTel-native, No lock-in.',
+    description: 'OTel-native means your instrumentation stays yours, whatever you decide.',
+  },
+  {
+    title: 'Pricing you can predict',
+    description: '$0.30/GB logs & traces. $0.10/mn metrics. No per-host fees. No surprises.',
+  },
+  {
+    title: 'Every signal in one place',
+    description: 'Logs, metrics, traces, LLM observability — fully correlated.',
+  },
+  {
+    title: 'First dashboard in under an hour',
+    description: '100+ integrations with pre-built dashboards.',
+  },
+]
 
 interface ErrorsProps {
   fullName?: string
@@ -27,69 +49,6 @@ interface FormState {
   termsOfServiceAccepted: boolean
 }
 
-// Variant Navbar component (now integrated into layout)
-export const VariantNavbar = ({ className }: { className?: string }) => {
-  return (
-    <div
-      className={`fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px] ${className}`}
-    >
-      <div className="bg-signoz_ink-600 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
-        <div className="flex justify-start">
-          <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
-            <Image
-              className="h-5 w-auto"
-              src="/img/SigNozLogo-orange.svg"
-              width={160}
-              height={60}
-              alt="SigNoz Logo"
-            />
-            <span className="text-[17.111px] font-medium">SigNoz</span>
-          </Link>
-        </div>
-      </div>
-      <div className="hidden h-full items-center justify-end bg-signoz_ink-300 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
-        <TrackingLink
-          target="_blank"
-          clickType="Nav Click"
-          clickName="Docs Link"
-          clickLocation="teams_variant"
-          clickText="Documentation"
-          href="/docs"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
-        >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Documentation
-        </TrackingLink>
-        <TrackingLink
-          target="_blank"
-          clickType="Nav Click"
-          clickName="Pricing Link"
-          clickLocation="teams_variant"
-          clickText="Pricing"
-          href="/pricing/"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
-        >
-          Pricing
-        </TrackingLink>
-      </div>
-      <div className="bg-signoz_ink-600 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
-        <TrackingLink
-          target="_blank"
-          clickType="Nav Click"
-          clickName="Docs Link"
-          clickLocation="teams_variant"
-          clickText="Docs"
-          href="/docs"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
-        >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Docs
-        </TrackingLink>
-      </div>
-    </div>
-  )
-}
-
 // Error state component
 const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   return (
@@ -102,7 +61,6 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => {
       </div>
 
       <a
-        type="submit"
         className="flex w-full items-center justify-center gap-2 rounded-md bg-signoz_cherry-500 py-3 text-sm font-medium"
         href="mailto:cloud-support@signoz.io"
       >
@@ -113,7 +71,7 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   )
 }
 
-// Testimonial component
+// Shared testimonials data
 const testimonials = [
   {
     quote:
@@ -151,80 +109,56 @@ const testimonials = [
   },
 ]
 
-const DISPLAY_DURATION = 4000 // 4 seconds exactly
+const DISPLAY_DURATION = 4000
 
-const Testimonial: React.FC = () => {
+const useTestimonialTimer = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const startTimeRef = useRef<number | null>(null)
   const timerRef = useRef<number | null>(null)
 
-  // Use a simpler, more reliable approach with setInterval for linear progress
   useEffect(() => {
-    // Reset progress on testimonial change
     setProgress(0)
     startTimeRef.current = Date.now()
 
-    // Clear existing timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-    }
+    if (timerRef.current) clearInterval(timerRef.current)
 
-    // Update progress every 50ms for smooth animation
-    const updateInterval = 50 // ms
     timerRef.current = window.setInterval(() => {
       if (!startTimeRef.current) return
-
       const elapsed = Date.now() - startTimeRef.current
       const newProgress = (elapsed / DISPLAY_DURATION) * 100
 
       if (newProgress >= 100) {
-        // Complete this testimonial and move to next
         setProgress(100)
         clearInterval(timerRef.current as number)
-
-        // Small delay before next testimonial
         setTimeout(() => {
-          setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length)
+          setCurrentIndex((prev) => (prev + 1) % testimonials.length)
         }, 100)
       } else {
         setProgress(newProgress)
       }
-    }, updateInterval)
+    }, 50)
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
+      if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [currentIndex])
 
-  const currentTestimonial = testimonials[currentIndex]
-
-  // Handle display for large number of testimonials
-  // Only show a maximum of 5 indicators, with the current one in the middle when possible
   const getIndicatorsToShow = () => {
-    if (testimonials.length <= 5) {
-      return testimonials.map((_, i) => i)
-    }
-
-    // Sliding window of 5 indicators, with current in the middle when possible
+    if (testimonials.length <= 5) return testimonials.map((_, i) => i)
     let start = Math.max(0, currentIndex - 2)
     let end = Math.min(testimonials.length - 1, start + 4)
-
-    // Adjust if we're at the end
-    if (end === testimonials.length - 1 && end - start < 4) {
-      start = Math.max(0, end - 4)
-    }
-
+    if (end === testimonials.length - 1 && end - start < 4) start = Math.max(0, end - 4)
     return Array.from({ length: end - start + 1 }, (_, i) => start + i)
   }
 
-  const indicatorsToShow = getIndicatorsToShow()
+  return { currentIndex, progress, indicatorsToShow: getIndicatorsToShow() }
+}
 
-  const cn = (...classes: (string | boolean | undefined)[]) => {
-    return classes.filter(Boolean).join(' ')
-  }
+// Control: full-height carousel (original layout)
+const ControlTestimonial: React.FC = () => {
+  const { currentIndex, progress, indicatorsToShow } = useTestimonialTimer()
+  const currentTestimonial = testimonials[currentIndex]
 
   return (
     <div className="relative flex h-[calc(100vh-56px)] max-w-md flex-col items-center justify-center p-8">
@@ -256,7 +190,6 @@ const Testimonial: React.FC = () => {
         </footer>
       </blockquote>
 
-      {/* Progress indicators with linear fill */}
       <div className="absolute bottom-0 left-0 right-0 mb-6 flex justify-center gap-1.5">
         {indicatorsToShow.map((index) => (
           <div
@@ -275,7 +208,6 @@ const Testimonial: React.FC = () => {
                   : index < currentIndex
                     ? 'opacity-60'
                     : 'opacity-0',
-                // Remove transition for current item to avoid stuttering
                 index === currentIndex ? '' : 'transition-all duration-100'
               )}
               style={{
@@ -285,29 +217,113 @@ const Testimonial: React.FC = () => {
             />
           </div>
         ))}
-
-        {/* If we're using a sliding window, show ellipsis indicators */}
-        {testimonials.length > 5 && indicatorsToShow[0] > 0 && (
-          <div className="mx-1 h-[4px] w-1.5 rounded-full bg-signoz_vanilla-100/30" />
-        )}
-
-        {testimonials.length > 5 &&
-          indicatorsToShow[indicatorsToShow.length - 1] < testimonials.length - 1 && (
-            <div className="mx-1 h-[4px] w-1.5 rounded-full bg-signoz_vanilla-100/30" />
-          )}
       </div>
     </div>
   )
 }
 
-// Completely isolated signup form component with its own state management
-const SignupFormIsolated: React.FC<{
-  onSignup: (payload: any) => Promise<void>
-  onSocialSignup: (payload: any) => Promise<void>
+// Variant: compact card testimonial
+const VariantTestimonial: React.FC = () => {
+  const { currentIndex, progress, indicatorsToShow } = useTestimonialTimer()
+  const currentTestimonial = testimonials[currentIndex]
+
+  return (
+    <div className="rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-5">
+      <p className="mb-4 text-sm italic leading-relaxed text-signoz_vanilla-100">
+        &ldquo;{currentTestimonial.quote}&rdquo;
+      </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <Image
+            src={currentTestimonial.avatar}
+            alt={currentTestimonial.author}
+            className="h-8 w-8 rounded-full"
+            width={32}
+            height={32}
+          />
+          <TrackingLink
+            href={currentTestimonial.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-signoz_robin-500"
+            clickType="Nav Click"
+            clickName="Testimonial Author Click"
+            clickLocation="teams_variant"
+            clickText={currentTestimonial.author}
+          >
+            {currentTestimonial.author}
+          </TrackingLink>
+        </div>
+        <div className="flex items-center gap-1">
+          {indicatorsToShow.map((index) => (
+            <div
+              key={index}
+              className={cn(
+                'h-[3px] overflow-hidden rounded-full bg-signoz_vanilla-100/20 transition-all duration-300',
+                index === currentIndex ? 'w-4' : 'w-2'
+              )}
+            >
+              <div
+                className={cn(
+                  'h-full bg-signoz_robin-500',
+                  index === currentIndex
+                    ? 'opacity-100'
+                    : index < currentIndex
+                      ? 'opacity-60'
+                      : 'opacity-0',
+                  index === currentIndex ? '' : 'transition-all duration-100'
+                )}
+                style={{
+                  width:
+                    index === currentIndex ? `${progress}%` : index < currentIndex ? '100%' : '0%',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface SignupPayload {
+  email: string
+  region: { name: string }
+  preferences: {
+    terms_of_service_accepted: boolean
+    opted_email_updates: boolean
+  }
+}
+
+interface SocialSignupPayload {
+  region: { name: string }
+  preferences: {
+    terms_of_service_accepted: boolean
+    opted_email_updates: boolean
+  }
+  connector: string
+}
+
+interface SignupFormIsolatedProps {
+  onSignup: (payload: SignupPayload) => Promise<void>
+  onSocialSignup: (payload: SocialSignupPayload) => Promise<void>
   isSubmitting: boolean
   errors: ErrorsProps
-  logEvent: (event: any) => void
-}> = ({ onSignup, onSocialSignup, isSubmitting, errors, logEvent }) => {
+  logEvent: (event: {
+    eventType: 'track'
+    eventName: string
+    attributes: Record<string, unknown>
+  }) => void
+}
+
+// Completely isolated signup form component with its own state management
+const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
+  onSignup,
+  onSocialSignup,
+  isSubmitting,
+  errors,
+  logEvent,
+}) => {
   const [formState, setFormState] = useState({
     workEmail: '',
     dataRegion: 'us',
@@ -317,7 +333,6 @@ const SignupFormIsolated: React.FC<{
   const searchParams = useSearchParams()
   const workEmailFromParams = searchParams.get('q')
 
-  // Set the work email from the URL params to the form data
   useEffect(() => {
     if (workEmailFromParams) {
       setFormState((prev) => ({
@@ -327,14 +342,11 @@ const SignupFormIsolated: React.FC<{
     }
   }, [workEmailFromParams])
 
-  // Focus email input when component mounts
   useEffect(() => {
-    if (emailInputRef.current) {
-      emailInputRef.current.focus()
-    }
+    if (emailInputRef.current) emailInputRef.current.focus()
   }, [])
 
-  const handleInputChange = useCallback((event) => {
+  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target
     const newValue = type === 'checkbox' ? checked : value
     setFormState((prev) => ({ ...prev, [name]: newValue }))
@@ -359,14 +371,12 @@ const SignupFormIsolated: React.FC<{
       })
       setFormState((prev) => ({ ...prev, dataRegion: selectedRegion }))
     },
-    [logEvent]
+    [logEvent, formState.termsOfServiceAccepted, formState.workEmail]
   )
 
   const handleSubmit = useCallback(
-    (event) => {
+    (event: React.MouseEvent<HTMLButtonElement> | React.FormEvent<HTMLFormElement>) => {
       event.preventDefault()
-
-      // Log click event for debugging
       logEvent({
         eventType: 'track',
         eventName: 'Website Click',
@@ -379,12 +389,9 @@ const SignupFormIsolated: React.FC<{
           dataRegion: formState.dataRegion,
         },
       })
-
       onSignup({
         email: formState.workEmail,
-        region: {
-          name: formState.dataRegion,
-        },
+        region: { name: formState.dataRegion },
         preferences: {
           terms_of_service_accepted: formState.termsOfServiceAccepted,
           opted_email_updates: true,
@@ -396,7 +403,6 @@ const SignupFormIsolated: React.FC<{
 
   const handleSocialSubmit = useCallback(
     (connector: string) => {
-      // Log click event for debugging
       logEvent({
         eventType: 'track',
         eventName: 'Website Click',
@@ -409,11 +415,8 @@ const SignupFormIsolated: React.FC<{
           dataRegion: formState.dataRegion,
         },
       })
-
       onSocialSignup({
-        region: {
-          name: formState.dataRegion,
-        },
+        region: { name: formState.dataRegion },
         preferences: {
           terms_of_service_accepted: formState.termsOfServiceAccepted,
           opted_email_updates: true,
@@ -438,7 +441,6 @@ const SignupFormIsolated: React.FC<{
           <label className="block text-sm font-medium text-signoz_vanilla-100" htmlFor="dataRegion">
             Data region{' '}
           </label>
-
           <div className="grid grid-cols-3 gap-3">
             {REGIONS.map((region) => (
               <button
@@ -469,10 +471,10 @@ const SignupFormIsolated: React.FC<{
           <div className="text-center text-sm text-signoz_vanilla-100/70">
             Sign up with your work account
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-3">
             <button
               type="button"
-              className="flex items-center justify-center gap-3 rounded-md border border-blue-600 bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
               onClick={() => handleSocialSubmit('google')}
             >
               <Image
@@ -482,15 +484,15 @@ const SignupFormIsolated: React.FC<{
                 height={20}
                 className="h-5 w-5"
               />
-              Google
+              Continue with Google
             </button>
             <button
               type="button"
-              className="flex items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-signoz_ink-400"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
               onClick={() => handleSocialSubmit('github')}
             >
               <FaGithub className="h-5 w-5" />
-              GitHub
+              Continue with GitHub
             </button>
           </div>
         </div>
@@ -541,45 +543,27 @@ const SignupFormIsolated: React.FC<{
           )}
         </button>
 
-        <div className="space-y-3">
-          <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="termsOfServiceAccepted"
-              name="termsOfServiceAccepted"
-              checked={formState.termsOfServiceAccepted}
-              onChange={handleInputChange}
-              className="mt-1 h-4 w-4 rounded border border-signoz_slate-400 bg-signoz_ink-300 accent-signoz_robin-500"
-            />
-            <label
-              htmlFor="termsOfServiceAccepted"
-              className="text-xs leading-relaxed text-signoz_vanilla-100/70"
-            >
-              I agree to the{' '}
-              <a
-                href="https://signoz.io/terms-of-service/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-signoz_robin-500 hover:underline"
-              >
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a
-                href="https://signoz.io/privacy/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-signoz_robin-500 hover:underline"
-              >
-                Privacy Policy
-              </a>
-              .
-            </label>
-          </div>
-          {errors?.termsOfService && (
-            <div className="text-xs text-red-400">{errors.termsOfService}</div>
-          )}
-        </div>
+        <p className="text-center text-xs text-signoz_vanilla-100/50">
+          By signing up, you agree to our{' '}
+          <a
+            href="https://signoz.io/terms-of-service/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-signoz_robin-500 hover:underline"
+          >
+            Terms of Service
+          </a>{' '}
+          and{' '}
+          <a
+            href="https://signoz.io/privacy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-signoz_robin-500 hover:underline"
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
 
         <div className="text-center">
           <p className="text-sm text-signoz_vanilla-100/70">
@@ -597,8 +581,14 @@ const SignupFormIsolated: React.FC<{
   )
 }
 
+interface TeamsVariantProps {
+  showVariant: boolean
+  experimentId: string
+  variantId: string
+}
+
 // TeamsVariant component with its own state management
-const TeamsVariant: React.FC = () => {
+const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, variantId }) => {
   const searchParams = useSearchParams()
   const authCode = searchParams.get('code')
   const ssoError = searchParams.get('has_sso_error')
@@ -615,55 +605,124 @@ const TeamsVariant: React.FC = () => {
   } = useSignupForm({ source: 'teams' })
 
   useEffect(() => {
-    if (authCode) {
-      handleSocialSignupCallback({ code: authCode })
-    }
+    if (authCode) handleSocialSignupCallback({ code: authCode })
   }, [authCode, handleSocialSignupCallback])
 
   useEffect(() => {
-    if (ssoError) {
-      handleError()
-    }
+    if (ssoError) handleError()
   }, [handleError, ssoError])
 
-  return (
-    <div className="variant-teams-container bg-signoz_ink-600 flex flex-col">
-      <VariantNavbar />
-
-      <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
-        {/* Left section - Sign up form */}
-        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+5vh)]">
-          <div className="w-full">
-            {(!isSubmitting && submitFailed) || ssoError ? (
-              <ErrorState error={errors.apiError || ''} />
-            ) : (
-              <SignupFormIsolated
-                onSignup={handleSignUp}
-                onSocialSignup={handleSocialSignup}
-                isSubmitting={isSubmitting}
-                errors={errors}
-                logEvent={logEvent}
-              />
-            )}
-          </div>
-
-          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block [@media(max-height:790px)]:lg:hidden">
-            <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
-              <span>OpenTelemetry Native.</span>
-              <span>Unfied Signals.</span>
-              <span>Predictable Pricing.</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Right section - Testimonials */}
-        <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
-          <div className="flex w-full items-center justify-center">
-            <Testimonial />
-          </div>
-        </div>
-      </div>
+  const formSection = (
+    <div className="w-full">
+      {(!isSubmitting && submitFailed) || ssoError ? (
+        <ErrorState error={errors.apiError || ''} />
+      ) : (
+        <SignupFormIsolated
+          onSignup={handleSignUp}
+          onSocialSignup={handleSocialSignup}
+          isSubmitting={isSubmitting}
+          errors={errors}
+          logEvent={logEvent}
+        />
+      )}
     </div>
+  )
+
+  return (
+    <ExperimentTracker experimentId={experimentId} variantId={variantId}>
+      {showVariant ? (
+        // Variant: value props + compact testimonials on left, form on right
+        <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-400">
+          <FocusedNavbar />
+          <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
+            {/* Left section — copy + checkmarks + logos (desktop only) */}
+            <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
+              <div className="flex max-w-[420px] flex-col gap-8">
+                {/* Headline */}
+                <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
+                  One Stop Observability
+                  <br />
+                  at Scale
+                </h1>
+
+                {/* Value props */}
+                <div className="flex flex-col gap-3">
+                  {VALUE_PROPS.map((prop) => (
+                    <div key={prop.title} className="flex items-start gap-2.5">
+                      <CheckCircle className="mt-[3px] h-3.5 w-3.5 flex-shrink-0 text-signoz_forest-500" />
+                      <div className="flex flex-col">
+                        <span className="text-[14px] font-semibold leading-[1.4] text-white">
+                          {prop.title}
+                        </span>
+                        <span className="text-[13px] leading-[1.5] text-gray-500">
+                          {prop.description}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Trust bar */}
+                <div className="flex flex-col gap-3">
+                  <p className="mb-0 text-[11px] font-semibold uppercase tracking-[1.2px] text-gray-500">
+                    Trusted by
+                  </p>
+                  <div className="grid grid-cols-3 gap-x-12 gap-y-6 opacity-60">
+                    {TRUST_BAR_LOGOS.map((logo) => (
+                      <Image
+                        key={logo.src}
+                        src={logo.src}
+                        alt={logo.alt}
+                        width={100}
+                        height={28}
+                        className="h-6 w-[88px] object-contain"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="hidden lg:flex lg:items-center lg:py-16">
+              <div className="h-full w-px bg-signoz_slate-400" />
+            </div>
+
+            {/* Right section — sign up form */}
+            <div className="relative flex w-full flex-col items-center justify-center p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:px-16 lg:py-14">
+              <div className="w-full max-w-[560px] rounded-[12px] border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-10">
+                {formSection}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Control: form on left, testimonials on right (original layout)
+        <div className="variant-teams-container ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-500">
+          <FocusedNavbar />
+          <div className="flex h-[calc(100vh-56px)] flex-col lg:mt-[8px] lg:flex-row">
+            {/* Left section — sign up form */}
+            <div className="relative flex w-full flex-col p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+5vh)]">
+              {formSection}
+              <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block [@media(max-height:790px)]:lg:hidden">
+                <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
+                  <span>OpenTelemetry Native.</span>
+                  <span>Unified Signals.</span>
+                  <span>Predictable Pricing.</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Right section — testimonials (desktop only) */}
+            <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
+              <div className="flex w-full items-center justify-center">
+                <ControlTestimonial />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </ExperimentTracker>
   )
 }
 
