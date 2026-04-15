@@ -9,9 +9,7 @@ doc_type: howto
 import GetHelp from '@/components/shared/get-help.md'
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
-  header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Overview
@@ -32,14 +30,16 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ### Step 1. Set environment variables
 
+These variables configure the OTLP exporter in your collector's existing config.
+
 <Tabs>
 <TabItem value="vm" label="VM" default>
 
 <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
-A VM is a virtual computer that runs on physical hardware. This includes:
-- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
-- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
-- **Bare metal servers**: Physical servers running Linux/Unix directly
+  A VM is a virtual computer that runs on physical hardware. This includes:
+  - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+  - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+  - **Bare metal servers**: Physical servers running Linux/Unix directly
 
 Use this section if you're running the OTel Collector directly on a server without containerization.
 
@@ -68,7 +68,7 @@ env:
 </TabItem>
 <TabItem value="docker" label="Docker">
 
-Pass these when running the container:
+Set these in your shell before Step 3. The `docker run` command passes them into the container via `-e` flags.
 
 ```bash
 export SIGNOZ_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
@@ -263,7 +263,7 @@ service:
 
 ## Dashboard
 
-Import the pre-built ArgoCD dashboard to visualize application health, sync status, controller performance, and repository activity. See the [ArgoCD Dashboard](/docs/dashboards/dashboard-templates/argocd-dashboard/) page for import instructions and a full description of panels.
+Import the pre-built ArgoCD dashboard to visualize application health, sync status, controller performance, and repository activity. See the [ArgoCD Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/argocd-dashboard/) page for import instructions and a full description of panels.
 
 <details>
 <ToggleHeading>
@@ -298,6 +298,11 @@ Verify the relevant ArgoCD component is running. Some components expose metrics 
 Confirm the `service.name` resource attribute equals `argocd`. The dashboard queries filter on this label.
 
 </details>
+
+## Next Steps
+
+- [Set up alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on key ArgoCD metrics such as `argocd_app_info` health status or out-of-sync application counts.
+- Explore the [ArgoCD Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/argocd-dashboard/) panels for controller performance and repository server activity.
 
 ## Get Help
 
