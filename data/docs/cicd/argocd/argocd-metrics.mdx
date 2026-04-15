@@ -86,10 +86,11 @@ Verify these values:
 
 ### Step 2. Configure the collector
 
-Add this configuration to your collector `config.yaml`:
+Append the `prometheus` receiver and `resource/argocd` processor to your collector `config.yaml`:
 
 ```yaml
 receivers:
+  # ... existing receivers ...
   prometheus:
     config:
       global:
@@ -98,6 +99,7 @@ receivers:
       scrape_configs:
         - job_name: argocd-metrics
           metrics_path: /metrics
+          scheme: http
           static_configs:
             - targets:
                 # replace with host:port on VM/Docker
@@ -107,6 +109,7 @@ receivers:
 
         - job_name: argocd-server-metrics
           metrics_path: /metrics
+          scheme: http
           static_configs:
             - targets:
                 # replace with host:port on VM/Docker
@@ -116,6 +119,7 @@ receivers:
 
         - job_name: argocd-repo-server-metrics
           metrics_path: /metrics
+          scheme: http
           static_configs:
             - targets:
                 # replace with host:port on VM/Docker
@@ -125,6 +129,7 @@ receivers:
 
         - job_name: argocd-applicationset-controller-metrics
           metrics_path: /metrics
+          scheme: http
           static_configs:
             - targets:
                 # replace with host:port on VM/Docker
@@ -134,6 +139,7 @@ receivers:
 
         - job_name: argocd-notifications-controller-metrics
           metrics_path: /metrics
+          scheme: http
           static_configs:
             - targets:
                 # replace with host:port on VM/Docker
@@ -142,49 +148,35 @@ receivers:
                 argocd_component: notifications-controller
 
 processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-
+  # ... existing processors ...
   resource/argocd:
     attributes:
       - key: service.name
         value: argocd
         action: upsert
+```
 
-exporters:
-  otlp_grpc:
-    endpoint: '${SIGNOZ_OTLP_ENDPOINT}'
-    tls:
-      insecure: false
-    headers:
-      'signoz-ingestion-key': '${SIGNOZ_INGESTION_KEY}'
+Next, add them to your metrics pipeline:
 
+```yaml
 service:
   pipelines:
     metrics:
-      receivers: [prometheus]
-      processors: [resource/argocd, batch]
-      exporters: [otlp_grpc]
+      receivers: [..., prometheus]
+      processors: [..., resource/argocd, batch]
+      exporters: [..., otlp]
 ```
 
 <Admonition type="info">
-  If ArgoCD runs in a different namespace, update the service names accordingly (for example, `argocd-metrics.<your-namespace>.svc.cluster.local`).
+  If ArgoCD runs in a different namespace, update the service names accordingly (for example, `argocd-metrics.<your-namespace>.svc.cluster.local`). You can verify your exact service names by running `kubectl get svc -n <your-namespace>`.
 </Admonition>
 
 <KeyPointCallout title="Running on Kubernetes?" defaultCollapsed="true">
-Add `external_labels` under `global` and the `k8s.cluster.name` attribute to the `resource/argocd` processor:
+Add the `k8s.cluster.name` attribute to the `resource/argocd` processor:
 
 ```yaml
-global:
-  scrape_interval: 60s
-  scrape_timeout: 30s
-  external_labels:
-    cluster: ${K8S_CLUSTER_NAME}
-
-# ...
-
 processors:
+  # ...
   resource/argocd:
     attributes:
       - key: service.name
@@ -237,25 +229,28 @@ docker run -d \
 
 ### Filter internal metrics
 
-Drop OTel Collector self-telemetry and Prometheus scrape metadata before sending to SigNoz. Add the processor and include it in the pipeline:
+Drop OTel Collector self-telemetry and Prometheus scrape metadata before sending to SigNoz. Append the `filter/drop_internal` processor and add it to your pipeline:
 
 ```yaml
 processors:
+  # ... existing processors ...
   filter/drop_internal:
-    metrics:
-      exclude:
-        match_type: regexp
-        metric_names:
-          - '^otelcol_.*'
-          - '^scrape_.*'
-          - '^up$'
+    error_mode: ignore
+    metric_conditions:
+      - 'IsMatch(metric.name, "^otelcol_.*")'
+      - 'IsMatch(metric.name, "^scrape_.*")'
+      - 'metric.name == "up"'
+```
 
+Include it in your pipeline before the `batch` processor:
+
+```yaml
 service:
   pipelines:
     metrics:
-      receivers: [prometheus]
-      processors: [resource/argocd, filter/drop_internal, batch]
-      exporters: [otlp_grpc]
+      receivers: [..., prometheus]
+      processors: [..., resource/argocd, filter/drop_internal, batch]
+      exporters: [..., otlp]
 ```
 
 </details>
