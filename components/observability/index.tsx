@@ -9,7 +9,7 @@ const Observability = () => {
   return (
     <section>
       <div className="flex h-auto w-auto flex-col border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 px-8 py-10 md:pl-10">
-        <div className="flex flex-col justify-between gap-8 2xl:flex-row">
+        <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
           <div className="flex shrink-[10] flex-col justify-between">
             <p className="mb-2 block text-2xl font-semibold text-signoz_vanilla-100">
               {' '}
@@ -51,7 +51,7 @@ const Observability = () => {
               </li>
             </ul>
           </div>
-          <div className="mx-auto aspect-[272/404] w-[272px] max-w-[min(272px,50%)]">
+          <div className="mx-auto aspect-[272/404] w-[272px] max-w-[min(272px,50%)] md:shrink-0">
             <Image
               src={featureGraphicEnterprise2}
               alt="Enterprise-grade Observability"
