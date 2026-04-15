@@ -297,6 +297,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'OpenClaw Dashboard Template',
   },
   {
+    name: 'OpenCode',
+    href: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+    clickName: 'OpenCode Dashboard Template',
+  },
+  {
     name: 'OpenRouter',
     href: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
     clickName: 'OpenRouter Dashboard Template',

@@ -2360,6 +2360,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+            label: 'OpenCode',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
             label: 'OpenRouter',
           },

@@ -242,6 +242,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       className="h-7 w-7"
     />
   ),
+  '/docs/dashboards/dashboard-templates/opencode-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/opencode-logo.webp"
+      alt="OpenCode Icon"
+      className="h-7 w-7"
+    />
+  ),
   '/docs/dashboards/dashboard-templates/openrouter-dashboard': (
     <img
       src="/svgs/icons/LLMMonitoring/openrouter-logo.webp"
