@@ -1,31 +1,92 @@
 ---
 date: 2026-04-15
-title: Monitor ArgoCD 
-description: Learn how to configure ArgoCD metrics monitoring and visualization with SigNoz
+title: Monitor ArgoCD with SigNoz
+description: Configure ArgoCD metrics collection with OpenTelemetry and visualize them in SigNoz dashboards.
 id: argocd-metrics
 doc_type: howto
 ---
 
+import GetHelp from '@/components/shared/get-help.md'
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 ## Overview
 
-
-[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is a declarative, GitOps continuous delivery tool for Kubernetes that exposes metrics at several endpoints. This document will help you monitor your ArgoCD [metrics](https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/) using SigNoz.
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) exposes Prometheus-format metrics from five components. This guide shows you how to collect those metrics with an OpenTelemetry Collector and send them to SigNoz.
 
 ## Prerequisites
 
-Ensure you have:
-
-- A running ArgoCD installation on your Kubernetes cluster
+- A running ArgoCD installation
+- Access to SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- OpenTelemetry Collector deployed
 
 ## Setup
 
-### Step 1. Configure OpenTelemetry Collector
+<Admonition type="info">
+  If you haven't deployed an OpenTelemetry Collector yet, follow the [OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) guide before continuing.
+</Admonition>
 
-To collect ArgoCD metrics and send them to SigNoz, you need to configure the OpenTelemetry Collector with a Prometheus receiver. Follow this [document](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to setup your OTel collector.
+### Step 1. Set environment variables
 
-#### Add Prometheus Receiver and Processors
+<Tabs>
+<TabItem value="vm" label="VM" default>
 
-Add the following `prometheus` receiver and processors to your collector `config.yaml` file. The new ArgoCD dashboard uses Query Builder which relies on `service.name` and component labels.
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're running the OTel Collector directly on a server without containerization.
+
+</KeyPointCallout>
+
+```bash
+export SIGNOZ_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these to your OpenTelemetry Collector deployment manifest:
+
+```yaml
+env:
+  - name: K8S_CLUSTER_NAME
+    value: '<your-cluster-name>'
+  - name: SIGNOZ_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: SIGNOZ_INGESTION_KEY
+    value: '<your-ingestion-key>'
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Pass these when running the container:
+
+```bash
+export SIGNOZ_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+</TabItem>
+</Tabs>
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-cluster-name>` (Kubernetes only): Your Kubernetes cluster identifier
+
+### Step 2. Configure the collector
+
+Add this configuration to your collector `config.yaml`:
 
 ```yaml
 receivers:
@@ -35,153 +96,214 @@ receivers:
         scrape_interval: 60s
         scrape_timeout: 30s
       scrape_configs:
-        # Application Controller
         - job_name: argocd-metrics
           metrics_path: /metrics
           static_configs:
-            - targets: [localhost:8082]
+            - targets:
+                # replace with host:port on VM/Docker
+                - argocd-metrics.argocd.svc.cluster.local:8082
               labels:
                 argocd_component: application-controller
 
-        # API Server
         - job_name: argocd-server-metrics
           metrics_path: /metrics
           static_configs:
-            - targets: [localhost:8083]
+            - targets:
+                # replace with host:port on VM/Docker
+                - argocd-server-metrics.argocd.svc.cluster.local:8083
               labels:
                 argocd_component: api-server
 
-        # Repo Server
         - job_name: argocd-repo-server-metrics
           metrics_path: /metrics
           static_configs:
-            - targets: [localhost:8084]
+            - targets:
+                # replace with host:port on VM/Docker
+                - argocd-repo-server.argocd.svc.cluster.local:8084
               labels:
                 argocd_component: repo-server
 
-        # ApplicationSet Controller
         - job_name: argocd-applicationset-controller-metrics
           metrics_path: /metrics
           static_configs:
-            - targets: [localhost:8080]
+            - targets:
+                # replace with host:port on VM/Docker
+                - argocd-applicationset-controller.argocd.svc.cluster.local:8080
               labels:
                 argocd_component: applicationset-controller
 
-        # Notifications Controller
         - job_name: argocd-notifications-controller-metrics
           metrics_path: /metrics
           static_configs:
-            - targets: [localhost:9001]
+            - targets:
+                # replace with host:port on VM/Docker
+                - argocd-notifications-controller-metrics.argocd.svc.cluster.local:9001
               labels:
                 argocd_component: notifications-controller
 
 processors:
-  # Add service name for dashboard compatibility
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+
   resource/argocd:
     attributes:
       - key: service.name
         value: argocd
         action: upsert
 
-  # Drop internal scrape metrics to reduce noise (Optional)
+exporters:
+  otlp_grpc:
+    endpoint: '${SIGNOZ_OTLP_ENDPOINT}'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '${SIGNOZ_INGESTION_KEY}'
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [resource/argocd, batch]
+      exporters: [otlp_grpc]
+```
+
+<Admonition type="info">
+  If ArgoCD runs in a different namespace, update the service names accordingly (for example, `argocd-metrics.<your-namespace>.svc.cluster.local`).
+</Admonition>
+
+<KeyPointCallout title="Running on Kubernetes?" defaultCollapsed="true">
+Add `external_labels` under `global` and the `k8s.cluster.name` attribute to the `resource/argocd` processor:
+
+```yaml
+global:
+  scrape_interval: 60s
+  scrape_timeout: 30s
+  external_labels:
+    cluster: ${K8S_CLUSTER_NAME}
+
+# ...
+
+processors:
+  resource/argocd:
+    attributes:
+      - key: service.name
+        value: argocd
+        action: upsert
+      - key: k8s.cluster.name
+        value: ${K8S_CLUSTER_NAME}
+        action: upsert
+```
+
+</KeyPointCallout>
+
+### Step 3. Run the collector
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+```bash
+otelcol-contrib --config config.yaml
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+```bash
+kubectl apply -f otel-collector-argocd-config.yaml -n otel-collector
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+```bash
+docker run -d \
+  -e SIGNOZ_OTLP_ENDPOINT \
+  -e SIGNOZ_INGESTION_KEY \
+  -v $(pwd)/config.yaml:/etc/otelcol-contrib/config.yaml \
+  otel/opentelemetry-collector-contrib:latest \
+  --config /etc/otelcol-contrib/config.yaml
+```
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+## Advanced Configuration (Optional)
+
+</ToggleHeading>
+
+### Filter internal metrics
+
+Drop OTel Collector self-telemetry and Prometheus scrape metadata before sending to SigNoz. Add the processor and include it in the pipeline:
+
+```yaml
+processors:
   filter/drop_internal:
     metrics:
       exclude:
         match_type: regexp
         metric_names:
-          - "^otelcol_.*"
-          - "^scrape_.*"
-          - "^up$"
-```
+          - '^otelcol_.*'
+          - '^scrape_.*'
+          - '^up$'
 
-Finally, enable the receiver and processors in your metrics pipeline:
-
-```yaml
 service:
   pipelines:
     metrics:
-      receivers: [prometheus] # Add to your existing receivers
-      processors: [resource/argocd, filter/drop_internal, batch] # Add to your existing processors
-      exporters: [otlp] # Your configured exporter
+      receivers: [prometheus]
+      processors: [resource/argocd, filter/drop_internal, batch]
+      exporters: [otlp_grpc]
 ```
 
-Checkout this [link](https://github.com/SigNoz/dashboards/blob/main/argocd/readme.md#configure-opentelemetry-collector) to see the complete configuration file.
+</details>
 
-<Admonition type="info">
-  Replace `localhost` with appropriate hostnames or service names (for example `argocd-metrics.argocd.svc.cluster.local`) if your ArgoCD is running in a different namespace or cluster.
-</Admonition>
+## Validate
 
-### Step 2. Import ArgoCD Dashboard 
+1. Go to **Metrics** in SigNoz.
+2. Search for `argocd_app_info` or any `argocd_`-prefixed metric.
+3. Confirm the `argocd_component` label appears on the metrics.
 
-Once your ArgoCD metrics are flowing into SigNoz, you can utilize the pre-built ArgoCD dashboard to monitor your deployment.
+## Dashboard
 
-1. Download the ArgoCD dashboard JSON from [SigNoz Dashboards Repository](https://github.com/SigNoz/dashboards/blob/main/argocd/argocd.json)
+Import the pre-built ArgoCD dashboard to visualize application health, sync status, controller performance, and repository activity. See the [ArgoCD Dashboard](/docs/dashboards/dashboard-templates/argocd-dashboard/) page for import instructions and a full description of panels.
 
-2. Import the dashboard in SigNoz:
-   - Navigate to Dashboards in your SigNoz UI
-   - Click on "Import Dashboard" in the top-right corner
-   - Upload the downloaded JSON file
-   - Click "Import"
-
-For more information on managing dashboards, refer this [document](https://signoz.io/docs/userguide/manage-dashboards/).
-
-## Dashboard Features
-
-The ArgoCD Dashboard provides comprehensive visibility into your ArgoCD deployment.
-
-### Dashboard Variables
-
-The dashboard includes variables that you can use to filter your data:
-
-- `{{namespace}}`: Namespace of the application
-- `{{health.status}}`: Health status of the application
-- `{{repo}}`: Name of the repository
-
-<Figure
-  src="/img/docs/cicd/argocd/argocd-overview.webp"
-  caption="ArgoCD Dashboard Overview"
-  alt="ArgoCD Dashboard Overview"
-/>
-
-### Dashboard Metrics 
-
-The dashboard displays key metrics to give you a complete view of your deployment status. It has the following sections:
-
-1. **Overall Status** - Monitor the number of applications and repository server status
-2. **Application Health** - Track healthy, processing, suspended, and degraded applications
-3. **Synchronization Status** - Monitor synced and out-of-sync applications
-4. **Controller Performance** - Track sync activity, reconciliation metrics, and Kubernetes API activity
-5. **Cluster and Repository Statistics** - Monitor cluster cache age, resource objects, and Git operations
-To get a details about metrics in each section, follow this [link](https://github.com/SigNoz/dashboards/blob/main/argocd/readme.md#sections).
-This dashboard enables you to proactively monitor your GitOps workflow, identify potential issues before they impact your deployments, and ensure the smooth operation of your ArgoCD instance.
+<details>
+<ToggleHeading>
 
 ## Troubleshooting
 
-If you're not seeing ArgoCD metrics in SigNoz, try the following steps:
+</ToggleHeading>
 
-1. **Verify endpoint accessibility**
-   - Ensure the OpenTelemetry Collector can access the ArgoCD metrics endpoints
-   - Check network policies or firewall rules that might be blocking access
+**No metrics appearing:**
 
-2. **Check service discovery**
-   - If using Kubernetes, make sure service names and ports are correct
-   - Verify that the service selectors match the pod labels
+1. Verify the collector reaches the ArgoCD metrics endpoints:
 
-3. **Inspect collector logs**
-   - Look for any scrape errors in the OpenTelemetry Collector logs
-   - Run `kubectl logs -n <namespace> <otel-collector-pod-name>` to check for any errors
+   ```bash
+   kubectl port-forward svc/argocd-metrics 8082:8082 -n argocd
+   curl localhost:8082/metrics
+   ```
 
-4. **Validate metrics format**
-   - Make sure ArgoCD is correctly exposing Prometheus-formatted metrics
-   - Try accessing the metrics endpoints directly using port-forwarding:
-     ```
-     kubectl port-forward svc/argocd-metrics 8082:8082 -n argocd
-     curl localhost:8082/metrics
-     ```
+2. Check collector logs for scrape errors:
 
-5. **Check ArgoCD version**
-   - Ensure you're using a version of ArgoCD that exposes metrics
-   - Some metrics might be available only in specific versions
+   ```bash
+   kubectl logs -n otel-collector <collector-pod-name>
+   ```
 
-If you continue to experience issues, check the [SigNoz community forum](https://community-chat.signoz.io/) or [open an issue on GitHub](https://github.com/SigNoz/signoz/issues) for further assistance.
+3. Confirm service names and ports match your ArgoCD deployment.
 
+**Missing component metrics:**
+
+Verify the relevant ArgoCD component is running. Some components expose metrics only when enabled (for example, ApplicationSet Controller, Notifications Controller).
+
+**Dashboard showing no data:**
+
+Confirm the `service.name` resource attribute equals `argocd`. The dashboard queries filter on this label.
+
+</details>
+
+## Get Help
+
+<GetHelp />
