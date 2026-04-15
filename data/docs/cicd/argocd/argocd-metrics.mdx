@@ -1,9 +1,9 @@
 ---
-date: 2026-03-24
+date: 2026-04-15
 title: Monitor ArgoCD 
-
 description: Learn how to configure ArgoCD metrics monitoring and visualization with SigNoz
 id: argocd-metrics
+doc_type: howto
 ---
 
 ## Overview
@@ -23,29 +23,92 @@ Ensure you have:
 
 To collect ArgoCD metrics and send them to SigNoz, you need to configure the OpenTelemetry Collector with a Prometheus receiver. Follow this [document](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to setup your OTel collector.
 
-#### Add Prometheus Receiver
+#### Add Prometheus Receiver and Processors
 
-Ensure that the `prometheus` receiver is added to the collector`config.yaml` file. Make sure to set the targets as shown in the [config] code block (https://github.com/SigNoz/dashboards/blob/main/argocd/readme.md#configure-opentelemetry-collector) below.
+Add the following `prometheus` receiver and processors to your collector `config.yaml` file. The new ArgoCD dashboard uses Query Builder which relies on `service.name` and component labels.
 
 ```yaml
-prometheus:
-  config:
-    global:
-      scrape_interval: 60s
-    scrape_configs:
-      - job_name: argocd-metrics # A logical label used to group the set of targets being scraped; helps in querying and identifying metrics from this specific service (ArgoCD in this case)
-        metrics_path: /metrics
-        scheme: http
-        static_configs:
-          - targets:
-            - localhost:8082  # Application metrics
-            - localhost:8083  # API Server metrics
-            - localhost:8084  # Repository Server metrics
+receivers:
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+        scrape_timeout: 30s
+      scrape_configs:
+        # Application Controller
+        - job_name: argocd-metrics
+          metrics_path: /metrics
+          static_configs:
+            - targets: [localhost:8082]
+              labels:
+                argocd_component: application-controller
+
+        # API Server
+        - job_name: argocd-server-metrics
+          metrics_path: /metrics
+          static_configs:
+            - targets: [localhost:8083]
+              labels:
+                argocd_component: api-server
+
+        # Repo Server
+        - job_name: argocd-repo-server-metrics
+          metrics_path: /metrics
+          static_configs:
+            - targets: [localhost:8084]
+              labels:
+                argocd_component: repo-server
+
+        # ApplicationSet Controller
+        - job_name: argocd-applicationset-controller-metrics
+          metrics_path: /metrics
+          static_configs:
+            - targets: [localhost:8080]
+              labels:
+                argocd_component: applicationset-controller
+
+        # Notifications Controller
+        - job_name: argocd-notifications-controller-metrics
+          metrics_path: /metrics
+          static_configs:
+            - targets: [localhost:9001]
+              labels:
+                argocd_component: notifications-controller
+
+processors:
+  # Add service name for dashboard compatibility
+  resource/argocd:
+    attributes:
+      - key: service.name
+        value: argocd
+        action: upsert
+
+  # Drop internal scrape metrics to reduce noise (Optional)
+  filter/drop_internal:
+    metrics:
+      exclude:
+        match_type: regexp
+        metric_names:
+          - "^otelcol_.*"
+          - "^scrape_.*"
+          - "^up$"
 ```
+
+Finally, enable the receiver and processors in your metrics pipeline:
+
+```yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus] # Add to your existing receivers
+      processors: [resource/argocd, filter/drop_internal, batch] # Add to your existing processors
+      exporters: [otlp] # Your configured exporter
+```
+
 Checkout this [link](https://github.com/SigNoz/dashboards/blob/main/argocd/readme.md#configure-opentelemetry-collector) to see the complete configuration file.
 
 <Admonition type="info">
- Replace `localhost` with appropriate hostnames or service names if your ArgoCD is running in a different namespace or cluster.
+  Replace `localhost` with appropriate hostnames or service names (for example `argocd-metrics.argocd.svc.cluster.local`) if your ArgoCD is running in a different namespace or cluster.
 </Admonition>
 
 ### Step 2. Import ArgoCD Dashboard 
@@ -74,15 +137,11 @@ The dashboard includes variables that you can use to filter your data:
 - `{{health.status}}`: Health status of the application
 - `{{repo}}`: Name of the repository
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/cicd/argocd/argocd-overview.webp"
-        alt="ArgoCD Dashboard Overview"
-    />
-    <figcaption>
-        <i>ArgoCD Dashboard Overview</i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cicd/argocd/argocd-overview.webp"
+  caption="ArgoCD Dashboard Overview"
+  alt="ArgoCD Dashboard Overview"
+/>
 
 ### Dashboard Metrics 
 
