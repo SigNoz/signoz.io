@@ -96,7 +96,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
       >
         <div className="mb-16 px-0">
           <div className="grid gap-9 p-9">
-            <div className="flex flex-col items-center gap-8 md:flex-row">
+            <div className="flex flex-col items-center gap-8 lg:flex-row">
               <div className="min-w-0">
                 <p className="text-2xl font-semibold text-signoz_vanilla-100">
                   {' '}
