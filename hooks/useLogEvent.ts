@@ -61,7 +61,8 @@ export const useLogEvent = () => {
       anonymousId: explicitAnonymousId,
     }: LogEventPayload) => {
       const userId = explicitUserId || getUserId()
-      const anonymousId = explicitAnonymousId || getOrCreateAnonymousId()
+      const growthBookAnonymousId = Cookies.get('gb_anonymous_id')
+      const anonymousId = explicitAnonymousId || growthBookAnonymousId || getOrCreateAnonymousId()
       // Use provided groupId or extract it from userId if available
       const resolvedGroupId = groupId || extractGroupIdFromEmail(userId)
 

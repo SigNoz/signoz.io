@@ -11,7 +11,6 @@ import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
-import { GrowthBookProvider } from '@/components/GrowthBookProvider'
 import { AnonymousIdSetter } from './anonymous-id-setter'
 
 const inter = Inter({
@@ -109,15 +108,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AnonymousIdSetter />
 
         <ThemeProviders>
-          <GrowthBookProvider>
-            <SectionContainer>
-              <div className="relative flex h-screen flex-col justify-between ">
-                <TopNav />
-                <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
-                <MainFooter />
-              </div>
-            </SectionContainer>
-          </GrowthBookProvider>
+          <SectionContainer>
+            <div className="relative flex h-screen flex-col justify-between ">
+              <TopNav />
+              <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
+              <MainFooter />
+            </div>
+          </SectionContainer>
         </ThemeProviders>
       </body>
     </html>

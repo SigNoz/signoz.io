@@ -10,6 +10,7 @@ import {
 } from '@/utils/docs/markdownRouting'
 
 const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
+const GROWTHBOOK_ANONYMOUS_ID_HEADER = 'x-gb-anonymous-id'
 
 // Extract OS from user agent (server-side version)
 const getOSFromUserAgent = (userAgent: string): string => {
@@ -36,6 +37,8 @@ export function middleware(req: NextRequest) {
     anonymousId = uuidv4()
   }
 
+  const growthBookAnonymousId = anonymousId ?? uuidv4()
+
   // Get user agent and detect bot
   const userAgent = req.headers.get('user-agent') || ''
   const { isBot, botType } = detectBotFromUserAgent(userAgent)
@@ -51,6 +54,8 @@ export function middleware(req: NextRequest) {
   const ip =
     req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
   const vercelIp = ipAddress(req) || 'unknown'
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set(GROWTHBOOK_ANONYMOUS_ID_HEADER, growthBookAnonymousId)
 
   // Log bot requests
   if (isBot) {
@@ -75,19 +80,27 @@ export function middleware(req: NextRequest) {
           custom_content_type_header: contentTypeHeader,
           custom_prefers_markdown: prefersMarkdown,
         },
-        anonymousId,
+        anonymousId: growthBookAnonymousId,
       })
     )
   }
 
   // Prepare response
-  let res = NextResponse.next()
+  let res = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
   const shouldRewrite = shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
 
   if (shouldRewrite) {
     const rewriteUrl = req.nextUrl.clone()
     rewriteUrl.pathname = buildDocsMarkdownRewritePath(pathname)
-    res = NextResponse.rewrite(rewriteUrl)
+    res = NextResponse.rewrite(rewriteUrl, {
+      request: {
+        headers: requestHeaders,
+      },
+    })
     if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
       res.headers.set('x-markdown-rewrite', 'true')
     }
@@ -128,8 +141,8 @@ export function middleware(req: NextRequest) {
   }
 
   // Set cookie if it wasn't already set
-  if (shouldSetCookie && anonymousId) {
-    res.cookies.set('gb_anonymous_id', anonymousId, {
+  if (shouldSetCookie) {
+    res.cookies.set('gb_anonymous_id', growthBookAnonymousId, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365, // one year
       sameSite: 'lax',
