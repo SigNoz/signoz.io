@@ -3,11 +3,33 @@
 import React, { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLogEvent } from '@/hooks/useLogEvent'
+import { extractGroupIdFromEmail } from '@/utils/userUtils'
 import { Check, CheckCircle, Loader2 } from 'lucide-react'
 
 const PORTAL_ID = '22308423'
 const FORM_ID = 'cf4128d5-51f1-46aa-ae4a-552bcff20f8c'
+const FORM_NAME = 'Contact Us Form'
 const SUBMIT_URL = `https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL_ID}/${FORM_ID}`
+
+const normalizeFieldKey = (key: string) =>
+  key
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase()
+
+const flattenSubmissionValues = (values: Record<string, string>) =>
+  Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [`hubspot_field_${normalizeFieldKey(key)}`, value])
+  )
+
+const stringifySubmissionValues = (values: Record<string, string>) => {
+  try {
+    return JSON.stringify(values)
+  } catch {
+    return '{}'
+  }
+}
 
 const HOSTING_OPTIONS = [
   { label: 'Enterprise Cloud', value: 'Enterprise Cloud' },
@@ -90,14 +112,28 @@ export default function ContactFormCustom() {
         throw new Error(data?.message || 'Submission failed')
       }
 
+      const submissionValues: Record<string, string> = {
+        email,
+        teams_deployment_option: hosting,
+        ...(scale ? { current_scale: scale } : {}),
+        ...(tools.length ? { existing_tools: tools.join(';') } : {}),
+        ...(description ? { description } : {}),
+      }
+
       logEvent({
-        eventName: 'Website Click',
+        eventName: 'HubSpot Form Submitted',
         eventType: 'track',
+        userId: email,
+        groupId: extractGroupIdFromEmail(email),
         attributes: {
-          clickType: 'Form Submit',
-          clickName: 'Contact Us Form Submit',
-          clickLocation: 'contact_us_page',
           pageLocation: pathname,
+          formName: FORM_NAME,
+          hubspot_form_id: FORM_ID,
+          hubspot_form_name: FORM_NAME,
+          hubspot_page_path: pathname,
+          hubspot_page_url: window.location.href,
+          hubspot_submission_values_json: stringifySubmissionValues(submissionValues),
+          ...flattenSubmissionValues(submissionValues),
         },
       })
 
