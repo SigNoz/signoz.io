@@ -48,7 +48,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
             <p className="text-center text-sm font-medium uppercase tracking-[.05em] text-signoz_vanilla-400">
               SigNoz is OpenTelemetry-Native
             </p>
-            <p className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-[44px]">
+            <p className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
               But why OpenTelemetry?
             </p>
             <p className="text-center text-xs font-medium text-signoz_vanilla-100 sm:text-base">

@@ -714,7 +714,7 @@ const UnifiedObservability = () => {
                 <div className="space-y-[10vh]">
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
                         Application Performance Monitoring
                       </p>
                       <Link
@@ -728,7 +728,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
                         Log Management
                       </p>
                       <Link
@@ -742,7 +742,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
                         Distributed Tracing
                       </p>
                       <Link
@@ -756,7 +756,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
                         Infrastructure Monitoring
                       </p>
                       <Link
@@ -770,7 +770,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
                         Metrics and Dashboards
                       </p>
                       <Link
@@ -784,7 +784,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
                         Alerts
                       </p>
                       <Link
@@ -798,7 +798,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
                         Exceptions Monitoring
                       </p>
                       <Link
