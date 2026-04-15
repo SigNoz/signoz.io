@@ -44,7 +44,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
         )}
       >
         <div className="min-w-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-          <p className="px-4 pt-4 text-left text-3xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[36px] lg:px-8 lg:pt-10">
+          <p className="px-4 pt-4 text-left text-3xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl lg:px-8 lg:pt-10">
             Developers <br className="hidden sm:block" />
             Love <br className="hidden sm:block" />
             SigNoz
