@@ -205,7 +205,7 @@ SigNoz uses **one metric with multiple dimensions**, and additionally breaks out
 | `trace.<SPAN_NAME>.duration` (legacy) | `signoz_latency.bucket{operation="<SPAN_NAME>"}` |
 | `trace.<SPAN_NAME>.duration.by_http_status` (legacy) | No equivalent metric |
 | `trace.<SPAN_NAME>.duration.by_service` (legacy) | `signoz_latency.bucket{operation="<SPAN_NAME>", service.name="..."}` |
-| `trace.<SPAN_NAME>.apdex` | No separate metric — compute via ClickHouse query |
+| `trace.<SPAN_NAME>.apdex` | No separate metric — use a SigNoz formula over `signoz_latency_count{operation="<SPAN_NAME>"}`: `(A + 0.5*(B - A)) / C` where A = `signoz_latency_count{le="T", operation="<SPAN_NAME>"}`, B = `signoz_latency_count{le="4T", operation="<SPAN_NAME>"}`, C = `signoz_latency_count{operation="<SPAN_NAME>"}` |
 
 **DB and External Call Latency**
 
