@@ -4,6 +4,10 @@ import React, { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import { extractGroupIdFromEmail } from '@/utils/userUtils'
+import {
+  createSubmissionRelayId,
+  sendSubmissionRelayInBackground,
+} from '@/utils/submissionRelayClient'
 import { Check, CheckCircle, Loader2 } from 'lucide-react'
 
 const PORTAL_ID = '22308423'
@@ -22,14 +26,6 @@ const flattenSubmissionValues = (values: Record<string, string>) =>
   Object.fromEntries(
     Object.entries(values).map(([key, value]) => [`hubspot_field_${normalizeFieldKey(key)}`, value])
   )
-
-const stringifySubmissionValues = (values: Record<string, string>) => {
-  try {
-    return JSON.stringify(values)
-  } catch {
-    return '{}'
-  }
-}
 
 const HOSTING_OPTIONS = [
   { label: 'Enterprise Cloud', value: 'Enterprise Cloud' },
@@ -132,9 +128,21 @@ export default function ContactFormCustom() {
           hubspot_form_name: FORM_NAME,
           hubspot_page_path: pathname,
           hubspot_page_url: window.location.href,
-          hubspot_submission_values_json: stringifySubmissionValues(submissionValues),
           ...flattenSubmissionValues(submissionValues),
         },
+      })
+
+      sendSubmissionRelayInBackground({
+        email,
+        signupId: createSubmissionRelayId('hubspot'),
+        source: 'hubspot-form',
+        createdAt: new Date().toISOString(),
+        formName: FORM_NAME,
+        pageLocation: pathname,
+        pageUrl: window.location.href,
+        formId: FORM_ID,
+        conversionId: '',
+        details: submissionValues,
       })
 
       logEvent({
