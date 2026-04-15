@@ -66,7 +66,7 @@ const SigNozStats = () => {
   return (
     <SectionLayout variant="bordered" className="flex flex-col !px-0 sm:flex-row">
       <div className="!border-b-1 flex-1 border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-        <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
+        <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
           Developers <br />
           Love
           <br />

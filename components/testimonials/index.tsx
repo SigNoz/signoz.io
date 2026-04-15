@@ -1,16 +1,28 @@
 import React from 'react'
-import Heading from '../../components/ui/Heading'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
+import OutplayLogo from '@/public/img/users/outplay.svg'
+import subomiAvatar from '@/public/img/users/subomi-oluwalana.webp'
+import dhruvAvatar from '@/public/img/users/dhruv-garg.webp'
+import vivekAvatar from '@/public/img/users/vivek-bhakta.webp'
+import pranayAvatar from '@/public/img/users/pranay-narang.webp'
+import sheyAvatar from '@/public/img/users/shey.webp'
+import danielAvatar from '@/public/img/users/daniel.webp'
+import goFrendiAvatar from '@/public/img/users/go-frendi.webp'
+import anselmAvatar from '@/public/img/users/anselm.jpg'
+import apoorvaAvatar from '@/public/img/users/apoorva-kumar.webp'
+import pawanAvatar from '@/public/img/users/pawan-outplay.webp'
+import farisAvatar from '@/public/img/users/faris.jpeg'
+import { cn } from '../../app/lib/utils'
 
-export const Testimonials = ({ page }) => {
+export const Testimonials = ({ page, className }: { page: string; className?: string }) => {
   const customerStoriesId = `btn-customer-stories-testimonials-${page}`
   const TESTIMONIALS_LIST = [
     [
       {
         name: 'Subomi Oluwalana',
-        avatar: '/img/users/subomi-oluwalana.webp',
+        avatar: subomiAvatar,
         designation: 'Founder & CEO at Convoy',
         review: (
           <>
@@ -25,7 +37,7 @@ export const Testimonials = ({ page }) => {
       },
       {
         name: 'Dhruv Garg',
-        avatar: '/img/users/dhruv-garg.webp',
+        avatar: dhruvAvatar,
         designation: 'Tech Lead at Nudge',
         review: (
           <>
@@ -39,7 +51,7 @@ export const Testimonials = ({ page }) => {
       },
       {
         name: 'Vivek Bhakta',
-        avatar: '/img/users/vivek-bhakta.webp',
+        avatar: vivekAvatar,
         designation: 'CTO at Wombo AI',
         review: (
           <>
@@ -50,7 +62,7 @@ export const Testimonials = ({ page }) => {
       },
       {
         name: 'Pranay Narang',
-        avatar: '/img/users/pranay-narang.webp',
+        avatar: pranayAvatar,
         designation: 'Engineering at Azodha',
         review: (
           <>
@@ -65,7 +77,7 @@ export const Testimonials = ({ page }) => {
     [
       {
         name: 'Sheheryar Sewani',
-        avatar: '/img/users/shey.webp',
+        avatar: sheyAvatar,
         designation: 'Seasoned Rails Dev & Founder',
         review: (
           <>
@@ -79,7 +91,7 @@ export const Testimonials = ({ page }) => {
       },
       {
         name: 'Daniel Schell',
-        avatar: '/img/users/daniel.webp',
+        avatar: danielAvatar,
         designation: 'Founder & CTO at Airlockdigital',
         review: (
           <>
@@ -90,7 +102,7 @@ export const Testimonials = ({ page }) => {
       },
       {
         name: 'Go Frendi Gunawan',
-        avatar: '/img/users/go-frendi.webp',
+        avatar: goFrendiAvatar,
         designation: 'Data Engineer at Ctlyst.id',
         review: (
           <>
@@ -104,7 +116,7 @@ export const Testimonials = ({ page }) => {
       },
       {
         name: 'Anselm Eickhoff',
-        avatar: '/img/users/anselm.jpg',
+        avatar: anselmAvatar,
         designation: 'Software Architect',
         review: (
           <>
@@ -122,7 +134,7 @@ export const Testimonials = ({ page }) => {
     [
       {
         name: 'Apoorva Kumar',
-        avatar: '/img/users/apoorva-kumar.webp',
+        avatar: apoorvaAvatar,
         designation: 'Lead Backend Infra Eng, NuCash',
         review: (
           <>
@@ -143,7 +155,7 @@ export const Testimonials = ({ page }) => {
     [
       {
         name: 'Pawan Bhadauria',
-        avatar: '/img/users/pawan-outplay.webp',
+        avatar: pawanAvatar,
         designation: 'VP - Engineering, Outplay',
         review: (
           <>
@@ -157,7 +169,7 @@ export const Testimonials = ({ page }) => {
       },
       {
         name: 'Faris Hassan',
-        avatar: '/img/users/faris.jpeg',
+        avatar: farisAvatar,
         designation: 'Lead Data Scientist',
         review: (
           <>
@@ -170,14 +182,18 @@ export const Testimonials = ({ page }) => {
         href: 'https://twitter.com/Iamfarisology/status/1553787074339381249',
       },
     ],
-    [],
   ]
   return (
     <section>
-      <div className="section-container !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Footer_backdrop.webp')] bg-[length:auto_100%] bg-[center_top_-45rem] bg-no-repeat !py-24 md:!w-[80vw]">
-        <div className="mb-16 flex flex-col items-center gap-12 text-center">
-          <img src="/img/users/outplay.svg" alt="Outplay logo" className="h-7" />
-          <span className="max-w-[50vw] text-center text-sm font-normal leading-10 text-signoz_sienna-200 sm:text-2xl">
+      <div
+        className={cn(
+          'section-container bg-blur-footer-backdrop relative mx-auto flex w-full flex-col items-center overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 !py-8 md:w-[80vw] md:!py-24',
+          className
+        )}
+      >
+        <div className="z-10 mb-16 flex flex-col items-center gap-12 text-center">
+          <OutplayLogo className="h-7 w-auto" aria-label="Outplay logo" />
+          <span className="max-w-[min(42rem,90%)] text-center text-sm font-normal leading-10 text-signoz_sienna-200 sm:text-2xl">
             We optimized all our top endpoints and fine-tuned database calls to improve our backend
             API response times by 35% using SigNoz. <br />
             Both our dev and QA teams use SigNoz actively in dev and production environments to
@@ -193,7 +209,7 @@ export const Testimonials = ({ page }) => {
           </div>
         </div>
 
-        <div className="row max-w-screen-md">
+        <div className="row z-10 max-w-screen-md">
           {TESTIMONIALS_LIST.map((column, idx) => (
             <div key={idx} className="col col--6">
               {column.map((testimonial, i) => (
@@ -211,7 +227,7 @@ export const Testimonials = ({ page }) => {
                     <div className="card-dark rounded-md bg-signoz_ink-400 p-2 hover:bg-signoz_ink-300">
                       <div className="card__header">
                         <div className="avatar">
-                          <img
+                          <Image
                             className="avatar__photo"
                             src={testimonial.avatar}
                             alt={`Profile of ${testimonial.name}`}
@@ -237,22 +253,17 @@ export const Testimonials = ({ page }) => {
             </div>
           ))}
         </div>
-        <div className="w-[52vw] shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
+        <div className="z-10 mx-auto flex w-full justify-center shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
           <TrackingLink
             href="/case-study/"
-            className="inline-block"
+            id={customerStoriesId}
             clickType="Secondary CTA"
             clickName="Customer Stories Link"
             clickText="Read customer stories"
-            clickLocation="Testimonials Section"
+            clickLocation="Trusted By Section"
+            className="button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
           >
-            <Button
-              id={customerStoriesId}
-              className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
-            >
-              Read customer stories
-              <ArrowRight size={14} />
-            </Button>
+            Read customer stories <ArrowRight size={14} />
           </TrackingLink>
         </div>
       </div>

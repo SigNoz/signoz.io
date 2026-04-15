@@ -1,19 +1,12 @@
 import React from 'react'
 import { cookies } from 'next/headers'
+import { generateUserHash } from '@/utils/userServer'
 import ChatbaseClient from './ChatbaseClient'
 import ChatbaseCookieSync from './ChatbaseCookieSync'
-import crypto from 'crypto'
 
 interface ChatbaseServerProps {
   className?: string
   disableFloatingMessages?: boolean
-}
-
-/**
- * Generate user hash for identity verification (server-side only)
- */
-export const generateUserHash = (userId: string, secret: string): string => {
-  return crypto.createHmac('sha256', secret).update(userId).digest('hex')
 }
 
 /**

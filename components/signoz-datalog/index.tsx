@@ -1,12 +1,13 @@
 import React from 'react'
-import styles from './styles.module.css'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
+import homepageDataProtectionGraphic2 from '@/public/img/graphics/homepage/feature-graphic-data-protection-2.webp'
 
 export const SignozDatalog = () => {
   return (
     <section>
-      <div className="section-container flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 px-10 py-10">
+      <div className="section-container flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !px-10 !py-10">
         <div className="flex w-full flex-col">
           <div>
             <p className="text-2xl font-semibold text-signoz_vanilla-100">
@@ -26,9 +27,10 @@ export const SignozDatalog = () => {
               </span>
             </p>
           </div>
-          <img
-            src="/img/graphics/homepage/feature-graphic-data-protection-2.webp"
+          <Image
+            src={homepageDataProtectionGraphic2}
             alt="Bar chart comparing observability costs for small, mid-sized, and large teams"
+            sizes="(max-width: 768px) 100vw, 80vw"
           />
           <div className="mt-[18px] flex flex-row gap-3"></div>
         </div>

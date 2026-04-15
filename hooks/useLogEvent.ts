@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect } from 'react'
 import { logEvent, LogEventPayload, detectBotClientSide } from '../utils/logEvent'
-import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '../utils/userUtils'
+import { getOrCreateAnonymousId, getUserId } from '../utils/userClient'
+import { extractGroupIdFromEmail } from '../utils/userShared'
 import {
   getOS,
   getTimezone,

@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@headlessui/react'
 import { Menu, X, ArrowRight } from 'lucide-react'
-import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import SearchButton from '../SearchButton'
+import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
+import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import { QUERY_PARAMS } from '@/constants/queryParams'
@@ -85,13 +85,7 @@ export default function TopNav() {
               clickLocation="Top Navbar"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Image
-                className="h-5 w-auto"
-                src="/img/SigNozLogo-orange.svg"
-                width={160}
-                height={60}
-                alt=""
-              />
+              <SigNozLogo className="h-5 w-auto shrink-0" aria-hidden="true" />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
 
@@ -156,7 +150,7 @@ export default function TopNav() {
           <div className="flex items-center justify-end gap-3">
             {!isLoginRoute && (
               <>
-                <SearchButton />
+                <SearchButtonDeferred />
                 {visibility.showGithubStars && <GitHubStars location="Top Navbar" />}
                 {visibility.showSignInGetStarted && (
                   <>

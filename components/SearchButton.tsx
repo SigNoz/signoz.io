@@ -29,6 +29,7 @@ import { cn } from 'app/lib/utils'
 
 type SearchButtonProps = {
   disableShortcut?: boolean
+  initiallyOpen?: boolean
 }
 
 type SearchModalProps = {
@@ -66,7 +67,7 @@ type SearchResultsHandle = {
   hasHits: () => boolean
 }
 
-const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
+const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: SearchButtonProps) => {
   const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
   const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
   const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
@@ -142,6 +143,14 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [disableShortcut, hasAlgoliaConfig])
 
+  useEffect(() => {
+    if (!initiallyOpen) {
+      return
+    }
+
+    setIsOpen(true)
+  }, [initiallyOpen])
+
   const handleSelect = useCallback(
     (itemUrl: string) => {
       if (!itemUrl) {
@@ -178,6 +187,7 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
       <button
         type="button"
         onClick={open}
+        aria-label="Open docs search"
         className={cn(
           'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
           'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',

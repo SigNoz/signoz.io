@@ -9,7 +9,7 @@ export default function FAQ() {
       <div className="mx-auto">
         <div className="flex w-full flex-col sm:flex-row">
           <div className="!w-[300px] flex-1">
-            <p className="pl-12 pt-10 text-4xl font-semibold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
+            <p className="pl-8 pt-10 text-4xl font-semibold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
               Frequently <br /> Asked <br /> Questions
             </p>
           </div>

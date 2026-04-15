@@ -3,44 +3,52 @@ import Card from '../Card/card'
 import { BookOpen, ArrowRight } from 'lucide-react'
 import { ArrowRightSolid } from '@/components/homepage-icons/icons'
 import TrackingLink from '@/components/TrackingLink'
+import KeyIcon from '@/public/img/index_features/key.svg'
+import FutureIcon from '@/public/img/index_features/future.svg'
+import CasesIcon from '@/public/img/index_features/cases.svg'
+import EasyToUseIcon from '@/public/img/index_features/easy-to-use.svg'
+import Image from 'next/image'
+import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-otel.svg?url'
+import { cn } from '../../app/lib/utils'
 
-export const WhyOpenTelemetry = () => {
-  const REASONS = [
-    {
-      title: 'No vendor lock-in',
-      desc: 'Get free of vendor-based agents inside your codebase.',
-      figure: '/img/landing/property-no-vendor-lock-in.webp',
-      logo: '/img/index_features/key.svg',
-    },
-    {
-      title: 'Futureproof',
-      desc: "OpenTelemetry's extensibility ensures support for any evolving technologies.",
-      figure: '/img/landing/property-ease-of-use.webp',
-      logo: '/img/index_features/future.svg',
-    },
-    {
-      title: 'Covers all use-cases',
-      desc: 'OpenTelemetry is a one-stop solution for all your telemetry needs. Generate logs, metrics, and traces with one SDK.',
-      figure: '/img/landing/property-covers-all-use-cases.webp',
-      logo: '/img/index_features/cases.svg',
-    },
-    {
-      title: 'Standardize Observability',
-      desc: 'A single standard for all telemetry signals means increased developer productivity, consistency across teams.',
-      figure: '/img/landing/property-standardize-observability.webp',
-      logo: '/img/index_features/easy-to-use.svg',
-    },
-  ]
+const REASONS = [
+  {
+    title: 'No vendor lock-in',
+    desc: 'Get free of vendor-based agents inside your codebase.',
+    logo: <KeyIcon className="h-6 w-6" aria-hidden="true" />,
+  },
+  {
+    title: 'Futureproof',
+    desc: "OpenTelemetry's extensibility ensures support for any evolving technologies.",
+    logo: <FutureIcon className="h-6 w-6" aria-hidden="true" />,
+  },
+  {
+    title: 'Covers all use-cases',
+    desc: 'OpenTelemetry is a one-stop solution for all your telemetry needs. Generate logs, metrics, and traces with one SDK.',
+    logo: <CasesIcon className="h-6 w-6" aria-hidden="true" />,
+  },
+  {
+    title: 'Standardize Observability',
+    desc: 'A single standard for all telemetry signals means increased developer productivity, consistency across teams.',
+    logo: <EasyToUseIcon className="h-6 w-6" aria-hidden="true" />,
+  },
+]
 
+export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
   return (
     <>
-      <section className="!mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
-        <div className="container bg-[url('/img/background_blur/Ellipse_207.webp')] bg-[center_top_calc(-600px)]">
-          <div className="flex flex-col items-center py-8 text-center md:py-28">
+      <section
+        className={cn(
+          'mx-auto w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      >
+        <div className="bg-blur-ellipse-207 container">
+          <div className="grid place-items-center py-8 text-center md:py-28">
             <p className="text-center text-sm font-medium uppercase tracking-[.05em] text-signoz_vanilla-400">
               SigNoz is OpenTelemetry-Native
             </p>
-            <p className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-[44px]">
+            <p className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
               But why OpenTelemetry?
             </p>
             <p className="text-center text-xs font-medium text-signoz_vanilla-100 sm:text-base">
@@ -63,8 +71,13 @@ export const WhyOpenTelemetry = () => {
           </div>
         </div>
       </section>
-      <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
-        {REASONS.map((section, index) => (
+      <div
+        className={cn(
+          'mx-auto grid w-full grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:w-[80vw]',
+          className
+        )}
+      >
+        {REASONS.map((section) => (
           <Card
             logo={section.logo}
             subTitle={section.title}
@@ -75,17 +88,22 @@ export const WhyOpenTelemetry = () => {
           />
         ))}
       </div>
-      <section className="!mx-auto !w-[100vw] border border-dashed border-signoz_slate-400 md:!w-[80vw] ">
-        <div className="section-container mb-16">
-          <div className="flex flex-col justify-between p-9">
-            <div className="flex flex-col justify-between sm:flex-row">
-              <div>
+      <section
+        className={cn(
+          'mx-auto w-full border border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      >
+        <div className="mb-16 px-0">
+          <div className="grid gap-9 p-9">
+            <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="min-w-0">
                 <p className="text-2xl font-semibold text-signoz_vanilla-100">
                   {' '}
                   SigNoz is built from the ground up for OpenTelemetry
                 </p>
 
-                <p className="my-3 max-w-[100vw] text-base font-normal leading-9 text-signoz_vanilla-400 sm:w-[42rem] md:max-w-[50vw]">
+                <p className="my-3 text-base font-normal leading-9 text-signoz_vanilla-400 md:max-w-[min(42rem,90%)]">
                   SigNoz offers the best in class support for OpenTelemetry{"'"}s semantic
                   conventions with the best visualizations ⎯ powered by our powerful ingestion
                   engine.
@@ -125,10 +143,15 @@ export const WhyOpenTelemetry = () => {
                   </li>
                 </ul>
               </div>
-              <div className="card-background mb-6 aspect-[449/352] sm:h-[352px]">
-                <img
-                  src="/img/graphics/homepage/feature-graphic-otel.webp"
+              <div className="mx-auto mb-6 aspect-[449/352] h-[400px] shrink-0 sm:h-[300px] 2xl:block">
+                <Image
+                  className="w-full"
+                  src={featureGraphicOtel}
                   alt="Illustration showing SigNoz built on top of OpenTelemetry"
+                  width={449}
+                  height={352}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -152,7 +175,12 @@ export const WhyOpenTelemetry = () => {
           </div>
         </div>
       </section>
-      <div className="!mx-auto h-12 !w-[100vw] w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]" />
+      <div
+        className={cn(
+          'mx-auto h-12 w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      />
     </>
   )
 }

@@ -2670,10 +2670,27 @@ module.exports = () => {
       ]
     },
     webpack: (config, options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ['@svgr/webpack'],
-      })
+      // Find Next.js's existing rule that handles SVG imports
+      const fileLoaderRule = config.module.rules.find((rule) => rule.test?.test?.('.svg'))
+
+      config.module.rules.push(
+        // Reapply Next.js file loader for *.svg?url (cacheable with content hash)
+        {
+          ...fileLoaderRule,
+          test: /\.svg$/i,
+          resourceQuery: /url/,
+        },
+        // Convert other *.svg imports to React components
+        {
+          test: /\.svg$/i,
+          issuer: fileLoaderRule.issuer,
+          resourceQuery: { not: [...(fileLoaderRule.resourceQuery?.not || []), /url/] },
+          use: ['@svgr/webpack'],
+        }
+      )
+
+      // Exclude *.svg from the original rule since we handle it above
+      fileLoaderRule.exclude = /\.svg$/i
 
       // this is to avoid caching for webpack
       // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
