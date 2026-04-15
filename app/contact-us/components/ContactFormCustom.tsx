@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLogEvent } from '@/hooks/useLogEvent'
-import { extractGroupIdFromEmail } from '@/utils/userUtils'
 import {
   createSubmissionRelayId,
   sendSubmissionRelayInBackground,
@@ -108,13 +107,15 @@ export default function ContactFormCustom() {
       logEvent({
         eventName: 'HubSpot Form Submitted',
         eventType: 'track',
-        userId: email,
-        groupId: extractGroupIdFromEmail(email),
         attributes: {
           pageLocation: pathname,
           formName: FORM_NAME,
           hubspot_form_id: FORM_ID,
           hubspot_form_name: FORM_NAME,
+          hubspot_event_name: '',
+          hubspot_conversion_id: '',
+          hubspot_redirect_url: '',
+          hubspot_message_origin: '',
           hubspot_page_path: pathname,
           hubspot_page_url: window.location.href,
           ...flattenSubmissionValues(submissionValues),
