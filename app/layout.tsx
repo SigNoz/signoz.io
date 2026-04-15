@@ -3,7 +3,6 @@ import 'css/global.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
 import siteMetadata from '@/data/siteMetadata'
-import { ThemeProviders } from './theme-providers'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
@@ -104,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <AnonymousIdSetter />
 
-        <ThemeProviders>{children}</ThemeProviders>
+        {children}
       </body>
     </html>
   )

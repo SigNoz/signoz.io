@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { RegionProvider } from '../../components/Region/RegionContext'
+import { TooltipProviderWrapper } from '@/components/TooltipProviderWrapper'
 
 export const metadata: Metadata = {
   robots: {
@@ -10,5 +11,9 @@ export const metadata: Metadata = {
 }
 
 export default function DocsOnboardingLayout({ children }: { children: ReactNode }) {
-  return <RegionProvider>{children}</RegionProvider>
+  return (
+    <TooltipProviderWrapper>
+      <RegionProvider>{children}</RegionProvider>
+    </TooltipProviderWrapper>
+  )
 }

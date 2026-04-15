@@ -9,7 +9,10 @@ import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
 import { Metadata } from 'next'
-import Chatbase from '@/components/Chatbase'
+import { ChatbaseClient } from '@/components/Chatbase'
+import ChatbaseCookieSync from '@/components/Chatbase/ChatbaseCookieSync'
+
+export const dynamic = 'force-static'
 
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
@@ -39,7 +42,8 @@ export default function Page() {
           <Testimonials page="homepage" className="max-w-8xl" />
           <GetStarted page="homepage" className="max-w-8xl" />
         </main>
-        <Chatbase />
+        <ChatbaseCookieSync />
+        <ChatbaseClient />
       </div>
     </>
   )
