@@ -315,7 +315,7 @@ export default function TopNav() {
     }
   }, [])
 
-const handleProductDropdownClick = () => setIsOpen(false)
+  const handleProductDropdownClick = () => setIsOpen(false)
   const handleResourcesDropdownClick = () => setIsOpenResources(false)
 
   // Hide TopNav on teams, contact-us page or if source is onboarding
@@ -766,7 +766,7 @@ const handleProductDropdownClick = () => setIsOpen(false)
         </nav>
         <Dialog as="div" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
           <div className="fixed inset-0 top-[56px]" />
-          <Dialog.Panel className="fixed inset-y-0 right-0 z-10 mt-[56px] w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
+          <Dialog.Panel className="fixed inset-y-0 right-0 z-50 mt-[56px] w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
             <div className="flex items-center justify-between">
               <TrackingLink
                 href="/"
