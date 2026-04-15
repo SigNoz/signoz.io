@@ -2631,7 +2631,6 @@ const docsSideNav = [
             route: '/docs/alerts-management/exceptions-based-alerts',
             label: 'Exceptions',
           },
-          { type: 'doc', route: '/docs/alerts-management/apdex-alerts', label: 'Apdex' },
         ],
       },
       {
@@ -2743,6 +2742,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/k8s-cpu-usage-alert',
             label: 'Kubernetes CPU Usage Alert',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/apdex-alerts',
+            label: 'Apdex Alerts',
           },
         ],
       },
