@@ -9,11 +9,9 @@ import {
 } from '@/utils/submissionRelayClient'
 import { flattenSubmissionValues } from '@/utils/hubspotTracking'
 import { Check, CheckCircle, Loader2 } from 'lucide-react'
+import { contactUsData } from '../data'
 
-const PORTAL_ID = '22308423'
-const FORM_ID = 'cf4128d5-51f1-46aa-ae4a-552bcff20f8c'
-const FORM_NAME = 'Contact Us Form'
-const SUBMIT_URL = `https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL_ID}/${FORM_ID}`
+const { FORM_ID, FORM_NAME, SUBMIT_URL } = contactUsData
 
 const HOSTING_OPTIONS = [
   { label: 'Enterprise Cloud', value: 'Enterprise Cloud' },
