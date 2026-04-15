@@ -8,24 +8,13 @@ import {
   createSubmissionRelayId,
   sendSubmissionRelayInBackground,
 } from '@/utils/submissionRelayClient'
+import { flattenSubmissionValues } from '@/utils/hubspotTracking'
 import { Check, CheckCircle, Loader2 } from 'lucide-react'
 
 const PORTAL_ID = '22308423'
 const FORM_ID = 'cf4128d5-51f1-46aa-ae4a-552bcff20f8c'
 const FORM_NAME = 'Contact Us Form'
 const SUBMIT_URL = `https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL_ID}/${FORM_ID}`
-
-const normalizeFieldKey = (key: string) =>
-  key
-    .trim()
-    .replace(/[^a-zA-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .toLowerCase()
-
-const flattenSubmissionValues = (values: Record<string, string>) =>
-  Object.fromEntries(
-    Object.entries(values).map(([key, value]) => [`hubspot_field_${normalizeFieldKey(key)}`, value])
-  )
 
 const HOSTING_OPTIONS = [
   { label: 'Enterprise Cloud', value: 'Enterprise Cloud' },
