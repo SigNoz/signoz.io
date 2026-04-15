@@ -108,6 +108,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/openclaw-monitoring': (
     <img src="/img/docs/llm/openclaw/openclaw-logo.svg" alt="OpenClaw Icon" className="h-7 w-7" />
   ),
+  '/docs/opencode-observability': (
+    <img
+      src="/svgs/icons/LLMMonitoring/opencode-logo.webp"
+      alt="OpenCode Icon"
+      className="h-7 w-7"
+    />
+  ),
   '/docs/openlit': (
     <img src="/svgs/icons/LLMMonitoring/openlit-logo.webp" alt="OpenLIT Icon" className="h-7 w-7" />
   ),

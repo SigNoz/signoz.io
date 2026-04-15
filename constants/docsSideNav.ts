@@ -2897,6 +2897,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/opencode-observability',
+        label: 'OpenCode',
+        type: 'doc',
+      },
+      {
         route: '/docs/openlit',
         label: 'OpenLIT',
         type: 'doc',
