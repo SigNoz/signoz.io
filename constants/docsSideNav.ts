@@ -1528,11 +1528,6 @@ const docsSideNav = [
           { type: 'doc', route: '/docs/userguide/logs_query_builder', label: 'Logs Query Builder' },
           {
             type: 'doc',
-            route: '/docs/userguide/logs-json-filters',
-            label: 'Writing JSON Filters',
-          },
-          {
-            type: 'doc',
             route: '/docs/logs-management/features/logs-quick-filters',
             label: 'Logs Quick Filters',
           },
@@ -1657,11 +1652,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/logs-management/troubleshooting/troubleshooting',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs-query-troubleshooting',
-            label: 'Logs Query Troubleshooting',
-          },
           { type: 'doc', route: '/docs/logs-management/troubleshooting/faqs', label: 'FAQs' },
         ],
       },

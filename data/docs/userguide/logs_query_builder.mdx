@@ -1,56 +1,85 @@
 ---
-date: 2026-04-10
+date: 2026-04-15
 title: Logs Query Builder
 
 id: logs_query_builder
 description: Learn how to use the SigNoz Logs Query Builder to search, filter, and analyze your log data with powerful query capabilities.
 ---
 
+The Logs Explorer in SigNoz provides a powerful interface for searching, filtering, and analyzing your log data. It includes quick filters on the left panel, a filter expression bar, and three view modes — List View, Time Series, and Table.
 
-We recently released an updated logs explorer page and query builder in SigNoz to make experience of our logs product much more intuitive and seamless.
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-explorer-overview.webp" alt="Logs Explorer with quick filters and list view"/>
+    <figcaption><i>Logs Explorer with quick filters, filter expression, and list view</i></figcaption>
+</figure>
 
-Some of the key features:
-1. Advanced filtering based on attributes and auto suggestions for filters<br></br>
+## Key Features
 
-    You can now create more complex queries for how you match attributes, and the query field will automatically suggest both attributes and values for your query.
+### Filtering and Search
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/02.webp)
+Write filter expressions in the search bar to narrow your logs. The query field supports auto-suggestions for both attributes and values. Use operators like `=`, `!=`, `IN`, `NOT IN`, `CONTAINS`, `EXISTS`, and combine them with `AND`/`OR`.
 
-    After entering your query hit 'run query' to see a default bar chart and results down below:
+After entering your query, click **Run Query** to see results in the selected view mode.
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/03.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-list-view.webp" alt="Logs list view with filter applied"/>
+    <figcaption><i>List view showing filtered logs with timestamp and body columns</i></figcaption>
+</figure>
 
-    To explore additional ways to filter your query, click 'view details' on any log line to get a list of parameters on the log, and click any value to automatically add a `{attribute} IN {value}` to your query.
+### Log Details
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/04.webp)
+Click on any log line to open the **Log details** panel. This shows the full log body, attributes, and resource fields in a structured view. The detail panel has four tabs — Overview, JSON, Context, and Metrics.
 
-2. Aggregation options like Group By, ability to specificy aggregation intervals, etc.<br></br>
+From the attribute values in the detail panel, you can:
+- **Filter for value** — add the attribute as an `IN` filter
+- **Filter out value** — add the attribute as a `NOT IN` filter
+- **Group By Attribute** — add the attribute to Group By
+- **Replace filters with this value** — replace the current filter with this specific value
 
-    The Group By drop down is automatically populated with common attributes, and selecting one, like log level in this example, gets us a few things right away
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-detail-view.webp" alt="Log details panel with attribute actions"/>
+    <figcaption><i>Log details panel showing body, attributes, and quick action options on attribute values</i></figcaption>
+</figure>
 
-    * A comparitive bar chart, with a legend (you can enter a format for the legend including explanatory text eg in this case you might enter `The log level is {{level}}` to make the chart more readable by others)
+### Aggregation and Group By
 
-    * A timeseries comparing the relative volume of results by time
+Switch to the **Time Series** view to see log counts over time. Use the **Group By** dropdown to break down results by attributes like `service.name`, `k8s.pod.name`, or any custom attribute.
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/05.webp)
+The query builder supports:
+- **Aggregate functions**: `count()`, `count_distinct()`, `avg()`, `sum()`, `p50()`, `p90()`, `p95()`, `p99()`
+- **Group By**: Split results by one or more attributes
+- **Having / Order By / Limit / Legend format**: Refine and customize the output
 
-3. Plot multiple queries and formulae based on them in the same charts<br></br>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-group-by.webp" alt="Time series view with group by"/>
+    <figcaption><i>Time Series view showing log count grouped by k8s.pod.name</i></figcaption>
+</figure>
 
-    For comparing two timeseries or values, you can now add multiple queries or formulae on the same chart, which is especially useful if you are comparing similar data across two different services.
+### Filter by Value
 
-4. Modify your query with a click<br></br>
+In the log details panel, hover over any attribute value to see quick action icons. These let you instantly filter for or against a value, group by the attribute, or replace the current filters — all without manually editing the query.
 
-    By clicking on the details of any log line, you can see the attributes for that item. Click any value, and your query will be modified to require that attribute and value.
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-filter-by-value.webp" alt="Filter by value options on attribute"/>
+    <figcaption><i>Quick actions on attribute values: Filter for value, Filter out value, Group By Attribute, Replace filters</i></figcaption>
+</figure>
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/06.webp)
+### Create Dashboards and Alerts
 
-5. Create Dashboards and Alerts in a single click from logs query builder<br></br>
+At the bottom of the Logs Explorer, you can:
+- **Save this view** — preserve your query configuration for quick access later
+- **Create an Alert** — set up a log-based alert directly from your current query
+- **Add to Dashboard** — export the current query as a dashboard panel
 
-    Directly from results you can add the query to a dashboard and set up an alert. This makes the timeseries view especially useful, as you can now create an alert when a certain event is logged beyond a certain rate.
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-create-dashboard-alert.webp" alt="Create dashboard and alert from logs explorer"/>
+    <figcaption><i>Save view, create alert, or add to dashboard directly from the Logs Explorer</i></figcaption>
+</figure>
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/07.webp)
+### Multiple Queries and Formulas
 
-With the alert query you can perform sophisticated comparisons or other math on your measurement from your logs.
+You can plot multiple queries and formulas on the same chart. This is useful for comparing log volumes across different services or calculating rates like error percentages.
 
+## Related
 
-For writing JSON filters in the logs explorer, see [Writing JSON Filters](/docs/userguide/logs-json-filters).
+- [Logs Quick Filters](/docs/logs-management/features/logs-quick-filters/) — use the quick filter panel on the left

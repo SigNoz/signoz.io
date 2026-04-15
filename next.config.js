@@ -1250,6 +1250,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/logs-query-troubleshooting/',
+          destination: '/docs/logs-management/troubleshooting/troubleshooting/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs-json-filters/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting/',
           destination: '/docs/traces-management/troubleshooting/troubleshooting/',
           permanent: true,
