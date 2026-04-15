@@ -55,12 +55,12 @@ export default function ProductNav() {
 
   return (
     <div className="fixed left-0 right-0 top-[56px] z-10">
-      <header className="header-bg mx-auto flex h-[56px] items-center overflow-x-auto overflow-y-hidden border-b border-signoz_slate-500 px-4 text-signoz_vanilla-400 !backdrop-blur-[20px] md:px-8 lg:px-8">
+      <header className="mx-auto flex items-center overflow-x-auto overflow-y-hidden border-b border-signoz_slate-500 px-4 text-signoz_vanilla-400 md:px-8 lg:px-8">
         <nav
           className="container flex w-full items-end justify-between"
           aria-label="Product Navigation"
         >
-          <div className="flex h-[56px] items-center gap-x-8">
+          <div className="flex items-center gap-x-8">
             {navigationItems.map((item) => (
               <Link
                 key={item.key}
