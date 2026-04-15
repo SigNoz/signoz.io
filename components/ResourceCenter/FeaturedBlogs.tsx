@@ -1,5 +1,5 @@
 import BlogPostCard from './BlogPostCard'
-import type { ResourceCenterBlog } from '../../app/(opentelemetry-hub-routes)/content'
+import type { ResourceCenterBlog } from '../../app/(site)/(opentelemetry-hub-routes)/content'
 
 interface FeaturedBlogsProps {
   isDarkMode: boolean

@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useId, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { QUERY_PARAMS } from '../../constants/queryParams'
-import { ONBOARDING_SOURCE } from '../../constants/globals'
 import { cn } from 'app/lib/utils'
+import { usePathname } from 'next/navigation'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 interface AdditionalDetails {
   [key: string]: string
@@ -163,10 +162,9 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
   const [submitError, setSubmitError] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
+  const pathname = usePathname()
   const feedbackFieldPrefix = useId().replace(/:/g, '')
-
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const isOnboarding = isDocsOnboardingPathname(pathname)
 
   const apiUrl = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
   const feedbackPath = process.env.NEXT_PUBLIC_SIGNOZ_CMS_FEEDBACK_PATH
@@ -335,7 +333,7 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
     }
   }
 
-  if (source === ONBOARDING_SOURCE) {
+  if (isOnboarding) {
     return null
   }
 

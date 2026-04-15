@@ -1,14 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { QUERY_PARAMS } from '@/constants/queryParams'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+import { useBrowserSearch } from '@/hooks/useBrowserSearch'
+
 const Tabs = ({ children, entityName }) => {
-  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const search = useBrowserSearch()
+  const isOnboarding = isDocsOnboardingPathname(pathname)
+  const searchParams = new URLSearchParams(search)
 
   const environment = searchParams.get(QUERY_PARAMS.ENVIRONMENT)
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   // Ensure children is always an array
   const childrenArray = React.Children.toArray(children)
@@ -44,7 +48,11 @@ const Tabs = ({ children, entityName }) => {
     selectedTab = defaultActiveTab
   }
   const [activeTab, setActiveTab] = useState(selectedTab)
-  const hideSelfHostTab = source === ONBOARDING_SOURCE && entityName === 'plans'
+  const hideSelfHostTab = isOnboarding && entityName === 'plans'
+
+  useEffect(() => {
+    setActiveTab(selectedTab)
+  }, [selectedTab])
 
   return (
     <div className="w-full" data-tabs-root>

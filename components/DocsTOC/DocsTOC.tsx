@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { ONBOARDING_SOURCE } from '../../constants/globals'
 import { DOC_TOC_CLASSES } from './docLayoutClasses'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import { RegionDropdown } from '../Region/RegionDropdown'
 import PageFeedback from '../PageFeedback/PageFeedback'
+import { usePathname } from 'next/navigation'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 interface TocItemProps {
   url: string
@@ -16,14 +17,15 @@ interface TocItemProps {
 interface DocsTOCProps {
   toc: TocItemProps[]
   hideTableOfContents: boolean
-  source: string
 }
 
-const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) => {
+const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents }) => {
+  const pathname = usePathname()
   const [activeSection, setActiveSection] = useState<string>('')
   const [filteredToc, setFilteredToc] = useState<TocItemProps[]>(toc || [])
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const tocItemsRef = useRef<HTMLDivElement>(null)
+  const isOnboarding = isDocsOnboardingPathname(pathname)
 
   // Mirror blog ToC behavior: observe headings and update active section
   useEffect(() => {
@@ -295,13 +297,7 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
     }
   }, [])
 
-  if (
-    hideTableOfContents ||
-    !toc ||
-    !Array.isArray(toc) ||
-    toc.length === 0 ||
-    source === ONBOARDING_SOURCE
-  ) {
+  if (hideTableOfContents || !toc || !Array.isArray(toc) || toc.length === 0 || isOnboarding) {
     return null
   }
 

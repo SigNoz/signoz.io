@@ -20,12 +20,10 @@ import SearchButton from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import * as Popover from '@radix-ui/react-popover'
 import Accordion from '../Accordion/Accordion'
-import { QUERY_PARAMS } from '@/constants/queryParams'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
@@ -247,7 +245,6 @@ const NAV_BREAKPOINTS = {
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   // All hooks must be called at the top level, before any conditional returns
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -268,7 +265,6 @@ export default function TopNav() {
   const isSignupRoute = pathname === signupRoute
   const isContactUsRoute = pathname === contactUsRoute
   const isWordleRoute = pathname === wordleRoute
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   const showCustomerStories = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.FULL_NAV
   const showGithubStars = windowWidth === null || windowWidth >= NAV_BREAKPOINTS.GITHUB_STARS
@@ -326,11 +322,11 @@ export default function TopNav() {
     }
   }, [])
 
-const handleProductDropdownClick = () => setIsOpen(false)
+  const handleProductDropdownClick = () => setIsOpen(false)
   const handleResourcesDropdownClick = () => setIsOpenResources(false)
 
-  // Hide TopNav on teams, contact-us page or if source is onboarding
-  if (isSignupRoute || isContactUsRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
+  // Hide TopNav on teams, contact-us, or wordle page
+  if (isSignupRoute || isContactUsRoute || isWordleRoute) {
     return null
   }
 

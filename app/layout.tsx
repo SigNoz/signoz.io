@@ -2,12 +2,9 @@ import 'css/tailwind.css'
 import 'css/global.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
-import SectionContainer from '@/components/SectionContainer'
 import siteMetadata from '@/data/siteMetadata'
 import { ThemeProviders } from './theme-providers'
 import { Metadata } from 'next'
-import MainFooter from '@/components/mainFooter'
-import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
@@ -28,14 +25,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteMetadata.title,
     description: siteMetadata.description,
-    url: './',
+    url: siteMetadata.siteUrl,
     siteName: siteMetadata.title,
     images: [siteMetadata.socialBanner],
     locale: 'en_US',
     type: 'website',
   },
   alternates: {
-    canonical: './',
+    canonical: siteMetadata.siteUrl,
     types: {
       'application/rss+xml': `${siteMetadata.siteUrl}/feed.xml`,
     },
@@ -107,15 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <AnonymousIdSetter />
 
-        <ThemeProviders>
-          <SectionContainer>
-            <div className="relative flex h-screen flex-col justify-between ">
-              <TopNav />
-              <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
-              <MainFooter />
-            </div>
-          </SectionContainer>
-        </ThemeProviders>
+        <ThemeProviders>{children}</ThemeProviders>
       </body>
     </html>
   )

@@ -5,8 +5,8 @@ import { filterData } from 'app/utils/common'
 import SectionHeader from './SectionHeader'
 import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
 import GridLayout from '@/layouts/GridLayout'
-import { POSTS_PER_PAGE } from '../../app/(opentelemetry-hub-routes)/constants'
-import type { ResourceCenterGuide } from '../../app/(opentelemetry-hub-routes)/content'
+import { POSTS_PER_PAGE } from '../../app/(site)/(opentelemetry-hub-routes)/constants'
+import type { ResourceCenterGuide } from '../../app/(site)/(opentelemetry-hub-routes)/content'
 
 export default function Guides({
   posts,

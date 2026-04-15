@@ -1,9 +1,9 @@
 import SectionLayout from '../SectionLayout'
-import PricingCalculator from 'app/pricing/pricingv1/components/PricingCalculator'
+import PricingCalculator from 'app/(site)/pricing/pricingv1/components/PricingCalculator'
 import { Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
-import { Section } from 'app/pricing/pricingv1/components/PricingCalculator'
+import { Section } from 'app/(site)/pricing/pricingv1/components/PricingCalculator'
 
 const UsageBasedPricing: React.FC<{
   show: Section[]

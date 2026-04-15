@@ -4,10 +4,13 @@ import { waitUntil, ipAddress } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
 import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
+import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { QUERY_PARAMS } from '@/constants/queryParams'
 import {
   buildDocsMarkdownRewritePath,
   shouldRewriteDocsToMarkdown,
 } from '@/utils/docs/markdownRouting'
+import { buildDocsOnboardingPath, isDocsPathname } from '@/utils/docs/onboardingPath'
 
 const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
 const GROWTHBOOK_ANONYMOUS_ID_HEADER = 'x-gb-anonymous-id'
@@ -50,6 +53,18 @@ export function middleware(req: NextRequest) {
 
   // Get request details
   const pathname = req.nextUrl.pathname
+  const isLegacyOnboardingDocsRequest =
+    isDocsPathname(pathname) &&
+    req.nextUrl.searchParams.get(QUERY_PARAMS.SOURCE) === ONBOARDING_SOURCE
+
+  if (isLegacyOnboardingDocsRequest) {
+    const redirectUrl = req.nextUrl.clone()
+    redirectUrl.pathname = buildDocsOnboardingPath(pathname)
+    redirectUrl.searchParams.delete(QUERY_PARAMS.SOURCE)
+
+    return NextResponse.redirect(redirectUrl)
+  }
+
   const referer = req.headers.get('referer') || req.headers.get('referrer') || 'direct'
   const ip =
     req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'

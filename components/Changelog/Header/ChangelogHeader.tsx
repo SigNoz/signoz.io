@@ -4,10 +4,11 @@ import Styles from './styles.module.css'
 import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { DeploymentType, DeploymentTypeColors, DeploymentTypeLabels } from '@/utils/strapi'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
 import { saveChangelogSubscription } from '@/utils/strapi'
 import Link from 'next/link'
+import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 
 interface ErrorsProps {
   email?: string
@@ -20,8 +21,8 @@ interface Props {
 const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
   const router = useRouter()
+  const search = useBrowserSearch()
   const emailRegex = new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
-  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [errors, setErrors] = useState<ErrorsProps>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,6 +32,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
   )
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(search)
     const deploymentType = searchParams.get('deploymentType')
     const decodedDeploymentType = deploymentType ? decodeURIComponent(deploymentType) : undefined
 
@@ -41,7 +43,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
       : DeploymentType.ALL
 
     setCurrentDeploymentType(deploymentTypeFromParams)
-  }, [])
+  }, [search])
 
   const handleSubscribeClick = () => {
     onOpen()
@@ -49,7 +51,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
 
   const handleDeploymentTypeChange = (type: DeploymentType) => {
     setCurrentDeploymentType(type)
-    const queryParams = new URLSearchParams(window.location.search)
+    const queryParams = new URLSearchParams(search)
     queryParams.set('deploymentType', encodeURIComponent(type))
     router.push(`/changelog?${queryParams.toString()}`, { scroll: false })
   }
