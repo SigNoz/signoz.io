@@ -137,6 +137,17 @@ export default function ContactFormCustom() {
         },
       })
 
+      logEvent({
+        eventName: 'Website Click',
+        eventType: 'track',
+        attributes: {
+          clickType: 'Form Submit',
+          clickName: 'Contact Us Form Submit',
+          clickLocation: 'contact_us_page',
+          pageLocation: pathname,
+        },
+      })
+
       setSuccess(true)
     } catch (err: any) {
       setError(err?.message || 'Something went wrong. Please try again.')
