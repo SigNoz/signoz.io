@@ -2,19 +2,12 @@
 
 import React from 'react'
 import styles from './styles.module.css'
-import { FormBlockedFallback, useHubspotFormFallback } from '@/components/HubspotFormFallback'
+import HubspotCustomForm from '@/components/hubspot-custom-form/HubspotCustomForm'
 
 const MigrateSaving = (props) => {
   const {
     data: { TITLE, DESC, PORTAL_ID, FORM_ID },
   } = props
-
-  const { formCreated, error, showFallback, formRef } = useHubspotFormFallback({
-    portalId: PORTAL_ID,
-    formId: FORM_ID,
-    target: '#my-hubspot-form',
-    formName: TITLE,
-  })
 
   return (
     <>
@@ -27,12 +20,7 @@ const MigrateSaving = (props) => {
             <div className={'col col--6 margin-vert--md'}>
               <div className={`card ${styles.hubForm}`}>
                 <div className="card__body">
-                  <div id="my-hubspot-form" ref={formRef}>
-                    {!formCreated && !error && !showFallback && (
-                      <p className="text--center">Loading...</p>
-                    )}
-                  </div>
-                  {showFallback && <FormBlockedFallback />}
+                  <HubspotCustomForm portalId={PORTAL_ID} formId={FORM_ID} formName={TITLE} />
                 </div>
               </div>
             </div>

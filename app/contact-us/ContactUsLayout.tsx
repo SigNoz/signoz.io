@@ -1,9 +1,14 @@
+'use client'
+
 import React from 'react'
 import Image from 'next/image'
 import { CheckCircle } from 'lucide-react'
-import ContactFormCustom from './components/ContactFormCustom'
+import { usePathname } from 'next/navigation'
+import { useLogEvent } from '@/hooks/useLogEvent'
+import HubspotCustomForm from '@/components/hubspot-custom-form/HubspotCustomForm'
 import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
 import { TRUST_BAR_LOGOS } from '@/constants/trustBarLogos'
+import { contactUsData } from './data'
 
 const OPTIONS = [
   {
@@ -23,6 +28,22 @@ const OPTIONS = [
 ]
 
 export default function ContactUsLayout() {
+  const pathname = usePathname()
+  const logEvent = useLogEvent()
+
+  const handleSubmitSuccess = () => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Form Submit',
+        clickName: 'Contact Us Form Submit',
+        clickLocation: 'contact_us_page',
+        pageLocation: pathname,
+      },
+    })
+  }
+
   return (
     <div className="ml-[calc(100%-100vw)] flex w-screen flex-col overflow-hidden bg-signoz_ink-400">
       <FocusedNavbar />
@@ -91,7 +112,14 @@ export default function ContactUsLayout() {
         {/* Right col — form */}
         <div className="relative flex w-full flex-col items-center justify-center p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:overflow-y-auto lg:px-16 lg:py-14">
           <div className="w-full max-w-[560px] rounded-[12px] border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-10">
-            <ContactFormCustom />
+            <HubspotCustomForm
+              portalId={contactUsData.PORTAL_ID}
+              formId={contactUsData.FORM_ID}
+              formName={contactUsData.FORM_NAME}
+              submitButtonText="Book a Demo"
+              selectVariant="pills"
+              onSubmitSuccess={handleSubmitSuccess}
+            />
           </div>
         </div>
       </div>
