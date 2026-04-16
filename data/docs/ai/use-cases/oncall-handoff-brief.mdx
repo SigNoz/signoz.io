@@ -2,7 +2,7 @@
 date: 2026-04-16
 id: oncall-handoff-brief
 title: On-Call Handoff Brief
-description: Generate a handoff summary of recent incidents, ongoing issues, and key metrics for the next on-call engineer.
+description: Generate a handoff summary of recent incidents and ongoing issues for the next on-call engineer.
 doc_type: howto
 ---
 
@@ -15,6 +15,7 @@ Instead of manually writing up a handoff doc, you ask your AI assistant, connect
 ## Prerequisites
 
 - Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure you have alerts configured in SigNoz. See [Alerts](https://signoz.io/docs/alerts/) if you haven't set this up.
 
 ## Generate the Handoff Summary
 
@@ -57,18 +58,20 @@ Use Claude Desktop for this use case. Claude will generate an interactive handof
 
 During this investigation, the MCP server called these tools:
 
-| MCP Tool | What It Did |
-|----------|-------------|
-| `signoz_list_alerts` | Retrieved all currently firing alerts |
-| `signoz_get_alert_history` | Fetched the complete alert state transition history for the 48-hour window to calculate flap counts and identify patterns |
-| `signoz_get_alert` | Retrieved detailed information for each alert including severity, conditions, and current status |
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_list_alerts` | Retrieved all currently firing alerts |
+| 1 | `signoz_get_alert_history` | Fetched the complete alert state transition history for the 48-hour window to calculate flap counts and identify patterns |
+| 1 | `signoz_get_alert` | Retrieved detailed information for each alert including severity, conditions, and current status |
 
 </details>
 
 ## Related Use Cases
 
+- [Alert Correlation Analysis](https://signoz.io/docs/ai/use-cases/alert-correlation-analysis/) - When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
 - [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Investigate where errors originate in the call chain when a single service starts failing.
 - [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Trace the bottleneck when latency spikes on one service.
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) - Search, filter, and analyze logs in SigNoz by asking questions in plain English.
 - [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/) - Deep-dive into a specific failing request by pasting its trace ID.
 
 
