@@ -1,0 +1,260 @@
+---
+date: 2026-04-16
+id: gitlab-traces
+title: GitLab Pipeline Traces
+description: Collect GitLab CI/CD pipeline traces with the OpenTelemetry GitLab Receiver and send them to SigNoz.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+This guide shows how to collect GitLab CI/CD pipeline traces using the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/gitlabreceiver" target="_blank" rel="noopener noreferrer nofollow">GitLab Receiver</a> and forward them to SigNoz.
+
+<Admonition type="note">
+The GitLab Receiver is **alpha** stability and ships only in `otelcol-contrib`, not the core OpenTelemetry Collector. The configuration schema and behavior may change in future releases. The receiver supports **traces only**.
+</Admonition>
+
+Each GitLab pipeline event triggers a webhook to the OTel Collector. The receiver converts the pipeline and its jobs into a trace with job-level child spans.
+
+## Prerequisites
+
+- OpenTelemetry Collector Contrib v0.123.0 or later
+- Access to SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- A GitLab project where you have Maintainer or Owner access to configure webhooks
+
+## Setup
+
+### Step 1. Configure the GitLab Receiver
+
+Create a `config.yaml` with the following content:
+
+```yaml:config.yaml
+receivers:
+  gitlab:
+    webhook:
+      endpoint: 0.0.0.0:19418
+      path: /events
+      health_path: /health
+      secret: ${GITLAB_WEBHOOK_SECRET}
+
+processors:
+  resource:
+    attributes:
+      - key: service.name
+        value: <service-name>
+        action: upsert
+
+exporters:
+  otlp:
+    endpoint: ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+    tls:
+      insecure: false
+
+service:
+  pipelines:
+    traces:
+      receivers: [gitlab]
+      processors: [resource]
+      exporters: [otlp]
+```
+
+Verify these values:
+
+- `GITLAB_WEBHOOK_SECRET`: A secret string you choose. GitLab sends it in the `X-Gitlab-Token` header; the receiver rejects requests that do not match.
+- `<service-name>`: A name to identify this pipeline source in SigNoz (e.g. `gitlab-ci`).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Step 2. Run the OTel Collector
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+```bash
+export GITLAB_WEBHOOK_SECRET=<your-webhook-secret>
+export SIGNOZ_INGESTION_KEY=<your-ingestion-key>
+./otelcol-contrib --config ./config.yaml
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+```bash
+docker run -d \
+  -e GITLAB_WEBHOOK_SECRET=<your-webhook-secret> \
+  -e SIGNOZ_INGESTION_KEY=<your-ingestion-key> \
+  -p 19418:19418 \
+  -v $(pwd)/config.yaml:/etc/otel/config.yaml \
+  otel/opentelemetry-collector-contrib:0.123.0 \
+  --config=/etc/otel/config.yaml
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Store credentials in a Secret and mount the config from a ConfigMap:
+
+```yaml:gitlab-otel-collector.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitlab-otel-secrets
+  namespace: signoz
+stringData:
+  GITLAB_WEBHOOK_SECRET: <your-webhook-secret>
+  SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-otel-config
+  namespace: signoz
+data:
+  config.yaml: |
+    receivers:
+      gitlab:
+        webhook:
+          endpoint: 0.0.0.0:19418
+          path: /events
+          health_path: /health
+          secret: ${GITLAB_WEBHOOK_SECRET}
+
+    processors:
+      resource:
+        attributes:
+          - key: service.name
+            value: <service-name>
+            action: upsert
+
+    exporters:
+      otlp:
+        endpoint: ingest.<region>.signoz.cloud:443
+        headers:
+          signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+        tls:
+          insecure: false
+
+    service:
+      pipelines:
+        traces:
+          receivers: [gitlab]
+          processors: [resource]
+          exporters: [otlp]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-otel-collector
+  namespace: signoz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab-otel-collector
+  template:
+    metadata:
+      labels:
+        app: gitlab-otel-collector
+    spec:
+      containers:
+        - name: collector
+          image: otel/opentelemetry-collector-contrib:0.123.0
+          command: ["/otelcol-contrib", "--config=/etc/otel/config.yaml"]
+          ports:
+            - containerPort: 19418
+          envFrom:
+            - secretRef:
+                name: gitlab-otel-secrets
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otel
+      volumes:
+        - name: config
+          configMap:
+            name: gitlab-otel-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab-otel-webhook
+  namespace: signoz
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 19418
+  selector:
+    app: gitlab-otel-collector
+```
+
+```bash
+kubectl apply -f gitlab-otel-collector.yaml
+```
+
+If your cluster is not publicly reachable, port-forward to expose the webhook endpoint:
+
+```bash
+kubectl port-forward svc/gitlab-otel-webhook -n signoz 19418:80
+```
+
+</TabItem>
+</Tabs>
+
+### Step 3. Create a GitLab webhook
+
+In your GitLab project, go to **Settings → Webhooks** and add a webhook:
+
+- **URL**: `https://<collector-host>:19418/events`
+
+<Admonition type="warning">
+  Use HTTPS in production. GitLab sends the secret token in plain text over HTTP — anyone who can intercept the request can spoof pipeline events.
+</Admonition>
+
+- **Secret token**: the same value as `GITLAB_WEBHOOK_SECRET`
+- **Trigger**: enable **Pipeline events** only
+
+Click **Add webhook**. Use **Test → Pipeline events** to confirm the collector receives the request.
+
+- `<collector-host>`: The hostname or IP where your OTel Collector is reachable from GitLab. If port-forwarding on Kubernetes, use `localhost`.
+
+## Validate
+
+Trigger a pipeline run in GitLab. Once the pipeline completes, open the **Traces** tab in SigNoz. Each pipeline appears as a root span with its jobs as child spans.
+
+Click a **Trace ID** to open the [span detail view](https://signoz.io/docs/userguide/span-details/) and inspect per-job durations and statuses.
+
+<Figure
+  src="/img/docs/cicd/gitlab/sample-traces.webp"
+  caption="GitLab Pipeline - Sample Traces"
+  alt="GitLab Pipeline - Sample Traces"
+/>
+
+<Figure
+  src="/img/docs/cicd/gitlab/sample-trace-details.webp"
+  caption="GitLab Pipeline - Sample Trace Details"
+  alt="GitLab Pipeline - Sample Trace Details"
+/>
+
+## Limitations
+
+- **Traces only** — no metrics or logs.
+- **Pipeline events only** — the receiver processes `X-Gitlab-Event: Pipeline Hook` webhooks only. `Job Hook` events are rejected by the receiver.
+- **No child or multi-project pipelines** — parent-child pipeline relationships are not preserved; each pipeline produces a separate independent trace.
+- **No manual instrumentation correlation** — trace IDs are derived from the pipeline's `finished_at` timestamp, available only after completion. Application-level spans cannot be correlated with pipeline spans.
+- **Alpha stability** — the receiver is in alpha. Expect possible breaking changes to config schema or behavior in future `otelcol-contrib` releases.
+
+## Next Steps
+
+- [Set up trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) to get notified on pipeline failures or duration regressions.
+- [Explore the Traces view](https://signoz.io/docs/product-features/trace-explorer/) to filter and analyze pipeline runs.
+- [CI/CD Monitoring overview](https://signoz.io/docs/cicd/overview/) for other supported integrations.
+
+## Get Help
+
+<GetHelp />

@@ -3581,6 +3581,18 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'GitLab',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/gitlab/gitlab-traces',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
         type: 'doc',
         route: '/docs/cicd/argocd/argocd-metrics',
         label: 'ArgoCD',
