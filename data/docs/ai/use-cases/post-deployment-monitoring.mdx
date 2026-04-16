@@ -128,7 +128,7 @@ Starting from a post-deployment health check, the investigation revealed:
 
 1. **Performance regressions**: Three endpoints show significant p99 latency degradation, with `GET /api/recommendations` being the most concerning due to the magnitude.
 2. **A new error appeared**: `TypeError: Cannot read property 'price' of undefined` that didn't exist before deployment.
-3. **Error rate increased**: Error rate increased from pre to psot deployment, with the newly introduced error accounting for the majority. 
+3. **Error rate increased**: Error rate increased from pre to post deployment, with the newly introduced error accounting for the majority. 
 4. **Affected operations**: The error primarily impacts product detail pages and shopping cart.
 
 You now have clear evidence that the deployment introduced both performance and functional regressions. With this data, you can decide whether to rollback the deployment or proceed forward, and you know exactly which endpoints and error types to investigate.
@@ -152,7 +152,7 @@ During this investigation, the MCP server called these tools:
 | Step | MCP Tool | What It Did |
 |------|----------|-------------|
 | 1 | `signoz_get_service_top_operations` | Retrieved the list of top operations for the frontend service to identify which endpoints to compare |
-| 1 | `signoz_aggregate_traces` | Computed p99 latency, error rates, and request counts for each operation in the 30-minute window before deployment (9:30 AM - 10:00 AM PST) |
+| 1 | `signoz_aggregate_traces` | Computed p99 latency, error rates, and request counts for each operation in the 30-minute window before and after deployment |
 | 2 | `signoz_search_traces` | Retrieved traces with exceptions from the frontend service in the before-deployment window |
 | 2 | `signoz_aggregate_traces` | Grouped and counted error types to identify new patterns |
 | 3 | `signoz_search_traces` | Filtered traces to only those containing the new TypeError message |
@@ -167,8 +167,3 @@ During this investigation, the MCP server called these tools:
 
 
 <GetHelp />
-
-
-
-
-
