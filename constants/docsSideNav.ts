@@ -1565,7 +1565,7 @@ const docsSideNav = [
             label: 'Types of Log Processors',
             type: 'category',
             isExpanded: false,
-            route: '/docs/logs-pipelines/processor-types',
+            route: '/docs/category/guides',
             items: [
               { type: 'doc', route: '/docs/logs-pipelines/guides/json', label: 'Parse JSON Logs' },
               {
