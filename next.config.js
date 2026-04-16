@@ -98,6 +98,14 @@ module.exports = () => {
           source: '/(.*)',
           headers: securityHeaders,
         },
+        // Static markdown files for AI agents
+        {
+          source: '/api/docs-markdown/:path*.md',
+          headers: [
+            { key: 'Content-Type', value: 'text/markdown; charset=utf-8' },
+            { key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' },
+          ],
+        },
       ]
     },
     async redirects() {

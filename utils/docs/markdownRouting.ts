@@ -17,7 +17,9 @@ export const shouldRewriteDocsToMarkdown = (
 
 export const buildDocsMarkdownRewritePath = (pathname: string): string => {
   const docsSlug = normalizeDocsSlugFromPathname(pathname)
-  return docsSlug ? `/api/docs-markdown/${docsSlug}` : '/api/docs-markdown'
+  // Rewrite to static .md files in public/api/docs-markdown/
+  // Root path (introduction) maps to index.md
+  return docsSlug ? `/api/docs-markdown/${docsSlug}.md` : '/api/docs-markdown/index.md'
 }
 
 export const resolveDocsMarkdownSlug = (segments?: string[]): string => {
