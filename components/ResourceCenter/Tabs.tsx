@@ -31,7 +31,7 @@ function TabLink({
 export default function Tabs({ activeTab }) {
   return (
     <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
-      <div className="container h-fit h-full overflow-x-auto">
+      <div className="container h-fit overflow-x-auto">
         <ul
           className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-signoz_vanilla-400 sm:gap-6"
           id="default-tab"
