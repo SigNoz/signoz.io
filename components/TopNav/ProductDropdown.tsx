@@ -7,13 +7,12 @@ import Link from 'next/link'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
 import TrackingLink from '@/components/TrackingLink'
-import { productDropdownItems, comparisonItems } from './constants'
-
-const POPOVER_CONTENT_CLASS =
-  "z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform before:absolute before:-top-[4px] before:left-0 before:right-0 before:h-[4px] before:content-[''] data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
-
-const SECTION_HEADING_CLASS =
-  'text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100'
+import {
+  productDropdownItems,
+  comparisonItems,
+  POPOVER_CONTENT_CLASS,
+  SECTION_HEADING_CLASS,
+} from './constants'
 
 export default function ProductDropdown() {
   const [isOpen, setIsOpen] = useState(false)
@@ -77,11 +76,7 @@ function ProductModulesSection({ onClose }: { onClose: () => void }) {
             onClick={onClose}
             prefetch={false}
           >
-            {typeof item.icon === 'string' && item.icon !== null ? (
-              <Image className="shrink-0" src={item.icon} alt={item.name} width={20} height={20} />
-            ) : (
-              <div className="h-5 w-5 shrink-0">{item.icon}</div>
-            )}
+            {item.icon}
             <div className="min-w-0">
               <div className="flex flex-row items-center gap-1">
                 <span className="text-sm">{item.name}</span>{' '}

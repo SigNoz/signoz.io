@@ -28,7 +28,7 @@ function TabLink({
   )
 }
 
-export default function Tabs({ activeTab }) {
+export default function Tabs({ activeTab }: { activeTab: string }) {
   return (
     <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
       <div className="container h-fit overflow-x-auto">

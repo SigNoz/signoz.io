@@ -90,7 +90,9 @@ export default function TopNav() {
             </TrackingLink>
 
             {!isLoginRoute && (
-              <div className={`flex items-center gap-x-6 ${visibility.showProduct ? 'ml-6' : ''}`}>
+              <div
+                className={`hidden items-center gap-x-6 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+              >
                 {visibility.showProduct && <ProductDropdown />}
                 {visibility.showWhySignoz && (
                   <TrackingLink
@@ -184,20 +186,18 @@ export default function TopNav() {
 
             {isLoginRoute && <LoginActions />}
 
-            {visibility.showHamburger && (
-              <button
-                type="button"
-                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                <span className="sr-only">Open main menu</span>
-                {mobileMenuOpen ? (
-                  <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
-                ) : (
-                  <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
-                )}
-              </button>
-            )}
+            <button
+              type="button"
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1280px]:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <span className="sr-only">Open main menu</span>
+              {mobileMenuOpen ? (
+                <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
           </div>
         </nav>
 
