@@ -1,4 +1,5 @@
 // Docs collection utilities - updated for custom content pipeline
+import { readContentJson, readContentJsonSync } from './contentLoader'
 
 export interface DocMeta {
   title: string
@@ -13,6 +14,21 @@ export interface DocMeta {
   readingTime: { minutes: number; words: number; text: string }
   draft?: boolean
   sidebar_label?: string
+  date?: string
+  lastmod?: string
+}
+
+export interface TocItem {
+  url: string
+  depth: number
+  value: string
+}
+
+export interface StructuredData {
+  '@type'?: string
+  '@context'?: string
+  mainEntityOfPage?: { '@type'?: string; '@id'?: string }
+  url?: string
   [key: string]: unknown
 }
 
@@ -26,20 +42,40 @@ export interface Doc extends DocMeta {
     directory: string
     name: string
   }
+  toc: TocItem[]
+  structuredData?: StructuredData
+  hide_table_of_contents?: boolean
 }
 
-let docsMetaPromise: Promise<DocMeta[]> | null = null
+// Production-only cache (dev mode always reads fresh)
+let docsMetaCache: DocMeta[] | null = null
 
 /**
  * Load lightweight doc metadata for listings/search.
  */
 export async function getAllDocsMeta(): Promise<DocMeta[]> {
-  if (!docsMetaPromise) {
-    docsMetaPromise = import('../../.content/Doc/meta.json').then(
-      (module) => module.default as DocMeta[]
-    )
+  if (process.env.NODE_ENV === 'production' && docsMetaCache) {
+    return docsMetaCache
   }
-  return docsMetaPromise
+  const data = await readContentJson<DocMeta[]>('Doc/meta.json')
+  if (process.env.NODE_ENV === 'production') {
+    docsMetaCache = data
+  }
+  return data
+}
+
+/**
+ * Sync version for use in synchronous contexts.
+ */
+export function getAllDocsMetaSync(): DocMeta[] {
+  if (process.env.NODE_ENV === 'production' && docsMetaCache) {
+    return docsMetaCache
+  }
+  const data = readContentJsonSync<DocMeta[]>('Doc/meta.json')
+  if (process.env.NODE_ENV === 'production') {
+    docsMetaCache = data
+  }
+  return data
 }
 
 /**
@@ -50,8 +86,7 @@ export async function getAllDocs(): Promise<Doc[]> {
   const docs = await Promise.all(
     meta.map(async (m) => {
       try {
-        const mod = await import(`../../.content/Doc/${m.slug}.json`)
-        return mod.default as Doc
+        return await readContentJson<Doc>(`Doc/${m.slug}.json`)
       } catch {
         console.warn(`Failed to load doc: ${m.slug}`)
         return null
@@ -66,8 +101,7 @@ export async function getAllDocs(): Promise<Doc[]> {
  */
 export async function getDocBySlug(slug: string): Promise<Doc | undefined> {
   try {
-    const mod = await import(`../../.content/Doc/${slug}.json`)
-    return mod.default as Doc
+    return await readContentJson<Doc>(`Doc/${slug}.json`)
   } catch {
     return undefined
   }

@@ -1,6 +1,6 @@
 import 'css/prism.css'
 
-import { coreContent } from 'pliny/utils/contentlayer'
+import { coreContent } from '@/utils/contentlayer/contentUtils'
 import { getAllDocsMeta, getDocBySlug } from '@/utils/contentlayer/docsCollection'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
@@ -45,8 +45,8 @@ export async function generateMetadata({
 export const generateStaticParams = async () => {
   const allDocs = await getAllDocsMeta()
   const paths = allDocs
-    .filter((p) => p.slug !== 'introduction')
-    .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
+    .filter((p) => p.slug && p.slug !== '' && p.slug !== '/') // Filter out introduction page (empty/root slug)
+    .map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
 }

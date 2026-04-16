@@ -1,8 +1,8 @@
 'use client'
 
 import { ReactNode, useEffect, useRef } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Doc } from 'contentlayer/generated'
+import { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { Doc } from '@/utils/contentlayer/docsCollection'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'

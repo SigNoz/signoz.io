@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
-import type { CoreContent } from 'pliny/utils/contentlayer'
-import type { Authors, Blog, Guide } from 'contentlayer/generated'
+import type { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { Blog } from '@/utils/contentlayer/blogCollection'
+import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
+import type { Guide } from '@/utils/contentlayer/guideCollection'
 import type { Comparison } from '../../types/transformedContent'
 import type { MDXContent } from '@/utils/strapi'
 

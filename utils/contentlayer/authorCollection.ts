@@ -2,6 +2,7 @@
 // Authors are stored directly in constants/authors.json, not processed by content pipeline
 
 export interface Author {
+  slug: string
   name: string
   title?: string
   url?: string
@@ -19,9 +20,13 @@ let authorsPromise: Promise<Author[]> | null = null
 
 export async function getAllAuthors(): Promise<Author[]> {
   if (!authorsPromise) {
-    authorsPromise = import('../../constants/authors.json').then(
-      (module) => module.default as Author[]
-    )
+    authorsPromise = import('../../constants/authors.json').then((module) => {
+      const authorsDict = module.default as Record<string, Omit<Author, 'slug'>>
+      return Object.entries(authorsDict).map(([slug, author]) => ({
+        slug,
+        ...author,
+      }))
+    })
   }
   return authorsPromise
 }

@@ -9,7 +9,7 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import Button from '@/components/ui/Button'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from '@/utils/contentlayer/contentUtils'
 import type { Blog } from '@/utils/contentlayer/blogCollection'
 import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
@@ -145,8 +145,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   // Generate structured data
   const structuredData = generateStructuredData('faqs', content)
 
-  // Prepare content for FAQLayout
-  const mainContent: CoreContent<Blog> = {
+  // Prepare content for FAQLayout (using type assertion since FAQ content has extra properties)
+  const mainContent = {
     title: content.title,
     date: content.date,
     lastmod: content.updatedAt,
@@ -168,7 +168,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         slug: faq.attributes?.path,
         date: faq.attributes?.date,
       })) || [],
-  }
+  } as unknown as CoreContent<Blog>
 
   // Prepare author details from the authors relation
   const authorDetails: CoreContent<Authors>[] = content.authors?.data?.map((author) => ({

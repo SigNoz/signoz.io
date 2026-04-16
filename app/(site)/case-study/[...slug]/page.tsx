@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from '@/utils/contentlayer/contentUtils'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 export const revalidate = 86400 // 1 day - must be static for Next.js
 export const dynamicParams = true

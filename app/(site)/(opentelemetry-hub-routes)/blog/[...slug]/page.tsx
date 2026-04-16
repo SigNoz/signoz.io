@@ -2,7 +2,7 @@ import 'css/prism.css'
 
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
+import { sortPosts, coreContent, allCoreContent } from '@/utils/contentlayer/contentUtils'
 import type { Blog } from '@/utils/contentlayer/blogCollection'
 import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
@@ -42,10 +42,9 @@ export async function generateMetadata({
   }
 
   const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthorEntries.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
+  const authorDetails = authorList
+    .map((author) => allAuthorEntries.find((p) => p.slug === author))
+    .filter((author): author is Authors => author !== undefined)
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
@@ -109,10 +108,9 @@ export default async function Page(props: { params: { slug: string[] } }) {
 
   const post = (await getBlogBySlug(slug)) as Blog
   const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = authors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
+  const authorDetails = authorList
+    .map((author) => authors.find((p) => p.slug === author))
+    .filter((author): author is Authors => author !== undefined)
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 

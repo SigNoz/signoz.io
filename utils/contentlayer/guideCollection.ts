@@ -1,8 +1,10 @@
 // Guide collection utilities - updated for custom content pipeline
+import { readContentJson, readContentJsonSync } from './contentLoader'
 
 export interface GuideMeta {
   title: string
   date: string
+  lastmod?: string
   tags: string[]
   slug: string
   path: string
@@ -13,6 +15,19 @@ export interface GuideMeta {
   authors?: string[]
   readingTime: { minutes: number; words: number; text: string }
   draft?: boolean
+}
+
+export interface TocItem {
+  url: string
+  depth: number
+  value: string
+}
+
+export interface StructuredData {
+  '@type'?: string
+  '@context'?: string
+  mainEntityOfPage?: { '@type'?: string; '@id'?: string }
+  url?: string
   [key: string]: unknown
 }
 
@@ -26,20 +41,40 @@ export interface Guide extends GuideMeta {
     directory: string
     name: string
   }
+  toc: TocItem[]
+  structuredData?: StructuredData
+  layout?: string
 }
 
-let guidesMetaPromise: Promise<GuideMeta[]> | null = null
+// Production-only cache (dev mode always reads fresh)
+let guidesMetaCache: GuideMeta[] | null = null
 
 /**
  * Load lightweight guide metadata for listings.
  */
 export async function getAllGuidesMeta(): Promise<GuideMeta[]> {
-  if (!guidesMetaPromise) {
-    guidesMetaPromise = import('../../.content/Guide/meta.json').then(
-      (module) => module.default as GuideMeta[]
-    )
+  if (process.env.NODE_ENV === 'production' && guidesMetaCache) {
+    return guidesMetaCache
   }
-  return guidesMetaPromise
+  const data = await readContentJson<GuideMeta[]>('Guide/meta.json')
+  if (process.env.NODE_ENV === 'production') {
+    guidesMetaCache = data
+  }
+  return data
+}
+
+/**
+ * Sync version for use in synchronous contexts.
+ */
+export function getAllGuidesMetaSync(): GuideMeta[] {
+  if (process.env.NODE_ENV === 'production' && guidesMetaCache) {
+    return guidesMetaCache
+  }
+  const data = readContentJsonSync<GuideMeta[]>('Guide/meta.json')
+  if (process.env.NODE_ENV === 'production') {
+    guidesMetaCache = data
+  }
+  return data
 }
 
 /**
@@ -50,8 +85,7 @@ export async function getAllGuides(): Promise<Guide[]> {
   const guides = await Promise.all(
     meta.map(async (m) => {
       try {
-        const mod = await import(`../../.content/Guide/${m.slug}.json`)
-        return mod.default as Guide
+        return await readContentJson<Guide>(`Guide/${m.slug}.json`)
       } catch {
         console.warn(`Failed to load guide: ${m.slug}`)
         return null
@@ -66,8 +100,7 @@ export async function getAllGuides(): Promise<Guide[]> {
  */
 export async function getGuideBySlug(slug: string): Promise<Guide | undefined> {
   try {
-    const mod = await import(`../../.content/Guide/${slug}.json`)
-    return mod.default as Guide
+    return await readContentJson<Guide>(`Guide/${slug}.json`)
   } catch {
     return undefined
   }

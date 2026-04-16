@@ -1,6 +1,20 @@
-// lib/content-pipeline/types-generator.ts
 import type { Collection, CollectionsMap } from './define'
-import { z, ZodType, ZodOptional, ZodDefault, ZodArray } from 'zod'
+import {
+  ZodType,
+  ZodOptional,
+  ZodDefault,
+  ZodArray,
+  ZodString,
+  ZodNumber,
+  ZodBoolean,
+  ZodDate,
+  ZodObject,
+  ZodAny,
+  ZodNullable,
+  ZodEnum,
+  ZodUnion,
+  ZodLiteral,
+} from 'zod'
 
 function zodToTsType(schema: ZodType): string {
   if (schema instanceof ZodOptional) {
@@ -9,90 +23,65 @@ function zodToTsType(schema: ZodType): string {
   if (schema instanceof ZodDefault) {
     return zodToTsType(schema._def.innerType)
   }
+  if (schema instanceof ZodNullable) {
+    return `${zodToTsType(schema.unwrap())} | null`
+  }
   if (schema instanceof ZodArray) {
     return `${zodToTsType(schema.element)}[]`
   }
-
-  const typeName = schema._def.typeName
-
-  switch (typeName) {
-    case 'ZodString':
-      return 'string'
-    case 'ZodNumber':
-      return 'number'
-    case 'ZodBoolean':
-      return 'boolean'
-    case 'ZodDate':
-      return 'Date'
-    case 'ZodObject':
-      return 'object'
-    case 'ZodAny':
-      return 'any'
-    default:
-      return 'unknown'
+  if (schema instanceof ZodString) {
+    return 'string'
   }
+  if (schema instanceof ZodNumber) {
+    return 'number'
+  }
+  if (schema instanceof ZodBoolean) {
+    return 'boolean'
+  }
+  if (schema instanceof ZodDate) {
+    return 'Date'
+  }
+  if (schema instanceof ZodLiteral) {
+    const val = schema._def.value
+    return typeof val === 'string' ? `'${val}'` : String(val)
+  }
+  if (schema instanceof ZodEnum) {
+    return schema._def.values.map((v: string) => `'${v}'`).join(' | ')
+  }
+  if (schema instanceof ZodUnion) {
+    return schema._def.options.map((o: ZodType) => zodToTsType(o)).join(' | ')
+  }
+  if (schema instanceof ZodObject) {
+    const shape = schema.shape
+    const fields = Object.entries(shape)
+      .map(([key, val]) => {
+        const optional = isOptional(val as ZodType) ? '?' : ''
+        return `${key}${optional}: ${zodToTsType(val as ZodType)}`
+      })
+      .join('; ')
+    return `{ ${fields} }`
+  }
+  if (schema instanceof ZodAny) {
+    return 'any'
+  }
+  return 'unknown'
 }
 
 function isOptional(schema: ZodType): boolean {
   return schema instanceof ZodOptional
 }
 
-function generateInterfaceFields(collection: Collection): string {
-  const shape = collection.schema.shape
+function generateFieldsFromSchema(schema: ZodObject<any>): string {
+  const shape = schema.shape
   const lines: string[] = []
 
-  for (const [key, schema] of Object.entries(shape)) {
-    const optional = isOptional(schema as ZodType) ? '?' : ''
-    const tsType = zodToTsType(schema as ZodType)
+  for (const [key, fieldSchema] of Object.entries(shape)) {
+    const optional = isOptional(fieldSchema as ZodType) ? '?' : ''
+    const tsType = zodToTsType(fieldSchema as ZodType)
     lines.push(`  ${key}${optional}: ${tsType}`)
   }
 
   return lines.join('\n')
-}
-
-function inferComputedFieldTypes(collection: Collection): string {
-  // Call computedFields with a dummy doc to infer types
-  const dummyDoc = {
-    _file: { path: '', directory: '', name: '' },
-    body: { raw: '', code: '' },
-  }
-  const dummyHelpers = {
-    readingTime: () => ({ minutes: 0, words: 0, text: '' }),
-    extractToc: () => [],
-  }
-
-  try {
-    const computed = collection.computedFields(dummyDoc as any, dummyHelpers)
-    const lines: string[] = []
-
-    for (const [key, value] of Object.entries(computed)) {
-      const tsType = inferValueType(value)
-      lines.push(`  ${key}: ${tsType}`)
-    }
-
-    return lines.join('\n')
-  } catch {
-    return ''
-  }
-}
-
-function inferValueType(value: unknown): string {
-  if (value === null) return 'null'
-  if (value === undefined) return 'undefined'
-  if (typeof value === 'string') return 'string'
-  if (typeof value === 'number') return 'number'
-  if (typeof value === 'boolean') return 'boolean'
-  if (Array.isArray(value)) {
-    if (value.length === 0) return 'unknown[]'
-    return `${inferValueType(value[0])}[]`
-  }
-  if (typeof value === 'object') {
-    const entries = Object.entries(value)
-    if (entries.length === 0) return 'object'
-    const fields = entries.map(([k, v]) => `${k}: ${inferValueType(v)}`).join('; ')
-    return `{ ${fields} }`
-  }
-  return 'unknown'
 }
 
 export function generateTypes(collections: CollectionsMap): string {
@@ -102,13 +91,13 @@ export function generateTypes(collections: CollectionsMap): string {
   for (const [name, collection] of Object.entries(collections)) {
     names.push(name)
 
-    const fields = generateInterfaceFields(collection)
-    const computed = inferComputedFieldTypes(collection)
+    const schemaFields = generateFieldsFromSchema(collection.schema)
+    const computedFields = generateFieldsFromSchema(collection.computedFieldsSchema)
 
     interfaces.push(`
 export interface ${name} {
-${fields}
-${computed}
+${schemaFields}
+${computedFields}
   body: {
     raw: string
     code: string

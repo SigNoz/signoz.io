@@ -1,4 +1,4 @@
-import { coreContent } from 'pliny/utils/contentlayer.js'
+import { coreContent } from '@/utils/contentlayer/contentUtils'
 import DocContent from '@/components/DocContent/DocContent'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import type { Doc } from '@/utils/contentlayer/docsCollection'

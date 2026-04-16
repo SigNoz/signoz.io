@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from '@/utils/contentlayer/contentUtils'
 import PageTitle from '@/components/PageTitle'
 import React from 'react'
 import { MDXContent } from '@/utils/strapi'

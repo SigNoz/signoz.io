@@ -1,11 +1,9 @@
-// lib/content-pipeline/schema.ts
 import { defineCollection, z, CollectionsMap } from './define'
 import siteMetadata from '../../data/siteMetadata'
 import blogRelatedArticles from '../../constants/blogRelatedArticles.json'
 import comparisonsRelatedArticles from '../../constants/comparisonsRelatedArticles.json'
 import guidesRelatedArticles from '../../constants/guidesRelatedArticles.json'
 
-// Helpers for structured data
 function getImageUrl(doc: any): string {
   const raw = doc.image || siteMetadata.socialBanner
   return raw.startsWith('http') ? raw : `${siteMetadata.siteUrl}${raw}`
@@ -60,7 +58,25 @@ function getRelatedArticles(
   return blog?.relatedArticles || []
 }
 
-// Collections
+// Shared computed field schemas
+const readingTimeSchema = z.object({
+  minutes: z.number(),
+  words: z.number(),
+  text: z.string(),
+})
+
+const tocItemSchema = z.object({
+  value: z.string(),
+  url: z.string(),
+  depth: z.number(),
+})
+
+const relatedArticleSchema = z.object({
+  title: z.string(),
+  publishedOn: z.string(),
+  url: z.string(),
+})
+
 export const Blog = defineCollection({
   name: 'Blog',
   directory: 'data/blog',
@@ -89,7 +105,16 @@ export const Blog = defineCollection({
     cta_text: z.string().optional(),
     is_newsroom: z.boolean().optional(),
   },
-  computedFields: (doc, helpers) => {
+  computedFields: {
+    slug: z.string(),
+    path: z.string(),
+    filePath: z.string(),
+    readingTime: readingTimeSchema,
+    toc: z.array(tocItemSchema),
+    relatedArticles: z.array(relatedArticleSchema),
+    structuredData: z.any(),
+  },
+  computedFieldsFn: (doc, helpers) => {
     const slug = doc.slug || doc._file.path.replace(/^blog\//, '').replace(/\.mdx$/, '')
     return {
       slug,
@@ -127,14 +152,25 @@ export const Doc = defineCollection({
     sidebar_label: z.string().optional(),
     hide_table_of_contents: z.boolean().optional(),
   },
-  computedFields: (doc, helpers) => {
+  computedFields: {
+    slug: z.string(),
+    path: z.string(),
+    filePath: z.string(),
+    readingTime: readingTimeSchema,
+    toc: z.array(tocItemSchema),
+    docTags: z.array(z.string()),
+    structuredData: z.any(),
+  },
+  computedFieldsFn: (doc, helpers) => {
     const DEFAULT_DOC_TAGS = ['SigNoz Cloud', 'Self-Host']
     const docTags =
       doc.tags && doc.tags.length > 0
         ? doc.tags.filter((t): t is string => typeof t === 'string' && t.trim() !== '')
         : DEFAULT_DOC_TAGS
 
-    const slug = doc.slug || doc._file.path.replace(/\.mdx$/, '')
+    // Normalize slug: strip leading/trailing slashes from frontmatter slugs
+    const rawSlug = doc.slug || doc._file.path.replace(/\.mdx$/, '')
+    const slug = rawSlug.replace(/^\/+|\/+$/g, '')
     return {
       slug,
       path: `docs/${slug}`,
@@ -175,7 +211,16 @@ export const Guide = defineCollection({
     canonicalUrl: z.string().optional(),
     keywords: z.array(z.string()).optional(),
   },
-  computedFields: (doc, helpers) => {
+  computedFields: {
+    slug: z.string(),
+    path: z.string(),
+    filePath: z.string(),
+    readingTime: readingTimeSchema,
+    toc: z.array(tocItemSchema),
+    relatedArticles: z.array(relatedArticleSchema),
+    structuredData: z.any(),
+  },
+  computedFieldsFn: (doc, helpers) => {
     const slug = doc.slug || doc._file.path.replace(/\.mdx$/, '')
     return {
       slug,
@@ -213,7 +258,16 @@ export const Comparisons = defineCollection({
     canonicalUrl: z.string().optional(),
     keywords: z.array(z.string()).optional(),
   },
-  computedFields: (doc, helpers) => {
+  computedFields: {
+    slug: z.string(),
+    path: z.string(),
+    filePath: z.string(),
+    readingTime: readingTimeSchema,
+    toc: z.array(tocItemSchema),
+    relatedArticles: z.array(relatedArticleSchema),
+    structuredData: z.any(),
+  },
+  computedFieldsFn: (doc, helpers) => {
     const slug = doc.slug || doc._file.path.replace(/\.mdx$/, '')
     return {
       slug,
@@ -251,7 +305,15 @@ export const OpenTelemetry = defineCollection({
     canonicalUrl: z.string().optional(),
     keywords: z.array(z.string()).optional(),
   },
-  computedFields: (doc, helpers) => {
+  computedFields: {
+    slug: z.string(),
+    path: z.string(),
+    filePath: z.string(),
+    readingTime: readingTimeSchema,
+    toc: z.array(tocItemSchema),
+    structuredData: z.any(),
+  },
+  computedFieldsFn: (doc, helpers) => {
     const slug = doc.slug || doc._file.path.replace(/\.mdx$/, '')
     return {
       slug,
@@ -290,7 +352,15 @@ export const Newsroom = defineCollection({
     cta_title: z.string().optional(),
     cta_text: z.string().optional(),
   },
-  computedFields: (doc, helpers) => {
+  computedFields: {
+    slug: z.string(),
+    path: z.string(),
+    filePath: z.string(),
+    readingTime: readingTimeSchema,
+    toc: z.array(tocItemSchema),
+    structuredData: z.any(),
+  },
+  computedFieldsFn: (doc, helpers) => {
     const slug = doc.slug || doc._file.path.replace(/\.mdx$/, '')
     return {
       slug,
@@ -303,7 +373,6 @@ export const Newsroom = defineCollection({
   },
 })
 
-// Export all collections
 export const collections: CollectionsMap = {
   Blog,
   Doc,

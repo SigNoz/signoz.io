@@ -1,4 +1,3 @@
-// lib/content-pipeline/define.ts
 import { z, ZodObject, ZodRawShape } from 'zod'
 
 export { z }
@@ -28,36 +27,39 @@ export interface TocItem {
   depth: number
 }
 
-export type ComputedFieldsFn<T> = (
-  doc: T & DocumentBase,
-  helpers: CollectionHelpers
-) => Record<string, unknown>
+export type ComputedFieldsFn<T, R> = (doc: T & DocumentBase, helpers: CollectionHelpers) => R
 
-export interface CollectionConfig<T extends ZodRawShape> {
+export interface CollectionConfig<T extends ZodRawShape, C extends ZodRawShape> {
   name: string
   directory: string
   include: string
   fields: T
-  computedFields: ComputedFieldsFn<z.infer<ZodObject<T>>>
+  computedFields: C
+  computedFieldsFn: ComputedFieldsFn<z.infer<ZodObject<T>>, z.infer<ZodObject<C>>>
 }
 
-export interface Collection<T extends ZodRawShape = ZodRawShape> {
+export interface Collection<
+  T extends ZodRawShape = ZodRawShape,
+  C extends ZodRawShape = ZodRawShape,
+> {
   name: string
   directory: string
   include: string
   schema: ZodObject<T>
-  computedFields: ComputedFieldsFn<z.infer<ZodObject<T>>>
+  computedFieldsSchema: ZodObject<C>
+  computedFieldsFn: ComputedFieldsFn<z.infer<ZodObject<T>>, z.infer<ZodObject<C>>>
 }
 
-export function defineCollection<T extends ZodRawShape>(
-  config: CollectionConfig<T>
-): Collection<T> {
+export function defineCollection<T extends ZodRawShape, C extends ZodRawShape>(
+  config: CollectionConfig<T, C>
+): Collection<T, C> {
   return {
     name: config.name,
     directory: config.directory,
     include: config.include,
     schema: z.object(config.fields),
-    computedFields: config.computedFields,
+    computedFieldsSchema: z.object(config.computedFields),
+    computedFieldsFn: config.computedFieldsFn,
   }
 }
 

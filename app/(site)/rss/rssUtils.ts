@@ -1,4 +1,4 @@
-import { sortPosts } from 'pliny/utils/contentlayer.js'
+import { sortPosts } from '@/utils/contentlayer/contentUtils'
 import { getAllBlogs } from '@/utils/contentlayer/blogCollection'
 import { getAllDocs } from '@/utils/contentlayer/docsCollection'
 import { getAllGuides } from '@/utils/contentlayer/guideCollection'

@@ -2,7 +2,7 @@ import 'css/prism.css'
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
-import { coreContent } from 'pliny/utils/contentlayer'
+import { coreContent } from '@/utils/contentlayer/contentUtils'
 import { getAllAuthors } from '@/utils/contentlayer/authorCollection'
 import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
@@ -42,10 +42,9 @@ export async function generateMetadata({
   }
 
   const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
+  const authorDetails = authorList
+    .map((author) => allAuthors.find((p) => p.slug === author))
+    .filter((author): author is Authors => author !== undefined)
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.date).toISOString()
@@ -100,10 +99,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const currentRoute = `/comparisons/${slug}`
 
   const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
+  const authorDetails = authorList
+    .map((author) => allAuthors.find((p) => p.slug === author))
+    .filter((author): author is Authors => author !== undefined)
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
