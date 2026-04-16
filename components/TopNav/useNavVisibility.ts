@@ -30,7 +30,6 @@ export function useNavVisibility() {
     showDocs: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.DOCS,
     showWhySignoz: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.WHY_SIGNOZ,
     showProduct: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRODUCT,
-    showHamburger: windowWidth !== null && windowWidth < NAV_BREAKPOINTS.FULL_NAV,
     showSignInGetStarted: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.SIGN_IN,
   }
 }
