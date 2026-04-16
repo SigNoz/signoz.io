@@ -5,9 +5,8 @@ import { getResourceCenterBlogs } from '../content'
 
 export const metadata = buildListingMetadata('Blog')
 
-const blogPosts = getResourceCenterBlogs()
-
 export default async function BlogHome() {
+  const blogPosts = await getResourceCenterBlogs()
   return (
     <ListingPageLayout>
       <Blogs posts={blogPosts} />

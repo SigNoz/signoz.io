@@ -1,9 +1,7 @@
 import { fetchMDXContentByPath, MDXContentApiResponse } from '@/utils/strapi'
 import { notFound } from 'next/navigation'
 import FAQsClient from './FAQsClient'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
-
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day - must be static for Next.js
 export const dynamicParams = true
 export const dynamic = 'force-static'
 

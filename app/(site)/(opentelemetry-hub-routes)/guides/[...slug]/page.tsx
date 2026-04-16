@@ -2,7 +2,6 @@ import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allGuides, allAuthors } from 'contentlayer/generated'
 import type { Authors, Guide } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
@@ -13,6 +12,8 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import React from 'react'
+import { getAllAuthors } from '@/utils/contentlayer/authorCollection'
+import { getAllGuides, getGuideBySlug } from '@/utils/contentlayer/guideCollection'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
 import { safeJsonLdStringify } from '@/utils/structuredData'
@@ -32,7 +33,7 @@ export async function generateMetadata({
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allGuides.find((p) => p.slug === slug)
+  const [post, allAuthorEntries] = await Promise.all([getGuideBySlug(slug), getAllAuthors()])
 
   if (!post) {
     return notFound()
@@ -40,7 +41,7 @@ export async function generateMetadata({
 
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
+    const authorResults = allAuthorEntries.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
 
@@ -82,7 +83,8 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allGuides.map((p) => ({ slug: p.slug?.split('/') }))
+  const guides = (await getAllGuides()) as Guide[]
+  const paths = guides.map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
 }
@@ -90,19 +92,20 @@ export const generateStaticParams = async () => {
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/guides/${slug}`
+  const [guides, authors] = await Promise.all([getAllGuides(), getAllAuthors()])
   const isGrafanaOrPrometheusArticle =
     slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
   // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allGuides))
+  const sortedCoreContents = allCoreContent(sortPosts(guides as Guide[]))
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
   if (postIndex === -1) {
     return notFound()
   }
 
-  const post = allGuides.find((p) => p.slug === slug) as Guide
+  const post = (await getGuideBySlug(slug)) as Guide
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
+    const authorResults = authors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
   const mainContent = coreContent(post)

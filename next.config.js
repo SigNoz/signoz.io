@@ -80,6 +80,18 @@ module.exports = () => {
         hostname: domain,
       })),
     },
+    experimental: {
+      // Exclude heavy contentlayer data from function bundles
+      // These routes are force-static, so they don't need the data at runtime
+      outputFileTracingExcludes: {
+        '/blog': ['.contentlayer/generated/**/*'],
+        '/blog/page/*': ['.contentlayer/generated/**/*'],
+        '/guides': ['.contentlayer/generated/**/*'],
+        '/guides/page/*': ['.contentlayer/generated/**/*'],
+        '/tags/*': ['.contentlayer/generated/**/*'],
+        '/opentelemetry': ['.contentlayer/generated/**/*'],
+      },
+    },
     async headers() {
       return [
         {

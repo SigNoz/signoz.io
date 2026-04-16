@@ -2,12 +2,11 @@ import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { buildListingMetadata } from '../metadata'
 
 export const metadata = buildListingMetadata('Comparisons')
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day - must be static for Next.js
 export const dynamic = 'force-static'
 
 export default async function ComparisonsHome() {

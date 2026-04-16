@@ -202,10 +202,12 @@ const TrustedByTeams = ({ page }) => {
         <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
           {COMPANIES.map((company, idx) => (
             <div key={`${idx}-${company.imageDesc}`} className="flex items-center justify-center">
-              <company.Logo
-                className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-                role="img"
-                aria-label={company.imageDesc}
+              <Image
+                src={company.src}
+                alt={company.imageDesc}
+                width={120}
+                height={40}
+                className="h-[40px] w-[100px] object-contain md:h-[40px] md:w-[120px]"
               />
             </div>
           ))}

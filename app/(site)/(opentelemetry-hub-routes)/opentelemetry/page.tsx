@@ -3,28 +3,24 @@ import { notFound } from 'next/navigation'
 
 import siteMetadata from '@/data/siteMetadata'
 import { safeJsonLdStringify } from '@/utils/structuredData'
-import { allBlogs } from 'contentlayer/generated'
+import { getBlogBySlug } from '@/utils/contentlayer/blogCollection'
 
-import BlogArticlePage, {
-  dynamic as blogDynamic,
-  dynamicParams as blogDynamicParams,
-  generateMetadata as generateBlogMetadata,
-} from '../blog/[...slug]/page'
+import BlogArticlePage, { generateMetadata as generateBlogMetadata } from '../blog/[...slug]/page'
 
 const LANDING_PARAMS = { slug: ['what-is-opentelemetry'] }
 const LANDING_CANONICAL = `${siteMetadata.siteUrl}/opentelemetry/`
 const BlogArticlePageWithOptions = BlogArticlePage as any
 
-export const dynamic = blogDynamic
-export const dynamicParams = blogDynamicParams
+export const dynamic = 'force-static'
+export const dynamicParams = false
 
 export async function generateMetadata(): Promise<Metadata | undefined> {
   return generateBlogMetadata({ params: LANDING_PARAMS })
 }
 
-export default function OpenTelemetryLanding() {
+export default async function OpenTelemetryLanding() {
   const slug = LANDING_PARAMS.slug.join('/')
-  const post = allBlogs.find((entry) => entry.slug === slug)
+  const post = await getBlogBySlug(slug)
 
   if (!post) {
     return notFound()

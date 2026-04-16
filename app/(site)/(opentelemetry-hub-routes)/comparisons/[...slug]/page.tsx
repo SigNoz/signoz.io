@@ -16,7 +16,6 @@ import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const defaultLayout = 'ComparisonsLayout'
@@ -25,7 +24,7 @@ const layouts = {
   ComparisonsLayout,
 }
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day - must be static for Next.js
 export const dynamicParams = true
 export const dynamic = 'force-static'
 

@@ -7,21 +7,21 @@ import {
 } from '../../../content'
 import { buildListingMetadata, buildStaticPaginationParams } from '../../../metadata'
 import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } from '@/utils/strapi'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
-
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day - must be static for Next.js
 export const dynamic = 'force-static'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return buildListingMetadata('OpenTelemetry', params.page)
 }
 
-const contentLayerArticles = getOpenTelemetryHubContentLayerArticles()
-
-export const generateStaticParams = async () =>
-  buildStaticPaginationParams(contentLayerArticles.length)
+export const generateStaticParams = async () => {
+  const articles = await getOpenTelemetryHubContentLayerArticles()
+  return buildStaticPaginationParams(articles.length)
+}
 
 export default async function Page({ params }: { params: { page: string } }) {
+  const contentLayerArticles = await getOpenTelemetryHubContentLayerArticles()
+
   // Fetch CMS opentelemetries articles
   let cmsArticles: ResourceCenterCard[] = []
   try {
