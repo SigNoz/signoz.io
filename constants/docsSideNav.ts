@@ -937,11 +937,11 @@ const docsSideNav = [
     label: 'APM & Distributed Tracing',
     type: 'category',
     isExpanded: false,
-    route: '/docs/apm-and-distributed-tracing/overview',
+    route: '/docs/instrumentation/overview',
     items: [
       {
         type: 'doc',
-        route: '/docs/apm-and-distributed-tracing/overview',
+        route: '/docs/instrumentation/overview',
         label: 'Overview',
       },
       {
@@ -1192,16 +1192,16 @@ const docsSideNav = [
         label: 'Traces',
         type: 'category',
         isExpanded: false,
-        route: '/docs/apm-and-distributed-tracing/trace-explorer',
+        route: '/docs/userguide/traces',
         items: [
           {
             type: 'doc',
-            route: '/docs/apm-and-distributed-tracing/trace-explorer',
+            route: '/docs/userguide/traces',
             label: 'Trace Explorer',
           },
           {
             type: 'doc',
-            route: '/docs/apm-and-distributed-tracing/trace-details',
+            route: '/docs/userguide/span-details',
             label: 'Trace Details',
           },
           {
