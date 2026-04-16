@@ -1951,9 +1951,9 @@ const docsSideNav = [
             label: 'Panels',
             type: 'category',
             isExpanded: false,
-            route: '/docs/dashboards/panels/overview',
+            route: '/docs/userguide/manage-panels',
             items: [
-              { type: 'doc', route: '/docs/dashboards/panels/overview', label: 'Overview' },
+              { type: 'doc', route: '/docs/userguide/manage-panels', label: 'Overview' },
               {
                 label: 'Panel Types',
                 type: 'category',
