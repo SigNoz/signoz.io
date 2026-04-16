@@ -1,7 +1,7 @@
 ---
 title: Introducing SigNoz Foundry - One Config, One Command Deployment
 slug: introducing-signoz-foundry
-date: 2026-04-10
+date: 2026-04-16
 tags: [Product]
 authors: [dhruv_ahuja]
 description: Deploy and manage self-hosted SigNoz across multiple platforms using a single config and a single command.
@@ -71,7 +71,7 @@ This is already seamless enough, but if you are setting up SigNoz from scratch, 
 
 <Figure src="/img/blog/2026/04/introducing-signoz-foundry-docker.webp" alt="Foundry speeds up the SigNoz setup process even for relatively painless Docker setups." caption="Foundry speeds up the SigNoz setup process even for relatively painless Docker setups." />
 
-As you can see above, you install Foundry once on your system, create a casting manifest, and point the `foundryctl cast` command to this manifest. The `casting.yaml` manifest referenced in the image contains [less than 10 lines of code](https://github.com/SigNoz/foundry/tree/main/docs/examples/docker/compose#configuration).
+As you can see above, you install Foundry once on your system, create a casting manifest, and point the `foundryctl cast` command to this manifest. The `casting.yaml` manifest referenced in the image contains <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/docker/compose#configuration" rel="noopener noreferrer nofollow" target="_blank">less than 10 lines of code</a>.
 
 That is the ease of setup you can expect from Foundry for all your deployments, regardless of the target environment.
 
@@ -81,11 +81,39 @@ As discussed initially, the setup process for SigNoz on Linux stands out as part
 
 **It was the proverbial Goliath that we needed to defeat, to consider Foundry a success.**
 
-Earlier, you would have to follow each step in our [comprehensive installation guide](https://signoz.io/docs/install/linux/) (which amounts to [13kb of Markdown](https://github.com/SigNoz/signoz.io/blob/main/data/docs/install/linux.mdx) if you’re feeding it to an LLM), while you dealt with any roadblocks that came along the way.
+Earlier, you would have to follow each step in our [comprehensive installation guide](https://signoz.io/docs/install/linux/) (which amounts to <a href="https://github.com/SigNoz/signoz.io/blob/main/data/docs/install/linux.mdx" rel="noopener noreferrer nofollow" target="_blank">13KB of Markdown</a> if you’re feeding it to an LLM), while you dealt with any roadblocks that came along the way.
 
 With Foundry, all you need is a minimal configuration and one command to get a locally running SigNoz instance with the correct permissions, restart policies, and ClickHouse migrations all taken care of!
 
-Compared to the massive requirement of 9 config files, the Foundry-equivalent is as minimal as it gets:
+Compared to the massive requirement of 9 config files, Foundry's equivalent at just <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/systemd/binary#configuration" rel="noopener noreferrer nofollow" target="_blank">7 lines of YAML</a> is as minimal as it gets.
+
+## Try It, Cast It, Tell Us
+
+Foundry is a big step towards simplifying open-source observability for our users. It has laid the groundwork that will enable us not only to ship features and bug fixes faster but also distribute SigNoz across more platforms confidently.
+
+To start using Foundry right away, you can download the latest release and run your first deployment. 
+
+**1. Install foundryctl**
+
+Download a release from [GitHub Releases](https://github.com/signoz/foundry/releases), or use the command line:
+
+```bash
+# Linux
+curl -L "https://github.com/SigNoz/foundry/releases/latest/download/foundry_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz" -o foundry.tar.gz
+tar -xzf foundry.tar.gz
+
+# macOS
+curl -L "https://github.com/SigNoz/foundry/releases/latest/download/foundry_darwin_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/arm64/arm64/g').tar.gz" -o foundry.tar.gz
+tar -xzf foundry.tar.gz
+
+# Windows
+
+$ARCH = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "amd64" }
+Invoke-WebRequest -Uri "https://github.com/SigNoz/foundry/releases/latest/download/foundry_windows_${ARCH}.tar.gz" -OutFile foundry.tar.gz -UseBasicParsing
+tar -xzf foundry.tar.gz
+```
+
+**2. Create a casting.yaml**
 
 ```yaml:casting.yaml
 apiVersion: v1alpha1
@@ -93,18 +121,20 @@ metadata:
   name: signoz
 spec:
   deployment:
-    flavor: binary
-    mode: systemd
+    mode: docker
+    flavor: compose
 ```
 
-## Try It, Cast It, Tell Us
+**3. Deploy**
 
-Foundry is a big step towards simplifying open-source observability for our users. It has laid the groundwork that will enable us not only to ship features and bug fixes faster but also to distribute SigNoz across more platforms confidently.
+```bash
+foundryctl cast -f casting.yaml
+```
 
 With that said, we are actively developing Foundry and want to hear how it fits into your infrastructure and workflows. Learning from real user experiences will help us build features that matter to you, our users.
 
 **Your feedback is the roadmap.**
 
-Try out the latest release at the [Foundry GitHub repo](https://github.com/SigNoz/foundry). If something does not work for your specific use case, feel free to start a discussion or open an issue. We will actively work with you to gather feedback, and help resolve your issues.
+If something does not work for your specific use case, feel free to start a discussion or open an issue on the [Foundry GitHub repo](https://github.com/SigNoz/foundry). We will actively work with you to gather feedback, and help resolve your issues.
 
-You can also join our [slack community](https://signoz.io/slack/) to interact with SigNoz maintainers and other community users.
+You can also join our [slack community](https://signoz.io/slack/) to interact with SigNoz maintainers and other community users.
