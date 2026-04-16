@@ -221,6 +221,16 @@ service:
   Both paths are listed so the config works across distributions. The receiver skips paths that don't exist on the host.
 </Admonition>
 
+<Admonition type="warning">
+  This config sends every line in syslog to SigNoz, including entries from unrelated processes. On a busy host, this increases ingestion costs. Add a filter operator to keep only Docker lines:
+
+  ```yaml
+  operators:
+    - type: filter
+      expr: 'not (body matches "dockerd")'
+  ```
+</Admonition>
+
 ### Step 2. Restart the Collector with syslog access
 
 Stop the existing Collector and restart it with `/var/log` mounted read-only:
@@ -262,9 +272,9 @@ For forwarding syslog over the network instead of tailing files directly, see [C
 
 ## Next Steps
 
-- **Parse log fields**: Docker daemon logs written by `dockerd` use structured log format (`level=info msg="..."`). Use the [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) to extract fields like `level`, `msg`, and `container` into attributes for filtering and alerting.
-- **Set up alerts**: Once logs are flowing, create [log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to notify on errors or anomalies.
-- **Explore dashboards**: Correlate log activity with container metrics using the [Docker metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/docker-containers/).
+- **Parse log fields**: `dockerd` writes structured log format (`level=info msg="..."`). Use the [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) to extract fields like `level`, `msg`, and `container` into attributes for filtering and alerting.
+- **Set up alerts**: Create [log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to catch errors from `dockerd`.
+- **Explore dashboards**: View container metrics alongside these logs with the [Docker metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/docker-container-metrics/).
 
 <details>
 <ToggleHeading>
