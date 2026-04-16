@@ -6,7 +6,6 @@ import { collections } from './schema'
 export interface ContentPipelineOptions {
   contentDir?: string
   outputDir?: string
-  cacheDir?: string
 }
 
 let buildPromise: Promise<void> | null = null
@@ -16,7 +15,6 @@ export function withContentPipeline(
   options: ContentPipelineOptions = {}
 ): NextConfig {
   const outputDir = options.outputDir || '.content'
-  const cacheDir = options.cacheDir || '.content-cache'
 
   return {
     ...nextConfig,
@@ -36,7 +34,6 @@ export function withContentPipeline(
         config.plugins.push(
           new ContentPipelineWebpackPlugin({
             outputDir,
-            cacheDir,
             watch: dev,
           })
         )
@@ -52,9 +49,9 @@ export function withContentPipeline(
 }
 
 class ContentPipelineWebpackPlugin {
-  private options: { outputDir: string; cacheDir: string; watch: boolean }
+  private options: { outputDir: string; watch: boolean }
 
-  constructor(options: { outputDir: string; cacheDir: string; watch: boolean }) {
+  constructor(options: { outputDir: string; watch: boolean }) {
     this.options = options
   }
 
@@ -88,7 +85,6 @@ class ContentPipelineWebpackPlugin {
 
     await buildAllCollections(collections, {
       outputDir: path.resolve(this.options.outputDir),
-      cacheDir: path.resolve(this.options.cacheDir),
     })
 
     const elapsed = ((Date.now() - start) / 1000).toFixed(2)

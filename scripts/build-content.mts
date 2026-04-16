@@ -62,7 +62,6 @@ async function main() {
 
   await buildAllCollections(collections, {
     outputDir,
-    cacheDir: path.resolve('.content-cache'),
   })
 
   // Generate tag-data.json from blog metadata

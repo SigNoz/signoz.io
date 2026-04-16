@@ -55,7 +55,6 @@ export function createHelpers(): CollectionHelpers {
 
 interface BuildOptions {
   outputDir: string
-  cacheDir: string
   prettyPrint?: boolean
 }
 
@@ -74,12 +73,13 @@ async function buildCollectionInternal<T>(
   collection: Collection,
   options: InternalBuildOptions
 ): Promise<BuildResult<T>> {
-  const { outputDir, cacheDir, prettyPrint = false, pool, ioLimit } = options
+  const { outputDir, prettyPrint = false, pool, ioLimit } = options
   const helpers = createHelpers()
 
-  const collectionCacheDir = path.join(cacheDir, collection.name)
+  // Use outputDir as both cache and output (unified directory)
+  const collectionDir = path.join(outputDir, collection.name)
   const schemaHash = JSON.stringify(collection.schema.shape)
-  const cache = new ContentCache(collectionCacheDir)
+  const cache = new ContentCache(collectionDir)
   await cache.init(schemaHash)
 
   const pattern = path.join(collection.directory, collection.include)
@@ -101,7 +101,7 @@ async function buildCollectionInternal<T>(
     const hash = fileHashes.get(filePath)!
     const cached = await cache.get<T>(filePath, hash)
     if (cached) {
-      cachedDocs.push({ filePath, doc: cached })
+      cachedDocs.push({ filePath, doc: cached.data })
     } else {
       toCompile.push({ filePath, hash })
     }
@@ -138,9 +138,19 @@ async function buildCollectionInternal<T>(
       const computed = collection.computedFieldsFn(docWithFields as any, helpers)
       const doc = { ...docWithFields, ...computed } as T
 
-      await cache.set(filePath, hash, doc)
+      // Get slug for the cache filename
+      const slug = (doc as any).slug || (doc as any)._file.name.replace(/\.mdx$/, '')
+      const slugPath = slug.replace(/\/$/, '') || 'index'
+
+      await cache.set(filePath, hash, slugPath, doc)
       compiledDocs.push({ filePath, doc })
     }
+  }
+
+  // Cleanup orphaned files (e.g., from renamed slugs)
+  const orphansRemoved = await cache.cleanupOrphans()
+  if (orphansRemoved > 0) {
+    console.log(`    -> removed ${orphansRemoved} orphaned files`)
   }
 
   await cache.flush()
@@ -151,33 +161,13 @@ async function buildCollectionInternal<T>(
   for (const { filePath, doc } of compiledDocs) fileToDoc.set(filePath, doc)
   const documents = files.map((f) => fileToDoc.get(f)!)
 
-  const collectionOutputDir = path.join(outputDir, collection.name)
-  await fs.mkdir(collectionOutputDir, { recursive: true })
-
+  // Write meta.json (lightweight metadata for listings)
   const jsonSpace = prettyPrint ? 2 : undefined
-
-  const dirsNeeded = new Set<string>()
-  const writeOps: Array<{ path: string; content: string }> = []
-
-  for (const doc of documents) {
-    const slug = (doc as any).slug || (doc as any)._file.name.replace(/\.mdx$/, '')
-    const slugPath = slug.replace(/\/$/, '') || 'index'
-    const outputPath = path.join(collectionOutputDir, `${slugPath}.json`)
-    dirsNeeded.add(path.dirname(outputPath))
-    writeOps.push({ path: outputPath, content: JSON.stringify(doc, null, jsonSpace) })
-  }
-
-  await Promise.all([...dirsNeeded].map((dir) => fs.mkdir(dir, { recursive: true })))
-  await Promise.all(writeOps.map(({ path: p, content }) => ioLimit(() => fs.writeFile(p, content))))
-
   const meta = documents.map((doc: any) => {
     const { body, ...rest } = doc
     return rest
   })
-  await fs.writeFile(
-    path.join(collectionOutputDir, 'meta.json'),
-    JSON.stringify(meta, null, jsonSpace)
-  )
+  await fs.writeFile(path.join(collectionDir, 'meta.json'), JSON.stringify(meta, null, jsonSpace))
 
   console.log(`    -> ${cachedDocs.length} cached, ${compiledDocs.length} compiled`)
 

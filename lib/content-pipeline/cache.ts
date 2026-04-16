@@ -4,7 +4,7 @@ import { createHash } from 'crypto'
 
 interface CacheManifest {
   schemaHash: string
-  entries: Record<string, { hash: string; cachedFile: string }>
+  entries: Record<string, { hash: string; slug: string }>
 }
 
 export class ContentCache {
@@ -12,10 +12,11 @@ export class ContentCache {
   private manifest: CacheManifest | null = null
   private manifestPath: string
   private dirty = false
+  private currentSlugs: Set<string> = new Set()
 
   constructor(cacheDir: string) {
     this.cacheDir = cacheDir
-    this.manifestPath = path.join(cacheDir, 'manifest.json')
+    this.manifestPath = path.join(cacheDir, '.manifest.json')
   }
 
   async init(schemaHash: string): Promise<void> {
@@ -34,6 +35,7 @@ export class ContentCache {
       this.manifest = { schemaHash, entries: {} }
     }
     this.dirty = false
+    this.currentSlugs.clear()
   }
 
   private ensureInitialized(): void {
@@ -42,32 +44,34 @@ export class ContentCache {
     }
   }
 
-  async get<T>(filePath: string, hash: string): Promise<T | undefined> {
+  async get<T>(filePath: string, hash: string): Promise<{ data: T; slug: string } | undefined> {
     this.ensureInitialized()
 
     const entry = this.manifest!.entries[filePath]
     if (!entry || entry.hash !== hash) return undefined
 
     try {
-      const cachedPath = path.join(this.cacheDir, entry.cachedFile)
+      const cachedPath = path.join(this.cacheDir, `${entry.slug}.json`)
       const data = await fs.readFile(cachedPath, 'utf-8')
-      return JSON.parse(data)
+      this.currentSlugs.add(entry.slug)
+      return { data: JSON.parse(data), slug: entry.slug }
     } catch {
       return undefined
     }
   }
 
-  async set<T>(filePath: string, hash: string, data: T): Promise<void> {
+  async set<T>(filePath: string, hash: string, slug: string, data: T): Promise<void> {
     this.ensureInitialized()
 
-    const cachedFile = `${hash.slice(0, 16)}.json`
-    const cachedPath = path.join(this.cacheDir, cachedFile)
+    const cachedPath = path.join(this.cacheDir, `${slug}.json`)
 
+    // Ensure parent directories exist for nested slugs (e.g., "docs/intro")
+    await fs.mkdir(path.dirname(cachedPath), { recursive: true })
     await fs.writeFile(cachedPath, JSON.stringify(data))
 
-    this.manifest!.entries[filePath] = { hash, cachedFile }
+    this.manifest!.entries[filePath] = { hash, slug }
+    this.currentSlugs.add(slug)
     this.dirty = true
-    // Don't save manifest on every set - use flush() at the end
   }
 
   async hashFile(filePath: string): Promise<string> {
@@ -94,10 +98,65 @@ export class ContentCache {
 
   async clear(): Promise<void> {
     try {
-      const files = await fs.readdir(this.cacheDir)
-      await Promise.all(files.map((f) => fs.unlink(path.join(this.cacheDir, f)).catch(() => {})))
+      await this.deleteJsonFilesRecursive(this.cacheDir)
     } catch {}
     this.dirty = false
+  }
+
+  private async deleteJsonFilesRecursive(dir: string): Promise<void> {
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true })
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name)
+        if (entry.isDirectory()) {
+          await this.deleteJsonFilesRecursive(fullPath)
+          // Try to remove empty directory
+          try {
+            await fs.rmdir(fullPath)
+          } catch {}
+        } else if (entry.name.endsWith('.json') && entry.name !== '.manifest.json') {
+          await fs.unlink(fullPath).catch(() => {})
+        }
+      }
+    } catch {}
+  }
+
+  async cleanupOrphans(): Promise<number> {
+    let removed = 0
+    try {
+      removed = await this.cleanupOrphansRecursive(this.cacheDir)
+    } catch {}
+    return removed
+  }
+
+  private async cleanupOrphansRecursive(dir: string): Promise<number> {
+    let removed = 0
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true })
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name)
+        if (entry.isDirectory()) {
+          removed += await this.cleanupOrphansRecursive(fullPath)
+          // Try to remove empty directory
+          try {
+            await fs.rmdir(fullPath)
+          } catch {}
+        } else if (
+          entry.name.endsWith('.json') &&
+          entry.name !== '.manifest.json' &&
+          entry.name !== 'meta.json'
+        ) {
+          // Get slug from path relative to cacheDir
+          const relativePath = path.relative(this.cacheDir, fullPath)
+          const slug = relativePath.replace(/\.json$/, '')
+          if (!this.currentSlugs.has(slug)) {
+            await fs.unlink(fullPath).catch(() => {})
+            removed++
+          }
+        }
+      }
+    } catch {}
+    return removed
   }
 
   async flush(): Promise<void> {
