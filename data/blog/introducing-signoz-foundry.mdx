@@ -60,6 +60,17 @@ A common problem when managing self-hosted deployments is dealing with version d
 
 <Figure src="/img/blog/2026/04/introducing-signoz-foundry-version-pinning.webp" alt="Foundry pins dependency versions to a tested, stable default version for guaranteed compatibility." caption="Foundry pins dependency versions to a tested, stable default version for guaranteed compatibility." />
 
+### Beyond Manifests: Infrastructure-as-Code Integration
+
+As engineering teams scale, they often rely on Infrastructure-as-Code (IaC) to manage their cloud infrastructure. Fiddling with YAML manifests becomes unfeasible at scale, and manually translating a complex observability stack into these native cloud primitives is a massive headache.
+
+Foundry solves this by generating ready-to-apply IaC modules for self-managed cloud deployments.
+
+Consider the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/ecs/ec2/terraform" target="_blank" rel="noopener noreferrer nofollow">AWS ECS target</a>: instead of forcing you to figure out how to translate our architecture into AWS concepts, Foundry generates the complete Terraform configuration.<br />
+It automatically wires up the ECS Task Definitions, configures AWS Cloud Map for service discovery, provisions the ECS Services, and handles S3-based configuration management. 
+
+You simply include ECS infrastructure details such as the Task Roles, VPC and Subnet IDs in your `casting.yaml`, and point Foundry to that manifest. Foundry will then generate the complete Terraform configuration for your ECS cluster, and run the entire pipeline end-to-end.
+
 ## Before and After: Running Foundry Locally
 
 ### The Docker Setup Experience
