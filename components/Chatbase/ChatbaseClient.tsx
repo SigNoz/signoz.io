@@ -23,6 +23,7 @@ export default function ChatbaseClient({
   userHash,
   disableFloatingMessages,
 }: ChatbaseClientProps) {
+  const SCRIPT_LOAD_DELAY_MS = 3000
   const isInitialized = useRef(false)
   const [shouldLoadScript, setShouldLoadScript] = useState(false)
   const pathname = usePathname()
@@ -110,8 +111,63 @@ export default function ChatbaseClient({
       })
     }
 
-    // Trigger script loading
-    setShouldLoadScript(true)
+    let isCancelled = false
+    let delayTimerId: number | null = null
+    let idleCallbackId: number | null = null
+
+    const cleanupReadyListener = (() => {
+      const markPageReady = () => {
+        if (isCancelled) {
+          return
+        }
+
+        if ('requestIdleCallback' in window) {
+          idleCallbackId = window.requestIdleCallback(() => {
+            if (!isCancelled) {
+              setShouldLoadScript(true)
+            }
+          })
+
+          return
+        }
+
+        setShouldLoadScript(true)
+      }
+
+      const triggerAfterDelay = () => {
+        delayTimerId = window.setTimeout(markPageReady, SCRIPT_LOAD_DELAY_MS)
+      }
+
+      if (document.readyState === 'complete') {
+        triggerAfterDelay()
+        return null
+      }
+
+      const handleWindowLoad = () => {
+        window.removeEventListener('load', handleWindowLoad)
+        triggerAfterDelay()
+      }
+
+      window.addEventListener('load', handleWindowLoad, { once: true })
+
+      return () => {
+        window.removeEventListener('load', handleWindowLoad)
+      }
+    })()
+
+    return () => {
+      isCancelled = true
+
+      cleanupReadyListener?.()
+
+      if (delayTimerId !== null) {
+        window.clearTimeout(delayTimerId)
+      }
+
+      if (idleCallbackId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleCallbackId)
+      }
+    }
   }, [disableFloatingMessages, isOnboarding, userId, userHash])
 
   const handleScriptLoad = () => {

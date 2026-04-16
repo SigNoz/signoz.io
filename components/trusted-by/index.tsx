@@ -1,33 +1,33 @@
-import React from 'react'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import NetAppLogo from '@/public/img/users/netapp.svg'
-import SamsungLogo from '@/public/img/users/samsung.svg'
-import ComcastLogo from '@/public/img/users/comcast.svg'
-import FreoLogo from '@/public/img/users/freo.svg'
-import FormanceLogo from '@/public/svgs/icons/formance.svg'
-import SalesforceLogo from '@/public/img/users/salesforce.svg'
-import RattleLogo from '@/public/img/users/rattle.svg'
-import SarvamLogo from '@/public/svgs/icons/sarvam.svg'
-import GoKiwiLogo from '@/public/img/users/gokiwi.svg'
-import LovartLogo from '@/public/svgs/icons/lovart.svg'
-import BlaxelLogo from '@/public/svgs/icons/blaxel.svg'
-import ShapedLogo from '@/public/img/case_study/logos/shaped-logo.svg'
+import netappUrl from '@/public/img/users/netapp.svg?url'
+import samsungUrl from '@/public/img/users/samsung.svg?url'
+import comcastUrl from '@/public/img/users/comcast.svg?url'
+import freoUrl from '@/public/img/users/freo.svg?url'
+import formanceUrl from '@/public/svgs/icons/formance.svg?url'
+import salesforceUrl from '@/public/img/users/salesforce.svg?url'
+import rattleUrl from '@/public/img/users/rattle.svg?url'
+import sarvamUrl from '@/public/svgs/icons/sarvam.svg?url'
+import gokiwiUrl from '@/public/img/users/gokiwi.svg?url'
+import lovartUrl from '@/public/svgs/icons/lovart.svg?url'
+import blaxelUrl from '@/public/svgs/icons/blaxel.svg?url'
+import shapedUrl from '@/public/img/case_study/logos/shaped-logo.svg?url'
 import { cn } from '../../app/lib/utils'
 
 export const COMPANIES = [
-  { Logo: NetAppLogo, imageDesc: 'netapp logo' },
-  { Logo: SamsungLogo, imageDesc: 'samsung logo' },
-  { Logo: ComcastLogo, imageDesc: 'comcast logo' },
-  { Logo: FreoLogo, imageDesc: 'freo logo' },
-  { Logo: FormanceLogo, imageDesc: 'formance logo' },
-  { Logo: SalesforceLogo, imageDesc: 'salesforce logo' },
-  { Logo: RattleLogo, imageDesc: 'rattle logo' },
-  { Logo: SarvamLogo, imageDesc: 'sarvam logo' },
-  { Logo: GoKiwiLogo, imageDesc: 'GoKiwi logo' },
-  { Logo: LovartLogo, imageDesc: 'lovart logo' },
-  { Logo: BlaxelLogo, imageDesc: 'blaxel logo' },
-  { Logo: ShapedLogo, imageDesc: 'shaped logo' },
+  { src: netappUrl, imageDesc: 'netapp logo' },
+  { src: samsungUrl, imageDesc: 'samsung logo' },
+  { src: comcastUrl, imageDesc: 'comcast logo' },
+  { src: freoUrl, imageDesc: 'freo logo' },
+  { src: formanceUrl, imageDesc: 'formance logo' },
+  { src: salesforceUrl, imageDesc: 'salesforce logo' },
+  { src: rattleUrl, imageDesc: 'rattle logo' },
+  { src: sarvamUrl, imageDesc: 'sarvam logo' },
+  { src: gokiwiUrl, imageDesc: 'GoKiwi logo' },
+  { src: lovartUrl, imageDesc: 'lovart logo' },
+  { src: blaxelUrl, imageDesc: 'blaxel logo' },
+  { src: shapedUrl, imageDesc: 'shaped logo' },
 ]
 
 export const TrustedByTeams = ({ page, className }: { page?: string; className?: string }) => {
@@ -48,11 +48,13 @@ export const TrustedByTeams = ({ page, className }: { page?: string; className?:
         </div>
         <div className="mb-12 mt-12 grid grid-cols-2 place-items-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8 sm:gap-y-14 md:mt-0 lg:grid-cols-6">
           {COMPANIES.map((company, idx) => (
-            <company.Logo
+            <Image
               key={`${idx}-${company.imageDesc}`}
-              className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-              role="img"
-              aria-label={company.imageDesc}
+              src={company.src}
+              alt={company.imageDesc}
+              width={120}
+              height={40}
+              className="h-[40px] w-[100px] object-contain md:h-[40px] md:w-[120px]"
             />
           ))}
         </div>

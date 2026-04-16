@@ -9,6 +9,30 @@ import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import { AnonymousIdSetter } from './anonymous-id-setter'
 
+const inlineManifestHref = `data:application/manifest+json,${encodeURIComponent(
+  JSON.stringify({
+    name: 'SigNoz',
+    short_name: 'SigNoz',
+    icons: [
+      {
+        src: '/static/favicons/web-app-manifest-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/static/favicons/web-app-manifest-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+    ],
+    theme_color: '#ffffff',
+    background_color: '#ffffff',
+    display: 'standalone',
+  })
+)}`
+
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -80,7 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="shortcut icon" href="/static/favicons/favicon.ico" />
       <link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-touch-icon.png" />
       <meta name="apple-mobile-web-app-title" content="SigNoz" />
-      <link rel="manifest" href="/static/favicons/site.webmanifest" />
+      <link rel="manifest" href={inlineManifestHref} />
       <link rel="mask-icon" href="/static/favicons/safari-pinned-tab.svg" color="#5bbad5" />
       <meta name="msapplication-TileColor" content="#000000" />
       <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff" />
