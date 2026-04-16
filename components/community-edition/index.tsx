@@ -1,12 +1,12 @@
 import React from 'react'
-import styles from './styles.module.css'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import SignozIcon from '@/public/svgs/icons/signoz.svg'
 
 export const CommunityEdition = () => {
   return (
     <section>
-      <div className="section-container flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400  px-4 py-10 md:px-10">
+      <div className="section-container !md:px-10 flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !px-10 !py-10">
         <div className="flex w-full flex-col">
           <div>
             <p className="text-2xl font-semibold text-signoz_vanilla-100">
@@ -19,8 +19,8 @@ export const CommunityEdition = () => {
             </p>
           </div>
           <div className="h-[72px] md:h-[250px]">
-            <TrackingLink 
-              href="https://github.com/SigNoz/signoz" 
+            <TrackingLink
+              href="https://github.com/SigNoz/signoz"
               clickType="External Click"
               clickName="GitHub Repository Link"
               clickText="SigNoz / signoz"
@@ -28,7 +28,7 @@ export const CommunityEdition = () => {
             >
               <div className="group flex items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
                 <div className="mr-4">
-                  <img src="/svgs/icons/signoz.svg" alt="SigNoz Icon" />
+                  <SignozIcon className="h-10 w-10" role="img" aria-label="SigNoz Icon" />
                 </div>
                 <div className="flex-grow">
                   <div className="text-sm font-medium text-signoz_vanilla-400 sm:text-base">

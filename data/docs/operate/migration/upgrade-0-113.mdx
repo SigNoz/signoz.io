@@ -1,0 +1,732 @@
+---
+date: 2026-02-25
+id: upgrade-0-113
+tags: [Self-Host]
+title: Upgrade to v0.113.0
+description: Upgrade guide for SigNoz v0.113.0 which deprecates the standalone signoz-schema-migrator image in favor of built-in migration commands in signoz-otel-collector.
+doc_type: howto
+---
+
+
+<KeyPointCallout title="What changed in v0.113" defaultCollapsed={false}>
+With v0.113, the standalone `signoz-schema-migrator` image is replaced by migration commands built directly into `signoz-otel-collector`. This removes the startup ordering issues caused by the old Job-based approach.
+
+Key changes:
+
+- `signoz-telemetrystore-migrator` replaces both `schema-migrator-sync` and `schema-migrator-async` services
+- Migration commands (`migrate bootstrap`, `migrate sync up`, `migrate async up`) are now subcommands of `signoz-otel-collector`
+- `otel-collector` now runs `migrate sync check` against ClickHouse at startup instead of waiting on a Job
+
+For more details, see [SigNoz/charts#828](https://github.com/SigNoz/charts/issues/828).
+</KeyPointCallout>
+
+## Upgrade Instructions
+
+<Tabs>
+<TabItem value="docker" label="Docker" default>
+
+<Tabs>
+<TabItem value="docker-standalone" label="Standalone" default>
+
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart.
+</KeyPointCallout>
+
+If you have customized your `docker-compose.yaml`, make the following changes before upgrading:
+
+### Step 1: Remove signoz-schema-migrator and references
+
+Remove the `schema-migrator-sync` and `schema-migrator-async` service definitions from your `docker-compose.yaml`:
+
+```diff:docker-compose.yaml
+-  schema-migrator-sync:
+-    ...
+-  schema-migrator-async:
+-    ...
+```
+
+Also remove the `schema-migrator-sync` reference from the `x-db-depend` anchor:
+
+```diff:docker-compose.yaml
+x-db-depend: &db-depend
+  !!merge <<: *common
+  depends_on:
+    clickhouse:
+      condition: service_healthy
+-    schema-migrator-sync:
+-      condition: service_completed_successfully
+```
+
+### Step 2: Add the new signoz-telemetrystore-migrator service
+
+Add the following `signoz-telemetrystore-migrator` service definition to your `docker-compose.yaml`. This single service replaces both `schema-migrator-sync` and `schema-migrator-async`:
+
+```yaml:docker-compose.yaml
+  signoz-telemetrystore-migrator:
+    !!merge <<: *db-depend
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.142.0}
+    container_name: signoz-telemetrystore-migrator
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    entrypoint:
+      - /bin/sh
+    command:
+    - -c
+    - |
+      /signoz-otel-collector migrate bootstrap &&
+      /signoz-otel-collector migrate sync up &&
+      /signoz-otel-collector migrate async up
+    restart: on-failure
+```
+
+### Step 3: Update signoz and otel-collector services
+
+Apply the following changes to the `signoz` service:
+
+```diff:docker-compose.yaml
+  signoz:
+    ...
+-    command:
+-      - --config=/root/config/prometheus.yml
+    volumes:
+-      - ../common/signoz/prometheus.yml:/root/config/prometheus.yml
+-      - ../common/dashboards:/root/config/dashboards
+      - sqlite:/var/lib/signoz/
+    environment:
+      ...
+-      - DASHBOARDS_PATH=/root/config/dashboards
+-      - STORAGE=clickhouse
+-      - GODEBUG=netdns=go
+-      - TELEMETRY_ENABLED=true
+-      - DEPLOYMENT_TYPE=docker-standalone-amd
+```
+
+Apply the following changes to the `otel-collector` service, it now runs `migrate sync check` as a startup guard:
+
+```diff:docker-compose.yaml
+  otel-collector:
+    !!merge <<: *db-depend
+    ...
++    entrypoint:
++    - /bin/sh
+    command:
+-      - --config=/etc/otel-collector-config.yaml
+-      - --manager-config=/etc/manager-config.yaml
+-      - --copy-path=/var/tmp/collector-config.yaml
++      - -c
++      - |
++        /signoz-otel-collector migrate sync check &&
++        /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml
+    environment:
+      ...
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
++      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+-    depends_on:
+-      schema-migrator-sync:
+-        condition: service_completed_successfully
+-      signoz:
+-        condition: service_healthy
+```
+
+### Step 4: Apply the changes
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart the stack.
+
+### Step 5: Validate migrations
+
+```bash
+docker ps -a --filter "name=signoz-telemetrystore-migrator"
+```
+
+The container should show status `Exited (0)`.
+
+</TabItem>
+<TabItem value="docker-ha" label="HA">
+
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) to pull the latest changes and restart.
+</KeyPointCallout>
+
+If you have customized your `docker-compose.ha.yaml`, make the following changes before upgrading:
+
+### Step 1: Remove signoz-schema-migrator and references
+
+Remove the `schema-migrator-sync` and `schema-migrator-async` service definitions from your `docker-compose.ha.yaml`:
+
+```diff:docker-compose.ha.yaml
+-  schema-migrator-sync:
+-    ...
+-  schema-migrator-async:
+-    ...
+```
+
+Update the `x-db-depend` anchor: remove `schema-migrator-sync` and add health checks for all ClickHouse replicas:
+
+```diff:docker-compose.ha.yaml
+x-db-depend: &db-depend
+  !!merge <<: *common
+  depends_on:
+    clickhouse:
+      condition: service_healthy
+-    schema-migrator-sync:
+-      condition: service_completed_successfully
++    clickhouse-2:
++      condition: service_healthy
++    clickhouse-3:
++      condition: service_healthy
+```
+
+### Step 2: Add the new signoz-telemetrystore-migrator service
+
+Add the following `signoz-telemetrystore-migrator` service definition to your `docker-compose.ha.yaml`. This single service replaces both `schema-migrator-sync` and `schema-migrator-async`:
+
+```yaml:docker-compose.ha.yaml
+  signoz-telemetrystore-migrator:
+    !!merge <<: *db-depend
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.142.0}
+    container_name: signoz-telemetrystore-migrator
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    entrypoint:
+      - /bin/sh
+    command:
+    - -c
+    - |
+      /signoz-otel-collector migrate bootstrap &&
+      /signoz-otel-collector migrate sync up &&
+      /signoz-otel-collector migrate async up
+    restart: on-failure
+```
+
+### Step 3: Update signoz and otel-collector services
+
+Apply the following changes to the `signoz` service:
+
+```diff:docker-compose.ha.yaml
+  signoz:
+    ...
+-    command:
+-      - --config=/root/config/prometheus.yml
+    volumes:
+-      - ../common/signoz/prometheus.yml:/root/config/prometheus.yml
+-      - ../common/dashboards:/root/config/dashboards
+      - ./clickhouse-setup/data/signoz/:/var/lib/signoz/
+    environment:
+      ...
+-      - DASHBOARDS_PATH=/root/config/dashboards
+-      - STORAGE=clickhouse
+-      - GODEBUG=netdns=go
+-      - TELEMETRY_ENABLED=true
+-      - DEPLOYMENT_TYPE=docker-standalone-amd
+```
+
+Apply the following changes to the `otel-collector` service, it now runs `migrate sync check` as a startup guard:
+
+```diff:docker-compose.ha.yaml
+  otel-collector:
+    !!merge <<: *db-depend
+    ...
++    entrypoint:
++    - /bin/sh
+    command:
+-      - --config=/etc/otel-collector-config.yaml
+-      - --manager-config=/etc/manager-config.yaml
+-      - --copy-path=/var/tmp/collector-config.yaml
++      - -c
++      - |
++        /signoz-otel-collector migrate sync check &&
++        /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml
+    environment:
+      ...
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
++      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+-    depends_on:
+-      clickhouse:
+-        condition: service_healthy
+-      schema-migrator-sync:
+-        condition: service_completed_successfully
+-      signoz:
+-        condition: service_healthy
+```
+
+### Step 4: Apply the changes
+
+Pull the latest changes and restart using your HA compose file:
+
+```bash
+cd deploy/docker
+docker compose -f docker-compose.ha.yaml pull
+docker compose -f docker-compose.ha.yaml up -d --remove-orphans
+```
+
+### Step 5: Validate migrations
+
+```bash
+docker ps -a --filter "name=signoz-telemetrystore-migrator"
+```
+
+The container should show status `Exited (0)`.
+
+</TabItem>
+</Tabs>
+</TabItem>
+<TabItem value="docker-swarm" label="Docker Swarm">
+
+<Tabs>
+<TabItem value="docker-swarm-standalone" label="Standalone" default>
+
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to pull the latest changes and restart.
+</KeyPointCallout>
+
+If you have customized your `docker-compose.yaml`, make the following changes before upgrading:
+
+### Step 1: Remove signoz-schema-migrator and references
+
+Remove the `schema-migrator` entry from the `x-db-depend` anchor:
+
+```diff:docker-compose.yaml
+x-db-depend: &db-depend
+  !!merge <<: *common
+  depends_on:
+    - clickhouse
+-    - schema-migrator
+```
+
+Remove the `schema-migrator` service definition:
+
+```diff:docker-compose.yaml
+-  schema-migrator:
+-    ...
+```
+
+### Step 2: Add the new signoz-telemetrystore-migrator service
+
+Add the following service definition. It runs bootstrap, sync, and async migrations sequentially:
+
+```yaml:docker-compose.yaml
+  signoz-telemetrystore-migrator:
+    !!merge <<: *db-depend
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.142.0}
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    entrypoint:
+      - /bin/sh
+    command:
+    - -c
+    - |
+      /signoz-otel-collector migrate bootstrap &&
+      /signoz-otel-collector migrate sync up &&
+      /signoz-otel-collector migrate async up
+```
+
+### Step 3: Update signoz and otel-collector services
+
+Apply the following changes to the `signoz` service:
+
+```diff:docker-compose.yaml
+  signoz:
+    ...
+-    command:
+-      - --config=/root/config/prometheus.yml
+-    configs:
+-      - source: signoz-prometheus-config
+-        target: /root/config/prometheus.yml
+    environment:
+      ...
+-      - DASHBOARDS_PATH=/root/config/dashboards
+-      - STORAGE=clickhouse
+-      - GODEBUG=netdns=go
+-      - TELEMETRY_ENABLED=true
+-      - DEPLOYMENT_TYPE=docker-swarm
+```
+
+Apply the following changes to the `otel-collector` service, it now runs `migrate sync check` as a startup guard:
+
+```diff:docker-compose.yaml
+  otel-collector:
+    !!merge <<: *db-depend
+    ...
++    entrypoint:
++    - /bin/sh
+    command:
+-      - --config=/etc/otel-collector-config.yaml
+-      - --manager-config=/etc/manager-config.yaml
+-      - --copy-path=/var/tmp/collector-config.yaml
++      - -c
++      - |
++        /signoz-otel-collector migrate sync check &&
++        /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml
+    environment:
+      ...
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
++      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+-    depends_on:
+-      - clickhouse
+-      - schema-migrator
+-      - signoz
+```
+
+### Step 4: Apply the changes
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to deploy the updated stack.
+
+### Step 5: Validate migrations
+
+```bash
+docker service ps signoz_signoz-telemetrystore-migrator
+```
+
+The task should show `Complete` state.
+
+</TabItem>
+<TabItem value="docker-swarm-ha" label="HA">
+
+<KeyPointCallout title="Using default Docker Compose files?" defaultCollapsed={false}>
+No manual changes are required. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to pull the latest changes and restart.
+</KeyPointCallout>
+
+If you have customized your `docker-compose.ha.yaml`, make the following changes before upgrading:
+
+### Step 1: Remove signoz-schema-migrator and references
+
+Remove the `schema-migrator` entry from the `x-db-depend` anchor:
+
+```diff:docker-compose.ha.yaml
+x-db-depend: &db-depend
+  !!merge <<: *common
+  depends_on:
+    - clickhouse
+    - clickhouse-2
+    - clickhouse-3
+-    - schema-migrator
+```
+
+Remove the `schema-migrator` service definition:
+
+```diff:docker-compose.ha.yaml
+-  schema-migrator:
+-    ...
+```
+
+### Step 2: Add the new signoz-telemetrystore-migrator service
+
+Add the following service definition. It runs bootstrap, sync, and async migrations sequentially:
+
+```yaml:docker-compose.ha.yaml
+  signoz-telemetrystore-migrator:
+    !!merge <<: *db-depend
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.142.0}
+    environment:
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
+      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
+      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+    entrypoint:
+      - /bin/sh
+    command:
+    - -c
+    - |
+      /signoz-otel-collector migrate bootstrap &&
+      /signoz-otel-collector migrate sync up &&
+      /signoz-otel-collector migrate async up
+```
+
+### Step 3: Update signoz and otel-collector services
+
+Apply the following changes to the `signoz` service:
+
+```diff:docker-compose.ha.yaml
+  signoz:
+    ...
+-    command:
+-      - --config=/root/config/prometheus.yml
+    volumes:
+-      - ../common/signoz/prometheus.yml:/root/config/prometheus.yml
+-      - ../common/dashboards:/root/config/dashboards
+      - ./clickhouse-setup/data/signoz/:/var/lib/signoz/
+    environment:
+      ...
+-      - DASHBOARDS_PATH=/root/config/dashboards
+-      - STORAGE=clickhouse
+-      - GODEBUG=netdns=go
+-      - TELEMETRY_ENABLED=true
+-      - DEPLOYMENT_TYPE=docker-swarm
+```
+
+Apply the following changes to the `otel-collector` service — it now runs `migrate sync check` as a startup guard. Replace volumes with configs:
+
+```diff:docker-compose.ha.yaml
+  otel-collector:
+    !!merge <<: *db-depend
+    ...
++    entrypoint:
++    - /bin/sh
+    command:
+-      - --config=/etc/otel-collector-config.yaml
+-      - --manager-config=/etc/manager-config.yaml
+-      - --copy-path=/var/tmp/collector-config.yaml
++      - -c
++      - |
++        /signoz-otel-collector migrate sync check &&
++        /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml
+-    volumes:
+-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+-      - ../common/signoz/otel-collector-opamp-config.yaml:/etc/manager-config.yaml
++    configs:
++      - source: otel-collector-config
++        target: /etc/otel-collector-config.yaml
++      - source: otel-manager-config
++        target: /etc/manager-config.yaml
+    environment:
+      ...
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN=tcp://clickhouse:9000
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER=cluster
++      - SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true
++      - SIGNOZ_OTEL_COLLECTOR_TIMEOUT=10m
+-    depends_on:
+-      - clickhouse
+-      - schema-migrator
+-      - signoz
+```
+
+Ensure the top-level `configs:` section includes `otel-collector-config` and `otel-manager-config` (and `clickhouse-*` if using configs for ClickHouse).
+
+### Step 4: Apply the changes
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) to deploy the updated stack.
+
+### Step 5: Validate migrations
+
+```bash
+docker service ps signoz_signoz-telemetrystore-migrator
+```
+
+The task should show `Complete` state.
+
+</TabItem>
+</Tabs>
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+<KeyPointCallout title="Using the default Helm chart?" defaultCollapsed={false}>
+No changes are required if you have no custom overrides for `schemaMigrator`. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment).
+</KeyPointCallout>
+
+If you have custom `schemaMigrator` overrides, update your `values.yaml` before upgrading.
+
+### Step 1: Update your values.yaml
+
+Rename the `schemaMigrator` block to `telemetryStoreMigrator` and update keys according to the table below:
+
+| Key | Status | Replacement |
+| --- | --- | --- |
+| `schemaMigrator.enabled` | Replaced | `telemetryStoreMigrator.enabled` |
+| `schemaMigrator.name` | Replaced | `telemetryStoreMigrator.name` |
+| `schemaMigrator.annotations` | Replaced | `telemetryStoreMigrator.annotations` |
+| `schemaMigrator.upgradeHelmHooks` | Replaced | `telemetryStoreMigrator.upgradeHelmHooks` |
+| `schemaMigrator.enableReplication` | Replaced | `telemetryStoreMigrator.enableReplication` |
+| `schemaMigrator.nodeSelector` | Replaced | `telemetryStoreMigrator.nodeSelector` |
+| `schemaMigrator.tolerations` | Replaced | `telemetryStoreMigrator.tolerations` |
+| `schemaMigrator.affinity` | Replaced | `telemetryStoreMigrator.affinity` |
+| `schemaMigrator.topologySpreadConstraints` | Replaced | `telemetryStoreMigrator.topologySpreadConstraints` |
+| `schemaMigrator.resources` | Replaced | `telemetryStoreMigrator.resources` |
+| `schemaMigrator.serviceAccount` | Replaced | `telemetryStoreMigrator.serviceAccount` |
+| `schemaMigrator.image` | Deprecated | None (uses otel-collector image) |
+| `schemaMigrator.args` | Deprecated | None |
+| `schemaMigrator.initContainers` | Deprecated | None |
+| `schemaMigrator.role` | Deprecated | None |
+| `signoz.initContainers.init` | Deprecated | None |
+| `signoz.initContainers.migration` | Deprecated | None |
+| `otelCollector.initContainers.init` | Deprecated | None |
+
+- **Replaced** : Move the key to the new path shown in the Replacement column.
+- **Deprecated** : Remove the key from your overrides entirely.
+
+### Step 2: Upgrade the Helm release
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment) to apply your updated values and upgrade the release.
+
+### Step 3: Validate migrations
+
+Check that the migration job completed:
+```bash
+kubectl get jobs -n <namespace> | grep signoz-telemetrystore-migrator
+```
+
+Expected: `1/1` completions. If the job failed, inspect the logs:
+```bash
+kubectl logs -n <namespace> job/<job-name> --tail=100
+```
+
+</TabItem>
+</Tabs>
+
+## Command Reference
+
+The `signoz-otel-collector migrate` command has the following subcommands:
+
+| Command | Description |
+| --- | --- |
+| `migrate bootstrap` | Creates the migration tracking tables in ClickHouse. Must run before any other migrate command. |
+| `migrate sync up` | Runs sync (schema) migrations. These mutate the store schema and must complete before the application starts. |
+| `migrate sync check` | Checks the status of sync migrations from the migration tracking table. |
+| `migrate async up` | Runs async (data) migrations. These include background data migrations that do not block the application. |
+| `migrate async check` | Checks the status of async migrations from the migration tracking table. |
+| `migrate ready` | Checks if the store is ready to run migrations. |
+
+### Global flags
+
+These flags apply to all `migrate` subcommands. Each flag has an equivalent environment variable:
+
+| Flag | Environment variable | Description |
+| --- | --- | --- |
+| `--clickhouse-dsn` | `SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN` | DSN for the ClickHouse connection |
+| `--clickhouse-cluster` | `SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER` | Name of the ClickHouse cluster |
+| `--clickhouse-replication` | `SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION` | Whether replication is enabled |
+| `--timeout` | `SIGNOZ_OTEL_COLLECTOR_TIMEOUT` | Operation timeout |
+
+The Docker Compose files use environment variables. The CLI flags are available for Linux Binary or manual use.
+
+### Commands mapping
+
+| `signoz-schema-migrator` | `signoz-otel-collector` |
+| --- | --- |
+| _(no equivalent)_ | `signoz-otel-collector migrate bootstrap --clickhouse-dsn <dsn>` |
+| `signoz-schema-migrator sync --dsn=<dsn> --up=` | `signoz-otel-collector migrate sync up --clickhouse-dsn <dsn>` |
+| `signoz-schema-migrator async --dsn=<dsn> --up=` | `signoz-otel-collector migrate async up --clickhouse-dsn <dsn>` |
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+<Tabs>
+<TabItem value="docker" label="Docker" default>
+
+### Migrator container exits with non-zero code
+
+**Symptoms**: The `signoz-telemetrystore-migrator` container exits with a non-zero code; signoz or otel-collector may never become healthy.
+
+**Likely causes**:
+- ClickHouse is not reachable (wrong host/port in `SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN`) or not healthy when the migrator starts.
+- Cluster/replication env vars do not match your setup: e.g. single-node ClickHouse with `SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION=true`, or wrong `SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER`.
+- Migrator image tag does not match the otel-collector image (migrations must match the collector version).
+
+**Resolution**:
+1. Inspect logs:
+   ```bash
+   # Docker Compose
+   docker logs signoz-telemetrystore-migrator
+   # Docker Swarm
+   docker service logs <stack>_signoz-telemetrystore-migrator
+   ```
+2. Confirm ClickHouse is up and reachable from the migrator network (e.g. `curl -s http://<clickhouse-host>:8123/ping` → `Ok.`).
+3. Set `SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN`, `CLUSTER`, and `REPLICATION` to match your ClickHouse deployment. Use the same image tag as the otel-collector service (e.g. `v0.142.0`). The migrator has `restart: on-failure` and will retry.
+
+### Otel-collector or signoz fails after upgrade
+
+**Symptoms**: Otel-collector exits soon after start; or signoz is stuck in a restart loop or fails health checks.
+
+**Likely causes**:
+- Otel-collector now runs `migrate sync check` at startup. If the `signoz-telemetrystore-migrator` has not completed **sync** migrations, the check fails and the collector exits.
+- Migrator never completed successfully (container not `Exited (0)`).
+- Leftover references to `schema-migrator-sync`, `schema-migrator-async`, or `schema-migrator` in `depends_on` or service definitions.
+- Otel-collector missing the new entrypoint/command and ClickHouse env vars (`SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN`, etc.), so it never runs the sync check.
+
+**Resolution**:
+1. Ensure the migrator finished: 
+```bash
+docker ps -a --filter "name=signoz-telemetrystore-migrator"
+```
+The container should show status `Exited (0)`.
+2. Fix migrator failures (see [Migrator container exits with non-zero code](#migrator-container-exits-with-non-zero-code) above), then restart the stack.
+3. Remove any remaining `schema-migrator*` services and `depends_on` entries from your compose file. Ensure otel-collector has the updated `entrypoint`/`command` (with `migrate sync check`) and the ClickHouse environment variables from the upgrade steps.
+4. Restart: 
+```bash
+docker compose up -d
+```
+(or redeploy the stack in Swarm).
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+### Helm upgrade fails or chart reports schemaMigrator/telemetryStoreMigrator errors
+
+**Symptoms**: `helm upgrade` fails with a template or values error mentioning `schemaMigrator`, `telemetryStoreMigrator`, or init containers.
+
+**Likely causes**:
+- Values still use the old `schemaMigrator` key; the chart expects `telemetryStoreMigrator` and may not accept deprecated keys.
+- Deprecated keys are still present (`schemaMigrator.image`, `schemaMigrator.args`, `signoz.initContainers.init`, `otelCollector.initContainers.init`, etc.).
+
+**Resolution**:
+1. Rename the entire `schemaMigrator` block to `telemetryStoreMigrator` and move over only the keys that have a **Replaced** mapping in the upgrade table.
+2. Remove all **Deprecated** keys (no replacement): `schemaMigrator.image`, `schemaMigrator.args`, `schemaMigrator.initContainers`, `schemaMigrator.role`, `signoz.initContainers.init`, `signoz.initContainers.migration`, `otelCollector.initContainers.init`.
+3. Re-run the upgrade with the updated `values.yaml`.
+
+### telemetrystore-migrator job fails
+
+**Symptoms**: The migration job shows `0/1` completions or `Failed`; otel-collector or SigNoz pods may not start because they depend on migrations.
+
+**Likely causes**:
+- ClickHouse not reachable from the cluster (wrong service name, namespace, or port in the DSN).
+- `telemetryStoreMigrator` (or otel-collector) ClickHouse settings in `values.yaml` are wrong: DSN, cluster name, or replication flag.
+- Job image tag does not match the otel-collector image.
+
+**Resolution**:
+1. Check job status and logs:
+   ```bash
+   kubectl get jobs -n <namespace> | grep telemetrystore-migrator
+   kubectl logs -n <namespace> job/<job-name> --tail=100
+   ```
+2. Verify ClickHouse is reachable from the namespace (DSN host resolves, port 9000 open). Ensure `telemetryStoreMigrator` and otel-collector use the same DSN/cluster/replication and the same image tag.
+3. After fixing values or connectivity, delete the failed job so the chart can re-run it: `kubectl delete job -n <namespace> <job-name>`, then run `helm upgrade` again.
+
+### Otel-collector pods crash or never become ready
+
+**Symptoms**: Otel-collector pods exit quickly or fail readiness; logs show migration or “sync check” related errors.
+
+**Likely causes**:
+- Otel-collector runs `migrate sync check` before starting. If the telemetrystore-migrator job has not completed **sync** migrations, the check fails and the pod exits.
+
+**Resolution**:
+1. Ensure the telemetrystore-migrator job completed successfully (`1/1` completions). See [telemetrystore-migrator job fails](#telemetrystore-migrator-job-fails) above if it failed.
+2. After the job succeeds, otel-collector pods should pass the sync check and start. If they still fail, inspect pod logs for the exact error.
+
+</TabItem>
+<TabItem value="linux" label="Linux Binary">
+
+### migrate commands fail
+
+**Symptoms**: `signoz-otel-collector migrate bootstrap`, `migrate sync up`, or `migrate async up` exit with an error.
+
+**Likely causes**:
+- ClickHouse not running or not reachable at the host/port in `--clickhouse-dsn`.
+- Wrong DSN (host, port, or password). Running `sync up` or `async up` without having run `bootstrap` first.
+- Network or firewall blocking the connection.
+
+**Resolution**:
+1. Verify ClickHouse: `curl -s http://<host>:8123/ping` → `Ok.`
+2. Use the correct `--clickhouse-dsn` (e.g. `tcp://localhost:9000` or `tcp://localhost:9000?password=<password>`). Run **bootstrap** first, then **sync up**, then **async up**; do not skip bootstrap.
+3. If the error mentions schema or permissions, check ClickHouse logs (e.g. `/var/log/clickhouse-server/`). After migrations succeed, start the otel-collector as in the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#linux-binary-installation).
+
+</TabItem>
+</Tabs>
+
+</details>

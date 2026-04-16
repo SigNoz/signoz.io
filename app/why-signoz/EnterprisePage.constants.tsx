@@ -5,11 +5,6 @@ import { Info } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 
-export const ENTERPRISE_DEMO_HUBSPOT_DATA = {
-  portalId: '22308423',
-  formId: 'a908efee-9ec5-4969-9ca4-6e91d0a32b8a',
-}
-
 const OBSERVABILITY_LANDSCAPE_SOURCE_LINK_CLASS_NAME =
   'mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400'
 
@@ -217,7 +212,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           flexible, no learning curve.
         </p>
         <TrackingLink
-          href="/resource-center/opentelemetry/"
+          href="/opentelemetry/"
           clickType="Secondary CTA"
           clickName="High Growth Teams Section Open Source + OpenTelemetry"
           clickLocation="Why SigNoz Page"

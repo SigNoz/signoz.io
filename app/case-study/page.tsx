@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 
 type CardProps = {
   logo?: string
+  logoAlt: string
   title?: string
   name?: string
   position?: string
@@ -34,6 +35,7 @@ type CardProps = {
 const cardDetails = [
   {
     logo: '/img/case_study/logos/shaped-logo.svg',
+    logoAlt: 'Shaped logo',
     title:
       'YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop Observability',
     name: 'Karl Lyons',
@@ -42,6 +44,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/brainfish-icon.svg',
+    logoAlt: 'Brainfish logo',
     title: 'How Brainfish leveraged SigNoz for effective Kubernetes monitoring & Logs management',
     name: 'Charlie Shen',
     position: 'Lead DevOps Engineer, Brainfish',
@@ -49,6 +52,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/logos/linkcy-logo-white-1.png',
+    logoAlt: 'Linkcy logo',
     title: 'How Fintech Startup Linkcy Monitors Critical APIs with SigNoz Dashboards',
     name: 'Alexandre Moray',
     position: 'Senior Software Engineer',
@@ -56,6 +60,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/cedana-logo.svg',
+    logoAlt: 'Cedana logo',
     title: 'How Cedana Leverages SigNoz to Ensure Uptime in Real-Time Compute Operations',
     name: 'Niranjan Ravichandra',
     position: 'Co-founder & CTO, Cedana',
@@ -63,6 +68,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/mailmodo-logo-white.svg',
+    logoAlt: 'Mailmodo logo',
     title:
       'How Mailmodo streamlined monitoring of 200GB+ daily logs from 200+ microservices with SigNoz',
     name: 'Avneesh Kumar',
@@ -71,6 +77,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/logos/gokiwi-logo.png',
+    logoAlt: 'Kiwi logo',
     title: 'How Kiwi Reduced API Response Times from 20 Seconds to Milliseconds Using SigNoz',
     name: 'Khushhal Reddy',
     position: 'Senior Backend Engineer, Kiwi',
@@ -78,6 +85,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/thehindu-logo.png',
+    logoAlt: 'The Hindu logo',
     title: 'How The Hindu uses SigNoz APM to Optimize Application Performance',
     name: 'Poonkuyilan V',
     position: 'IT Infrastructure Lead, The Hindu',
@@ -85,6 +93,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/logos/tableflow-logo.png',
+    logoAlt: 'TableFlow logo',
     title: 'How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly',
     name: 'Eric Ciminelli',
     position: 'Co-founder, Tableflow',
@@ -92,6 +101,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/logos/instasafe-logo.png',
+    logoAlt: 'InstaSafe logo',
     title:
       'How InstaSafe chose SigNoz over Grafana and Elastic APM to power their observability needs',
     name: 'Bhaswanth Gattineni',
@@ -100,6 +110,7 @@ const cardDetails = [
   },
   {
     logo: '/img/users/blip_logo.webp',
+    logoAlt: 'Blip logo',
     title: 'How Blip uses SigNoz to improve their issue resolution time by 14x',
     name: 'Nate Bohman',
     position: 'Senior DevOps Engineer, Blip',
@@ -107,6 +118,7 @@ const cardDetails = [
   },
   {
     logo: '/img/users/outplay.svg',
+    logoAlt: 'Outplay logo',
     title: 'How Outplay uses SigNoz to improve their backend API response time by 35%',
     name: 'Vijay Perumal',
     position: 'Technical Lead',
@@ -114,6 +126,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/logos/WomboLogo.svg',
+    logoAlt: 'Wombo AI logo',
     title: 'How Wombo AI provides great experience to its 5mn MAU using SigNoz for Observability',
     name: 'Abhinav Ramana',
     position: 'Senior Software Engineer',
@@ -121,6 +134,7 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/logos/HTTPSCOUT.svg',
+    logoAlt: 'HTTPSCOUT logo',
     title: 'Democratizing Observability - How SigNoz Empowers Solo Entrepreneurs and Small Teams',
     name: 'Shey Sewani',
     position: 'Founder, HTTPSCOUT',
@@ -159,6 +173,7 @@ function caseStudies() {
               <CustomerCard
                 key={index}
                 logo={customer.logo}
+                logoAlt={customer.logoAlt}
                 title={customer.title}
                 name={customer.name}
                 position={customer.position}
@@ -175,13 +190,13 @@ function caseStudies() {
 
 export default caseStudies
 
-const CustomerCard: React.FC<CardProps> = ({ logo, title, name, position, href }) => {
+const CustomerCard: React.FC<CardProps> = ({ logo, logoAlt, title, name, position, href }) => {
   return (
     <Link href={href}>
       <div className="group min-h-[19rem] cursor-pointer rounded border border-signoz_slate-400 bg-signoz_ink-400 p-12 hover:bg-signoz_ink-300">
         <div className="flex flex-col gap-3">
           <div className="mb-4 flex h-12 items-start">
-            <img src={logo} className="max-h-10 max-w-32 object-contain" />
+            <img src={logo} alt={logoAlt} className="max-h-10 max-w-32 object-contain" />
           </div>
           <div className="text-base font-semibold">{title}</div>
           <div>
@@ -233,7 +248,7 @@ const GetStarted = ({ page }) => {
             <div className="relative flex items-center justify-center">
               <img
                 src="/img/landing/landing_thumbnail.webp"
-                alt="Custom Thumbnail"
+                alt="SigNoz dashboard with application performance metrics - Customer Stories"
                 className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
               />
             </div>

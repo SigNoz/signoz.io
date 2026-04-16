@@ -4,19 +4,38 @@ import DataProtectionLaws from '@/components/data-protection-laws'
 import PricingStructure from '@/components/pricing-structure'
 import { CommunityEdition } from '@/components/community-edition'
 import { SignozDatalog } from '@/components/signoz-datalog'
+import Image from 'next/image'
+import featureGraphicEnterprise from '@/public/img/graphics/homepage/feature-graphic-enterprise.svg?url'
+import { cn } from '../../app/lib/utils'
 
-const WhySelectSignoz = ({ isInPricingPage = false }) => {
+const WhySelectSignoz = ({
+  isInPricingPage = false,
+  className,
+}: {
+  isInPricingPage?: boolean
+  className?: string
+}) => {
   return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Why <br /> select <br /> SigNoz?{' '}
+    <div
+      className={cn(
+        'section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:w-[80vw]',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          `grid grid-cols-1 sm:grid-cols-[1fr_2fr]`,
+          !isInPricingPage && 'md:grid-cols-[300px_1fr]'
+        )}
+      >
+        <div className="min-w-0">
+          <p className="sticky top-[3rem] px-8 pt-4 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:px-4 sm:text-4xl lg:px-8 lg:pt-10">
+            Why <br className="hidden md:block" /> select <br className="hidden md:block" /> SigNoz?{' '}
           </p>
         </div>
-        <div className="flex-[2_2_0%]">
-          <div className="ml-0 flex flex-col justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 py-10 sm:flex-row  md:pl-10">
-            <div className="flex shrink-[10] flex-col gap-16 px-8 md:px-0">
+        <div className="min-w-0">
+          <div className="ml-0 flex flex-col gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 md:flex-row md:items-center md:py-10 md:pl-10">
+            <div className="flex min-w-0 flex-1 flex-col gap-16 px-8 md:px-0">
               <div>
                 <p className="mb-2 block text-base font-medium text-signoz_vanilla-100">
                   Built for scale
@@ -45,8 +64,15 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
                 </p>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[50vw]">
-              <img src="/img/graphics/homepage/feature-graphic-enterprise.webp" alt="" />
+            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80vw] md:shrink-0">
+              <Image
+                className="w-full"
+                src={featureGraphicEnterprise}
+                alt="Illustration of SigNoz connecting observability, security, and data controls"
+                width={272}
+                height={352}
+                loading="lazy"
+              />
             </div>
           </div>
           {isInPricingPage ? (
@@ -60,7 +86,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
             <>
               <Observability />
               <DataProtectionLaws isInPricingPage={isInPricingPage} />
-              <PricingStructure />
+              <PricingStructure className="py-4 md:py-8" />
             </>
           )}
         </div>

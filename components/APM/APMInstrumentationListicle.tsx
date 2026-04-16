@@ -32,6 +32,8 @@ import {
   SiAndroid,
   SiWordpress,
   SiDeno,
+  SiVercel,
+  SiHasura,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 import { APM_INSTRUMENTATION_ITEMS } from '@/constants/componentItems'
@@ -105,6 +107,15 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/instrumentation/opentelemetry-wordpress': (
     <SiWordpress className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/userguide/vercel-to-signoz': (
+    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black p-1">
+      <SiVercel className="h-7 w-7 text-white" />
+    </span>
+  ),
+  '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
+  '/docs/integrations/opentelemetry-dbos': (
+    <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />
   ),
 }
 

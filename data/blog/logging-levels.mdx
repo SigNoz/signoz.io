@@ -1,0 +1,457 @@
+---
+title: Logging Levels Explained - Order, Severity, and Common Use Cases
+slug: logging-levels
+date: 2026-04-08
+tags: [logging, monitoring]
+authors: [saurabh_patil]
+description: Understand what log levels mean, when to use them, their severity order, how to choose the right level for debugging, monitoring, and incident response and best practices for production logging examples.
+keywords: [logging levels, logging level hierarchy, log severity levels, logging levels in java, logging levels python, logging level in log4j]
+---
+
+Logging levels categorize log messages by severity, letting you control how much detail your application emits and how quickly you can find the messages that matter. This guide covers the standard log level hierarchy, when to use each level, how to configure levels across Python, Java, Go, and Node.js.
+
+## What Are Logging Levels?
+
+A logging level (also called log severity) is a label attached to every log message that indicates its importance. When you set a minimum logging level for your application, the logger discards any message below that threshold. For example, setting the level to WARN means only WARN, ERROR, and FATAL messages get recorded while DEBUG and INFO messages are silently dropped.
+
+This filtering mechanism exists because production systems generate enormous volumes of log data. A busy microservice might produce thousands of DEBUG messages per second, most of which are irrelevant unless you are actively troubleshooting. Logging levels let you turn the detail up during debugging and back down for normal operation.
+
+The concept originated with syslog in the 1980s, which defined eight severity levels (Emergency through Debug) as part of the messaging protocol for Unix systems. Modern logging frameworks simplified this into six levels that have become the standard across most languages.
+
+## The Standard Log Level Hierarchy
+
+Many modern logging frameworks use a broadly similar severity hierarchy, but the built-in levels vary by ecosystem. The following are the most common levels ordered from highest to lowest severity. Setting a level means you see that level and everything above it.
+
+| Log Level | Description |
+| --- | --- |
+| FATAL | A severe error that may cause the application to terminate or become unusable |
+| ERROR | An operation failed and needs attention |
+| WARN | Indicates a potential issue or unexpected situation that doesn’t break execution |
+| INFO | Normal operational messages indicating expected system behavior |
+| DEBUG | Detailed information useful for debugging during development |
+| TRACE | Extremely fine-grained diagnostic events (lowest level, rarely enabled in production) |
+
+The hierarchy works as a filter. If you set the level to INFO, the logger records INFO, WARN, ERROR, and FATAL messages, but drops TRACE and DEBUG messages. This relationship is consistent across frameworks, though the exact names vary slightly.
+
+## When to Use Each Level
+
+### TRACE
+
+TRACE is the most verbose level. Use it only when you need to follow execution through a specific code path, such as tracing how a request flows through middleware layers or watching each iteration of a data transformation. Most frameworks disable TRACE by default, and many don't even include it without custom registration.
+
+```python:trace_example.py
+import logging
+
+# Python doesn't include TRACE by default. Register it as level 5.
+TRACE = 5
+logging.addLevelName(TRACE, "TRACE")
+logging.basicConfig(level=TRACE, format="%(levelname)s %(message)s")
+logger = logging.getLogger("myapp")
+
+logger.log(TRACE, "Entering parse_records loop, batch_size=50")
+logger.log(TRACE, "Row 0: id=101, status=pending")
+logger.log(TRACE, "Row 1: id=102, status=active")
+```
+
+```bash:Output
+TRACE Entering parse_records loop, batch_size=50
+TRACE Row 0: id=101, status=pending
+TRACE Row 1: id=102, status=active
+```
+
+Do not leave TRACE logging enabled in production. The volume will overwhelm your log storage and significantly impact application performance.
+
+### DEBUG
+
+DEBUG messages help during development and troubleshooting by capturing variable values, SQL queries, HTTP request/response details, and internal state, which help you reconstruct what happened.
+
+```python:debug_example.py
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)-8s %(message)s")
+logger = logging.getLogger("myapp")
+
+user_id = 42
+logger.debug("Fetching user with id=%s", user_id)
+logger.debug("SQL: SELECT * FROM users WHERE id = 42")
+logger.debug("Query returned 1 row in 3ms")
+```
+
+```bash:Output
+DEBUG    Fetching user with id=42
+DEBUG    SQL: SELECT * FROM users WHERE id = 42
+DEBUG    Query returned 1 row in 3ms
+```
+
+In production, set the level to INFO or WARN and only enable DEBUG temporarily when investigating an issue. Some frameworks support changing the log level at runtime without restarting the application, which makes this practical.
+
+### INFO
+
+INFO is the default level for most production deployments. Use it for events that confirm the application is operating normally, such as startup/shutdown, configuration loaded, scheduled jobs completed, and user actions processed.
+
+```python:info_example.py
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)-8s %(message)s")
+logger = logging.getLogger("myapp")
+
+logger.info("Server started on port 8080")
+logger.info("Order created: orderId=ORD-991, userId=user-42, total=59.99")
+logger.info("Scheduled job 'cleanup_sessions' completed, removed 134 entries")
+```
+
+```bash:Output
+INFO     Server started on port 8080
+INFO     Order created: orderId=ORD-991, userId=user-42, total=59.99
+INFO     Scheduled job 'cleanup_sessions' completed, removed 134 entries
+```
+
+A good test for INFO is whether someone would miss anything actionable if they skipped these logs for a week. If yes, the message should probably be WARN or ERROR, and if it is only useful during debugging, it belongs at DEBUG.
+
+### WARN
+
+WARN indicates something unexpected happened, but the application recovered or can continue. Use it for situations that might become problems if they persist. For example: retries that eventually succeeded, deprecated API calls, disk usage approaching capacity, slow responses from dependencies.
+
+```python:warn_example.py
+import logging
+
+logging.basicConfig(level=logging.WARNING, format="%(levelname)-8s %(message)s")
+logger = logging.getLogger("myapp")
+
+logger.warning("Disk usage at %d%%, threshold is 80%%", 87)
+logger.warning("API response took 4.2s, expected under 1s")
+logger.warning("Retrying payment gateway (attempt 2 of 3)")
+```
+
+```bash:Output
+WARNING  Disk usage at 87%, threshold is 80%
+WARNING  API response took 4.2s, expected under 1s
+WARNING  Retrying payment gateway (attempt 2 of 3)
+```
+
+WARN messages should be actionable. If your team consistently ignores WARN logs, either the messages are miscategorized (and should be DEBUG/INFO), or you have an alert configuration problem.
+
+### ERROR
+
+An ERROR means a specific operation failed while the process itself kept running, typically affecting a user or a downstream system in some visible way. When logging at this level, include enough context to investigate the failed operation, relevant IDs, and the error message.
+
+```python:error_example.py
+import logging
+
+logging.basicConfig(level=logging.ERROR, format="%(levelname)-8s %(message)s")
+logger = logging.getLogger("myapp")
+
+logger.error("Payment failed: orderId=ORD-001, gateway returned status=503")
+logger.error("Database connection lost: host=db-primary, retries exhausted")
+```
+
+```bash:Output
+ERROR    Payment failed: orderId=ORD-001, gateway returned status=503
+ERROR    Database connection lost: host=db-primary, retries exhausted
+```
+
+Avoid logging at ERROR for expected conditions, such as validation failures or 404 responses. Those are normal application behaviours, and logging them as errors creates noise that drowns out real problems.
+
+### FATAL / CRITICAL
+
+FATAL indicates the application is about to crash or has encountered a condition it cannot recover from, such as a required database is unreachable at startup, a missing configuration file, or an out-of-memory condition.
+
+```python:critical_example.py
+import logging
+
+logging.basicConfig(level=logging.CRITICAL, format="%(levelname)-8s %(message)s")
+logger = logging.getLogger("myapp")
+
+logger.critical("Configuration file /etc/app/config.yaml not found, exiting")
+logger.critical("Out of memory: allocated 3.8GB of 4GB limit")
+```
+
+```bash:Output
+CRITICAL Configuration file /etc/app/config.yaml not found, exiting
+CRITICAL Out of memory: allocated 3.8GB of 4GB limit
+```
+
+In most applications, FATAL messages are rare, and if you find yourself logging FATAL more than a few times per deployment, some of those messages are probably ERROR-level issues that the application can actually handle.
+
+## Configuring Logging Levels in Practice
+
+### Python
+
+Python's logging module uses five standard levels (DEBUG, INFO, WARNING, ERROR, CRITICAL). You can set different levels per module to keep your own code verbose while silencing noisy libraries.
+
+```python:logging_config.py
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(name)-20s %(levelname)-8s %(message)s")
+
+# Your app: show DEBUG and above
+logging.getLogger("myapp").setLevel(logging.DEBUG)
+
+# Noisy libraries: show only WARNING and above
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+app = logging.getLogger("myapp")
+lib = logging.getLogger("urllib3")
+
+app.debug("This appears (myapp is set to DEBUG)")
+app.info("This also appears")
+lib.debug("This is hidden (urllib3 is set to WARNING)")
+lib.warning("This appears")
+```
+
+```bash:Output
+myapp                DEBUG    This appears (myapp is set to DEBUG)
+myapp                INFO     This also appears
+urllib3              WARNING  This appears
+```
+
+Use the `LOG_LEVEL` environment variable to change levels without editing code:
+
+```python:app.py
+import os
+import logging
+
+level = os.environ.get("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=getattr(logging, level), format="%(levelname)-8s %(message)s")
+
+logging.debug("Debug details here")
+logging.info("Application started")
+logging.warning("Something looks off")
+```
+
+```bash:bash
+$ python app.py
+INFO     Application started
+WARNING  Something looks off
+
+$ LOG_LEVEL=DEBUG python app.py
+DEBUG    Debug details here
+INFO     Application started
+WARNING  Something looks off
+```
+
+For structured formatting, exception handling, and production-ready patterns, see [Python Logging Best Practices](/guides/python-logging-best-practices/).
+
+### Java (SLF4J 2.0.17 + Log4j2 2.24.3)
+
+Log4j2 defines six levels: TRACE, DEBUG, INFO, WARN, ERROR, and FATAL. Configure them in `log4j2.xml` to set different levels per package.
+
+```xml:log4j2.xml
+<!-- src/main/resources/log4j2.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss} %-5level %logger{36} - %msg%n" />
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Logger name="com.example" level="DEBUG" additivity="false">
+      <AppenderRef ref="Console" />
+    </Logger>
+    <Logger name="org.springframework" level="WARN" />
+    <Root level="INFO">
+      <AppenderRef ref="Console" />
+    </Root>
+  </Loggers>
+</Configuration>
+```
+
+For Spring Boot 4.x, the same levels can be set in `application.properties`:
+
+```text:application.properties
+# src/main/resources/application.properties
+logging.level.com.example=DEBUG
+logging.level.org.springframework=WARN
+logging.level.root=INFO
+```
+
+Spring Boot supports changing log levels at runtime via the Actuator endpoint (`POST /actuator/loggers/{name}`). For the full setup, see [Spring Boot Logging](/guides/spring-boot-logging/).
+
+### Go (slog, standard library since Go 1.21)
+
+Go's `log/slog` package defines four levels: DEBUG (-4), INFO (0), WARN (4), ERROR (8). This example uses `LevelVar` so the level can be changed at runtime.
+
+```go:main.go
+package main
+
+import (
+	"log/slog"
+	"os"
+)
+
+func main() {
+	level := new(slog.LevelVar)
+	level.Set(slog.LevelInfo)
+	if os.Getenv("LOG_LEVEL") == "debug" {
+		level.Set(slog.LevelDebug)
+	}
+
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level})))
+
+	slog.Debug("loading config", "path", "/etc/app/config.yaml")
+	slog.Info("server started", "port", 8080)
+	slog.Warn("slow query detected", "duration_ms", 1200)
+	slog.Error("failed to send email", "to", "alice@example.com")
+}
+```
+
+```bash:bash
+$ go run main.go
+{"level":"INFO","msg":"server started","port":8080}
+{"level":"WARN","msg":"slow query detected","duration_ms":1200}
+{"level":"ERROR","msg":"failed to send email","to":"alice@example.com"}
+
+$ LOG_LEVEL=debug go run main.go
+{"level":"DEBUG","msg":"loading config","path":"/etc/app/config.yaml"}
+{"level":"INFO","msg":"server started","port":8080}
+{"level":"WARN","msg":"slow query detected","duration_ms":1200}
+{"level":"ERROR","msg":"failed to send email","to":"alice@example.com"}
+```
+
+For a detailed walkthrough of Go logging, see [Complete Guide to Logging in Go with slog](/guides/golang-slog/).
+
+### Node.js (Pino)
+
+Pino uses numeric levels: trace (10), debug (20), info (30), warn (40), error (50), fatal (60). It outputs structured JSON by default.
+
+```bash:bash
+npm install pino
+```
+
+```jsx:app.js
+const pino = require('pino');
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+
+logger.debug({ userId: 42 }, 'Fetching user profile');
+logger.info({ port: 3000 }, 'Server started');
+logger.warn({ latency: 4200 }, 'Slow response from payment service');
+logger.error({ orderId: 'ORD-001', statusCode: 503 }, 'Payment gateway returned error');
+```
+
+```bash:bash
+$ node app.js
+{"level":30,"port":3000,"msg":"Server started"}
+{"level":40,"latency":4200,"msg":"Slow response from payment service"}
+{"level":50,"orderId":"ORD-001","statusCode":503,"msg":"Payment gateway returned error"}
+
+$ LOG_LEVEL=debug node app.js
+{"level":20,"userId":42,"msg":"Fetching user profile"}
+{"level":30,"port":3000,"msg":"Server started"}
+{"level":40,"latency":4200,"msg":"Slow response from payment service"}
+{"level":50,"orderId":"ORD-001","statusCode":503,"msg":"Payment gateway returned error"}
+```
+
+For production Pino configuration patterns, see [Pino Logger - Complete Node.js Guide](/guides/pino-logger-nodejs-logging-library/).
+
+## Log Level Comparison Across Frameworks
+
+Different frameworks use slightly different names and numeric values for the same concepts. Severity from lowest to highest.
+
+| Python | Log4j2 | Go slog | Pino (Node.js) | Syslog |
+| --- | --- | --- | --- | --- |
+|  | TRACE (600) |  | trace (10) |  |
+| DEBUG (10) | DEBUG (500) | DEBUG (-4) | debug (20) | Debug (7) |
+| INFO (20) | INFO (400) | INFO (0) | info (30) | Informational (6) |
+| WARNING (30) | WARN (300) | WARN (4) | warn (40) | Warning (4) |
+| ERROR (40) | ERROR (200) | ERROR (8) | error (50) | Error (3) |
+| CRITICAL (50) | FATAL (100) |  | fatal (60) | Emergency (0) |
+
+Note that Python's numeric values go up with severity, while Log4j2's go down (higher number = less severe). Go Slog uses a sparse scale to leave room for custom levels between the standard ones.
+
+For a detailed look at syslog severity levels and how they map to application-level logging, see [Understanding Syslog Severity Levels](/guides/syslog-levels/).
+
+## Choosing the Right Level for Each Environment
+
+The level you set should match the environment's purpose.
+
+| Environment | Recommended Level | Reasoning |
+| --- | --- | --- |
+| Local development | DEBUG or TRACE | You need full visibility while writing and testing code |
+| CI/test | WARN | Tests should pass quietly; only surface failures and unexpected behavior |
+| Staging | INFO | Mirror production settings, but enable DEBUG per-service when testing specific features |
+| Production | INFO or WARN | Balance between visibility and volume; avoid DEBUG unless actively troubleshooting |
+
+For production, set your application code to INFO and third-party libraries to WARN or ERROR. Libraries like ORMs, HTTP clients, and framework internals can produce thousands of DEBUG lines per request, drowning your own application logs.
+
+## Filtering Logs by Level in Log Management Tool
+
+Once your application emits structured logs with severity levels, you can filter and analyze them in SigNoz. SigNoz is an all-in-one observability backend that lets you correlate your logs, traces and metrics in one place.
+
+To filter logs by level in SigNoz, open the Logs Explorer and add a filter for `severity_text` in the query builder. Select `severity_text = ERROR` to show only error logs, and combine this with other filters like `service.name` to narrow down to a specific service.
+
+<Figure src="/img/blog/2026/04/logging-levels-explained-log-explorer.webp" alt="SigNoz Logs Explorer showing severity text filter with WARN, ERROR, INFO, Information, Normal, and Warning levels selected, displaying timestamped Kafka broker log entries in list view." caption="Filtering logs by severity level in the SigNoz Logs Explorer" />
+
+To find all ERROR and FATAL logs across your system in the last hour, use the query builder with `severity_number >= 17` (the OpenTelemetry severity number for ERROR). This gives you a single view of every failure across all services, regardless of which language or framework each service uses.
+
+<Figure src="/img/blog/2026/04/logging-levels-explained-log-query.webp" alt="SigNoz Logs Explorer filtered by severity_number >= 17 showing a list of ERROR logs with repeated checkout failing due to external API messages and timestamps." caption="Querying all ERROR-level and above logs using severity_number >= 17 in SigNoz" />
+
+SigNoz also lets you create [alerts based on log severity](/docs/alerts-management/log-based-alerts/). For example, you can set up an alert that fires when the rate of ERROR logs from a specific service exceeds 10 per minute. This is more useful than alerting on total log volume because it targets the logs that actually indicate problems.
+
+For sending logs from your application to SigNoz using OpenTelemetry, the setup depends on your language. The SigNoz documentation covers instrumentation for [Python](/docs/instrumentation/python/), [Java](/docs/instrumentation/java/), [Go](/docs/instrumentation/golang/), and [Node.js](/docs/instrumentation/nodejs/), among others.
+
+## Best Practices for Using Logging Levels
+
+### Correct ERROR usage
+
+Events like 404 responses and validation failures are part of normal application flow, so logging them at ERROR creates noise that buries the real problems. Reserve ERROR for things that genuinely should not have happened and require investigation, like a database connection dropping or a payment gateway returning a 503.
+
+### Per-module level configuration
+
+Setting your own application code to DEBUG or INFO while keeping third-party libraries (ORMs, HTTP clients, framework internals) at WARN or ERROR lets you stay close to your own code's behaviour without being flooded by library noise. The Python and Log4j2 configuration examples earlier in this article show how to set this up.
+
+### Environment-driven level control
+
+Hard-coding a log level ties every verbosity change to a code deployment, so reading the level from an environment variable (`LOG_LEVEL`) instead gives you the flexibility to increase verbosity in production temporarily without touching the codebase.
+
+### Production-safe defaults
+
+DEBUG output from a typical web framework easily generates 10-100x the volume of INFO-level logs, which is why production should default to INFO or WARN with DEBUG enabled only on a specific service while you are actively investigating an issue.
+
+### Contextual log messages
+
+A log line like `ERROR: Payment failed` tells you nothing useful during an incident. Adding IDs and state directly, such as `ERROR: Payment failed, orderId=ORD-001, gateway_status=503, user_id=u-42`, makes the log self-contained enough to act on.
+
+### Sensitive data redaction
+
+Passwords, API keys, tokens, and personally identifiable information should never appear in logs at any level, so use redaction in your log formatter or structured logging to exclude sensitive fields before they reach your log pipeline.
+
+### WARN trend monitoring
+
+Because WARN exists to surface problems before they escalate, tracking the rate of WARN messages over time through a dashboard or alert gives your team early visibility. A gradual increase in warnings such as slow queries, retry attempts, or approaching disk limits often predicts the subsequent ERROR spike.
+
+## Conclusion
+
+Logging levels are a small decision in code that has an outsized impact on how quickly your team can diagnose production issues. Pick the right level for each message during development, match the minimum level to each environment, and use a [log management tool](/blog/best-open-source-log-management-tools/) to filter and alert on severity across all your services.
+
+## FAQs
+
+### What are the standard logging levels in order of severity?
+
+From least severe to most severe, the standard levels are TRACE, DEBUG, INFO, WARN, ERROR, and FATAL (or CRITICAL). Setting a level means the logger records messages at or above that level and discards everything below it. For example, setting the level to WARN means only WARN, ERROR, and FATAL messages are recorded.
+
+### What is the difference between ERROR and FATAL?
+
+ERROR indicates a specific operation failed, but the process is still running. A failed API call or a database query timeout would be logged at ERROR. FATAL means the application has hit an unrecoverable condition and is about to exit, like a missing configuration file at startup or an out-of-memory condition.
+
+### What logging level should I use in production?
+
+INFO is the most common production default. It captures application lifecycle events (startup, shutdown, completed operations) without the noise of DEBUG output. Set your own application code to INFO and third-party libraries to WARN or ERROR to keep log volume manageable.
+
+### Can I change log levels at runtime without restarting my application?
+
+Yes, most modern frameworks support this. In Spring Boot, use the Actuator endpoint (`POST /actuator/loggers/{name}`). In Go's `slog`, use a `LevelVar` which can be changed from an HTTP handler. In Python, call `logger.setLevel()` on any logger instance. This is useful for temporarily enabling DEBUG in production while investigating an issue.
+
+### What is the difference between TRACE and DEBUG?
+
+TRACE is more verbose than DEBUG. DEBUG logs variable values, query results, and internal state, which are useful for troubleshooting. TRACE logs step-by-step execution details like loop iterations, method entry/exit, and individual record processing. Most frameworks do not even define TRACE by default, and it should almost never be enabled in production.
+
+### How do logging levels map between different frameworks?
+
+The concepts are the same across frameworks, but the names and numeric values differ.
+
+- Python uses DEBUG (10), INFO (20), WARNING (30), ERROR (40), and CRITICAL (50), where higher numbers mean higher severity.
+- Log4j2 uses TRACE (600), DEBUG (500), INFO (400), WARN (300), ERROR (200), FATAL (100), where lower numbers mean higher severity.
+- Go's slog uses DEBUG (-4), INFO (0), WARN (4), ERROR (8).
+
+See the comparison table earlier in this article for a full mapping, including Pino and syslog.

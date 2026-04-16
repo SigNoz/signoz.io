@@ -75,6 +75,14 @@ export const EXPERIMENTS = {
     },
     flagName: 'teams-page-focused-layout-experiment',
   },
+  TEAMS_PAGE_VALUE_PROPS: {
+    id: 'teams-page-value-props',
+    variants: {
+      CONTROL: 'current-layout',
+      VARIANT: 'value-props-social-proof',
+    },
+    flagName: 'teams-page-value-props',
+  },
   CLOUD_FIRST_PRICING_PAGE: {
     id: 'cloud-first-pricing-page',
     variants: {
@@ -94,6 +102,16 @@ export const EXPERIMENTS = {
     flagName: 'chatbase-bubble-experiment',
     concluded: true,
     defaultVariant: 'with-chatbase-bubble',
+  },
+  HOMEPAGE_EMAIL_SIGNUP: {
+    id: 'homepage-email-signup',
+    variants: {
+      CONTROL: 'existing-cta-buttons',
+      VARIANT: 'email-input-with-modal',
+    },
+    flagName: 'homepage-email-signup',
+    concluded: true,
+    defaultVariant: 'existing-cta-buttons',
   },
   // Add more experiments here as needed
 } as const

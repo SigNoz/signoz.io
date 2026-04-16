@@ -12,6 +12,7 @@ import {
   SiTemporal,
   SiOllama,
   SiHuggingface,
+  SiN8N,
 } from 'react-icons/si'
 import { LLM_MONITORING_ITEMS } from '@/constants/componentItems'
 
@@ -30,6 +31,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       alt="Azure OpenAI Icon"
       className="h-7 w-7"
     />
+  ),
+  '/docs/baseten-monitoring': (
+    <img src="/svgs/icons/LLMMonitoring/baseten-logo.webp" alt="Baseten Icon" className="h-7 w-7" />
   ),
   '/docs/claude-code-monitoring': <SiClaude className="h-7 w-7 text-orange-500" />,
   '/docs/claude-agent-monitoring': <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
@@ -98,10 +102,18 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/mistral-observability': (
     <img src="/img/docs/llm/mistral/mistral-logo.webp" alt="Mistral AI Icon" className="h-7 w-7" />
   ),
+  '/docs/n8n-monitoring': <SiN8N className="h-7 w-7 text-gray-400" />,
   '/docs/ollama-monitoring': <SiOllama className="h-7 w-7 text-white" />,
   '/docs/openai-monitoring': <SiOpenai className="h-7 w-7 text-green-400" />,
   '/docs/openclaw-monitoring': (
     <img src="/img/docs/llm/openclaw/openclaw-logo.svg" alt="OpenClaw Icon" className="h-7 w-7" />
+  ),
+  '/docs/opencode-observability': (
+    <img
+      src="/svgs/icons/LLMMonitoring/opencode-logo.webp"
+      alt="OpenCode Icon"
+      className="h-7 w-7"
+    />
   ),
   '/docs/openlit': (
     <img src="/svgs/icons/LLMMonitoring/openlit-logo.webp" alt="OpenLIT Icon" className="h-7 w-7" />
@@ -117,6 +129,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <img src="/svgs/icons/LLMMonitoring/pipecat-logo.webp" alt="Pipecat Icon" className="h-7 w-7" />
   ),
   '/docs/pydantic-ai-observability': <SiPydantic className="h-7 w-7 text-pink-600" />,
+  '/docs/qwen-observability': (
+    <img src="/svgs/icons/LLMMonitoring/qwen-logo.webp" alt="Qwen Icon" className="h-7 w-7" />
+  ),
   '/docs/semantic-kernel-observability': (
     <img
       src="/img/docs/llm/semantic-kernel/sk-logo.webp"

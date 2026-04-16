@@ -1,0 +1,121 @@
+---
+date: 2026-03-30
+id: latency-spike-explainer
+title: Latency Spike Explainer
+description: Ask your AI assistant "why is this slow?" and get a full span breakdown identifying the bottleneck service.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+PagerDuty fires. The alert reads: `checkout-service p99 latency > 2s (currently 4.7s), triggered 3 min ago`. You already know what is slow. You need to know why.
+
+You open your AI assistant, connected to SigNoz via the MCP server, and start asking.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Inspect a Slow Trace
+
+```
+Show me traces from checkout-service slower than 2 seconds in the last 30 minutes. Break down the spans for the slowest one.
+```
+
+The span tree comes back:
+
+```
+POST /api/checkout (checkout-service, 4,712ms)
+  |-- ValidateCart (checkout-service, 8ms)
+  |-- GetCustomerProfile (customer-service, 41ms)
+  |-- ProcessPayment (payment-service, 4,480ms)  <-- 95% of total
+  |     |-- ChargeCard (stripe-gateway, 4,430ms)
+  |-- SendConfirmation (notification-service, skipped, upstream failure)
+```
+
+95% of the time is in the `ChargeCard` call to the Stripe gateway.
+
+## Step 2: Is This All Requests or Just the Tail?
+
+```
+Show me the p50 and p99 latency for checkout-service /api/checkout over the last 2 hours, broken down in 5-minute intervals.
+```
+
+Both p50 and p99 were stable at ~400ms until 1:47 AM, then both jumped. p50 is at 3.8s, p99 at 4.7s. This is not tail latency. Nearly every request is affected. Something broke at 1:47 AM.
+
+## Step 3: Compare With a Healthy Trace
+
+```
+Find me a trace from checkout-service between 2 and 3 hours ago where duration was under 500ms.
+```
+
+A healthy trace from before the spike:
+
+```
+POST /api/checkout (checkout-service, 387ms)
+  |-- ValidateCart (checkout-service, 6ms)
+  |-- GetCustomerProfile (customer-service, 38ms)
+  |-- ProcessPayment (payment-service, 291ms)
+  |     |-- ChargeCard (stripe-gateway, 248ms)
+  |-- SendConfirmation (notification-service, 31ms)
+```
+
+Same call chain. The only difference: `ChargeCard` went from 248ms to 4,430ms. The problem is not in your code. It is downstream.
+
+## Step 4: Check the Dependency
+
+```
+Show me p99 latency for payment-service over the last 2 hours in 5-minute intervals. Also pull any error or warning logs from payment-service in the last 30 minutes.
+```
+
+Payment-service latency spiked at the exact same time. The logs show the cause:
+
+```
+01:47:12 WARN  Stripe endpoint config reloaded: region changed us-east-1 -> eu-west-1
+01:47:14 WARN  ChargeCard latency elevated (2,341ms), retrying
+01:47:15 ERROR ChargeCard timeout after 5000ms
+01:47:18 WARN  ChargeCard latency elevated (4,102ms)
+```
+
+A config change at 1:47 AM switched the Stripe endpoint to a different region. Every charge request is now making a cross-Atlantic round trip.
+
+## Step 5: Quantify and Decide
+
+```
+Show me total request count and error rate for checkout-service over the last 2 hours in 5-minute intervals. What percentage of requests are slower than 2 seconds?
+```
+
+847 requests since the spike. 94% are over 2 seconds. Error rate is 12% (timeouts). The trend is flat, not worsening, but nearly every customer is getting a degraded experience. You revert the config change.
+
+## Tips for Your Own Investigations
+
+- **Check percentiles, not just p99.** If p50 is fine but p99 is bad, only a subset of requests are slow. If both are bad, something systemic broke.
+- **Follow the dependency chain.** If the bottleneck span is a call to another service, check that service directly. Correlate latency spikes and error logs across both.
+- **Quantify before you act.** Know the blast radius before you wake someone up or trigger a rollback.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_search_traces` | Found traces matching the duration and time range filter |
+| 1 | `signoz_get_trace_details` | Returned the full span tree for the slowest trace |
+| 2 | `signoz_aggregate_traces` | Computed p50/p99 latency in time-series buckets |
+| 3 | `signoz_search_traces` | Found a healthy baseline trace from before the spike |
+| 4 | `signoz_get_service_top_operations` | Got latency breakdown for the downstream service |
+| 4 | `signoz_search_logs` | Pulled error and warning logs from payment-service |
+| 5 | `signoz_aggregate_traces` | Computed request counts and error rates over time |
+
+</details>
+
+## Next Steps
+
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration) - Search and analyze logs without writing queries.
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id) - Debug a support ticket with a trace ID.
+
+<GetHelp />

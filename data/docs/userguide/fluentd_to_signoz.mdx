@@ -1,8 +1,7 @@
 ---
-date: 2026-03-12
+date: 2026-03-21
 title: FluentD to SigNoz
 description: Send Fluentd logs to SigNoz using the OpenTelemetry Collector.
-
 id: fluentd_to_signoz
 hide_table_of_contents: true
 ---
@@ -36,10 +35,11 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
    ```yaml
    service:
        ...
-       logs:
-           receivers: [otlp, fluentforward]
-           processors: [batch]
-           exporters: [otlp]
+       pipelines:
+           logs:
+               receivers: [otlp, fluentforward]
+               processors: [batch]
+               exporters: [otlp]
    ```
 
 4. **Update FluentD Configuration**
@@ -117,10 +117,11 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
 
    service:
      ...
-     logs:
-       receivers: [otlp, fluentforward]
-       processors: [batch]
-       exporters: [clickhouselogsexporter]
+     pipelines:
+       logs:
+         receivers: [otlp, fluentforward]
+         processors: [batch]
+         exporters: [clickhouselogsexporter]
    ```
 
 3. **Expose Collector Port**

@@ -26,6 +26,7 @@ import {
   SiSupabase,
   SiOllama,
   SiHuggingface,
+  SiN8N,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -92,6 +93,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       alt="Azure OpenAI Icon"
       className="h-7 w-7"
     />
+  ),
+  '/docs/dashboards/dashboard-templates/baseten-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/baseten-logo.webp" alt="Baseten Icon" className="h-7 w-7" />
   ),
   '/docs/dashboards/dashboard-templates/cicd': <Settings className="h-7 w-7 text-green-600" />,
   '/docs/dashboards/dashboard-templates/claude-code-dashboard/': (
@@ -224,6 +228,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   'https://github.com/SigNoz/dashboards/tree/main/nomad': (
     <Layers className="h-7 w-7 text-purple-600" />
   ),
+  '/docs/dashboards/dashboard-templates/n8n-dashboard': <SiN8N className="h-7 w-7 text-gray-500" />,
   '/docs/dashboards/dashboard-templates/ollama-dashboard': (
     <SiOllama className="h-7 w-7 text-white" />
   ),
@@ -234,6 +239,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <img
       src="/svgs/icons/LLMMonitoring/openclaw-logo.svg"
       alt="OpenClaw Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/opencode-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/opencode-logo.webp"
+      alt="OpenCode Icon"
       className="h-7 w-7"
     />
   ),
@@ -252,6 +264,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/dashboards/dashboard-templates/pydantic-ai-dashboard': (
     <SiPydantic className="h-7 w-7 text-pink-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/qwen-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/qwen-logo.webp" alt="Qwen Icon" className="h-7 w-7" />
   ),
   '/docs/dashboards/dashboard-templates/rabbitmq': (
     <SiRabbitmq className="h-7 w-7 text-orange-600" />
@@ -275,7 +290,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   'https://github.com/SigNoz/dashboards/tree/main/slurm': (
     <Server className="h-7 w-7 text-green-600" />
   ),
-  'https://github.com/SigNoz/dashboards/tree/main/snowflake': (
+  '/docs/dashboards/dashboard-templates/snowflake': (
     <SiSnowflake className="h-7 w-7 text-blue-400" />
   ),
   '/docs/dashboards/dashboard-templates/supabase': (

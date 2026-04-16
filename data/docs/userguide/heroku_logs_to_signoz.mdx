@@ -1,5 +1,5 @@
 ---
-date: 2026-01-27
+date: 2026-03-24
 title: Stream Logs from Heroku to SigNoz
 description: Stream application logs from Heroku to SigNoz using HTTPS drains. This guide covers setup for both Cloud and Self-Hosted SigNoz instances.
 id: heroku_logs_to_signoz
@@ -37,7 +37,7 @@ Once the drain is added, verify the logs in SigNoz under the Logs tab.
 ## Stream Heroku Logs to Self-Hosted SigNoz
 
 ### 1. Expose a Port in `docker-compose.yaml`
-Modify the [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose-minimal.yaml) file to expose port `8081` for receiving logs:
+Modify the [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose.yaml) file to expose port `8081` for receiving logs:
 
 ```yaml:/deploy/docker/docker-compose-minimal.yaml {8} 
 ...
@@ -68,10 +68,11 @@ Modify the pipeline in the `otel-collector-config.yaml`](https://github.com/SigN
 ```yaml:/deploy/docker/otel-collector-config.yaml {4}
 service:
   ...
-  logs:
-    receivers: [otlp, httplogreceiver/heroku]
-    processors: [batch]
-    exporters: [clickhouselogsexporter]
+  pipelines:
+    logs:
+      receivers: [otlp, httplogreceiver/heroku]
+      processors: [batch]
+      exporters: [clickhouselogsexporter]
 ```
 
 ### 4. Restart the OTEL Collector

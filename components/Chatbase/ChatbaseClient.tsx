@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
-import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '@/utils/userUtils'
+import { getOrCreateAnonymousId, getUserId } from '@/utils/userClient'
+import { extractGroupIdFromEmail } from '@/utils/userShared'
 
 interface ChatbaseClientProps {
   className?: string

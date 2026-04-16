@@ -42,7 +42,7 @@ const CTASection = () => {
             <div className="relative flex items-center justify-center">
               <Image
                 src="/img/landing/landing_thumbnail.webp"
-                alt="Landing Thumbnail"
+                alt="SigNoz dashboard with application performance metrics - Kubecon North America 2025"
                 className="z-[0] -mb-24 w-3/5 rounded-lg max-sm:-mb-8"
                 width={1200}
                 height={630}

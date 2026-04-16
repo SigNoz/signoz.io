@@ -9,135 +9,6 @@ image: /img/blog/2023/07/opentelemetry_gin_cover-min.jpg
 keywords: [opentelemetry,gin,opentelemetry gin,opentelemetry gin middleware,opentelemetry gin example,opentelemetry gorm,gorm,golang,apm tools,application performance monitoring]
 ---
 
-<head>
-  <script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Implementing OpenTelemetry in a Gin application",
-  "alternativeHeadline": "How to use OpenTelemetry for tracing and monitoring Gin applications in Go",
-  "author": {
-    "@type": "Person",
-    "name": "Nitya"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2023-07-28T00:00:00Z",
-  "dateModified": "2024-08-07T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/blog/opentelemetry-gin/"
-  },
-  "description": "Learn how to implement OpenTelemetry in a Gin application for end-to-end tracing and monitoring. This guide covers instrumenting Gin and GORM with OpenTelemetry and visualizing data using SigNoz.",
-  "keywords": "opentelemetry, gin, opentelemetry gin, opentelemetry gin middleware, opentelemetry gin example, opentelemetry gorm, gorm, golang, apm tools, application performance monitoring",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "OpenTelemetry",
-      "description": "An open-source observability framework for cloud-native software"
-    },
-    {
-      "@type": "Thing",
-      "name": "Gin",
-      "description": "A web framework written in Go"
-    },
-    {
-      "@type": "Thing",
-      "name": "Application Performance Monitoring",
-      "description": "The practice of monitoring software applications to detect and diagnose performance issues"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "OpenTelemetry",
-      "applicationCategory": "Observability Framework"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "Gin",
-      "applicationCategory": "Web Framework"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "GORM",
-      "applicationCategory": "ORM Library"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Application Performance Monitoring"
-    }
-  ],
-  "mainEntity": {
-    "@type": "HowTo",
-    "name": "How to Implement OpenTelemetry in a Gin Application",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Install SigNoz",
-        "text": "Install SigNoz as the backend analysis tool for OpenTelemetry data"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Get sample Gin app",
-        "text": "Clone a sample Go application with Gin framework"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Configure OpenTelemetry",
-        "text": "Declare variables for configuring OpenTelemetry in your Gin application"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Instrument Gin with OpenTelemetry",
-        "text": "Add OpenTelemetry instrumentation to your Gin application"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Add OpenTelemetry Gin middleware",
-        "text": "Implement the OpenTelemetry middleware in your Gin application"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Set environment variables",
-        "text": "Set the necessary environment variables for OpenTelemetry data export"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Generate sample data",
-        "text": "Create and retrieve books using the sample Gin application to generate telemetry data"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Visualize data in SigNoz",
-        "text": "Access the SigNoz UI to visualize and analyze the collected telemetry data"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Monitor GORM with OpenTelemetry",
-        "text": "Instrument the GORM database client with OpenTelemetry for database query tracing"
-      }
-    ]
-  }
-}) }}
-  />
-</head>
-
 OpenTelemetry can be used to trace Gin applications for performance issues and bugs. OpenTelemetry is an open-source project under the Cloud Native Computing Foundation (<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) that aims to standardize the generation and collection of telemetry data like logs, metrics, and traces.
 
 
@@ -198,7 +69,7 @@ You can visit our documentation for instructions on how to install SigNoz using 
 
 <a href="/docs/install/" target="_blank"><NextImage src="/img/blog/common/deploy_docker_documentation.webp" alt="Deployment Docs" width={1200} height={675} /></a>
 
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
+When you are done installing SigNoz, you can access the UI at `http://localhost:3301/application`
 
 <figure data-zoomable align='center'>
     <NextImage src="/img/blog/2022/02/signoz_dashboard.webp" alt="SigNoz dashboard" width={1200} height={675} />
@@ -320,7 +191,7 @@ IP os SigNoz backend should be **without http/https scheme.**
 
 `SERVICE_NAME`: goGinApp (you can name it whatever you want)
 
-`OTEL_EXPORTER_OTLP_ENDPOINT`: localhost:4317
+`OTEL_EXPORTER_OTLP_ENDPOINT`: `localhost:4317`
 
 Since we have installed SigNoz on our local machine, we use the above IP. If you install SigNoz on a different machine, you can update it with the relevant IP.
 
@@ -366,7 +237,7 @@ In order to monitor your Gin application with SigNoz, you first need to generate
     
 
 **Step 9: Visualize the collected data in SigNoz**<br></br>
-Access the signoz UI  on [http://localhost:3301/application](http://localhost:3301/application) 
+Access the signoz UI  on `http://localhost:3301/application` 
 
 Go to `Services` → `goGinApp` → you will be able to see the dashboard
 

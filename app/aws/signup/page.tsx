@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react'
 import { useSearchParams, usePathname } from 'next/navigation'
 import { ExternalLink, Loader2, Mail } from 'lucide-react'
-import { VariantNavbar } from '../../teams/TeamsVariant'
+import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
 import { Button } from '@/components/ui/Button'
 import Image from 'next/image'
 import { useLogEvent } from '@/hooks/useLogEvent'
@@ -372,7 +372,7 @@ const Instructions = () => {
 export default function AWSSignupPage() {
   return (
     <div className="bg-signoz_ink-600 min-h-screen font-sans">
-      <VariantNavbar className="bg-signoz_ink-300 px-8" />
+      <FocusedNavbar className="bg-signoz_ink-300 px-8" />
       <div className="flex min-h-[calc(100vh-56px)] flex-col lg:flex-row">
         <div className="flex w-full flex-col items-center p-8 px-4 md:px-8 lg:w-5/12 lg:border-r lg:border-signoz_slate-500 lg:px-24">
           <Suspense

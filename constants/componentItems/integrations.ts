@@ -41,6 +41,16 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/sql-server',
       clickName: 'Microsoft SQL Server Integration Link',
     },
+    {
+      name: 'Hasura',
+      href: '/docs/integrations/opentelemetry-hasura',
+      clickName: 'Hasura Integration Link',
+    },
+    {
+      name: 'DBOS',
+      href: '/docs/integrations/opentelemetry-dbos',
+      clickName: 'DBOS Integration Link',
+    },
   ] satisfies ComponentItem[],
   aws: [
     {

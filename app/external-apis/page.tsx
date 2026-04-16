@@ -4,20 +4,20 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Monitor External APIs With Built-In Service Correlation | SigNoz',
+    absolute: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz',
   },
   openGraph: {
-    title: 'Monitor External APIs With Built-In Service Correlation',
+    title: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz',
     description:
-      'Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.',
+      'Monitor External API calls with SigNoz. Automatically detect domains, endpoints, latency and error rates using OpenTelemetry for complete service correlation.',
     images: '/img/platform/ExternalApisMeta.webp',
   },
   description:
-    'Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.',
+    'Monitor External API calls with SigNoz. Automatically detect domains, endpoints, latency and error rates using OpenTelemetry for complete service correlation.',
   twitter: {
-    title: 'Monitor External APIs With Built-In Service Correlation',
+    title: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz',
     description:
-      'Automatically detect external API calls using OpenTelemetry semantic conventions. Click any metric to view the service making the call or the underlying trace.',
+      'Monitor External API calls with SigNoz. Automatically detect domains, endpoints, latency and error rates using OpenTelemetry for complete service correlation.',
     images: '/img/platform/ExternalApisMeta.webp',
   },
 }

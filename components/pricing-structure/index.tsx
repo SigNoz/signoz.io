@@ -2,10 +2,16 @@ import React from 'react'
 import Heading from '../../components/ui/Heading'
 import SubHeading from '../../components/ui/SubHeading'
 import { H1, H4 } from '../Headings/Headings'
+import { cn } from '../../app/lib/utils'
 
-const PricingStructure = () => {
+const PricingStructure = ({ className }: { className?: string }) => {
   return (
-    <section className="border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400">
+    <section
+      className={cn(
+        'border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400',
+        className
+      )}
+    >
       <div className="section-container mx-auto px-8 py-10 md:px-10">
         <div className="flex flex-col justify-between">
           <div className="mb-5">

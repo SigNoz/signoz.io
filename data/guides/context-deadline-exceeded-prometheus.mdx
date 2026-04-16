@@ -67,13 +67,13 @@ Effective troubleshooting starts with proper diagnosis. Here's how to identify a
         
         You will notice a lot of data, which may appear difficult to read.
         
-        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image%204.webp" alt="" caption="" />Let’s decode it one by one :
+        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image%204.webp" alt="Prometheus error output showing context deadline exceeded" caption="" />Let’s decode it one by one :
         
         - There are 31 goroutines active at the time of the profile capture.
             
-            <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-276bcb1e-d88f-479d-83eb-028068902545.webp" alt="" caption="" />- Blocked Goroutines (3 instances)
+            <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-276bcb1e-d88f-479d-83eb-028068902545.webp" alt="Go goroutine stack trace showing blocked goroutines" caption="" />- Blocked Goroutines (3 instances)
             
-            <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-546fc198-8399-4937-96bc-c106bf46cef6.webp" alt="" caption="" />- "3 @ ..." indicates that 3 different goroutines are executing the same code path at this specific point in time.
+            <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-546fc198-8399-4937-96bc-c106bf46cef6.webp" alt="Go goroutine stack trace showing network-related waits" caption="" />- "3 @ ..." indicates that 3 different goroutines are executing the same code path at this specific point in time.
             - The goroutines are stuck waiting for network-related operations.
                 - `internal/poll.runtime_pollWait`: Waiting for I/O events on a file descriptor.
                 - `internal/poll.FD.Read`: Reading data from a file descriptor, typically a network socket.
@@ -81,7 +81,7 @@ Effective troubleshooting starts with proper diagnosis. Here's how to identify a
                 - `*net/http.(conn).serve*`: This suggests that the goroutine is handling an HTTP request.
         - Discovery Manager Goroutines (2 instances)
             
-            <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-20ac5d3d-d07c-4efc-aab3-ad29d37ac46b.webp" alt="" caption="" />- These goroutines are involved in Prometheus's discovery manager, which handles service discovery for targets.
+            <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-20ac5d3d-d07c-4efc-aab3-ad29d37ac46b.webp" alt="Go stack trace showing Prometheus discovery manager goroutines" caption="" />- These goroutines are involved in Prometheus's discovery manager, which handles service discovery for targets.
             - The `discovery/legacymanager.Manager.sender` function is related to sending target discovery updates.
         
         From above, we can figure out that the goroutine is stuck waiting for network-related operations. Hinting at network-related issues while trying to read data.

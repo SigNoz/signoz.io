@@ -51,7 +51,7 @@ export default function ArticleMetaDetailsCard({
                       <Link
                         href={author.url}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener noreferrer nofollow"
                         className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
                         prefetch={false}
                       >

@@ -159,6 +159,11 @@ function getRelatedArticles(doc, relatedArticles) {
   }
 }
 
+function getImageUrl(doc) {
+  const raw = doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)
+  return raw.startsWith('http') ? raw : `${siteMetadata.siteUrl}${raw}`
+}
+
 const getAuthorDetails = (authorID) => {
   if (allAuthors[authorID]) {
     return allAuthors[authorID]
@@ -170,10 +175,59 @@ const getAuthorDetails = (authorID) => {
 function getAuthors(doc) {
   const authorsArr = doc?.authors._array || ['SigNoz Team']
 
-  return authorsArr.map((author) => ({
-    '@type': 'Person',
-    name: getAuthorDetails(author).name || 'SigNoz Team',
-  }))
+  return authorsArr.map((author) => {
+    const details = getAuthorDetails(author)
+    return {
+      '@type': 'Person',
+      name: details.name || 'SigNoz Team',
+      ...(details.url && { url: details.url }),
+    }
+  })
+}
+
+function buildArticleStructuredData(doc) {
+  const postUrl = `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`
+  const tags = Array.isArray(doc.tags) ? doc.tags : []
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: doc.title,
+    description: doc.description || doc.summary || `Read about ${doc.title}`,
+    image: {
+      '@type': 'ImageObject',
+      url: getImageUrl(doc),
+      width: 1200,
+      height: 630,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl,
+    },
+    url: postUrl,
+    datePublished: doc.date,
+    dateModified: doc.lastmod || doc.date,
+    inLanguage: siteMetadata.language,
+    wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
+    author: getAuthors(doc),
+    publisher: {
+      '@type': 'Organization',
+      name: siteMetadata.title,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
+        width: 600,
+        height: 60,
+      },
+      sameAs: [
+        siteMetadata.linkedin,
+        siteMetadata.x,
+        siteMetadata.github,
+        siteMetadata.youtube,
+        siteMetadata.hackernews,
+      ],
+    },
+    ...(tags.length > 0 ? { articleSection: tags[0] } : {}),
+  }
 }
 
 export const Page = defineDocumentType(() => ({
@@ -192,6 +246,8 @@ export const Blog = defineDocumentType(() => ({
     tags: { type: 'list', of: { type: 'string' }, default: [] },
     lastmod: { type: 'date' },
     draft: { type: 'boolean' },
+    /** When true, omit this post from sitemap.xml (e.g. /blog/what-is-opentelemetry redirects to /opentelemetry but uses the same blog slug and params, /opentelemetry/ is added to sitemap. */
+    excludeFromSitemap: { type: 'boolean', required: false },
     summary: { type: 'string' },
     description: { type: 'string' },
     images: { type: 'json' },
@@ -217,29 +273,7 @@ export const Blog = defineDocumentType(() => ({
     },
     structuredData: {
       type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/blog/${doc.slug}`,
-        },
-        author: getAuthors(doc),
-        publisher: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-          logo: {
-            '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
-          },
-        },
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
+      resolve: (doc) => buildArticleStructuredData(doc),
     },
   },
 }))
@@ -297,7 +331,7 @@ export const Newsroom = defineDocumentType(() => ({
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+        image: getImageUrl(doc),
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -333,29 +367,7 @@ export const Guide = defineDocumentType(() => ({
     },
     structuredData: {
       type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/guides/${doc.slug}`,
-        },
-        author: getAuthors(doc),
-        publisher: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-          logo: {
-            '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
-          },
-        },
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
+      resolve: (doc) => buildArticleStructuredData(doc),
     },
   },
 }))
@@ -405,28 +417,37 @@ export const Doc = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'TechArticle',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/docs/${doc.slug}`,
-        },
+        headline: doc.title,
+        description: doc.description,
+        image: getImageUrl(doc),
         author: {
           '@type': 'Organization',
-          name: 'SigNoz',
+          name: siteMetadata.title,
         },
         publisher: {
           '@type': 'Organization',
-          name: 'SigNoz',
+          name: siteMetadata.title,
           logo: {
             '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+            url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
           },
+          sameAs: [
+            siteMetadata.linkedin,
+            siteMetadata.x,
+            siteMetadata.github,
+            siteMetadata.youtube,
+            siteMetadata.hackernews,
+          ],
         },
-        headline: doc.title,
-        datePublished: doc.date || 'Thu Jun 06 2025', // Setting it Jun 06, 2025 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
-        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2025',
-        description: doc.description,
-        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+        },
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+        inLanguage: siteMetadata.language,
+        wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
+        datePublished: doc.date || '2025-06-06', // Setting it Jun 06, 2025 as date metadata doesn't exist for docs, TODO: add date to all existing doc files
+        dateModified: doc.lastmod || doc.date || '2025-06-06',
       }),
     },
   },

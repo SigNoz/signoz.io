@@ -83,7 +83,9 @@ import QueryRace from './HighCardinalityData/QueryRace'
 import SamplingAggregation from './HighCardinalityData/SamplingAggregation'
 import UsersAnalogy from './HighCardinalityData/UsersAnalogy'
 import Tooltip from './ui/Tooltip'
+import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
+import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
 import dynamic from 'next/dynamic'
 const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'), { ssr: false })
 
@@ -172,4 +174,6 @@ export const components: MDXComponents = {
   UsersAnalogy,
   Tooltip,
   DatabaseTable,
+  InlineCTA,
+  MCPInstallButton,
 }

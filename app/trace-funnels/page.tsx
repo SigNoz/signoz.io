@@ -4,20 +4,21 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Create Visual Funnels from Traces to Track Step-by-Step Completion | SigNoz',
+    absolute:
+      'Trace Funnels - Create Visual Funnels to Track Step-by-Step Flows & Drop-Offs | SigNoz',
   },
   openGraph: {
-    title: 'Create Visual Funnels from Traces to Track Step-by-Step Completion',
+    title: 'Trace Funnels - Create Visual Funnels to Track Step-by-Step Flows & Drop-Offs | SigNoz',
     description:
-      'The only distributed tracing tool that tracks multi-step request flows. See where traces succeed, where they fail, and where they drop off in multi-step processes.',
+      'Create visual trace funnels with SigNoz to track multi-step request flows, visualize drop-offs, and identify bottlenecks in distributed systems.',
     images: '/img/platform/TraceFunnelsMeta.webp',
   },
   description:
-    'The only distributed tracing tool that tracks multi-step request flows. See where traces succeed, where they fail, and where they drop off in multi-step processes.',
+    'Create visual trace funnels with SigNoz to track multi-step request flows, visualize drop-offs, and identify bottlenecks in distributed systems.',
   twitter: {
-    title: 'Create Visual Funnels from Traces to Track Step-by-Step Completion',
+    title: 'Trace Funnels - Create Visual Funnels to Track Step-by-Step Flows & Drop-Offs | SigNoz',
     description:
-      'The only distributed tracing tool that tracks multi-step request flows. See where traces succeed, where they fail, and where they drop off in multi-step processes.',
+      'Create visual trace funnels with SigNoz to track multi-step request flows, visualize drop-offs, and identify bottlenecks in distributed systems.',
     images: '/img/platform/TraceFunnelsMeta.webp',
   },
 }

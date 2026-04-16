@@ -3,15 +3,22 @@ import Image from 'next/image'
 import Button from '@/components/Button/Button'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
+import { cn } from '../../app/lib/utils'
 
-export const GetStarted = ({ page }) => {
+export const GetStarted = ({ page, className }: { page: string; className?: string }) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
   return (
-    <div className="bg-[width:50%] bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat">
-      <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
-        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+    <>
+      <section
+        className={cn(
+          'mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          className
+        )}
+      >
+        <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
@@ -53,20 +60,20 @@ export const GetStarted = ({ page }) => {
               </div>
             </div>
             <div className="relative flex items-center justify-center">
-              <div className="relative -mb-36 aspect-[1200/630] w-3/5 max-sm:-mb-8">
+              <div className="relative -mb-36 aspect-[2400/1194] w-full max-sm:-mb-8 xl:w-3/5">
                 <Image
-                  src="/img/landing/landing_thumbnail.webp"
-                  alt="Custom Thumbnail"
+                  src={landingThumbnail}
+                  alt="SigNoz dashboard with application performance metrics - Get Started"
                   className="z-[0] rounded-lg"
                   fill
-                  sizes="60vw"
-                  priority
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1536px) 60vw, 900px"
                 />
               </div>
             </div>
           </div>
         </div>
       </section>
-    </div>
+    </>
   )
 }

@@ -51,11 +51,11 @@
 
 ### Git Hooks
 
-- We use Husky for pre-commit checks. See details in [CONTRIBUTING.md#git-hooks-and-checks](CONTRIBUTING.md#git-hooks-and-checks).
+- We use Husky for pre-commit checks. See [contributing/repo-workflow.md#git-hooks-and-checks](contributing/repo-workflow.md#git-hooks-and-checks).
 
 # Contributing
 
-Looking to contribute a blog or improve docs? See the full guidelines in [CONTRIBUTING.md](CONTRIBUTING.md), including blog contribution steps, docs standards, and the PR checklist.
+Looking to contribute a blog, docs page, or site change? Start with [CONTRIBUTING.md](CONTRIBUTING.md), then use the task-specific playbooks under [contributing/](contributing/).
 
 If you have any questions or need further assistance, feel free to reach out to us on [SigNoz Slack Community](https://signoz.io/slack).
 

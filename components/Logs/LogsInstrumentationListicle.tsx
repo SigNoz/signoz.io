@@ -24,6 +24,8 @@ import {
   SiGooglecloud,
   SiMysql,
   SiDeno,
+  SiSupabase,
+  SiHasura,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -51,7 +53,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/userguide/collect_kubernetes_pod_logs': <SiKubernetes className="h-7 w-7 text-blue-600" />,
   '/docs/userguide/collect_docker_logs': <SiDocker className="h-7 w-7 text-blue-500" />,
   '/docs/userguide/heroku_logs_to_signoz': <SiHeroku className="h-7 w-7 text-purple-600" />,
-  '/docs/userguide/vercel_logs_to_signoz': (
+  '/docs/userguide/vercel-to-signoz': (
     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black p-1">
       <SiVercel className="h-7 w-7 text-white" />
     </span>
@@ -70,6 +72,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/logs-management/send-logs/convex-log-streams-signoz': (
     <img src="/img/icons/convex-logo.svg" alt="Convex" className="h-9 w-9" />
+  ),
+  '/docs/logs-management/send-logs/supabase-logs': (
+    <SiSupabase className="h-7 w-7 text-emerald-500" />
   ),
   // Languages
   '/docs/logs-management/send-logs/python-logs': <SiPython className="h-7 w-7 text-blue-500" />,
@@ -153,6 +158,10 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <SiKubernetes className="h-7 w-7 text-blue-500" />
   ),
   '/docs/gcp-monitoring/cloud-run/logging/': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
+  '/docs/integrations/opentelemetry-dbos': (
+    <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />
+  ),
 }
 
 // AKS uses the same href as EKS but needs a different icon — override for Azure context

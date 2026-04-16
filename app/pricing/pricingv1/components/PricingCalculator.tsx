@@ -3,7 +3,7 @@
 // TODO: file too large
 import type React from 'react'
 import { useState, useEffect, useMemo } from 'react'
-import { Slider } from '@nextui-org/react'
+import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
@@ -402,38 +402,18 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({
     ariaLabel: string,
     inputValue: string
   ) => (
-    <Slider
-      size="sm"
-      step={0.01}
-      maxValue={MAX_VALUE}
-      minValue={MIN_VALUE}
-      showTooltip={true}
-      tooltipProps={{
-        content: value === 0 ? '0' : formatFunc(Number(inputValue)),
-      }}
-      color={color}
-      marks={[
-        { value: MIN_VALUE, label: minLabel },
-        { value: MAX_VALUE, label: maxLabel },
-      ]}
-      classNames={{
-        base: 'max-w-full',
-        label: 'text-medium',
-      }}
-      aria-label={ariaLabel}
-      renderThumb={(props) => (
-        <div
-          {...props}
-          className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-          aria-valuetext={value === 0 ? '0' : formatFunc(Number(inputValue))}
-        >
-          <span
-            className={`block h-5 w-5 rounded-full bg-${thumbColor} transition-transform group-data-[dragging=true]:scale-80`}
-          />
-        </div>
-      )}
+    <PricingRangeSlider
       value={value}
       onChange={onChange}
+      min={MIN_VALUE}
+      max={MAX_VALUE}
+      step={0.01}
+      color={color}
+      minLabel={minLabel}
+      maxLabel={maxLabel}
+      tooltipText={value === 0 ? '0' : formatFunc(Number(inputValue))}
+      thumbColorToken={thumbColor}
+      aria-label={ariaLabel}
     />
   )
 
