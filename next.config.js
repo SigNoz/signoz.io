@@ -173,6 +173,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/alerts-management/overview',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview/',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,

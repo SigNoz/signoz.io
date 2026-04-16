@@ -2610,11 +2610,11 @@ const docsSideNav = [
     label: 'Alerts',
     type: 'category',
     isExpanded: false,
-    route: '/docs/alerts-management/overview',
+    route: '/docs/alerts',
     items: [
       {
         type: 'doc',
-        route: '/docs/alerts-management/overview',
+        route: '/docs/alerts',
         label: 'Overview',
       },
       {
