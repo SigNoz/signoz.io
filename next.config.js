@@ -101,6 +101,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,
@@ -1281,7 +1291,7 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/query-handles-missing-values/',
-          destination: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
           permanent: true,
         },
         {
