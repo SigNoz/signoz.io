@@ -1,22 +1,43 @@
-import type { Doc } from '../../.contentlayer/generated/types'
+// Docs collection utilities - updated for custom content pipeline
 
-export type DocMeta = Omit<Doc, 'body' | '_raw'>
+export interface DocMeta {
+  title: string
+  id: string
+  slug: string
+  path: string
+  filePath: string
+  description?: string
+  summary?: string
+  tags?: string[]
+  docTags: string[]
+  readingTime: { minutes: number; words: number; text: string }
+  draft?: boolean
+  sidebar_label?: string
+  [key: string]: unknown
+}
+
+export interface Doc extends DocMeta {
+  body: {
+    raw: string
+    code: string
+  }
+  _file: {
+    path: string
+    directory: string
+    name: string
+  }
+}
 
 let docsMetaPromise: Promise<DocMeta[]> | null = null
-let docsFullPromise: Promise<Doc[]> | null = null
 
 /**
  * Load lightweight doc metadata for listings/search.
- * ~4MB instead of ~75MB
  */
 export async function getAllDocsMeta(): Promise<DocMeta[]> {
   if (!docsMetaPromise) {
-    docsMetaPromise = import('../../.contentlayer/generated/Doc/_index-meta.json')
-      .then((module) => module.default as DocMeta[])
-      .catch(() => {
-        console.warn('Doc _index-meta.json not found, falling back to full index')
-        return getAllDocs() as Promise<DocMeta[]>
-      })
+    docsMetaPromise = import('../../.content/Doc/meta.json').then(
+      (module) => module.default as DocMeta[]
+    )
   }
   return docsMetaPromise
 }
@@ -25,19 +46,29 @@ export async function getAllDocsMeta(): Promise<DocMeta[]> {
  * Load full docs. Only use in generateStaticParams.
  */
 export async function getAllDocs(): Promise<Doc[]> {
-  if (!docsFullPromise) {
-    docsFullPromise = import('../../.contentlayer/generated/Doc/_index.json').then(
-      (module) => module.default as Doc[]
-    )
-  }
-  return docsFullPromise
+  const meta = await getAllDocsMeta()
+  const docs = await Promise.all(
+    meta.map(async (m) => {
+      try {
+        const mod = await import(`../../.content/Doc/${m.slug}.json`)
+        return mod.default as Doc
+      } catch {
+        console.warn(`Failed to load doc: ${m.slug}`)
+        return null
+      }
+    })
+  )
+  return docs.filter((d): d is Doc => d !== null)
 }
 
 /**
  * Load a single doc by slug.
- * Uses full index lookup (only runs at build time via generateStaticParams).
  */
 export async function getDocBySlug(slug: string): Promise<Doc | undefined> {
-  const docs = await getAllDocs()
-  return docs.find((doc) => doc.slug === slug)
+  try {
+    const mod = await import(`../../.content/Doc/${slug}.json`)
+    return mod.default as Doc
+  } catch {
+    return undefined
+  }
 }

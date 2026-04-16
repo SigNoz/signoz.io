@@ -4,7 +4,7 @@ import DocRenderer from './DocRender'
 import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
-import type { Doc } from 'contentlayer/generated'
+import type { Doc } from '@/utils/contentlayer/docsCollection'
 
 interface DocumentationPanelProps {
   currentStep: UpgradePath

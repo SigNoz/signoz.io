@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next'
-import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
+import { getAllBlogs } from '@/utils/contentlayer/blogCollection'
+import { getAllDocs } from '@/utils/contentlayer/docsCollection'
+import { getAllGuides } from '@/utils/contentlayer/guideCollection'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 
@@ -25,6 +27,17 @@ export const revalidate = 86400 // 1 day - must be static for Next.js
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
+
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  const [allBlogs, allDocs, allGuides, { faqs, caseStudies, opentelemetries, comparisons }] =
+    await Promise.all([
+      getAllBlogs(),
+      getAllDocs(),
+      getAllGuides(),
+      fetchAllCMSContent(deploymentStatus),
+    ])
 
   const blogRoutes = allBlogs
     .filter((post) => !post.draft && !post?.excludeFromSitemap)
@@ -52,12 +65,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.7,
     }))
-
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  const { faqs, caseStudies, opentelemetries, comparisons } =
-    await fetchAllCMSContent(deploymentStatus)
 
   let faqRoutes: MetadataRoute.Sitemap = []
   if (faqs) {

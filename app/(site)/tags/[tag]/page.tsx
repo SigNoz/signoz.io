@@ -1,6 +1,6 @@
 import { slug } from 'github-slugger'
 import type { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog } from 'contentlayer/generated'
+import type { Blog } from '@/utils/contentlayer/blogCollection'
 import siteMetadata from '@/data/siteMetadata'
 import ListLayout from '@/layouts/ListLayoutWithTags'
 import { getAllBlogsMeta, type BlogMeta } from '@/utils/contentlayer/blogCollection'

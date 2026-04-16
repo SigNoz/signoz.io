@@ -3,6 +3,7 @@ import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { buildListingMetadata } from '../metadata'
 import { getResourceCenterGuides } from '../content'
 
+export const dynamic = 'force-static'
 export const metadata = buildListingMetadata('Guides')
 
 export default async function GuidesHome() {

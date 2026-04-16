@@ -3,8 +3,8 @@ import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
 import { coreContent } from 'pliny/utils/contentlayer'
-import { allAuthors } from 'contentlayer/generated'
-import type { Authors } from 'contentlayer/generated'
+import { getAllAuthors } from '@/utils/contentlayer/authorCollection'
+import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import ComparisonsLayout from '@/layouts/ComparisonsLayout'
@@ -35,7 +35,7 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
 
-  const post = await fetchComparisonBySlug(slug)
+  const [post, allAuthors] = await Promise.all([fetchComparisonBySlug(slug), getAllAuthors()])
 
   if (!post) {
     return notFound()
@@ -91,7 +91,7 @@ export const generateStaticParams = async () => {
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
 
-  const post = await fetchComparisonBySlug(slug)
+  const [post, allAuthors] = await Promise.all([fetchComparisonBySlug(slug), getAllAuthors()])
 
   if (!post) {
     return notFound()

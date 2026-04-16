@@ -81,7 +81,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={siteMetadata.language} className={inter.className} suppressHydrationWarning>
+    <html
+      lang={siteMetadata.language}
+      className={`dark ${inter.className}`}
+      suppressHydrationWarning
+    >
       <GoogleTagManager gtmId="GTM-N9B6D4H" />
       <link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png" />

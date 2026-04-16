@@ -1,9 +1,8 @@
-import { allDocs } from 'contentlayer/generated'
-import type { Doc } from 'contentlayer/generated'
+import { getAllDocs, type Doc } from '@/utils/contentlayer/docsCollection'
 import UpgradePathTool from './components/UpgradePathTool'
 import upgradeSchema from '@/constants/upgradeSchema.json'
 
-function getUpgradeDocsBySlug(): Record<string, Doc> {
+async function getUpgradeDocsBySlug(): Promise<Record<string, Doc>> {
   const guideUrls = Array.from(
     new Set(
       Object.values(upgradeSchema.releases)
@@ -11,6 +10,8 @@ function getUpgradeDocsBySlug(): Record<string, Doc> {
         .filter(Boolean)
     )
   )
+
+  const allDocs = await getAllDocs()
 
   return Object.fromEntries(
     guideUrls
@@ -26,8 +27,8 @@ function getUpgradeDocsBySlug(): Record<string, Doc> {
   )
 }
 
-function UpgradePathToolPage() {
-  const docsBySlug = getUpgradeDocsBySlug()
+async function UpgradePathToolPage() {
+  const docsBySlug = await getUpgradeDocsBySlug()
 
   return (
     <>

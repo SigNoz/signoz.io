@@ -3,6 +3,7 @@ import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { buildListingMetadata } from '../metadata'
 import { getResourceCenterBlogs } from '../content'
 
+export const dynamic = 'force-static'
 export const metadata = buildListingMetadata('Blog')
 
 export default async function BlogHome() {

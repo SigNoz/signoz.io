@@ -1,4 +1,4 @@
-const { withContentlayer } = require('next-contentlayer2')
+const { withContentPipeline } = require('./lib/content-pipeline/next-plugin.js')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -64,7 +64,7 @@ const securityHeaders = [
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
 module.exports = () => {
-  const plugins = [withContentlayer, withBundleAnalyzer]
+  const plugins = [withContentPipeline, withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     productionBrowserSourceMaps: true, // Enable source maps for debugging
@@ -105,6 +105,20 @@ module.exports = () => {
             { key: 'Content-Type', value: 'text/markdown; charset=utf-8' },
             { key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' },
           ],
+        },
+      ]
+    },
+    async rewrites() {
+      return [
+        // Rewrite /api/docs-markdown/:path*/ to static .md files
+        // Handles both trailing slash and non-trailing slash versions
+        {
+          source: '/api/docs-markdown/:path*/',
+          destination: '/api/docs-markdown/:path*.md',
+        },
+        {
+          source: '/api/docs-markdown/:path((?!.*\\.md$).+)',
+          destination: '/api/docs-markdown/:path.md',
         },
       ]
     },

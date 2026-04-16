@@ -8,6 +8,9 @@ export async function generateMetadata({ params }: { params: { page: string } })
   return buildListingMetadata('Guides', params.page)
 }
 
+export const dynamic = 'force-static'
+export const dynamicParams = false
+
 export const generateStaticParams = async () => {
   const guides = await getAllGuidesMeta()
   return buildStaticPaginationParams(guides.length)
