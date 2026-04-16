@@ -336,7 +336,8 @@ export function useHubspotCustomForm({
           pageUri: window.location.href,
           pageName: document.title,
         },
-        ...(state.definition.legalConsentOptions
+        ...(state.definition.legalConsentOptions &&
+        (state.definition.legalConsentOptions as Record<string, unknown>).type !== 'none'
           ? { legalConsentOptions: state.definition.legalConsentOptions }
           : {}),
       }
