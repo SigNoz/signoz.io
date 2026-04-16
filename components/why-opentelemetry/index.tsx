@@ -96,7 +96,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
       >
         <div className="mb-16 px-0">
           <div className="grid gap-9 p-9">
-            <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="flex flex-col items-center gap-8 lg:flex-row">
               <div className="min-w-0">
                 <p className="text-2xl font-semibold text-signoz_vanilla-100">
                   {' '}
@@ -143,9 +143,9 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
                   </li>
                 </ul>
               </div>
-              <div className="mx-auto mb-6 aspect-[449/352] h-[400px] shrink-0 sm:h-[300px] 2xl:block">
+              <div className="mx-auto mb-6 shrink-0 sm:h-[300px] 2xl:block">
                 <Image
-                  className="w-full"
+                  className="h-full w-full"
                   src={featureGraphicOtel}
                   alt="Illustration showing SigNoz built on top of OpenTelemetry"
                   width={449}

@@ -34,8 +34,8 @@ const WhySelectSignoz = ({
           </p>
         </div>
         <div className="min-w-0">
-          <div className="ml-0 grid grid-cols-1 gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 md:py-10 md:pl-10 2xl:grid-cols-[minmax(0,1fr)_auto] 2xl:items-start">
-            <div className="grid min-w-0 grid-cols-1 gap-16 px-8 md:px-0">
+          <div className="ml-0 flex flex-col gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 md:flex-row md:items-center md:py-10 md:pl-10">
+            <div className="flex min-w-0 flex-1 flex-col gap-16 px-8 md:px-0">
               <div>
                 <p className="mb-2 block text-base font-medium text-signoz_vanilla-100">
                   Built for scale
@@ -64,7 +64,7 @@ const WhySelectSignoz = ({
                 </p>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80vw]">
+            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80vw] md:shrink-0">
               <Image
                 className="w-full"
                 src={featureGraphicEnterprise}
