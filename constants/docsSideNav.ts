@@ -3010,6 +3010,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/oncall-handoff-brief',
             label: 'On-Call Handoff Brief',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-fatigue-audit',
+            label: 'Alert Fatigue Audit',
+          },
         ],
       },
     ],
