@@ -19,18 +19,18 @@ At the top of the alert creation page, you can set:
 </figure>
 
 ## Step 1: Define the Metric
-In this step, you use the [Metrics Query Builder](/docs/userguide/query-builder/)
+In this step, you use the [Metrics Query Builder](https://signoz.io/docs/userguide/query-builder/)
 to choose the metric to monitor. The following fields are available:
 
 - **Metric**: Select the specific metric you want to monitor (e.g., `k8s.pod.memory_request_utilization`, `system.cpu.utilization`).
 
 - **Filter**: Write a filter expression to narrow the data (e.g., `service.name = 'frontend'`). Supports logical operators like AND, OR, IN, NOT IN.
 
-- **Aggregate within time series**: Select the time aggregation function (Avg, Sum, Min, Max, Count, Rate, etc.) and the step interval. Learn more about [time aggregation](/docs/metrics-management/types-and-aggregation/#aggregation).
+- **Aggregate within time series**: Select the time aggregation function (Avg, Sum, Min, Max, Count, Rate, etc.) and the step interval. Learn more about [time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation).
 
-- **Aggregate across time series**: Select the space aggregation function and optional group-by dimensions. Learn more about [space aggregation](/docs/metrics-management/types-and-aggregation/#aggregation).
+- **Aggregate across time series**: Select the space aggregation function and optional group-by dimensions. Learn more about [space aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation).
 
-- **[Legend Format](/docs/userguide/query-builder/#legend-format)**: Customize the legend's format in the visual representation of the alert.
+- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: Customize the legend's format in the visual representation of the alert.
 
 - **Having**: Apply conditions to filter the results further based on aggregate value.
 
@@ -100,7 +100,7 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
 
 ### Notification Channels
 
-   Choose the [notification channels](/docs/alerts-management/notification-channel/slack/) to send alerts to from those configured in Settings > Alert Channels. You can select multiple channels per threshold.
+   Choose the [notification channels](https://signoz.io/docs/alerts-management/notification-channel/slack/) to send alerts to from those configured in Settings > Alert Channels. You can select multiple channels per threshold.
     
 ### Threshold
     
@@ -150,7 +150,7 @@ You can incorporate result attributes in the alert message to make notifications
 
 **Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the notification message, you will use `$service.name`.
 
-Using [advanced Slack formatting](https://api.slack.com/reference/surfaces/formatting#advanced) is supported if you are using Slack as a notification channel.
+Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" target="_blank" rel="noopener noreferrer nofollow">advanced Slack formatting</a> is supported if you are using Slack as a notification channel.
 
 ### Group alerts by
 Combine alerts with the same field values into a single notification. Select fields to group by (optional). When empty, all matching alerts are combined into one notification.
@@ -182,7 +182,7 @@ Click the **Test Notification** button at the bottom of the page to send a test 
     <figcaption><i>Memory usage metric builder query</i></figcaption>
 </figure>
 
-The [`hostmetricsreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver) creates several host system metrics, including [`system_memory_usage`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/memoryscraper/documentation.md#systemmemoryusage), which contains the memory usage for each [state](https://www.kernel.org/doc/Documentation/filesystems/proc.txt) from `/proc/meminfo`. 
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver" target="_blank" rel="noopener noreferrer nofollow">hostmetricsreceiver</a> creates several host system metrics, including <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/memoryscraper/documentation.md#systemmemoryusage" target="_blank" rel="noopener noreferrer nofollow">system_memory_usage</a>, which contains the memory usage for each <a href="https://www.kernel.org/doc/Documentation/filesystems/proc.txt" target="_blank" rel="noopener noreferrer nofollow">state</a> from `/proc/meminfo`. 
 The states can be `free`, `used`, `cached`, etc. We want to alert when the total memory usage of a host exceeds the threshold, so the filter expression excludes the `free` state with `state!= 'free'`.
 We calculate the average value within each time series and then sum across time series grouped by `host.name` to get the per-host memory usage. 
 
