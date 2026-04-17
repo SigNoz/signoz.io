@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import DOMPurify from 'dompurify'
 import { Loader2 } from 'lucide-react'
 import type { HubspotFormDefinition, FormValues } from '../../types/hubspotForm'
 import type { SelectVariant, FormTheme } from './types'
@@ -90,7 +91,7 @@ export default function HubspotCustomForm({
             <div
               key={`rich-${groupIdx}`}
               className={`text-sm ${t.richText} [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_h4]:m-0 [&_h5]:m-0 [&_h6]:m-0 [&_p]:m-0`}
-              dangerouslySetInnerHTML={{ __html: group.richText }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(group.richText) }}
             />
           )
         }

@@ -4,11 +4,11 @@ import React from 'react'
 import styles from './styles.module.css'
 import HubspotCustomForm from '@/components/hubspot-custom-form/HubspotCustomForm'
 
-const MigrateSaving = (props) => {
-  const {
-    data: { TITLE, DESC, PORTAL_ID, FORM_ID },
-  } = props
+type MigrateSavingProps = {
+  data: { TITLE: string; DESC: string; PORTAL_ID: string; FORM_ID: string }
+}
 
+const MigrateSaving = ({ data: { TITLE, DESC, PORTAL_ID, FORM_ID } }: MigrateSavingProps) => {
   return (
     <>
       <div className={styles.svsdHeaderContainer}>

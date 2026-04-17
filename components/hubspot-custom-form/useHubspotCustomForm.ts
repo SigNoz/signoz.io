@@ -18,7 +18,9 @@ import type {
   HubspotSubmissionPayload,
 } from '../../types/hubspotForm'
 
-const definitionCache = new Map<string, HubspotFormDefinition>()
+const CACHE_TTL_MS = 60 * 60 * 1000 // 1 hour
+
+const definitionCache = new Map<string, { definition: HubspotFormDefinition; timestamp: number }>()
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -122,8 +124,18 @@ function validateField(
   }
 
   if (typeof value === 'string' && value) {
-    if (field.fieldType === 'email' && !EMAIL_REGEX.test(value)) {
-      return 'Please enter a valid email address'
+    if (field.fieldType === 'email') {
+      if (!EMAIL_REGEX.test(value)) {
+        return 'Please enter a valid email address'
+      }
+      const domain = value.split('@')[1]?.toLowerCase()
+      if (
+        domain &&
+        field.validation?.blockedEmailDomains?.length &&
+        field.validation.blockedEmailDomains.some((d) => d.toLowerCase() === domain)
+      ) {
+        return 'Please use your work email address'
+      }
     }
 
     if (field.fieldType === 'number') {
@@ -242,15 +254,17 @@ export function useHubspotCustomForm({
     }
 
     const cached = definitionCache.get(formId)
-    if (cached) {
-      dispatch({ type: 'SET_DEFINITION', definition: cached })
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      dispatch({ type: 'SET_DEFINITION', definition: cached.definition })
       logEvent({
         eventName: 'HubSpot Form Loaded',
         eventType: 'track',
         attributes: {
           ...commonAttributes,
           hubspot_load_source: 'cache',
-          hubspot_field_count: String(cached.fieldGroups.flatMap((g) => g.fields).length),
+          hubspot_field_count: String(
+            cached.definition.fieldGroups.flatMap((g) => g.fields).length
+          ),
         },
       })
       return
@@ -265,7 +279,7 @@ export function useHubspotCustomForm({
         throw new Error(`Failed to load form (${res.status})`)
       }
       const definition: HubspotFormDefinition = await res.json()
-      definitionCache.set(formId, definition)
+      definitionCache.set(formId, { definition, timestamp: Date.now() })
       dispatch({ type: 'SET_DEFINITION', definition })
 
       logEvent({
@@ -460,6 +474,13 @@ export function useHubspotCustomForm({
         }
 
         onSubmitSuccess?.(state.values)
+
+        // Handle redirect if configured in HubSpot
+        if (state.definition.redirect) {
+          setTimeout(() => {
+            window.location.href = state.definition!.redirect!
+          }, 1500)
+        }
       } catch (err) {
         dispatch({ type: 'SET_STATUS', status: 'idle' })
         dispatch({

@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import DOMPurify from 'dompurify'
 import { CheckCircle } from 'lucide-react'
 import type { FormTheme } from './types'
 import { themeStyles } from './types'
@@ -22,7 +23,7 @@ export default function HubspotCustomFormSuccess({
       {message ? (
         <div
           className={`text-sm ${t.successText} [&_p]:mb-1 [&_p]:last:mb-0`}
-          dangerouslySetInnerHTML={{ __html: message }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message) }}
         />
       ) : (
         <h3 className={`text-lg font-semibold ${t.successText}`}>We&apos;ll be in touch soon.</h3>
