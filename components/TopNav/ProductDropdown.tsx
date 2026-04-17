@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import { Button } from '@headlessui/react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
 import TrackingLink from '@/components/TrackingLink'
+import BrainfishIcon from '@/public/img/index_features/brainfish.svg'
 import {
   productDropdownItems,
   comparisonItems,
@@ -116,13 +116,7 @@ function SidebarSection({ onClose }: { onClose: () => void }) {
             onClick={onClose}
             prefetch={false}
           >
-            <Image
-              className="shrink-0"
-              src="/img/index_features/brainfish.svg"
-              alt="Brainfish"
-              width={20}
-              height={20}
-            />
+            <BrainfishIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
             <div className="line-clamp-2 max-w-[274px] text-sm text-signoz_vanilla-400 group-hover:text-[#fff]">
               How Brainfish leveraged SigNoz for effective Kubernetes monitoring
             </div>
