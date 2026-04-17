@@ -1,5 +1,3 @@
-import '@/css/opentelemetry-hub.css'
-
 import { type ReactNode } from 'react'
 import OpenTelemetryHubShellClient from './OpenTelemetryHubShellClient'
 

@@ -82,6 +82,9 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     '/docs/integrations/aws-elasticache-redis': <SiRedis className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
     '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
+    '/docs/integrations/opentelemetry-dbos': (
+      <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />
+    ),
   }
 
   const temporalCards = INTEGRATIONS_ITEMS.temporal.map((item) => ({

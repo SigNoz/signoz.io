@@ -16,9 +16,10 @@ function Footer() {
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const isLoginRoute = pathname === '/login/'
   const isTeamsRoute = pathname === '/teams/'
+  const isContactUsRoute = pathname === '/contact-us/'
   const isOnboardingRoute = source === ONBOARDING_SOURCE
 
-  if (isLoginRoute || isTeamsRoute || isOnboardingRoute) {
+  if (isLoginRoute || isTeamsRoute || isContactUsRoute || isOnboardingRoute) {
     return null
   }
 

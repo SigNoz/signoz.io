@@ -17,6 +17,7 @@ import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -127,7 +128,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
         <OpenTelemetryHubContent
           content={mainContent}
@@ -157,7 +158,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
       />
       <Layout
         content={mainContent}
