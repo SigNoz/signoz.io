@@ -1285,11 +1285,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/guides/apm-metrics',
-            label: 'Understanding APM Metrics',
-          },
-          {
-            type: 'doc',
             route: '/docs/traces-management/guides/derived-fields-spans',
             label: 'Derived Fields for Spans',
           },

@@ -91,6 +91,16 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/docs/traces-management/guides/apm-metrics',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/apm-metrics/',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
           source: '/docs/application-monitoring/api-monitoring',
           destination: '/docs/traces-management/guides/entry-point-spans-service-overview/',
           permanent: true,
