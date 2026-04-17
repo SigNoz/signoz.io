@@ -91,6 +91,16 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/docs/application-monitoring/api-monitoring',
+          destination: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/application-monitoring/api-monitoring/',
+          destination: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,
@@ -1804,21 +1814,6 @@ module.exports = () => {
         {
           source: '/docs/metrics-management/hostmetrics/',
           destination: '/docs/infrastructure-monitoring/overview/',
-          permanent: true,
-        },
-        {
-          source: '/docs/userguide/trac',
-          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
-          permanent: true,
-        },
-        {
-          source: '/docs/userguide/traces',
-          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
-          permanent: true,
-        },
-        {
-          source: '/docs/userguide/traces/',
-          destination: '/docs/apm-and-distributed-tracing/trace-explorer/',
           permanent: true,
         },
         {
