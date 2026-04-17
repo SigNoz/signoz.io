@@ -1,7 +1,5 @@
 'use client'
 
-import '../css/article-layout.css'
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
@@ -190,8 +188,8 @@ export default function ArticleLayout({
   return (
     <main id={MAIN_CONTENT_ID} ref={mainRef}>
       <SectionContainer>
-        <div className="doc doc-no-sidebar overflow-clip px-3 pt-8 md:px-6 md:pt-12 lg:px-8">
-          <div className="doc-content md:px-0 lg:px-4">
+        <div className="mx-auto flex h-full w-full max-w-ot-hub items-start justify-center gap-4 overflow-clip px-3 pt-8 max-lg:flex-col max-lg:gap-3 md:px-6 md:pt-12 lg:px-8">
+          <div className="mx-auto box-border w-full min-w-0 max-w-[780px] flex-auto md:px-0 lg:px-4">
             {hasToc && <div className="mb-4 lg:hidden" />}
 
             <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
@@ -221,7 +219,9 @@ export default function ArticleLayout({
                             alt={primaryAuthor.name}
                             width={36}
                             height={36}
-                            className="h-9 w-9 rounded-full border border-white/10 object-cover"
+                            objectPosition="center"
+                            objectFit="cover"
+                            className="h-9 w-9 rounded-full border border-white/10 object-cover object-center"
                           />
                         )}
                         <div className="flex flex-col gap-1">
@@ -342,15 +342,18 @@ export default function ArticleLayout({
 
           {/* Right sidebar - Desktop only */}
           {(hasMetaInfo || hasToc) && (
-            <aside className="doc-right hidden lg:block" aria-label="On this page navigation">
-              <div className="doc-right-inner">
+            <aside
+              className="sticky top-[120px] box-border hidden h-[calc(100vh-140px)] max-h-[calc(100vh-140px)] w-80 min-w-80 max-w-80 flex-[0_0_320px] self-start px-4 lg:block"
+              aria-label="On this page navigation"
+            >
+              <div className="flex h-full flex-col gap-3">
                 {metaInfoCard}
                 {hasToc && (
-                  <div className="doc-toc">
+                  <div className="flex min-h-0 flex-auto flex-col gap-1">
                     <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
                     <div
                       ref={tocContainerRef}
-                      className="doc-toc-items doc-toc-scroll border-l border-signoz_slate-500 pl-3"
+                      className="relative z-[1] max-h-none min-h-0 flex-auto overflow-y-auto border-l border-signoz_slate-500 pl-3"
                     >
                       <TableOfContents
                         toc={toc}

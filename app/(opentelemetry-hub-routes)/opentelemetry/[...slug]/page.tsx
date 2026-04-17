@@ -1,6 +1,4 @@
 import 'css/prism.css'
-import 'css/post.css'
-import 'css/doc.css'
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
@@ -16,7 +14,7 @@ import React from 'react'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
-import { generateStructuredData } from '@/utils/structuredData'
+import { generateStructuredData, safeJsonLdStringify } from '@/utils/structuredData'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
@@ -246,7 +244,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         {jsonLd && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
           />
         )}
         <OpenTelemetryHubContent
@@ -274,7 +272,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
       )}
       <Layout

@@ -74,7 +74,7 @@ const ALL_FEATURES_DATA = {
       desc: 'Cloud / Self-Hosted',
       action: (
         <TrackingLink
-          href={'/contact-us/'}
+          href={'/contact-us/?source=pricing'}
           className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
           clickType="Secondary CTA"
           clickName="Enterprise Contact Button"

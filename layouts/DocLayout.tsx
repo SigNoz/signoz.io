@@ -1,7 +1,5 @@
 'use client'
 
-import '../css/doc.css'
-
 import { ReactNode, useEffect, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Doc } from 'contentlayer/generated'
@@ -15,6 +13,7 @@ import docsSideNav from '@/constants/docsSideNav'
 import Link from 'next/link'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
+import { DOC_TOC_CLASSES, DOC_SIDENAV_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 
 export interface tocItemProps {
   url: string
@@ -39,12 +38,12 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
       <main ref={mainRef} className="">
         <ProgressBar target={mainRef} />
         <SectionContainer>
-          <div className="doc overflow-clip">
-            <div className="doc-sidenav border-r border-signoz_slate-500">
+          <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 overflow-clip">
+            <div className={DOC_SIDENAV_CLASSES}>
               <DocsSidebar />
             </div>
 
-            <div className="doc-content md:px-0 lg:px-4">
+            <div className="box-border min-w-0 flex-[1_1_auto] md:px-0 lg:px-4">
               <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
                 <h2 className="text-3xl">{title}</h2>
                 {children}
@@ -82,17 +81,17 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
             </div>
 
             {toc && Array.isArray(toc) && toc.length > 0 && (
-              <div className="doc-toc">
+              <div className={DOC_TOC_CLASSES}>
                 <div className="mb-3 text-xs uppercase"> On this page </div>
 
-                <div className="doc-toc-items border-l border-signoz_slate-500 pl-3 ">
+                <div className="relative z-[1] min-h-0 flex-[1_1_auto] overflow-y-auto border-l border-signoz_slate-500 pl-3">
                   {toc.map((tocItem: tocItemProps) => {
                     return (
-                      <div className="doc-toc-item" key={tocItem.url}>
+                      <div className="w-full text-[13px] font-medium" key={tocItem.url}>
                         <a
                           data-level={tocItem.depth}
                           href={tocItem.url}
-                          className="mb-1 line-clamp-2 text-xs"
+                          className="mb-1 line-clamp-2 inline-block w-full text-xs"
                         >
                           {tocItem.value}
                         </a>

@@ -355,8 +355,73 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/resource-center',
+          destination: '/blog',
+          permanent: true,
+        },
+        {
           source: '/resource-center/',
-          destination: '/resource-center/blog/',
+          destination: '/blog/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/blog',
+          destination: '/blog',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/blog/',
+          destination: '/blog/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/blog/page/:page',
+          destination: '/blog/page/:page',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/comparisons',
+          destination: '/comparisons',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/comparisons/',
+          destination: '/comparisons/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/comparisons/page/:page',
+          destination: '/comparisons/page/:page',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/guides',
+          destination: '/guides',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/guides/',
+          destination: '/guides/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/guides/page/:page',
+          destination: '/guides/page/:page',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/opentelemetry',
+          destination: '/opentelemetry',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/opentelemetry/',
+          destination: '/opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/resource-center/opentelemetry/page/:page',
+          destination: '/opentelemetry/page/:page',
           permanent: true,
         },
         {
@@ -573,11 +638,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/comparisons/',
-          destination: '/resource-center/comparisons/',
-          permanent: true,
-        },
-        {
           source: '/learn/user-stories/',
           destination: '/blog/community-update-06/#observability-user-stories',
           permanent: true,
@@ -707,11 +767,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/blog/',
-          destination: '/resource-center/blog/',
-          permanent: true,
-        },
-        {
           source: '/blog/open-source-log-management/',
           destination: '/blog/best-open-source-log-management-tools',
           permanent: true,
@@ -735,11 +790,6 @@ module.exports = () => {
         {
           source: '/opentelemetry/series/nextjs/',
           destination: '/blog/opentelemetry-nextjs/',
-          permanent: true,
-        },
-        {
-          source: '/guides/',
-          destination: '/resource-center/guides/',
           permanent: true,
         },
         {
@@ -1680,6 +1730,11 @@ module.exports = () => {
           destination: '/guides/tomcat-performance-monitoring/',
           permanent: true,
         },
+        {
+          source: '/guides/pino-logger/',
+          destination: '/guides/pino-logger-nodejs-logging-library/',
+          permanent: true,
+        },
         // April 2026 tech SEO 404 remediation redirects
         {
           source: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting/',
@@ -2215,7 +2270,7 @@ module.exports = () => {
         },
         {
           source: '/learn/',
-          destination: '/resource-center/guides/',
+          destination: '/guides/',
           permanent: true,
         },
         {
@@ -2620,10 +2675,27 @@ module.exports = () => {
       ]
     },
     webpack: (config, options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ['@svgr/webpack'],
-      })
+      // Find Next.js's existing rule that handles SVG imports
+      const fileLoaderRule = config.module.rules.find((rule) => rule.test?.test?.('.svg'))
+
+      config.module.rules.push(
+        // Reapply Next.js file loader for *.svg?url (cacheable with content hash)
+        {
+          ...fileLoaderRule,
+          test: /\.svg$/i,
+          resourceQuery: /url/,
+        },
+        // Convert other *.svg imports to React components
+        {
+          test: /\.svg$/i,
+          issuer: fileLoaderRule.issuer,
+          resourceQuery: { not: [...(fileLoaderRule.resourceQuery?.not || []), /url/] },
+          use: ['@svgr/webpack'],
+        }
+      )
+
+      // Exclude *.svg from the original rule since we handle it above
+      fileLoaderRule.exclude = /\.svg$/i
 
       // this is to avoid caching for webpack
       // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache

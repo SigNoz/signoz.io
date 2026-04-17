@@ -1,0 +1,328 @@
+---
+date: 2026-04-07
+id: dbos-instrumentation
+title: DBOS OpenTelemetry Instrumentation
+description: Send traces and logs to SigNoz from DBOS workflow applications using OpenTelemetry.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+This guide shows you how to instrument your DBOS application with OpenTelemetry and send telemetry to SigNoz. With OTLP enabled, DBOS can export traces and logs. DBOS automatically constructs hierarchical traces for workflows and their steps, and traces each HTTP request if you use FastAPI or Flask.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- <a href="https://pypi.org/project/dbos/" target="_blank" rel="noopener noreferrer nofollow">
+    Python 3.10+
+  </a>
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- A DBOS application
+
+Tested with Python 3.13 and DBOS version 2.17.0.
+
+## Send telemetry to SigNoz
+
+### Step 1. Install DBOS OpenTelemetry dependencies
+
+```bash
+pip install "dbos[otel]"
+```
+
+### Step 2. Enable OpenTelemetry export in DBOS
+
+In your Python application code, update the `DBOSConfig` object you pass to `DBOS`. Enable OTLP export and set both the traces and logs endpoints:
+
+```python:main.py
+from dbos import DBOS, DBOSConfig
+
+config: DBOSConfig = {
+    "name": "<service-name>",
+    "enable_otlp": True,
+    "otlp_traces_endpoints": ["https://ingest.<region>.signoz.cloud:443/v1/traces"],
+    "otlp_logs_endpoints":   ["https://ingest.<region>.signoz.cloud:443/v1/logs"],
+}
+
+DBOS(config=config)
+```
+
+Verify these values:
+
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+
+### Step 3. Set environment variables and run
+
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your DBOS application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+### Step 3.1 Set the ingestion key environment variable
+
+Set the ingestion key in your shell before you start the application. The OpenTelemetry SDK used by DBOS reads authentication headers from this environment variable at runtime:
+
+```bash
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3.2 Start your application
+
+Choose the startup command that matches your app:
+
+- If you use FastAPI, start your ASGI app with `uvicorn`.
+- If you use Flask, start the app with the WSGI or ASGI server command you already use in that project.
+- If you use plain DBOS without a web framework, start it with `dbos start`.
+
+Example for a FastAPI app:
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Example for a plain DBOS app:
+
+```bash
+dbos start
+```
+
+### Step 3.3 Generate a little traffic
+
+After the app starts, trigger one workflow run or send one HTTP request. SigNoz needs live traffic before traces and logs appear.
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+### Step 3.1 Set the ingestion key environment variable
+
+Set the ingestion key in PowerShell before you start the application:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3.2 Start your application
+
+Choose the startup command that matches your app:
+
+- If you use FastAPI, start your ASGI app with `uvicorn`.
+- If you use Flask, start the app with the WSGI or ASGI server command you already use in that project.
+- If you use plain DBOS without a web framework, start it with `dbos start`.
+
+Example for a FastAPI app:
+
+```powershell
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Example for a plain DBOS app:
+
+```powershell
+dbos start
+```
+
+### Step 3.3 Generate a little traffic
+
+After the app starts, trigger one workflow run or send one HTTP request so DBOS can emit traces and logs.
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+### Step 3.1 Store the ingestion key in a Kubernetes Secret
+
+Create a Secret, then reference it from your deployment. This keeps the ingestion key out of your manifest:
+
+```bash
+kubectl create secret generic signoz-otlp \
+  --from-literal=OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3.2 Reference the Secret in your deployment manifest
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    valueFrom:
+      secretKeyRef:
+        name: signoz-otlp
+        key: OTEL_EXPORTER_OTLP_HEADERS
+```
+
+### Step 3.3 Apply the updated manifest and generate traffic
+
+Redeploy your workload, then invoke one workflow or HTTP endpoint so DBOS exports traces and logs.
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 3.1 Keep the ingestion key outside the image
+
+Do not bake the ingestion key into your `Dockerfile`. Pass it at runtime.
+
+If you use `docker-compose.yml`, reference a host environment variable:
+
+```yaml
+environment:
+  - OTEL_EXPORTER_OTLP_HEADERS=${OTEL_EXPORTER_OTLP_HEADERS}
+```
+
+Verify these values:
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3.2 Set the environment variable in your shell
+
+```bash
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+### Step 3.3 Build and run your container
+
+```bash
+docker build -t my-dbos-app .
+docker run \
+  -p 8000:8000 \
+  -e OTEL_EXPORTER_OTLP_HEADERS="$OTEL_EXPORTER_OTLP_HEADERS" \
+  my-dbos-app
+```
+
+### Step 3.4 Generate a little traffic
+
+After the container starts, invoke one workflow or HTTP endpoint so SigNoz receives sample traces and logs.
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+After you start the application and generate traffic, confirm that SigNoz receives both traces and logs.
+
+### Validate traces
+
+1. Invoke a workflow or send one HTTP request to your DBOS application.
+2. In SigNoz, open **APM > Services**.
+3. Select your service name (`<service-name>`) from the service list.
+4. Open the **Traces** tab.
+5. Confirm that SigNoz shows traces for your request.
+6. Open one trace and confirm that it contains the workflow and step spans you expect.
+
+<Figure
+  src="/img/docs/integrations/dbos/sample-traces.webp"
+  alt="DBOS traces in SigNoz showing workflow and step spans"
+  caption="DBOS traces in SigNoz with workflow and step spans"
+/>
+
+### Validate logs
+
+1. Open **Logs Explorer** in SigNoz.
+2. Filter logs by `service.name` using your configured service name (`<service-name>`).
+3. Confirm that SigNoz shows logs from your DBOS application.
+4. Open one log entry and confirm that it matches the request or workflow run you just triggered.
+
+<Figure
+  src="/img/docs/integrations/dbos/sample-logs.webp"
+  alt="DBOS application logs in SigNoz Logs Explorer"
+  caption="DBOS application logs in SigNoz Logs Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No telemetry appearing in SigNoz
+
+- Likely cause: OTLP is not enabled in the DBOS configuration.
+- Fix: Confirm `enable_otlp: True` is set in your `DBOSConfig` and that both OTLP endpoints are present.
+- Verify: Traces and logs appear in SigNoz within a few minutes after enabling.
+
+### Authentication errors
+
+- Likely cause: Missing or incorrect ingestion key.
+- Fix: Set the `signoz-ingestion-key` header in `OTEL_EXPORTER_OTLP_HEADERS` and verify
+  the key is active in [SigNoz Cloud ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Verify: Check that the environment variable is exported before starting the process.
+
+### "OTLP tracer/logger provider not set, skipping exporter setup" warnings
+
+- Likely cause: The module failed to load before DBOS could register providers, or the
+  uvicorn module path doesn't match the actual filename.
+- Fix: Ensure the module name in the uvicorn command matches your filename exactly
+  (e.g., `uvicorn main:app` for `main.py`, `uvicorn myapp:app` for `myapp.py`).
+- Verify: Warnings are absent in the startup logs after the fix.
+
+### Traces missing workflow spans
+
+- Likely cause: Functions are not decorated as DBOS workflows.
+- Fix: Ensure functions are decorated with `@DBOS.workflow()` or `@DBOS.step()`.
+- Verify: DBOS only creates spans for decorated workflow and step functions.
+
+### Logs not appearing in SigNoz
+
+- Likely cause: Your app has not emitted any logs since startup.
+- Fix: Trigger one request or workflow run that writes logs, then check **Logs Explorer** again.
+- Verify: Filter by `service.name` and confirm that new DBOS log entries appear.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+Use the OpenTelemetry Collector when you need to process, filter, or route telemetry before
+it reaches SigNoz. Follow the [Switch to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/)
+guide for setup instructions.
+
+For DBOS, point the OTLP endpoints to your collector:
+
+```python:main.py
+config: DBOSConfig = {
+    "name": "<service-name>",
+    "enable_otlp": True,
+    "otlp_traces_endpoints": ["http://<collector-host>:4318/v1/traces"],
+    "otlp_logs_endpoints":   ["http://<collector-host>:4318/v1/logs"],
+}
+```
+
+</details>
+
+## Next steps
+
+- Set up [alerts](https://signoz.io/docs/alerts/) for trace latency, error rates, or log-based conditions.
+- Build [dashboards](https://signoz.io/docs/dashboards/) to monitor DBOS workflow activity.
+- Learn about [manual instrumentation in Python](https://signoz.io/docs/instrumentation/python/manual-instrumentation/) to add custom spans and attributes.
+
+## Get Help
+
+<GetHelp />
