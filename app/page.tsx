@@ -58,11 +58,6 @@ const softwareApplicationSchema = {
   url: `${siteUrl}/`,
   description:
     'Open-source observability platform for application performance monitoring, logs, and traces.',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-  },
 }
 
 const reviewSchemas = [
