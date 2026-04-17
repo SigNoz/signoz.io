@@ -1,8 +1,13 @@
 // Contact Us Data
+const PORTAL_ID = '22308423'
+const FORM_ID = 'cf4128d5-51f1-46aa-ae4a-552bcff20f8c'
+
 export const contactUsData = {
   TITLE: 'Enterprise Grade Observability at Any Scale',
-  PORTAL_ID: '22308423',
-  FORM_ID: 'cf4128d5-51f1-46aa-ae4a-552bcff20f8c',
+  PORTAL_ID,
+  FORM_ID,
+  FORM_NAME: 'Contact Us Form',
+  SUBMIT_URL: `https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL_ID}/${FORM_ID}`,
   FEATURES: [
     {
       title: 'Dedicated support',

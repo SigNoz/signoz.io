@@ -46,6 +46,11 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Integration Link',
     },
+    {
+      name: 'DBOS',
+      href: '/docs/integrations/opentelemetry-dbos',
+      clickName: 'DBOS Integration Link',
+    },
   ] satisfies ComponentItem[],
   aws: [
     {

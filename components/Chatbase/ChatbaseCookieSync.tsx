@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { getOrCreateAnonymousId } from '@/utils/userUtils'
+import { getOrCreateAnonymousId } from '@/utils/userClient'
 
 /**
  * Component that syncs the anonymous ID from localStorage to cookies

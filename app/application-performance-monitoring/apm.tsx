@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/Card/card'
@@ -213,11 +212,11 @@ const TrustedByTeams = ({ page }) => {
         </div>
         <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
           {COMPANIES.map((company, idx) => (
-            <div key={`${idx}-${company.image}`} className="flex items-center justify-center">
-              <img
+            <div key={`${idx}-${company.imageDesc}`} className="flex items-center justify-center">
+              <company.Logo
                 className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-                src={company.image}
-                alt={company.imageDesc}
+                role="img"
+                aria-label={company.imageDesc}
               />
             </div>
           ))}
@@ -389,7 +388,7 @@ const SigNozUsage = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Use SigNoz
             <br /> APM for...
           </p>
@@ -409,7 +408,7 @@ const UsageBasedPricing = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Simple
             <br /> usage-based <br /> pricing
           </p>
@@ -449,7 +448,7 @@ const ExploreDocs = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Explore Docs
           </p>
         </div>

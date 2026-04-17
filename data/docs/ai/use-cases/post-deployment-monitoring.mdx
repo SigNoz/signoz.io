@@ -1,0 +1,169 @@
+---
+date: 2026-04-16
+id: post-deployment-monitoring
+title: Post Deployment Monitoring
+description: Compare key metrics before and after a deployment to detect performance regressions or unexpected changes.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Your team deployed a new version of the `frontend` service to production at 10:00 AM (PST). You want to verify there are no performance regressions or unexpected behavior changes by comparing metrics from before and after the deployment.
+
+You open your AI assistant, connected to SigNoz via the MCP server, to run the comparison.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Compare Metrics Before and After Deployment
+
+```text
+Show me the top operations for the frontend service. For each endpoint, compare p99 latency and error rate from the 30 minutes before 10:00 AM PST vs the 30 minutes after. Flag anything that degraded.
+```
+
+The assistant analyzes the deployment window and returns a comparison table:
+
+```text
+Frontend service - Top operations comparison (30 min before vs after 10:00 AM PST)
+
+Operation                              | Calls (before → after) | p99 Latency (before) | p99 Latency (after) | Change  | Error Rate (before) | Error Rate (after) | Assessment
+---------------------------------------|------------------------|----------------------|---------------------|---------|---------------------|--------------------|-----------------------
+GET /api/recommendations               | 510 → 540              | 112 ms               | 170 ms              | +52%    | 0.8%                | 1.1%               | ⚠️ p99 degraded
+GET /api/products/[productId]/index    | 405 → 430              | 78 ms                | 105 ms              | +35%    | 0%                  | 14.4%              | ⚠️ p99 + errors
+GET /api/cart                          | 1156 → 1250            | 3.78 ms              | 4.23 ms             | +12%    | 0.09%               | 2.0%               | ⚠️ errors spiked
+GET /api/products/index                | 192 → 205              | 77 ms                | 103 ms              | +33%    | 0.5%                | 0.5%               | ⚠️ p99 degraded
+GET /api/currency                      | 215 → 228              | 210 ms               | 250 ms              | +19%    | 0%                  | 0%                 | minor
+GET /api/data                          | 142 → 136              | 104 ms               | 98 ms               | −6%     | 0%                  | 0%                 | ok
+GET /api/shipping                      | 138 → 145              | 154 ms               | 120 ms              | −22%    | 0%                  | 0%                 | improved
+GET / (homepage)                       | 125 → 118              | 459 ms               | 389 ms              | −15%    | 0%                  | 0%                 | improved
+
+Things that degraded after deployment:
+
+- GET /api/products/[productId]/index — p99 went from ~78 ms to ~105 ms (+35%) and error rate jumped from 0% to 14.4%. This endpoint had no errors before deployment, now it's failing on 1 in 7 requests.
+- GET /api/cart — error rate spiked from 0.09% to 2.0% (22× increase), though latency impact is minor.
+- GET /api/recommendations — p99 jumped from ~112 ms to ~170 ms (+52%), the biggest latency regression on a moderate-traffic endpoint (~540 calls/30min).
+- GET /api/products/index — p99 went from ~77 ms to ~103 ms (+33%).
+```
+
+The comparison reveals both latency regressions and error rate spikes. The product detail page and cart endpoints show significant error rate increases that didn't exist before deployment. To understand what's causing these errors, you'll dig into the specific error types that appeared.
+
+## Step 2: Compare Error Patterns Before and After Deployment
+
+Beyond latency regressions, you want to know if the deployment introduced any new error types.
+
+```text
+Compare errors for the frontend service in the 30 minutes before 10 AM PST versus the 30 minutes after. Show me if any new error types appeared.
+```
+
+The assistant analyzes both time windows and identifies new error patterns:
+
+```text
+Error comparison for frontend service:
+
+Before deploy (9:30 AM - 10:00 AM PST):
+# | Error Type                                    | Count
+--|-----------------------------------------------|-------
+1 | RPC exception with status code: UNAVAILABLE   | 12
+2 | Connection timeout to payment-service         | 8
+3 | Product not found                             | 5
+
+Total errors: 25
+Error rate: 1.2% (25 errors / 2,083 requests)
+
+After deploy (10:00 AM - 10:30 AM PST):
+# | Error Type                                    | Count
+--|-----------------------------------------------|-------
+1 | TypeError: Cannot read property 'price' of undefined | 87
+2 | RPC exception with status code: UNAVAILABLE   | 15
+3 | Connection timeout to payment-service         | 11
+4 | Product not found                             | 6
+
+Total errors: 119
+Error rate: 5.8% (119 errors / 2,052 requests)
+
+🚨 NEW ERROR DETECTED:
+- "TypeError: Cannot read property 'price' of undefined" (87 occurrences)
+  This error did not exist before the deploy.
+
+Error rate increased from 1.2% to 5.8% (4.8× increase).
+The new error accounts for 73% of all post-deploy errors.
+```
+
+The deployment clearly introduced a new `TypeError` that didn't exist before, and it's now responsible for the majority of errors. 
+
+## Step 3: Find Which Operation Introduced the Error
+
+You know there's a new error type, but you need to know which specific operation or endpoint is affected.
+
+```text
+Show me which operations are throwing the "Cannot read property 'price' of undefined" error. Group by operation name.
+```
+
+The assistant breaks down where the new error is occurring:
+
+```text
+Operations throwing "TypeError: Cannot read property 'price' of undefined":
+
+# | Operation                                          | Error Count | % of Total
+--|---------------------------------------------------|-------------|------------
+1 | GET /api/products/[productId]/index               | 62          | 71.3%
+2 | executing api route (pages) /api/products/[productId] | 62       | 71.3%
+3 | GET /api/cart                                     | 25          | 28.7%
+
+The error is concentrated in two areas:
+1. Product detail page endpoint (71%)
+2. Shopping cart endpoint (29%)
+
+Both operations share a common data structure: product information with pricing.
+```
+
+The error is primarily affecting the product detail page, with impact on the cart endpoint. Both endpoints were directly affected post-deploy.
+
+
+## Final Summary
+
+Starting from a post-deployment health check, the investigation revealed:
+
+1. **Performance regressions**: Three endpoints show significant p99 latency degradation, with `GET /api/recommendations` being the most concerning due to the magnitude.
+2. **A new error appeared**: `TypeError: Cannot read property 'price' of undefined` that didn't exist before deployment.
+3. **Error rate increased**: Error rate increased from pre to post deployment, with the newly introduced error accounting for the majority. 
+4. **Affected operations**: The error primarily impacts product detail pages and shopping cart.
+
+You now have clear evidence that the deployment introduced both performance and functional regressions. With this data, you can decide whether to rollback the deployment or proceed forward, and you know exactly which endpoints and error types to investigate.
+
+## Tips for Your Own Investigations
+
+- **Pick a consistent time window.** Use equal windows before and after the deployment timestamp (e.g., 30 minutes each) to ensure fair comparison. Avoid comparing different time ranges or durations.
+- **Check both metrics and errors.** Don't stop at latency regressions. Always check if new error types appeared.
+- **Focus on high-traffic endpoints first.** A 50% regression on a low-traffic endpoint may be less critical than a 20% regression on your busiest API. Prioritize investigations based on request volume and impact.
+- **Watch for correlated degradation patterns.** If multiple endpoints that share a dependency (database, cache, downstream service) all degrade together, the root cause is likely in that shared component, not in each individual endpoint.
+- **Drill down from error types to operations.** When you find a new error type, immediately identify which specific operations are throwing it. This pinpoints where to start your code investigation.
+- **Verify improvements are real.** If traffic dropped significantly for an endpoint, lower latency might just mean fewer requests, not better performance. Check request counts alongside metrics.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_get_service_top_operations` | Retrieved the list of top operations for the frontend service to identify which endpoints to compare |
+| 1 | `signoz_aggregate_traces` | Computed p99 latency, error rates, and request counts for each operation in the 30-minute window before and after deployment |
+| 2 | `signoz_search_traces` | Retrieved traces with exceptions from the frontend service in the before-deployment window |
+| 2 | `signoz_aggregate_traces` | Grouped and counted error types to identify new patterns |
+| 3 | `signoz_search_traces` | Filtered traces to only those containing the new TypeError message |
+| 3 | `signoz_aggregate_traces` | Grouped the TypeError occurrences by operation name to identify which endpoints are affected |
+</details>
+
+## Related Use Cases
+
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Investigate which service or dependency is causing slowdowns when latency spikes on an endpoint.
+- [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Find where errors originate in the call chain when error rates spike unexpectedly.
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) - Search deployment logs and error messages to identify what changed during the deployment window.
+
+
+<GetHelp />

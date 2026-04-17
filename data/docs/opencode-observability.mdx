@@ -1,0 +1,180 @@
+---
+date: 2026-04-15
+id: opencode-observability-with-opentelemetry
+
+title: OpenCode Observability & Monitoring with OpenTelemetry
+description: Enable observability and monitoring in your OpenCode usage with OpenTelemetry and send traces, logs, and metrics to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through enabling observability and monitoring in OpenCode using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, logs, and metrics to SigNoz using OpenTelemetry. Once set up, you’ll be able to track coding session activity, log outputs, and system-level metrics in SigNoz, giving you visibility into performance trends, error rates, and usage patterns directly from your development workflow.
+
+Instrumenting OpenCode with telemetry provides full observability into how coding assistance is used in practice. With SigNoz, you can correlate traces, logs, and metrics in a single dashboard, set up alerts, and analyze historical data to continuously improve reliability, efficiency, and user experience.
+
+## Prerequisites
+
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
+- Internet access to send telemetry data to SigNoz Cloud
+- <a href="https://opencode.ai/" target="_blank" rel="noopener noreferrer nofollow">OpenCode</a> installed and running on your system
+
+## Monitoring OpenCode
+
+For detailed instructions on setting up OpenTelemetry instrumentation for OpenCode, check out the <a href="https://github.com/DEVtheOPS/opencode-plugin-otel/blob/main/README.md" target="_blank" rel="noopener noreferrer nofollow">official plugin documentation</a>.
+
+### Step 1: Install the OpenTelemetry Plugin
+
+Add the plugin to your OpenCode config at `~/.config/opencode/opencode.json` (create the file if it doesn't already exist):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["@devtheops/opencode-plugin-otel"]
+}
+```
+
+### Step 2: Configure OpenTelemetry Environment Variables
+
+Set the required environment variables to enable telemetry and configure the OpenTelemetry endpoint:
+
+```bash
+export OPENCODE_ENABLE_TELEMETRY=1
+export OPENCODE_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OPENCODE_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+
+### Step 3: Run OpenCode with Telemetry Enabled
+
+With the environment variables set, you can now run OpenCode in one of two ways:
+
+**Option 1: Via VSCode**
+
+Open your project in VSCode with the `code` command:
+
+```bash
+code .
+```
+
+The OpenCode VSCode extension will automatically pick up the environment variables and start with telemetry enabled.
+
+**Option 2: Via Terminal**
+
+Run OpenCode directly in your terminal using the `opencode` command:
+
+```bash
+opencode
+```
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your OpenCode usage should now automatically emit traces, logs, and metrics.
+
+You should be able to view traces in SigNoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/opencode/opencode-traces.webp"
+  alt="OpenCode Trace View"
+  caption="OpenCode Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/opencode/opencode-detailed-traces.webp"
+  alt="OpenCode Detailed Trace View"
+  caption="OpenCode Detailed Trace View"
+/>
+
+You should be able to view logs in SigNoz Cloud under the logs tab. 
+
+<Figure
+  src="/img/docs/llm/opencode/opencode-logs.webp"
+  alt="OpenCode Logs View"
+  caption="OpenCode Logs View"
+/>
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure
+  src="/img/docs/llm/opencode/opencode-detailed-logs.webp"
+  alt="OpenCode Detailed Log View"
+  caption="OpenCode Detailed Logs View"
+/>
+
+You should be able to see OpenCode related metrics in SigNoz Cloud under the metrics tab:
+
+<Figure
+  src="/img/docs/llm/opencode/opencode-metrics.webp"
+  alt="OpenCode Metrics View"
+  caption="OpenCode Metrics View"
+/>
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure
+  src="/img/docs/llm/opencode/opencode-detailed-metrics.webp"
+  alt="OpenCode Detailed Metrics View"
+  caption="OpenCode Detailed Metrics View"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+</details>
+
+## Next Steps
+
+You can also check out our custom OpenCode dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/opencode-dashboard/) which provides specialized visualizations for monitoring your OpenCode usage. The dashboard includes pre-built charts specifically tailored for AI coding agents, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/opencode/opencode-dashboard.webp"
+  alt="OpenCode Dashboard"
+  caption="OpenCode Dashboard Template"
+/>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
