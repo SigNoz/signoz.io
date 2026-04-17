@@ -1,0 +1,78 @@
+---
+date: 2026-04-16
+id: oncall-handoff-brief
+title: On-Call Handoff Brief
+description: Generate a handoff summary of recent incidents and ongoing issues for the next on-call engineer.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Your on-call shift is ending. The next engineer is about to take over, and they need to know what happened during your shift.
+
+Instead of manually writing up a handoff doc, you ask your AI assistant, connected to the SigNoz MCP, to generate a summary from recent alert history.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure you have alerts configured in SigNoz. See [Alerts](https://signoz.io/docs/alerts/) if you haven't set this up.
+
+## Generate the Handoff Summary
+
+Ask your AI assistant to pull the alert history and format it as a handoff brief:
+
+```text
+Get the alert history for the last 48 hours. For each alert that fired, tell me which service was affected, when it fired, peak severity, and whether it's resolved or still open. Format as a handoff summary.
+```
+
+Your assistant will use the SigNoz MCP server to fetch the alert history and generate a structured handoff. Here's an example response:
+
+```text
+All 3 alerts currently firing (severity: error):
+
+**Frontend Service**: 65 flaps in 48h. Peak error rate 100%. OPEN.
+
+**Payment Service**: 119 flaps in 48h (one every 24 min). Peak error rate 50%. OPEN.
+
+**Checkout Service**: 44 flaps in 48h. Peak error rate 100%. OPEN.
+
+All three alerts have been flapping continuously—error rates dip below threshold
+briefly then spike back up. None have cleanly resolved. The high flap counts suggest
+the underlying issue isn't being fixed, just intermittently masked by low traffic.
+```
+
+<Admonition type="tip">
+Use Claude Desktop for this use case. Claude will generate an interactive handoff brief visualization that's easy to scan and share with the incoming on-call engineer.
+
+<Figure
+  src="/img/docs/ai/mcp/handoff.webp"
+  alt="Claude Handoff View"
+  caption="Claude Desktop Handoff View"
+/>
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_list_alerts` | Retrieved all currently firing alerts |
+| 1 | `signoz_get_alert_history` | Fetched the complete alert state transition history for the 48-hour window to calculate flap counts and identify patterns |
+| 1 | `signoz_get_alert` | Retrieved detailed information for each alert including severity, conditions, and current status |
+
+</details>
+
+## Related Use Cases
+
+- [Alert Correlation Analysis](https://signoz.io/docs/ai/use-cases/alert-correlation-analysis/) - When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
+- [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Investigate where errors originate in the call chain when a single service starts failing.
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Trace the bottleneck when latency spikes on one service.
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) - Search, filter, and analyze logs in SigNoz by asking questions in plain English.
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/) - Deep-dive into a specific failing request by pasting its trace ID.
+
+
+<GetHelp />
