@@ -1,196 +1,401 @@
 ---
-date: 2026-02-06
-title: OpenTelemetry Bridge for Logrus
-description: This document explains how to collect log data from Logrus and visualise it in SigNoz.
+date: 2026-04-13
+title: Send logs from Logrus to SigNoz using OpenTelemetry
 id: logrus-to-signoz
+doc_type: howto
+description: Learn how to send logs from the Go Logrus logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
 ---
 
-## Overview
+import GetHelp from '@/components/shared/get-help.md'
 
-This document explains how to collect log data from [Logrus](https://github.com/sirupsen/logrus) and visualise it in [SigNoz](https://signoz.io/).
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ## Prerequisites
 
-- A running Golang application
+- A running Golang application that uses the [Logrus](https://github.com/sirupsen/logrus) logger
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
-## Setup
+## Send logs to SigNoz
 
-### Step 1: Install dependencies
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
 
-Navigate to the root folder of your golang application and run the below command to install the required dependencies.
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+### Step 1. Set environment variables
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service_name>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+### Step 1. Set environment variables
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: '<service_name>'
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+<Admonition type="warning">
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 1. Set environment variables in Dockerfile
+
+Add environment variables to your Dockerfile:
+
+```dockerfile:Dockerfile
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o main .
+
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/main .
+
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service_name>"
+
+CMD ["./main"]
+```
+
+Or pass them at runtime:
+
+```bash
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service_name>" \
+    your-image:latest
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+### Step 1. Set environment variables (PowerShell)
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service_name>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+</Tabs>
+
+### Step 2. Install dependencies
+
+In the root folder of your Go application, run:
 
 ```bash
 go get \
-go.opentelemetry.io/contrib/bridges/otellogrus \
-go.opentelemetry.io/otel/sdk/log \
-go.opentelemetry.io/otel/sdk/trace \
-go.opentelemetry.io/otel/trace \
-go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp \
-github.com/sirupsen/logrus
+  github.com/sirupsen/logrus \
+  go.opentelemetry.io/contrib/bridges/otellogrus \
+  go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp \
+  go.opentelemetry.io/otel/sdk/log
 ```
 
-### Step 2: Instrument OpenTelemetry Logrus Log Bridge in your Golang application
+### Step 3. Instrument your application
 
-To instrument your Go application with the OpenTelemetry Logrus Log Bridge, add the following code to your golang application `main.go` file.
+Add the following code to your `main.go` file:
 
-```go
+```go:main.go
+package main
+
 import (
-   "context"
-   "log"
-   
-   "github.com/sirupsen/logrus"
-   "go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
-   otel_log"go.opentelemetry.io/otel/sdk/log"
-   "go.opentelemetry.io/contrib/bridges/otellogrus"
-)
+	"context"
+	"log"
 
+	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/bridges/otellogrus"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	otel_log "go.opentelemetry.io/otel/sdk/log"
+)
 
 func main() {
-   logExporter, err := otlploghttp.New(context.Background())
-   if err != nil {
-       // handle error
-       log.Fatal(err)
-   }
+	ctx := context.Background()
 
+	// Reads OTEL_EXPORTER_OTLP_ENDPOINT from env and initializes the OTLP HTTP log exporter
+	logExporter, err := otlploghttp.New(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-   // create log provider
-   log_provider := otel_log.NewLoggerProvider(
-       otel_log.WithProcessor(
-           otel_log.NewBatchProcessor(logExporter),
-       ),
-   )
+	// Wraps the exporter in a LoggerProvider with a batch processor
+	logProvider := otel_log.NewLoggerProvider(
+		otel_log.WithProcessor(
+			otel_log.NewBatchProcessor(logExporter),
+		),
+	)
+	defer logProvider.Shutdown(ctx)
 
+	// Registers the hook globally. All logrus.Info/Warn/Error calls are exported as OTel logs
+	hook := otellogrus.NewHook("signoz-golang", otellogrus.WithLoggerProvider(logProvider))
+	logrus.AddHook(hook)
 
-   defer log_provider.Shutdown(context.Background())
-
-
-   // Create an *otellogrus.Hook and use it in your application.
-   hook := otellogrus.NewHook("<signoz-golang>", otellogrus.WithLoggerProvider(log_provider))
-
-
-   // Set the newly created hook as a global logrus hook
-   logrus.AddHook(hook)
-   
-   ......
+	logrus.Info("Hello from Logrus via OpenTelemetry")
 }
 ```
 
-In this code, we initialized an OpenTelemetry Protocol (OTLP) Log provider using the OTLP log exporter and OTLP Batch processor. The OTLP Log provider is then used to create a global Logrus hook using the `otellogrus` package.
+1. Creates an OTLP HTTP log exporter that sends logs to the endpoint defined by `OTEL_EXPORTER_OTLP_ENDPOINT`.
+2. Wraps the exporter in a `LoggerProvider` with a batch processor for efficient log delivery.
+3. Creates a Logrus hook via `otellogrus.NewHook` and registers it globally with `logrus.AddHook`.
+4. Every `logrus.Info`, `logrus.Warn`, `logrus.Error`, etc. call is now captured and exported as OpenTelemetry logs.
 
-### Step 3 (Optional): Inject Trace and Span ID fields to your logs
+### Step 4. Run your application
 
-Trace and span IDs in structured logs provide a way to correlate logs, track requests across services, and diagnose issues effectively. To add the Span and Trace ID fields to your structured logs:
+```bash
+go run main.go
+```
 
-**Import the OpenTelemetry Trace library to your code file**
+The environment variables you set in Step 1 are automatically read by the OTLP exporter.
 
-```go
+<details>
+<ToggleHeading>
+
+## With Trace Correlation (Advanced)
+
+</ToggleHeading>
+
+Correlate Logrus logs with [OpenTelemetry traces](https://signoz.io/docs/instrumentation/golang/) by injecting `trace_id` and `span_id` fields into your structured logs.
+
+### Install additional dependencies
+
+```bash
+go get \
+  github.com/sirupsen/logrus \
+  go.opentelemetry.io/contrib/bridges/otellogrus \
+  go.opentelemetry.io/otel \
+  go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp \
+  go.opentelemetry.io/otel/sdk/log \
+  go.opentelemetry.io/otel/sdk/trace \
+  go.opentelemetry.io/otel/trace
+```
+
+### Instrument your application
+
+Add the following code to your `main.go` file:
+
+```go:main.go
+package main
+
 import (
-   "go.opentelemetry.io/otel"
-   sdktrace "go.opentelemetry.io/otel/sdk/trace"
-   oteltrace "go.opentelemetry.io/otel/trace"
+	"context"
+	"log"
+
+	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/contrib/bridges/otellogrus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	otel_log "go.opentelemetry.io/otel/sdk/log"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	oteltrace "go.opentelemetry.io/otel/trace"
 )
-```
 
-**Fetch current Span and Trace ID from context using the OTLP TracerProvider** 
-
-```go
-   otel.SetTracerProvider(
-       sdktrace.NewTracerProvider(
-           sdktrace.WithSampler(sdktrace.AlwaysSample()),
-       ),
-   )
-
-   tracer := otel.GetTracerProvider().Tracer("signoz-tracer")
-   _, span := tracer.Start(context.Background(), "signoz-tracer")
-   defer span.End()
-   
-```
-This code implements an OTLP TracerProvider. The OTLP TracerProvider is responsible for creating Spans which help to trace an operation.
-
-**Create a function to add Span and Trace ID values to your Logrus fields** 
-
-```go
+// Extracts trace correlation details from an OpenTelemetry span
 func LogrusFields(span oteltrace.Span) logrus.Fields {
-   return logrus.Fields{
-       "span_id":  span.SpanContext().SpanID().String(),
-       "trace_id": span.SpanContext().TraceID().String(),
-   }
+	return logrus.Fields{
+		"span_id":  span.SpanContext().SpanID().String(),
+		"trace_id": span.SpanContext().TraceID().String(),
+	}
+}
+
+func main() {
+	ctx := context.Background()
+
+	// Reads OTEL_EXPORTER_OTLP_ENDPOINT from env and initializes the OTLP HTTP log exporter
+	logExporter, err := otlploghttp.New(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Wraps the exporter in a LoggerProvider with a batch processor
+	logProvider := otel_log.NewLoggerProvider(
+		otel_log.WithProcessor(
+			otel_log.NewBatchProcessor(logExporter),
+		),
+	)
+	defer logProvider.Shutdown(ctx)
+
+	// Registers the hook globally. All logrus.Info/Warn/Error calls are exported as OTel logs
+	hook := otellogrus.NewHook("signoz-golang", otellogrus.WithLoggerProvider(logProvider))
+	logrus.AddHook(hook)
+
+	// Initializes the OTLP HTTP trace exporter
+	traceExporter, err := otlptracehttp.New(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Configures the TracerProvider with a batch processor and always sample
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(traceExporter),
+	)
+	defer tp.Shutdown(ctx)
+
+	// Registers the TracerProvider globally
+	otel.SetTracerProvider(tp)
+
+	// Starts a sample span
+	tracer := otel.GetTracerProvider().Tracer("signoz-tracer")
+	ctx, span := tracer.Start(ctx, "signoz-span")
+	defer span.End()
+
+	// Injects trace correlation details into structured log fields
+	logrus.WithContext(ctx).WithFields(LogrusFields(span)).Info("Logrus log with trace correlation")
+	logrus.Info("Logrus log without trace correlation")
 }
 ```
-This function extracts the context span and trace IDs and adds the IDs as fields to the Logrus structured log.
 
-### Step 4: Send Logrus logs to SigNoz 
+1. Sets up both an OTLP log exporter and an OTLP trace exporter.
+2. Creates a `LoggerProvider` for logs and a `TracerProvider` for traces.
+3. Registers a Logrus hook to send all logs through OpenTelemetry.
+4. Starts a span and extracts its `trace_id` and `span_id` via `LogrusFields`.
+5. Uses `logrus.WithContext(ctx).WithFields(...)` to attach trace IDs as structured fields to the log entry.
 
-<Tabs entityName="plans">
+### Run your application
 
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+```bash
+go run main.go
+```
 
-To send Logrus logs to your SigNoz cloud account:
+The environment variables you set in Step 1 are automatically read by the OTLP exporter.
 
-1. Add logs to your code.
-    ```go
-    # with span and trace ids
-    logrus.WithFields(LogrusFields(span)).Info("Logrus logs with span id and trace id 004")
+</details>
 
-    # without span and trace ids
-    logrus.Info("Logrus logs with span id and trace id 004")
-    ```
-2. Run your Golang application with your SigNoz credentials
-    ```bash
-	INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 go run main.go
-	```
+## Validate
 
-	Input the following values:
-	
-    - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-    - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+Open the **Logs** section in your SigNoz dashboard. You should see log entries from your Logrus logger.
 
-Run your Golang application as specified above and wait some minutes for the logs to be sent to your SigNoz cloud dashboard.  You can view the logs in the **Logs** section of your dashboard.
+If you followed the **With Trace Correlation** section, the `trace_id` and `span_id` fields appear as indexed attributes on each log entry, letting you jump from a log to its corresponding trace.
 
-<Admonition type="info">
+<Figure
+  src="/img/docs/logs-management/send-logs/logrus-logs.webp"
+  caption="Logrus log entry with trace_id and span_id fields for trace correlation"
+  alt="Logrus log with trace correlation in SigNoz"
+/>
 
-If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+<details>
+<ToggleHeading>
 
-[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
+## Setup OpenTelemetry Collector (Optional)
 
-</Admonition>
+</ToggleHeading>
 
-</TabItem>
+### What is the OpenTelemetry Collector?
 
-<TabItem value='self-host' label="Self-Host">
+The OTel Collector sits between your application and SigNoz. Your app sends telemetry to the Collector, which then forwards it to SigNoz.
 
-To send Logrus logs to your Self-hosted SigNoz dashboard:
+### Why use it?
 
-1. Add logs to your code.
-    ```go
-    # with span and trace ids
-    logrus.WithFields(LogrusFields(span)).Info("Logrus logs with span id and trace id 004")
+- **Filtering and sampling** — Drop noisy logs or sample traces before they leave your infrastructure.
+- **Lightweight applications** — Offload batching, retries, and compression to the Collector.
+- **Resource enrichment** — The Collector can tag data with Kubernetes pod names, cloud regions, or host metadata.
+- **Multi-backend routing** — Send telemetry to multiple destinations without changing your application code.
 
-    # without span and trace ids
-    logrus.Info("Logrus logs with span id and trace id 004")
-    ```
-2. Run your Golang application with your SigNoz credentials
-    ```bash
-	INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_OPENTELEMETRY_ENDPOINT> go run main.go
-	```
+### Collector configuration
 
-    Change `<SIGNOZ_OPENTELEMETRY_ENDPOINT>` to your SigNoz `otlp` receiver endpoint, change `INSECURE_MODE` to `true` or `false` depending on if your connection is secured or not.
+The default Collector configuration already includes the `otlp` receiver. Point your application to the Collector endpoint:
 
-Run your Golang application as specified above and wait some minutes for the logs to be sent to your SigNoz dashboard. You can view the logs in the **Logs** section of your dashboard.
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318" \
+OTEL_SERVICE_NAME="<service_name>" \
+go run main.go
+```
 
-<Admonition type="info">
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
 
-If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 
-[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
+</details>
 
-</Admonition>
+<details>
+<ToggleHeading>
 
-</TabItem>
+## Troubleshooting
 
-</Tabs>
+</ToggleHeading>
 
-<figure data-zoomable align='center'>
-<img src="/img/docs/logs-management/send-logs/logrus-logs.webp" alt="Logrus logs" />
-<figcaption><i>Logrus logs</i></figcaption>
-</figure>
+### No logs appearing in SigNoz
+
+- Verify `OTEL_EXPORTER_OTLP_ENDPOINT` points to the correct endpoint and port (`443` for Cloud, `4318` for self-hosted).
+- For SigNoz Cloud, confirm `OTEL_EXPORTER_OTLP_HEADERS` contains a valid ingestion key.
+- Ensure `defer logProvider.Shutdown(ctx)` is called before your application exits. Without it, buffered logs may not flush.
+- Check that your application emits logs via `logrus.Info`, `logrus.Error`, etc. after the hook is registered.
+
+### Trace IDs not appearing in logs
+
+- Confirm you are using `logrus.WithContext(ctx).WithFields(LogrusFields(span))` and not just `logrus.Info()`.
+- Verify the span is active and not already ended when the log is emitted.
+- Check that the `oteltrace` import is `"go.opentelemetry.io/otel/trace"` and `LogrusFields` correctly extracts `span.SpanContext()`.
+
+</details>
+
+## Next Steps
+
+- [Query and filter logs](https://signoz.io/docs/product-features/logs-explorer/)
+- [Set up log-based alerts](https://signoz.io/docs/userguide/alerts-management/)
+- [Correlate logs with traces](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/)
+
+<GetHelp />
