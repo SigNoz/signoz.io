@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import siteMetadata from '@/data/siteMetadata'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 import { allBlogs } from 'contentlayer/generated'
 
 import BlogArticlePage, {
@@ -45,7 +46,7 @@ export default function OpenTelemetryLanding() {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
       )}
       <BlogArticlePageWithOptions params={LANDING_PARAMS} suppressStructuredData />

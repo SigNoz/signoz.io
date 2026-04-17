@@ -1159,6 +1159,11 @@ const docsSideNav = [
             route: '/docs/integrations/opentelemetry-hasura',
             label: 'Hasura',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
+          },
           // {
           //   type: 'category',
           //   isExpanded: false,
@@ -1490,6 +1495,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-hasura',
             label: 'Hasura',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
           },
           {
             type: 'doc',
@@ -2322,6 +2332,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+            label: 'OpenCode',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
             label: 'OpenRouter',
           },
@@ -2871,6 +2886,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/opencode-observability',
+        label: 'OpenCode',
+        type: 'doc',
+      },
+      {
         route: '/docs/openlit',
         label: 'OpenLIT',
         type: 'doc',
@@ -2963,6 +2983,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ai/use-cases/alert-correlation-analysis',
             label: 'Alert Correlation Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/post-deployment-monitoring',
+            label: 'Post Deployment Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/oncall-handoff-brief',
+            label: 'On-Call Handoff Brief',
           },
         ],
       },
@@ -3380,6 +3410,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/opentelemetry-hasura',
         label: 'Hasura',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-dbos',
+        label: 'DBOS',
       },
       {
         type: 'doc',

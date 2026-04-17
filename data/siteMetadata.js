@@ -17,6 +17,7 @@ const siteMetadata = {
   x: 'https://x.com/SigNozHQ',
   youtube: 'https://www.youtube.com/@signoz',
   linkedin: 'https://www.linkedin.com/company/signozio',
+  hackernews: 'https://www.ycombinator.com/companies/signoz',
   locale: 'en-US',
   analytics: {},
   newsletter: {
@@ -54,8 +55,7 @@ const siteMetadata = {
       lang: 'en',
     },
   },
-  search: {
-  },
+  search: {},
 }
 
 module.exports = siteMetadata

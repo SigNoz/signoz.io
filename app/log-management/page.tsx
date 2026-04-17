@@ -4,20 +4,22 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Log Management | SigNoz',
+    absolute: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
   },
   openGraph: {
-    title: 'Log Management | SigNoz',
-    description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-    images:"/img/platform/LogsManagementHero.webp"
+    title: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
+    description:
+      'Ingest, search, and analyze logs at scale with SigNoz log management powered by OpenTelemetry & Columnar Database. Correlate logs with metrics and traces for faster debugging and performance optimization.',
+    images: '/img/platform/LogsManagementHero.webp',
   },
   description:
-    'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-  twitter:{
-    title: 'Log Management | SigNoz',
-    description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-    images:"/img/platform/LogsManagementHero.webp",
-  }
+    'Ingest, search, and analyze logs at scale with SigNoz log management powered by OpenTelemetry & Columnar Database. Correlate logs with metrics and traces for faster debugging and performance optimization.',
+  twitter: {
+    title: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
+    description:
+      'Ingest, search, and analyze logs at scale with SigNoz log management powered by OpenTelemetry & Columnar Database. Correlate logs with metrics and traces for faster debugging and performance optimization.',
+    images: '/img/platform/LogsManagementHero.webp',
+  },
 }
 
 export default function LogManagementPage() {

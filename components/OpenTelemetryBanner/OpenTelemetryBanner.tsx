@@ -1,4 +1,3 @@
-
 import { ArrowRight } from 'lucide-react'
 
 interface OpenTelemetryBannerProps {
@@ -27,7 +26,7 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
               {/* Tags */}
               <div className="flex flex-wrap items-center gap-2 sm:w-3/4 sm:gap-3">
                 <a
-                  href="/resource-center/opentelemetry/"
+                  href="/opentelemetry/"
                   target="_blank"
                   className="flex w-fit items-center gap-2 rounded-full border border-signoz_ink-300 bg-signoz_ink-300/50 px-3 py-1 text-xs text-gray-400 transition-colors hover:border-signoz_robin-500 hover:text-white sm:px-4 sm:py-1.5 sm:text-sm"
                 >
@@ -60,7 +59,7 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
 
             {/* Title section */}
             <div className="py-2">
-              <h1 className="text-3xl font-bold leading-normal sm:leading-normal md:leading-normal text-white sm:text-4xl md:text-5xl">
+              <h1 className="text-3xl font-bold leading-normal text-white sm:text-4xl sm:leading-normal md:text-5xl md:leading-normal">
                 {title}
               </h1>
             </div>

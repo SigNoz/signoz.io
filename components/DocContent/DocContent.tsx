@@ -11,6 +11,7 @@ import TableOfContents from '../DocsTOC/DocsTOC'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { DOC_TOC_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
@@ -43,7 +44,7 @@ const DocContent: React.FC<{
   const shouldRenderTOC =
     !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && source !== ONBOARDING_SOURCE
   const shouldReserveTocColumn = source !== ONBOARDING_SOURCE
-  const feedbackWrapperClassName = shouldRenderTOC ? 'doc-feedback-mobile-only' : undefined
+  const feedbackWrapperClassName = shouldRenderTOC ? 'block lg:hidden' : undefined
   const articleRef = useRef<HTMLElement | null>(null)
 
   const docTags = useMemo(() => post?.docTags || [], [post?.docTags])
@@ -66,8 +67,10 @@ const DocContent: React.FC<{
 
   return (
     <>
-      <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        <div className="doc-title-row mb-4 flex items-center justify-between gap-2">
+      <div
+        className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${source === ONBOARDING_SOURCE ? '!w-full px-4' : ''}`}
+      >
+        <div className="mb-4 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-2">
             {!isOnboarding && post.docTags && post.docTags.length > 0 && (
               <TagsWithTooltips tags={post.docTags} />
@@ -110,7 +113,7 @@ const DocContent: React.FC<{
         </>
       ) : shouldReserveTocColumn ? (
         <>
-          <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+          <div className={`${DOC_TOC_CLASSES} invisible`} aria-hidden="true" />
         </>
       ) : null}
     </>
