@@ -216,18 +216,48 @@ export function useHubspotCustomForm({
   }, [state.definition])
 
   const fetchDefinition = useCallback(async () => {
+    const resolvedFormName = formName || formId
+    const commonAttributes = {
+      hubspot_form_id: formId,
+      hubspot_form_name: resolvedFormName,
+      hubspot_portal_id: portalId,
+      hubspot_page_path: typeof window !== 'undefined' ? window.location.pathname : '',
+      hubspot_page_url: typeof window !== 'undefined' ? window.location.href : '',
+    }
+
     if (initialDefinition) {
       dispatch({ type: 'SET_DEFINITION', definition: initialDefinition })
+      logEvent({
+        eventName: 'HubSpot Form Loaded',
+        eventType: 'track',
+        attributes: {
+          ...commonAttributes,
+          hubspot_load_source: 'initial_definition',
+          hubspot_field_count: String(
+            initialDefinition.fieldGroups.flatMap((g) => g.fields).length
+          ),
+        },
+      })
       return
     }
 
     const cached = definitionCache.get(formId)
     if (cached) {
       dispatch({ type: 'SET_DEFINITION', definition: cached })
+      logEvent({
+        eventName: 'HubSpot Form Loaded',
+        eventType: 'track',
+        attributes: {
+          ...commonAttributes,
+          hubspot_load_source: 'cache',
+          hubspot_field_count: String(cached.fieldGroups.flatMap((g) => g.fields).length),
+        },
+      })
       return
     }
 
     dispatch({ type: 'SET_STATUS', status: 'loading' })
+    const fetchStart = Date.now()
 
     try {
       const res = await fetch(`/api/hubspot-form/${formId}`)
@@ -237,13 +267,46 @@ export function useHubspotCustomForm({
       const definition: HubspotFormDefinition = await res.json()
       definitionCache.set(formId, definition)
       dispatch({ type: 'SET_DEFINITION', definition })
+
+      logEvent({
+        eventName: 'HubSpot Form Loaded',
+        eventType: 'track',
+        attributes: {
+          ...commonAttributes,
+          hubspot_load_source: 'api',
+          hubspot_load_duration_ms: String(Date.now() - fetchStart),
+          hubspot_field_count: String(definition.fieldGroups.flatMap((g) => g.fields).length),
+        },
+      })
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load form'
+
       dispatch({
         type: 'SET_DEFINITION_ERROR',
-        error: err instanceof Error ? err.message : 'Failed to load form',
+        error: errorMessage,
+      })
+
+      logEvent({
+        eventName: 'HubSpot Form Failed to Load',
+        eventType: 'track',
+        attributes: {
+          ...commonAttributes,
+          hubspot_error_message: errorMessage,
+          hubspot_load_duration_ms: String(Date.now() - fetchStart),
+          hubspot_user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+          hubspot_online: typeof navigator !== 'undefined' ? String(navigator.onLine) : '',
+          hubspot_connection_type:
+            typeof navigator !== 'undefined' &&
+            'connection' in navigator &&
+            navigator.connection &&
+            typeof navigator.connection === 'object' &&
+            'effectiveType' in navigator.connection
+              ? String(navigator.connection.effectiveType)
+              : '',
+        },
       })
     }
-  }, [formId, initialDefinition])
+  }, [formId, formName, portalId, initialDefinition, logEvent])
 
   useEffect(() => {
     void fetchDefinition()
