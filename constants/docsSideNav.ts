@@ -1856,6 +1856,7 @@ const docsSideNav = [
         label: 'Working with Metrics',
         type: 'category',
         isExpanded: false,
+        route: '/docs/metrics-management/working-with-metrics-guides',
         items: [
           {
             type: 'doc',
