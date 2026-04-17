@@ -10,7 +10,11 @@ import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
 import { Metadata } from 'next'
 import Chatbase from '@/components/Chatbase'
+import siteMetadata from '@/data/siteMetadata'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+
+const siteUrl = siteMetadata.siteUrl
+const organizationId = `${siteUrl}/#organization`
 
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
@@ -25,15 +29,16 @@ export const metadata: Metadata = {
 
 const organizationSchema = {
   '@type': 'Organization',
-  '@id': 'https://signoz.io/#organization',
-  name: 'SigNoz',
-  url: 'https://signoz.io/',
-  logo: 'https://signoz.io/img/logo.svg',
+  '@id': organizationId,
+  name: siteMetadata.title,
+  url: `${siteUrl}/`,
+  logo: `${siteUrl}${siteMetadata.siteLogo}`,
   sameAs: [
-    'https://x.com/SigNozHQ',
-    'https://www.linkedin.com/company/signozio',
-    'https://github.com/SigNoz/signoz',
-    'https://www.youtube.com/@signoz',
+    siteMetadata.linkedin,
+    siteMetadata.x,
+    siteMetadata.github,
+    siteMetadata.youtube,
+    siteMetadata.hackernews,
   ],
   description:
     'SigNoz is an open-source observability platform for monitoring metrics, logs, and traces.',
@@ -41,21 +46,16 @@ const organizationSchema = {
 
 const websiteSchema = {
   '@type': 'WebSite',
-  url: 'https://signoz.io/',
-  name: 'SigNoz',
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: 'https://signoz.io/search?q={search_term_string}',
-    'query-input': 'required name=search_term_string',
-  },
+  url: `${siteUrl}/`,
+  name: siteMetadata.title,
 }
 
 const softwareApplicationSchema = {
   '@type': 'SoftwareApplication',
-  name: 'SigNoz',
+  name: siteMetadata.title,
   applicationCategory: 'DeveloperApplication',
   operatingSystem: 'Linux, Kubernetes',
-  url: 'https://signoz.io/',
+  url: `${siteUrl}/`,
   description:
     'Open-source observability platform for application performance monitoring, logs, and traces.',
   offers: {
@@ -109,15 +109,15 @@ const reviewSchemas = [
 
 const videoSchema = {
   '@type': 'VideoObject',
-  '@id': 'https://signoz.io/#video',
+  '@id': `${siteUrl}/#video`,
   name: 'SigNoz Overview - Open Source Observability Platform',
   description: 'Learn how SigNoz helps monitor metrics, logs, and traces in one platform.',
-  thumbnailUrl: 'https://signoz.io/img/landing/landing_thumbnail.webp',
-  uploadDate: '2024-01-01',
+  thumbnailUrl: `${siteUrl}/img/landing/landing_thumbnail.webp`,
+  uploadDate: '2024-05-09',
   contentUrl: 'https://vimeo.com/944340217',
   embedUrl: 'https://player.vimeo.com/video/944340217',
   publisher: {
-    '@id': 'https://signoz.io/#organization',
+    '@id': organizationId,
   },
 }
 
