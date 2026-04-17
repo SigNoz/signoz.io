@@ -33,17 +33,15 @@ The **root span** is the first span in a trace — it does not have a Parent Spa
 
 Learn more about <a href="https://opentelemetry.io/docs/concepts/signals/traces/" target="_blank" rel="noopener noreferrer nofollow">how traces work in OpenTelemetry</a>.
 
-</details>
-
-### Example scenario
-
-Consider three services — `Frontend`, `Auth`, and `Database`:
+**Example:** Consider three services — `Frontend`, `Auth`, and `Database`:
 
 1. `Frontend` creates the root span (Span ID: `abc1`, Parent ID: none).
 2. `Frontend` calls `Auth`, passing its Span ID `abc1` in the `traceparent` header. `Auth` creates a new span (Span ID: `def2`, Parent ID: `abc1`).
 3. `Auth` calls `Database`, passing its Span ID `def2`. `Database` creates a new span (Span ID: `ghi3`, Parent ID: `def2`).
 
 If `Auth` fails to export its span (Span ID: `def2`), the `Database` span will reference a Parent Span ID (`def2`) that does not exist in the collected trace — resulting in a missing span.
+
+</details>
 
 ## Span gaps
 
