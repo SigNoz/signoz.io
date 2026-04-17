@@ -1,16 +1,27 @@
 'use client'
 
 import React from 'react'
+import type { FormTheme } from './types'
+import { themeStyles } from './types'
 
 type HubspotCustomFormErrorProps = {
   message?: string
   onRetry?: () => void
+  theme?: FormTheme
 }
 
-export default function HubspotCustomFormError({ message, onRetry }: HubspotCustomFormErrorProps) {
+export default function HubspotCustomFormError({
+  message,
+  onRetry,
+  theme = 'dark',
+}: HubspotCustomFormErrorProps) {
+  const t = themeStyles[theme]
+
   return (
-    <div className="flex flex-col items-center gap-4 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-6 text-center">
-      <p className="text-sm text-signoz_vanilla-300">
+    <div
+      className={`flex flex-col items-center gap-4 rounded-md border p-6 text-center ${t.errorPanel}`}
+    >
+      <p className="text-sm">
         {message ||
           'Unable to load the form. This may be caused by a browser extension or network issue.'}
       </p>

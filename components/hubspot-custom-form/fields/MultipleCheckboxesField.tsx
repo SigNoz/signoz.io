@@ -3,6 +3,7 @@
 import React from 'react'
 import { Check } from 'lucide-react'
 import type { FieldRendererProps } from '../types'
+import { themeStyles } from '../types'
 import FieldWrapper from './FieldWrapper'
 
 export default function MultipleCheckboxesField({
@@ -12,12 +13,14 @@ export default function MultipleCheckboxesField({
   touched,
   onChange,
   disabled,
+  theme = 'dark',
 }: FieldRendererProps) {
   const selectedValues = Array.isArray(value)
     ? value
     : typeof value === 'string' && value
       ? value.split(';')
       : []
+  const t = themeStyles[theme]
 
   const toggle = (optValue: string) => {
     const next = selectedValues.includes(optValue)
@@ -27,7 +30,7 @@ export default function MultipleCheckboxesField({
   }
 
   return (
-    <FieldWrapper field={field} error={error} touched={touched}>
+    <FieldWrapper field={field} error={error} touched={touched} theme={theme}>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         {(field.options || []).map((opt) => {
           const isChecked = selectedValues.includes(opt.value)
@@ -44,12 +47,12 @@ export default function MultipleCheckboxesField({
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                   isChecked
                     ? 'border-signoz_robin-500 bg-signoz_robin-500'
-                    : 'border-signoz_slate-100 bg-transparent'
+                    : `${t.checkboxBorder} bg-transparent`
                 }`}
               >
                 {isChecked && <Check className="h-3 w-3 text-white" strokeWidth={2.5} />}
               </span>
-              <span className="text-sm text-signoz_vanilla-300">{opt.label}</span>
+              <span className={`text-sm ${t.text}`}>{opt.label}</span>
             </label>
           )
         })}

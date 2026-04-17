@@ -66,6 +66,7 @@ function Enterprise() {
                       portalId={ENTERPRISE_DATA.PORTAL_ID}
                       formId={ENTERPRISE_DATA.FORM_ID}
                       formName={ENTERPRISE_DATA.TITLE}
+                      theme="light"
                     />
                   </div>
                 </div>

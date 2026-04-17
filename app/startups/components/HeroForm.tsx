@@ -10,5 +10,5 @@ type HeroFormProps = {
 }
 
 export default function HeroForm({ portalId, formId, formName }: HeroFormProps) {
-  return <HubspotCustomForm portalId={portalId} formId={formId} formName={formName} />
+  return <HubspotCustomForm portalId={portalId} formId={formId} formName={formName} theme="light" />
 }

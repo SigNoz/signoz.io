@@ -3,7 +3,8 @@
 import React from 'react'
 import { Loader2 } from 'lucide-react'
 import type { HubspotFormDefinition, FormValues } from '../../types/hubspotForm'
-import type { SelectVariant } from './types'
+import type { SelectVariant, FormTheme } from './types'
+import { themeStyles } from './types'
 import { useHubspotCustomForm } from './useHubspotCustomForm'
 import { getFieldRenderer } from './fieldRegistry'
 import HiddenField from './fields/HiddenField'
@@ -21,6 +22,7 @@ export type HubspotCustomFormProps = {
   className?: string
   renderSuccess?: () => React.ReactNode
   selectVariant?: SelectVariant
+  theme?: FormTheme
 }
 
 export default function HubspotCustomForm({
@@ -33,6 +35,7 @@ export default function HubspotCustomForm({
   className,
   renderSuccess,
   selectVariant,
+  theme = 'dark',
 }: HubspotCustomFormProps) {
   const {
     definition,
@@ -56,17 +59,19 @@ export default function HubspotCustomForm({
     onSubmitSuccess,
   })
 
+  const t = themeStyles[theme]
+
   if (definitionLoading) {
-    return <HubspotCustomFormSkeleton />
+    return <HubspotCustomFormSkeleton theme={theme} />
   }
 
   if (definitionError) {
-    return <HubspotCustomFormError message={definitionError} onRetry={retryFetch} />
+    return <HubspotCustomFormError message={definitionError} onRetry={retryFetch} theme={theme} />
   }
 
   if (status === 'success') {
     if (renderSuccess) return <>{renderSuccess()}</>
-    return <HubspotCustomFormSuccess message={definition?.thankYouMessage} />
+    return <HubspotCustomFormSuccess message={definition?.thankYouMessage} theme={theme} />
   }
 
   if (!definition) return null
@@ -84,7 +89,7 @@ export default function HubspotCustomForm({
           return (
             <div
               key={`rich-${groupIdx}`}
-              className="text-sm text-signoz_vanilla-300 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_h4]:m-0 [&_h5]:m-0 [&_h6]:m-0 [&_p]:m-0"
+              className={`text-sm ${t.richText} [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_h4]:m-0 [&_h5]:m-0 [&_h6]:m-0 [&_p]:m-0`}
               dangerouslySetInnerHTML={{ __html: group.richText }}
             />
           )
@@ -122,6 +127,7 @@ export default function HubspotCustomForm({
                       onBlur={() => setFieldTouched(field.name)}
                       disabled={isSubmitting}
                       selectVariant={selectVariant}
+                      theme={theme}
                     />
                   )
                 })}
@@ -140,6 +146,7 @@ export default function HubspotCustomForm({
                     onBlur={() => setFieldTouched(field.name)}
                     disabled={isSubmitting}
                     selectVariant={selectVariant}
+                    theme={theme}
                   />
                 )
               })
@@ -149,15 +156,13 @@ export default function HubspotCustomForm({
       })}
 
       {submitError && (
-        <p className="rounded border border-red-900/50 bg-red-900/20 px-3 py-2 text-sm text-red-300">
-          {submitError}
-        </p>
+        <p className={`rounded border px-3 py-2 text-sm ${t.submitError}`}>{submitError}</p>
       )}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex h-[44px] w-full items-center justify-center gap-2 rounded-md bg-signoz_robin-500 text-sm font-semibold text-white transition hover:bg-signoz_robin-500/90 disabled:opacity-60"
+        className={`flex h-[44px] w-full items-center justify-center gap-2 rounded-md text-sm font-semibold transition disabled:opacity-60 ${t.submitButton}`}
       >
         {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {isSubmitting ? 'Submitting\u2026' : resolvedSubmitText}

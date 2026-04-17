@@ -2,6 +2,7 @@
 
 import React from 'react'
 import type { FieldRendererProps } from '../types'
+import { themeStyles } from '../types'
 import FieldWrapper from './FieldWrapper'
 
 export default function TextAreaField({
@@ -12,11 +13,13 @@ export default function TextAreaField({
   onChange,
   onBlur,
   disabled,
+  theme = 'dark',
 }: FieldRendererProps) {
   const stringValue = typeof value === 'string' ? value : ''
+  const t = themeStyles[theme]
 
   return (
-    <FieldWrapper field={field} error={error} touched={touched}>
+    <FieldWrapper field={field} error={error} touched={touched} theme={theme}>
       <textarea
         name={field.name}
         value={stringValue}
@@ -25,7 +28,7 @@ export default function TextAreaField({
         disabled={disabled}
         placeholder={field.placeholder || ''}
         rows={2}
-        className="w-full resize-none rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm text-signoz_vanilla-300 placeholder-gray-500/50 outline-none transition focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500 disabled:opacity-50"
+        className={`w-full resize-none rounded-md border px-4 py-3 text-sm outline-none transition focus:ring-1 disabled:opacity-50 ${t.input}`}
       />
     </FieldWrapper>
   )
