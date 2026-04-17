@@ -38,7 +38,7 @@ export default function TextField({
         placeholder={field.placeholder || ''}
         min={field.validation?.minAllowedValue}
         max={field.validation?.maxAllowedValue}
-        className={`w-full rounded-md border px-4 py-3 text-sm outline-none transition focus:ring-1 disabled:opacity-50 ${t.input}`}
+        className={`w-full rounded-md border px-4 py-3 text-sm outline-none transition [appearance:textfield] focus:ring-1 disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${t.input}`}
       />
     </FieldWrapper>
   )
