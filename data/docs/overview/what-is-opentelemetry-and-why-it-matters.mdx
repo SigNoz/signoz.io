@@ -1,89 +1,96 @@
 ---
-date: 2026-04-06
+date: 2026-04-17
 id: what-is-opentelemetry-and-why-it-matters
 title: What Is OpenTelemetry and Why It Matters
-description: What OpenTelemetry is, what problem it solves, what you actually get from adopting it, and where its rough edges are. A concrete, honest overview for teams evaluating or starting with OTel.
+description: A beginner-friendly introduction to OpenTelemetry — what it is, why to use it instead of a vendor's proprietary agent, and how to start with SigNoz.
 doc_type: explanation
 ---
 
-OpenTelemetry is an open-source framework for generating, collecting, and exporting traces, metrics, and logs, fully decoupled from any backend. Instrument your services once and send telemetry wherever you want, without tying your data to a single vendor.
+## The problem
 
-## What OpenTelemetry actually is
+Your app is slow. A user reports an error. A request takes 8 seconds instead of 200 milliseconds. You open the code, but the code looks fine. What happened in production?
 
-OpenTelemetry is not a backend. It does not store data, draw dashboards, or fire alerts. It is the generation and transport layer: everything between your application code and wherever you send telemetry.
+Without data from inside your running application, you are guessing. You need **telemetry**: the signals that tell you what your app is doing, where it spends time, and when it fails.
 
-Say you instrumented 40 services with a vendor SDK. The contract is up, costs doubled, the tool does not fit. Without OpenTelemetry, migrating means re-instrumenting every service, rebuilding dashboards, rewriting alerts. With OpenTelemetry, you change an exporter endpoint. See the <a href="https://opentelemetry.io/docs/what-is-opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">official overview</a> for the full definition.
+## Where OpenTelemetry fits in
 
-The building blocks:
+OpenTelemetry (usually called **OTel**) is a free, open-source toolkit that produces telemetry from your application and sends it somewhere you can use it. It supports most major languages and works with any compatible monitoring tool.
 
-- **APIs and SDKs** to produce traces, metrics, and logs in 11+ languages (Java, Python, Go, .NET, JavaScript, Ruby, and more).
-- **Auto-instrumentation** that captures many common frameworks (HTTP servers, database clients, message queues) with zero code changes for <a href="https://opentelemetry.io/docs/languages/" target="_blank" rel="noopener noreferrer nofollow">supported languages</a>.
-- **OTLP**, a single wire format for all three signal types.
-- **The Collector**, a binary that receives, batches, filters, transforms, and routes telemetry.
-- **Semantic conventions** that standardize attribute names across languages and services.
+A simple mental model:
 
-Use the SDK without the Collector, or the Collector without changing your app. Adopt pieces as you need them.
+- **OpenTelemetry** sits in your app, collects the telemetry, and ships it out.
+- A **backend** like SigNoz receives that telemetry, stores it, and gives you dashboards, search, and alerts.
 
-As of 2026, the <a href="https://www.cncf.io/reports/opentelemetry-project-journey-report/" target="_blank" rel="noopener noreferrer nofollow">CNCF project journey report</a> counts 9,160+ contributors and 1,100+ contributing companies. What you depend on is not maintained by one company.
+OpenTelemetry does not store data or draw dashboards. That is the backend's job. See [What is SigNoz?](https://signoz.io/docs/what-is-signoz/) for more on the backend side.
 
-## The problem it solves
+<Figure src="/img/docs/overview/otel-signoz-flow.svg" alt="Your app, instrumented with OpenTelemetry, sends telemetry over OTLP to SigNoz, which provides dashboards, alerts, search, and visualization." caption="OpenTelemetry produces and ships telemetry. A backend like SigNoz stores it and turns it into dashboards, alerts, and search."/>
 
-Before OpenTelemetry, each vendor shipped its own agent, SDK, and data model. Pick a monitoring tool, and that choice follows you into every service, every deploy pipeline, every runbook. Most teams just stay put, even when the tool no longer fits.
+## The three kinds of telemetry
 
-OpenTelemetry breaks that. Instrument once against a vendor-neutral API. Change backends by updating an exporter endpoint. Dashboards still need rebuilding, but touching every service to swap instrumentation goes away.
+OpenTelemetry collects three kinds of data:
 
-OpenTracing and OpenCensus tried this separately. Neither got broad adoption. OpenTelemetry unified both with enough industry backing to sustain it.
+- **Traces** — The path of a single request across your services. Answers "why was this request slow?"
+- **Metrics** — Numbers over time, like requests per second or CPU usage. Good for dashboards and alerts.
+- **Logs** — Text messages your app writes when something happens.
 
-## What you get in practice
+Together, these give you a full view of how your system behaves.
 
-If you adopt OpenTelemetry, you are usually choosing to depend less on one vendor's SDK. If you want to test a different backend, run two backends in parallel, or migrate later, you usually do not have to re-instrument every service. In many cases, the change happens in your export or Collector configuration instead.
+## Why OpenTelemetry instead of a vendor agent?
 
-OpenTelemetry gives you a shared format and common attribute names across services and languages. That makes traces easier to follow and reduces the usual naming drift between teams.
+Most observability vendors ship their own agent and SDK. Whichever one you pick becomes part of every service, every deploy pipeline, and every runbook. Switching later means ripping out instrumentation from every service and starting over — so most teams stay put even when the tool stops fitting.
 
-Using the Collector lets you move some decisions out of application code: sampling, filtering, redaction, batching, and routing can often be handled centrally. That is useful for larger teams, especially when platform and application responsibilities are separate.
+OpenTelemetry ends that lock-in. You instrument **once**, using an open standard. After that:
 
-## Complexity, performance, and maturity
+- **Any compatible backend accepts your data.** OTel flows to SigNoz, but also to Datadog, New Relic, Grafana, Honeycomb, and others. Picking a backend no longer means picking an agent.
+- **Switching backends is a configuration change.** You update an export endpoint; you do not re-instrument every service.
+- **You can run two backends in parallel.** Compare tools with real traffic before committing, or route different signals to different destinations.
+- **Consistent data across services.** OTel's <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" target="_blank" rel="noopener noreferrer nofollow">semantic conventions</a> standardize attribute names, so "HTTP status code" or "DB query" means the same thing across every service and every language.
 
-### Complexity
+OpenTelemetry is a <a href="https://www.cncf.io/projects/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">CNCF project</a> with contributors from 1,100+ companies. It is the industry standard — even proprietary vendors now support OTel because customers expect it. See the <a href="https://opentelemetry.io/docs/what-is-opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">official overview</a> for more background.
 
-The first thing many teams notice is that OpenTelemetry has more pieces than a single-vendor agent. That can feel heavier at first, especially if you are comparing it with a tool that bundles instrumentation, collection, and export into one install.
+### Already using a vendor agent? Moving is less work than it looks
 
-For a new rollout or a migration, you do not need to adopt every piece on day one. In many supported languages, teams start with auto-instrumentation and send data straight to their backend. The Collector becomes useful later, when you want central control over filtering, sampling, redaction, or routing to multiple destinations.
+If you run Datadog, New Relic, or another vendor's agent today, the move can feel like two projects: switch to OpenTelemetry, then integrate SigNoz. In practice it is one project — the OTel instrumentation step **is** the migration.
 
-### Performance
+A few things typically reduce the effort:
 
-The <a href="https://opentelemetry.io/docs/specs/otel/performance/" target="_blank" rel="noopener noreferrer nofollow">OTel performance spec</a> requires SDK operations not to block application threads, with bounded resource usage by default. Actual overhead varies by language, workload, and sampling config.
+- **Auto-instrumentation covers the common cases.** For most popular frameworks (HTTP servers, database clients, queues), replacing a vendor agent with OTel auto-instrumentation is a drop-in swap, not a rewrite.
+- **SigNoz accepts OTel natively.** No proprietary exporter or bridging layer between your app and SigNoz.
+- **Migrate one signal at a time.** Run your current vendor and SigNoz side by side, and move traces, then metrics, then logs at your own pace. If you need to keep Datadog Agents running during the move, the [Datadog Receiver](https://signoz.io/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/) can forward their metrics to SigNoz through the OpenTelemetry Collector while you migrate the rest.
 
-You swap one instrumentation layer for another, not stack them. OTel replaces your proprietary agent's overhead, it does not add to it.
+Vendor-specific plans: [Migrate from Datadog](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/) · [All migration guides](https://signoz.io/docs/migration/migrate-to-signoz/).
 
-### Maturity
-
-The <a href="https://opentelemetry.io/docs/specs/status/" target="_blank" rel="noopener noreferrer nofollow">spec status page</a> is the source of truth. As of early 2026: tracing is fully stable with long-term support. Metrics data model and OTLP are stable. Logs bridge API, SDK, and protocol are stable. Profiles are still in early development.
-
-Maturity varies by language. The <a href="https://opentelemetry.io/status/" target="_blank" rel="noopener noreferrer nofollow">status matrix</a> has the full breakdown. Check it for your stack before committing.
-
-## What OpenTelemetry is not
-
-It does not store, visualize, or alert on telemetry. You need a backend like SigNoz for that. It also does not replace logging best practices: OTel moves your logs, but what you log is up to you.
+The effort compounds in your favor. A vendor-specific agent is a decision you pay for again every time you switch. OpenTelemetry is the one decision that does not need to be remade.
 
 ## Getting started
 
-Pick one service, add auto-instrumentation, send data to a backend that speaks OTLP. SigNoz accepts OTLP natively: no proprietary agent, no format conversion. Start with traces and add metrics and logs later.
+The simplest path:
+
+1. [Create a SigNoz Cloud account](https://signoz.io/teams/) (or self-host SigNoz).
+2. Pick one service in your app.
+3. Add OpenTelemetry auto-instrumentation for its language. For many [supported languages](https://signoz.io/docs/instrumentation/), this requires little or no code change.
+4. Point the data at SigNoz, which accepts OpenTelemetry natively.
+5. Start with traces. Add metrics and logs when you are ready.
 
 <DocCardContainer>
   <DocCard
-    title="Get started with APM"
+    title="What is SigNoz?"
+    description="The backend side: dashboards, search, and alerts on your OpenTelemetry data."
+    href="https://signoz.io/docs/what-is-signoz/"
+  />
+  <DocCard
+    title="Send traces (APM)"
     description="Instrument your app with OpenTelemetry and start sending traces to SigNoz."
-    href="https://signoz.io/docs/instrumentation/overview/"
+    href="https://signoz.io/docs/instrumentation/"
   />
   <DocCard
-    title="Why use the Collector?"
-    description="Understand when to send telemetry through the OpenTelemetry Collector."
-    href="https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/"
+    title="Send logs"
+    description="Collect logs with OpenTelemetry, agents like FluentBit, or existing log libraries."
+    href="https://signoz.io/docs/logs-management/send-logs-to-signoz/"
   />
   <DocCard
-    title="Migrate to SigNoz"
-    description="Use OpenTelemetry to migrate from various platforms to SigNoz."
-    href="https://signoz.io/docs/migration/migrate-to-signoz/"
+    title="Send metrics"
+    description="Ingest metrics from applications, infrastructure, and Prometheus sources."
+    href="https://signoz.io/docs/metrics-management/send-metrics/"
   />
 </DocCardContainer>
