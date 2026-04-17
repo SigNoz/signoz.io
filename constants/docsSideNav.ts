@@ -1252,6 +1252,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/traces-management/guides/tail-sampling',
+            label: 'Tail Sampling',
+          },
+          {
+            type: 'doc',
             route: '/docs/traces-management/guides/pii-scrubbing/',
             label: 'PII Scrubbing',
           },
