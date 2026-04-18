@@ -19,13 +19,13 @@ You need to know which alerts actually correlate with real service degradation a
 
 ## Step 1: Pull Alert History
 
-Start by asking your AI assistant to retrieve your complete alert history:
+Start by asking your AI assistant to list every configured alert and retrieve its state-transition history:
 
 ```text
-Pull all alert history for the last 24 hours.
+List every configured alert rule in SigNoz. For each rule, pull its state-transition history for the last 24 hours. Summarize which rules fired, how many transitions each had, and which rules had zero transitions (either stable or stuck).
 ```
 
-Your assistant will use the SigNoz MCP server to fetch the alert history. Here's an example response:
+Your assistant will use the SigNoz MCP server to enumerate rules and fetch per-rule history. Here's an example response:
 
 ```text
 Alert history — last 24 hours (2026-04-16 21:43 UTC → 2026-04-17 21:45 UTC)
@@ -44,20 +44,20 @@ Service                                      | Firing | Resolved
 ---------------------------------------------|--------|----------
 checkout-service                             | 6      | 6
 
-🔴 Cart Service Latency — warning — 156 transitions (78 firing, 78 resolved)
+🟠 Cart Service Latency — warning — 156 transitions (78 firing, 78 resolved)
 Flapping heavily.
 
 Service                                      | Firing | Resolved
 ---------------------------------------------|--------|----------
 cart-service                                 | 78     | 78
 
-🔴 Frontend 5xx Errors — warning — 94 transitions
+🟠 Frontend 5xx Errors — warning — 94 transitions
 
 Service                                      | Firing | Resolved
 ---------------------------------------------|--------|----------
 frontend                                     | 47     | 47
 
-🔴 API Gateway Timeout — warning — 240 transitions (120 firing, 120 resolved)
+🟠 API Gateway Timeout — warning — 240 transitions (120 firing, 120 resolved)
 
 Service                                      | Firing | Resolved
 ---------------------------------------------|--------|----------
@@ -74,14 +74,15 @@ You now have a baseline view of all alerts that fired. Next, you need to gather 
 
 ## Step 2: Retrieve Detailed Metrics for Each Alert
 
-For each alert that fired, you need to understand its firing pattern and the actual service health during those windows:
+For each alert, gather the signals needed to tell signal from noise — firing cadence, auto-resolve behavior, service health around each fire, flap density, and the rule's own configuration:
 
 ```text
-For each alert, retrieve:
+For each alert rule from Step 1, retrieve:
 - Total fire count and fire frequency (fires per hour)
 - Mean duration before auto-resolve
-- The error rate and p99 latency of the owning service, 5 min before and 5 min after the alert start time
-- Whether the owner service showed >20% increase in error rate or >50% increase in p99 within the same ±10 min window
+- Peak fires within any rolling 30-minute window
+- The error rate and p99 latency of the owning service, 5 min before and 5 min after each alert start time, and the per-firing delta
+- The rule's current configuration: threshold expression, referenced metric, and whether that metric produced data during the window
 ```
 
 Your assistant will analyze each alert's firing patterns and correlate them with actual service metrics to determine if alerts correspond to real degradation or are firing on noise. Here's what you might see:
@@ -171,10 +172,10 @@ Ask your assistant to categorize each alert based on its behavior:
 
 ```text
 Classify each alert into one of four categories:
-1. NOISY: Fires frequently (>5x/day avg), auto-resolves in <2 min, no correlated degradation in any service
+1. NOISY: Fires frequently (>5x/day avg), auto-resolves in <2 min, no correlated degradation in the owning service
 2. FLAPPING: Fires and resolves >3 times within any 30-min window, suggesting threshold is too close to normal variance
-3. STALE: Alert definition references a metric with no data or flat signal for >90% of the window (dead alert)
-4. VALID: Correlated with measurable degradation in owning or dependent service
+3. STALE: Rule produces no usable signal — firing continuously with zero transitions for >24h, or has an invalid/unreachable threshold expression, or references a metric with no data for >90% of the window
+4. VALID: Per-firing deltas show a meaningful increase in error rate or p99 latency on the owning service in the post-window vs pre-window
 ```
 
 Your assistant will classify each alert and provide recommendations. Here's an example response:
@@ -232,12 +233,12 @@ During this investigation, the MCP server called these tools:
 
 | Step | MCP Tool | What It Did |
 |------|----------|-------------|
-| 1 | `signoz_list_alerts` | Retrieved all configured alerts and their current states |
-| 1 | `signoz_get_alert_history` | Fetched state transition history for the 24-hour window to identify which alerts fired and how frequently |
-| 2 | `signoz_get_alert` | Retrieved detailed alert configurations including thresholds and conditions |
-| 2 | `signoz_aggregate_traces` | Computed error rates and p99 latency for services 5 minutes before and after each alert firing to detect correlation with actual degradation |
-| 3 | `signoz_get_alert` | Retrieved alert rule definitions to understand classification criteria |
-| 3 | `signoz_query_metrics` | Analyzed metric data to detect flapping patterns and stale alert conditions |
+| 1 | `signoz_list_alerts` | Enumerated every configured alert rule and its current state |
+| 1 | `signoz_get_alert_history` | Fetched state-transition history per rule for the 24-hour window, including rules with zero transitions |
+| 2 | `signoz_get_alert_history` | Derived fire counts, mean auto-resolve duration, and peak fires per rolling 30-minute window |
+| 2 | `signoz_get_alert` | Retrieved each rule's threshold expression and referenced metric to support the STALE check |
+| 2 | `signoz_aggregate_traces` | Computed error rate and p99 latency for the owning service 5 minutes before and after each firing to measure per-firing deltas |
+| 2 | `signoz_query_metrics` | Checked whether each rule's referenced metric produced data during the window (no-data / flat-signal detection) |
 
 </details>
 
