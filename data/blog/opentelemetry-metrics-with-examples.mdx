@@ -50,30 +50,31 @@ If you [come from Prometheus](https://signoz.io/blog/opentelemetry-vs-prometheus
 
 To generate metrics, OpenTelemetry provides a *Meter*, a core component of its API. This *Meter* lets you create different *instruments*, like counters or gauges, to capture *measurements*. Each *measurement* is a single data point that shows the value of a *metric* at a specific time, giving you a clear snapshot of what’s happening in your system.
 
-## How are OpenTelemetry Instruments Classified?
+### How are OpenTelemetry Instruments Classified?
 
 Instruments can be broadly classified into two distinct types based on **when** the metric is collected.
 
-### Synchronous Instruments
+#### Synchronous Instruments
 
 These integrate directly into your application's workflow, measuring events as they happen. For instance, they can track immediate data like HTTP request sizes or transaction counts as your code processes them. 
 
-### Asynchronous Instruments
+#### Asynchronous Instruments
 
 They work by collecting measurements only when needed (*on demand*) depending on the configuration of the metric collection system. To give an example, consider collecting the temperature from a sensor every 15 seconds for safety monitoring.
 
-<Admonition>
-Synchronous instruments can also additionally have **trace context** associated with it as well. 
-Asynchronous instruments usually register **callback functions** which are invoked when necessary for metric collection.
-</Admonition>
+<KeyPointCallout title="Behavioral Difference">
+Measurements recorded by synchronous instruments can be associated with <a href="https://opentelemetry.io/docs/concepts/context-propagation/">OpenTelemetry  Context</a>, which means they can be correlated with traces and other signals.
+
+Asynchronous instruments register **callback functions** that are invoked only when the meter is observed during collection, rather than directly inline with your application code.
+</KeyPointCallout>
 
 We will explore different instruments and their use cases in depth in the next section!
 
-## What are the Various Types of Metric Instruments?
+### What are the Various Types of Metric Instruments?
 
 Currently OTel metrics support seven different instruments. Let’s try to understand these instruments and their properties.
 
-### Counter
+#### Counter
 
 A synchronous instrument that measures values that only increase over time. OpenTelemetry counters provide an `add` method that accept a non-negative value, to be added to the current total.
 
@@ -94,11 +95,11 @@ class Counter(_Synchronous, APICounter):
         )
 ```
 
-### Asynchronous Counter
+#### Asynchronous Counter
 
 Asynchronous counters are used to report monotonically increasing values on demand. It is recommended that callback functions registered with asynchronous counters should report total values, rather than increments, allowing aggregations to perform these calculations between current and previous measurements.
 
-### UpDown Counter
+#### UpDown Counter
 
 A synchronous instrument that measures values that can increase or decrease. As an UpDown Counter is non-monotonic, it allows reporting positive or negative deltas to the current value. This is inherently different from the counter that always represents an overall total, because of its monotonic nature.
 
@@ -114,11 +115,11 @@ class UpDownCounter(_Synchronous, APIUpDownCounter):
         )
 ```
 
-### Asynchronous UpDown Counter
+#### Asynchronous UpDown Counter
 
 Similar to an UpDown counter, but reports measurements only on demand; its usage is recommended when values can be logically represented across a time series, and their computation is trivial. Asynchronous UpDown Counter is commonly used to measure metrics like memory usage for user applications in a system.
 
-### Gauge
+#### Gauge
 
 An OpenTelemetry gauge is a synchronous instrument that measures arbitrary values at the time of recording, meaning these measurements can go up or down over time. Values of a gauge are non-additive across measurements. Consider CPU usage- their sum might produce a value greater than 100%.
 
@@ -128,11 +129,11 @@ After <a href="https://github.com/open-telemetry/opentelemetry-specification/iss
 
 </KeyPointCallout>
 
-### Asynchronous Gauge
+#### Asynchronous Gauge
 
 A gauge that reports values only when observed. You should use an asynchronous gauge when non-summable data needs to be measured at regular intervals, rather than in a continuous stream.
 
-### Histogram
+#### Histogram
 
 Histograms are synchronous instruments that record the distribution of non-negative values across pre-defined *buckets*, that represent ranges. These help make sense of data points that must be studied in groups across a distribution. Each value added to the histogram is placed in the bucket based on a defined unit of measurement, such as *time in seconds*.
 
