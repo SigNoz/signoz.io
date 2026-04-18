@@ -62,7 +62,11 @@ export default function StartUpsHero({ startUpsData }: StartUpsHeroProps) {
 
           {/* Right column: application form */}
           <div className="rounded-xl border border-signoz_slate-400 bg-[rgb(244_242_250)] p-6 shadow-xl backdrop-blur-sm">
-            <HeroForm portalId={startUpsData.PORTAL_ID} formId={startUpsData.FORM_ID} />
+            <HeroForm
+              portalId={startUpsData.PORTAL_ID}
+              formId={startUpsData.FORM_ID}
+              formName={startUpsData.TITLE}
+            />
           </div>
         </div>
       </div>

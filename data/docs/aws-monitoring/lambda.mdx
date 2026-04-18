@@ -1,29 +1,160 @@
 ---
-date: 2025-12-28
+date: 2026-04-01
 id: lambda
 title: AWS Lambda
 description: Overview of AWS Lambda monitoring with SigNoz, including logs, metrics, and traces.
 doc_type: explanation
 ---
 
-<DocCardContainer>
+<Admonition type="tip">
 
-<DocCard
-    title="📄️ Logging"
-    description="This guide provides a detailed walkthrough on how to set up AWS Lambda to send Logs to SigNoz."
-    href="/docs/aws-monitoring/lambda/lambda-logs/"
+**SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/lambda/) for automated setup with pre-built dashboards. See the [comparison guide](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to choose the best approach.
+
+</Admonition>
+
+SigNoz supports multiple ways to monitor AWS Lambda. This page helps you choose the right approach for logs, traces, and metrics, then links to detailed setup guides.
+
+## Quick Decision Guide
+
+| What you need                              | Recommended Method                                                                                         | Why                                                                |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Logs** (lower latency, no code changes)  | [OTel Collector Extension Layer](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/) | Telemetry API integration, lower latency than S3, no code changes  |
+| **Logs** (from existing S3 pipelines)      | [S3 Lambda Forwarder](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)                           | Reuses existing S3 log storage, no changes to Lambda functions     |
+| **Traces** (auto-instrumentation)          | [OTel Lambda Layers](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)                          | Language-specific layers capture traces without code changes       |
+| **Metrics** (manual, low cost)             | [CloudWatch Exporter](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)                        | Scrapes CloudWatch metrics with minimal AWS cost                   |
+| **Logs & Metrics** (fastest setup, Cloud only) | [One-Click Integration](https://signoz.io/docs/integrations/aws/lambda/)                                   | Auto-discovery, pre-built dashboards, ~5 minute setup              |
+
+---
+
+## Logs: OTel Extension vs S3
+
+### OTel Collector Extension Layer
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/lambda-logs-otel-extension-flow.svg"
+  caption="OTel Collector Extension Layer flow for Lambda logs"
+  alt="Architecture diagram showing Lambda function sending logs via Telemetry API to OTel Collector Extension Layer, then forwarding to SigNoz via OTLP"
 />
 
-<DocCard
-    title="📄️ APM & Tracing"
-    description="This guide provides a detailed walkthrough on how to set up AWS Lambda to send Traces to SigNoz."
-    href="/docs/aws-monitoring/lambda/lambda-traces/"
+The OTel Collector runs as a Lambda extension and registers with Lambda's Telemetry API to receive logs automatically. No function code changes required.
+
+**Benefits:**
+- ✅ No code changes to your Lambda function
+- ✅ Direct integration via Lambda Telemetry API — no CloudWatch required
+- ✅ Lower latency than S3 for high-traffic functions
+- ✅ Minimal AWS cost (Lambda extension overhead only)
+
+**Trade-offs:**
+- ❌ Requires adding a Lambda layer and a collector config file
+- ❌ Logs are buffered — sent at the start of the **next invocation** or during function shutdown, not immediately after each invocation. For short-lived or low-traffic functions, expect visible lag.
+
+| Feature          | Details                                  |
+| ---------------- | ---------------------------------------- |
+| **Setup**        | Add layer + config file                  |
+| **Code Changes** | None                                     |
+| **Latency**      | Next invocation or shutdown (buffered)   |
+| **AWS Cost**     | Minimal (Lambda extension overhead only) |
+| **Best For**     | Most use cases                           |
+
+→ [Logs via OTel Extension Layer](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/)
+
+### S3 Forwarder
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/lambda-logs-s3-flow.svg"
+  caption="S3-based log forwarding flow for Lambda logs"
+  alt="Architecture diagram showing Lambda logs flowing through CloudWatch to S3, then triggered Lambda forwarder sends to SigNoz"
 />
 
-<DocCard
-    title="📄️ Metrics"
-    description="This guide provides a detailed walkthrough on how to collect AWS Lambda Metrics using CloudWatch Exporter."
-    href="/docs/aws-monitoring/lambda/lambda-metrics/"
+Lambda logs flow through CloudWatch Logs to an S3 bucket. A forwarder Lambda function is triggered on new objects and sends them to SigNoz. Use this when you already have a CloudWatch → S3 log archival pipeline.
+
+**Benefits:**
+- ✅ No code changes to your Lambda function
+- ✅ Reuses existing S3 log storage and pipelines
+- ✅ Decoupled from function execution — delivery failures don't affect your function
+
+**Trade-offs:**
+- ❌ Higher latency — delivery depends on CloudWatch → S3 export interval
+- ❌ Additional AWS cost for S3 storage and forwarder Lambda invocations
+- ❌ Requires setting up a separate forwarder Lambda function
+
+| Feature          | Details                         |
+| ---------------- | ------------------------------- |
+| **Setup**        | Lambda function + S3 bucket     |
+| **Code Changes** | None                            |
+| **Latency**      | Delayed (depends on S3 sync)    |
+| **AWS Cost**     | S3 storage + Lambda invocations |
+| **Best For**     | Existing S3 log pipelines       |
+
+→ [Logs via S3](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)
+
+---
+
+## Traces: OTel Auto-Instrumentation
+
+Add language-specific OTel layers to your Lambda function to automatically capture traces without code changes.
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/lambda-traces-flow.svg"
+  caption="OTel auto-instrumentation flow for Lambda traces"
+  alt="Architecture diagram showing Lambda function with OTel auto-instrumentation layer sending traces through OTel Collector layer to SigNoz"
 />
 
-</DocCardContainer>
+**Benefits:**
+- ✅ No code changes — instrumentation happens via Lambda layers
+- ✅ Automatically captures invocation spans and outbound HTTP calls
+- ✅ Forwards traces through a separate OTel Collector layer — function response time is not blocked
+
+**Trade-offs:**
+- ❌ Adds cold start latency from layer initialization
+- ❌ Custom spans require manual instrumentation
+- ❌ Trace-log correlation requires additional setup (OTel SDK logging in your function code)
+
+**Supported languages:** Python, Node.js, Java, Ruby
+
+→ [APM & Tracing Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)
+
+---
+
+## Metrics: CloudWatch Exporter
+
+Scrape Lambda metrics (Invocations, Errors, Duration, Throttles) from CloudWatch using the Prometheus CloudWatch Exporter.
+
+**Benefits:**
+- ✅ No changes to Lambda functions
+- ✅ Covers standard Lambda metrics out of the box
+- ✅ Minimal AWS cost — reads from CloudWatch, no additional data streams
+
+**Trade-offs:**
+- ❌ Polling-based — not real-time; metrics lag by the scrape interval
+- ❌ Requires running a CloudWatch Exporter instance
+
+→ [Metrics Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)
+
+---
+
+## One-Click vs Manual
+
+| Feature                  | One-Click Integration           | Manual Setup                   |
+| ------------------------ | ------------------------------- | ------------------------------ |
+| **Availability**         | SigNoz Cloud only               | Cloud & Self-Hosted            |
+| **Setup Time**           | ~5 minutes                      | 15-60 minutes                  |
+| **Pre-built Dashboards** | ✅ Included                     | ❌ Build your own              |
+| **Auto-Discovery**       | ✅ New resources detected       | ❌ Manual configuration        |
+| **AWS Cost**             | CloudWatch + Firehose charges   | Minimal                        |
+| **Granular Control**     | Limited                         | Full control                   |
+| **Best For**             | Quick start, managed experience | Cost optimization, self-hosted |
+
+See the full [One-Click vs Manual comparison](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) for details.
+
+---
+
+## Combining Approaches
+
+Many teams use a mix:
+
+- **One-Click** for metrics and pre-built dashboards
+- **OTel Extension Layer** for lower-latency logs
+- **OTel Auto-Instrumentation** for distributed traces
+
+All data flows into the same SigNoz instance and can be queried together.

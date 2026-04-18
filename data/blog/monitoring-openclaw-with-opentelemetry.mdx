@@ -19,11 +19,13 @@ That's when I came across `Diagnostic-OTel`, a built-in plugin that handles tele
 
 This is a note on how I'm keeping an eye on my OpenClaw Agent with OpenTelemetry because if it's going to work this hard for me, the least I can do is make sure it's running well.
 
+<InlineCTA message="Track token usage, costs, and agent performance in real time. SigNoz Cloud supports OpenTelemetry-native LLM observability out of the box." />
+
 <Figure src="/img/blog/2026/02/openclaw-monitoring-dashboard-with-opentelemetry.webp" alt="OpenClaw monitoring dashboard tracking token limits and usage with OpenTelemetry (Visualization: SigNoz)" caption="OpenClaw token usage dashboard with OpenTelemetry" />
 
 ## What type of Telemetry does Diagnostic-OTel provide?
 
-Understanding what telemetry Diagnostic-OTel emits will help us plan our Dashboard and Alerts more effectively beforehand. OpenClaw uses [OpenTelemetry](/blog/opentelemetry-collector-complete-guide/) internally for telemetry collection. We get the following:
+Understanding what telemetry Diagnostic-OTel emits will help us plan our Dashboard and Alerts more effectively beforehand. OpenClaw uses [OpenTelemetry](/opentelemetry/) internally for telemetry collection. We get the following:
 
 1. **Traces:** spans for model usage and webhook/message processing.
 2. **Metrics:** counters and histograms, token usage, cost, context size, run duration, message-flow counters, queue depth, and session state.
@@ -34,6 +36,8 @@ The practical value is immediate. You get token cost attribution (which sessions
 You can check the names and types of the exported metrics in detail in the <a href="https://docs.openclaw.ai/logging#diagnostics-%2B-opentelemetry" rel="noopener noreferrer nofollow" target="_blank">Official OpenClaw Documentation</a>.
 
 ## Setting up the Diagnostic-OTel plugin in under 10 minutes
+
+This section covers the essential steps to get started quickly. For the complete reference guide covering self-hosted SigNoz setup, troubleshooting common issues, and routing telemetry through an OpenTelemetry Collector, see our [OpenClaw monitoring documentation](/docs/openclaw-monitoring/).
 
 ### Prerequisites
 
@@ -202,6 +206,6 @@ Walkthrough of the OpenClaw Overview dashboard showing LLM token usage, queue an
 
 ## Conclusion
 
-When building autonomous workflows with OpenClaw, running blind isn't an option. Without tracking your model calls and tool executions, token budgets drain quickly and debugging agent loops is impossible. 
+When building autonomous workflows with OpenClaw, running blind isn't an option. Without tracking your model calls and tool executions, token budgets drain quickly and debugging agent loops is impossible. The built-in `diagnostics-otel` plugin makes fixing this straightforward. With no custom code required, you can connect it directly to SigNoz and see exactly where your tokens are going.
 
-The built-in `diagnostics-otel` plugin makes fixing this straightforward. With no custom code required, you can connect it directly to SigNoz and see exactly where your tokens are going.
+If you run into issues getting telemetry to show up, check the [troubleshooting](/docs/openclaw-monitoring/#troubleshooting) section in our docs. And if you want to add batching, filtering, or multi-backend routing to your setup, the docs also cover [setting up the OpenTelemetry collector](/docs/openclaw-monitoring/#setup-opentelemetry-collector-optional) as an intermediary.

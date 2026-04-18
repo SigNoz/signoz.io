@@ -1,5 +1,5 @@
 ---
-date: 2025-12-18
+date: 2026-04-06
 title: Collecting systemd logs (journald)
 description: Configure OpenTelemetry Collector to collect systemd journal logs and send them to SigNoz. Learn about filtering by units, priority levels, and combining multiple criteria.
 
@@ -31,7 +31,7 @@ Jun 25 10:30:46 hostname myapp[1234]: Application started successfully
 
 ### Step 1: Install OpenTelemetry Collector Contrib
 
-Follow the [installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver</a> is available in the OpenTelemetry Collector Contrib distribution.
+Follow the [installation guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to install the OpenTelemetry Collector. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver</a> is available in the OpenTelemetry Collector Contrib distribution.
 
 <KeyPointCallout title="Running the Collector in a container?" defaultCollapsed="true">
 The `journald` receiver shells out to `journalctl`, so the Collector needs access to the `journalctl` binary (in `$PATH`) and the host journal files. The simplest setup is running the OTel Collector on the host. If you run the Collector in a container, ensure you mount the journal directory and make `journalctl` available in the container. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver documentation</a> for container-specific requirements and examples.
@@ -76,7 +76,7 @@ exporters:
 ```
 
 Replace the placeholders:
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (e.g., `us`, `eu`, or `in`)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
@@ -327,4 +327,4 @@ Now that you're collecting systemd logs, explore these related features:
 - Explore other log collection methods:
   - [Collect application logs](https://signoz.io/docs/logs-management/send-logs/application-logs/)
   - [Collect Docker container logs](https://signoz.io/docs/userguide/collect_docker_logs/)
-  - [Collect Kubernetes logs](https://signoz.io/docs/logs-management/send-logs/kubernetes/)
+  - [Collect Kubernetes logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/)

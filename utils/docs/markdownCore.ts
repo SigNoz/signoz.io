@@ -42,12 +42,71 @@ const getClassNames = (node: HastElement): string[] => {
   return []
 }
 
+export const getTextContent = (node: HastContent): string => {
+  if (isHastText(node)) {
+    return node.value
+  }
+
+  if (!isHastElement(node)) {
+    return ''
+  }
+
+  return ((node.children || []) as HastContent[]).map((child) => getTextContent(child)).join('')
+}
+
 const shouldRemoveMarkdownElement = (node: HastElement): boolean => {
   if (MARKDOWN_CLEANUP_TAG_NAMES.has(node.tagName)) {
     return true
   }
 
   return getClassNames(node).some((className) => MARKDOWN_CLEANUP_CLASS_NAMES.has(className))
+}
+
+const shouldPreserveButtonLabel = (node: HastElement): boolean => {
+  if (node.tagName !== 'button') {
+    return false
+  }
+
+  if (node.properties?.['data-tab-value'] || node.properties?.dataTabValue) {
+    return false
+  }
+
+  const textContent = getTextContent(node).trim()
+  if (!textContent) {
+    return false
+  }
+
+  return getClassNames(node).includes('text-left')
+}
+
+const normalizeMarkdownElement = (node: HastElement) => {
+  if (node.tagName !== 'img') {
+    return
+  }
+
+  const src = node.properties?.src
+  if (typeof src !== 'string' || !src.startsWith('/_next/image')) {
+    return
+  }
+
+  try {
+    const imageUrl = new URL(src, 'https://signoz.io')
+    if (imageUrl.pathname !== '/_next/image' && imageUrl.pathname !== '/_next/image/') {
+      return
+    }
+
+    const originalUrl = imageUrl.searchParams.get('url')
+    if (!originalUrl) {
+      return
+    }
+
+    node.properties = {
+      ...node.properties,
+      src: originalUrl,
+    }
+  } catch {
+    // Preserve the rendered src when URL parsing fails.
+  }
 }
 
 const hasMeaningfulMarkdownContent = (node: HastContent): boolean => {
@@ -71,6 +130,26 @@ const hasMeaningfulMarkdownContent = (node: HastContent): boolean => {
 const cleanMarkdownNode = (node: HastContent): HastContent[] => {
   if (!isHastElement(node)) {
     return [node]
+  }
+
+  normalizeMarkdownElement(node)
+
+  if (shouldPreserveButtonLabel(node)) {
+    return [
+      {
+        type: 'element',
+        tagName: 'p',
+        properties: {},
+        children: [
+          {
+            type: 'element',
+            tagName: 'strong',
+            properties: {},
+            children: [{ type: 'text', value: getTextContent(node).trim() }],
+          },
+        ],
+      },
+    ]
   }
 
   if (shouldRemoveMarkdownElement(node)) {

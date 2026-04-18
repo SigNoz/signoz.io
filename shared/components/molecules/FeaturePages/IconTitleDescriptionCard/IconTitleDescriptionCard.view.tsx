@@ -41,7 +41,7 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
       )}
 
       {description && (
-        <div className="m-0 text-left text-sm text-signoz_vanilla-400">{description}</div>
+        <div className="m-0 w-full text-left text-sm text-signoz_vanilla-400">{description}</div>
       )}
     </div>
   )

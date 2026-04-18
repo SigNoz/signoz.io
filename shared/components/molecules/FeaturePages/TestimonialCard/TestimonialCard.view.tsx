@@ -27,10 +27,18 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
   )
 }
 
-export const TestimonialCardGrid: React.FC = () => {
+export interface TestimonialCardGridProps {
+  /** When true, excludes the last card from the grid */
+  excludeLastCard?: boolean
+}
+
+export const TestimonialCardGrid: React.FC<TestimonialCardGridProps> = ({
+  excludeLastCard = false,
+}) => {
+  const testimonials = excludeLastCard ? TESTIMONIALS.slice(0, -1) : TESTIMONIALS
   return (
     <GridLayout cols={2} className="gap-8 px-0 md:px-32">
-      {TESTIMONIALS.map((testimonial, index) => (
+      {testimonials.map((testimonial, index) => (
         <TestimonialCard key={index} {...testimonial} />
       ))}
     </GridLayout>

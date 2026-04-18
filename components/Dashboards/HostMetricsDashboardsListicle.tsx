@@ -4,33 +4,26 @@ import React from 'react'
 import { SiKubernetes } from 'react-icons/si'
 import { Server } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
+import { HOST_METRICS_DASHBOARDS_ITEMS } from '@/constants/componentItems'
 
-interface IconCardData {
-  name: string
-  href: string
-  icon: React.ReactNode
-  clickName: string
+const ICON_MAP: Record<string, React.ReactNode> = {
+  '/docs/dashboards/dashboard-templates/hostmetrics-k8s': (
+    <SiKubernetes className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/hostmetrics-vm': (
+    <Server className="h-7 w-7 text-green-600" />
+  ),
 }
 
-const HostMetricsDashboardsData: IconCardData[] = [
-  {
-    name: 'Host Metrics K8s',
-    href: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
-    icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
-    clickName: 'Host Metrics K8s Dashboard Template',
-  },
-  {
-    name: 'Host Metrics',
-    href: 'https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json',
-    icon: <Server className="h-7 w-7 text-green-600" />,
-    clickName: 'Host Metrics Dashboard Template',
-  },
-]
+const cards = HOST_METRICS_DASHBOARDS_ITEMS.map((item) => ({
+  ...item,
+  icon: ICON_MAP[item.href],
+}))
 
 export default function HostMetricsDashboardsListicle() {
   return (
     <IconCardGrid
-      cards={HostMetricsDashboardsData}
+      cards={cards}
       sectionName="Host Metrics Dashboards Section"
       viewAllText="View all Host Metrics dashboards"
       gridCols="grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2"

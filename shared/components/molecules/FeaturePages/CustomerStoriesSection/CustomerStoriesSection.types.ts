@@ -3,4 +3,6 @@ export interface CustomerStoriesSectionProps {
     clickName: string
     clickLocation: string
   }
+  showOverlay?: boolean
+  showFeaturedCaseStudy?: boolean
 }

@@ -3,7 +3,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Modern New Relic Alternative | SigNoz',
+  title: 'Modern New Relic Alternative',
   description:
     'SigNoz is the modern New Relic alternative with OpenTelemetry-native ingestion, unlimited basic seats, and predictable usage-based pricing.',
   openGraph: {

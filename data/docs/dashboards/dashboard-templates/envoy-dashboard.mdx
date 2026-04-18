@@ -1,0 +1,113 @@
+---
+date: 2026-03-14
+id: envoy-dashboard
+title: Envoy Proxy Dashboard
+description: Monitor Envoy Proxy performance using OpenTelemetry metrics.
+doc_type: explanation
+---
+
+This dashboard provides monitoring of Envoy Proxy performance using <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/stat_sinks/open_telemetry_stat_sink" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Stat Sink</a>, giving you visibility into traffic patterns, connection handling, and internal server health.
+
+<Admonition type="info">
+To use this dashboard, you need to configure Envoy to send metrics to SigNoz. Follow the [Envoy Metrics](https://signoz.io/docs/userguide/envoy-metrics/) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/envoy-proxy-metrics-1.webp"
+  alt="Envoy Dashboard Preview"
+  caption="Envoy Dashboard - General Overview and Request Metrics"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/envoy/envoy-otlp-v1.json"
+    dashboardName="Envoy Proxy"
+  />
+</div>
+
+## Dashboard Variables
+
+This dashboard includes pre-configured variables for filtering:
+
+- **namespace**: Filter by Kubernetes namespace
+- **service.name**: Filter by specific service name
+- **cluster**: Filter by upstream cluster name
+- **deployment_environment**: Filter by deployment environment (e.g., production, staging)
+
+## What This Dashboard Monitors
+
+This dashboard provides comprehensive monitoring of Envoy Proxy performance, giving you visibility into:
+
+- **Request patterns and throughput**: Track incoming requests, response times, and data transfer rates
+- **Connection health**: Monitor active connections, connection lifecycle, and upstream cluster status
+- **Error tracking**: Identify and analyze 4xx/5xx errors with detailed breakdowns
+- **Resource usage**: Keep tabs on Envoy's memory consumption and heap size
+- **Upstream performance**: Monitor backend cluster health, connection failures, and error rates
+
+## Metrics Included
+
+### General Overview
+
+- **Active Connections**: Active downstream HTTP connections
+- **Total Requests**: Total HTTP requests received
+- **Request Rate**: HTTP requests per second
+- **Envoy Uptime**: Envoy process uptime
+
+### Traffic & Latency
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/envoy-proxy-metrics-2.webp"
+  alt="Envoy Dashboard Preview"
+  caption="Envoy Dashboard - Traffic, Latency, and Response Code Metrics"
+/>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/envoy-proxy-metrics-3.webp"
+  alt="Envoy Dashboard Preview"
+  caption="Envoy Dashboard - Upstream Metrics and Resource Usage"
+/>
+
+- **Ingress Data Rate**: Incoming data rate (bytes/s)
+- **Egress Data Rate**: Outgoing data rate (bytes/s)
+- **Average Response Size**: Average HTTP response size
+- **Request Throughput**: Average request throughput
+- **Average Response Time**: Mean HTTP request latency
+- **P50 Latency**: 50th percentile latency
+- **P95 Latency**: 95th percentile latency
+- **P99 Latency**: 99th percentile latency
+
+### Errors & Responses
+
+- **Response Code Distribution**: Response codes by class
+- **2xx Success Rate**: Rate of successful responses
+- **4xx Client Errors**: Rate of client errors
+- **5xx Server Errors**: Rate of server errors
+- **Total Error Count**: Cumulative 4xx and 5xx count
+- **Error Rate**: Combined 4xx and 5xx error rate
+- **Error Rate by Class**: Breakdown of 4xx vs 5xx errors
+
+### Upstream Metrics
+
+- **Upstream Request Volume**: Requests by upstream cluster
+- **Upstream Active Connections**: Active upstream connections
+- **Upstream Connection Failures**: Failed upstream connections
+- **Upstream Error Rate**: Upstream 4xx/5xx errors
+- **Upstream Throughput**: Total TX+RX to upstream clusters
+
+### Connection Lifecycle
+
+- **Connection Establish Rate**: New downstream connections/sec
+- **Connection Destruction Rate**: Closed downstream connections/sec
+
+### Resource Usage
+
+- **Memory Allocated**: Envoy memory usage (allocated)
+- **Heap Size**: Envoy heap memory size
+
+## Related Dashboards
+
+- [Kubernetes](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards)
+- [Host Metrics](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-dashboards)
+- [Nginx](https://signoz.io/docs/dashboards/dashboard-templates/nginx)

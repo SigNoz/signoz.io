@@ -8,8 +8,9 @@ import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import SigNozStats from '@/components/signoz-stats'
+import { COMPANIES } from '@/components/trusted-by'
 
-function MetricsDashboards() {
+function Exceptions() {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
@@ -17,19 +18,19 @@ function MetricsDashboards() {
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <Header />
-        <TrustedByTeams page="MetricsDashboards" />
+        <TrustedByTeams page="Exceptions" />
         <SigNozFeatures />
         {/* <SigNozUsage /> */}
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
         <SigNozStats />
-        <GetStarted page="MetricsDashboards" />
+        <GetStarted page="Exceptions" />
       </div>
     </main>
   )
 }
 
-export default MetricsDashboards
+export default Exceptions
 
 const PlatformCard = ({ title, description }) => {
   return (
@@ -171,7 +172,7 @@ const Header = () => {
               <div className="absolute">
                 <img
                   src="/img/features/exceptions/exceptions-overview.webp"
-                  alt="Custom Thumbnail"
+                  alt="SigNoz exception details view with a stack trace and related trace graph"
                   className="w-full rounded-lg"
                 />
               </div>
@@ -182,21 +183,6 @@ const Header = () => {
     </header>
   )
 }
-
-const COMPANIES = [
-  { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
-  { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
-  { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
-  { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
-  { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
-  { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
-  { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
-  { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
-  { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
-]
 
 const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
@@ -212,11 +198,12 @@ const TrustedByTeams = ({ page }) => {
         </div>
         <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
           {COMPANIES.map((company, idx) => (
-            <div key={`${idx}-${company.image}`} className="flex items-center justify-center">
-              <img
+            <div key={`${idx}-${company.imageDesc}`} className="flex items-center justify-center">
+              <company.Logo
+                key={`${idx}-${company.imageDesc}`}
                 className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-                src={company.image}
-                alt={company.imageDesc}
+                role="img"
+                aria-label={company.imageDesc}
               />
             </div>
           ))}
@@ -358,7 +345,7 @@ const SigNozUsage = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Use SigNoz
             <br /> Metrics & Dashboards for...
           </p>
@@ -378,7 +365,7 @@ const UsageBasedPricing = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Simple
             <br /> usage-based <br /> pricing
           </p>
@@ -412,7 +399,7 @@ const ExploreDocs = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Explore Docs
           </p>
         </div>
@@ -458,7 +445,7 @@ const GetStarted = ({ page }) => {
             <div className="relative flex items-center justify-center">
               <img
                 src="/img/landing/landing_thumbnail.webp"
-                alt="Custom Thumbnail"
+                alt="SigNoz dashboard with application performance metrics - Exceptions"
                 className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
               />
             </div>

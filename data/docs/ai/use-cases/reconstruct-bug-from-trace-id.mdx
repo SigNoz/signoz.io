@@ -1,0 +1,126 @@
+---
+date: 2026-03-30
+id: reconstruct-bug-from-trace-id
+title: Reconstruct a Bug from a Trace ID
+description: Paste a trace ID from a support ticket into your AI assistant and reconstruct the full request path with root cause analysis.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+A Slack message from support:
+
+> _Customer says their checkout failed with a 500 error. Here is the request ID from the error page: `7a3f2b1c8d4e5f6a9b0c1d2e3f4a5b6c`. Can someone look into this?_
+
+You paste the ID into your AI assistant, connected to SigNoz via the MCP server, and ask what happened.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Reconstruct the Request Path
+
+```
+Look up trace ID 7a3f2b1c8d4e5f6a9b0c1d2e3f4a5b6c. The customer says checkout failed with a 500 error. What happened?
+```
+
+The full span tree comes back:
+
+```
+Trace 7a3f2b1c...: POST /api/checkout for customer 4291
+
+Request path:
+  api-gateway /api/checkout (823ms)
+    -> auth-service /verify-token (12ms) OK
+    -> checkout-service /process (798ms)
+         -> inventory-service /reserve (45ms) OK
+         -> payment-service /charge (680ms) FAILED
+              -> HTTP POST stripe.com/v1/charges (672ms)
+                 Status: 402, "card_declined"
+         -> order-service /create (never called, skipped after payment failure)
+
+Root cause: The Stripe charge returned a 402 (card_declined). The
+payment-service propagated this as a 500 to the checkout-service,
+which bubbled it up to the customer as a generic server error.
+
+This is a customer-side issue (declined card), but the error handling
+is masking it. The customer should see "Payment declined" not "Server error."
+```
+
+You can already reply to the support ticket: the customer's card was declined, but the app is showing the wrong error message.
+
+## Step 2: Correlate with Logs
+
+The span tree tells you what happened. Logs add the details that spans do not capture.
+
+```
+Show me the logs for this trace, especially what payment-service logged when the charge failed.
+```
+
+The correlated logs surface the exact behavior:
+
+```
+payment-service logs:
+  14:46:31.442 INFO  Processing charge for order ord_8821, amount $149.99
+  14:46:32.114 WARN  Stripe returned decline_code=insufficient_funds
+  14:46:32.115 ERROR PaymentError: charge failed, raising InternalServerError
+```
+
+The payment service catches the Stripe decline but re-raises it as `InternalServerError` instead of mapping it to a client-facing 402.
+
+## Step 3: Determine Blast Radius
+
+```
+What is the error rate for payment-service /charge over the last 24 hours? Break down the failures by type.
+```
+
+The aggregated view reveals the scope:
+
+```
+payment-service /charge over the last 24 hours:
+  Total requests: 3,847
+  Failed: 312 (8.1% error rate)
+
+Breakdown of failures:
+  - 287 (92%) are card declines (Stripe 402) incorrectly raised as 500
+  - 18 (6%) are Stripe timeouts (legitimate 5xx)
+  - 7 (2%) are invalid amount errors
+```
+
+287 customers in the last 24 hours got a generic "Server Error" when their card was simply declined. This is a bug in payment-service error handling, not a one-off.
+
+## Refine Your Investigation
+
+- **Dig into a specific span**: _"full attributes on the failed Stripe span"_
+- **Find similar failures**: _"5 more traces where payment-service returned 500 in the last hour"_
+- **Check the timeline**: _"when did this error pattern start? correlate with deployments"_
+- **Get customer impact**: _"how many unique customers hit the 500-masking-402 bug today?"_
+
+<Admonition type="tip">
+If your logs include the `trace_id` field, the assistant can correlate them directly. If trace IDs only appear in the log body text, the assistant falls back to a full-text search. This works, but can be slow and resource-intensive on high-volume log environments. For faster correlation, ensure your instrumentation propagates `trace_id` as a structured log attribute. See [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs) for setup instructions.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+Reconstructing a bug from a trace ID typically uses these MCP tools:
+
+| Step | MCP Tool | What It Does |
+|------|----------|-------------|
+| 1 | `signoz_search_traces` | Finds the trace by ID |
+| 2 | `signoz_get_trace_details` | Returns the full span tree with all span attributes |
+| 3 | `signoz_search_logs` | Searches for logs correlated by trace ID |
+| 4 | `signoz_aggregate_traces` | Checks error rates to determine if the failure is isolated |
+| 5 | `signoz_get_service_top_operations` | Gets operation-level error rates for the affected service |
+
+</details>
+
+## Next Steps
+
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration) - Search and analyze logs without writing queries.
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer) - Ask "why is this slow?" and trace the bottleneck.
+
+<GetHelp />

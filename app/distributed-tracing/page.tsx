@@ -4,20 +4,23 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'High-Performance Trace Analysis Powered by Columnar Storage | SigNoz',
+    absolute:
+      'Distributed Tracing - High-Performance Trace Analysis Powered by OpenTelemetry | SigNoz',
   },
   openGraph: {
-    title: 'High-Performance Trace Analysis Powered by Columnar Storage',
+    title:
+      'Distributed Tracing - High-Performance Trace Analysis Powered by OpenTelemetry | SigNoz',
     description:
-      'Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.',
+      'SigNoz offers powerful Distributed Tracing powered by OpenTelemetry. Analyze millions of spans, track requests across services & quickly find root causes to optimize application performance.',
     images: '/img/platform/DistributedTracingMeta.webp',
   },
   description:
-    'Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.',
+    'SigNoz offers powerful Distributed Tracing powered by OpenTelemetry. Analyze millions of spans, track requests across services & quickly find root causes to optimize application performance.',
   twitter: {
-    title: 'High-Performance Trace Analysis Powered by Columnar Storage',
+    title:
+      'Distributed Tracing - High-Performance Trace Analysis Powered by OpenTelemetry | SigNoz',
     description:
-      'Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.',
+      'SigNoz offers powerful Distributed Tracing powered by OpenTelemetry. Analyze millions of spans, track requests across services & quickly find root causes to optimize application performance.',
     images: '/img/platform/DistributedTracingMeta.webp',
   },
 }

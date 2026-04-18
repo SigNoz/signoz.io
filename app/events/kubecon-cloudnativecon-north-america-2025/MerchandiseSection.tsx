@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
 
 const merchandise = {
   title: 'Cool merch.',
@@ -78,26 +79,20 @@ const MerchandiseSection: React.FC<MerchandiseSectionProps> = ({
         backdrop="blur"
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        className="self-center"
+        panelClassName="bg-transparent p-0"
       >
-        <ModalContent className="bg-transparent">
-          {() => (
-            <ModalBody className="p-0">
-              {selectedImage && (
-                <div className="relative h-[80vh] w-full">
-                  <Image
-                    src={`/img/events/kubecon-2025/${selectedImage.placeholder}`}
-                    alt={selectedImage.name}
-                    fill
-                    priority={true}
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
-                  />
-                </div>
-              )}
-            </ModalBody>
-          )}
-        </ModalContent>
+        {selectedImage && (
+          <div className="relative h-[80vh] w-full">
+            <Image
+              src={`/img/events/kubecon-2025/${selectedImage.placeholder}`}
+              alt={selectedImage.name}
+              fill
+              priority={true}
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+            />
+          </div>
+        )}
       </Modal>
     </>
   )

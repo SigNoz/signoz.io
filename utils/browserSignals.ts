@@ -106,6 +106,8 @@ export const getBrowserEnvironmentSignals = () => {
   return {
     custom_browser_screen_width: window.screen?.width || 0,
     custom_browser_screen_height: window.screen?.height || 0,
+    custom_viewport_screen_width: window.innerWidth || 0,
+    custom_viewport_screen_height: window.innerHeight || 0,
     custom_browser_language_count: window.navigator?.languages?.length || 0,
     custom_browser_has_touch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
     custom_browser_history_length: window.history?.length || 0,

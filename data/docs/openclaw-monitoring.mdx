@@ -1,0 +1,258 @@
+---
+date: 2026-03-10
+id: openclaw-monitoring-with-opentelemetry
+title: OpenClaw Monitoring & Observability with OpenTelemetry
+description: Monitoring and observability for OpenClaw usage and performance with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through setting up observability and monitoring for OpenClaw using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe and track various metrics for your OpenClaw applications and LLM usage.
+
+Monitoring your OpenClaw usage and performance with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- For Python: `pip` installed for managing Python packages
+- A running OpenClaw instance
+
+## Monitoring OpenClaw
+
+For more information on getting started with OpenClaw in your environment, refer to the <a href="https://docs.openclaw.ai/start/getting-started" target="_blank" rel="noopener noreferrer nofollow">OpenClaw quickstart guide</a>.
+
+<KeyPointCallout defaultCollapsed='true' title='Temporary fix to Enable Logs'>
+
+Current version of OpenClaw still has some issues with log ingestion. To enable it we have made some changes in a <a href="https://github.com/LuffySama-Dev/openclaw/tree/logsIsolationIssueFixed" rel="noopener noreferrer nofollow" target="_blank">forked repo</a> and created a <a href="https://github.com/openclaw/openclaw/pull/22478" rel="noopener noreferrer nofollow" target="_blank">PR#22478</a>. Feel free to follow below steps to enable logs. If you just want `traces` and `metrics` then you can ignore these steps.
+
+**Preconditions**
+
+- Node.js and pnpm are installed.
+- Your npm global prefix is set to a user-level directory (e.g., `~/.npm-global`).
+
+**Clone the Repository & Checkout the Fix Branch**
+
+```bash
+git clone https://github.com/LuffySama-Dev/openclaw.git
+cd openclaw
+git switch logsIsolationIssueFixed
+```
+
+**Install dependencies and build**
+
+```bash
+pnpm install
+pnpm build
+```
+
+**Install globally from the local repo (important: do not use `sudo`)**
+
+```bash
+npm install -g .
+```
+
+**Ensure the user-level npm bin directory is first in your PATH**
+
+```bash
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+hash -r
+```
+
+**Verify that OpenClaw resolves to the user path (not `/usr/bin`)**
+
+```bash
+which openclaw
+openclaw --version
+npm ls -g openclaw --depth=0
+```
+
+</KeyPointCallout>
+
+### Step 1: Enable Diagnostic-OTel plugin
+
+The `diagnostics-otel` plugin ships with OpenClaw but is disabled by default. You can enable it via CLI:
+
+```bash
+openclaw plugins enable diagnostics-otel
+```
+
+Or add it directly to your config file (`~/.openclaw/openclaw.json`):
+
+```json
+{
+  "plugins": {
+    "allow": ["diagnostics-otel"],
+    "entries": {
+      "diagnostics-otel": {
+        "enabled": true
+      }
+    }
+  }
+}
+```
+
+### Step 2: Configure the OTEL Exporter
+
+You can configure the exporter via CLI:
+
+```bash
+openclaw config set diagnostics.enabled true
+openclaw config set diagnostics.otel.enabled true
+openclaw config set diagnostics.otel.traces true
+openclaw config set diagnostics.otel.metrics true
+openclaw config set diagnostics.otel.logs true
+openclaw config set diagnostics.otel.protocol http/protobuf
+openclaw config set diagnostics.otel.endpoint "https://ingest.<region>.signoz.cloud:443"
+openclaw config set diagnostics.otel.headers '{"signoz-ingestion-key":"<your-ingestion-key>"}'
+openclaw config set diagnostics.otel.serviceName "<service_name>"
+```
+- **`<service_name>`** is the name of your service
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+<KeyPointCallout defaultCollapsed='true' title='Important Note of Config'>
+
+**Important notes on this config:**
+
+- **`protocol`** - OpenClaw only supports `http/protobuf` as of now. Setting `grpc` is silently ignored.
+- **`endpoint`** - SigNoz Cloud uses port 443 for both OTLP/HTTP and OTLP/gRPC, unlike the typical 4317/4318 split. If the endpoint doesn't already contain `/v1/traces` or `/v1/metrics`, the plugin appends the appropriate path automatically.
+- **`headers`** - SigNoz Cloud requires the `signoz-ingestion-key` header for authentication.
+- **`flushIntervalMs`** - Minimum 1000ms. The default (60s) means quick tasks won't show traces for up to a minute. Set it to `5000` for near-real-time visibility.
+- **`sampleRate`** - Controls trace sampling (0.0–1.0, applied to root spans only). For personal use, `1.0` is fine.
+
+</KeyPointCallout>
+
+### Step 3: Check your config (Optional)
+
+You can quickly check your config using the following command:
+
+```bash
+openclaw config get diagnostics
+```
+
+Your output should look like this.
+
+```json
+{
+  "enabled": true,
+  "otel": {
+    "enabled": true,
+    "endpoint": "https://ingest.<region>.signoz.cloud:443",
+    "protocol": "http/protobuf",
+    "headers": {
+      "signoz-ingestion-key": "<YOUR_SIGNOZ_INGESTION_KEY>"
+    },
+    "serviceName": "openclaw-gateway",
+    "traces": true,
+    "metrics": true,
+    "logs": true,
+    "sampleRate": 1,
+    "flushIntervalMs": 5000
+  }
+}
+```
+
+OR you can check your `~/.openclaw/openclaw.json` config file too.
+
+### Step 4: Restart your OpenClaw gateway
+
+```bash
+openclaw gateway restart
+```
+
+## View Traces and Metrics in SigNoz
+
+Your OpenClaw instance should now automatically emit traces and metrics.
+
+You should be able to view traces in SigNoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/openclaw/openclaw-traces.webp"
+  alt="OpenClaw Trace View"
+  caption="OpenClaw Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/openclaw/openclaw-detailed-traces.webp"
+  alt="OpenClaw Detailed Trace View"
+  caption="OpenClaw Detailed Trace View"
+/>
+
+You should be able to see OpenClaw related metrics in SigNoz Cloud under the metrics tab:
+
+<Figure
+  src="/img/docs/llm/openclaw/openclaw-metrics.webp"
+  alt="OpenClaw Metrics View"
+  caption="OpenClaw Metrics View"
+/>
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure
+  src="/img/docs/llm/openclaw/openclaw-detailed-metrics.webp"
+  alt="OpenClaw Detailed Metrics View"
+  caption="OpenClaw Detailed Metrics View"
+/>
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+</details>
+
+## Next Steps
+
+You can also check out our custom OpenClaw dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/openclaw-dashboard/) which provides specialized visualizations for monitoring your OpenClaw usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/openclaw/openclaw-dashboard.webp"
+  alt="OpenClaw Dashboard"
+  caption="OpenClaw Dashboard Template"
+/>
+
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+

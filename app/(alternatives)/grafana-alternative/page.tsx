@@ -3,7 +3,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Modern Grafana Alternative | SigNoz',
+  title: 'Modern Grafana Alternative',
   description:
     'SigNoz is the modern Grafana alternative: one OpenTelemetry-native backend for logs, metrics, and traces without stitching Loki, Tempo, and Mimir together.',
   openGraph: {

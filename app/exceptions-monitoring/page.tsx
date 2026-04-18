@@ -4,20 +4,22 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Exceptions Monitoring | SigNoz',
+    absolute: 'Exceptions Monitoring - Track and Debug Application Errors | SigNoz',
   },
   openGraph: {
-    title: 'Exceptions Monitoring | SigNoz',
-    description: 'Monitor exceptions automatically in Python, Java, Ruby, and Javascript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
-    images:"/img/features/exceptions/exceptions-overview.webp"
+    title: 'Exceptions Monitoring - Track and Debug Application Errors | SigNoz',
+    description:
+      'Monitor Exceptions and application errors with SigNoz powered by OpenTelemetry. Track traces, debug faster and ensure reliable performance in real time.',
+    images: '/img/features/exceptions/exceptions-overview.webp',
   },
   description:
-    'Monitor exceptions automatically in Python, Java, Ruby, and Javascript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
-  twitter:{
-    title: 'Exceptions Monitoring | SigNoz',
-    description: 'Monitor exceptions automatically in Python, Java, Ruby, and Javascript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
-    images:"/img/features/exceptions/exceptions-overview.webp",
-  }
+    'Monitor Exceptions and application errors with SigNoz powered by OpenTelemetry. Track traces, debug faster and ensure reliable performance in real time.',
+  twitter: {
+    title: 'Exceptions Monitoring - Track and Debug Application Errors | SigNoz',
+    description:
+      'Monitor Exceptions and application errors with SigNoz powered by OpenTelemetry. Track traces, debug faster and ensure reliable performance in real time.',
+    images: '/img/features/exceptions/exceptions-overview.webp',
+  },
 }
 
 export default function ExceptionsPage() {

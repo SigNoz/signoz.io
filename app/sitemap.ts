@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 
   const blogRoutes = allBlogs
-    .filter((post) => !post.draft)
+    .filter((post) => !post.draft && !post?.excludeFromSitemap)
     .map((post) => ({
       url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
@@ -104,7 +104,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const routes = [
     '',
-    'blog',
     'tags',
     'pricing',
     'case-study',
@@ -115,9 +114,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'support',
     'teams',
     'faqs', // Add the main FAQs page
+    'blog',
     'opentelemetry',
     'comparisons',
     'guides',
+    'datadog-alternative',
+    'grafana-alternative',
+    'newrelic-alternative',
   ].map((route) => ({
     url: `${siteUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],

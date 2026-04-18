@@ -6,11 +6,50 @@ import { LuActivity, LuLogIn } from 'react-icons/lu'
 import { TbChartHistogram, TbHeartbeat, TbShieldLock } from 'react-icons/tb'
 import { FaRegFileAlt } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
+import { JAVASCRIPT_INSTRUMENTATION_ITEMS } from '@/constants/componentItems'
 
 type SectionId = 'all' | 'server' | 'frontend' | 'advanced'
 
 interface JavascriptInstrumentationListicleProps {
   category?: SectionId
+}
+
+const ICON_MAP: Record<string, React.ReactNode> = {
+  // Server
+  '/docs/instrumentation/javascript/opentelemetry-nodejs': (
+    <SiNodedotjs className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/instrumentation/javascript/opentelemetry-nextjs': (
+    <SiNextdotjs className="h-7 w-7 rounded-full bg-white text-black" />
+  ),
+  '/docs/instrumentation/javascript/opentelemetry-nuxtjs': (
+    <SiNuxtdotjs className="h-7 w-7 text-green-500" />
+  ),
+  // Frontend
+  '/docs/frontend-monitoring/sending-traces-with-opentelemetry': (
+    <LuActivity className="h-7 w-7 text-sky-500" />
+  ),
+  '/docs/frontend-monitoring/sending-logs-with-opentelemetry': (
+    <LuLogIn className="h-7 w-7 text-indigo-500" />
+  ),
+  '/docs/frontend-monitoring/sending-metrics-with-opentelemetry': (
+    <TbChartHistogram className="h-7 w-7 text-emerald-500" />
+  ),
+  '/docs/instrumentation/javascript/opentelemetry-react-native': (
+    <SiReact className="h-7 w-7 text-sky-400" />
+  ),
+  '/docs/frontend-monitoring/opentelemetry-web-vitals': (
+    <TbHeartbeat className="h-7 w-7 text-rose-500" />
+  ),
+  '/docs/frontend-monitoring/document-load': <FaRegFileAlt className="h-7 w-7 text-blue-500" />,
+  // Advanced
+  '/docs/instrumentation/javascript/nodejs-manual-instrumentation': (
+    <SiJavascript className="h-7 w-7 text-yellow-500" />
+  ),
+  '/docs/instrumentation/javascript/nodejs-selective-instrumentation': (
+    <SiNodedotjs className="h-7 w-7 text-green-500" />
+  ),
+  '/docs/userguide/otlp-http-enable-cors': <TbShieldLock className="h-7 w-7 text-purple-500" />,
 }
 
 export default function JavascriptInstrumentationListicle({
@@ -47,30 +86,17 @@ export default function JavascriptInstrumentationListicle({
     </div>
   )
 
+  const mapIcons = (items: readonly { name: string; href: string; clickName: string }[]) =>
+    items.map((item) => ({
+      ...item,
+      icon: ICON_MAP[item.href],
+    }))
+
   const renderServerSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Back-end & Fullstack Runtimes</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Node.js',
-            href: '/docs/instrumentation/javascript/opentelemetry-nodejs',
-            icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'Node.js Instrumentation Link',
-          },
-          {
-            name: 'Next.js',
-            href: '/docs/instrumentation/javascript/opentelemetry-nextjs',
-            icon: <SiNextdotjs className="h-7 w-7 rounded-full bg-white text-black" />,
-            clickName: 'Next.js Instrumentation Link',
-          },
-          {
-            name: 'Nuxt.js',
-            href: '/docs/instrumentation/javascript/opentelemetry-nuxtjs',
-            icon: <SiNuxtdotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'Nuxt.js Instrumentation Link',
-          },
-        ]}
+        cards={mapIcons(JAVASCRIPT_INSTRUMENTATION_ITEMS.server)}
         sectionName="JavaScript Back-end Section"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -81,44 +107,7 @@ export default function JavascriptInstrumentationListicle({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Frontend Monitoring</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Send Frontend Traces',
-            href: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
-            icon: <LuActivity className="h-7 w-7 text-sky-500" />,
-            clickName: 'Frontend Traces Instrumentation Link',
-          },
-          {
-            name: 'Send Frontend Logs',
-            href: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
-            icon: <LuLogIn className="h-7 w-7 text-indigo-500" />,
-            clickName: 'Frontend Logs Instrumentation Link',
-          },
-          {
-            name: 'Send Frontend Metrics',
-            href: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
-            icon: <TbChartHistogram className="h-7 w-7 text-emerald-500" />,
-            clickName: 'Frontend Metrics Instrumentation Link',
-          },
-          {
-            name: 'React Native',
-            href: '/docs/instrumentation/javascript/opentelemetry-react-native',
-            icon: <SiReact className="h-7 w-7 text-sky-400" />,
-            clickName: 'React Native Instrumentation Link',
-          },
-          {
-            name: 'Monitor Web Vitals',
-            href: '/docs/frontend-monitoring/opentelemetry-web-vitals',
-            icon: <TbHeartbeat className="h-7 w-7 text-rose-500" />,
-            clickName: 'Web Vitals Instrumentation Link',
-          },
-          {
-            name: 'Document Load Timings',
-            href: '/docs/frontend-monitoring/document-load',
-            icon: <FaRegFileAlt className="h-7 w-7 text-blue-500" />,
-            clickName: 'Document Load Instrumentation Link',
-          },
-        ]}
+        cards={mapIcons(JAVASCRIPT_INSTRUMENTATION_ITEMS.frontend)}
         sectionName="JavaScript Frontend Section"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
@@ -129,26 +118,7 @@ export default function JavascriptInstrumentationListicle({
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Manual & Advanced Control</h2>
       <IconCardGrid
-        cards={[
-          {
-            name: 'Manual Node.js Instrumentation',
-            href: '/docs/instrumentation/javascript/nodejs-manual-instrumentation',
-            icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
-            clickName: 'Manual Node.js Instrumentation Link',
-          },
-          {
-            name: 'Selective Auto-Instrumentation',
-            href: '/docs/instrumentation/javascript/nodejs-selective-instrumentation',
-            icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'Selective Auto-Instrumentation Link',
-          },
-          {
-            name: 'Enable OTLP HTTP CORS',
-            href: '/docs/userguide/otlp-http-enable-cors',
-            icon: <TbShieldLock className="h-7 w-7 text-purple-500" />,
-            clickName: 'OTLP HTTP CORS Guide Link',
-          },
-        ]}
+        cards={mapIcons(JAVASCRIPT_INSTRUMENTATION_ITEMS.advanced)}
         sectionName="JavaScript Advanced Section"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />

@@ -1,0 +1,187 @@
+---
+date: 2026-03-27
+id: lambda-logs-otel-extension
+title: Send AWS Lambda logs to SigNoz using the OTel Collector Extension Layer
+description: Collect AWS Lambda logs without code changes using the OpenTelemetry Collector extension layer and the Lambda Telemetry API, then forward them to SigNoz.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Collect AWS Lambda logs by running an OpenTelemetry Collector instance as a Lambda extension layer. The collector registers with Lambda's <a href="https://docs.aws.amazon.com/lambda/latest/dg/telemetry-api.html" target="_blank" rel="noopener noreferrer nofollow">Telemetry API</a> to receive logs. You do not need to change your function code.
+
+<Admonition type="tip">
+
+**SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/lambda/) for automated setup with pre-built dashboards. See the [comparison guide](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to choose the best approach.
+
+**AWS Lambda Logs via S3**: Prefer routing logs via CloudWatch Logs and S3? Use [AWS Lambda Logs via S3](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/) for a code-free approach to collect logs.
+
+**Application Logs**: If you want to send application logs from Node.js Lambda functions directly (to correlate with traces), refer to the [AWS Lambda Node.js Guide](https://signoz.io/docs/logs-management/send-logs/aws-lambda-nodejs/).
+</Admonition>
+
+## Prerequisites
+
+- An AWS account with permission to create and modify Lambda functions and layers.
+- Your SigNoz Cloud region and ingestion key. Find these under **Settings → Ingestion Settings** in the SigNoz UI.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Replace the `endpoint` in the exporter with your SigNoz host and remove the `signoz-ingestion-key` header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## How it works
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/lambda-otel-extension-architecture.svg"
+  caption="Architecture of OTel Collector Extension Layer for Lambda logs"
+  alt="Architecture of OTel Collector Extension Layer for Lambda logs"
+/>
+
+When a Lambda function initializes, the OpenTelemetry Collector starts as an extension layer and registers with the Lambda Telemetry API. As the function executes, Lambda automatically pushes logs and platform events to the collector.
+
+To ensure telemetry export doesn't impact your function's performance or billable duration, the collector uses a **decouple processor**. This processor buffers logs in memory and separates telemetry transmission from the function's main execution path. Because the function doesn't wait for network calls to SigNoz to complete, the buffered logs are asynchronously sent in the background during the next invocation or shutdown phase.
+
+## Setting up OTel Collector extension layer for Lambda logs
+
+### Step 1: Add the OTel Collector extension layer
+
+1. Open your Lambda function in the AWS console.
+2. Go to **Layers** → **Add a layer** → **Specify an ARN**.
+3. Paste the ARN for the OpenTelemetry Collector layer that matches your function's architecture and region.
+
+Find the latest ARN on the
+<a href="https://github.com/open-telemetry/opentelemetry-lambda/releases" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-lambda releases page</a>.
+ARNs follow the pattern:
+
+```
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-collector-<arch>-<version>:<layer-version>
+```
+
+Replace `<aws-region>`, `<arch>` (`amd64` or `arm64`), and `<version>` with the values from the latest release.
+
+<Admonition type="info">
+The account `184161586896` is the official AWS account maintained by the OpenTelemetry community for publishing Lambda layers.
+</Admonition>
+
+### Step 2: Create the collector configuration
+
+Create a file named `collector.yaml` at the root of your Lambda deployment package (it will be available at `/var/task/collector.yaml` at runtime).
+
+```yaml:collector.yaml
+receivers:
+  telemetryapi:
+
+exporters:
+  otlp_grpc:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      signoz-ingestion-key: '<your-ingestion-key>'
+
+processors:
+  batch:
+  decouple:
+  resource:
+    attributes:
+      - key: service.name
+        value: "lambda-func-test"
+        action: upsert
+      - key: deployment.environment
+        value: "production"
+        action: upsert
+
+service:
+  pipelines:
+    logs:
+      receivers: [telemetryapi]
+      processors: [resource, batch, decouple]
+      exporters: [otlp_grpc]
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="note">
+  - `otlp_grpc` requires Collector v0.145.0 or later (bundled in recent Lambda layer releases). If you use an older layer, replace `otlp_grpc` with `otlp`.
+  - You can add resource attributes in the `resource` processor to enrich your logs with metadata. Adjust the `service.name` and `deployment.environment` values as needed.
+  - You can add type of logs to export by adding types field to `telemetryapi` receiver. By default, it receives all logs and platform events. For example, to receive only `function` logs, use:
+    ```yaml
+    receivers:
+      telemetryapi:
+        types: ["function"]
+    ```
+</Admonition>
+
+### Step 3: Point the extension to your config
+
+Set the following environment variable on your Lambda function:
+
+| Variable | Value |
+|---|---|
+| `OPENTELEMETRY_COLLECTOR_CONFIG_URI` | `/var/task/collector.yaml` |
+
+To set it in the AWS console: go to **Configuration** → **Environment variables** → **Edit** → **Add environment variable**.
+
+<Admonition type="warning">
+Remote config URIs (S3 or HTTP) add cold-start latency because the collector fetches the file before starting. Embed the config in the deployment package to avoid this overhead.
+</Admonition>
+
+### Step 4: Deploy and invoke
+
+Deploy your updated Lambda function and invoke it. The collector initialises on the first invocation. It exports logs during that invocation or the next one.
+
+## Validate
+
+1. In SigNoz, open **Logs** → **Logs Explorer**.
+2. Filter by `service.name = 'lambda-func-test'` or service name set by you in the config.
+3. You should see Lambda platform logs (`START`, `END`, `REPORT`) and any `stdout`/`stderr` output from your function.
+
+<Admonition type="info">
+Logs appear with a delay. The decouple processor transmits buffered telemetry at the start of the next invocation or during the Lambda shutdown phase, creating a lag between function execution and log arrival in SigNoz.
+</Admonition>
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/lambda-sample-logs.webp"
+  caption="Sample logs in SigNoz"
+  alt="Sample logs in SigNoz"
+/>
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/lambda-sample-log-detailed.webp"
+  caption="Sample log details in SigNoz"
+  alt="Sample log details in SigNoz"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+**No logs appearing in SigNoz**
+
+- Verify the `OPENTELEMETRY_COLLECTOR_CONFIG_URI` environment variable is set and points to the correct path.
+- Check CloudWatch Logs for the Lambda function's log group — the extension layer logs its own startup and any config errors there.
+- Confirm the layer ARN matches your function's architecture (`amd64` vs `arm64`) and region.
+- `otlp_grpc` requires Collector v0.145.0 or later (bundled in recent Lambda layer releases). If you use an older layer, replace `otlp_grpc` with `otlp` in your collector configuration.
+
+**Cold-start latency increased**
+
+- Embed `collector.yaml` in the deployment package instead of fetching it over the network.
+- The decouple processor stops export from blocking the function. Collector initialisation on the first invocation adds small overhead.
+
+**Logs missing for short-lived functions**
+
+- Lambda skips the shutdown phase for short-lived functions. Invoke the function at least twice to flush buffered telemetry from the first run.
+</details>
+
+## Next Steps
+
+- <a href="https://github.com/open-telemetry/opentelemetry-lambda" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-lambda on GitHub</a> — layer releases and source
+- [Send AWS Lambda logs via S3](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)
+- [Send AWS Lambda Traces to SigNoz](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)
+- [One-Click AWS Integration for Lambda](https://signoz.io/docs/integrations/aws/lambda/)
+
+## Get Help
+
+<GetHelp />

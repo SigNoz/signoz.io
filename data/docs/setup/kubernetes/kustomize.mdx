@@ -1,0 +1,405 @@
+---
+date: 2026-03-26
+title: Deploying to Kubernetes with Kustomize
+tags: [Self-Host]
+description: Learn how to deploy SigNoz on Kubernetes using Foundry and Kustomize. Foundry generates Kustomize manifests from your casting so you can deploy the full SigNoz stack without Helm.
+id: kubernetes-kustomize
+slug: /setup/kubernetes/kustomize
+doc_type: howto
+---
+
+<HostingDecision />
+
+This guide explains how to deploy SigNoz on Kubernetes using <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> and <a href="https://kustomize.io" target="_blank" rel="noopener noreferrer nofollow">Kustomize</a>. Foundry generates and deploys a complete set of Kustomize manifests from your configuration.
+
+<KeyPointCallout title="Why Kustomize?" defaultCollapsed={true}>
+Kustomize is built into `kubectl` and lets you customize Kubernetes manifests without templates. This approach is useful when you want:
+
+- Plain YAML manifests you can inspect and version-control directly
+- No Helm/Tiller dependency
+- Easy overlays for dev/staging/prod environments
+- GitOps-friendly deployment with tools like ArgoCD or Flux
+</KeyPointCallout>
+
+## Prerequisites
+
+- A running **Kubernetes cluster** (v1.25+)
+- **kubectl** installed and configured to talk to your cluster
+- **foundryctl**: The Foundry CLI (see Step 1)
+
+## Step 1: Install foundryctl
+
+Download and extract the `foundryctl` binary from <a href="https://github.com/SigNoz/foundry/releases" target="_blank" rel="noopener noreferrer nofollow">GitHub Releases</a>.
+
+**Linux:**
+
+```bash
+curl -L "https://github.com/SigNoz/foundry/releases/latest/download/foundry_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz" -o foundry.tar.gz
+tar -xzf foundry.tar.gz
+```
+
+**macOS:**
+
+```bash
+curl -L "https://github.com/SigNoz/foundry/releases/latest/download/foundry_darwin_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/arm64/arm64/g').tar.gz" -o foundry.tar.gz
+tar -xzf foundry.tar.gz
+```
+
+**Windows (PowerShell):**
+
+```powershell
+$ARCH = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "amd64" }
+Invoke-WebRequest -Uri "https://github.com/SigNoz/foundry/releases/latest/download/foundry_windows_${ARCH}.tar.gz" -OutFile foundry.tar.gz -UseBasicParsing
+tar -xzf foundry.tar.gz
+```
+
+After extracting, run `foundryctl` from the unpacked directory:
+
+```bash
+./foundry_*/bin/foundryctl <COMMAND> <OPTIONS>
+```
+
+## Step 2: Create casting.yaml
+
+Create a casting file that targets Kubernetes with `flavor: kustomize` and `mode: kubernetes`.
+
+<KeyPointCallout title="Casting reference" defaultCollapsed={true}>
+For a complete guide on casting configuration, see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/casting.md" target="_blank" rel="noopener noreferrer nofollow">How to Write a Casting</a>. For the minimal Kustomize example, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/kubernetes/kustomize" target="_blank" rel="noopener noreferrer nofollow">Foundry Kubernetes Kustomize example</a>.
+</KeyPointCallout>
+
+```yaml
+apiVersion: v1alpha1
+metadata:
+  name: signoz
+spec:
+  deployment:
+    # kustomize generates plain Kubernetes manifests with Kustomize overlays
+    flavor: kustomize
+    # kubernetes specifies Kubernetes as the target
+    mode: kubernetes
+```
+
+## Step 3: Generate the Manifests (forge)
+
+Run **forge** to generate the Kustomize manifests:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+Foundry generates the manifests into `pours/deployment/` with the following structure:
+
+```
+pours/deployment/
+├── kustomization.yaml          # Root kustomization
+├── namespace.yaml              # SigNoz namespace
+├── clickhouse-operator/        # Altinity ClickHouse Operator
+│   ├── deployment.yaml
+│   ├── clusterrole.yaml
+│   ├── clusterrolebinding.yaml
+│   ├── configmap.yaml
+│   ├── service.yaml
+│   ├── serviceaccount.yaml
+│   └── kustomization.yaml
+├── telemetrystore/clickhouse/  # ClickHouse (time-series storage)
+│   ├── clickhouseinstallation.yaml
+│   ├── configmap.yaml
+│   └── kustomization.yaml
+├── telemetrykeeper/            # ClickHouse Keeper (coordination)
+│   └── clickhousekeeper/
+│       ├── clickhousekeeperinstallation.yaml
+│       └── kustomization.yaml
+├── metastore/postgres/         # PostgreSQL (metadata storage)
+│   ├── statefulset.yaml
+│   ├── service.yaml
+│   ├── serviceaccount.yaml
+│   └── kustomization.yaml
+├── signoz/                     # SigNoz query service
+│   ├── statefulset.yaml
+│   ├── service.yaml
+│   ├── serviceaccount.yaml
+│   └── kustomization.yaml
+├── ingester/                   # OTel Collector (telemetry ingestion)
+│   ├── deployment.yaml
+│   ├── configmap.yaml
+│   ├── service.yaml
+│   ├── serviceaccount.yaml
+│   └── kustomization.yaml
+└── telemetrystore-migrator/    # Schema migration job
+    ├── job.yaml
+    └── kustomization.yaml
+```
+
+## Step 4: Deploy
+
+The recommended way to deploy is with `foundryctl cast`, which runs forge and then deploys in one step:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+<KeyPointCallout title="Skip cast and apply with kubectl directly" defaultCollapsed={true}>
+If you prefer to apply manifests yourself instead of using `foundryctl cast`, you must install the Altinity ClickHouse Operator CRDs **before** applying the kustomize manifests. The generated ClickHouseInstallation and ClickHouseKeeperInstallation resources depend on them:
+
+```bash
+# 1. Apply CRDs first
+kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/0.25.3/deploy/operatorhub/0.25.3/clickhouseinstallations.clickhouse.altinity.com.crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/0.25.3/deploy/operatorhub/0.25.3/clickhouseinstallationtemplates.clickhouse.altinity.com.crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/0.25.3/deploy/operatorhub/0.25.3/clickhouseoperatorconfigurations.clickhouse.altinity.com.crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/0.25.3/deploy/operatorhub/0.25.3/clickhousekeeperinstallations.clickhouse-keeper.altinity.com.crd.yaml
+
+# 2. Then apply the kustomize manifests
+kubectl apply -k pours/deployment/
+```
+</KeyPointCallout>
+
+## Step 5: Verify
+
+1. Check that all pods are running in the `signoz` namespace:
+
+```bash
+kubectl get pods -n signoz
+```
+
+Expected output (names and counts may vary):
+
+```
+NAME                                    READY   STATUS      RESTARTS   AGE
+chi-signoz-clickhouse-0-0-0             1/1     Running     0          2m
+clickhouse-operator-...                 1/1     Running     0          2m
+signoz-keeper-0                         1/1     Running     0          2m
+signoz-postgres-0                       1/1     Running     0          2m
+signoz-signoz-0                         1/1     Running     0          2m
+signoz-ingester-...                     1/1     Running     0          2m
+signoz-telemetrystore-migrator-...      0/1     Completed   0          2m
+```
+
+2. Port-forward the SigNoz UI to your local machine:
+
+```bash
+kubectl port-forward -n signoz svc/signoz-signoz 8080:8080
+```
+
+Then open `http://localhost:8080` in your browser.
+
+3. Check the health endpoint:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/health
+```
+
+## Customizing with Foundry Patches
+
+Instead of manually editing generated manifests, use `spec.patches` in your casting to apply RFC 6902 JSON Patches during forge. Patches target generated files by path and are applied before writing to `pours/`, so your customizations are reproducible and survive re-forging.
+
+<KeyPointCallout title="Patches reference" defaultCollapsed={true}>
+For the full patches reference, see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">Foundry Patches documentation</a>. For a complete production-ready example, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/kubernetes/kustomize-patches" target="_blank" rel="noopener noreferrer nofollow">Kustomize with Patches example</a>.
+</KeyPointCallout>
+
+Each patch entry has:
+- **`target`**: the file path within `pours/` to patch (exact or glob)
+- **`operations`**: a list of JSON Patch operations (`op`, `path`, `value`)
+
+### Example: Casting with patches
+
+```yaml
+apiVersion: v1alpha1
+metadata:
+  name: signoz
+spec:
+  deployment:
+    flavor: kustomize
+    mode: kubernetes
+  patches:
+    # Set storage class and size on ClickHouse data volumes
+    # Adjust for your cloud: gp3 (AWS), pd-ssd (GCP), managed-premium (Azure)
+    - target: "deployment/telemetrystore/clickhouse/clickhouseinstallation.yaml"
+      operations:
+        - op: add
+          path: /spec/templates/volumeClaimTemplates/0/spec/storageClassName
+          value: gp3
+        - op: replace
+          path: /spec/templates/volumeClaimTemplates/0/spec/resources/requests/storage
+          value: 100Gi
+        - op: add
+          path: /spec/templates/volumeClaimTemplates/1/spec/storageClassName
+          value: gp3
+
+    # Set resource limits on ClickHouse
+    - target: "deployment/telemetrystore/clickhouse/clickhouseinstallation.yaml"
+      operations:
+        - op: replace
+          path: /spec/templates/podTemplates/0/spec/containers/0/resources
+          value:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+
+    # Set resource limits on SigNoz
+    - target: "deployment/signoz/statefulset.yaml"
+      operations:
+        - op: replace
+          path: /spec/template/spec/containers/0/resources
+          value:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+
+    # Schedule on dedicated observability nodes
+    - target: "deployment/signoz/statefulset.yaml"
+      operations:
+        - op: add
+          path: /spec/template/spec/tolerations
+          value:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "signoz"
+              effect: "NoSchedule"
+        - op: add
+          path: /spec/template/spec/nodeSelector
+          value:
+            node-role.kubernetes.io/observability: ""
+
+    # Expose SigNoz via AWS NLB
+    - target: "deployment/signoz/service.yaml"
+      operations:
+        - op: replace
+          path: /spec/type
+          value: LoadBalancer
+        - op: add
+          path: /metadata/annotations
+          value:
+            service.beta.kubernetes.io/aws-load-balancer-type: nlb
+
+    # Set resource limits on ingester
+    - target: "deployment/ingester/deployment.yaml"
+      operations:
+        - op: replace
+          path: /spec/template/spec/containers/0/resources
+          value:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+
+    # Set storage class on PostgreSQL metastore
+    - target: "deployment/metastore/postgres/statefulset.yaml"
+      operations:
+        - op: add
+          path: /spec/volumeClaimTemplates/0/spec/storageClassName
+          value: gp3
+        - op: replace
+          path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+          value: 20Gi
+```
+
+### Native Kustomize patches
+
+Since Foundry generates standard Kustomize bases, you can also use native Kustomize patches on the generated `kustomization.yaml`. This lets you use strategic merge patches or overlays for environment-specific customization without re-forging.
+
+Use a Foundry patch to inject a `patches` block into the root `kustomization.yaml`:
+
+```yaml
+apiVersion: v1alpha1
+metadata:
+  name: signoz
+spec:
+  deployment:
+    flavor: kustomize
+    mode: kubernetes
+  patches:
+    - target: "deployment/kustomization.yaml"
+      operations:
+        - op: add
+          path: /patches
+          value:
+            - target:
+                kind: StatefulSet
+                name: signoz-signoz
+              patch: |-
+                apiVersion: apps/v1
+                kind: StatefulSet
+                metadata:
+                  name: signoz-signoz
+                spec:
+                  template:
+                    spec:
+                      nodeSelector:
+                        node-role.kubernetes.io/observability: ""
+```
+
+Or create an overlay directory that references the generated base and applies your own Kustomize patches on top:
+
+```
+my-deployment/
+├── base/                    # Copy of pours/deployment/
+│   └── ...
+└── overlays/
+    └── prod/
+        ├── kustomization.yaml
+        └── increase-resources.yaml
+```
+
+```yaml
+# overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base
+patches:
+- path: increase-resources.yaml
+  target:
+    kind: StatefulSet
+    name: signoz-clickhouse
+```
+
+```bash
+kubectl apply -k overlays/prod/
+```
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### CRD not found errors
+If you see errors about `ClickHouseInstallation` or `ClickHouseKeeperInstallation` resources not being recognized, the Altinity ClickHouse Operator CRDs are missing. Use `foundryctl cast` which installs them automatically, or install them manually before running `kubectl apply -k` (see the "Skip cast and apply with kubectl directly" callout in Step 4).
+
+### Pods stuck in Pending
+Check that your cluster has enough resources. The default resource requests are:
+- ClickHouse: 500m CPU, 512Mi memory
+- ClickHouse Operator: 1000m CPU, 2Gi memory
+- PostgreSQL: 100m CPU, 128Mi memory
+- SigNoz: 100m CPU, 200Mi memory
+- Ingester: 125m CPU, 512Mi memory
+- Keeper: 1 CPU, 1Gi memory
+
+Also verify that your cluster has a default StorageClass for the PersistentVolumeClaims.
+
+### ClickHouse not ready
+Check ClickHouse Operator logs:
+```bash
+kubectl logs -n signoz deployment/clickhouse-operator
+```
+
+### Migration job failing
+Check the migrator job logs:
+```bash
+kubectl logs -n signoz job/signoz-telemetrystore-migrator
+```
+
+</details>
+
+## Next Steps
+- [OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)
+- [Instrument your application](https://signoz.io/docs/instrumentation/overview)
+- [Tutorials](https://signoz.io/docs/tutorials/)

@@ -1,14 +1,14 @@
 'use client'
 
 import React from 'react'
-import styles from './styles.module.css'
 import { FormBlockedFallback, useHubspotFormFallback } from '@/components/HubspotFormFallback'
 
-function PricingForm({ portalId, formId }) {
+function PricingForm({ portalId, formId, formName }) {
   const { formCreated, error, showFallback, formRef } = useHubspotFormFallback({
     portalId,
     formId,
     target: '#my-hubspot-form',
+    formName,
   })
 
   return (

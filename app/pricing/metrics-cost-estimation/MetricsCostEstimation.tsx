@@ -1,14 +1,14 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Slider, Tooltip, SliderValue } from '@nextui-org/react'
-import { Link } from '@nextui-org/react'
+import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import { AppModal as Modal } from '@/components/ui/Modal'
+import { useDisclosure } from '@/hooks/useDisclosure'
+import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
-const formatNumber = (number: Number) =>
+const formatNumber = (number: number) =>
   number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })
 
 const MetricsCostEstimation = () => {
@@ -33,7 +33,7 @@ const MetricsCostEstimation = () => {
   const MIN_VALUE = 1
   const MAX_VALUE = 6
 
-  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(1)
+  const [metricsValue, setMetricsValue] = React.useState<number>(1)
   const [inputMetricsValue, setinputMetricsValue] = React.useState<string>('1')
   const [metricsRetentionPeriod, setMetricsRetentionPeriod] = useState(
     RETENTION_PERIOD.METRICS[0].months
@@ -41,15 +41,11 @@ const MetricsCostEstimation = () => {
 
   const [selectedVideoID, setSelectedVideoID] = useState<string | null>(null)
 
-  const handleChangeMetrics = (value: SliderValue) => {
-    if (Array.isArray(value)) {
-      value = value[0]
-    }
-
-    if (isNaN(Number(value))) return
-
-    setMetricsValue(value)
-    setinputMetricsValue(value.toString())
+  const handleChangeMetrics = (value: number | number[]) => {
+    const v = typeof value === 'number' ? value : value[0]
+    if (isNaN(Number(v))) return
+    setMetricsValue(v)
+    setinputMetricsValue(v.toString())
   }
 
   const [inputValue, setInputValue] = useState('0.1')
@@ -60,8 +56,8 @@ const MetricsCostEstimation = () => {
 
   const MAX_INPUT_VALUE = 10000
 
-  const handleOpenVideo = (videoId): void => {
-    setSelectedVideoID(videoId)
+  const handleOpenVideo = (videoId: string | number): void => {
+    setSelectedVideoID(String(videoId))
     onOpen()
   }
 
@@ -130,79 +126,19 @@ const MetricsCostEstimation = () => {
                       <div className=""> {inputMetricsValue} </div>
                     </div>
                     <div>
-                      <Slider
-                        size="sm"
-                        step={1}
-                        maxValue={MAX_VALUE}
-                        minValue={MIN_VALUE}
-                        showSteps={true}
-                        showTooltip={true}
-                        tooltipProps={{
-                          content: formatNumber(
-                            Array.isArray(metricsValue) ? metricsValue[0] : metricsValue
-                          ),
-                        }}
-                        color="secondary"
-                        marks={[
-                          {
-                            value: MIN_VALUE,
-                            label: `${MIN_VALUE}`,
-                          },
-                          {
-                            value: 2,
-                            label: `2`,
-                          },
-                          {
-                            value: 3,
-                            label: `3`,
-                          },
-                          {
-                            value: 4,
-                            label: `4`,
-                          },
-                          {
-                            value: 5,
-                            label: `5`,
-                          },
-                          {
-                            value: MAX_VALUE,
-                            label: `${MAX_VALUE}`,
-                          },
-                        ]}
-                        classNames={{
-                          label: 'text-medium',
-                          step: 'h-[0.6rem] w-[0.15rem]',
-                        }}
-                        renderThumb={(props) => (
-                          <div
-                            {...props}
-                            className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-                          >
-                            <span className="block h-5 w-5 rounded-full bg-signoz_robin-500 transition-transform group-data-[dragging=true]:scale-80" />
-                          </div>
-                        )}
-                        renderValue={({ children, ...props }) => (
-                          <output {...props}>
-                            <Tooltip className="rounded-md text-tiny text-default-500">
-                              <input
-                                className="hover:border-primary focus:border-primary w-12 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors"
-                                type="text"
-                                value={inputMetricsValue}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                  const v = e.target.value
-                                  setinputMetricsValue(v)
-                                }}
-                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                  if (e.key === 'Enter' && !isNaN(Number(inputMetricsValue))) {
-                                    setMetricsValue(Number(inputMetricsValue))
-                                  }
-                                }}
-                              />
-                            </Tooltip>
-                          </output>
-                        )}
+                      <PricingRangeSlider
                         value={metricsValue}
                         onChange={handleChangeMetrics}
+                        min={MIN_VALUE}
+                        max={MAX_VALUE}
+                        step={1}
+                        color="secondary"
+                        minLabel="1"
+                        maxLabel="6"
+                        markLabels={['1', '2', '3', '4', '5', '6']}
+                        tooltipText={formatNumber(metricsValue)}
+                        thumbColorToken="signoz_robin-500"
+                        aria-label="Datapoints per minute in a time-series"
                       />
                     </div>
                   </div>
@@ -256,18 +192,20 @@ const MetricsCostEstimation = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <Button className="w-full">
-                    <Link href={'/teams'} className="flex-center">
-                      Start your free 30-day trial
-                      <ArrowRight size={14} />
-                    </Link>
-                  </Button>
-                  <Button className="w-full" type={Button.TYPES.SECONDARY}>
-                    <Link href={'/docs/introduction/'} className="flex-center">
-                      Read the docs
-                      <ArrowRight size={14} />
-                    </Link>
-                  </Button>
+                  <Link
+                    href="/teams/"
+                    className="flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-signoz_robin-500 px-4 text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                  >
+                    Start your free 30-day trial
+                    <ArrowRight size={14} />
+                  </Link>
+                  <Link
+                    href="/docs/introduction/"
+                    className="button-background flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                  >
+                    Read the docs
+                    <ArrowRight size={14} />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -296,7 +234,7 @@ const MetricsCostEstimation = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Link href={'/pricing/'} style={{ cursor: 'default' }}>
+                  <Link href="/pricing/" className="cursor-default no-underline">
                     <div className="group flex w-full cursor-pointer items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
                       <div className="mr-4">
                         <img
@@ -324,22 +262,18 @@ const MetricsCostEstimation = () => {
       </main>
 
       <Modal
-        size={'5xl'}
+        size="5xl"
         backdrop="blur"
         isOpen={isOpen}
-        onClose={() => setSelectedVideoID(null)}
-        onOpenChange={onOpenChange}
-        className="self-center"
+        onOpenChange={(open) => {
+          onOpenChange(open)
+          if (!open) setSelectedVideoID(null)
+        }}
+        panelClassName="bg-transparent p-0"
       >
-        <ModalContent className="bg-transparent">
-          {() => (
-            <>
-              <ModalBody className="py-6">
-                <VimeoPlayer videoId={selectedVideoID} />
-              </ModalBody>
-            </>
-          )}
-        </ModalContent>
+        <div className="px-6 py-6">
+          {selectedVideoID ? <VimeoPlayer videoId={selectedVideoID} /> : null}
+        </div>
       </Modal>
     </div>
   )

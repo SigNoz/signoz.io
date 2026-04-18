@@ -52,6 +52,7 @@ function Support() {
                       className="button button--secondary button--outline text-xs"
                       target="_blank"
                       href={'https://signoz.io/slack'}
+                      prefetch={false}
                     >
                       Slack Community
                     </Link>

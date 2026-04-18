@@ -1,0 +1,104 @@
+---
+date: 2026-03-21
+id: snowflake
+title: Snowflake Metrics Dashboard
+description: Monitor your Snowflake performance, storage usage, and query execution metrics in SigNoz.
+doc_type: explanation
+---
+
+Monitor the performance, storage, and cost of your Snowflake environment. This dashboard gives you a comprehensive view of Snowflake's billing, overall credit usage, query bottlenecks, and storage utilization.
+
+<Admonition type="info">
+  To use this dashboard, you need to configure the Snowflake receiver to send metrics to SigNoz. Follow the [Snowflake Integration](https://signoz.io/docs/integrations/snowflake/) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/snowflake/billing-and-credit-usage.webp"
+  alt="Snowflake Billing and Credit Usage Metrics"
+  caption="Snowflake Billing and Credit Usage Metrics"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/snowflake/snowflake-otlp-v1.json"
+    dashboardName="Snowflake Metrics"
+  />
+</div>
+
+## Dashboard Variables
+
+This dashboard includes `deployment_environment` and `snowflake_account_name` variables, allowing you to monitor different deployment environments and accounts in the same place.
+
+## What This Dashboard Monitors
+
+The Snowflake dashboard monitors all the critical metrics of your Snowflake cluster, capturing any pattern changes so you can take appropriate actions to prevent issues.
+
+- **Billing/Cost**: Spot abnormal credit usage or sudden spikes in your billing.
+- **Query Performance**: Identify non-performant queries and track data read/write volumes to optimize warehouse scaling.
+- **Storage Consumption**: Track the amount of data stored in different locations to pinpoint drastic deviations in storage patterns.
+- **User Activity**: Monitor login events and user session activity.
+
+## Metrics Included
+
+### Billing and Credit Usage
+
+- **Total Credits Used**: The total sum of all credits used across your account during the selected time window.
+- **Overall credits used**: The most recently reported value of total credits used by the account.
+- **Cloud Service credits used**: Reported total credits used in the cloud service.
+- **Virtual warehouse credits used**: Reported total credits used by the virtual warehouse service.
+- **Credits used by warehouse**: Total credits used associated per individual warehouse.
+
+### Query Metrics
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/snowflake/query-metrics-1.webp"
+  alt="Snowflake Query Metrics"
+  caption="Snowflake Query Metrics"
+/>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/snowflake/query-metrics-2.webp"
+  alt="Snowflake Query Metrics"
+  caption="Snowflake Query Metrics"
+/>
+
+- **Top Queries Scanned**: Average bytes scanned in a Snowflake account based on query type.
+- **Average bytes scanned**: Average number of bytes scanned in a Snowflake account.
+- **Average bytes written**: Average bytes written in a Snowflake account.
+- **Average bytes deleted**: Average bytes deleted in a Snowflake account.
+- **Query Execution vs Query Compilation Time**: Comparison between query execution and compilation times.
+- **Average rows inserted**: Average number of rows inserted in a table over the last 24 hour window.
+- **Average rows deleted**: Average number of rows deleted in a table over the last 24 hour window.
+- **Average rows updated**: Average number of rows updated in a table over the last 24 hour window.
+- **Average rows produced**: Average number of rows produced in a table over the last 24 hour window.
+
+### Storage Metrics
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/snowflake/storage-metrics.webp"
+  alt="Snowflake Storage Metrics"
+  caption="Snowflake Storage Metrics"
+/>
+
+- **Total storage bytes**: Number of bytes of table storage used, including bytes for data currently in Time Travel.
+- **Total stage bytes**: Number of bytes of stage storage used by files in all internal stages (named, table, user).
+- **Total failsafe bytes**: Number of bytes of data in Fail-safe.
+- **Average bytes spilled to remote storage**: Average bytes spilled (intermediate results do not fit in memory) to remote storage.
+- **Average bytes spilled to local storage**: Average bytes spilled (intermediate results do not fit in memory) to local storage.
+
+### Other Metrics
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/snowflake/other-metrics.webp"
+  alt="Other Snowflake Metrics"
+  caption="Other Snowflake Metrics"
+/>
+
+- **Total logins**: Total login attempts for the account over the last 24 hour window.
+- **Avg Session IDs per user**: Distinct session IDs associated with Snowflake usernames.
+
+## Next Steps
+
+- **[Set Alerts](https://signoz.io/docs/userguide/alerts-management/)**: Create alerts for high credit usage or slow queries.

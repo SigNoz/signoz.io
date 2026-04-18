@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
-import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '@/utils/userUtils'
+import { getOrCreateAnonymousId, getUserId } from '@/utils/userClient'
+import { extractGroupIdFromEmail } from '@/utils/userShared'
 
 interface ChatbaseClientProps {
   className?: string
@@ -127,7 +128,7 @@ export default function ChatbaseClient({
         <Script
           src="https://www.chatbase.co/embed.min.js"
           id="ZXMN63dnzm9r1LEY0He6U"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           onLoad={handleScriptLoad}
           onError={handleScriptError}
           data-domain="www.chatbase.co"

@@ -1,18 +1,19 @@
 ---
-title: Send Demo App Telemetry to SigNoz Cloud in minutes
+title: Send OTel Demo Telemetry to SigNoz Cloud in 5 Minutes
 id: quickstart
-tags : [SigNoz Cloud]
-date: 2026-02-03
-doc_type: howto
-description: Set up the OpenTelemetry Demo Application to send logs, metrics, and traces to SigNoz Cloud in minutes.
+tags: [SigNoz Cloud]
+date: 2026-03-12
+doc_type: tutorial
+description: Spin up the OpenTelemetry Demo App and start exploring traces, logs, metrics, and service maps in SigNoz Cloud in under 5 minutes.
 ---
 
-Want to explore SigNoz without setting up your own app? This quickstart guide walks you through how to spin up a [lightweight OpenTelemetry Demo](https://github.com/SigNoz/opentelemetry-demo-lite) and
-start sending logs, metrics, and traces to SigNoz Cloud in minutes. 
+import GetHelp from '@/components/shared/get-help.md'
+
+This quickstart spins up a multi-service <a href="https://github.com/SigNoz/opentelemetry-demo-lite" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Demo</a> app and sends traces, logs, and metrics to your SigNoz Cloud account — no code changes needed.
 
 <video
   src="/img/docs/otel-demo-quickstart.mp4"
-  alt="OpenTelemetry Demo App"
+  alt="OpenTelemetry Demo App sending telemetry to SigNoz Cloud"
   muted
   autoPlay
   loop
@@ -21,123 +22,156 @@ start sending logs, metrics, and traces to SigNoz Cloud in minutes.
   Your browser does not support the video tag.
 </video>
 
-The OpenTelemetry Demo App is a distributed microservices application with built-in telemetry, making it an ideal environment for exploring observability workflows with SigNoz.
-
 ## Prerequisites
 
-- [A SigNoz Cloud account](/teams/)
-- Docker and Docker Compose installed
+- A SigNoz Cloud account ([sign up free](https://signoz.io/teams/))
+- <a href="https://docs.docker.com/get-docker/" target="_blank" rel="noopener noreferrer nofollow">Docker</a> and <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Compose</a> installed
 
 ## Setup
 
-### Step 1: Clone the OpenTelemetry Demo App
+### Step 1: Clone the demo app
 
 ```bash
 git clone https://github.com/SigNoz/opentelemetry-demo-lite.git
 cd opentelemetry-demo-lite
 ```
 
-### Step 2: Start the Demo App
+### Step 2: Start the demo app
 
-From the root of the `opentelemetry-demo-lite` directory, run:
+Run the following command from the `opentelemetry-demo-lite` directory:
 
 ```bash
 OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 SIGNOZ_INGESTION_KEY=<your-ingestion-key> docker compose up -d
 ```
 
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](/docs/ingestion/signoz-cloud/keys/)
-- `<region>`: Your SigNoz Cloud [region](/docs/ingestion/signoz-cloud/overview/#get-started)
+Replace the following:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-Alternatively, you can create a `.env` file in the project root with these values:
+<KeyPointCallout title="Alternative: use a .env file" defaultCollapsed={true}>
+Instead of passing environment variables inline, create a `.env` file in the project root:
 
-```bash
+```bash:.env
 OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443
 SIGNOZ_INGESTION_KEY=<your-ingestion-key>
 ```
 
-Then run:
+Then start the app:
 
 ```bash
 docker compose up -d
 ```
+</KeyPointCallout>
 
-Verify the services are running:
+### Step 3: Verify containers are running
 
 ```bash
 docker compose ps -a
 ```
 
-<figure>
-  <img src="/img/docs/otel-demo-docker-containers.webp" />
-  <figcaption>Docker containers of OTel Demo App</figcaption>
-</figure>
+You should see all 12 services in the `running` state:
 
-The application is pre-configured to send telemetry data to SigNoz Cloud automatically.
+<Figure
+  src="/img/docs/otel-demo-docker-containers.webp"
+  alt="Docker containers of the OpenTelemetry demo app running"
+  caption="All demo app containers should show a running status"
+/>
 
-### Step 4: Verify Telemetry in SigNoz Cloud
+The app automatically generates traffic using a built-in browser simulator, so telemetry starts flowing to SigNoz immediately.
 
-1. Navigate to the **Services** tab — you should see a list of services from the demo app
-2. Use the **Service Map** to visualize the architecture and request flows
-3. Check the **Traces**, **Logs**, and **Metrics** tabs to explore telemetry data
+## Validate
 
-<figure>
-  <img src="/img/docs/otel-demo-services.webp" alt="SigNoz services tab" />
-  <figcaption>Services Listed down in SigNoz services tab</figcaption>
-</figure>
+After 2–3 minutes, open your SigNoz Cloud dashboard and verify each signal:
 
-You are now successfully sending data to SigNoz Cloud!
+1. **Services** — Navigate to **Services** tab. You should see services like `frontend`, `cartservice`, `checkoutservice`, and others listed with live RED metrics (Rate, Errors, Duration).
+
+<Figure
+  src="/img/docs/otel-demo-services.webp"
+  alt="SigNoz Services tab showing demo app services"
+  caption="Demo app services appear in the Services tab with live metrics"
+/>
+
+2. **Traces** — Go to **Traces** and search for traces from any service. Click a trace to see the full request journey across services.
+
+3. **Logs** — Go to **Logs** tab and filter by any service name to see structured log entries.
+
+4. **Metrics** — Go to **Metrics Explorer** and explore metrics.
+
+<Admonition type="info">
+The demo app's browser simulator generates continuous traffic at ~5 requests per second, so you'll see a steady stream of telemetry data.
+</Admonition>
 
 <details>
 <ToggleHeading>
 ## Troubleshooting
 </ToggleHeading>
 
-### Enable collector's debug logging
+### Services not appearing in SigNoz
 
-Edit `otel-collector-config.yaml` and change the log level from `info` to `debug`:
+- **Check your credentials** — Verify that `OTLP_ENDPOINT` and `SIGNOZ_INGESTION_KEY` are set correctly. Re-run with the correct values if needed.
+- **Wait for data** — OpenTelemetry batches data before sending. Wait 2–3 minutes after starting the demo app.
+- **Check network connectivity** — Ensure your machine can reach `ingest.<region>.signoz.cloud:443`. Test with:
+  ```bash
+  curl -v https://ingest.<region>.signoz.cloud:443
+  ```
 
-```yaml
+### Containers not starting
+
+Check logs for the failing service:
+
+```bash
+docker compose logs <service-name>
+```
+
+Common causes:
+- **Insufficient memory** — The demo app requires ~4 GB of available Docker memory. Check Docker Desktop settings.
+- **Port conflicts** — Ensure no other services are using ports required by the demo containers.
+
+### Enable Collector debug logging
+
+Edit `otel-collector-config.yaml` and change the log level:
+
+```yaml {4}
 service:
   telemetry:
     logs:
       level: debug
 ```
 
-Restart with rebuild to apply changes:
+Restart and rebuild to apply changes:
 
 ```bash
 docker compose up -d --build
 ```
 
-Check the OTel Collector logs for detailed export information:
+Then check the OTel Collector logs:
 
 ```bash
 docker compose logs otel-col
 ```
 
-Look for successful export messages or errors like connection failures and authentication issues.
-
-### Containers not starting
-
-If containers are failing to start, check the logs for the specific service:
-
-```bash
-docker compose logs <service-name>
-```
-
-Ensure Docker has adequate memory and no port conflicts exist.
-
-### Services not appearing in SigNoz
-
-- Verify your `OTLP_ENDPOINT` and `SIGNOZ_INGESTION_KEY` are set correctly
-- Check network connectivity to the SigNoz endpoint
-- Wait 2-3 minutes after starting the demo app (OpenTelemetry buffers data before sending)
+Look for export confirmation messages or errors like connection failures and authentication issues.
 
 </details>
 
+## Clean up
+
+When you're done exploring, stop and remove all containers:
+
+```bash
+docker compose down
+```
+
 ## Next Steps
 
-- Set up a [Redis dashboard](/docs/integrations/redis/#connect-redis) to monitor the database used by the demo app
-- Explore [Kafka monitoring](/docs/messaging-queues/kafka-overview/) to observe message queues in the demo app
-- Use [Infrastructure Monitoring](/docs/infrastructure-monitoring/overview/) to get a unified view of host and container performance
+Now that you have telemetry flowing, try these:
 
+- **Instrument your own app** — Set up [OpenTelemetry instrumentation](https://signoz.io/docs/instrumentation/) for your language and framework
+- **Send logs** — Collect and send [application logs](https://signoz.io/docs/logs-management/send-logs-to-signoz/) to SigNoz from your own services
+- **Send metrics** — Push [custom metrics](https://signoz.io/docs/metrics-management/send-metrics/) from your applications to SigNoz
+- **Set up alerts** — Create [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
+- **Monitor infrastructure** — Use [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for a unified view of host and container performance
+
+## Get Help
+
+<GetHelp />

@@ -10,116 +10,6 @@ description: Learn how to deploy and manage OpenTelemetry resources in Kubernete
 keywords: [OpenTelemetry Operator, Kubernetes, observability, telemetry, auto-instrumentation, collectors, SigNoz]
 ---
 
-<head>
-  <script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "OpenTelemetry Operator Complete Guide [[OTel](https://signoz.io/blog/what-is-opentelemetry/) Collector + Auto-Instrumentation Demo]",
-  "alternativeHeadline": "Learn how to use OpenTelemetry operator to deploy OpenTelemetry Collectors and auto-instrument a sample Java application",
-  "author": {
-    "@type": "Person",
-    "name": "Daniel"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2023-11-17T00:00:00Z",
-  "dateModified": "2024-08-07T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/blog/opentelemetry-operator-complete-guide/"
-  },
-  "description": "An OpenTelemetry Operator is a Kubernetes Operator that manages OpenTelemetry Collectors and auto-instrumentation of workloads. Learn how to use OpenTelemetry operator to deploy OpenTelemetry Collectors and auto-instrument a sample Java application.",
-  "keywords": "opentelemetry, signoz, autoinstrumentation, observability, kubernetes, operator, java, monitoring",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "OpenTelemetry Operator",
-      "description": "A Kubernetes Operator that manages OpenTelemetry Collectors and auto-instrumentation of workloads"
-    },
-    {
-      "@type": "Thing",
-      "name": "Kubernetes",
-      "description": "An open-source container orchestration platform"
-    },
-    {
-      "@type": "Thing",
-      "name": "Auto-instrumentation",
-      "description": "The process of automatically adding observability instrumentation to applications"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "OpenTelemetry",
-      "applicationCategory": "Observability Framework"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Application Performance Monitoring"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "Spring PetClinic",
-      "applicationCategory": "Sample Java Application"
-    }
-  ],
-  "mainEntity": {
-    "@type": "HowTo",
-    "name": "How to Use OpenTelemetry Operator for Auto-instrumentation",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Set up SigNoz",
-        "text": "Sign up for a SigNoz cloud account or install self-hosted SigNoz"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Set up the OpenTelemetry Operator",
-        "text": "Install the OpenTelemetry Operator in your Kubernetes cluster"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create an OpenTelemetry Collector instance",
-        "text": "Deploy an OpenTelemetry Collector using the OpenTelemetryCollector CRD"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create an Instrumentation instance",
-        "text": "Set up an Instrumentation resource to configure auto-instrumentation"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Deploy and auto-instrument a Java application",
-        "text": "Deploy a sample Java application with OpenTelemetry auto-instrumentation"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "View telemetry data in SigNoz",
-        "text": "Access the SigNoz dashboard to view and analyze the collected telemetry data"
-      }
-    ]
-  }
-}) }}
-  />
-</head>
-
-
 Manually deploying and managing OpenTelemetry components in a Kubernetes environment can be a complex and time-consuming task. It involves creating various Kubernetes resources, setting up configurations, and ensuring the components are properly integrated with the applications.
 
 
@@ -208,7 +98,7 @@ cd spring-petclinic
 java -jar target/*.jar
 ```
 
-You can then access the running application at [localhost:8090](http://localhost:8090)
+You can then access the running application at `http://localhost:8090`
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/11/petclinic-welcome.webp" alt="petclinic welcome screen"/>
@@ -338,7 +228,7 @@ In essence, once you deploy an application in the specified languages, the OpenT
 You can find the ingestion details in the SigNoz dashboard under the `Settings` tab.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2025/09/signoz-settings.webp" alt=""/>
+    <img src="/img/blog/2025/09/signoz-settings.webp" alt="SigNoz settings page for ingestion keys"/>
     <figcaption><i></i></figcaption>
 </figure>
 
@@ -405,7 +295,7 @@ Forward network traffic from your local machine to a specific port on a pod in y
 kubectl port-forward ${POD_NAME} 8080:8080
 ```
 
-In your browser, visit [http://localhost:8080](http://localhost:8080/) to see the running application.
+In your browser, visit `http://localhost:8080` to see the running application.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/11/petclinic-welcome.webp" alt="petclinic welcome screen"/>
@@ -450,7 +340,7 @@ By selecting and viewing the Latency chart, you gain access to crucial percentil
 Beneath, you can observe the Apdex (Application Performance Index) is at 0, and the Error percentage chart has no data. This is because there was no failure in the requests sent to the application, resulting in no data for the error percentage. The Key Operations chart, on the other hand, shows all the requests made and activities carried out in the application.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2025/09/signoz-operations.webp" alt=""/>
+    <img src="/img/blog/2025/09/signoz-operations.webp" alt="SigNoz operations view for the Spring PetClinic application"/>
     <figcaption><i></i></figcaption>
 </figure>
 

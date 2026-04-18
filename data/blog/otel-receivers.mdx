@@ -1,0 +1,408 @@
+---
+title: OpenTelemetry Receivers Explained - Types, Push vs Pull, and Configuration Patterns
+slug: otel-receivers
+date: 2026-04-08
+tags: [opentelemetry]
+authors: [mahak_kaur]
+description: OpenTelemetry receivers are the entry points that ingest telemetry into the OTel Collector. Learn how push and pull receivers differ, the main receiver categories, how to choose the right one, and production config examples.
+keywords: [opentelemetry receivers, otel receivers, opentelemetry collector receivers, OTLP receiver, prometheus receiver opentelemetry, otel collector configuration, push vs pull receivers]
+---
+
+Before traces, metrics, and logs can be stored, queried, or correlated in an observability backend, they need a reliable path into the collection pipeline. In practice, that input does not come from one source or one format. Applications emit OTLP (<a href="https://opentelemetry.io/docs/specs/otlp/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Protocol</a>), infrastructure exposes Prometheus metrics, logs live in files, and Kubernetes surfaces node data through the Kubelet API.
+
+That is the problem OpenTelemetry receivers solve. Inside the OpenTelemetry Collector, receivers accept telemetry from these different sources, translate it into the Collector's internal format, and pass it into the pipeline for processing and export.
+
+This guide explains how receivers solve that ingestion problem, how push and pull collection differ, and how to choose and configure the right receiver for common production scenarios.
+
+## What Are OpenTelemetry Receivers?
+
+A receiver is the component that gets telemetry **into** the OpenTelemetry Collector. It accepts data in a source-specific format, translates it into the Collector's internal data model, and hands it off to the next pipeline stage.
+
+### What problem they solve
+
+Receivers let one Collector handle telemetry that arrives in different formats. A single environment can include OTLP from Go services, Prometheus metrics from Redis, logs from Java applications, and resource metrics from Kubernetes nodes. Without receivers, each source would need its own agent. A single Collector pipeline removes that overhead and lets teams migrate backends, support mixed instrumentation, and correlate all three signals.
+
+### How receivers normalize data
+
+Every receiver converts incoming telemetry into the Collector's internal representation called `pdata`. This model is based on OTLP protobuf structures, so converting to and from the OTLP wire format involves very little copying overhead. A span that arrived as a Jaeger Thrift payload looks identical to one that arrived as OTLP protobuf by the time it reaches the first processor. This normalization is what lets the Collector work with telemetry from different formats. We can swap backends, add processing, or change export destinations without touching application instrumentation.
+
+### Where receivers sit in the pipeline
+
+The <a href="https://opentelemetry.io/docs/collector/architecture/" rel="noopener noreferrer nofollow" target="_blank">Collector pipeline</a> has three stages, and data moves through them in one direction:
+
+```
+Receivers → Processors → Exporters
+```
+
+The diagram below shows how multiple receivers can feed shared processors before telemetry is exported to one or more backends.
+
+<Figure src="/img/blog/2026/04/otel-receivers-image-collector-pipeline.webp" alt="Diagram of the OpenTelemetry Collector pipeline showing OTLP, Prometheus, Filelog, and Kubeletstats receivers sending traces, metrics, and logs through memory limiter, batch, and attributes processors to exporters and an observability backend." caption="OpenTelemetry Collector pipeline: receivers ingest telemetry, processors transform it, exporters send it onward, and the backend stores and visualizes the resulting signals." />
+
+Each pipeline handles one signal type: traces, metrics, or logs. Multiple receivers can feed the same pipeline, and one receiver can also be shared across multiple pipelines.
+
+**A receiver must be referenced in a pipeline to be active.** Defining a receiver under the `receivers:` key only configures it. The receiver does not open ports or start collecting data until it is listed under `service.pipelines.<signal>.receivers`. This is one of the most common Collector configuration mistakes.
+
+The same receiver can be shared across pipelines. If `otlp` is referenced in both the traces and metrics pipelines, the Collector starts one OTLP receiver and routes incoming traces to the traces pipeline and incoming metrics to the metrics pipeline.
+
+<KeyPointCallout title="Warning: Shared receivers fan out synchronously" defaultCollapsed={true}>
+If one downstream pipeline blocks (for example, due to a slow exporter or missing batch processor), it can back up the shared receiver and affect the other pipelines. Always configure batch processors and memory limiters for each pipeline.
+</KeyPointCallout>
+
+## Push vs. Pull: Two Ingestion Models
+
+Every receiver operates in one of two modes. This affects how you deploy the Collector, how you scale it, and whether duplicate data becomes a risk.
+
+**Push receivers** expose a network endpoint and wait for data to arrive from applications or other Collectors. Because they don't maintain any state about where the data comes from, you can easily scale them horizontally behind a load balancer. If the Collector gets overwhelmed, it pushes back using standard protocol responses (like sending a `503 Service Unavailable` over HTTP or an `UNAVAILABLE` status over gRPC) telling the sender to slow down and retry later.
+
+**Pull receivers** actively scrape external systems at configured intervals. They have to keep track of scrape loops, endpoint health, and timers. Because they maintain this state, running identical pull configs on multiple Collector replicas means every replica will scrape the exact same targets, resulting in duplicate data. To fix this, you have to coordinate them using manual sharding or the [OpenTelemetry Operator's Target Allocator](https://opentelemetry.io/docs/kubernetes/operator/target-allocator/).
+
+| Factor | Push | Pull |
+| --- | --- | --- |
+| Who initiates | Source sends to Collector | Collector fetches from source |
+| Network direction | Inbound to Collector | Outbound from Collector |
+| Duplicate risk (multi-replica) | Low (load-balanced) | High (all scrape same targets) |
+| Backpressure | Protocol-level (gRPC UNAVAILABLE, HTTP 429/503) | Controlled by scrape interval |
+| Examples | OTLP, Jaeger, Zipkin, Kafka | Prometheus, Host Metrics, Kubeletstats |
+
+## The Main Types of OTel Receivers
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver" rel="noopener noreferrer nofollow" target="_blank">collector-contrib repository</a> includes many receivers, but most production deployments use a handful from five categories. The diagram below groups the receiver ecosystem into five practical categories and shows the most common examples in each group.
+
+<Figure src="/img/blog/2026/04/otel-receivers-image-types.webp" alt="Mind map of OpenTelemetry receiver categories with examples including OTLP, Jaeger, Zipkin, Prometheus, Host Metrics, Kubeletstats, Filelog, Kafka, FluentForward, Syslog, and StatsD." caption="Main types of OpenTelemetry receivers: protocol-based, scraper-based, infrastructure/host-based, file/log-based, and platform-specific receivers." />
+
+### Protocol-based receivers (push)
+
+**OTLP Receiver** is the default for all new instrumentation. It accepts traces, metrics, and logs over gRPC (port 4317) and HTTP (port 4318) with stable support for all three signals. In local setups, `localhost:4317` and `4318` are common OTLP defaults.
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "${env:MY_POD_IP}:4317"
+        tls:
+          cert_file: /etc/otel/tls/tls.crt
+          key_file: /etc/otel/tls/tls.key
+      http:
+        endpoint: "${env:MY_POD_IP}:4318"
+```
+
+`${env:MY_POD_IP}` is an environment variable that resolves to the pod's IP address at startup. Using this instead of `0.0.0.0` restricts the receiver to the pod's own network interface. In Kubernetes, this value is typically injected using the downward API in the pod spec.
+
+The OTLP receiver supports both gRPC and HTTP. gRPC is the better choice for service-to-service traffic inside a cluster because it uses binary encoding and multiplexes connections. HTTP is useful when gRPC is not an option, such as browser-based telemetry or networks where firewalls block gRPC.
+
+**Jaeger Receiver** is for teams still running Jaeger-instrumented services. It accepts traces over gRPC (port 14250), Thrift HTTP (14268), and Thrift over UDP (6831 compact, 6832 binary). It handles traces only, not metrics or logs. If you are starting fresh, skip this receiver entirely. Jaeger v1 <a href="https://www.cncf.io/blog/2025/09/01/jaeger-at-10-forged-in-community-reborn-in-opentelemetry/" rel="noopener noreferrer nofollow" target="_blank">reached end-of-life in December 2025</a>, and Jaeger v2 is built directly on the OTel Collector, so it accepts OTLP natively.
+
+**Zipkin Receiver** serves a similar role for Zipkin users. It accepts Zipkin V1 and V2 spans over HTTP on port 9411. Like Jaeger, it handles traces only. One common point of confusion: the <a href="https://opentelemetry.io/blog/2025/deprecating-zipkin-exporters/" rel="noopener noreferrer nofollow" target="_blank">December 2025 deprecation</a> applies to the Zipkin *exporter* spec, not the receiver. The receiver is still available and maintained in the Collector.
+
+<KeyPointCallout title="Tip: Migrating from Jaeger or Zipkin" defaultCollapsed={false}>
+If you have services still sending traces in Jaeger or Zipkin format, run the corresponding receiver alongside OTLP. Migrate services to OTLP one at a time, and remove the legacy receiver once no services depend on it.
+</KeyPointCallout>
+
+Here is a quick summary of how these three protocol-based receivers compare:
+
+| Feature | OTLP | Jaeger | Zipkin |
+| --- | --- | --- | --- |
+| Signals | Traces, metrics, logs | Traces only | Traces only |
+| Ports | 4317, 4318 | 14250, 14268, 6831, 6832 | 9411 |
+| Recommended for new apps | Yes | No | No |
+| Status | Active, stable | Migration bridge | Active, beta |
+
+
+### Scraper-based receivers (pull)
+
+**Prometheus Receiver** scrapes `/metrics` endpoints and converts Prometheus-format metrics to OTel metrics. It supports full `scrape_config` syntax including Kubernetes service discovery.
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "kubernetes-pods"
+          scrape_interval: 30s
+          kubernetes_sd_configs:
+            - role: pod
+          metric_relabel_configs:
+            - source_labels: [__name__]
+              regex: "http_request_duration_seconds.*|http_requests_total"
+              action: keep
+```
+
+Two important details when configuring the Prometheus receiver:
+
+1. **Escaping dollar signs:** If you use regular expressions that rely on the `$` symbol (like regex backreferences), you must write them as `$$`. A single `$` tells the Collector to look for an environment variable instead.
+2. **Filtering metrics early:** Use `metric_relabel_configs` to drop metrics you don't need *before* they enter the Collector. Dropping heavy, detailed metrics at the scrape phase is much more memory-efficient than ingesting everything and trying to filter it later in the pipeline.
+
+The Prometheus receiver handles metrics only and maintains scrape state, so running multiple replicas with identical scrape configs produces duplicate metrics. Use the Target Allocator to distribute targets across replicas.
+
+<KeyPointCallout title="Prometheus vs. OTLP for metrics" defaultCollapsed={false}>
+If the source already exposes a `/metrics` endpoint, use the Prometheus receiver. However, if you control the application and can instrument it yourself with OTel SDKs, OTLP is the better choice. It is simpler to scale and covers traces, metrics, and logs all on a single port. In most production environments, you will run both receivers side by side.
+</KeyPointCallout>
+
+### Infrastructure and host-based receivers
+
+**Host Metrics Receiver** collects CPU, memory, disk, filesystem, network, and load metrics from the host. Designed for agent or DaemonSet deployments.
+
+```yaml
+receivers:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 30s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      filesystem:
+      network:
+```
+
+**Note on containers:** The `root_path: /hostfs` setting is critical when running the Collector in a container. Without it, the receiver will accidentally report metrics for the container itself instead of the underlying host. You must mount the host's root filesystem (e.g., using `-v /:/hostfs:ro` in Docker) and point the receiver to it. Also, because this receiver doesn't automatically tag metrics with host information, you should pair it with the `resourcedetection` processor so you know which machine the metrics came from.
+
+**Kubeletstats Receiver** pulls pod, node, container, and volume metrics from the Kubelet API. Each Collector in a DaemonSet queries the local kubelet.
+
+```yaml
+receivers:
+  kubeletstats:
+    collection_interval: 20s
+    auth_type: serviceAccount
+    endpoint: "https://${env:K8S_NODE_NAME}:10250"
+    insecure_skip_verify: true
+    metric_groups: [node, pod, container]
+```
+
+> *If you are looking to deploy these in a cluster, check out our complete guide to [OpenTelemetry Kubernetes observability](https://signoz.io/blog/opentelemetry-kubernetes/).*
+
+### File and log-based receivers
+
+The **Filelog Receiver** is your tool for reading logs from disk. It tails files, handles log rotation, parses JSON, and patches together multiline logs.
+
+```yaml
+extensions:
+  file_storage:
+    directory: /var/otelcol/storage
+
+receivers:
+  filelog:
+    include: ["/var/log/myapp/**.json"]
+    start_at: beginning
+    storage: file_storage
+    multiline:
+      line_start_pattern: '^\d{4}-\d{2}-\d{2}'
+    operators:
+      - type: json_parser
+        severity:
+          parse_from: attributes.level
+```
+
+Notice the `storage: file_storage` line. This tells the receiver to save its place, so if the Collector restarts, it remembers exactly which logs it has already read. Without it, the Collector will either re-read old logs (creating duplicates) or skip logs that were written while it was offline.
+
+<KeyPointCallout title="Note: file_storage directory must exist" defaultCollapsed={false}>
+The <code>file_storage</code> extension requires its <code>directory</code> to exist before the Collector starts. In containers, mount a persistent volume to that path. If you want the Collector to create the directory automatically, add <code>create_directory: true</code> to the extension config.
+</KeyPointCallout>
+
+For <a href="https://opentelemetry.io/docs/platforms/kubernetes/collector/components/" rel="noopener noreferrer nofollow" target="_blank">Kubernetes container logs</a>, the `container` operator handles Docker JSON, CRI-O, and containerd formats:
+
+```yaml
+receivers:
+  filelog:
+    include: ["/var/log/pods/**/**/**.log"]
+    operators:
+      - type: container
+```
+
+### Platform-specific receivers
+
+The **Kafka Receiver** consumes traces, metrics, and logs from Kafka topics. This is primarily used in large-scale environments that use Kafka as a buffer between edge Collectors and a central Collector cluster.
+
+There are many other specialty receivers available, such as `fluentforward` for migrating from Fluentd, `syslog` for legacy networking gear, and `statsd`. You can find all of these in the [contrib distribution](https://signoz.io/blog/opentelemetry-collector-contrib/).
+
+From there, the practical question is which receiver fits your source, signal type, and scaling model.
+
+## How to Choose the Right Receiver
+
+| Scenario | Receiver | Signal |
+| --- | --- | --- |
+| New OTel SDK-instrumented services | OTLP | Traces, metrics, logs |
+| Migrating from Jaeger | Jaeger → OTLP | Traces |
+| Migrating from Zipkin | Zipkin → OTLP | Traces |
+| Existing Prometheus `/metrics` endpoints | Prometheus | Metrics |
+| Host/VM resource metrics | Host Metrics | Metrics |
+| Log files on disk | Filelog | Logs |
+| Kubernetes container logs | Filelog + `container` operator | Logs |
+| Kubernetes pod/node metrics | Kubeletstats | Metrics |
+| Kafka-buffered telemetry | Kafka | Traces, metrics, logs |
+
+If the app uses OTel SDKs, use OTLP. If the source exposes Prometheus metrics, use the Prometheus receiver. If logs are on disk, use Filelog. If the source speaks a legacy format, use the corresponding receiver as a temporary bridge and plan migration to OTLP.
+
+After choosing a receiver, the important part is wiring it into the Collector correctly.
+
+In practice, receiver setup has two parts. First, you define the receiver under `receivers:` so the Collector knows which endpoint, protocol, or source to use. Second, you attach that receiver to a pipeline under `service.pipelines` so incoming telemetry can be processed and exported.
+
+For push-based receivers such as OTLP, the application or agent also has to send data to that receiver endpoint. Collector config opens the door, but the sender still has to point to it.
+
+## Minimal Receiver Config Examples
+
+A Collector configuration file wires receivers, processors, and exporters into pipelines. Before connecting a real backend, it helps to verify that a receiver is actually accepting data. The config below does that using the `debug` exporter, which prints incoming telemetry to `stdout`:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug]
+```
+
+Once spans appear in stdout, the receiver is working. Swap the `debug` exporter for the SigNoz exporter and the pipeline is production-ready.
+
+This minimal example validates traces only. The production-shaped config below shows how to wire metrics and logs pipelines as well.
+
+**A production-shaped multi-receiver config:**
+
+The following config extends this to a full multi-receiver setup. It accepts application traces and metrics over OTLP, scrapes Prometheus targets, collects host metrics, and tails log files, all feeding into shared processors before export.
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "${env:MY_POD_IP}:4317"
+        tls:
+          cert_file: /etc/otel/tls/tls.crt
+          key_file: /etc/otel/tls/tls.key
+      http:
+        endpoint: "${env:MY_POD_IP}:4318"
+
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "app-metrics"
+          scrape_interval: 15s
+          static_configs:
+            - targets: ["app:9464"]
+
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 30s
+    scrapers: { cpu: {}, memory: {}, disk: {}, network: {} }
+
+  filelog:
+    include: ["/var/log/myapp/*.log"]
+    start_at: end
+    storage: file_storage
+
+extensions:
+  file_storage:
+    directory: /var/otelcol/storage
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 20
+  batch:
+    send_batch_size: 8192
+    timeout: 200ms
+
+exporters:
+  otlp_grpc/signoz:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  extensions: [file_storage]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_grpc/signoz]
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_grpc/signoz]
+    logs:
+      receivers: [otlp, filelog]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_grpc/signoz]
+```
+
+A few settings in this config are worth understanding because they keep the Collector stable and prevent hard-to-debug data loss.
+
+The `memory_limiter` processor goes first in every chain. If the Collector consumes more memory than your container limit allows, the runtime kills the process and drops everything in flight. The memory limiter rejects new data before that threshold is reached, propagating backpressure to the SDK instead.
+
+The `batch` processor groups telemetry into larger payloads before export. That reduces the number of outbound requests and usually improves throughput.
+
+Notice that the `storage: file_storage` extension on the Filelog receiver saves read offsets to disk. That way, a restart does not force the Collector to re-read old logs or skip logs that arrived while it was down.
+
+## Viewing Receiver Data in SigNoz
+
+Once your receivers are collecting data, you need an observability backend to store and query it.
+
+In this setup, [SigNoz](https://signoz.io/) is the backend. Receivers ingest traces, metrics, and logs into the Collector, processors transform them, and an OTLP exporter sends the result to SigNoz for querying and correlation.
+
+To send data to SigNoz, configure an OTLP exporter like this:
+
+```yaml
+exporters:
+  otlp_grpc/signoz:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: "${env:SIGNOZ_INGESTION_KEY}"
+```
+
+<KeyPointCallout title="Note" defaultCollapsed={true}>
+Recent <a href="https://github.com/open-telemetry/opentelemetry-collector/releases" rel="noopener noreferrer nofollow" target="_blank">Collector releases</a> renamed the exporter to <code>otlp_grpc</code>. Older examples may show <code>otlp</code>, which remains a valid alias.
+</KeyPointCallout>
+
+With this in the production config, data from every receiver flows into SigNoz: traces from the OTLP receiver, metrics from Prometheus and Host Metrics, and logs from Filelog. Use the **region-specific** ingestion endpoint from [SigNoz Cloud Settings → Ingestion.](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Once data arrives, the traces explorer shows spans from all services that pushed over OTLP. Filtering by `deployment.environment` narrows the view to a specific environment, and service names, operation names, and response codes are visible in the list.
+
+<Figure src="/img/blog/2026/04/otel-receivers-image-signoz-traces.webp" alt="SigNoz traces explorer showing spans from the OTel Demo environment, filtered by deployment environment, with service names, operation names, durations, and response status codes." caption="Spans from the OTel Demo application in the SigNoz traces explorer. Services instrumented with OpenTelemetry SDKs push traces over OTLP to the Collector, which forwards them to SigNoz." />
+
+Clicking into any span opens the trace detail view with a flamegraph showing timing across services. The Related Signals panel on the right links to **logs** and **metrics** from the same time window, which is where routing all three signals through one pipeline pays off.
+
+<Figure src="/img/blog/2026/04/otel-receivers-image-spans.webp" alt="SigNoz trace detail view for a frontend request showing a flamegraph, span timeline, service breakdown, span attributes, and Related Signals links to logs and metrics." caption="A trace from frontend-proxy through frontend showing span timing, service breakdown, and the Related Signals panel linking to correlated logs and metrics in SigNoz." />
+
+The **Infrastructure Monitoring** view shows host-level data from the Host Metrics receiver. Each row is a node with CPU usage, memory usage, IOWAIT, and load average, updated on the collection interval set in the receiver config.
+
+<Figure src="/img/blog/2026/04/otel-receivers-image-hostlevel.webp" alt="SigNoz Infrastructure Monitoring view showing host-level CPU usage, memory usage, IOWAIT, and load metrics for multiple nodes collected by the Host Metrics receiver." caption="Host-level CPU and memory metrics in SigNoz Infrastructure Monitoring, collected by the Host Metrics receiver running as a DaemonSet agent." />
+
+Logs from the Filelog receiver and the OTLP receiver appear in the Logs Explorer. Filtering by `deployment.environment` or service name shows structured log entries with parsed severity, timestamps, and body text that can be queried across services.
+
+<Figure src="/img/blog/2026/04/otel-receivers-image-logs.webp" alt="SigNoz Logs Explorer showing structured application logs filtered by deployment environment, with severity filters, timestamps, and log bodies queryable across services." caption="Application logs from the OTel Demo environment in the SigNoz logs explorer, showing structured log entries with severity levels and timestamps queryable across services." />
+
+Teams that want a managed ingestion endpoint can use [SigNoz Cloud](https://signoz.io/teams/). Those that need more control over deployment or data location can [self-host SigNoz](https://signoz.io/docs/install/).
+
+## A Mental Model for Choosing OTel Receivers
+
+It helps to think of OpenTelemetry receivers simply as ingestion adapters. Instead of asking "which receiver is best," ask "which receiver matches my source?"
+
+*   **Protocol-based** receivers (like OTLP) accept pushed telemetry.
+*   **Scraper-based** receivers (like Prometheus) pull data from endpoints.
+*   **Infrastructure** receivers gather host and Kubernetes metrics.
+*   **File-based** receivers read logs directly from disk.
+*   **Platform** receivers act as bridges for tools like Kafka or Fluentd.
+
+When designing a pipeline, use these four questions to narrow your choices:
+
+1. **What signal does the source emit?** Does it send traces, metrics, logs, or a combination? OTLP handles all three. Prometheus is for metrics. Filelog is specifically for logs.
+2. **Do you need to push or pull?** If the application can actively send telemetry (using an OTel SDK or Fluent Bit), use a push receiver. If the source only exposes an endpoint (like the Kubelet API), use a pull receiver.
+3. **How will this scale?** Push receivers scale horizontally without issues. Pull receivers require coordination (like a Target Allocator) if you want to run multiple replicas without duplicating data.
+4. **Are you migrating?** OTLP, Prometheus, Host Metrics, and Filelog are long-term choices. Jaeger and Zipkin are migration bridges that should eventually be phased out.
+
+As a general rule: start with OTLP for all new instrumentation. Add the Prometheus receiver when your infrastructure already exposes `/metrics`. Tail your disk-based logs with Filelog. Treat legacy protocols as temporary, and always remember to put the `memory_limiter` first in every pipeline.

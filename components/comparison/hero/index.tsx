@@ -38,7 +38,10 @@ const Hero = (props) => {
         )}
       </div>
       <div className={styles.headerHeroImageContainer}>
-        <img src="/img/signoz-distributed-tracing.webp" />
+        <img
+          src="/img/signoz-distributed-tracing.webp"
+          alt="SigNoz trace details view showing a distributed trace waterfall and span attributes for an HTTP request"
+        />
       </div>
     </div>
   )

@@ -17,6 +17,7 @@ import DocCard from './DocCard'
 import DocCardContainer from './DocCardContainer'
 import NextCarousel from './Carousel/Carousel'
 import Figure from './Figure/Figure'
+import NextImage from 'next/image'
 import PricingCTA from './PricingCTA'
 import PageFeedback from './PageFeedback/PageFeedback'
 import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
@@ -82,7 +83,9 @@ import QueryRace from './HighCardinalityData/QueryRace'
 import SamplingAggregation from './HighCardinalityData/SamplingAggregation'
 import UsersAnalogy from './HighCardinalityData/UsersAnalogy'
 import Tooltip from './ui/Tooltip'
+import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
+import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
 import dynamic from 'next/dynamic'
 const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'), { ssr: false })
 
@@ -112,6 +115,7 @@ export const components: MDXComponents = {
   DocCardContainer,
   NextCarousel,
   Figure,
+  NextImage,
   PricingCTA,
   PageFeedback,
   CustomMetricPlayground,
@@ -170,4 +174,6 @@ export const components: MDXComponents = {
   UsersAnalogy,
   Tooltip,
   DatabaseTable,
+  InlineCTA,
+  MCPInstallButton,
 }

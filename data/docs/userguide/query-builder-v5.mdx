@@ -1,9 +1,10 @@
 ---
-date: 2025-08-01
+date: 2026-04-16
 id: query-builder
 
-title: Query Builder
+title: Query Builder v5 Guide
 description: Learn how to use SigNoz Query Builder to filter, aggregate, and visualize data. Simplify complex queries and gain actionable insights with advanced features.
+doc_type: explanation
 ---
 
 ## Overview
@@ -394,55 +395,108 @@ Combine multiple queries to perform sophisticated analysis that single queries c
 
 ## Multi-Query Analysis: Trace Operators
 
-Combine Multiple Trace Queries to perform sophisticated analysis within a trace (Parent Child Relationships)
+Trace operators let you combine multiple trace queries to express span relationships within a trace: parent-child hierarchies, co-occurrence, exclusion, and union.
 
-### Use Cases for Multiple Queries
+<Admonition type="info">
+**Important: Trace operators return left-hand side spans.** For all operators except OR (`||`), the result set contains spans matching the **left** operand. The right operand acts as a condition/filter. For example, `A => B` returns spans from A that have a direct child matching B, not the B spans themselves.
+</Admonition>
 
-**Direct Descendants**
-- Query A: Span with service.name = 'frontend' being the root span
-- Query B: Span with service.name = 'customer' as the direct descendant of the 'frontend' span
-- Trace Matching: `A => B` (Direct Descendant)
+### Available Trace Operators
+
+- **Has Direct Child** (`=>`): Returns left (A) spans. Spans from A that have a **direct child** matching B.
+- **Has Descendant** (`->`): Returns left (A) spans. Spans from A that have a **descendant** (at any depth) matching B.
+- **AND** (`&&`): Returns left (A) spans. Spans from A in traces that **also contain** spans matching B.
+- **OR** (`||`): Returns **both** A and B spans. **Union** of spans from both A and B (deduplicated).
+- **NOT** (binary, `A NOT B`): Returns left (A) spans. Spans from A in traces that **do not contain** any spans matching B.
+- **NOT** (unary, `NOT A`): Returns all other spans. All spans in the time range whose trace does **not** contain any spans matching A.
+
+### Expression Syntax
+
+- **Identifiers**: Query labels like `A`, `B`, `C` (letters followed by optional digits)
+- **Parentheses**: Use `()` to group sub-expressions, e.g., `(A => B) && (C -> D)`
+- **Max operators**: Up to 10 operators per expression
+- **Operator precedence** (lowest to highest): `->`, `=>`, `&&`, `||`, `NOT`
+
+<Admonition type="note">
+Unlike standard Boolean logic where AND binds tighter than OR, trace operators give `||` higher precedence than `&&`. Use parentheses to make your intent explicit when combining these operators.
+</Admonition>
+
+For example, `A => B && C` is parsed as `A => (B && C)` because `&&` has higher precedence than `=>`. Use parentheses to override precedence when combining multiple operators.
+
+### Examples
+
+#### Has Direct Child (`=>`)
+
+Find frontend spans that are direct parents of customer service spans:
+- Query A: `service.name = 'frontend'`
+- Query B: `service.name = 'customer'`
+- Expression: `A => B`
+- **Result**: Returns the frontend spans (A) that directly called the customer service
 
 <figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/direct-descedant-operator.mp4" 
-        width="100%" 
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/direct-descedant-operator.mp4"
+        width="100%"
         controls
     >
         Your browser does not support the video tag.
     </video>
-    <figcaption><i>Example showing the Direct Descendant Trace Operator</i></figcaption>
+    <figcaption><i>Example showing the Has Direct Child Trace Operator</i></figcaption>
 </figure>
 
-**InDirect Descendants**
-- Query A: Span with service.name = 'frontend' as the root span
-- Query B: Span with service.name = 'customer' and 'has_error = true' anywhere in the same trace as nth descendant
-- Trace Matching: `A -> B` (InDirect Descendant)
+#### Has Descendant (`->`)
+
+Find frontend spans that are ancestors (at any depth) of erroring customer service spans:
+- Query A: `service.name = 'frontend'`
+- Query B: `service.name = 'customer' AND has_error = true`
+- Expression: `A -> B`
+- **Result**: Returns the frontend spans (A) that are ancestors of the erroring customer spans at any depth.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/query-builder/indirect-descedant-operator.webp" alt="SigNoz UI showing Indirect Descendant Trace Operator"/>
-    <figcaption><i>Trace Explorer</i></figcaption>
+    <figcaption><i>Example showing the Has Descendant Trace Operator</i></figcaption>
 </figure>
 
-**AND (Within a Trace)**
-- Query A: Span with service.name = 'cartservice' 
-- Query B: Any span in the trace with status_code != 200
-- Trace Matching: `A && B` (AND Operation)
+#### AND (`&&`)
+
+Find cartservice spans in traces that also have non-200 status codes:
+- Query A: `service.name = 'cartservice'`
+- Query B: `status_code != 200`
+- Expression: `A && B`
+- **Result**: Returns the cartservice spans (A), only from traces where at least one span matches the status_code condition (B)
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/and-operator.webp" alt="SigNoz UI showing AND Trace Operator "/>
-    <figcaption><i>Trace Explorer</i></figcaption>
+    <img src="/img/docs/product-features/query-builder/and-operator.webp" alt="SigNoz UI showing AND Trace Operator"/>
+    <figcaption><i>Example showing the AND Trace Operator</i></figcaption>
 </figure>
 
+#### OR (`||`)
 
-### Available Trace Operators
+Get spans from either the frontend or the backend service:
+- Query A: `service.name = 'frontend'`
+- Query B: `service.name = 'backend'`
+- Expression: `A || B`
+- **Result**: Returns spans from **both** A and B (deduplicated union)
 
-- **Direct Descendant**: '=>`
-- **InDirect Descendant**: '->`
-- **AND**: '&&`
-- **OR**: '||`
-- **NOT**: 'NOT`
+#### NOT
+
+**Binary NOT** - Find cartservice spans in traces that have no errors:
+- Query A: `service.name = 'cartservice'`
+- Query B: `has_error = true`
+- Expression: `A NOT B`
+- **Result**: Returns cartservice spans (A) only from traces that contain zero erroring spans
+
+**Unary NOT** - Find all spans in traces that don't involve the payment service:
+- Query A: `service.name = 'paymentservice'`
+- Expression: `NOT A`
+- **Result**: Returns all spans in the time range from traces that have no payment service spans
+
+#### Nested Expressions
+
+Combine operators with parentheses:
+- Expression: `(A => B) && (C -> D)`
+- **Result**: Returns spans from `A => B` (A spans that are direct parents of B spans) that are also in traces containing the `C -> D` relationship
 
 ---
 

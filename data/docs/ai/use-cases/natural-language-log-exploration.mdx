@@ -1,0 +1,155 @@
+---
+date: 2026-03-30
+id: natural-language-log-exploration
+title: Natural Language Log Exploration
+description: Search, filter, and analyze logs in SigNoz by asking questions in plain English through your AI assistant.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+A product manager posts in #incidents:
+
+> Multiple sellers are complaining that products they updated hours ago still show old prices in search results. The catalog page shows the right data, but search is stale.
+
+You have SigNoz collecting logs and the MCP server connected to your AI assistant. You know search is powered by an indexing pipeline, but you don't know the internals.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server).
+- Make sure your services are sending logs to SigNoz. See [Send Logs to SigNoz](https://signoz.io/docs/userguide/logs) if you haven't set this up.
+
+## Step 1: Search for the Symptom
+
+```
+Show me recent error or warning logs from any service related to search indexing or index lag in the last 6 hours.
+```
+
+Results come back from `search-indexer`:
+
+```
+Found 34 logs matching across 2 services:
+
+1. 14:52:11 WARN  search-indexer - "Index lag exceeds threshold: 4h12m behind head (threshold: 15m)"
+2. 14:47:03 WARN  search-indexer - "Index lag exceeds threshold: 4h07m behind head (threshold: 15m)"
+3. 14:42:01 WARN  search-indexer - "Index lag exceeds threshold: 4h02m behind head (threshold: 15m)"
+4. 14:22:18 WARN  search-indexer - "Consumer group rebalance completed, partition assignment unchanged"
+5. 13:15:44 WARN  search-indexer - "Batch processing rate: 12 events/sec (normal: ~340 events/sec)"
+...
+```
+
+The search indexer is 4+ hours behind. Processing speed has dropped from 340 events/sec to 12. That explains the stale results. But there are no errors, just slowness. Why is it crawling?
+
+## Step 2: Understand Why Throughput Dropped
+
+```
+Show me logs from search-indexer in the last 6 hours that mention "skip", "drop", "malformed", "parse", or "invalid".
+```
+
+The volume is striking:
+
+```
+Found 9,847 logs matching:
+
+1. 14:51:58 WARN  "Skipping malformed event: missing required field 'sku_id' (event_source: catalog-pipeline)"
+2. 14:51:57 WARN  "Skipping malformed event: field 'price' is not numeric: 'USD29.99' (event_source: catalog-pipeline)"
+3. 14:51:55 WARN  "Parse retry exhausted for event, moving to dead letter queue (event_source: catalog-pipeline)"
+...
+```
+
+Nearly 10,000 malformed events in 6 hours. The indexer is spending all its time retrying bad data and dead-lettering it. Valid events are stuck behind the flood. Every bad event comes from `catalog-pipeline`.
+
+```
+How many "Skipping malformed event" warnings has search-indexer logged per hour over the last 24 hours?
+```
+
+The hourly breakdown shows a clear inflection point:
+
+```
+Malformed event warnings per hour (search-indexer):
+
+  00:00 - 10:00 UTC:  0-3/hour (baseline noise)
+  10:00 - 10:59:      2
+  11:00 - 11:59:      1,847   <-- spike
+  12:00 - 12:59:      1,923
+  13:00 - 13:59:      1,812
+  14:00 - 14:59:      1,690 (ongoing)
+```
+
+The malformed events started at 11:00 UTC. Something changed in `catalog-pipeline` around that time.
+
+## Step 3: Trace the Root Cause Upstream
+
+```
+Show me INFO and WARN logs from catalog-pipeline between 10:45 and 11:15 UTC today. I am looking for deployments, config changes, or schema changes.
+```
+
+The deployment logs tell the story:
+
+```
+Found 28 logs:
+
+1. 10:52:03 INFO  "Deployment started: catalog-pipeline v2.14.0 -> v2.15.0 (deployer: ci-bot)"
+2. 10:52:18 INFO  "Migration applied: product_event_schema_v3"
+3. 10:52:19 INFO  "Event format updated: sku_id field moved from root to nested product.identifiers.sku_id"
+4. 10:52:19 INFO  "Event format updated: price field changed from cents (int) to formatted string (e.g. 'USD29.99')"
+5. 10:52:31 INFO  "Deployment complete: catalog-pipeline v2.15.0 healthy"
+6. 10:53:01 INFO  "Backfill started: reprocessing 14,291 products with new schema"
+7. 11:01:12 INFO  "Backfill complete: 14,291 events published"
+```
+
+`catalog-pipeline` v2.15.0 changed the event schema in two breaking ways: it moved `sku_id` into a nested path and changed `price` from integer cents to a formatted string. The search indexer still expects the old schema. Every event from the new version fails validation. On top of that, the backfill re-published 14,291 products in the new format, flooding the indexer with unparseable data.
+
+## Step 4: Scope the Impact
+
+```
+How many events has search-indexer moved to the dead letter queue in the last 6 hours? What is the current index lag?
+```
+
+The damage:
+
+```
+Dead letter queue (last 6 hours):
+  - Events moved to DLQ: 9,214
+  - Estimated unique products affected: ~6,800
+
+Current index lag: 4h17m behind head
+Indexer throughput: 12 events/sec (normal: 340 events/sec)
+```
+
+~6,800 products have stale search data. The lag keeps growing because new events from v2.15.0 continue arriving in the broken format. The fix: either roll back `catalog-pipeline` to v2.14.0, or deploy a hotfix to `search-indexer` to handle both schema versions. The 9,214 dead-lettered events will need to be replayed after the fix.
+
+## Tips for Your Own Investigations
+
+1. **Start with what you know.** The Slack message, the error alert, the customer complaint. Search for that first.
+2. **Follow the thread.** When results mention another service, a timeout, or an error code, ask about that next.
+3. **Scope before you dig.** Once you know what is failing, check how many errors, when they started, and whether they are increasing.
+4. **Find the boundary.** Zoom into the moment errors started. The logs right before the first error often reveal the trigger.
+
+<Admonition type="tip">
+If a field like `service.name` is not available, ask the assistant to discover fields: _"What resource attributes are available for logs?"_ Field availability depends on how your services are instrumented.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_search_logs` | Searched across all services for warning/error logs matching search indexing keywords |
+| 2 | `signoz_search_logs` | Found malformed event warnings in the indexer, revealing upstream data quality issue |
+| 2 | `signoz_aggregate_logs` | Computed malformed event counts per hour to pinpoint when the problem started |
+| 3 | `signoz_search_logs` | Found deployment and schema migration logs in catalog-pipeline around the start time |
+| 4 | `signoz_aggregate_logs` | Counted dead-lettered events to measure blast radius |
+
+</details>
+
+## Next Steps
+
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer) - Ask "why is this slow?" and trace the bottleneck.
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id) - Debug a support ticket with a trace ID.
+
+<GetHelp />

@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import docsSideNav from 'constants/docsSideNav'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Tooltip } from '@nextui-org/react'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 
 interface DocsSidebarProps {
   onNavItemClick?: () => void
@@ -166,7 +166,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
           {!isGetStarted && (
             <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
           )}
-          <Tooltip content={doc.label} placement="right" delay={500}>
+          <Tooltip content={doc.label} side="right" delayDuration={500}>
             <span className="truncate font-medium">{doc.label}</span>
           </Tooltip>
         </Link>
@@ -195,7 +195,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
             <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
               {category.isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </div>
-            <Tooltip content={category.label} placement="right" delay={500}>
+            <Tooltip content={category.label} side="right" delayDuration={500}>
               <span className="truncate font-medium">{category.label}</span>
             </Tooltip>
           </div>
@@ -204,7 +204,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
           <div className="mt-1">
             {category.link && category.link.type === 'generated-index' && (
               <div className="mx-5 mb-2 mt-2">
-                <Tooltip content={category.link.title} placement="right" delay={500}>
+                <Tooltip content={category.link.title} side="right" delayDuration={500}>
                   <h4
                     className={`truncate text-xs font-medium text-gray-400 ${
                       isActiveRoute ? 'text-blue-400' : 'hover:text-gray-300'

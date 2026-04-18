@@ -1,109 +1,169 @@
 ---
-date: 2026-01-27
-title: Send traces and logs from AWS Lambda Node.js functions to SigNoz
-description: Learn how to send traces and logs from AWS Lambda Node.js functions to SigNoz using OpenTelemetry auto-instrumentation.
-tags : [SigNoz Cloud]
+date: 2026-03-26
+title: Send logs from AWS Lambda Node.js functions to SigNoz
+description: Learn how to send structured logs and correlated traces from AWS Lambda Node.js functions to SigNoz using the OpenTelemetry SDK.
 id: aws-lambda-nodejs
-hide_table_of_contents: true
+doc_type: howto
 ---
 
-You can auto instrument your Node.js Lambda function to send traces and logs to SigNoz. Follow the steps below.
+import GetHelp from '@/components/shared/get-help.md'
 
-<Tabs entityName="plans">
+This guide walks through instrumenting your AWS Lambda Node.js function to emit structured logs to SigNoz using the OpenTelemetry SDK. You will add the OTel Lambda Layer and call `logger.emit` directly in your code for fine-grained, attribute-rich log records.
 
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+<Admonition type="tip">
 
-## Configure OpenTelemetry for AWS Lambda Functions
+**OTel Collector Extension Layer**: For a code-free approach to collect logs, use the [OTel Collector Extension Layer](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/).
 
-### Add Required Dependencies
+**AWS Lambda Logs via S3**: Prefer routing logs via CloudWatch Logs and S3? Use [AWS Lambda Logs via S3](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/) for a code-free approach to collect logs.
+</Admonition>
 
-Add the OpenTelemetry API dependency to your NodeJS application
+## Prerequisites
+
+- An AWS account with permissions to create and manage Lambda functions.
+- A SigNoz account (Cloud or Self-Hosted).
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Steps
+
+### Step 1: Add Required Dependencies
+
+Add the necessary OpenTelemetry packages to your Node.js project.
+
 ```bash
-yarn add @opentelemetry/api
+yarn add @opentelemetry/api @opentelemetry/api-logs
 ```
 
-### Set Up Your Lambda Function
+### Step 2: Instrument Your Lambda Function
 
-Use OpenTelemetry APIs to trace spans and log events within your Lambda function. 
-
-Below is an `index.js` file of a [sample app](https://github.com/SigNoz/nodejs-lambda). This example demonstrates how to create a trace span, emit a custom log 
-entry, and ensure logs are captured by explicitly flushing the LoggerProvider at the end of the execution. It is important to flush to avoid losing any log data during 
-the function's lifecycle.
-
+Update your Lambda function code to initialize the logger provider and send logs.
 
 ```javascript:index.js
 const { trace } = require("@opentelemetry/api");
 const logsAPI = require("@opentelemetry/api-logs");
 
+// Initialize Logger Provider
 const provider = logsAPI.logs.getLoggerProvider();
 const logger = provider.getLogger("default", "1.0.0");
-const { flush } = require("./instrumentation");
 
-const tracer = trace.getTracer("test", "0.1");
+const tracer = trace.getTracer("default", "1.0.0");
 
 exports.handler = async (event) => {
   const parentSpan = tracer.startSpan("main");
-  tracer.startActiveSpan("testSpan", (span) => {
+
+  // Example of creating a span and emitting a log within it
+  tracer.startActiveSpan("process-request", (span) => {
     logger.emit({
-      severityText: "info",
-      body: "this is a log body example",
-      attributes: { "log.type": "custom" },
+      severityText: "INFO",
+      body: "Processing request in Lambda",
+      attributes: { "custom.attribute": "value" },
     });
     span.end();
   });
 
   const response = {
     statusCode: 200,
-    body: JSON.stringify("Hello from Lambda!"),
+    body: JSON.stringify("Hello from SigNoz Lambda!"),
   };
 
-  provider.forceFlush();
+  // IMPORTANT: Flush logs before the function exits
+  await provider.forceFlush();
+  parentSpan.end();
+
   return response;
 };
 ```
 
-### Zip the Folder for Deployment
+**Key Points:**
 
-Run the below command in the root directory of your NodeJS project. The command recursively (`-r`) compresses all files and folders in the current directory (`./`) 
-into a zip file named `deploy.zip`.
+- **`logger.emit`**: Used to send structured logs.
+- **`provider.forceFlush()`**: Critical to ensure logs are sent before the Lambda environment freezes or shuts down.
+
+### Step 3: Create Deployment Package
+
+Zip your function code and dependencies.
 
 ```bash
-zip -r deploy.zip ./
+zip -r deploy.zip .
 ```
 
-### Upload to AWS Lambda
+### Step 4: Upload to AWS Lambda
 
-- Navigate to the **Code** section in AWS Lambda.
-- Select **Upload from .zip file** and upload `deploy.zip`.
+1.  Navigate to your function in the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer nofollow">AWS Console</a>.
+2.  Go to the **Code** tab.
+3.  Choose **Upload from** -> **.zip file** and upload your `deploy.zip`.
 
-### Configure Environment Variables
+### Step 5: Configure Environment Variables
 
-Go to **Configuration** > **Environment Variables** and add the following:
+Navigate to **Configuration** > **Environment Variables** and add the following:
 
 ```environment
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name>
-```
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>`is the name of your Lambda function.
-
-### Add the OpenTelemetry Lambda Layer
-Go to the **Layers** section and add the following ARN:
-
-```environment
-arn:aws:lambda:<aws_region>:184161586896:layer:opentelemetry-nodejs-0_9_0:4
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+OTEL_SERVICE_NAME=<service_name>
 ```
 
-Replace `<aws_region>` with your AWS region.
-Check [OpenTelemetry Lambda releases](https://github.com/open-telemetry/opentelemetry-lambda/releases) for the latest version.
+Verify these values:
 
-### Test the Lambda Function
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your [SigNoz Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: A name for your Lambda service (e.g., `my-lambda-service`).
 
-Run the function and verify traces and logs in SigNoz.
+### Step 6: Add OpenTelemetry Lambda Layer
 
-</TabItem>
+This layer provides the OpenTelemetry Node.js Extension for AWS Lambda with auto-instrumentation capabilities.
 
-</Tabs>
+1.  Go to the **Layers** section of your function.
+2.  Click **Add a layer**.
+3.  Select **Specify an ARN**.
+4.  Enter the ARN for your region and architecture. Find the latest ARN on the <a href="https://github.com/open-telemetry/opentelemetry-lambda/releases" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-lambda releases page</a>.
+
+**Example ARN (Node.js, x86_64, us-east-1):**
+
+```text
+arn:aws:lambda:us-east-1:184161586896:layer:opentelemetry-nodejs-0_20_0:1
+```
+
+## Validate
+
+1. Trigger your Lambda function (e.g., using a Test event in the AWS Console).
+2. Go to the SigNoz Logs Explorer.
+3. Filter by `service.name`.
+4. You should see your structured log records with the custom attributes you set (e.g., `custom.attribute`).
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Logs not appearing in SigNoz
+
+- **Check endpoint and key**: Verify `OTEL_EXPORTER_OTLP_ENDPOINT` points to the correct SigNoz region and that `OTEL_EXPORTER_OTLP_HEADERS` contains a valid ingestion key.
+- **Check CloudWatch**: Open CloudWatch Logs for your Lambda function and look for OTel SDK output. Errors here usually indicate a misconfigured endpoint or a missing/wrong ingestion key.
+- **Check layer version**: Ensure the OTel Lambda layer ARN matches your function's runtime and architecture.
+
+### Logs missing attributes
+
+- Confirm you are passing a `resource` with `service.name` when initialising the SDK.
+- Verify `OTEL_SERVICE_NAME` is set if you rely on the environment variable instead of a code-level resource.
+
+### "Task timed out" error
+
+- Increase your Lambda function's timeout (e.g., to 30 seconds) to allow the SDK time to flush spans and logs before the function exits.
+
+</details>
+
+## Related Guides
+
+- [Send AWS Lambda logs via OTel Collector Extension Layer](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/)
+- [Send Logs via S3 Forwarder](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)
+- [AWS Lambda Integration](https://signoz.io/docs/integrations/aws/lambda/)
+
+## Get Help
+
+<GetHelp />

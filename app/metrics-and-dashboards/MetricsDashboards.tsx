@@ -9,6 +9,7 @@ import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import SigNozStats from '@/components/signoz-stats'
+import { COMPANIES } from '@/components/trusted-by'
 
 function MetricsDashboards() {
   return (
@@ -173,7 +174,7 @@ const Header = () => {
           <div className="product-explainer-video hero-figure rounded-none p-0 md:rounded-lg md:p-3">
             <Image
               src="/img/features/metrics/metrics-overview1.webp"
-              alt="Custom Thumbnail"
+              alt="SigNoz metrics dashboard showing CPU and memory usage charts by namespace and pod"
               className="h-auto w-full rounded-none md:rounded-lg"
               height={10000}
               width={10000}
@@ -185,21 +186,6 @@ const Header = () => {
     </header>
   )
 }
-
-const COMPANIES = [
-  { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
-  { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
-  { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
-  { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
-  { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
-  { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
-  { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
-  { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
-  { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
-]
 
 const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
@@ -215,11 +201,11 @@ const TrustedByTeams = ({ page }) => {
         </div>
         <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
           {COMPANIES.map((company, idx) => (
-            <div key={`${idx}-${company.image}`} className="flex items-center justify-center">
-              <img
+            <div key={`${idx}-${company.imageDesc}`} className="flex items-center justify-center">
+              <company.Logo
                 className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-                src={company.image}
-                alt={company.imageDesc}
+                role="img"
+                aria-label={company.imageDesc}
               />
             </div>
           ))}
@@ -311,7 +297,7 @@ const SigNozFeatures = () => {
       desc: 'Your metrics data is stored in ClickHouse - and we give you the ability to write ClickHouse queries directly on your data. This enables in-depth analysis when you want to dig deeper into your data.',
       image: '/img/features/metrics/clickhouse-query-metrics.webp',
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/',
+      buttonLink: 'https://signoz.io/docs/userguide/writing-clickhouse-traces-query/',
     },
     {
       title: 'PromQL Support',
@@ -398,7 +384,7 @@ const SigNozUsage = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Use SigNoz
             <br /> Metrics & Dashboards for...
           </p>
@@ -418,7 +404,7 @@ const UsageBasedPricing = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Simple
             <br /> usage-based <br /> pricing
           </p>
@@ -452,7 +438,7 @@ const ExploreDocs = () => {
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Explore Docs
           </p>
         </div>
@@ -498,7 +484,7 @@ const GetStarted = ({ page }) => {
             <div className="relative flex items-center justify-center">
               <img
                 src="/img/landing/landing_thumbnail.webp"
-                alt="Custom Thumbnail"
+                alt="SigNoz dashboard with application performance metrics - Metrics and Dashboards"
                 className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
               />
             </div>

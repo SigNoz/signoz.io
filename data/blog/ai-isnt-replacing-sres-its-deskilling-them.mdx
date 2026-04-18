@@ -1,0 +1,114 @@
+---
+
+title: "AI Isn't Replacing SREs. It's Deskilling Them."
+slug: ai-isnt-replacing-sres-its-deskilling-them
+date: 2026-02-27
+tags: [AI, SRE, Observability]
+authors: [elizabeth_mathew]
+description: When AI handles 95% of your incident response, do you get worse at handling the 5% that actually matters? Exploring the ironies of automation applied to SREs and the growing deskilling risk.
+image: /img/blog/2026/02/ai-sre-deskilling-cover.webp
+keywords: [AI, SRE, site reliability engineering, automation, deskilling, observability, incident response, ironies of automation]
+
+---
+
+There are two popular prophecies floating around tech circles these days.
+
+The first says [SRE is the future of all software engineering](https://swizec.com/blog/the-future-of-software-engineering-is-sre/), that as AI writes more and more code, the humans who remain will be the ones keeping systems alive. The second says AI will devour every tech job alive, SREs included. Neither is particularly useful if you're an SRE trying to figure out what your Tuesday will look like in 2027.
+
+Let's ask a more grounded question by looking at what's already happening: When AI handles 95% of your incident response, do you get worse at handling the 5% that actually matters?
+
+Most of us already use AI for our daily work (our brains a little fried!), and so do SREs. Today's discussion agenda is not whether AI replaces SREs, but whether AI is quietly making SREs less capable and whether anyone will notice anything before the next novel outage hits. The foundational framework for this entire debate comes from a 1983 research paper that's eerily prescient.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2026/02/ai-sre-deskilling-cover.webp" alt="AI and SRE - The Ironies of Automation" />
+</figure>
+
+> Here's the [LinkedIn post](https://www.linkedin.com/posts/pranay01_something-ive-been-thinking-about-lately-activity-7428804029134225408-IXif) our founder posted a few days ago, which inspired me to write this.
+
+## The Ironies of Automation: Part-I
+
+---
+
+*Note from author: Below is a brief precursor to History of Automation, which you might enjoy if you are into History and Cultures (like me).*
+
+---
+
+In 1983, a cognitive psychologist named Lisanne Bainbridge published a paper called [*Ironies of Automation*](https://www.semanticscholar.org/paper/Ironies-of-automation-Bainbridge/0713bb9d9b138e4e0a15406006de9b0cddf68e28). It became one of the most cited papers in human factors research, and its core argument is almost uncomfortably relevant today.
+
+Bainbridge studied what happened when factories and industrial systems automated the work of blue-collar operators. The findings were paradoxical and revealed that the more you automate a process, the more critical the human operator becomes during the rare moments automation fails and the less practice they get, and the worse they become at exactly those interventions. Automation, which was inherently designed to remove humans from the loop, left them with the worst possible job, i.e., long stretches of passive monitoring punctuated by rare, high-stakes crises they were increasingly unprepared for.
+
+Ring any bells yet?
+
+Basically, I'm drawing a parallel between the AI revolution and industrial automation. Industrial automation reshaped blue-collar work by taking over routine physical tasks, and the workers who remained had to handle exceptions they'd lost the muscle memory for. AI is doing the same thing to knowledge workers by taking over the routine cognitive tasks, the pattern matching, the triage, the known-issue resolution and leaving humans with the rare, complex, ambiguous problems.
+
+The *exact* problems that require deep *expertise*, the *exact expertise* that atrophies when you stop practising.
+
+Now we're replaying this pattern with AI agents, and the stakes in software systems are only growing.
+
+## Current State of AI in SRE
+
+Let's take stock of where things stand today in the world of site reliability engineering.
+
+### What's already automated or heavily AI-assisted?
+
+Alert noise reduction and intelligent grouping, runbook execution for known issues, log pattern detection and anomaly flagging, and basic root-cause suggestions from historical incident data, and auto-remediation for well-understood failure modes like restarting a crashed pod or scaling up a service that's running hot, are all fairly automated today.
+
+### What's on the horizon?
+
+Some immediate targets include multi-signal correlation across metrics, logs, and traces, autonomous root-cause analysis for partially understood failures, predictive incident detection before users are affected, AI-driven change risk assessment and automated rollbacks.
+
+PagerDuty frames this as a tiered model.
+
+- Tier 1 incidents: Known issues with known fixes get fully automated.
+- Tier 2 incidents: Partially understood problems receive AI recommendations with human validation.
+- Tier 3 incidents: Novel, complex, cascading failures stay human-led, with AI providing supporting context.
+
+But here's the catch.
+
+If *human* SREs only engage with Tier 3 incidents, i.e. the novel, never-before-seen outages, where do they build the *intuition* to handle them? Intuition is usually developed from years of hands-on incident response, pattern recognition built through repetition, and the kind of gut-level understanding of a system that only develops from painfully waking up at the odd hour to solve the bug that brought the system down.
+
+## The Crisis of Deskilling
+
+This is where the picture starts getting blurry. Let's look at some emerging research on AI-induced deskilling across multiple fields, which paints a consistent and concerning picture.
+
+In medicine, a [recent study](https://www.thelancet.com/journals/langas/article/PIIS2468-1253(25)00133-5/abstract) found that endoscopists who used AI assistance for polyp detection saw their unassisted detection rates drop from 28% to 22% after a period of AI use. They got worse at the thing they were supposed to be experts in, not because they forgot the theory, but because they stopped exercising the skill.
+
+In aviation, [research](https://flightsafety.org/wp-content/uploads/2019/12/IASS_2019_Behrend_Lafargue.pdf) has shown that long-haul pilots who rely heavily on autopilot systems experience measurable degradation in situational awareness and manual flying ability. The problem got serious enough that the FAA now mandates more manual flying time to counteract the effect.
+
+Somewhere over the past year, AI stopped being a tool I occasionally reached for and became the first thing I reach for, *always*. My instinct now is to offload as much as possible and apply my own thinking only where it's absolutely unavoidable. The problem is that these moments are becoming the only exercises my brain gets, and I can feel the *rust*.
+
+We can draw a pattern here. The more you let the system handle, the worse you get at handling things yourself and here's the truly dangerous part, *you don't feel it happening*. It gets masked as hyper-productivity. Cognitive research suggests that because AI tools make tasks feel easier and enhance visible performance, users are often unable to accurately judge the true status of their own skills. You feel competent, dashboards look green, and then on a Wednesday, a novel incident hits that doesn't match any pattern the AI has seen, and you realise the muscle has atrophied.
+
+For SREs, this manifests in specific ways, like we stop reading raw log streams because the AI summarises them, we stop forming hypotheses during incidents because the AI suggests root causes, we stop building mental models of system architecture because the AI maps dependencies for us, and each of these individually looks like a productivity win. Collectively, they hollow out the very expertise that makes an SRE effective when things go sideways in ways nobody anticipated.
+
+But there's something even more concerning than deskilling, and researchers have started calling it *never-skilling*. Deskilling means you once had a capability but have since lost it. Never-skilling means you never developed it in the first place. For junior SREs entering the field today in an environment where AI handles most of the incident response workflow, the opportunities to build foundational intuition and muscle through hands-on practice are vanishing.
+
+The training pipeline itself is broken and not *self-healing*.
+
+SREs realise their skills are degrading and lean more on AI to compensate, which further degrades their skills, creating a vicious cycle from which escape is difficult.
+
+### What Can We Do About It?
+
+We are definitely not rejecting AI tooling; we are adopting it and integrating it stronger than ever before, because that's the only way forward.
+
+A few approaches worth considering:
+
+**Deliberate inefficiency.** Just as the FAA mandates manual flying time even when the autopilot is perfectly capable, SRE teams can designate certain incidents, even the ones the AI could handle, as *human-practice opportunities*. This can be considered as a long-term investment to keep skills fresh, although it might come at the cost of a super-fast solution.
+
+**Build for human-in-the-loop, not human-on-the-side.** There's a meaningful difference between a system where a human approves an AI's recommendation and one where a human actively engages with the problem alongside AI. The former keeps humans in a supervisory role that Bainbridge showed leads to vigilance decay, and the latter keeps them cognitively engaged.
+
+Let's zoom out and take a look at the bigger picture.
+
+### The Bigger Picture
+
+Everything we've discussed here, the ironies of automation, the deskilling risk, the never-skilling problem, collectively applies well beyond SRE. Software engineering as a whole is navigating the same tension. As AI writes more code, reviews more PRs, and handles more debugging, the same questions apply.
+
+We're talking about SREs specifically because that's the world we live in at [SigNoz](https://signoz.io/). We build an open-source observability platform, the kind of tool that gives SREs the metrics, traces, and logs they need to understand their systems deeply. For us, this deskilling question is not a rhetorical fad; it directly shapes how we're building AI into our product.
+
+Our approach is to start with an AI assistant that helps SREs leverage the power of LLMs while keeping humans firmly in control. Eventually, we'll enable more autonomy but within clear guardrails, and only as trust is earned.
+
+One advantage we have in this space is that, as an observability platform, we sit on the data itself, the metrics, traces, and logs that SREs rely on. Most AI SRE products today integrate with observability tools through APIs, which means they're working with a limited, second-hand view of your systems. Because we own the data layer, we can build much deeper, more context-aware AI capabilities that understand your system the way an experienced SRE would.
+
+And to answer the burning question in your head, our goal isn't AI that replaces SREs. It's AI that supercharges SREs. Unlike ongoing lore, we believe humans will remain essential for the decisions that matter most, especially those that impact production infrastructure.
+
+The future of SRE is human *with* AI intentionally designed to keep humans sharp, engaged, and ready for the 5% that really counts.

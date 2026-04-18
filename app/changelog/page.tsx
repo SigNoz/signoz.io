@@ -2,12 +2,41 @@ import ChangelogRenderer from '@/components/Changelog/Renderer/ChangelogRenderer
 import ChangelogFooter from '@/components/Changelog/Footer/ChangelogFooter'
 import ChangelogHeader from '@/components/Changelog/Header/ChangelogHeader'
 import { DeploymentType, fetchChangelogEntries } from '../../utils/strapi'
+import siteMetadata from '@/data/siteMetadata'
+import { Metadata } from 'next'
 
 interface ChangelogProps {
   searchParams: {
     page?: string
     deploymentType?: string
   }
+}
+
+export const metadata: Metadata = {
+  title: 'SigNoz Changelog',
+  description: 'SigNoz Changelog | SigNoz',
+  openGraph: {
+    title: 'SigNoz Changelog | SigNoz',
+    description: 'SigNoz Changelog | SigNoz',
+    url: `${siteMetadata.siteUrl}/changelog`,
+    siteName: siteMetadata.title,
+    locale: 'en_US',
+    type: 'website',
+    images: [siteMetadata.socialBanner],
+  },
+  twitter: {
+    title: 'SigNoz Changelog | SigNoz',
+    description: 'SigNoz Changelog | SigNoz',
+    images: [siteMetadata.socialBanner],
+    site: siteMetadata.twitter,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: `${siteMetadata.siteUrl}/changelog`,
+  },
 }
 
 const Changelog = async ({ searchParams }: ChangelogProps) => {

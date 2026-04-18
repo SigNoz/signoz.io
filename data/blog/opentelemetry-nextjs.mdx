@@ -1,8 +1,8 @@
 ---
 
-title: Monitor NextJS with OpenTelemetry - Traces, Metrics, and Logs
+title: How to Instrument Next.js Applications with OpenTelemetry
 slug: opentelemetry-nextjs
-date: 2026-02-18
+date: 2026-03-13
 tags: [OpenTelemetry, NextJS, JavaScript]
 authors: [yuvraj, dhruv_ahuja]
 description: This in-depth guide walks you through how to instrument your Next.js application using OpenTelemetry. Learn how to collect traces, metrics, and logs—and send them to Jaeger or SigNoz for complete observability.
@@ -20,17 +20,26 @@ keywords: [opentelemetry,nextjs,opentelemetry nextjs,javascript,apm tools,applic
   nextHref="/blog/opentelemetry-nextjs-use-cases"
 />
 
-Vercel gives you some observability out of the box for your NextJS application: function logs, perf insights, basic metrics. While these might be enough for you initially, these metrics and insights aren't enough for a modern application that interacts with multiple complex integrations, such as a distributed system, or even LLMs, as basically all applications in 2026 rely on AI in some form.
+Vercel gives you some observability out of the box for your Next.js application: function logs, perf insights, basic metrics. While these might be enough for you initially, these metrics and insights aren't enough for modern-day distributed application systems.
 
-As an engineer interacting with, or as a decision maker for engineering systems, you should be aware of Vercel's observability offering and where it can potentially fall short for your needs.<br />
-From there, you can chart a path toward an observability system that scales alongside your business needs — and, inevitably, your application's complexity. In this write-up, we'll showcase how NextJS integrates with OpenTelemetry.
+If you are utilizing Vercel's observability for your Next.js applications, you should understand where its shortcomings lie.
 
-## Where Vercel Falls Short
+In this write-up, we'll showcase why OpenTelemetry is a better alternative to Vercel's observability offering, and how you can integrate OpenTelemetry in your Next.js applications.
 
-<KeyPointCallout title="Understanding OpenTelemetry" defaultCollapsed="true">
+<InlineCTA message="Go beyond Vercel's built-in observability. Send your Next.js traces, metrics, and logs to SigNoz for end-to-end visibility across your entire stack." />
+
+## What is OpenTelemetry?
+
 OpenTelemetry (OTel), the open-source observability standard, aims to standardize how telemetry is generated and exported, reducing the engineering bandwidth required to maintain telemetry logic across complex application systems. Since it makes it trivial to define the target for your application telemetry data, OpenTelemetry eliminates *vendor lock-in* and forces observability vendors to compete on features to retain customers.
 
 If you wish to learn more, feel free to check out our [detailed write-up on OpenTelemetry](https://signoz.io/opentelemetry/).
+
+## Where Vercel Falls Short
+
+<KeyPointCallout title="Skip to implementation">
+Here, we'll go over the shortcomings of Vercel's observability offering, and how OpenTelemetry can help you overcome them.
+
+Feel free to jump to the [implementation part](#implementing-opentelemetry-in-nextjs) if you wish to get hands-on with the OTel and Next.js integration.
 </KeyPointCallout>
 
 Following are some key aspects where Vercel lacks the features we expect to see in a robust observability platform:
@@ -41,16 +50,9 @@ Following are some key aspects where Vercel lacks the features we expect to see 
 - **No Service Correlation**: Can’t trace calls across microservices, queue workers, or other components in a distributed system.
 - **Weak Debug Context**: No slow query breakdowns. No cache hit/miss metrics. No idea why stuff is slow. This remains a persistent problem as there is no scope for custom instrumentation.
 
-At this point, you’ll research and understand [observability in detail](https://signoz.io/guides/what-is-observability/), and likely find Jaeger or Datadog. However, both come with meaningful trade-offs:
+Now that we have covered the shortcomings of Vercel's observability offering, let's dive into why observability is needed for Next.js applications.
 
-- **Jaeger**: Great for tracing, lacks support for metrics and logs. You would have to juggle between multiple tools and lack correlation between traces, metrics, and logs.
-- **Datadog**: Full-featured, but don’t blink, or [*your bill will triple*](https://signoz.io/blog/datadog-pricing/).
-
-<Figure src="/img/blog/common/datadog-pricing.webp" alt="Datadog is feature-rich but prone to pricing spikes." caption="Datadog is feature-rich but prone to pricing spikes." link="https://www.reddit.com/r/devops/comments/1ok48jx/datadog_suddenly_increasing_charges/" sourceText="Reddit" />
-
-This guide walks through how to instrument a Next.js app using OpenTelemetry, explains Jaeger’s limits, and shows how SigNoz gives you a complete [observability pipeline](https://signoz.io/guides/observability-pipeline/) without breaking the bank.
-
-## Why Even Bother Instrumenting Next.js Applications?
+## Why is Observability Needed for Next.js Applications?
 
 You might think: “My app’s just pages and API routes. Why should I trace anything?”
 
@@ -66,45 +68,10 @@ Checking the internals, you will see that Next.js interacts with multiple layers
 - **API Routers**: Has two options: the <a href="https://nextjs.org/docs/app" target="_blank" rel="noopener noreferrer">App Router</a> and the <a href="https://nextjs.org/docs/pages" target="_blank" rel="noopener noreferrer">Pages Router</a>, that follow distinct implementation patterns.
 - **Client/server boundaries**: Boundaries between client and server components are often blurred, dynamic, and hard to trace. Functionalities in client components might not be available in server components and vice-versa.
 
-So, when you lack instrumentation for your Next.js applications, you are essentially flying blind — prone to errors that are tough to contextualize or correlate. Let's understand the impact observability has with a few real-world scenarios.
+Now that you understand why you need observability for Next.js applications, and where Vercel's integration can fall short, let's get hands-on with implementing OpenTelemetry in Next.js applications.<br />
+This exercise should help you understand how OTel enables you to derive deep insights from your Next.js applications.
 
-## Real Scenarios Where Tracing Saves Hours
-
-### The Mysterious Slow Page Load
-
-> User says: “The dashboard is slow.”
-
-**Without tracing**: You tail server logs and grep for errors. But it is not immediately obvious what is taking long, or whether it's an issue on the user's end.
-
-**With tracing**: You see 50ms for server rendering and a 3s wait on a third-party analytics API. You swap it for an async call, and the dashboard feels snappy again.
-
-### The Intermittent 500
-
-> An API crashes randomly without any obvious pattern.
-
-**Without tracing**: You add more logging, redeploy, and wait for it to happen again. It could happen anytime and you do not have concrete steps to take.
-
-**With tracing**: A DB connection times out after 12 retries under load. The trace shows exactly which query, which endpoint, and the load level that causes the failure.
-
-### The Deployment Regression
-
-> Site feels slower after the latest deployment. There's a regression somewhere.
-
-**Without tracing**: You diff the PRs, stare at bundle sizes, and run Lighthouse hoping for a clue.
-
-**With tracing**: A new function call inside a Server Component adds 200ms to every page load. You get a quick patch-fix out while your team optimizes the function.
-
-### The Auth Redirect Loop
-
-> You notice frequent 404 errors in the logs, but without any clear reason. It often happens when opening shared Project links.
-
-**Without tracing**: You see an erroneous API call in the network tab but can't tell where it's coming from or why it's returning 404 `Not Found` responses.
-
-**With tracing**: The application redirects users that lack access to given Project. However, a state mismatch mid-redirect triggers a second auth check. The relevant [traces](https://signoz.io/blog/distributed-tracing/) shows both calls, their order, and exactly where the state diverged.
-
-**Bottom line**: Instrumentation turns debugging from guesswork into precision diagnosis.
-
-## Setup a Real App
+## Implementing OpenTelemetry in Next.js
 
 Rather than instrumenting a toy counter app, we'll use the official Next.js `with-supabase` template. Supabase handles auth, database, and storage. So the app has real user sessions, DB reads/writes, and external API calls already configured for us. That gives us meaningful traces to actually look at.
 
@@ -129,7 +96,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your_supabase_publishable_key>
 ```
 
 <KeyPointCallout title="Understanding Publishable Keys">
-Supabase replaced introduced Publishable Keys as the default alternative in June 2025 as a more secure and convenient method of using API Keys. <a href="https://supabase.com/changelog?next=Y3Vyc29yOnYyOpK0MjAyNC0wOS0xM1QxNTowMDoyOVrOAG2JYw==&restPage=2#whats-the-change" target="_blank" rel="noopener noreferrer nofollow">The changelog</a> describes it in more detail.
+Supabase introduced Publishable Keys as the default alternative in June 2025 as a more secure and convenient method of using API Keys. <a href="https://supabase.com/changelog?next=Y3Vyc29yOnYyOpK0MjAyNC0wOS0xM1QxNTowMDoyOVrOAG2JYw==&restPage=2#whats-the-change" target="_blank" rel="noopener noreferrer nofollow">The changelog</a> describes it in more detail.
 </KeyPointCallout>
 
 ### Test it Locally
@@ -165,8 +132,6 @@ Open `http://localhost:3000` and test signup, login, and protected routes.
 - **Middleware**: You can add some, we’ll instrument it later
 
 This template project mimics production-grade complexity—real auth, real DB ops, real external APIs. As traces excel at visualizing complex communications among multiple components, it's an ideal choice for our use-case.
-
-Note: In this guide, we will be using different ports (`3000`, `3000`) across the sections. Ensure you are using the port as per your system.
 
 ## Setting Up OpenTelemetry in Next.js
 
@@ -566,7 +531,7 @@ We need more than just a trace viewer. In production, you want:
 - Dashboards for teams
 - Advanced filters and KPIs
 
-Next up: how to plug SigNoz into your setup to get full-stack observability—**without** leaving [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/).
+Next up: how to plug SigNoz into your setup to get full-stack observability—**without** leaving [OpenTelemetry](https://signoz.io/opentelemetry/).
 
 Let’s go.
 

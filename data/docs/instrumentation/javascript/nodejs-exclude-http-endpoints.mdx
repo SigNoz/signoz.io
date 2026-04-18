@@ -1,0 +1,129 @@
+---
+date: 2026-03-26
+id: nodejs-exclude-http-endpoints
+title: Exclude HTTP endpoints in Node.js
+description: Learn how to exclude specific HTTP endpoints from being instrumented in Node.js
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+By default, OpenTelemetry automatically instruments all incoming and outgoing HTTP requests. However, endpoints like health checks (`/health`), readiness probes, or metrics (`/metrics`) can generate a lot of noise in your traces.
+
+This guide shows you how to filter out these requests by configuring the `HttpInstrumentation` hook so they don't produce spans.
+
+## Prerequisites
+
+- Node.js version 18.0 or higher (see official list of [supported versions](https://github.com/open-telemetry/opentelemetry-js?tab=readme-ov-file#supported-runtimes))
+- Instrumented [Node.js app](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/#prerequisites) with OpenTelemetry SDK installed and configured
+
+## Configure HttpInstrumentation
+
+The `HttpInstrumentation` class allows you to define an `ignoreIncomingRequestHook`. This hook is a function that receives the request object (`req`). If it returns `true`, the request is ignored and no span is created.
+
+<Tabs>
+<TabItem value="automatic" label="Using Auto-Instrumentation SDK" default>
+
+<Admonition type="warning">
+In case you're using zero-code instrumentation, HTTP endpoints cannot be configured through environment variables. You'll need to switch to programmatic instrumentation by creating an `instrumentation.js` file as shown below and loading it with `node -r ./instrumentation.js app.js`. See [Node.js OpenTelemetry Instrumentation](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/#code-based-setup-optional) for the complete setup guide.
+</Admonition>
+
+If you are using `getNodeAutoInstrumentations`, pass the configuration to the `@opentelemetry/instrumentation-http` key. The `getNodeAutoInstrumentations` helper allows you to configure specific instrumentations by name.
+
+```javascript:instrumentation.js
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+// ... other imports
+
+const sdk = new NodeSDK({
+  // ... other config
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-http': {
+        ignoreIncomingRequestHook(req) {
+            // Exclude common health check paths
+            const excludedPaths = [
+                /^\/health/, 
+                /^\/ready/, 
+                /^\/metrics/
+            ];
+            return excludedPaths.some(pattern => pattern.test(req.url));
+        },
+      },
+    }),
+  ],
+});
+
+sdk.start();
+```
+</TabItem>
+<TabItem value="manual" label="Manual Instrumentation">
+
+If you are manually adding instrumentations, instantiate and configure the `HttpInstrumentation` class directly:
+
+```javascript:instrumentation.js
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+
+const httpInstrumentation = new HttpInstrumentation({
+  ignoreIncomingRequestHook(req) {
+    return req.url.startsWith('/health') || req.url.startsWith('/api/static');
+  },
+});
+
+const sdk = new NodeSDK({
+  instrumentations: [
+    httpInstrumentation,
+    // ... any other instrumentations
+  ],
+});
+
+sdk.start();
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+1. Run your application with the new configuration:
+   ```bash
+   node -r ./instrumentation.js app.js
+   ```
+2. Generate traffic to the excluded endpoints (e.g., `curl http://localhost:3000/health`).
+3. Generate traffic to included endpoints (e.g., `curl http://localhost:3000/api/users`).
+4. Go to the **Traces** tab in SigNoz.
+5. Verify that you **only** see traces for the included endpoints.
+
+<Figure
+  src="/img/docs/instrumentation/exclude-http-endpoints-nodejs.webp"
+  alt="Sample trace output showing HTTP endpoints except health checks"
+  caption="Sample traces after excluding health checks"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### Still seeing traces for excluded endpoints?
+
+- **Check Regex/Conditions**: `req.url` includes the path and query string (e.g., `/health?id=1`). Avoid using strict equality (`===`) for partial matches; use `.startsWith()` or regex instead. Log `req.url` to debug.
+- **Instrumentation Order**: If using manual instrumentation, ensure `HttpInstrumentation` is initialized and passed to the SDK.
+- **Multiple Instrumentations**: If you use both auto-instrumentations and manual instances, they might conflict. Prefer one method.
+
+### Enable debug logging
+
+Set `OTEL_LOG_LEVEL=debug` to see if the instrumentation is initialized and if spans are being created/dropped.
+
+</details>
+
+## Next Steps
+
+- [Node.js Selective Instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/)
+- [Node.js Manual Instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-manual-instrumentation/)
+
+## Get Help
+
+<GetHelp />

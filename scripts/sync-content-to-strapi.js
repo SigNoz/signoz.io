@@ -253,7 +253,7 @@ function extractAssetPaths(content, frontmatter) {
     }
   }
 
-  const componentTags = ['img', 'video', 'source', 'Image', 'Figure', 'Table']
+  const componentTags = ['img', 'video', 'source', 'Image', 'Figure', 'Table', 'NextImage']
 
   componentTags.forEach((tagName) => {
     const tagRegex = new RegExp(

@@ -198,6 +198,11 @@ const docsSideNav = [
                 label: 'Deploying with ArgoCD',
                 route: '/docs/install/argocd',
               },
+              {
+                type: 'doc',
+                label: 'Deploying with Kustomize',
+                route: '/docs/setup/kubernetes/kustomize',
+              },
             ],
           },
           {
@@ -269,117 +274,117 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.113',
+            route: '/docs/operate/migration/upgrade-0-113',
             label: 'Upgrade to v0.113',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.94',
+            route: '/docs/operate/migration/upgrade-0-94',
             label: 'Upgrade to v0.94',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.92',
+            route: '/docs/operate/migration/upgrade-0-92',
             label: 'Upgrade to v0.92',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.88',
+            route: '/docs/operate/migration/upgrade-0-88',
             label: 'Upgrade to v0.88',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.86',
+            route: '/docs/operate/migration/upgrade-0-86',
             label: 'Upgrade to v0.86',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.76',
+            route: '/docs/operate/migration/upgrade-0-76',
             label: 'Upgrade to v0.76',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.70',
+            route: '/docs/operate/migration/upgrade-0-70',
             label: 'Upgrade to v0.70',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.64',
+            route: '/docs/operate/migration/upgrade-0-64',
             label: 'Upgrade to v0.64',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.55',
+            route: '/docs/operate/migration/upgrade-0-55',
             label: 'Upgrade to v0.55',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.51',
+            route: '/docs/operate/migration/upgrade-0-51',
             label: 'Upgrade to v0.51',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.49',
+            route: '/docs/operate/migration/upgrade-0-49',
             label: 'Upgrade to v0.49',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.45',
+            route: '/docs/operate/migration/upgrade-0-45',
             label: 'Upgrade to v0.45',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.38',
+            route: '/docs/operate/migration/upgrade-0-38',
             label: 'Upgrade to v0.38',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.37',
+            route: '/docs/operate/migration/upgrade-0-37',
             label: 'Upgrade to v0.37',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.36',
+            route: '/docs/operate/migration/upgrade-0-36',
             label: 'Upgrade to v0.36',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.27',
+            route: '/docs/operate/migration/upgrade-0-27',
             label: 'Upgrade to v0.27',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.23',
+            route: '/docs/operate/migration/upgrade-0-23',
             label: 'Upgrade to v0.23',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.19',
+            route: '/docs/operate/migration/upgrade-0-19',
             label: 'Upgrade to v0.19',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.12',
+            route: '/docs/operate/migration/upgrade-0-12',
             label: 'Upgrade to v0.12',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.10',
+            route: '/docs/operate/migration/upgrade-0-10',
             label: 'Upgrade to v0.10',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.9',
+            route: '/docs/operate/migration/upgrade-0-9',
             label: 'Upgrade to v0.9',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.8.1',
+            route: '/docs/operate/migration/upgrade-0-8-1',
             label: 'Upgrade to v0.8.1',
           },
           {
             type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.8.0',
+            route: '/docs/operate/migration/upgrade-0-8-0',
             label: 'Upgrade to v0.8.0',
           },
         ],
@@ -447,7 +452,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
+                route: '/docs/userguide/writing-clickhouse-traces-query',
                 label: 'ClickHouse queries for building dashboards and alerts',
               },
             ],
@@ -463,6 +468,18 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/authentication',
                 label: 'Authentication',
+              },
+            ],
+          },
+          {
+            label: 'Identity & Access',
+            type: 'category',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/service-accounts',
+                label: 'Service Accounts',
               },
             ],
           },
@@ -653,7 +670,7 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route:
-                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0.15',
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0-15',
                     label: 'Upgrade k8s-infra to v0.15.0',
                   },
                   {
@@ -911,6 +928,12 @@ const docsSideNav = [
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
           },
+          {
+            type: 'doc',
+            label: 'Routing Connector',
+            route:
+              '/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector',
+          },
         ],
       },
     ],
@@ -1021,6 +1044,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/javascript/nodejs-selective-instrumentation',
                 label: 'Selective Instrumentation',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/javascript/nodejs-exclude-http-endpoints',
+                label: 'Exclude HTTP Endpoints',
+              },
             ],
           },
           {
@@ -1130,6 +1158,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/instrumentation/opentelemetry-cloudflare',
             label: 'Cloudflare Workers',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-hasura',
+            label: 'Hasura',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
           },
           // {
           //   type: 'category',
@@ -1450,8 +1488,23 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/userguide/vercel_logs_to_signoz',
+            route: '/docs/userguide/vercel-to-signoz',
             label: 'Vercel',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-neondb',
+            label: 'Neon',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-hasura',
+            label: 'Hasura',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
           },
           {
             type: 'doc',
@@ -1462,6 +1515,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/cloudflare-logs',
             label: 'Cloudflare',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/supabase-logs',
+            label: 'Supabase',
           },
           {
             type: 'doc',
@@ -1571,6 +1629,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/logs_query_builder',
             label: 'Logs Query Builder',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs-query-troubleshooting',
+            label: 'Logs Query Troubleshooting',
           },
           {
             type: 'doc',
@@ -1777,6 +1840,16 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/mysql-metrics',
                 label: 'MySQL',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-neondb',
+                label: 'Neon',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-hasura',
+                label: 'Hasura',
               },
             ],
           },
@@ -2033,6 +2106,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/baseten-dashboard',
+            label: 'Baseten',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CI/CD',
           },
@@ -2080,6 +2158,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/envoy-dashboard',
+            label: 'Envoy Proxy',
           },
           {
             type: 'doc',
@@ -2137,6 +2220,11 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
                 label: 'Hostmetrics (K8s)',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
+                label: 'Hostmetrics (VM)',
+              },
             ],
           },
           {
@@ -2163,12 +2251,37 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
-                label: 'Kubernetes Cluster Metrics Dashboard',
+                label: 'Kubernetes Cluster Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Host Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-events',
+                label: 'Kubernetes Events',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
+                label: 'Kubernetes PVC Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
+                label: 'Kubernetes Pod Metrics (Overall)',
               },
               {
                 type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
                 label: 'Kubernetes Pod Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
+                label: 'Kubernetes Node Metrics (Overall)',
               },
               {
                 type: 'doc',
@@ -2217,6 +2330,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/mistral-dashboard',
+            label: 'Mistral AI',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mysql',
             label: 'MySQL',
           },
@@ -2227,6 +2345,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/n8n-dashboard',
+            label: 'n8n Cloud',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/ollama-dashboard',
             label: 'Ollama',
           },
@@ -2234,6 +2357,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openai-dashboard',
             label: 'OpenAI',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
+            label: 'OpenClaw',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+            label: 'OpenCode',
           },
           {
             type: 'doc',
@@ -2257,8 +2390,18 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/qwen-dashboard',
+            label: 'Qwen',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/rabbitmq',
             label: 'RabbitMQ',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/render-dashboard',
+            label: 'Render',
           },
           {
             type: 'doc',
@@ -2269,6 +2412,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
             label: 'SigNoz Ingestion Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/snowflake',
+            label: 'Snowflake',
           },
           {
             type: 'doc',
@@ -2639,6 +2787,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/baseten-monitoring',
+        label: 'Baseten',
+        type: 'doc',
+      },
+      {
         route: '/docs/claude-code-monitoring',
         label: 'Claude Code',
         type: 'doc',
@@ -2729,6 +2882,16 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/mistral-observability',
+        label: 'Mistral AI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/n8n-monitoring',
+        label: 'n8n Cloud',
+        type: 'doc',
+      },
+      {
         route: '/docs/ollama-monitoring',
         label: 'Ollama',
         type: 'doc',
@@ -2736,6 +2899,16 @@ const docsSideNav = [
       {
         route: '/docs/openai-monitoring',
         label: 'OpenAI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/openclaw-monitoring',
+        label: 'OpenClaw',
+        type: 'doc',
+      },
+      {
+        route: '/docs/opencode-observability',
+        label: 'OpenCode',
         type: 'doc',
       },
       {
@@ -2756,6 +2929,11 @@ const docsSideNav = [
       {
         route: '/docs/pydantic-ai-observability',
         label: 'Pydantic AI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/qwen-observability',
+        label: 'Qwen',
         type: 'doc',
       },
       {
@@ -2789,12 +2967,55 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/ai/signoz-mcp-server',
-        label: 'MCP Server',
+        label: 'SigNoz MCP Server',
       },
       {
         type: 'doc',
         route: '/docs/ai/agent-skills',
         label: 'Agent Skills',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/ai/use-cases',
+        label: 'MCP Use Cases',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/natural-language-log-exploration',
+            label: 'Log Exploration',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/latency-spike-explainer',
+            label: 'Latency Spike Explainer',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
+            label: 'Report from Trace ID',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/error-rate-spike-explainer',
+            label: 'Error Rate Spike Explainer',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-correlation-analysis',
+            label: 'Alert Correlation Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/post-deployment-monitoring',
+            label: 'Post Deployment Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/oncall-handoff-brief',
+            label: 'On-Call Handoff Brief',
+          },
+        ],
       },
     ],
   },
@@ -2897,7 +3118,12 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/aws-monitoring/lambda/lambda-logs',
-            label: 'Logs',
+            label: 'Logs (S3)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-logs-otel-extension',
+            label: 'Logs (OTel Extension)',
           },
           {
             type: 'doc',
@@ -3188,8 +3414,28 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/opentelemetry-neondb',
+        label: 'Neon',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/supabase',
         label: 'Supabase',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/vercel-to-signoz',
+        label: 'Vercel Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-hasura',
+        label: 'Hasura',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-dbos',
+        label: 'DBOS',
       },
       {
         type: 'doc',

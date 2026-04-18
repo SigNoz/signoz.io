@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
 
 interface ChatModalProps {
   isOpen: boolean

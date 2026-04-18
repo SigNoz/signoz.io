@@ -46,6 +46,18 @@ export default function NotFoundRecovery({
             </li>
           ))}
         </ul>
+
+        <ul className="mt-3 list-none space-y-3 p-0">
+          <li>
+            <Link
+              href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=404_page&utm_campaign=newsletter"
+              className="text-base leading-6 text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
+              target="_blank"
+            >
+              Newsletter - Observability Real Talk
+            </Link>
+          </li>
+        </ul>
       </section>
     </main>
   )

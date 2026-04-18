@@ -3,16 +3,19 @@ import { ArrowUpRight, CheckCircle, ChevronDown, Info } from 'lucide-react'
 import Image from 'next/image'
 import Button from 'components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
-import { Tooltip } from '@nextui-org/react'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { Card } from '@/components/ui/Card'
 
 export default function TeamsPricingCard() {
   return (
-    <Card variant={"aqua"}>
-      <div className="flex flex-grow flex-col m-6">
+    <Card variant={'aqua'}>
+      <div className="m-6 flex flex-grow flex-col">
         <div className="mb-4 flex flex-col md:flex-row md:justify-between">
           <div className="w-full md:w-[60%]">
-            <h3 className="pinkish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl">
+            <h3
+              id="teams"
+              className="pinkish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl"
+            >
               Teams
             </h3>
             <p className="text-base text-gray-400">
@@ -162,7 +165,6 @@ export default function TeamsPricingCard() {
               <span className="flex items-center gap-1">
                 Support via in-product Chat, Email, and Slack
                 <Tooltip
-                  className="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
                   content={
                     <div className="max-w-xs">
                       <p className="mb-1 font-medium text-signoz_vanilla-100">Support includes:</p>
@@ -174,6 +176,7 @@ export default function TeamsPricingCard() {
                       </ul>
                     </div>
                   }
+                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
                 >
                   <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
                 </Tooltip>
@@ -188,7 +191,6 @@ export default function TeamsPricingCard() {
               <span className="flex items-center gap-1">
                 SOC2 Type II & HIPAA Compliant
                 <Tooltip
-                  className="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
                   content={
                     <div className="max-w-xs">
                       <p className="mb-1 font-medium text-signoz_vanilla-100">
@@ -201,6 +203,7 @@ export default function TeamsPricingCard() {
                       </ul>
                     </div>
                   }
+                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
                 >
                   <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
                 </Tooltip>

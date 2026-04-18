@@ -1,6 +1,8 @@
+'use client'
+
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { Slider, Tooltip, SliderValue } from '@nextui-org/react'
+import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import { ArrowUpRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import { ArrowRight } from 'lucide-react'
@@ -108,34 +110,37 @@ const MonthlyEstimate = () => {
     RETENTION_PERIOD.METRICS[0].months
   )
 
-  const [tracesValue, setTracesValue] = React.useState<SliderValue>(0)
+  const [tracesValue, setTracesValue] = React.useState<number>(0)
   const [inputTracesValue, setInputTracesValue] = React.useState<string>('0')
 
-  const [logsValue, setLogsValue] = React.useState<SliderValue>(0)
+  const [logsValue, setLogsValue] = React.useState<number>(0)
   const [inputLogsValue, setInputLogsValue] = React.useState<string>('0')
 
-  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(0)
+  const [metricsValue, setMetricsValue] = React.useState<number>(0)
   const [inputMetricsValue, setInputMetricsValue] = React.useState<string>('0')
 
   const MIN_VALUE = 1
   const MAX_VALUE = 200000
 
-  const handleChangeTraces = (value: SliderValue) => {
-    if (isNaN(Number(value))) return
-    setTracesValue(value)
-    setInputTracesValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString())
+  const handleChangeTraces = (value: number | number[]) => {
+    const v = typeof value === 'number' ? value : value[0]
+    if (isNaN(Number(v))) return
+    setTracesValue(v)
+    setInputTracesValue(linearToLog(v, MIN_VALUE, MAX_VALUE).toString())
   }
 
-  const handleChangeLogs = (value: SliderValue) => {
-    if (isNaN(Number(value))) return
-    setLogsValue(value)
-    setInputLogsValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString())
+  const handleChangeLogs = (value: number | number[]) => {
+    const v = typeof value === 'number' ? value : value[0]
+    if (isNaN(Number(v))) return
+    setLogsValue(v)
+    setInputLogsValue(linearToLog(v, MIN_VALUE, MAX_VALUE).toString())
   }
 
-  const handleChangeMetrics = (value: SliderValue) => {
-    if (isNaN(Number(value))) return
-    setMetricsValue(value)
-    setInputMetricsValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString())
+  const handleChangeMetrics = (value: number | number[]) => {
+    const v = typeof value === 'number' ? value : value[0]
+    if (isNaN(Number(v))) return
+    setMetricsValue(v)
+    setInputMetricsValue(linearToLog(v, MIN_VALUE, MAX_VALUE).toString())
   }
 
   const getPricePerUnit = (type: string, retentionPeriod: number) => {
@@ -146,7 +151,7 @@ const MonthlyEstimate = () => {
     }
   }
 
-  const calculateSubtotal = (type: string, value: SliderValue, retentionPeriod: number) => {
+  const calculateSubtotal = (type: string, value: number, retentionPeriod: number) => {
     const pricePerUnit = getPricePerUnit(type, retentionPeriod)
     const estimatedUsage = linearToLog(value, MIN_VALUE, MAX_VALUE)
     return Number(pricePerUnit) * Number(estimatedUsage)
@@ -261,63 +266,19 @@ const MonthlyEstimate = () => {
             </select>
           </div>
           <div className="metrics-background flex items-center">
-            <Slider
-              size="sm"
-              step={0.01}
-              maxValue={MAX_VALUE}
-              minValue={MIN_VALUE}
-              showTooltip={true}
-              tooltipProps={{
-                content: formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE)),
-              }}
-              color="secondary"
-              marks={[
-                {
-                  value: MIN_VALUE,
-                  label: '0GB',
-                },
-                {
-                  value: MAX_VALUE,
-                  label: '200TB',
-                },
-              ]}
-              aria-label="Traces data ingestion volume"
-              classNames={{
-                base: 'max-w-md',
-                label: 'text-medium',
-              }}
-              renderThumb={(props) => (
-                <div
-                  {...props}
-                  className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-                >
-                  <span className="block h-5 w-5 rounded-full bg-signoz_robin-500 transition-transform group-data-[dragging=true]:scale-80" />
-                </div>
-              )}
-              renderValue={({ children, ...props }) => (
-                <output {...props}>
-                  <Tooltip className="rounded-md text-tiny text-default-500">
-                    <input
-                      className="hover:border-primary focus:border-primary w-12 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors"
-                      type="text"
-                      value={inputTracesValue}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const v = e.target.value
-                        setInputTracesValue(v)
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter' && !isNaN(Number(inputTracesValue))) {
-                          setTracesValue(
-                            logToLinear(Number(inputTracesValue), MIN_VALUE, MAX_VALUE)
-                          )
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                </output>
-              )}
+            <PricingRangeSlider
               value={tracesValue}
               onChange={handleChangeTraces}
+              min={MIN_VALUE}
+              max={MAX_VALUE}
+              step={0.01}
+              color="secondary"
+              minLabel="0GB"
+              maxLabel="200TB"
+              tooltipText={formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
+              thumbColorToken="signoz_robin-500"
+              aria-label="Traces data ingestion volume"
+              className="max-w-md"
             />
           </div>
 
@@ -350,61 +311,19 @@ const MonthlyEstimate = () => {
             </select>
           </div>
           <div className="metrics-background flex items-center">
-            <Slider
-              size="sm"
-              step={0.01}
-              maxValue={MAX_VALUE}
-              minValue={MIN_VALUE}
-              showTooltip={true}
-              tooltipProps={{
-                content: formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE)),
-              }}
-              color="danger"
-              marks={[
-                {
-                  value: MIN_VALUE,
-                  label: '0GB',
-                },
-                {
-                  value: MAX_VALUE,
-                  label: '200TB',
-                },
-              ]}
-              aria-label="Logs data ingestion volume"
-              classNames={{
-                base: 'max-w-md',
-                label: 'text-medium',
-              }}
-              renderThumb={(props) => (
-                <div
-                  {...props}
-                  className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-                >
-                  <span className="block h-5 w-5 rounded-full bg-signoz_sakura-500 transition-transform group-data-[dragging=true]:scale-80" />
-                </div>
-              )}
-              renderValue={({ children, ...props }) => (
-                <output {...props}>
-                  <Tooltip className="rounded-md text-tiny text-default-500">
-                    <input
-                      className="hover:border-primary focus:border-primary w-12 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors"
-                      type="text"
-                      value={inputLogsValue}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const v = e.target.value
-                        setInputLogsValue(v)
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter' && !isNaN(Number(inputLogsValue))) {
-                          setLogsValue(logToLinear(Number(inputLogsValue), MIN_VALUE, MAX_VALUE))
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                </output>
-              )}
+            <PricingRangeSlider
               value={logsValue}
               onChange={handleChangeLogs}
+              min={MIN_VALUE}
+              max={MAX_VALUE}
+              step={0.01}
+              color="danger"
+              minLabel="0GB"
+              maxLabel="200TB"
+              tooltipText={formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
+              thumbColorToken="signoz_sakura-500"
+              aria-label="Logs data ingestion volume"
+              className="max-w-md"
             />
           </div>
 
@@ -437,63 +356,19 @@ const MonthlyEstimate = () => {
             </select>
           </div>
           <div className="metrics-background flex items-center">
-            <Slider
-              size="sm"
-              step={0.01}
-              maxValue={MAX_VALUE}
-              minValue={MIN_VALUE}
-              showTooltip={true}
-              tooltipProps={{
-                content: formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE)),
-              }}
-              color="warning"
-              marks={[
-                {
-                  value: MIN_VALUE,
-                  label: '0M',
-                },
-                {
-                  value: MAX_VALUE,
-                  label: '200B',
-                },
-              ]}
-              aria-label="Metrics data ingestion volume"
-              classNames={{
-                base: 'max-w-md',
-                label: 'text-medium',
-              }}
-              renderThumb={(props) => (
-                <div
-                  {...props}
-                  className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-                >
-                  <span className="block h-5 w-5 rounded-full bg-signoz_amber-500 transition-transform group-data-[dragging=true]:scale-80" />
-                </div>
-              )}
-              renderValue={({ children, ...props }) => (
-                <output {...props}>
-                  <Tooltip className="rounded-md text-tiny text-default-500">
-                    <input
-                      className="hover:border-primary focus:border-primary w-12 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors"
-                      type="text"
-                      value={inputMetricsValue}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const v = e.target.value
-                        setInputMetricsValue(v)
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                        if (e.key === 'Enter' && !isNaN(Number(inputMetricsValue))) {
-                          setMetricsValue(
-                            logToLinear(Number(inputMetricsValue), MIN_VALUE, MAX_VALUE)
-                          )
-                        }
-                      }}
-                    />
-                  </Tooltip>
-                </output>
-              )}
+            <PricingRangeSlider
               value={metricsValue}
               onChange={handleChangeMetrics}
+              min={MIN_VALUE}
+              max={MAX_VALUE}
+              step={0.01}
+              color="warning"
+              minLabel="0M"
+              maxLabel="200B"
+              tooltipText={formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
+              thumbColorToken="signoz_amber-500"
+              aria-label="Metrics data ingestion volume"
+              className="max-w-md"
             />
           </div>
 

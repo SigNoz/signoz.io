@@ -1,6 +1,8 @@
+'use client'
+
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Slider, Tooltip } from '@nextui-org/react'
+import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import { ArrowUpRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '../TrackingLink'
@@ -119,22 +121,25 @@ const MobileEstimate = () => {
   const MIN_VALUE = 1
   const MAX_VALUE = 200000
 
-  const handleChangeTraces = (value) => {
-    if (isNaN(Number(value))) return
-    setTracesValue(value)
-    setInputTracesValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString())
+  const handleChangeTraces = (value: number | number[]) => {
+    const v = typeof value === 'number' ? value : value[0]
+    if (isNaN(Number(v))) return
+    setTracesValue(v)
+    setInputTracesValue(linearToLog(v, MIN_VALUE, MAX_VALUE).toString())
   }
 
-  const handleChangeLogs = (value) => {
-    if (isNaN(Number(value))) return
-    setLogsValue(value)
-    setInputLogsValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString())
+  const handleChangeLogs = (value: number | number[]) => {
+    const v = typeof value === 'number' ? value : value[0]
+    if (isNaN(Number(v))) return
+    setLogsValue(v)
+    setInputLogsValue(linearToLog(v, MIN_VALUE, MAX_VALUE).toString())
   }
 
-  const handleChangeMetrics = (value) => {
-    if (isNaN(Number(value))) return
-    setMetricsValue(value)
-    setInputMetricsValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString())
+  const handleChangeMetrics = (value: number | number[]) => {
+    const v = typeof value === 'number' ? value : value[0]
+    if (isNaN(Number(v))) return
+    setMetricsValue(v)
+    setInputMetricsValue(linearToLog(v, MIN_VALUE, MAX_VALUE).toString())
   }
 
   const getPricePerUnit = (type, retentionPeriod) => {
@@ -393,32 +398,19 @@ const MobileEstimate = () => {
               <span className="text-[13px] font-semibold uppercase text-signoz_vanilla-400">
                 Scale of ingestion (per month)
               </span>
-              <Slider
+              <PricingRangeSlider
                 className="mt-4"
-                size="sm"
-                step={0.01}
-                maxValue={MAX_VALUE}
-                minValue={MIN_VALUE}
-                showTooltip={true}
-                tooltipProps={{
-                  content: formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE)),
-                }}
-                color="secondary"
-                marks={[
-                  { value: MIN_VALUE, label: '0GB' },
-                  { value: MAX_VALUE, label: '200TB' },
-                ]}
-                aria-label="Traces data ingestion volume"
-                renderThumb={(props) => (
-                  <div
-                    {...props}
-                    className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-                  >
-                    <span className="block h-5 w-5 rounded-full bg-signoz_robin-500 transition-transform group-data-[dragging=true]:scale-80" />
-                  </div>
-                )}
                 value={tracesValue}
                 onChange={handleChangeTraces}
+                min={MIN_VALUE}
+                max={MAX_VALUE}
+                step={0.01}
+                color="secondary"
+                minLabel="0GB"
+                maxLabel="200TB"
+                tooltipText={formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
+                thumbColorToken="signoz_robin-500"
+                aria-label="Traces data ingestion volume"
               />
             </div>
             <div className="mb-4 mt-0 flex justify-between pt-6 uppercase">
@@ -467,32 +459,19 @@ const MobileEstimate = () => {
               <span className="text-[13px] font-semibold uppercase text-signoz_vanilla-400">
                 Scale of ingestion (per month)
               </span>
-              <Slider
+              <PricingRangeSlider
                 className="mt-4"
-                size="sm"
-                step={0.01}
-                maxValue={MAX_VALUE}
-                minValue={MIN_VALUE}
-                showTooltip={true}
-                tooltipProps={{
-                  content: formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE)),
-                }}
-                color="danger"
-                marks={[
-                  { value: MIN_VALUE, label: '0GB' },
-                  { value: MAX_VALUE, label: '200TB' },
-                ]}
-                aria-label="Logs data ingestion volume"
-                renderThumb={(props) => (
-                  <div
-                    {...props}
-                    className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-                  >
-                    <span className="block h-5 w-5 rounded-full bg-signoz_sakura-500 transition-transform group-data-[dragging=true]:scale-80" />
-                  </div>
-                )}
                 value={logsValue}
                 onChange={handleChangeLogs}
+                min={MIN_VALUE}
+                max={MAX_VALUE}
+                step={0.01}
+                color="danger"
+                minLabel="0GB"
+                maxLabel="200TB"
+                tooltipText={formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
+                thumbColorToken="signoz_sakura-500"
+                aria-label="Logs data ingestion volume"
               />
             </div>
             <div className="mb-4 mt-0 flex justify-between pt-6 uppercase">
@@ -541,32 +520,19 @@ const MobileEstimate = () => {
               <span className="text-[13px] font-semibold uppercase text-signoz_vanilla-400">
                 Scale of ingestion (per month)
               </span>
-              <Slider
+              <PricingRangeSlider
                 className="mt-4"
-                size="sm"
-                step={0.01}
-                maxValue={MAX_VALUE}
-                minValue={MIN_VALUE}
-                showTooltip={true}
-                tooltipProps={{
-                  content: formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE)),
-                }}
-                color="warning"
-                marks={[
-                  { value: MIN_VALUE, label: '0M' },
-                  { value: MAX_VALUE, label: '200B' },
-                ]}
-                aria-label="Metrics data ingestion volume"
-                renderThumb={(props) => (
-                  <div
-                    {...props}
-                    className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-                  >
-                    <span className="block h-5 w-5 rounded-full bg-signoz_amber-500 transition-transform group-data-[dragging=true]:scale-80" />
-                  </div>
-                )}
                 value={metricsValue}
                 onChange={handleChangeMetrics}
+                min={MIN_VALUE}
+                max={MAX_VALUE}
+                step={0.01}
+                color="warning"
+                minLabel="0M"
+                maxLabel="200B"
+                tooltipText={formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
+                thumbColorToken="signoz_amber-500"
+                aria-label="Metrics data ingestion volume"
               />
             </div>
             <div className="mb-4 mt-0 flex justify-between pt-6 uppercase">

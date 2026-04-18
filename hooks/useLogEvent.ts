@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect } from 'react'
 import { logEvent, LogEventPayload, detectBotClientSide } from '../utils/logEvent'
-import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '../utils/userUtils'
+import { getOrCreateAnonymousId, getUserId } from '../utils/userClient'
+import { extractGroupIdFromEmail } from '../utils/userShared'
 import {
   getOS,
   getTimezone,
@@ -56,9 +57,11 @@ export const useLogEvent = () => {
       attributes,
       eventType,
       groupId,
-    }: Omit<LogEventPayload, 'userId' | 'anonymousId'>) => {
-      const userId = getUserId()
-      const anonymousId = getOrCreateAnonymousId()
+      userId: explicitUserId,
+      anonymousId: explicitAnonymousId,
+    }: LogEventPayload) => {
+      const userId = explicitUserId || getUserId()
+      const anonymousId = explicitAnonymousId || getOrCreateAnonymousId()
       // Use provided groupId or extract it from userId if available
       const resolvedGroupId = groupId || extractGroupIdFromEmail(userId)
 

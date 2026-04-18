@@ -36,6 +36,7 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
 - If a docs path/URL changes:
   - add a permanent redirect in `next.config.js`
   - update links and `constants/docsSideNav.ts`
+  - update discovery surfaces when relevant (see the redirects and discovery section in `contributing/docs-authoring.md`)
 - For OpenTelemetry technical claims, verify against official sources first:
   1. `https://opentelemetry.io/docs/*`
   2. `https://github.com/open-telemetry/*`
@@ -46,11 +47,8 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
 
 ### Frontend/site code (`app/**`, `components/**`, `hooks/**`, `utils/**`)
 
-- Prefer existing patterns/components before adding abstractions.
-- Use Next.js App Router conventions already present in the repo.
-- Keep types/constants organized per existing conventions.
+- Follow `contributing/site-code.md`.
 - If a change affects docs MDX components or docs rendering, verify both agent markdown (`utils/docs/agentMarkdownStubs.ts`) and Copy Markdown (`utils/docs/buildCopyMarkdownFromRendered.ts`) behavior.
-- Avoid new dependencies unless required; include justification in PR context.
 
 ### PR review output
 

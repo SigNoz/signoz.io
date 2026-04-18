@@ -1,5 +1,5 @@
 import SectionLayout from '../SectionLayout/SectionLayout.view'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Mail } from 'lucide-react'
 import ButtonGroup from '../ButtonGroup/ButtonGroup.view'
 import StatsCard from '@/components/Card/card'
 
@@ -55,12 +55,18 @@ const SigNozStats = () => {
       variant: 'secondary' as const,
       icon: <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />,
     },
+    {
+      text: 'Read Our Newsletter',
+      href: 'https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=feature_page&utm_campaign=newsletter',
+      variant: 'secondary' as const,
+      icon: <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5" />,
+    },
   ]
 
   return (
     <SectionLayout variant="bordered" className="flex flex-col !px-0 sm:flex-row">
-      <div className="!w-[300px] flex-1 border !border-b-1 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-        <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
+      <div className="!border-b-1 flex-1 border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
+        <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
           Developers <br />
           Love
           <br />
@@ -70,7 +76,7 @@ const SigNozStats = () => {
 
       <div className="flex flex-[2_2_0%] flex-col">
         <div className="border-b border-l border-t border-dashed border-signoz_slate-400 bg-transparent p-0">
-          <div className="p-6">
+          <div className="p-10 md:p-6">
             <h2 className="text-2xl font-bold text-signoz_vanilla-100">
               Your data stays where you want
             </h2>
@@ -83,7 +89,7 @@ const SigNozStats = () => {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 text-left sm:grid-cols-2 [&>div]:!border-r-1 [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
+          <div className="[&>div]:!border-r-1 grid grid-cols-1 text-left sm:grid-cols-2 [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
             {STATS_LIST.map((stat, index) => (
               <StatsCard
                 logo={stat.logo}

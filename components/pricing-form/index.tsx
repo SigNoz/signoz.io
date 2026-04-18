@@ -1,13 +1,22 @@
-import React, { useState } from "react";
-import styles from "./styles.module.css";
-import { useHubspotForm } from "@aaronhayes/react-use-hubspot-form";
+import React from 'react'
+import styles from './styles.module.css'
+import { useHubspotForm } from '@aaronhayes/react-use-hubspot-form'
+import { useHubspotSubmissionTracking } from '@/hooks/useHubspotSubmissionTracking'
 
-function PricingForm({ portalId, formId }) {
+type PricingFormProps = {
+  portalId: string
+  formId: string
+  formName?: string
+}
+
+function PricingForm({ portalId, formId, formName }: PricingFormProps) {
+  useHubspotSubmissionTracking(formId, formName)
+
   const { loaded, error, formCreated } = useHubspotForm({
     portalId,
     formId,
-    target: "#my-hubspot-form",
-  });
+    target: '#my-hubspot-form',
+  })
   return (
     <>
       <div id="my-hubspot-form">
@@ -16,7 +25,7 @@ function PricingForm({ portalId, formId }) {
       </div>
       {loaded && error && <p>Some error occurred.</p>}
     </>
-  );
+  )
 }
 
-export default PricingForm;
+export default PricingForm

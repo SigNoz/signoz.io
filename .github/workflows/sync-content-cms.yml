@@ -247,41 +247,26 @@ jobs:
         if: success()
         env:
           DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
+          CHANGED_FILES_PATH: .github/outputs/content_changed_files.json
+          DELETED_FILES_PATH: .github/outputs/content_deleted_files.json
+          CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
           echo "🔄 Triggering ISR revalidation..."
           echo "Environment: $DEPLOYMENT_STATUS"
           
-          # Determine the base URL based on deployment status
           if [ "$DEPLOYMENT_STATUS" = "live" ]; then
-            BASE_URL="${{ env.NEXT_PUBLIC_BASE_URL }}"
+            export BASE_URL="${{ env.NEXT_PUBLIC_BASE_URL }}"
             echo "Using production URL: $BASE_URL"
           elif [ "$DEPLOYMENT_STATUS" = "staging" ]; then
-            BASE_URL="${{ env.NEXT_PUBLIC_STAGING_BASE_URL }}"
+            export BASE_URL="${{ env.NEXT_PUBLIC_STAGING_BASE_URL }}"
             echo "Using staging URL: $BASE_URL"
           else
             echo "⏭️ Skipping revalidation for draft deployment"
             exit 0
           fi
           
-          RESPONSE=$(curl -s -w "\n%{http_code}" --location "$BASE_URL/api/revalidate" \
-            --header 'Content-Type: application/json' \
-            --data "{
-              \"revalidateAll\": true,
-              \"clearCache\": true,
-              \"secret\": \"${{ env.REVALIDATE_SECRET }}\"
-            }")
-          
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-          BODY=$(echo "$RESPONSE" | head -n-1)
-          
-          if [ "$HTTP_CODE" -eq 200 ]; then
-            echo "✅ Revalidation successful!"
-            echo "Response: $BODY"
-          else
-            echo "❌ Revalidation failed with HTTP $HTTP_CODE"
-            echo "Response: $BODY"
-            exit 1
-          fi
+          node scripts/revalidate-after-cms-sync.js
 
       - name: Update PR Comment
         if: always() && github.event_name == 'pull_request'

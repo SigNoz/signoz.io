@@ -1,0 +1,294 @@
+---
+date: 2026-03-22
+id: opentelemetry-hasura
+title: OpenTelemetry Hasura Integration
+description: Monitor your Hasura GraphQL Engine by exporting OpenTelemetry traces, metrics, and logs to SigNoz.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Hasura provides built-in OpenTelemetry support for distributed tracing, metrics, and logs on Hasura Cloud and Enterprise editions. Starting from version v2.18.0, you can configure Hasura to export telemetry data directly to SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Hasura Cloud, or Hasura Self-Hosted Enterprise Edition
+- Hasura GraphQL Engine v2.35.0 or later (recommended for all signals)
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Configure OpenTelemetry Export
+
+You can configure OpenTelemetry export for Hasura using either the Console UI or the CLI.
+
+### Configure via Console
+
+1. Log into your Hasura Console and navigate to the **Settings** tab (⚙).
+2. Click on **OpenTelemetry Exporter**.
+3. Configure your connection based on the type of telemetry you want to export:
+
+<Tabs>
+<TabItem value="traces" label="Traces">
+
+- **Endpoint**: `https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **Connection Type**: HTTP/Protobuf
+- **Data Types**: Select `traces`
+
+</TabItem>
+<TabItem value="metrics" label="Metrics">
+
+- **Endpoint**: `https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **Connection Type**: HTTP/Protobuf
+- **Data Types**: Select `metrics`
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+- **Endpoint**: `https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **Connection Type**: HTTP/Protobuf
+- **Data Types**: Select `logs`
+
+</TabItem>
+</Tabs>
+
+<Figure
+  src="/img/docs/integrations/hasura/configure-telemetry-endpoints.webp"
+  caption="Configure Telemetry Endpoints"
+  alt="Configure Telemetry Endpoints"
+/>
+
+4. Under **Headers**, add:
+   - **Name**: `signoz-ingestion-key`
+   - **Value**: Your SigNoz ingestion key
+5. Optionally, under **Attributes**, set `service.name` to identify your Hasura instance (e.g., `hasura-prod`).
+
+<Figure
+  src="/img/docs/integrations/hasura/configure-ingestion-key.webp"
+  caption="Configure Ingestion Key and Custom Attributes"
+  alt="Configure Ingestion Key and Custom Attributes"
+/>
+
+<Admonition type="note" title="Tip">
+  If you run multiple Hasura applications, configure different `service.name` attributes for each to
+  identify and filter metrics more easily.
+</Admonition>
+
+6. Click **Update**, then toggle the **Status** button to enable the integration.
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<details>
+<ToggleHeading>
+
+### Alternatively Configure via CLI
+
+</ToggleHeading>
+
+Alternatively, you can apply this configuration via the Hasura CLI by updating your `metadata/opentelemetry.yaml` file:
+
+```yaml
+status: enabled
+data_types:
+  - traces
+  - metrics
+  - logs
+exporter_otlp:
+  headers:
+    - name: signoz-ingestion-key
+      value: <your-ingestion-key>
+  resource_attributes:
+    - name: service.name
+      value: hasura-prod
+  otlp_traces_endpoint: https://ingest.<region>.signoz.cloud:443/v1/traces
+  otlp_metrics_endpoint: https://ingest.<region>.signoz.cloud:443/v1/metrics
+  otlp_logs_endpoint: https://ingest.<region>.signoz.cloud:443/v1/logs
+  protocol: http/protobuf
+  traces_propagators:
+    - tracecontext
+batch_span_processor:
+  max_export_batch_size: 512
+```
+
+Apply the metadata:
+
+```bash
+hasura metadata apply
+```
+
+</details>
+
+## Available Telemetry
+
+Hasura exports the following telemetry data to SigNoz:
+
+<Tabs>
+<TabItem value="traces" label="Traces" default>
+
+Hasura traces operations across:
+
+- Metadata APIs (`/v1/metadata`)
+- Schema APIs (`/v2/query`)
+- GraphQL API (`/v1/graphql`)
+- Event triggers
+- Scheduled triggers
+
+Multiple operations are linked together with the same trace ID, enabling end-to-end request tracing.
+
+</TabItem>
+<TabItem value="metrics" label="Metrics">
+
+Hasura exports OpenTelemetry metrics covering:
+
+- API request rates and latencies
+- Query execution times
+- Event trigger performance
+- Connection pool statistics
+
+The available metrics are the same as those available via Prometheus. See <a href="https://hasura.io/docs/2.0/observability/enterprise-edition/prometheus/metrics/" target="_blank" rel="noopener noreferrer nofollow">Hasura Metrics Documentation</a>.
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+All logs printed to the output stream are exported to SigNoz. Log structure follows the OpenTelemetry Logs Data Model:
+
+- `body` contains the log message
+- `severity` contains the log level
+- `attributes.type` contains the Hasura log type
+
+</TabItem>
+</Tabs>
+
+## Trace Data Connectors
+
+Hasura Data Connectors run as separate services alongside the GraphQL Engine. Each connector handles communication with a specific database. Data connectors only support traces. To visualize the full timeline of a GraphQL request (including the actual database execution), you must also configure OpenTelemetry for your data connectors using environment variables in their respective deployments.
+
+<Tabs>
+<TabItem value="graphql" label="GraphQL Data Connectors">
+
+The GraphQL Data Connectors (which power Athena, MariaDB, MySQL, Oracle, Redshift, Snowflake, etc.) are built on top of Quarkus. Set the following environment variables on the connector container:
+
+```bash
+QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+QUARKUS_OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+QUARKUS_OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+QUARKUS_OTEL_RESOURCE_ATTRIBUTES="service.name=hasura-graphql-connector"
+```
+
+</TabItem>
+<TabItem value="mongo" label="Mongo Data Connector">
+
+The Mongo Data Connector uses standard OpenTelemetry environment variables:
+
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/traces"
+OTEL_EXPORTER_OTLP_TRACES_PROTOCOL="http/protobuf"
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+OTEL_SERVICE_NAME="hasura-mongo-connector"
+OTEL_PROPAGATORS="tracecontext"
+```
+
+</TabItem>
+</Tabs>
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+## Validate
+
+Verify data is appearing in SigNoz:
+
+1. Go to the **Services** section in SigNoz to see your Hasura service listed.
+2. Navigate to **Traces** to view distributed traces for your GraphQL operations.
+3. Use **Dashboards** > **Metrics Explorer** to query Hasura metrics.
+4. Check the **Logs** tab and filter by `service.name` to see Hasura logs.
+
+Data should start appearing within a few minutes of enabling the integration.
+
+<Figure
+  src="/img/docs/integrations/hasura/sample-traces.webp"
+  caption="Sample Traces in SigNoz Traces Explorer"
+  alt="Sample Traces in SigNoz Traces Explorer"
+/>
+
+<Figure
+  src="/img/docs/integrations/hasura/sample-metrics.webp"
+  caption="Sample Metrics in SigNoz Metrics Explorer"
+  alt="Sample Metrics in SigNoz Metrics Explorer"
+/>
+
+<Figure
+  src="/img/docs/integrations/hasura/sample-logs.webp"
+  caption="Sample Logs in SigNoz Logs Explorer"
+  alt="Sample Logs in SigNoz Logs Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Data is not appearing in SigNoz
+
+- **Check endpoint format**: Ensure the endpoint URL includes the correct path suffix (`/v1/traces`, `/v1/metrics`, `/v1/logs`). Hasura does not auto-append these.
+- **Verify ingestion key**: Confirm your `signoz-ingestion-key` header value is correct and active.
+- **Check region**: Ensure the region in your endpoint matches your SigNoz Cloud region.
+- **Verify Hasura version**: OpenTelemetry traces require Hasura v2.18.0+, metrics require v2.31.0+, and logs require v2.35.0+.
+
+### Connection errors
+
+- If using Hasura Cloud, ensure your SigNoz endpoint uses HTTPS with port 443.
+- If running Hasura as a Docker container, you may need to use `http://host.docker.internal:4318` for local collectors.
+
+### Trace context not propagating
+
+Hasura supports W3C Trace Context for trace propagation (from v2.35.0+). If upstream services aren't receiving trace context, ensure they also support W3C Trace Context headers.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+Configure your existing Collector to accept data and forward it. Ensure your `otel-collector-config.yaml` has the `otlp` HTTP receiver enabled and is present in your pipelines.
+We can configure Hasura to point to your collector endpoint (e.g., `http://host.docker.internal:4318/v1/traces`) instead of SigNoz directly.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next Steps
+
+- Set up [dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize Hasura performance
+- Create [alerts](https://signoz.io/docs/userguide/alerts-management/) for critical metrics like error rates or high latency
+- Explore [distributed tracing](https://signoz.io/docs/userguide/traces/) to identify performance bottlenecks
+- Query [logs](https://signoz.io/docs/userguide/logs/) to debug issues in your Hasura setup
+
+## Get Help
+
+<GetHelp />

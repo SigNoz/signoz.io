@@ -67,6 +67,7 @@ function Enterprise() {
                       <PricingForm
                         portalId={ENTERPRISE_DATA.PORTAL_ID}
                         formId={ENTERPRISE_DATA.FORM_ID}
+                        formName={ENTERPRISE_DATA.TITLE}
                       />
                     </HubspotProvider>
                   </div>

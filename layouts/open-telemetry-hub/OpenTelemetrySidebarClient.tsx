@@ -58,7 +58,7 @@ export default function OpenTelemetrySidebarClient({
   useEffect(() => {
     setTriggerContainer(document.getElementById(mobileTriggerId))
     setOverlayContainer(document.getElementById(mobileOverlayId))
-  }, [mobileOverlayId, mobileTriggerId])
+  }, [mobileOverlayId, mobileTriggerId, normalizedRoute])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -83,11 +83,11 @@ export default function OpenTelemetrySidebarClient({
       setSelectedLanguage(defaultLanguage)
       return
     }
-    if (!defaultLanguage && !selectedLanguage && availableLanguages.length > 0) {
+    if (!defaultLanguage && availableLanguages.length > 0) {
       setSelectedLanguage('ALL')
       return
     }
-    if (!defaultLanguage && !selectedLanguage) {
+    if (!defaultLanguage) {
       setSelectedLanguage(null)
     }
   }, [availableLanguages, defaultLanguage, selectedLanguage])
@@ -224,7 +224,7 @@ export default function OpenTelemetrySidebarClient({
 
   const desktopSidebar =
     showSidebar && filteredNav.length ? (
-      <div className="doc-sidenav hidden lg:block">
+      <div className="box-border hidden w-full min-w-0 max-w-none max-lg:static max-lg:h-auto max-lg:max-h-none lg:block lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-stretch">
         <Sidebar
           items={filteredNav}
           activeRoute={normalizedRouteMemo}

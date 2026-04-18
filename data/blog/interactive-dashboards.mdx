@@ -17,11 +17,11 @@ Your dashboard shows a latency spike. To investigate it, you copy the query, ope
 
 <YouTube id="7MCiG_RFMiU" mute={false} />
 
-# What We Built
+## What We Built
 
 Every dashboard panel now has a right-click menu with actual debugging tools. Here's what you can do:
 
-## 1. Jump between signals without losing context
+### 1. Jump between signals without losing context
 
 You're looking at a metrics panel showing high latency. Right-click it and you'll see options to "View in Logs" or "View in Traces". Click either one - the explorer opens with the same filters, same time range, same everything. You immediately see the logs or traces related to that latency spike.
 
@@ -32,7 +32,7 @@ This works from any panel type. Whether you're looking at a metrics panel, a log
 
 All your dashboard context - time range, filters, variables - automatically carries over to the new view.
 
-## 2. See and edit queries directly
+### 2. See and edit queries directly
 
 Remember having to switch to edit mode just to see what query powers a panel? Now you can see it right in view mode:
 
@@ -42,7 +42,7 @@ histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by 
 
 Want to check P95 instead of P99? Change it right there. Add a filter for production only? Do it. The query updates live. If you like the changes and have edit access, save it as a new panel.
 
-## 3. Filter tables by clicking cells
+### 3. Filter tables by clicking cells
 
 Got a table showing errors by service? Click "payment-service" - now the table only shows payment service data. Click "500" in the status column - now it's only 500 errors. Click "response_time > 1000" - now it's only slow 500 errors from payment service.
 
@@ -54,7 +54,7 @@ WHERE service='payment-service'
   AND response_time > 1000
 ```
 
-## 4. Break out data to find what's actually broken
+### 4. Break out data to find what's actually broken
 
 Here's the killer feature. Your dashboard shows 500 errors per minute. But which service? Which endpoint? Which region?
 
@@ -75,17 +75,17 @@ Click /api/process-payment, break out by error_type:
 
 Found it. The payment service can't connect to something. Three clicks, 30 seconds.
 
-## 5. Link to your actual tools
+### 5. Link to your actual tools
 
 Dashboards don't exist in a vacuum. You need to check Jenkins, look at GitHub, create Jira tickets. Context Links make this one click.
 
-### External tools
+#### External tools
 
 `https://github.com/company/repo/commit/{{commit_hash}}
 https://jenkins.company.com/job/{{deployment_id}}
 https://app.stripe.com/payments/{{payment_id}}`
 
-### Internal navigation
+#### Internal navigation
 
 `/trace/{{_trace_id}}
 /dashboard/service-metrics?service={{service_name}}
@@ -93,13 +93,13 @@ https://app.stripe.com/payments/{{payment_id}}`
 
 See a [trace ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) in your dashboard? Click it to open trace details. See a deployment ID? Click it, Jenkins opens. Configure whatever links make sense for your workflow.
 
-## 6. Update dashboard variables from anywhere
+### 6. Update dashboard variables from anywhere
 
 Your dashboard has a `$region` variable. You see problems in eu-west-1. Instead of scrolling up to the dropdown, just click "eu-west-1" in any panel and select "Set $region". The whole dashboard updates.
 
 Need a new variable? Click a value, create the variable on the spot. No config needed.
 
-# Example of a debugging session
+## Example of a debugging session
 
 Here's an actual production issue debugged with Interactive Dashboards:
 
@@ -119,7 +119,7 @@ Here's an actual production issue debugged with Interactive Dashboards:
 
 Two minutes from alert to root cause. No tab switching. No query copying. Just clicking through the investigation.
 
-# Works on all your dashboards right now
+## Works on all your dashboards right now
 
 Every dashboard you have is already interactive. No migration, no setup. Just start clicking panels.
 
@@ -131,7 +131,7 @@ Want to get more out of it?
 - Name dashboard variables consistently
 - Use GROUP BY in your queries so breakout analysis works
 
-# Who benefits
+## Who benefits
 
 **If you're on-call**: Debug without leaving the dashboard. Everything is one click away.
 
@@ -139,7 +139,7 @@ Want to get more out of it?
 
 **If you run platform**: Your dashboards now connect directly to your CD pipeline, your runbooks, your everything.
 
-# What's coming
+## What's coming
 
 We're actively working on expanding Interactive Dashboards with more capabilities. Stay tuned for updates on future enhancements.
 

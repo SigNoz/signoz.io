@@ -1,7 +1,8 @@
 ---
-date: 2024-06-06
+date: 2026-03-19
 id: anomaly-based-alerts
-
+description: Learn how anomaly-based alerts work in SigNoz, including metric selection, alert conditions, seasonality options, z-score thresholds, and how anomalies are detected from historical patterns.
+doc_type: explanation
 title: Anomaly based alerts 
 ---
 
@@ -112,83 +113,297 @@ A button to test the alert to ensure that it works as expected.
 
 ## How It Works
 
-### Prediction Model
+The anomaly detection system uses a **seasonal decomposition approach** to identify unusual patterns in time series data. It learns from historical patterns and compares current values against predictions based on:
+- Recent trends (immediate past behavior)
+- Seasonal patterns (cyclical behavior)
+- Historical growth trends (long-term changes)
 
-The system predicts expected values using the formula:
+### Key Components
+- **Seasonality Types**: Hourly, Daily, Weekly
+- **Evaluation Window**: Configurable (we'll use 5 minutes in examples)
+- **Detection Method**: Z-score based anomaly scoring
 
+## Core Algorithm
+
+### Formula
 ```
-Predicted Value = Average(Past Period) + Average(Current Season) - Mean(Past 3 Seasons)
+prediction = moving_avg(past_period) + avg(current_season) - mean(past_seasons)
+             \____________________/   \________________/   \________________/
+                      |                        |                    |
+              Recent baseline         Seasonal growth      Historical average
 ```
-
-Where:
-
-- **Past Period**: The immediate previous period (hour/day/week)
-- **Current Season**: The current seasonal window up to now
-- **Past Seasons**: Three consecutive previous seasonal periods
-
-### Seasonality Options
-
-The system supports three types of seasonality:
-- **Hourly**: For metrics that follow hourly patterns
-- **Daily**: For metrics that follow daily patterns
-- **Weekly**: For metrics that follow weekly patterns
-
-### Time Windows
-
-Based on the selected seasonality, the system analyzes:
-1. **Current Period**: The window you're analyzing (e.g., last 5 minutes)
-2. **Past Period**: Previous period with 5-minute offset
-   - Hourly: last hour
-   - Daily: last day
-   - Weekly: last week
-3. **Seasonal Windows**: Multiple seasonal periods for trend analysis
-   - Current Season
-   - Past Season
-   - Past 2 Seasons
-   - Past 3 Seasons
 
 ### Anomaly Score Calculation
-1. **Standard Deviation**: Calculated from the current season's data
-2. **Anomaly Score**: `|Actual Value - Predicted Value| / Standard Deviation`
-3. **Bounds**:
-   - Upper Bound = Moving Average(Predicted) + (z-score × Standard Deviation)
-   - Lower Bound = Moving Average(Predicted) - (z-score × Standard Deviation)
+```
+anomaly_score = |actual_value - predicted_value| / stddev(current_season)
+```
 
-### Best Practices
+### Detection Logic
+```
+if anomaly_score > z_score_threshold:
+    Trigger
+```
 
-1. **Choosing Seasonality**
-   - Select based on your metric's natural cycle
-   - Consider business patterns and user behavior
-   - Start with the most obvious pattern (e.g., daily for most business metrics)
+## Hourly Seasonality
 
-2. **Setting Z-Score Threshold**
-   - Default: 3 (catches significant anomalies)
-   - Lower for more sensitive detection
-   - Higher for fewer false positives
+### Time Window Breakdown
 
-3. **Time Window Selection**
-   - Use appropriate intervals based on metric volatility
+For evaluation at **3:05 PM** (15:05):
 
-### Limitations and Considerations
+| Window | Time Range | Purpose |
+|--------|------------|---------|
+| **Current Period** | 15:00-15:05 today | Values being evaluated |
+| **Past Period** | 13:55-14:00 today | Baseline from 1 hour ago |
+| **Current Season** | 14:05-15:05 today | Last hour's trend |
+| **Past Season 1** | 13:05-14:05 today | 1-2 hours ago trend |
+| **Past Season 2** | 12:05-13:05 today | 2-3 hours ago trend |
+| **Past Season 3** | 11:05-12:05 today | 3-4 hours ago trend |
 
-1. **Data Requirements**
-   - Needs at least 4 seasonal periods of historical data
-   - More historical data improves prediction accuracy
-   - Missing data points may affect accuracy
+### Example: E-commerce Checkout Service Latency
 
-2. **Sensitivity**
-   - May be sensitive to sudden seasonal pattern changes
-   - Requires tuning for metrics with high variability
-   - Consider business context when setting thresholds
+#### Data Pattern
+```yaml
+# Evaluating at 3:05 PM for window 3:00-3:05 PM
+# Normal pattern: spike at :00 due to promo emails, gradual decrease
 
-## Examples
+Current Period (15:00-15:05):
+  15:00: 250ms  # small spike from promo email traffic
+  15:01: 220ms  # small but still elevated
+  15:02: 180ms  # Normalizing
+  15:03: 150ms  # Normal
+  15:04: 145ms  # Normal
+  15:05: 380ms  # Example of our interest!
 
-### 1. Web Traffic Monitoring
-- **Seasonality**: Daily
-- **Use Case**: Detect unusual spikes or drops in website traffic
-- **Benefits**: Accounts for daily patterns (work hours vs. off hours) while adapting to growth trends
+Past Period (13:55-14:00):
+  13:55: 140ms  # End of normal period
+  13:56: 142ms
+  13:57: 145ms
+  13:58: 180ms  # Pre-spike buildup
+  13:59: 210ms  # Pre-spike buildup
+  14:00: 245ms  # Start of hourly spike
 
-### 2. Weekly Business Metrics
-- **Seasonality**: Weekly
-- **Use Case**: Monitor business KPIs (sales, signups)
-- **Benefits**: Accounts for weekly business cycles and seasonal trends
+Historical Patterns:
+  Current Season avg (14:05-15:05): 175ms
+  Past Season 1 avg (13:05-14:05): 172ms
+  Past Season 2 avg (12:05-13:05): 170ms
+  Past Season 3 avg (11:05-12:05): 168ms
+
+Standard Deviation: 35ms - entire season
+```
+
+#### Standard Deviation For Hourly Seasonality Example
+
+The Current Season window is **14:05-15:05** (last hour). The system would have data points for this entire hour.
+
+```yaml
+Current Season Data (14:05-15:05) - Full Hour:
+  14:05: 145ms
+  14:06: 148ms
+  14:07: 152ms
+  ...
+  14:58: 165ms
+  14:59: 195ms
+  15:00: 250ms 
+  15:01: 220ms
+  15:02: 180ms
+  15:03: 150ms
+  15:04: 145ms
+  15:05: 380ms
+```
+
+#### Standard Deviation Formula
+
+```
+1. Calculate mean = Sum(values) / n
+2. Calculate variance = Sum(value - mean)^2 / n
+3. Standard deviation = sqrt(variance)
+```
+
+#### Detailed Calculation Example
+
+Let's say we have 60 data points (one per minute) in the Current Season with this distribution:
+
+```yaml
+Data Distribution:
+- Normal range (140-160ms): 45 points
+- Moderate spikes (180-220ms): 10 points  
+- High spikes (240-260ms): 5 points
+
+Sample calculation with simplified data:
+Values: [145, 148, 152, ..., 250, 220, 180, 150, 145]
+Mean: 175ms
+
+Variance calculation:
+- (145-175)^2 = 900
+- (148-175)^2 = 729
+- (152-175)^2 = 529
+- ...
+- (250-175)^2 = 5625
+- (220-175)^2 = 2025
+
+Sum of squared differences: ~73,500
+Variance (σ²): 73,500 / 60 = 1,225
+Standard Deviation (σ): √1,225 = 35ms
+```
+
+#### Calculated from Current Season
+The standard deviation is computed from the entire seasonal period, not just the evaluation window:
+- **Hourly**: Last hour of data
+- **Daily**: Last 24 hours of data  
+- **Weekly**: Last 7 days of data
+
+#### Calculation for 15:05 spike
+
+1. **Moving avg of past period**: (140+142+145+180+210+245)/6 = 177ms
+2. **Current season average**: 175ms
+3. **Historical mean**: (172+170+168)/3 = 170ms
+4. **Prediction**: 177 + 175 - 170 = **182ms**
+5. **Actual value**: 380ms
+6. **Anomaly Score**: |380 - 182| / 35 = **5.66**
+
+
+**Result**: ✅ Alert triggered (5.66 > 3.0 threshold)
+
+## Daily Seasonality
+
+### Time Window Breakdown
+
+For evaluation on **Tuesday 2:05 PM**:
+
+| Window | Time Range | Purpose |
+|--------|------------|---------|
+| **Current Period** | Tue 14:00-14:05 | Values being evaluated |
+| **Past Period** | Mon 13:55-14:00 | Same time yesterday |
+| **Current Season** | Mon 14:05 - Tue 14:05 | Last 24 hours |
+| **Past Season 1** | Sun 14:05 - Mon 14:05 | 24-48 hours ago |
+| **Past Season 2** | Sat 14:05 - Sun 14:05 | 48-72 hours ago |
+| **Past Season 3** | Fri 14:05 - Sat 14:05 | 72-96 hours ago |
+
+### Example: Payment Gateway Transaction Volume
+
+#### Context
+A payment gateway with strong daily patterns:
+- Business hours: 9 AM - 6 PM peak
+- Lunch dip: 12 PM - 1 PM
+- After-hours: minimal activity
+- Weekend: 40% lower than weekdays
+
+#### Data Pattern
+```yaml
+# Evaluating Tuesday 2:05 PM for window 2:00-2:05 PM
+# Expected: Post-lunch recovery period
+
+Current Period (Tue 14:00-14:05):
+  14:00: 8,500 txn/min   # Lunch recovery starting
+  14:01: 9,200 txn/min   # Ramping up
+  14:02: 9,800 txn/min   # Normal afternoon
+  14:03: 10,100 txn/min  # Normal afternoon
+  14:04: 9,900 txn/min   # Normal afternoon
+  14:05: 4,200 txn/min   # Drop of interest!
+
+Past Period (Mon 13:55-14:00):
+  13:55: 7,800 txn/min   # End of lunch period
+  13:56: 8,100 txn/min
+  13:57: 8,400 txn/min
+  13:58: 8,700 txn/min
+  13:59: 9,000 txn/min
+  14:00: 9,300 txn/min   # Recovery complete
+
+Daily Patterns:
+  Current Season avg (last 24h): 6,200 txn/min
+  Past Season 1 avg (Mon): 6,100 txn/min
+  Past Season 2 avg (Sun): 3,800 txn/min  # Weekend
+  Past Season 3 avg (Sat): 3,600 txn/min  # Weekend
+
+Standard Deviation: 2,500 txn/min
+```
+
+#### Calculation for 14:05 drop
+
+1. **Moving avg of past period**: ~8,550 txn/min
+2. **Current season average**: 6,200 txn/min
+3. **Historical mean**: (6,100+3,800+3,600)/3 = 4,500 txn/min
+4. **Prediction**: 8,550 + 6,200 - 4,500 = **10,250 txn/min**
+5. **Actual value**: 4,200 txn/min
+6. **Anomaly Score**: |4,200 - 10,250| / 2,500 = **2.42**
+
+#### Result
+**Result**: ❌ No alert (2.42 < 3.0 threshold)
+
+While this is a significant drop, it doesn't exceed the threshold due to high variance from weekend data. You might want to use **weekly seasonality** for this metric to avoid weekend influence.
+
+## Weekly Seasonality
+
+### Time Window Breakdown
+
+For evaluation on **Week 4, Wednesday 10:05 AM**:
+
+| Window | Time Range | Purpose |
+|--------|------------|---------|
+| **Current Period** | W4 Wed 10:00-10:05 | Values being evaluated |
+| **Past Period** | W3 Wed 09:55-10:00 | Same time last week |
+| **Current Season** | W3 Wed 10:05 - W4 Wed 10:05 | Last 7 days |
+| **Past Season 1** | W2 Wed 10:05 - W3 Wed 10:05 | 7-14 days ago |
+| **Past Season 2** | W1 Wed 10:05 - W2 Wed 10:05 | 14-21 days ago |
+| **Past Season 3** | W0 Wed 10:05 - W1 Wed 10:05 | 21-28 days ago |
+
+### Example: SaaS Application User Sessions
+
+#### Data Pattern
+```yaml
+# Evaluating Week 4, Wednesday 10:05 AM for window 10:00-10:05 AM
+# Expected: Mid-week team sync spike around 10 AM
+
+Current Period (W4 Wed 10:00-10:05):
+  10:00: 12,000 sessions  # Start of sync meetings
+  10:01: 14,500 sessions  # Spike building
+  10:02: 16,200 sessions  # Peak sync time
+  10:03: 15,800 sessions  # Still elevated
+  10:04: 14,200 sessions  # Normalizing
+  10:05: 13,500 sessions  # Normal
+
+Past Period (W3 Wed 09:55-10:00):
+  09:55: 10,500 sessions  # Pre-meeting normal
+  09:56: 10,800 sessions
+  09:57: 11,200 sessions  # People joining early
+  09:58: 11,800 sessions
+  09:59: 12,500 sessions  # Meeting prep
+  10:00: 13,800 sessions  # Meetings starting
+
+Weekly Patterns:
+  Current Season avg (last 7 days): 8,500 sessions
+  Past Season 1 avg (W2-W3): 8,200 sessions
+  Past Season 2 avg (W1-W2): 8,000 sessions
+  Past Season 3 avg (W0-W1): 7,800 sessions
+
+Standard Deviation: 3,000 sessions
+```
+
+#### Normal Behavior Validation
+
+For the 10:03 data point (15,800 sessions):
+
+1. **Moving avg of past period**: ~11,600 sessions
+2. **Current season average**: 8,500 sessions
+3. **Historical mean**: (8,200+8,000+7,800)/3 = 8,000 sessions
+4. **Prediction**: 11,600 + 8,500 - 8,000 = **12,100 sessions**
+5. **Actual value**: 15,800 sessions
+6. **Anomaly Score**: |15,800 - 12,100| / 3,000 = **1.23**
+
+Result: (1.23 < 3.0) - This is an expected Wednesday spike
+
+### Z-Score Threshold Tuning
+
+```yaml
+# Conservative (fewer alerts)
+z_score_threshold: 4.0
+
+# Balanced (default)
+z_score_threshold: 3.0
+
+# Sensitive (more alerts)
+z_score_threshold: 2.5
+
+# Very sensitive
+z_score_threshold: 2.0
+```

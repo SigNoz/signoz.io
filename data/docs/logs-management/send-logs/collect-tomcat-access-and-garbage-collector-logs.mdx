@@ -1,7 +1,7 @@
 ---
-date: 2024-12-17
+date: 2026-04-06
 title: Collecting Tomcat Access and Garbage Collector Logs
-
+description: Collect Tomcat access logs and garbage collector logs with OpenTelemetry Collector and send them to SigNoz.
 id: collect-tomcat-access-and-garbage-collector-logs
 hide_table_of_contents: true
 ---
@@ -17,7 +17,7 @@ You can configure OpenTelemetry Collector to read Tomcat Server Access and Garba
 #### 1. Install OpenTelemetry Collector
 
 The OpenTelemetry Collector provides a vendor-neutral way to collect, process, and export telemetry data (logs, metrics, traces). 
-Follow this [installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+Follow this [installation guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
 
 #### 2. Configure Filelog Receiver
 
@@ -46,15 +46,16 @@ In the same `config.yaml`, add the receivers to the pipeline:
 
 ```yaml:config.yaml
 service:
-  logs:
-    receivers: [otlp, filelog/access_logs, filelog/gc_logs]
-    processors: [batch]
-    exporters: [otlp]
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/access_logs, filelog/gc_logs]
+      processors: [batch]
+      exporters: [otlp]
 ```
 
 #### 4. Restart the OTel Collector
 
-Apply changes by [restarting the OTel Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). 
+Apply changes by [restarting the OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/). 
 
 #### 5. Verify Export
 
@@ -81,7 +82,7 @@ Check the SigNoz UI for the exported logs.
 #### Scenario 1: SigNoz Running on the Same Host
 
 ##### 1. Modify Docker Compose File
-Update [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose-minimal.yaml) to mount your log files:
+Update [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose.yaml) to mount your log files:
 
 ```yaml:/deploy/docker/docker-compose-minimal.yaml 
 otel-collector:
@@ -110,10 +111,11 @@ Modify the pipeline to include the filelog receiver:
 
 ```yaml::/deploy/docker/otel-collector-config.yaml
 service:
-  logs:
-    receivers: [otlp, filelog/access_logs, filelog/gc_logs]
-    processors: [batch]
-    exporters: [clickhouselogsexporter]
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/access_logs, filelog/gc_logs]
+      processors: [batch]
+      exporters: [clickhouselogsexporter]
 ```
 
 ##### 4. Restart the OTel Collector

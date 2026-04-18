@@ -12,8 +12,7 @@ keywords: [logs management,log analytics,logs performance benchmark,open source,
 Logs are an integral part of any system that helps you get information about the application state and how it handles its operations. The goal of this blog is to compare the commonly used logging solutions, i.e., ElasticSearch (ELK stack) and Loki (PLG stack), with SigNoz on three parameters: ingestion, query, and storage.
 
 
-
-![cover image](/img/blog/2022/12/benchmark-cover.webp)
+<NextImage src="/img/blog/2022/12/benchmark-cover.webp" alt="Cover Image" width={1200} height={675} priority />
 
 Though the performance benchmarks in our tests represent a very specific scenario and use cases, our results seem to directionally agree with what other observability teams have reported, especially wrt. Elastic stack.
 
@@ -30,7 +29,7 @@ We will go through how we have created the environment for benchmarking the diff
 For any log management tool to be efficient, the following three factors are very important.
 
 - **Ingestion**<br></br>
-  Distributed cloud-native applications can generate logs at a humungous scale. [Log management tools](https://signoz.io/blog/open-source-log-management/) should be efficient at ingesting log data at scale.
+  Distributed cloud-native applications can generate logs at a humungous scale. [Open source log management tools](https://signoz.io/blog/best-open-source-log-management-tools/) should be efficient at ingesting log data at scale.
 
 - **Query**<br></br>
   Logs help in troubleshooting, and troubleshooting should be fast. The end-user experience depends on how fast a user can query relevant logs.
@@ -94,7 +93,7 @@ SigNoz cluster architecture for the performance benchmark looks as the following
 </figure>
 
 
-The three VMs are generating logs and sending it to signoz-[OTel](https://signoz.io/blog/what-is-opentelemetry/)-collector using OTLP. The reason we are using OTEL collectors on the receiver side instead of directly writing to ClickHouse from the generator VMs is that the OTEL collectors running in the generator VM's may or may not be the distribution from SigNoz.
+The three VMs are generating logs and sending it to signoz-[OTel](https://signoz.io/opentelemetry/)-collector using OTLP. The reason we are using OTEL collectors on the receiver side instead of directly writing to ClickHouse from the generator VMs is that the OTEL collectors running in the generator VM's may or may not be the distribution from SigNoz.
 
 In our [otel collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) configuration, we have extracted all fields, and we have converted all the fields from interesting fields to selected fields in the UI, which means they all are indexed.
 

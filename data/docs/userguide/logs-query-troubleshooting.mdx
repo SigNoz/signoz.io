@@ -1,0 +1,42 @@
+---
+date: 2026-03-13
+id: logs-query-troubleshooting
+title: Logs Query Troubleshooting
+description: Common issues and solutions when querying logs in SigNoz.
+doc_type: howto
+---
+
+This section helps you resolve common issues when querying logs in SigNoz.
+
+## Querying Fields with Dots in Key Names
+
+### Problem
+
+When working with structured logs that contain keys with dots (like `result.description`), you may encounter issues when trying to query these fields directly. This is a common scenario with Azure logs such as AppServiceConsoleLogs.
+
+Keys containing dots cannot be queried directly using standard syntax because the system interprets the dot as a path separator rather than part of the key name. For example, these queries will not work:
+
+* `body.result.description EXISTS` (returns no results)
+* `body['result.description'] EXISTS` (syntax error)
+* `body["result.description"] EXISTS` (syntax error)
+* `body CONTAINS 'result.description'` (returns no results)
+
+### Solution: Use Log Pipelines
+
+To work with fields that have dots in their key names, you can use log pipelines to transform the data:
+
+1. Create a pipeline that moves (or copies) result.description into attributes.result.description
+2. Query it using the attributes prefix
+
+For example, you can then query it like: `attributes.result.description EXISTS`
+
+See [Logs Pipeline Introduction](https://signoz.io/docs/logs-pipelines/introduction/) for more details on creating pipelines.
+
+## Getting Help
+
+If you encounter an issue not listed here:
+1. Check the [Logs Query Builder documentation](https://signoz.io/docs/userguide/logs_query_builder/)
+2. Review the [Search Syntax guide](https://signoz.io/docs/userguide/search-syntax/)
+3. Check the [General Search Troubleshooting Guide](https://signoz.io/docs/userguide/search-troubleshooting/)
+4. Verify field names exist in your data using the [Logs Fields view](https://signoz.io/docs/userguide/logs_fields/)
+5. If the issue still persists, reach out to support via the chatbox at the bottom right corner of your SigNoz Cloud interface
