@@ -37,7 +37,7 @@ Key config options:
 | `decision_wait_after_root_received` | `0s`    | Additional wait after root span arrives; `0s` disables root-span acceleration |
 | `num_traces`                        | `50000` | Maximum traces buffered in memory                                             |
 | `expected_new_traces_per_sec`       | `0`     | Hint for pre-allocating memory                                                |
-| `sample_on_first_match`             | `false` | Decide as soon as any policy matches, without waiting for remaining spans     |
+| `sample_on_first_match`             | `false` | Short-circuit policy evaluation as soon as any policy matches, without evaluating remaining policies |
 
 ## Setup
 
@@ -273,7 +273,7 @@ Monitor `otelcol_processor_tail_sampling_sampling_trace_dropped_too_early` for e
 
 A span arriving after its trace's sampling decision is made inherits the existing decision. If the decision has already been evicted from memory and no decision cache is configured, the late span triggers a new evaluation cycle — which can produce a different decision for that span.
 
-Configure `decision_cache` (`sampled_cache_size` and `non_sampled_cache_size`) to persist decisions beyond the in-memory buffer. Set cache sizes at least 10x `num_traces` for effective late-span handling.
+Configure `decision_cache` (`sampled_cache_size` and `non_sampled_cache_size`) to persist decisions beyond the in-memory buffer. Set cache sizes well above `num_traces` to reduce the chance of a late span missing its cached decision.
 
 ### Shutdown behavior
 
@@ -305,7 +305,7 @@ All spans for a single trace must arrive at the same collector instance. Without
 
 1. Check for late-arriving spans — compare span arrival times against `decision_wait`.
 2. If running multiple collectors, verify trace-ID routing is working (load balancing exporter).
-3. Review policy order — `drop` policies should come after `sample` policies so they can override.
+3. Review your policies — `drop` overrides any `sample` decision regardless of policy order. If a `drop` policy matches, the trace is dropped even if another policy would have sampled it.
 
 </details>
 
