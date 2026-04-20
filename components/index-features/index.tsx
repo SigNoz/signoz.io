@@ -119,6 +119,16 @@ const sections = [
     imgWidth: 528,
     imgHeight: 320,
   },
+  {
+    iconTag: 'Observability where you already work. No AI SRE required.',
+    text: 'Connect SigNoz to your coding agents (eg: Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place.',
+    // buttonText: 'Explore',
+    logo: <BarChart2Icon aria-hidden="true" />,
+    img: featureGraphic1,
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 1128,
+    imgHeight: 360,
+  },
 ]
 
 export const SigNozFeatures = ({ className }: { className?: string }) => {
