@@ -6,7 +6,24 @@ export const dynamic = 'force-static'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 
-  const staticRoutes = ['pricing', 'teams'].map((route) => ({
+  const staticRoutes = [
+    'pricing',
+    'teams',
+    'why-signoz',
+    'observability-for-ai-native-companies',
+    'log-management',
+    'llm-observability',
+    'external-apis',
+    'distributed-tracing',
+    'metrics-and-dashboards',
+    'exceptions-monitoring',
+    'alerts-management',
+    'application-performance-monitoring',
+    'trace-funnels',
+    'datadog-migration-tool',
+    'upgrade-path',
+    'unified-observability',
+  ].map((route) => ({
     url: `${siteUrl}/${route}/`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: 'weekly' as const,
