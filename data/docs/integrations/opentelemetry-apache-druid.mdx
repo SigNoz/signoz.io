@@ -69,7 +69,7 @@ Add the `otelcol` service to your `docker-compose.yml`:
 ```yaml:docker-compose.yml
 otelcol:
   container_name: 'otelcol'
-  image: 'otel/opentelemetry-collector-contrib:latest'
+  image: 'otel/opentelemetry-collector-contrib:0.150.1'
   volumes:
     - './druid-metrics-collection-config.yaml:/etc/otelcol/config.yaml'
   ports:
@@ -220,13 +220,15 @@ kubectl rollout restart deployment -n <druid-namespace>
 
 <Admonition type="note" title="Metric naming in SigNoz">
   The StatsD emitter prefixes every metric with the emitting node type. `query/time` from the broker arrives as `druid.broker.query.time.<datasource>.<queryType>`. Pattern: `druid.<nodetype>.<metric>` where `<nodetype>` is one of `broker`, `coordinator`, `historical`, `middleManager`, or `router`.
+
+  Some coordinator metrics also include the host and port of the emitting node, for example `druid.coordinator.segment.dropQueue.count.<host>.<port>`. You may see this suffix when building dashboards or alerts on segment-level metrics.
 </Admonition>
 
 ## Validate
 
 1. Open SigNoz.
 2. Go to **Metrics** > **Metrics Explorer**.
-3. Search for `druid.broker.query.time` or `druid.broker.jvm.mem.used.heap` to confirm metrics flow.
+3. Search for `druid.` to confirm metrics flow.
 
 <Figure
   src="/img/docs/integrations/apache-druid/druid-metrics-dashboard.webp"
@@ -252,7 +254,7 @@ kubectl rollout restart deployment -n <druid-namespace>
 ## Next Steps
 
 - Import the [Apache Druid dashboard](https://signoz.io/docs/dashboards/dashboard-templates/apache-druid-dashboard).
-- Set up [alerts](https://signoz.io/docs/userguide/alerts-management/) on `druid.<node>.ingest.kafka.lag` or coordinator segment queue metrics.
+- Set up [alerts](https://signoz.io/docs/userguide/alerts-management/) on coordinator segment queue metrics or, if you use Kafka-based ingestion, `druid.<node>.ingest.kafka.lag`.
 
 ## Get Help
 
