@@ -8,6 +8,7 @@ import {
   SiMongodb,
   SiRedis,
   SiApache,
+  SiApachedruid,
   SiNginx,
   SiRabbitmq,
   SiDocker,
@@ -68,6 +69,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/dashboards/dashboard-templates/apache-web-server': (
     <SiApache className="h-7 w-7 text-red-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/apache-druid-dashboard': (
+    <SiApachedruid className="h-7 w-7 text-[#29F5E6]" />
   ),
   '/docs/dashboards/dashboard-templates/apm-dashboards': (
     <Activity className="h-7 w-7 text-blue-500" />

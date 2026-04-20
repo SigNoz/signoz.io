@@ -22,6 +22,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Apache Web Server Dashboard Template',
   },
   {
+    name: 'Apache Druid',
+    href: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+    clickName: 'Apache Druid Dashboard Template',
+  },
+  {
     name: 'APM',
     href: '/docs/dashboards/dashboard-templates/apm-dashboards',
     clickName: 'APM Dashboard Template',

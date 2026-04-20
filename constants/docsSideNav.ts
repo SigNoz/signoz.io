@@ -2057,6 +2057,11 @@ const docsSideNav = [
             label: 'Apache Web Server',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+            label: 'Apache Druid',
+          },
+          {
             label: 'APM',
             type: 'category',
             isExpanded: false,
