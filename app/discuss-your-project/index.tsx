@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import styles from './styles.module.css'
 
 const DiscussYourProject = ({ title, desc, withUnderline = false }) => {
