@@ -20,11 +20,9 @@ export function compareSitemapEntries(
 ): number {
   const ta = lastModifiedTimestamp(a)
   const tb = lastModifiedTimestamp(b)
-  const aHas = ta !== null
-  const bHas = tb !== null
-  if (!aHas && !bHas) return 0
-  if (!aHas && bHas) return -1
-  if (aHas && !bHas) return 1
+  if (ta === null && tb === null) return 0
+  if (ta === null) return -1
+  if (tb === null) return 1
   return tb - ta
 }
 
