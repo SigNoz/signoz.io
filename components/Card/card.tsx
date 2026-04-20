@@ -17,6 +17,8 @@ type CardProps = {
   info?: string
   buttonText?: string
   buttonLink?: string
+  ctaText?: string
+  ctaLink?: string
   logo?: string | StaticImageData | React.ReactNode
   logoSize?: number
   subTitleSize?: number
@@ -41,6 +43,8 @@ const Card: React.FC<CardProps> = ({
   text,
   buttonText,
   buttonLink,
+  ctaText,
+  ctaLink,
   logo,
   img,
   imgClassName,
@@ -137,6 +141,26 @@ const Card: React.FC<CardProps> = ({
           {desc}
         </p>
       ))}
+      {ctaText ? (
+        ctaLink ? (
+          <TrackingLink
+            href={ctaLink}
+            clickType="Secondary CTA"
+            clickName={`${title || 'Feature'} CTA`}
+            clickText={ctaText}
+            clickLocation={sectionName}
+            className="inline-block"
+          >
+            <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-2">
+              {ctaText} <ArrowRight size={14} />
+            </Button>
+          </TrackingLink>
+        ) : (
+          <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-2">
+            {ctaText} <ArrowRight size={14} />
+          </Button>
+        )
+      ) : null}
       {img ? (
         <Image
           src={img}
