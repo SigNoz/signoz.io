@@ -48,6 +48,7 @@ const REASONS = [
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
     imgHeight: 337,
+    className: 'sm:col-span-2',
   },
   {
     title: 'Observability where you already work. No AI SRE required.',
@@ -57,6 +58,7 @@ const REASONS = [
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
     imgHeight: 337,
+    className: 'sm:col-span-2',
   },
 ]
 
@@ -91,6 +93,7 @@ const BuildForDevelopers = ({ className }: { className?: string }) => {
                   imgHeight={section.imgHeight}
                   key={section.title}
                   sectionName="Built for Developers"
+                  className={section.className}
                 />
               ))}
             </div>
