@@ -15,6 +15,9 @@ import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const siteUrl = siteMetadata.siteUrl
 const organizationId = `${siteUrl}/#organization`
+const websiteId = `${siteUrl}/#website`
+const softwareAppId = `${siteUrl}/#software`
+const webpageId = `${siteUrl}/#webpage`
 
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
@@ -30,9 +33,33 @@ export const metadata: Metadata = {
 const organizationSchema = {
   '@type': 'Organization',
   '@id': organizationId,
-  name: siteMetadata.title,
+  name: 'SigNoz',
+  legalName: 'SigNoz Inc.',
   url: `${siteUrl}/`,
-  logo: `${siteUrl}${siteMetadata.siteLogo}`,
+  logo: {
+    '@type': 'ImageObject',
+    url: `${siteUrl}/svgs/icons/signoz.svg`,
+    width: 512,
+    height: 512,
+  },
+  image: `${siteUrl}/img/signoz-meta-image.webp`,
+  description:
+    'SigNoz is an open-source, OpenTelemetry-native observability platform that provides unified monitoring for metrics, logs, and traces in a single pane of glass.',
+  slogan: 'OpenTelemetry-Native Traces, Metrics, and Logs in a single pane of glass',
+  email: siteMetadata.email,
+  foundingDate: '2020',
+  founder: [
+    {
+      '@type': 'Person',
+      name: 'Pranay Prateek',
+      jobTitle: 'CEO & Co-Founder',
+    },
+    {
+      '@type': 'Person',
+      name: 'Ankit Nayan',
+      jobTitle: 'CTO & Co-Founder',
+    },
+  ],
   sameAs: [
     siteMetadata.linkedin,
     siteMetadata.x,
@@ -40,24 +67,65 @@ const organizationSchema = {
     siteMetadata.youtube,
     siteMetadata.hackernews,
   ],
-  description:
-    'SigNoz is an open-source observability platform for monitoring metrics, logs, and traces.',
 }
 
 const websiteSchema = {
   '@type': 'WebSite',
+  '@id': websiteId,
   url: `${siteUrl}/`,
-  name: siteMetadata.title,
+  name: 'SigNoz',
+  description: siteMetadata.description,
+  publisher: {
+    '@id': organizationId,
+  },
+}
+
+const webpageSchema = {
+  '@type': 'WebPage',
+  '@id': webpageId,
+  url: `${siteUrl}/`,
+  name: 'SigNoz | The Open Source Datadog Alternative',
+  description:
+    'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+  isPartOf: {
+    '@id': websiteId,
+  },
+  about: {
+    '@id': softwareAppId,
+  },
 }
 
 const softwareApplicationSchema = {
   '@type': 'SoftwareApplication',
-  name: siteMetadata.title,
+  '@id': softwareAppId,
+  name: 'SigNoz',
   applicationCategory: 'DeveloperApplication',
-  operatingSystem: 'Linux, Kubernetes',
+  applicationSubCategory: 'Observability Platform',
+  operatingSystem: 'Linux, macOS, Windows',
   url: `${siteUrl}/`,
   description:
-    'Open-source observability platform for application performance monitoring, logs, and traces.',
+    'Open-source, OpenTelemetry-native observability platform for application performance monitoring (APM), distributed tracing, log management, metrics monitoring, exceptions tracking, and alerts.',
+  screenshot: `${siteUrl}/img/signoz-meta-image.webp`,
+  featureList:
+    'Application Performance Monitoring, Distributed Tracing, Log Management, Metrics & Dashboards, Exceptions Tracking, Alerts & Notifications, Service Maps, Flame Graphs, OpenTelemetry-Native',
+  isAccessibleForFree: true,
+  license: 'https://github.com/SigNoz/signoz/blob/develop/LICENSE',
+  offers: [
+    {
+      '@type': 'Offer',
+      name: 'Community Edition',
+      price: '0',
+      priceCurrency: 'USD',
+      description: 'Free, self-hosted open-source edition',
+      url: `${siteUrl}/docs/install/`,
+    },
+    {
+      '@type': 'Offer',
+      name: 'Cloud',
+      description: 'Fully managed SigNoz cloud with usage-based pricing',
+      url: `${siteUrl}/pricing/`,
+    },
+  ],
 }
 
 const reviewSchemas = [
@@ -70,8 +138,7 @@ const reviewSchemas = [
       name: 'Vijaya Perumal',
     },
     itemReviewed: {
-      '@type': 'SoftwareApplication',
-      name: 'SigNoz',
+      '@id': softwareAppId,
     },
   },
   {
@@ -83,8 +150,7 @@ const reviewSchemas = [
       name: 'Subomi Oluwalana',
     },
     itemReviewed: {
-      '@type': 'SoftwareApplication',
-      name: 'SigNoz',
+      '@id': softwareAppId,
     },
   },
   {
@@ -96,8 +162,7 @@ const reviewSchemas = [
       name: 'Go Frendi Gunawan',
     },
     itemReviewed: {
-      '@type': 'SoftwareApplication',
-      name: 'SigNoz',
+      '@id': softwareAppId,
     },
   },
 ]
@@ -121,6 +186,7 @@ const homepageStructuredData = {
   '@graph': [
     organizationSchema,
     websiteSchema,
+    webpageSchema,
     softwareApplicationSchema,
     ...reviewSchemas,
     videoSchema,
