@@ -160,27 +160,27 @@ SigNoz generates eight metrics from span data.
 **Core R.E.D Metrics (all spans)**
 
 - `signoz_calls_total` — Request and error counts (counter).
-  - Relevant Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `http.status_code`
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `http.status_code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 - `signoz_latency.bucket` — Latency distribution as histogram buckets.
-  - Relevant Dimensions: `service.name`, `operation`, `span.kind`, `status.code`
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 - `signoz_latency.sum` — Sum of all latency values (for avg = sum/count).
-  - Relevant Dimensions: `service.name`, `operation`, `span.kind`, `status.code`
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 - `signoz_latency.count` — Count of latency observations (for avg = sum/count).
-  - Relevant Dimensions: `service.name`, `operation`, `span.kind`, `status.code`
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 
 **DB Call Metrics**
 
 - `signoz_db_latency_sum` — Sum of DB call latency.
-  - Relevant Dimensions: `service.name`, `status.code`, `db.system`, `db.name`
+  - Dimensions: `service.name`, `status.code`, `db.system`, `db.name`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 - `signoz_db_latency_count` — Count of DB call latency observations.
-  - Relevant Dimensions: `service.name`, `status.code`, `db.system`, `db.name`
+  - Dimensions: `service.name`, `status.code`, `db.system`, `db.name`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 
 **External Call Metrics**
 
 - `signoz_external_call_latency_sum` — Sum of external call latency.
-  - Relevant Dimensions: `service.name`, `status.code`, `http.status_code`
+  - Dimensions: `service.name`, `status.code`, `http.status_code`, `address`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 - `signoz_external_call_latency_count` — Count of external call latency observations.
-  - Relevant Dimensions: `service.name`, `status.code`, `http.status_code`
+  - Dimensions: `service.name`, `status.code`, `http.status_code`, `address`, `service.namespace`, `deployment.environment`, `signoz.collector.id`, `resource_deployment.environment`, `resource_signoz.collector.id`
 
 ### Metric Mapping
 
@@ -193,9 +193,9 @@ SigNoz uses **one metric with multiple dimensions**, and additionally breaks out
 | Datadog Metric | SigNoz Equivalent |
 | --- | --- |
 | `trace.<SPAN_NAME>.hits` | `signoz_calls_total{operation="<SPAN_NAME>"}` |
-| `trace.<SPAN_NAME>.hits.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>", http.status_code="200"}` |
+| `trace.<SPAN_NAME>.hits.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>"}` |
 | `trace.<SPAN_NAME>.errors` | `signoz_calls_total{operation="<SPAN_NAME>", status.code="STATUS_CODE_ERROR"}` |
-| `trace.<SPAN_NAME>.errors.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>", status.code="STATUS_CODE_ERROR", http.status_code="503"}` |
+| `trace.<SPAN_NAME>.errors.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>", status.code="STATUS_CODE_ERROR"}` |
 
 **Latency**
 
