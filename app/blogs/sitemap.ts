@@ -1,11 +1,41 @@
 import { MetadataRoute } from 'next'
 import { allBlogs, allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
+import { fetchAllCMSContent } from 'utils/cmsContent'
 
 export const dynamic = 'force-static'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
+
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  const { faqs, caseStudies, opentelemetries } = await fetchAllCMSContent(deploymentStatus)
+
+  let faqRoutes: MetadataRoute.Sitemap = []
+  if (faqs) {
+    faqRoutes = faqs.data.map((faq) => ({
+      url: `${siteUrl}/faqs${faq.path}/`,
+      lastModified: faq.date || faq.updatedAt || faq.publishedAt,
+    }))
+  }
+
+  let caseStudyRoutes: MetadataRoute.Sitemap = []
+  if (caseStudies) {
+    caseStudyRoutes = caseStudies.data.map((caseStudy) => ({
+      url: `${siteUrl}/case-study${caseStudy.path}/`,
+      lastModified: caseStudy.updatedAt || caseStudy.publishedAt,
+    }))
+  }
+
+  let opentelemetryRoutes: MetadataRoute.Sitemap = []
+  if (opentelemetries) {
+    opentelemetryRoutes = opentelemetries.data.map((opentelemetry) => ({
+      url: `${siteUrl}/opentelemetry${opentelemetry.path}/`,
+      lastModified: opentelemetry.updatedAt || opentelemetry.publishedAt,
+    }))
+  }
 
   const blogRoutes = allBlogs
     .filter((post) => !post.draft && !post?.excludeFromSitemap)
@@ -25,11 +55,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     }))
 
-  const staticRoutes = ['blog', 'guides'].map((route) => ({
+  const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry'].map((route) => ({
     url: `${siteUrl}/${route}/`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: 'weekly' as const,
   }))
 
-  return [...staticRoutes, ...blogRoutes, ...guideRoutes]
+  return [
+    ...staticRoutes,
+    ...blogRoutes,
+    ...guideRoutes,
+    ...faqRoutes,
+    ...caseStudyRoutes,
+    ...opentelemetryRoutes,
+  ]
 }
