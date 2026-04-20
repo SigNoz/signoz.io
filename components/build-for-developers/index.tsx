@@ -6,7 +6,6 @@ import featureGraphicColumnarDb from '@/public/img/graphics/homepage/feature-gra
 import featureGraphicFlexibleQuerying from '@/public/img/graphics/homepage/feature-graphic-flexible-querying.svg?url'
 import featureGraphicCorrelation from '@/public/img/graphics/homepage/feature-graphic-correlation.svg?url'
 import { cn } from '../../app/lib/utils'
-import { BarChart2Icon } from 'lucide-react'
 
 const REASONS = [
   {
@@ -53,8 +52,9 @@ const REASONS = [
   {
     title: 'Observability where you already work. No AI SRE required.',
     desc: 'Connect SigNoz to your coding agents (eg: Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place.',
-    ctaText: 'Learn More',
-    ctaLink: '/docs/ai/signoz-mcp-server',
+    buttonText: 'Learn More',
+    buttonLink: '/docs/ai/signoz-mcp-server/',
+    buttonPosition: 'before' as const,
     figure: featureGraphicCorrelation,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
@@ -95,8 +95,9 @@ const BuildForDevelopers = ({ className }: { className?: string }) => {
                   key={section.title}
                   sectionName="Built for Developers"
                   className={section.className}
-                  ctaText={section.ctaText}
-                  ctaLink={section.ctaLink}
+                  buttonText={section.buttonText}
+                  buttonLink={section.buttonLink}
+                  buttonPosition={section.buttonPosition}
                 />
               ))}
             </div>

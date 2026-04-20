@@ -17,8 +17,7 @@ type CardProps = {
   info?: string
   buttonText?: string
   buttonLink?: string
-  ctaText?: string
-  ctaLink?: string
+  buttonPosition?: 'before' | 'after'
   logo?: string | StaticImageData | React.ReactNode
   logoSize?: number
   subTitleSize?: number
@@ -43,8 +42,7 @@ const Card: React.FC<CardProps> = ({
   text,
   buttonText,
   buttonLink,
-  ctaText,
-  ctaLink,
+  buttonPosition = 'after',
   logo,
   img,
   imgClassName,
@@ -83,6 +81,27 @@ const Card: React.FC<CardProps> = ({
   const isRenderableLogo = React.isValidElement(logo)
   const isStringLogo = typeof logo === 'string'
   const isStaticImage = typeof img !== 'string'
+
+  const buttonBlock = buttonText ? (
+    buttonLink ? (
+      <TrackingLink
+        href={buttonLink}
+        clickType="Secondary CTA"
+        clickName={`${title || 'Feature'} Link`}
+        clickText={buttonText}
+        clickLocation={sectionName}
+        className="inline-block"
+      >
+        <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
+          {buttonText} <ArrowRight size={14} />
+        </Button>
+      </TrackingLink>
+    ) : (
+      <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
+        {buttonText} <ArrowRight size={14} />
+      </Button>
+    )
+  ) : null
 
   return (
     <div
@@ -141,26 +160,7 @@ const Card: React.FC<CardProps> = ({
           {desc}
         </p>
       ))}
-      {ctaText ? (
-        ctaLink ? (
-          <TrackingLink
-            href={ctaLink}
-            clickType="Secondary CTA"
-            clickName={`${title || 'Feature'} CTA`}
-            clickText={ctaText}
-            clickLocation={sectionName}
-            className="inline-block"
-          >
-            <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-2">
-              {ctaText} <ArrowRight size={14} />
-            </Button>
-          </TrackingLink>
-        ) : (
-          <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-2">
-            {ctaText} <ArrowRight size={14} />
-          </Button>
-        )
-      ) : null}
+      {buttonText && buttonPosition === 'before' ? buttonBlock : null}
       {img ? (
         <Image
           src={img}
@@ -172,27 +172,7 @@ const Card: React.FC<CardProps> = ({
           className={cn(`card-background h-auto w-auto border-none`, imgClassName)}
         />
       ) : null}
-
-      {buttonText ? (
-        buttonLink ? (
-          <TrackingLink
-            href={buttonLink}
-            clickType="Secondary CTA"
-            clickName={`${title || 'Feature'} Link`}
-            clickText={buttonText}
-            clickLocation={sectionName}
-            className="inline-block"
-          >
-            <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
-              {buttonText} <ArrowRight size={14} />
-            </Button>
-          </TrackingLink>
-        ) : (
-          <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
-            {buttonText} <ArrowRight size={14} />
-          </Button>
-        )
-      ) : null}
+      {buttonText && buttonPosition === 'after' ? buttonBlock : null}
     </div>
   )
 }
