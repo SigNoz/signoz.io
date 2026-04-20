@@ -23,15 +23,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes = [
     '',
-    'tags',
-    'about-us',
-    'terms-of-service',
-    'privacy',
-    'security',
-    'support',
-    'faqs',
+    'tags/',
+    'about-us/',
+    'terms-of-service/',
+    'privacy/',
+    'security/',
+    'support/',
+    'faqs/',
   ].map((route) => ({
-    url: `${siteUrl}/${route}${route ? '/' : ''}`,
+    url: `${siteUrl}/${route}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: 'weekly' as const,
   }))
