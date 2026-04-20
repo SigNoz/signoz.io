@@ -1,0 +1,383 @@
+---
+
+title: Bunyan Logger - Complete Guide to Node.js JSON Logging with Examples
+slug: bunyan-logger-nodejs-logging-library
+date: 2026-04-20
+tags: [nodejs, logging]
+authors: [saurabh_patil]
+description: Learn how to use Bunyan logger in Node.js for structured JSON logging with child loggers, streams, serializers, and the CLI tool.
+keywords: [bunyan logger, bunyan nodejs, node bunyan, bunyan json logging, nodejs logging, bunyan streams, bunyan child logger]
+
+---
+
+<a href="https://github.com/trentm/node-bunyan" rel="noopener noreferrer nofollow" target="_blank">Bunyan</a> is a simple and fast JSON logging library for Node.js. It is designed to output structured, machine-parseable logs while providing developer-friendly tools to make those logs human-readable when needed.
+
+Using Bunyan, you can easily log events from your Node.js server in a structured JSON format, including information such as the [log level](/blog/logging-levels/), timestamp, process ID, hostname, and any custom fields you attach. You can also configure multiple output destinations (called streams), create child loggers for sub-components, and use serializers to format complex objects like HTTP requests and responses.
+
+## Why should you use Bunyan Logger?
+
+Here are a few reasons why you should use Bunyan:
+
+1. **Structured JSON output by default**: Unlike text-based loggers, Bunyan outputs every log record as a JSON object. This makes logs easy to parse, query, and analyze with [log management tools](/blog/best-open-source-log-management-tools/).
+2. **Built-in CLI for pretty-printing**: Bunyan ships with a <a href="https://github.com/trentm/node-bunyan?tab=readme-ov-file#cli-usage" rel="noopener noreferrer nofollow" target="_blank">command-line tool</a> that transforms raw JSON logs into a colored, human-readable format, so you get machine-friendly logs in production and developer-friendly logs during debugging.
+3. **Extensible streams system**: You can send logs to multiple destinations simultaneously, such as stdout, files, rotating files, HTTP endpoints, or custom transports, each with its own log level.
+4. **Child loggers**: Bunyan lets you create lightweight child loggers that inherit the parent's configuration while adding extra context fields. This is useful for adding request-specific data (like a request ID) without creating a new logger.
+5. **Serializers for complex objects**: Bunyan provides built-in serializer functions for HTTP requests, responses, and errors. You can also write custom serializers to control how any object is represented in your logs.
+
+## Log Levels in Bunyan
+
+Bunyan uses six numeric log levels. Setting a logger to a particular level means all records at that level and above are logged.
+
+| Level | Value | Description |
+| --- | --- | --- |
+| `trace` | 10 | Logging from external libraries or very detailed application logging |
+| `debug` | 20 | Detailed diagnostic information useful during development |
+| `info` | 30 | Normal operational messages like, service started, request handled, etc. |
+| `warn` | 40 | Something unexpected that should eventually be looked at by an operator |
+| `error` | 50 | Fatal for a particular request, but the service continues running |
+| `fatal` | 60 | The service is about to crash or become unusable |
+
+## Key Concepts in Bunyan
+
+### Streams
+
+A "stream" is Bunyan's term for an output destination (equivalent to a log4j Appender). Each Bunyan logger can have one or more streams, and each stream can be set to a different log level. Streams can write to stdout, to a file, to a rotating file, or to any custom writable stream.
+
+```jsx:index.js
+const bunyan = require('bunyan');
+
+const log = bunyan.createLogger({
+  name: 'myapp',
+  streams: [
+    {
+      level: 'info',
+      stream: process.stdout     // log INFO and above to stdout
+    },
+    {
+      level: 'error',
+      path: './error.log'        // log ERROR and above to a file
+    }
+  ]
+});
+
+log.error("Error logged in terminal and ./error.log file")
+log.info("Message logged in terminal only.")
+```
+
+### Serializers
+
+Serializers are functions that convert complex JavaScript objects into a clean JSON representation for logging. Bunyan provides <a href="https://github.com/trentm/node-bunyan?tab=readme-ov-file#serializers" rel="noopener noreferrer nofollow" target="_blank">standard serializers</a> for common objects like HTTP requests (`req`), responses (`res`), and errors (`err`).
+
+```jsx:index.js
+const log = bunyan.createLogger({
+  name: 'myapp',
+  serializers: bunyan.stdSerializers  // adds req, res, and err serializers
+});
+
+// Usage
+log.info({ req: req }, 'incoming request');
+log.error({ err: error }, 'something failed');
+```
+
+You can also define your own custom serializers:
+
+```jsx:customSerializers.js
+const log = bunyan.createLogger({
+  name: 'myapp',
+  serializers: {
+    user: function(user) {
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      };
+    }
+  }
+});
+
+log.info({ user: userObject }, 'user logged in');
+```
+
+### Child Loggers
+
+Child loggers let you specialize a logger for a sub-component or a specific request by adding extra fields that appear in every log record produced by the child.
+
+```jsx:childLogger.js
+const log = bunyan.createLogger({ name: 'myapp' });
+
+// Create a child logger with a request ID
+const reqLog = log.child({ req_id: 'abc-123' });
+
+reqLog.info('handling request');
+// Output includes: { ..., "req_id": "abc-123", "msg": "handling request" }
+```
+
+### Bunyan CLI
+
+Bunyan ships with a <a href="https://github.com/trentm/node-bunyan#cli-usage" rel="noopener noreferrer nofollow" target="_blank">CLI</a> tool for pretty-printing and filtering JSON logs:
+
+```bash
+# Pretty-print logs
+node app.js | bunyan
+
+# Filter by log level
+node app.js | bunyan -l warn
+
+# Filter by condition
+node app.js | bunyan -c 'this.req_id === "abc-123"'
+```
+
+## Bunyan vs. Winston vs. Pino
+
+If you are choosing a [Node.js logging](/guides/nodejs-logging/) library, here is how Bunyan compares to the two most popular alternatives.
+
+| Feature | Bunyan | Winston | Pino |
+| --- | --- | --- | --- |
+| Output format | JSON only | Configurable (JSON, text, custom) | JSON only |
+| Log levels | 6 fixed (trace through fatal) | Configurable | 6 fixed (trace through fatal) |
+| Child loggers | Yes (prototype-based) | Yes | Yes (prototype-based) |
+| CLI tool | Built-in `bunyan` CLI | None | Separate `pino-pretty` |
+| Transports | Streams (built-in rotating-file) | Pluggable transports | Worker-thread transports |
+| Performance | Moderate | Moderate | Fastest (offloads to worker thread) |
+| Maintenance | Last Release in 2021 | Actively maintained | Actively maintained |
+| DTrace support | Yes (optional) | No | No |
+
+Bunyan's strength is its simplicity: JSON output, a built-in CLI, and child loggers work well together out of the box. If your primary concern is throughput, [Pino Logger](/guides/pino-logger-nodejs-logging-library/) is measurably faster because it offloads formatting to a worker thread. [Winston Logger](/blog/winston-logger/) offers the most flexibility in output formats and transport options.
+
+Now, let us use Bunyan Logger in a sample Node.js application and send the captured logs to a log management tool, [SigNoz](https://signoz.io/).
+
+## Getting Started with Bunyan Logger
+
+### Prerequisites
+
+Before you begin, make sure you have <a href="https://nodejs.org/" rel="noopener noreferrer nofollow" target="_blank">Node.js</a> installed with <a href="https://docs.npmjs.com/cli/" rel="noopener noreferrer nofollow" target="_blank">NPM</a> and an <a href="https://expressjs.com/" rel="noopener noreferrer nofollow" target="_blank">Express</a> project set up.
+
+### Steps to use Bunyan Logger
+
+Create a node project in the current directory:
+
+```bash
+mkdir bunyan-nodejs-example
+cd bunyan-nodejs-example
+```
+
+Initialize an npm project:
+
+```bash
+npm init -y
+```
+
+Install express and bunyan packages:
+
+```bash
+npm i bunyan express --save
+```
+
+Create a logger file called `logger.js`:
+
+```bash
+touch logger.js
+```
+
+Set up the Bunyan logger instance in `logger.js`:
+
+```jsx:logger.js
+const bunyan = require('bunyan');
+
+const logger = bunyan.createLogger({
+  name: 'express-app',
+  streams: [
+    {
+      level: 'info',
+      stream: process.stdout
+    }
+  ],
+  serializers: bunyan.stdSerializers
+});
+
+module.exports = logger;
+```
+
+Create an entry file called `index.js`:
+
+```bash
+touch index.js
+```
+
+Create a basic Express app with Bunyan logging:
+
+```jsx:index.js
+const express = require("express");
+const logger = require("./logger");
+
+const PORT = process.env.PORT || "5555";
+const app = express();
+
+app.use(express.json());
+
+// Logging middleware - logs every incoming request
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.info({
+      method: req.method,
+      url: req.url,
+      statusCode: res.statusCode,
+      duration: `${duration}ms`
+    }, 'request completed');
+  });
+  next();
+});
+
+app.get("/", (req, res) => {
+  logger.info({ path: req.path }, "Hello World route hit");
+  res.json({ method: req.method, message: "Hello World" });
+});
+
+app.get("/404", (req, res) => {
+  logger.warn({ path: req.path }, "404 route hit");
+  res.sendStatus(404);
+});
+
+app.get("/user", (req, res) => {
+  try {
+    throw new Error("Invalid user");
+  } catch (error) {
+    logger.error({ err: error }, "Error in /user route");
+    res.status(500).send("Error!");
+  }
+});
+
+app.listen(parseInt(PORT, 10), () => {
+  logger.info(`Listening on http://localhost:${PORT}`);
+});
+```
+
+Run the server with the below command:
+
+```bash
+node index.js
+```
+
+Curl the localhost:
+
+```bash
+curl http://localhost:5555
+```
+
+If done correctly, the console should show a JSON log line indicating the server is listening.
+
+```bash:Output
+{"name":"express-app","hostname":"Olly@SigNoz","pid":79495,"level":30,"msg":"Listening on http://localhost:5555","time":"2026-04-14T10:42:08.270Z","v":0}
+{"name":"express-app","hostname":"Olly@SigNoz","pid":79495,"level":30,"path":"/","msg":"Hello World route hit","time":"2026-04-14T10:42:13.198Z","v":0}
+{"name":"express-app","hostname":"Olly@SigNoz","pid":79495,"level":30,"method":"GET","url":"/","statusCode":200,"duration":"3ms","msg":"request completed","time":"2026-04-14T10:42:13.200Z","v":0}
+```
+
+At this point, the project structure should look like this:
+
+```bash
+bunyan-nodejs-example/
+├── node_modules/
+├── index.js
+├── logger.js
+├── package-lock.json
+└── package.json
+```
+
+### Using the Bunyan CLI
+
+The raw JSON output from Bunyan is machine-readable but can be hard to scan visually. You can pipe the output through the Bunyan CLI for a formatted view:
+
+```bash
+node index.js | npx bunyan
+```
+
+This will produce colored, indented output that is much easier to read during development.
+
+Output
+
+<Figure src="/img/guides/2026/04/bunyan-logger-nodejs-logging-library-output.webp" alt="" caption="" />
+
+Logs will be captured depending on the route you hit:
+
+- Hitting `/` will produce an `info` level log with the request details.
+- Hitting `/404` will produce a `warn` level log.
+- Hitting `/user` will produce an `error` level log with the full error stack trace.
+
+In a production environment, you will need a log management tool to efficiently store and manage your logs. In this tutorial, we will use [SigNoz](https://signoz.io/) a all in one observability platform to collect and visualize logs from the Bunyan logging library.
+
+## Sending Bunyan Logs to SigNoz
+
+SigNoz uses [OpenTelemetry](/opentelemetry/) to collect logs. OpenTelemetry provides an instrumentation package for Bunyan that captures log records and exports them via the OTLP protocol. There are two approaches: [no-code auto-instrumentation](/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs/) and [code-level instrumentation](/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs/). In this tutorial, we will be covering a no-code auto-instrumentation method.
+
+You will need a [SigNoz Cloud account](/teams/) (30-day free trial, no credit card required) to proceed. Once you sign up, generate and note your [ingestion key](/docs/ingestion/signoz-cloud/keys/) and [ingestion URL](/docs/ingestion/signoz-cloud/overview/#how-do-i-find-my-ingestion-url) from the Settings page. You'll need both in step 2.
+
+### No-Code Auto-Instrumentation
+
+Auto-instrumentation automatically captures Bunyan logs with trace correlation, along with HTTP requests (incoming and outgoing).
+
+**Step 1: Install Dependencies**
+
+```bash
+npm install --save @opentelemetry/api \
+  @opentelemetry/auto-instrumentations-node
+```
+
+**Step 2: Run the Application**
+
+Set the environment variables and run your application using the `NODE_OPTIONS` environment variable.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="bunyan-express-app"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+node index.js
+```
+
+Replace `<region>` with your SigNoz Cloud region and `<your-ingestion-key>` with your ingestion key.
+
+**Step 3: Generate logs**
+
+Hit the localhost endpoints `/`, `/404`, and `/user` in new terminal to generate the logs.
+
+```bash
+curl http://localhost:5555/
+curl http://localhost:5555/user
+curl http://localhost:5555/404
+```
+
+**Step 4: Observing the Logs on SigNoz**
+
+Open your SigNoz instance and navigate to the **Logs** section. Filter by `service.name = bunyan-express-app` (or whatever you set as your `OTEL_SERVICE_NAME`) to view the logs sent from your application.
+
+You should see structured JSON log entries from Bunyan, including all the fields like `name`, `level`, `msg`, `hostname`, `pid`, and any custom fields you added.
+
+<Figure src="/img/guides/2026/04/bunyan-logger-nodejs-logging-library-log-explorer.webp" alt="Bunyan log details in SigNoz, structured JSON fields like statusCode, method, url, and trace_id are automatically captured and available for filtering and correlation." caption="Detailed view of a Bunyan log entry in SigNoz with request attributes and trace correlation." />
+
+If you enabled [trace correlation](/docs/traces-management/guides/correlate-traces-and-logs/), you can click on a log entry with a `traceId` and navigate directly to the associated trace.
+
+<Figure src="/img/guides/2026/04/bunyan-logger-nodejs-logging-library-traces.webp" alt="SigNoz Traces Explorer displaying a flamegraph for a GET /user request with 8 spans, 1 error span, and span details including trace ID, duration, and related logs." caption="Trace flamegraph for a Bunyan-logged request showing correlated spans and error details in SigNoz." />
+
+## Conclusion
+
+Bunyan is a robust, fast, and highly extensible JSON logging library that makes structured logging in Node.js straightforward. By outputting machine-readable JSON logs by default, supporting lightweight child loggers, and offering a built-in CLI tool for local debugging, it bridges the gap between developer experience and production readiness.
+
+When you pair Bunyan with an all-in-one observability platform like SigNoz, you can to correlate your application logs directly with distributed traces and metrics. This centralized context makes root cause analysis significantly faster and your overall system much easier to monitor.
+
+## Get Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [**SigNoz cloud**](/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [**enterprise self-hosted or BYOC offering**](/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [**community edition**](/docs/install/self-host/).
+
+---
+
+Hope we answered all your questions regarding Bunyan Logger. If you have more questions, feel free to join our [Slack community](/slack/).
+
+You can also subscribe to our [**newsletter**](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.
