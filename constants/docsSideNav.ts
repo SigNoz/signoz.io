@@ -2583,6 +2583,11 @@ const docsSideNav = [
             label: 'Troubleshooting Guide',
           },
           { type: 'doc', route: '/docs/userguide/query-troubleshooting-faqs', label: 'FAQs' },
+          {
+            type: 'doc',
+            route: '/docs/querying/query-performance',
+            label: 'Query Performance & Common Issues',
+          },
         ],
       },
     ],
