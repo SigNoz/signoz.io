@@ -50,14 +50,13 @@ const REASONS = [
     imgHeight: 337,
   },
   {
-    iconTag: 'Observability where you already work. No AI SRE required.',
-    text: 'Connect SigNoz to your coding agents (eg: Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place.',
+    title: 'Observability where you already work. No AI SRE required.',
+    desc: 'Connect SigNoz to your coding agents (eg: Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place.',
     // buttonText: 'Explore',
-    logo: <BarChart2Icon aria-hidden="true" />,
-    img: featureGraphicCorrelation,
+    figure: featureGraphicCorrelation,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
-    imgHeight: 360,
+    imgHeight: 337,
   },
 ]
 
