@@ -2053,13 +2053,13 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/apache-web-server',
-            label: 'Apache Web Server',
+            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+            label: 'Apache Druid',
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
-            label: 'Apache Druid',
+            route: '/docs/dashboards/dashboard-templates/apache-web-server',
+            label: 'Apache Web Server',
           },
           {
             label: 'APM',
