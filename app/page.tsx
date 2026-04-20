@@ -34,7 +34,6 @@ const organizationSchema = {
   '@type': 'Organization',
   '@id': organizationId,
   name: 'SigNoz',
-  legalName: 'SigNoz Inc.',
   url: `${siteUrl}/`,
   logo: {
     '@type': 'ImageObject',
