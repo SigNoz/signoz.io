@@ -110,6 +110,9 @@ const softwareApplicationSchema = {
     'Application Performance Monitoring, Distributed Tracing, Log Management, Metrics & Dashboards, Exceptions Tracking, Alerts & Notifications, Service Maps, Flame Graphs, OpenTelemetry-Native',
   isAccessibleForFree: true,
   license: 'https://github.com/SigNoz/signoz/blob/develop/LICENSE',
+  publisher: {
+    '@id': organizationId,
+  },
   offers: [
     {
       '@type': 'Offer',
@@ -174,6 +177,7 @@ const videoSchema = {
   description: 'Learn how SigNoz helps monitor metrics, logs, and traces in one platform.',
   thumbnailUrl: `${siteUrl}/img/landing/landing_thumbnail.webp`,
   uploadDate: '2024-05-09',
+  duration: 'PT1M54S',
   contentUrl: 'https://vimeo.com/944340217',
   embedUrl: 'https://player.vimeo.com/video/944340217',
   publisher: {
