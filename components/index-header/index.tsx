@@ -15,6 +15,19 @@ export function Header() {
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
       <div className="relative mx-auto flex w-full flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 pt-12 text-center md:pt-16">
+        <TrackingLink
+          href="https://newsletter.signoz.io/p/our-project-hail-mary-the-observability"
+          clickType="Pill CTA"
+          clickName="Newsletter Pill"
+          clickText="From our Newsletter: How we observe 21B metric points daily"
+          clickLocation="Hero Section"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <button className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-signoz_slate-200 bg-signoz_slate-400 px-4 py-2 text-xs font-medium leading-5 text-white shadow-[0_0_14px_0_rgba(78,116,248,0.40)] sm:gap-2 sm:text-sm">
+            💌 From our Newsletter: How we observe 21B metric points daily →
+          </button>
+        </TrackingLink>
         <Hero>
           <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
           <span className="hidden md:inline">Observability on Your Terms,</span>
