@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import { allBlogs, allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from 'utils/cmsContent'
+import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
 
 export const dynamic = 'force-static'
 
@@ -25,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (caseStudies) {
     caseStudyRoutes = caseStudies.data.map((caseStudy) => ({
       url: `${siteUrl}/case-study${caseStudy.path}/`,
-      lastModified: caseStudy.updatedAt || caseStudy.publishedAt,
+      lastModified: caseStudy.date || caseStudy.updatedAt || caseStudy.publishedAt,
     }))
   }
 
@@ -33,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (opentelemetries) {
     opentelemetryRoutes = opentelemetries.data.map((opentelemetry) => ({
       url: `${siteUrl}/opentelemetry${opentelemetry.path}/`,
-      lastModified: opentelemetry.updatedAt || opentelemetry.publishedAt,
+      lastModified: opentelemetry.date || opentelemetry.updatedAt || opentelemetry.publishedAt,
     }))
   }
 
@@ -57,11 +58,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry'].map((route) => ({
     url: `${siteUrl}/${route}/`,
-    lastModified: new Date().toISOString().split('T')[0],
+    // lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: 'weekly' as const,
   }))
 
-  return [
+  const allRoutes: MetadataRoute.Sitemap = [
     ...staticRoutes,
     ...blogRoutes,
     ...guideRoutes,
@@ -69,4 +70,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...caseStudyRoutes,
     ...opentelemetryRoutes,
   ]
+
+  allRoutes.sort(compareSitemapEntries)
+
+  return allRoutes.map((entry) => {
+    if (entry.lastModified == null) return entry
+    const dateOnly = toSitemapDateOnly(entry.lastModified)
+    if (dateOnly == null) {
+      const { lastModified: _removed, ...rest } = entry
+      return rest as MetadataRoute.Sitemap[number]
+    }
+    return { ...entry, lastModified: dateOnly }
+  })
 }

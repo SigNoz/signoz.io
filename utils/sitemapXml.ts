@@ -1,3 +1,5 @@
+import { MetadataRoute } from 'next'
+
 export type SitemapEntry = {
   url: string
   lastModified?: string | Date
@@ -5,15 +7,39 @@ export type SitemapEntry = {
   priority?: number
 }
 
+function lastModifiedTimestamp(entry: MetadataRoute.Sitemap[number]): number | null {
+  const lm = entry.lastModified
+  if (lm == null) return null
+  const t = new Date(lm).getTime()
+  return Number.isFinite(t) ? t : null
+}
+
+export function compareSitemapEntries(
+  a: MetadataRoute.Sitemap[number],
+  b: MetadataRoute.Sitemap[number]
+): number {
+  const ta = lastModifiedTimestamp(a)
+  const tb = lastModifiedTimestamp(b)
+  const aHas = ta !== null
+  const bHas = tb !== null
+  if (!aHas && !bHas) return 0
+  if (!aHas && bHas) return -1
+  if (aHas && !bHas) return 1
+  return tb - ta
+}
+
+export function toSitemapDateOnly(value: string | Date): string | undefined {
+  const d = value instanceof Date ? value : new Date(value)
+  if (!Number.isFinite(d.getTime())) return undefined
+  return d.toISOString().split('T')[0]
+}
+
 export function entriesToXml(entries: SitemapEntry[]): string {
   const urlTags = entries.map((entry) => {
     const parts = [`    <loc>${entry.url}</loc>`]
     if (entry.lastModified) {
-      const date =
-        entry.lastModified instanceof Date
-          ? entry.lastModified.toISOString().split('T')[0]
-          : String(entry.lastModified).split('T')[0]
-      parts.push(`    <lastmod>${date}</lastmod>`)
+      const date = toSitemapDateOnly(entry.lastModified)
+      if (date) parts.push(`    <lastmod>${date}</lastmod>`)
     }
     if (entry.changeFrequency) {
       parts.push(`    <changefreq>${entry.changeFrequency}</changefreq>`)
