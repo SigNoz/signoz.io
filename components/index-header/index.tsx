@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import Hero from '@/components/ui/Hero'
 import { ArrowRight, Calendar } from 'lucide-react'
@@ -6,7 +8,6 @@ import TrackingLink from '@/components/TrackingLink'
 import { VideoModalPlayer } from './VideoModalPlayer'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
-// Server component with single CTA
 export function Header() {
   const primaryCTA = 'Get Started - Free'
 
