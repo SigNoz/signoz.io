@@ -6,6 +6,7 @@ import featureGraphicColumnarDb from '@/public/img/graphics/homepage/feature-gra
 import featureGraphicFlexibleQuerying from '@/public/img/graphics/homepage/feature-graphic-flexible-querying.svg?url'
 import featureGraphicCorrelation from '@/public/img/graphics/homepage/feature-graphic-correlation.svg?url'
 import { cn } from '../../app/lib/utils'
+import { BarChart2Icon } from 'lucide-react'
 
 const REASONS = [
   {
@@ -47,6 +48,16 @@ const REASONS = [
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
     imgHeight: 337,
+  },
+  {
+    iconTag: 'Observability where you already work. No AI SRE required.',
+    text: 'Connect SigNoz to your coding agents (eg: Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place.',
+    // buttonText: 'Explore',
+    logo: <BarChart2Icon aria-hidden="true" />,
+    img: featureGraphicCorrelation,
+    imgClassName: 'w-full !bg-transparent',
+    imgWidth: 1128,
+    imgHeight: 360,
   },
 ]
 
