@@ -144,7 +144,7 @@ export const productDropdownItems: ProductItem[] = [
       <ShieldPlus className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />
     ),
     description: 'Full-stack monitoring for AI applications',
-    name: 'AI Observability',
+    name: 'AI Observability with MCP',
     order: 12,
   },
 ]
