@@ -1951,7 +1951,7 @@ const docsSideNav = [
         label: 'Overview',
       },
       {
-        label: 'Manage Dashboards',
+        label: 'Working with Dashboards',
         type: 'category',
         isExpanded: false,
         route: '/docs/userguide/manage-dashboards',
