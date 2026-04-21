@@ -3429,8 +3429,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/vercel-to-signoz',
-        label: 'Vercel Traces',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
       {
         type: 'doc',
