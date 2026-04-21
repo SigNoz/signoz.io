@@ -3020,6 +3020,16 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/alert-fatigue-audit',
             label: 'Alert Fatigue Audit',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+            label: 'Dashboard Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/incident-specific-dashboard',
+            label: 'Incident Specific Dashboard Spin-Up',
+          },
         ],
       },
     ],
