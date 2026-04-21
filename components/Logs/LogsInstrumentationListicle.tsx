@@ -53,7 +53,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/userguide/collect_kubernetes_pod_logs': <SiKubernetes className="h-7 w-7 text-blue-600" />,
   '/docs/userguide/collect_docker_logs': <SiDocker className="h-7 w-7 text-blue-500" />,
   '/docs/userguide/heroku_logs_to_signoz': <SiHeroku className="h-7 w-7 text-purple-600" />,
-  '/docs/userguide/vercel-to-signoz': (
+  '/docs/integrations/vercel': (
     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black p-1">
       <SiVercel className="h-7 w-7 text-white" />
     </span>
