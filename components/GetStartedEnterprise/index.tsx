@@ -6,7 +6,8 @@ import Link from 'next/link'
 
 export const GetStartedEnterprise = () => {
   const getStartedId = `btn-get-started-enterprise-bottom`
-  const readDocumentationId = `btn-read-documentation-enterprise-bottom`
+  const selfHostedId = `btn-enterprise-self-hosted-bottom`
+  const byocId = `btn-enterprise-byoc-bottom`
 
   return (
     <div className="bg-[width:50%] bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat">
@@ -28,7 +29,7 @@ export const GetStartedEnterprise = () => {
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId} className="gap-2">
+                <Button type={Button.TYPES.SECONDARY} id={selfHostedId} className="gap-2">
                   <Server size={16} />
                   <Link
                     href="/contact-us/?source=get-started-enterprise-self-hosted"
@@ -38,7 +39,7 @@ export const GetStartedEnterprise = () => {
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId} className="gap-2">
+                <Button type={Button.TYPES.SECONDARY} id={byocId} className="gap-2">
                   <CloudUpload size={16} />
                   <Link
                     href="/contact-us/?source=get-started-enterprise-byoc"
