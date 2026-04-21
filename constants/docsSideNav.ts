@@ -3020,6 +3020,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/alert-fatigue-audit',
             label: 'Alert Fatigue Audit',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/optimize-performance-during-development',
+            label: 'Optimize Performance During Development',
+          },
         ],
       },
     ],
