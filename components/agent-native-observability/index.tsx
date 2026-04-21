@@ -48,9 +48,6 @@ export const AgentNativeObservability = ({ className }: { className?: string }) 
       >
         <div className="bg-blur-ellipse-207 container">
           <div className="grid place-items-center py-8 text-center md:py-28">
-            <p className="text-center text-sm font-medium uppercase tracking-[.05em] text-signoz_vanilla-400">
-              Agent Native Observability
-            </p>
             <p className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
               Introducing Agent Native Observability
             </p>
