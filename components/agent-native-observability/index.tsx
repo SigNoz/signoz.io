@@ -1,4 +1,3 @@
-import React from 'react'
 import { BookOpen, ArrowRight, MessageSquareText, Zap, BookText, Unlock } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
