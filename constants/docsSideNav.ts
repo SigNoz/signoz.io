@@ -3025,6 +3025,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/optimize-performance-during-development',
             label: 'Optimize Performance During Development',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+            label: 'Trace Failing Request',
+          },
         ],
       },
     ],
