@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes = [
     'pricing',
+    'pricing/metrics-cost-estimation',
     'teams',
     'why-signoz',
     'observability-for-ai-native-companies',
@@ -21,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'application-performance-monitoring',
     'trace-funnels',
     'datadog-migration-tool',
+    'datadog-pricing-calculator',
     'upgrade-path',
     'unified-observability',
   ].map((route) => ({

@@ -12,7 +12,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
-  const { faqs, caseStudies, opentelemetries } = await fetchAllCMSContent(deploymentStatus)
+  const { faqs, caseStudies, opentelemetries, comparisons } =
+    await fetchAllCMSContent(deploymentStatus)
 
   let faqRoutes: MetadataRoute.Sitemap = []
   if (faqs) {
@@ -38,6 +39,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   }
 
+  let comparisonRoutes: MetadataRoute.Sitemap = []
+  if (comparisons) {
+    comparisonRoutes = comparisons.data.map((comparison) => ({
+      url: `${siteUrl}/comparisons${comparison.path}/`,
+      lastModified: comparison.date || comparison.updatedAt || comparison.publishedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }))
+  }
+
   const blogRoutes = allBlogs
     .filter((post) => !post.draft && !post?.excludeFromSitemap)
     .map((post) => ({
@@ -56,11 +67,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry'].map((route) => ({
-    url: `${siteUrl}/${route}/`,
-    // lastModified: new Date().toISOString().split('T')[0],
-    changeFrequency: 'weekly' as const,
-  }))
+  const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry', 'comparisons'].map(
+    (route) => ({
+      url: `${siteUrl}/${route}/`,
+      // lastModified: new Date().toISOString().split('T')[0],
+      changeFrequency: 'weekly' as const,
+    })
+  )
 
   const allRoutes: MetadataRoute.Sitemap = [
     ...staticRoutes,
@@ -69,6 +82,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...faqRoutes,
     ...caseStudyRoutes,
     ...opentelemetryRoutes,
+    ...comparisonRoutes,
   ]
 
   allRoutes.sort(compareSitemapEntries)
