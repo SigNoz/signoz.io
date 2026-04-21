@@ -2243,6 +2243,11 @@ const docsSideNav = [
             label: 'JVM',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+            label: 'Kafka',
+          },
+          {
             label: 'Kubernetes',
             type: 'category',
             isExpanded: false,

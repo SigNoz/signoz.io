@@ -207,6 +207,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'JVM Dashboard Template',
   },
   {
+    name: 'Kafka',
+    href: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+    clickName: 'Kafka Dashboard Template',
+  },
+  {
     name: 'Kubernetes',
     href: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
     clickName: 'K8s Infra Metrics Dashboard Template',
