@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   const docRoutes = allDocs
-    .filter((post) => !post.draft)
+    .filter((post) => !post.draft && post.slug !== 'introduction')
     .map((post) => ({
       url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,

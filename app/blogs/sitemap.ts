@@ -70,7 +70,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry', 'comparisons'].map(
     (route) => ({
       url: `${siteUrl}/${route}/`,
-      // lastModified: new Date().toISOString().split('T')[0],
       changeFrequency: 'weekly' as const,
     })
   )

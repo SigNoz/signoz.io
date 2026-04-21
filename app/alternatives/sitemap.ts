@@ -21,7 +21,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'product-comparison/signoz-vs-dynatrace',
   ].map((route) => ({
     url: `${siteUrl}/${route}/`,
-    lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: 'weekly' as const,
   }))
 
