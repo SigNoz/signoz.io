@@ -175,7 +175,7 @@ const videoSchema = {
   name: 'SigNoz Overview - Open Source Observability Platform',
   description: 'Learn how SigNoz helps monitor metrics, logs, and traces in one platform.',
   thumbnailUrl: `${siteUrl}/img/landing/landing_thumbnail.webp`,
-  uploadDate: '2024-05-09',
+  uploadDate: '2024-05-09T00:00:00+00:00',
   duration: 'PT1M54S',
   contentUrl: 'https://vimeo.com/944340217',
   embedUrl: 'https://player.vimeo.com/video/944340217',
