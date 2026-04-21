@@ -1,7 +1,6 @@
 'use client'
 import React from 'react'
 import styles from './styles.module.css'
-import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import DiscussYourProject from '../discuss-your-project'
 import SignozCloudSignUpForm from '../signoz-cloud-signup-form'
 

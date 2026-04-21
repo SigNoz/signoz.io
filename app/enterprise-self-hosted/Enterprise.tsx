@@ -2,9 +2,8 @@
 
 import React from 'react'
 import styles from './styles.module.css'
-import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
-import PricingForm from '../pricing-form'
 import DiscussYourProject from '../discuss-your-project'
+import HubspotCustomForm from '@/components/hubspot-custom-form/HubspotCustomForm'
 
 const ENTERPRISE_DATA = {
   TITLE: 'Enterprise-Grade Observability in your own infrastructure',
@@ -63,13 +62,12 @@ function Enterprise() {
               <div className={'col col--6 margin-vert--md'}>
                 <div className={`card ${styles.enterpriseCard}`}>
                   <div className="card__body">
-                    <HubspotProvider>
-                      <PricingForm
-                        portalId={ENTERPRISE_DATA.PORTAL_ID}
-                        formId={ENTERPRISE_DATA.FORM_ID}
-                        formName={ENTERPRISE_DATA.TITLE}
-                      />
-                    </HubspotProvider>
+                    <HubspotCustomForm
+                      portalId={ENTERPRISE_DATA.PORTAL_ID}
+                      formId={ENTERPRISE_DATA.FORM_ID}
+                      formName={ENTERPRISE_DATA.TITLE}
+                      theme="light"
+                    />
                   </div>
                 </div>
               </div>

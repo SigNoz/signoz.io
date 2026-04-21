@@ -4,6 +4,7 @@ import { ArrowRight, Calendar } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { VideoModalPlayer } from './VideoModalPlayer'
+import { HeroSectionPill } from './HeroSectionPill'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
 // Server component with single CTA
@@ -15,6 +16,13 @@ export function Header() {
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
       <div className="relative mx-auto flex w-full flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 pt-12 text-center md:pt-16">
+        {/* Comment this when the newsletter is not live */}
+        
+        <HeroSectionPill
+          href="https://newsletter.signoz.io/p/our-project-hail-mary-the-observability"
+          text="💌 From our Newsletter: How we observe 21B metric points daily →"
+        />
+        {/* End of newsletter section */}
         <Hero>
           <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
           <span className="hidden md:inline">Observability on Your Terms,</span>
