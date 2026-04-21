@@ -39,15 +39,15 @@ const Header: React.FC = () => {
       },
     },
     {
-      text: 'Read Documentation',
-      href: '/docs/llm-observability/',
+      text: 'Explore SigNoz MCP',
+      href: '/docs/ai/signoz-mcp-server/',
       variant: 'secondary' as const,
       className: 'flex-center',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Observability for AI Native Companies Hero Docs',
         clickLocation: 'Observability for AI Native Companies Hero',
-        clickText: 'Read Documentation',
+        clickText: 'Explore SigNoz MCP',
       },
     },
   ]
