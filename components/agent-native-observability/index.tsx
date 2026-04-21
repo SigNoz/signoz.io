@@ -8,7 +8,7 @@ import { cn } from '../../app/lib/utils'
 const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
   {
     icon: <MessageSquareText size={14} className="text-signoz_vanilla-400" />,
-    iconText: 'NATURAL LANGUAGE OBSERVABILITY',
+    iconText: 'NATURAL LANGUAGE',
     title: 'Talk to your observability stack in English',
     description:
       '"Create a latency dashboard for my payment service". Build with zero manual intervention.',
@@ -18,7 +18,7 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
     iconText: 'END-TO-END DEBUGGING',
     title: 'From alert to root cause to fix. In one session.',
     description:
-      'Quickly connect to Kubernetes, Git, Jira via Cloud Provider CLI like AWS CLI, GCloud CLI.',
+      'Connect to your kubernetes, Git, Jira, Cloud Provider CLIs and use it to find root cause',
   },
   {
     icon: <BookText size={14} className="text-signoz_vanilla-400" />,
@@ -32,7 +32,7 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
     iconText: 'OPEN BY DESIGN',
     title: 'Open by design. No lock-in. Ever.',
     description:
-      'Built on OTel, your instrumentation, your agents, your investigation data is always yours.',
+      'Built on OTel, your instrumentation, your agents. Your investigation data is always yours.',
   },
 ]
 
