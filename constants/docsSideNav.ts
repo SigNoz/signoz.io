@@ -1488,7 +1488,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/integrations/vercel',
+            route: '/docs/userguide/vercel-to-signoz',
             label: 'Vercel',
           },
           {

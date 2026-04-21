@@ -712,12 +712,7 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/vercel_logs_to_signoz/',
-          destination: '/docs/integrations/vercel/',
-          permanent: true,
-        },
-        {
-          source: '/docs/userguide/vercel-to-signoz/',
-          destination: '/docs/integrations/vercel/',
+          destination: '/docs/userguide/vercel-to-signoz/',
           permanent: true,
         },
         {
