@@ -48,9 +48,9 @@ export const AgentNativeObservability = ({ className }: { className?: string }) 
       >
         <div className="bg-blur-ellipse-207 container">
           <div className="grid place-items-center py-8 text-center md:py-28">
-            <p className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
+            <h2 className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
               Introducing Agent Native Observability
-            </p>
+            </h2>
             <p className="max-w-3xl text-center text-xs font-medium text-signoz_vanilla-100 sm:text-base">
               Connect SigNoz MCP to your coding agents (eg: Claude Code, Cursor) and debug
               production issues without leaving your dev environment. Traces, logs, metrics, service
