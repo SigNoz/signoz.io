@@ -97,8 +97,7 @@ export const getPageType = (pathname: string): string => {
 
   // Enterprise pages
   if (normalizedPath === '/enterprise') return 'Enterprise Page'
-  if (normalizedPath === '/enterprise-cloud') return 'Enterprise Cloud Form Page'
-  if (normalizedPath === '/enterprise-self-hosted') return 'Enterprise Self Hosted Form Page'
+  if (normalizedPath === '/contact-us') return 'Contact Us Page'
 
   // Default for any other page
   return 'Other'
