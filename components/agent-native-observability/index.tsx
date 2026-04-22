@@ -18,7 +18,7 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
     iconText: 'END-TO-END DEBUGGING',
     title: 'From alert to root cause to fix. In one session.',
     description:
-      'Connect to your kubernetes, Git, Jira, Cloud Provider CLIs and use it to find root cause.',
+      'Connect to your Kubernetes, Git, Jira, Cloud Provider CLIs and use them to find the root cause.',
   },
   {
     icon: <BookText size={14} className="text-signoz_vanilla-400" />,
