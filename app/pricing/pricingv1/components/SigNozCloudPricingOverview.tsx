@@ -66,18 +66,22 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
     <div className={`py-4 ${className}`}>
       <div className="flex flex-col gap-4">
         {/* Top features section */}
-        <div className="flex items-center justify-between gap-4 font-bold">
+        <div className="flex flex-col items-start justify-between gap-3 font-bold sm:flex-row sm:items-center sm:gap-4">
           <div className="flex items-center gap-2">
-            <CheckCircle className="text-green-500" size={16} />
-            <span className="text-base text-signoz_vanilla-400">No user-based pricing</span>
+            <CheckCircle className="flex-shrink-0 text-green-500" size={16} />
+            <span className="text-sm text-signoz_vanilla-400 sm:text-base">
+              No user-based pricing
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle className="text-green-500" size={16} />
-            <span className="text-base text-signoz_vanilla-400">No host-based pricing</span>
+            <CheckCircle className="flex-shrink-0 text-green-500" size={16} />
+            <span className="text-sm text-signoz_vanilla-400 sm:text-base">
+              No host-based pricing
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle className="text-green-500" size={16} />
-            <span className="text-base text-signoz_vanilla-400">
+            <CheckCircle className="flex-shrink-0 text-green-500" size={16} />
+            <span className="text-left text-sm text-signoz_vanilla-400 sm:text-base">
               No special pricing for custom metrics
             </span>
           </div>
@@ -134,7 +138,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
         </div>
 
         {/* Telemetry types */}
-        <div className="mb-8 mt-4 flex items-center justify-between">
+        <div className="mb-8 mt-4 flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center sm:gap-0">
           <div className="text-left">
             <h4 className="mb-1 text-xl font-medium">Logs</h4>
             <p className="mb-0 text-sm text-gray-400">
@@ -155,7 +159,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               </select>
             </span>
           </div>
-          <div className="w-16 border-t border-dashed border-gray-600"></div>
+          <div className="h-px w-full border-t border-dashed border-gray-600 sm:h-auto sm:w-16"></div>
           <div className="text-left">
             <h4 className="mb-1 text-xl font-medium">Traces</h4>
             <p className="mb-0 text-sm text-gray-400">
@@ -176,7 +180,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               </select>
             </span>
           </div>
-          <div className="w-16 border-t border-dashed border-gray-600"></div>
+          <div className="h-px w-full border-t border-dashed border-gray-600 sm:h-auto sm:w-16"></div>
           <div className="text-left">
             <h4 className="mb-1 text-xl font-medium">Metrics</h4>
             <p className="mb-0 text-sm text-gray-400">
