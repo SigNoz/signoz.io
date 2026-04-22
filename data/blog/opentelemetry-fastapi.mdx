@@ -1,401 +1,359 @@
 ---
-
 title: Implementing OpenTelemetry in FastAPI - A Practical Guide
 slug: opentelemetry-fastapi
-date: 2024-08-22
-tags: [OpenTelemetry, FastAPI, Observability, Monitoring]
-authors: [ankit_anand]
-description: Learn how to implement OpenTelemetry in FastAPI applications for enhanced observability and performance monitoring. A comprehensive guide with practical examples.
+date: 2026-04-21
+tags: [OpenTelemetry, FastAPI, Python]
+authors: [ankit_anand, dhruv_ahuja]
+description: Learn how to instrument FastAPI with OpenTelemetry for production-grade observability. Covers auto-instrumentation, programmatic setup, multi-worker deployments, structured logging, and sampling strategies.
 image: /img/blog/2024/02/opentelemetry-fastapi-cover.webp
-keywords: [opentelemetry,opentelemetry python,opentelemetry fastapi,distributed tracing,observability,fastapi monitoring,fastapi instrumentation,signoz]
-cta_title: "Set Up OpenTelemetry with FastAPI in 15 min with Our Guided Onboarding"
-cta_text: "Monitor FastAPI with OTel"
+keywords: [opentelemetry,opentelemetry python,opentelemetry fastapi,fastapi instrumentation,fastapi monitoring,fastapi observability,python tracing,distributed tracing,signoz]
+
 ---
 
-FastAPI is a modern Python web framework based on standard Python type hints that makes it easy to build APIs. It's a relatively new framework, having been released in 2018 but has now been adopted by big companies like Uber, Netflix, and Microsoft. Using OpenTelemetry, you can monitor your FastAPI applications for performance by collecting telemetry signals like traces.
+FastAPI is a modern, high-performance Python web framework based on Python type hints that makes it easy to develop type-safe applications. Since its launch in 2018, companies of all sizes have quickly adopted it, including giants such as Uber, Netflix, and Microsoft, for building production-grade web applications.
 
-![/img/blog/2024/02/opentelemetry-fastapi-cover.webp](/img/blog/2024/02/opentelemetry-fastapi-cover.webp)
+Using OpenTelemetry, you can instrument your FastAPI applications to collect traces, metrics, and logs, giving you an "inside look" into how these applications behave when serving production workloads.
 
-FastAPI is one of the fastest Python web frameworks currently available and is really efficient when it comes to writing code. It is based on ASGI specification, unlike other Python frameworks like Flask, which is based on WSGI specification. 
+FastAPI is one of the most popular web frameworks because of its stellar developer experience via features like validation on API boundaries and automatic OpenAPI documentation generation.<br />
+By building its web architecture on the async-friendly and scalable ASGI protocol, it achieves better performance than existing frameworks which relied on the WSGI protocol.
 
-This guide will walk you through the process of implementing OpenTelemetry in your FastAPI projects, enabling you to gain deep insights into your application's performance and behavior.
-
-<InlineCTA message="Send your FastAPI traces to SigNoz Cloud in 15 minutes — auto-instrumentation, pre-built dashboards, and guided onboarding included." />
+This guide will walk you through the process of implementing OpenTelemetry in your FastAPI projects, plus some best practices and advanced techniques, enabling you to gain deep insights into your application's performance and behavior.
 
 ## What is OpenTelemetry and Why Use it with FastAPI?
 
-Instrumentation is the biggest challenge engineering teams face when starting out with monitoring their application performance. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is the leading open-source standard that is solving the problem of instrumentation. It is currently an incubating project under the <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >Cloud Native Computing Foundation</a>.
+Instrumentation is the biggest challenge engineering teams face when starting out with monitoring their application performance. [OpenTelemetry](https://signoz.io/opentelemetry/) is the leading open-source standard that is solving the problem of instrumentation. It is currently an incubating project under the <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>.
 
-OpenTelemetry is an open-source observability framework that provides a standardized way to collect and export telemetry data. It offers a unified approach to tracing, metrics, and logging — the three [pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). 
+OpenTelemetry (OTel) is an open-source observability framework that provides a standardized way to collect and export telemetry data. It offers a unified approach to tracing, metrics, and logging — the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/).
 
-OpenTelemetry's data model consists of three core components:
+OpenTelemetry's data model has three core components:
 
 - **Traces**: Represent the journey of a request through your system.
 - **Metrics**: Provide quantitative measurements of your application's performance.
 - **Logs**: Offer contextual information about events in your application.
 
-The integration of OpenTelemetry with FastAPI brings several benefits:
+Integrating OpenTelemetry with FastAPI has several benefits:
 
 1. **Enhanced visibility**: Gain insights into request flows, performance bottlenecks, and error patterns.
 2. **Standardization**: Use a vendor-neutral solution that works with various backends and tools.
 3. **Automatic instrumentation**: Leverage built-in support for common libraries and frameworks.
 4. **Customizability**: Extend and customize telemetry data collection to fit your specific needs.
 
-One of the biggest advantages of using OpenTelemetry is that it is vendor-agnostic. It can export data in multiple formats which you can send to a backend of your choice.
+The key advantage of OpenTelemetry is that it decouples instrumentation from the backend. You instrument once, and can send data to any compatible backend without any vendor lock-in.<br />
+In this guide, we'll use [SigNoz](https://signoz.io/) as the backend for visualizing the telemetry data.
 
-In this article, we will use [SigNoz](https://signoz.io/) as a backend. SigNoz is an open-source APM tool that can be used for both metrics and distributed tracing.
+## Running a FastAPI Application with OpenTelemetry
 
-Let's get started and see how to use OpenTelemetry for a FastAPI application.
+OpenTelemetry is a natural fit for instrumenting ASGI frameworks like FastAPI. Let's set up a sample application and send its telemetry data to SigNoz.
 
-## Running a FastAPI application with OpenTelemetry
+### Prerequisites
 
-OpenTelemetry is a great choice to instrument ASGI frameworks. As it is open-source and vendor-agnostic, the data can be sent to any backend of your choice.
+- Python 3.10 or newer. Download the <a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank">latest version</a>.
+- A [SigNoz Cloud account](https://signoz.io/teams/) for visualizing the telemetry data.
+
+While Python 3.10 works, it is scheduled to reach <a href="https://devguide.python.org/versions/" rel="noopener noreferrer nofollow" target="_blank">end-of-life in October 2026</a>. Given this, we developed the application with Python 3.12 and recommend that you use the same version.
 
 ### Setting up SigNoz
 
-You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
+SigNoz is an OpenTelemetry-native observability platform that provides logs, traces, and metrics in a single pane of glass. Traditional monitoring tools often fall short as they lack correlation across telemetry signals. Telemetry correlation is vital as it helps you debug issues as applications interact across distributed systems.
 
-SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+Now, let's set up your SigNoz instance to ingest data from our demo application.
 
-![/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp](/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp)
+- [Sign up](https://signoz.io/teams/) for a free SigNoz Cloud account.
+- [Follow this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to create ingestion keys.
+- Keep your region and ingestion key values handy for the following steps.
 
-You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
+### Instrumenting a Sample FastAPI Application
 
-{/* <!-- You can get started with SigNoz using just three commands at your terminal.
+To help you understand OpenTelemetry in practice, we have prepared a sample FastAPI app that includes a diverse set of endpoints, including ones that manually instrument business logic. Let's get started.
 
-```jsx
-git clone -b main <https://github.com/SigNoz/signoz.git>
-cd signoz/deploy/
-./install.sh
-
-```
-
-For detailed instructions, you can visit our documentation.
-
-![/img/blog/common/deploy_docker_documentation.webp](/img/blog/common/deploy_docker_documentation.webp)
-
-When you are done installing SigNoz, you can access the UI at: `http://localhost:3301/`
-
-The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
-
-<figure data-zoomable align='center'>
-<img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="Homepage SigNoz dashboard"/>
-<figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
-</figure>
---> */}
-
-### Instrumenting a sample FastAPI application with OpenTelemetry
-
-**Prerequisites**<br></br>
-
-- Python 3.8 or newer
-
-Download the <a href = "https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank" >latest version</a> of Python.
-
-**Step 1. Running sample FastAPI app**<br></br>
-We will be using the FastAPI app at this <a href = "https://github.com/SigNoz/sample-fastAPI-app" rel="noopener noreferrer nofollow" target="_blank" >Github repo</a>. All the required OpenTelemetry packages are contained within the `requirements.txt` file under `app` folder in this sample app. Go to the `app` folder first.
+**Step 1. Clone and set up the application**
 
 ```bash
-git clone <https://github.com/SigNoz/sample-fastAPI-app.git>
-cd sample-fastapi-app/
-cd app
-
+git clone git@github.com:SigNoz/examples.git
+cd fastapi/opentelemetry-fastapi-demo
 ```
 
-It’s a good practice to create virtual environments for running Python apps, so we will be using a virtual python environment for this sample fastAPI app.
-
-### Create a Virtual Environment
+Create and activate a Python virtual environment. Setting up virtual environments prevents dependency conflicts between different Python projects on your system.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-
 ```
 
-**Step 2. Run instructions for sending data to SigNoz**<br></br>
-The `requirements.txt` file contains all the necessary [OpenTelemetry Python](https://signoz.io/docs/instrumentation/opentelemetry-python/) packages needed for instrumentation. In order to install those packages, run the following command:
+**Step 2. Install dependencies**
+
+The `requirements.txt` file contains all the necessary [OpenTelemetry Python](https://signoz.io/docs/instrumentation/opentelemetry-python/) packages. Install them by running:
 
 ```bash
 python -m pip install -r requirements.txt
-
 ```
 
-The dependencies included are briefly explained below:
+The following dependencies enable the OpenTelemetry instrumentation process:
 
-opentelemetry-distro - The distro provides a mechanism to automatically configure some of the more common options for users. It helps to get started with OpenTelemetry auto-instrumentation quickly.
+- `opentelemetry-distro`: The distro provides a mechanism to automatically configure some of the more common options for users. It helps to get started with OpenTelemetry auto-instrumentation quickly.
+- `opentelemetry-exporter-otlp`: This library provides a way to install all OTLP exporters. You will need an exporter to send the data to SigNoz.
 
-opentelemetry-exporter-otlp - This library provides a way to install all OTLP exporters. You will need an exporter to send the data to SigNoz.
+<KeyPointCallout title="Bundled OTel Exporter Packages">
+The `opentelemetry-exporter-otlp` is a convenience wrapper package to install all OTLP exporters. Currently, it installs:
 
-<Admonition>
-💡 The `opentelemetry-exporter-otlp` is a convenience wrapper package to install all OTLP exporters. Currently, it installs:
-
-- opentelemetry-exporter-otlp-proto-http
-- opentelemetry-exporter-otlp-proto-grpc
-- (soon) opentelemetry-exporter-otlp-json-http
+- `opentelemetry-exporter-otlp-proto-http`
+- `opentelemetry-exporter-otlp-proto-grpc`
 
 The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
-</Admonition>
 
-**Step 3. Install application specific packages**<br></br>
-This step is required to install packages specific to the application. This command figures out which instrumentation packages the user might want to install and installs it for them:
+</KeyPointCallout>
+
+**Step 3. Install application-specific instrumentation packages**
+
+This command detects which libraries your application uses and installs the corresponding instrumentation packages:
 
 ```bash
 opentelemetry-bootstrap --action=install
-
 ```
 
-<Admonition>
-Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
-</Admonition>
+Make sure all your application dependencies are installed before running this command. It will not install instrumentation packages for dependencies that aren't already present in your virtual environment.
 
-**Step 4. Configure environment variables to run app and send data to SigNoz**<br></br>
-You're almost done. In the last step, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
+**Step 4. Run the application with OpenTelemetry**
+
+Configure the OTLP exporter environment variables and run the app using the `opentelemetry-instrument` CLI:
 
 ```bash
-OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \\
-OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
-OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
-opentelemetry-instrument <your_run_command>
-
+OTEL_TRACES_EXPORTER=console,otlp \
+OTEL_SERVICE_NAME=sample-fastapi-app \
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<your-region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+opentelemetry-instrument uvicorn app.main:app --host localhost --port 5002
 ```
 
-- `<service_name>` is the name of the service you want
-- `<your_run_command>` can be `python3 app.py` or `python manage.py runserver --noreload`
-- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
+Replace `<your-region>` with the region of your SigNoz workspace (e.g., `us`, `in`) and `<SIGNOZ_INGESTION_KEY>` with your newly created ingestion key.
 
-You will be able to get ingestion details in SigNoz cloud account under settings --> ingestion settings.
+<Figure
+  src="/img/blog/common/signoz-detailed-ingestion-key.webp"
+  alt="Each SigNoz ingestion key can have per-signal ingestion limits and an adjustable expiry date."
+  caption="Each SigNoz ingestion key can have per-signal ingestion limits and an adjustable expiry date."
+/>
 
-<figure data-zoomable align='center'>
-<img src="/img/blog/common/ingestion-key-details.webp" alt="Ingestion key details"/>
-<figcaption><i>Ingestion details in SigNoz dashboard</i></figcaption>
-</figure>
+<KeyPointCallout title="Web Server Configuration">
+Don't run the app in reloader or hot-reload mode because it breaks instrumentation. For example, if you use the `--reload` flag, it enables the reloader mode and breaks OpenTelemetry instrumentation.
 
-<Admonition>
-Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `--reload` or `reload=True`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
-</Admonition>
+Also, we are using `uvicorn` as the web server for our application. Feel free to use `gunicorn` with Uvicorn workers if you want.
+However, as of April 2026, the FastAPI deployment guide recommends <a href="https://fastapi.tiangolo.com/deployment/docker/#base-docker-image" rel="noopener noreferrer nofollow" target="_blank">using Uvicorn's built-in worker support instead of older Gunicorn-based setups</a> because Uvicorn can now manage worker lifecycles on its own.
 
-For our sample FastAPI application, the run command will look like:
+</KeyPointCallout>
+
+Your app is now running at `http://localhost:5002/`. Generate some traffic by hitting the following endpoints:
 
 ```bash
-OTEL_RESOURCE_ATTRIBUTES=service.name=sample-fastapi-app \\
-OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
-OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
-opentelemetry-instrument uvicorn main:app --host localhost --port 5002
-
+curl http://localhost:5002/
+curl http://localhost:5002/ping
+curl "http://localhost:5002/items/2?q=otel"
+curl http://localhost:5002/external-api
+curl -i http://localhost:5002/exception
 ```
 
-<Admonition>
+These endpoints show:
 
-The uvicorn run command with multiple workers is yet to be supported. Alternatively, you can use gunicorn with the worker class `uvicorn.workers.Uvicorn[H11]Worker`
+- Auto-instrumented FastAPI requests
+- Auto-instrumented outbound `httpx` API calls
+- A custom `load-item` span inside `/items/{item_id}`
+- Exception recording and error status on `/exception`
 
-</Admonition>
-
-In that case, the final command will be:
-
-```bash
-OTEL_RESOURCE_ATTRIBUTES=service.name=sample-fastapi-app \\
-OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
-OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
-opentelemetry-instrument gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
-
-```
-
-And, congratulations! You have instrumented your sample FastAPI app. You can check if your app is running or not by hitting the endpoint at `http://localhost:5002/`.
-
-You need to generate some load on your app so that there is data to be captured by OpenTelemetry. You can use locust for this load testing.
+You can use Locust to generate more traffic and observe application behaviour across various data points.
 
 ```bash
 pip3 install locust
-
+locust -f locustfile.py --headless --users 10 --spawn-rate 1 -H http://localhost:5002
 ```
+
+In a few seconds, you should see `sample-fastapi-app` appear in the SigNoz services list. You can click on that entry to open a detailed APM page.
+
+<Figure
+  src="/img/blog/2026/04/opentelemetry-fastapi-services-list.webp"
+  alt="Upon ingesting emitted telemetry data, SigNoz will list our FastAPI application within the Services pane."
+  caption="Upon ingesting emitted telemetry data, SigNoz will list our FastAPI application within the Services pane."
+/>
+
+### Alternate: Run with Docker
+
+If you wish to run the application with Docker, build the Docker image by running:
 
 ```bash
-locust -f locustfile.py --headless --users 10 --spawn-rate 1 -H <http://localhost:5002>
-
-```
-
-Or you can also hit the endpoint `http://localhost:5002/` manually to generate some load.
-
-You will find `sample-fastapi-app` in the list of sample applications being monitored by SigNoz.
-
-<figure data-zoomable align='center'>
-<img src="/img/blog/2021/11/list_of_apps_fastapi.webp" alt="FastAPI in the list of applications"/>
-<figcaption><i>FastAPI in the list of applications being monitored by SigNoz</i></figcaption>
-</figure>
-
-If you want to run the application with a Docker image, refer to the section below for instructions.
-
-### Run with Docker
-
-You can use the below instructions if you want to run your app as a Docker image, below are the instructions.<br></br>
-
-**Build Docker image**
-
-```jsx
 docker build -t sample-fastapi-app .
-
 ```
 
-**Setting environment variables**<br></br>
-You need to set some environment variables while running the application with OpenTelemetry and send collected data to SigNoz. You can do so with the following commands at the terminal:
+Next, run the container with the OpenTelemetry environment variables configured.
 
 ```bash
-# If you have your SigNoz IP Address, replace <IP of SigNoz> with your IP Address.
-
-docker run -d --name fastapi-container \\
--e OTEL_METRICS_EXPORTER='none' \\
--e OTEL_RESOURCE_ATTRIBUTES='service.name=fastapiApp' \\
--e OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
--e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
--e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
--p 5002:5002 sample-fastapi-app
-
+docker run --rm -p 5002:5002 \
+  -e OTEL_SERVICE_NAME=sample-fastapi-app \
+  -e OTEL_RESOURCE_ATTRIBUTES=deployment.environment=docker \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<your-region>.signoz.cloud:443 \
+  -e OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<YOUR_INGESTION_KEY> \
+  -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+  sample-fastapi-app
 ```
 
-If you're using Docker Compose setup:
+Alternatively, you can also use the Docker Compose manifest with pre-configured defaults for the general environment variables. Simply replace the placeholders with actual region and key values, and run the following command.
 
 ```bash
-# If you are running SigNoz through official Docker Compose setup, run `docker network ls` and find ClickHouse network ID. It will be something like this `clickhouse-setup_default`
-# and pass network ID by using `--net <network ID>`
-
-docker run -d --name fastapi-container \\
---net clickhouse-setup_default  \\
---link clickhouse-setup_otel-collector_1 \\
--e OTEL_METRICS_EXPORTER='none' \\
--e OTEL_RESOURCE_ATTRIBUTES='service.name=fastapiApp' \\
--e OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
--e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
--e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
--p 5002:5002 sample-fastapi-app
-
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<your-region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<YOUR_INGESTION_KEY> \
+docker compose up --build
 ```
 
-## Monitor FastAPI application with SigNoz
+## Visualizing FastAPI Application Telemetry with SigNoz
 
-SigNoz makes it easy to visualize metrics and traces captured through OpenTelemetry instrumentation.
+Now that you've interacted with the application and generated some telemetry data, let's understand how OpenTelemetry backends like SigNoz help you measure application performance, dissect how your application processes individual incoming requests, and understand data patterns.
 
-SigNoz comes with out of box RED metrics charts and visualization. RED metrics stands for:
+When you click on an entry in the Services list, SigNoz provides an out-of-the-box RED metrics dashboard for that service. RED in "RED metrics" stands for:
 
-- Rate of requests
-- Error rate of requests
-- Duration taken by requests
+- **Rate** of requests
+- **Error** rate of requests
+- **Duration** taken by requests
 
-<figure data-zoomable align='center'>
-<img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz charts and metrics"/>
-<figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz</i></figcaption>
-</figure>
+<Figure
+  src="/img/blog/2026/04/opentelemetry-fastapi-service-detail.webp"
+  alt="View critical information like percentile latency, rate of operations, error percentage and top endpoints for FastAPI applications via the Service Detail view."
+  caption="View critical information like percentile latency, rate of operations, error percentage and top endpoints for FastAPI applications via the Service Detail view."
+/>
 
-You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
+**Dissecting Individual Requests**
 
-<figure data-zoomable align='center'>
-<img src="/img/blog/common/trace_filter_apply_aggregates.webp" alt="List of traces on SigNoz dashboard"/>
-<figcaption><i>View of traces at a particular timestamp</i></figcaption>
-</figure>
+Inside the Traces view, you can open individual entries. Here, using the flamegraph view, you can visually break down the time taken by each operation for a single request.
 
-You can use flamegraphs to exactly identify the issue causing the latency.
+<Figure
+  src="/img/blog/2026/04/opentelemetry-fastapi-trace-flamegraph.webp"
+  alt="Flamegraphs help understand time taken for each operation in a request, and the context around each operation."
+  caption="Flamegraphs help understand time taken for each operation in a request, and the context around each operation."
+/>
 
-<figure data-zoomable align='center'>
-<img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"/>
-<figcaption><i>View of traces at a particular timestamp</i></figcaption>
-</figure>
+In this case, we can see that the `load_item` operation is responsible for almost all the processing time, and that FastAPI's internal response barely took 0.10 milliseconds.<br />
+Checking the application code, you would notice that we `time.sleep` for a few seconds if the query param is an even number. We've also registered the exact sleep duration to the span as a custom attribute (`demo.io_delay_seconds`).
 
-You can also build custom metrics dashboard for your infrastructure.
+**Understanding Application Behaviour Using Metrics**
 
-<figure data-zoomable align='center'>
-<img src="/img/blog/common/signoz_custom_dashboard-min.webp" alt="Custom metrics dashboard"/>
-<figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
-</figure>
+As part of OpenTelemetry's auto-instrumentation, all instrumented Python apps emit some metrics such as request duration, unless explicitly disabled.<br />
+Using this `request duration` metric, we can understand how each endpoint behaves while serving traffic from our load generation script.
+
+<Figure
+  src="/img/blog/2026/04/opentelemetry-fastapi-request-duration.webp"
+  alt="SigNoz metrics detail view allows you to understand application behavior and persist views for reuse."
+  caption="SigNoz metrics detail view allows you to understand application behavior and persist views for reuse."
+/>
+
+Breaking down traffic by endpoint, we can see consistent traffic patterns emerging. If these patterns change in the future, we'll know that something is wrong.
+
+For example, if the `/external-api` begins exceeding the 5s mark, an engineer must investigate the cause: are we getting rate-limited by the external API, is our FastAPI web server hitting its limits, and so on.
 
 ## Advanced OpenTelemetry Techniques for FastAPI
 
-As you become more comfortable with OpenTelemetry, consider these advanced techniques:
+As you become more comfortable with OpenTelemetry, consider these advanced techniques.
 
-1. **Custom processors**: Modify or filter spans before they're exported:
+1. **Custom processors**: Modify or filter spans before they're exported. You can also inspect a span's details on its completion via <a href="https://opentelemetry-python.readthedocs.io/en/stable/sdk/trace.html#opentelemetry.sdk.trace.SpanProcessor.on_end" rel="noopener noreferrer nofollow" target="_blank">the `on_end` method</a>, which exposes a read-only span instance.
 
-```python
-from opentelemetry.sdk.trace import SpanProcessor
+   ```python
+   from opentelemetry.context import Context
+   from opentelemetry import trace
+   from opentelemetry.sdk.trace import SpanProcessor, Span, ReadableSpan, TracerProvider
 
-class CustomProcessor(SpanProcessor):
-    def on_start(self, span, parent_context):
-        span.set_attribute("custom.attribute", "value")
+   tracer_provider: TracerProvider = trace.get_tracer_provider()
 
-    def on_end(self, span):
-        if span.name == "sensitive_operation":
-            span.set_attribute("sensitive_data", "[REDACTED]")
+   class AppContextSpanProcessor(SpanProcessor):
+       def on_start(self, span: Span, parent_context: Context | None = None):
+           common_attributes = {"app.environ": "canary", "app.release": "2026.04", "app.contract_type": "ai_cloud"}
+           span.set_attributes(common_attributes)
 
-trace.get_tracer_provider().add_span_processor(CustomProcessor())
+           # assuming that out of many, you have a few attributes that need modification
+           if span.name == "sensitive_operation":
+               span.set_attribute("app.contract_type", "[REDACTED]")
 
-```
+       def on_end(self, span: ReadableSpan):
+           print("on span end:", span.name, span.attributes)
 
-1. **Error tracking**: Capture and analyze exceptions:
+   tracer_provider.add_span_processor(AppContextSpanProcessor())
+   ```
 
-```python
-from fastapi import HTTPException
+2. **Error tracking**: Capture and track exceptions. Keep in mind that recording exceptions (`span.record_exception(exc)`) for _all errors_ will significantly increase the amount of telemetry your [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/) has to store. Instead, selectively capture exceptions to control telemetry noise and costs.
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
-    span = trace.get_current_span()
-    span.set_status(trace.Status(trace.StatusCode.ERROR, str(exc)))
-    span.record_exception(exc)
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+   ```python
+   from fastapi import FastAPI
+   from fastapi.responses import JSONResponse
+   from opentelemetry import trace
+   from opentelemetry.trace import Status, StatusCode
 
-```
+   app = FastAPI()
 
-1. **Integrating with FastAPI's dependency injection**:
+   @app.exception_handler(Exception)
+   async def http_exception_handler(request, exc):
+       span = trace.get_current_span()
+       span.set_status(Status(StatusCode.ERROR, str(exc)))
+       span.record_exception(exc)
+
+       # convert trace_id to hex code
+       trace_id = format(span.get_span_context().trace_id, "032x")
+       return JSONResponse(status_code=500, content={"message": "something went wrong.", "request_id": trace_id})
+   ```
+
+   When serving enterprise clients or when running your FastAPI applications in secure environments, you can also choose to include the `trace_id` within error responses, to help users share more context for particular failures.
+
+3. **Integrating with FastAPI's dependency injection**: You can use FastAPI's <a href="https://fastapi.tiangolo.com/reference/dependencies/#fastapi.Depends" rel="noopener noreferrer nofollow" target="_blank">_dependency functions_</a> to build reusable, instrumented "pieces" that capture key operations performed within their `yield` scope.
 
 ```python
 from fastapi import Depends
 from opentelemetry import trace
 
 async def get_traced_db():
+    db = ...
     with trace.get_tracer(__name__).start_as_current_span("database_operation"):
-        # Your database connection logic here
+        # Yield an instrumented database dependency.
         yield db
 
 @app.get("/items")
-async def read_items(db = Depends(get_traced_db)):
+async def read_items(db=Depends(get_traced_db)):
+    query = "SELECT 1;"
     # Use the traced database connection
     return await db.fetch_all(query)
-
 ```
 
-1. **Optimizing OpenTelemetry overhead**: For high-traffic applications, consider:
-    - Using a more aggressive sampling strategy.
-    - Batching span exports to reduce network overhead.
-    - Monitoring the performance impact of OpenTelemetry itself.
+4. **Excluding health check endpoints**: Endpoints such as health checks and readiness probes generate noise in your traces. Exclude them by setting the environment variable `OTEL_PYTHON_FASTAPI_EXCLUDED_URLS="health,ping"`.
 
-These advanced techniques allow you to fine-tune OpenTelemetry's behavior, ensuring that you collect the most relevant data while minimizing overhead.
+   This will exclude the `/health` and the `/ping` endpoints. Each comma-separated value is treated as a regex pattern, meaning you can build more complex patterns to manage the exceptions list.
+
+5. **Optimizing OpenTelemetry overhead**: For high-traffic applications, consider:
+   - Using a more aggressive sampling strategy.
+   - Batching span exports to reduce network overhead.
+   - Monitoring the performance impact of OpenTelemetry itself.
+
+These advanced techniques allow you to fine-tune OpenTelemetry's behavior, ensuring that you collect the most relevant data while minimizing noise.
 
 ## OpenTelemetry Best Practices for FastAPI Microservices
 
-Implementing OpenTelemetry in a FastAPI microservices architecture requires special considerations to ensure effective observability across your distributed system. This section covers best practices and strategies to optimize your OpenTelemetry implementation in a FastAPI microservices environment.
+Implementing OpenTelemetry in a FastAPI microservices architecture requires special considerations to ensure effective observability across your distributed system. This section covers best practices and strategies to optimize your instrumentation logic for modern application systems.
 
 ### 1. Correlating Traces Across Microservices
 
-Distributed tracing is crucial in a microservices architecture. To effectively correlate traces across multiple FastAPI microservices:
+Distributed tracing is crucial in a microservices architecture. To effectively correlate traces across multiple FastAPI microservices, consider:
 
-a) Use consistent service names:
+a) **Use consistent service names:** Consistent and unique service names ensure that telemetry generated from each application can be correctly correlated. This is crucial for modern distributed systems where an application might interact with multiple other services on a per-request basis.
 
-```python
-from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
-
-resource = Resource(attributes={"service.name": "user-service"})
-tracer = trace.get_tracer(__name__, resource=resource)
-
+```bash
+export OTEL_SERVICE_NAME="user-service"
+# alternatively,
+export OTEL_RESOURCE_ATTRIBUTES="service.name=user-service"
 ```
 
-b) Propagate context in HTTP headers:
+b) **Propagate trace context in HTTP headers:** While auto-instrumentation takes care of trace context propagation in most cases, you can manually inject the trace context to outgoing requests if you _are not_ using auto-instrumentation for HTTP clients like `requests` or `httpx`.
 
 ```python
 from fastapi import FastAPI, Request
+from opentelemetry import trace
 from opentelemetry.propagate import extract, inject
 import httpx
 
 app = FastAPI()
+tracer = trace.get_tracer(__name__)
 
 @app.get("/user/{user_id}")
 async def get_user(request: Request, user_id: int):
@@ -404,74 +362,98 @@ async def get_user(request: Request, user_id: int):
         async with httpx.AsyncClient() as client:
             headers = {}
             inject(headers)
-            response = await client.get(f"<http://auth-service/validate/{user_id}>", headers=headers)
+            response = await client.get(f"http://auth-service/validate/{user_id}", headers=headers)
         # Process response
-
 ```
 
 ### 2. Optimizing OpenTelemetry Performance
 
-In a microservices architecture, the overhead of telemetry can accumulate. To optimize performance:
+In a microservices architecture, telemetry generation can accumulate and impact application performance. Sampling and tweaking the batching logic can help you reduce this operational overhead during telemetry exports.
 
-a) Use sampling to reduce data volume:
+a) **Use sampling to reduce data volume:** Sampling defines how many traces are exported based on a given configuration. You can configure built-in samplers using environment variables.
 
-```python
-from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
+For example, to sample 10% of traces while respecting upstream sampling decisions, you can use the `parentbased_traceidratio` sampler:
 
-sampler = ParentBased(root=TraceIdRatioBased(0.1))  # Sample 10% of traces
-trace.get_tracer_provider().set_sampler(sampler)
-
+```bash
+export OTEL_TRACES_SAMPLER="parentbased_traceidratio"
+export OTEL_TRACES_SAMPLER_ARG="0.1"
 ```
 
-b) Batch span exports:
+If you're considering sampling strategies, make sure to go through the OpenTelemetry Python SDK's <a href="https://opentelemetry-python.readthedocs.io/en/latest/sdk/trace.sampling.html" rel="noopener noreferrer nofollow" target="_blank">documentation on sampling</a> once, it will help you build a logical base and choose the right strategy for your application.
+
+b) **Batch span exports:** While the OTel SDK automatically batches telemetry data during export, you can further tweak the values using the `OTEL_BSP_MAX_EXPORT_BATCH_SIZE`, `OTEL_BSP_MAX_QUEUE_SIZE`, and the `OTEL_BSP_SCHEDULE_DELAY` environment variables.
+
+Benchmarking will help you find a configuration that performs well for your workload. You can understand what these environment variables mean in our [detailed breakdown here](https://signoz.io/blog/otel-environment-variables/#configuring-batching-of-spans).
+
+### 3. Configuring Application-Level Sampling
+
+For certain use cases, you might need sampling that keeps the application context in mind. For example, you may want to ensure requests that belong to high priority users are always traced while free requests are heavily sampled down.
+
+To implement such behavior, you can define custom samplers that "cherry-pick" the exact traces you wish to sample, discarding the rest.
+
+<KeyPointCallout title="Need for Manual Instrumentation">
+
+While OpenTelemetry heavily promotes "zero-code" configuration via environment variables (like `OTEL_TRACES_SAMPLER`), relying on them for **custom** samplers in Python requires packaging your sampler and registering it as a system entry point (e.g., via `setup.py`).
+
+This is often not feasible for modern web applications. A better approach is to utilize manual instrumentation, which marginally simplifies this configuration process.
+
+</KeyPointCallout>
+
+When building a custom sampler, it is recommended to wrap it in a `ParentBased` sampler. This ensures that if an upstream service decides to sample a request, your application respects that decision and doesn't accidentally drop child spans, which would otherwise result in broken traces.
 
 ```python
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.sampling import Sampler, SamplingResult, Decision, ParentBased
 
-exporter = OTLPSpanExporter(endpoint="<http://collector:4317>")
-span_processor = BatchSpanProcessor(exporter)
-trace.get_tracer_provider().add_span_processor(span_processor)
+class AppContextSampler(Sampler):
+    def should_sample(self, parent_context, trace_id, name, kind, attributes, links=None, trace_state=None):
+        # "Cherry-pick" traces if they have a specific high_priority attribute.
+        if attributes is not None and attributes.get("high_priority"):
+            return SamplingResult(Decision.RECORD_AND_SAMPLE, attributes=attributes, trace_state=trace_state)
 
+        return SamplingResult(Decision.DROP, trace_state=trace_state)
+
+    def get_description(self):
+        return "AppContextSampler"
+
+# Register the sampler in the provider and set it as the default trace provider application-wide.
+sampler = ParentBased(root=AppContextSampler())
+provider = TracerProvider(sampler=sampler)
+trace.set_tracer_provider(provider)
 ```
 
-### 3. Configuring Sampling and Data Retention
+We can see it in action by running a script like the one below, which performs the necessary scaffolding to export trace data manually, and generates two root spans — with and without the required attribute.
 
-Effective sampling and data retention strategies are crucial in a microservices environment:
+<Figure
+  src="/img/blog/2026/04/opentelemetry-fastapi-custom-sampler.webp"
+  alt="Developers can write custom trace samplers that meet their specific sampling requirements."
+  caption="Developers can write custom trace samplers that meet their specific sampling requirements."
+/>
 
-a) Use adaptive sampling:
+Running the script, we can validate that the OTel SDK excludes the second span during telemetry export.
 
-```python
-from opentelemetry.sdk.trace.sampling import ParentBased, RateLimitingSampler
-
-sampler = ParentBased(root=RateLimitingSampler(100))  # 100 samples per second
-trace.get_tracer_provider().set_sampler(sampler)
-
-```
-
-b) Implement trace-based sampling decisions:
-
-```python
-class CustomSampler(Sampler):
-    def should_sample(self, context, trace_id, name, kind, attributes, links, trace_state):
-        if "high_priority" in attributes:
-            return SamplingResult(SamplingDecision.RECORD_AND_SAMPLE)
-        return SamplingResult(SamplingDecision.DROP)
-
-sampler = CustomSampler()
-trace.get_tracer_provider().set_sampler(sampler)
-
-```
+<Figure
+  src="/img/blog/2026/04/opentelemetry-fastapi-sampler-output.webp"
+  alt="The OpenTelemetry SDK respects the custom sampler's decision, dropping traces without the required attribute."
+  caption="The OpenTelemetry SDK respects the custom sampler's decision, dropping traces without the required attribute."
+/>
 
 ### 4. Custom Metrics and Spans for FastAPI Microservices
 
-Implement custom metrics and spans that provide valuable insights for FastAPI microservices:
+To best derive value from OpenTelemetry, implement custom metrics and spans that provide business-level insights from your applications.<br />
+These are important because auto-instrumentation only captures "actions" performed by the instrumented libraries like FastAPI or Redis. The responsibility to observe business logic remains with the application developers.
 
-a) Track inter-service communication:
+Below are a few simple examples:
+
+a) **Track inter-service communication:** Tracking statistics during downstream API calls can help track communication patterns.
 
 ```python
-from opentelemetry import metrics
+from opentelemetry import metrics, trace
 
+tracer = trace.get_tracer(__name__)
 meter = metrics.get_meter(__name__)
+
 request_counter = meter.create_counter(
     name="inter_service_requests",
     description="Number of requests between services",
@@ -482,60 +464,41 @@ async def call_service(service_name: str):
     with tracer.start_as_current_span(f"call_{service_name}"):
         # Make the service call
         request_counter.add(1, {"target_service": service_name})
-
 ```
 
-b) Monitor FastAPI route performance:
+b) **Use middleware to capture per-request stats:** You can add contextual information for a request, such as events and attributes, at the middleware layer.
 
 ```python
 from fastapi import FastAPI, Request
+from opentelemetry import trace
 from time import time
 
 app = FastAPI()
 
 @app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
+async def handle_request_metadata(request: Request, call_next):
     start_time = time()
     response = await call_next(request)
     process_time = time() - start_time
-    with tracer.start_as_current_span("http_request"):
-        tracer.add_event("process_time", {"value": process_time})
+
+    span = trace.get_current_span()
+    span.add_event("process_time", {"value": process_time})
+    span.set_attribute("served_by", f"{app.title}-{app.version}")
+
     return response
-
-```
-
-c) Track database operations:
-
-```python
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from sqlalchemy import create_engine
-
-engine = create_engine("postgresql://user:password@localhost/dbname")
-SQLAlchemyInstrumentor().instrument(engine=engine)
-
 ```
 
 By implementing these best practices, you'll be able to effectively monitor and optimize your FastAPI microservices using OpenTelemetry. This approach provides deep insights into your distributed system's performance and helps identify bottlenecks and issues across service boundaries.
 
 ## Conclusion
 
-OpenTelemetry makes it very convenient to instrument your FastAPI application. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. As SigNoz offers a full-stack observability tool, you don't have to use multiple tools for your monitoring needs.
-
-You can try out SigNoz by visiting its GitHub repo 👇
-
-![/img/blog/common/signoz_github.webp](/img/blog/common/signoz_github.webp)
-
-If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
-
-![/img/blog/common/join_slack_cta.webp](/img/blog/common/join_slack_cta.webp)
+With this guide, you now have the fundamental knowledge to instrument FastAPI applications with OpenTelemetry. You now also understand how convenient OTel makes it to delve deeper into what _actually happens_ under the hood of your web applications.
 
 ---
 
-Read more about OpenTelemetry 👇
+[SigNoz](https://signoz.io/) is an OpenTelemetry-native platform that visualizes traces, metrics, and logs in a single pane, which helps debug complex issues or understand the flow of data across distributed environments.
 
-[Things you need to know about OpenTelemetry tracing](https://signoz.io/blog/opentelemetry-tracing/)
-
-[OpenTelemetry collector - architecture and configuration guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+If you're interested in trying out SigNoz for your FastAPI applications, [sign up](https://signoz.io/teams/) for a 30-day free trial (no credit card required).
 
 ## FAQs
 
@@ -566,45 +529,3 @@ OpenTelemetry offers several advantages:
 4. Extensible: Allows for custom instrumentation and exporters.
 
 While other solutions may offer easier setup or more specialized features, OpenTelemetry's flexibility and standardization make it a strong choice for many FastAPI applications.
-
-### What is OpenTelemetry and why should I use it with FastAPI?
-
-OpenTelemetry is an open-source observability framework that provides a standardized way to collect and export telemetry data (traces, metrics, and logs). It's beneficial for FastAPI applications because it offers enhanced visibility into request flows, standardization across different backends, automatic instrumentation, and customizability to fit specific needs.
-
-### How do I implement OpenTelemetry in my FastAPI application?
-
-To implement OpenTelemetry in your FastAPI app:
-
-1. Install necessary packages ([opentelemetry-distro](https://signoz.io/opentelemetry/python-auto-instrumentation/), opentelemetry-exporter-otlp)
-2. Use opentelemetry-bootstrap to install application-specific instrumentation
-3. Configure environment variables for OTLP exporters
-4. Run your FastAPI app with the opentelemetry-instrument command
-
-### What are the key components of OpenTelemetry's data model?
-
-OpenTelemetry's data model consists of three core components:
-
-1. Traces: Represent the journey of a request through your system
-2. Metrics: Provide quantitative measurements of your application's performance
-3. Logs: Offer contextual information about events in your application
-
-### Can I use OpenTelemetry with FastAPI in a Docker environment?
-
-Yes, you can use OpenTelemetry with FastAPI in a Docker environment. You'll need to set the appropriate environment variables in your Docker run command or docker-compose file to configure [OpenTelemetry exporters](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) and other settings.
-
-### How can I visualize the data collected by OpenTelemetry from my FastAPI application?
-
-You can use various backends to visualize OpenTelemetry data. The article recommends using SigNoz, an open-source APM tool that provides out-of-the-box RED (Rate, Error, Duration) metrics charts and [distributed tracing](https://signoz.io/blog/distributed-tracing/) visualization. It allows you to monitor application latency, requests per second, error percentage, and analyze individual traces using flamegraphs.
-
-### What are some advanced OpenTelemetry techniques for FastAPI?
-
-Advanced OpenTelemetry techniques for FastAPI include:
-
-1. Using custom processors to modify or filter spans
-2. Implementing error tracking to capture and analyze exceptions
-3. Integrating with FastAPI's dependency injection system
-4. Optimizing OpenTelemetry overhead for high-traffic applications through sampling strategies and batching span exports
-
-### How does OpenTelemetry impact the performance of my FastAPI application?
-
-OpenTelemetry generally adds minimal overhead to FastAPI applications. The exact impact depends on factors like sampling rate and export frequency. For most applications, the performance hit is negligible compared to the insights gained. However, high-traffic applications may require careful tuning to optimize performance.

@@ -387,7 +387,7 @@ export const GETTING_STARTED_CARDS = [
         in your infra - Self-host via Helm chart runs in your own VPC or air-gapped environment. Or
         you can bring your own cloud.
         <TrackingLink
-          href="/enterprise-cloud/"
+          href="/contact-us/?source=why-signoz-page-signoz-offerings"
           clickType="Secondary CTA"
           clickName="Getting Started Section Use SigNoz Cloud or host in your infrastructure"
           clickLocation="Why SigNoz Page"
