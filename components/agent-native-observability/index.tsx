@@ -31,8 +31,7 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
     icon: <Unlock size={14} className="text-signoz_vanilla-400" />,
     iconText: 'OPEN STANDARDS',
     title: 'Based on Open Standards. No lock-in. Ever.',
-    description:
-      'Coding agents work much better as we are based on OpenTelemetry which agents are already trained on.',
+    description: 'Built on OpenTelemetry - the standard coding agents are already trained on.',
   },
 ]
 
