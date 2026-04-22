@@ -11,43 +11,31 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-It is a common practice to back up telemetry data for longer durations due to
-compliance and audit purposes. You can use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter" target="_blank" rel="noopener noreferrer nofollow">AWS S3 Exporter</a> to
-retain OpenTelemetry data as long as you need.
+It is a common practice to back up telemetry data for longer durations due to compliance and audit purposes. You can use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter" target="_blank" rel="noopener noreferrer nofollow">AWS S3 Exporter</a> to retain OpenTelemetry data as long as you need.
 
 ## How It Works
 
-The OpenTelemetry Collector supports multiple exporters per pipeline. Adding
-`awss3` alongside the existing `otlp` exporter means data fans out to both
-SigNoz and S3 independently. If one exporter fails, the other is unaffected.
-For a full overview of Collector configuration, see the
-[OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration) page.
+The OpenTelemetry Collector supports multiple exporters per pipeline. Adding `awss3` alongside the existing `otlp` exporter means data fans out to both SigNoz and S3 independently. If one exporter fails, the other is unaffected. For a full overview of Collector configuration, see the [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration) page.
 
 ## Limitations
 
 - Data in AWS S3 is not accessible in the SigNoz UI
 - You need a third-party tool like **Amazon Athena** to query data
-- Use separate `s3_prefix` values per signal to keep logs, metrics, and traces
-  organized in S3
 
-<KeyPointCallout title="Self-hosted and don't need infinite retention?" defaultCollapsed={true}>
+<KeyPointCallout title="Self-hosted and want queryable S3 storage?" defaultCollapsed={true}>
 
-If you want to query data stored in AWS S3 using **SigNoz** and do not
-have the requirement for infinite or very long retention period, then use
-[SigNoz's AWS S3 Retention](https://signoz.io/docs/userguide/retention-period#configuring-cold-storage---amazon-s3) instead.
+Use [Cold Storage to Amazon S3](https://signoz.io/docs/userguide/retention-period#configuring-cold-storage---amazon-s3) instead. It tiers older data to S3 through ClickHouse, so it remains queryable in the SigNoz UI. Retention is still bounded — not infinite.
 
 </KeyPointCallout>
 
 ## Prerequisites
 
 - Running instance of OpenTelemetry Collector with `otelcol-contrib` distribution (if not running already, see the [SigNoz installation guide](https://signoz.io/docs/install/) or the <a href="https://opentelemetry.io/docs/collector/installation/" target="_blank" rel="noopener noreferrer nofollow">OTel Collector installation docs</a> for standalone setups)
-- Access to AWS S3 Bucket either using AWS credentials as environment variables
-  or IAM roles for ECS tasks or EC2 instances (for more details, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter#aws-credential-configuration" target="_blank" rel="noopener noreferrer nofollow">AWS credential configuration docs</a>)
+- Access to AWS S3 Bucket either using AWS credentials as environment variables or IAM roles for ECS tasks or EC2 instances (for more details, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/awss3exporter#aws-credential-configuration" target="_blank" rel="noopener noreferrer nofollow">AWS credential configuration docs</a>)
 
 ## Adding AWS S3 Exporter
 
-Add the following snippet to your existing `otel-collector-config.yaml`. This
-example exports logs to S3:
+Add the following snippet to your existing `otel-collector-config.yaml`. This example exports logs to S3:
 
 ```yaml:otel-collector-config.yaml
 exporters:
@@ -78,8 +66,7 @@ service:
 ### Exporting All Signals (Logs, Metrics, and Traces)
 </ToggleHeading>
 
-To back up all three signals, use named instances with different prefixes.
-Append these exporters and update each pipeline in your existing config:
+To back up all three signals, use named instances with different prefixes. Append these exporters and update each pipeline in your existing config:
 
 ```yaml:otel-collector-config.yaml
 exporters:
@@ -129,10 +116,15 @@ service:
 
 The exporter supports several optional fields for production use:
 
-- `compression`: `none` (default), `gzip`, or `zstd`. Use `gzip` or `zstd` in production to reduce storage costs.
+Top-level options on the exporter (siblings of `s3uploader`):
+
 - `marshaler`: output format. Default: `otlp_json` (queryable with Amazon Athena). `otlp_proto` is more compact but harder to query.
+
+Options nested under `s3uploader`:
+
+- `compression`: `none` (default), `gzip`, or `zstd`. Use `gzip` or `zstd` in production to reduce storage costs.
 - `s3_partition_format`: strftime-based path for time partitioning. Default: `year=%Y/month=%m/day=%d/hour=%H/minute=%M`
-- `storage_class`: S3 storage class. Default: `STANDARD`. Valid values: `STANDARD`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`. Use `STANDARD_IA` or `INTELLIGENT_TIERING` for archival data to reduce costs.
+- `storage_class`: S3 storage class. Default: `STANDARD`. Valid values: `STANDARD`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`. Use `STANDARD_IA` or `INTELLIGENT_TIERING` for archival data to reduce costs (see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html" target="_blank" rel="noopener noreferrer nofollow">AWS S3 storage classes</a>).
 - `role_arn`: IAM role ARN to assume via STS, instead of static credentials.
 - `endpoint`: custom S3-compatible endpoint URL for MinIO, LocalStack, or other stores.
 - `s3_force_path_style`: set to `true` when using non-AWS S3-compatible stores.
@@ -142,6 +134,7 @@ Example with all optional fields:
 ```yaml:otel-collector-config.yaml
 exporters:
   awss3/logs:
+    marshaler: otlp_json
     s3uploader:
       region: '<region>'
       s3_bucket: '<bucket-name>'
@@ -152,7 +145,6 @@ exporters:
       role_arn: '<iam-role-arn>'
       endpoint: '<s3-compatible-endpoint>'
       s3_force_path_style: true
-    marshaler: otlp_json
 ```
 
 Replace the placeholders:
@@ -164,10 +156,9 @@ For the full list of configuration options, see the <a href="https://github.com/
 
 </details>
 
-## Validate
+## Validate in S3
 
-After deploying your updated Collector config, verify that objects are appearing
-in S3:
+This data will not appear in the SigNoz UI — verify delivery directly in S3. After deploying your updated Collector config, check that objects are appearing in your bucket:
 
 ```bash
 aws s3 ls s3://<bucket-name>/logs/ --recursive | head
@@ -179,8 +170,9 @@ You should see keys following the partition pattern:
 logs/year=2024/month=01/day=15/hour=10/minute=30/<unique-id>.json.gz
 ```
 
-If no objects appear, check the Collector logs for S3 permission errors or
-configuration issues.
+The `.json.gz` extension comes from the default `marshaler: otlp_json` combined with `compression: gzip`. Changing either option changes the extension.
+
+If no objects appear, check the Collector logs for S3 permission errors or configuration issues.
 
 <details>
 <ToggleHeading>
