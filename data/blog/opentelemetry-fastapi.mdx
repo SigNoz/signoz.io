@@ -70,7 +70,7 @@ To help you understand OpenTelemetry in practice, we have prepared a sample Fast
 
 ```bash
 git clone git@github.com:SigNoz/examples.git
-cd fastapi/opentelemetry-fastapi-demo
+cd examples/fastapi/opentelemetry-fastapi-demo
 ```
 
 Create and activate a Python virtual environment. Setting up virtual environments prevents dependency conflicts between different Python projects on your system.
@@ -143,7 +143,7 @@ However, as of April 2026, the FastAPI deployment guide recommends <a href="http
 
 </KeyPointCallout>
 
-Your app is now running at `http://localhost:5002/`. Generate some traffic by hitting the following endpoints:
+Your app is now running at `http://localhost:5002/`. Generate some traffic by hitting the following endpoints in a new terminal window:
 
 ```bash
 curl http://localhost:5002/
@@ -161,6 +161,7 @@ These endpoints show:
 - Exception recording and error status on `/exception`
 
 You can use Locust to generate more traffic and observe application behaviour across various data points.
+With the app running in the background, re-activate your virtual environment and start Locust with the shipped configuration:
 
 ```bash
 pip3 install locust
@@ -189,8 +190,8 @@ Next, run the container with the OpenTelemetry environment variables configured.
 docker run --rm -p 5002:5002 \
   -e OTEL_SERVICE_NAME=sample-fastapi-app \
   -e OTEL_RESOURCE_ATTRIBUTES=deployment.environment=docker \
-  -e OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<your-region>.signoz.cloud:443 \
-  -e OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<YOUR_INGESTION_KEY> \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<your-region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<YOUR_INGESTION_KEY>" \
   -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
   sample-fastapi-app
 ```
@@ -198,8 +199,8 @@ docker run --rm -p 5002:5002 \
 Alternatively, you can also use the Docker Compose manifest with pre-configured defaults for the general environment variables. Simply replace the placeholders with actual region and key values, and run the following command.
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<your-region>.signoz.cloud:443 \
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<YOUR_INGESTION_KEY> \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<your-region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<YOUR_INGESTION_KEY>" \
 docker compose up --build
 ```
 
