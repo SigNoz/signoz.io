@@ -1,5 +1,5 @@
 ---
-date: 2026-04-17
+date: 2026-04-23
 id: tail-sampling
 title: Tail Sampling
 description: Sample traces at the collector after all spans arrive, using policies based on status, latency, span name, and more.
@@ -27,23 +27,11 @@ Use tail sampling when your sampling decision depends on trace-level data (error
 
 The processor buffers incoming spans in memory, grouped by trace ID. When `decision_wait` expires, it evaluates the buffered trace against your policies. A trace is sampled if **any** policy returns a sample decision. `drop` policies override sample decisions.
 
-Set `decision_wait_after_root_received` to accelerate evaluation once the root span arrives (disabled by default).
-
-Key config options:
-
-| Option                              | Default | Description                                                                   |
-| ----------------------------------- | ------- | ----------------------------------------------------------------------------- |
-| `decision_wait`                     | `30s`   | Wait time before evaluating a trace                                           |
-| `decision_wait_after_root_received` | `0s`    | Additional wait after root span arrives; `0s` disables root-span acceleration |
-| `num_traces`                        | `50000` | Maximum traces buffered in memory                                             |
-| `expected_new_traces_per_sec`       | `0`     | Hint for pre-allocating memory                                                |
-| `sample_on_first_match`             | `false` | Short-circuit policy evaluation as soon as any policy matches, without evaluating remaining policies |
-
 ## Setup
 
-Add `tail_sampling` to your collector config and wire it into the traces pipeline:
+Add `tail_sampling` to your collector config and wire it into the traces pipeline. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor" target="_blank" rel="noopener noreferrer nofollow">official processor docs</a> for the full config reference.
 
-```yaml
+```yaml:config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
@@ -70,6 +58,16 @@ service:
   When running multiple collector instances, all spans for a trace ID must arrive at the same instance. Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/loadbalancingexporter" target="_blank" rel="noopener noreferrer nofollow">load balancing exporter</a> in a first collector layer to route by trace ID, then apply tail sampling in a second layer.
 </Admonition>
 
+## Configuration reference
+
+| Option                              | Default | Description                                                                   |
+| ----------------------------------- | ------- | ----------------------------------------------------------------------------- |
+| `decision_wait`                     | `30s`   | Wait time before evaluating a trace                                           |
+| `decision_wait_after_root_received` | `0s`    | Additional wait after root span arrives; `0s` disables root-span acceleration |
+| `num_traces`                        | `50000` | Maximum traces buffered in memory                                             |
+| `expected_new_traces_per_sec`       | `0`     | Hint for pre-allocating memory                                                |
+| `sample_on_first_match`             | `false` | Short-circuit policy evaluation as soon as any policy matches, without evaluating remaining policies |
+
 ## Policies
 
 Each policy defines a condition for keeping a trace. Policies are OR-ed: a trace is sampled if any policy matches. A `drop` policy overrides any `sample` decision.
@@ -78,7 +76,7 @@ Each policy defines a condition for keeping a trace. Policies are OR-ed: a trace
 
 Sample traces containing at least one error span. Traces without errors are implicitly not sampled.
 
-```yaml
+```yaml:config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
@@ -94,7 +92,7 @@ processors:
 
 Sample traces where total duration exceeds a threshold.
 
-```yaml
+```yaml:config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
@@ -108,7 +106,7 @@ processors:
 
 Set `upper_threshold_ms` to keep only traces within a duration band:
 
-```yaml
+```yaml:config.yaml
 - name: keep-medium-traces
   type: latency
   latency:
@@ -120,7 +118,7 @@ Set `upper_threshold_ms` to keep only traces within a duration band:
 
 The `drop` policy prevents sampling when any sub-policy matches. Use it to exclude noisy low-value traces by URL path.
 
-```yaml
+```yaml:config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
@@ -137,9 +135,9 @@ processors:
                 values: [/health, /ready, /live, /metrics]
 ```
 
-To match with a single regex instead of exact values:
+To match with a single regex instead of exact values (uses <a href="https://github.com/google/re2/wiki/Syntax" target="_blank" rel="noopener noreferrer nofollow">RE2 syntax</a>):
 
-```yaml
+```yaml:config.yaml
 - name: match-probe-paths-regex
   type: string_attribute
   string_attribute:
@@ -154,7 +152,7 @@ The `string_attribute` policy matches span and resource attributes, not the span
 
 Drop all traces that contain a span named `health-check`:
 
-```yaml
+```yaml:config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
@@ -172,9 +170,9 @@ processors:
                   - 'name == "health-check"'
 ```
 
-Use regex to match a pattern across multiple span names:
+Use regex to match a pattern across multiple span names (see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md" target="_blank" rel="noopener noreferrer nofollow">OTTL docs</a> for available functions):
 
-```yaml
+```yaml:config.yaml
 - name: drop-probe-spans-by-name
   type: drop
   drop:
@@ -197,7 +195,7 @@ Use regex to match a pattern across multiple span names:
 
 Always keep errors and slow traces, then sample 5% of everything else as a baseline.
 
-```yaml
+```yaml:config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
@@ -221,30 +219,35 @@ processors:
 
 Use `and` to combine policies: all sub-policies must match for the trace to be sampled. This example samples 1% of health-probe traces from `api-gateway` and 100% of error traces from any service.
 
-```yaml
+```yaml:config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
     num_traces: 50000
     policies:
+      # Policy 1: keep 100% of error traces from any service
       - name: keep-all-errors
         type: status_code
         status_code:
           status_codes: [ERROR]
+      # Policy 2: AND — all three sub-policies must match
       - name: low-sample-probes
         type: and
         and:
           and_sub_policy:
+            # Sub-policy A: only traces from api-gateway
             - name: match-service
               type: string_attribute
               string_attribute:
                 key: service.name
                 values: [api-gateway]
+            # Sub-policy B: only health/ready probe routes
             - name: match-probe-route
               type: string_attribute
               string_attribute:
                 key: http.route
                 values: [/health, /ready]
+            # Sub-policy C: keep 1% of matching traces
             - name: probabilistic-1pct
               type: probabilistic
               probabilistic:
@@ -258,10 +261,14 @@ After restarting the collector, confirm sampling is working:
 1. Trigger traces from your services, including both success and error scenarios.
 2. Open **Traces > Explorer** in SigNoz and verify only expected traces appear.
 3. Check the collector's `otelcol_processor_tail_sampling_count_traces_sampled` metric to confirm decisions are being made. Query by label:
-   - Sampled traces: `otelcol_processor_tail_sampling_count_traces_sampled{sampled="true"}`
-   - Not sampled: `otelcol_processor_tail_sampling_count_traces_sampled{sampled="false"}`
+  - Sampled traces: `otelcol_processor_tail_sampling_count_traces_sampled{sampled="true"}`
+  - Not sampled: `otelcol_processor_tail_sampling_count_traces_sampled{sampled="false"}`
+
+<details>
+<ToggleHeading>
 
 ## Limitations
+</ToggleHeading>
 
 ### Memory pressure
 
@@ -282,6 +289,7 @@ Pending traces are evaluated with partial data on shutdown, which can produce in
 ### Collector scaling
 
 All spans for a single trace must arrive at the same collector instance. Without trace-ID-aware routing across instances, sampling decisions will be based on incomplete data. See the load balancing exporter note in the [Setup](#setup) section.
+</details>
 
 <details>
 <ToggleHeading>
