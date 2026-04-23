@@ -1,4 +1,7 @@
 import React from 'react'
+import Image from 'next/image'
+import javaIconUrl from '@/public/img/icons/java-icon.svg?url'
+import azureIconUrl from '@/public/img/icons/azure-icon.svg?url'
 import {
   SiJavascript,
   SiPython,
@@ -91,7 +94,15 @@ const InstrumentationSupport = () => {
                 { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript' },
                 { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python' },
                 {
-                  icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
+                  icon: (
+                    <Image
+                      src={javaIconUrl}
+                      alt="Java"
+                      width={20}
+                      height={20}
+                      className="h-5 w-5"
+                    />
+                  ),
                   name: 'Java',
                 },
                 { icon: <SiGo className="h-5 w-5 text-cyan-500" />, name: 'Go' },
@@ -116,7 +127,15 @@ const InstrumentationSupport = () => {
                 { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python' },
                 { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript' },
                 {
-                  icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
+                  icon: (
+                    <Image
+                      src={javaIconUrl}
+                      alt="Java"
+                      width={20}
+                      height={20}
+                      className="h-5 w-5"
+                    />
+                  ),
                   name: 'Java',
                 },
                 { icon: <SiGo className="h-5 w-5 text-cyan-500" />, name: 'Go' },
@@ -152,7 +171,15 @@ const InstrumentationSupport = () => {
               techIcons={[
                 { icon: <SiAmazon className="h-5 w-5 text-orange-500" />, name: 'AWS' },
                 {
-                  icon: <img src="/img/icons/azure-icon.svg" width={20} height={20} alt="Azure" />,
+                  icon: (
+                    <Image
+                      src={azureIconUrl}
+                      width={20}
+                      height={20}
+                      alt="Azure"
+                      className="h-5 w-5"
+                    />
+                  ),
                   name: 'Azure',
                 },
                 { icon: <SiGooglecloud className="h-5 w-5 text-blue-400" />, name: 'Google Cloud' },

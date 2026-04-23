@@ -1,6 +1,8 @@
 import React from 'react'
+import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 import { ArrowUpRight } from 'lucide-react'
+import featureGraphicOtelWebp from '@/public/img/graphics/homepage/feature-graphic-otel.webp'
 
 const StartupProgram = () => {
   return (
@@ -51,8 +53,16 @@ const StartupProgram = () => {
                 </TrackingLink>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[320px] max-w-[50vw]">
-              <img src="/img/graphics/homepage/feature-graphic-otel.webp" alt="Startup Program" />
+            <div className="relative mx-auto aspect-[272/352] w-[320px] max-w-[50vw]">
+              <Image
+                src={featureGraphicOtelWebp}
+                alt="Startup Program — OpenTelemetry illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 50vw, 320px"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
         </div>

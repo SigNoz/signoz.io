@@ -1,4 +1,8 @@
+import Image from 'next/image'
 import { cn } from 'app/lib/utils'
+import draftingCompassIconUrl from '@/public/img/index_features/drafting-compass.svg?url'
+import logsIconUrl from '@/public/img/index_features/logs.svg?url'
+import barChartIconUrl from '@/public/img/index_features/bar-chart-2.svg?url'
 import { METRICS_PRICES, RETENTION_PERIOD, TRACES_AND_LOGS_PRICES } from './constants'
 import {
   formatBytes,
@@ -52,9 +56,11 @@ export const PricingCalculatorDesktopGrid: React.FC<PricingCalculatorDesktopGrid
         <>
           {/* Traces Row */}
           <div className="metrics-background col-start-1 flex items-center gap-2 p-2">
-            <img
-              src="/img/index_features/drafting-compass.svg"
+            <Image
+              src={draftingCompassIconUrl}
               alt="Traces Icon"
+              width={20}
+              height={20}
               className="h-5 w-5"
             />
             <span>Traces</span>
@@ -113,7 +119,7 @@ export const PricingCalculatorDesktopGrid: React.FC<PricingCalculatorDesktopGrid
         <>
           {/* Logs Row */}
           <div className="metrics-background col-start-1 flex items-center gap-2 p-2">
-            <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
+            <Image src={logsIconUrl} alt="Logs Icon" width={20} height={20} className="h-5 w-5" />
             <span>Logs</span>
           </div>
           <div className="metrics-background col-start-2 flex items-center gap-1">
@@ -170,7 +176,13 @@ export const PricingCalculatorDesktopGrid: React.FC<PricingCalculatorDesktopGrid
         <>
           {/* Metrics Row */}
           <div className="metrics-background col-start-1 flex items-center gap-2 p-2">
-            <img src="/img/index_features/bar-chart-2.svg" alt="Metrics Icon" className="h-5 w-5" />
+            <Image
+              src={barChartIconUrl}
+              alt="Metrics Icon"
+              width={20}
+              height={20}
+              className="h-5 w-5"
+            />
             <span>Metrics</span>
           </div>
           <div className="metrics-background col-start-2 flex items-center gap-1">
