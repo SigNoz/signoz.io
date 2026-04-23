@@ -1,9 +1,10 @@
 ---
-date: 2026-02-04
+date: 2026-04-23
 
 title: K8s Infra - Configure
 id: k8s-infra-otel-config
 description: Configure the k8s-infra OpenTelemetry collection agent to send Kubernetes metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
 This guide explains how to configure the OpenTelemetry Collectors deployed by the SigNoz [K8s-Infra Helm chart](https://github.com/signoz/charts/tree/main/charts/k8s-infra/README.md). You'll learn how to set up telemetry data collection and enable the collection of metrics, logs, and traces from your Kubernetes cluster.
@@ -225,6 +226,11 @@ presets:
       - sources:
         - from: resource_attribute
           name: k8s.pod.ip
+      - sources:
+        - from: resource_attribute
+          name: k8s.pod.uid
+      - sources:
+        - from: connection
     # This label/annotation extraction rule takes the value of the key from labels/annotations and maps it to the tag_name attribute which will be added to the associated resources
     extractLabels:
       # Example from pod
@@ -248,6 +254,10 @@ presets:
 - Enable only required metadata fields to optimize performance
 - Use `passthrough: true` in very large clusters to reduce API load
 - Configure pod association based on your networking setup
+
+<Admonition type="warning">
+Helm replaces arrays entirely rather than merging them. If you override `podAssociation`, you must include **all** desired rules — not just the ones you want to add. Omitting the default `connection` rule, for example, prevents the k8sattributes processor from associating telemetry to pods by source IP, which causes `extractLabels` and `extractAnnotations` to stop working.
+</Admonition>
 
 ### 6. Cluster-level Metrics
 ```yaml
@@ -345,6 +355,14 @@ otelAgent:
 ```
 <Admonition type="info">
 Any setting supported by the OpenTelemetry batch processor can be set under `processors.batch` in the chart values.
+</Admonition>
+
+### Adding Custom Processors to Pipelines
+
+Defining a processor under `otelAgent.config.processors` (or `otelDeployment.config.processors`) adds it to the collector configuration but does **not** automatically include it in any pipeline. You must also reference the processor in the appropriate pipeline's `processors` list under `otelAgent.config.service.pipelines` for it to take effect.
+
+<Admonition type="warning">
+Helm replaces arrays entirely rather than merging them. When you override a pipeline's `processors` list, include all processors you need in that pipeline — both your custom processor and the existing defaults.
 </Admonition>
 ## Common Deployment Scenarios
 
