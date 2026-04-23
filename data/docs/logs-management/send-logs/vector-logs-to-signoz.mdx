@@ -1,5 +1,5 @@
 ---
-date: 2026-04-05
+date: 2026-04-22
 title: Send Logs from Vector to SigNoz
 id: vector-logs-to-signoz
 doc_type: howto
@@ -31,7 +31,7 @@ import GetHelp from '@/components/shared/get-help.md'
 To send logs from Vector to SigNoz Cloud, you need to use the `http` sink.
 
 <Tabs>
-<TabItem value="vm" label="VM / Bare Metal" default>
+<TabItem value="vm" label="VM" default>
 
 <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
@@ -72,18 +72,20 @@ sinks:
     type: http
     inputs:
       - system_logs
-    uri: https://ingest.<region>.signoz.cloud/logs/vector
+    uri: "https://ingest.<region>.signoz.cloud/logs/vector"
     encoding:
       codec: json
     request:
       headers:
-        signoz-ingestion-key: '<your-ingestion-key>'
+        signoz-ingestion-key: "<your-ingestion-key>"
 ```
 
 Verify these values:
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+The `http` sink sends log events as JSON to SigNoz Cloud's ingestion endpoint. The `signoz-ingestion-key` header authenticates each request. Vector batches events before sending.
 
 ### Step 3: Restart Vector
 
@@ -129,12 +131,12 @@ customConfig:
       type: http
       inputs:
         - kubernetes_logs
-      uri: https://ingest.<region>.signoz.cloud/logs/vector
+      uri: "https://ingest.<region>.signoz.cloud/logs/vector"
       encoding:
         codec: json
       request:
         headers:
-          signoz-ingestion-key: '<your-ingestion-key>'
+          signoz-ingestion-key: "<your-ingestion-key>"
 
 service:
   enabled: false
@@ -175,12 +177,12 @@ sinks:
     type: http
     inputs:
       - docker_logs
-    uri: https://ingest.<region>.signoz.cloud/logs/vector
+    uri: "https://ingest.<region>.signoz.cloud/logs/vector"
     encoding:
       codec: json
     request:
       headers:
-        signoz-ingestion-key: '<your-ingestion-key>'
+        signoz-ingestion-key: "<your-ingestion-key>"
 ```
 
 Verify these values:
@@ -295,6 +297,8 @@ sinks:
 ```
 
 Replace `<signoz-host>` with the hostname or IP of your SigNoz instance.
+
+The `opentelemetry` sink sends logs over OTLP HTTP to your SigNoz collector on port `4318`. The `remap` transform above shapes each log event into the OTLP `resourceLogs` structure before the sink serializes it.
 
 ### Step 3: Restart Vector
 
