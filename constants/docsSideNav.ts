@@ -3464,6 +3464,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/flyio',
+        label: 'Fly.io',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/nomad',
         label: 'Nomad',
       },

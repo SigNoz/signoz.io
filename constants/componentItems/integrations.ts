@@ -77,6 +77,7 @@ export const INTEGRATIONS_ITEMS = {
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
     { name: 'Vercel', href: '/docs/integrations/vercel', clickName: 'Vercel Integration Link' },
+    { name: 'Fly.io', href: '/docs/integrations/flyio', clickName: 'Fly.io Integration Link' },
   ] satisfies ComponentItem[],
 } as const
 
