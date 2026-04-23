@@ -1,5 +1,5 @@
 ---
-date: 2026-04-15
+date: 2026-04-23
 title: Monitor ArgoCD with SigNoz
 description: Configure ArgoCD metrics collection with OpenTelemetry and visualize them in SigNoz dashboards.
 id: argocd-metrics
@@ -28,10 +28,6 @@ import GetHelp from '@/components/shared/get-help.md'
   If you haven't deployed an OpenTelemetry Collector yet, follow the [OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) guide before continuing.
 </Admonition>
 
-### Step 1. Set environment variables
-
-These variables configure the OTLP exporter in your collector's existing config.
-
 <Tabs>
 <TabItem value="vm" label="VM" default>
 
@@ -41,54 +37,24 @@ These variables configure the OTLP exporter in your collector's existing config.
   - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
   - **Bare metal servers**: Physical servers running Linux/Unix directly
 
-Use this section if you're running the OTel Collector directly on a server without containerization.
-
+  Use this section if you're running the OTel Collector directly on a server without containerization.
 </KeyPointCallout>
 
-```bash
-export SIGNOZ_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
-```
-
-</TabItem>
-<TabItem value="kubernetes" label="Kubernetes">
-
-Add these to your OpenTelemetry Collector deployment manifest:
-
-```yaml
-env:
-  - name: K8S_CLUSTER_NAME
-    value: '<your-cluster-name>'
-  - name: SIGNOZ_OTLP_ENDPOINT
-    value: 'https://ingest.<region>.signoz.cloud:443'
-  - name: SIGNOZ_INGESTION_KEY
-    value: '<your-ingestion-key>'
-```
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-Set these in your shell before Step 3. The `docker run` command passes them into the container via `-e` flags.
+### Step 1. Set environment variables
 
 ```bash
 export SIGNOZ_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 ```
-
-</TabItem>
-</Tabs>
-
-Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<your-cluster-name>` (Kubernetes only): Your Kubernetes cluster identifier
 
 ### Step 2. Configure the collector
 
-Append the `prometheus` receiver and `resource/argocd` processor to your collector `config.yaml`:
+Append the `prometheus` receiver and `resource/argocd` processor to your collector `config.yaml`. Replace each target with the actual `host:port` where the ArgoCD component is reachable:
 
-```yaml
+```yaml:config.yaml
 receivers:
   # ... existing receivers ...
   prometheus:
@@ -102,7 +68,120 @@ receivers:
           scheme: http
           static_configs:
             - targets:
-                # replace with host:port on VM/Docker
+                - <argocd-host>:8082
+              labels:
+                argocd_component: application-controller
+
+        - job_name: argocd-server-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:8083
+              labels:
+                argocd_component: api-server
+
+        - job_name: argocd-repo-server-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:8084
+              labels:
+                argocd_component: repo-server
+
+        - job_name: argocd-applicationset-controller-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:8080
+              labels:
+                argocd_component: applicationset-controller
+
+        - job_name: argocd-notifications-controller-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:9001
+              labels:
+                argocd_component: notifications-controller
+
+processors:
+  # ... existing processors ...
+  resource/argocd:
+    attributes:
+      - key: service.name
+        value: argocd
+        action: upsert
+
+exporters:
+  # ... existing exporters ...
+  otlp:
+    endpoint: ${env:SIGNOZ_OTLP_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+    tls:
+      insecure: false
+```
+
+Add them to your metrics pipeline:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [..., prometheus]
+      processors: [..., resource/argocd, batch]
+      exporters: [..., otlp]
+```
+
+### Step 3. Run the collector
+
+```bash
+otelcol-contrib --config config.yaml
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+### Step 1. Set environment variables
+
+Add these to your OpenTelemetry Collector deployment manifest:
+
+```yaml:otel-collector.yaml
+env:
+  - name: K8S_CLUSTER_NAME
+    value: '<your-cluster-name>'
+  - name: SIGNOZ_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: SIGNOZ_INGESTION_KEY
+    value: '<your-ingestion-key>'
+```
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-cluster-name>`: Your Kubernetes cluster identifier
+
+### Step 2. Configure the collector
+
+Append the `prometheus` receiver and `resource/argocd` processor to your collector `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  # ... existing receivers ...
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+        scrape_timeout: 30s
+      scrape_configs:
+        - job_name: argocd-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
                 - argocd-metrics.argocd.svc.cluster.local:8082
               labels:
                 argocd_component: application-controller
@@ -112,7 +191,6 @@ receivers:
           scheme: http
           static_configs:
             - targets:
-                # replace with host:port on VM/Docker
                 - argocd-server-metrics.argocd.svc.cluster.local:8083
               labels:
                 argocd_component: api-server
@@ -122,7 +200,6 @@ receivers:
           scheme: http
           static_configs:
             - targets:
-                # replace with host:port on VM/Docker
                 - argocd-repo-server.argocd.svc.cluster.local:8084
               labels:
                 argocd_component: repo-server
@@ -132,7 +209,6 @@ receivers:
           scheme: http
           static_configs:
             - targets:
-                # replace with host:port on VM/Docker
                 - argocd-applicationset-controller.argocd.svc.cluster.local:8080
               labels:
                 argocd_component: applicationset-controller
@@ -142,7 +218,6 @@ receivers:
           scheme: http
           static_configs:
             - targets:
-                # replace with host:port on VM/Docker
                 - argocd-notifications-controller-metrics.argocd.svc.cluster.local:9001
               labels:
                 argocd_component: notifications-controller
@@ -154,11 +229,27 @@ processors:
       - key: service.name
         value: argocd
         action: upsert
+      - key: k8s.cluster.name
+        value: ${K8S_CLUSTER_NAME}
+        action: upsert
+
+exporters:
+  # ... existing exporters ...
+  otlp:
+    endpoint: ${env:SIGNOZ_OTLP_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+    tls:
+      insecure: false
 ```
 
-Next, add them to your metrics pipeline:
+<Admonition type="info">
+  If ArgoCD runs in a different namespace, update the service names accordingly (e.g., `argocd-metrics.<your-namespace>.svc.cluster.local`). Verify with `kubectl get svc -n <your-namespace>`.
+</Admonition>
 
-```yaml
+Add them to your metrics pipeline:
+
+```yaml:config.yaml
 service:
   pipelines:
     metrics:
@@ -167,39 +258,7 @@ service:
       exporters: [..., otlp]
 ```
 
-<Admonition type="info">
-  If ArgoCD runs in a different namespace, update the service names accordingly (for example, `argocd-metrics.<your-namespace>.svc.cluster.local`). You can verify your exact service names by running `kubectl get svc -n <your-namespace>`.
-</Admonition>
-
-<KeyPointCallout title="Running on Kubernetes?" defaultCollapsed="true">
-Add the `k8s.cluster.name` attribute to the `resource/argocd` processor:
-
-```yaml
-processors:
-  # ...
-  resource/argocd:
-    attributes:
-      - key: service.name
-        value: argocd
-        action: upsert
-      - key: k8s.cluster.name
-        value: ${K8S_CLUSTER_NAME}
-        action: upsert
-```
-
-</KeyPointCallout>
-
 ### Step 3. Run the collector
-
-<Tabs>
-<TabItem value="vm" label="VM" default>
-
-```bash
-otelcol-contrib --config config.yaml
-```
-
-</TabItem>
-<TabItem value="kubernetes" label="Kubernetes">
 
 ```bash
 kubectl apply -f <your-collector-manifest>.yaml -n <otel-collector-namespace>
@@ -207,6 +266,107 @@ kubectl apply -f <your-collector-manifest>.yaml -n <otel-collector-namespace>
 
 </TabItem>
 <TabItem value="docker" label="Docker">
+
+### Step 1. Set environment variables
+
+The `docker run` command in Step 3 passes these into the container via `-e` flags.
+
+```bash
+export SIGNOZ_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 2. Configure the collector
+
+Append the `prometheus` receiver and `resource/argocd` processor to your `config.yaml`. Replace each target with the actual `host:port` where the ArgoCD component is reachable from the container:
+
+```yaml:config.yaml
+receivers:
+  # ... existing receivers ...
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+        scrape_timeout: 30s
+      scrape_configs:
+        - job_name: argocd-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:8082
+              labels:
+                argocd_component: application-controller
+
+        - job_name: argocd-server-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:8083
+              labels:
+                argocd_component: api-server
+
+        - job_name: argocd-repo-server-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:8084
+              labels:
+                argocd_component: repo-server
+
+        - job_name: argocd-applicationset-controller-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:8080
+              labels:
+                argocd_component: applicationset-controller
+
+        - job_name: argocd-notifications-controller-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+                - <argocd-host>:9001
+              labels:
+                argocd_component: notifications-controller
+
+processors:
+  # ... existing processors ...
+  resource/argocd:
+    attributes:
+      - key: service.name
+        value: argocd
+        action: upsert
+
+exporters:
+  # ... existing exporters ...
+  otlp:
+    endpoint: ${env:SIGNOZ_OTLP_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+    tls:
+      insecure: false
+```
+
+Add them to your metrics pipeline:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [..., prometheus]
+      processors: [..., resource/argocd, batch]
+      exporters: [..., otlp]
+```
+
+### Step 3. Run the collector
 
 ```bash
 docker run -d \
@@ -269,23 +429,22 @@ Import the pre-built ArgoCD dashboard to visualize application health, sync stat
 <ToggleHeading>
 
 ## Troubleshooting
-
 </ToggleHeading>
 
 **No metrics appearing:**
 
 1. Verify the collector reaches the ArgoCD metrics endpoints:
 
-   ```bash
-   kubectl port-forward svc/argocd-metrics 8082:8082 -n argocd
-   curl localhost:8082/metrics
-   ```
+  ```bash
+  kubectl port-forward svc/argocd-metrics 8082:8082 -n argocd
+  curl localhost:8082/metrics
+  ```
 
 2. Check collector logs for scrape errors:
 
-   ```bash
-   kubectl logs -n otel-collector <collector-pod-name>
-   ```
+  ```bash
+  kubectl logs -n otel-collector <collector-pod-name>
+  ```
 
 3. Confirm service names and ports match your ArgoCD deployment.
 
