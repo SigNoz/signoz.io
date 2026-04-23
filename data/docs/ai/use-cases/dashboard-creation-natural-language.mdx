@@ -1,0 +1,94 @@
+---
+date: 2026-04-20
+id: dashboard-creation-natural-language
+title: Dashboard Creation from Natural Language
+description: Create custom dashboards by describing what you want to visualize in plain English.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+You need to monitor a new microservice you just deployed, but building a dashboard from scratch means clicking through metrics, logs, and traces and configuring visualization panels.
+
+You open your AI assistant, connected to SigNoz via the MCP server, and ask it to build the dashboard for you.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+
+## Step 1: Create the Dashboard from a Natural Language Prompt
+
+```text
+Confirm the recommendation service is sending data. Then search for its relevant data and create a dashboard with three panels: p99 latency, error rate, and request throughput.
+```
+
+Your assistant will first verify the service exists and is actively sending telemetry data, then build the dashboard:
+
+```text
+✓ Service confirmation: The recommendation service is actively sending data
+  - 3,342 calls over the last 24 hours
+  - Primary operation: oteldemo.RecommendationService/ListRecommendations
+  - Current error rate: ~4.28%
+
+✓ Dashboard created: "Recommendation Service Overview"
+  - Dashboard ID: 019dad7d-a6b2-7269-b5a0-65e0ebd42924
+
+Three panels configured (all scoped to service.name = 'recommendation' over last 24h):
+
+1. P99 Latency (top-left)
+   - Metric: p99(durationNano) on traces
+   - Visualization: Time series
+
+2. Error Rate (%) (top-right)
+   - Formula: (error spans / total spans) × 100
+   - Visualization: Time series
+
+3. Request Throughput (req/s) (full-width, bottom)
+   - Metric: rate() on traces
+   - Visualization: Time series
+
+You can open it in SigNoz under Dashboards → "Recommendation Service Overview"
+```
+
+The dashboard is now live with all three panels displaying real-time metrics for the recommendation service.
+
+
+## Final Summary
+
+You now have a fully functional dashboard created from just using a simple prompt.
+
+<Figure
+  src="/img/docs/ai/mcp/recommendation-dashboard.webp"
+  alt="Recommendation Service Dashboard"
+  caption="Recommendation Service Dashboard Overview"
+/>
+
+<Figure
+  src="/img/docs/ai/mcp/recommendation-dashboard-detailed.webp"
+  alt="Recommendation Service Dashboard Detailed View"
+  caption="Recommendation Service Dashboard Detailed View"
+/>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this workflow, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_list_services` | Verified the recommendation service exists and is actively sending telemetry data |
+| 1 | `signoz_aggregate_traces` | Retrieved p99 latency, error rate, and request throughput metrics over the last 24 hours |
+| 1 | `signoz_create_dashboard` | Created the dashboard with three panels configured for the recommendation service |
+
+</details>
+
+## Related Use Cases
+
+- [Incident Specific Dashboard Spin-Up](https://signoz.io/docs/ai/use-cases/incident-specific-dashboard/) - Instantly generate focused dashboards for active incidents with relevant metrics and traces.
+- [Alert Correlation Analysis](https://signoz.io/docs/ai/use-cases/alert-correlation-analysis/) - When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
+- [Post Deployment Monitoring](https://signoz.io/docs/ai/use-cases/post-deployment-monitoring/) - Compare key metrics before and after a deployment to detect performance regressions or unexpected changes.
+
+
+<GetHelp />

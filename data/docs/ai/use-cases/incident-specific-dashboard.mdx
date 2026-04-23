@@ -1,0 +1,114 @@
+---
+date: 2026-04-20
+id: incident-specific-dashboard
+title: Incident Specific Dashboard Spin-Up
+description: Instantly generate focused dashboards for active incidents with relevant metrics and traces.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The checkout service is throwing errors. Your error rate alert fired and you need visibility into what's happening right now. Instead of manually parsing through all your telemetry data, you want a focused dashboard that shows exactly what's broken.
+
+You open your AI assistant, connected to SigNoz via the MCP server, and ask it to build an incident-specific dashboard.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+
+## Step 1: Create the Incident Dashboard from a Natural Language Prompt
+
+```text
+Our checkout service error alert is firing. Create an incident dashboard for the last 1 hour with:
+
+Checkout error rate, latency (p95/p99), and throughput vs last week's baseline
+Top error messages and failing traces
+Health of key dependencies services
+Infrastructure: CPU, memory, pod restarts
+```
+
+Your assistant will analyze the checkout service, identify its dependencies, gather the relevant metrics, and build a comprehensive incident dashboard:
+
+```text
+✓ Service confirmation: Checkout service detected
+  - Error rate: 75% (27 errors / 36 calls in last hour)
+  - Dependencies identified: payment, cart, product-catalog, currency, shipping, email
+
+✓ Root cause identified: Payment service
+  - Error rate: 52% (26 errors / 50 calls)
+  - Top failing operations:
+    - oteldemo.CheckoutService/PlaceOrder: 27 failures
+    - oteldemo.PaymentService/Charge: 26 failures
+  - Pattern: Nearly identical error counts suggest every checkout that reaches payment fails
+
+✓ Dashboard created: "Checkout Service — Incident Response (Last 1h)"
+  - Dashboard ID: 019dad99-26b3-75aa-a76d-9060062cbadb
+
+Dashboard organized into four sections:
+
+Section 1: Golden Signals vs 7-day Baseline
+- Error Rate % (current vs same window 7 days ago)
+- Throughput (req/s) with baseline overlay
+- P95 Latency with baseline comparison
+- P99 Latency with baseline comparison
+
+Section 2: Top Errors & Failing Traces
+- Table of failing operations grouped by span name
+- List of recent error traces with traceID and status messages for one-click drill-down
+
+Section 3: Dependency Health
+- Error rate % for each dependency: payment, cart, product-catalog, currency, shipping, email
+- P95 latency broken out by each downstream service
+
+Section 4: Infrastructure
+- CPU utilization for checkout container (grouped by container.id)
+- Memory usage for checkout container (grouped by container.id)
+- Note: Pod restart metrics not available (requires k8s.pod.* metrics from k8s-infra collector)
+
+Open the dashboard in SigNoz under Dashboards → "Checkout Service — Incident Response (Last 1h)"
+```
+
+The dashboard is now live and provides a complete incident view.
+
+## Final Summary
+
+You now have a fully functional incident dashboard created from just using a simple prompt.
+
+<Figure
+  src="/img/docs/ai/mcp/incident-dashboard.webp"
+  alt="Incident Service Dashboard"
+  caption="Incident Service Dashboard Overview"
+/>
+
+<Figure
+  src="/img/docs/ai/mcp/incident-dashboard-detailed.webp"
+  alt="Incident Service Dashboard Detailed View"
+  caption="Incident Service Dashboard Detailed View"
+/>
+
+The dashboard clearly shows that payment-service is the likely root cause with elevated errors and high latency.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this workflow, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_list_services` | Verified the checkout service exists and retrieved initial error rate statistics |
+| 1 | `signoz_get_service_top_operations` | Identified checkout service dependencies (payment, cart, product-catalog, currency, shipping, email) and top failing operations |
+| 1 | `signoz_aggregate_traces` | Retrieved error rates, latency percentiles (p95/p99), throughput metrics, and compared against 7-day baseline |
+| 1 | `signoz_create_dashboard` | Created the incident dashboard with four sections covering golden signals, errors, dependency health, and infrastructure |
+
+</details>
+
+## Related Use Cases
+
+- [Dashboard Creation from Natural Language](https://signoz.io/docs/ai/use-cases/dashboard-creation-natural-language/) - Create custom dashboards by describing what you want to visualize in plain English.
+- [Alert Correlation Analysis](https://signoz.io/docs/ai/use-cases/alert-correlation-analysis/) - When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
+- [On-Call Handoff Brief](https://signoz.io/docs/ai/use-cases/oncall-handoff-brief/) - Generate a handoff summary of recent incidents and ongoing issues for the next on-call engineer.
+
+
+<GetHelp />

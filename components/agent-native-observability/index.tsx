@@ -18,7 +18,7 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
     iconText: 'END-TO-END DEBUGGING',
     title: 'From alert to root cause to fix. In one session.',
     description:
-      'Quickly connect to Kubernetes, Git, Jira via Cloud Provider CLI like AWS CLI, GCloud CLI.',
+      'Connect to your Kubernetes, Git, Jira, Cloud Provider CLIs and use them to find the root cause.',
   },
   {
     icon: <BookText size={14} className="text-signoz_vanilla-400" />,
@@ -29,10 +29,9 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
   },
   {
     icon: <Unlock size={14} className="text-signoz_vanilla-400" />,
-    iconText: 'OPEN BY DESIGN',
-    title: 'Open by design. No lock-in. Ever.',
-    description:
-      'Built on OTel, your instrumentation, your agents, your investigation data is always yours.',
+    iconText: 'OPEN STANDARDS',
+    title: 'Based on Open Standards. No lock-in. Ever.',
+    description: 'Built on OpenTelemetry - the standard coding agents are already trained on.',
   },
 ]
 
