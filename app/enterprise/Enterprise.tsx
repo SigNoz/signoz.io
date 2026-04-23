@@ -135,7 +135,7 @@ export default function Enterprise() {
         {/* Enterprise Cloud */}
         <div className="border-dashed-container flex flex-row">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-            <div className="flex-1 flex-col items-start border-b-1 border-r-0 border-dashed border-signoz_slate-300 px-8 py-8 md:border-b-0 md:border-r md:border-dashed">
+            <div className="border-b-1 flex-1 flex-col items-start border-r-0 border-dashed border-signoz_slate-300 px-8 py-8 md:border-b-0 md:border-r md:border-dashed">
               <div className="mt-3 text-xl font-bold">Enterprise Cloud</div>
 
               <div className="mt-4 text-lg font-normal">
@@ -179,7 +179,10 @@ export default function Enterprise() {
                 type={Button.TYPES.SECONDARY}
                 className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
-                <Link href="/enterprise-cloud" className="flex-center">
+                <Link
+                  href="/contact-us/?source=enterprise-page-enterprise-cloud"
+                  className="flex-center"
+                >
                   Contact us
                   <ArrowRight size={14} />
                 </Link>
@@ -220,7 +223,10 @@ export default function Enterprise() {
                 type={Button.TYPES.SECONDARY}
                 className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
-                <Link href="/enterprise-self-hosted" className="flex-center">
+                <Link
+                  href="/contact-us/?source=enterprise-page-enterprise-self-hosted"
+                  className="flex-center"
+                >
                   Contact us
                   <ArrowRight size={14} />
                 </Link>
@@ -249,7 +255,7 @@ export default function Enterprise() {
                 type={Button.TYPES.SECONDARY}
                 className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
-                <Link href="/enterprise-self-hosted" className="flex-center">
+                <Link href="/contact-us/?source=enterprise-page-byoc" className="flex-center">
                   Contact us
                   <ArrowRight size={14} />
                 </Link>

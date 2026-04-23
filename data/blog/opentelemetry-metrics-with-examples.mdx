@@ -1,19 +1,21 @@
 ---
-title: OpenTelemetry Metrics with 5 Practical Examples
-slug: opentelemetery-metrics-with-examples
-date: 2025-12-15
+title: OpenTelemetry Metrics - A Complete Practical Guide
+slug: opentelemetry-metrics-with-examples
+date: 2026-04-19
 tags: [OpenTelemetry]
 authors: [elizabeth_mathew, dhruv_ahuja]
-description: OpenTelemetry provides a unified framework for collecting custom metrics using instruments like counters, gauges, and histograms. Blog contains practical examples to monitor custom metrics and visualise it in a Application Performance Monitoring dashboard [APM].
+description: Learn what OpenTelemetry metrics are, how instruments like counters, gauges, and histograms work, and how to apply them with 5 practical custom metric examples for application monitoring.
 image: /img/blog/2025/03/opentelemetry-metrics-with-examples.webp
 hide_table_of_contents: false
-keywords: [opentelemetry, metrics, custom metrics, examples, Application Performance Monitoring, SigNoz, instruments, counter, gauge, histogram, metrics API]
+keywords: [opentelemetry metrics, otel metrics, opentelemetry, custom metrics, metric instruments, examples, meter, counter, gauge, histogram, metrics API, application performance monitoring, SigNoz]
 ---
 
 
-Picture this, your observability tool already nails the basics like request rates, latency and memory usage, but you need more insight. *Think user churn rates, engagement spikes, or even how many carts get abandoned mid-checkout*. That’s where [OpenTelemetry](https://signoz.io/opentelemetry/) steps in, providing a way to track those critical custom metrics with ease.
+Picture this, your observability tool already nails the basics like request rates, latency and memory usage, but you need more insight. *Think user churn rates, engagement spikes, or even how many carts get abandoned mid-checkout*. That’s where [OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) steps in, providing a way to track those critical custom metrics with ease.
 
-<a href = "https://opentelemetry.io/docs/specs/otel/metrics/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Metrics</a> has emerged as a benchmark for collection and management of metric data by providing a unified framework for generating, processing and exporting metrics. This blog is primarily about different measurement instruments and some really cool and fun ways of easily collecting custom metrics from your application. By showcasing these examples, we hope to inspire you with ideas you can adopt for your own monitoring needs.
+**OpenTelemetry metrics are numerical measurements captured over time that help you understand service health, performance, and behavior.** They give you a standard way to generate, process, and export custom metrics across different languages and backends.
+
+The <a href = "https://opentelemetry.io/docs/specs/otel/metrics/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Metrics specification</a> has emerged as a benchmark for collection and management of metric data. This blog is primarily about different measurement instruments and some really cool and fun ways of collecting custom metrics from your application. By showcasing these examples, we hope to inspire you with ideas you can adopt for your own monitoring needs.
 
 So let’s jump right into it!
 
@@ -25,7 +27,7 @@ A metric is a measurement of a service captured at runtime which tells us ab
 Additionally, these metrics can later be used by APM tools for configuring alerts or creating dashboards for easy monitoring.
 We will be closely examining some cool custom metric examples later in this blog.
 
-The best way to understand OTel metrics is to think of it as a ‘fitness tracker’. A fitness tracker monitors various health metrics such as steps taken, heart rate, and calories burned throughout the day. Similarly, OTel metrics functions as the ‘fitness tracker’ for your application, continuously collecting data on application and system health like request rates, error counts, and response times.
+The best way to understand OTel metrics is to think of it as a ‘fitness tracker’. A fitness tracker monitors various health metrics such as steps taken, heart rate, and calories burned throughout the day. Similarly, the OpenTelemetry metrics system functions as the ‘fitness tracker’ for your application, continuously collecting data on application and system health like request rates, error counts, and response times.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/03/metric_pipeline.webp" alt="Metric pipeline"/>
@@ -35,36 +37,48 @@ The best way to understand OTel metrics is to think of it as a ‘fitness tracke
     </i></figcaption>
 </figure>
 
-OpenTelemetry metrics are completely open-source and vendor-neutral. Think of it like a free universal remote that works with any TV you’ve got, not just one brand, and you don’t have to pay a dime! It fully integrates with popular monitoring tools including Prometheus and StatsD through a standardised collector and exporter system. As shown in the figure above, it splits the two main parts, SDK and API, so different SDKs can be configured at run time. This makes it super easy to tweak and control how your metrics are handled.
+The OpenTelemetry Metrics specification is completely open-source and vendor-neutral. Think of it like a free universal remote that works with any TV you’ve got, not just one brand, and you don’t have to pay a dime! It fully integrates with popular monitoring tools including Prometheus and StatsD through a standardized collector and exporter system.<br />
+As shown in the figure above, it splits the two main parts, SDK and API, so different SDKs can be configured at run time. This makes it super easy to tweak and control how your metrics are handled.
 
-## What are OpenTelemetry Instruments?
+### How is Metric Data Collected?
+
+Under the hood, the data flow is fairly simple: a *Meter* creates instruments, your application records measurements, and the SDK aggregates them into metric streams using the <a href="https://opentelemetry.io/docs/specs/otel/metrics/#metrics-data-model" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry *Metrics Data Model*</a>.<br />
+Those streams can then be shaped further with views and exported over [OTLP](https://signoz.io/blog/what-is-otlp/) — the OpenTelemetry protocol for encoding, transporting, and delivering telemetry data between clients, collectors, and backends.
+
+In many real-world setups, the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) acts as the vendor-neutral middle layer, receiving telemetry in push-based pipelines, batching or transforming it, and forwarding it to a backend like SigNoz.<br />
+If you [come from Prometheus](https://signoz.io/blog/opentelemetry-vs-prometheus/), the mental model still fits because OpenTelemetry can work with both push and pull models, including pull-based collection through Prometheus receivers and exporters.
+
+### What are OpenTelemetry Instruments?
 
 To generate metrics, OpenTelemetry provides a *Meter*, a core component of its API. This *Meter* lets you create different *instruments*, like counters or gauges, to capture *measurements*. Each *measurement* is a single data point that shows the value of a *metric* at a specific time, giving you a clear snapshot of what’s happening in your system.
 
-## Classification of Instruments
+### How are OpenTelemetry Instruments Classified?
 
 Instruments can be broadly classified into two distinct types based on **when** the metric is collected.
 
-### Synchronous Instruments
+#### Synchronous Instruments
 
 These integrate directly into your application's workflow, measuring events as they happen. For instance, they can track immediate data like HTTP request sizes or transaction counts as your code processes them. 
 
-### Asynchronous Instruments
+#### Asynchronous Instruments
 
 They work by collecting measurements only when needed (*on demand*) depending on the configuration of the metric collection system. To give an example, consider collecting the temperature from a sensor every 15 seconds for safety monitoring.
 
-<Admonition>
- Synchronous instruments can also additionally have **trace context** associated with it as well. 
-Asynchronous instruments usually register **callback functions** which are invoked when necessary for metric collection.
-</Admonition>
+<KeyPointCallout title="Behavioral Difference">
+Measurements recorded by synchronous instruments can be associated with <a href="https://opentelemetry.io/docs/concepts/context-propagation/">OpenTelemetry  Context</a>, which means they can be correlated with traces and other signals.
+
+Asynchronous instruments register **callback functions** that are invoked only when the meter is observed during collection, rather than directly inline with your application code.
+</KeyPointCallout>
 
 We will explore different instruments and their use cases in depth in the next section!
 
-## What are the Various Types of Metric Instruments?
+### What are the Various Types of Metric Instruments?
 
-Currently OTel metrics support seven different instruments. Let’s try to understand these instruments and their properties.
+Currently, the OpenTelemetry Metrics API supports seven different instruments. Let’s try to understand these instruments and their properties.
 
-### Counter
+Although the examples in this post use Python, the underlying OpenTelemetry model stays consistent across other ecosystems as well. The same ideas around *Meters*, counters, gauges, histograms, and observable instruments carry over cleanly to languages such as .NET, Java, Go, and Rust. So if you have seen a <a href="https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.meter.createobservablecounter?view=net-10.0" rel="noopener noreferrer nofollow" target="_blank">.NET `CreateObservableCounter`</a> or are instrumenting a Rust service with the OTel SDK, you are still working with the same core concepts, just expressed in language-specific APIs.
+
+#### Counter
 
 A synchronous instrument that measures values that only increase over time. OpenTelemetry counters provide an `add` method that accept a non-negative value, to be added to the current total.
 
@@ -85,11 +99,11 @@ class Counter(_Synchronous, APICounter):
         )
 ```
 
-### Asynchronous Counter
+#### Asynchronous Counter
 
 Asynchronous counters are used to report monotonically increasing values on demand. It is recommended that callback functions registered with asynchronous counters should report total values, rather than increments, allowing aggregations to perform these calculations between current and previous measurements.
 
-### UpDown Counter
+#### UpDown Counter
 
 A synchronous instrument that measures values that can increase or decrease. As an UpDown Counter is non-monotonic, it allows reporting positive or negative deltas to the current value. This is inherently different from the counter that always represents an overall total, because of its monotonic nature.
 
@@ -105,11 +119,11 @@ class UpDownCounter(_Synchronous, APIUpDownCounter):
         )
 ```
 
-### Asynchronous UpDown Counter
+#### Asynchronous UpDown Counter
 
 Similar to an UpDown counter, but reports measurements only on demand; its usage is recommended when values can be logically represented across a time series, and their computation is trivial. Asynchronous UpDown Counter is commonly used to measure metrics like memory usage for user applications in a system.
 
-### Gauge
+#### Gauge
 
 An OpenTelemetry gauge is a synchronous instrument that measures arbitrary values at the time of recording, meaning these measurements can go up or down over time. Values of a gauge are non-additive across measurements. Consider CPU usage- their sum might produce a value greater than 100%.
 
@@ -119,17 +133,17 @@ After <a href="https://github.com/open-telemetry/opentelemetry-specification/iss
 
 </KeyPointCallout>
 
-### Asynchronous Gauge
+#### Asynchronous Gauge
 
 A gauge that reports values only when observed. You should use an asynchronous gauge when non-summable data needs to be measured at regular intervals, rather than in a continuous stream.
 
-### Histogram
+#### Histogram
 
 Histograms are synchronous instruments that record the distribution of non-negative values across pre-defined *buckets*, that represent ranges. These help make sense of data points that must be studied in groups across a distribution. Each value added to the histogram is placed in the bucket based on a defined unit of measurement, such as *time in seconds*.
 
 As an example, think of the time a customer spends on a product page. Majority customers spending minutes viewing a product might indicate desirable features — it might be a good indicator to rank that product higher in your search results.
 
-Histogram’s <a href="https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/metrics/_internal/instrument.py#L251" rel="noopener noreferrer nofollow" target="_blank">`record` method</a> implementation is similar to the Counter’s `add` method, where it processes only non-negative values.
+Histogram’s <a href="https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/metrics/_internal/instrument.py#L251" rel="noopener noreferrer nofollow" target="_blank">`record` method</a> implementation is similar to the Counter’s `add` method, where it only processes non-negative values.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/03/instrument.webp" alt="A Quick Overview of OTel Metric Instruments"/>
@@ -517,7 +531,7 @@ A meter is used to create <a href="https://opentelemetry.io/docs/concepts/signal
 
 While [Prometheus](https://signoz.io/guides/how-does-prometheus-work/) exclusively focuses on metrics monitoring and storage, OpenTelemetry defines open standards to generate and collect telemetry such as traces, metrics, and logs. Prometheus typically uses a pull-based model, scraping `/metrics` endpoints at regular intervals. OpenTelemetry pipelines generally push telemetry data to the OTel Collector or an observability backend. However, OpenTelemetry also supports pull-based pipelines via Prometheus exporters and receivers.
 
-We have covered the differences in more detail [in a separate blog](https://signoz.io/blog/opentelemetry-vs-prometheus/).
+For a deeper breakdown, read our [OpenTelemetry vs Prometheus guide](https://signoz.io/blog/opentelemetry-vs-prometheus/). If you are specifically comparing standards and wire formats, our [OpenMetrics vs OpenTelemetry comparison](https://signoz.io/blog/openmetrics-vs-opentelemetry/) adds that extra layer of context.
 
 ### What is the Difference Between OpenTelemetry Metrics and Traces?
 

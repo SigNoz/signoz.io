@@ -1,6 +1,6 @@
 import React from 'react'
 import { cookies } from 'next/headers'
-import { generateUserHash } from '@/utils/userUtils'
+import { generateUserHash } from '@/utils/userServer'
 import ChatbaseClient from './ChatbaseClient'
 import ChatbaseCookieSync from './ChatbaseCookieSync'
 
@@ -25,10 +25,7 @@ export default async function ChatbaseServer({
     return (
       <>
         <ChatbaseCookieSync />
-        <ChatbaseClient
-          className={className}
-          disableFloatingMessages={disableFloatingMessages}
-        />
+        <ChatbaseClient className={className} disableFloatingMessages={disableFloatingMessages} />
       </>
     )
   }
@@ -44,10 +41,7 @@ export default async function ChatbaseServer({
     return (
       <>
         <ChatbaseCookieSync />
-        <ChatbaseClient
-          className={className}
-          disableFloatingMessages={disableFloatingMessages}
-        />
+        <ChatbaseClient className={className} disableFloatingMessages={disableFloatingMessages} />
       </>
     )
   }

@@ -81,6 +81,7 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/opentelemetry-kong-gateway',
       clickName: 'Kong Gateway Integration Link',
     },
+    { name: 'Vercel', href: '/docs/integrations/vercel', clickName: 'Vercel Integration Link' },
   ] satisfies ComponentItem[],
 } as const
 

@@ -165,7 +165,7 @@ export const APM_INSTRUMENTATION_ITEMS = {
     },
     {
       name: 'Vercel',
-      href: '/docs/userguide/vercel-to-signoz',
+      href: '/docs/integrations/vercel',
       clickName: 'Vercel Instrumentation Link',
     },
     {
