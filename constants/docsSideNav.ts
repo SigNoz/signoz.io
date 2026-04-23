@@ -3020,6 +3020,31 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/oncall-handoff-brief',
             label: 'On-Call Handoff Brief',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-fatigue-audit',
+            label: 'Alert Fatigue Audit',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/optimize-performance-during-development',
+            label: 'Optimize Performance During Development',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+            label: 'Trace Failing Request',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+            label: 'Dashboard Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/incident-specific-dashboard',
+            label: 'Incident Specific Dashboard Spin-Up',
+          },
         ],
       },
     ],
@@ -3434,8 +3459,13 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/vercel-to-signoz',
-        label: 'Vercel Traces',
+        route: '/docs/integrations/opentelemetry-apache-druid',
+        label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
       {
         type: 'doc',

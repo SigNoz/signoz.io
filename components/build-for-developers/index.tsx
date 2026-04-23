@@ -58,7 +58,6 @@ const BuildForDevelopers = ({ className }: { className?: string }) => {
         className
       )}
     >
-      <div className=" h-12 w-full border !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
       <div className="overflow-hidden">
         <div className="bg-blur-perlin-noise relative">
           <div className={`section-container mb-0 !px-0 pt-12`}>

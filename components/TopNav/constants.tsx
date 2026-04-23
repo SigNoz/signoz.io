@@ -143,8 +143,8 @@ export const productDropdownItems: ProductItem[] = [
     icon: (
       <ShieldPlus className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />
     ),
-    description: 'Full-stack monitoring for AI applications',
-    name: 'AI Observability',
+    description: 'Observability in your Coding Agents via MCP',
+    name: 'Agent Native Observability',
     order: 12,
   },
 ]
