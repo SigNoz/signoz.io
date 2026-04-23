@@ -104,8 +104,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'LibraryTabs',
   'MDXButton',
   'MetricsDefinition',
-  'OtelOperatorAutoInstrumentation',
-  'OtelOperatorOTLPEndpoint',
   'MultiNodePart1',
   'MultiNodePart2',
   'PrereqsInstrument',
