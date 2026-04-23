@@ -211,8 +211,8 @@ export default function Page() {
           <Header />
           <TrustedByTeams page="homepage" className="max-w-8xl" />
           <SigNozFeatures className="max-w-8xl" />
-          <BuildForDevelopers className="max-w-8xl" />
           <AgentNativeObservability className="max-w-8xl" />
+          <BuildForDevelopers className="max-w-8xl" />
           <WhyOpenTelemetry className="max-w-8xl" />
           <WhySelectSignoz className="max-w-8xl" />
           <SigNozStats className="max-w-8xl" />

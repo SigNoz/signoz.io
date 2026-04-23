@@ -2606,6 +2606,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-collector-processors/',
+          destination: '/blog/opentelemetry-processors/',
+          permanent: true,
+        },
+        {
           source: '/alerts',
           destination: '/alerts-management/',
           permanent: true,
