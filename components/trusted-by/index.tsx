@@ -1,31 +1,44 @@
 import React from 'react'
-import styles from './styles.module.css'
-import Heading from '../../components/ui/Heading'
-import { Button } from '@headlessui/react'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import NetAppLogo from '@/public/img/users/netapp.svg'
+import SamsungLogo from '@/public/img/users/samsung.svg'
+import ComcastLogo from '@/public/img/users/comcast.svg'
+import FreoLogo from '@/public/img/users/freo.svg'
+import FormanceLogo from '@/public/svgs/icons/formance.svg'
+import SalesforceLogo from '@/public/img/users/salesforce.svg'
+import RattleLogo from '@/public/img/users/rattle.svg'
+import SarvamLogo from '@/public/svgs/icons/sarvam.svg'
+import GoKiwiLogo from '@/public/img/users/gokiwi.svg'
+import LovartLogo from '@/public/svgs/icons/lovart.svg'
+import BlaxelLogo from '@/public/svgs/icons/blaxel.svg'
+import ShapedLogo from '@/public/img/case_study/logos/shaped-logo.svg'
+import { cn } from '../../app/lib/utils'
 
 export const COMPANIES = [
-  { image: '/img/users/netapp.svg', imageDesc: 'netapp logo' },
-  { image: '/img/users/samsung.svg', imageDesc: 'samsung logo' },
-  { image: '/img/users/comcast.svg', imageDesc: 'comcast logo' },
-  { image: '/img/users/freo.svg', imageDesc: 'freo logo' },
-  { image: '/svgs/icons/formance.svg', imageDesc: 'formance logo' },
-  { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
-  { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/svgs/icons/sarvam.svg', imageDesc: 'sarvam logo' },
-  { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
-  { image: '/svgs/icons/lovart.svg', imageDesc: 'lovart logo' },
-  { image: '/svgs/icons/blaxel.svg', imageDesc: 'blaxel logo' },
-  { image: '/img/case_study/logos/shaped-logo.svg', imageDesc: 'shaped logo' },
+  { Logo: NetAppLogo, imageDesc: 'netapp logo' },
+  { Logo: SamsungLogo, imageDesc: 'samsung logo' },
+  { Logo: ComcastLogo, imageDesc: 'comcast logo' },
+  { Logo: FreoLogo, imageDesc: 'freo logo' },
+  { Logo: FormanceLogo, imageDesc: 'formance logo' },
+  { Logo: SalesforceLogo, imageDesc: 'salesforce logo' },
+  { Logo: RattleLogo, imageDesc: 'rattle logo' },
+  { Logo: SarvamLogo, imageDesc: 'sarvam logo' },
+  { Logo: GoKiwiLogo, imageDesc: 'GoKiwi logo' },
+  { Logo: LovartLogo, imageDesc: 'lovart logo' },
+  { Logo: BlaxelLogo, imageDesc: 'blaxel logo' },
+  { Logo: ShapedLogo, imageDesc: 'shaped logo' },
 ]
 
-export const TrustedByTeams = ({ page }) => {
+export const TrustedByTeams = ({ page, className }: { page?: string; className?: string }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
 
   return (
     <section
-      className={`${styles.used_by} !m-0 !mx-auto !w-[100vw]  border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]`}
+      className={cn(
+        'm-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6 md:w-[80vw]',
+        className
+      )}
     >
       <div className="section-container">
         <div className="mb-2 flex flex-col items-center text-center md:mb-12">
@@ -33,17 +46,14 @@ export const TrustedByTeams = ({ page }) => {
             Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
           </div>
         </div>
-        <div
-          className={`mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6`}
-        >
+        <div className="mb-12 mt-12 grid grid-cols-2 place-items-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8 sm:gap-y-14 md:mt-0 lg:grid-cols-6">
           {COMPANIES.map((company, idx) => (
-            <div key={`${idx}-${company.image}`} className="flex items-center justify-center">
-              <img
-                className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-                src={company.image}
-                alt={company.imageDesc}
-              />
-            </div>
+            <company.Logo
+              key={`${idx}-${company.imageDesc}`}
+              className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
+              role="img"
+              aria-label={company.imageDesc}
+            />
           ))}
         </div>
         <div
@@ -52,15 +62,14 @@ export const TrustedByTeams = ({ page }) => {
           <div className="mb-5 flex flex-col items-center text-center">
             <TrackingLink
               href="/case-study/"
+              id={customerStoriesId}
               clickType="Secondary CTA"
               clickName="Customer Stories Link"
               clickText="Read customer stories"
               clickLocation="Trusted By Section"
-              className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+              className="button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
-              <Button className="flex-center z-[1] mx-2" id={customerStoriesId}>
-                Read customer stories <ArrowRight size={14} />
-              </Button>
+              Read customer stories <ArrowRight size={14} />
             </TrackingLink>
           </div>
         </div>

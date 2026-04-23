@@ -2,7 +2,6 @@ import 'css/tailwind.css'
 import 'css/global.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
-import { SearchProvider, SearchConfig } from 'pliny/search'
 import SectionContainer from '@/components/SectionContainer'
 import siteMetadata from '@/data/siteMetadata'
 import { ThemeProviders } from './theme-providers'
@@ -113,10 +112,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <GrowthBookProvider>
             <SectionContainer>
               <div className="relative flex h-screen flex-col justify-between ">
-                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                  <TopNav />
-                  <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
-                </SearchProvider>
+                <TopNav />
+                <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
                 <MainFooter />
               </div>
             </SectionContainer>

@@ -12,6 +12,7 @@ import {
   SiAmazonwebservices,
   SiMysql,
   SiHasura,
+  SiVercel,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -81,6 +82,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     '/docs/integrations/aws-rds-mysql': <SiMysql className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/aws-elasticache-redis': <SiRedis className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
+    '/docs/integrations/vercel': <SiVercel className="h-7 w-7 text-black dark:text-white" />,
     '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
     '/docs/integrations/opentelemetry-dbos': (
       <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />

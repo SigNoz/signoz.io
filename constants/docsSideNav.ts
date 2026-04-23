@@ -15,6 +15,11 @@ const docsSideNav = [
         route: '/docs/what-is-signoz',
       },
       {
+        type: 'doc',
+        label: 'What Is OpenTelemetry?',
+        route: '/docs/overview/what-is-opentelemetry-and-why-it-matters',
+      },
+      {
         label: 'SigNoz Features',
         type: 'category',
         isExpanded: false,
@@ -2360,6 +2365,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+            label: 'OpenCode',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
             label: 'OpenRouter',
           },
@@ -2897,6 +2907,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/opencode-observability',
+        label: 'OpenCode',
+        type: 'doc',
+      },
+      {
         route: '/docs/openlit',
         label: 'OpenLIT',
         type: 'doc',
@@ -2989,6 +3004,41 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ai/use-cases/alert-correlation-analysis',
             label: 'Alert Correlation Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/post-deployment-monitoring',
+            label: 'Post Deployment Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/oncall-handoff-brief',
+            label: 'On-Call Handoff Brief',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-fatigue-audit',
+            label: 'Alert Fatigue Audit',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/optimize-performance-during-development',
+            label: 'Optimize Performance During Development',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+            label: 'Trace Failing Request',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+            label: 'Dashboard Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/incident-specific-dashboard',
+            label: 'Incident Specific Dashboard Spin-Up',
           },
         ],
       },
@@ -3399,8 +3449,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/vercel-to-signoz',
-        label: 'Vercel Traces',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
       {
         type: 'doc',

@@ -1,27 +1,25 @@
-'use client'
-
 import React from 'react'
-import Heading from '../../components/ui/Heading'
-import SubHeading from '../../components/ui/SubHeading'
-import { ArrowRight, Book, BookOpen } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
+import featureGraphicDataProtection from '@/public/img/graphics/homepage/feature-graphic-data-protection.svg?url'
 
 const DataProtectionLaws = ({ isInPricingPage = false }) => {
   return (
     <section>
-      <div className="section-container flex h-auto w-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !py-10 px-8 md:px-10">
-        <div className="flex flex-col">
+      <div className="section-container grid h-auto w-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !py-10 px-8 md:px-10">
+        <div className="grid min-w-0 grid-cols-1">
           <div>
             <p className="mb-4 block text-2xl font-semibold text-signoz_vanilla-100 md:mb-2">
               Worried about Data Protection Laws?
             </p>
             {!isInPricingPage ? (
               <ul className="list-['—_'] pl-5 ">
-                <li className="mb-2 max-w-[100vw] text-sm font-normal leading-9 text-signoz_vanilla-400 sm:w-[35rem] md:max-w-[50vw] md:text-base">
+                <li className="mb-2 max-w-full text-sm font-normal leading-9 text-signoz_vanilla-400 sm:w-[35rem] md:max-w-[min(35rem,100%)] md:text-base">
                   &nbsp;Store your data in the US, EU or India region depending on your needs.
                 </li>
-                <li className="max-w-[100vw] text-sm font-normal leading-9 text-signoz_vanilla-400 sm:w-[35rem] md:max-w-[50vw] md:text-base">
+                <li className="max-w-full text-sm font-normal leading-9 text-signoz_vanilla-400 sm:w-[35rem] md:max-w-[min(35rem,100%)] md:text-base">
                   &nbsp;You can self-host SigNoz or opt for our managed self-hosted offerings to
                   have complete adherence to data privacy and regulation laws.
                 </li>
@@ -33,12 +31,15 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
               </div>
             )}
           </div>
-          <img
-            src="/img/graphics/homepage/feature-graphic-data-protection.webp"
+          <Image
+            className="w-full"
+            src={featureGraphicDataProtection}
             alt="Map showing SigNoz cloud regions in the United States, European Union, and India"
+            width={720}
+            height={400}
           />
           {!isInPricingPage ? (
-            <div className="mt-[18px] flex flex-col gap-3 sm:flex-row">
+            <div className="mt-[18px] grid grid-cols-1 gap-3 xl:grid-cols-[repeat(3,max-content)]">
               <TrackingLink
                 href="/teams/"
                 className="inline-block"

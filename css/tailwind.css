@@ -49,6 +49,153 @@
       rgba(11, 12, 14, 0) 56.77%
     );
   }
+
+  /* Perlin_noise.webp — horizontal dark vignette, transparent center oval */
+  .bg-blur-perlin-noise {
+    background-image: radial-gradient(
+      ellipse 55% 50% at 50% 50%,
+      transparent 30%,
+      rgba(13, 13, 13, 0.5) 100%
+    );
+  }
+
+  /* Ellipse_388.webp */
+  .bg-blur-ellipse-388 {
+    background-repeat: no-repeat;
+    background-image: radial-gradient(
+      circle at 50% 100%,
+      rgba(239, 160, 112, 0.06) 0%,
+      transparent 65%
+    );
+  }
+
+  /* Ellipse_388.webp */
+  .bg-blur-ellipse-388-with-dots {
+    background-repeat: no-repeat;
+    background-position-y: 120px;
+    background-image: radial-gradient(
+      circle at 50% 100%,
+      rgba(239, 160, 112, 0.06) 0%,
+      transparent 65%
+    );
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+
+      background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+
+      background-size: 12px 12px;
+      background-position: 50% 50%;
+
+      /* fade out edges */
+      mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
+
+      opacity: 0.5;
+    }
+  }
+
+  /* Ellipse_207.webp — pink/rose radial glow (rgba(237,113,144) ~6% opacity) */
+  .bg-blur-ellipse-207 {
+    background-image: radial-gradient(
+      circle at 50% 50%,
+      rgba(237, 113, 144, 0.06) 0%,
+      transparent 65%
+    );
+  }
+
+  /* Ellipse_206.webp — violet/lavender radial glow (rgba(192,106,255) ~5% opacity) */
+  .bg-blur-ellipse-206 {
+    background-image: radial-gradient(
+      circle at 50% 50%,
+      rgba(192, 106, 255, 0.05) 0%,
+      transparent 65%
+    );
+  }
+
+  /* Footer_backdrop.webp — warm orange center transitioning to blue/indigo at bottom */
+  .bg-blur-footer-backdrop {
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      border-radius: 50%;
+    }
+
+    /* smaller, more centralized glow */
+    &::before {
+      top: -10vw;
+      width: 60vw;
+      height: 60vw;
+      z-index: 0;
+
+      background: radial-gradient(
+          circle at 50% 100%,
+          rgba(239, 160, 112, 0.16) 80%,
+          transparent 65%
+        )
+        no-repeat;
+      mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
+
+      @media (max-width: 1200px) {
+        top: -18vw;
+        width: 90vw;
+        height: 90vw;
+      }
+    }
+
+    /* 4 closer rings, smaller and higher */
+    &::after {
+      top: -5vw;
+      width: 45vw;
+      height: 45vw;
+      z-index: 1;
+      opacity: 0.85;
+
+      @media (max-width: 1200px) {
+        top: -18vw;
+        width: 90vw;
+        height: 90vw;
+      }
+
+      background: radial-gradient(
+          circle,
+          transparent 48%,
+          rgba(239, 160, 112, 0.07) 48.18%,
+          transparent 48.45%
+        ),
+        radial-gradient(
+          circle,
+          transparent 54%,
+          rgba(239, 160, 112, 0.06) 54.18%,
+          transparent 54.45%
+        ),
+        radial-gradient(
+          circle,
+          transparent 60%,
+          rgba(239, 160, 112, 0.05) 60.18%,
+          transparent 60.45%
+        ),
+        radial-gradient(
+          circle,
+          transparent 66%,
+          rgba(239, 160, 112, 0.04) 66.18%,
+          transparent 66.45%
+        );
+
+      mask-image: radial-gradient(
+        circle,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.92) 42%,
+        rgba(0, 0, 0, 0.45) 62%,
+        transparent 74%
+      );
+    }
+  }
 }
 
 /* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */

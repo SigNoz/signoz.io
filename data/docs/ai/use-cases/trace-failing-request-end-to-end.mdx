@@ -1,0 +1,133 @@
+---
+date: 2026-04-21
+id: trace-failing-request-end-to-end
+title: Trace a Failing Request End-to-End
+description: Debug a failed request from your IDE and get the full trace with span breakdown and error logs without opening a browser.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Something breaks. Your `/checkout` endpoint is returning 500s. Instead of manually filtering traces, clicking through spans, and hunting for correlated logs, you open your AI assistant, connected to SigNoz via the MCP server, and start investigating.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Get the Full Trace with Error Details
+
+```text
+Find the latest failed /checkout trace and show me the full span tree with the error. Also show matching error logs.
+```
+
+The AI assistant returns the complete breakdown:
+
+```text
+Latest failed /checkout trace
+Trace ID: a1b3adef15df29b119e5379dee016ff0
+Time: 2026-04-21 22:29:03 UTC
+Duration: ~8.95s
+Status: HTTP 500
+Root cause: Payment request failed. Invalid token. app.loyalty.level=gold
+
+Span tree:
+user_checkout_single                                     load-generator    24.75s  ok
+└─ POST http://frontend-proxy:8080/api/checkout          load-generator    8.95s   ERROR 500
+   └─ POST (ingress)                                     frontend-proxy    8.94s   ERROR 500
+      └─ router frontend egress                          frontend-proxy    8.93s   ERROR 500
+         └─ POST /api/checkout (server)                  frontend          8.92s   ERROR 500
+            └─ POST /api/checkout (inner)                frontend          8.92s   ERROR 500
+               └─ executing api route (pages) /api/checkout  frontend      8.92s   ERROR 500
+                  └─ oteldemo.CheckoutService/PlaceOrder [client]  frontend  8.82s ERROR
+                     └─ oteldemo.CheckoutService/PlaceOrder [server] checkout 8.93s ERROR
+                        │   status: "failed to charge card: could not charge
+                        │            the card: rpc error: code = Unknown desc =
+                        │            Payment request failed. Invalid token.
+                        │            app.loyalty.level=gold"
+                        ├─ prepareOrderItemsAndShippingQuoteFromCart  checkout  4.23s  ok
+                        │  ├─ CartService/GetCart [client]            checkout  140ms  ok
+                        │  │  └─ POST /oteldemo.CartService/GetCart   cart      1ms    ok
+                        │  │     └─ HGET <user-id> → valkey-cart:6379 cart      0.8ms  ok
+                        │  ├─ ProductCatalogService/GetProduct [client] checkout 1.43s ok
+                        │  │  └─ ProductCatalogService/GetProduct [server] product-catalog 1.23s ok
+                        │  │     └─ postgresql                        product-catalog 28ms ok
+                        │  ├─ CurrencyService/Convert [client]        checkout  34ms   ok
+                        │  │  └─ CurrencyService/Convert [server]     currency  1.2ms  ok
+                        │  ├─ shipping POST /get-quote [client]       checkout  528ms  ok
+                        │  │  └─ POST /get-quote                      shipping  40ms   ok
+                        │  │     └─ POST /getquote [client]           shipping  26ms   ok
+                        │  │        └─ POST /getquote                 quote     0.5ms  ok
+                        │  │           └─ {closure} / calculate-quote quote     <1ms   ok
+                        │  └─ CurrencyService/Convert [client]        checkout  757ms  ok
+                        │     └─ CurrencyService/Convert [server]     currency  27ms   ok
+                        └─ oteldemo.PaymentService/Charge [client]    checkout  1.07s  ERROR  ← failure
+                           │   status: "Payment request failed. Invalid token.
+                           │            app.loyalty.level=gold"
+                           └─ oteldemo.PaymentService/Charge [server] payment   0.9ms  ERROR
+                              └─ charge (internal)                    payment   0.3ms  ok
+
+The error bubbles up exclusively through the payment path — cart, product-catalog,
+currency, shipping, and quote all return clean. The failure originates in the
+payment service's charge handler and propagates back through checkout → frontend
+→ frontend-proxy → load-generator.
+
+Matching error / context logs for this trace:
+
+Time (UTC)         Service            Severity  Body
+22:29:03.942       frontend-proxy     access    POST /api/checkout HTTP/1.1" 500 ... 8935ms
+22:29:04.364       checkout           INFO      [PlaceOrder] (user_id=772944f0-…, currency=USD)
+22:29:04.609       cart               INFO      GetCartAsync called with userId=772944f0-…
+22:29:05.588       product-catalog    INFO      Product Found (LS4PSXUNUM "Red Flashlight")
+22:29:06.283       currency           INFO      Convert conversion successful
+22:29:07.164       shipping           INFO      Requesting quote
+22:29:07.166       quote              INFO      Calculated quote ({"total":44.95})
+22:29:07.190       shipping           INFO      Sending Quote
+22:29:07.674       currency           INFO      Convert conversion successful
+22:29:09.542       payment            info      Charge request received. (amount $333.95 USD, card 4539-1103-5661-7083)
+22:29:09.543       payment            warn      Payment request failed. Invalid token. app.loyalty.level=gold
+22:29:12.939       load-generator     INFO      Checkout completed for user 772944f0-…
+                                                 (misleading — load-gen logs this even on HTTP 500)
+
+Stack trace from the payment-service warn log:
+
+Error: Payment request failed. Invalid token. app.loyalty.level=gold
+    at module.exports.charge (/usr/src/app/charge.js:37:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Object.chargeServiceHandler [as charge] (/usr/src/app/index.js:21:22)
+```
+
+## What This Tells You
+
+The payment service in `charge.js:37` is rejecting the request with "Invalid token" specifically when `app.loyalty.level=gold`.
+
+This workflow beats sprinkling debug logs across 4 services. You get the full distributed context, correlated logs, and root cause in one query, all from your IDE.
+
+## Tips for Your Own Investigations
+
+- **Start from the failure point.** The span tree shows where the error originates. Don't waste time debugging healthy upstream services.
+- **Correlate logs with traces.** Stack traces, error messages, and context logs surface details that spans alone don't capture. Always check matching logs for the trace ID.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+Tracing a failing request end-to-end typically uses these MCP tools:
+
+| Step | MCP Tool | What It Does |
+|------|----------|-------------|
+| 1 | `signoz_search_traces` | Finds the latest failed trace matching the route filter |
+| 1 | `signoz_get_field_values` | Discovers available field names when the initial search fails (e.g., finding the correct route field) |
+| 1 | `signoz_get_trace_details` | Returns the full span tree with all span attributes and error details |
+| 1 | `signoz_search_logs` | Searches for logs correlated by trace ID to surface error context and stack traces |
+
+</details>
+
+## Related Use Cases
+
+- [Reconstruct a Bug from a Trace ID](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/) - Debug a support ticket with a trace ID.
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Ask "why is this slow?" and trace the bottleneck.
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) - Search and analyze logs without writing queries.
+
+<GetHelp />

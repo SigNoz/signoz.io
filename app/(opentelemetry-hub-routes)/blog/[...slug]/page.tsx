@@ -15,6 +15,7 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const defaultLayout = 'BlogLayout'
 const layouts = {
@@ -118,7 +119,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
         {!suppressStructuredData && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
           />
         )}
         <OpenTelemetryHubContent
@@ -151,7 +152,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
       {!suppressStructuredData && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
       )}
       <Layout

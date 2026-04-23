@@ -137,7 +137,7 @@ const CostComparison: React.FC = () => {
     <>
       <SectionLayout
         variant="bordered"
-        className="flex flex-col gap-y-9 !border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
+        className="!border-b-1 !border-t-1 flex flex-col gap-y-9 border-dashed border-signoz_slate-400 !px-0"
       >
         <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
@@ -151,10 +151,10 @@ const CostComparison: React.FC = () => {
             times at no extra charge.
           </div>
         </div>
-        <div className="flex flex-col border-t-1 border-dashed border-signoz_slate-400 sm:flex-row">
+        <div className="border-t-1 flex flex-col border-dashed border-signoz_slate-400 sm:flex-row">
           <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
             <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
-              <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
+              <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
                 CloudWatch's <br className="hidden md:block" /> billing{' '}
                 <br className="hidden md:block" /> complexity
               </h2>

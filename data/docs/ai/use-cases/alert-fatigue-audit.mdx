@@ -1,0 +1,253 @@
+---
+date: 2026-04-17
+id: alert-fatigue-audit
+title: Alert Fatigue Audit
+description: Identify noisy, flapping, and stale alerts by analyzing which alerts correlate with actual service degradation and which don't.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+You're drowning in alerts. Your pager fires 25 times a day, but only 3 of them matter. The rest? False alarms that train your team to ignore notifications.
+
+You need to know which alerts actually correlate with real service degradation and which are just noise. You open your AI assistant, connected to SigNoz via the MCP server, to analyze your alerts.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure you have alerts configured in SigNoz. See [Alerts](https://signoz.io/docs/alerts/) if you haven't set this up.
+
+## Step 1: Pull Alert History
+
+Start by asking your AI assistant to list every configured alert and retrieve its state-transition history:
+
+```text
+List every configured alert rule in SigNoz. For each rule, pull its state-transition history for the last 24 hours. Summarize which rules fired, how many transitions each had, and which rules had zero transitions (either stable or stuck).
+```
+
+Your assistant will use the SigNoz MCP server to enumerate rules and fetch per-rule history. Here's an example response:
+
+```text
+Alert history — last 24 hours (2026-04-16 21:43 UTC → 2026-04-17 21:45 UTC)
+
+Rules with state transitions in window: 5 of 6
+
+🔴 Database Connection Pool Exhaustion — critical — 18 transitions
+
+Service                                      | Firing | Resolved
+---------------------------------------------|--------|----------
+payment-service                              | 9      | 9
+
+🔴 High Error Rate (checkout) — critical — 12 transitions
+
+Service                                      | Firing | Resolved
+---------------------------------------------|--------|----------
+checkout-service                             | 6      | 6
+
+🟠 Cart Service Latency — warning — 156 transitions (78 firing, 78 resolved)
+Flapping heavily.
+
+Service                                      | Firing | Resolved
+---------------------------------------------|--------|----------
+cart-service                                 | 78     | 78
+
+🟠 Frontend 5xx Errors — warning — 94 transitions
+
+Service                                      | Firing | Resolved
+---------------------------------------------|--------|----------
+frontend                                     | 47     | 47
+
+🟠 API Gateway Timeout — warning — 240 transitions (120 firing, 120 resolved)
+
+Service                                      | Firing | Resolved
+---------------------------------------------|--------|----------
+api-gateway                                  | 120    | 120
+
+Rules with zero transitions in the last 24h (1)
+These rules either weren't triggered or have been in a stable state the entire window:
+
+- test-alert — critical (continuously firing since 2026-04-10, no state changes)
+```
+
+
+You now have a baseline view of all alerts that fired. Next, you need to gather detailed metrics about each alert's behavior to understand whether they're signal or noise.
+
+## Step 2: Retrieve Detailed Metrics for Each Alert
+
+For each alert, gather the signals needed to tell signal from noise — firing cadence, auto-resolve behavior, service health around each fire, flap density, and the rule's own configuration:
+
+```text
+For each alert rule from Step 1, retrieve:
+- Total fire count and fire frequency (fires per hour)
+- Mean duration before auto-resolve
+- Peak fires within any rolling 30-minute window
+- The error rate and p99 latency of the owning service, 5 min before and 5 min after each alert start time, and the per-firing delta
+- The rule's current configuration: threshold expression, referenced metric, and whether that metric produced data during the window
+```
+
+Your assistant will analyze each alert's firing patterns and correlate them with actual service metrics to determine if alerts correspond to real degradation or are firing on noise. Here's what you might see:
+
+```text
+Alert firing patterns (24h window)
+
+Alert                              | Service           | Fires | Fires/hr | Mean duration before resolve
+-----------------------------------|-------------------|-------|----------|------------------------------
+Database Connection Pool Exhaustion| payment-service   | 9     | 0.38     | 1,245 s (20.8 min)
+High Error Rate (checkout)         | checkout-service  | 6     | 0.25     | 1,680 s (28.0 min)
+Cart Service Latency               | cart-service      | 78    | 3.25     | 180 s (3.0 min)
+Frontend 5xx Errors                | frontend          | 47    | 1.96     | 240 s (4.0 min)
+API Gateway Timeout                | api-gateway       | 120   | 5.00     | 45 s (0.75 min)
+
+Note: For alerts with fewer than 20 firings, all instances were analyzed. For high-frequency alerts (20+ firings), a representative sample of 10 instances was analyzed to assess correlation patterns.
+
+---
+
+▶ Database Connection Pool Exhaustion (9 firings, payment-service)
+
+Metric           | Pre-window (5 min before) | Post-window (5 min after) | Δ
+-----------------|---------------------------|---------------------------|----------
+Avg traffic      | 1,240 spans               | 890 spans                 | −28.2%
+Avg error rate   | 2.1%                      | 18.5%                     | +16.4 pp
+Avg p99 latency  | 450 ms                    | 3,200 ms                  | +611%
+Median p99       | 420 ms                    | 3,100 ms                  | +638%
+
+Per-firing error-rate delta (n=9): 8/9 firings showed >20% error rate increase.
+Per-firing p99 delta (n=9): 9/9 firings showed >300% p99 increase.
+Clear correlation: every firing matched severe service degradation.
+
+▶ High Error Rate (checkout) (6 firings, checkout-service)
+
+Metric           | Pre-window       | Post-window      | Δ
+-----------------|------------------|------------------|----------
+Avg traffic      | 2,100 spans      | 1,850 spans      | −11.9%
+Avg error rate   | 1.8%             | 14.2%            | +12.4 pp
+Avg p99 latency  | 680 ms           | 1,450 ms         | +113%
+
+Per-firing error-rate delta (n=6): 6/6 firings showed >10% error rate increase.
+Per-firing p99 delta (n=6): 5/6 firings showed >80% p99 increase.
+Strong correlation: all firings matched measurable degradation.
+
+▶ Cart Service Latency (78 firings, cart-service)
+
+Metric           | Pre-window       | Post-window      | Δ
+-----------------|------------------|------------------|----------
+Avg traffic      | 3,400 spans      | 3,420 spans      | +0.6%
+Avg error rate   | 0.2%             | 0.3%             | +0.1 pp
+Avg p99 latency  | 520 ms           | 495 ms           | −4.8%
+
+Per-firing p99 delta (n=10 sampled): min −18%, median −5%, mean −3%, max +12%.
+p99 decreased or stayed flat in 8/10 samples.
+No correlation: service metrics actually improved after alerts fired.
+
+▶ Frontend 5xx Errors (47 firings, frontend)
+
+Metric           | Pre-window       | Post-window      | Δ
+-----------------|------------------|------------------|----------
+Avg traffic      | 5,200 spans      | 5,100 spans      | −1.9%
+Avg error rate   | 4.8%             | 4.9%             | +0.1 pp
+Avg p99 latency  | 890 ms           | 910 ms           | +2.2%
+
+Per-firing error-rate delta (n=10 sampled): min −8%, median +1%, mean +0.5%, max +9%.
+Per-firing p99 delta (n=10 sampled): min −5%, median +2%, mean +1.8%, max +8%.
+Minimal correlation: metrics are essentially flat around threshold, oscillating on noise.
+
+▶ API Gateway Timeout (120 firings, api-gateway)
+
+Metric           | Pre-window       | Post-window      | Δ
+-----------------|------------------|------------------|----------
+Avg traffic      | 8,500 spans      | 8,480 spans      | −0.2%
+Avg error rate   | 0.1%             | 0.1%             | 0 pp
+Avg p99 latency  | 95 ms            | 98 ms            | +3.2%
+
+Per-firing p99 delta (n=10 sampled): min −4%, median +2%, mean +1.5%, max +8%.
+Per-firing error-rate delta (n=10 sampled): all samples showed 0% change.
+No correlation: fires 120 times/day (5x/hour), auto-resolves in <1 min, no service degradation detected.
+```
+
+The metrics reveal distinct patterns: Database and Checkout alerts show strong correlation with actual degradation (300%+ latency spikes, 10%+ error rate increases). Cart Service Latency fires frequently but metrics actually improve after firing. Frontend 5xx Errors oscillates around the threshold with minimal real change. API Gateway Timeout fires very frequently (120x/day) with quick auto-resolution and zero correlation with service health. Now you can classify each alert based on these patterns.
+
+## Step 3: Classify Alerts by Behavior Pattern
+
+Ask your assistant to categorize each alert based on its behavior:
+
+```text
+Classify each alert into one of four categories:
+1. NOISY: Fires frequently (>5x/day avg), auto-resolves in <2 min, no correlated degradation in the owning service
+2. FLAPPING: Fires and resolves >3 times within any 30-min window, suggesting threshold is too close to normal variance
+3. STALE: Rule produces no usable signal — firing continuously with zero transitions for >24h, or has an invalid/unreachable threshold expression, or references a metric with no data for >90% of the window
+4. VALID: Per-firing deltas show a meaningful increase in error rate or p99 latency on the owning service in the post-window vs pre-window
+```
+
+Your assistant will classify each alert and provide recommendations. Here's an example response:
+
+```text
+Classification of the 6 alerts
+
+Alert                              | Severity  | Class       | Rationale
+-----------------------------------|-----------|-------------|--------------------------------------------------------
+Database Connection Pool Exhaustion| critical  | ✅ VALID    | 9 fires/day, mean auto-resolve 20.8 min; 8/9 firings showed >20% error-rate increase and >300% p99 increase at service level. Strong correlation with severe degradation.
+High Error Rate (checkout)         | critical  | ✅ VALID    | 6 fires/day, mean auto-resolve 28 min; 6/6 firings showed >10% error-rate increase and >80% p99 increase. Consistently catches real incidents.
+Cart Service Latency               | warning   | 🟠 FLAPPING | 78 fires/day, peak 8 fires in a single 30-min window, mean auto-resolve 3 min; 0/10 sampled firings correlated with service-level degradation (p99 actually decreased 4.8% on average post-fire). Firing on noise.
+Frontend 5xx Errors                | warning   | 🟠 FLAPPING | 47 fires/day, peak 6 fires in a single 30-min window, mean auto-resolve 4 min; error rate and p99 oscillate around threshold with minimal real change (<2%). Threshold too sensitive.
+API Gateway Timeout                | warning   | 🔴 NOISY    | 120 fires/day (5x/hour), auto-resolves in <1 min every time; 0/10 sampled firings showed any service-level degradation (error rate flat at 0.1%, p99 stable). Extremely noisy, no correlation with actual issues.
+test-alert                         | critical  | ⚫ STALE     | State=firing since 2026-04-10 with 0 transitions in 24h. Threshold condition is invalid (count() < -1). Dead rule definition, no usable signal being produced. Name suggests leftover test rule.
+
+Summary by category
+
+Class         | Count | Alerts
+--------------|-------|--------------------------------------------------
+VALID         | 2     | Database Connection Pool Exhaustion, High Error Rate (checkout)
+FLAPPING      | 2     | Cart Service Latency, Frontend 5xx Errors
+NOISY         | 1     | API Gateway Timeout
+STALE         | 1     | test-alert
+```
+
+With the classification complete, here's your action plan.
+
+## Final Summary
+
+Starting with 6 alerts generating 260 fires in 24 hours, you analyzed firing patterns and correlated them with actual service metrics. The classification revealed:
+
+- **2 VALID alerts** (Database Connection Pool, Checkout Errors): Consistently correlate with measurable service degradation—keep these
+- **2 FLAPPING alerts** (Cart Latency, Frontend 5xx): Fire frequently on noise without real degradation—need threshold tuning
+- **1 NOISY alert** (API Gateway Timeout): Fires very frequently (120x/day) with instant auto-resolution and zero correlation—needs immediate threshold adjustment
+- **1 STALE alert** (test-alert): Dead rule with invalid configuration—delete immediately
+
+You now know which alerts are working correctly (VALID), which need tuning (FLAPPING/NOISY), and which should be deleted (STALE). By fixing the 3 noisy/flapping alerts and deleting 1 stale alert, you can reduce alert volume while keeping the alerts that catch real incidents.
+
+
+## Tips for Your Own Investigations
+
+- **Fire count alone doesn't indicate noise.** Always check correlation with actual degradation, not just frequency.
+- **Look for the before/after pattern.** If metrics are the same 5 min before and after an alert fires, the threshold is too sensitive.
+- **Re-run this audit periodically.** Traffic patterns change. Thresholds that worked months ago might now be noisy.
+
+
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_list_alerts` | Enumerated every configured alert rule and its current state |
+| 1 | `signoz_get_alert_history` | Fetched state-transition history per rule for the 24-hour window, including rules with zero transitions |
+| 2 | `signoz_get_alert_history` | Derived fire counts, mean auto-resolve duration, and peak fires per rolling 30-minute window |
+| 2 | `signoz_get_alert` | Retrieved each rule's threshold expression and referenced metric to support the STALE check |
+| 2 | `signoz_aggregate_traces` | Computed error rate and p99 latency for the owning service 5 minutes before and after each firing to measure per-firing deltas |
+| 2 | `signoz_query_metrics` | Checked whether each rule's referenced metric produced data during the window (no-data / flat-signal detection) |
+
+</details>
+
+## Related Use Cases
+
+- [Alert Correlation Analysis](https://signoz.io/docs/ai/use-cases/alert-correlation-analysis/) - When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
+- [On-Call Handoff Brief](https://signoz.io/docs/ai/use-cases/oncall-handoff-brief/) - Generate a handoff summary of recent incidents and ongoing issues for the next on-call engineer.
+- [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Find where errors originate in the call chain when error rates spike on a service.
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Trace the bottleneck when latency spikes on one service.
+
+
+<GetHelp />
