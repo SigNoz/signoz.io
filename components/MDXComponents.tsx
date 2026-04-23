@@ -52,6 +52,13 @@ import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 import MarketplaceInstallationListicle from './Setup/MarketplaceInstallationListicle'
 import CollectionAgentsListicle from './Setup/CollectionAgentsListicle'
+import K8sInstall from './shared/K8sInstall'
+import K8sOtelDemo from './shared/K8sOtelDemo'
+import RetentionInfo from './shared/RetentionInfo'
+import SigNozCloud from './shared/SigNozCloud'
+import UpgradeInfo from './shared/UpgradeInfo'
+import OtelOperatorOTLPEndpoint from './shared/OtelOperatorOTLPEndpoint'
+import OtelOperatorAutoInstrumentation from './shared/OtelOperatorAutoInstrumentation'
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
@@ -161,6 +168,13 @@ export const components: MDXComponents = {
   LLMMonitoringListicle,
   OtelCollectorFlow,
   CollectionAgentsListicle,
+  K8sInstall,
+  K8sOtelDemo,
+  RetentionInfo,
+  SigNozCloud,
+  UpgradeInfo,
+  OtelOperatorOTLPEndpoint,
+  OtelOperatorAutoInstrumentation,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
   MetricsQuickStartOverview,
