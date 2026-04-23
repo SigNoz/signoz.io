@@ -21,18 +21,11 @@ export const METRICS_PRICES: Record<number, number> = {
   13: 0.18,
 }
 
+const sortedRecordKeys = (record: Record<number, number>) =>
+  (Object.keys(record) as string[]).map(Number).sort((a, b) => a - b)
+
+/** Retention options are derived from price keys so tiers stay in sync. */
 export const RETENTION_PERIOD = {
-  TRACES_AND_LOGS: [
-    { days: 15, price: 0.3 },
-    { days: 30, price: 0.4 },
-    { days: 90, price: 0.6 },
-    { days: 180, price: 0.8 },
-    { days: 365, price: 1.4 },
-  ],
-  METRICS: [
-    { months: 1, price: 0.1 },
-    { months: 3, price: 0.12 },
-    { months: 6, price: 0.15 },
-    { months: 13, price: 0.18 },
-  ],
+  TRACES_AND_LOGS: sortedRecordKeys(TRACES_AND_LOGS_PRICES).map((days) => ({ days })),
+  METRICS: sortedRecordKeys(METRICS_PRICES).map((months) => ({ months })),
 }

@@ -1,7 +1,7 @@
 import { MIN_LOG_VALUE } from './constants'
 
-// Transform linear slider value to logarithmic scale
-export const linearToLog = (value: number, minLog: number, maxLog: number) => {
+// Transform linear slider value to logarithmic scale (floor is MIN_LOG_VALUE from constants).
+export const linearToLog = (value: number, maxLog: number) => {
   if (value === 0) return 0
   const minValue = Math.log(MIN_LOG_VALUE)
   const maxValue = Math.log(maxLog)
@@ -10,7 +10,7 @@ export const linearToLog = (value: number, minLog: number, maxLog: number) => {
 }
 
 // Transform logarithmic value back to linear scale for slider
-export const logToLinear = (value: number, minLog: number, maxLog: number) => {
+export const logToLinear = (value: number, maxLog: number) => {
   if (value === 0) return 0
   const minValue = Math.log(MIN_LOG_VALUE)
   const maxValue = Math.log(maxLog)

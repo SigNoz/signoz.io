@@ -6,7 +6,7 @@ interface PricingCalculatorHeaderProps {
   isMounted: boolean
   showCopiedToast: boolean
   copyLinkToClipboard: () => void
-  shareWithTeam: () => void
+  shareWithTeam: () => Promise<void>
 }
 
 export const PricingCalculatorHeader: React.FC<PricingCalculatorHeaderProps> = ({

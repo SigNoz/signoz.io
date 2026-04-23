@@ -25,21 +25,18 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
         <div className="flex items-center gap-3">
           {isSectionVisible('traces') && (
             <>
-              {/* <img src="/img/index_features/drafting-compass.svg" alt="Traces Icon" className="h-5 w-5" /> */}
               <DraftingCompass isActive={true} />
               <span className="text-md font-medium text-signoz_vanilla-100">Traces</span>
             </>
           )}
           {isSectionVisible('logs') && (
             <>
-              {/* <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" /> */}
               <LogsIcon isActive={true} />
               <span className="text-md font-medium text-signoz_vanilla-100">Logs</span>
             </>
           )}
           {isSectionVisible('metrics') && (
             <>
-              {/* <img src="/img/index_features/bar-chart-2.svg" alt="Metrics Icon" className="h-5 w-5" /> */}
               <MetricsIcon isActive={true} />
               <span className="text-md font-medium text-signoz_vanilla-100">Metrics</span>
             </>

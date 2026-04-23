@@ -22,7 +22,7 @@ import {
 } from 'react-icons/si'
 import TrackingLink from '../../../../components/TrackingLink'
 import Button, { BUTTON_TYPES } from '../../../../components/Button/Button'
-import { ArrowUpRight, LucideServer, Database, Cloud, Workflow } from 'lucide-react'
+import { ArrowUpRight, LucideServer, Database, Workflow } from 'lucide-react'
 
 const InstrumentationSupport = () => {
   const TechIcon = ({ icon, name }: { icon: React.ReactNode; name: string }) => (

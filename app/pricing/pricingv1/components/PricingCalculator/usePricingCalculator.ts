@@ -1,12 +1,10 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ALL_SECTIONS,
   MAX_VALUE,
   METRICS_PRICES,
-  MIN_LOG_VALUE,
-  MIN_VALUE,
   RETENTION_PERIOD,
   TRACES_AND_LOGS_PRICES,
 } from './constants'
@@ -106,9 +104,7 @@ export function usePricingCalculator({
         const value = Number.parseInt(tracesParam)
         if (!isNaN(value) && value >= 0) {
           setInputTracesValue(value.toString())
-          setTracesValue(
-            value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
-          )
+          setTracesValue(value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MAX_VALUE))
         }
       }
 
@@ -116,9 +112,7 @@ export function usePricingCalculator({
         const value = Number.parseInt(logsParam)
         if (!isNaN(value) && value >= 0) {
           setInputLogsValue(value.toString())
-          setLogsValue(
-            value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
-          )
+          setLogsValue(value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MAX_VALUE))
         }
       }
 
@@ -126,9 +120,7 @@ export function usePricingCalculator({
         const value = Number.parseInt(metricsParam)
         if (!isNaN(value) && value >= 0) {
           setInputMetricsValue(value.toString())
-          setMetricsValue(
-            value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
-          )
+          setMetricsValue(value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MAX_VALUE))
         }
       }
 
@@ -159,29 +151,28 @@ export function usePricingCalculator({
     const numValue = typeof value === 'number' ? value : value[0]
     if (isNaN(numValue)) return
     setTracesValue(numValue)
-    setInputTracesValue(linearToLog(numValue, MIN_LOG_VALUE, MAX_VALUE).toString())
+    setInputTracesValue(linearToLog(numValue, MAX_VALUE).toString())
   }
 
   const handleChangeLogs = (value: number | number[]) => {
     const numValue = typeof value === 'number' ? value : value[0]
     if (isNaN(numValue)) return
     setLogsValue(numValue)
-    setInputLogsValue(linearToLog(numValue, MIN_LOG_VALUE, MAX_VALUE).toString())
+    setInputLogsValue(linearToLog(numValue, MAX_VALUE).toString())
   }
 
   const handleChangeMetrics = (value: number | number[]) => {
     const numValue = typeof value === 'number' ? value : value[0]
     if (isNaN(numValue)) return
     setMetricsValue(numValue)
-    setInputMetricsValue(linearToLog(numValue, MIN_VALUE, MAX_VALUE).toString())
+    setInputMetricsValue(linearToLog(numValue, MAX_VALUE).toString())
   }
 
   const handleInputTracesChange = (value: string) => {
     setInputTracesValue(value)
     const numValue = Number(value)
     if (isNaN(numValue) || numValue < 0) return
-    const linearValue =
-      numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
+    const linearValue = numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MAX_VALUE)
     setTracesValue(linearValue)
   }
 
@@ -189,8 +180,7 @@ export function usePricingCalculator({
     setInputLogsValue(value)
     const numValue = Number(value)
     if (isNaN(numValue) || numValue < 0) return
-    const linearValue =
-      numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
+    const linearValue = numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MAX_VALUE)
     setLogsValue(linearValue)
   }
 
@@ -198,8 +188,7 @@ export function usePricingCalculator({
     setInputMetricsValue(value)
     const numValue = Number(value)
     if (isNaN(numValue) || numValue < 0) return
-    const linearValue =
-      numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
+    const linearValue = numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MAX_VALUE)
     setMetricsValue(linearValue)
   }
 
@@ -251,7 +240,7 @@ export function usePricingCalculator({
   const calculateSubtotal = (type: string, value: number, retentionPeriod: number) => {
     if (value === 0) return 0
     const pricePerUnit = getPricePerUnit(type, retentionPeriod)
-    const estimatedUsage = linearToLog(value, MIN_LOG_VALUE, MAX_VALUE)
+    const estimatedUsage = linearToLog(value, MAX_VALUE)
     return Number(pricePerUnit) * Number(estimatedUsage)
   }
 
@@ -270,7 +259,7 @@ export function usePricingCalculator({
   const isHighVolume = totalEstimate >= 2500
 
   const [isMobile, setIsMobile] = useState(false)
-  useLayoutEffect(() => {
+  useEffect(() => {
     const query = embedded ? '(max-width: 1280px)' : '(max-width: 768px)'
     const mql = window.matchMedia(query)
     const sync = () => setIsMobile(mql.matches)
