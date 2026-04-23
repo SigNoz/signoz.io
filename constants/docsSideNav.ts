@@ -934,6 +934,11 @@ const docsSideNav = [
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector',
           },
+          {
+            type: 'doc',
+            label: 'GeoIP Processor',
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor',
+          },
         ],
       },
     ],
