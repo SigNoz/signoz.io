@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import {
   ALL_SECTIONS,
   MAX_VALUE,
@@ -270,20 +270,15 @@ export function usePricingCalculator({
   const isHighVolume = totalEstimate >= 2500
 
   const [isMobile, setIsMobile] = useState(false)
+  useLayoutEffect(() => {
+    const query = embedded ? '(max-width: 1280px)' : '(max-width: 768px)'
+    const mql = window.matchMedia(query)
+    const sync = () => setIsMobile(mql.matches)
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (!embedded) setIsMobile(window.innerWidth <= 768)
-      else setIsMobile(window.innerWidth <= 1280)
-    }
-
-    handleResize()
-
-    window.addEventListener('resize', handleResize)
-
-    return () => window.removeEventListener('resize', handleResize)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    sync()
+    mql.addEventListener('change', sync)
+    return () => mql.removeEventListener('change', sync)
+  }, [embedded])
 
   return {
     isMounted,

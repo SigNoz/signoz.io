@@ -19,19 +19,25 @@ const Banner = () => {
   //Uncomment the below code to launch a banner on homepage and comment our return null
 
   return (
-      <div className="w-full bg-indigo-500 flex items-center justify-center py-2">
-          <div className="w-full flex justify-between items-center px-4 md:justify-center">
-              <Link href="https://signoz.io/blog/cloud-teams-plan-now-at-49usd/" className="text-base font-medium text-white leading-5">
-               We slashed SigNoz Cloud monthly base fee by 75% - learn more. 🥳         
-               </Link>
-              <button className="text-white md:absolute md:right-4" onClick={() => setVisible(false)}>
-                  <X size={16} />
-              </button>
-          </div>
+    <div className="flex w-full min-w-0 items-center justify-center bg-indigo-500 py-2">
+      <div className="flex w-full min-w-0 max-w-full items-center gap-3 px-4 md:relative md:justify-center">
+        <Link
+          href="https://signoz.io/blog/cloud-teams-plan-now-at-49usd/"
+          className="min-w-0 flex-1 break-words text-base font-medium leading-5 text-white md:flex-none md:text-center"
+        >
+          We slashed SigNoz Cloud monthly base fee by 75% - learn more. 🥳
+        </Link>
+        <button
+          type="button"
+          className="shrink-0 text-white md:absolute md:right-4"
+          onClick={() => setVisible(false)}
+          aria-label="Dismiss banner"
+        >
+          <X size={16} />
+        </button>
       </div>
-  );
-
-  // return null
+    </div>
+  )
 }
 
 export default Banner

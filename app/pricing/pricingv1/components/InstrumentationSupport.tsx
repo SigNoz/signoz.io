@@ -78,13 +78,13 @@ const InstrumentationSupport = () => {
 
   return (
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%] flex-1 md:!w-[300px]">
+      <div className="flex w-full min-w-0 flex-col sm:flex-row">
+        <div className="w-full shrink-0 sm:w-[300px] sm:max-w-[300px] md:!w-[300px]">
           <p className="sticky top-[100px] px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-8">
             Complete <br /> Observability <br /> for <br /> Every <br /> Use Case
           </p>
         </div>
-        <div className="flex-[2_2_0%]">
+        <div className="min-w-0 flex-[2_2_0%]">
           <div className="ml-0 flex flex-col border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-8 py-10 md:px-4 md:pl-10">
             {/* APM Section */}
             <CategorySection
