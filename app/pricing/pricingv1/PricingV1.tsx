@@ -1,5 +1,4 @@
-import React, { Suspense } from 'react'
-import dynamic from 'next/dynamic'
+import React from 'react'
 import { Card } from '@/components/ui/Card'
 import Heading from '../../../components/ui/Heading'
 import TeamsPricingCard from './components/TeamsPricingCard'
@@ -12,19 +11,7 @@ import FAQ from './components/FAQ'
 import StartupProgram from './components/StartupProgram'
 import SigNozCloudPricingOverview from './components/SigNozCloudPricingOverview'
 import InstrumentationSupport from './components/InstrumentationSupport'
-
-const PricingCalculator = dynamic(() => import('./components/PricingCalculator'), {
-  loading: () => <PricingCalculatorSkeleton />,
-})
-
-function PricingCalculatorSkeleton() {
-  return (
-    <div
-      aria-hidden
-      className="min-h-[560px] animate-pulse rounded-lg border border-signoz_slate-400/30 bg-signoz_ink-500/40 md:min-h-[640px]"
-    />
-  )
-}
+import PricingCalculator from './components/PricingCalculator'
 
 export default function PricingV1Page() {
   return (
@@ -60,9 +47,7 @@ export default function PricingV1Page() {
                   Get an instant estimate based on your usage. No surprises, no hidden fees.
                 </p>
               </div>
-              <Suspense fallback={<PricingCalculatorSkeleton />}>
-                <PricingCalculator />
-              </Suspense>
+              <PricingCalculator />
             </div>
           </Card>
         </div>
