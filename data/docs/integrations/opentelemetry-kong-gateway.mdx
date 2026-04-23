@@ -1,5 +1,5 @@
 ---
-date: 2026-04-13
+date: 2026-04-23
 id: opentelemetry-kong-gateway
 title: OpenTelemetry Kong Gateway Integration
 description: Monitor Kong Gateway by exporting OpenTelemetry traces, metrics, and logs natively to SigNoz.
@@ -23,9 +23,10 @@ Kong Gateway provides a native OpenTelemetry plugin to capture proxy latencies, 
 
 ## Configure OpenTelemetry Export
 
-Configure the <a href="https://developer.konghq.com/plugins/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">opentelemetry plugin</a> either via your declarative Configuration (<a href="https://github.com/kong/deck" target="_blank" rel="noopener noreferrer nofollow">decK</a>) or via the Kong Ingress Controller in Kubernetes.
+Configure the <a href="https://developer.konghq.com/plugins/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">opentelemetry plugin</a> either via declarative config (<a href="https://github.com/kong/deck" target="_blank" rel="noopener noreferrer nofollow">decK</a>) or via the Kong Ingress Controller in Kubernetes.
 
-### Using Declarative Config (deck)
+<Tabs>
+<TabItem value="deck" label="Declarative Config (decK)" default>
 
 ```yaml
 _format_version: "3.0"
@@ -64,14 +65,10 @@ Sync your state via Kong's Admin API:
 deck gateway sync kong-state.yaml --kong-addr <YOUR-KONG-ADMIN-URL>
 ```
 
+</TabItem>
+<TabItem value="kic" label="Kong Ingress Controller (CRD)">
 
-<details>
-<ToggleHeading>
-
-### Using Kong Ingress Controller (CRD)
-</ToggleHeading>
-
-Apply a `KongClusterPlugin` to enable the plugin globally across all services managed by the Ingress Controller. 
+Apply a `KongClusterPlugin` to enable the plugin globally across all services managed by the Ingress Controller.
 
 ```yaml
 apiVersion: configuration.konghq.com/v1
@@ -111,7 +108,15 @@ Apply the file to your cluster:
 kubectl apply -f kong-plugin-otel.yaml
 ```
 
-</details>
+</TabItem>
+</Tabs>
+
+<Admonition type="tip">
+  To collect only specific signal types, remove the endpoints you don't need:
+  - **Traces only**: remove `logs_endpoint` and the `metrics` block
+  - **Logs only**: remove `traces_endpoint` and the `metrics` block
+  - **Metrics only**: remove `traces_endpoint` and `logs_endpoint`
+</Admonition>
 
 ## Available Telemetry
 
