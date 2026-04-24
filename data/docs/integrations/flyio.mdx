@@ -1,5 +1,5 @@
 ---
-date: 2026-04-23
+date: 2026-04-24
 id: flyio
 title: Monitor Fly.io with SigNoz
 description: Ship logs and metrics from your Fly.io apps to SigNoz — forward logs via fly-log-shipper and scrape metrics through Fly's Prometheus federation endpoint.
@@ -24,7 +24,10 @@ If using self-hosted SigNoz, most steps are identical. To adapt this guide, upda
 
 ---
 
-## Part 1: Forward Logs
+<Tabs>
+<TabItem value="logs" label="Logs" default>
+
+## Forward Logs
 
 Fly.io logs are forwarded to SigNoz using <a href="https://github.com/superfly/fly-log-shipper" target="_blank" rel="noopener noreferrer nofollow">fly-log-shipper</a> — a Fly app that runs Vector and drains logs from your entire Fly.io organisation.
 
@@ -77,9 +80,21 @@ Once deployed, fly-log-shipper begins draining logs from all apps in the organis
 
 Open **Logs Explorer** in SigNoz. Within a minute you should see log entries with Fly.io-specific attributes such as `app`, `region`, and `instance_id`.
 
----
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
 
-## Part 2: Collect Metrics
+- **fly-log-shipper not running** — run `fly status` inside the `fly-log-shipper` directory and confirm the app is in a `running` state.
+- **Wrong secrets** — re-check `ACCESS_TOKEN`, `SIGNOZ_INGESTION_KEY`, and `SIGNOZ_INGESTION_URL` with `fly secrets list`. Update them with `fly secrets set` and redeploy.
+- **Token scope** — ensure the token was created with `fly tokens create readonly personal`, not a deploy token.
+
+</details>
+
+</TabItem>
+<TabItem value="metrics" label="Metrics">
+
+## Collect Metrics
 
 Fly.io exposes application and infrastructure metrics via a Prometheus federation endpoint. You collect these by deploying an **OpenTelemetry Collector** that scrapes Fly's federation API and exports to SigNoz.
 
@@ -109,26 +124,19 @@ A pre-built Fly.io Prometheus dashboard is available to import directly into Sig
   </figcaption>
 </figure>
 
----
-
 <details>
 <ToggleHeading>
 ## Troubleshooting
 </ToggleHeading>
-
-### No logs appearing in SigNoz
-
-- **fly-log-shipper not running** — run `fly status` inside the `fly-log-shipper` directory and confirm the app is in a `running` state.
-- **Wrong secrets** — re-check `ACCESS_TOKEN`, `SIGNOZ_INGESTION_KEY`, and `SIGNOZ_INGESTION_URL` with `fly secrets list`. Update them with `fly secrets set` and redeploy.
-- **Token scope** — ensure the token was created with `fly tokens create readonly personal`, not a deploy token.
-
-### No metrics appearing in SigNoz
 
 - **Wrong org slug** — confirm `<your-org-slug>` in `metrics_path` matches the output of `fly orgs list`.
 - **Token format** — the token file must contain only the raw value after `FlyV1 ` (no prefix, no trailing newline).
 - **Gauge vs counter** — Fly's federation endpoint does not expose metric types; all metrics default to Gauge. Use the `transform/fly_metrics` processor to convert counters. See [Fly.io Metrics](https://signoz.io/docs/metrics-management/fly-metrics/) for details.
 
 </details>
+
+</TabItem>
+</Tabs>
 
 ## Next Steps
 
