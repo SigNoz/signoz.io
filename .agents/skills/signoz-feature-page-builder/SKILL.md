@@ -1,6 +1,6 @@
 ---
 name: signoz-feature-page-builder
-description: Create new SigNoz feature pages following established architecture, shared components, and design patterns. Use when asked to "create a feature page", "build a landing page", "new product page", "scaffold a page like trace-funnels", or any request to build a marketing/product page for a SigNoz feature. Also activates for "add a page for [feature]" or "build a page similar to alerts/external-apis/why-signoz".
+description: Create new SigNoz feature pages following established architecture, shared components, and design patterns. Use when asked to "create a feature page", "build a landing page", "new product page", "scaffold a page like trace-funnels", or any request to build a marketing/product page for a SigNoz feature. Also activates for "add a page for [feature]", "build a page similar to alerts/external-apis/why-signoz", "here's the copy for the page", "build from this copy", or "use this Figma file to build a page".
 ---
 
 # SigNoz Feature Page Builder
@@ -15,7 +15,9 @@ The **trace-funnels page** (`app/trace-funnels/`) is the cleanest reference impl
 - `app/why-signoz/` — Complex enterprise page with varied card types
 - `app/datadog-migration-tool/` — Modal/form integration pattern
 
-## Build Workflow
+## Build Workflows
+
+### Workflow A: Interactive (define as you go)
 
 1. **Define Page Goals**: Clarify the feature name, target audience, key value propositions (3-5), primary CTA, and secondary CTA.
 2. **Create File Structure**: Follow the standard 3-file pattern (see [page-architecture.md](references/page-architecture.md)).
@@ -24,6 +26,18 @@ The **trace-funnels page** (`app/trace-funnels/`) is the cleanest reference impl
 5. **Add Tracking**: Integrate `TrackingLink` and tracking objects on all interactive elements.
 6. **Visual Review**: Run `$signoz-visual-review` on the completed page to catch visual issues.
 7. **Verify**: Run `yarn lint` and `yarn build` to confirm the page compiles.
+
+### Workflow B: Copy-First (build from raw content + assets)
+
+Use this when the user provides all copy in a single prompt, optionally with a Figma URL for assets. See [copy-to-page-workflow.md](references/copy-to-page-workflow.md) for the full algorithm.
+
+1. **Analyze Copy**: Classify each content block (HERO, FEATURE_SPLIT, FEATURE_CARD, FEATURE_CAROUSEL, CTA, META).
+2. **Fetch Assets**: If a Figma URL is provided, fetch the file via Figma MCP tools, identify exportable frames, and download images to `public/img/<feature-name>/`.
+3. **Map Content to Components**: Apply the content analysis algorithm to decide which shared components handle each block.
+4. **Show Content Map**: Present the user a brief table showing how their copy was classified, which component each block maps to, and which image goes where.
+5. **Generate Page**: Build all 3 files with properly sized, arranged, and spaced content.
+6. **Flag Gaps**: Identify any sections that need more copy, missing images, or user decisions — do not fabricate content.
+7. **Visual Review + Verify**: Run `$signoz-visual-review` then `yarn lint` and `yarn build`.
 
 ## Standard Page Flow
 
@@ -85,6 +99,7 @@ Every interactive element needs tracking. See [content-patterns.md](references/c
 - **File structure and metadata**: See [page-architecture.md](references/page-architecture.md)
 - **Shared component catalog**: See [shared-components.md](references/shared-components.md)
 - **Content and tracking patterns**: See [content-patterns.md](references/content-patterns.md)
+- **Copy-first build workflow**: See [copy-to-page-workflow.md](references/copy-to-page-workflow.md)
 - **Pre-launch checklist**: See [design-checklist.md](references/design-checklist.md)
 
 ## Guardrails
