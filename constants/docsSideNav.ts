@@ -3040,6 +3040,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/incident-specific-dashboard',
             label: 'Incident Specific Dashboard Spin-Up',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-creation-natural-language',
+            label: 'Alert Creation from Natural Language',
+          },
         ],
       },
     ],
