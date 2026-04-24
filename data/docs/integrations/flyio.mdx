@@ -22,6 +22,7 @@ If using self-hosted SigNoz, most steps are identical. To adapt this guide, upda
 - A `SigNoz Cloud` (or self-hosted) workspace
 - `Fly CLI` installed and a Fly.io account
 
+
 <Tabs>
 <TabItem value="logs" label="Logs" default>
 
@@ -94,33 +95,262 @@ Open **Logs Explorer** in SigNoz. Within a minute you should see log entries wit
 
 ## Collect Metrics
 
-Fly.io exposes application and infrastructure metrics via a Prometheus federation endpoint. You collect these by deploying an **OpenTelemetry Collector** that scrapes Fly's federation API and exports to SigNoz.
+Fly.io exposes application and infrastructure metrics via a Prometheus federation endpoint. The OpenTelemetry Collector scrapes this endpoint and forwards metrics to SigNoz. For the full reference, see [Fly.io Metrics](https://signoz.io/docs/metrics-management/fly-metrics/).
 
-The setup involves three main parts:
+### Step 1: Create an org metrics token
 
-1. **Generate an org-scoped metrics token** — used to authenticate against Fly's federation endpoint.
-2. **Configure the OTel Collector** — add a `prometheus` receiver pointed at `api.fly.io/prometheus/<org-slug>/federate`, a `transform/fly_metrics` processor to fix metric types, and an `otlphttp` exporter to SigNoz.
-3. **Run the Collector** — on a VM, in Docker, or via the SigNoz K8s Infra Helm chart.
+Generate a token at the org scope:
 
-For complete step-by-step instructions across all deployment options, see [Fly.io Metrics](https://signoz.io/docs/metrics-management/fly-metrics/).
+```bash
+fly tokens create org --org <your-org-slug>
+```
 
-### Pre-built dashboard
+This prints a value beginning with `FlyV1 ...`. Save only the raw part after `FlyV1 ` to a file (do not include the prefix):
 
-A pre-built Fly.io Prometheus dashboard is available to import directly into SigNoz:
+```bash
+# Save the raw token (without the "FlyV1 " prefix)
+echo '<RAW_TOKEN_AFTER_FlyV1>' > fly_federate_token
+```
 
-<div className="flex justify-center">
-  <DashboardActions
-    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/fly/fly-prometheus-v1.json"
-    dashboardName="Fly.io (Prometheus)"
-  />
-</div>
+### Step 2: Configure the OpenTelemetry Collector
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/dashboards/dashboard-templates/fly-dashboard.webp" alt="Fly.io pre-built Prometheus dashboard in SigNoz" />
-  <figcaption>
-    <i>Fly.io Prometheus dashboard in SigNoz</i>
-  </figcaption>
-</figure>
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+Follow instructions here to install [OpenTelemetry Binary as an agent](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
+
+Update `config.yaml` in the `otelcol-contrib` folder with the following:
+
+```yaml:config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: fly-federate
+          scheme: https
+          metrics_path: /prometheus/<your-org-slug>/federate   # e.g., /prometheus/personal/federate
+          params:
+            match[]: ['{__name__=~"fly_.*"}']
+          static_configs:
+            - targets: ["api.fly.io"]
+          authorization:
+            type: FlyV1
+            credentials_file: /etc/otel/secret/fly_federate_token
+```
+
+Replace `<your-org-slug>` with your actual organization slug. Then add the `prometheus` receiver to your `receivers` configuration.
+
+```yaml:config.yaml
+processors:
+  transform/fly_metrics:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - 'convert_gauge_to_sum("cumulative", true) where IsMatch(metric.name, "^fly_.*_count$") or metric.name == "fly_instance_cpu" or metric.name == "fly_instance_net_sent_bytes" or metric.name == "fly_instance_net_recv_bytes"'
+```
+
+Add the `transform/fly_metrics` processor to your `processors` configuration.
+
+```yaml:config.yaml
+exporters:
+  otlphttp:
+    endpoint: "https://ingest.{region}.signoz.cloud:443"
+    headers:
+      signoz-access-token: <YOUR_SIGNOZ_API_KEY>
+```
+
+Replace `{region}` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+```yaml:config.yaml
+service:
+  telemetry:
+    logs:
+      level: debug
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [transform/fly_metrics, batch]
+      exporters: [otlphttp]
+```
+
+### Step 3: Run the Collector
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Install the [OpenTelemetry Collector for Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+
+Update `otel.yaml` with the following:
+
+```yaml:otel.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: fly-federate
+          scheme: https
+          metrics_path: /prometheus/<your-org-slug>/federate
+          params:
+            match[]: ['{__name__=~"fly_.*"}']
+          static_configs:
+            - targets: ["api.fly.io"]
+          authorization:
+            type: FlyV1
+            credentials_file: /etc/otel/secret/fly_federate_token
+```
+
+Replace `<your-org-slug>` with your actual organization slug.
+
+```yaml:otel.yaml
+processors:
+  transform/fly_metrics:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - 'convert_gauge_to_sum("cumulative", true) where IsMatch(metric.name, "^fly_.*_count$") or metric.name == "fly_instance_cpu" or metric.name == "fly_instance_net_sent_bytes" or metric.name == "fly_instance_net_recv_bytes"'
+```
+
+```yaml:otel.yaml
+exporters:
+  otlphttp:
+    endpoint: "https://ingest.{region}.signoz.cloud:443"
+    headers:
+      signoz-access-token: <YOUR_SIGNOZ_API_KEY>
+```
+
+Replace `{region}` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+```yaml:otel.yaml
+service:
+  telemetry:
+    logs:
+      level: debug
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [transform/fly_metrics, batch]
+      exporters: [otlphttp]
+```
+
+### Step 3: Run the Collector
+
+```bash
+docker run --rm -it \
+  -v "$(pwd)/otel.yaml:/etc/otel/config.yaml" \
+  -v "$(pwd)/fly_federate_token:/etc/otel/secret/fly_federate_token:ro" \
+  otel/opentelemetry-collector-contrib:0.103.1 \
+  --config /etc/otel/config.yaml
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Install the [SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+
+**Create the namespace (if needed):**
+
+```bash
+kubectl create namespace signoz
+```
+
+**Create the secret for the Fly token:**
+
+```bash
+kubectl create secret generic fly-federate-token \
+  --from-file=fly_federate_token=./fly_federate_token \
+  -n signoz
+```
+
+**Update `override-values.yaml`:**
+
+```yaml:override-values.yaml
+global:
+  cloud: others
+  clusterName: <CLUSTER_NAME>
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+otelInsecure: false
+signozApiKey: <your-ingestion-key>
+
+otelAgent:
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: 0.103.1
+  config:
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: fly-federate
+              scheme: https
+              metrics_path: /prometheus/<your-org-slug>/federate
+              params:
+                match[]: ['{__name__=~"fly_.*"}']
+              static_configs:
+                - targets: ["api.fly.io"]
+              authorization:
+                type: FlyV1
+                credentials_file: /etc/otel/secret/fly_federate_token
+    processors:
+      transform/fly_metrics:
+        error_mode: ignore
+        metric_statements:
+          - context: datapoint
+            statements:
+              - 'convert_gauge_to_sum("cumulative", true) where IsMatch(metric.name, "^fly_.*_count$") or metric.name == "fly_instance_cpu" or metric.name == "fly_instance_net_sent_bytes" or metric.name == "fly_instance_net_recv_bytes"'
+    exporters:
+      otlphttp:
+        endpoint: https://ingest.{region}.signoz.cloud:443
+        headers:
+          signoz-access-token: <your-ingestion-key>
+    service:
+      pipelines:
+        metrics:
+          receivers: [prometheus]
+          processors: [transform/fly_metrics, batch]
+          exporters: [otlphttp]
+  extraVolumes:
+    - name: fly-token
+      secret:
+        secretName: fly-federate-token
+  extraVolumeMounts:
+    - name: fly-token
+      mountPath: /etc/otel/secret/fly_federate_token
+      subPath: fly_federate_token
+      readOnly: true
+```
+
+### Step 3: Deploy the chart
+
+```bash
+helm install my-release signoz/k8s-infra -f override-values.yaml
+```
+
+</TabItem>
+</Tabs>
+
+<KeyPointCallout title="Important Configuration" defaultCollapsed="false">
+  Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by default. The `transform/fly_metrics` processor converts the relevant metrics to Sum (counter) type. Add any additional metric names to the processor statements as needed.
+</KeyPointCallout>
+
+### Verify the federation endpoint
+
+Generate some traffic and confirm metrics are returned:
+
+```bash
+curl -sS -i -G \
+  -H "Authorization: FlyV1 $(cat fly_federate_token)" \
+  --data-urlencode 'match[]={__name__=~"fly_.*"}' \
+  https://api.fly.io/prometheus/<your-org-slug>/federate | head -n 40
+```
+
+You should see lines like `fly_instance_cpu_user_seconds_total`, `fly_instance_memory_resident`, etc.
 
 <details>
 <ToggleHeading>
@@ -141,6 +371,24 @@ A pre-built Fly.io Prometheus dashboard is available to import directly into Sig
 - [Set up metric-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on Fly.io app metrics.
 - [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to get notified on error patterns in Fly.io logs.
 - [Create a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) to combine Fly.io metrics and logs in a single view.
+
+## Pre-built Dashboard
+
+A pre-built Fly.io Prometheus dashboard is available to import directly into SigNoz:
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/fly/fly-prometheus-v1.json"
+    dashboardName="Fly.io (Prometheus)"
+  />
+</div>
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/dashboards/dashboard-templates/fly-dashboard.webp" alt="Fly.io pre-built Prometheus dashboard in SigNoz" />
+  <figcaption>
+    <i>Fly.io Prometheus dashboard in SigNoz</i>
+  </figcaption>
+</figure>
 
 ## Get Help
 
