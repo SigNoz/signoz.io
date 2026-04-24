@@ -155,7 +155,7 @@ function extractFrontmatter(filePath) {
 }
 
 function getFileContentAtRef(ref, filePath) {
-  return tryRun(`git show ${ref}:${filePath}`)
+  return tryRun(`git show ${ref}:"${filePath}"`)
 }
 
 function hasOnlyTitleAndDescriptionChanges(filePath, options = {}) {
