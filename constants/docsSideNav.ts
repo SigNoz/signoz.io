@@ -3050,6 +3050,11 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/alert-creation-natural-language',
             label: 'Alert Creation from Natural Language',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/postmortem-evidence-pack',
+            label: 'Postmortem Evidence Pack',
+          },
         ],
       },
     ],
