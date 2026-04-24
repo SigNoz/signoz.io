@@ -308,7 +308,7 @@ function main() {
   const comparisonRef = isPreCommit ? 'HEAD' : resolveComparisonRef(baseBranch)
 
   // Get changed files
-  const changedFiles = isPreCommit ? getStagedDocFiles() : getChangedDocFiles(baseBranch)
+  const changedFiles = isPreCommit ? getStagedDocFiles() : getChangedDocFiles(baseBranch, comparisonRef)
 
   if (changedFiles.length === 0) {
     console.log('No documentation files to check')
