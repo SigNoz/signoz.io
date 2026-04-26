@@ -1305,13 +1305,13 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/k8s-metrics',
-        label: 'Kubernetes Metrics',
+        route: '/docs/infrastructure-monitoring/cert-manager',
+        label: 'Cert-Manager',
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/cert-manager',
-        label: 'Cert-Manager',
+        route: '/docs/infrastructure-monitoring/k8s-metrics',
+        label: 'Kubernetes Metrics',
       },
       {
         type: 'category',

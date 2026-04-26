@@ -95,7 +95,7 @@ service:
 
 ### Step 3: Configure the exporter
 
-If you don't have an OTLP exporter yet, add this block. Replace `<OTLP_ENDPOINT>` and `<SIGNOZ_INGESTION_KEY>` with your values:
+If you don't have an OTLP exporter yet, add this block.
 
 ```yaml:otel-collector-config.yaml
 exporters:
@@ -117,16 +117,16 @@ Verify these values:
 Apply the updated config and restart the collector:
 
 ```bash
-# Kubernetes Helm example
+# Kubernetes Helm example — replace <collector-namespace> with your OTel Collector namespace
 helm upgrade otel-collector open-telemetry/opentelemetry-collector \
-  --namespace cert-manager \
+  --namespace <collector-namespace> \
   -f otel-collector-values.yaml
 ```
 
 Or restart the pod directly if the config is mounted via a ConfigMap:
 
 ```bash
-kubectl rollout restart deployment -n cert-manager otel-collector
+kubectl rollout restart deployment -n <collector-namespace> otel-collector
 ```
 
 ## Validate
@@ -140,35 +140,6 @@ Metrics appear within ~60 seconds. You should see metrics like this:
   caption="Sample cert-manager metrics in Metrics Explorer"
   alt="Sample cert-manager metrics in Metrics Explorer"
 />
-
-<details>
-<ToggleHeading>
-
-## Metrics collected
-</ToggleHeading>
-
-| Metric                                                  | Type      | Description                                         |
-| ------------------------------------------------------- | --------- | --------------------------------------------------- |
-| `certmanager_certificate_ready_status`                  | Gauge     | Readiness per certificate: 1 = ready, 0 = not ready |
-| `certmanager_certificate_expiration_timestamp_seconds`  | Gauge     | Certificate expiry as Unix timestamp                |
-| `certmanager_certificate_not_after_timestamp_seconds`   | Gauge     | Validity end time                                   |
-| `certmanager_certificate_not_before_timestamp_seconds`  | Gauge     | Validity start time                                 |
-| `certmanager_certificate_renewal_timestamp_seconds`     | Gauge     | Next scheduled renewal time                         |
-| `certmanager_clusterissuer_ready_status`                | Gauge     | ClusterIssuer readiness                             |
-| `certmanager_issuer_ready_status`                       | Gauge     | Namespace-scoped Issuer readiness                   |
-| `certmanager_controller_sync_call_count`                | Counter   | Reconcile loop invocations per controller           |
-| `certmanager_controller_sync_error_count`               | Counter   | Failed reconcile operations per controller          |
-| `certmanager_http_acme_client_request_count`            | Counter   | Outbound ACME HTTP requests (ACME issuers only)     |
-| `certmanager_http_acme_client_request_duration_seconds` | Summary   | ACME request latency                                |
-| `controller_runtime_webhook_requests_total`             | Counter   | Kubernetes admission webhook requests               |
-| `controller_runtime_webhook_requests_in_flight`         | Gauge     | Current in-flight webhook requests                  |
-| `controller_runtime_webhook_latency_seconds`            | Histogram | Webhook admission processing latency                |
-| `workqueue_depth`                                       | Gauge     | Current controller work queue depth                 |
-| `workqueue_adds_total`                                  | Counter   | Total items enqueued per controller                 |
-| `process_cpu_seconds_total`                             | Counter   | CPU usage per component                             |
-| `process_resident_memory_bytes`                         | Gauge     | RSS memory per component                            |
-
-</details>
 
 <details>
 <ToggleHeading>
