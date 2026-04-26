@@ -1,7 +1,7 @@
 ---
 date: 2026-04-25
 id: cert-manager
-title: Cert-Manager Metrics
+title: Collect Cert-Manager Metrics with OpenTelemetry
 description: Scrape cert-manager Prometheus metrics with the OpenTelemetry Collector and monitor certificate health, controller performance, and ACME operations in SigNoz.
 doc_type: howto
 ---
@@ -24,7 +24,7 @@ cert-manager is a Kubernetes add-on that manages TLS certificate issuance and re
 
 ## Setup
 
-Setting up cert-manager requires installing cert-manager in your cluster and configuring the OpenTelemetry Collector to scrape <a href="https://cert-manager.io/docs/devops-tips/prometheus-metrics/" target="_blank" rel="noopener noreferrer">cert-manager Prometheus metrics</a>.
+Install cert-manager in your cluster and configure the OpenTelemetry Collector to scrape <a href="https://cert-manager.io/docs/devops-tips/prometheus-metrics/" target="_blank" rel="noopener noreferrer">cert-manager Prometheus metrics</a>.
 
 ### Step 1: Install cert-manager with Prometheus metrics enabled
 
@@ -40,7 +40,7 @@ helm install cert-manager jetstack/cert-manager \
   --set prometheus.enabled=true
 ```
 
-`prometheus.enabled=true` enables `/metrics` on port 9402 for all three components. If cert-manager is already installed, upgrade with the same flag.
+`prometheus.enabled=true` enables `/metrics` on port 9402 for all three components. This is the default in the Helm chart, but set it explicitly to ensure it hasn't been overridden. If cert-manager is already installed, upgrade with the same flag.
 
 Verify the endpoints are reachable:
 
@@ -51,7 +51,7 @@ curl -s http://localhost:9402/metrics | grep certmanager_certificate_ready_statu
 
 ### Step 2: Add the Prometheus scrape config to your OTel Collector
 
-Append this snippet to your existing OTel Collector config. Add the `prometheus` receiver alongside existing receivers, not as a replacement:
+Append this snippet to your existing OTel Collector config, adding `prometheus` alongside existing receivers:
 
 ```yaml:otel-collector-config.yaml
 receivers:
@@ -133,7 +133,7 @@ kubectl rollout restart deployment -n <collector-namespace> otel-collector
 
 After restarting the collector, go to **SigNoz → Metrics Explorer** and search for `certmanager_`.
 
-Metrics appear within ~60 seconds. You should see metrics like this:
+Metrics appear within ~60 seconds:
 
 <Figure
   src="/img/docs/infrastructure-monitoring/cert-manager-metrics.webp"
@@ -161,7 +161,7 @@ Metrics appear within ~60 seconds. You should see metrics like this:
 
 ### ACME metrics are absent (`certmanager_http_acme_client_request_count`)
 
-- Expected: these metrics only emit when cert-manager makes outbound HTTP requests to an ACME server such as Let's Encrypt. Self-signed and CA issuers never trigger the ACME code path, so these metrics will not appear if you only use those issuer types.
+- Expected: cert-manager emits these metrics only when making outbound HTTP requests to an ACME server such as Let's Encrypt. They don't appear with self-signed or CA issuers.
 
 </details>
 
