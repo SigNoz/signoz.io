@@ -148,7 +148,7 @@ export default function APIVersionSwitcher({
   )
 
   if (portalContainer) {
-    return createPortal(selectUI, portalContainer)
+    return <>{createPortal(selectUI, portalContainer)}</>
   }
 
   return null
