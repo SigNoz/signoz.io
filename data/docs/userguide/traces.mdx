@@ -1,9 +1,9 @@
 ---
-date: 2026-04-16
+date: 2026-04-27
 id: traces
 title: Trace Explorer
-description: Filter, aggregate, and search traces in SigNoz using the Trace Explorer.
-doc_type: howto
+description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
+doc_type: explanation
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -11,36 +11,27 @@ import PrereqsInstrument from '@/components/shared/prereqs-instrument.md'
 
 A trace is a recording of the path a request takes through your system — from the first service it hits to every downstream call it makes. Each trace is made up of spans, where each span represents a single unit of work in one service.
 
+The Trace Explorer is the central interface for searching, filtering, and analyzing traces in SigNoz. It offers four views — **List View**, **Trace View**, **Time Series**, and **Table** — each suited to different analysis tasks. See the [Trace Explorer reference](https://signoz.io/docs/product-features/trace-explorer/) for a full walkthrough of every view and feature.
+
 ## Prerequisites
 
 <PrereqsInstrument />
 
-## Open the Traces section
+## How the Trace Explorer is organized
 
-From the sidebar, select **Traces**:
+The Trace Explorer surfaces spans from your instrumented services. Two filtering mechanisms are available:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/apm-and-distributed-tracing/traces-explorer.webp" alt="Traces Explorer"/>
-    <figcaption><i>Traces Explorer</i></figcaption>
-</figure>
-
-## Visualize aggregate metrics from traces
-
-SigNoz lets you create aggregates of your filtered traces using various aggregate functions. See [query builder aggregation docs](https://signoz.io/docs/userguide/query-builder/#aggregation) for details.
-
-## Filter spans by tags and attributes
-
-The Trace Explorer provides quick filtering of spans using various parameters.
-
-There are two ways to filter traces:
-
-- **Quick Filter** — select a filter from the panel on the left. More details on available quick filters are [here](https://signoz.io/docs/product-features/trace-explorer/#quick-filters).
+- **Quick Filters** — the panel on the left lets you narrow spans by duration, status, service name, HTTP method, and more. See the [quick filters reference](https://signoz.io/docs/product-features/trace-explorer/#quick-filters) for all available options.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/trace-explorer/trace-explorer-quick-filters.webp" alt="Quick Filters in Traces Explorer"/>
     <figcaption><i>Quick Filters in Traces Explorer</i></figcaption>
 </figure>
 
-- **Query Builder** — select the **Search Filter** input, choose a key from your attributes, select an operator, and enter a value. Select **Stage and Run Query** to apply. See the [Query Builder docs](https://signoz.io/docs/userguide/query-builder/#using-the-filtering-feature) for more details.
+- **Query Builder** — the search bar at the top accepts attribute-based filters (key, operator, value). You can combine multiple conditions and run ad-hoc queries. See the [Query Builder docs](https://signoz.io/docs/userguide/query-builder/#using-the-filtering-feature) for more details.
+
+## Aggregate metrics from traces
+
+In Time Series and Table views, SigNoz can aggregate filtered trace data using functions like `count`, `avg`, `p99`, and more. This lets you chart request rates or latency percentiles directly from trace data without needing a separate metrics pipeline. See the [query builder aggregation docs](https://signoz.io/docs/userguide/query-builder/#aggregation) for details.
 
 <GetHelp />

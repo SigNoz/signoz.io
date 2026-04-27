@@ -1,5 +1,5 @@
 ---
-date: 2026-04-17
+date: 2026-04-27
 id: application-details
 title: Application Details
 description: Explore application-level metrics in SigNoz including latency percentiles, error rates, operations per second, key operations, and Apdex scores.
@@ -39,24 +39,46 @@ Shows the percentage of operations that returned errors over time.
 Application Performance Index (<a href="https://www.apdex.org/" rel="noopener noreferrer nofollow" target="_blank">Apdex</a>) scores user satisfaction from 0 (least satisfied) to 1 (most satisfied) based on a configurable latency threshold. The current threshold is displayed next to the chart title (default: `0.5`). Click **Settings** in the top-right corner to change it.
 
 **Key Operations** <br></br>
-Lists the top operations for your service with P50, P95, P99 latency, number of calls, and error rate. Toggle **Entrypoint Spans** to filter to only root-level operations. Click any operation to drill into its traces.
+Lists the top operations for your service with P50, P95, P99 latency, number of calls, and error rate. Click any operation to drill into its traces.
+
+The **Entry Point Spans** toggle filters the Key Operations table to show only spans where the `serviceName` changes — i.e., the first span when a request enters this service from any upstream service. Switching it on hides internal downstream spans and gives you a concise, high-level view of how external traffic is behaving.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apm-and-distributed-tracing/key-operations-entrypoint-spans.webp" alt="Key Operations table with Entry Point Spans toggle enabled"/>
+    <figcaption><i>Key Operations — Entry Point Spans toggle filters to service entry-point spans only</i></figcaption>
+</figure>
+
+## View Magnified Graphs
+
+To magnify any metric graph, click the three-dot menu (**⋯**) in the top-right corner of the chart and select **View**. This opens an expanded view of the graph for easier analysis.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apm-and-distributed-tracing/view-magnified-graph.webp" alt="Magnified graph view opened via the 3-dot menu on a metric chart"/>
+    <figcaption><i>Click the 3-dot menu → View to open a magnified graph</i></figcaption>
+</figure>
+
+### Filter Series
+
+Inside the magnified graph, use the **Filter Series** search bar to locate specific labels and include or exclude them. For example, searching `p9` in the latency graph shows only `p90` and `p99` series. Click **Save** to persist any changes.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apm-and-distributed-tracing/filter-series.webp" alt="Filter Series search bar inside a magnified metric graph"/>
+    <figcaption><i>Filter Series — narrow the displayed series in a metric graph</i></figcaption>
+</figure>
+
+## Next Steps
+
+- **Database Calls** — explore database call latency and throughput broken down by operation. See [Database Calls](https://signoz.io/docs/apm-and-distributed-tracing/database-calls).
+- **External Calls** — see outbound HTTP/gRPC call metrics from your service. See [External Calls](https://signoz.io/docs/apm-and-distributed-tracing/external-calls).
+- **Traces** — drill into individual traces for this service from the [Trace Explorer](https://signoz.io/docs/userguide/traces/).
+- **Pre-built Dashboard** — import the <a href="https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json" target="_blank" rel="noopener noreferrer nofollow">APM Metrics Dashboard</a> for a ready-made view of application performance metrics.
+
+You can also import the <a href="https://github.com/SigNoz/dashboards/tree/main/key-operations" target="_blank" rel="noopener noreferrer nofollow">Key Operations Dashboard</a> for a ready-made view of your service's key operations.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/application-details-bottom.webp" alt="Apdex, Error Percentage, and Key Operations panels"/>
     <figcaption><i>Apdex, Error Percentage, and Key Operations</i></figcaption>
 </figure>
-
-## Database Calls
-
-For details on database call metrics and required span attributes, see [Database Calls](https://signoz.io/docs/apm-and-distributed-tracing/database-calls).
-
-## External Calls
-
-For details on external call metrics and required span attributes, see [External Calls](https://signoz.io/docs/apm-and-distributed-tracing/external-calls).
-
-## Pre-built Dashboard
-
-Import the <a href="https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json" target="_blank" rel="noopener noreferrer nofollow">APM Metrics Dashboard</a> for a ready-made view of application performance metrics.
 
 ## Get Help
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-04-17
+date: 2026-04-27
 id: trace-anomalies
 title: Understanding Traces
 description: Understand missing spans, span gaps, and trace duration discrepancies in SigNoz.
@@ -8,11 +8,16 @@ doc_type: explanation
 
 import GetHelp from '@/components/shared/get-help.md'
 
-## Missing spans
+Traces in SigNoz represent the complete path a request takes through your distributed system. In practice, you may occasionally notice anomalies — spans that appear missing, gaps between consecutive spans, or durations that don't match what you expect. This page explains the most common trace anomalies and why they occur.
+
+## FAQs
+
+<details>
+<summary><b>Why are some spans missing from a trace?</b></summary>
 
 A missing span occurs when a span's parent span is not found in the collected trace.
 
-### Common causes
+**Common causes:**
 
 - **Tail sampling** — if you have configured tail sampling in your OpenTelemetry Collector pipeline, the sampler randomly selects a subset of spans to keep and drops the rest. This means some spans from a trace may be retained while others are discarded, resulting in incomplete traces with missing spans.
 - **Network issues** — spans may be dropped in transit due to network issues between your application and the OpenTelemetry Collector, or between the Collector and SigNoz. This can happen due to transient connectivity failures, timeouts, or packet loss.
@@ -43,7 +48,10 @@ If `Auth` fails to export its span (Span ID: `def2`), the `Database` span will r
 
 </details>
 
-## Span gaps
+</details>
+
+<details>
+<summary><b>What causes gaps between consecutive spans?</b></summary>
 
 Sometimes there are gaps between consecutive spans. This happens when some process or code is not traced. By default, OpenTelemetry auto-instrumentation libraries do not trace custom functions or methods.
 
@@ -51,7 +59,10 @@ To fix span gaps, add [manual instrumentation](https://signoz.io/docs/instrument
 
 ![Span Gap](/img/docs/span-gap.png)
 
-## Trace duration discrepancies
+</details>
+
+<details>
+<summary><b>Why does the trace duration differ from what I see in the spans list?</b></summary>
 
 When analyzing latency metrics in the traces list, you may notice that the duration shown differs from what appears in the trace details. This is because:
 
@@ -63,7 +74,7 @@ This can lead to apparent discrepancies for several reasons:
 - **Asynchronous operations** — child spans can run longer than the root span when operations are performed asynchronously.
 - **Total trace duration** — the trace details view shows the complete duration including all spans, which may be longer than just the root span.
 
-### Example scenario
+**Example scenario:**
 
 You might see a trace listed as **38.9 seconds** in the traces page, but when you open the trace details, it shows a total duration of **1 minute**. This happens when:
 
@@ -72,5 +83,7 @@ You might see a trace listed as **38.9 seconds** in the traces page, but when yo
 3. The total time from the first span start to the last span end was 1 minute.
 
 This behavior is expected and reflects how distributed systems actually work. If you need to measure specific service-to-service latencies rather than root span duration, see the [ClickHouse traces query guide](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/#querying-for-specific-service-latencies).
+
+</details>
 
 <GetHelp />

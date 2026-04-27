@@ -1,5 +1,5 @@
 ---
-date: 2026-04-17
+date: 2026-04-27
 title: Trace Funnels
 id: overview
 description: Track how requests flow through your distributed system with step-by-step conversion analysis using Trace Funnels in SigNoz.
@@ -11,17 +11,10 @@ Trace Funnels provides visibility into the step-by-step progression of requests 
 
 Unlike traditional monitoring that shows only aggregate metrics, Trace Funnels correlates span data with your internal services and traces, helping you identify the root cause of issues faster by tracking how requests flow through your system.
 
-## How It Works
-
-Trace Funnels leverages OpenTelemetry <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" target="_blank" rel="noopener noreferrer nofollow">semantic conventions</a> to automatically detect and analyze sequential spans from your instrumented services. The feature works by using the span attributes mentioned below:
-
-| Attribute | Description | Example |
-|-----------|-------------|---------|
-| `service.name` | Name of the service emitting the span | `frontend`, `backend`, `database` |
-| `span.name` | Name of the specific operation | `HTTP GET /orders`, `ProcessOrder`, `WriteOrderRecord` |
-| `trace.id` | Unique identifier for the trace | `1234567890abcdef` |
-
-These attributes are used to automatically correlate spans within the same trace, identify sequential operations, and calculate conversion rates between steps.
+<figure data-zoomable align='center'>
+    <img src="/img/docs/trace-funnels/funnel_example.gif" alt="Step-by-step conversion analysis in Trace Funnels"/>
+    <figcaption><i>Step-by-Step Conversion Analysis</i></figcaption>
+</figure>
 
 ## When to Use & Key Benefits
 
@@ -96,6 +89,18 @@ Further filter spans by attributes (e.g., `http.status_code = 200`, `error = fal
     <img src="/img/docs/trace-funnels/funnel_step_definition.png" alt="Defining funnel steps"/>
     <figcaption><i>Defining Funnel Steps</i></figcaption>
 </figure>
+
+## How It Works
+
+Trace Funnels leverages OpenTelemetry <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" target="_blank" rel="noopener noreferrer nofollow">semantic conventions</a> to automatically detect and analyze sequential spans from your instrumented services. The feature works by using the span attributes mentioned below:
+
+| Attribute | Description | Example |
+|-----------|-------------|---------|
+| `service.name` | Name of the service emitting the span | `frontend`, `backend`, `database` |
+| `span.name` | Name of the specific operation | `HTTP GET /orders`, `ProcessOrder`, `WriteOrderRecord` |
+| `trace.id` | Unique identifier for the trace | `1234567890abcdef` |
+
+These attributes are used to automatically correlate spans within the same trace, identify sequential operations, and calculate conversion rates between steps.
 
 ## Related Resources
 

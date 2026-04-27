@@ -1,8 +1,8 @@
 ---
-date: 2024-06-06
+date: 2026-04-27
 id: trace-explorer
-
 title: Traces Explorer in SigNoz
+description: Explore the Trace Explorer views, quick filters, trace matching, column customization, and bottom bar actions in SigNoz.
 ---
 
 ## Introduction
@@ -45,14 +45,12 @@ You can perform the following operations in List view:
 
 **Customize Columns**
 
-Add or delete columns using the `Options` button. For example, you can add the `httpMethod` column to see the request methods alongside each trace.
-
+Click the **Options** button on the right side of the toolbar to add or remove columns from the list. For example, you can add `service.name`, `http_method`, `response_status_code`, or `event_type` to display alongside each span.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/trace-explorer/trace-explorer-list-view-2.webp" alt="Add or Delete column in List View of the Traces Explorer"/>
-    <figcaption><i> Add or Delete column in List View </i></figcaption>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-list-view-options.webp" alt="Options panel to add or remove columns in List View"/>
+    <figcaption><i>Customize columns using the Options panel in List View</i></figcaption>
 </figure>
-
 
 <Admonition>
 - Timestamp column can't be removed.
@@ -187,6 +185,33 @@ This provides you with a tabular representation of the output of Query made usin
 </figure>
 
 
+## Trace Matching
+
+Trace Matching lets you define multiple span queries and combine them with **trace-level operators** — going beyond single-span filtering to find spans based on their relationships within a trace. Click **Add Trace Matching** below the filter bar to open the multi-query input.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-trace-matching.webp" alt="Add Trace Matching panel showing Query A, Query B, and expression input"/>
+    <figcaption><i>Trace Matching — define multiple queries and combine with trace operators</i></figcaption>
+</figure>
+
+Each query (A, B, C…) is a standard span filter. The **Expression** field combines them using trace operators:
+
+| Operator | Symbol | What it returns |
+|---|---|---|
+| Has Direct Child | `=>` | Spans from A that have a **direct child** matching B |
+| Has Descendant | `->` | Spans from A that are **ancestors** (at any depth) of B |
+| AND | `&&` | Spans from A in traces that **also contain** spans matching B |
+| OR | `\|\|` | **Union** of spans from both A and B |
+| NOT | `A NOT B` | Spans from A in traces that **do not contain** any spans matching B |
+
+**Example — Has Descendant:**
+- Query A: `service.name = 'frontend'`
+- Query B: `service.name = 'customer' AND has_error = true`
+- Expression: `A -> B`
+- **Result:** Returns frontend spans that are ancestors of erroring customer spans at any depth.
+
+For full operator reference and more examples, see [Multi-Query Analysis with Trace Operators](https://signoz.io/docs/userguide/query-builder-v5/#multi-query-analysis-trace-operators).
+
 ## Quick Filters
 
 The Traces Explorer in SigNoz provides a feature for quick filtering of spans using various parameters. 
@@ -254,21 +279,28 @@ Here's a detailed explanation of the available filters and how to use them.
 
 
 ## Bottom Bar
-The bar present at the Bottom of each view in Traces Explorer has multiple helpful features.
+
+The bar at the bottom of each view in Traces Explorer provides quick actions for saving, alerting, and dashboarding.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar.webp" alt="Bottom Bar of Traces Explorer"/>
-    <figcaption><i> Bottom Bar in Traces Explorer </i></figcaption>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-new.webp" alt="Bottom Bar of Traces Explorer showing Save this view, Create an Alert, and Add to Dashboard"/>
+    <figcaption><i>Bottom Bar — Save view, Create an Alert, Add to Dashboard</i></figcaption>
 </figure>
-
 
 ### Save View
 
-At the Bottom of each View available in the Traces Explorer, we have an option to **Save this View** . What this does is, it saves the specific settings that you have applied for the particular View as a template which can be accessed later from the `Views Tab` available at the top or from `Select a View` dropdown. To know more details about Save View, please refer to this [documentation](https://signoz.io/docs/product-features/saved-view/).
+Click **Save this view** to save the current filter configuration as a named view. Saved views can be accessed later from the **Views** tab at the top of the Traces Explorer or from the **Select a view** dropdown. To know more details about Save View, please refer to this [documentation](https://signoz.io/docs/product-features/saved-view/).
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-save-view.webp" alt="Save view"/>
-    <figcaption><i> Save view </i></figcaption>
+    <figcaption><i>Save view</i></figcaption>
+</figure>
+
+To manage all your saved views, switch to the **Views** tab at the top of the page. The Views page lists every saved view with the creator, timestamp, and a search bar to find them quickly.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-views-page.webp" alt="Views tab showing all saved trace views"/>
+    <figcaption><i>Views page — manage all saved trace views</i></figcaption>
 </figure>
 
 

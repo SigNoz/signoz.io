@@ -102,12 +102,32 @@ module.exports = () => {
         },
         {
           source: '/docs/application-monitoring/api-monitoring',
-          destination: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
           permanent: true,
         },
         {
           source: '/docs/application-monitoring/api-monitoring/',
-          destination: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies/',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
           permanent: true,
         },
         {

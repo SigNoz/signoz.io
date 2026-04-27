@@ -1,5 +1,5 @@
 ---
-date: 2026-04-17
+date: 2026-04-27
 id: metrics
 title: View Services
 description: Learn how to monitor application metrics in SigNoz, view key performance indicators like latency, error rate, and request rates, and analyze detailed application performance.
@@ -91,52 +91,22 @@ OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
 
 By default, you can filter based on `service.namespace` and `deployment.environment` dimensions.
 
-To add another dimension, update the dimension fields of <a href = "https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml#L107" rel="noopener noreferrer nofollow" target="_blank" >config.yaml file</a> and then deploy the yaml file again.
+To add custom filter dimensions in Services, update the `dimensions` section in the [SigNoz OpenTelemetry Collector config](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) and redeploy/restart the collector. See <a href="https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml#L4" rel="noopener noreferrer nofollow" target="_blank">otel-collector-config.yaml</a> for the full YAML example.
 
 ## Global Time
-On the top right corner of your application's dashboard, you have the ability to select the time frame for the data displayed in **all the metric graphs**. You can choose from a range of options, spanning from the last 5 minutes to the past week, and even opt for a custom date range.
+
+Use the time range selector at the top right of the Services page to set the time frame for all metric columns. Options range from the last 5 minutes to the past week, with a custom date range picker.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/global-time.webp" alt="SigNoz UI showing how to apply a time interval for all your metrics chart"/>
-    <figcaption><i> Global Time</i></figcaption>
+    <img src="/img/docs/apm-and-distributed-tracing/global-time-selector.webp" alt="SigNoz Services page showing the time range selector at the top right"/>
+    <figcaption><i>Global Time — select the time range for all service metrics</i></figcaption>
 </figure>
 
+## Next Steps
 
-## View Magnified graphs
-
-You can magnify the graphs by hovering over the Metric name, clicking the dropdown arrow, and selecting the "View" option.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/view-enlarged-graphs.webp" alt="SigNoz UI showing how view a magnified view of a graph"/>
-    <figcaption><i>View Magnified Graphs</i></figcaption>
-</figure>
-
-
-### Filter Series 
-
-Inside the Metric's graph, you can use the "Filter Series" search bar to locate specific labels, allowing you to include or exclude them from the graph. For instance, in the image below, our search for 'p9' within the latency graph resulted in the display of 'p90' and 'p99' latency data. Click on the **Save** Button to save any changes.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/filter-series.webp" alt="SigNoz UI showing the filter series feature inside a graph"/>
-    <figcaption><i> Filter Series </i></figcaption>
-</figure>
-
-
-
-{/* <!-- ### Graph Specific Global Time 
-
-In the graph for any metric, you'll find the "Global Time" dropdown at the top right corner. This dropdown provides you with the flexibility to choose your preferred time interval for data, ranging from the last 5 minutes to the last 1 week. Once you select any value from this drop-down and click **Save**, these changes will be saved **for that particular graph**.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/graph-specific-global-time.webp" alt="SigNoz UI showing the Global Time for that particular graph"/>
-    <figcaption><i> Graph Specific Global Time </i></figcaption>
-</figure>
- --> */}
-
-
-## View Details About an Application
-
-For details on application-level metrics including latency percentiles, error rates, operations per second, key operations, and Apdex scores, see [Application Details](https://signoz.io/docs/apm-and-distributed-tracing/application-details).
+- [Application Details](https://signoz.io/docs/apm-and-distributed-tracing/application-details) — Explore latency percentiles, error rates, Apdex scores, and key operations for a specific service.
+- [Database Calls](https://signoz.io/docs/apm-and-distributed-tracing/database-calls) — Monitor database call rate and latency for your services.
+- [External Calls](https://signoz.io/docs/apm-and-distributed-tracing/external-calls) — Track outbound HTTP and gRPC call metrics.
 
 ## Get Help
 

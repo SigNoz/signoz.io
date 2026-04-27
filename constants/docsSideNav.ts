@@ -1165,7 +1165,7 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/userguide/metrics',
         items: [
-          { type: 'doc', route: '/docs/userguide/metrics', label: 'Service Details' },
+          { type: 'doc', route: '/docs/userguide/metrics', label: 'View Services' },
           {
             type: 'doc',
             route: '/docs/apm-and-distributed-tracing/application-details',
@@ -1180,11 +1180,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/apm-and-distributed-tracing/external-calls',
             label: 'External Calls',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/guides/entry-point-spans-service-overview',
-            label: 'Entry Point Spans',
           },
         ],
       },
@@ -1217,8 +1212,8 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                route: '/docs/apm-and-distributed-tracing/trace-anomalies',
-                label: 'Understanding Traces',
+                route: '/docs/trace-funnels/setup',
+                label: 'Setup Trace Funnels',
               },
               {
                 type: 'doc',
@@ -1254,11 +1249,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/guides/pii-scrubbing',
             label: 'PII Scrubbing',
-          },
-          {
-            type: 'doc',
-            route: '/docs/trace-funnels/setup',
-            label: 'Setup Trace Funnels',
           },
         ],
       },
