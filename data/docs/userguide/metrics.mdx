@@ -2,18 +2,19 @@
 date: 2026-04-27
 id: metrics
 title: View Services
-description: Learn how to monitor application metrics in SigNoz, view key performance indicators like latency, error rate, and request rates, and analyze detailed application performance.
-doc_type: howto
+description: Understand the Services section in SigNoz — RED metrics, filtering, sorting, global time, refresh interval, and sharing.
+doc_type: explanation
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
 import MetricsDefinition from '@/components/shared/metrics-definition.md'
 
-This page walks you through the **Services** section and gets you started with monitoring your application. You'll learn the following:
+The **Services** section in SigNoz gives you an overview of all your instrumented applications in one place. It surfaces the RED metrics — Rate, Errors, and Duration — for every service, so you can quickly spot which services are degraded, slow, or erroring without drilling into individual traces.
 
-- What are application metrics
-- How to use the **Services** section to see an overview of your applications
-- How to view details about a specific application
+<figure data-zoomable align='center'>
+    <img src="/img/docs/services-overview.webp" alt="SigNoz UI showing the Services section"/>
+    <figcaption><i>Services Section</i></figcaption>
+</figure>
 
 ## Prerequisites
 
@@ -23,7 +24,7 @@ This section assumes that your application is already instrumented. For details 
 
 <MetricsDefinition />
 
-The **Services** section relies on the rate, errors, and duration ("RED") method to help you predict the experience of your users and includes the following keys metrics:
+The **Services** section relies on the rate, errors, and duration ("RED") method to help you predict the experience of your users and includes the following key metrics:
 
 - **P99 Latency:** the amount of time your application spends processing each of the fastest 99% of requests. For example, if the value of the `P99` latency is 760 ms, 99% percent of requests have responses that are equal to or faster than 760 ms.
 - **Error Rate**: the percentage of failing requests i.e ratio of error requests to the total requests.
@@ -31,36 +32,7 @@ The **Services** section relies on the rate, errors, and duration ("RED") method
 - **Key Operations**: It lists the key APIs and operations which the particular application is serving.
 - **Apdex**: It is a score between 0 and 1 that helps you measure the user satisfaction.
 
-## Open the Services Section
 
-From the sidebar, select **Services**:
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/services-overview.webp" alt="SigNoz UI showing the Services section"/>
-    <figcaption><i>Services Section</i></figcaption>
-</figure>
-
-
-This page provides an overview of your applications' health and performance. It shows the list of your applications formatted as a table and, for each application, SigNoz displays the RED metrics mentioned above.
-
-This page shows all the instrumented applications sending the data to SigNoz. This includes web servers, message brokers/queuing systems, web/mobile clients, cron jobs, and more.
-
-**What services are shown? And how are the RED metrics calculated?**
-
-We rely on the semantic conventions provided by OpenTelemetry. Every unique `service.name` configured and received is part of the service list. 
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/trace-request-shop.webp" alt="A trace Request in SigNoz UI"/>
-    <figcaption><i>A typical trace request</i></figcaption>
-</figure>
-
-
-The following logic is used for the RED metrics generation of each service.
-In a distributed trace, a request goes through several entities performing various kinds of work. There is an entry point span for each service that took part in the trace journey. This can be thought of as a sub-root span for the service. This sub-root span can have many child spans which could be doing work in parallel or sequential or a combination of both. From an outside perspective this sub-root span work is an operation done by the service and how much time it took to complete this operation is the duration metric. For a web server, this is an API endpoint returning some data and request time is the duration metric. For a messaging consumer service, this is a consume trigger, and till it is done with the message received. For a mobile client application, this could be a button click to submit a form and the time taken to fulfill the request.
-
-- Operations/s - Number of sub-root spans seen for a service
-- PXX - Quantile of the duration of the sub-root spans
-- Error rate - Number of sub-root spans with status error / Total number of sub-root spans
 
 ## Sort the List of Applications
 
@@ -71,7 +43,6 @@ You can switch the sorting order of the values in a column by clicking its headi
     <figcaption><i>Sort Applications</i></figcaption>
 </figure>
 
-
 ## Filter the List of Applications
 
 You can add attributes to applications and filter based on these attributes. 
@@ -80,7 +51,6 @@ You can add attributes to applications and filter based on these attributes.
     <img src="/img/docs/resource-attribute-filtering.webp" alt="SigNoz UI showing how to filter your application using attributes"/>
     <figcaption><i>Attributes based filtering</i></figcaption>
 </figure>
-
 
 You can add attributes with `OTEL_RESOURCE_ATTRIBUTES` flag when starting the application. The below example shows how to set values for `service.namespace` and `deployment.environment`
 
@@ -101,6 +71,40 @@ Use the time range selector at the top right of the Services page to set the tim
     <img src="/img/docs/apm-and-distributed-tracing/global-time-selector.webp" alt="SigNoz Services page showing the time range selector at the top right"/>
     <figcaption><i>Global Time — select the time range for all service metrics</i></figcaption>
 </figure>
+
+## Refresh Interval
+
+Click the refresh dropdown next to the time range selector to control how often the Services page updates. You can enable **Auto Refresh** and choose an interval — from every 5 seconds up to once per day.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apm-and-distributed-tracing/services-refresh-interval.webp" alt="Refresh interval options including Auto Refresh with intervals from 5 seconds to 1 day"/>
+    <figcaption><i>Refresh Interval — set auto refresh frequency</i></figcaption>
+</figure>
+
+## Share
+
+Click **Share** in the top-right corner to copy a shareable link to the current Services page — including the active time range and filters — so you can send it to a teammate and have them land on exactly the same view.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apm-and-distributed-tracing/services-share.webp" alt="Share panel showing Enable absolute time toggle and Copy page link button"/>
+    <figcaption><i>Share — copy the current page link to share with your team</i></figcaption>
+</figure>
+
+## How Services and RED Metrics Are Determined 
+
+We rely on the semantic conventions provided by OpenTelemetry. Every unique `service.name` configured and received is part of the service list.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/trace-request-shop.webp" alt="A trace Request in SigNoz UI"/>
+    <figcaption><i>A typical trace request</i></figcaption>
+</figure>
+
+The following logic is used for the RED metrics generation of each service.
+In a distributed trace, a request goes through several entities performing various kinds of work. There is an entry point span for each service that took part in the trace journey. This can be thought of as a sub-root span for the service. This sub-root span can have many child spans which could be doing work in parallel or sequential or a combination of both. From an outside perspective this sub-root span work is an operation done by the service and how much time it took to complete this operation is the duration metric. For a web server, this is an API endpoint returning some data and request time is the duration metric. For a messaging consumer service, this is a consume trigger, and till it is done with the message received. For a mobile client application, this could be a button click to submit a form and the time taken to fulfill the request.
+
+- **Operations/s** - Number of sub-root spans seen for a service
+- **PXX** - Quantile of the duration of the sub-root spans
+- **Error rate** - Number of sub-root spans with status error / Total number of sub-root spans
 
 ## Next Steps
 
