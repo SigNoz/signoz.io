@@ -62,6 +62,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Baseten Dashboard Template',
   },
   {
+    name: 'Cert-Manager',
+    href: '/docs/dashboards/dashboard-templates/cert-manager-dashboard',
+    clickName: 'Cert-Manager Dashboard Template',
+  },
+  {
     name: 'CI/CD',
     href: '/docs/dashboards/dashboard-templates/cicd',
     clickName: 'CI/CD Dashboard Template',
