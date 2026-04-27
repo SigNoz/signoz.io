@@ -51,6 +51,11 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/opentelemetry-dbos',
       clickName: 'DBOS Integration Link',
     },
+    {
+      name: 'Apache Druid',
+      href: '/docs/integrations/opentelemetry-apache-druid',
+      clickName: 'Apache Druid Integration Link',
+    },
   ] satisfies ComponentItem[],
   aws: [
     {

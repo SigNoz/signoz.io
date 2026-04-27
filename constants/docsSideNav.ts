@@ -2068,6 +2068,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+            label: 'Apache Druid',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
@@ -2256,6 +2261,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/jvm-metrics',
             label: 'JVM',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+            label: 'Kafka',
           },
           {
             label: 'Kubernetes',
@@ -3060,6 +3070,16 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/incident-specific-dashboard',
             label: 'Incident Specific Dashboard Spin-Up',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-creation-natural-language',
+            label: 'Alert Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/postmortem-evidence-pack',
+            label: 'Postmortem Evidence Pack',
+          },
         ],
       },
     ],
@@ -3466,6 +3486,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/supabase',
         label: 'Supabase',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-apache-druid',
+        label: 'Apache Druid',
       },
       {
         type: 'doc',

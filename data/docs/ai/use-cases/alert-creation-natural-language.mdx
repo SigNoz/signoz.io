@@ -1,0 +1,92 @@
+---
+date: 2026-04-23
+id: alert-creation-natural-language
+title: Alert Creation from Natural Language
+description: Quickly create production ready alerts for newly deployed services using plain English descriptions.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Your recommendation service just went live in production. You need alerts configured now: high latency, error spikes, and service availability. But manually building alert rules means clicking through query builders, setting thresholds, and configuring notification channels.
+
+You open your AI assistant, connected to SigNoz via the MCP server, and describe what you need in plain English.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+
+## Step 1: Create Alerts from a Natural Language Prompt
+
+```text
+Confirm the recommendation service is sending data. Then create three alerts: one for p99 latency above 2 seconds, one for error rate above 5%, and one for service availability.
+```
+
+Your assistant will first verify the service exists and is actively sending telemetry data, then create the alerts:
+
+```text
+Using "demo-alerts" notification channel for all three alerts. Creating them now.
+
+Alert 1: p99 latency above 2 seconds
+✓ Created
+
+Alert 2: error rate above 5%
+✓ Created
+
+Alert 3: Service availability — using alertOnAbsent to fire when no spans are received from the service.
+✓ Created
+
+All done. Here's the summary:
+
+Recommendation service status: Sending data — 87 calls in the last hour (~0.024/sec), currently running at ~5.7% error rate.
+
+Alerts created, all routed to demo-alerts, 5m evaluation window / 1m frequency:
+
+1. P99 Latency > 2s (warning) — fires when recommendation's p99 trace duration exceeds 2000ms, recovers below 1500ms.
+2. Error Rate > 5% (critical) — computed as errors / total_calls * 100 on recommendation traces, recovers below 3%.
+3. No Data / Availability (critical) — fires if no spans arrive from the service for 5 minutes.
+
+Two things worth flagging:
+
+• Heads up on the error rate alert: the service is currently at ~5.7%, so this alert may fire immediately once evaluation starts. Let me know if you'd like the threshold raised or the window lengthened.
+• I used a 5-minute absentFor for the availability alert. If you want something more sensitive (e.g., 2 minutes) or less noisy (e.g., 10 minutes), happy to adjust.
+```
+
+The alerts are now active and will notify you when thresholds are breached.
+
+## Final Summary
+
+You now have three production-ready alerts configured from a simple prompt. Your recommendation service is being monitored for latency issues, error spikes, and availability problems. All without manually configuring query builders or notification channels.
+
+<Figure
+  src="/img/docs/ai/mcp/alert-view.webp"
+  alt="Alerts View"
+  caption="Alerts View"
+/>
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this workflow, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_list_services` | Verified the recommendation service exists and is actively sending telemetry data |
+| 1 | `signoz_create_alert` | Created the p99 latency alert with threshold and notification configuration |
+| 1 | `signoz_create_alert` | Created the error rate alert with percentage-based threshold |
+| 1 | `signoz_create_alert` | Created the service availability alert monitoring for data absence |
+
+</details>
+
+## Related Use Cases
+
+- [Post Deployment Monitoring](https://signoz.io/docs/ai/use-cases/post-deployment-monitoring/) - Compare key metrics before and after a deployment to detect performance regressions or unexpected changes.
+- [Alert Correlation Analysis](https://signoz.io/docs/ai/use-cases/alert-correlation-analysis/) - When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
+- [Dashboard Creation from Natural Language](https://signoz.io/docs/ai/use-cases/dashboard-creation-natural-language/) - Create custom dashboards by describing what you want to visualize in plain English.
+
+
+<GetHelp />

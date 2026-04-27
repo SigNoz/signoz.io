@@ -210,6 +210,11 @@ export const METRICS_QUICK_START_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Metrics Link',
     },
+    {
+      name: 'Apache Druid',
+      href: '/docs/integrations/opentelemetry-apache-druid',
+      clickName: 'Apache Druid Metrics Link',
+    },
   ] satisfies ComponentItem[],
   webServers: [
     {

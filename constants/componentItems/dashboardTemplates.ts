@@ -17,6 +17,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Anthropic API Dashboard Template',
   },
   {
+    name: 'Apache Druid',
+    href: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+    clickName: 'Apache Druid Dashboard Template',
+  },
+  {
     name: 'Apache Web Server',
     href: '/docs/dashboards/dashboard-templates/apache-web-server',
     clickName: 'Apache Web Server Dashboard Template',
@@ -205,6 +210,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'JVM',
     href: '/docs/dashboards/dashboard-templates/jvm-metrics',
     clickName: 'JVM Dashboard Template',
+  },
+  {
+    name: 'Kafka',
+    href: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+    clickName: 'Kafka Dashboard Template',
   },
   {
     name: 'Kubernetes',
