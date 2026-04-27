@@ -1,5 +1,5 @@
 ---
-date: 2026-04-23
+date: 2026-04-26
 id: tail-sampling
 title: Tail Sampling
 description: Sample traces at the collector after all spans arrive, using policies based on status, latency, span name, and more.
@@ -20,7 +20,7 @@ Use tail sampling when your sampling decision depends on trace-level data (error
 
 ## Prerequisites
 
-- `otelcol-contrib` installed and running
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed and running
 - Familiarity with [OTel Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
 
 ## How it works
@@ -29,7 +29,7 @@ The processor buffers incoming spans in memory, grouped by trace ID. When `decis
 
 ## Setup
 
-Add `tail_sampling` to your collector config and wire it into the traces pipeline. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor" target="_blank" rel="noopener noreferrer nofollow">official processor docs</a> for the full config reference.
+Add `tail_sampling` to the `processors` section of your collector config and wire it into the traces pipeline. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor" target="_blank" rel="noopener noreferrer nofollow">official processor docs</a> for the full config reference.
 
 ```yaml:config.yaml
 processors:
@@ -51,7 +51,7 @@ service:
 ```
 
 <Admonition type="warning">
-  Place `tail_sampling` **after** any context-dependent processors such as `k8sattributes`. The processor reassembles spans into new batches, discarding the original context.
+  Place `tail_sampling` **after** any context-dependent processors such as `k8sattributes`, and **just before** `batch`. The processor reassembles spans into new batches, discarding the original context. Putting `batch` after `tail_sampling` ensures only sampled spans are batched for export.
 </Admonition>
 
 <Admonition type="info">
