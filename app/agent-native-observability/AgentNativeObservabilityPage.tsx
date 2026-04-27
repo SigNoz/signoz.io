@@ -63,8 +63,6 @@ const Header: React.FC = () => {
           Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
           issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
           logs, metrics, service topology, and your actual codebase — all in one place.{' '}
-          <br className="hidden md:block" /> Or use our AI Assistant out-of-the-box. No AI SRE
-          required.
         </span>
       }
       buttonGroup={headerButtonGroup}
