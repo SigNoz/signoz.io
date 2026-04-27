@@ -3459,11 +3459,6 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/integrations/opentelemetry-apache-druid',
-        label: 'Apache Druid',
-      },
-      {
-        type: 'doc',
         route: '/docs/integrations/vercel',
         label: 'Vercel',
       },
