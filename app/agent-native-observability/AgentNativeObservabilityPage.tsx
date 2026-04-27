@@ -23,11 +23,11 @@ const Header: React.FC = () => {
         <TrackingLink
           href="/teams/"
           clickType="Primary CTA"
-          clickName="Agent Native Page Hero Get Started Free"
+          clickName="Agent Native Page Hero Get Started - Free"
           clickLocation="Agent Native Observability Page Hero"
-          clickText="Get Started Free"
+          clickText="Get Started - Free"
         >
-          Get Started Free
+          Get Started - Free
           <ArrowRight size={14} />
         </TrackingLink>
       </Button>
@@ -236,11 +236,11 @@ const BottomCTA: React.FC = () => {
             <TrackingLink
               href="/teams/"
               clickType="Secondary CTA"
-              clickName="Agent Native Page Bottom CTA Get Started Free"
+              clickName="Agent Native Page Bottom CTA Get Started - Free"
               clickLocation="Agent Native Observability Page Bottom CTA"
-              clickText="Get Started Free"
+              clickText="Get Started - Free"
             >
-              Get Started Free
+              Get Started - Free
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
