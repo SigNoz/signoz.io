@@ -1,0 +1,80 @@
+---
+date: 2026-04-21
+id: kafka
+title: Kafka Monitoring Dashboard
+description: Monitor Kafka brokers, topics, partitions, and consumer groups using OpenTelemetry kafkametricsreceiver.
+doc_type: explanation
+---
+
+This dashboard provides comprehensive monitoring for your Kafka cluster, including insights into broker health, topic retention, partition status, and consumer group latency.
+
+<Admonition type="info">
+  To use this dashboard, you need to configure the OpenTelemetry Collector to collect Kafka metrics using the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkametricsreceiver" target="_blank" rel="noopener noreferrer nofollow">kafkametricsreceiver</a>. Follow the [Kafka Integration](https://signoz.io/docs/messaging-queues/kafka) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/kafka-dashboard.webp"
+  alt="Kafka Dashboard"
+  caption="Kafka Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/main/kafka/kafka-dashboard.json"
+    dashboardName="Kafka Monitoring"
+  />
+</div>
+
+## Dashboard Variables
+
+This dashboard includes pre-configured variables for filtering:
+
+- **deployment_environment**: Filter by deployment environment
+- **kafka_cluster_alias**: Filter by your Kafka cluster alias
+
+## What This Dashboard Monitors
+
+This dashboard provides visibility into:
+
+- **Broker Health**: Track the total number of active brokers and their log retention.
+- **Topic Analytics**: Monitor the total topics, with details on retention periods and sizes, as well as total partitions and replication factors.
+- **Partition Status**: Identify offline or under-replicated partitions critical to cluster stability.
+- **Replica Health**: Compare replicas against in-sync replicas per topic-partition.
+- **Consumer Group Performance**: Analyze consumer group lag, offset sums, and active members to identify slow consumers.
+
+## Metrics Included
+
+### Broker Metrics
+- **Total Brokers**: Number of active brokers in the cluster.
+- **Broker Log Retention Period**: Log retention time per broker.
+
+### Topic Metrics
+- **Total Topics**: Number of topics in the cluster.
+- **Topic Log Retention Period**: Log retention policies per topic.
+- **Topic Log Retention Size**: Log retention size limits per topic.
+- **Topic Overview**: Partitions, replication factor, and min ISR per topic.
+
+### Partition Metrics
+- **Offline Partitions**: Number of partitions currently offline.
+- **Under-replicated Partitions**: Number of under-replicated partitions needing syncing.
+- **Total Partitions**: Total number of partitions across all brokers.
+- **Partition Offsets**: Current and oldest offsets per topic-partition.
+- **Replica Health**: Replicas vs in-sync replicas per topic-partition.
+
+### Consumer Group Metrics
+- **Max Consumer Group Lag**: Maximum lag across all consumer groups.
+- **Consumer Group Lag by Group and Topic**: Breakdown of consumer lag.
+- **Consumer Group Members**: Active members per consumer group.
+- **Consumer Group Offset Sum by Topic**: Committed offset sum per topic.
+- **Consumer Group Overview**: Members and total lag per consumer group.
+
+## Next Steps
+
+- Explore the [Kafka Integration](https://signoz.io/docs/messaging-queues/kafka) to configure metrics collection
+- Learn about [querying metrics](https://signoz.io/docs/userguide/query-builder) to create custom visualizations
+
+## Related Dashboards
+
+- [RabbitMQ](https://signoz.io/docs/dashboards/dashboard-templates/rabbitmq)

@@ -301,6 +301,69 @@ tags: ["test"]
       assert.strictEqual(warnings.length, 0)
     })
 
+    it('should allow older dates when only title and description change', () => {
+      const oldDate = new Date()
+      oldDate.setDate(oldDate.getDate() - 30)
+      const oldDateStr = oldDate.toISOString().split('T')[0]
+
+      const previousContent = `---
+title: Previous Title
+date: ${oldDateStr}
+description: Previous description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const currentContent = `---
+title: Updated Title
+date: ${oldDateStr}
+description: Updated description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const filePath = createTestFile('metadata-only-change.mdx', currentContent)
+      const { errors, warnings } = validateMetadata(filePath, { previousContent })
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
+    it('should still require a recent date when body content changes', () => {
+      const oldDate = new Date()
+      oldDate.setDate(oldDate.getDate() - 30)
+      const oldDateStr = oldDate.toISOString().split('T')[0]
+
+      const previousContent = `---
+title: Existing Title
+date: ${oldDateStr}
+description: Existing description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const currentContent = `---
+title: Existing Title
+date: ${oldDateStr}
+description: Existing description
+tags: ["test"]
+---
+
+# Updated Content
+`
+
+      const filePath = createTestFile('body-change-old-date.mdx', currentContent)
+      const { errors } = validateMetadata(filePath, { previousContent })
+
+      assert.ok(errors.includes('date cannot be more than 7 days in the past'))
+    })
+
     it('should warn when tags is not an array', () => {
       const today = new Date().toISOString().split('T')[0]
       const content = `---

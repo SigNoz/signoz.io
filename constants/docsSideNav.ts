@@ -2243,6 +2243,11 @@ const docsSideNav = [
             label: 'JVM',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+            label: 'Kafka',
+          },
+          {
             label: 'Kubernetes',
             type: 'category',
             isExpanded: false,
@@ -3039,6 +3044,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ai/use-cases/incident-specific-dashboard',
             label: 'Incident Specific Dashboard Spin-Up',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-creation-natural-language',
+            label: 'Alert Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/postmortem-evidence-pack',
+            label: 'Postmortem Evidence Pack',
           },
         ],
       },

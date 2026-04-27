@@ -27,6 +27,7 @@ import {
   SiOllama,
   SiHuggingface,
   SiN8N,
+  SiApachekafka,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -186,6 +187,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   'https://github.com/SigNoz/dashboards/tree/main/jmx': <Cpu className="h-7 w-7 text-red-600" />,
   '/docs/dashboards/dashboard-templates/jvm-metrics': <Cpu className="h-7 w-7 text-orange-600" />,
+  '/docs/dashboards/dashboard-templates/kafka-dashboard': <SiApachekafka className="h-7 w-7" />,
   '/docs/dashboards/dashboard-templates/kubernetes-dashboards': (
     <SiKubernetes className="h-7 w-7 text-blue-600" />
   ),
