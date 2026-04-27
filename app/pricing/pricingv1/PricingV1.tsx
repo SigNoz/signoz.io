@@ -1,10 +1,8 @@
 import React from 'react'
 import { Card } from '@/components/ui/Card'
 import Heading from '../../../components/ui/Heading'
-import PricingFeatures from './components/PricingFeatures'
 import TeamsPricingCard from './components/TeamsPricingCard'
 import EnterpriseCard from './components/EnterpriseCard'
-import PricingCalculator from './components/PricingCalculator'
 import ExploreAllFeatures from './components/ExploreAllFeatures'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { TrustedByTeams } from '@/components/trusted-by'
@@ -13,6 +11,7 @@ import FAQ from './components/FAQ'
 import StartupProgram from './components/StartupProgram'
 import SigNozCloudPricingOverview from './components/SigNozCloudPricingOverview'
 import InstrumentationSupport from './components/InstrumentationSupport'
+import PricingCalculator from './components/PricingCalculator'
 
 export default function PricingV1Page() {
   return (
