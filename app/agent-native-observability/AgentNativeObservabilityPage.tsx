@@ -132,7 +132,7 @@ const InContextObservability: React.FC = () => {
     >
       <div className="mx-auto max-w-4xl text-center">
         <h2 className="mb-4 text-4xl font-semibold text-signoz_vanilla-100">
-          In-context Observability
+          Powerful, In-context Obervability
         </h2>
         <p className="text-lg text-signoz_vanilla-400">
           In the tools you need. At the time you need.

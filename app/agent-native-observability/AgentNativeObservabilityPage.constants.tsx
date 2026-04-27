@@ -67,9 +67,9 @@ export const FEATURE_CARDS = [
           Investigate issues, diagnose root cause, and fix without leaving your env.
         </p>
         <TrackingLink
-          href="/docs/signoz-mcp/"
+          href="/docs/ai/signoz-mcp-server/"
           clickType="Secondary CTA"
-          clickName="Agent Native Feature 2 Learn More"
+          clickName="Agent Native Feature 1 Learn More"
           clickLocation="Agent Native Observability Page"
           clickText="Learn more"
         >
@@ -147,14 +147,14 @@ export const FEATURE_CARDS = [
           not around it.
         </p>
         <TrackingLink
-          href="/blog/"
+          href="https://www.youtube.com/@signoz"
           clickType="Secondary CTA"
-          clickName="Agent Native Feature 4 Learn More"
+          clickName="Agent Native Feature 4 Watch Video"
           clickLocation="Agent Native Observability Page"
-          clickText="Learn more"
+          clickText="Watch Video"
         >
           <Button variant="secondary" rounded="full" isButton className="mt-4">
-            Learn more
+            Watch Video
           </Button>
         </TrackingLink>
       </div>
@@ -196,17 +196,6 @@ export const FEATURE_CARDS = [
           them as reusable skills. The open investigation format SigNoz uses becomes a standard your
           entire team can build on.
         </p>
-        <TrackingLink
-          href="/blog/"
-          clickType="Secondary CTA"
-          clickName="Agent Native Feature 5 Learn More"
-          clickLocation="Agent Native Observability Page"
-          clickText="Learn more"
-        >
-          <Button variant="secondary" rounded="full" isButton className="mt-4">
-            Learn more
-          </Button>
-        </TrackingLink>
       </div>
     ),
     className: 'flex-col items-start justify-center gap-4',
