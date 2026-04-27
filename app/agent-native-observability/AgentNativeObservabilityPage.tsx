@@ -152,7 +152,7 @@ const InContextObservability: React.FC = () => {
                 debugging in your terminal today.
               </p>
               <TrackingLink
-                href="/docs/signoz-mcp/"
+                href="/docs/ai/signoz-mcp-server/"
                 clickType="Primary CTA"
                 clickName="Agent Native Page MCP Server Get Started"
                 clickLocation="Agent Native Observability Page In-Context Section"
