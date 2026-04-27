@@ -1300,13 +1300,13 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/hostmetrics',
-        label: 'Host Metrics',
+        route: '/docs/infrastructure-monitoring/cert-manager',
+        label: 'Cert-Manager',
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/cert-manager',
-        label: 'Cert-Manager',
+        route: '/docs/infrastructure-monitoring/hostmetrics',
+        label: 'Host Metrics',
       },
       {
         type: 'doc',
