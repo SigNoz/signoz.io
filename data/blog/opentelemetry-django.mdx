@@ -9,14 +9,16 @@ image: /img/blog/common/django-dashboard.webp
 keywords: [opentelemetry,opentelemetry django,opentelemetry python,distributed tracing,observability,django monitoring,django instrumentation,signoz]
 ---
 
-Any production-grade Django application is composed of multiple interconnected components such as HTTP servers, WSGI/ASGI gateways, databases, caches, background workers and more. Due to the complexity of modern web applications, these components may misbehave at various stages of the application's lifespan. To observe a Django application (including monitoring its vitals for performance concerns), you need to observe these components. And that’s where OpenTelemetry comes into the picture.
+Most production-grade Django applications are composed of multiple interconnected components such as HTTP servers, WSGI/ASGI gateways, databases, caches, background workers, and more.<br />
+To manage your Django applications reliably, monitor their performance as they serve users, and debug issues as they arise, you need <Tooltip text="telemetry" content="Telemetry refers to the data collected from sources such as applications to understand how they operate." /> across those components and request paths. And that’s where OpenTelemetry comes into the picture.
 
 In this hands-on guide, we will set up OpenTelemetry Django auto-instrumentation on a sample Django application, run it via a Gunicorn web server, and export traces, metrics, and logs to SigNoz, an OpenTelemetry-native observability backend.<br />
 Finally, we'll verify that telemetry flows end to end, visualize your application's telemetry, and understand how it works under the hood.
 
 ## What is OpenTelemetry Django?
 
-[OpenTelemetry Django](https://signoz.io/docs/instrumentation/opentelemetry-python/) instrumentation enables the generation and management of telemetry data (logs, metrics, and traces) from your Django application. This data is then used to observe the application and gain insights into its performance and behavior. OpenTelemetry provides an open-source standard with a consistent data format and collection mechanism. As application owners, you will always have the freedom to choose different vendors to visualize the collected telemetry data, and can consume this data in a variety of formats.
+[OpenTelemetry Django](https://signoz.io/docs/instrumentation/opentelemetry-python/) instrumentation enables the generation and management of telemetry data (logs, metrics, and traces) from your Django application. This data is then used to observe the application and gain insights into its performance and behavior.<br />
+OpenTelemetry provides an open-source standard with a consistent data format and collection mechanism. As application owners, you will always have the freedom to choose different vendors to visualize the collected telemetry data, and can consume this data in a variety of formats.
 
 Instrumentation is the biggest challenge engineering teams face when starting out with monitoring their application performance. [OpenTelemetry](https://signoz.io/why-opentelemetry/) is the leading open-source standard solving the problem of instrumentation. It is currently an incubating project under the [Cloud Native Computing Foundation](https://www.cncf.io/) and aims to make telemetry data a built-in feature of cloud-native software applications.
 
@@ -37,7 +39,8 @@ You can find the detailed tutorial on [official django website](https://docs.dja
 
 ## Implementing OpenTelemetry in Django Applications
 
-Let's go through the steps of setting up and instrumenting a Django application with OpenTelemetry to emit traces and metrics. We will start with OpenTelemetry Django auto instrumentation as it is easy to set up and covers most observability needs in the beginning (traces and metrics). We will then go over manual instrumentation to enable you to extract the most value from OTel integrations in applications.
+Let's go through the steps of setting up and instrumenting a Django application with OpenTelemetry to emit traces and metrics. We will primarily cover OpenTelemetry Django auto-instrumentation as it is easy to set up and covers most observability needs in the beginning (traces and metrics).
+
 In this guide, we are going to send the emitted telemetry to SigNoz.
 
 ### Prerequisites for Application Instrumentation
