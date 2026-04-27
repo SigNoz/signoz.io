@@ -27,17 +27,17 @@ export const FEATURE_CARDS = [
           Connect to Kubernetes, Git, Jira via your cloud provider CLI in your dev environment.
           Investigate issues, diagnose root cause, and fix without leaving your env.
         </p>
-        <TrackingLink
-          href="/docs/ai/signoz-mcp-server/"
-          clickType="Secondary CTA"
-          clickName="Agent Native Feature 1 Learn More"
-          clickLocation="Agent Native Observability Page"
-          clickText="Learn more"
-        >
-          <Button variant="secondary" rounded="full" isButton className="mt-4">
+        <Button asChild variant="secondary" rounded="full" className="mt-4">
+          <TrackingLink
+            href="/docs/ai/signoz-mcp-server/"
+            clickType="Secondary CTA"
+            clickName="Agent Native Feature 1 Learn More"
+            clickLocation="Agent Native Observability Page"
+            clickText="Learn more"
+          >
             Learn more
-          </Button>
-        </TrackingLink>
+          </TrackingLink>
+        </Button>
       </div>
     ),
     className: 'flex-col items-start justify-center gap-4',
@@ -49,6 +49,7 @@ export const FEATURE_CARDS = [
           src="/img/agent-native-observability/image-2.webp"
           alt="Coding agent investigating an ECS service OOM issue — tracing root cause from alert to fix"
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-top"
         />
       </div>
@@ -61,6 +62,7 @@ export const FEATURE_CARDS = [
           src="/img/agent-native-observability/image-3.webp"
           alt="skill.md file defining custom debugging heuristics — latency propagation, backpressure, cascading failures"
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-top"
         />
       </div>
@@ -77,17 +79,17 @@ export const FEATURE_CARDS = [
           service topology, your escalation paths and let the coding agents investigate and pinpoint
           the issue.
         </p>
-        <TrackingLink
-          href="/docs/ai/agent-skills/"
-          clickType="Secondary CTA"
-          clickName="Agent Native Feature 3 Learn More"
-          clickLocation="Agent Native Observability Page"
-          clickText="Learn more"
-        >
-          <Button variant="secondary" rounded="full" isButton className="mt-4">
+        <Button asChild variant="secondary" rounded="full" className="mt-4">
+          <TrackingLink
+            href="/docs/ai/agent-skills/"
+            clickType="Secondary CTA"
+            clickName="Agent Native Feature 3 Learn More"
+            clickLocation="Agent Native Observability Page"
+            clickText="Learn more"
+          >
             Learn more
-          </Button>
-        </TrackingLink>
+          </TrackingLink>
+        </Button>
       </div>
     ),
     className: 'flex-col items-start justify-center gap-4',
@@ -107,17 +109,17 @@ export const FEATURE_CARDS = [
           limited reasoning. With SigNoz MCP and coding agents, you work inside your environment,
           not around it.
         </p>
-        <TrackingLink
-          href="https://www.youtube.com/@signoz"
-          clickType="Secondary CTA"
-          clickName="Agent Native Feature 4 Watch Video"
-          clickLocation="Agent Native Observability Page"
-          clickText="Watch Video"
-        >
-          <Button variant="secondary" rounded="full" isButton className="mt-4">
+        <Button asChild variant="secondary" rounded="full" className="mt-4">
+          <TrackingLink
+            href="https://www.youtube.com/@signoz"
+            clickType="Secondary CTA"
+            clickName="Agent Native Feature 4 Watch Video"
+            clickLocation="Agent Native Observability Page"
+            clickText="Watch Video"
+          >
             Watch Video
-          </Button>
-        </TrackingLink>
+          </TrackingLink>
+        </Button>
       </div>
     ),
     className: 'flex-col items-start justify-center gap-4',
@@ -129,6 +131,7 @@ export const FEATURE_CARDS = [
           src="/img/graphics/homepage/feature-graphic-5.svg"
           alt="GitHub, Slack, GitLab, and Jira connected to SigNoz — tribal knowledge and integrations flow"
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain"
         />
       </div>
@@ -141,6 +144,7 @@ export const FEATURE_CARDS = [
           src="/img/graphics/homepage/feature-graphic-otel.webp"
           alt="SigNoz built on top of OpenTelemetry — isometric layers showing the open-standards foundation"
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain"
         />
       </div>

@@ -151,23 +151,23 @@ const InContextObservability: React.FC = () => {
                 logs, metrics, service topology, deployment history — in every session. Start
                 debugging in your terminal today.
               </p>
-              <TrackingLink
-                href="/docs/ai/signoz-mcp-server/"
-                clickType="Primary CTA"
-                clickName="Agent Native Page MCP Server Get Started"
-                clickLocation="Agent Native Observability Page In-Context Section"
-                clickText="Get started in minutes"
+              <Button
+                asChild
+                variant="default"
+                rounded="full"
+                className="flex-center flex !w-fit items-center gap-2"
               >
-                <Button
-                  isButton
-                  variant="default"
-                  rounded="full"
-                  className="flex-center flex !w-fit items-center gap-2"
+                <TrackingLink
+                  href="/docs/ai/signoz-mcp-server/"
+                  clickType="Primary CTA"
+                  clickName="Agent Native Page MCP Server Get Started"
+                  clickLocation="Agent Native Observability Page In-Context Section"
+                  clickText="Get started in minutes"
                 >
                   Get started in minutes
                   <ArrowRight size={14} />
-                </Button>
-              </TrackingLink>
+                </TrackingLink>
+              </Button>
             </div>
           </Card>
         </div>
