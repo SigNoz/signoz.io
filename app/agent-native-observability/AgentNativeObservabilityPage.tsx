@@ -59,30 +59,25 @@ const Header: React.FC = () => {
         </>
       }
       description={
-        <>
+        <span className="text-base">
           Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
           issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
           logs, metrics, service topology, and your actual codebase — all in one place.{' '}
           <br className="hidden md:block" /> Or use our AI Assistant out-of-the-box. No AI SRE
           required.
-        </>
+        </span>
       }
       buttonGroup={headerButtonGroup}
       sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
       heroImageAlt="Agent Native Observability hero"
-      heroImage={
-        <div className="mx-auto flex h-[300px] w-full max-w-4xl items-center justify-center rounded-lg bg-signoz_ink-400 md:h-[400px]">
-          <span className="text-sm text-signoz_vanilla-400">
-            [Placeholder: Agent Native Observability hero image]
-          </span>
-        </div>
-      }
+      heroImage={'/img/platform/AgentNativeObservabilityMeta.webp'}
       buttonDescription={
         <div className="text-center text-sm text-signoz_vanilla-400">
           No learning new Dashboard UX. In-context Observability in your workflows.
         </div>
       }
       className="mt-0"
+      align="left"
     />
   )
 }
@@ -143,38 +138,40 @@ const InContextObservability: React.FC = () => {
           In the tools you need. At the time you need.
         </p>
       </div>
-      <div className="mx-auto grid max-w-4xl grid-cols-1 gap-10 md:grid-cols-2">
-        <Card variant="gradient">
-          <div className="m-6 flex flex-grow flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Terminal className="size-6 text-signoz_robin-500" />
-              <h3 className="text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
-            </div>
-            <p className="text-base text-signoz_vanilla-400">
-              Plug into Claude Code, Cursor in minutes. Get full observability context — traces,
-              logs, metrics, service topology, deployment history — in every session. Start
-              debugging in your terminal today.
-            </p>
-            <TrackingLink
-              href="/docs/signoz-mcp/"
-              clickType="Primary CTA"
-              clickName="Agent Native Page MCP Server Get Started"
-              clickLocation="Agent Native Observability Page In-Context Section"
-              clickText="Get started in minutes"
-            >
-              <Button
-                isButton
-                variant="default"
-                rounded="full"
-                className="flex-center flex !w-fit items-center gap-2"
+      <div className="mx-auto flex max-w-4xl justify-center gap-10">
+        <div className="w-full md:w-1/2">
+          <Card variant="gradient">
+            <div className="m-6 flex flex-grow flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <Terminal className="size-6 text-signoz_robin-500" />
+                <h3 className="text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
+              </div>
+              <p className="text-base text-signoz_vanilla-400">
+                Plug into Claude Code, Cursor in minutes. Get full observability context — traces,
+                logs, metrics, service topology, deployment history — in every session. Start
+                debugging in your terminal today.
+              </p>
+              <TrackingLink
+                href="/docs/signoz-mcp/"
+                clickType="Primary CTA"
+                clickName="Agent Native Page MCP Server Get Started"
+                clickLocation="Agent Native Observability Page In-Context Section"
+                clickText="Get started in minutes"
               >
-                Get started in minutes
-                <ArrowRight size={14} />
-              </Button>
-            </TrackingLink>
-          </div>
-        </Card>
-        <Card variant="gradient">
+                <Button
+                  isButton
+                  variant="default"
+                  rounded="full"
+                  className="flex-center flex !w-fit items-center gap-2"
+                >
+                  Get started in minutes
+                  <ArrowRight size={14} />
+                </Button>
+              </TrackingLink>
+            </div>
+          </Card>
+        </div>
+        {/* <Card variant="gradient">
           <div className="m-6 flex flex-grow flex-col gap-4">
             <div className="flex items-center gap-3">
               <Bot className="size-6 text-signoz_robin-500" />
@@ -203,7 +200,7 @@ const InContextObservability: React.FC = () => {
               </Button>
             </TrackingLink>
           </div>
-        </Card>
+        </Card> */}
       </div>
     </SectionLayout>
   )
@@ -216,7 +213,7 @@ const FeatureSections: React.FC = () => {
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
             <h2 className="text-center text-4xl font-semibold text-signoz_vanilla-100">
-              Why Agent Native Observability?
+              Why Agent Native Observability
             </h2>
             <div className="text-center text-base text-signoz_vanilla-100">
               Debug faster. Ship with confidence. All from your dev environment.

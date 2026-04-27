@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     title: 'Agent Native Observability | SigNoz',
     description:
       'Connect SigNoz to your coding agents like Claude Code and Cursor. Debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase — all in one place.',
+    images: '/img/platform/AgentNativeObservabilityMeta.webp',
   },
   description:
     'Connect SigNoz to your coding agents like Claude Code and Cursor. Debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase — all in one place.',
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
     title: 'Agent Native Observability | SigNoz',
     description:
       'Connect SigNoz to your coding agents like Claude Code and Cursor. Debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase — all in one place.',
+    images: '/img/platform/AgentNativeObservabilityMeta.webp',
   },
 }
 

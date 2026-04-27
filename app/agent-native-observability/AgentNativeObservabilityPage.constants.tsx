@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 import Button from '@/components/ui/Button'
 
@@ -13,42 +14,45 @@ export const TRUSTED_BY_LOGOS = [
 ]
 
 export const FEATURE_CARDS = [
-  {
-    description: (
-      <div className="flex h-full min-h-[300px] w-full items-center justify-center rounded-lg bg-signoz_ink-400">
-        <span className="text-sm text-signoz_vanilla-400">
-          [Placeholder: Natural language dashboard creation UI]
-        </span>
-      </div>
-    ),
-  },
-  {
-    title: 'Talk to your observability stack in plain language.',
-    description: (
-      <div>
-        <p>
-          Describe what you want in natural language and SigNoz builds it. Create dashboards from
-          80+ templates or from scratch. Generate alerts with sensible defaults. Run queries and get
-          results directly in chat — no query language required.
-        </p>
-        <p className="mt-3 text-sm italic text-signoz_vanilla-400">
-          &quot;Create a latency dashboard for my payment service&quot; — Done. Fully interactive.
-        </p>
-        <TrackingLink
-          href="/blog/"
-          clickType="Secondary CTA"
-          clickName="Agent Native Feature 1 Learn More"
-          clickLocation="Agent Native Observability Page"
-          clickText="Learn more"
-        >
-          <Button variant="secondary" rounded="full" isButton className="mt-4">
-            Learn more
-          </Button>
-        </TrackingLink>
-      </div>
-    ),
-    className: 'flex-col items-start justify-center gap-4',
-  },
+  // {
+  //   description: (
+  //     <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
+  //       <Image
+  //         src="/img/agent-native-observability/image-1.webp"
+  //         alt="SigNoz Assistant creating a latency dashboard for a payment service in natural language"
+  //         fill
+  //         className="object-cover object-top"
+  //       />
+  //     </div>
+  //   ),
+  // },
+  // {
+  //   title: 'Talk to your observability stack in plain language.',
+  //   description: (
+  //     <div>
+  //       <p>
+  //         Describe what you want in natural language and SigNoz builds it. Create dashboards from
+  //         80+ templates or from scratch. Generate alerts with sensible defaults. Run queries and get
+  //         results directly in chat — no query language required.
+  //       </p>
+  //       <p className="mt-3 text-sm italic text-signoz_vanilla-400">
+  //         &quot;Create a latency dashboard for my payment service&quot; — Done. Fully interactive.
+  //       </p>
+  //       <TrackingLink
+  //         href="/blog/"
+  //         clickType="Secondary CTA"
+  //         clickName="Agent Native Feature 1 Learn More"
+  //         clickLocation="Agent Native Observability Page"
+  //         clickText="Learn more"
+  //       >
+  //         <Button variant="secondary" rounded="full" isButton className="mt-4">
+  //           Learn more
+  //         </Button>
+  //       </TrackingLink>
+  //     </div>
+  //   ),
+  //   className: 'flex-col items-start justify-center gap-4',
+  // },
   {
     title: 'From alert to root cause to fix. In one session.',
     description: (
@@ -63,7 +67,7 @@ export const FEATURE_CARDS = [
           Investigate issues, diagnose root cause, and fix without leaving your env.
         </p>
         <TrackingLink
-          href="/blog/"
+          href="/docs/signoz-mcp/"
           clickType="Secondary CTA"
           clickName="Agent Native Feature 2 Learn More"
           clickLocation="Agent Native Observability Page"
@@ -79,19 +83,25 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="flex h-full min-h-[300px] w-full items-center justify-center rounded-lg bg-signoz_ink-400">
-        <span className="text-sm text-signoz_vanilla-400">
-          [Placeholder: Alert to root cause investigation flow]
-        </span>
+      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
+        <Image
+          src="/img/agent-native-observability/image-2.webp"
+          alt="Coding agent investigating an ECS service OOM issue — tracing root cause from alert to fix"
+          fill
+          className="object-cover object-top"
+        />
       </div>
     ),
   },
   {
     description: (
-      <div className="flex h-full min-h-[300px] w-full items-center justify-center rounded-lg bg-signoz_ink-400">
-        <span className="text-sm text-signoz_vanilla-400">
-          [Placeholder: Custom system prompt / skills config]
-        </span>
+      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
+        <Image
+          src="/img/agent-native-observability/image-3.webp"
+          alt="skill.md file defining custom debugging heuristics — latency propagation, backpressure, cascading failures"
+          fill
+          className="object-cover object-top"
+        />
       </div>
     ),
   },
@@ -107,7 +117,7 @@ export const FEATURE_CARDS = [
           the issue.
         </p>
         <TrackingLink
-          href="/blog/"
+          href="/docs/ai/agent-skills/"
           clickType="Secondary CTA"
           clickName="Agent Native Feature 3 Learn More"
           clickLocation="Agent Native Observability Page"
@@ -153,19 +163,25 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="flex h-full min-h-[300px] w-full items-center justify-center rounded-lg bg-signoz_ink-400">
-        <span className="text-sm text-signoz_vanilla-400">
-          [Placeholder: Jira / GitHub / Slack enrichment flow]
-        </span>
+      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg bg-signoz_ink-500">
+        <Image
+          src="/img/graphics/homepage/feature-graphic-5.svg"
+          alt="GitHub, Slack, GitLab, and Jira connected to SigNoz — tribal knowledge and integrations flow"
+          fill
+          className="object-contain"
+        />
       </div>
     ),
   },
   {
     description: (
-      <div className="flex h-full min-h-[300px] w-full items-center justify-center rounded-lg bg-signoz_ink-400">
-        <span className="text-sm text-signoz_vanilla-400">
-          [Placeholder: OTel-native + portability diagram]
-        </span>
+      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg bg-signoz_ink-500">
+        <Image
+          src="/img/graphics/homepage/feature-graphic-otel.webp"
+          alt="SigNoz built on top of OpenTelemetry — isometric layers showing the open-standards foundation"
+          fill
+          className="object-contain"
+        />
       </div>
     ),
   },
