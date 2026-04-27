@@ -13,26 +13,45 @@ function run(command) {
   }
 }
 
-function getChangedDocFiles(baseRef) {
-  let mergeBase
+function tryRun(command) {
   try {
-    mergeBase = run(`git merge-base HEAD ${baseRef}`)
+    return execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
   } catch (error) {
-    if (baseRef !== 'origin/main') {
-      mergeBase = run('git merge-base HEAD origin/main')
-    } else {
-      throw error
+    return null
+  }
+}
+
+function resolveComparisonRef(baseRef) {
+  const mergeBase = tryRun(`git merge-base HEAD ${baseRef}`)
+  if (mergeBase) {
+    return mergeBase
+  }
+
+  if (baseRef !== 'origin/main') {
+    const fallbackMergeBase = tryRun('git merge-base HEAD origin/main')
+    if (fallbackMergeBase) {
+      return fallbackMergeBase
     }
   }
+
+  console.error(`Unable to determine a merge base for ${baseRef}`)
+  process.exit(1)
+}
+
+function getChangedDocFiles(baseRef) {
+  const comparisonRef = resolveComparisonRef(baseRef)
 
   const docPattern = /^data\/docs\/.*\.mdx$/
   const changedFiles = new Set()
 
   // Get committed changes
   try {
-    const committedDiff = execSync(`git diff --name-only --diff-filter=ACMR ${mergeBase} HEAD`, {
-      encoding: 'utf8',
-    })
+    const committedDiff = execSync(
+      `git diff --name-only --diff-filter=ACMR ${comparisonRef} HEAD`,
+      {
+        encoding: 'utf8',
+      }
+    )
     committedDiff
       .split('\n')
       .filter((file) => docPattern.test(file))
@@ -65,6 +84,7 @@ function getGitAuthorDate(filePath) {
   try {
     const dateString = execSync(`git log -2 --pretty=format:%as -- ${filePath}`, {
       encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
     }).trim()
     return dateString || null
   } catch (error) {
@@ -89,37 +109,91 @@ function getStagedDocFiles() {
   }
 }
 
-function extractFrontmatter(filePath) {
-  try {
-    const content = fs.readFileSync(filePath, 'utf8')
-    const lines = content.split('\n')
-    let inFrontmatter = false
-    let frontmatterLines = []
-    let delimiterCount = 0
+function splitFrontmatter(content) {
+  const lines = content.split('\n')
 
-    for (const line of lines) {
-      if (line.trim() === '---') {
-        delimiterCount++
-        if (delimiterCount === 1) {
-          inFrontmatter = true
-          continue
-        }
-        if (delimiterCount === 2) {
-          break
-        }
-      }
-      if (inFrontmatter && delimiterCount === 1) {
-        frontmatterLines.push(line)
+  if (lines[0]?.trim() !== '---') {
+    return { frontmatter: '', body: content }
+  }
+
+  const frontmatterLines = []
+
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '---') {
+      return {
+        frontmatter: frontmatterLines.join('\n'),
+        body: lines.slice(i + 1).join('\n'),
       }
     }
 
-    return frontmatterLines.join('\n')
+    frontmatterLines.push(lines[i])
+  }
+
+  return { frontmatter: '', body: content }
+}
+
+function parseFrontmatterFields(frontmatter) {
+  const fieldMap = new Map()
+
+  for (const line of frontmatter.split('\n')) {
+    const match = line.match(/^(\w+):\s*(.*)$/)
+    if (match) {
+      fieldMap.set(match[1], match[2].trim())
+    }
+  }
+
+  return fieldMap
+}
+
+function extractFrontmatter(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8')
+    return splitFrontmatter(content).frontmatter
   } catch (error) {
     return null
   }
 }
 
-function validateMetadata(filePath) {
+function getFileContentAtRef(ref, filePath) {
+  return tryRun(`git show ${ref}:"${filePath}"`)
+}
+
+function hasOnlyTitleAndDescriptionChanges(filePath, options = {}) {
+  const currentContent = fs.readFileSync(filePath, 'utf8')
+  const previousContent =
+    options.previousContent ??
+    (options.comparisonRef ? getFileContentAtRef(options.comparisonRef, filePath) : null)
+
+  if (!previousContent || currentContent === previousContent) {
+    return false
+  }
+
+  const { frontmatter: currentFrontmatter, body: currentBody } = splitFrontmatter(currentContent)
+  const { frontmatter: previousFrontmatter, body: previousBody } = splitFrontmatter(previousContent)
+
+  if (currentBody !== previousBody) {
+    return false
+  }
+
+  const currentFields = parseFrontmatterFields(currentFrontmatter)
+  const previousFields = parseFrontmatterFields(previousFrontmatter)
+  const changedKeys = new Set()
+
+  for (const key of new Set([...currentFields.keys(), ...previousFields.keys()])) {
+    if ((currentFields.get(key) ?? '') !== (previousFields.get(key) ?? '')) {
+      changedKeys.add(key)
+    }
+  }
+
+  if (changedKeys.size === 0) {
+    return false
+  }
+
+  const allowedKeys = new Set(['title', 'description'])
+  return Array.from(changedKeys).every((key) => allowedKeys.has(key))
+}
+
+function validateMetadata(filePath, options = {}) {
   const errors = []
   const warnings = []
 
@@ -136,16 +210,8 @@ function validateMetadata(filePath) {
     return { errors, warnings }
   }
 
-  const lines = frontmatter.split('\n')
-  const fieldMap = new Map()
-
-  // Parse frontmatter fields
-  for (const line of lines) {
-    const match = line.match(/^(\w+):\s*(.*)$/)
-    if (match) {
-      fieldMap.set(match[1], match[2].trim())
-    }
-  }
+  const fieldMap = parseFrontmatterFields(frontmatter)
+  const shouldEnforceRecentDate = !hasOnlyTitleAndDescriptionChanges(filePath, options)
 
   // Validate tags field (warning only)
   if (fieldMap.has('tags')) {
@@ -169,32 +235,33 @@ function validateMetadata(filePath) {
       if (isNaN(date.getTime())) {
         errors.push('invalid date value')
       } else {
-        // Set up date boundaries
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
+        if (shouldEnforceRecentDate) {
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
 
-        const dateToCheck = new Date(date)
-        dateToCheck.setHours(0, 0, 0, 0)
+          const dateToCheck = new Date(date)
+          dateToCheck.setHours(0, 0, 0, 0)
 
-        // Allow dates up to 7 days in the future
-        const maxFutureDate = new Date(today)
-        maxFutureDate.setDate(maxFutureDate.getDate() + 7)
+          // Allow dates up to 7 days in the future
+          const maxFutureDate = new Date(today)
+          maxFutureDate.setDate(maxFutureDate.getDate() + 7)
 
-        // Allow dates up to 7 days in the past
-        const minPastDate = new Date(today)
-        minPastDate.setDate(minPastDate.getDate() - 7)
+          // Allow dates up to 7 days in the past
+          const minPastDate = new Date(today)
+          minPastDate.setDate(minPastDate.getDate() - 7)
 
-        if (dateToCheck > maxFutureDate) {
-          errors.push('date cannot be more than 7 days in the future')
-        } else if (dateToCheck < minPastDate) {
-          errors.push('date cannot be more than 7 days in the past')
+          if (dateToCheck > maxFutureDate) {
+            errors.push('date cannot be more than 7 days in the future')
+          } else if (dateToCheck < minPastDate) {
+            errors.push('date cannot be more than 7 days in the past')
+          }
         }
       }
     }
   }
 
   // Compare frontmatter date with git commit date
-  if (fieldMap.has('date')) {
+  if (fieldMap.has('date') && shouldEnforceRecentDate) {
     const frontmatterDate = fieldMap.get('date').replace(/['"]/g, '').trim()
     const gitDate = getGitAuthorDate(filePath)
 
@@ -238,9 +305,10 @@ function main() {
   const baseBranch = process.env.GITHUB_BASE_REF
     ? `origin/${process.env.GITHUB_BASE_REF}`
     : process.env.DEFAULT_BRANCH || 'origin/main'
+  const comparisonRef = isPreCommit ? 'HEAD' : resolveComparisonRef(baseBranch)
 
   // Get changed files
-  const changedFiles = isPreCommit ? getStagedDocFiles() : getChangedDocFiles(baseBranch)
+  const changedFiles = isPreCommit ? getStagedDocFiles() : getChangedDocFiles(baseBranch, comparisonRef)
 
   if (changedFiles.length === 0) {
     console.log('No documentation files to check')
@@ -254,7 +322,7 @@ function main() {
   let allValid = true
 
   for (const file of changedFiles) {
-    const { errors, warnings } = validateMetadata(file)
+    const { errors, warnings } = validateMetadata(file, { comparisonRef })
 
     if (errors.length > 0) {
       console.error(`❌ ${file}: ${errors.join('; ')}`)

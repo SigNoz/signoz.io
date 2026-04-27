@@ -2053,6 +2053,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+            label: 'Apache Druid',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
@@ -2241,6 +2246,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/jvm-metrics',
             label: 'JVM',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+            label: 'Kafka',
           },
           {
             label: 'Kubernetes',
@@ -3020,6 +3030,36 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/alert-fatigue-audit',
             label: 'Alert Fatigue Audit',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/optimize-performance-during-development',
+            label: 'Optimize Performance During Development',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+            label: 'Trace Failing Request',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+            label: 'Dashboard Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/incident-specific-dashboard',
+            label: 'Incident Specific Dashboard Spin-Up',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-creation-natural-language',
+            label: 'Alert Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/postmortem-evidence-pack',
+            label: 'Postmortem Evidence Pack',
+          },
         ],
       },
     ],
@@ -3429,8 +3469,13 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/vercel-to-signoz',
-        label: 'Vercel Traces',
+        route: '/docs/integrations/opentelemetry-apache-druid',
+        label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
       {
         type: 'doc',
@@ -3596,6 +3641,18 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/cicd/jenkins/jenkins-tracing',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
+        label: 'GitLab',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/gitlab/gitlab-traces',
             label: 'Traces',
           },
         ],

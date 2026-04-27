@@ -51,6 +51,11 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/opentelemetry-dbos',
       clickName: 'DBOS Integration Link',
     },
+    {
+      name: 'Apache Druid',
+      href: '/docs/integrations/opentelemetry-apache-druid',
+      clickName: 'Apache Druid Integration Link',
+    },
   ] satisfies ComponentItem[],
   aws: [
     {
@@ -76,6 +81,7 @@ export const INTEGRATIONS_ITEMS = {
   ] satisfies ComponentItem[],
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
+    { name: 'Vercel', href: '/docs/integrations/vercel', clickName: 'Vercel Integration Link' },
   ] satisfies ComponentItem[],
 } as const
 

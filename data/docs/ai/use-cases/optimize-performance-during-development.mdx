@@ -1,0 +1,126 @@
+---
+date: 2026-04-21
+id: optimize-performance-during-development
+title: Optimize Performance During Development
+description: Profile request paths via traces while building features to find overhead before it reaches production.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+You're building a new recommendations feature for your e-commerce API. The functionality works, but when you test it in staging, the response feels slow. You could ship it and optimize later, or you could catch the performance problem now, before it reaches production.
+
+You open your AI assistant, connected to SigNoz via the MCP server, and start investigating.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your staging or development environment is instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Step 1: Get the Span Breakdown
+
+```text
+Show me the span breakdown for /api/recommendations in staging. Which spans take the most time? Is there unnecessary serialization or duplicate DB calls?
+```
+
+The assistant searches for recent traces from the `/api/recommendations` endpoint and pulls the detailed span tree.
+
+## Step 2: Analyze the Response
+
+The assistant returns a detailed breakdown:
+
+```text
+Span breakdown for /api/recommendations in staging
+
+Average end-to-end latency: ~2.08 seconds. This is the same across samples — the endpoint is consistently slow, not spiky.
+
+What the trace looks like:
+The handler (recommendations.handler) does this, sequentially, for each of 30 recommended products:
+
+1. db.fetch_recommendation_ids — one-time lookup, ~0.76 ms. Returns the list of product IDs for the user.
+2. For every product ID, in a loop (30 iterations):
+   - db.fetch_product_by_id — SELECT * FROM products WHERE id=?
+   - db.fetch_user_preference_match — SELECT preferences FROM users WHERE id=?
+   - serialization.deserialize_product_metadata
+
+Top time consumers (averages across all staging requests, last 6h):
+
+Span                                   | Avg duration | Calls per request | Total per request
+---------------------------------------|--------------|-------------------|------------------
+db.fetch_product_by_id                 | ~44 ms       | 30                | ~1,320 ms (~64%)
+db.fetch_user_preference_match         | ~18 ms       | 30                | ~550 ms (~27%)
+serialization.deserialize_product_metadata | ~6 ms    | 30                | ~185 ms (~9%)
+db.fetch_recommendation_ids            | ~0.9 ms      | 1                 | ~1 ms
+
+The DB calls alone account for roughly 90% of the total request time (~1.87s out of 2.08s), all of it serial.
+
+Yes — there are clear problems:
+
+1. Classic N+1 on products. db.fetch_product_by_id runs 30 times with SELECT * FROM products WHERE id=?.
+   The recommendation IDs are already known after the first query. Replace the loop with a single
+   SELECT * FROM products WHERE id IN (...) (or a JOIN against the recommendations query).
+   Expected savings: ~1.28s → ~50ms.
+
+2. Duplicate DB call — db.fetch_user_preference_match is called 30 times with the same user_id.
+   The SQL is SELECT preferences FROM users WHERE id=? and the user doesn't change within a single request.
+   This is fetched once per product iteration instead of once per request. Hoist it out of the loop
+   (or cache it in a request-scoped variable).
+   Expected savings: ~530ms (~25% of total latency gone immediately).
+
+3. Redundant serialization. serialization.deserialize_product_metadata fires 30 times at ~6 ms each.
+   This is almost certainly re-deserializing the same blob repeatedly, or deserializing per-row when
+   it could be done in bulk. Worth looking at whether it can be lifted out or memoized — ~185 ms to be recovered.
+
+4. SELECT * on products. Pulling every column when the response likely only needs a subset wastes
+   bandwidth and deserialization time — contributes to why fetch_product_by_id is ~44 ms per row
+   rather than a few ms.
+
+Rough optimization projection:
+Batch product fetch + hoist user preference lookup + bulk deserialize → endpoint drops from ~2.08s to
+~100-200ms, conservatively a 10x improvement.
+
+The single highest-ROI fix is hoisting fetch_user_preference_match out of the loop — that's a one-line
+change for ~25% latency reduction.
+```
+
+You now have a clear map of where the time is going and exactly what to fix. You caught the N+1 query, the duplicate user lookup, and the redundant serialization all before shipping to production.
+
+## Final Summary
+
+Starting from a slow-feeling endpoint in staging, the trace analysis revealed:
+
+1. **N+1 query on products**: 30 individual database calls instead of one batched query, accounting for 64% of total request time.
+2. **Duplicate user preference lookup**: The same query running 30 times per request when it should run once, wasting 27% of request time.
+3. **Redundant serialization**: Deserializing product metadata 30 times when it could be done in bulk, adding 9% overhead.
+4. **Inefficient column selection**: Using `SELECT *` when only a subset of columns is needed, inflating per-row processing time.
+
+The trace breakdown showed that a simple refactor — batching the product fetch, hoisting the user lookup, and optimizing serialization — could reduce latency significantly. You found all of this while building the feature, not after users complained.
+
+## Tips for Your Own Investigations
+
+- **Profile while building, not after shipping.** Traces in staging or local environments reveal inefficiencies before users feel them.
+- **Check serialization and deserialization.** Spans labeled `deserialize`, `marshal`, `unmarshal`, or `parse` that run repeatedly often point to unnecessary data processing.
+- **Compare expected vs actual span counts.** If you expect one database query but see 30, or expect one API call but see 10, investigate why the pattern doesn't match your mental model.
+- **Ask for optimization suggestions.** The AI can estimate potential savings and prioritize fixes based on the trace breakdown.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this investigation, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_search_traces` | Found recent traces for `/api/recommendations` in the staging environment |
+| 1 | `signoz_get_trace_details` | Retrieved the full span tree for a representative trace, showing the nested structure and timing of each operation |
+| 1 | `signoz_aggregate_traces` | Computed average span durations across multiple requests to confirm the pattern is consistent, not an anomaly |
+
+</details>
+
+## Related Use Cases
+
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Investigate which service or dependency is causing slowdowns when latency spikes on an endpoint.
+- [Post Deployment Monitoring](https://signoz.io/docs/ai/use-cases/post-deployment-monitoring/) - Compare metrics before and after deployment to catch regressions.
+
+<GetHelp />

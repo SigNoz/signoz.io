@@ -16,7 +16,9 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
   sectionLayoutClassName = '!mt-0 max-md:-mb-[3rem]',
   className = '',
   buttonDescription = '',
+  align = 'center',
 }) => {
+  const isLeft = align === 'left'
   const heroContent =
     typeof heroImage === 'string' ? (
       <div className="relative z-[1] w-full">
@@ -38,24 +40,53 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
     <header className={cn('relative !mx-auto max-w-8xl md:!w-[80vw]', className)}>
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
-      <div className="relative !mx-auto flex max-w-8xl flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
-        <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
+      <div
+        className={cn(
+          'relative !mx-auto flex max-w-8xl flex-col border !border-b-0 border-dashed border-signoz_slate-400 px-6 pb-4 pt-12 md:!w-[80vw] md:px-8 md:pt-[4rem]',
+          isLeft ? 'items-start text-left' : 'items-center text-center'
+        )}
+      >
+        <h1
+          className={cn(
+            'text-gradient z-[1] my-4 text-2xl font-semibold tracking-tight dark:text-white sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]',
+            isLeft ? '!px-0 !py-3' : '!p-3'
+          )}
+        >
           {title}
         </h1>
 
-        <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
+        <p
+          className={cn(
+            'm-0 text-lg font-normal leading-normal text-signoz_vanilla-400 sm:p-0 sm:leading-8',
+            isLeft ? 'px-0 py-3' : 'p-3'
+          )}
+        >
           {description}
         </p>
       </div>
 
-      <div className="relative z-[1] !mx-auto flex max-w-8xl flex-col items-center gap-4 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:!w-[80vw]">
+      <div
+        className={cn(
+          'relative z-[1] !mx-auto flex max-w-8xl flex-col gap-4 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 px-6 pb-12 pt-4 md:!w-[80vw] md:px-8',
+          isLeft ? 'items-start' : 'items-center'
+        )}
+      >
         {(buttonGroup || (buttons && buttons.length > 0)) && (
-          <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
+          <div
+            className={cn(
+              'flex flex-col gap-3 md:flex-row',
+              isLeft ? 'items-start' : 'items-center justify-center'
+            )}
+          >
             {buttonGroup ?? (buttons && <ButtonGroup buttons={buttons} />)}
           </div>
         )}
         {buttonDescription && (
-          <div className="text-center text-sm text-signoz_vanilla-400">{buttonDescription}</div>
+          <div
+            className={cn('text-sm text-signoz_vanilla-400', isLeft ? 'text-left' : 'text-center')}
+          >
+            {buttonDescription}
+          </div>
         )}
       </div>
 
