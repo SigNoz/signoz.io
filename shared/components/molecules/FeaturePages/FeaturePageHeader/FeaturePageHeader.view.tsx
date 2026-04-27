@@ -55,7 +55,12 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
           {title}
         </h1>
 
-        <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
+        <p
+          className={cn(
+            'm-0 text-lg font-normal leading-normal text-signoz_vanilla-400 sm:p-0 sm:leading-8',
+            isLeft ? 'px-0 py-3' : 'p-3'
+          )}
+        >
           {description}
         </p>
       </div>

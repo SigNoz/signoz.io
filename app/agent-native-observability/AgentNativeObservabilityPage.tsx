@@ -13,12 +13,12 @@ import { Card } from '@/components/ui/Card'
 
 const Header: React.FC = () => {
   const headerButtonGroup = (
-    <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
+    <div className="flex flex-col items-start gap-3 md:flex-row">
       <Button
         asChild
         variant="default"
         rounded="full"
-        className="flex-center flex !w-fit items-center gap-2"
+        className="flex-center flex min-w-[200px] items-center gap-2"
       >
         <TrackingLink
           href="/teams/"
@@ -35,7 +35,7 @@ const Header: React.FC = () => {
         asChild
         variant="secondary"
         rounded="full"
-        className="flex-center flex !w-fit items-center gap-2"
+        className="flex-center flex min-w-[200px] items-center gap-2"
       >
         <TrackingLink
           href="/docs/ai/signoz-mcp-server/"
@@ -72,7 +72,7 @@ const Header: React.FC = () => {
       heroImageAlt="Agent Native Observability hero"
       heroImage={'/img/platform/AgentNativeObservabilityMeta.webp'}
       buttonDescription={
-        <div className="text-center text-sm text-signoz_vanilla-400">
+        <div className="text-sm text-signoz_vanilla-400">
           No learning new Dashboard UX. In-context Observability in your workflows.
         </div>
       }
