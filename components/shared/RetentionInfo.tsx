@@ -3,7 +3,7 @@ import CustomLink from '@/components/Link'
 
 export default function RetentionInfo() {
   return (
-    <Admonition type="info" title="">
+    <Admonition type="info">
       <p>
         By default, retention period is set to <strong>7 days</strong> for logs and traces, and{' '}
         <strong>30 days</strong> for metrics. To change this, navigate to the{' '}

@@ -3,7 +3,7 @@ import CustomLink from '@/components/Link'
 
 export default function SigNozCloud() {
   return (
-    <Admonition type="tip" title="">
+    <Admonition type="tip">
       <p>
         The easiest way to run SigNoz is to use SigNoz Cloud - no installation, maintenance, or
         scaling needed.

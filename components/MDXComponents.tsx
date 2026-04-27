@@ -51,6 +51,8 @@ import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 import MarketplaceInstallationListicle from './Setup/MarketplaceInstallationListicle'
 import CollectionAgentsListicle from './Setup/CollectionAgentsListicle'
+import CloneRepo from './shared/CloneRepo'
+import CommonPrerequisites from './shared/CommonPrerequisites'
 import K8sInstall from './shared/K8sInstall'
 import K8sOtelDemo from './shared/K8sOtelDemo'
 import RetentionInfo from './shared/RetentionInfo'
@@ -133,13 +135,15 @@ export const components: MDXComponents = {
   GrafanaVsSigNoz,
   NewRelicVsSigNoz,
   DatadogAlternativesFinder,
-  KeyPointCallout: ({ children, title, type, ...rest }) => {
-    return (
-      <Admonition || 'Note'} type={type || 'info'} {...rest}>
-        {children}
-      </Admonition>
-    )
-  },
+  KeyPointCallout: ({ children, title, type, ...rest }) => (
+    <Admonition
+      {...rest}
+      title={title === '' || title == null ? 'Note' : title}
+      type={type ?? 'info'}
+    >
+      {children}
+    </Admonition>
+  ),
   GetStartedOpenTelemetryButton,
   InterlinkCard,
   InArticleVideoShowcaseModal,
@@ -184,6 +188,8 @@ export const components: MDXComponents = {
   ProductFeatureShowcase,
   MetricsQuickStartOverview,
   CICDMonitoringListicle,
+  CloneRepo,
+  CommonPrerequisites,
   AWSMonitoringListicle,
   AWSOneClickListicle,
   CardinalityExplosion,
