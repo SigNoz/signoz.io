@@ -22,7 +22,7 @@ const Header: React.FC = () => {
       >
         <TrackingLink
           href="/teams/"
-          clickType="Primary CTA"
+          clickType="Secondary CTA"
           clickName="Agent Native Page Hero Get Started - Free"
           clickLocation="Agent Native Observability Page Hero"
           clickText="Get Started - Free"
@@ -39,7 +39,7 @@ const Header: React.FC = () => {
       >
         <TrackingLink
           href="/docs/ai/signoz-mcp-server/"
-          clickType="Secondary CTA"
+          clickType="Primary CTA"
           clickName="Agent Native Page Hero Connect SigNoz MCP"
           clickLocation="Agent Native Observability Page Hero"
           clickText="Connect SigNoz MCP"
