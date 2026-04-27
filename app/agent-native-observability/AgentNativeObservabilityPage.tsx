@@ -38,7 +38,7 @@ const Header: React.FC = () => {
         className="flex-center flex !w-fit items-center gap-2"
       >
         <TrackingLink
-          href="/docs/signoz-mcp/"
+          href="/docs/ai/signoz-mcp-server/"
           clickType="Secondary CTA"
           clickName="Agent Native Page Hero Connect SigNoz MCP"
           clickLocation="Agent Native Observability Page Hero"
@@ -247,7 +247,7 @@ const BottomCTA: React.FC = () => {
             className="flex-center flex !w-fit items-center gap-2"
           >
             <TrackingLink
-              href="/docs/signoz-mcp/"
+              href="/docs/ai/signoz-mcp-server/"
               clickType="Primary CTA"
               clickName="Agent Native Page Bottom CTA Connect MCP"
               clickLocation="Agent Native Observability Page Bottom CTA"
