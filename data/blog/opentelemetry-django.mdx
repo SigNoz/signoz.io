@@ -1,10 +1,10 @@
 ---
-title: Beginner's Guide to OpenTelemetry & Django (2026)
+title: A Practical OpenTelemetry Django Auto-Instrumentation Guide
 slug: opentelemetry-django
-date: 2026-03-09
+date: 2026-04-27
 tags: [Observability, Python, OpenTelemetry, Monitoring]
 authors: [ankit_anand, dhruv_ahuja]
-description: OpenTelemetry provides an open-source standard with a consistent collection mechanism and data format. In this article, learn how to set up monitoring for a Django application using OpenTelemetry.
+description: Learn how to set up OpenTelemetry Django auto-instrumentation using opentelemetry-instrumentation-django to monitor traces, metrics, and logs.
 image: /img/blog/common/django-dashboard.webp
 keywords: [opentelemetry,opentelemetry django,opentelemetry python,distributed tracing,observability,django monitoring,django instrumentation,signoz]
 ---
@@ -13,7 +13,8 @@ Django is a popular open-source "batteries-included" Python web framework that e
 
 A Django application is composed of multiple interconnected components such as HTTP servers, WSGI/ASGI gateways, databases, caches, background workers and more. Due to the complexity of modern web applications, these components may misbehave at various stages of the application's lifespan. To observe a Django application (including monitoring its vitals for performance concerns), you need to observe all these components. And that’s where OpenTelemetry comes into the picture.
 
-We will walk you through the process of implementing OpenTelemetry for Django applications by instrumenting a sample Django application to generate telemetry data, and sending the data to an OpenTelemetry-native observability backend like SigNoz to visualize and analyze. Built to work with OpenTelemetry from day 1, SigNoz is the ideal choice for handling telemetry data of all volumes.
+In this hands-on guide, we will set up OpenTelemetry Django auto-instrumentation on a sample Django application, run it via a Gunicorn web server, and export traces, metrics, and logs to SigNoz, an OpenTelemetry-native observability backend.<br />
+Finally, we'll verify that telemetry flows end to end, visualize your application's telemetry, and understand how it works under the hood.
 
 ## What is OpenTelemetry Django?
 
@@ -38,7 +39,7 @@ You can find the detailed tutorial on [official django website](https://docs.dja
 
 ## Implementing OpenTelemetry in Django Applications
 
-Let's go through the steps of setting up and instrumenting a Django application with OpenTelemetry to emit traces and metrics. We will start with automatic instrumentation as it is easy to setup and covers most observability needs in the beginning (traces and metrics). We will then go over manual instrumentation to enable you to extract the most value from OTel integrations in applications.
+Let's go through the steps of setting up and instrumenting a Django application with OpenTelemetry to emit traces and metrics. We will start with OpenTelemetry Django auto instrumentation as it is easy to set up and covers most observability needs in the beginning (traces and metrics). We will then go over manual instrumentation to enable you to extract the most value from OTel integrations in applications.
 In this guide, we are going to send the emitted telemetry to SigNoz.
 
 ### Prerequisites for Application Instrumentation
@@ -101,7 +102,7 @@ The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter 
 
 Now, we need to install the required OTel instrumentation libraries to generate telemetry from our application.
 
-The `opentelemetry-bootstrap` command installs the corresponding instrumentation packages for libraries present in the current environment.
+The `opentelemetry-bootstrap` command installs the corresponding instrumentation packages for libraries present in the current environment. For this project, it detects Django and installs `opentelemetry-instrumentation-django`, the OpenTelemetry package that traces requests in Django applications, along with other matching instrumentation packages.
 
 ```bash
 opentelemetry-bootstrap --action=install
@@ -142,7 +143,9 @@ The sample app creates an admin account as shown in the picture below.
 
 We're almost done. In the last step, we just need to configure a few environment variables for the [OTLP exporters](https://opentelemetry.io/docs/specs/otel/protocol/exporter/).
 
-We will be running the app server using Gunicorn. As Gunicorn uses a pre-fork model, we have configured a `gunicorn.config.py` that ensures OpenTelemetry hooks are initialized for child workers as they spawn.
+### Running OpenTelemetry Django with Gunicorn
+
+We will be running the Django app server using Gunicorn. The sample includes a `gunicorn.config.py` file with a `post_fork` hook that creates a `gunicorn-config-init` span and adds an event when each worker starts. This is a validation step to confirm telemetry is flowing from individual Gunicorn workers.
 
 The run command will look like:
 
@@ -401,6 +404,12 @@ The most common causes are: the OTLP exporter endpoint/protocol isn’t reachabl
 ### Do I need manual instrumentation if I already have automatic instrumentation?
 
 Automatic instrumentation is the best “quick win” for broad trace coverage (requests, framework hooks, common libraries). Manual instrumentation becomes valuable when you need domain-level spans/attributes (e.g., “checkout”, “payment authorization”), or to capture flows not covered by automatic libraries.
+
+### Does OpenTelemetry use Django middleware?
+
+OpenTelemetry Django instrumentation is not something you usually add to Django's `MIDDLEWARE` list. The `opentelemetry-instrumentation-django` package instruments Django's request/response lifecycle and creates spans for incoming requests. If you need to capture attributes added by your Django middleware, use a response hook so the middleware stack has already run before those span attributes are attached.
+
+Check out the <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/django/django.html" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Django documentation</a> for more concrete examples and API definitions.
 
 ### How do I prevent tracing health checks or noisy endpoints in Django?
 
