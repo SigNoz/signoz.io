@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Terminal, Bot } from 'lucide-react'
+import { ArrowRight, Terminal } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
@@ -171,36 +171,6 @@ const InContextObservability: React.FC = () => {
             </div>
           </Card>
         </div>
-        {/* <Card variant="gradient">
-          <div className="m-6 flex flex-grow flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Bot className="size-6 text-signoz_robin-500" />
-              <h3 className="text-2xl font-bold text-signoz_vanilla-100">SigNoz AI Assistant</h3>
-            </div>
-            <p className="text-base text-signoz_vanilla-400">
-              Pre-built, customisable agents that run investigations, correlate signals, enrich
-              runbooks, and post incident summaries automatically. Deploy once, extend infinitely.
-              Your stack, your workflows, your heuristics.
-            </p>
-            <TrackingLink
-              href="/docs/"
-              clickType="Primary CTA"
-              clickName="Agent Native Page AI Assistant Deploy"
-              clickLocation="Agent Native Observability Page In-Context Section"
-              clickText="Deploy your first agent"
-            >
-              <Button
-                isButton
-                variant="default"
-                rounded="full"
-                className="flex-center flex !w-fit items-center gap-2"
-              >
-                Deploy your first agent
-                <ArrowRight size={14} />
-              </Button>
-            </TrackingLink>
-          </div>
-        </Card> */}
       </div>
     </SectionLayout>
   )
