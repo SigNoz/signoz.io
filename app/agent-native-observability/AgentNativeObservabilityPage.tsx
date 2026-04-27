@@ -16,7 +16,7 @@ const Header: React.FC = () => {
     <div className="flex flex-col items-start gap-3 md:flex-row">
       <Button
         asChild
-        variant="default"
+        variant="secondary"
         rounded="full"
         className="flex-center flex min-w-[200px] items-center gap-2"
       >
@@ -33,7 +33,7 @@ const Header: React.FC = () => {
       </Button>
       <Button
         asChild
-        variant="secondary"
+        variant="default"
         rounded="full"
         className="flex-center flex min-w-[200px] items-center gap-2"
       >
@@ -62,7 +62,8 @@ const Header: React.FC = () => {
         <span className="text-base">
           Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
           issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
-          logs, metrics, service topology, and your actual codebase — all in one place.{' '}
+          logs, metrics, service topology, and your actual codebase — all in one place. No separate
+          AI SRE product required.
         </span>
       }
       buttonGroup={headerButtonGroup}
