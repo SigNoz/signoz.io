@@ -10,9 +10,7 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-The GeoIP processor reads an IP address from a configured attribute, looks it up in a local MaxMind database, and writes geographic data back as `geo.*` attributes on the same record. It supports traces, logs, and metrics.
-
-For `8.8.8.8`, the processor adds `geo.city_name`, `geo.country.iso_code`, `geo.location.lat`, `geo.location.lon`, and more. Use these attributes for geographic filtering, dashboards, and alerts in SigNoz.
+The GeoIP processor reads an IP address from a configured attribute, looks it up in a local MaxMind database, and writes geographic data back as `geo.*` attributes on the same record. It supports traces, logs, and metrics. Use these attributes for geographic filtering, dashboards, and alerts in SigNoz.
 
 <Admonition type="warning">
   The GeoIP processor is **alpha** stability for all signal types. Configuration may change in future releases. Only available in `otelcol-contrib`, not the core `otelcol` binary.
@@ -55,31 +53,26 @@ processors:
     providers:
       maxmind:
         database_path: /var/lib/GeoLite2-City.mmdb
-```
-
-Replace `/var/lib/GeoLite2-City.mmdb` with the path to your `.mmdb` file.
-
-By default, the processor checks `client.address` then `source.address`, and writes attributes to the resource. To override the defaults:
-
-```yaml:otel-collector-config.yaml
-processors:
-  geoip:
-    providers:
-      maxmind:
-        database_path: /var/lib/GeoLite2-City.mmdb
-    context: record   # use "resource" only if the IP is in a resource attribute
-    attributes:
+    context: record      # optional; default is "resource"
+    attributes:          # optional; defaults to [client.address, source.address]
       - client.address
       - source.address
 ```
 
-Key fields:
+Replace `/var/lib/GeoLite2-City.mmdb` with the path to your `.mmdb` file.
+
+For a public IP address like `8.8.8.8`, the processor writes `geo.city_name`, `geo.country.iso_code`, `geo.location.lat`, `geo.location.lon`, and more onto the record.
+
+<details>
+<ToggleHeading>Key fields</ToggleHeading>
 
 | Field                             | Default                            | Description                                                                                                                                           |
 | --------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `providers.maxmind.database_path` | —                                  | **Required.** Absolute path to the GeoLite2-City or GeoIP2-City `.mmdb` file.                                                                         |
 | `context`                         | `resource`                         | Where to read and write attributes. Use `resource` for resource-level attributes; use `record` for span, log record, or metric data point attributes. |
 | `attributes`                      | `[client.address, source.address]` | Ordered list of attribute keys to check for an IP. The processor uses the **first** key that contains a valid, routable IP address.                   |
+
+</details>
 
 <Admonition type="warning">
   **Most applications need `context: record`.** The default `context: resource` reads from the OpenTelemetry resource, which holds SDK-level fields like `service.name`. Most apps set the caller IP as a span attribute or log record attribute. For that case, set `context: record`. With the default `resource` context, the processor finds no IP and adds no geo attributes.
