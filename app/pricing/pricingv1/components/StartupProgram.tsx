@@ -1,19 +1,21 @@
 import React from 'react'
+import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 import { ArrowUpRight } from 'lucide-react'
+import featureGraphicOtelWebp from '@/public/img/graphics/homepage/feature-graphic-otel.webp'
 
 const StartupProgram = () => {
   return (
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%] flex-1 md:!w-[300px]">
+      <div className="flex w-full min-w-0 flex-col sm:flex-row">
+        <div className="w-full shrink-0 sm:w-[300px] sm:max-w-[300px] md:!w-[300px]">
           <p className="sticky top-[100px] px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-8">
             SigNoz <br /> for <br /> Startups
           </p>
         </div>
-        <div className="flex-[2_2_0%]">
-          <div className="ml-0 flex flex-col justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 py-10 sm:flex-row md:pl-10">
-            <div className="flex shrink-[10] flex-col gap-16 px-8 md:px-0">
+        <div className="min-w-0 flex-[2_2_0%]">
+          <div className="ml-0 flex min-w-0 flex-col justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 py-10 sm:flex-row md:pl-10">
+            <div className="flex min-w-0 flex-1 shrink-[10] flex-col gap-16 px-8 md:px-0">
               <div>
                 <p className="mb-2 block text-base font-medium text-signoz_vanilla-100">
                   Special Pricing
@@ -51,8 +53,16 @@ const StartupProgram = () => {
                 </TrackingLink>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[320px] max-w-[50vw]">
-              <img src="/img/graphics/homepage/feature-graphic-otel.webp" alt="Startup Program" />
+            <div className="relative mx-auto aspect-[272/352] w-[320px] max-w-[50vw]">
+              <Image
+                src={featureGraphicOtelWebp}
+                alt="Startup Program — OpenTelemetry illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 50vw, 320px"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
         </div>

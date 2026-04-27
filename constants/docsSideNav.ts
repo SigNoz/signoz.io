@@ -15,6 +15,11 @@ const docsSideNav = [
         route: '/docs/what-is-signoz',
       },
       {
+        type: 'doc',
+        label: 'What Is OpenTelemetry?',
+        route: '/docs/overview/what-is-opentelemetry-and-why-it-matters',
+      },
+      {
         label: 'SigNoz Features',
         type: 'category',
         isExpanded: false,
@@ -2247,6 +2252,11 @@ const docsSideNav = [
             label: 'JVM',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+            label: 'Kafka',
+          },
+          {
             label: 'Kubernetes',
             type: 'category',
             isExpanded: false,
@@ -3019,6 +3029,41 @@ const docsSideNav = [
             route: '/docs/ai/use-cases/oncall-handoff-brief',
             label: 'On-Call Handoff Brief',
           },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-fatigue-audit',
+            label: 'Alert Fatigue Audit',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/optimize-performance-during-development',
+            label: 'Optimize Performance During Development',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+            label: 'Trace Failing Request',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+            label: 'Dashboard Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/incident-specific-dashboard',
+            label: 'Incident Specific Dashboard Spin-Up',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-creation-natural-language',
+            label: 'Alert Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/postmortem-evidence-pack',
+            label: 'Postmortem Evidence Pack',
+          },
         ],
       },
     ],
@@ -3428,8 +3473,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/vercel-to-signoz',
-        label: 'Vercel Traces',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
       {
         type: 'doc',

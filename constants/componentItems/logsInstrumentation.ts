@@ -15,7 +15,7 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
     },
     {
       name: 'Vercel',
-      href: '/docs/userguide/vercel-to-signoz',
+      href: '/docs/integrations/vercel',
       clickName: 'Vercel Logs Link',
     },
     {
