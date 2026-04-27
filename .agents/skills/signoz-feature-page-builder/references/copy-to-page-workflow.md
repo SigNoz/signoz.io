@@ -83,26 +83,148 @@ Always follow this arrangement:
 
 ## Figma Asset Integration
 
-### Fetching Assets from Figma
+### Prerequisites: Figma MCP Setup
 
-When the user provides a Figma URL:
+Before fetching assets, verify Figma MCP is available. Check for tools prefixed with `mcp__figma` (e.g., `mcp__figma__get_file`, `mcp__figma_developer__get_file`).
 
-1. **Fetch the Figma file/frame** using Figma MCP tools or `WebFetch` for Figma URLs
-2. **Identify exportable assets**: Look for frames named with export intent (e.g., `hero-image`, `step-1`, `feature-screenshot`)
-3. **Export at appropriate sizes**: Request 2x exports for retina quality
-4. **Download and place** in `public/img/<feature-name>/`
+**If no Figma MCP tools are found**, instruct the user:
+
+```
+No Figma MCP is configured. To enable Figma asset fetching, add one:
+
+Option A (Figma Developer MCP — recommended):
+  claude mcp add figma-developer -- npx -y figma-developer-mcp --figma-api-key=<YOUR_KEY>
+
+Option B (Framelink Figma MCP):
+  claude mcp add figma -- npx -y @anthropic-ai/framelink-figma-mcp --figma-api-key=<YOUR_KEY>
+
+Get your API key from: Figma > Settings > Personal Access Tokens
+```
+
+Do NOT proceed with asset fetching until the MCP is confirmed working.
+
+### Auto-Discovery: Finding Nodes Without IDs
+
+The user will provide a Figma file URL — never ask for node IDs. Discover them automatically:
+
+**Step 1: Parse the Figma URL**
+
+Extract the file key and optional node-id from the URL:
+- `https://www.figma.com/design/<fileKey>/<name>` → whole file
+- `https://www.figma.com/design/<fileKey>/<name>?node-id=<nodeId>` → specific frame/page
+
+**Step 2: Fetch the file tree**
+
+Use the Figma MCP `get_file` tool (or equivalent) with the file key. This returns the full document tree with all pages, frames, groups, and components.
+
+**Step 3: Walk the tree and identify exportable assets**
+
+Traverse the document tree and collect all nodes of type `FRAME`, `GROUP`, or `COMPONENT` that match export patterns:
+
+| Name pattern (case-insensitive) | Asset type | Export scale | Final format |
+|-------------------------------|------------|-------------|-------------|
+| `*hero*`, `*header*`, `*banner*` | Hero image | **4x PNG** | WebP |
+| `*feature*`, `*section*`, `*screenshot*` | Feature screenshot | 2x PNG | WebP |
+| `*step*`, `*carousel*`, `*slide*` | Carousel step | 2x PNG | WebP |
+| `*icon*`, `*logo*` (small frames) | Icon | 2x SVG preferred, PNG fallback | SVG or WebP |
+| `*og*`, `*meta*`, `*social*` | OG image | 2x PNG | WebP (1200x630) |
+| `*graphic*` | Graphic/illustration | 4x PNG | WebP |
+| Any other named frame at top level | General asset | 2x PNG | WebP |
+
+**Important:** Export **groups** as single flattened images, not individual children. When a Figma node is a GROUP (like "feature-graphic-hero" in the screenshot), export the entire group as one image. The MCP's `get_images` / `export` tool handles this — pass the group's node ID.
+
+**Step 4: Present discovered assets to the user**
+
+Before exporting, show a table of discovered assets:
+
+```
+Found 5 exportable assets in Figma file:
+
+| # | Node name              | Type  | Export as         | Maps to            |
+|---|------------------------|-------|-------------------|--------------------|
+| 1 | feature-graphic-hero   | GROUP | 4x PNG → WebP    | Hero image         |
+| 2 | logs-explorer-screenshot | FRAME | 2x PNG → WebP  | Feature section 1  |
+| 3 | step-1-create-pipeline | FRAME | 2x PNG → WebP    | Carousel step 1    |
+| 4 | step-2-filter-logs     | FRAME | 2x PNG → WebP    | Carousel step 2    |
+| 5 | og-card                | FRAME | 2x PNG → WebP    | OG meta image      |
+
+Proceed with export? (or specify changes)
+```
+
+Wait for user confirmation before exporting.
+
+### Exporting Assets from Figma
+
+**Step 1: Export via MCP**
+
+Use the Figma MCP image export tool. Common tool signatures:
+
+```
+# Figma Developer MCP
+get_images(fileKey, ids: [nodeId1, nodeId2], scale: 4, format: "png")
+
+# Framelink MCP
+export_node(file_key, node_id, scale: 4, format: "png")
+```
+
+**Export rules by asset type:**
+
+| Asset type | Scale | Format | Reason |
+|-----------|-------|--------|--------|
+| Hero / header / banner / graphic | **4x** | PNG | High-res hero needs maximum clarity |
+| Feature screenshots | 2x | PNG | Retina quality |
+| Carousel steps | 2x | PNG | Retina quality |
+| Icons (small) | 2x | SVG (preferred) or PNG | Vector stays sharp at any size |
+| OG/meta images | 2x | PNG | Will be resized to 1200x630 |
+
+**Step 2: Download exported images**
+
+The MCP returns image URLs. Download each one:
+
+```bash
+curl -L -o public/img/<feature-name>/<asset-name>.png "<figma-export-url>"
+```
+
+**Step 3: Convert PNG → WebP**
+
+Use macOS `sips` (always available) for conversion:
+
+```bash
+# Hero image: exported at 4x PNG, convert to WebP
+sips -s format webp public/img/<feature-name>/hero.png --out public/img/<feature-name>/hero.webp
+
+# Feature screenshots: 2x PNG → WebP
+sips -s format webp public/img/<feature-name>/feature-logs.png --out public/img/<feature-name>/feature-logs.webp
+
+# Remove original PNGs after WebP conversion
+rm public/img/<feature-name>/*.png
+```
+
+**If `sips` doesn't support WebP** (older macOS), fall back to:
+```bash
+# Install cwebp if needed
+brew install webp
+cwebp -q 90 input.png -o output.webp
+```
 
 ### Asset-to-Section Mapping
 
-| Asset type | Naming convention | Maps to |
-|-----------|-------------------|---------|
-| Hero/banner image | `hero.webp` or `<feature>-hero.webp` | `FeaturePageHeader` heroImage |
-| Feature screenshot | `feature-<name>.png` | Split section image column |
-| Step screenshot | `step-<n>-<name>.png` | CarouselCards item image |
+| Asset type | File naming | Maps to |
+|-----------|-------------|---------|
+| Hero/banner/graphic image | `<feature>-hero.webp` | `FeaturePageHeader` heroImage |
+| Feature screenshot | `feature-<name>.webp` | Split section image column |
+| Step screenshot | `step-<n>-<name>.webp` | CarouselCards item image |
 | OG/meta image | `<Feature>Meta.webp` (1200x630) | `page.tsx` metadata |
-| Icon/illustration | Individual component icons | Card icon slots (prefer lucide-react) |
+| Icon/illustration | `icon-<name>.svg` | Card icon slots (prefer lucide-react) |
 
 ### Image Sizing Rules
+
+**Hero images (exported at 4x):**
+- Wide format, typically the full product UI or a graphic illustration
+- The 4x export ensures crisp rendering on all displays including 3x retina
+- Placed below the hero text/buttons
+- Should show the feature in action
+- Final WebP keeps the full resolution — Next.js `<Image>` handles responsive sizing
 
 **Split section images (text + image layout):**
 - Image fills its grid column (~50% of 80vw container)
@@ -114,11 +236,6 @@ When the user provides a Figma URL:
 - All carousel images must be the same aspect ratio for smooth transitions
 - Landscape 16:9 preferred
 - Resolution: At least 800px wide for clarity in the carousel panel
-
-**Hero images:**
-- Wide format, typically the full product UI
-- Placed below the hero text/buttons
-- Should show the feature in action
 
 **Card icons:**
 - Prefer `lucide-react` icons over custom assets for cards

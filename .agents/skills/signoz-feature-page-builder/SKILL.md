@@ -32,7 +32,14 @@ The **trace-funnels page** (`app/trace-funnels/`) is the cleanest reference impl
 Use this when the user provides all copy in a single prompt, optionally with a Figma URL for assets. See [copy-to-page-workflow.md](references/copy-to-page-workflow.md) for the full algorithm.
 
 1. **Analyze Copy**: Classify each content block (HERO, FEATURE_SPLIT, FEATURE_CARD, FEATURE_CAROUSEL, CTA, META).
-2. **Fetch Assets**: If a Figma URL is provided, fetch the file via Figma MCP tools, identify exportable frames, and download images to `public/img/<feature-name>/`.
+2. **Fetch Assets from Figma** (if URL provided):
+   a. **Check MCP**: Verify Figma MCP tools are available (`mcp__figma*`). If not, prompt the user to add one via `claude mcp add`.
+   b. **Auto-discover nodes**: Parse the Figma URL, fetch the file tree, and walk it to find all exportable FRAME/GROUP/COMPONENT nodes. Never ask the user for node IDs.
+   c. **Show discovered assets**: Present a table of found assets with proposed export settings for user confirmation.
+   d. **Export groups as single images**: Export each GROUP node (e.g., "feature-graphic-hero") as one flattened image, not its individual children.
+   e. **Export at correct scales**: Hero/header/graphic/banner assets at **4x PNG**; all other assets at **2x PNG**.
+   f. **Convert PNG to WebP**: Use `sips -s format webp` (macOS) to convert all exported PNGs to WebP. Remove original PNGs after conversion.
+   g. **Place assets**: Save final WebP files to `public/img/<feature-name>/`.
 3. **Map Content to Components**: Apply the content analysis algorithm to decide which shared components handle each block.
 4. **Show Content Map**: Present the user a brief table showing how their copy was classified, which component each block maps to, and which image goes where.
 5. **Generate Page**: Build all 3 files with properly sized, arranged, and spaced content.

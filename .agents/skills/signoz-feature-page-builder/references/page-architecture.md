@@ -138,12 +138,16 @@ export const CAROUSEL_DATA = [
 
 ```
 public/img/<feature-name>/
-  ├── <FeatureName>Meta.webp    # OG image (1200x630)
-  ├── feature-screenshot-1.png  # Feature screenshots
-  ├── feature-screenshot-2.png
-  └── ...
+  ├── <FeatureName>Meta.webp         # OG image (1200x630)
+  ├── <feature-name>-hero.webp       # Hero image (exported 4x PNG → WebP)
+  ├── feature-<name>.webp            # Feature screenshots (2x PNG → WebP)
+  ├── step-<n>-<name>.webp           # Carousel steps (2x PNG → WebP)
+  └── icon-<name>.svg                # Icons (SVG preferred)
 ```
 
-- Use `.webp` for OG/meta images (compression)
-- Use `.png` for product screenshots (clarity)
-- Name images descriptively: `funnel-step-definition.png`, not `image1.png`
+- Use `.webp` for all raster images (hero, screenshots, OG) — better compression, universal browser support
+- Hero/header images are exported from Figma at **4x scale** as PNG, then converted to WebP for maximum retina clarity
+- Feature screenshots and carousel steps are exported at **2x scale** as PNG, then converted to WebP
+- Use `.svg` for icons and simple illustrations
+- Name images descriptively: `feature-logs-explorer.webp`, not `image1.webp`
+- Conversion command (macOS): `sips -s format webp input.png --out output.webp`
