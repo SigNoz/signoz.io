@@ -133,12 +133,10 @@ export const components: MDXComponents = {
   GrafanaVsSigNoz,
   NewRelicVsSigNoz,
   DatadogAlternativesFinder,
-  KeyPointCallout: (props) => {
-    const title = props.title || 'Note'
-    const type = props.type || 'info'
+  KeyPointCallout: ({ children, title, type, ...rest }) => {
     return (
-      <Admonition title={title} type={type} {...props}>
-        {props.children}
+      <Admonition || 'Note'} type={type || 'info'} {...rest}>
+        {children}
       </Admonition>
     )
   },
