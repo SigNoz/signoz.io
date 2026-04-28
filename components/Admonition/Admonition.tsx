@@ -229,17 +229,25 @@ export const admonitionChevronVariants = cva('shrink-0 opacity-50', {
   },
 })
 
-export const admonitionContentVariants = cva('admonition-content max-w-none leading-relaxed', {
-  variants: {
-    size: {
-      sm: 'pl-[34px] text-sm',
-      lg: 'pl-[38px] text-base',
+export const admonitionContentVariants = cva(
+  [
+    'admonition-content max-w-none leading-relaxed',
+    '[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ul:last-child]:mb-0',
+    '[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_ol:last-child]:mb-0',
+    '[&_li]:mb-1 [&_li:last-child]:mb-0',
+  ].join(' '),
+  {
+    variants: {
+      size: {
+        sm: 'pl-[34px] text-sm',
+        lg: 'pl-[38px] text-base',
+      },
     },
-  },
-  defaultVariants: {
-    size: 'lg',
-  },
-})
+    defaultVariants: {
+      size: 'lg',
+    },
+  }
+)
 
 export type AdmonitionSizeVariant = NonNullable<VariantProps<typeof admonitionRootVariants>['size']>
 
