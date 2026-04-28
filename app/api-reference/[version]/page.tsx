@@ -6,17 +6,11 @@ import {
   fetchAvailableAPIVersions,
   resolveLatestVersion,
 } from '@/utils/apiReference'
-import { API_SPEC_REVALIDATE_SECONDS } from '@/constants/apiReference'
 import siteMetadata from '@/data/siteMetadata'
 import OpenAPISpec from '@/components/OpenAPISpec'
 import APIVersionSwitcher from '@/components/APIVersionSwitcher'
 
-export const revalidate = API_SPEC_REVALIDATE_SECONDS
-export const dynamicParams = true
-
-export async function generateStaticParams() {
-  return []
-}
+export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: { version: string }
