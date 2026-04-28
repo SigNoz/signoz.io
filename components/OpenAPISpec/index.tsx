@@ -18,5 +18,5 @@ export default function OpenAPISpec({ specContent }: OpenAPISpecProps) {
 
   if (!mounted) return null
 
-  return <API apiDescriptionDocument={specContent} router="hash" layout="responsive" />
+  return <API apiDescriptionDocument={specContent} router="hash" layout="responsive" hideTryIt />
 }
