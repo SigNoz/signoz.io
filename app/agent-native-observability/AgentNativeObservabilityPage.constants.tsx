@@ -111,7 +111,7 @@ export const FEATURE_CARDS = [
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
-            href="https://www.youtube.com/@signoz"
+            href="https://youtube.com/playlist?list=PL0N8FjJpzGl-pTr0H7UrX6rdLGsiVPolw&si=SvFwmnw-pjmj5zKD"
             clickType="Secondary CTA"
             clickName="Agent Native Feature 4 Watch Video"
             clickLocation="Agent Native Observability Page"
