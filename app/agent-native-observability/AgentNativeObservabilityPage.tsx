@@ -16,13 +16,13 @@ const Header: React.FC = () => {
     <div className="flex flex-col items-start gap-3 md:flex-row">
       <Button
         asChild
-        variant="default"
+        variant="secondary"
         rounded="full"
         className="flex-center flex min-w-[200px] items-center gap-2"
       >
         <TrackingLink
           href="/teams/"
-          clickType="Primary CTA"
+          clickType="Secondary CTA"
           clickName="Agent Native Page Hero Get Started - Free"
           clickLocation="Agent Native Observability Page Hero"
           clickText="Get Started - Free"
@@ -33,13 +33,13 @@ const Header: React.FC = () => {
       </Button>
       <Button
         asChild
-        variant="secondary"
+        variant="default"
         rounded="full"
         className="flex-center flex min-w-[200px] items-center gap-2"
       >
         <TrackingLink
           href="/docs/ai/signoz-mcp-server/"
-          clickType="Secondary CTA"
+          clickType="Primary CTA"
           clickName="Agent Native Page Hero Connect SigNoz MCP"
           clickLocation="Agent Native Observability Page Hero"
           clickText="Connect SigNoz MCP"
@@ -62,9 +62,8 @@ const Header: React.FC = () => {
         <span className="text-base">
           Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
           issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
-          logs, metrics, service topology, and your actual codebase — all in one place.{' '}
-          <br className="hidden md:block" /> Or use our AI Assistant out-of-the-box. No AI SRE
-          required.
+          logs, metrics, service topology, and your actual codebase — all in one place. No separate
+          AI SRE product required.
         </span>
       }
       buttonGroup={headerButtonGroup}
