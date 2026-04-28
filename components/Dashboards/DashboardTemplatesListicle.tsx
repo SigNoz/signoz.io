@@ -42,7 +42,6 @@ import {
   Settings,
   GitBranch,
   Layers,
-  Globe,
   Zap,
   Shield,
   HardDrive,
