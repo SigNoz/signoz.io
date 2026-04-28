@@ -29,6 +29,7 @@ import {
   SiHuggingface,
   SiN8N,
   SiApachekafka,
+  SiPython,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -41,7 +42,6 @@ import {
   Settings,
   GitBranch,
   Layers,
-  Globe,
   Zap,
   Shield,
   HardDrive,
@@ -138,7 +138,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/envoy-dashboard': (
     <Network className="h-7 w-7 text-purple-500" />
   ),
-  '/docs/dashboards/dashboard-templates/flask-monitoring': <Globe className="h-7 w-7 text-black" />,
+  '/docs/dashboards/dashboard-templates/flask-monitoring': (
+    <SiPython className="h-7 w-7 text-yellow-400" />
+  ),
   '/docs/dashboards/dashboard-templates/frontend-monitoring': (
     <Network className="h-7 w-7 text-white" />
   ),
