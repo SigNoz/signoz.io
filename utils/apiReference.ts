@@ -60,6 +60,7 @@ export async function fetchOpenAPISpec(version: string): Promise<string | null> 
         'User-Agent': 'signoz-api-reference',
         ...(process.env.GITHUB_TOKEN ? { Authorization: `token ${process.env.GITHUB_TOKEN}` } : {}),
       },
+      next: { revalidate: API_SPEC_REVALIDATE_SECONDS },
     })
     if (!res.ok) {
       console.error(`[api-reference] Failed to fetch spec for ${version}: ${res.status}`)
@@ -84,7 +85,7 @@ async function fetchAllAPIVersions(): Promise<APIVersionInfo[]> {
   for (let page = 0; page < MAX_PAGES && url; page++) {
     const res = await fetch(url, {
       headers: githubFetchHeaders(),
-      cache: 'no-store',
+      next: { revalidate: API_SPEC_REVALIDATE_SECONDS },
     })
 
     if (!res.ok) {
