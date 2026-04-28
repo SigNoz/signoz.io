@@ -1,14 +1,22 @@
-import { writeFileSync, mkdirSync } from 'fs'
+import { writeFileSync, mkdirSync, readFileSync } from 'fs'
 import path from 'path'
 import siteMetadata from '../data/siteMetadata.js'
-import tagData from '../app/tag-data.json' assert { type: 'json' }
-import {
-  allBlogs,
-  allDocs,
-  allGuides,
-} from '../.contentlayer/generated/index.mjs'
-import { sortPosts } from 'pliny/utils/contentlayer.js'
-import { filterPostsByTag, generateRss } from './rssFeed.mjs';
+import tagData from '../app/tag-data.json' with { type: 'json' }
+import { filterPostsByTag, generateRss } from './rssFeed.mjs'
+
+const CONTENT_DIR = path.resolve(process.cwd(), '.content')
+const readContentJsonSync = (relativePath) => {
+  const fullPath = path.join(CONTENT_DIR, relativePath)
+  return JSON.parse(readFileSync(fullPath, 'utf-8'))
+}
+
+const allBlogs = readContentJsonSync('Blog/meta.json')
+const allDocs = readContentJsonSync('Doc/meta.json')
+const allGuides = readContentJsonSync('Guide/meta.json')
+
+// Sort posts by date (newest first)
+const sortPosts = (posts) =>
+  [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
 const FEED_FILENAME = 'feed.xml'
 
@@ -40,11 +48,7 @@ function generateRSS(config, allCollections) {
 }
 
 const rss = () => {
-  generateRSS(siteMetadata, [
-    ...allBlogs,
-    ...allGuides,
-    ...allDocs,
-  ])
+  generateRSS(siteMetadata, [...allBlogs, ...allGuides, ...allDocs])
   console.log('RSS feed generated...')
 }
 

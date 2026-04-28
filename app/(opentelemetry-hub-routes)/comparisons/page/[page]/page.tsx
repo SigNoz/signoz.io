@@ -1,7 +1,7 @@
 import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { fetchAllComparisonsForPage } from '@/utils/cachedData'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { allCoreContent, sortPosts } from '@/utils/contentlayer/contentUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { buildListingMetadata } from '../../../metadata'
 

@@ -1,4 +1,4 @@
-const { withContentlayer } = require('next-contentlayer2')
+const { withContentPipeline } = require('./lib/content-pipeline/next-plugin.js')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -64,7 +64,7 @@ const securityHeaders = [
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
 module.exports = () => {
-  const plugins = [withContentlayer, withBundleAnalyzer]
+  const plugins = [withContentPipeline, withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     productionBrowserSourceMaps: true, // Enable source maps for debugging

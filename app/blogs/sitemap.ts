@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
-import { allBlogs, allGuides } from 'contentlayer/generated'
+import { getAllBlogsMeta } from '@/utils/contentlayer/blogCollection'
+import { getAllGuidesMeta } from '@/utils/contentlayer/guideCollection'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from 'utils/cmsContent'
 import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
@@ -14,8 +15,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
-  const { faqs, caseStudies, opentelemetries, comparisons } =
-    await fetchAllCMSContent(deploymentStatus)
+  const [allBlogs, allGuides, { faqs, caseStudies, opentelemetries, comparisons }] =
+    await Promise.all([getAllBlogsMeta(), getAllGuidesMeta(), fetchAllCMSContent(deploymentStatus)])
 
   let faqRoutes: MetadataRoute.Sitemap = []
   if (faqs) {

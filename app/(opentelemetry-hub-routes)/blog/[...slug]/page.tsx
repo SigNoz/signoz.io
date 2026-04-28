@@ -2,9 +2,9 @@ import 'css/prism.css'
 
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allBlogs, allAuthors } from 'contentlayer/generated'
-import type { Authors, Blog } from 'contentlayer/generated'
+import { sortPosts, coreContent, allCoreContent } from '@/utils/contentlayer/contentUtils'
+import type { Blog } from '@/utils/contentlayer/blogCollection'
+import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import BlogLayout from '@/layouts/BlogLayout'
@@ -15,6 +15,8 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
+import { getAllAuthors } from '@/utils/contentlayer/authorCollection'
+import { getAllBlogs, getBlogBySlug } from '@/utils/contentlayer/blogCollection'
 import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const defaultLayout = 'BlogLayout'
@@ -33,17 +35,16 @@ export async function generateMetadata({
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allBlogs.find((p) => p.slug === slug)
+  const [post, allAuthorEntries] = await Promise.all([getBlogBySlug(slug), getAllAuthors()])
 
   if (!post) {
     return notFound()
   }
 
   const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
+  const authorDetails = authorList
+    .map((author) => allAuthorEntries.find((p) => p.slug === author))
+    .filter((author): author is Authors => author !== undefined)
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
@@ -84,7 +85,8 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allBlogs.map((p) => ({ slug: p.slug?.split('/') }))
+  const blogs = (await getAllBlogs()) as Blog[]
+  const paths = blogs.map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
 }
@@ -95,19 +97,20 @@ export default async function Page(props: { params: { slug: string[] } }) {
     .suppressStructuredData
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/blog/${slug}`
+  const [blogs, authors] = await Promise.all([getAllBlogs(), getAllAuthors()])
+
   // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allBlogs))
+  const sortedCoreContents = allCoreContent(sortPosts(blogs as Blog[]))
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
   if (postIndex === -1) {
     return notFound()
   }
 
-  const post = allBlogs.find((p) => p.slug === slug) as Blog
+  const post = (await getBlogBySlug(slug)) as Blog
   const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
+  const authorDetails = authorList
+    .map((author) => authors.find((p) => p.slug === author))
+    .filter((author): author is Authors => author !== undefined)
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 

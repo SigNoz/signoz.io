@@ -1,6 +1,8 @@
-import { sortPosts } from 'pliny/utils/contentlayer.js'
-import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
-import { MDXContentApiResponse } from '../../utils/strapi'
+import { sortPosts } from '@/utils/contentlayer/contentUtils'
+import { getAllBlogs } from '@/utils/contentlayer/blogCollection'
+import { getAllDocs } from '@/utils/contentlayer/docsCollection'
+import { getAllGuides } from '@/utils/contentlayer/guideCollection'
+import { MDXContentApiResponse } from '@/utils/strapi'
 import { normaliseSlug } from '../../scripts/rssFeed.mjs'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 
@@ -59,7 +61,12 @@ const mapOpentelemetryEntries = (opentelemetries: MDXContentApiResponse | undefi
 
 export const loadPublishedPosts = async () => {
   const deploymentStatus = getDeploymentStatus()
-  const { faqs, opentelemetries, comparisons } = await fetchAllCMSContent(deploymentStatus)
+  const [{ faqs, opentelemetries, comparisons }, allBlogs, allDocs, allGuides] = await Promise.all([
+    fetchAllCMSContent(deploymentStatus),
+    getAllBlogs(),
+    getAllDocs(),
+    getAllGuides(),
+  ])
 
   const faqPosts = mapFaqEntries(faqs)
   const opentelemetryPosts = mapOpentelemetryEntries(opentelemetries)

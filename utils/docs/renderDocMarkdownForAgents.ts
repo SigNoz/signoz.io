@@ -1,4 +1,4 @@
-import type { Doc } from 'contentlayer/generated'
+import type { Doc } from '@/utils/contentlayer/docsCollection'
 import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
 import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
@@ -182,7 +182,7 @@ const setMarkdownCache = (key: string, value: string): void => {
 }
 
 export async function renderDocMarkdownForAgents(doc: Doc): Promise<string> {
-  const cacheKey = doc.slug || doc._id
+  const cacheKey = doc.slug || doc.id
   const cached = markdownCache.get(cacheKey)
 
   if (cached) {

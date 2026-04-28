@@ -1,8 +1,9 @@
 import { slug } from 'github-slugger'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import type { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { Blog } from '@/utils/contentlayer/blogCollection'
 import siteMetadata from '@/data/siteMetadata'
 import ListLayout from '@/layouts/ListLayoutWithTags'
-import { allBlogs } from 'contentlayer/generated'
+import { getAllBlogsMeta, type BlogMeta } from '@/utils/contentlayer/blogCollection'
 import tagData from 'app/tag-data.json'
 import { genPageMetadata } from 'app/seo'
 import { Metadata } from 'next'
@@ -10,6 +11,26 @@ import { notFound } from 'next/navigation'
 
 export const dynamicParams = false
 export const dynamic = 'force-static'
+
+/**
+ * Sort posts by date in descending order (newest first).
+ * Local implementation that doesn't require _raw field like pliny's sortPosts.
+ */
+function sortPostsByDate<T extends { date: string }>(posts: T[]): T[] {
+  return [...posts].sort((a, b) => {
+    if (a.date > b.date) return -1
+    if (a.date < b.date) return 1
+    return 0
+  })
+}
+
+/**
+ * Filter out drafts and return core content fields.
+ * Local implementation that doesn't require _raw field like pliny's allCoreContent.
+ */
+function filterAndMapPosts(posts: BlogMeta[]): CoreContent<Blog>[] {
+  return posts.filter((post) => !post.draft).map((post) => post as unknown as CoreContent<Blog>)
+}
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURI(params.tag)
@@ -37,10 +58,13 @@ export const generateStaticParams = async () => {
   return paths
 }
 
-export default function TagPage({ params }: { params: { tag: string } }) {
+export default async function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURI(params.tag)
-  const filteredPosts = allCoreContent(
-    sortPosts(allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag)))
+  const allBlogs = await getAllBlogsMeta()
+  const filteredPosts = filterAndMapPosts(
+    sortPostsByDate(
+      allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag))
+    )
   )
 
   // Return 404 for empty tag pages

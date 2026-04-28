@@ -1,13 +1,12 @@
 import 'css/prism.css'
 
-import { coreContent } from 'pliny/utils/contentlayer'
-import { allDocs } from 'contentlayer/generated'
-import type { Doc } from 'contentlayer/generated'
+import { coreContent } from '@/utils/contentlayer/contentUtils'
+import { getAllDocsMeta, getDocBySlug } from '@/utils/contentlayer/docsCollection'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
-import Chatbase from '@/components/Chatbase'
+import Chatbase from '@/components/Chatbase/ChatbaseClient'
 import { safeJsonLdStringify } from '@/utils/structuredData'
 
 export const dynamicParams = false
@@ -19,7 +18,7 @@ export async function generateMetadata({
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allDocs.find((p) => p.slug === slug)
+  const post = await getDocBySlug(slug)
 
   if (!post) {
     notFound()
@@ -44,16 +43,17 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
+  const allDocs = await getAllDocsMeta()
   const paths = allDocs
-    .filter((p) => p.slug !== 'introduction')
-    .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
+    .filter((p) => p.slug && p.slug !== '' && p.slug !== '/') // Filter out introduction page (empty/root slug)
+    .map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
 }
 
-export default function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allDocs.find((p) => p.slug === slug) as Doc
+  const post = await getDocBySlug(slug)
 
   if (!post) {
     notFound()

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Guide, Authors } from 'contentlayer/generated'
+import { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { Guide } from '@/utils/contentlayer/guideCollection'
+import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 

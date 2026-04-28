@@ -1,7 +1,19 @@
-import { allBlogs, allGuides } from 'contentlayer/generated'
-import { sortPosts } from 'pliny/utils/contentlayer'
+import { getAllBlogsMeta } from '@/utils/contentlayer/blogCollection'
+import { getAllGuidesMeta } from '@/utils/contentlayer/guideCollection'
 import type { MDXContent } from '@/utils/strapi'
 import hubConfig from '@/constants/opentelemetry_hub.json'
+
+/**
+ * Sort posts by date in descending order (newest first).
+ * This is a local implementation that doesn't require _raw field like pliny's sortPosts.
+ */
+function sortPostsByDate<T extends { date: string }>(posts: T[]): T[] {
+  return [...posts].sort((a, b) => {
+    if (a.date > b.date) return -1
+    if (a.date < b.date) return 1
+    return 0
+  })
+}
 
 type ResourceCenterCardSource = {
   slug?: string | null
@@ -87,12 +99,14 @@ export function pickOpenTelemetryArticleFields(
   })
 }
 
-export function getResourceCenterBlogs(): ResourceCenterBlog[] {
-  return sortPosts(allBlogs).map(pickResourceCenterCardFields)
+export async function getResourceCenterBlogs(): Promise<ResourceCenterBlog[]> {
+  const allBlogs = await getAllBlogsMeta()
+  return sortPostsByDate(allBlogs).map(pickResourceCenterCardFields)
 }
 
-export function getResourceCenterGuides(): ResourceCenterGuide[] {
-  return sortPosts(allGuides).map(pickResourceCenterCardFields)
+export async function getResourceCenterGuides(): Promise<ResourceCenterGuide[]> {
+  const allGuides = await getAllGuidesMeta()
+  return sortPostsByDate(allGuides).map(pickResourceCenterCardFields)
 }
 
 type HubConfigNode = {
@@ -128,7 +142,7 @@ function normalizeUrlToPath(url: string): string {
  * Returns contentlayer-based articles (blogs + guides) that are referenced
  * in the OpenTelemetry hub config (learn chapters excl. comparisons + quick-start).
  */
-export function getOpenTelemetryHubContentLayerArticles(): ResourceCenterCard[] {
+export async function getOpenTelemetryHubContentLayerArticles(): Promise<ResourceCenterCard[]> {
   const paths = (hubConfig as any).paths || []
   const learnPath = paths.find((p: any) => p.key === 'learn')
   const quickStartPath = paths.find((p: any) => p.key === 'quick-start')
@@ -149,6 +163,7 @@ export function getOpenTelemetryHubContentLayerArticles(): ResourceCenterCard[] 
   }
 
   // Match against contentlayer blogs + guides
+  const [allBlogs, allGuides] = await Promise.all([getAllBlogsMeta(), getAllGuidesMeta()])
   const allDocs = [...allBlogs, ...allGuides]
   const matched = new Map<string, ResourceCenterCard>()
 

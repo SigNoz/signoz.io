@@ -9,8 +9,9 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import Button from '@/components/ui/Button'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import { Blog, Authors } from 'contentlayer/generated'
+import { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { Blog } from '@/utils/contentlayer/blogCollection'
+import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
@@ -147,7 +148,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const structuredData = generateStructuredData('faqs', content)
 
   // Prepare content for FAQLayout
-  const mainContent: CoreContent<Blog> = {
+  // FAQs are fetched from CMS and shaped differently than MDX Blog posts
+  const mainContent = {
     title: content.title,
     date: content.date,
     lastmod: content.updatedAt,
@@ -158,7 +160,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     authors: content.authors?.map((author) => author?.name) || [],
     slug: path,
     path: content.path || `/faqs/${path}`,
-    type: 'Blog',
     readingTime: readingTimeData,
     filePath: `/faqs/${path}`,
     structuredData: structuredData,
@@ -222,7 +223,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       </div>
 
       <FAQLayout
-        content={mainContent}
+        content={mainContent as any}
         authorDetails={authorDetails}
         authors={content.authors?.map((author) => author?.name) || []}
         toc={toc}

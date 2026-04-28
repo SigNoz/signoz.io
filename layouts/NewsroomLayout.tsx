@@ -1,6 +1,8 @@
 import { ReactNode } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Newsroom } from 'contentlayer/generated'
+import { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { Blog } from '@/utils/contentlayer/blogCollection'
+// Newsroom is essentially the same as Blog
+type Newsroom = Blog
 import Link from '@/components/Link'
 import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'

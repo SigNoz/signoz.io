@@ -1,12 +1,13 @@
 import { MetadataRoute } from 'next'
-import { allDocs } from 'contentlayer/generated'
+import { getAllDocsMeta } from '@/utils/contentlayer/docsCollection'
 import siteMetadata from '@/data/siteMetadata'
 import { toSitemapDateOnly } from 'utils/sitemapXml'
 
 export const dynamic = 'force-static'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
+  const allDocs = await getAllDocsMeta()
 
   const introductionRoute: MetadataRoute.Sitemap[number] = {
     url: `${siteUrl}/docs/introduction/`,
