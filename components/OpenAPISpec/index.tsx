@@ -16,7 +16,12 @@ export default function OpenAPISpec({ specContent }: OpenAPISpecProps) {
     setMounted(true)
   }, [])
 
-  if (!mounted) return null
+  if (!mounted)
+    return (
+      <div className="hidden h-screen w-screen">
+        <API apiDescriptionDocument={specContent} router="static" layout="stacked" hideTryIt />
+      </div>
+    )
 
   return <API apiDescriptionDocument={specContent} router="hash" layout="responsive" hideTryIt />
 }
