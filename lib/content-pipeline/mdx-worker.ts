@@ -4,6 +4,8 @@ import matter from 'gray-matter'
 import { bundleMDX } from 'mdx-bundler'
 import readingTimeLib from 'reading-time'
 import GithubSlugger from 'github-slugger'
+import React from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -19,6 +21,9 @@ import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 
 import { collections } from './schema'
 import { coerceFields, type CollectionHelpers, type TocItem, type DocumentBase } from './define'
+import { buildAgentMdxComponentsForDoc } from '../../utils/docs/agentMarkdownStubs'
+import { htmlToMarkdown, normalizeWhitespace } from '../../utils/docs/markdownCore'
+import { buildMarkdownDocument, MORE_DOCS_POINTER } from '../../utils/docs/buildMarkdownDocument'
 
 const icon = fromHtmlIsomorphic(
   `<span class="content-header-link">
@@ -86,6 +91,89 @@ function createHelpers(): CollectionHelpers {
 }
 
 const helpers = createHelpers()
+
+// Agent markdown rendering for Doc collection
+interface DocForAgent {
+  slug?: string
+  title: string
+  description?: string
+  docTags?: string[]
+  toc?: TocItem[]
+  body: { raw: string; code: string }
+}
+
+const getDocTags = (doc: DocForAgent): string[] => {
+  if (!Array.isArray(doc.docTags)) return []
+  return doc.docTags.filter(
+    (tag): tag is string => typeof tag === 'string' && tag.trim().length > 0
+  )
+}
+
+const normalizeHeadingText = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+const getLeadingH1Text = (markdown: string): string | null => {
+  const lines = markdown.split(/\r?\n/)
+  for (const rawLine of lines) {
+    const line = rawLine.trim()
+    if (!line) continue
+    const headingMatch = line.match(/^#\s+(.+?)\s*#*\s*$/)
+    return headingMatch ? headingMatch[1].trim() : null
+  }
+  return null
+}
+
+const hasMatchingLeadingH1 = (markdown: string, title: string): boolean => {
+  const leadingH1 = getLeadingH1Text(markdown)
+  if (!leadingH1) return false
+  return normalizeHeadingText(leadingH1) === normalizeHeadingText(title)
+}
+
+const getMdxComponentFromCode = (code: string) => {
+  const jsxRuntime = require('react/jsx-runtime')
+  const scope = {
+    React,
+    ReactDOM: require('react-dom'),
+    _jsx_runtime: jsxRuntime,
+  }
+  const fn = new Function(...Object.keys(scope), code)
+  const moduleExports = fn(...Object.values(scope)) as { default?: unknown }
+  if (!moduleExports?.default) {
+    throw new Error('Compiled MDX module did not return a default component')
+  }
+  return moduleExports.default as unknown
+}
+
+async function renderAgentMarkdown(doc: DocForAgent): Promise<string> {
+  const mdxComponents = buildAgentMdxComponentsForDoc(doc as any)
+  const MdxComponent = getMdxComponentFromCode(doc.body.code)
+  const element = React.createElement(MdxComponent as any, {
+    components: mdxComponents,
+    toc: doc.toc || [],
+  })
+  const html = renderToStaticMarkup(element as any)
+  const bodyMarkdown = await htmlToMarkdown(html, { cleanForDocsUi: true })
+
+  if (!bodyMarkdown) {
+    throw new Error('Empty markdown generated from MDX source')
+  }
+
+  const includeTitle = !hasMatchingLeadingH1(bodyMarkdown, doc.title)
+  return normalizeWhitespace(
+    buildMarkdownDocument({
+      title: doc.title,
+      includeTitle,
+      description: doc.description,
+      tags: getDocTags(doc),
+      bodyMarkdown,
+      footerLines: [MORE_DOCS_POINTER],
+    })
+  )
+}
 
 export interface CompileTask {
   filePath: string
@@ -168,10 +256,27 @@ export default async function compileFile(task: CompileTask): Promise<CompileRes
   const { body, ...meta } = doc as any
 
   await fs.mkdir(path.dirname(metaPath), { recursive: true })
-  await Promise.all([
+
+  const writePromises: Promise<void>[] = [
     fs.writeFile(metaPath, JSON.stringify(meta)),
     fs.writeFile(bodyPath, JSON.stringify(body)),
-  ])
+  ]
+
+  // Generate agent markdown for Doc collection only
+  if (collectionName === 'Doc') {
+    const agentPath = path.join(outputDir, `${slugPath}.agent.txt`)
+    writePromises.push(
+      renderAgentMarkdown(doc as DocForAgent)
+        .then((agentMarkdown) => fs.writeFile(agentPath, agentMarkdown))
+        .catch((err) => {
+          console.error(`Failed to render agent markdown for ${slugPath}:`, err.message)
+          // Write empty file on failure to avoid missing file errors
+          return fs.writeFile(agentPath, '')
+        })
+    )
+  }
+
+  await Promise.all(writePromises)
 
   // Return only what main thread needs for tracking
   return { slugPath, meta }

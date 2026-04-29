@@ -182,7 +182,9 @@ export class ContentCache {
             await fs.rmdir(fullPath)
           } catch {}
         } else if (
-          (entry.name.endsWith('.meta.json') || entry.name.endsWith('.body.json')) &&
+          (entry.name.endsWith('.meta.json') ||
+            entry.name.endsWith('.body.json') ||
+            entry.name.endsWith('.agent.txt')) &&
           entry.name !== '.manifest.json'
         ) {
           await fs.unlink(fullPath).catch(() => {})
@@ -212,13 +214,15 @@ export class ContentCache {
             await fs.rmdir(fullPath)
           } catch {}
         } else if (
-          (entry.name.endsWith('.meta.json') || entry.name.endsWith('.body.json')) &&
+          (entry.name.endsWith('.meta.json') ||
+            entry.name.endsWith('.body.json') ||
+            entry.name.endsWith('.agent.txt')) &&
           entry.name !== '.manifest.json' &&
           entry.name !== 'meta.json'
         ) {
-          // Get slug from path relative to cacheDir (strip .meta.json or .body.json)
+          // Get slug from path relative to cacheDir (strip .meta.json, .body.json, or .agent.txt)
           const relativePath = path.relative(this.cacheDir, fullPath)
-          const slug = relativePath.replace(/\.(meta|body)\.json$/, '')
+          const slug = relativePath.replace(/\.(meta|body)\.json$/, '').replace(/\.agent\.txt$/, '')
           if (!this.currentSlugs.has(slug)) {
             await fs.unlink(fullPath).catch(() => {})
             removed++

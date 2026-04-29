@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { getAllDocs, getDocBySlug } from '@/utils/contentlayer/docsCollection'
-import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
+import * as fs from 'fs/promises'
+import { getAllDocsMeta } from '@/utils/contentlayer/docsCollection'
+import { getContentPath } from '@/utils/contentlayer/contentLoader'
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 
 export const runtime = 'nodejs'
@@ -8,12 +9,21 @@ export const dynamic = 'force-static'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
+async function readAgentMarkdown(slug: string): Promise<string | null> {
+  try {
+    const agentPath = getContentPath(`Doc/${slug}.agent.txt`)
+    return await fs.readFile(agentPath, 'utf-8')
+  } catch {
+    return null
+  }
+}
+
 export async function generateStaticParams() {
-  const docs = await getAllDocs()
+  const docsMeta = await getAllDocsMeta()
 
   return [
     { slug: [] },
-    ...docs
+    ...docsMeta
       .filter((doc) => typeof doc.slug === 'string')
       .filter((doc) => doc.slug !== 'introduction')
       .map((doc) => ({ slug: doc.slug.split('/') })),
@@ -31,13 +41,11 @@ const notFoundResponse = () =>
 
 export async function GET(_: Request, { params }: { params: { slug?: string[] } }) {
   const slug = resolveDocsMarkdownSlug(params.slug)
-  const doc = await getDocBySlug(slug)
+  const markdown = await readAgentMarkdown(slug)
 
-  if (!doc) {
+  if (!markdown) {
     return notFoundResponse()
   }
-
-  const markdown = await renderDocMarkdownForAgents(doc)
 
   return new NextResponse(markdown, {
     headers: {
