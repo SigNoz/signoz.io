@@ -59,6 +59,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'Figure',
   'HostingDecision',
   'HostMetricsDashboardsListicle',
+  'Image',
   'IntegrationsListicle',
   'JavaInstrumentationListicle',
   'JavascriptInstrumentationListicle',
@@ -276,6 +277,17 @@ const createKnownComponentStubs = (): Record<
       caption ? React.createElement('figcaption', null, caption) : null
     )
   },
+  Image: (props) => {
+    const src = getStringProp(props, 'src')
+    const alt = getStringProp(props, 'alt') || ''
+
+    if (!src) {
+      const UnknownImage = createUnknownComponentStub('Image')
+      return React.createElement(UnknownImage, props)
+    }
+
+    return React.createElement('img', { src, alt })
+  },
   DocCard: (props) => {
     const href = getStringProp(props, 'href')
     const title = getStringProp(props, 'title') || getStringProp(props, 'name')
@@ -466,10 +478,18 @@ export const buildAgentMdxComponentsForDoc = (doc: {
     )
   }
 
-  return componentNames.reduce<DocsComponentMap>((accumulator, componentName) => {
+  const components = componentNames.reduce<DocsComponentMap>((accumulator, componentName) => {
     accumulator[componentName] = Object.prototype.hasOwnProperty.call(knownStubs, componentName)
       ? knownStubs[componentName as KnownAgentMdxComponentName]
       : createUnknownComponentStub(componentName)
     return accumulator
   }, {})
+
+  // Always include Image - it's injected by remarkImgToJsx at compile time,
+  // so it won't be detected in the raw MDX by extractMdxComponentNames
+  if (!components.Image) {
+    components.Image = knownStubs.Image
+  }
+
+  return components
 }
