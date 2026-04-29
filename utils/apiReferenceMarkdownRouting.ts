@@ -18,7 +18,6 @@ export function shouldRewriteApiReferenceToOpenAPISpec(
 }
 
 export function buildApiReferenceOpenAPISpecRewritePath(pathname: string): string {
-  console.log('pathname', pathname)
   const normalized = pathname.replace(/\/+$/, '') || '/'
   const version = normalized.slice('/api-reference/'.length)
   return `/api/api-reference-openapi/${encodeURIComponent(version)}`
