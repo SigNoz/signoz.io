@@ -4,7 +4,7 @@ import GrowthBookClientProvider from '@/components/GrowthBookClientProvider'
 
 export async function GrowthBookProvider({ children }: { children: React.ReactNode }) {
   // Read the anonymous ID from the cookie (populated by middleware)
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const anonymousId: string = cookieStore.get('gb_anonymous_id')?.value || 'unknown'
 
   // Prepare the data to pass to the client component

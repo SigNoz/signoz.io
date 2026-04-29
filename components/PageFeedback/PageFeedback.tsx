@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useId, useState } from 'react'
+import React, { Suspense, useId, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '../../constants/queryParams'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
@@ -154,7 +154,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   </form>
 )
 
-const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) => {
+const PageFeedbackInner: React.FC<PageFeedbackProps> = ({ placement = 'default' }) => {
   const [helpful, setHelpful] = useState<boolean | null>(null)
   const [needsImprovement, setNeedsImprovement] = useState<string>('')
   const [positiveFeedback, setPositiveFeedback] = useState<string>('')
@@ -446,6 +446,14 @@ const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) =>
         )}
       </section>
     </div>
+  )
+}
+
+const PageFeedback: React.FC<PageFeedbackProps> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <PageFeedbackInner {...props} />
+    </Suspense>
   )
 }
 

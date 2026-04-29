@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useRef } from 'react'
+import { ReactNode, Suspense, useRef } from 'react'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
@@ -22,7 +22,7 @@ interface LayoutProps {
   children: ReactNode
 }
 
-export default function DocLayout({ children }: LayoutProps) {
+function DocLayoutInner({ children }: LayoutProps) {
   const mainRef = useRef<HTMLElement | null>(null)
 
   const searchParams = useSearchParams()
@@ -72,5 +72,13 @@ export default function DocLayout({ children }: LayoutProps) {
         </SectionContainer>
       </main>
     </RegionProvider>
+  )
+}
+
+export default function DocLayout({ children }: LayoutProps) {
+  return (
+    <Suspense fallback={null}>
+      <DocLayoutInner>{children}</DocLayoutInner>
+    </Suspense>
   )
 }

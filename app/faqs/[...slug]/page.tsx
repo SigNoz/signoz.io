@@ -15,17 +15,15 @@ import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamicParams = true
 export const dynamic = 'force-static'
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata> {
+  const params = await props.params
   try {
-    // Convert slug array to path
     const path = params.slug.join('/')
 
     const isProduction = process.env.VERCEL_ENV === 'production'
@@ -90,7 +88,8 @@ export async function generateStaticParams() {
   return []
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   if (!params.slug || params.slug.length === 0) {
     return <div className="min-h-screen">Redirecting to FAQs index...</div>
   }

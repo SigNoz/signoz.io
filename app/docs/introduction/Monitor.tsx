@@ -11,13 +11,13 @@ import {
 } from 'lucide-react'
 import {
   SiKubernetes,
-  SiAmazonwebservices,
   SiGooglecloud,
   SiReact,
   SiAndroid,
   SiApachekafka,
   SiDocker,
 } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import LinksCardGrid, { LinksCardProps } from '@/components/Card/LinksCardGrid'
 
 export default function Monitor() {
@@ -60,7 +60,7 @@ export default function Monitor() {
         {
           name: 'AWS',
           href: '/docs/aws-monitoring/overview/',
-          icon: <SiAmazonwebservices className="h-5 w-5 text-orange-500" />,
+          icon: <FaAws className="h-5 w-5 text-orange-500" />,
           clickName: 'AWS Monitoring Link',
         },
         {

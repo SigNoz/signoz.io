@@ -25,8 +25,9 @@ const notFoundResponse = () =>
     },
   })
 
-export async function GET(_: Request, { params }: { params: { slug?: string[] } }) {
-  const slug = resolveDocsMarkdownSlug(params.slug)
+export async function GET(_: Request, { params }: { params: Promise<{ slug?: string[] }> }) {
+  const { slug: slugParam } = await params
+  const slug = resolveDocsMarkdownSlug(slugParam)
   const markdown = await readAgentMarkdown(slug)
 
   if (!markdown) {

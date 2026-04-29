@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Styles from './styles.module.css'
 import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
@@ -17,7 +17,7 @@ interface Props {
   showFilters?: boolean
 }
 
-const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
+const ChangelogHeaderInner: React.FC<Props> = ({ showFilters = true }) => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
   const router = useRouter()
   const emailRegex = new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
@@ -34,7 +34,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
     const deploymentType = searchParams.get('deploymentType')
     const decodedDeploymentType = deploymentType ? decodeURIComponent(deploymentType) : undefined
 
-    let deploymentTypeFromParams = Object.values(DeploymentType).includes(
+    const deploymentTypeFromParams = Object.values(DeploymentType).includes(
       decodedDeploymentType as DeploymentType
     )
       ? (decodedDeploymentType as DeploymentType)
@@ -177,6 +177,14 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
         </div>
       </Modal>
     </div>
+  )
+}
+
+const ChangelogHeader: React.FC<Props> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <ChangelogHeaderInner {...props} />
+    </Suspense>
   )
 }
 

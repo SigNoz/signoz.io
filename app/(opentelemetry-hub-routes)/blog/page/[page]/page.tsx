@@ -4,7 +4,8 @@ import { buildListingMetadata, buildStaticPaginationParams } from '../../../meta
 import { getResourceCenterBlogs } from '../../../content'
 import { getAllBlogsMeta } from '@/utils/contentlayer/blogCollection'
 
-export async function generateMetadata({ params }: { params: { page: string } }) {
+export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   return buildListingMetadata('Blog', params.page)
 }
 
@@ -13,7 +14,8 @@ export const generateStaticParams = async () => {
   return buildStaticPaginationParams(blogs.length)
 }
 
-export default async function Page({ params }: { params: { page: string } }) {
+export default async function Page(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   const blogPosts = await getResourceCenterBlogs()
   return (
     <ListingPageLayout>

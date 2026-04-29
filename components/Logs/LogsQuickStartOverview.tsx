@@ -1,15 +1,7 @@
 import React from 'react'
-import {
-  SiKubernetes,
-  SiDocker,
-  SiPython,
-  SiNodedotjs,
-  SiFluentbit,
-  SiAmazonwebservices,
-  SiGo,
-} from 'react-icons/si'
+import { SiKubernetes, SiDocker, SiPython, SiNodedotjs, SiFluentbit, SiGo } from 'react-icons/si'
 import { TbHttpGet } from 'react-icons/tb'
-import { FaFileAlt, FaJava } from 'react-icons/fa'
+import { FaFileAlt, FaJava, FaAws } from 'react-icons/fa'
 import { LuLogIn } from 'react-icons/lu'
 import IconCardGrid from '../Card/IconCardGrid'
 import { LOGS_QUICK_START_ITEMS } from '@/constants/componentItems'
@@ -30,9 +22,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     </span>
   ),
   '/docs/userguide/send-logs-http': <TbHttpGet className="h-7 w-7 text-green-600" />,
-  '/docs/userguide/send-cloudwatch-logs-to-signoz': (
-    <SiAmazonwebservices className="h-7 w-7 text-orange-400" />
-  ),
+  '/docs/userguide/send-cloudwatch-logs-to-signoz': <FaAws className="h-7 w-7 text-orange-400" />,
 }
 
 const logsData = LOGS_QUICK_START_ITEMS.map((item) => ({

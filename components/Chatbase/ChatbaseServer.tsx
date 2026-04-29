@@ -31,7 +31,7 @@ export default async function ChatbaseServer({
   }
 
   // Get anonymous ID from cookies (set by the client)
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const anonymousIdCookie = cookieStore.get('app_anonymous_id')
   const anonymousId = anonymousIdCookie?.value
 

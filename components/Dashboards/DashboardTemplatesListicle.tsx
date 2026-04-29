@@ -19,7 +19,6 @@ import {
   SiClaude,
   SiGooglegemini,
   SiAnthropic,
-  SiAmazonwebservices,
   SiPydantic,
   SiGo,
   SiTemporal,
@@ -31,6 +30,7 @@ import {
   SiApachekafka,
   SiPython,
 } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import {
   Monitor,
   Database,
@@ -63,7 +63,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
   ),
   '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard': (
-    <SiAmazonwebservices className="h-7 w-7 text-white" />
+    <FaAws className="h-7 w-7 text-white" />
   ),
   '/docs/dashboards/dashboard-templates/anthropic-dashboard': (
     <SiAnthropic className="h-7 w-7 text-orange-600" />

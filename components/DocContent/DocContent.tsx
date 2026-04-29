@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useMemo, useRef } from 'react'
+import React, { Suspense, useCallback, useMemo, useRef } from 'react'
 import { Edit } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { components } from '@/components/MDXComponents'
@@ -17,7 +17,7 @@ import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
 import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFromRendered'
 
-const DocContent: React.FC<{
+const DocContentInner: React.FC<{
   title: string
   post: any
   toc: any
@@ -117,6 +117,20 @@ const DocContent: React.FC<{
         </>
       ) : null}
     </>
+  )
+}
+
+const DocContent: React.FC<{
+  title: string
+  post: any
+  toc: any
+  hideTableOfContents: boolean
+  editLink?: string
+}> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <DocContentInner {...props} />
+    </Suspense>
   )
 }
 

@@ -5,14 +5,16 @@ import { allCoreContent, sortPosts } from '@/utils/contentlayer/contentUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { buildListingMetadata } from '../../../metadata'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamic = 'force-static'
 
-export async function generateMetadata({ params }: { params: { page: string } }) {
+export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   return buildListingMetadata('Comparisons', params.page)
 }
 
-export default async function Page({ params }: { params: { page: string } }) {
+export default async function Page(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   const comparisons = await fetchAllComparisonsForPage()
   const posts = allCoreContent(sortPosts(comparisons))
 

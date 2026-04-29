@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import { getPageType } from '../../utils/getPageType'
@@ -18,7 +18,7 @@ const FLAGGED_USER_AGENTS = new Set(
     .filter(Boolean)
 )
 
-export default function PageViewTracker() {
+function PageViewTrackerInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const logEvent = useLogEvent()
@@ -86,4 +86,12 @@ export default function PageViewTracker() {
   }, [pathname, searchParams, logEvent]) // Rerun effect when path or search params change
 
   return null // This component doesn't render anything visible
+}
+
+export default function PageViewTracker() {
+  return (
+    <Suspense fallback={null}>
+      <PageViewTrackerInner />
+    </Suspense>
+  )
 }

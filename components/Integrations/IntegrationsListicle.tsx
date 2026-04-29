@@ -9,12 +9,12 @@ import {
   SiClickhouse,
   SiGo,
   SiTypescript,
-  SiAmazonwebservices,
   SiMysql,
   SiHasura,
   SiApachedruid,
   SiVercel,
 } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
 import { INTEGRATIONS_ITEMS } from '@/constants/componentItems'
@@ -77,7 +77,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
       />
     ),
     '/docs/integrations/aws/one-click-aws-integrations': (
-      <SiAmazonwebservices className="h-7 w-7 text-[#FF9900]" />
+      <FaAws className="h-7 w-7 text-[#FF9900]" />
     ),
     '/docs/integrations/aws-rds-postgres': <SiPostgresql className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/aws-rds-mysql': <SiMysql className="h-7 w-7 text-[#FF9900]" />,

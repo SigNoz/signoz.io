@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
@@ -14,10 +14,7 @@ interface ChatbaseClientProps {
   disableFloatingMessages?: boolean
 }
 
-/**
- * Client component that loads the Chatbase embed script and handles identity verification
- */
-export default function ChatbaseClient({
+function ChatbaseClientInner({
   className,
   userId,
   userHash,
@@ -135,6 +132,14 @@ export default function ChatbaseClient({
         />
       )}
     </>
+  )
+}
+
+export default function ChatbaseClient(props: ChatbaseClientProps) {
+  return (
+    <Suspense fallback={null}>
+      <ChatbaseClientInner {...props} />
+    </Suspense>
   )
 }
 

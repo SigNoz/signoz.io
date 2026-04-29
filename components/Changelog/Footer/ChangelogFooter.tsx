@@ -1,10 +1,10 @@
 'use client'
 import Pagination from '@signozhq/pagination'
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import type { TPagination } from '@/utils/strapi'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
-const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) => {
+const ChangelogFooterInner: React.FC<{ pagination: TPagination }> = ({ pagination }) => {
   const { page } = useParams()
   const [currentPage, setCurrentPage] = useState(page ? parseInt(page as string, 10) : 1)
   const router = useRouter()
@@ -45,6 +45,14 @@ const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) 
         align="end"
       />
     </div>
+  )
+}
+
+const ChangelogFooter: React.FC<{ pagination: TPagination }> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <ChangelogFooterInner {...props} />
+    </Suspense>
   )
 }
 

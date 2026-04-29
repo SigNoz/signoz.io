@@ -1,13 +1,6 @@
 import React from 'react'
-import {
-  SiRedis,
-  SiPostgresql,
-  SiNginx,
-  SiMongodb,
-  SiClickhouse,
-  SiAmazonwebservices,
-  SiAwslambda,
-} from 'react-icons/si'
+import { SiRedis, SiPostgresql, SiNginx, SiMongodb, SiClickhouse } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import IconCardGrid from '../../../components/Card/IconCardGrid'
 
 interface IconCardData {
@@ -51,7 +44,7 @@ const integrationsData: IconCardData[] = [
   {
     name: 'AWS',
     href: '/docs/integrations/aws/one-click-aws-integrations/',
-    icon: <SiAmazonwebservices className="h-7 w-7 text-orange-500" />,
+    icon: <FaAws className="h-7 w-7 text-orange-500" />,
     clickName: 'AWS Integration Link',
   },
 ]

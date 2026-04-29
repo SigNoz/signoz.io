@@ -10,7 +10,8 @@ import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } fr
 export const revalidate = 86400 // 1 day - must be static for Next.js
 export const dynamic = 'force-static'
 
-export async function generateMetadata({ params }: { params: { page: string } }) {
+export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   return buildListingMetadata('OpenTelemetry', params.page)
 }
 
@@ -19,7 +20,8 @@ export const generateStaticParams = async () => {
   return buildStaticPaginationParams(articles.length)
 }
 
-export default async function Page({ params }: { params: { page: string } }) {
+export default async function Page(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   const contentLayerArticles = await getOpenTelemetryHubContentLayerArticles()
 
   // Fetch CMS opentelemetries articles

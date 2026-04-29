@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
@@ -147,7 +147,7 @@ const useTestimonialTimer = () => {
   const getIndicatorsToShow = () => {
     if (testimonials.length <= 5) return testimonials.map((_, i) => i)
     let start = Math.max(0, currentIndex - 2)
-    let end = Math.min(testimonials.length - 1, start + 4)
+    const end = Math.min(testimonials.length - 1, start + 4)
     if (end === testimonials.length - 1 && end - start < 4) start = Math.max(0, end - 4)
     return Array.from({ length: end - start + 1 }, (_, i) => start + i)
   }
@@ -316,14 +316,13 @@ interface SignupFormIsolatedProps {
   }) => void
 }
 
-// Completely isolated signup form component with its own state management
-const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
+function SignupFormIsolatedInner({
   onSignup,
   onSocialSignup,
   isSubmitting,
   errors,
   logEvent,
-}) => {
+}: SignupFormIsolatedProps) {
   const [formState, setFormState] = useState({
     workEmail: '',
     dataRegion: 'us',
@@ -581,14 +580,21 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
   )
 }
 
+const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <SignupFormIsolatedInner {...props} />
+    </Suspense>
+  )
+}
+
 interface TeamsVariantProps {
   showVariant: boolean
   experimentId: string
   variantId: string
 }
 
-// TeamsVariant component with its own state management
-const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, variantId }) => {
+function TeamsVariantInner({ showVariant, experimentId, variantId }: TeamsVariantProps) {
   const searchParams = useSearchParams()
   const authCode = searchParams.get('code')
   const ssoError = searchParams.get('has_sso_error')
@@ -723,6 +729,14 @@ const TeamsVariant: React.FC<TeamsVariantProps> = ({ showVariant, experimentId, 
         </div>
       )}
     </ExperimentTracker>
+  )
+}
+
+const TeamsVariant: React.FC<TeamsVariantProps> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <TeamsVariantInner {...props} />
+    </Suspense>
   )
 }
 

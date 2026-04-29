@@ -6,7 +6,7 @@ import { loadPublishedPosts } from '../rssUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const runtime = 'nodejs'
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamic = 'force-static'
 
 const CACHE_CONTROL_HEADER = `s-maxage=${CMS_REVALIDATE_INTERVAL}, stale-while-revalidate=30`
@@ -19,8 +19,12 @@ const notFoundResponse = () =>
     },
   })
 
-export async function GET(request: Request, { params }: { params: { segments?: string[] } }) {
-  const segments = params.segments ?? []
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ segments?: string[] }> }
+) {
+  const { segments: segmentsParam } = await params
+  const segments = segmentsParam ?? []
 
   if (!Array.isArray(segments) || segments.length !== 2 || segments[0] !== 'tags') {
     return notFoundResponse()

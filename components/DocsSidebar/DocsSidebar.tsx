@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
 import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
@@ -13,7 +13,7 @@ interface DocsSidebarProps {
   onNavItemClick?: () => void
 }
 
-const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
+const DocsSidebarInner: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const regionParam = searchParams.get('region')
@@ -263,6 +263,14 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     >
       <ul className="list-none space-y-1 p-0">{sideNav.map(renderItem)}</ul>
     </nav>
+  )
+}
+
+const DocsSidebar: React.FC<DocsSidebarProps> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <DocsSidebarInner {...props} />
+    </Suspense>
   )
 }
 

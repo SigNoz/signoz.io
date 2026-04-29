@@ -1,14 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  SiAmazonec2,
-  SiAmazonecs,
-  SiAmazoneks,
-  SiAwslambda,
-  SiAmazonrds,
-  SiAmazondynamodb,
-} from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 // Using generic Material Design icons for services without Simple Icons
 import {
   MdRouter,
@@ -50,14 +43,14 @@ export default function AWSOneClickListicle() {
     </div>
   )
 
-  // Icon map keyed by href
+  // Icon map keyed by href - using FaAws for AWS services since specific icons were removed from react-icons
   const ICON_MAP: Record<string, React.ReactNode> = {
-    '/docs/integrations/aws/ec2': <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
-    '/docs/integrations/aws/ecs': <SiAmazonecs className="h-7 w-7 text-orange-500" />,
-    '/docs/integrations/aws/eks': <SiAmazoneks className="h-7 w-7 text-orange-500" />,
-    '/docs/integrations/aws/lambda': <SiAwslambda className="h-7 w-7 text-orange-500" />,
-    '/docs/integrations/aws/rds': <SiAmazonrds className="h-7 w-7 text-blue-500" />,
-    '/docs/integrations/aws/dynamodb': <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
+    '/docs/integrations/aws/ec2': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/ecs': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/eks': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/lambda': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/integrations/aws/rds': <FaAws className="h-7 w-7 text-blue-500" />,
+    '/docs/integrations/aws/dynamodb': <FaAws className="h-7 w-7 text-blue-500" />,
     '/docs/integrations/aws/elasticache': <MdMemory className="h-7 w-7 text-blue-500" />,
     '/docs/integrations/aws/alb': <MdRouter className="h-7 w-7 text-purple-500" />,
     '/docs/integrations/aws/api-gateway': <MdHttp className="h-7 w-7 text-purple-500" />,

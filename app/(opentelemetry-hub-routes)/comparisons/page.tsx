@@ -7,7 +7,7 @@ import { buildListingMetadata } from '../metadata'
 
 export const metadata = buildListingMetadata('Comparisons')
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamic = 'force-static'
 
 export default async function ComparisonsHome() {

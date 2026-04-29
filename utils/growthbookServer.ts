@@ -36,7 +36,7 @@ export const getServerGrowthBook = cache(async (forceAnonymousId?: string) => {
   configureServerSideGrowthBook()
 
   // Read directly from Next's cookie store
-  const anonCookie = cookies().get('gb_anonymous_id')
+  const anonCookie = (await cookies()).get('gb_anonymous_id')
   const anonymousId = forceAnonymousId || anonCookie?.value || 'unknown'
 
   // DEBUG: log cookie header and the derived anonymous ID
@@ -72,7 +72,7 @@ export async function evaluateFeatureFlag(
   forceAnonymousId?: string
 ): Promise<boolean> {
   // Derive a stable anonymousId: use override or cookie
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const cookieValue = cookieStore.get('gb_anonymous_id')?.value
   const id = forceAnonymousId ?? cookieValue ?? 'unknown'
   const gb = await getServerGrowthBook(id)
@@ -85,7 +85,7 @@ export async function getFeatureValue<T>(
   defaultValue: T,
   forceAnonymousId?: string
 ): Promise<T> {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const cookieValue = cookieStore.get('gb_anonymous_id')?.value
   const id = forceAnonymousId ?? cookieValue ?? 'unknown'
   const gb = await getServerGrowthBook(id)
@@ -98,7 +98,7 @@ export async function getFeatureDetails<T>(
   defaultValue: T,
   forceAnonymousId?: string
 ): Promise<FeatureResult<T>> {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const cookieValue = cookieStore.get('gb_anonymous_id')?.value
   const id = forceAnonymousId ?? cookieValue ?? 'unknown'
   const gb = await getServerGrowthBook(id)

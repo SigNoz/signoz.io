@@ -4,16 +4,15 @@ import React, { useState } from 'react'
 import {
   SiDocker,
   SiKubernetes,
-  SiAmazonwebservices,
   SiGooglecloud,
   SiDigitalocean,
   SiHelm,
   SiArgo,
   SiLinux,
-  SiAmazonecs,
   SiRedhatopenshift,
   SiRender,
 } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
 import { SELF_HOST_INSTALLATION_ITEMS } from '@/constants/componentItems'
 
@@ -67,7 +66,7 @@ export default function SelfHostInstallationListicle({
     '/docs/install/docker-swarm': <SiDocker className="h-7 w-7 text-blue-500" />,
     '/docs/install/docker-selinux': <SiDocker className="h-7 w-7 text-blue-500" />,
     '/docs/install/linux': <SiLinux className="h-7 w-7 text-black dark:text-white" />,
-    '/docs/install/kubernetes/aws': <SiAmazonwebservices className="h-7 w-7 text-amber-500" />,
+    '/docs/install/kubernetes/aws': <FaAws className="h-7 w-7 text-amber-500" />,
     '/docs/install/kubernetes/gcp': <SiGooglecloud className="h-7 w-7 text-blue-400" />,
     '/docs/install/kubernetes/aks': (
       <img src="/img/icons/azure-icon.svg" width={20} height={20} alt="Azure" />
@@ -77,7 +76,7 @@ export default function SelfHostInstallationListicle({
     '/docs/install/kubernetes/local': <SiKubernetes className="h-7 w-7 text-blue-600" />,
     '/docs/install/argocd': <SiArgo className="h-7 w-7 text-gray-500" />,
     '/docs/install/kubernetes/openshift': <SiRedhatopenshift className="h-7 w-7 text-red-800" />,
-    '/docs/install/ecs/': <SiAmazonecs className="h-7 w-7 text-amber-500" />,
+    '/docs/install/ecs/': <FaAws className="h-7 w-7 text-amber-500" />,
     '/docs/install/azure-container-apps': (
       <img src="/img/icons/azure-icon.svg" width={20} height={20} alt="Azure" />
     ),

@@ -15,7 +15,7 @@ export const dynamic = 'force-static'
 export const dynamicParams = false
 
 export async function generateMetadata(): Promise<Metadata | undefined> {
-  return generateBlogMetadata({ params: LANDING_PARAMS })
+  return generateBlogMetadata({ params: Promise.resolve(LANDING_PARAMS) })
 }
 
 export default async function OpenTelemetryLanding() {

@@ -1,14 +1,13 @@
 'use client'
 
-/* eslint-disable jsx-a11y/anchor-has-content */
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
-import { AnchorHTMLAttributes, useEffect, useState } from 'react'
+import { AnchorHTMLAttributes, Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 type CustomLinkProps = LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>
 
-const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
+function CustomLinkInner({ href, prefetch, ...rest }: CustomLinkProps) {
   const searchParams = useSearchParams()
   const [regionParam, setRegionParam] = useState<string | null>(null)
   const [cloudRegionParam, setCloudRegionParam] = useState<string | null>(null)
@@ -53,4 +52,10 @@ const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
   return <a target="_blank" rel="noopener noreferrer nofollow" href={href} {...rest} />
 }
 
-export default CustomLink
+export default function CustomLink(props: CustomLinkProps) {
+  return (
+    <Suspense fallback={null}>
+      <CustomLinkInner {...props} />
+    </Suspense>
+  )
+}

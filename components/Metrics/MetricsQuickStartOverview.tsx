@@ -19,7 +19,6 @@ import {
   SiGithubactions,
   SiArgo,
   SiTemporal,
-  SiAmazon,
   SiGooglecloud,
   SiSnowflake,
   SiFlydotio,
@@ -33,7 +32,7 @@ import {
   SiHasura,
   SiApachedruid,
 } from 'react-icons/si'
-import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
+import { FaJava, FaServer, FaDatabase, FaCloud, FaAws } from 'react-icons/fa'
 import { VscGraphLine } from 'react-icons/vsc'
 import IconCardGrid from '../Card/IconCardGrid'
 import { METRICS_QUICK_START_ITEMS } from '@/constants/componentItems'
@@ -73,14 +72,14 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <SiDocker className="h-7 w-7 text-blue-500" />
   ),
   '/docs/userguide/k8s-metrics': <SiKubernetes className="h-7 w-7 text-blue-600" />,
-  '/docs/integrations/aws/ecs': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/integrations/aws/ecs': <FaAws className="h-7 w-7 text-orange-500" />,
   '/docs/opentelemetry-collection-agents/ecs/sidecar/overview/': (
-    <SiAmazon className="h-7 w-7 text-orange-500" />
+    <FaAws className="h-7 w-7 text-orange-500" />
   ),
   '/docs/opentelemetry-collection-agents/ecs/ec2/overview/': (
-    <SiAmazon className="h-7 w-7 text-orange-500" />
+    <FaAws className="h-7 w-7 text-orange-500" />
   ),
-  '/docs/aws-monitoring/eks': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/aws-monitoring/eks': <FaAws className="h-7 w-7 text-orange-500" />,
   '/docs/gcp-monitoring/compute-engine/metrics': (
     <SiGooglecloud className="h-7 w-7 text-blue-500" />
   ),
@@ -112,15 +111,15 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/integrations/sql-server': <FaDatabase className="h-7 w-7 text-red-600" />,
   '/docs/azure-monitoring/db-metrics': <FaDatabase className="h-7 w-7 text-blue-600" />,
-  '/docs/integrations/aws-rds-mysql': <SiAmazon className="h-7 w-7 text-orange-500" />,
-  '/docs/integrations/aws-rds-postgres': <SiAmazon className="h-7 w-7 text-orange-500" />,
-  '/docs/integrations/aws-elasticache-redis': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/integrations/aws-rds-mysql': <FaAws className="h-7 w-7 text-orange-500" />,
+  '/docs/integrations/aws-rds-postgres': <FaAws className="h-7 w-7 text-orange-500" />,
+  '/docs/integrations/aws-elasticache-redis': <FaAws className="h-7 w-7 text-orange-500" />,
   // Web Servers
   '/docs/metrics-management/nginx-metrics': <SiNginx className="h-7 w-7 text-green-600" />,
   '/docs/gcp-monitoring/gcp-clb/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
   // Messaging
   '/docs/messaging-queues/kafka': <SiApachekafka className="h-7 w-7 text-black dark:text-white" />,
-  '/docs/messaging-queues/msk': <SiAmazon className="h-7 w-7 text-orange-500" />,
+  '/docs/messaging-queues/msk': <FaAws className="h-7 w-7 text-orange-500" />,
   '/docs/messaging-queues/confluent-kafka': (
     <SiApachekafka className="h-7 w-7 text-black dark:text-white" />
   ),

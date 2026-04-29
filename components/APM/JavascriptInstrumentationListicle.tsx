@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { SiNodedotjs, SiNextdotjs, SiNuxtdotjs, SiJavascript, SiReact } from 'react-icons/si'
+import { SiNodedotjs, SiNextdotjs, SiNuxt, SiJavascript, SiReact } from 'react-icons/si'
 import { LuActivity, LuLogIn } from 'react-icons/lu'
 import { TbChartHistogram, TbHeartbeat, TbShieldLock } from 'react-icons/tb'
 import { FaRegFileAlt } from 'react-icons/fa'
@@ -23,7 +23,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <SiNextdotjs className="h-7 w-7 rounded-full bg-white text-black" />
   ),
   '/docs/instrumentation/javascript/opentelemetry-nuxtjs': (
-    <SiNuxtdotjs className="h-7 w-7 text-green-500" />
+    <SiNuxt className="h-7 w-7 text-green-500" />
   ),
   // Frontend
   '/docs/frontend-monitoring/sending-traces-with-opentelemetry': (

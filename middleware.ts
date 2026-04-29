@@ -49,7 +49,10 @@ export function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
   const referer = req.headers.get('referer') || req.headers.get('referrer') || 'direct'
   const ip =
-    req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+    req.headers.get('x-forwarded-for') ||
+    req.headers.get('x-real-ip') ||
+    ipAddress(req) ||
+    'unknown'
   const vercelIp = ipAddress(req) || 'unknown'
 
   // Log bot requests

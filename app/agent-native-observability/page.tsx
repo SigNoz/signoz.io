@@ -2,7 +2,7 @@ import AgentNativeObservabilityPage from './AgentNativeObservabilityPage'
 import { Metadata } from 'next'
 
 export const dynamic = 'force-static'
-export const revalidate = 60 * 60 * 24 * 365
+export const revalidate = 31536000
 
 export const metadata: Metadata = {
   title: {

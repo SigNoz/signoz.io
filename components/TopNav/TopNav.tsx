@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Button } from '@headlessui/react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -19,7 +19,7 @@ import ResourcesDropdown from './ResourcesDropdown'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
 
-export default function TopNav() {
+function TopNavInner() {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -213,5 +213,13 @@ export default function TopNav() {
 
       {shouldShowTabs ? <Tabs activeTab={activeTab} /> : null}
     </div>
+  )
+}
+
+export default function TopNav() {
+  return (
+    <Suspense fallback={null}>
+      <TopNavInner />
+    </Suspense>
   )
 }

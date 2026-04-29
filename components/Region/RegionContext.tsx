@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, Suspense, useContext, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
@@ -64,7 +64,7 @@ const FALLBACK_REGIONS: RegionData[] = [
 
 const RegionContext = createContext<RegionContextType | undefined>(undefined)
 
-export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+function RegionProviderInner({ children }: { children: React.ReactNode }) {
   const [regions, setRegions] = useState<RegionData[]>([])
   const [region, setRegionState] = useState<string | null>(null)
   const [cloudRegion, setCloudRegionState] = useState<string | null>(null)
@@ -158,6 +158,14 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     <RegionContext.Provider value={{ regions, region, cloudRegion, setRegion, isLoading }}>
       {children}
     </RegionContext.Provider>
+  )
+}
+
+export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <Suspense fallback={null}>
+      <RegionProviderInner>{children}</RegionProviderInner>
+    </Suspense>
   )
 }
 

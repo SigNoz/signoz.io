@@ -94,8 +94,7 @@ import Tooltip from './ui/Tooltip'
 import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
 import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
-import dynamic from 'next/dynamic'
-const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'), { ssr: false })
+import IncidentCostGraphic from './Blog/IncidentCostGraphic'
 
 export const components: MDXComponents = {
   Region,

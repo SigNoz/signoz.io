@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
@@ -10,7 +11,7 @@ import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '../constants/globals'
 import { QUERY_PARAMS } from '../constants/queryParams'
 
-function Footer() {
+function FooterInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
@@ -286,6 +287,14 @@ function Footer() {
         </div>
       </div>
     </div>
+  )
+}
+
+function Footer() {
+  return (
+    <Suspense fallback={null}>
+      <FooterInner />
+    </Suspense>
   )
 }
 

@@ -10,17 +10,8 @@ import {
   SiNodedotjs,
   SiFluentd,
   SiApachetomcat,
-  SiAmazonwebservices,
   SiGo,
   SiCloudflare,
-  SiAmazonec2,
-  SiAmazonecs,
-  SiAmazoneks,
-  SiAwslambda,
-  SiAmazonrds,
-  SiAmazondynamodb,
-  SiAmazons3,
-  SiAmazoncloudwatch,
   SiGooglecloud,
   SiMysql,
   SiDeno,
@@ -28,7 +19,7 @@ import {
   SiHasura,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
-import { FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
+import { FaFileAlt, FaJava, FaWindows, FaAws } from 'react-icons/fa'
 import { LuLogIn } from 'react-icons/lu'
 import {
   MdRouter,
@@ -90,7 +81,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <SiNodedotjs className="h-7 w-7 text-green-500" />
   ),
   '/docs/logs-management/send-logs/aws-lambda-nodejs': (
-    <SiAmazonwebservices className="h-7 w-7 text-orange-400" />
+    <FaAws className="h-7 w-7 text-orange-400" />
   ),
   '/docs/logs-management/send-logs/logrus-to-signoz': <SiGo className="h-7 w-7 text-cyan-500" />,
   '/docs/logs-management/send-logs/zap-to-signoz': <SiGo className="h-7 w-7 text-cyan-600" />,
@@ -109,16 +100,16 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/logs-management/send-logs/vector-logs-to-signoz': (
     <TbBrandOpenSource className="h-7 w-7 text-purple-500" />
   ),
-  // Cloud - AWS
-  '/docs/aws-monitoring/ec2/ec2-logs': <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
-  '/docs/integrations/aws/ecs': <SiAmazonecs className="h-7 w-7 text-orange-500" />,
+  // Cloud - AWS - using FaAws since specific icons were removed from react-icons
+  '/docs/aws-monitoring/ec2/ec2-logs': <FaAws className="h-7 w-7 text-orange-500" />,
+  '/docs/integrations/aws/ecs': <FaAws className="h-7 w-7 text-orange-500" />,
   '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/': (
-    <SiAmazoneks className="h-7 w-7 text-orange-500" />
+    <FaAws className="h-7 w-7 text-orange-500" />
   ),
-  '/docs/integrations/aws/lambda': <SiAwslambda className="h-7 w-7 text-orange-500" />,
-  '/docs/aws-monitoring/s3': <SiAmazons3 className="h-7 w-7 text-green-600" />,
-  '/docs/integrations/aws/rds': <SiAmazonrds className="h-7 w-7 text-blue-500" />,
-  '/docs/integrations/aws/dynamodb': <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/aws/lambda': <FaAws className="h-7 w-7 text-orange-500" />,
+  '/docs/aws-monitoring/s3': <FaAws className="h-7 w-7 text-green-600" />,
+  '/docs/integrations/aws/rds': <FaAws className="h-7 w-7 text-blue-500" />,
+  '/docs/integrations/aws/dynamodb': <FaAws className="h-7 w-7 text-blue-500" />,
   '/docs/integrations/aws/elasticache': <MdMemory className="h-7 w-7 text-blue-500" />,
   '/docs/aws-monitoring/elb': <MdRouter className="h-7 w-7 text-purple-500" />,
   '/docs/integrations/aws/alb': <MdRouter className="h-7 w-7 text-purple-500" />,
@@ -127,9 +118,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/integrations/aws/sns': <MdNotifications className="h-7 w-7 text-pink-500" />,
   '/docs/integrations/aws/sqs': <MdMessage className="h-7 w-7 text-pink-500" />,
   '/docs/aws-monitoring/vpc': <MdSecurity className="h-7 w-7 text-green-500" />,
-  '/docs/userguide/send-cloudwatch-logs-to-signoz': (
-    <SiAmazoncloudwatch className="h-7 w-7 text-pink-600" />
-  ),
+  '/docs/userguide/send-cloudwatch-logs-to-signoz': <FaAws className="h-7 w-7 text-pink-600" />,
   // Cloud - Azure
   '/docs/azure-monitoring/app-service/logging/': <MdCloudQueue className="h-7 w-7 text-blue-600" />,
   // Note: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/' already mapped above (AKS reuses EKS icon)
@@ -140,12 +129,10 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/azure-monitoring/az-blob-storage/logging/': (
     <MdStorage className="h-7 w-7 text-blue-600" />
   ),
-  '/docs/azure-monitoring/virtual-machines/vm-metrics': (
-    <SiAmazonec2 className="h-7 w-7 text-blue-600" />
-  ),
+  '/docs/azure-monitoring/virtual-machines/vm-metrics': <FaAws className="h-7 w-7 text-blue-600" />,
   '/docs/azure-monitoring/mysql-flexible-server': <SiMysql className="h-7 w-7 text-blue-500" />,
   // Cloud - GCP
-  '/docs/gcp-monitoring/gcp-fns/logging/': <SiAwslambda className="h-7 w-7 text-blue-500" />,
+  '/docs/gcp-monitoring/gcp-fns/logging/': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
   '/docs/gcp-monitoring/app-engine/logging/': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
   '/docs/gcp-monitoring/compute-engine/logging/': (
     <SiGooglecloud className="h-7 w-7 text-blue-500" />

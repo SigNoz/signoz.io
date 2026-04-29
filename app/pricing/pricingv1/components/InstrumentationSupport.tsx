@@ -14,12 +14,12 @@ import {
   SiDotnet,
   SiPhp,
   SiRuby,
-  SiAmazon,
   SiGooglecloud,
   SiRedis,
   SiPostgresql,
   SiMongodb,
 } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import TrackingLink from '../../../../components/TrackingLink'
 import Button, { BUTTON_TYPES } from '../../../../components/Button/Button'
 import { ArrowUpRight, LucideServer, Database, Workflow } from 'lucide-react'
@@ -169,7 +169,7 @@ const InstrumentationSupport = () => {
               title="Cloud, Databases & Integrations"
               description="Pre-built integrations for cloud services, databases, and third-party tools"
               techIcons={[
-                { icon: <SiAmazon className="h-5 w-5 text-orange-500" />, name: 'AWS' },
+                { icon: <FaAws className="h-5 w-5 text-orange-500" />, name: 'AWS' },
                 {
                   icon: (
                     <Image

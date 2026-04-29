@@ -6,7 +6,7 @@ import { useLogEvent } from '../../hooks/useLogEvent'
 import WorkspaceReady from './WorkspaceReady'
 import WorkspaceSetup from './WorkspaceSetup'
 
-function WorkspaceSetupHome() {
+function WorkspaceSetupHomeInner() {
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false)
   const [isWorkspaceSetupDelayed, setIsWorkspaceSetupDelayed] = useState(false)
   const [isPollingEnabled, setIsPollingEnabled] = useState(false)
@@ -150,17 +150,21 @@ function WorkspaceSetupHome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEmailVerified])
 
+  return isWorkspaceReady ? (
+    <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
+  ) : (
+    <WorkspaceSetup
+      isWorkspaceSetupDelayed={isWorkspaceSetupDelayed}
+      email={decodeURIComponent(email || '')}
+      workspaceData={workspaceData}
+    />
+  )
+}
+
+function WorkspaceSetupHome() {
   return (
-    <Suspense>
-      {isWorkspaceReady ? (
-        <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
-      ) : (
-        <WorkspaceSetup
-          isWorkspaceSetupDelayed={isWorkspaceSetupDelayed}
-          email={decodeURIComponent(email || '')}
-          workspaceData={workspaceData}
-        />
-      )}
+    <Suspense fallback={null}>
+      <WorkspaceSetupHomeInner />
     </Suspense>
   )
 }

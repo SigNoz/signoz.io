@@ -4,7 +4,8 @@ import { buildListingMetadata, buildStaticPaginationParams } from '../../../meta
 import { getResourceCenterGuides } from '../../../content'
 import { getAllGuidesMeta } from '@/utils/contentlayer/guideCollection'
 
-export async function generateMetadata({ params }: { params: { page: string } }) {
+export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   return buildListingMetadata('Guides', params.page)
 }
 
@@ -13,7 +14,8 @@ export const generateStaticParams = async () => {
   return buildStaticPaginationParams(guides.length)
 }
 
-export default async function Page({ params }: { params: { page: string } }) {
+export default async function Page(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   const guidePosts = await getResourceCenterGuides()
   return (
     <ListingPageLayout>

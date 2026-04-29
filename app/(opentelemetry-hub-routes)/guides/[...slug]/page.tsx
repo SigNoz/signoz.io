@@ -27,11 +27,10 @@ const layouts = {
 export const dynamicParams = false
 export const dynamic = 'force-static'
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
   const [post, allAuthorEntries] = await Promise.all([getGuideBySlug(slug), getAllAuthors()])
 
@@ -88,7 +87,8 @@ export const generateStaticParams = async () => {
   return paths
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/guides/${slug}`
   const [guides, authors] = await Promise.all([getAllGuides(), getAllAuthors()])

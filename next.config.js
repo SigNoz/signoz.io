@@ -67,13 +67,33 @@ module.exports = () => {
   const plugins = [withContentPipeline, withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
+    transpilePackages: ['@stoplight/elements', '@stoplight/elements-core'],
     productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['app', 'components', 'layouts', 'scripts'],
-    },
     trailingSlash: true,
-    swcMinify: true,
+    // Turbopack configuration (default bundler in Next.js 16)
+    turbopack: {
+      resolveAlias: {
+        // Fix @stoplight/elements compatibility with react-dom
+        // The package uses legacy APIs (render, unmountComponentAtNode) that need shimming
+        'react-dom$': './shims/react-dom-compat.js',
+      },
+      rules: {
+        // SVG handling: differentiate between ?url imports and regular imports
+        '*.svg': [
+          {
+            // Match ?url imports - return as asset URL with content hash
+            condition: { query: /url/ },
+            type: 'asset',
+          },
+          {
+            // Default: convert to React component via SVGR
+            loaders: ['@svgr/webpack'],
+            as: '*.js',
+          },
+        ],
+      },
+    },
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
@@ -2690,6 +2710,14 @@ module.exports = () => {
       ]
     },
     webpack: (config, options) => {
+      // Fix @stoplight/elements compatibility with react-dom
+      // The package uses legacy APIs (render, unmountComponentAtNode) that need shimming
+      const path = require('path')
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'react-dom$': path.resolve('./shims/react-dom-compat.js'),
+      }
+
       // Find Next.js's existing rule that handles SVG imports
       const fileLoaderRule = config.module.rules.find((rule) => rule.test?.test?.('.svg'))
 

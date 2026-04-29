@@ -1,15 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  SiAmazonec2,
-  SiAmazonecs,
-  SiAmazoneks,
-  SiAwslambda,
-  SiAmazonrds,
-  SiAmazondynamodb,
-  SiAmazons3,
-} from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 // Using generic Material Design icons for services without Simple Icons
 import {
   MdRouter,
@@ -53,14 +45,14 @@ export default function AWSMonitoringListicle() {
     </div>
   )
 
-  // Icon map keyed by href
+  // Icon map keyed by href - using FaAws for AWS services since specific icons were removed from react-icons
   const ICON_MAP: Record<string, React.ReactNode> = {
-    '/docs/aws-monitoring/ec2/': <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
-    '/docs/aws-monitoring/ecs/': <SiAmazonecs className="h-7 w-7 text-orange-500" />,
-    '/docs/aws-monitoring/eks': <SiAmazoneks className="h-7 w-7 text-orange-500" />,
-    '/docs/aws-monitoring/lambda': <SiAwslambda className="h-7 w-7 text-orange-500" />,
-    '/docs/aws-monitoring/rds': <SiAmazonrds className="h-7 w-7 text-blue-500" />,
-    '/docs/aws-monitoring/dynamodb': <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
+    '/docs/aws-monitoring/ec2/': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/ecs/': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/eks': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/lambda': <FaAws className="h-7 w-7 text-orange-500" />,
+    '/docs/aws-monitoring/rds': <FaAws className="h-7 w-7 text-blue-500" />,
+    '/docs/aws-monitoring/dynamodb': <FaAws className="h-7 w-7 text-blue-500" />,
     '/docs/aws-monitoring/elasticache': <MdMemory className="h-7 w-7 text-blue-500" />,
     '/docs/aws-monitoring/alb': <MdRouter className="h-7 w-7 text-purple-500" />,
     '/docs/aws-monitoring/elb-logs': <MdRouter className="h-7 w-7 text-purple-500" />,
@@ -69,7 +61,7 @@ export default function AWSMonitoringListicle() {
     '/docs/aws-monitoring/msk': <MdCloudQueue className="h-7 w-7 text-black dark:text-white" />,
     '/docs/aws-monitoring/sqs': <MdMessage className="h-7 w-7 text-pink-500" />,
     '/docs/aws-monitoring/sns': <MdNotifications className="h-7 w-7 text-pink-500" />,
-    '/docs/aws-monitoring/s3': <SiAmazons3 className="h-7 w-7 text-green-600" />,
+    '/docs/aws-monitoring/s3': <FaAws className="h-7 w-7 text-green-600" />,
   }
 
   const computeCards = AWS_MONITORING_ITEMS.compute.map((item) => ({

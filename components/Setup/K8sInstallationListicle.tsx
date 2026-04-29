@@ -2,7 +2,6 @@
 
 import React from 'react'
 import {
-  SiAmazonwebservices,
   SiGooglecloud,
   SiDigitalocean,
   SiHelm,
@@ -10,11 +9,12 @@ import {
   SiRedhatopenshift,
   SiArgo,
 } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
 import { K8S_INSTALLATION_ITEMS } from '@/constants/componentItems'
 
 const ICON_MAP: Record<string, React.ReactNode> = {
-  '/docs/install/kubernetes/aws': <SiAmazonwebservices className="h-7 w-7 text-amber-500" />,
+  '/docs/install/kubernetes/aws': <FaAws className="h-7 w-7 text-amber-500" />,
   '/docs/install/kubernetes/gcp': <SiGooglecloud className="h-7 w-7 text-blue-400" />,
   '/docs/install/kubernetes/aks': (
     <img src="/img/icons/azure-icon.svg" width={20} height={20} alt="Azure" />

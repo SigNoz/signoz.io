@@ -23,7 +23,7 @@ import {
   SiNodedotjs,
   SiCloudflare,
   SiNextdotjs,
-  SiNuxtdotjs,
+  SiNuxt,
   SiNginx,
   SiReact,
   SiLaravel,
@@ -50,7 +50,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/instrumentation/opentelemetry-reactjs': <SiReact className="h-7 w-7 text-blue-400" />,
   '/docs/instrumentation/opentelemetry-react-native': <SiReact className="h-7 w-7 text-blue-400" />,
-  '/docs/instrumentation/opentelemetry-nuxtjs': <SiNuxtdotjs className="h-7 w-7 text-green-500" />,
+  '/docs/instrumentation/opentelemetry-nuxtjs': <SiNuxt className="h-7 w-7 text-green-500" />,
   '/docs/instrumentation/opentelemetry-cloudflare': (
     <SiCloudflare className="h-7 w-7 text-orange-500" />
   ),

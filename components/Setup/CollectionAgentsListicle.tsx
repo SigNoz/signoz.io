@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { SiDocker, SiKubernetes, SiHelm, SiAmazonecs } from 'react-icons/si'
+import { SiDocker, SiKubernetes, SiHelm } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import { VscVm } from 'react-icons/vsc'
 import IconCardGrid from '../Card/IconCardGrid'
 import { COLLECTION_AGENTS_ITEMS } from '@/constants/componentItems'
@@ -59,10 +60,10 @@ export default function SelfHostInstallationListicle({
       <SiDocker className="h-7 w-7 text-blue-500" />
     ),
     '/docs/opentelemetry-collection-agents/ecs/ec2/overview': (
-      <SiAmazonecs className="h-7 w-7 text-amber-500" />
+      <FaAws className="h-7 w-7 text-amber-500" />
     ),
     '/docs/opentelemetry-collection-agents/ecs/sidecar/overview': (
-      <SiAmazonecs className="h-7 w-7 text-amber-500" />
+      <FaAws className="h-7 w-7 text-amber-500" />
     ),
     '/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview': (
       <SiKubernetes className="h-7 w-7 text-blue-600" />

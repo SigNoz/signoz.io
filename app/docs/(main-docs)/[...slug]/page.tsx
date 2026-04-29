@@ -12,11 +12,10 @@ import { safeJsonLdStringify } from '@/utils/structuredData'
 export const dynamicParams = false
 export const dynamic = 'force-static'
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
   const post = await getDocBySlug(slug)
 
@@ -51,7 +50,8 @@ export const generateStaticParams = async () => {
   return paths
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
   const post = await getDocBySlug(slug)
 

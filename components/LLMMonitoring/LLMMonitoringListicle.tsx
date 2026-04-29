@@ -7,20 +7,20 @@ import {
   SiClaude,
   SiGooglegemini,
   SiAnthropic,
-  SiAmazonwebservices,
   SiPydantic,
   SiTemporal,
   SiOllama,
   SiHuggingface,
   SiN8N,
 } from 'react-icons/si'
+import { FaAws } from 'react-icons/fa'
 import { LLM_MONITORING_ITEMS } from '@/constants/componentItems'
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/agno-monitoring': (
     <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
   ),
-  '/docs/amazon-bedrock-monitoring': <SiAmazonwebservices className="h-7 w-7 text-white" />,
+  '/docs/amazon-bedrock-monitoring': <FaAws className="h-7 w-7 text-white" />,
   '/docs/anthropic-monitoring': <SiAnthropic className="h-7 w-7 text-orange-500" />,
   '/docs/autogen-observability': (
     <img src="/svgs/icons/LLMMonitoring/autogen-logo.webp" alt="AutoGen Icon" className="h-7 w-7" />

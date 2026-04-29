@@ -31,7 +31,10 @@ function filterAndMapPosts(posts: BlogMeta[]): CoreContent<Blog>[] {
   return posts.filter((post) => !post.draft).map((post) => post as unknown as CoreContent<Blog>)
 }
 
-export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
+export async function generateMetadata(props: {
+  params: Promise<{ tag: string }>
+}): Promise<Metadata> {
+  const params = await props.params
   const tag = decodeURI(params.tag)
   return genPageMetadata({
     title: tag,
@@ -57,7 +60,8 @@ export const generateStaticParams = async () => {
   return paths
 }
 
-export default async function TagPage({ params }: { params: { tag: string } }) {
+export default async function TagPage(props: { params: Promise<{ tag: string }> }) {
+  const params = await props.params
   const tag = decodeURI(params.tag)
   const allBlogs = await getAllBlogsMeta()
   const filteredPosts = filterAndMapPosts(

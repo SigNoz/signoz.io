@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import FAQsClient from './FAQsClient'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamicParams = true
 export const dynamic = 'force-static'
 
