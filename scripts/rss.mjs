@@ -4,7 +4,7 @@ import siteMetadata from '../data/siteMetadata.js'
 import tagData from '../app/tag-data.json' with { type: 'json' }
 import { filterPostsByTag, generateRss } from './rssFeed.mjs'
 
-const CONTENT_DIR = path.resolve(process.cwd(), '.content')
+const CONTENT_DIR = path.resolve(process.cwd(), '.vercel/cache/content')
 const readContentJsonSync = (relativePath) => {
   const fullPath = path.join(CONTENT_DIR, relativePath)
   return JSON.parse(readFileSync(fullPath, 'utf-8'))
