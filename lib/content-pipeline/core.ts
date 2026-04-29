@@ -6,6 +6,7 @@ import { glob } from 'fast-glob'
 import type { Collection, CollectionsMap } from './define'
 import { ContentCache } from './cache'
 import { generateTypes } from './types-generator'
+import { computeSourceHash } from './source-hash'
 import type { CompileTask, CompileResult } from './mdx-worker'
 
 // Limit workers to balance speed vs memory (~300MB per worker)
@@ -23,6 +24,7 @@ interface BuildOptions {
 
 interface InternalBuildOptions extends BuildOptions {
   pool: Piscina
+  sourceHash: string
 }
 
 interface BuildResult<T> {
@@ -46,9 +48,10 @@ async function buildCollectionInternal<T>(
 
   // Use outputDir as both cache and output (unified directory)
   const collectionDir = path.join(outputDir, collection.name)
-  const schemaHash = JSON.stringify(collection.fields)
+  // Combine schema fields with source hash to detect both schema and code changes
+  const cacheKey = `${options.sourceHash}:${JSON.stringify(collection.fields)}`
   const cache = new ContentCache(collectionDir)
-  await cache.init(schemaHash)
+  await cache.init(cacheKey)
 
   const pattern = path.join(collection.directory, collection.include)
   const files = await glob(pattern, { absolute: true })
@@ -148,9 +151,18 @@ export async function buildAllCollections(
     },
   })
 
+  // Compute source hash once for all collections
+  const { hash: sourceHash, dirty: sourceDirty } = await computeSourceHash()
+  if (sourceDirty) {
+    console.log(`Source dirty: uncommitted changes detected, forcing rebuild`)
+  } else {
+    console.log(`Source hash: ${sourceHash}`)
+  }
   console.log(`Using ${MAX_WORKERS} worker threads`)
 
-  const internalOptions: InternalBuildOptions = { ...options, pool }
+  // Force rebuild if source files have uncommitted changes
+  const effectiveOptions = sourceDirty ? { ...options, force: true } : options
+  const internalOptions: InternalBuildOptions = { ...effectiveOptions, pool, sourceHash }
 
   try {
     const collectionArray = Object.values(collections)
@@ -186,8 +198,11 @@ export async function buildCollection<T>(
     },
   })
 
+  const { hash: sourceHash, dirty: sourceDirty } = await computeSourceHash()
+  const effectiveOptions = sourceDirty ? { ...options, force: true } : options
+
   try {
-    return await buildCollectionInternal<T>(collection, { ...options, pool })
+    return await buildCollectionInternal<T>(collection, { ...effectiveOptions, pool, sourceHash })
   } finally {
     await pool.destroy()
   }
