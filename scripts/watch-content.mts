@@ -11,9 +11,9 @@ let rebuildTimer: NodeJS.Timeout | null = null
 let isBuilding = false
 let pendingRebuild = false
 
-// Source file to touch after rebuild to trigger Next.js Fast Refresh
-// Touching a .ts file that's imported by pages causes recompilation
-const REFRESH_TRIGGER_FILE = path.resolve('utils', 'contentlayer', 'contentLoader.ts')
+// Trigger file to touch after rebuild to trigger Next.js Fast Refresh
+// Using a file in .content/ avoids polluting the working tree with dirty source files
+const REFRESH_TRIGGER_FILE = path.resolve('.content', '.refresh-trigger')
 
 const contentDirs = [
   'data',
@@ -30,24 +30,19 @@ function getCollectionFromPath(filePath: string): string | null {
 }
 
 /**
- * Touch the contentLoader.ts file to trigger Next.js Fast Refresh.
- * We update a timestamp comment to ensure the file content actually changes,
- * which forces webpack to recompile it and all dependent modules.
+ * Touch the refresh trigger file to signal content has changed.
+ * This file is added to webpack's contextDependencies via the plugin,
+ * so changing it triggers recompilation without polluting source files.
  */
 function triggerRefresh() {
   try {
-    let content = fs.readFileSync(REFRESH_TRIGGER_FILE, 'utf-8')
-
-    // Update or add the refresh timestamp comment
-    const timestampComment = `// @refresh-trigger: ${Date.now()}`
-    if (content.includes('// @refresh-trigger:')) {
-      content = content.replace(/\/\/ @refresh-trigger: \d+/, timestampComment)
-    } else {
-      // Add at the end of the file
-      content = content.trimEnd() + `\n\n${timestampComment}\n`
+    // Ensure .content directory exists
+    const dir = path.dirname(REFRESH_TRIGGER_FILE)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
     }
-
-    fs.writeFileSync(REFRESH_TRIGGER_FILE, content)
+    // Write timestamp to trigger file change detection
+    fs.writeFileSync(REFRESH_TRIGGER_FILE, String(Date.now()))
   } catch (err) {
     console.error('Failed to trigger refresh:', err)
   }

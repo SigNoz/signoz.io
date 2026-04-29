@@ -6,7 +6,8 @@ import * as path from 'path'
 import * as fs from 'fs'
 import GithubSlugger from 'github-slugger'
 
-// Handle ESM/CJS interop
+// Handle ESM/CJS interop - tsx may wrap modules with a default export
+// depending on how they're transpiled. This fallback ensures compatibility.
 const core = (coreModule as any).default || coreModule
 const schema = (schemaModule as any).default || schemaModule
 const { buildAllCollections } = core

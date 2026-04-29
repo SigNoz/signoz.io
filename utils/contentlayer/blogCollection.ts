@@ -43,6 +43,8 @@ export interface RelatedArticle {
   date?: string
 }
 
+// Note: This interface should stay in sync with the Blog schema in lib/content-pipeline/schema.ts
+// and the generated types in types/content-generated/types.d.ts
 export interface Blog extends BlogMeta {
   body: {
     raw: string

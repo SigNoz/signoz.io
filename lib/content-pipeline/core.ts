@@ -5,7 +5,6 @@ import Piscina from 'piscina'
 import { glob } from 'fast-glob'
 import readingTimeLib from 'reading-time'
 import GithubSlugger from 'github-slugger'
-import pLimit from 'p-limit'
 import type { Collection, CollectionHelpers, CollectionsMap, TocItem, DocumentBase } from './define'
 import { coerceFields } from './define'
 import { ContentCache } from './cache'
@@ -13,8 +12,9 @@ import { generateTypes } from './types-generator'
 import type { CompileTask, CompileResult } from './mdx-worker'
 
 const CPU_COUNT = os.cpus().length
-const IO_CONCURRENCY = CPU_COUNT * 4
 
+// Note: __dirname resolves correctly when running via tsx (which preserves it).
+// If this pipeline is ever bundled differently, consider using import.meta.url instead.
 const workerPath = path.resolve(__dirname, 'mdx-worker.ts')
 
 export function createHelpers(): CollectionHelpers {
@@ -62,7 +62,6 @@ interface BuildOptions {
 
 interface InternalBuildOptions extends BuildOptions {
   pool: Piscina
-  ioLimit: ReturnType<typeof pLimit>
 }
 
 interface BuildResult<T> {
@@ -75,7 +74,7 @@ async function buildCollectionInternal<T>(
   collection: Collection,
   options: InternalBuildOptions
 ): Promise<BuildResult<T>> {
-  const { outputDir, prettyPrint = false, pool, ioLimit } = options
+  const { outputDir, prettyPrint = false, pool } = options
   const helpers = createHelpers()
 
   // Use outputDir as both cache and output (unified directory)
@@ -144,9 +143,14 @@ async function buildCollectionInternal<T>(
       const computed = collection.computedFieldsFn(docWithFields as any, helpers)
       const doc = { ...docWithFields, ...computed } as T
 
-      // Get slug for the cache filename
-      const slug = (doc as any).slug || (doc as any)._file.name.replace(/\.mdx$/, '')
-      const slugPath = slug.replace(/\/$/, '') || 'index'
+      // Get slug for the cache filename, sanitized to prevent path traversal
+      const rawSlug = (doc as any).slug || (doc as any)._file.name.replace(/\.mdx$/, '')
+      const slugPath =
+        rawSlug
+          .replace(/\/$/, '')
+          .split('/')
+          .filter((s: string) => s !== '..' && s !== '.')
+          .join('/') || 'index'
 
       await cache.set(filePath, hash, slugPath, doc)
       compiledDocs.push({ filePath, doc })
@@ -184,19 +188,15 @@ export async function buildAllCollections(
   collections: CollectionsMap,
   options: BuildOptions
 ): Promise<void> {
-  const { outputDir } = options
-
   const pool = new Piscina({
     filename: workerPath,
     maxThreads: CPU_COUNT,
     execArgv: ['--import', 'tsx'],
   })
 
-  const ioLimit = pLimit(IO_CONCURRENCY)
-
   console.log(`Using ${CPU_COUNT} worker threads`)
 
-  const internalOptions: InternalBuildOptions = { ...options, pool, ioLimit }
+  const internalOptions: InternalBuildOptions = { ...options, pool }
 
   try {
     const collectionArray = Object.values(collections)
@@ -227,10 +227,9 @@ export async function buildCollection<T>(
     maxThreads: CPU_COUNT,
     execArgv: ['--import', 'tsx'],
   })
-  const ioLimit = pLimit(IO_CONCURRENCY)
 
   try {
-    return await buildCollectionInternal<T>(collection, { ...options, pool, ioLimit })
+    return await buildCollectionInternal<T>(collection, { ...options, pool })
   } finally {
     await pool.destroy()
   }

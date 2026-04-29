@@ -1,6 +1,9 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { createHash } from 'crypto'
+import pLimit from 'p-limit'
+
+const FILE_READ_CONCURRENCY = 32
 
 interface CacheManifest {
   schemaHash: string
@@ -74,21 +77,19 @@ export class ContentCache {
     this.dirty = true
   }
 
-  async hashFile(filePath: string): Promise<string> {
-    const content = await fs.readFile(filePath)
-    return createHash('sha256').update(new Uint8Array(content)).digest('hex')
-  }
-
   async hashFiles(filePaths: string[]): Promise<Map<string, string>> {
     const results = new Map<string, string>()
+    const limit = pLimit(FILE_READ_CONCURRENCY)
     const hashes = await Promise.all(
-      filePaths.map(async (filePath) => {
-        const content = await fs.readFile(filePath)
-        return {
-          filePath,
-          hash: createHash('sha256').update(new Uint8Array(content)).digest('hex'),
-        }
-      })
+      filePaths.map((filePath) =>
+        limit(async () => {
+          const content = await fs.readFile(filePath)
+          return {
+            filePath,
+            hash: createHash('sha256').update(new Uint8Array(content)).digest('hex'),
+          }
+        })
+      )
     )
     for (const { filePath, hash } of hashes) {
       results.set(filePath, hash)

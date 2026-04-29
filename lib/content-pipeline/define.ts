@@ -104,11 +104,6 @@ export function coerceFields(
     if (field.type === 'date' && value !== undefined) {
       result[key] = value instanceof Date ? value : new Date(value as string)
     }
-
-    // Coerce arrays with defaults
-    if (field.type === 'array' && value === undefined && field.default !== undefined) {
-      result[key] = field.default
-    }
   }
 
   return result

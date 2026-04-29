@@ -9,6 +9,7 @@ export interface ContentPipelineOptions {
 }
 
 let buildPromise: Promise<void> | null = null
+let buildGeneration = 0
 
 export function withContentPipeline(
   nextConfig: NextConfig,
@@ -53,22 +54,33 @@ class ContentPipelineWebpackPlugin {
     const pluginName = 'ContentPipelineWebpackPlugin'
 
     // Run build before compilation
+    // Track generation to dedupe concurrent builds (server + client compilations)
+    let lastBuiltGeneration = -1
     compiler.hooks.beforeCompile.tapPromise(pluginName, async () => {
-      // Dedupe builds
+      // If we've already built for the current generation, skip
+      if (lastBuiltGeneration === buildGeneration) {
+        return
+      }
+      // Dedupe concurrent builds - reuse existing promise if one is running
       if (!buildPromise) {
-        buildPromise = this.runBuild()
+        buildPromise = this.runBuild().finally(() => {
+          buildPromise = null
+        })
       }
       await buildPromise
-      buildPromise = null
+      lastBuiltGeneration = buildGeneration
     })
 
-    // In dev mode, add data directory to watch list
-    // Note: We only watch data/, not .content/ - the contentLoader uses fs.readFile
-    // in dev mode which bypasses bundler caching, so watching .content/ is not needed
-    // and would cause issues with .d.ts files being processed as modules
+    // In dev mode, add data directory and refresh trigger to watch list
+    // The refresh trigger file (.content/.refresh-trigger) is updated by watch-content.mts
+    // after content rebuilds, causing webpack to recompile dependent modules
     if (this.options.watch) {
       compiler.hooks.afterCompile.tap(pluginName, (compilation: any) => {
         compilation.contextDependencies.add(path.resolve('data'))
+        // Watch the refresh trigger file so webpack detects content changes
+        compilation.fileDependencies.add(path.resolve('.content', '.refresh-trigger'))
+        // Invalidate build generation when content changes to trigger rebuild
+        buildGeneration++
       })
     }
   }
