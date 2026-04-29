@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { UpgradePathState, UpgradeSchema, GitHubReleasesResponse } from '../types/upgrade'
-import type { Doc } from '@/utils/contentlayer/docsCollection'
+import type { Doc } from '@/types/content'
 import upgradeSchema from '@/constants/upgradeSchema.json'
 import {
   calculateUpgradePath,

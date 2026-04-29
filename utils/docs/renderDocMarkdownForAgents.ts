@@ -1,4 +1,4 @@
-import type { Doc } from '@/utils/contentlayer/docsCollection'
+import type { Doc } from '@/types/content'
 import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
 import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'

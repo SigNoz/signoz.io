@@ -1,4 +1,5 @@
-import { getAllDocs, type Doc } from '@/utils/contentlayer/docsCollection'
+import type { Doc } from '@/types/content'
+import { getAllDocs } from '@/utils/contentlayer/docsCollection'
 import UpgradePathTool from './components/UpgradePathTool'
 import upgradeSchema from '@/constants/upgradeSchema.json'
 

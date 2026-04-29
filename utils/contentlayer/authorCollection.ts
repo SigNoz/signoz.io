@@ -1,20 +1,7 @@
 // Author collection utilities
 // Authors are stored directly in constants/authors.json, not processed by content pipeline
 
-export interface Author {
-  slug: string
-  name: string
-  title?: string
-  url?: string
-  image_url?: string
-  avatar?: string
-  occupation?: string
-  company?: string
-  email?: string
-  twitter?: string
-  linkedin?: string
-  github?: string
-}
+import type { Author } from '@/types/content'
 
 let authorsPromise: Promise<Author[]> | null = null
 

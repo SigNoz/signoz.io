@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 import { formatDate } from 'pliny/utils/formatDate'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
-import type { Blog } from '@/utils/contentlayer/blogCollection'
+import type { CoreContent, Blog } from '@/types/content'
 import Link from '@/components/Link'
 import PageTitle from '@/components/PageTitle'
 import SectionContainer from '@/components/SectionContainer'

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { CoreContent } from '@/types/content'
 import PageTitle from '@/components/PageTitle'
 import React from 'react'
 import { MDXContent } from '@/utils/strapi'

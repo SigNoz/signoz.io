@@ -1,8 +1,7 @@
 'use client'
 
 import { ReactNode, useEffect, useRef } from 'react'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
-import type { Doc } from '@/utils/contentlayer/docsCollection'
+import type { CoreContent, Doc } from '@/types/content'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'

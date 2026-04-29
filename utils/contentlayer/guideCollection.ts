@@ -1,50 +1,6 @@
 // Guide collection utilities - updated for custom content pipeline
 import { readContentJson, readContentJsonSync } from './contentLoader'
-
-export interface GuideMeta {
-  title: string
-  date: string
-  lastmod?: string
-  tags: string[]
-  slug: string
-  path: string
-  filePath: string
-  summary?: string
-  description?: string
-  image?: string
-  authors?: string[]
-  readingTime: { minutes: number; words: number; text: string }
-  draft?: boolean
-}
-
-export interface TocItem {
-  url: string
-  depth: number
-  value: string
-}
-
-export interface StructuredData {
-  '@type'?: string
-  '@context'?: string
-  mainEntityOfPage?: { '@type'?: string; '@id'?: string }
-  url?: string
-  [key: string]: unknown
-}
-
-export interface Guide extends GuideMeta {
-  body: {
-    raw: string
-    code: string
-  }
-  _file: {
-    path: string
-    directory: string
-    name: string
-  }
-  toc: TocItem[]
-  structuredData?: StructuredData
-  layout?: string
-}
+import type { Guide, GuideMeta } from '@/types/content'
 
 // Production-only cache (dev mode always reads fresh)
 let guidesMetaCache: GuideMeta[] | null = null

@@ -1,9 +1,7 @@
 'use client'
 
 import { ReactNode, useRef, useState, useEffect } from 'react'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
-import type { Blog } from '@/utils/contentlayer/blogCollection'
-import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
+import type { CoreContent, Blog, Author as Authors } from '@/types/content'
 import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import FAQHeader, { AuthorProps } from '@/components/FAQHeader/FAQHeader'

@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
+import type { CoreContent } from '@/types/content'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 

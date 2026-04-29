@@ -1,7 +1,5 @@
 import { ReactNode } from 'react'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
-import type { Blog } from '@/utils/contentlayer/blogCollection'
-import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
+import type { CoreContent, Blog, Author as Authors } from '@/types/content'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 

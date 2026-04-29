@@ -1,7 +1,7 @@
+import type { Doc } from '@/types/content'
 import { coreContent } from '@/utils/contentlayer/contentUtils'
 import DocContent from '@/components/DocContent/DocContent'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import type { Doc } from '@/utils/contentlayer/docsCollection'
 
 const DocRenderer = ({
   docUrl,

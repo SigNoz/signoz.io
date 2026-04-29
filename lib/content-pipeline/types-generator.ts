@@ -1,10 +1,4 @@
-import type {
-  Collection,
-  CollectionsMap,
-  FieldDef,
-  FieldsShape,
-  FieldDefOrShorthand,
-} from './define'
+import type { CollectionsMap, FieldsShape, FieldDefOrShorthand } from './define'
 import { normalizeField } from './define'
 
 function fieldToTsType(field: FieldDefOrShorthand): string {
@@ -22,7 +16,7 @@ function fieldToTsType(field: FieldDefOrShorthand): string {
       baseType = 'boolean'
       break
     case 'date':
-      baseType = 'Date'
+      baseType = 'string'
       break
     case 'any':
       baseType = 'any'
@@ -87,13 +81,16 @@ export function generateTypes(collections: CollectionsMap): string {
   for (const [name, collection] of Object.entries(collections)) {
     names.push(name)
 
-    const schemaFields = generateFieldsFromShape(collection.fields)
-    const computedFields = generateFieldsFromShape(collection.computedFields)
+    // Merge schema fields with computed fields, computed fields take precedence
+    const mergedFields: FieldsShape = {
+      ...collection.fields,
+      ...collection.computedFields,
+    }
+    const allFields = generateFieldsFromShape(mergedFields)
 
     interfaces.push(`
 export interface ${name} {
-${schemaFields}
-${computedFields}
+${allFields}
   body: {
     raw: string
     code: string

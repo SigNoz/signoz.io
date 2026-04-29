@@ -1,13 +1,8 @@
 // Content utility functions - replacements for pliny/utils/contentlayer
 
-interface ContentWithDate {
-  date: string
-  draft?: boolean
-}
+import type { ContentWithDate, ContentWithBody, CoreContent } from '@/types/content'
 
-interface ContentWithBody {
-  body?: { raw: string; code: string }
-}
+export type { CoreContent }
 
 /**
  * Sort content by date (newest first)
@@ -32,8 +27,3 @@ export function allCoreContent<T extends ContentWithDate & ContentWithBody>(
 ): Omit<T, 'body'>[] {
   return contents.filter((c) => !c.draft).map((c) => coreContent(c))
 }
-
-/**
- * CoreContent type - content without body
- */
-export type CoreContent<T> = Omit<T, 'body'>

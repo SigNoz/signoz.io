@@ -1,51 +1,6 @@
 // Docs collection utilities - updated for custom content pipeline
 import { readContentJson, readContentJsonSync } from './contentLoader'
-
-export interface DocMeta {
-  title: string
-  id: string
-  slug: string
-  path: string
-  filePath: string
-  description?: string
-  summary?: string
-  tags?: string[]
-  docTags: string[]
-  readingTime: { minutes: number; words: number; text: string }
-  draft?: boolean
-  sidebar_label?: string
-  date?: string
-  lastmod?: string
-}
-
-export interface TocItem {
-  url: string
-  depth: number
-  value: string
-}
-
-export interface StructuredData {
-  '@type'?: string
-  '@context'?: string
-  mainEntityOfPage?: { '@type'?: string; '@id'?: string }
-  url?: string
-  [key: string]: unknown
-}
-
-export interface Doc extends DocMeta {
-  body: {
-    raw: string
-    code: string
-  }
-  _file: {
-    path: string
-    directory: string
-    name: string
-  }
-  toc: TocItem[]
-  structuredData?: StructuredData
-  hide_table_of_contents?: boolean
-}
+import type { Doc, DocMeta } from '@/types/content'
 
 // Production-only cache (dev mode always reads fresh)
 let docsMetaCache: DocMeta[] | null = null

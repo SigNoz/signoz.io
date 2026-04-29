@@ -3,10 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
-import type { Blog } from '@/utils/contentlayer/blogCollection'
-import type { Author as Authors } from '@/utils/contentlayer/authorCollection'
-import type { Guide } from '@/utils/contentlayer/guideCollection'
+import type { CoreContent, Blog, Author as Authors, Guide } from '@/types/content'
 import type { Comparison } from '../types/transformedContent'
 import { ExternalLink } from 'lucide-react'
 

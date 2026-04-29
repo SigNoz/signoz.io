@@ -1,66 +1,6 @@
 // Blog collection utilities - updated for custom content pipeline
-// Type will be generated at .content/generated/types.d.ts
 import { readContentJson, readContentJsonSync } from './contentLoader'
-
-// Lightweight metadata type (no body/code)
-export interface BlogMeta {
-  title: string
-  date: string
-  lastmod?: string
-  tags: string[]
-  slug: string
-  path: string
-  filePath: string
-  summary?: string
-  description?: string
-  image?: string
-  images?: string[]
-  authors: string[]
-  readingTime: { minutes: number; words: number; text: string }
-  draft?: boolean
-  excludeFromSitemap?: boolean
-}
-
-export interface TocItem {
-  url: string
-  depth: number
-  value: string
-}
-
-export interface StructuredData {
-  '@type'?: string
-  '@context'?: string
-  mainEntityOfPage?: { '@type'?: string; '@id'?: string }
-  url?: string
-  [key: string]: unknown
-}
-
-export interface RelatedArticle {
-  title: string
-  url: string
-  publishedOn: string
-  slug?: string
-  date?: string
-}
-
-// Note: This interface should stay in sync with the Blog schema in lib/content-pipeline/schema.ts
-// and the generated types in types/content-generated/types.d.ts
-export interface Blog extends BlogMeta {
-  body: {
-    raw: string
-    code: string
-  }
-  _file: {
-    path: string
-    directory: string
-    name: string
-  }
-  toc: TocItem[]
-  structuredData?: StructuredData
-  layout?: string
-  is_newsroom?: boolean
-  relatedArticles?: RelatedArticle[]
-}
+import type { Blog, BlogMeta } from '@/types/content'
 
 // Production-only cache (dev mode always reads fresh)
 let blogsMetaCache: BlogMeta[] | null = null

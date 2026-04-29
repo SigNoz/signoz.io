@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
-import { CoreContent } from '@/utils/contentlayer/contentUtils'
-import type { Blog } from '@/utils/contentlayer/blogCollection'
+import type { CoreContent, Blog } from '@/types/content'
 // Newsroom is essentially the same as Blog
 type Newsroom = Blog
 import Link from '@/components/Link'
