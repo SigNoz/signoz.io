@@ -757,11 +757,12 @@ Environment variables for the self-hosted MCP server. SigNoz Cloud users do not 
 | `TRANSPORT_MODE` | Transport protocol: `stdio` or `http` | `stdio` |
 | `MCP_SERVER_PORT` | Port for HTTP server (when `TRANSPORT_MODE=http`) | `8000` |
 | `LOG_LEVEL` | Logging verbosity: `debug`, `info`, `warn`, `error` | `info` |
+| `SIGNOZ_CUSTOM_HEADERS` | Extra HTTP headers added to every SigNoz API request, such as reverse-proxy auth headers. Format: `Key1:Value1,Key2:Value2` | _(optional)_ |
 | `OAUTH_ENABLED` | Enable OAuth 2.1 authentication (`true`/`false`) | `false` |
 | `OAUTH_TOKEN_SECRET` | Encryption key for OAuth tokens (min 32 bytes) | _(required when `OAUTH_ENABLED=true`)_ |
 | `OAUTH_ISSUER_URL` | Public URL of this MCP server | _(required when `OAUTH_ENABLED=true`)_ |
 | `OAUTH_ACCESS_TOKEN_TTL_MINUTES` | Access token lifetime in minutes | `60` |
-| `OAUTH_REFRESH_TOKEN_TTL_MINUTES` | Refresh token lifetime in minutes | `1440` (24h) |
+| `OAUTH_REFRESH_TOKEN_TTL_MINUTES` | Refresh token lifetime in minutes | `43200` (30d) |
 | `OAUTH_AUTH_CODE_TTL_SECONDS` | Authorization code lifetime in seconds | `600` (10min) |
 
 
@@ -783,16 +784,23 @@ After connecting, verify the server is working:
 
 The MCP server exposes the following tools to your AI assistant:
 
+<Admonition type="note">
+Alert-rule and notification-channel tools use newer SigNoz rules and channels APIs. Use SigNoz v0.120.0 or later for full compatibility with the latest MCP server. Older SigNoz deployments may return HTTP 404 for those tools.
+</Admonition>
+
 | Tool | Description |
 |------|-------------|
 | `signoz_list_metrics` | Search and list available metrics |
 | `signoz_query_metrics` | Query metrics with smart aggregation defaults |
 | `signoz_get_field_keys` | Discover available field keys for metrics, traces, or logs |
 | `signoz_get_field_values` | Get possible values for a field key |
-| `signoz_list_alerts` | List alerts with filtering and pagination |
-| `signoz_get_alert` | Get details of a specific alert rule |
+| `signoz_list_alerts` | List firing, silenced, or inhibited Alertmanager alert instances |
+| `signoz_list_alert_rules` | List configured alert rules, including inactive or disabled rules |
+| `signoz_get_alert` | Get an alert rule definition by ID |
 | `signoz_get_alert_history` | Get alert history timeline for a rule |
 | `signoz_create_alert` | Create an alert rule using v2 schema validation |
+| `signoz_update_alert` | Update an existing alert rule |
+| `signoz_delete_alert` | Delete an alert rule |
 | `signoz_list_dashboards` | List all dashboards with summaries |
 | `signoz_get_dashboard` | Get full dashboard configuration |
 | `signoz_create_dashboard` | Create a new dashboard |
@@ -800,8 +808,11 @@ The MCP server exposes the following tools to your AI assistant:
 | `signoz_delete_dashboard` | Delete a dashboard by UUID |
 | `signoz_list_services` | List services within a time range |
 | `signoz_get_service_top_operations` | Get top operations for a service |
-| `signoz_list_log_views` | List all saved log views |
-| `signoz_get_log_view` | Get details of a saved log view |
+| `signoz_list_views` | List saved Explorer views for traces, logs, or metrics |
+| `signoz_get_view` | Get a saved Explorer view by UUID |
+| `signoz_create_view` | Create a saved Explorer view |
+| `signoz_update_view` | Replace an existing saved Explorer view |
+| `signoz_delete_view` | Delete a saved Explorer view |
 | `signoz_aggregate_logs` | Aggregate logs (count, avg, p99, etc.) with grouping |
 | `signoz_search_logs` | Search logs with flexible filtering |
 | `signoz_aggregate_traces` | Aggregate trace statistics with grouping |
@@ -809,8 +820,10 @@ The MCP server exposes the following tools to your AI assistant:
 | `signoz_get_trace_details` | Get full trace with all spans |
 | `signoz_execute_builder_query` | Execute a raw Query Builder v5 query |
 | `signoz_list_notification_channels` | List notification channels |
+| `signoz_get_notification_channel` | Get a single notification channel by ID |
 | `signoz_create_notification_channel` | Create a notification channel and send a test notification |
 | `signoz_update_notification_channel` | Update a notification channel and send a test notification |
+| `signoz_delete_notification_channel` | Delete a notification channel by ID |
 
 For detailed parameter reference, see the <a href="https://github.com/SigNoz/signoz-mcp-server?tab=readme-ov-file#available-tools" target="_blank" rel="noopener noreferrer nofollow">GitHub repository README</a>.
 
@@ -830,7 +843,7 @@ For detailed parameter reference, see the <a href="https://github.com/SigNoz/sig
 
 - For SigNoz Cloud: ensure you are using the correct [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) in the MCP URL.
 - Confirm your API key is valid and has not expired.
-- For self-hosted HTTP mode, ensure the `Authorization` header format is `Bearer <your-api-key>`.
+- For self-hosted HTTP mode where the client sends the key, use the `SIGNOZ-API-KEY: <your-api-key>` header.
 
 ### SigNoz Cloud connection issues
 
