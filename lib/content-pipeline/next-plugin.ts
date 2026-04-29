@@ -2,6 +2,7 @@ import type { NextConfig } from 'next'
 import * as path from 'path'
 import { buildAllCollections } from './core'
 import { collections } from './schema'
+import { CONTENT_OUTPUT_DIR, REFRESH_TRIGGER_FILE } from './constants'
 
 export interface ContentPipelineOptions {
   contentDir?: string
@@ -15,7 +16,7 @@ export function withContentPipeline(
   nextConfig: NextConfig,
   options: ContentPipelineOptions = {}
 ): NextConfig {
-  const outputDir = options.outputDir || '.content'
+  const outputDir = options.outputDir || CONTENT_OUTPUT_DIR
 
   return {
     ...nextConfig,
@@ -72,13 +73,13 @@ class ContentPipelineWebpackPlugin {
     })
 
     // In dev mode, add data directory and refresh trigger to watch list
-    // The refresh trigger file (.content/.refresh-trigger) is updated by watch-content.mts
-    // after content rebuilds, causing webpack to recompile dependent modules
+    // The refresh trigger file is updated by watch-content.mts after content rebuilds,
+    // causing webpack to recompile dependent modules
     if (this.options.watch) {
       compiler.hooks.afterCompile.tap(pluginName, (compilation: any) => {
         compilation.contextDependencies.add(path.resolve('data'))
         // Watch the refresh trigger file so webpack detects content changes
-        compilation.fileDependencies.add(path.resolve('.content', '.refresh-trigger'))
+        compilation.fileDependencies.add(REFRESH_TRIGGER_FILE)
         // Invalidate build generation when content changes to trigger rebuild
         buildGeneration++
       })

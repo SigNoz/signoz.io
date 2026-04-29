@@ -2,8 +2,9 @@
 // Uses fs.readFile directly to ensure fresh content after rebuilds
 import * as fs from 'fs'
 import * as path from 'path'
+import { CONTENT_OUTPUT_DIR } from '../../lib/content-pipeline/constants'
 
-const CONTENT_DIR = path.resolve(process.cwd(), '.content')
+const CONTENT_DIR = CONTENT_OUTPUT_DIR
 
 export function getContentPath(relativePath: string): string {
   const fullPath = path.resolve(CONTENT_DIR, relativePath)

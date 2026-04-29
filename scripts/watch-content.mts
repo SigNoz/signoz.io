@@ -5,15 +5,16 @@ import { watch } from 'chokidar'
 import { spawn } from 'child_process'
 import * as fs from 'fs'
 import path from 'path'
+import * as constantsModule from '../lib/content-pipeline/constants'
+
+// Handle ESM/CJS interop
+const constants = (constantsModule as any).default || constantsModule
+const { CONTENT_OUTPUT_DIR, REFRESH_TRIGGER_FILE } = constants
 
 const DEBOUNCE_MS = 500
 let rebuildTimer: NodeJS.Timeout | null = null
 let isBuilding = false
 let pendingRebuild = false
-
-// Trigger file to touch after rebuild to trigger Next.js Fast Refresh
-// Using a file in .content/ avoids polluting the working tree with dirty source files
-const REFRESH_TRIGGER_FILE = path.resolve('.content', '.refresh-trigger')
 
 const contentDirs = [
   'data',
@@ -36,10 +37,9 @@ function getCollectionFromPath(filePath: string): string | null {
  */
 function triggerRefresh() {
   try {
-    // Ensure .content directory exists
-    const dir = path.dirname(REFRESH_TRIGGER_FILE)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
+    // Ensure content directory exists
+    if (!fs.existsSync(CONTENT_OUTPUT_DIR)) {
+      fs.mkdirSync(CONTENT_OUTPUT_DIR, { recursive: true })
     }
     // Write timestamp to trigger file change detection
     fs.writeFileSync(REFRESH_TRIGGER_FILE, String(Date.now()))

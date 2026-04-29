@@ -2,6 +2,7 @@
 // scripts/build-content.mts
 import * as coreModule from '../lib/content-pipeline/core'
 import * as schemaModule from '../lib/content-pipeline/schema'
+import * as constantsModule from '../lib/content-pipeline/constants'
 import * as path from 'path'
 import * as fs from 'fs'
 import GithubSlugger from 'github-slugger'
@@ -10,8 +11,10 @@ import GithubSlugger from 'github-slugger'
 // depending on how they're transpiled. This fallback ensures compatibility.
 const core = (coreModule as any).default || coreModule
 const schema = (schemaModule as any).default || schemaModule
+const constants = (constantsModule as any).default || constantsModule
 const { buildAllCollections } = core
 const { collections } = schema
+const { CONTENT_OUTPUT_DIR } = constants
 
 // MDX plugins are now in the worker (lib/content-pipeline/mdx-worker.ts)
 
@@ -61,7 +64,7 @@ async function main() {
 
   console.log(`Building content${force ? ' (force rebuild)' : ''}...\n`)
 
-  const outputDir = path.resolve('.content')
+  const outputDir = CONTENT_OUTPUT_DIR
 
   await buildAllCollections(collections, {
     outputDir,
