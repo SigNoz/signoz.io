@@ -1,0 +1,73 @@
+---
+date: 2026-04-30
+id: serving-on-external-url
+title: Serving SigNoz from a Prefix
+description: Learn how to serve SigNoz under a URL prefix (e.g. /signoz/) so it can run behind a reverse proxy alongside other services on the same domain.
+doc_type: howto
+tags: [Self-Host]
+---
+
+SigNoz can be served under a URL prefix, so you can place it behind a reverse proxy alongside other services on the same domain - for example, `https://example.com/signoz/`.
+
+A single environment variable (`SIGNOZ_GLOBAL_EXTERNAL__URL`) is the only configuration required. Both the API and the frontend derive the prefix from its value at startup. No image rebuild is needed.
+
+## Prerequisites
+
+- SigNoz v0.112.0 or later.
+- A reverse proxy configured to forward traffic for the chosen prefix to the SigNoz service.
+
+## Configuration
+
+To serve SigNoz under a URL prefix, set environment variable `SIGNOZ_GLOBAL_EXTERNAL__URL` on the `signoz` service to the full external URL, including the path:
+
+```bash
+SIGNOZ_GLOBAL_EXTERNAL__URL=https://example.com/signoz
+```
+
+SigNoz reads the path component (`/signoz`) at startup and applies it as the prefix for all API routes and frontend assets.
+
+
+## What SigNoz handles automatically
+
+Everything in SigNoz - the UI and all product features - works correctly under the configured prefix. No additional changes are needed anywhere in the product.
+
+<Admonition type="info">
+Health endpoints (`/api/v1/health`, `/api/v2/healthz`, `/api/v2/readyz`, `/api/v2/livez`) are served **without** the prefix so existing container probes keep working without reconfiguration.
+</Admonition>
+
+## Validate
+
+After restarting SigNoz with the updated configuration:
+
+1. Open `https://example.com/signoz/` in your browser.
+2. Confirm the SigNoz UI loads and in-app navigation works end to end.
+3. Verify health probes succeed - confirm `GET /api/v1/health` (without the prefix) returns `200 OK`.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### UI loads but API calls return 404
+
+The prefix in `SIGNOZ_GLOBAL_EXTERNAL__URL` must exactly match what your reverse proxy forwards. Check that the proxy is not stripping the prefix before passing requests to SigNoz.
+
+### Static assets (JS/CSS) return 404
+
+Ensure the reverse proxy forwards the full path, including the prefix, to SigNoz. Stripping the prefix on the proxy side breaks asset resolution because SigNoz injects the prefix into all asset URLs at startup.
+
+### Health probes failing after adding the prefix
+
+Health endpoints do not use the prefix. Update your container probe to target `/api/v1/health` directly, without the prefix.
+
+### Storage or session conflicts when running multiple instances on the same host
+
+Storage keys are scoped to the prefix automatically. If you are seeing conflicts, confirm each instance has a distinct prefix set via `SIGNOZ_GLOBAL_EXTERNAL__URL`.
+
+</details>
+
+## Next steps
+
+- [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/)
+- [Root User Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/root-user/)
+- [Relational Database Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/relational-database/)

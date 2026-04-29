@@ -518,6 +518,12 @@ const docsSideNav = [
                 label: 'Relational Databases Support',
                 isExpanded: false,
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/serving-on-external-url',
+                label: 'Serving from a Prefix',
+                isExpanded: false,
+              },
             ],
           },
           {
