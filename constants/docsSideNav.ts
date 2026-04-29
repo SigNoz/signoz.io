@@ -522,7 +522,6 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/manage/administrator-guide/configuration/serving-on-external-url',
                 label: 'Serving on an External URL',
-                isExpanded: false,
               },
             ],
           },

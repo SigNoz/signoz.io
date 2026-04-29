@@ -26,9 +26,9 @@ SIGNOZ_GLOBAL_EXTERNAL__URL=https://example.com/signoz
 SigNoz reads the path component (`/signoz`) at startup and applies it as the prefix for all API routes and frontend assets.
 
 
-## What SigNoz handles automatically
+## Behavior
 
-Everything in SigNoz - the UI and all product features - works correctly under the configured prefix. No additional changes are needed anywhere in the product.
+Everything in SigNoz - the UI and all product features - works correctly under the configured prefix as of v0.121.0. No additional changes are needed anywhere in the product.
 
 <Admonition type="info">
 Health endpoints (`/api/v1/health`, `/api/v2/healthz`, `/api/v2/readyz`, `/api/v2/livez`) are served **without** the prefix so existing container probes keep working without reconfiguration.
@@ -40,7 +40,11 @@ After restarting SigNoz with the updated configuration:
 
 1. Open `https://example.com/signoz/` in your browser.
 2. Confirm the SigNoz UI loads and in-app navigation works end to end.
-3. Verify health probes succeed - confirm `GET /api/v1/health` (without the prefix) returns `200 OK`.
+3. Verify health probes succeed - run the following and confirm it returns `200 OK`:
+
+```bash
+curl -i https://example.com/api/v1/health
+```
 
 <details>
 <ToggleHeading>
