@@ -25,11 +25,13 @@ export async function generateMetadata({
     notFound()
   }
 
+  const fullTitle = post?.title ? `${post.title} | SigNoz Docs` : 'SigNoz Docs'
+
   return {
     title: post?.title,
     description: post?.description,
     openGraph: {
-      title: post?.title,
+      title: fullTitle,
       description: post?.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
@@ -38,7 +40,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: post?.title,
+      title: fullTitle,
     },
   }
 }
