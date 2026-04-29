@@ -17,7 +17,7 @@ const notFoundResponse = () =>
 
 export async function GET(_: Request, { params }: { params: { version: string } }) {
   const raw = params.version
-  const version = raw === 'latest' ? await resolveLatestVersion() : decodeURIComponent(raw)
+  const version = raw === 'latest' ? await resolveLatestVersion() : raw
 
   if (!version) return notFoundResponse()
 

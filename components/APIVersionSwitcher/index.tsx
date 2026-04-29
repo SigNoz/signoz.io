@@ -16,6 +16,9 @@ interface APIVersionSwitcherProps {
   availableVersions: string[]
 }
 
+// Coupled to Stoplight Elements' internal DOM structure (tested with @stoplight/elements ^8.5.0).
+// Locates the sidebar header row by navigating from the "powered by Stoplight" link upward.
+// If Stoplight updates their DOM layout, this selector may need adjustment.
 function findSidebarHeaderRow(apiRoot: HTMLElement): {
   headerRow: HTMLElement
   heading: HTMLElement
@@ -110,8 +113,10 @@ export default function APIVersionSwitcher({
 
     if (findAndAttach()) return undefined
 
+    let attempts = 0
+    const MAX_ATTEMPTS = 50 // ~10 seconds
     const interval = setInterval(() => {
-      if (findAndAttach()) clearInterval(interval)
+      if (findAndAttach() || ++attempts >= MAX_ATTEMPTS) clearInterval(interval)
     }, 200)
 
     return () => clearInterval(interval)

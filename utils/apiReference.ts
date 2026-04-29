@@ -57,8 +57,7 @@ export async function fetchOpenAPISpec(version: string): Promise<string | null> 
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'signoz-api-reference',
-        ...(process.env.GITHUB_TOKEN ? { Authorization: `token ${process.env.GITHUB_TOKEN}` } : {}),
+        ...githubFetchHeaders(),
       },
       next: { revalidate: API_SPEC_REVALIDATE_SECONDS },
     })

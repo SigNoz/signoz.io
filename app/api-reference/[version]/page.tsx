@@ -7,10 +7,11 @@ import {
   resolveLatestVersion,
 } from '@/utils/apiReference'
 import siteMetadata from '@/data/siteMetadata'
+import { API_SPEC_REVALIDATE_SECONDS } from '@/constants/apiReference'
 import OpenAPISpec from '@/components/OpenAPISpec'
 import APIVersionSwitcher from '@/components/APIVersionSwitcher'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = API_SPEC_REVALIDATE_SECONDS
 
 interface PageProps {
   params: { version: string }

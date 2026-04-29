@@ -16,6 +16,9 @@ export default function OpenAPISpec({ specContent }: OpenAPISpecProps) {
     setMounted(true)
   }, [])
 
+  // SSR placeholder: renders the full spec in a hidden div so crawlers/SEO bots
+  // can index endpoint content. The `hidden` class prevents visual display but
+  // Stoplight still parses the spec in the DOM — accepted trade-off for SEO coverage.
   if (!mounted)
     return (
       <div className="hidden h-screen w-screen">
