@@ -2,36 +2,29 @@
 date: 2026-04-30
 id: serving-on-external-url
 title: Serving SigNoz on an External URL
-description: Learn how to serve SigNoz on a custom external URL or prefix so it can run behind a reverse proxy alongside other services on the same domain.
+description: Learn how to serve SigNoz on a custom external URL or base path so it can run behind a reverse proxy alongside other services on the same domain.
 doc_type: howto
 tags: [Self-Host]
 ---
 
-SigNoz can be served under a URL prefix, so you can place it behind a reverse proxy alongside other services on the same domain - for example, `https://example.com/signoz/`.
+SigNoz can be served under a base path, so you can place it behind a reverse proxy alongside other services on the same domain - for example, `https://example.com/signoz/`.
 
-A single environment variable (`SIGNOZ_GLOBAL_EXTERNAL__URL`) is the only configuration required. Both the API and the frontend derive the prefix from its value at startup. No image rebuild is needed.
+A single environment variable is the only configuration required. Everything under SigNoz derives the base path from its value at startup. No image rebuild is needed.
 
-## Prerequisites
-
-- SigNoz v0.121.0 or later.
+<Admonition type="info">
+This feature is available from SigNoz v0.121.0 or later.
+</Admonition>
 
 ## Configuration
 
-To serve SigNoz under a URL prefix, set environment variable `SIGNOZ_GLOBAL_EXTERNAL__URL` on the `signoz` service to the prefix URL:
+Configure the base path by setting `SIGNOZ_GLOBAL_EXTERNAL__URL` to your external URL:
 
 ```bash
 SIGNOZ_GLOBAL_EXTERNAL__URL=https://example.com/signoz
 ```
 
-SigNoz reads the path component (`/signoz`) at startup and applies it as the prefix for all API routes and frontend assets.
-
-
-## Behavior
-
-Everything in SigNoz - the UI and all product features - works correctly under the configured prefix as of v0.121.0. No additional changes are needed anywhere in the product.
-
 <Admonition type="info">
-Health endpoints (`/api/v1/health`, `/api/v2/healthz`, `/api/v2/readyz`, `/api/v2/livez`) are served **without** the prefix so existing container probes keep working without reconfiguration.
+SigNoz reads the path component from the URL (e.g. `/signoz`) and uses it as the base path for all API routes and frontend assets. Health endpoints (`/api/v1/health`, `/api/v2/healthz`, `/api/v2/readyz`, `/api/v2/livez`) remain accessible without the prefix for container healthchecks.
 </Admonition>
 
 ## Validate
@@ -53,19 +46,19 @@ curl -i https://example.com/api/v1/health
 
 ### UI loads but API calls return 404
 
-The prefix in `SIGNOZ_GLOBAL_EXTERNAL__URL` must exactly match what your reverse proxy forwards. Check that the proxy is not stripping the prefix before passing requests to SigNoz.
+The base path in `SIGNOZ_GLOBAL_EXTERNAL__URL` must exactly match what your reverse proxy forwards. Check that the proxy is not stripping the base path before passing requests to SigNoz.
 
 ### Static assets (JS/CSS) return 404
 
-Ensure the reverse proxy forwards the full path, including the prefix, to SigNoz. Stripping the prefix on the proxy side breaks asset resolution because SigNoz injects the prefix into all asset URLs at startup.
+Ensure the reverse proxy forwards the full path, including the base path, to SigNoz. Stripping the base path on the proxy side breaks asset resolution because SigNoz injects the base path into all asset URLs at startup.
 
-### Health probes failing after adding the prefix
+### Health probes failing after adding the base path
 
-Health endpoints do not use the prefix. Update your container probe to target `/api/v1/health` directly, without the prefix.
+Health endpoints do not use the base path. Update your container probe to target `/api/v1/health` directly, without the base path.
 
 ### Storage or session conflicts when running multiple instances on the same host
 
-Storage keys are scoped to the prefix automatically. If you are seeing conflicts, confirm each instance has a distinct prefix set via `SIGNOZ_GLOBAL_EXTERNAL__URL`.
+Storage keys are scoped to the base path automatically. If you are seeing conflicts, confirm each instance has a distinct base path set via `SIGNOZ_GLOBAL_EXTERNAL__URL`.
 
 </details>
 
