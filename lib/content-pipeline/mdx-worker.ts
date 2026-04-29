@@ -2,6 +2,8 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 import matter from 'gray-matter'
 import { bundleMDX } from 'mdx-bundler'
+import readingTimeLib from 'reading-time'
+import GithubSlugger from 'github-slugger'
 
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -14,6 +16,9 @@ import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypePrismPlus from 'rehype-prism-plus'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
+
+import { collections } from './schema'
+import { coerceFields, type CollectionHelpers, type TocItem, type DocumentBase } from './define'
 
 const icon = fromHtmlIsomorphic(
   `<span class="content-header-link">
@@ -47,21 +52,60 @@ const mdxPlugins = {
   ],
 }
 
-export interface CompileTask {
-  filePath: string
-  collectionDirectory: string
+// Helpers for computed fields (same as in core.ts)
+function createHelpers(): CollectionHelpers {
+  return {
+    readingTime(text: string) {
+      const result = readingTimeLib(text)
+      return {
+        minutes: Math.ceil(result.minutes),
+        words: result.words,
+        text: result.text,
+      }
+    },
+    extractToc(markdown: string): TocItem[] {
+      const slugger = new GithubSlugger()
+      const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
+      const regXCodeBlock = /```[\s\S]*?```/g
+      const contentWithoutCodeBlocks = markdown.replace(regXCodeBlock, '')
+      const headings: TocItem[] = []
+      for (const match of contentWithoutCodeBlocks.matchAll(regXHeader)) {
+        const flag = match.groups?.flag
+        const content = match.groups?.content?.trim()
+        if (content) {
+          headings.push({
+            value: content,
+            url: `#${slugger.slug(content)}`,
+            depth: flag?.length ?? 1,
+          })
+        }
+      }
+      return headings
+    },
+  }
 }
 
+const helpers = createHelpers()
+
+export interface CompileTask {
+  filePath: string
+  collectionName: string // Name to look up in collections
+  outputDir: string
+}
+
+// Minimal result - all heavy data written to disk by worker
 export interface CompileResult {
-  frontmatter: Record<string, any>
-  content: string
-  code: string
-  relativePath: string
-  fileName: string
+  slugPath: string
+  meta: Record<string, unknown> // Metadata only, no body
 }
 
 export default async function compileFile(task: CompileTask): Promise<CompileResult> {
-  const { filePath, collectionDirectory } = task
+  const { filePath, collectionName, outputDir } = task
+
+  const collection = collections[collectionName]
+  if (!collection) {
+    throw new Error(`Unknown collection: ${collectionName}`)
+  }
 
   const raw = await fs.readFile(filePath, 'utf-8')
   const { data: frontmatter, content } = matter(raw)
@@ -87,8 +131,48 @@ export default async function compileFile(task: CompileTask): Promise<CompileRes
     }),
   })
 
-  const relativePath = path.relative(collectionDirectory, filePath)
+  // Build document (same as core.ts did)
+  const relativePath = path.relative(collection.directory, filePath)
   const fileName = path.basename(filePath)
 
-  return { frontmatter, content, code, relativePath, fileName }
+  const validated = coerceFields(frontmatter, collection.fields)
+  const baseDoc: DocumentBase = {
+    _file: {
+      path: relativePath,
+      directory: path.dirname(relativePath),
+      name: fileName,
+    },
+    body: {
+      raw: content,
+      code,
+    },
+  }
+
+  const docWithFields = { ...validated, ...baseDoc }
+  const computed = collection.computedFieldsFn(docWithFields as any, helpers)
+  const doc = { ...docWithFields, ...computed }
+
+  // Get slug for filenames
+  const rawSlug = (doc as any).slug || fileName.replace(/\.mdx$/, '')
+  const slugPath =
+    rawSlug
+      .replace(/\/$/, '')
+      .split('/')
+      .filter((s: string) => s !== '..' && s !== '.')
+      .join('/') || 'index'
+
+  // Write both files directly in worker
+  const metaPath = path.join(outputDir, `${slugPath}.meta.json`)
+  const bodyPath = path.join(outputDir, `${slugPath}.body.json`)
+
+  const { body, ...meta } = doc as any
+
+  await fs.mkdir(path.dirname(metaPath), { recursive: true })
+  await Promise.all([
+    fs.writeFile(metaPath, JSON.stringify(meta)),
+    fs.writeFile(bodyPath, JSON.stringify(body)),
+  ])
+
+  // Return only what main thread needs for tracking
+  return { slugPath, meta }
 }

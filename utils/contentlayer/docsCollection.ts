@@ -1,5 +1,5 @@
 // Docs collection utilities - updated for custom content pipeline
-import { readContentJson, readContentJsonSync } from './contentLoader'
+import { readContentJson, readContentJsonSync, readContentDocument } from './contentLoader'
 import type { Doc, DocMeta } from '@/types/content'
 
 // Production-only cache (dev mode always reads fresh)
@@ -41,7 +41,7 @@ export async function getAllDocs(): Promise<Doc[]> {
   const docs = await Promise.all(
     meta.map(async (m) => {
       try {
-        return await readContentJson<Doc>(`Doc/${m.slug}.json`)
+        return await readContentDocument<Doc>(`Doc/${m.slug}`)
       } catch {
         console.warn(`Failed to load doc: ${m.slug}`)
         return null
@@ -56,7 +56,7 @@ export async function getAllDocs(): Promise<Doc[]> {
  */
 export async function getDocBySlug(slug: string): Promise<Doc | undefined> {
   try {
-    return await readContentJson<Doc>(`Doc/${slug}.json`)
+    return await readContentDocument<Doc>(`Doc/${slug}`)
   } catch {
     return undefined
   }

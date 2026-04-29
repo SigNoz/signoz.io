@@ -37,3 +37,37 @@ export function readContentJsonSync<T>(relativePath: string): T {
   const content = fs.readFileSync(fullPath, 'utf-8')
   return JSON.parse(content) as T
 }
+
+/**
+ * Read a document from split meta/body files.
+ * Documents are stored as {slug}.meta.json and {slug}.body.json for memory efficiency.
+ * @param basePath - Path without .json extension, e.g. "Doc/my-slug"
+ */
+export async function readContentDocument<T>(basePath: string): Promise<T> {
+  const metaPath = getContentPath(`${basePath}.meta.json`)
+  const bodyPath = getContentPath(`${basePath}.body.json`)
+
+  const [metaContent, bodyContent] = await Promise.all([
+    fs.promises.readFile(metaPath, 'utf-8'),
+    fs.promises.readFile(bodyPath, 'utf-8'),
+  ])
+
+  const meta = JSON.parse(metaContent)
+  const body = JSON.parse(bodyContent)
+  return { ...meta, body } as T
+}
+
+/**
+ * Sync version of readContentDocument.
+ */
+export function readContentDocumentSync<T>(basePath: string): T {
+  const metaPath = getContentPath(`${basePath}.meta.json`)
+  const bodyPath = getContentPath(`${basePath}.body.json`)
+
+  const metaContent = fs.readFileSync(metaPath, 'utf-8')
+  const bodyContent = fs.readFileSync(bodyPath, 'utf-8')
+
+  const meta = JSON.parse(metaContent)
+  const body = JSON.parse(bodyContent)
+  return { ...meta, body } as T
+}

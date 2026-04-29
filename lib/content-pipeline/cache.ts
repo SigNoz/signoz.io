@@ -1,4 +1,5 @@
 import * as fs from 'fs/promises'
+import { createReadStream, createWriteStream } from 'fs'
 import * as path from 'path'
 import { createHash } from 'crypto'
 import pLimit from 'p-limit'
@@ -54,10 +55,39 @@ export class ContentCache {
     if (!entry || entry.hash !== hash) return undefined
 
     try {
-      const cachedPath = path.join(this.cacheDir, `${entry.slug}.json`)
-      const data = await fs.readFile(cachedPath, 'utf-8')
+      // Read meta and body separately, then merge
+      const metaPath = path.join(this.cacheDir, `${entry.slug}.meta.json`)
+      const bodyPath = path.join(this.cacheDir, `${entry.slug}.body.json`)
+
+      const [metaData, bodyData] = await Promise.all([
+        fs.readFile(metaPath, 'utf-8'),
+        fs.readFile(bodyPath, 'utf-8'),
+      ])
+
       this.currentSlugs.add(entry.slug)
-      return { data: JSON.parse(data), slug: entry.slug }
+      const meta = JSON.parse(metaData)
+      const body = JSON.parse(bodyData)
+      return { data: { ...meta, body } as T, slug: entry.slug }
+    } catch {
+      return undefined
+    }
+  }
+
+  // Get only metadata - reads only meta file, body.code never touches memory
+  async getMetaOnly(
+    filePath: string,
+    hash: string
+  ): Promise<{ meta: Record<string, unknown>; slug: string } | undefined> {
+    this.ensureInitialized()
+
+    const entry = this.manifest!.entries[filePath]
+    if (!entry || entry.hash !== hash) return undefined
+
+    try {
+      const metaPath = path.join(this.cacheDir, `${entry.slug}.meta.json`)
+      const data = await fs.readFile(metaPath, 'utf-8')
+      this.currentSlugs.add(entry.slug)
+      return { meta: JSON.parse(data), slug: entry.slug }
     } catch {
       return undefined
     }
@@ -66,12 +96,47 @@ export class ContentCache {
   async set<T>(filePath: string, hash: string, slug: string, data: T): Promise<void> {
     this.ensureInitialized()
 
-    const cachedPath = path.join(this.cacheDir, `${slug}.json`)
+    const metaPath = path.join(this.cacheDir, `${slug}.meta.json`)
+    const bodyPath = path.join(this.cacheDir, `${slug}.body.json`)
+
+    // Split document into meta and body for separate storage
+    const { body, ...meta } = data as any
 
     // Ensure parent directories exist for nested slugs (e.g., "docs/intro")
-    await fs.mkdir(path.dirname(cachedPath), { recursive: true })
-    await fs.writeFile(cachedPath, JSON.stringify(data))
+    await fs.mkdir(path.dirname(metaPath), { recursive: true })
 
+    // Write meta and body in parallel
+    await Promise.all([
+      fs.writeFile(metaPath, JSON.stringify(meta)),
+      fs.writeFile(bodyPath, JSON.stringify(body)),
+    ])
+
+    this.manifest!.entries[filePath] = { hash, slug }
+    this.currentSlugs.add(slug)
+    this.dirty = true
+  }
+
+  // Write only metadata - use when body.json is already written (e.g., by worker)
+  async setMetaOnly(
+    filePath: string,
+    hash: string,
+    slug: string,
+    meta: Record<string, unknown>
+  ): Promise<void> {
+    this.ensureInitialized()
+
+    const metaPath = path.join(this.cacheDir, `${slug}.meta.json`)
+    await fs.mkdir(path.dirname(metaPath), { recursive: true })
+    await fs.writeFile(metaPath, JSON.stringify(meta))
+
+    this.manifest!.entries[filePath] = { hash, slug }
+    this.currentSlugs.add(slug)
+    this.dirty = true
+  }
+
+  // Track slug in manifest only - files already written by worker
+  trackSlug(filePath: string, hash: string, slug: string): void {
+    this.ensureInitialized()
     this.manifest!.entries[filePath] = { hash, slug }
     this.currentSlugs.add(slug)
     this.dirty = true
@@ -80,20 +145,21 @@ export class ContentCache {
   async hashFiles(filePaths: string[]): Promise<Map<string, string>> {
     const results = new Map<string, string>()
     const limit = pLimit(FILE_READ_CONCURRENCY)
-    const hashes = await Promise.all(
+
+    await Promise.all(
       filePaths.map((filePath) =>
         limit(async () => {
-          const content = await fs.readFile(filePath)
-          return {
-            filePath,
-            hash: createHash('sha256').update(new Uint8Array(content)).digest('hex'),
+          // Stream-based hashing - avoids loading entire file into memory
+          const hash = createHash('sha256')
+          const stream = createReadStream(filePath)
+          for await (const chunk of stream) {
+            hash.update(chunk)
           }
+          results.set(filePath, hash.digest('hex'))
         })
       )
     )
-    for (const { filePath, hash } of hashes) {
-      results.set(filePath, hash)
-    }
+
     return results
   }
 
@@ -115,7 +181,10 @@ export class ContentCache {
           try {
             await fs.rmdir(fullPath)
           } catch {}
-        } else if (entry.name.endsWith('.json') && entry.name !== '.manifest.json') {
+        } else if (
+          (entry.name.endsWith('.meta.json') || entry.name.endsWith('.body.json')) &&
+          entry.name !== '.manifest.json'
+        ) {
           await fs.unlink(fullPath).catch(() => {})
         }
       }
@@ -143,13 +212,13 @@ export class ContentCache {
             await fs.rmdir(fullPath)
           } catch {}
         } else if (
-          entry.name.endsWith('.json') &&
+          (entry.name.endsWith('.meta.json') || entry.name.endsWith('.body.json')) &&
           entry.name !== '.manifest.json' &&
           entry.name !== 'meta.json'
         ) {
-          // Get slug from path relative to cacheDir
+          // Get slug from path relative to cacheDir (strip .meta.json or .body.json)
           const relativePath = path.relative(this.cacheDir, fullPath)
-          const slug = relativePath.replace(/\.json$/, '')
+          const slug = relativePath.replace(/\.(meta|body)\.json$/, '')
           if (!this.currentSlugs.has(slug)) {
             await fs.unlink(fullPath).catch(() => {})
             removed++
@@ -164,5 +233,47 @@ export class ContentCache {
     if (!this.dirty || !this.manifest) return
     await fs.writeFile(this.manifestPath, JSON.stringify(this.manifest))
     this.dirty = false
+  }
+
+  // Stream-write a JSON array to avoid building huge string in memory
+  async writeJsonArrayStreaming(
+    filePath: string,
+    items: Iterable<unknown>,
+    prettyPrint = false
+  ): Promise<void> {
+    const stream = createWriteStream(filePath)
+    const indent = prettyPrint ? '  ' : ''
+    const newline = prettyPrint ? '\n' : ''
+
+    return new Promise((resolve, reject) => {
+      stream.on('error', reject)
+      stream.on('finish', resolve)
+
+      stream.write('[' + newline)
+
+      let first = true
+      for (const item of items) {
+        if (!first) {
+          stream.write(',' + newline)
+        }
+        first = false
+
+        const json = JSON.stringify(item, null, prettyPrint ? 2 : undefined)
+        if (prettyPrint) {
+          // Indent each line of the JSON
+          stream.write(
+            json
+              .split('\n')
+              .map((line) => indent + line)
+              .join('\n')
+          )
+        } else {
+          stream.write(json)
+        }
+      }
+
+      stream.write(newline + ']' + newline)
+      stream.end()
+    })
   }
 }

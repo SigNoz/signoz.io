@@ -1,5 +1,5 @@
 // Blog collection utilities - updated for custom content pipeline
-import { readContentJson, readContentJsonSync } from './contentLoader'
+import { readContentJson, readContentJsonSync, readContentDocument } from './contentLoader'
 import type { Blog, BlogMeta } from '@/types/content'
 
 // Production-only cache (dev mode always reads fresh)
@@ -43,7 +43,7 @@ export async function getAllBlogs(): Promise<Blog[]> {
   const blogs = await Promise.all(
     meta.map(async (m) => {
       try {
-        return await readContentJson<Blog>(`Blog/${m.slug}.json`)
+        return await readContentDocument<Blog>(`Blog/${m.slug}`)
       } catch {
         console.warn(`Failed to load blog: ${m.slug}`)
         return null
@@ -58,7 +58,7 @@ export async function getAllBlogs(): Promise<Blog[]> {
  */
 export async function getBlogBySlug(slug: string): Promise<Blog | undefined> {
   try {
-    return await readContentJson<Blog>(`Blog/${slug}.json`)
+    return await readContentDocument<Blog>(`Blog/${slug}`)
   } catch {
     return undefined
   }

@@ -1,5 +1,5 @@
 // Guide collection utilities - updated for custom content pipeline
-import { readContentJson, readContentJsonSync } from './contentLoader'
+import { readContentJson, readContentJsonSync, readContentDocument } from './contentLoader'
 import type { Guide, GuideMeta } from '@/types/content'
 
 // Production-only cache (dev mode always reads fresh)
@@ -41,7 +41,7 @@ export async function getAllGuides(): Promise<Guide[]> {
   const guides = await Promise.all(
     meta.map(async (m) => {
       try {
-        return await readContentJson<Guide>(`Guide/${m.slug}.json`)
+        return await readContentDocument<Guide>(`Guide/${m.slug}`)
       } catch {
         console.warn(`Failed to load guide: ${m.slug}`)
         return null
@@ -56,7 +56,7 @@ export async function getAllGuides(): Promise<Guide[]> {
  */
 export async function getGuideBySlug(slug: string): Promise<Guide | undefined> {
   try {
-    return await readContentJson<Guide>(`Guide/${slug}.json`)
+    return await readContentDocument<Guide>(`Guide/${slug}`)
   } catch {
     return undefined
   }

@@ -3,56 +3,17 @@ import * as path from 'path'
 import * as os from 'os'
 import Piscina from 'piscina'
 import { glob } from 'fast-glob'
-import readingTimeLib from 'reading-time'
-import GithubSlugger from 'github-slugger'
-import type { Collection, CollectionHelpers, CollectionsMap, TocItem, DocumentBase } from './define'
-import { coerceFields } from './define'
+import type { Collection, CollectionsMap } from './define'
 import { ContentCache } from './cache'
 import { generateTypes } from './types-generator'
 import type { CompileTask, CompileResult } from './mdx-worker'
 
-const CPU_COUNT = os.cpus().length
+// Limit workers to balance speed vs memory (~300MB per worker)
+const MAX_WORKERS = Math.min(os.cpus().length, 8)
 
 // Note: __dirname resolves correctly when running via tsx (which preserves it).
 // If this pipeline is ever bundled differently, consider using import.meta.url instead.
 const workerPath = path.resolve(__dirname, 'mdx-worker.ts')
-
-export function createHelpers(): CollectionHelpers {
-  return {
-    readingTime(text: string) {
-      const result = readingTimeLib(text)
-      return {
-        minutes: Math.ceil(result.minutes),
-        words: result.words,
-        text: result.text,
-      }
-    },
-
-    extractToc(markdown: string): TocItem[] {
-      const slugger = new GithubSlugger()
-      const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
-      const regXCodeBlock = /```[\s\S]*?```/g
-
-      const contentWithoutCodeBlocks = markdown.replace(regXCodeBlock, '')
-      const headings: TocItem[] = []
-
-      for (const match of contentWithoutCodeBlocks.matchAll(regXHeader)) {
-        const flag = match.groups?.flag
-        const content = match.groups?.content?.trim()
-
-        if (content) {
-          headings.push({
-            value: content,
-            url: `#${slugger.slug(content)}`,
-            depth: flag?.length ?? 1,
-          })
-        }
-      }
-
-      return headings
-    },
-  }
-}
 
 interface BuildOptions {
   outputDir: string
@@ -70,12 +31,18 @@ interface BuildResult<T> {
   compiled: number
 }
 
+// Metadata-only reference (no body.code in memory)
+interface DocMeta {
+  filePath: string
+  slug: string
+  meta: Record<string, unknown>
+}
+
 async function buildCollectionInternal<T>(
   collection: Collection,
   options: InternalBuildOptions
 ): Promise<BuildResult<T>> {
   const { outputDir, prettyPrint = false, pool } = options
-  const helpers = createHelpers()
 
   // Use outputDir as both cache and output (unified directory)
   const collectionDir = path.join(outputDir, collection.name)
@@ -95,67 +62,52 @@ async function buildCollectionInternal<T>(
 
   const fileHashes = await cache.hashFiles(files)
 
-  const cachedDocs: Array<{ filePath: string; doc: T }> = []
+  // Track only metadata references, not full documents
+  const fileToMeta = new Map<string, DocMeta>()
   const toCompile: Array<{ filePath: string; hash: string }> = []
+  let cachedCount = 0
 
+  // Phase 1: Check cache - only extract metadata, don't parse body.code
   for (const filePath of files) {
     const hash = fileHashes.get(filePath)!
     if (options.force) {
       toCompile.push({ filePath, hash })
     } else {
-      const cached = await cache.get<T>(filePath, hash)
+      // Use getMetaOnly to avoid parsing large body.code strings
+      const cached = await cache.getMetaOnly(filePath, hash)
       if (cached) {
-        cachedDocs.push({ filePath, doc: cached.data })
+        fileToMeta.set(filePath, { filePath, slug: cached.slug, meta: cached.meta })
+        cachedCount++
       } else {
         toCompile.push({ filePath, hash })
       }
     }
   }
 
-  const compiledDocs: Array<{ filePath: string; doc: T }> = []
-
+  // Phase 2: Compile in parallel - worker does ALL heavy lifting
+  // Worker: compiles MDX, applies computed fields, writes meta.json + body.json
+  // Returns only: slugPath + meta (for tracking)
   if (toCompile.length > 0) {
     const tasks: CompileTask[] = toCompile.map(({ filePath }) => ({
       filePath,
-      collectionDirectory: collection.directory,
+      collectionName: collection.name, // Worker looks up collection by name
+      outputDir: collectionDir,
     }))
 
+    // Let Piscina handle concurrency
     const results = await Promise.all(tasks.map((task) => pool.run(task) as Promise<CompileResult>))
 
+    // Just update manifest and tracking - files already written by worker
     for (let i = 0; i < results.length; i++) {
       const result = results[i]
       const { filePath, hash } = toCompile[i]
 
-      const validated = coerceFields(result.frontmatter, collection.fields)
-      const baseDoc: DocumentBase = {
-        _file: {
-          path: result.relativePath,
-          directory: path.dirname(result.relativePath),
-          name: result.fileName,
-        },
-        body: {
-          raw: result.content,
-          code: result.code,
-        },
-      }
-
-      const docWithFields = { ...validated, ...baseDoc }
-      const computed = collection.computedFieldsFn(docWithFields as any, helpers)
-      const doc = { ...docWithFields, ...computed } as T
-
-      // Get slug for the cache filename, sanitized to prevent path traversal
-      const rawSlug = (doc as any).slug || (doc as any)._file.name.replace(/\.mdx$/, '')
-      const slugPath =
-        rawSlug
-          .replace(/\/$/, '')
-          .split('/')
-          .filter((s: string) => s !== '..' && s !== '.')
-          .join('/') || 'index'
-
-      await cache.set(filePath, hash, slugPath, doc)
-      compiledDocs.push({ filePath, doc })
+      // Update cache manifest (files already on disk from worker)
+      cache.trackSlug(filePath, hash, result.slugPath)
+      fileToMeta.set(filePath, { filePath, slug: result.slugPath, meta: result.meta })
     }
   }
+  const compiledCount = toCompile.length
 
   // Cleanup orphaned files (e.g., from renamed slugs)
   const orphansRemoved = await cache.cleanupOrphans()
@@ -165,23 +117,20 @@ async function buildCollectionInternal<T>(
 
   await cache.flush()
 
-  // Merge documents maintaining file order
-  const fileToDoc = new Map<string, T>()
-  for (const { filePath, doc } of cachedDocs) fileToDoc.set(filePath, doc)
-  for (const { filePath, doc } of compiledDocs) fileToDoc.set(filePath, doc)
-  const documents = files.map((f) => fileToDoc.get(f)!)
+  // Stream-write meta.json to avoid building huge JSON string in memory
+  const metaPath = path.join(collectionDir, 'meta.json')
+  const metaIterator = (function* () {
+    for (const f of files) {
+      yield fileToMeta.get(f)!.meta
+    }
+  })()
+  await cache.writeJsonArrayStreaming(metaPath, metaIterator, prettyPrint)
 
-  // Write meta.json (lightweight metadata for listings)
-  const jsonSpace = prettyPrint ? 2 : undefined
-  const meta = documents.map((doc: any) => {
-    const { body, ...rest } = doc
-    return rest
-  })
-  await fs.writeFile(path.join(collectionDir, 'meta.json'), JSON.stringify(meta, null, jsonSpace))
+  console.log(`    -> ${cachedCount} cached, ${compiledCount} compiled`)
 
-  console.log(`    -> ${cachedDocs.length} cached, ${compiledDocs.length} compiled`)
-
-  return { documents, cached: cachedDocs.length, compiled: compiledDocs.length }
+  // Return empty documents array - callers should read from cache files
+  // This avoids loading all documents into memory at once
+  return { documents: [] as T[], cached: cachedCount, compiled: compiledCount }
 }
 
 export async function buildAllCollections(
@@ -190,11 +139,16 @@ export async function buildAllCollections(
 ): Promise<void> {
   const pool = new Piscina({
     filename: workerPath,
-    maxThreads: CPU_COUNT,
+    maxThreads: MAX_WORKERS,
     execArgv: ['--import', 'tsx'],
+    // Limit memory per worker to prevent OOM
+    resourceLimits: {
+      maxOldGenerationSizeMb: 128,
+      maxYoungGenerationSizeMb: 48,
+    },
   })
 
-  console.log(`Using ${CPU_COUNT} worker threads`)
+  console.log(`Using ${MAX_WORKERS} worker threads`)
 
   const internalOptions: InternalBuildOptions = { ...options, pool }
 
@@ -224,8 +178,12 @@ export async function buildCollection<T>(
 ): Promise<BuildResult<T>> {
   const pool = new Piscina({
     filename: workerPath,
-    maxThreads: CPU_COUNT,
+    maxThreads: MAX_WORKERS,
     execArgv: ['--import', 'tsx'],
+    resourceLimits: {
+      maxOldGenerationSizeMb: 128,
+      maxYoungGenerationSizeMb: 48,
+    },
   })
 
   try {
