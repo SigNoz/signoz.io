@@ -8,10 +8,6 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
-
 ## Overview
 
 Docker writes container output to JSON log files on the host and daemon events to `journald` or syslog. This guide covers collecting both with an OpenTelemetry Collector.
@@ -20,9 +16,11 @@ Docker writes container output to JSON log files on the host and daemon events t
 
 - Docker Engine 20.10+ installed and running
 - Administrative access to the Docker host
-- OpenTelemetry Collector installed and sending logs to SigNoz
+- [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) installed and sending logs to SigNoz
 
-If you haven't installed the Collector yet, follow the [Docker collection agent guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ## Setup
 
@@ -242,7 +240,7 @@ docker run --name opentelemetry-collector \
   -v /proc:/hostfs/proc:ro \
   -v /sys:/hostfs/sys:ro \
   -v /:/hostfs:ro \
-  -v "$(pwd)/otel-collector-config.yaml":/etc/otelcol-contrib/config.yaml \
+  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
   -e HOST_PROC=/hostfs/proc \
   -e HOST_SYS=/hostfs/sys \
   -e HOST_ROOT=/hostfs \
@@ -252,7 +250,7 @@ docker run --name opentelemetry-collector \
 </TabItem>
 <TabItem value="docker-compose" label="Using Docker Compose">
 
-Create a `docker-compose.yaml` in the same directory as your `otel-collector-config.yaml`:
+Create a `docker-compose.yaml` in the same directory as your `config.yaml`:
 
 ```yaml:docker-compose.yaml
 services:
@@ -262,7 +260,7 @@ services:
     restart: unless-stopped
     user: "0:0"
     volumes:
-      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+      - ./config.yaml:/etc/otelcol-contrib/config.yaml
       - /:/hostfs:ro
       - /proc:/hostfs/proc:ro
       - /sys:/hostfs/sys:ro
