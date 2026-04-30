@@ -1,11 +1,11 @@
 'use client'
 
-import React, { Suspense, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
-import { useSearchParams } from 'next/navigation'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { usePathname } from 'next/navigation'
 import { getOrCreateAnonymousId, getUserId } from '@/utils/userClient'
 import { extractGroupIdFromEmail } from '@/utils/userShared'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 interface ChatbaseClientProps {
   className?: string
@@ -14,7 +14,19 @@ interface ChatbaseClientProps {
   disableFloatingMessages?: boolean
 }
 
-function ChatbaseClientInner({
+async function fetchUserHash(): Promise<{ userId: string; userHash: string } | null> {
+  try {
+    const res = await fetch('/api/chatbase-hash', {
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
+  }
+}
+
+export default function ChatbaseClient({
   className,
   userId,
   userHash,
@@ -22,8 +34,8 @@ function ChatbaseClientInner({
 }: ChatbaseClientProps) {
   const isInitialized = useRef(false)
   const [shouldLoadScript, setShouldLoadScript] = useState(false)
-  const searchParams = useSearchParams()
-  const source = searchParams?.get('source')
+  const pathname = usePathname()
+  const isOnboarding = isDocsOnboardingPathname(pathname)
 
   useEffect(() => {
     // Ensure we're running in a browser environment
@@ -32,8 +44,8 @@ function ChatbaseClientInner({
       return
     }
 
-    if (source === ONBOARDING_SOURCE) {
-      console.log('Skipping Chatbase initialization due to onboarding source param')
+    if (isOnboarding) {
+      console.log('Skipping Chatbase initialization due to onboarding path')
       return
     }
 
@@ -41,75 +53,93 @@ function ChatbaseClientInner({
     if (isInitialized.current) return
     isInitialized.current = true
 
-    // Get user information
-    const anonymousId = getOrCreateAnonymousId()
-    const storedUserId = getUserId()
+    const initChatbase = async () => {
+      // Get user information
+      const anonymousId = getOrCreateAnonymousId()
+      const storedUserId = getUserId()
 
-    // Use server-provided userId/hash if available, otherwise use client-side data
-    const finalUserId = userId || anonymousId
+      // Sync anonymous ID to cookie so server can access it for hash generation
+      if (anonymousId) {
+        document.cookie = `app_anonymous_id=${anonymousId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+      }
 
-    // Set up Chatbase configuration BEFORE loading the script
-    if (finalUserId) {
-      const userMetadata: Record<string, string> = {}
+      // If no server-provided hash, try to fetch it
+      let finalUserId = userId || anonymousId
+      let finalUserHash = userHash
 
-      // Add email to metadata if available
-      if (storedUserId) {
-        userMetadata.email = storedUserId
-
-        // Extract company from email domain
-        const company = extractGroupIdFromEmail(storedUserId)
-        if (company) {
-          userMetadata.company = company
+      if (!finalUserHash && anonymousId) {
+        const hashData = await fetchUserHash()
+        if (hashData) {
+          finalUserId = hashData.userId
+          finalUserHash = hashData.userHash
         }
       }
 
-      // Configure Chatbase with identity verification if hash is available
-      if (userHash) {
-        window.chatbaseUserConfig = {
-          user_id: finalUserId,
-          user_hash: userHash,
-          user_metadata: userMetadata,
+      // Set up Chatbase configuration BEFORE loading the script
+      if (finalUserId) {
+        const userMetadata: Record<string, string> = {}
+
+        // Add email to metadata if available
+        if (storedUserId) {
+          userMetadata.email = storedUserId
+
+          // Extract company from email domain
+          const company = extractGroupIdFromEmail(storedUserId)
+          if (company) {
+            userMetadata.company = company
+          }
+        }
+
+        // Configure Chatbase with identity verification if hash is available
+        if (finalUserHash) {
+          window.chatbaseUserConfig = {
+            user_id: finalUserId,
+            user_hash: finalUserHash,
+            user_metadata: userMetadata,
+          }
+        } else {
+          // Fallback without identity verification
+          window.chatbaseUserConfig = {
+            user_id: finalUserId,
+            user_metadata: userMetadata,
+          }
         }
       } else {
-        // Fallback without identity verification
-        window.chatbaseUserConfig = {
-          user_id: finalUserId,
-          user_metadata: userMetadata,
+        console.log('No user ID available for Chatbase configuration')
+      }
+
+      if (disableFloatingMessages) {
+        window.chatbaseConfig = {
+          ...(window.chatbaseConfig || {}),
+          showFloatingInitialMessages: false,
         }
       }
-    } else {
-      console.log('No user ID available for Chatbase configuration')
-    }
 
-    if (disableFloatingMessages) {
-      window.chatbaseConfig = {
-        ...(window.chatbaseConfig || {}),
-        showFloatingInitialMessages: false,
-      }
-    }
-
-    // Initialize Chatbase exactly as provided in the embed script
-    if (!window.chatbase || window.chatbase('getState') !== 'initialized') {
-      window.chatbase = (...args: any[]) => {
-        if (!window.chatbase.q) {
-          window.chatbase.q = []
-        }
-        window.chatbase.q.push(args)
-      }
-
-      window.chatbase = new Proxy(window.chatbase, {
-        get(target: any, prop: string | symbol) {
-          if (prop === 'q') {
-            return target.q
+      // Initialize Chatbase exactly as provided in the embed script
+      if (!window.chatbase || window.chatbase('getState') !== 'initialized') {
+        window.chatbase = (...args: any[]) => {
+          if (!window.chatbase.q) {
+            window.chatbase.q = []
           }
-          return (...args: any[]) => target(prop, ...args)
-        },
-      })
+          window.chatbase.q.push(args)
+        }
+
+        window.chatbase = new Proxy(window.chatbase, {
+          get(target: any, prop: string | symbol) {
+            if (prop === 'q') {
+              return target.q
+            }
+            return (...args: any[]) => target(prop, ...args)
+          },
+        })
+      }
+
+      // Trigger script loading
+      setShouldLoadScript(true)
     }
 
-    // Trigger script loading
-    setShouldLoadScript(true)
-  }, [disableFloatingMessages, source, userId, userHash])
+    initChatbase()
+  }, [disableFloatingMessages, isOnboarding, userId, userHash])
 
   const handleScriptLoad = () => {
     console.log('Chatbase script loaded successfully')
@@ -132,14 +162,6 @@ function ChatbaseClientInner({
         />
       )}
     </>
-  )
-}
-
-export default function ChatbaseClient(props: ChatbaseClientProps) {
-  return (
-    <Suspense fallback={null}>
-      <ChatbaseClientInner {...props} />
-    </Suspense>
   )
 }
 

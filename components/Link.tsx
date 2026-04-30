@@ -2,22 +2,16 @@
 
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
-import { AnchorHTMLAttributes, Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { AnchorHTMLAttributes } from 'react'
+import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 
 type CustomLinkProps = LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>
 
-function CustomLinkInner({ href, prefetch, ...rest }: CustomLinkProps) {
-  const searchParams = useSearchParams()
-  const [regionParam, setRegionParam] = useState<string | null>(null)
-  const [cloudRegionParam, setCloudRegionParam] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (searchParams) {
-      setRegionParam(searchParams.get('region'))
-      setCloudRegionParam(searchParams.get('cloud_region'))
-    }
-  }, [searchParams])
+const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
+  const search = useBrowserSearch()
+  const searchParams = new URLSearchParams(search)
+  const regionParam = searchParams.get('region')
+  const cloudRegionParam = searchParams.get('cloud_region')
 
   const isInternalLink =
     (href && (href.startsWith('/') || href.startsWith('.'))) ||
@@ -52,10 +46,4 @@ function CustomLinkInner({ href, prefetch, ...rest }: CustomLinkProps) {
   return <a target="_blank" rel="noopener noreferrer nofollow" href={href} {...rest} />
 }
 
-export default function CustomLink(props: CustomLinkProps) {
-  return (
-    <Suspense fallback={null}>
-      <CustomLinkInner {...props} />
-    </Suspense>
-  )
-}
+export default CustomLink

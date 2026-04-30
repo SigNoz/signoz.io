@@ -1,15 +1,13 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@headlessui/react'
 import { Menu, X, ArrowRight } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
 import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
-import { QUERY_PARAMS } from '@/constants/queryParams'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { TABS, TAB_PATHNAMES } from './constants'
@@ -19,10 +17,9 @@ import ResourcesDropdown from './ResourcesDropdown'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
 
-function TopNavInner() {
+export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isDocsBasePath, setIsDocsBasePath] = useState(false)
@@ -36,7 +33,6 @@ function TopNavInner() {
   const isSignupRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
   const isWordleRoute = pathname === '/todaysdevopswordle/'
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   useEffect(() => {
     const docsBase = pathname.startsWith('/docs')
@@ -63,8 +59,8 @@ function TopNavInner() {
     }
   }, [pathname])
 
-  // Hide TopNav on teams, contact-us page or if source is onboarding
-  if (isSignupRoute || isContactUsRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
+  // Hide TopNav on teams, contact-us page
+  if (isSignupRoute || isContactUsRoute || isWordleRoute) {
     return null
   }
 
@@ -213,13 +209,5 @@ function TopNavInner() {
 
       {shouldShowTabs ? <Tabs activeTab={activeTab} /> : null}
     </div>
-  )
-}
-
-export default function TopNav() {
-  return (
-    <Suspense fallback={null}>
-      <TopNavInner />
-    </Suspense>
   )
 }

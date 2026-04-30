@@ -1,10 +1,9 @@
 'use client'
 
-import React, { Suspense, useId, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { QUERY_PARAMS } from '../../constants/queryParams'
-import { ONBOARDING_SOURCE } from '../../constants/globals'
+import React, { useId, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { cn } from 'app/lib/utils'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 interface AdditionalDetails {
   [key: string]: string
@@ -154,7 +153,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   </form>
 )
 
-const PageFeedbackInner: React.FC<PageFeedbackProps> = ({ placement = 'default' }) => {
+const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) => {
   const [helpful, setHelpful] = useState<boolean | null>(null)
   const [needsImprovement, setNeedsImprovement] = useState<string>('')
   const [positiveFeedback, setPositiveFeedback] = useState<string>('')
@@ -165,8 +164,8 @@ const PageFeedbackInner: React.FC<PageFeedbackProps> = ({ placement = 'default' 
 
   const feedbackFieldPrefix = useId().replace(/:/g, '')
 
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const pathname = usePathname()
+  const isOnboarding = isDocsOnboardingPathname(pathname)
 
   const apiUrl = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
   const feedbackPath = process.env.NEXT_PUBLIC_SIGNOZ_CMS_FEEDBACK_PATH
@@ -335,7 +334,7 @@ const PageFeedbackInner: React.FC<PageFeedbackProps> = ({ placement = 'default' 
     }
   }
 
-  if (source === ONBOARDING_SOURCE) {
+  if (isOnboarding) {
     return null
   }
 
@@ -446,14 +445,6 @@ const PageFeedbackInner: React.FC<PageFeedbackProps> = ({ placement = 'default' 
         )}
       </section>
     </div>
-  )
-}
-
-const PageFeedback: React.FC<PageFeedbackProps> = (props) => {
-  return (
-    <Suspense fallback={null}>
-      <PageFeedbackInner {...props} />
-    </Suspense>
   )
 }
 
