@@ -226,6 +226,32 @@ If you run into authentication issues, open the command palette and run **Authen
 </TabItem>
 </Tabs>
 
+### Header-Based Authentication (for Cloud MCP Clients)
+
+Some MCP clients (like Cursor Automations) run entirely in the cloud and cannot perform interactive OAuth authentication. For these clients, use header-based authentication by passing your API key and instance URL directly in the request headers.
+
+<Admonition type="info">
+**When to use this:** If your MCP client doesn't support OAuth flows or stdio transport — for example, Cursor Automations — use this header-based configuration instead.
+</Admonition>
+
+```json title="mcp.json"
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "https://mcp.<region>.signoz.cloud/mcp",
+      "headers": {
+        "SIGNOZ-API-KEY": "<your-api-key>",
+        "X-SigNoz-URL": "https://<tenant>.signoz.cloud"
+      }
+    }
+  }
+}
+```
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-api-key>`: The API key from [Get your API Key](#get-your-api-key)
+- `<tenant>`: Your SigNoz Cloud tenant name (the subdomain of your instance URL)
+
 ### Get your API Key
 
 When you add the hosted MCP URL to your client, the MCP client will initiate an authentication flow. You will be prompted to enter:
