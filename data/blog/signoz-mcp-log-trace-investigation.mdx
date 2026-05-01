@@ -1,0 +1,229 @@
+---
+title: "Using SigNoz MCP for Log and Trace Investigation"
+slug: signoz-mcp-log-trace-investigation
+date: 2026-05-01
+tags: [SigNoz, MCP, Observability, Logs, Traces]
+authors: [goutham_karthi]
+image: /img/blog/2026/05/mcp-blog-cover-4.webp
+description: Learn how the SigNoz MCP server lets you investigate logs and traces from plain English — whether you're starting from a vague symptom, a trace ID, or a failing endpoint.
+keywords: [SigNoz, MCP, observability, logs, traces, investigation, debugging, natural language, OpenTelemetry]
+---
+
+Logs and traces are the most detailed source of truth you have in a distributed system. When something goes wrong, they contain the full picture such as 
+
+- which service failed
+- which line of code threw the error
+- how long each step in the request took
+- what the system state looked like at the moment of failure.
+
+The signals are all there. The challenge has always been getting to them quickly.
+
+Traditional log and trace investigation assumes you already know where to look. You need to know 
+
+- which service to filter by
+- which fields to query on
+- the specific time window
+
+If you're investigating an unfamiliar service or a problem that spans multiple services, you spend the first part of every investigation just setting up this context yourself before you can start actually analyzing anything.
+
+<figure data-zoomable align='center'>
+    <img
+        src="/img/blog/2026/05/mcp-blog-cover-4.webp"
+        alt="Blog Cover"
+    />
+</figure>
+
+SigNoz makes this easier than most tools. Traces, logs, and metrics are correlated out of the box via OpenTelemetry, so you're not jumping between disconnected systems to piece together what happened. But even with that correlation in place, you still need to know which service to open, which filters to apply, and what to look for. The interface is powerful, but it still requires you to drive.
+
+The SigNoz MCP changes that dynamic. Instead of navigating to the right service and constructing the right filters, you describe what you're looking for in plain English and the MCP does the navigation for you. You start from a symptom, a trace ID, or a failing endpoint and it finds the relevant logs, traces, and correlated signals automatically.
+
+In this post we'll walk through three specific use cases — exploring logs without writing a single query, reconstructing a bug from a trace ID, and tracing a failing request end-to-end across multiple services.
+
+## The Problem with Traditional Log and Trace Investigation
+
+<figure data-zoomable align='center'>
+    <img
+        src="/img/blog/2026/05/mcp-blog-section-cover-4.webp"
+        alt="Section Cover"
+    />
+</figure>
+
+The challenge with log and trace investigation isn't that the data isn't there. It's that accessing it requires context you often don't have right at the start of an investigation.
+
+When an incident starts or a bug gets reported, the information you typically have is vague. 
+
+- A Slack message saying search results are stale.
+- A support ticket with a user ID and a timestamp.
+- An endpoint that's returning 500s.
+
+None of these give you a service name to filter by, a field name to query on, or a log pattern to search for. You have to fetch that context through investigation but observability tools assume you already have it before you start.
+
+This creates a frustrating loop. You open your observability tool, try a query, get too many results or the wrong ones, refine the filter, try again. If you're investigating a service you don't own or haven't worked with before, that loop takes longer because you don't know the field names, the log format, or which operations matter. By the time you have enough to start making progress, you've already spent 15-20 minutes on navigation rather than investigation.
+
+Traces have a slightly different problem. The data in a distributed trace is highly detailed. It’s a full call chain across every service involved in a request, with timing and error information at every step. But those details are only accessible if you have a trace ID to start from, or know exactly which service and time window to search. A support ticket that says "checkout was broken at 3pm" doesn't give you any specifics relating to the exact trace ID. It simply gives you a starting point for a manual search.
+
+SigNoz's native OTel integration means traces, logs, and metrics are already correlated — you don't need to stitch them together from separate systems. The MCP builds on SigNoz’s native OTel integration and correlated traces, metrics, and logs by removing the remaining friction of
+
+- the querying
+- the filtering
+- the navigation
+
+that all still require manual effort even when the data is in one place.
+
+## Exploring Logs Without Writing a Single Query
+
+Most log investigations start with a symptom rather than a service. The reports typically just describe the problem rather than providing a specific service name, a log pattern, or a query to run.  They just describe what's wrong from the outside.
+
+The traditional approach is to take that description and translate it into a query yourself. You pick a service you think might be involved, write a filter, see what comes back, and iterate from there. If you know the system well, this works. But when you don't, it's slow and uncertain.
+
+With the SigNoz MCP you start from the symptom directly:
+
+```text
+Show me recent error or warning logs from any service related to search indexing or index lag in the last 6 hours.
+```
+
+You don’t have to specify a service or write a query or filter. The MCP is automatically able to query through all relevant logs across the relevant time frames and find exactly what you’re looking for. 
+
+From there the investigation follows naturally. Each response points to the next question, and each prompt gets more specific as the picture becomes clearer:
+
+```text
+Show me logs from that service that mention 'skip', 'drop', 'malformed', or 'invalid'.
+```
+
+```text
+Show me how many of those warnings occurred per hour over the last 24 hours.
+```
+
+```text
+Show me deployment or config change logs from the upstream service around the time the spike started.
+```
+
+Each prompt builds on the last. You follow the signal rather than constructing the full query upfront. The MCP handles the service discovery, the filtering, and the aggregation and all you have to do is keep asking the next logical question until you have a root cause.
+
+- [Step-by-step guide](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/)
+
+## Reconstructing a Bug from a Trace ID
+
+- Support tickets and error trackers almost always come with a trace ID.
+- An error page shows a request ID.
+- A customer pastes a reference number from a failed transaction.
+
+These IDs are the starting point for a debugging session but in order to turn them into a full picture of what happened you need to navigate to your observability tool, search for the trace, click through the span tree, and search for correlated logs.
+
+With the SigNoz MCP, you paste the trace ID and ask a single question:
+
+```text
+Look up trace ID 7a3f2b1c8d4e5f6a9b0c1d2e3f4a5b6c. The customer says checkout failed with a 500 error. What happened?
+```
+
+The full span tree comes back immediately — every service involved in the request, every operation that ran, the timing of each step, and exactly where the failure occurred:
+
+```text
+Request path:
+  api-gateway /api/checkout (823ms)
+    -> auth-service /verify-token (12ms) OK
+    -> checkout-service /process (798ms)
+         -> inventory-service /reserve (45ms) OK
+         -> payment-service /charge (680ms) FAILED
+              -> HTTP POST stripe.com/v1/charges (672ms)
+                 Status: 402, "card_declined"
+```
+
+The span tree tells you what happened structurally such as where the failure occurred and how it propagated. But spans don't always capture the full context. For that you ask for the correlated logs:
+
+```text
+Show me the logs for this trace, especially what payment-service logged when the charge failed.
+```
+
+Because SigNoz correlates traces and logs natively through OpenTelemetry, the relevant logs surface immediately without any manual timestamp matching or separate log searching.
+
+```text
+payment-service logs:
+    14:46:31.442 INFO  Processing charge for order ord_8821, amount $149.99
+    14:46:32.114 WARN  Stripe returned decline_code=insufficient_funds
+    14:46:32.115 ERROR PaymentError: charge failed, raising InternalServerError
+```
+
+The logs reveal exactly what happened: the Stripe charge returned a card decline, but the payment service re-raised it as an `InternalServerError` instead of mapping it to a meaningful client-facing error. The customer got a generic 500 when they should have seen "Payment declined."
+
+With two prompts and a trace ID as the starting point, you’re able to get a complete picture of the failure
+
+- span tree
+- correlated logs
+- root cause
+- a clear fix
+
+all without opening a single dashboard.
+
+- [Step-by-step guide](https://signoz.io/docs/ai/use-cases/reconstruct-bug-from-trace-id/)
+
+## Tracing a Failing Request End-to-End
+
+The previous use case starts with a trace ID already in hand. But often you don't have one. Your endpoint is returning 500s, an alert fired, and all you know is that something is broken. You need to find the failing request, understand the full call chain, and surface the correlated logs, all without a specific trace ID to start from.
+
+With the SigNoz MCP, a single prompt handles all of it:
+
+```text
+Find the latest failed /checkout trace and show me the full span tree with the error. Also show matching error logs.
+```
+
+The assistant gives you a complete picture with the trace, the span tree, and the correlated logs, all in one response:
+
+```text
+Latest failed /checkout trace
+Trace ID: a1b3adef15df29b119e5379dee016ff0
+Duration: ~8.95s  |  Status: HTTP 500
+
+Span tree:
+└─ POST /api/checkout                    frontend-proxy    ERROR 500
+   └─ POST /api/checkout (server)        frontend          ERROR 500
+      └─ CheckoutService/PlaceOrder      checkout          ERROR
+         ├─ prepareOrderItems...         checkout          ok
+         │  ├─ CartService/GetCart       cart              ok
+         │  ├─ GetProduct                product-catalog   ok
+         │  ├─ CurrencyService/Convert   currency          ok
+         │  └─ shipping /get-quote       shipping          ok
+         └─ PaymentService/Charge        checkout          ERROR ← failure
+            └─ PaymentService/Charge     payment           ERROR
+               status: "Payment request failed. Invalid token.
+                        app.loyalty.level=gold"
+
+Matching logs:
+22:29:09.542  payment  info  Charge request received
+22:29:09.543  payment  warn  Payment request failed. Invalid token. app.loyalty.level=gold
+
+Stack trace:
+Error: Payment request failed. Invalid token. app.loyalty.level=gold
+    at module.exports.charge (/usr/src/app/charge.js:37:13)
+```
+
+The span tree shows the full call chain across every service: cart, product catalog, currency, shipping all return clean. The failure originates at a single point: `PaymentService/Charge`. The correlated logs, surfaced automatically through SigNoz's native OTel integration, go one level deeper. A stack trace pointing directly to `charge.js` line 37, with a specific error message that reveals the failure is scoped to gold-tier loyalty users.
+
+You didn't need a trace ID. And you didn't manually filter traces or search for logs separately. All you needed was one prompt to get the failing trace, the full span tree, the correlated logs, and a stack trace, giving you everything you need to open a PR and fix the bug.
+
+- [Step-by-step guide](https://signoz.io/docs/ai/use-cases/trace-failing-request-end-to-end/)
+
+<YouTube id="Kfod9Ch9g6U" mute={false} />
+
+## Putting It Together — Investigations That Start from a Question
+
+The three use cases in this post cover different starting points:
+
+- A vague symptom in a message
+- A trace ID from a support ticket
+- A failing endpoint with no ID at all
+
+But they share the same underlying pattern. You start with something incomplete, and the MCP does the work of translating it into structured telemetry data.
+
+That shift is important because investigations in practice rarely start with perfect information. You don't always know which service to look at. You don't always have a trace ID. You don't always know what the logs look like for a service you don't own. Traditional observability tooling handles the analysis well once you have all that info, but that process itself takes time and requires context that isn't always available.
+
+The SigNoz MCP removes that step. Whether you're starting from a symptom, an identifier, or a failing endpoint, the entry point is always the same. Describe what you're looking for, and let the MCP find it. The correlation between traces, logs, and metrics that SigNoz provides natively through OpenTelemetry is still doing the heavy lifting underneath, but the MCP just makes accessing it conversational rather than manual.
+
+The result is that investigations that used to require knowing your way around a system become accessible to anyone on the team regardless of whether they own the service, know the query syntax, or have investigated that part of the stack before.
+
+## Getting Started
+
+To try these workflows yourself, connect your AI assistant to SigNoz using the MCP server. Setup takes a few minutes and works with any compatible AI assistant.
+
+- [SigNoz MCP Server Docs](https://signoz.io/docs/ai/signoz-mcp-server/)
+- <a href="https://github.com/SigNoz/signoz-mcp-server" target="_blank" rel="noopener noreferrer nofollow">SigNoz MCP GitHub</a>
