@@ -226,7 +226,17 @@ If you run into authentication issues, open the command palette and run **Authen
 </TabItem>
 </Tabs>
 
-### Header-Based Authentication (for Cloud MCP Clients)
+### Authenticate from your client
+
+When you add the hosted MCP URL to your client, the MCP client will initiate an authentication flow. You will be prompted to enter:
+1. Your **SigNoz instance URL** (e.g., `https://your-instance.signoz.cloud`)
+2. Your **API key** — go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key (requires **Admin** role). See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
+
+<Admonition type="warning">
+Only **Admin** users can create API keys. If you don't see the option, contact your workspace administrator.
+</Admonition>
+
+### Header-Based Authentication
 
 Some MCP clients (like Cursor Automations) run entirely in the cloud and cannot perform interactive OAuth authentication. For these clients, use header-based authentication by passing your API key and instance URL directly in the request headers.
 
@@ -241,7 +251,7 @@ Some MCP clients (like Cursor Automations) run entirely in the cloud and cannot 
       "url": "https://mcp.<region>.signoz.cloud/mcp",
       "headers": {
         "SIGNOZ-API-KEY": "<your-api-key>",
-        "X-SigNoz-URL": "https://<tenant>.signoz.cloud"
+        "X-SigNoz-URL": "<your-signoz-instance-url>"
       }
     }
   }
@@ -249,21 +259,11 @@ Some MCP clients (like Cursor Automations) run entirely in the cloud and cannot 
 ```
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-api-key>`: The API key from [Get your API Key](#get-your-api-key)
-- `<tenant>`: Your SigNoz Cloud tenant name (the subdomain of your instance URL)
+- `<your-api-key>`: API key from [SigNoz Service accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/)
+- `<your-signoz-instance-url>`: Your SigNoz Cloud instance URL
 
 <Admonition type="warning">
 Keep your API key secure — never commit `mcp.json` to version control when it contains secrets.
-</Admonition>
-
-### Get your API Key
-
-When you add the hosted MCP URL to your client, the MCP client will initiate an authentication flow. You will be prompted to enter:
-1. Your **SigNoz instance URL** (e.g., `https://your-instance.signoz.cloud`)
-2. Your **API key** — go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key (requires **Admin** role). See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
-
-<Admonition type="warning">
-Only **Admin** users can create API keys. If you don't see the option, contact your workspace administrator.
 </Admonition>
 
 </TabItem>
