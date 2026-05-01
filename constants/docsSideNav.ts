@@ -3464,7 +3464,7 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/integrations/flyio',
+        route: '/docs/integrations/outposts/flyio',
         label: 'Fly.io',
       },
       {

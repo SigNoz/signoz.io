@@ -1661,6 +1661,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/integrations/flyio/',
+          destination: '/docs/integrations/outposts/flyio/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/docker-standalone/',
           destination: '/docs/install/docker/',
           permanent: true,
