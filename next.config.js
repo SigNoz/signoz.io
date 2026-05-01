@@ -91,11 +91,6 @@ module.exports = () => {
     async redirects() {
       return [
         {
-          source: '/foundry.sh',
-          destination: 'https://raw.githubusercontent.com/SigNoz/foundry/main/scripts/foundry.sh',
-          permanent: true,
-        },
-        {
           source: '/enterprise-self-hosted/',
           destination: '/contact-us/?source=redirect-enterprise-self-hosted',
           permanent: true,
@@ -2690,6 +2685,11 @@ module.exports = () => {
         {
           source: '/docs/logs-management/send-logs/deno-logs/',
           destination: '/docs/instrumentation/opentelemetry-deno/',
+          permanent: true,
+        },
+        {
+          source: '/foundry.sh',
+          destination: 'https://raw.githubusercontent.com/SigNoz/foundry/main/scripts/foundry.sh',
           permanent: true,
         },
       ]
