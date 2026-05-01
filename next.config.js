@@ -93,7 +93,7 @@ module.exports = () => {
         {
           source: '/foundry.sh',
           destination: 'https://raw.githubusercontent.com/SigNoz/foundry/main/scripts/foundry.sh',
-          permanent: false,
+          permanent: true,
         },
         {
           source: '/enterprise-self-hosted/',
