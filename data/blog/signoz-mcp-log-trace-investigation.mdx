@@ -9,12 +9,12 @@ description: Learn how the SigNoz MCP server lets you investigate logs and trace
 keywords: [SigNoz, MCP, observability, logs, traces, investigation, debugging, natural language, OpenTelemetry]
 ---
 
-Logs and traces are the most detailed source of truth you have in a distributed system. When something goes wrong, they contain the full picture such as 
+Logs and traces are the most detailed source of truth you have in a distributed system. When something goes wrong, they contain the full picture:
 
 - which service failed
 - which line of code threw the error
 - how long each step in the request took
-- what the system state looked like at the moment of failure.
+- what the system state was at the moment of failure.
 
 The signals are all there. The challenge has always been getting to them quickly.
 
@@ -62,11 +62,11 @@ This creates a frustrating loop. You open your observability tool, try a query, 
 
 Traces have a slightly different problem. The data in a distributed trace is highly detailed. It’s a full call chain across every service involved in a request, with timing and error information at every step. But those details are only accessible if you have a trace ID to start from, or know exactly which service and time window to search. A support ticket that says "checkout was broken at 3pm" doesn't give you any specifics relating to the exact trace ID. It simply gives you a starting point for a manual search.
 
-SigNoz's native OTel integration means traces, logs, and metrics are already correlated. The MCP builds on SigNoz’s native OTel integration by removing the remaining friction of querying, filtering, and navigation that still require manual effort even when the data is in one place.
+SigNoz's native OTel integration means traces, logs, and metrics are already correlated. The MCP builds on that by removing the remaining friction of querying, filtering, and navigation that still require manual effort even when the data is in one place.
 
 ## Exploring Logs Without Writing a Single Query
 
-Most log investigations start with a symptom rather than a service. The reports typically just describe the problem rather than providing a specific service name, a log pattern, or a query to run.  They just describe what's wrong from the outside.
+Most log investigations start with a symptom rather than a service. The reports typically just describe the problem rather than providing a specific service name, a log pattern, or a query to run.
 
 The traditional approach is to take that description and translate it into a query yourself. You pick a service you think might be involved, write a filter, see what comes back, and iterate from there. If you know the system well, this works. But when you don't, it's slow and uncertain.
 
@@ -92,7 +92,7 @@ Show me how many of those warnings occurred per hour over the last 24 hours.
 Show me deployment or config change logs from the upstream service around the time the spike started.
 ```
 
-Each prompt builds on the last. You follow the signal rather than constructing the full query upfront. The MCP handles the service discovery, the filtering, and the aggregation and all you have to do is keep asking the next logical question until you have a root cause.
+Each prompt builds on the last. You follow the signal rather than constructing the full query upfront. The MCP handles the service discovery, the filtering, and the aggregation, and all you have to do is keep asking the next logical question until you have a root cause.
 
 - [Step-by-step guide](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/)
 
@@ -151,13 +151,13 @@ The two use cases in this post cover different starting points:
 - a vague symptom in a message
 - a failing endpoint with no trace ID at all
 
-But they share the same underlying pattern. You start with something incomplete, and the MCP does the work of translating it into structured telemetry data.
+But they share the same underlying pattern. You start with something incomplete, and the MCP does the work of translating your plain English into queries against your telemetry data.
 
-That transition is important because investigations rarely start with perfect info. You don't always know which service to look at or waht the logs look like. Traditional observability tooling handles the analysis well once you have all that context, but gathering that context takes time.
+That transition is important because investigations rarely start with perfect info. You don't always know which service to look at or what the logs look like. Traditional observability tooling handles the analysis well once you have all that context, but gathering that context takes time.
 
 The SigNoz MCP removes that step. Whether you're starting from a symptom or a failing endpoint, the entry point is always the same. Describe what you're looking for, and let the MCP find it. The correlation between traces, logs, and metrics that SigNoz provides natively through OpenTelemetry is still doing the heavy lifting underneath, but the MCP makes accessing it conversational rather than manual.
 
-The result is that investigations that used to require knowing your way around a system become accessible to anyone on the team regardless of whether they own the service, know the query syntax, or have investigated that part of the stack before.
+The result is that investigations that used to require knowing your way around a system become accessible to anyone on the team, regardless of whether they own the service, know the query syntax, or have investigated that part of the stack before.
 
 ## Getting Started
 
