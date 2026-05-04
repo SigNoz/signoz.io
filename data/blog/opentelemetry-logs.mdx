@@ -13,49 +13,18 @@ OpenTelemetry logs are timestamped records that represent events from applicatio
 In practice, OpenTelemetry logging usually works with your existing logging libraries, the OpenTelemetry Collector, and an observability backend like SigNoz.
 
 
-[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) is a Cloud Native Computing Foundation (<a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) incubating project that standardizes how applications generate telemetry data. It provides vendor-agnostic APIs, SDKs, and tooling for traces, metrics, logs, and baggage.
-
-With OpenTelemetry instrumentation, you can collect four telemetry signals:
-
-- **Traces**<br />
-  Traces help track user requests across services.
-
-- **Metrics**<br />
-  Metrics are measurements at specific timestamps to monitor performance like server response times, memory utilization, etc.
-
-- **Logs**<br />
-  Logs are text records - structured or unstructured- containing information about activities and operations within an operating system, application, server, etc.
-
-- **Baggage**<br />
-  Baggage helps to pass information with [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) between two process boundaries.
-
-Before deep diving into OpenTelemetry logs, let's briefly overview OpenTelemetry.
-
-## What is OpenTelemetry?
-
-OpenTelemetry provides instrumentation libraries for your application. The development of these libraries is guided by the <a href="https://github.com/open-telemetry/opentelemetry-specification" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry specification</a>. The OpenTelemetry specification describes the cross-language requirements and design expectations for all OpenTelemetry implementations in various programming languages.
-
-<Figure
-  src="/img/blog/2022/09/opentelemetry_architecture.webp"
-  alt="OpenTelemetry Architecture"
-  caption="How OpenTelemetry fits in an application architecture. OTel is the convenient short form for OpenTelemetry"
-/>
-
-OpenTelemetry libraries can be used to generate logs, metrics, and traces. You can then collect these signals with OpenTelemetry Collector or send them to an observability backend of your choice. In this article, we will focus on [OpenTelemetry logs](https://signoz.io/comparisons/opentelemetry-events-vs-logs/). OpenTelemetry can be used to collect log data and process it. Let's explore OpenTelemetry logs further.
-
-[![Get Started - Free CTA](/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp)](https://signoz.io/teams/)
+[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) is a Cloud Native Computing Foundation (<a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) incubating project that standardizes how applications generate telemetry data. The <a href="https://github.com/open-telemetry/opentelemetry-specification" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry specification</a> defines cross-language requirements for traces, metrics, logs, and [baggage](https://signoz.io/blog/otel-baggage/), so teams can collect telemetry without being locked into one vendor.
 
 ## What are OpenTelemetry Logs?
 
-You can generate logs using OpenTelemetry SDK's in different languages. Unlike traces and metrics, OpenTelemetry logs take a different approach.
-In order to be successful, OpenTelemetry needs to support the existing legacy of logs and logging libraries. And this is the main design philosophy of OpenTelemetry logs. But it is not limited to this. With time, OpenTelemetry aims to integrate logs better with other signals.
+Unlike traces and metrics, OpenTelemetry logs are designed to support the logging libraries and log formats teams already use. You can collect logs from files, stdout, syslog, existing agents, or language SDKs, then process them with the OpenTelemetry Collector.
 
 A log usually captures an event and stores it as a text record. Developers use log data to debug applications. There are many types of log data:
 
 - **Application logs**<br />
   Application logs contain information about events that have occurred within a software application.
 
-- **System Logs**<br />
+- **System logs**<br />
   System logs contain information about events that occur within the operating system itself.
 
 - **Network logs**<br />
@@ -103,11 +72,11 @@ for programmatic use cases like filtering and alerting. For example, you can rel
 
 **Attributes:** Provides additional information about the specific event occurrence.
 
-### OpenTelemetry Log format
+### OTLP representation of OpenTelemetry log records
 
-OpenTelemetry Log Format is the specific part of the OTLP protocol that efficiently encodes the fields
-defined in the OpenTelemetry Log Data Model into a compact, efficient binary form (like JSON or XML).
-An example of a log record following OpenTelemetry log data model in JSON format might look like this:
+The <a href="https://opentelemetry.io/docs/specs/otel/logs/data-model/"  target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry log data model defines the fields in a log record. OTLP is [the protocol](https://signoz.io/blog/what-is-otlp/) used to transmit those records, commonly encoded as Protocol Buffers over gRPC or HTTP. OTLP also supports a JSON Protobuf encoding, which is useful for examples and debugging.
+
+An example of a log record following, the OpenTelemetry log data model in JSON format might look like this:
 
 ```json
 {
@@ -374,7 +343,7 @@ You will need OpenTelemetry Collector (otel collector) to collect syslogs. In th
     string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
   )
 
-  *.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
+  *.* action(type="omfwd" target="127.0.0.1" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
   ```
 
   For production use cases it is recommended to use something like below:
@@ -386,13 +355,13 @@ You will need OpenTelemetry Collector (otel collector) to collect syslogs. In th
     string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
   )
 
-  *.*  action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp"
+  *.*  action(type="omfwd" target="127.0.0.1" port="54527" protocol="tcp"
           action.resumeRetryCount="10"
           queue.type="linkedList" queue.size="10000" template="UTCTraditionalForwardFormat")
   ```
 
   So that you have retries and queue in place to de-couple the sending from the other logging action.
-  Also we are assuming that you are running the otel binary on the same host. If not, the value of `target` might change depending on your environment.
+  Also we are assuming that you are running the otel binary on the same host. If the OpenTelemetry Collector runs on a different host, replace `127.0.0.1` with that host's IP address or DNS name.
 
 - Now restart your rsyslog service by running `sudo systemctl restart rsyslog.service`
 - You can check the status of service by running `sudo systemctl status rsyslog.service`
