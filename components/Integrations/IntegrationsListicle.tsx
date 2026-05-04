@@ -12,6 +12,7 @@ import {
   SiAmazonwebservices,
   SiMysql,
   SiHasura,
+  SiApachedruid,
   SiVercel,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
@@ -86,6 +87,12 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
     '/docs/integrations/opentelemetry-dbos': (
       <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />
+    ),
+    '/docs/integrations/opentelemetry-apache-druid': (
+      <SiApachedruid className="h-7 w-7 text-[#29F5E6]" />
+    ),
+    '/docs/integrations/opentelemetry-kong-gateway': (
+      <img src="/img/icons/kong-icon.svg" alt="Kong Gateway" className="h-7 w-7 object-contain" />
     ),
   }
 

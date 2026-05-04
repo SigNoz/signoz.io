@@ -1,0 +1,84 @@
+---
+date: 2026-04-20
+id: apache-druid-dashboard
+title: Apache Druid Dashboard
+description: Monitor Apache Druid broker and coordinator health - query performance, JVM heap, GC activity, and Jetty thread pool saturation.
+doc_type: explanation
+---
+
+<Admonition type="info">
+  Send Apache Druid metrics to SigNoz before using this dashboard. See the [Apache Druid metrics setup guide](https://signoz.io/docs/integrations/opentelemetry-apache-druid).
+</Admonition>
+
+This dashboard covers broker and coordinator nodes: query latency, CPU cost, JVM heap, GC frequency, and HTTP thread pool utilization.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/druid-metrics-dashboard.webp"
+  alt="Apache Druid Dashboard in SigNoz"
+  caption="Apache Druid Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/apache-druid/apache-druid-dashboard.json"
+    dashboardName="Apache Druid"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Query health**: Track broker query time and CPU cost per scan query. Spikes in query time with flat CPU point to slow historical nodes; rising CPU with flat query time points to CPU-bound processing on the broker.
+- **JVM heap pressure**: Watch used heap approach committed and max across broker and coordinator. A narrowing gap between used and max signals GC pressure building.
+- **GC activity**: Monitor G1 old-gen and young-gen collection counts and CPU time. Frequent old-gen collections on the broker degrade query throughput; on the coordinator they delay segment assignment.
+- **Thread pool saturation**: Broker and coordinator Jetty thread pools show busy, idle, and total counts. When busy approaches total, the node starts queuing or rejecting HTTP requests.
+- **Coordinator duty cycle**: Track how long each coordinator duty group (Historical Management, Indexing Service, Metadata Store) takes per cycle. Sustained increases indicate segment assignment backlog or metadata store slowness.
+
+## Metrics Included
+
+### KPI Panels
+- **Broker Heartbeat**: Heartbeat count — shows the broker is up and sending metrics.
+- **Broker Open Connections**: Open Jetty connections on the broker.
+- **Broker Thread Pool Utilization**: Fraction of broker Jetty threads in use. Red above 0.8.
+- **Coordinator Duty Time**: Latest coordinator management cycle duration.
+
+### Query Performance
+- **Broker Query Time**: Scan query latency on the broker.
+- **Broker Query CPU Time**: CPU cost per scan query. High CPU with low query time points to CPU-bound processing.
+
+### JVM Health
+- **Broker JVM Heap Memory**: Used, committed, and max heap for the broker. Used approaching max signals GC pressure.
+- **Coordinator JVM Heap Memory**: Used, committed, and max heap for the coordinator.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/druid-metrics-dashboard-3.webp"
+  alt="Apache Druid Broker Metrics"
+  caption="Apache Druid Broker Metrics"
+/>
+
+### GC Activity
+- **Broker GC Count**: G1 old-gen and young-gen collection cycles per interval on the broker.
+- **Broker GC CPU Time**: CPU time GC consumes per interval. Rising old-gen means GC is stealing CPU from queries.
+- **Coordinator GC Count**: G1 GC cycles per interval on the coordinator. Elevated old-gen often precedes segment assignment slowdowns.
+
+### Thread Pool & Coordinator Duties
+- **Broker Jetty Thread Pool**: Busy, idle, and total HTTP threads on the broker. Busy approaching total means the broker is close to rejecting requests.
+- **Coordinator Jetty Thread Pool**: Busy, idle, and total HTTP threads on the coordinator.
+- **Coordinator Global Duty Times**: Time each duty group takes per cycle: Historical Management, Indexing Service, and Metadata Store. Sustained spikes indicate segment assignment backlog.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/druid-metrics-dashboard-2.webp"
+  alt="Apache Druid Coordinator Metrics"
+  caption="Apache Druid Coordinator Metrics"
+/>
+
+## Dynamic Variable
+
+A `service` variable (`service.name`) is pre-set to `apache-druid`. If you send Druid metrics under a different service name, update it in **Dashboard Settings → Variables**.
+
+## Next Steps
+
+- Explore the [Apache Druid metrics setup guide](https://signoz.io/docs/integrations/opentelemetry-apache-druid/) to configure metrics collection
+- Set up [alerts](https://signoz.io/docs/userguide/alerts-management/) for query performance and JVM health.
+- Learn about [querying metrics](https://signoz.io/docs/product-features/query-builder/) to create custom visualizations

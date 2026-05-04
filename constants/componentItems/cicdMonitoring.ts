@@ -32,6 +32,13 @@ export const CICD_MONITORING_ITEMS = {
       clickName: 'ArgoCD Metrics Link',
     },
   ] satisfies ComponentItem[],
+  gitlab: [
+    {
+      name: 'GitLab Pipeline Traces',
+      href: '/docs/cicd/gitlab/gitlab-traces',
+      clickName: 'GitLab Pipeline Traces Link',
+    },
+  ] satisfies ComponentItem[],
 } as const
 
 export const getAllCICDMonitoringItems = (): ComponentItem[] =>

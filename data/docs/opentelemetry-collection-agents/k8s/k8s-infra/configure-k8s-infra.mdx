@@ -1,9 +1,10 @@
 ---
-date: 2026-02-04
+date: 2026-04-27
 
 title: K8s Infra - Configure
 id: k8s-infra-otel-config
 description: Configure the k8s-infra OpenTelemetry collection agent to send Kubernetes metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
 This guide explains how to configure the OpenTelemetry Collectors deployed by the SigNoz [K8s-Infra Helm chart](https://github.com/signoz/charts/tree/main/charts/k8s-infra/README.md). You'll learn how to set up telemetry data collection and enable the collection of metrics, logs, and traces from your Kubernetes cluster.
@@ -225,6 +226,11 @@ presets:
       - sources:
         - from: resource_attribute
           name: k8s.pod.ip
+      - sources:
+        - from: resource_attribute
+          name: k8s.pod.uid
+      - sources:
+        - from: connection
     # This label/annotation extraction rule takes the value of the key from labels/annotations and maps it to the tag_name attribute which will be added to the associated resources
     extractLabels:
       # Example from pod
@@ -248,6 +254,24 @@ presets:
 - Enable only required metadata fields to optimize performance
 - Use `passthrough: true` in very large clusters to reduce API load
 - Configure pod association based on your networking setup
+
+<KeyPointCallout title="Note: extracting labels and annotations from other Kubernetes objects">
+
+The `from:` field selects which Kubernetes object the processor reads the label or annotation from. The examples above use `pod` and `node`, but other workload kinds are supported as well, and each reads from its own metadata.
+
+Refer to the opentelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">k8sattributes processor documentation</a> for the full list of supported sources and the exact behavior of each.
+
+</KeyPointCallout>
+
+<KeyPointCallout title="Warning: customizing podAssociation replaces all defaults">
+
+If telemetry suddenly stops getting Kubernetes attributes (`k8s.pod.name`, `k8s.namespace.name`, etc.) after a `values.yaml` change, an override on `podAssociation` is the most likely cause.
+
+Helm replaces arrays entirely rather than merging them. When you override `podAssociation`, the chart's defaults are dropped — including the `connection` rule that matches telemetry by the source IP of the OTLP connection, and the `k8s.pod.uid` rule used by file-based log collection. Without those fallbacks the processor cannot associate telemetry with a pod, and `extractLabels` / `extractAnnotations` stop producing attributes.
+
+If you customize `podAssociation`, include the rules you need from the chart defaults alongside your additions.
+
+</KeyPointCallout>
 
 ### 6. Cluster-level Metrics
 ```yaml
@@ -346,6 +370,17 @@ otelAgent:
 <Admonition type="info">
 Any setting supported by the OpenTelemetry batch processor can be set under `processors.batch` in the chart values.
 </Admonition>
+
+### Adding Custom Processors to Pipelines
+
+Defining a processor under `otelAgent.config.processors` (or `otelDeployment.config.processors`) adds it to the collector configuration but does **not** automatically include it in any pipeline. To activate a custom processor, reference it in the relevant pipeline's `processors` list under `otelAgent.config.service.pipelines` (or `otelDeployment.config.service.pipelines` for the deployment collector).
+
+<KeyPointCallout title="Warning: pipeline arrays are replaced, not merged">
+
+When you override a pipeline's `processors` list, Helm replaces the entire list — the chart's defaults for that pipeline are dropped. Always include both your custom processor and every default processor you still want to run in that pipeline.
+
+</KeyPointCallout>
+
 ## Common Deployment Scenarios
 
 ### Production Cluster with Full Monitoring
@@ -487,6 +522,16 @@ otelDeployment:
 ```
 
 The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might need to configure the receiver with a username and password and other configurations.
+
+## Troubleshooting
+
+### A custom processor under `otelAgent.config.processors` does not appear to run
+
+Defining a processor in values renders it into the collector configuration, but does not attach it to any pipeline. Confirm the processor is referenced in the relevant pipeline's `processors` list — see [Adding Custom Processors to Pipelines](#adding-custom-processors-to-pipelines). After applying the change and restarting the collector pods, verify in SigNoz Explorer that the attribute or transformation introduced by the processor is present on the relevant signal.
+
+### Telemetry stopped getting Kubernetes attributes after customizing `podAssociation`
+
+Helm replaces array values rather than merging them, so an override on `podAssociation` drops the chart defaults — including the fallbacks the processor needs to associate telemetry with a pod. See the warning under [Kubernetes Metadata Enrichment](#5-kubernetes-metadata-enrichment) for the rules to keep. After restoring the rules and restarting the collector pods, confirm in SigNoz Explorer that resource attributes such as `k8s.pod.name` and `k8s.namespace.name` are populated on traces, metrics, or logs from your workloads.
 
 ## Resource Requirements
 

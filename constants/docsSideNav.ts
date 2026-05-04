@@ -513,6 +513,11 @@ const docsSideNav = [
                 label: 'Relational Databases Support',
                 isExpanded: false,
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/serving-on-external-url',
+                label: 'Serving on an External URL',
+              },
             ],
           },
           {
@@ -929,6 +934,11 @@ const docsSideNav = [
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector',
           },
+          {
+            type: 'doc',
+            label: 'GeoIP Processor',
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor',
+          },
         ],
       },
     ],
@@ -1157,6 +1167,11 @@ const docsSideNav = [
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Kong Gateway',
+          },
         ],
       },
       {
@@ -1301,6 +1316,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/infrastructure-monitoring/overview',
         label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/infrastructure-monitoring/cert-manager',
+        label: 'Cert-Manager',
       },
       {
         type: 'doc',
@@ -1509,6 +1529,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Kong Gateway',
           },
           {
             type: 'doc',
@@ -1855,6 +1880,11 @@ const docsSideNav = [
                 route: '/docs/integrations/opentelemetry-hasura',
                 label: 'Hasura',
               },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'Kong Gateway',
+              },
             ],
           },
           {
@@ -2057,6 +2087,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+            label: 'Apache Druid',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
@@ -2112,6 +2147,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/baseten-dashboard',
             label: 'Baseten',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cert-manager-dashboard',
+            label: 'Cert-Manager',
           },
           {
             type: 'doc',
@@ -2303,6 +2343,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kong-gateway',
+            label: 'Kong Gateway',
           },
           {
             label: 'LiteLLM',
@@ -3468,6 +3513,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/opentelemetry-apache-druid',
+        label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/vercel',
         label: 'Vercel',
       },
@@ -3480,6 +3530,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/opentelemetry-dbos',
         label: 'DBOS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-kong-gateway',
+        label: 'Kong Gateway',
       },
       {
         type: 'doc',
@@ -3635,6 +3690,18 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/cicd/jenkins/jenkins-tracing',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
+        label: 'GitLab',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/gitlab/gitlab-traces',
             label: 'Traces',
           },
         ],
