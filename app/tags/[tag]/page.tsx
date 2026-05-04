@@ -24,11 +24,10 @@ function sortPostsByDate<T extends { date: string }>(posts: T[]): T[] {
 }
 
 /**
- * Filter out drafts and return core content fields.
- * Local implementation that doesn't require _raw field like pliny's allCoreContent.
+ * Filter out drafts
  */
-function filterAndMapPosts(posts: BlogMeta[]): CoreContent<Blog>[] {
-  return posts.filter((post) => !post.draft).map((post) => post as unknown as CoreContent<Blog>)
+function filterPosts(posts: BlogMeta[]): CoreContent<Blog>[] {
+  return posts.filter((post): post is BlogMeta & CoreContent<Blog> => !post.draft)
 }
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
@@ -60,7 +59,7 @@ export const generateStaticParams = async () => {
 export default async function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURI(params.tag)
   const allBlogs = await getAllBlogsMeta()
-  const filteredPosts = filterAndMapPosts(
+  const filteredPosts = filterPosts(
     sortPostsByDate(
       allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag))
     )

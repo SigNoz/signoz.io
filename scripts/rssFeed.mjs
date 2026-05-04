@@ -19,6 +19,13 @@ export const normaliseSlug = (value) => {
 }
 
 export const resolvePostPath = (post) => {
+  // New content pipeline provides computed `path` field (e.g., "blog/my-post", "docs/intro")
+  // Use it directly if available
+  if (post.path) {
+    return post.path
+  }
+
+  // Fallback for old contentlayer format or CMS content
   const sourcePath = post._raw?.sourceFilePath ?? ''
   if (sourcePath.startsWith('docs/')) return `docs/${post.slug}`
   if (sourcePath.startsWith('comparisons/')) return `comparisons${post.path}`
