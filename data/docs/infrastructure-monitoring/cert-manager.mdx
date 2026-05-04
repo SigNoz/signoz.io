@@ -1,0 +1,175 @@
+---
+date: 2026-04-25
+id: cert-manager
+title: Collect Cert-Manager Metrics with OpenTelemetry
+description: Scrape cert-manager Prometheus metrics with the OpenTelemetry Collector and monitor certificate health, controller performance, and ACME operations in SigNoz.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+cert-manager is a Kubernetes add-on that manages TLS certificate issuance and renewal. It exposes Prometheus metrics on port 9402 across three components: the controller, the webhook, and the cainjector.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- cert-manager v1.x installed in your Kubernetes cluster with Prometheus metrics enabled
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) deployed in-cluster with access to the `cert-manager` namespace
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Setup
+
+Install cert-manager in your cluster and configure the OpenTelemetry Collector to scrape <a href="https://cert-manager.io/docs/devops-tips/prometheus-metrics/" target="_blank" rel="noopener noreferrer nofollow">cert-manager Prometheus metrics</a>.
+
+### Step 1: Install cert-manager with Prometheus metrics enabled
+
+If cert-manager isn't installed, add the Jetstack Helm repository and install it:
+
+```bash
+helm repo add jetstack https://charts.jetstack.io --force-update
+
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set crds.enabled=true \
+  --set prometheus.enabled=true
+```
+
+`prometheus.enabled=true` enables `/metrics` on port 9402 for all three components. This is the default in the Helm chart, but set it explicitly to ensure it hasn't been overridden. If cert-manager is already installed, upgrade with the same flag.
+
+Verify the endpoints are reachable:
+
+```bash
+kubectl port-forward -n cert-manager svc/cert-manager 9402:9402 &
+curl -s http://localhost:9402/metrics | grep certmanager_certificate_ready_status
+```
+
+### Step 2: Add the Prometheus scrape config to your OTel Collector
+
+Append this snippet to your existing [OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) config, adding `prometheus` alongside existing receivers:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        # cert-manager controller
+        - job_name: cert-manager
+          scrape_interval: 30s
+          static_configs:
+            - targets:
+                - cert-manager.cert-manager.svc.cluster.local:9402
+
+        # cert-manager webhook
+        - job_name: cert-manager-webhook
+          scrape_interval: 30s
+          static_configs:
+            - targets:
+                - cert-manager-webhook.cert-manager.svc.cluster.local:9402
+
+        # cert-manager cainjector
+        - job_name: cert-manager-cainjector
+          scrape_interval: 30s
+          static_configs:
+            - targets:
+                - cert-manager-cainjector.cert-manager.svc.cluster.local:9402
+```
+
+The targets use in-cluster DNS. If your OTel Collector runs in a different namespace, adjust the hostnames to match (`<service>.<namespace>.svc.cluster.local`).
+
+Then enable the `prometheus` receiver in your metrics pipeline:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus] # add prometheus alongside existing receivers
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Step 3: Configure the exporter
+
+If you don't have an OTLP exporter yet, add this block.
+
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp:
+    endpoint: 'ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Step 4: Restart the OTel Collector
+
+Apply the updated config and restart the collector:
+
+```bash
+# Kubernetes Helm example — replace <collector-namespace> with your OTel Collector namespace
+helm upgrade otel-collector open-telemetry/opentelemetry-collector \
+  --namespace <collector-namespace> \
+  -f otel-collector-values.yaml
+```
+
+Or restart the pod directly if the config is mounted via a ConfigMap:
+
+```bash
+kubectl rollout restart deployment -n <collector-namespace> otel-collector
+```
+
+## Validate
+
+After restarting the collector, go to **SigNoz → Metrics Explorer** and search for `certmanager_`.
+
+Metrics appear within ~60 seconds:
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/cert-manager-metrics.webp"
+  caption="Sample cert-manager metrics in Metrics Explorer"
+  alt="Sample cert-manager metrics in Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No `certmanager_` metrics after 2 minutes
+
+- Likely cause: collector cannot reach the cert-manager service on port 9402
+- Fix: check that `prometheus.enabled=true` was set during cert-manager installation, and verify the service exists: `kubectl get svc -n cert-manager`
+- Verify: look for scrape errors in the collector logs with `kubectl logs -n cert-manager deploy/otel-collector | grep cert-manager`
+
+### All metrics missing (not just cert-manager metrics)
+
+- Likely cause: exporter endpoint or ingestion key is incorrect
+- Fix: verify the `endpoint` and `signoz-ingestion-key` values in the exporter config
+- Verify: check collector logs for export errors
+
+### ACME metrics are absent (`certmanager_http_acme_client_request_count`)
+
+- Expected: cert-manager emits these metrics only when making outbound HTTP requests to an ACME server such as Let's Encrypt. They don't appear with self-signed or CA issuers.
+
+</details>
+
+## Next steps
+
+- [Cert-Manager Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/cert-manager-dashboard/): import the pre-built SigNoz dashboard for certificate and controller visibility
+- [Metric-based alerts](https://signoz.io/docs/alerts-management/metric-based-alerts/): set up alerts for certificate expiry or issuer failures
+
+## Get Help
+
+<GetHelp />

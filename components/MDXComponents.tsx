@@ -29,7 +29,6 @@ import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
 import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
 import NewRelicVsSigNoz from './NewRelicVsSigNoz/NewRelicVsSigNoz'
 import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
-import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 import InterlinkCard from './InterlinkCard/InterlinkCard'
 import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
@@ -52,6 +51,15 @@ import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 import MarketplaceInstallationListicle from './Setup/MarketplaceInstallationListicle'
 import CollectionAgentsListicle from './Setup/CollectionAgentsListicle'
+import CloneRepo from './shared/CloneRepo'
+import CommonPrerequisites from './shared/CommonPrerequisites'
+import K8sInstall from './shared/K8sInstall'
+import K8sOtelDemo from './shared/K8sOtelDemo'
+import RetentionInfo from './shared/RetentionInfo'
+import SigNozCloud from './shared/SigNozCloud'
+import UpgradeInfo from './shared/UpgradeInfo'
+import OtelOperatorOTLPEndpoint from './shared/OtelOperatorOTLPEndpoint'
+import OtelOperatorAutoInstrumentation from './shared/OtelOperatorAutoInstrumentation'
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
@@ -127,7 +135,15 @@ export const components: MDXComponents = {
   GrafanaVsSigNoz,
   NewRelicVsSigNoz,
   DatadogAlternativesFinder,
-  KeyPointCallout,
+  KeyPointCallout: ({ children, title, type, ...rest }) => (
+    <Admonition
+      {...rest}
+      title={title === '' || title == null ? 'Note' : title}
+      type={type ?? 'info'}
+    >
+      {children}
+    </Admonition>
+  ),
   GetStartedOpenTelemetryButton,
   InterlinkCard,
   InArticleVideoShowcaseModal,
@@ -161,10 +177,19 @@ export const components: MDXComponents = {
   LLMMonitoringListicle,
   OtelCollectorFlow,
   CollectionAgentsListicle,
+  K8sInstall,
+  K8sOtelDemo,
+  RetentionInfo,
+  SigNozCloud,
+  UpgradeInfo,
+  OtelOperatorOTLPEndpoint,
+  OtelOperatorAutoInstrumentation,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
   MetricsQuickStartOverview,
   CICDMonitoringListicle,
+  CloneRepo,
+  CommonPrerequisites,
   AWSMonitoringListicle,
   AWSOneClickListicle,
   CardinalityExplosion,
