@@ -1046,6 +1046,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/javascript/opentelemetry-graphql',
+                label: 'GraphQL',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/javascript/nodejs-manual-instrumentation',
                 label: 'Manual Instrumentation',
               },
