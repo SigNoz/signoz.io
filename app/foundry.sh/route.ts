@@ -9,7 +9,7 @@ import {
 } from '@/constants/cache'
 
 const FOUNDRY_SCRIPT_URL =
-  'https://raw.githubusercontent.com/SigNoz/foundry/c65fadcd9af9bbe8e898a92f5defa3776689f3c3/scripts/foundry.sh'
+  'https://raw.githubusercontent.com/SigNoz/foundry/main/scripts/foundry.sh'
 
 const CACHE_TAG = 'foundry-installer-script'
 
