@@ -1,7 +1,5 @@
-import { sortPosts } from '@/utils/contentlayer/contentUtils'
-import { getAllBlogs } from '@/utils/contentlayer/blogCollection'
-import { getAllDocs } from '@/utils/contentlayer/docsCollection'
-import { getAllGuides } from '@/utils/contentlayer/guideCollection'
+import { sortPosts } from 'pliny/utils/contentlayer.js'
+import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
 import { MDXContentApiResponse } from '@/utils/strapi'
 import { normaliseSlug } from '../../../scripts/rssFeed.mjs'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
@@ -66,10 +64,6 @@ export const loadPublishedPosts = async () => {
   const faqPosts = mapFaqEntries(faqs)
   const opentelemetryPosts = mapOpentelemetryEntries(opentelemetries)
   const comparisonPosts = mapComparisonEntries(comparisons)
-
-  const allBlogs = getAllBlogs()
-  const allDocs = getAllDocs()
-  const allGuides = getAllGuides()
 
   const combinedPosts = [
     ...faqPosts,
