@@ -102,6 +102,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/baseten-dashboard': (
     <img src="/svgs/icons/LLMMonitoring/baseten-logo.webp" alt="Baseten Icon" className="h-7 w-7" />
   ),
+  '/docs/dashboards/dashboard-templates/cert-manager-dashboard': (
+    <Shield className="h-7 w-7 text-blue-500" />
+  ),
   '/docs/dashboards/dashboard-templates/cicd': <Settings className="h-7 w-7 text-green-600" />,
   '/docs/dashboards/dashboard-templates/claude-code-dashboard/': (
     <SiClaude className="h-7 w-7 text-orange-500" />
@@ -194,6 +197,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   'https://github.com/SigNoz/dashboards/tree/main/jmx': <Cpu className="h-7 w-7 text-red-600" />,
   '/docs/dashboards/dashboard-templates/jvm-metrics': <Cpu className="h-7 w-7 text-orange-600" />,
   '/docs/dashboards/dashboard-templates/kafka-dashboard': <SiApachekafka className="h-7 w-7" />,
+  '/docs/dashboards/dashboard-templates/kong-gateway': (
+    <img src="/img/icons/kong-icon.svg" alt="Kong Gateway" className="h-7 w-7 object-contain" />
+  ),
   '/docs/dashboards/dashboard-templates/kubernetes-dashboards': (
     <SiKubernetes className="h-7 w-7 text-blue-600" />
   ),

@@ -1,0 +1,98 @@
+---
+date: 2026-04-23
+id: kong-gateway
+title: Kong Gateway Dashboard
+description: Monitor Kong Gateway performance, latency, and error rates using OpenTelemetry.
+doc_type: explanation
+---
+
+Monitor Kong Gateway performance and connection management. Track request processing, latency, and error rates.
+
+<Admonition type="info">
+  To use this dashboard, configure Kong Gateway to send metrics to SigNoz using the [OpenTelemetry plugin](https://docs.konghq.com/hub/kong-inc/opentelemetry/). Follow the [Kong Gateway Integration](https://signoz.io/docs/integrations/opentelemetry-kong-gateway/) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/kong-gateway-1.webp"
+  alt="Kong Gateway Dashboard - Overview"
+  caption="Kong Gateway Dashboard - Overview"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/kong-gateway/kong-gateway-dashboard.json"
+    dashboardName="Kong Gateway"
+  />
+</div>
+
+After import, the Total Requests and Active Connections panels should populate immediately if Kong is sending metrics to SigNoz.
+
+## Tracked Metrics
+
+Metric panels require **Kong Gateway Enterprise v3.13+**. Traces are available with Kong Gateway 3.0+ and logs with 3.8+ (Enterprise or OSS).
+
+- **Request Traffic**: Track incoming requests and request rates.
+- **Latency**: Monitor request, upstream, and Kong internal latencies (p50, p90, p99) to find bottlenecks.
+- **Error Tracking**: View 5xx error rates by service and 4xx errors by status code.
+- **Server Performance**: Track active connections and database connectivity.
+- **Upstream Health**: Monitor upstream target status.
+- **Resource Management**: Check bandwidth usage by service and Lua shared dictionary memory utilization.
+
+## Dashboard Panels
+
+### Overview Metrics
+
+- **Total Requests**: Complete count of requests.
+- **Request Rate (req/s)**: Incoming requests per second.
+- **Active Connections**: Active network connections.
+- **DB Connected**: Connection status of the configured database.
+
+### Request Metrics
+
+- **Request Rate by Service**: Request rates for each configured service.
+- **Requests by HTTP Status Code**: Requests grouped by HTTP status code.
+
+### Latency Metrics
+
+- **Request Latency (p50 / p90 / p99)**: End-to-end request latency distribution.
+- **Upstream Latency (p50 / p90 / p99)**: Latency distribution for upstream requests.
+- **Kong Internal Latency (p50 / p90 / p99)**: Latency introduced by Kong's internal processing.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/kong-gateway-2.webp"
+  alt="Kong Gateway Dashboard - Performance metrics"
+  caption="Kong Gateway Dashboard - Performance metrics"
+/>
+
+### Error Metrics
+
+- **5xx Error Rate by Service**: 5xx server-side errors across different services.
+- **4xx Errors by Status Code**: 4xx client-side errors by status code.
+
+### Traffic & Network
+
+- **Bandwidth by Service (bytes/s)**: Network throughput consumed by each service.
+- **Active Nginx Connections**: Live NGINX connection counts.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/kong-gateway-3.webp"
+  alt="Kong Gateway Dashboard - Error & Traffic Metrics"
+  caption="Kong Gateway Dashboard - Error & Traffic Metrics"
+/>
+
+### Health & Resources
+
+- **Upstream Target Health**: Upstream target status.
+- **Lua Shared Dict Memory**: Memory utilization of Kong's Lua shared dictionaries.
+
+## Next Steps
+
+- Set up [alerts](https://signoz.io/docs/alerts/) to notify you of high upstream latency or error rates.
+- Use [Query Builder](https://signoz.io/docs/product-features/query-builder/) to explore your Kong metrics in detail.
+
+## Related Dashboards
+
+- [NGINX Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx/)
+- [Envoy Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/envoy-dashboard/)
