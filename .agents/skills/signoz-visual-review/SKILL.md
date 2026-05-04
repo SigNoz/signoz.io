@@ -34,20 +34,56 @@ For each finding:
 
 End with a summary grouped by severity and an overall assessment.
 
+## Scope
+
+This skill applies to all SigNoz marketing pages, including:
+
+- **Feature pages** (`app/trace-funnels/`, `app/alerts-management/`, etc.) — use shared components from `shared/components/molecules/FeaturePages/` with Tailwind classes
+- **Comparison pages** (`app/product-comparison/signoz-vs-*/`) — use dedicated components from `components/comparison/` with CSS modules
+- **Any page** with visual design issues the user wants reviewed
+
+Adapt findings to whatever styling system the page uses (Tailwind classes OR CSS module properties).
+
 ## Quick Heuristics (SigNoz-Specific)
 
-These are patterns observed across the best SigNoz feature pages:
+These are patterns observed across the best SigNoz pages:
+
+### Text Hierarchy on Dark Backgrounds
+
+The most impactful improvement for any dark-themed page is proper text hierarchy through color/opacity:
+
+- **Titles**: Full white (`color: inherit` or `text-signoz_vanilla-100`) — commands attention
+- **Body/descriptions**: Muted white (`rgba(255,255,255,0.75)` in CSS modules, or `text-signoz_vanilla-400` in Tailwind) — readable but recedes
+- **Tertiary text**: Further muted (`rgba(255,255,255,0.55)` or `text-signoz_slate-400`) — for captions, extra detail
+- **Anti-pattern**: Title and body text at the same brightness — everything competes, nothing stands out
+
+### Section Separation on Dark Backgrounds
+
+On dark backgrounds, sections blend together without explicit visual breaks:
+
+- **Subtle borders**: `border-bottom: 1px solid rgba(255,255,255,0.06)` between repeating sections (e.g., feature reason rows)
+- **Dashed borders**: `border-dashed border-signoz_slate-400` for major section dividers (SectionLayout pattern)
+- **Background shifts**: `bg-signoz_ink-400` on cards/surfaces to lift them from `bg-signoz_ink-500` page
+- **Spacing alone is not enough**: Even with generous padding, dark sections need a visual edge or background shift to feel distinct
+
+### Feature Page Patterns
 
 - **Section rhythm**: Consistent `py-10` / `py-20` padding within `SectionLayout variant="bordered"`
-- **Dashed borders**: `border-dashed border-signoz_slate-400` for section dividers — should be consistent across all sections
 - **Content width**: Main content at `md:!w-[80vw] max-w-8xl !mx-auto` via SectionLayout
-- **Text hierarchy**: Titles in `text-signoz_vanilla-100`, body in `text-signoz_vanilla-400`, accents in `text-signoz_cherry-500` or `text-signoz_robin-400`
 - **Button hierarchy**: Primary = solid default variant, Secondary = outline/secondary variant, both with `ArrowRight` icon
 - **Hero pattern**: `FeaturePageHeader` with gradient text title, max 2 buttons, hero image below
-- **Image sizing**: Use `width={10000} height={10000}` pattern for responsive images within containers (Next.js Image with intrinsic sizing)
-- **Split layouts**: `GridLayout variant="split"` for alternating text + image sections — text and image should alternate sides for visual rhythm
-- **CTA banners**: Centered text with `ButtonGroup` inside dashed-border sections, `py-20` padding
-- **Standard page tail**: `UsageBasedPricing` → `SigNozStats` → `CustomerStoriesSection` — present on all feature pages
+- **Image sizing**: Use `width={10000} height={10000}` pattern for responsive images within containers
+- **Split layouts**: `GridLayout variant="split"` for alternating text + image — alternate sides for rhythm
+- **CTA banners**: Centered text with `ButtonGroup`, `py-20` padding
+- **Standard page tail**: `UsageBasedPricing` → `SigNozStats` → `CustomerStoriesSection`
+
+### Comparison Page Patterns
+
+- **CSS modules**: Comparison components use `.module.css` files, not Tailwind — fixes must use CSS properties
+- **Grid/table readability**: Header rows need more font-weight (600 vs 500) and a subtle border-bottom to separate from data rows
+- **Detail text in grids**: Minimum `0.75rem` with `line-height: 130%` — smaller than that becomes unreadable on dark backgrounds
+- **Alternating feature rows**: Add subtle `border-bottom: 1px solid rgba(255,255,255,0.06)` to create visual separation between repeating sections
+- **Hero description**: Constrain width to 65% for comfortable line length, mute to `rgba(255,255,255,0.75)`
 
 ## Domain References
 
@@ -61,8 +97,9 @@ Consult these for detailed tactical rules when reviewing specific design aspects
 
 ## Guardrails
 
-- Suggest changes using existing Tailwind classes and SigNoz design tokens — do not invent new CSS variables or tokens.
-- Recommend existing shared components from `shared/components/molecules/FeaturePages/` before suggesting custom implementations.
-- Keep suggestions actionable with specific class names and file locations.
+- **Match the styling system**: If the page uses Tailwind, suggest Tailwind classes. If it uses CSS modules (`.module.css`), suggest CSS properties. Do not mix systems.
+- Recommend existing shared components before suggesting custom implementations.
+- Keep suggestions actionable with specific class names/properties and file locations.
 - Do not suggest changes that contradict the established SigNoz visual language (dark theme, dashed borders, gradient overlays).
 - Prioritize consistency with existing high-quality pages (trace-funnels, alerts-management) over theoretical ideals.
+- **Always take screenshots**: Use Chrome DevTools MCP to capture the current state before suggesting fixes, and verify after applying changes. Visual review without seeing the actual render is guesswork.

@@ -98,6 +98,26 @@ Section 3: [Text | Image]  (alternating)
 - **Width transition**: `!w-[90vw]` on mobile → `md:!w-[80vw]` on desktop (via SectionLayout)
 - **Padding reduction**: Some sections use `max-md:` to reduce padding on mobile
 
+## Section Separation on Dark Backgrounds
+
+On dark backgrounds, spacing alone is not enough — adjacent sections with the same `bg-signoz_ink-500` background blend together visually. Always add at least one visual separator:
+
+### Separation Techniques (pick one per boundary)
+
+- **Subtle solid border**: `border-bottom: 1px solid rgba(255,255,255,0.06)` — nearly invisible but creates a visual edge between repeating items (e.g., alternating feature rows in comparison pages)
+- **Dashed border**: `border-dashed border-signoz_slate-400` — stronger separator for major section boundaries (the standard SigNoz pattern for feature pages)
+- **Background shift**: One section at `bg-signoz_ink-400` creates depth against `bg-signoz_ink-500`
+- **Increased spacing**: `py-20` between major page sections, `py-10` within grouped content
+
+### When to Use Which
+
+| Boundary type | Separator |
+|--------------|-----------|
+| Between repeating items (feature rows, card groups) | Subtle solid border `rgba(255,255,255,0.06)` |
+| Between major page sections (hero → features → grid) | Dashed border or generous spacing |
+| Between CTA banner and surrounding content | Background shift + increased padding |
+| Between grid header and data rows | Subtle accent border (e.g., `rgba(255,107,0,0.2)`) |
+
 ## Common Issues to Flag
 
 1. **Arbitrary spacing**: Values like `mt-[37px]` or `py-[15px]` instead of scale values
@@ -106,3 +126,4 @@ Section 3: [Text | Image]  (alternating)
 4. **Broken alternation**: Split sections with text on the same side consecutively (should alternate)
 5. **Full-width content**: Text or cards stretching to container edges without `px-6` inner padding
 6. **Missing responsive grid collapse**: Card grids not dropping to `grid-cols-1` on mobile
+7. **No section boundaries on dark bg**: Adjacent sections with same dark background and no border/spacing distinction — sections blur together

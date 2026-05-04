@@ -9,8 +9,10 @@ Visual hierarchy determines how important elements appear in relation to one ano
 Do not rely solely on font size to denote importance. On dark backgrounds, opacity and weight differences are more effective than size changes.
 
 - **Weight**: Primary text at `font-semibold` (600) or `font-bold` (700). Secondary text at `font-normal` (400). Avoid weights below 400 on dark backgrounds — thin text loses readability.
-- **Color/opacity**: Primary content in `text-signoz_vanilla-100` (bright). Secondary content in `text-signoz_vanilla-400` (muted). Tertiary in `text-signoz_vanilla-400` with lower opacity or `text-signoz_slate-400`.
-- **Example**: A section title at `text-2xl font-semibold text-signoz_vanilla-100` with a description at `text-base font-normal text-signoz_vanilla-400 leading-relaxed` creates clear separation without size excess.
+- **Color/opacity (Tailwind)**: Primary content in `text-signoz_vanilla-100` (bright). Secondary content in `text-signoz_vanilla-400` (muted). Tertiary in `text-signoz_slate-400`.
+- **Color/opacity (CSS modules)**: Primary content at full white (`color: inherit`). Secondary content at `color: rgba(255, 255, 255, 0.75)`. Tertiary at `color: rgba(255, 255, 255, 0.55)`. This is the single most impactful change for pages using CSS modules — description text that matches title brightness creates visual noise.
+- **Example (Tailwind)**: A section title at `text-2xl font-semibold text-signoz_vanilla-100` with a description at `text-base font-normal text-signoz_vanilla-400 leading-relaxed` creates clear separation without size excess.
+- **Example (CSS module)**: A section title at `font-weight: 600; font-size: 1.5rem` with a description at `font-weight: 400; font-size: 1rem; color: rgba(255,255,255,0.75); line-height: 170%` — the opacity difference does the heavy lifting.
 
 ### 2. De-emphasize to Emphasize
 
