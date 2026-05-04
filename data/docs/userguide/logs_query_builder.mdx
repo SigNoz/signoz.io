@@ -1,6 +1,6 @@
 ---
-date: 2026-04-17
-title: Logs Query Builder
+date: 2026-05-04
+title: Logs Explorer
 id: logs_query_builder
 description: Learn how to use the SigNoz Logs Query Builder to search, filter, and analyze your log data with powerful query capabilities.
 doc_type: howto
@@ -13,37 +13,80 @@ The Logs Explorer in SigNoz provides a powerful interface for searching, filteri
     <figcaption><i>Logs Explorer with quick filters, filter expression, and list view</i></figcaption>
 </figure>
 
-## Key Features
+## Filtering and Search
 
-### Filtering and Search
+The search feature allows you to filter logs using different attributes (like `service.name`, `status` etc.) with operators (like `IN`, `=`, `!=`, `NOT IN`, `CONTAINS`, `EXISTS`). You can filter using multiple attributes simultaneously and combine them with `AND`/`OR`.
 
-Write filter expressions in the search bar to narrow your logs. The query field supports auto-suggestions for both attributes and values. Use operators like `=`, `!=`, `IN`, `NOT IN`, `CONTAINS`, `EXISTS`, and combine them with `AND`/`OR`.
+Just like search, the Query Builder also allows you to filter your logs data based on different attributes using operators. The Query Builder provides you with additional powerful features like aggregation, grouping etc. on your data. To learn more about the Query Builder, refer to this [documentation](https://signoz.io/docs/userguide/query-builder/).
 
 After entering your query, click **Run Query** to see results in the selected view mode.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/ui/logs-list-view.webp" alt="Logs list view with filter applied"/>
-    <figcaption><i>List view showing filtered logs with timestamp and body columns</i></figcaption>
-</figure>
+## Views
 
-### Log Details
+There are three views available in the Logs Explorer.
 
-Click on any log line to open the **Log details** panel. This shows the full log body, attributes, and resource fields in a structured view. The detail panel has four tabs — Overview, JSON, Context, and Metrics.
+### List View
 
-From the attribute values in the detail panel, you can:
-- **Filter for value** — add the attribute as an `IN` filter
-- **Filter out value** — add the attribute as a `NOT IN` filter
-- **Group By Attribute** — add the attribute to Group By
-- **Replace filters with this value** — replace the current filter with this specific value
+The List View displays logs as individual rows with timestamp and body columns.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/ui/logs-detail-view.webp" alt="Log details panel with attribute actions"/>
-    <figcaption><i>Log details panel showing body, attributes, and quick action options on attribute values</i></figcaption>
+    <img src="/img/docs/logs-management/ui/logs-list-view.webp" alt="List View in Logs Explorer"/>
+    <figcaption><i>List View in Logs Explorer</i></figcaption>
 </figure>
 
-### Aggregation and Group By
+#### Download Logs
 
-Switch to the **Time Series** view to see log counts over time. Use the **Group By** dropdown to break down results by attributes like `service.name`, `k8s.pod.name`, or any custom attribute.
+You can download your logs by choosing the export format (JSONL or CSV), specifying the number of rows to export (10k, 30k, or 50k), and selecting which columns to include. Click the download icon in the toolbar to configure and export.
+
+#### Settings
+
+The settings panel (accessible via the gear icon in the toolbar) has four sections:
+
+**Format**
+
+There are three formats available which display logs in different layouts:
+1. **Raw** — Shows log entries in the raw format as they appear in the logging system.
+2. **Default** — Provides a balanced view by formatting a raw log based on different attributes to make it more readable.
+3. **Column** — Organizes the logs data into different attribute columns to provide a tabular view of logs.
+
+**Font Size**
+
+Adjust the font size for log entries to improve readability based on your preference.
+
+**Max Lines Per Row**
+
+Set the maximum number of lines of text that each log entry is allowed to display. Useful for controlling how much of each log body is visible in the list.
+
+**Columns**
+
+Add or remove columns for different attributes available in your logs. This works for **Default** and **Column** formats. By default, logs are formatted into `Timestamp` and `Body` columns.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-list-view-settings.webp" alt="List View Settings in Logs Explorer"/>
+    <figcaption><i>List View settings showing Format, Font Size, Max Lines Per Row, and Columns options</i></figcaption>
+</figure>
+
+#### Show in Context
+
+When you hover over a log line, you will find a **Show in Context** option on the right side. This shows 10 logs before and 10 logs after the selected log by default, which is useful for faster debugging. You can load more logs and filter them by a particular attribute.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-show-in-context.webp" alt="Show in Context feature in List View"/>
+    <figcaption><i>Show in Context feature showing surrounding log entries</i></figcaption>
+</figure>
+
+#### Copy Link
+
+You can copy a direct link to a particular log line, which can be shared with anyone who has access to the same SigNoz instance.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-copy-link.webp" alt="Copy Link feature in List View"/>
+    <figcaption><i>Copy Link feature for sharing a specific log line</i></figcaption>
+</figure>
+
+### Time Series View
+
+The Time Series View provides a graphical representation of logs data over time based on the filters or operations applied. Use the **Group By** dropdown to break down results by attributes like `service.name`, `k8s.pod.name`, or any custom attribute.
 
 The query builder supports:
 - **Aggregate functions**: `count()`, `count_distinct()`, `avg()`, `sum()`, `p50()`, `p90()`, `p95()`, `p99()`
@@ -51,20 +94,91 @@ The query builder supports:
 - **Having / Order By / Limit / Legend format**: Refine and customize the output
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/ui/logs-group-by.webp" alt="Time series view with group by"/>
-    <figcaption><i>Time Series view showing log count grouped by k8s.pod.name</i></figcaption>
+    <img src="/img/docs/logs-management/ui/logs-timeseries-view.webp" alt="Time Series View in Logs Explorer"/>
+    <figcaption><i>Time Series View in Logs Explorer</i></figcaption>
 </figure>
 
-### Filter by Value
+### Table View
+
+The Table View provides a tabular representation of different operations like the count of logs, average of duration etc., based on the filters applied.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-table-view.webp" alt="Table View in Logs Explorer"/>
+    <figcaption><i>Table View in Logs Explorer</i></figcaption>
+</figure>
+
+## Log Details
+
+Click on any log line to open the **Log details** panel. This gives a comprehensive view of your log including the full body, attributes, and resource fields. The detail panel has four tabs — Overview, JSON, Context, and Metrics.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-detail-view.webp" alt="Log Details Panel in Logs Explorer"/>
+    <figcaption><i>Log Details Panel in Logs Explorer</i></figcaption>
+</figure>
+
+### Overview
+
+The Overview tab has two sections:
+
+**Body**
+
+Shows the complete body of the log. You can toggle **Wrap text** to switch between formatted and raw display.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-detail-body.webp" alt="Log Body in Overview section of Log Details"/>
+    <figcaption><i>Log Body in the Overview section showing body content with Wrap text toggle</i></figcaption>
+</figure>
+
+**Attributes**
+
+Shows all log attributes in a tabular format with the attribute name and its value. You can search for specific attributes using the search bar.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-detail-search-attribute.webp" alt="Search for an attribute in Log Details"/>
+    <figcaption><i>Search for a specific attribute in the Log Details panel</i></figcaption>
+</figure>
 
 In the log details panel, hover over any attribute value to see quick action icons. These let you instantly filter for or against a value, group by the attribute, or replace the current filters — all without manually editing the query.
 
+From the attribute values, you can:
+- **Filter for value** — add the attribute as an `IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter for Value will create a filter `container_id IN debian`. This will list the logs where the `container_id` attribute is `debian`.
+- **Filter out value** — add the attribute as a `NOT IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter out Value will create a filter `container_id NOT_IN debian`. This will list the logs where the `container_id` attribute is not `debian`.
+- **Group By Attribute** — add the attribute to Group By
+- **Replace filters with this value** — replace the current filter with this specific value
+
 <figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/ui/logs-filter-by-value.webp" alt="Filter by value options on attribute"/>
+    <img src="/img/docs/logs-management/ui/logs-detail-overview-actions.webp" alt="Quick actions on attribute values in Log Details"/>
     <figcaption><i>Quick actions on attribute values: Filter for value, Filter out value, Group By Attribute, Replace filters</i></figcaption>
 </figure>
 
-### Create Dashboards and Alerts
+### JSON
+
+Displays the log in JSON format. You can toggle **Wrap text** to switch to raw format, and use **Copy Log** to copy your log in either JSON or raw form.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-detail-json.webp" alt="JSON tab in Log Details panel"/>
+    <figcaption><i>JSON tab showing the complete log in JSON format with Copy Log option</i></figcaption>
+</figure>
+
+### Context
+
+Shows surrounding logs for the selected log entry — 10 logs before and 10 logs after by default. You can load more logs and filter by a particular attribute. This is useful for faster debugging by seeing what happened around a specific log event.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-detail-context.webp" alt="Context tab in Log Details panel"/>
+    <figcaption><i>Context tab showing surrounding log entries for debugging</i></figcaption>
+</figure>
+
+### Metrics
+
+The Metrics tab shows infrastructure metrics (CPU usage, Memory usage, Pod CPU/Memory usage) for the node and pod associated with the selected log entry. This helps you correlate log events with resource utilization.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-detail-metrics.webp" alt="Metrics tab in Log Details panel"/>
+    <figcaption><i>Metrics tab showing CPU and Memory usage for the associated node and pod</i></figcaption>
+</figure>
+
+## Create Dashboards and Alerts
 
 At the bottom of the Logs Explorer, you can:
 - **Save this view** — preserve your query configuration for quick access later
@@ -76,9 +190,23 @@ At the bottom of the Logs Explorer, you can:
     <figcaption><i>Save view, create alert, or add to dashboard directly from the Logs Explorer</i></figcaption>
 </figure>
 
-### Multiple Queries and Formulas
+## Multiple Queries and Formulas
 
 You can plot multiple queries and formulas on the same chart. This is useful for comparing log volumes across different services or calculating rates like error percentages.
+
+## Live View
+
+The Live View streams new log entries continuously as they occur, helping you debug real-time incidents. Live View is only available in the **List View**.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/ui/logs-live-view.webp" alt="Live View in Logs Explorer"/>
+    <figcaption><i>Live View streaming logs in real time</i></figcaption>
+</figure>
+
+It supports:
+- **Search filters** with a histogram showing log counts over time
+- **Format options** — Raw, Default, and Column. You can also adjust **Max Lines Per Row** by hovering over the Format button.
+- **Pause and Resume** — stop the real-time feed to scroll through logs, then resume when ready
 
 ## Related
 

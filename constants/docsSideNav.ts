@@ -36,11 +36,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/product-features/logs-explorer',
-            label: 'Logs Explorer',
-          },
-          {
-            type: 'doc',
             route: '/docs/product-features/saved-view',
             label: 'Saved View',
           },
@@ -1535,7 +1530,7 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/userguide/logs_query_builder',
         items: [
-          { type: 'doc', route: '/docs/userguide/logs_query_builder', label: 'Logs Query Builder' },
+          { type: 'doc', route: '/docs/userguide/logs_query_builder', label: 'Logs Explorer' },
           {
             type: 'doc',
             route: '/docs/logs-management/features/logs-quick-filters',
@@ -1569,7 +1564,6 @@ const docsSideNav = [
         route: '/docs/logs-pipelines/introduction',
         items: [
           { type: 'doc', route: '/docs/logs-pipelines/introduction', label: 'Introduction' },
-          { type: 'doc', route: '/docs/logs-pipelines/concepts', label: 'Concepts' },
           { type: 'doc', route: '/docs/logs-pipelines/parsing', label: 'How to Parse Logs' },
           {
             label: 'Types of Log Processors',

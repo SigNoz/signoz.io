@@ -420,6 +420,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/logs-pipelines/concepts/',
+          destination: '/docs/logs-pipelines/introduction/',
+          permanent: true,
+        },
+        {
           source: '/docs/logs-pipelines/guides/severity/',
           destination: '/docs/logs-pipelines/guides/severity-parsing/',
           permanent: true,
