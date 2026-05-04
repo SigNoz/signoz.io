@@ -11,7 +11,7 @@ keywords: [SigNoz, MCP, observability, dashboards, monitoring, incident, natural
 
 Dashboards are one of the fundamental parts of observability. They give you visibility into how your services are performing, what's healthy, and what isn't. But building them is a different story. Setting one up properly takes time, requires knowing the right metric names, and involves lots of manual configuration that you put off until you really need it.
 
-That delay has real consequences. A new service goes to production without proper monitoring because nobody had time to build the dashboard before the release. Or an incident starts and the on-call engineer doesn't have the exact panels they're looking for. Dashboards exist to give you visibility, but there's oftentimes a lot of friction to build them.
+That delay has real consequences. A new service goes to production without proper monitoring because nobody had time to build the dashboard before the release. Or an incident starts and the on-call engineer doesn't have the exact panels they're looking for. Dashboards exist to give you visibility, but there's often a lot of friction to build them.
 
 <figure data-zoomable align='center'>
     <img
@@ -40,10 +40,10 @@ Building a dashboard from scratch is time-consuming. Before you write a single q
 
 Then for each panel, you need to:
 
-- Configure it individually
-- Set the right time ranges
-- Pick the right visualization type
-- Scope everything correctly to the service you want to monitor
+- **Configure** it individually
+- **Set** the right time ranges
+- **Pick** the right visualization type
+- **Scope** everything correctly to the service you want to monitor
 
 For teams running multiple services, this doesn't scale well. Every new service that gets deployed is another dashboard that needs to be built. 
 
@@ -53,32 +53,40 @@ Teams know they need better dashboard coverage. The friction of building them ma
 
 ## Creating Dashboards from Natural Language
 
-When a new service gets deployed, there are some things you immediately need to know: is it healthy, what's the error rate, how is latency looking? Getting answers to those questions without a dashboard means manually filtering through metrics and traces every time you want to check.  But as we've established, building that dashboard takes time you often don't have right at the moment of a release.
+When a new service gets deployed, there are some things you immediately need to know:
+
+- Is it healthy?
+- What's the error rate?
+- How is latency looking?
+
+Getting answers to those questions without a dashboard means manually filtering through metrics and traces every time you want to check.  But as we've established, building that dashboard takes time you often don't have right at the moment of a release.
 
 With the SigNoz MCP, the workflow is a single prompt. You ask the MCP to confirm the service is sending data, find its relevant metrics, and create a dashboard with the panels you need:
 
 ```text
-Check if the payments-service is sending telemetry to SigNoz.
+Check if the recommendations service is sending telemetry to SigNoz.
 Then create a monitoring dashboard for it with panels for error rate, p99 latency,
 request throughput, and any other signals worth tracking for this type of service.
 ```
 
 The MCP first verifies the service is actually ingesting telemetry, a useful check that catches instrumentation issues before you assume your new service is being monitored correctly. Then it:
 
-- Discovers the right metric, trace, and log names automatically
-- Constructs the correct query formulas for each panel
-- Creates the dashboard directly in your SigNoz instance
-
-If you're not sure where to start, you can also ask the AI to reason on what the most important panels would be for your service. Based on the telemetry your service is sending, it can suggest what's worth monitoring. Whether that's golden signals like error rate, latency, and throughput, or more specific metrics relevant to what your service actually does. You don't need to come in with a list of panels already in mind.
-
-You can generate a dashboard built specifically for the service you asked about, with panels configured against its actual data. All showing real metrics, ready to use immediately.
+- **Discovers** the right metric, trace, and log names automatically
+- **Constructs** the correct query formulas for each panel
+- **Creates** the dashboard directly in your SigNoz instance
 
 <figure data-zoomable align='center'>
     <img
         src="/img/blog/2026/04/recommendation-dashboard-detailed.webp"
-        alt="Dashboard for payments-service showing error rate, p99 latency, and throughput panels"
+        alt="Dashboard for recommendation-service showing error rate, p99 latency, and throughput panels"
     />
 </figure>
+
+If you're not sure where to start, you can also ask the AI to reason on what the most important panels would be for your service. Based on the telemetry your service is sending, it can suggest what's worth monitoring — whether that's golden signals like error rate, latency, and throughput, or more specific metrics relevant to what your service actually does.
+
+You don't need to come in with a list of panels already in mind.
+
+You can generate a dashboard built specifically for the service you asked about, with panels configured against its actual data. All showing real metrics, ready to use immediately.
 
 The whole process takes seconds rather than the 20-30 minutes it would take to build the same dashboard manually. And because the MCP handles telemetry data discovery and query construction automatically, you don't need to know the exact metric names or formula syntax upfront. You just describe what you want to see.
 
@@ -88,39 +96,39 @@ The whole process takes seconds rather than the 20-30 minutes it would take to b
 
 ## Spinning Up an Incident Dashboard on the Fly
 
-The great thing about dashboards is they allows you to monitor everything you need at a glance. The issue is these dashboards are oftentimes too general for specific incidents. During an incident, you want to hone in on a specific signal. But you're looking for it in a dashboard that wasn't designed for the failure you're dealing with. Meanwhile, every minute spent configuring a more focused view is a minute not spent on the actual investigation.
+The great thing about dashboards is it allows you to monitor everything you need at a glance. The issue is these dashboards are often too general for specific incidents. During an incident, you want to hone in on a specific signal. But you're looking for it in a dashboard that wasn't designed for the failure you're dealing with. Meanwhile, every minute spent configuring a more focused view is a minute not spent on the actual investigation.
 
 This is where a purpose-built incident dashboard makes a real difference. It allows for a focused view scoped to the specific incident, showing exactly what's relevant:
 
-- Current error rate against baseline
-- Failing operations
-- Dependency health
-- Infrastructure metrics 
+- **Current error rate** against baseline
+- **Failing operations**
+- **Dependency health**
+- **Infrastructure metrics**
 
 Normally, creating such a dashboard would take around 30 minutes. But now it's achievable with a single prompt. 
 
 With the SigNoz MCP, you describe what you need and it builds it:
 
 ```text
-The payments-service is throwing errors and latency has spiked. Create an incident dashboard
+The checkout service is throwing errors and latency has spiked. Create an incident dashboard
 scoped to this service. Include current error rate vs baseline, the top failing operations,
 the health of any services it depends on, and the relevant infrastructure metrics.
 ```
 
 The MCP:
 
-- Analyzes the service
-- Identifies its dependencies automatically
-- Structures the dashboard around what's actually relevant to the incident 
+- **Analyzes** the service
+- **Identifies** its dependencies automatically
+- **Structures** the dashboard around what's actually relevant to the incident
 
 <figure data-zoomable align='center'>
     <img
         src="/img/blog/2026/04/incident-dashboard-detailed.webp"
-        alt="Incident dashboard scoped to payments-service"
+        alt="Incident dashboard scoped to checkout-service"
     />
 </figure>
 
-If a service is throwing errors, the MCP identifies other services that it depends on and builds dependency health panels for all of them without you needing to list them out. Now you're able to create detailed, incident-specific dashboards in the middle of an active incident in seconds, without any manual effort.
+If a service is throwing errors, the MCP identifies other services that it depends on and builds dependency health panels for all of them without you needing to list them out. You can now create detailed, incident-specific dashboards in seconds, even in the middle of an active incident without any manual effort.
 
 - [Step-by-step guide](https://signoz.io/docs/ai/use-cases/incident-specific-dashboard/)
 
@@ -128,7 +136,7 @@ If a service is throwing errors, the MCP identifies other services that it depen
 
 ## Putting It Together — Dashboards When You Need Them
 
-The SigNoz MCP allows you to change the way you approach dashboards. Dashboards stops being something you plan, build, and maintain in advance, and becomes something you generate on demand for exactly what you need at any given moment.
+The SigNoz MCP allows you to change the way you approach dashboards. Dashboards stop being something you plan, build, and maintain in advance, and become something you generate on demand for exactly what you need at any given moment.
 
 That shift matters because the moments when you need a good dashboard are also the moments when you have no time to build one. A new service just shipped. An incident just started. These are exactly the situations where dashboard coverage is most critical and manual creation is least practical.
 
