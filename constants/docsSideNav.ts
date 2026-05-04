@@ -36,11 +36,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/product-features/trace-explorer',
-            label: 'Trace Explorer',
-          },
-          {
-            type: 'doc',
             route: '/docs/product-features/logs-explorer',
             label: 'Logs Explorer',
           },
