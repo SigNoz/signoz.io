@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import React from 'react'
 
-const TAB_STYLE = 'inline-flex h-full items-center rounded-t-lg px-1 py-1.5 pb-3.5'
+const TAB_STYLE =
+  'inline-flex h-full shrink-0 items-center whitespace-nowrap rounded-t-lg px-1 py-1.5 pb-3.5'
 const ACTIVE_STYLE = 'border-b-2 border-signoz_robin-500 text-signoz_vanilla-100'
 
 function TabLink({
@@ -17,7 +18,7 @@ function TabLink({
 }) {
   return (
     <Link
-      className={`me-2 ${TAB_STYLE} ${activeTab === tabId ? ACTIVE_STYLE : ''}`}
+      className={`${TAB_STYLE} ${activeTab === tabId ? ACTIVE_STYLE : ''}`}
       href={href}
       role="tab"
       aria-selected={activeTab === tabId}
@@ -27,12 +28,12 @@ function TabLink({
   )
 }
 
-export default function Tabs({ activeTab }) {
+export default function Tabs({ activeTab }: { activeTab: string }) {
   return (
-    <header className="header-bg mx-auto box-border flex h-[56px] w-full items-center overflow-x-auto border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
-      <div className="container h-full">
+    <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
+      <div className="container h-fit overflow-x-auto">
         <ul
-          className="mb-0 flex h-full gap-6 pl-0 text-center text-sm font-medium text-signoz_vanilla-400"
+          className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-signoz_vanilla-400 sm:gap-6"
           id="default-tab"
           data-tabs-toggle="#default-tab-content"
           role="tablist"

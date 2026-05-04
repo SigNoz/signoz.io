@@ -1,8 +1,9 @@
 ---
-date: 2024-06-06
+date: 2026-04-23
 title: Metric Types and Aggregation
-
+description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 id: types-and-aggregation
+doc_type: explanation
 ---
 
 This page describes the different types of metrics that SigNoz supports and how they are aggregated.
@@ -126,6 +127,16 @@ The selection of the temporal aggregation function depends on the use case and t
 - **Count**: The number of memory usage measurements in the interval. This doesn't make much sense in the context of memory usage.
 
 - **Count Distinct**: The number of distinct memory usage measurements in the interval. This doesn't make much sense in the context of memory usage.
+
+<Admonition type="tip">
+Gauge metrics do not support Rate or Increase temporal aggregation. To compute changes over time for a Gauge metric, use the **Time Shift** function with a formula:
+
+1. Create your Gauge query (query **A**).
+2. Clone it as query **B** and add a **Time Shift** function to **B**, with the shift value in seconds (for example, `3600` for a 1-hour comparison).
+3. Add a formula **A − B** to calculate the difference between the current and shifted values.
+
+See the <a href="https://signoz.io/docs/userguide/query-builder/#functions-for-extended-data-analysis">Time Shift function documentation</a> for details.
+</Admonition>
 
 For each interval, the aggregated value is calculated based on the temporal aggregation function specified in the query. The result of this step is a single aggregated value for each interval within the time series. The number of time series remains the same after temporal aggregation.
 

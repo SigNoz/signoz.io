@@ -1,8 +1,8 @@
 ---
-date: 2024-06-06
+date: 2026-04-08
 id: manage-variables
-
 title: Manage Variables in SigNoz
+description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -154,10 +154,16 @@ ORDER BY
 
 ### PromQL
 
-Variables work seamlessly in Prometheus queries:
+**Single-select variables**: Use the `=` matcher with the variable:
 
 ```
 sum(rate(http_requests_total{job="$job_name"}[5m]))
+```
+
+**Multi-select variables**: Use the `=~` regex matcher instead of `=`. When multiple values are selected, SigNoz expands the variable into a regex pattern (e.g., `value1|value2|value3`), which requires `=~` to match correctly.
+
+```
+sum(rate(http_requests_total{service_name=~"$service_name", deployment_environment=~"$deployment_environment"}[5m]))
 ```
 
 ## Chaining Variables

@@ -1,7 +1,6 @@
 ---
-date: 2025-11-25
+date: 2026-04-23
 id: argocd-dashboard
-
 title: ArgoCD Dashboard
 description: Monitor ArgoCD applications and operations with comprehensive metrics including application health, sync status, controller performance, cluster stats, and repository server activity.
 doc_type: explanation
@@ -10,11 +9,17 @@ doc_type: explanation
 This dashboard provides comprehensive monitoring of ArgoCD application health and synchronization status, offering detailed visibility into application states, sync results, and controller performance for optimal GitOps workflow monitoring.
 
 <Admonition type="note">
-To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [ArgoCD Metrics](https://signoz.io/docs/cicd/argocd/argocd-metrics/) guide to get started.
+  To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [ArgoCD Metrics](https://signoz.io/docs/cicd/argocd/argocd-metrics/) guide to get started.
 </Admonition>
 
+<Figure
+  src="/img/docs/cicd/argocd/argocd-overview.webp"
+  alt="ArgoCD Dashboard"
+  caption="ArgoCD Dashboard Template"
+/>
+
 <div className="flex justify-center">
-  <DashboardActions 
+  <DashboardActions
     dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/argocd/argocd.json"
     dashboardName="ArgoCD Dashboard"
   />
@@ -36,14 +41,17 @@ This dashboard tracks essential ArgoCD metrics to help you:
 ### Overview Section
 
 #### Number Of Applications
+
 - **Applications Graph**: Time-series visualization showing total number of applications by health status:
   - Grouped by health status for trend analysis
   - Filtered by namespace and repository for focused monitoring
 
 #### Repository Servers
+
 - **Repository Count**: Shows the total number of repository servers configured in ArgoCD
 
 #### Applications By Repository
+
 - **Repository Distribution**: Displays application count grouped by repository:
   - Helps identify repository usage patterns
   - Useful for capacity planning and load distribution
@@ -51,15 +59,23 @@ This dashboard tracks essential ArgoCD metrics to help you:
 ### Application Health Section
 
 #### Health Status Metrics
+
 - **Healthy**: Number of applications in healthy state (green indicator)
 - **Progressing**: Number of applications currently in progress (blue indicator)
 - **Suspended**: Number of suspended applications (red background indicator)
 - **Degraded**: Number of degraded applications (red text indicator)
 
+#### Advanced Application Metrics
+
+- **Application Details**: Comprehensive view of individual applications and their current state
+- **Orphaned Resources per App**: Identifies stray resources not properly tracked or cleaned up by ArgoCD
+
 ### Application Sync Status Section
 
 #### Synchronization Tracking
+
 - **Synced**: Graph showing applications that are in sync with their Git repositories
+
   - Grouped by repository for detailed analysis
   - Essential for ensuring deployments are up-to-date
 
@@ -70,18 +86,22 @@ This dashboard tracks essential ArgoCD metrics to help you:
 ### Controller Stats Section
 
 #### Sync and Reconciliation Activity
+
 - **Sync Activity**: Shows different phases of sync operations:
+
   - **Succeeded**: Successful sync operations
-  - **Failed**: Failed sync attempts  
+  - **Failed**: Failed sync attempts
   - **Error**: Sync operations that encountered errors
 
 - **Reconciliation Activity**: Displays application reconciliation count over time
   - Tracks controller workload and processing efficiency
 
 #### Performance Metrics
+
 - **Count of Application Reconciliation by Duration Bounds**: Histogram showing reconciliation performance distribution
 - **Reconciliation Performance**: Detailed performance analysis by duration buckets
 - **K8s API Activity**: Monitors Kubernetes API requests during application reconciliation:
+
   - Grouped by verb (GET, POST, PUT, DELETE) and resource kind
   - Essential for understanding API load patterns
 
@@ -91,26 +111,44 @@ This dashboard tracks essential ArgoCD metrics to help you:
 ### Cluster Stats Section
 
 #### Cluster Resource Monitoring
+
 - **Age of Cluster Cache**: Tracks cluster cache freshness in seconds
+
   - Critical for ensuring up-to-date cluster state information
 
 - **Count of Cluster Resource Objects**: Number of Kubernetes resource objects in the cache
+
   - Grouped by server for multi-cluster environments
 
 - **Count of Cluster Events**: Tracks processed Kubernetes events
+
   - Important for monitoring cluster activity levels
 
 - **Count of API Resources**: Number of monitored Kubernetes API resources
+
   - Helps understand the scope of monitoring coverage
+
+- **Cluster Connection Status**: Real-time status of Kubernetes cluster connectivity
+  - Essential for identifying communication issues between ArgoCD and destination clusters
 
 ### Repo Server Stats Section
 
 #### Git Repository Activity
+
 - **Count of Git Ls-Remote Requests**: Tracks Git ls-remote operations by repository
+
   - Important for monitoring repository connectivity and health
 
 - **Count of Git Fetch Requests**: Shows Git fetch operations by repository
+
   - Critical for understanding repository synchronization activity
+
+- **Pending Repo Requests**: Indicates backlogs in Git repository operations
+
+  - Useful for spotting synchronization bottlenecks
+
+- **Git Request Duration (P99)**: The 99th percentile response time for Git interactions
+  - Tracks performance and latency when interacting with Git providers
 
 ## Dashboard Variables
 
@@ -119,6 +157,7 @@ This dashboard includes pre-configured variables for filtering:
 - **health.status**: Filter by application health status (Healthy, Progressing, Suspended, Degraded, etc.)
 - **namespace**: Filter by Kubernetes namespace for environment-specific monitoring
 - **repo**: Filter by Git repository name for repository-specific analysis
+- **sync.status**: Filter by sync status (Synced, OutOfSync, Unknown)
 
 ## Related Dashboards
 

@@ -9,7 +9,7 @@ const siteMetadata = {
   theme: 'dark', // system, dark or light
   siteUrl: 'https://signoz.io',
   siteRepo: 'https://github.com/signoz/',
-  siteLogo: '/img/logo.svg',
+  siteLogo: '/svgs/icons/signoz.svg',
   socialBanner: '/img/signoz-meta-image.webp',
   mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'hello@signoz.io',

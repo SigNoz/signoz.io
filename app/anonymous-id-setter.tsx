@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import Cookies from 'js-cookie'
-import { ANONYMOUS_ID_COOKIE, ANONYMOUS_ID_KEY, COOKIE_EXPIRY_DAYS } from '../hooks/useAnonymousId'
+import { ANONYMOUS_ID_COOKIE, ANONYMOUS_ID_KEY, COOKIE_EXPIRY_DAYS } from '@/constants/anonymousId'
 import { v4 as uuidv4 } from 'uuid'
 
 export function AnonymousIdSetter() {

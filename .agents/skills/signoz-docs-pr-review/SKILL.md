@@ -16,6 +16,7 @@ Use this skill for docs review on changes such as:
 - `constants/docsSideNav.ts`
 - `constants/componentItems.ts` and `constants/componentItems/*.ts` when new docs should also appear in docs listicles, overview cards, or similar discovery surfaces
 - `next.config.js` when docs URL paths change
+- `components/**/*.mdx` when changed together with docs work (see **Shared doc fragments** in `contributing/docs-review.md`)
 
 If a PR includes frontend code too, use this skill only for the docs part.
 
@@ -33,11 +34,12 @@ Apply rules from those playbooks directly. Do not restate the entire guide in co
 1. Identify docs files changed in the PR.
 2. Identify related discoverability files that should change with the docs when relevant (`constants/docsSideNav.ts` for sidebar visibility, `constants/componentItems.ts` as the public entrypoint and `constants/componentItems/*.ts` as the source modules for listicle/overview visibility).
 3. **Read `contributing/docs-review.md` and `contributing/docs-authoring.md` in full before starting the review.** These playbooks contain the JTBD rubric, authoring standards, onboarding-label policy, and summary format that drive every review decision. Reviewing without reading them first leads to missed checks and inconsistent feedback.
-4. Identify intended user personas for each changed doc (for example: OTel beginner, platform engineer, app developer, SRE) from doc context.
-5. Run the JTBD-first pass defined in `contributing/docs-review.md` before technical verification.
-6. Verify technical accuracy when claims involve OpenTelemetry behavior or configuration, following the source priority and citation rules in `contributing/docs-review.md`.
-7. Post inline findings for concrete issues.
-8. Post exactly one concise summary comment using the format in `contributing/docs-review.md`.
+4. If the PR adds or rewrites `components/**/*.mdx` shared partials, follow **Shared doc fragments** in `contributing/docs-review.md`: flag new MDX partials so authors consider `.tsx` unless there is a clear reason to keep MDX.
+5. Identify intended user personas for each changed doc (for example: OTel beginner, platform engineer, app developer, SRE) from doc context.
+6. Run the JTBD-first pass defined in `contributing/docs-review.md` before technical verification.
+7. Verify technical accuracy when claims involve OpenTelemetry behavior or configuration, following the source priority and citation rules in `contributing/docs-review.md`.
+8. Post inline findings for concrete issues.
+9. Post exactly one concise summary comment using the format in `contributing/docs-review.md`.
 
 ## Commenting Rules
 
