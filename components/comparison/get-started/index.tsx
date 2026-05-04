@@ -42,7 +42,7 @@ const GetStartedSection = (props) => {
       <div
         className={`${styles.trySigNozContainer} 
         ${!withHackerNews && styles.withoutHackerNews} 
-        ${!withMigrationSupport && styles.withoutMigrationSupport} bg-indigo-500`}
+        ${!withMigrationSupport && styles.withoutMigrationSupport} bg-signoz_robin-500`}
       >
         <h3 className={styles.tagline}>
           OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of glass
