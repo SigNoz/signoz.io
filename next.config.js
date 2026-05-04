@@ -2687,11 +2687,6 @@ module.exports = () => {
           destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
-        {
-          source: '/foundry.sh',
-          destination: 'https://raw.githubusercontent.com/SigNoz/foundry/main/scripts/foundry.sh',
-          permanent: true,
-        },
       ]
     },
     webpack: (config, options) => {
