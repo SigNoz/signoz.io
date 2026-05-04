@@ -12,6 +12,7 @@ import OpenAPISpec from '@/components/OpenAPISpec'
 import APIVersionSwitcher from '@/components/APIVersionSwitcher'
 
 export const revalidate = API_SPEC_REVALIDATE_SECONDS
+export const dynamic = 'force-static'
 
 interface PageProps {
   params: { version: string }
