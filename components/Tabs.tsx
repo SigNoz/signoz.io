@@ -1,14 +1,16 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import React, { Suspense, useState } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '@/constants/queryParams'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
-const Tabs = ({ children, entityName }) => {
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+
+function TabsInner({ children, entityName }) {
   const searchParams = useSearchParams()
+  const pathname = usePathname()
 
   const environment = searchParams.get(QUERY_PARAMS.ENVIRONMENT)
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const isOnboarding = isDocsOnboardingPathname(pathname)
 
   // Ensure children is always an array
   const childrenArray = React.Children.toArray(children)
@@ -44,7 +46,7 @@ const Tabs = ({ children, entityName }) => {
     selectedTab = defaultActiveTab
   }
   const [activeTab, setActiveTab] = useState(selectedTab)
-  const hideSelfHostTab = source === ONBOARDING_SOURCE && entityName === 'plans'
+  const hideSelfHostTab = isOnboarding && entityName === 'plans'
 
   return (
     <div className="w-full" data-tabs-root>
@@ -85,6 +87,14 @@ const Tabs = ({ children, entityName }) => {
         })}
       </div>
     </div>
+  )
+}
+
+const Tabs = ({ children, entityName }) => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TabsInner entityName={entityName}>{children}</TabsInner>
+    </Suspense>
   )
 }
 

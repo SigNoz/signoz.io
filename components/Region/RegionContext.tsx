@@ -1,9 +1,9 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { QUERY_PARAMS } from '@/constants/queryParams'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { usePathname, useRouter } from 'next/navigation'
+import { useBrowserSearch } from '@/hooks/useBrowserSearch'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 interface Cluster {
   cloud_provider: string
@@ -64,7 +64,7 @@ const FALLBACK_REGIONS: RegionData[] = [
 
 const RegionContext = createContext<RegionContextType | undefined>(undefined)
 
-export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+function RegionProviderInner({ children }: { children: React.ReactNode }) {
   const [regions, setRegions] = useState<RegionData[]>([])
   const [region, setRegionState] = useState<string | null>(null)
   const [cloudRegion, setCloudRegionState] = useState<string | null>(null)
@@ -72,9 +72,8 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
-  const isOnboarding = source === ONBOARDING_SOURCE
+  const search = useBrowserSearch()
+  const isOnboarding = isDocsOnboardingPathname(pathname)
 
   useEffect(() => {
     const fetchRegions = async () => {
@@ -98,6 +97,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [])
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(search)
     const regionParam = searchParams.get('region')
     const cloudRegionParam = searchParams.get('cloud_region')
 
@@ -129,10 +129,10 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setCloudRegionState(firstCluster.cloud_region)
       }
     }
-  }, [searchParams, regions])
+  }, [search, regions, isOnboarding])
 
   const setRegion = (newRegion: string | null, newCloudRegion: string | null) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()))
+    const current = new URLSearchParams(search)
 
     if (newRegion) {
       current.set('region', newRegion)
@@ -146,8 +146,8 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       current.delete('cloud_region')
     }
 
-    const search = current.toString()
-    const query = search ? `?${search}` : ''
+    const searchString = current.toString()
+    const query = searchString ? `?${searchString}` : ''
 
     router.push(`${pathname}${query}`, { scroll: false })
     setRegionState(newRegion)
@@ -159,6 +159,10 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       {children}
     </RegionContext.Provider>
   )
+}
+
+export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <RegionProviderInner>{children}</RegionProviderInner>
 }
 
 export const useRegion = () => {

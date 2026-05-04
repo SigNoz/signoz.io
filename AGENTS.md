@@ -56,3 +56,7 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
 - Focus on concrete issues and fixes, not praise-only comments.
 - If no issues are found, state that explicitly and call out residual risks/testing gaps.
 
+## yarn build
+
+When building, write to a file and then read the file to look what you want, stop combining build with grep or any other command.
+This avoids multiple builds because the command to grep is wrong.
