@@ -17,6 +17,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Anthropic API Dashboard Template',
   },
   {
+    name: 'Apache Druid',
+    href: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+    clickName: 'Apache Druid Dashboard Template',
+  },
+  {
     name: 'Apache Web Server',
     href: '/docs/dashboards/dashboard-templates/apache-web-server',
     clickName: 'Apache Web Server Dashboard Template',
@@ -212,6 +217,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'JVM Dashboard Template',
   },
   {
+    name: 'Kafka',
+    href: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+    clickName: 'Kafka Dashboard Template',
+  },
+  {
     name: 'Kubernetes',
     href: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
     clickName: 'K8s Infra Metrics Dashboard Template',
@@ -225,6 +235,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Key Operations',
     href: '/docs/dashboards/dashboard-templates/key-operations',
     clickName: 'Key Operations Dashboard Template',
+  },
+  {
+    name: 'Kong Gateway',
+    href: '/docs/dashboards/dashboard-templates/kong-gateway',
+    clickName: 'Kong Gateway Dashboard Template',
   },
   {
     name: 'LiteLLM',

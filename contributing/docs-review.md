@@ -21,13 +21,20 @@ Review these when relevant:
 - `constants/componentItems.ts`
 - `constants/componentItems/*.ts`
 - `next.config.js` when docs URLs change
+- `components/**/*.mdx` when the PR adds or meaningfully changes these alongside docs (see **Shared doc fragments** below)
 
 If a PR also changes frontend code, use the frontend review workflow for the code portion.
+
+### Shared doc fragments (`components/`)
+
+Shared snippets imported into docs should **prefer React (`.tsx`)** over new **`.mdx` partials** under `components/`. MDX partials add maintenance cost for `MDXComponents` and `utils/docs/agentMarkdownStubs.ts`.
+
+**Reviewer guidance (recommendation, not a hard rule):** if the PR **adds** new `components/**/*.mdx` files, leave an inline note or call it out in the summary so the author can confirm a `.tsx` fragment would not work. Do not block on legacy or intentional MDX without discussion.
 
 ## Review Process
 
 1. Identify changed docs files.
-2. Check whether related discovery files should also change.
+2. Check whether related discovery files should also change. When `components/**/*.mdx` is in scope for this PR, apply the **Shared doc fragments** recommendation (flag new MDX partials; prefer `.tsx` for new shared snippets).
 3. Read the changed pages with the standards from [docs-authoring.md](docs-authoring.md) in mind.
 4. Identify likely personas from context.
 5. Run the JTBD-first rubric.
@@ -181,6 +188,9 @@ Post exactly one concise summary comment that includes:
 gh pr view <PR_NUMBER>
 gh pr diff <PR_NUMBER>
 gh api repos/<REPO>/pulls/<PR_NUMBER>/files --paginate
+
+# MDX partials under components/ (prefer .tsx for new shared fragments)
+gh pr diff <PR_NUMBER> --name-only | grep -E '^components/.*\.mdx$' || true
 
 # changed docs and guidance
 rg --files data/docs

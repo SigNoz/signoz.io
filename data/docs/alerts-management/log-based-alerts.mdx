@@ -1,8 +1,9 @@
 ---
-date: 2026-04-01
+date: 2026-04-23
 id: log-based-alerts
 title: Log based alerts
 description: Set up log-based alerts in SigNoz using the Logs Query Builder to trigger notifications based on log patterns and thresholds.
+doc_type: howto
 ---
 
 A Log-based alert allows you to define conditions based on log data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Log-based alert:
@@ -126,11 +127,20 @@ A field to name the alert for easy identification.
 
 Add a detailed description for the alert, explaining its purpose and trigger conditions.
 
-You can incorporate result attributes in the alert descriptions to make the alerts more informative:
+You can incorporate template variables in the alert descriptions to make the alerts more informative:
 
-**Syntax**: Use `$<attribute-name>` to insert attribute values. Attribute values can be any attribute used in group by.
+| Variable | Description |
+| --- | --- |
+| `{{$value}}` | The current aggregated value that triggered the alert |
+| `{{$threshold}}` | The threshold value that was breached |
+| `$<attribute-name>` | Any attribute used in the Group By clause (e.g., `$service.name`) |
 
-**Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the alert description, you will use `$service.name`.
+**Example**: If you have a query grouped by `service.name` with a threshold of 100, you could write:
+`Log count for $service.name is {{$value}} (threshold: {{$threshold}})`
+
+#### Related Logs Link
+
+Log-based alert notifications include a **Related Logs** link that opens the Logs Explorer filtered to the relevant time range and query filters from the alert definition. Use this to view the actual log messages that contributed to the alert.
 
 #### Slack alert format
 

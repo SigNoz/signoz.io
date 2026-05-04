@@ -138,8 +138,8 @@ export const productDropdownItems: ProductItem[] = [
     order: 8,
   },
   {
-    key: 'observability-for-ai-native-companies',
-    url: '/observability-for-ai-native-companies/',
+    key: 'agent-native-observability',
+    url: '/agent-native-observability/',
     icon: (
       <ShieldPlus className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />
     ),

@@ -25,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'datadog-pricing-calculator',
     'upgrade-path',
     'unified-observability',
+    'agent-native-observability',
   ].map((route) => ({
     url: `${siteUrl}/${route}/`,
     changeFrequency: 'weekly' as const,
