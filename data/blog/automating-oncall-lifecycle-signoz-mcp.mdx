@@ -19,14 +19,14 @@ But that level of on-call requires lots of process and discipline that most team
 
 On-call tends to accumulate debt over time. Alert rules get created and never revisited. Noisy alerts train engineers to ignore their pager. Shift handoffs get rushed and context gets lost. Postmortems get pushed back because pulling together the evidence takes hours. Teams know about all of these problems, but they just never get prioritized because on-call itself always gets in the way.
 
-The SigNoz MCP addresses this across the full on-call lifecycle. And not just during an active incident, but before one and after one.
-
 <figure data-zoomable align='center'>
     <img
         src="/img/blog/2026/04/mcp-blog-cover-3.webp"
         alt="Blog Cover"
     />
 </figure>
+
+The SigNoz MCP addresses this across the full on-call lifecycle. And not just during an active incident, but before one and after one.
 
 In this post we'll walk through four specific use cases that cover the on-call lifecycle from end to end — creating alerts for new services, generating shift handoff briefs, auditing and reducing alert fatigue, and compiling postmortem evidence packs.
 
@@ -39,9 +39,11 @@ In this post we'll walk through four specific use cases that cover the on-call l
     />
 </figure>
 
-On-call is supposed to be a "safety net". When something breaks in production, the right person gets notified, investigates, fixes it, and hands off cleanly. In theory it's a well-defined process. In practice, the overhead compounds quickly.
+On-call is supposed to be a "safety net." When something breaks in production, the right person gets notified, investigates, fixes it, and hands off cleanly. In theory it's a well-defined process. In practice, the overhead compounds quickly.
 
-Every noisy alert that fires without a real incident behind it reduces trust in the alerting system. Every rushed handoff where context gets lost means the next engineer starts their shift with less information. Every postmortem that gets skipped or half-finished because it was too time-consuming means the same incident is more likely to happen again.
+- Every **noisy alert** that fires without a real incident behind it reduces trust in the alerting system.
+- Every **rushed handoff** where context gets lost means the next engineer starts their shift with less information.
+- Every **postmortem** that gets skipped or half-finished because it was too time-consuming means the same incident is more likely to happen again.
 
 The result is an on-call experience that feels reactive and exhausting rather than structured and manageable. Engineers are constantly in response mode and can hardly find the time to fix the underlying problems that make on-call hard in the first place.
 
@@ -122,7 +124,11 @@ This gives you a baseline view of every alert's firing behavior. From there, you
 For each alert rule, retrieve the total fire count, fire frequency, and mean duration before auto-resolve. Then check the error rate and p99 latency of the owning service 5 minutes before and after each alert firing. Show me the per-firing delta for each rule.
 ```
 
-The question it's answering is simple: did anything actually get worse when this alert fired? Alerts that consistently correlate with real degradation like error rates spiking and latency jumping are doing their job. Alerts that fire constantly but show no corresponding change in service health are noise. And alerts that fire and auto-resolve every time, with zero service impact are harmful to on-call quality.
+The question it's answering is simple: did anything actually get worse when this alert fired? | Classification | Behavior | Verdict |
+|---|---|---|
+| VALID | Correlates with real degradation — error rates spike, latency jumps | Keep |
+| NOISY | Fires constantly with no corresponding change in service health | Tune |
+| FLAPPING | Fires and auto-resolves every time, zero service impact | Delete |
 
 The final step is classification:
 
@@ -148,7 +154,14 @@ With the SigNoz MCP, the entire evidence pack comes from a single prompt:
 Compile an incident timeline for yesterday 14:00-16:00 UTC: alert transitions, metric inflection points, representative errors, and the trace that best captures the failure path.
 ```
 
-The MCP pulls alert state transitions for the window, identifies metric inflection points where error rates and latency changed significantly, surfaces error messages with their root cause signatures, and finds the trace that best captures the full failure path end to end. You get a clean structured incident timeline with precise timing, correlated signals across alerts, metrics, logs, and traces, and a clear narrative of what happened and when.
+The MCP compiles:
+
+- **Alert state transitions** for the incident window
+- **Metric inflection points** where error rates and latency changed significantly
+- **Error messages** with their root cause signatures
+- **The representative trace** that best captures the full failure path end to end
+
+You get a clean structured incident timeline with precise timing, correlated signals across alerts, metrics, logs, and traces, and a clear narrative of what happened and when.
 
 The result is a postmortem evidence pack that would have taken an engineer an hour to compile manually, produced in seconds. With the hard work of evidence gathering done automatically, the postmortem itself can focus on what actually matters like understanding why the incident happened and how to prevent it from happening again.
 
@@ -158,9 +171,12 @@ The result is a postmortem evidence pack that would have taken an engineer an ho
 
 The four use cases in this post cover on-call from end to end:
 
-- before an incident
-- during one
-- after it resolves.
+| Use Case | Lifecycle Phase | What the MCP Does |
+|---|---|---|
+| Alert creation | Before | Creates alert rules from a plain English prompt |
+| Shift handoff brief | Before / transition | Summarizes the full alert history for the outgoing engineer |
+| Alert fatigue audit | Between incidents | Classifies every rule by firing quality and recommends action |
+| Postmortem evidence | After | Compiles a complete incident timeline across all signals |
 
 Most observability tooling is built for the middle part. You have dashboards and alerts for when things are actively breaking. But the work that happens before an incident and after one is just as important and far less supported.
 
