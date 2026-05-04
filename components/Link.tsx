@@ -3,22 +3,16 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
-import { AnchorHTMLAttributes, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { AnchorHTMLAttributes } from 'react'
+import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 
 type CustomLinkProps = LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>
 
 const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
-  const searchParams = useSearchParams()
-  const [regionParam, setRegionParam] = useState<string | null>(null)
-  const [cloudRegionParam, setCloudRegionParam] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (searchParams) {
-      setRegionParam(searchParams.get('region'))
-      setCloudRegionParam(searchParams.get('cloud_region'))
-    }
-  }, [searchParams])
+  const search = useBrowserSearch()
+  const searchParams = new URLSearchParams(search)
+  const regionParam = searchParams.get('region')
+  const cloudRegionParam = searchParams.get('cloud_region')
 
   const isInternalLink =
     (href && (href.startsWith('/') || href.startsWith('.'))) ||

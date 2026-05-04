@@ -4,7 +4,7 @@ import React, { useEffect, useState, FC } from 'react';
 import { Lexend, Orbitron } from 'next/font/google';
 import { BiTime } from 'react-icons/bi';
 import { HiLightBulb } from 'react-icons/hi2';
-import { cn } from '../../lib/utils';
+import { cn } from '../../../lib/utils';
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['500'] });
 const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] });
