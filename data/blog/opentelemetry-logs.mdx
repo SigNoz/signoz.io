@@ -113,6 +113,12 @@ Traditional logging is usually tied to application-specific formats, local files
 
 Correlating logs with traces and metrics helps teams move from symptoms to root cause faster. An error log with a `TraceId` can point to the exact distributed trace for that request, while related metrics can show whether the issue is isolated or part of a wider pattern.
 
+## Is OpenTelemetry logging stable?
+
+Logs are a stable signal in the OpenTelemetry specification, but language SDK support varies. As of May 2026, the <a href="https://opentelemetry.io/docs/languages/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry language status table</a> lists logs support as stable for Java, .NET, C++, and PHP, beta for Go and Rust, and under development for Python, JavaScript, Ruby, Swift, Erlang/Elixir, and Kotlin.
+
+For production rollouts, check the status and usage patterns of your language SDK and logging bridge before choosing a direct SDK approach. Collector-based file/stdout collection is often the safest path when you want minimal application changes or when logs support in your language is still evolving.
+
 {/* <!-- ## Correlation in OpenTelemetry
 
 Let's see through a code example how correlation works in OpenTelemetry. Consider a hypothetical scenario where a web service processes user requests. We'll showcase how to correlate logs, metrics, and traces using OpenTelemetry:
@@ -473,6 +479,28 @@ The goal of OpenTelemetry is to make log data have a richer context, making it m
 > Source: <a href="https://opentelemetry.io/docs/specs/otel/logs/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry website</a>
 
 To get started with OpenTelemetry logs, install SigNoz and start experimenting by sending some log data to SigNoz. SigNoz also provides traces and metrics. So you can have all three telemetry signals under [a single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/).
+
+## FAQs
+
+### What are OpenTelemetry logs?
+
+OpenTelemetry logs are timestamped event records represented with the OpenTelemetry log data model. They can include severity, body, attributes, resource information, instrumentation scope, and trace context such as `TraceId` and `SpanId`.
+
+### What type of log is OpenTelemetry?
+
+OpenTelemetry is not a single log format like JSON, syslog, or plain text. It defines a log data model and telemetry pipeline that can collect existing logs, enrich them with context, and export them through OTLP or other supported exporters.
+
+### What is the difference between OpenTelemetry logs and events?
+
+In OpenTelemetry, events are a specific kind of log record with a defined name and structure. Logs are broader and can include flexible diagnostic records from applications, systems, infrastructure, and logging libraries.
+
+### What is the difference between OpenTelemetry logs and traces?
+
+Traces show the path and timing of a request across services. Logs capture detailed events at specific points in time. When logs include `TraceId` and `SpanId`, you can correlate a log entry with the exact trace and span where it happened.
+
+### Does OpenTelemetry replace logging libraries?
+
+Usually, no. Most teams keep their existing logging libraries and use OpenTelemetry instrumentation, logging bridges, or the Collector to add context, parse logs, and export them to an observability backend.
 
 ---
 
