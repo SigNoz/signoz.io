@@ -16,7 +16,7 @@ interface ChatbaseClientProps {
 
 async function fetchUserHash(): Promise<{ userId: string; userHash: string } | null> {
   try {
-    const res = await fetch('/api/chatbase-hash', {
+    const res = await fetch('/api/chatbase-hash/', {
       cache: 'no-store',
     })
     if (!res.ok) return null
@@ -60,7 +60,7 @@ export default function ChatbaseClient({
 
       // Sync anonymous ID to cookie so server can access it for hash generation
       if (anonymousId) {
-        document.cookie = `app_anonymous_id=${anonymousId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+        document.cookie = `app_anonymous_id=${encodeURIComponent(anonymousId)}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
       }
 
       // If no server-provided hash, try to fetch it

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense, useState } from 'react'
+import React, { useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
@@ -91,11 +91,7 @@ function TabsInner({ children, entityName }) {
 }
 
 const Tabs = ({ children, entityName }) => {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <TabsInner entityName={entityName}>{children}</TabsInner>
-    </Suspense>
-  )
+  return <TabsInner entityName={entityName}>{children}</TabsInner>
 }
 
 export default Tabs

@@ -102,7 +102,6 @@ export async function getFeatureValue<T>(
 // Helper function to get detailed feature result
 export async function getFeatureDetails<T>(
   key: string,
-  _defaultValue: T,
   forceAnonymousId?: string
 ): Promise<FeatureResult<T>> {
   const id = resolveGrowthBookAnonymousId(forceAnonymousId)
