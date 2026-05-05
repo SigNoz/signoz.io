@@ -198,7 +198,7 @@ cat contributing/docs-authoring.md
 cat contributing/docs-review.md
 
 # likely docs quality issues
-rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|<[^>]+>" data/docs
+rg -n "## Next steps|## Troubleshooting|Admonition|ToggleHeading|https?://|<[^>]+>" data/docs
 
 # link health
 curl -sI <URL>
