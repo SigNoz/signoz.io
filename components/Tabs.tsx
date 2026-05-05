@@ -1,15 +1,27 @@
 'use client'
 
-import React, { useState } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
-function TabsInner({ children, entityName }) {
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
+function getWindowParams() {
+  if (typeof window === 'undefined') {
+    return { environment: null, pathname: '' }
+  }
+  const params = new URLSearchParams(window.location.search)
+  return {
+    environment: params.get(QUERY_PARAMS.ENVIRONMENT),
+    pathname: window.location.pathname,
+  }
+}
 
-  const environment = searchParams.get(QUERY_PARAMS.ENVIRONMENT)
+function TabsInner({ children, entityName }) {
+  const [{ environment, pathname }, setParams] = useState(getWindowParams)
+
+  useEffect(() => {
+    setParams(getWindowParams())
+  }, [])
+
   const isOnboarding = isDocsOnboardingPathname(pathname)
 
   // Ensure children is always an array
