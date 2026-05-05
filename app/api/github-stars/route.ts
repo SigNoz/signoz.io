@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
+import { unstable_cache } from 'next/cache'
 import { GITHUB_STARS_EDGE_S_MAXAGE_SECONDS } from '@/constants/cache'
 
 const GITHUB_REPO_API_URL = 'https://api.github.com/repos/SigNoz/signoz'
+const CACHE_TAG = 'github-stars-signoz'
 
 interface GitHubRepoPayload {
   stargazers_count: number
@@ -10,6 +12,7 @@ interface GitHubRepoPayload {
 function githubFetchHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',
+    'User-Agent': 'signoz-web',
   }
 
   if (process.env.GITHUB_TOKEN) {
@@ -38,9 +41,26 @@ async function fetchGitHubStars(): Promise<number> {
   return data.stargazers_count
 }
 
+const getCachedGitHubStars = unstable_cache(fetchGitHubStars, ['signoz-github-stars-v1'], {
+  revalidate: GITHUB_STARS_EDGE_S_MAXAGE_SECONDS,
+  tags: [CACHE_TAG],
+})
+
+let pendingStarsRequest: Promise<number> | null = null
+
+function getGitHubStars(): Promise<number> {
+  if (!pendingStarsRequest) {
+    pendingStarsRequest = getCachedGitHubStars().finally(() => {
+      pendingStarsRequest = null
+    })
+  }
+
+  return pendingStarsRequest
+}
+
 export async function GET() {
   try {
-    const stars = await fetchGitHubStars()
+    const stars = await getGitHubStars()
 
     return NextResponse.json(
       { stars },
