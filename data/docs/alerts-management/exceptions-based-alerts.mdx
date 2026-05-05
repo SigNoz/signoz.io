@@ -1,30 +1,30 @@
 ---
-date: 2026-04-17
+date: 2026-05-04
 id: exceptions-based-alerts
 title: Exceptions based alerts
 description: Configure exceptions-based alerts in SigNoz using ClickHouse queries to monitor application errors and exception patterns.
 doc_type: howto
 ---
 
-An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring an Exceptions-based alert:
+An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met. You can define your exception query using **Query Builder** or **ClickHouse queries**.
+
+Here's a breakdown of the various sections and options available when configuring an Exceptions-based alert:
 
 At the top of the alert creation page, you can set:
 
 - **Alert Name**: A field to name the alert for easy identification.
 - **Labels**: Add static labels or tags for categorization. Labels should be added in key-value pairs. First enter key (avoid space in key) and set value.
 
-## Step 1: Define the Metric Using Clickhouse Query
-In this step, you define the Clickhouse query to retrieve the exception data and set conditions for triggering the alert. The following elements are available:
+## Step 1: Define the Metric Using ClickHouse Query
+In this step, you define the ClickHouse query to retrieve the exception data and set conditions for triggering the alert. For help writing ClickHouse queries, see [Writing ClickHouse Traces Queries](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/) and [Writing ClickHouse Queries in Dashboards](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/). The following elements are available:
 
-- **Clickhouse Query**: A field to write a Clickhouse SQL query that selects and aggregates exception data. The query should define the exception type, time range, and other necessary conditions.
+- **ClickHouse Query**: A field to write a ClickHouse SQL query that selects and aggregates exception data. The query should define the exception type, time range, and other necessary conditions.
 
 - **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to define the format for the legend in the visual representation of the alert.
 
-- **Having**: Apply conditions to filter the results further based on aggregate value.
-
 <figure data-zoomable align='center'>
-    <img src="/img/docs/alerts/alerts-exceptions-based-1.webp" alt="Using Clickhouse Query to define metrics"/>
-    <figcaption><i>Using Clickhouse Query to define metrics</i></figcaption>
+    <img src="/img/docs/alerts/alerts-exceptions-based-1.webp" alt="Using ClickHouse Query to define metrics"/>
+    <figcaption><i>Using ClickHouse Query to define metrics</i></figcaption>
 </figure>
 
 
@@ -35,28 +35,18 @@ The condition configuration of an alert in SigNoz consists of these core parts:
 
 ### Query
 
-   An alert can consist of multiple queries and formulas. But only 1 of them can be put into consideration while determining the alert condition.
-
-   You can define one or more queries or formulas to fetch the data you want to evaluate. However, only one of them can be used as the trigger for the alert condition.
-
-   For example:
-
-   - `A` = Total request count
-   - `B` = Total error count
-   - `C` = `B / A` (Error rate)
-
-   You can use query `C` as the evaluation target to trigger alerts based on error rate.
+   The ClickHouse query you defined in Step 1 returns the values that the alert condition evaluates. Ensure your query returns a `value` column and an `interval` column for time-series evaluation.
 
 ### Condition
 
-   This defines the logical condition to check against the selected query's value.
+   This defines the logical condition to check against the query result.
 
    | Operator | Description | Example Usage |
    | --- | --- | --- |
-   | `Above` | Triggers if the value is greater than | CPU usage `Above 90` (%) |
-   | `Below` | Triggers if the value is less than | Apdex score `Below 0.8` |
-   | `Equal to` | Triggers if the value is exactly equal | Request count `Equal to 0` |
-   | `Not equal to` | Triggers if the value is not equal | Instance status `Not Equal to 1` |
+   | `Above` | Triggers if the value is greater than | Exception count `Above 10` |
+   | `Below` | Triggers if the value is less than | Exception count `Below 1` |
+   | `Equal to` | Triggers if the value is exactly equal | Exception count `Equal to 0` |
+   | `Not equal to` | Triggers if the value is not equal | Exception count `Not Equal to 0` |
 
 ### Match Type
 
