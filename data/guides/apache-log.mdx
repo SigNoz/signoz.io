@@ -3,40 +3,41 @@
 title: Complete Guide to Apache Logs - Access, Analyze, and Manage
 slug: apache-log
 date: 2024-07-16
-tags: [logging]
+tags: [Apache, Logging]
 authors: [simran_kumari]
-description: Master Apache logs with our comprehensive guide. Learn to access, analyze, and manage Apache log files, understand logging levels, and implement advanced log management techniques.
+description: Learn Apache logs, access log format and log analysis. Explore Apache log files, analytics & management techniques to monitor and troubleshoot effectively with SigNoz.
 keywords: [Apache logs, clear Apache logs, analyze Apache logs, manage Apache logs, Apache logging levels, Apache log files, access Apache logs, Apache log analysis, Apache log management, Apache error logs]
 
 ---
 
+Apache logs file is crucial for understanding and managing the behavior of your web server. Apache logs file provides detailed records of server activity, with Apache access log capturing client interactions and Apache error logs recording server issues—essential data such as client IP addresses, request methods, requested URLs, response status codes, user agents, and timestamps. This information is valuable for troubleshooting issues, performing security analysis, and optimizing performance, making Apache log files an essential component of server management. Effective Apache [log management](/log-management/) ensures you can perform Apache log analysis to identify issues quickly and optimize performance through Apache log file analysis.
 
-Apache logs are crucial for understanding and managing the behavior of your web server. They provide detailed records of server activity, capturing essential data such as client IP addresses, request methods, requested URLs, response status codes, user agents, and timestamps. This information is invaluable for troubleshooting issues, performing security analysis, and optimizing performance, making Apache logs an essential component of server management.
-
-This guide aims to provide a thorough understanding of Apache logs, covering everything from their basic structure to advanced analysis and automation techniques using tools like SigNoz.
+This comprehensive Apache log guide covers Apache access log format, Apache log format configurations, and Apache access log analytics techniques using tools like [SigNoz](https://signoz.io/).
 
 ## Understanding Apache Logs
 
-Understanding Apache logs is essential for effectively managing and maintaining an Apache web server. These logs provide valuable insights into server operations, performance, and security. In this section, you will dive into the world of Apache logs.
+Understanding Apache log file and mastering Apache log analysis is essential for effectively managing and maintaining an Apache web server. These logs provide valuable insights into server operations, performance, and security. In this section, you will dive into the world of Apache logs.
 
 ### What are Apache logs?
 
-Apache logs are records of various events and activities that occur on an Apache web server. They capture information about requests made to the server, errors encountered, and other server operations. These logs are invaluable for system administrators and developers for monitoring server health, troubleshooting problems, and ensuring optimal performance and security.
+Apache log are records of various events and activities that occur on an Apache web server, with Apache access log tracking requests and error logs capturing issues. They capture information about requests made to the server, errors encountered, and other server operations. These logs are invaluable for system administrators and developers for monitoring server health, troubleshooting problems, and ensuring optimal performance and security.
 
-### Types of Apache Logs
+Proper Apache log management begins with understanding these two primary Apache log file types. Apache access log analytics helps track user behavior, while Apache log file analysis of error logs aids troubleshooting.
 
-Apache logs come in different types, each serving a specific purpose. The two primary types of logs are access logs and error logs.
+### Types of Apache Log
 
-1. Access Logs
-    - Access logs record all requests made to the server. They typically include information such as the IP address of the client, request time, requested URL, HTTP status code, and user agent.
+Apache log come in different types, each serving a specific purpose. The two primary types of logs are Apache access log and Apache error logs.
+
+1. **Apache Access Logs**
+    - Apache access log record all requests made to the server, and understanding the Apache access log format is crucial for effective Apache log analysis. They typically include information such as the IP address of the client, request time, requested URL, HTTP status code, and user agent.
     - Example:
-        
+
         ```bash
         127.0.0.1 - frank [18/Jul/2024:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
         ```
-        
+
         Explanation of Components:
-        
+
         - 127.0.0.1: The IP address of the client making the request.
         - frank: The user identifier for the client, typically provided by HTTP authentication.
         - [18/Jul/2024:13:55:36 -0700]: The date and time when the request was made, followed by the time zone offset.
@@ -46,16 +47,19 @@ Apache logs come in different types, each serving a specific purpose. The two pr
             - HTTP/1.0: The HTTP protocol version used.
         - 200: The HTTP status code returned by the server, indicating the result of the request (200 means OK).
         - 2326: The size of the response in bytes, excluding headers.
-2. Error Logs
-    - Error logs capture issues that the server encounters while processing requests. This includes errors such as file not found, server misconfigurations, and more.
+
+    This Apache access log format follows the Common Log Format, which can be customized based on your Apache log management needs, allowing for more detailed Apache access log analytics.
+
+2. **Error Logs**
+    - Error logs capture issues that the server encounters while processing requests. Apache log files for errors use a different Apache log format than access logs, requiring distinct Apache log file analysis techniques for troubleshooting. This includes errors such as file not found, server misconfigurations, and more.
     - Example:
-        
+
         ```bash
         [Fri Jul 14 14:32:14.873076 2024] [core:notice] [pid 1234] AH00094: Command line: '/usr/sbin/httpd -D FOREGROUND'
         ```
-        
+
         Explanation of Components:
-        
+
         - [Fri Jul 14 14:32:14.873076 2024]: The date and time when the error occurred, down to microseconds.
         - [core]: The module and the severity level of the message.
             - core: The module where the error or notice originated.
@@ -64,7 +68,7 @@ Apache logs come in different types, each serving a specific purpose. The two pr
         - AH00094: The unique identifier for the specific error or notice.
         - Command line: '/usr/sbin/httpd -D FOREGROUND': The command line that was used to start the server.
 
-### Common Use Cases for Log Analysis
+### Common Use Cases for Apache Log Analysis
 
 Analyzing Apache logs is essential for various aspects of web server management. Here are some common use cases for log analysis:
 
@@ -77,22 +81,23 @@ Analyzing Apache logs is essential for various aspects of web server management.
 
 ## Configuring Apache Logging
 
-Configuring Apache logging is crucial for ensuring that log data is properly captured and stored for analysis. This section covers default log locations on different operating systems, changing the default log location, and configuring log file paths and names in the `httpd.conf` or `apache2.conf` file.
+Configuring Apache log file paths and understanding Apache log format options is crucial for effective log management for ensuring that log data is properly captured and stored for analysis. This section covers default log locations on different operating systems, changing the default log location, and configuring log file paths and names in the `httpd.conf` or `apache2.conf` file.
 
 ### Default Log Locations
 
-Knowing the default log locations helps in quickly accessing the logs for initial setup and troubleshooting. The default log locations vary between operating systems.
+Knowing the default log locations helps in quickly accessing the logs for initial setup and troubleshooting. The default log locations vary between operating systems. These default Apache log file locations store both Apache access log and error logs, which are essential for log analysis.
 
 - Linux
-    - Access Logs: `/var/log/apache2/access.log` or `/var/log/httpd/access_log`
-    - Error Logs: `/var/log/apache2/error.log` or `/var/log/httpd/error_log`
+  - Access Logs: `/var/log/apache2/access.log` or `/var/log/httpd/access_log`
+  - Error Logs: `/var/log/apache2/error.log` or `/var/log/httpd/error_log`
+
 - Windows
-    - Access Logs: `C:\Program Files\Apache Group\Apache2\logs\access.log`
-    - Error Logs: `C:\Program Files\Apache Group\Apache2\logs\error.log`
+  - Access Logs: `C:\Program Files\Apache Group\Apache2\logs\access.log`
+  - Error Logs: `C:\Program Files\Apache Group\Apache2\logs\error.log`
 
-### Changing the Default Apache Log Location
+### Changing the Default Apache Log File Location for Better Log Management
 
-Changing the default log location can help organize logs better or direct them to a [centralized logging system](https://signoz.io/blog/centralized-logging/).
+Changing the default log location can help organize logs better or direct them to a [centralized logging](/blog/centralized-logging/) system. This improves Apache log management and enables centralized log file analysis across multiple servers.
 
 1. Open the Apache configuration file (typically `httpd.conf` or `apache2.conf`).
 2. Locate the `CustomLog` directive for access logs and the `ErrorLog` directive for error logs.
@@ -135,13 +140,13 @@ LogFormat "%h %l %u %t "%r" %>s %b" custom
 
 - LogFormat: This directive defines the format of log entries.
 - "%h %l %u %t "%r" %>s %b": This format string specifies what data to include in the log entries.
-    - %h: Remote host (IP address)
-    - %l: Remote logname (usually)``
-    - %u: Remote user (if authenticated)
-    - %t: Time the request was received
-    - "%r": The request line from the client (e.g., `GET / HTTP/1.0`)
-    - %>s: Status code sent to the client
-    - %b: Size of the response in bytes, excluding HTTP headers
+  - %h: Remote host (IP address)
+  - %l: Remote logname (usually)``
+  - %u: Remote user (if authenticated)
+  - %t: Time the request was received
+  - "%r": The request line from the client (e.g., `GET / HTTP/1.0`)
+  - %>s: Status code sent to the client
+  - %b: Size of the response in bytes, excluding HTTP headers
 - custom: This keyword assigns a name to this custom log format, which can be referenced later.
 
 CustomLog "/var/log/apache2/custom_access.log" custom
@@ -152,7 +157,7 @@ CustomLog "/var/log/apache2/custom_access.log" custom
 
 ### Using Piped Logs
 
-Piped logs provide a powerful way to manage log data by directing log entries through an external program, allowing for real-time processing and more flexible handling of log files.
+Piped logs provide a powerful way to manage log data by directing log entries through an external program, allowing for real-time processing and more flexible handling of log files. This approach enhances Apache log management by enabling automatic Apache log file rotation and real-time Apache log file analysis.
 
 Piped logs use an external program to handle log entries. This is useful for advanced logging requirements, such as real-time log analysis or integration with centralized logging systems.
 
@@ -169,33 +174,33 @@ CustomLog "|/usr/bin/rotatelogs /var/log/apache2/access_log.%Y-%m-%d 86400" cust
 ```
 
 - ErrorLog "|/usr/bin/rotatelogs /var/log/apache2/error_log.%Y-%m-%d 86400"
-    - This configuration uses `rotatelogs`, a utility that manages log file rotation.
-    - "|/usr/bin/rotatelogs": The pipe symbol (`|`) directs the log output to the `rotatelogs` program.
-    - "/var/log/apache2/error_log.%Y-%m-%d": The log file name pattern includes the date, creating a new log file daily.
-    - 86400: The time in seconds (86400 seconds = 24 hours) to rotate the log file.
+  - This configuration uses `rotatelogs`, a utility that manages log file rotation.
+  - "|/usr/bin/rotatelogs": The pipe symbol (`|`) directs the log output to the `rotatelogs` program.
+  - "/var/log/apache2/error_log.%Y-%m-%d": The log file name pattern includes the date, creating a new log file daily.
+  - 86400: The time in seconds (86400 seconds = 24 hours) to rotate the log file.
 - CustomLog "|/usr/bin/rotatelogs /var/log/apache2/access_log.%Y-%m-%d 86400" custom
-    - This configuration similarly uses `rotatelogs` for the access log.
-    - "|/usr/bin/rotatelogs": The pipe symbol (`|`) directs the log output to the `rotatelogs` program.
-    - "/var/log/apache2/access_log.%Y-%m-%d": The log file name pattern includes the date, creating a new log file daily.
-    - custom: This references the previously defined custom log format.
+  - This configuration similarly uses `rotatelogs` for the access log.
+  - "|/usr/bin/rotatelogs": The pipe symbol (`|`) directs the log output to the `rotatelogs` program.
+  - "/var/log/apache2/access_log.%Y-%m-%d": The log file name pattern includes the date, creating a new log file daily.
+  - custom: This references the previously defined custom log format.
 
 ### Log rotation and management with `logrotate`
 
-To ensure Apache logs do not consume excessive disk space, integrating `logrotate` is essential. This utility automates the rotation, compression, and removal of old log files. Proper configuration of `logrotate` helps maintain manageable log file sizes while preserving necessary data for analysis and troubleshooting.
+To ensure Apache log files do not consume excessive disk space, integrating `logrotate` is essential for log management. This utility automates the rotation, compression, and removal of old log files. Proper configuration of `logrotate` helps maintain manageable log file sizes while preserving necessary data for analysis and troubleshooting.
 
-### Configuring `logrotate` for Apache Logs:
+### Configuring `logrotate` for Apache Logs
 
 1. Install `logrotate`: Ensure `logrotate` is installed on your system. It is typically pre-installed on most Linux distributions. If not, you can install it using the package manager:
-    
-    ```bash
-    sudo yum install logrotate
-    ```
-    
+
+  ```bash
+  sudo yum install logrotate
+  ```
+
 2. Create a Logrotate Configuration File: Create a configuration file `/etc/logrotate/httpd` for Apache logs. This file will define how and when logs are rotated.
-    
+
     Example Configuration:
-    
-    ```
+
+    ```bash
     /var/log/httpd/*.log {
         daily
         rotate 7
@@ -210,11 +215,11 @@ To ensure Apache logs do not consume excessive disk space, integrating `logrotat
         endscript
     }
     ```
-    
+
     - Explanation of Configuration Options:
         - /var/log/httpd/*.log: Specifies the log files to be rotated.
         - daily: Rotates the logs daily.
-        - rotate 7: Keeps seven days’ worth of old log files before deleting them.
+        - rotate 7: Keeps seven days' worth of old log files before deleting them.
         - compress: Compresses the rotated log files to save space.
         - delaycompress: Delays compression of the log file until the next rotation cycle.
         - missingok: Ignores the error if the log file is missing.
@@ -222,66 +227,66 @@ To ensure Apache logs do not consume excessive disk space, integrating `logrotat
         - create 0640 root adm: Sets permissions for the new log file and specifies the owner and group.
         - sharedscripts: Ensures that the postrotate script is run only once, even if multiple log files are rotated.
         - postrotate/endscript: Defines a script to be run after log rotation. In this case, it reloads the Apache server to ensure it starts writing to the new log file.
+
 3. Test the Configuration: You can manually test your `logrotate` configuration to ensure it works as expected.
-    
+
     ```bash
     sudo logrotate -d /etc/logrotate.d/httpd
     ```
-    
 
-Note: You will have to replace the occurrences of `httpd` with `apache2`based on your system. 
+Note: You will have to replace the occurrences of `httpd` with `apache2`based on your system.
 
-By implementing `logrotate` with the appropriate configuration, you can ensure efficient log management in Apache environments, preventing log files from consuming excessive disk space and maintaining the server’s performance and stability.
+By implementing `logrotate` with the appropriate configuration, you can ensure efficient log management in Apache environments, preventing log files from consuming excessive disk space and maintaining the server's performance and stability.
 
-## Apache Log Formats
+## Apache Log Format Types and Apache Access Log Format Configuration
 
 Understanding Apache log formats is essential for effective log analysis and monitoring. Different formats capture various levels of detail about web server activity. Below are the main log formats used by Apache.
 
 ### Common Log Format (CLF)
 
-The Common Log Format is a standardized format that provides essential information about each request. It includes:
+The Common Log Format is a standardized format that provides essential information about each request. The Apache access log format in CLF is standardized, making Apache log file analysis straightforward across different Apache servers. It includes:
 
 - Format: `%h %l %u %t \"%r\" %>s %b`
-    - `%h`: Remote host (IP address)
-    - `%l`: Remote logname (usually)``
-    - `%u`: Remote user (authenticated user)
-    - `%t`: Time the request was received
-    - `%r`: Request line from the client (method, resource, protocol)
-    - `%>s`: Status code sent to the client
-    - `%b`: Size of the object sent to the client (excluding headers)
+  - `%h`: Remote host (IP address)
+  - `%l`: Remote logname (usually)``
+  - `%u`: Remote user (authenticated user)
+  - `%t`: Time the request was received
+  - `%r`: Request line from the client (method, resource, protocol)
+  - `%>s`: Status code sent to the client
+  - `%b`: Size of the object sent to the client (excluding headers)
 - Example:
-    
-    ```bash
-    127.0.0.1 - - [14/Jul/2024:12:34:56 +0000] "GET /index.html HTTP/1.1" 200 1043
-    ```
-    
+
+  ```bash
+  127.0.0.1 - - [14/Jul/2024:12:34:56 +0000] "GET /index.html HTTP/1.1" 200 1043
+  ```
 
 <Figure src="/img/guides/2024/07/apache-log-napkin-selection_(2).webp" alt="common log format" caption="Common Log Format" />
 
 ### Combined Log Format
 
-The Combined Log Format (CLF) builds on the Common Log Format to give you a richer view of your web traffic. It includes not only the basic details of each request but also the referrer and user agent, providing a more comprehensive understanding of your users and their behaviors.
+The Combined Apache log format builds on the Common Apache access log format to give you a richer view of your web traffic. It includes not only the basic details of each request but also the referrer and user agent, providing a more comprehensive understanding of your users and their behaviors.
 
-### Understanding the Combined Log Format:
+This enhanced Apache access log format enables more sophisticated log analytics. The additional fields in this log format support detailed log file analysis for user behavior tracking and marketing attribution.
+
+### Understanding the Combined Log Format
 
 Imagine you run a popular online store. You want to know not just how many people visit your site, but also where they come from and what devices they use. The Combined Log Format can help you answer these questions.
 
 - Referrer Insight: The referrer field tells you which page a visitor was on before they arrived at your site. This can help you identify which external links or marketing campaigns are driving traffic to your store.
 - User Agent Details: The user agent string reveals information about the visitor's browser and operating system. Knowing this helps you optimize your site for the most popular devices and troubleshoot compatibility issues
 - Format: `%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"`
-    - `%h`, `%l`, `%u`, `%t`, `%r`, `%>s`, `%b`: Same as in CLF
-    - `%{Referer}i`: Referrer URL
-    - `%{User-Agent}i`: User agent string
+  - `%h`, `%l`, `%u`, `%t`, `%r`, `%>s`, `%b`: Same as in CLF
+  - `%{Referer}i`: Referrer URL
+  - `%{User-Agent}i`: User agent string
 - Example:
-    
+
     ```bash
     127.0.0.1 - - [14/Jul/2024:12:34:56 +0000] "GET /index.html HTTP/1.1" 200 1043 "http://example.com" "Mozilla/5.0"
     ```
-    
 
 Real-Life Example:
 
-Let’s say you see the following log entry:
+Let's say you see the following log entry:
 
 ```bash
 127.0.0.1 - frank [18/Jul/2024:13:55:36 -0700] "GET /product/123 HTTP/1.1" 200 2326 "http://example.com/promo" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -311,23 +316,22 @@ Custom log formats allow you to tailor the information logged to meet your speci
 Imagine you're running a tech blog and want to track not just the traffic but also the search terms visitors use to find your articles. By customizing your log format, you can capture this specific data.
 
 - Example: You might define a custom log format that includes the search term as a custom field. This could look like:
-    
-    ```bash
-    "%h %t \"%r\" %>s %b \"%{User-Agent}i\" \"%{Search-Term}i\""
-    ```
-    
+
+  ```bash
+  "%h %t \"%r\" %>s %b \"%{User-Agent}i\" \"%{Search-Term}i\""
+  ```
+
 - Real-Life Scenario:
-    
-    ```arduino
-    192.168.1.1 [18/Jul/2024:14:00:00 -0700] "GET /article/seo-tips HTTP/1.1" 200 5120 "Mozilla/5.0
-    ```
-    
+
+  ```arduino
+  192.168.1.1 [18/Jul/2024:14:00:00 -0700] "GET /article/seo-tips HTTP/1.1" 200 5120 "Mozilla/5.0
+  ```
 
 By leveraging custom log formats, you can transform raw server data into actionable insights, making your web analytics as detailed and relevant as you need them to be.
 
 ## Analyzing Apache Access Logs
 
-Analyzing Apache access logs is essential for understanding web server activity and user interactions. This section outlines the structure of access logs and key fields that provide valuable insights.
+Apache access log analytics and systematic Apache log file analysis are essential for understanding web server activity and user interactions. Proper Apache log management ensures these log files remain accessible for ongoing analysis. This section outlines the structure of access logs and key fields that provide valuable insights.
 
 ### Structure of Access Logs
 
@@ -339,7 +343,7 @@ Sample Log Entry:
 127.0.0.1 - - [14/Jul/2024:12:34:56 +0000] "GET /index.html HTTP/1.1" 200 1043 "http://example.com" "Mozilla/5.0"
 ```
 
-### Key Fields and Their Meanings
+### Key Fields and Their Meanings (Apache Access Log Format Reference)
 
 | Field | Example | Meaning |
 | --- | --- | --- |
@@ -366,7 +370,7 @@ Sample Log Entry:
 [Wed Jul 14 12:34:56.123456 2024] [error] [client 127.0.0.1] File does not exist: /var/www/html/missing.html
 ```
 
-### Common Error Messages and Their Interpretations
+### Common Error Messages and Their Interpretations (For Apache Log File Analysis)
 
 | Error Message | Example | Interpretation |
 | --- | --- | --- |
@@ -393,11 +397,9 @@ Analyzing Apache logs provides valuable insights that can significantly enhance 
 
 <Figure src="/img/guides/2024/07/apache-log-napkin-selection_(1).webp" alt="Practical applications of Analyzing Apache logs" caption="Practical applications of Analyzing Apache logs" />
 
-Practical applications of Analyzing Apache logs
-
 ## Monitoring Apache Logs with SigNoz
 
-[Monitoring Apache](https://signoz.io/blog/opentelemetry-apache-server-metrics-monitoring/) logs is vital for ensuring the optimal performance and security of your web server. Apache logs provide insights into server activities, access requests, and potential issues that could affect user experience or indicate security threats.
+[Monitoring Apache](/blog/opentelemetry-apache-server-metrics-monitoring/) logs is vital for ensuring the optimal performance and security of your web server. Apache logs provide insights into server activities, access requests, and potential issues that could affect user experience or indicate security threats.
 
 SigNoz enhances Apache log monitoring by offering real-time visibility, advanced querying, and alerting capabilities. This integration allows administrators to quickly identify and respond to anomalies, track performance metrics, and maintain comprehensive observability over their web server operations. SigNoz's centralized logging system simplifies the monitoring process, making it easier to correlate logs from Apache with other system logs for a holistic view of your infrastructure.
 
@@ -407,10 +409,11 @@ To set up monitoring for Apache logs in SigNoz, follow these steps:
 
 ### Prerequisites
 
-- Ensure you have a SigNoz account. Sign up [here](https://signoz.io/teams/).
+- Ensure you have a [SigNoz Cloud](/teams/) account.
 - Root or sudo access to the server.
+- Basic understanding of Apache log file locations and Apache access log format.
 
-To send Apache logs to SigNoz, you'll need to follow these steps. The process involves setting up Apache to generate logs, installing and configuring the OpenTelemetry Collector to send logs to SigNoz, and ensuring that everything is working correctly.
+To send Apache logs to SigNoz, you'll need to follow these steps. The process involves setting up Apache to generate logs, installing and configuring the [OpenTelemetry Collector](/blog/opentelemetry-collector-complete-guide/) to send logs to SigNoz, and ensuring that everything is working correctly.
 
 ### Step 1: Set Up Apache to Generate Logs
 
@@ -433,24 +436,22 @@ systemctl status httpd
 <Figure src="/img/guides/2024/07/apache-log-Untitled%202.webp" alt="Starting and enabling Apache server" caption="Starting and enabling Apache server" />
 
 - Access Log Configuration:
-    - By default, Apache logs access information to `/var/log/httpd/access_log`.
-    - Ensure that the `CustomLog` directive is enabled in your Apache configuration file (usually found at `/etc/httpd/conf/httpd.conf`):
-        
-        ```
-        CustomLog logs/access_log combined
-        ```
-        
+  - By default, Apache access logs write to `/var/log/httpd/access_log`. This Apache log file uses the Apache access log format specified in your configuration. Proper Apache log management ensures this Apache log file path is accessible to monitoring tools.
+  - Ensure that the `CustomLog` directive is enabled in your Apache configuration file (usually found at `/etc/httpd/conf/httpd.conf`):
+
+  ```bash
+  CustomLog logs/access_log combined
+  ```
 
 <Figure src="/img/guides/2024/07/apache-log-Untitled%203.webp" alt="CustomLog directive in Apache Configuration File" caption="CustomLog directive in Apache Configuration File" /> 
 
 - Error Log Configuration:
-    - Apache logs error information to `/var/log/httpd/error_log`.
-    - Ensure that the `ErrorLog` directive is enabled in your Apache configuration file (found at `/etc/httpd/conf/httpd.conf`)
-        
-        ```
-        ErrorLog logs/error_log
-        ```
-        
+  - Apache logs error information to `/var/log/httpd/error_log`.
+  - Ensure that the `ErrorLog` directive is enabled in your Apache configuration file (found at `/etc/httpd/conf/httpd.conf`)
+
+  ```bash
+  ErrorLog logs/error_log
+  ```
 
 <Figure src="/img/guides/2024/07/apache-log-Untitled%204.webp" alt="ErrorLog Configuration in Apache Configuration File" caption="ErrorLog Configuration in Apache Configuration File" />
 
@@ -459,187 +460,181 @@ systemctl status httpd
 Install the OpenTelemetry Collector on your EC2 instance.
 
 1. Update Packages:
-    
-    ```
+
+    ```bash
     sudo yum update -y
     ```
-    
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%205.webp" alt="Updating packages" caption="Updating packages" />
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%205.webp" alt="Updating packages" caption="Updating packages" />
 
-1. Download and Install OpenTelemetry Collector:
-    - Ensure you have the OpenTelemetry Collector installed on your system. If not, install it using the following commands:
-        
-        ```bash
-        wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
-        mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
-        ```
-        
-    
-    <Figure src="/img/guides/2024/07/apache-log-Untitled%206.webp" alt="Installing OpenTelemetry collector" caption="Installing OpenTelemetry collector" />
-    
-    *Installing OpenTelemetry collector*
-    
-    Note: Ensure you have the latest version of the OpenTelemetry Collector. The commands above use version 0.116.0, which is the latest at the time of writing. To verify and download the most current version, visit the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Releases</a> page.
-    
-2. Create Configuration File:
-    - Create the [OpenTelemetry](https://signoz.io/opentelemetry/) configuration file, `config.yaml` in the folder otelcol-contrib with the below content in it.
+2. Download and Install OpenTelemetry Collector:
+  
+  Ensure you have the OpenTelemetry Collector installed on your system. If not, install it using the following commands:
+  
+  ```bash
+  wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
+  mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
+  ```
 
-```yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
-  prometheus:
-    config:
-      global:
-        scrape_interval: 60s
-      scrape_configs:
-        - job_name: otel-collector-binary
-          static_configs:
-            - targets:
-              # - localhost:8888
-  filelog:
-    include: 
-	    - /var/log/httpd/access_log
-	    - /var/log/httpd/error_log
-    start_at: end
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%206.webp" alt="Installing OpenTelemetry collector" caption="Installing OpenTelemetry collector" />
 
-processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-  resourcedetection:
-    detectors: [env, system]
-    timeout: 2s
-    system:
-      hostname_sources: [os]
+3. Create Configuration File:
+  
+  Create the [OpenTelemetry](/opentelemetry/) configuration file, `config.yaml` in the folder otelcol-contrib with the below content in it.
 
-extensions:
-  health_check: 
-    endpoint: "0.0.0.0:13134"
-  zpages:
-    endpoint: "127.0.0.1:55680"
+  ```yaml
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    hostmetrics:
+      collection_interval: 60s
+      scrapers:
+        cpu: {}
+        disk: {}
+        load: {}
+        filesystem: {}
+        memory: {}
+        network: {}
+        paging: {}
+        process:
+          mute_process_name_error: true
+          mute_process_exe_error: true
+          mute_process_io_error: true
+        processes: {}
+    prometheus:
+      config:
+        global:
+          scrape_interval: 60s
+        scrape_configs:
+          - job_name: otel-collector-binary
+            static_configs:
+              - targets:
+                # - localhost:8888
+    filelog:
+      include: 
+  	    - /var/log/httpd/access_log
+  	    - /var/log/httpd/error_log
+      start_at: end
 
-exporters:
-  otlp:
-    endpoint: <cloud endpoint goes here>
-    tls:
-      insecure: false
-    headers:
-      "signoz-ingestion-key": <ingestion key goes here>
+  processors:
+    batch:
+      send_batch_size: 1000
+      timeout: 10s
+    resourcedetection:
+      detectors: [env, system]
+      timeout: 2s
+      system:
+        hostname_sources: [os]
 
-service:
-  telemetry:
-    metrics:
-      address: 0.0.0.0:8888  # Metrics telemetry address
-  extensions: [health_check, zpages]
-  pipelines:
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics/internal:
-      receivers: [prometheus, hostmetrics]  # Ensure receivers are defined
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    logs:
-      receivers: [otlp, filelog]  # Include filelog receiver here
-      processors: [batch]
-      exporters: [otlp]
-```
+  extensions:
+    health_check: 
+      endpoint: "0.0.0.0:13134"
+    zpages:
+      endpoint: "127.0.0.1:55680"
 
-Replace the endpoint and ingestion key value with the actual OTLP endpoint and token provided by SigNoz.
+  exporters:
+    otlp:
+      endpoint: <cloud endpoint goes here>
+      tls:
+        insecure: false
+      headers:
+        "signoz-ingestion-key": <ingestion key goes here>
 
-- To run otel-collector, run the following command inside the `otelcol-contrib` directory:
-    
-    ```bash
-    ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
-    ```
-    
+  service:
+    telemetry:
+      metrics:
+        address: 0.0.0.0:8888  # Metrics telemetry address
+    extensions: [health_check, zpages]
+    pipelines:
+      metrics:
+        receivers: [otlp]
+        processors: [batch]
+        exporters: [otlp]
+      metrics/internal:
+        receivers: [prometheus, hostmetrics]  # Ensure receivers are defined
+        processors: [resourcedetection, batch]
+        exporters: [otlp]
+      traces:
+        receivers: [otlp]
+        processors: [batch]
+        exporters: [otlp]
+      logs:
+        receivers: [otlp, filelog]  # Include filelog receiver here
+        processors: [batch]
+        exporters: [otlp]
+  ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%207.webp" alt="Running Otel-collector" caption="Running Otel-collector" />
+  Replace the endpoint and ingestion key value with the actual OTLP endpoint and token provided by SigNoz.
+
+  To run otel-collector, run the following command inside the `otelcol-contrib` directory:
+
+  ```bash
+  ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+  ```
+
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%207.webp" alt="Running Otel-collector" caption="Running Otel-collector" />
 
 ### Step 3: Testing Apache Logs on SigNoz
 
 1. Generate Traffic to Apache Server
 
-- Use the `curl` command to generate multiple requests to your Apache server.
+  Use the `curl` command to generate multiple requests to your Apache server.
 
-```
-for i in {1..10}; do curl http://localhost/; done
-```
+  ```bash
+  for i in {1..10}; do curl http://localhost/; done
+  ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%208.webp" alt="Sending GET requests to Apache server" caption="Sending GET requests to Apache server" /> 
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%208.webp" alt="Sending GET requests to Apache server" caption="Sending GET requests to Apache server" /> 
 
-- Replace `localhost` with your server's IP address or domain name if you are testing from a different machine.
-- Generate different types of HTTP requests to test various logging scenarios.
+  Replace `localhost` with your server's IP address or domain name if you are testing from a different machine. Then generate different types of HTTP requests to test various logging scenarios.
 
-```
-curl -X GET http://localhost/
-curl -X POST http://localhost/
-curl -X PUT http://localhost/
-curl -X DELETE http://localhost/
-```
+  ```bash
+  curl -X GET http://localhost/
+  curl -X POST http://localhost/
+  curl -X PUT http://localhost/
+  curl -X DELETE http://localhost/
+  ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%209.webp" alt="Sending POST requests to Apache server" caption="Sending POST requests to Apache server" /> 
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%209.webp" alt="Sending POST requests to Apache server" caption="Sending POST requests to Apache server" /> 
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2010.webp" alt="Sending PUT requests to Apache server" caption="Sending PUT requests to Apache server" /> 
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%2010.webp" alt="Sending PUT requests to Apache server" caption="Sending PUT requests to Apache server" /> 
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2011.webp" alt="Sending DELETE requests to Apache server" caption="Sending DELETE requests to Apache server" /> 
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%2011.webp" alt="Sending DELETE requests to Apache server" caption="Sending DELETE requests to Apache server" /> 
 
 2. Verify Logs in Apache
 
-- Verify that the requests are being logged in the `access_log` file.
+  Verify that the requests are being logged in the `access_log` file.
 
-```
-sudo tail -f /var/log/httpd/access_log
-```
+  ```bash
+  sudo tail -f /var/log/httpd/access_log
+  ```
 
-<Figure src="/img/guides/2024/07/apache-log-01e06ec6-e80a-4add-b463-5051fd10c75c.webp" alt="Verifying access logs in Apache" caption="Verifying access logs in Apache" />
+  <Figure src="/img/guides/2024/07/apache-log-01e06ec6-e80a-4add-b463-5051fd10c75c.webp" alt="Verifying access logs in Apache" caption="Verifying access logs in Apache" />
 
-You should see entries corresponding to the requests you generated.
+  You should see entries corresponding to the requests you generated.
 
-- Similarly, verify that any errors (if any) are being logged in the `error_log` file.
+  Similarly, verify that any errors (if any) are being logged in the `error_log` file.
 
-```
-sudo tail -f /var/log/httpd/error_log
-```
+  ```bash
+  sudo tail -f /var/log/httpd/error_log
+  ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2012.webp" alt="Verifying Error logs in Apache" caption="Verifying Error logs in Apache" />
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%2012.webp" alt="Verifying Error logs in Apache" caption="Verifying Error logs in Apache" />
 
 3. Verify Logs in SigNoz
 
-- Log in to your SigNoz cloud and navigate to the logs section.
-- Verify that you can see the Apache access and error logs in the SigNoz dashboard.
+  Log in to your SigNoz cloud and navigate to the logs section.
+  Verify that you can see the Apache access and error logs in the SigNoz dashboard.
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2013.webp" alt="Visualizing and monitoring Apache logs in Signoz Dashboard" caption="Visualizing and monitoring Apache logs in Signoz Dashboard" /> 
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%2013.webp" alt="Visualizing and monitoring Apache logs in Signoz Dashboard" caption="Visualizing and monitoring Apache logs in Signoz Dashboard" /> 
 
-- Use the search and filter options to find specific log entries related to the requests you generated.
+  Use the search and filter options to find specific log entries related to the requests you generated.
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2014.webp" alt="Filtering Apache logs based on log file name" caption="Filtering Apache logs based on log file name" />
+  <Figure src="/img/guides/2024/07/apache-log-Untitled%2014.webp" alt="Filtering Apache logs based on log file name" caption="Filtering Apache logs based on log file name" />
 
 ## Conclusion
 
@@ -714,8 +709,3 @@ Apache logging levels indicate the severity of events logged. They range from hi
 ### Are Apache logs owned by root?
 
 Yes, Apache logs are typically owned by the root user or the Apache user (such as `www-data` or `apache`), depending on the server configuration. This ensures proper permissions and security for log file access.
-
-## Resources
-
-- [Log Management using SigNoz](https://signoz.io/docs/logs-management/overview/)
-- [Collecting Logs from Files and Monitoring using SigNoz](https://signoz.io/docs/userguide/collect_logs_from_file/)
