@@ -31,11 +31,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/product-features/alert-management',
-            label: 'Alert Management',
-          },
-          {
-            type: 'doc',
             route: '/docs/product-features/trace-explorer',
             label: 'Trace Explorer',
           },
