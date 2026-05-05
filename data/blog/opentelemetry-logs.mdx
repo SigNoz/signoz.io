@@ -10,7 +10,7 @@ hide_table_of_contents: false
 keywords: [opentelemetry logs,opentelemetry log,opentelemetry,logs correlation,opentelemetry logging,telemetry signals,observability,signoz]
 ---
 OpenTelemetry logs are timestamped records that represent events from applications, services, hosts, and infrastructure components. They use a common data model so logs from different sources can be parsed, enriched, correlated with traces and metrics, and exported through OpenTelemetry-compatible pipelines.<br />
-In practice, OpenTelemetry logging usually works with your existing logging libraries, the OpenTelemetry Collector, and an observability backend like SigNoz.
+In practice, OpenTelemetry logging usually works with your existing logging libraries, the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/), and an observability backend like SigNoz.
 
 
 [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) is a Cloud Native Computing Foundation (<a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) incubating project that standardizes how applications generate telemetry data. The <a href="https://github.com/open-telemetry/opentelemetry-specification" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry specification</a> defines cross-language requirements for traces, metrics, logs, and [baggage](https://signoz.io/blog/otel-baggage/), so teams can collect telemetry without being locked into one vendor.
@@ -108,6 +108,8 @@ Traditional logging is usually tied to application-specific formats, local files
 | Events | What named event happened inside telemetry data? | In OpenTelemetry, events are a specific kind of log record with a defined name and structure |
 | Traces | Where did a request go and how long did each step take? | Logs can include `TraceId` and `SpanId` so you can jump from a log to the exact trace |
 | Metrics | What changed over time? | Metrics show trends and alerts; logs explain individual events behind those changes |
+
+For a deeper comparison, see [OpenTelemetry events vs logs](https://signoz.io/comparisons/opentelemetry-events-vs-logs/).
 
 ## Why log correlation matters in OpenTelemetry
 
@@ -225,6 +227,11 @@ receivers:
         parse_from: body
 
 processors:
+  resource:
+    attributes:
+      - key: service.name
+        value: myapp
+        action: upsert
   batch:
 
 exporters:
@@ -237,7 +244,7 @@ service:
   pipelines:
     logs:
       receivers: [filelog/app]
-      processors: [batch]
+      processors: [resource, batch]
       exporters: [otlp]
 ```
 
@@ -281,6 +288,8 @@ from its SDK.
   logging.info("User login successful.")
   ```
 
+  For SigNoz setup details, see [Python logs with OpenTelemetry](https://signoz.io/docs/logs-management/send-logs/python-logs/).
+
   **Example 2. Instrumenting in Java with a Log Appender**
 
 
@@ -315,6 +324,8 @@ application's source code as shown in the below example.
   As you can see, while the mechanism differs by language ecosystem (Handlers in Python, Appenders in Java), the
   underlying idea is the same, i.e, integrate the OpenTelemetry SDK with your existing logging framework to automatically enrich
   all your logs with invaluable trace context.
+
+  For SigNoz setup details, see [Java logs with OpenTelemetry](https://signoz.io/docs/logs-management/send-logs/java-logs/).
 
 ### Collecting third-party application log data
 
@@ -409,7 +420,7 @@ For example, a user may [parse log](https://signoz.io/guides/log-parsing/#best-p
 
 OpenTelemetry also provides processors for processing logs. Processors are used at various stages of a pipeline. Generally, a processor pre-processes data before it is exported (e.g. modify attributes or sample) or helps ensure that data makes it through a pipeline successfully (e.g. batch/retry).
 
-Processors are also helpful when you have multiple receivers for logs and you want to parse/transforms logs collected from all the receivers. Some well-known log processors are:
+Processors are also helpful when you have multiple receivers for logs and you want to parse/transform logs collected from all the receivers. Some well-known log processors are:
 
 - Batch Processor
 - Memory Limit Processor
@@ -419,7 +430,7 @@ Processors are also helpful when you have multiple receivers for logs and you wa
 ## Log Analytics - Querying and Visualising Logs
 
 Once you have configured OpenTelemetry to collect your logs, you need a backend to analyze, query, and
-visualize them. This is where the value of structured logging is truly unlocked. As an OpenTelemetry-native platform, SigNoz is designed to work  with the OTel data model. Let's explore
+visualize them. This is where the value of structured logging is truly unlocked. As an OpenTelemetry-native platform, SigNoz [Logs Explorer](https://signoz.io/docs/logs-management/overview/) is designed to work with the OTel data model. Let's explore
 how you can perform log analytics. The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
 
 ### Searching and Filtering with the Query Builder
@@ -501,11 +512,3 @@ Traces show the path and timing of a request across services. Logs capture detai
 ### Does OpenTelemetry replace logging libraries?
 
 Usually, no. Most teams keep their existing logging libraries and use OpenTelemetry instrumentation, logging bridges, or the Collector to add context, parse logs, and export them to an observability backend.
-
----
-
-**Related Posts**
-
-- [OpenTelemetry Collector - complete guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
-
-- [Log Monitoring 101 Detailed Guide](https://signoz.io/blog/log-monitoring/)
