@@ -2,14 +2,16 @@ import { allDocs } from 'contentlayer/generated'
 import type { Doc } from 'contentlayer/generated'
 import UpgradePathTool from './components/UpgradePathTool'
 import upgradeSchema from '@/constants/upgradeSchema.json'
+import { STANDARD_GUIDE_URL } from './utils/upgradeUtils'
 
 function getUpgradeDocsBySlug(): Record<string, Doc> {
   const guideUrls = Array.from(
-    new Set(
-      Object.values(upgradeSchema.releases)
+    new Set([
+      ...Object.values(upgradeSchema.releases)
         .map((release) => release.guideUrl)
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+      STANDARD_GUIDE_URL,
+    ])
   )
 
   return Object.fromEntries(

@@ -30,5 +30,9 @@ export const metadata: Metadata = {
 }
 
 export default function APIReferenceLayout({ children }: { children: ReactNode }) {
-  return children
+  return (
+    <div className="api-reference flex min-h-[calc(100dvh-220px)] flex-col" data-theme="dark">
+      {children}
+    </div>
+  )
 }
