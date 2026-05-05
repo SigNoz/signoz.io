@@ -121,60 +121,6 @@ Logs are a stable signal in the OpenTelemetry specification, but language SDK su
 
 For production rollouts, check the status and usage patterns of your language SDK and logging bridge before choosing a direct SDK approach. Collector-based file/stdout collection is often the safest path when you want minimal application changes or when logs support in your language is still evolving.
 
-{/* <!-- ## Correlation in OpenTelemetry
-
-Let's see through a code example how correlation works in OpenTelemetry. Consider a hypothetical scenario where a web service processes user requests. We'll showcase how to correlate logs, metrics, and traces using OpenTelemetry:
-
-```python
-import openTelemetry from 'opentelemetry';
-
-# Initialize OpenTelemetry Tracer, Meter, and Logger
-tracer = openTelemetry.trace.getTracer('example-app');
-meter = openTelemetry.metrics.getMeter('example-app');
-logger = openTelemetry.logging.getLogger('example-app');
-
-# Start a trace span for processing a user request
-with tracer.start_as_current_span('process-request') as span:
-    try:
-        # Some processing logic here...
-
-        # Log an informational message
-        logger.info("Processing user request for user_id: 12345");
-
-        # Record a metric for request count
-        request_count_metric = meter.createCounter('request_count');
-        request_count_metric.add(1, {"method": "GET"});
-
-        # More processing logic...
-
-    except Exception as e:
-        # Log an error message
-        logger.error(f"Error processing request: {str(e)}");
-
-        # Set error attributes on the span
-        span.set_attribute("error", True);
-        span.set_attribute("error.message", str(e));
-
-        # Record a metric for error count
-        error_count_metric = meter.createCounter('error_count');
-        error_count_metric.add(1, {"type": "processing_error"});
-
-```
-
-In the above example:
-
-- We start a trace span for processing a user request.
-
-- Within the span, we log an informational message about the request processing.
-
-- We record a metric for the request count.
-
-If there's an exception during processing, we log an error message, set error attributes on the span, and record an error count metric.
-
-With OpenTelemetry's correlation capabilities, when analyzing the data, you can link the log entries, metrics, and trace spans together. This allows you to see, for instance, the specific log messages associated with a particular trace or the metrics associated with a specific operation.
-
-Now let's talk about how to collect log data with OpenTelmetry. --> */}
-
 ## Collecting log data with OpenTelemetry
 
 OpenTelemetry provides various receivers and processors for collecting first-party and third-party logs directly via [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) or via existing agents such as FluentBit so that minimal changes are required to move to OpenTelemetry for logs.
@@ -427,7 +373,7 @@ Processors are also helpful when you have multiple receivers for logs and you wa
 - Attributes Processor
 - Resource Processor
 
-## Log Analytics - Querying and Visualising Logs
+## Querying and Correlating OpenTelemetry Logs in SigNoz
 
 Once you have configured OpenTelemetry to collect your logs, you need a backend to analyze, query, and
 visualize them. This is where the value of structured logging is truly unlocked. As an OpenTelemetry-native platform, SigNoz [Logs Explorer](https://signoz.io/docs/logs-management/overview/) is designed to work with the OTel data model. Let's explore
