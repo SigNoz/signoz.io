@@ -205,6 +205,38 @@ There are **two** ways to collect application logs:
 
 For advanced parsing and collecting capabilities, you can also use something like FluentBit or Logstash. The agents can push the logs to the OpenTelemetry collector using protocols like FluentForward/TCP/UDP, etc.
 
+### OpenTelemetry Collector logs example: filelog receiver
+
+The `filelog` receiver is a good starting point when your application already writes logs to files. The Collector tails the file, parses each line, and exports the records through your logs pipeline.
+
+```yaml
+receivers:
+  filelog/app:
+    include: [/var/log/myapp/*.log]
+    start_at: end
+    operators:
+      - type: json_parser
+        parse_from: body
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: ingest.<your-region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog/app]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+For more configuration options, see the SigNoz guide to [collect logs from a file](https://signoz.io/docs/userguide/collect_logs_from_file/).
+
 - **Directly to OpenTelemetry Collector with SDK**<br />
   In this approach, you can modify your logging library that is used by the application to use the logging SDK provided by OpenTelemetry and directly forward the logs from the application to OpenTelemetry. 
   This approach removes any need for agents/intermediary medium but loses the simplicity of having the log file locally. Let's explore it in greater detail.
@@ -360,7 +392,8 @@ You will need OpenTelemetry Collector (otel collector) to collect syslogs. In th
 
 - Now restart your rsyslog service by running `sudo systemctl restart rsyslog.service`
 - You can check the status of service by running `sudo systemctl status rsyslog.service`
-- If there are no errors your logs will be visible on SigNoz UI.
+- Generate a test syslog entry by running `logger "SigNoz syslog test message"`, then search for `SigNoz syslog test message` in SigNoz Logs Explorer.
+- If there are no errors your logs will be visible on SigNoz UI. For a more detailed walkthrough, see the SigNoz guide to [collect syslogs with OpenTelemetry Collector](https://signoz.io/docs/userguide/collecting_syslogs/).
 
 ## Log processing with OpenTelemetry
 
