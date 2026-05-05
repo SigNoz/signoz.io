@@ -284,13 +284,6 @@ export default function ArticleLayout({
               </div>
             )}
 
-            {/* Newsletter Section */}
-            {showNewsletter && (
-              <div className="mb-16 mt-8">
-                <NewsletterSubscription />
-              </div>
-            )}
-
             {/* Related Articles Section */}
             {showRelatedArticles &&
               relatedArticles &&
@@ -302,7 +295,7 @@ export default function ArticleLayout({
                       Related Articles
                     </h2>
                     <div className="w-full space-y-4 lg:w-2/3">
-                      {relatedArticles.slice(0, 2).map((article, index) => (
+                      {relatedArticles.slice(0, 3).map((article, index) => (
                         <TrackingLink
                           key={index}
                           href={article.url}
@@ -338,6 +331,13 @@ export default function ArticleLayout({
                   </div>
                 </div>
               )}
+
+            {/* Newsletter Section */}
+            {showNewsletter && (
+              <div className="mb-16 mt-8">
+                <NewsletterSubscription />
+              </div>
+            )}
           </div>
 
           {/* Right sidebar - Desktop only */}
