@@ -1,8 +1,9 @@
 ---
-date: 2026-02-06
+date: 2026-04-20
 title: Send Logs from Zap to SigNoz
 id: zap-to-signoz
 description: Learn how to send logs from Zap logger to SigNoz using OpenTelemetry for Go applications
+doc_type: howto
 ---
 
 This guide explains how to forward logs from [Zap](https://github.com/uber-go/zap) to SigNoz.
@@ -19,6 +20,7 @@ This guide explains how to forward logs from [Zap](https://github.com/uber-go/za
 ```bash
 go get go.opentelemetry.io/contrib/bridges/otelzap
 go get go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp
+go get go.opentelemetry.io/otel/trace
 go get go.uber.org/zap
 ```
 
@@ -26,6 +28,7 @@ We import the required packages:
 
 - `otelzap`: The bridge for Zap logger to work with OpenTelemetry.
 - `otlploghttp`: The OTLP exporter for logs over HTTP.
+- `otel/trace`: Used to read the active span's `trace_id` and `span_id` for log-trace correlation.
 - `zap`: The high-performance logging library.
 
 ### Define Endpoint and Access Token
@@ -114,11 +117,38 @@ The `logger.Info` method logs messages. In this example, instead of writing logs
 
 ### Trace With Context
 
+To correlate logs with traces, extract `trace_id` and `span_id` from the active span on the incoming context and log them as explicit fields:
+
 ```go
-logger.Info("setting context", zap.Any("context", ctx))
+if traceID, spanID, ok := GetTraceIDAndSpanID(r.Context()); ok {
+    logger.Info("handling request",
+        zap.String("trace_id", traceID),
+        zap.String("span_id", spanID),
+    )
+}
 ```
 
-You can include the context for more contextual tracing of the log messages
+Where `GetTraceIDAndSpanID` reads the current span from context via `go.opentelemetry.io/otel/trace`:
+
+```go
+import "go.opentelemetry.io/otel/trace"
+
+func GetTraceIDAndSpanID(ctx context.Context) (string, string, bool) {
+    sc := trace.SpanFromContext(ctx).SpanContext()
+    if sc.HasTraceID() && sc.HasSpanID() {
+        return sc.TraceID().String(), sc.SpanID().String(), true
+    }
+    return "", "", false
+}
+```
+
+<Admonition type="info" title="Best practice">
+
+Prefer extracting `trace_id` and `span_id` as explicit string fields over dumping the whole context (for example, `zap.Any("context", ctx)`). Contexts can carry unrelated values (auth tokens, request metadata, deadlines) that could be serialized into a log field, and the two IDs are all SigNoz needs for log-to-trace correlation.
+
+</Admonition>
+
+Call the logger from a scope that already has an active span (for example, an HTTP handler that has been instrumented with `otelhttp`, or any function running under `tracer.Start(ctx, ...)`). Using `context.Background()` will not produce a trace or span ID. For more details, see <a href="https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/" target="_blank" rel="noopener noreferrer nofollow">Correlate Traces and Logs</a>.
 
 logging.go
 
@@ -128,10 +158,12 @@ package logging
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"go.opentelemetry.io/contrib/bridges/otelzap"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -139,6 +171,8 @@ func Example() {
 
 	otlpEndpoint := "<signoz-client-url>"
 	accessToken := "<my-access-token>"
+	// ctx is used only to initialize the exporter; it does not carry any span,
+	// so logs emitted with this context will not be correlated with a trace.
 	ctx := context.Background()
 
 	headers := map[string]string{
@@ -176,10 +210,30 @@ func Example() {
 	// You can now use your logger in your code.
 	logger.Info("something really cool")
 
-	// You can set context for trace correlation using zap.Any or zap.Reflect
-	logger.Info("setting context", zap.Any("context", ctx))
-
 	logger.Info("Hello from Zap logger!")
+}
+
+// GetTraceIDAndSpanID extracts trace and span IDs from the active span on ctx.
+// Returns empty strings and false if no recording span is present.
+func GetTraceIDAndSpanID(ctx context.Context) (string, string, bool) {
+	sc := trace.SpanFromContext(ctx).SpanContext()
+	if sc.HasTraceID() && sc.HasSpanID() {
+		return sc.TraceID().String(), sc.SpanID().String(), true
+	}
+	return "", "", false
+}
+
+// Handler shows the recommended correlation pattern: extract trace_id and
+// span_id from the request context and log them as explicit fields.
+func Handler(w http.ResponseWriter, r *http.Request, logger *zap.Logger) {
+	fields := []zap.Field{}
+	if traceID, spanID, ok := GetTraceIDAndSpanID(r.Context()); ok {
+		fields = append(fields,
+			zap.String("trace_id", traceID),
+			zap.String("span_id", spanID),
+		)
+	}
+	logger.Info("handling request", fields...)
 }
 
 ```
@@ -192,7 +246,6 @@ If using the `k8s-infra` chart (which auto-collects container logs), disable log
 
 </Admonition>
 
-## Everything
 ## Output
 For looking at logs, login into signoz cloud and navigate into logs tab to view the logs.
 <figure data-zoomable align='center'>
@@ -213,6 +266,7 @@ For looking at logs, login into signoz cloud and navigate into logs tab to view 
 ```bash
 go get go.opentelemetry.io/contrib/bridges/otelzap
 go get go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp
+go get go.opentelemetry.io/otel/trace
 go get go.uber.org/zap
 ```
 
@@ -220,6 +274,7 @@ We import the required packages:
 
 - `otelzap`: The bridge for Zap logger to work with OpenTelemetry.
 - `otlploghttp`: The OTLP exporter for logs over HTTP.
+- `otel/trace`: Used to read the active span's `trace_id` and `span_id` for log-trace correlation.
 - `zap`: The high-performance logging library.
 
 ### Define Endpoint and Access Token
@@ -296,11 +351,38 @@ The `logger.Info` method logs messages. In this example, instead of writing logs
 
 ### Trace With Context
 
+To correlate logs with traces, extract `trace_id` and `span_id` from the active span on the incoming context and log them as explicit fields:
+
 ```go
-logger.Info("setting context", zap.Any("context", ctx))
+if traceID, spanID, ok := GetTraceIDAndSpanID(r.Context()); ok {
+    logger.Info("handling request",
+        zap.String("trace_id", traceID),
+        zap.String("span_id", spanID),
+    )
+}
 ```
 
-You can include the context for more contextual tracing of the log messages
+Where `GetTraceIDAndSpanID` reads the current span from context via `go.opentelemetry.io/otel/trace`:
+
+```go
+import "go.opentelemetry.io/otel/trace"
+
+func GetTraceIDAndSpanID(ctx context.Context) (string, string, bool) {
+    sc := trace.SpanFromContext(ctx).SpanContext()
+    if sc.HasTraceID() && sc.HasSpanID() {
+        return sc.TraceID().String(), sc.SpanID().String(), true
+    }
+    return "", "", false
+}
+```
+
+<Admonition type="info" title="Best practice">
+
+Prefer extracting `trace_id` and `span_id` as explicit string fields over dumping the whole context (for example, `zap.Any("context", ctx)`). Contexts can carry unrelated values (auth tokens, request metadata, deadlines) that could be serialized into a log field, and the two IDs are all SigNoz needs for log-to-trace correlation.
+
+</Admonition>
+
+Call the logger from a scope that already has an active span (for example, an HTTP handler that has been instrumented with `otelhttp`, or any function running under `tracer.Start(ctx, ...)`). Using `context.Background()` will not produce a trace or span ID. For more details, see <a href="https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/" target="_blank" rel="noopener noreferrer nofollow">Correlate Traces and Logs</a>.
 
 logging.go
 
@@ -310,16 +392,20 @@ package logging
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"go.opentelemetry.io/contrib/bridges/otelzap"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
 func Example() {
 
 	otlpEndpoint := "<signoz-client-url>" // For local instance, this is usually 0.0.0.0:4318
+	// ctx is used only to initialize the exporter; it does not carry any span,
+	// so logs emitted with this context will not be correlated with a trace.
 	ctx := context.Background()
 
 	// Create an exporter that will emit log records.
@@ -353,10 +439,30 @@ func Example() {
 	// You can now use your logger in your code.
 	logger.Info("something really cool")
 
-	// You can set context for trace correlation using zap.Any or zap.Reflect
-	logger.Info("setting context", zap.Any("context", ctx))
-
 	logger.Info("Hello from Zap logger!")
+}
+
+// GetTraceIDAndSpanID extracts trace and span IDs from the active span on ctx.
+// Returns empty strings and false if no recording span is present.
+func GetTraceIDAndSpanID(ctx context.Context) (string, string, bool) {
+	sc := trace.SpanFromContext(ctx).SpanContext()
+	if sc.HasTraceID() && sc.HasSpanID() {
+		return sc.TraceID().String(), sc.SpanID().String(), true
+	}
+	return "", "", false
+}
+
+// Handler shows the recommended correlation pattern: extract trace_id and
+// span_id from the request context and log them as explicit fields.
+func Handler(w http.ResponseWriter, r *http.Request, logger *zap.Logger) {
+	fields := []zap.Field{}
+	if traceID, spanID, ok := GetTraceIDAndSpanID(r.Context()); ok {
+		fields = append(fields,
+			zap.String("trace_id", traceID),
+			zap.String("span_id", spanID),
+		)
+	}
+	logger.Info("handling request", fields...)
 }
 
 ```

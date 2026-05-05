@@ -62,7 +62,6 @@ export const generateRssItem = (config, post) => {
       ? post.tags.map((t) => typeof t === 'object' ? `<category>${escape(t?.value ?? '')}</category>` : `<category>${escape(t)}</category>`).join('')
       : ''
     }
-    }
   </item>
 `.trim()
 }

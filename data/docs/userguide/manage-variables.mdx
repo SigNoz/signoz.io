@@ -1,9 +1,8 @@
 ---
 date: 2026-04-17
 id: manage-variables
-
 title: Manage Variables in SigNoz
-description: Create and manage dashboard variables in SigNoz to build reusable and interactive dashboards.
+description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 doc_type: howto
 ---
 
@@ -114,6 +113,64 @@ Textbox - A free text input field with an optional default value
     Example: Free text as a variable
 
     ![Variables-with-Text](/img/docs/dashboards/variables/text-box-trace_id.png)
+
+## Using Variables in Queries
+
+Variables are referenced using `$var` syntax across all query types.
+
+### Query Builder
+
+**Single-select variables**: Use the variable name directly
+
+```
+service.name = $service.name AND has_error = true AND http.route EXISTS
+```
+
+<Admonition type="tip">
+Name your variable the same as the field to avoid confusion (e.g., variable `service.name` for field `service.name`)
+</Admonition>
+
+**Multi-select variables**: Use `IN` operator for multiple values
+
+```
+k8s.namespace.name = $k8s.namespace.name AND k8s.pod.name IN $k8s.pod.name
+```
+
+### ClickHouse Queries
+
+Reference variables with `$` prefix in your SQL:
+
+```sql
+SELECT 
+    toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval,
+    attributes_string['http.method'] AS method,
+    toFloat64(avg(durationNano)) AS value
+FROM 
+    signoz_traces.distributed_signoz_index_v3
+WHERE 
+    attributes_string['http.method'] != ''
+    AND attributes_string['http.method'] = $http.method  -- Variable usage
+    AND timestamp > now() - INTERVAL 30 MINUTE
+    AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY 
+    (method, interval)
+ORDER BY 
+    (method, interval) ASC;
+```
+
+### PromQL
+
+**Single-select variables**: Use the `=` matcher with the variable:
+
+```
+sum(rate(http_requests_total{job="$job_name"}[5m]))
+```
+
+**Multi-select variables**: Use the `=~` regex matcher instead of `=`. When multiple values are selected, SigNoz expands the variable into a regex pattern (e.g., `value1|value2|value3`), which requires `=~` to match correctly.
+
+```
+sum(rate(http_requests_total{service_name=~"$service_name", deployment_environment=~"$deployment_environment"}[5m]))
+```
 
 ## Chaining Variables
 

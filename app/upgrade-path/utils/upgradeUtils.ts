@@ -7,7 +7,8 @@ import {
 } from '../types/upgrade'
 import { compareSemverTags } from '@/utils/semverTags'
 
-const STANDARD_GUIDE_URL = 'https://signoz.io/docs/operate/migration/upgrade-standard'
+/** Fallback guide for GitHub releases not listed in upgradeSchema.json. */
+export const STANDARD_GUIDE_URL = 'https://signoz.io/docs/operate/migration/upgrade-standard'
 
 export function mergeReleasesWithSchema(
   githubData: GitHubReleasesResponse,
