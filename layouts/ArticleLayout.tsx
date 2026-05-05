@@ -162,6 +162,7 @@ export default function ArticleLayout({
   const readingTimeText = getReadingTimeText(content)
 
   const MAX_VISIBLE_TAGS = 2
+  const MAX_RELATED_ARTICLES = 3
   const tagsArray = Array.isArray(content.tags) ? content.tags : []
   const primaryTags = tagsArray.slice(0, MAX_VISIBLE_TAGS)
   const hiddenTags = tagsArray.slice(MAX_VISIBLE_TAGS)
@@ -297,7 +298,7 @@ export default function ArticleLayout({
                     <h2 className="text-xl font-semibold text-white">Related Articles</h2>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {relatedArticles.slice(0, 3).map((article, index) => (
+                    {relatedArticles.slice(0, MAX_RELATED_ARTICLES).map((article, index) => (
                       <TrackingLink
                         key={index}
                         href={article.url}
