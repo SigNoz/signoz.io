@@ -129,7 +129,6 @@ function WorkspaceReady({
                 href={workspaceData?.invite_link}
                 target="_blank"
                 onClick={handleWorkspaceLinkClick}
-                rel="noreferrer"
               >
                 {workspaceData?.invite_link}
               </a>

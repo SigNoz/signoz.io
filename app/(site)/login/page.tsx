@@ -368,7 +368,6 @@ export default function Login() {
                                   href={`https://${tenant.name}.${tenant.region.dns}/login`}
                                   target="_blank"
                                   className="shrink-0 rounded-sm bg-signoz_robin-500 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
-                                  rel="noreferrer"
                                 >
                                   Login
                                 </a>
@@ -454,12 +453,7 @@ export default function Login() {
                 )}
 
                 {badge.url ? (
-                  <a
-                    href={badge.url}
-                    className="flex items-center gap-2"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                  <a href={badge.url} className="flex items-center gap-2" target="_blank">
                     <span className="text-xs text-signoz_vanilla-400">{badge.text}</span>
                     <ArrowUpRight size={12} />
                   </a>

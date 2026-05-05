@@ -20,7 +20,6 @@ import {
   SiPostgresql,
   SiMongodb,
 } from 'react-icons/si'
-import { FaAws } from 'react-icons/fa'
 import TrackingLink from '@/components/TrackingLink'
 import Button, { BUTTON_TYPES } from '@/components/Button/Button'
 import { ArrowUpRight, LucideServer, Database, Workflow } from 'lucide-react'

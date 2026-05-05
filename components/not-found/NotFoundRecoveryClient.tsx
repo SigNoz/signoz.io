@@ -14,7 +14,7 @@ type SuggestionsResponse = {
 export default function NotFoundRecoveryClient() {
   const pathname = usePathname()
   const [suggestions, setSuggestions] = useState<SuggestedDoc[]>(QUICK_LINK_FALLBACK)
-  const [suggestionIntro, setSuggestionIntro] = useState('Popular docs to get started:')
+  const [suggestionIntro, setSuggestionIntro] = useState('You might be looking for:')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function NotFoundRecoveryClient() {
         </ul>
 
         <ul className="mt-3 list-none space-y-3 p-0">
-          <li>
+          <li className={isLoading ? 'animate-pulse' : ''}>
             <Link
               href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=404_page&utm_campaign=newsletter"
               className="text-base leading-6 text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
