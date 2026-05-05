@@ -25,7 +25,7 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
 
     const fetchStars = async () => {
       try {
-        const response = await fetch('/api/github-stars')
+        const response = await fetch('/api/github-stars/')
         if (!response.ok) {
           throw new Error('Failed to fetch')
         }
