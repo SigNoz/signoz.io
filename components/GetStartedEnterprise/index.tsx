@@ -6,7 +6,8 @@ import Link from 'next/link'
 
 export const GetStartedEnterprise = () => {
   const getStartedId = `btn-get-started-enterprise-bottom`
-  const readDocumentationId = `btn-read-documentation-enterprise-bottom`
+  const selfHostedId = `btn-enterprise-self-hosted-bottom`
+  const byocId = `btn-enterprise-byoc-bottom`
 
   return (
     <div className="bg-[width:50%] bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat">
@@ -20,21 +21,30 @@ export const GetStartedEnterprise = () => {
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
                 <Button id={getStartedId} className="gap-2">
                   <Cloud size={16} />
-                  <Link href="/enterprise-cloud" className="flex-center gap-8">
+                  <Link
+                    href="/contact-us/?source=get-started-enterprise-cloud"
+                    className="flex-center gap-8"
+                  >
                     Enterprise Cloud
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId} className="gap-2">
+                <Button type={Button.TYPES.SECONDARY} id={selfHostedId} className="gap-2">
                   <Server size={16} />
-                  <Link href="/enterprise-self-hosted" className="flex-center gap-8">
+                  <Link
+                    href="/contact-us/?source=get-started-enterprise-self-hosted"
+                    className="flex-center gap-8"
+                  >
                     Enterprise Self-Hosted
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId} className="gap-2">
+                <Button type={Button.TYPES.SECONDARY} id={byocId} className="gap-2">
                   <CloudUpload size={16} />
-                  <Link href="/enterprise-self-hosted" className="flex-center gap-8">
+                  <Link
+                    href="/contact-us/?source=get-started-enterprise-byoc"
+                    className="flex-center gap-8"
+                  >
                     Bring your own cloud
                   </Link>
                 </Button>

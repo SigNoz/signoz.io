@@ -15,7 +15,7 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
     },
     {
       name: 'Vercel',
-      href: '/docs/userguide/vercel-to-signoz',
+      href: '/docs/integrations/vercel',
       clickName: 'Vercel Logs Link',
     },
     {
@@ -53,6 +53,11 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       name: 'DBOS',
       href: '/docs/integrations/opentelemetry-dbos',
       clickName: 'DBOS Logs Link',
+    },
+    {
+      name: 'Kong Gateway',
+      href: '/docs/integrations/opentelemetry-kong-gateway',
+      clickName: 'Kong Gateway Logs Link',
     },
   ] satisfies ComponentItem[],
   languages: [

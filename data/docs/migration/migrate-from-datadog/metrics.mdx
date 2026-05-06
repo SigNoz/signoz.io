@@ -1,5 +1,5 @@
 ---
-date: 2026-01-18
+date: 2026-04-16
 id: metrics
 title: Migrate Metrics from Datadog
 description: Learn how to migrate your application and infrastructure metrics from Datadog to SigNoz using OpenTelemetry.
@@ -155,12 +155,64 @@ See [Using Datadog Receiver](https://signoz.io/docs/migration/migrate-from-datad
 
 APM metrics (like `trace.servlet.request.hits`, `trace.servlet.request.duration`) are generated from traces. When you migrate traces to SigNoz using OpenTelemetry (see [Migrate Traces](https://signoz.io/docs/migration/migrate-from-datadog/traces/)), SigNoz automatically generates equivalent APM metrics.
 
-SigNoz generates these metrics from traces:
+SigNoz generates eight metrics from span data.
 
-- Request rate (calls per second)
-- Error rate (errors per second)
-- P50, P90, P99 latency
-- Apdex score
+**Core R.E.D Metrics (all spans)**
+
+- `signoz_calls_total` — Request and error counts (counter).
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `http.status_code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+- `signoz_latency.bucket` — Latency distribution as histogram buckets.
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+- `signoz_latency.sum` — Sum of all latency values (for avg = sum/count).
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+- `signoz_latency.count` — Count of latency observations (for avg = sum/count).
+  - Dimensions: `service.name`, `operation`, `span.kind`, `status.code`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+
+**DB Call Metrics**
+
+- `signoz_db_latency_sum` — Sum of DB call latency.
+  - Dimensions: `service.name`, `status.code`, `db.system`, `db.name`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+- `signoz_db_latency_count` — Count of DB call latency observations.
+  - Dimensions: `service.name`, `status.code`, `db.system`, `db.name`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+
+**External Call Metrics**
+
+- `signoz_external_call_latency_sum` — Sum of external call latency.
+  - Dimensions: `service.name`, `status.code`, `http.status_code`, `address`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+- `signoz_external_call_latency_count` — Count of external call latency observations.
+  - Dimensions: `service.name`, `status.code`, `http.status_code`, `address`, `service.namespace`, `deployment.environment`, `signoz.collector.id`
+
+### Metric Mapping
+
+Datadog creates a **separate metric per operation** — the span name (e.g. `rails.request`, `redis.command`, `mysql.query`) is embedded in the metric name itself. It also uses separate metric names for HTTP-status breakdowns (`.by_http_status`). DB calls and external calls are not broken out into separate metrics — they use different span names (e.g. `trace.mysql.query.hits` vs `trace.rails.request.hits`).
+
+SigNoz uses **one metric with multiple dimensions**, and additionally breaks out DB and external call latency into dedicated metrics. All SigNoz APM metrics carry labels, and you filter/group by them instead of querying different metric names.
+
+**Request and Error Counts**
+
+| Datadog Metric | SigNoz Equivalent |
+| --- | --- |
+| `trace.<SPAN_NAME>.hits` | `signoz_calls_total{operation="<SPAN_NAME>"}` |
+| `trace.<SPAN_NAME>.hits.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>"}` |
+| `trace.<SPAN_NAME>.errors` | `signoz_calls_total{operation="<SPAN_NAME>", status.code="STATUS_CODE_ERROR"}` |
+| `trace.<SPAN_NAME>.errors.by_http_status` | `signoz_calls_total{operation="<SPAN_NAME>", status.code="STATUS_CODE_ERROR"}` |
+
+**Latency**
+
+| Datadog Metric | SigNoz Equivalent |
+| --- | --- |
+| `trace.<SPAN_NAME>` (DDSketch distribution) | `signoz_latency.bucket{operation="<SPAN_NAME>"}` — supports p50/p75/p90/p95/p99 |
+| `trace.<SPAN_NAME>.duration` (legacy) | `signoz_latency.bucket{operation="<SPAN_NAME>"}` |
+| `trace.<SPAN_NAME>.duration.by_http_status` (legacy) | No equivalent metric |
+| `trace.<SPAN_NAME>.duration.by_service` (legacy) | `signoz_latency.bucket{operation="<SPAN_NAME>", service.name="..."}` |
+| `trace.<SPAN_NAME>.apdex` | No separate metric — compute via ClickHouse query |
+
+**DB and External Call Latency**
+
+| Datadog Metric | SigNoz Equivalent |
+| --- | --- |
+| `trace.mysql.query`, `trace.postgres.query`, etc. | `signoz_db_latency_sum{db.system="..."}` / `signoz_db_latency_count{db.system="..."}` (average only) |
+| `trace.http.request`, `trace.okhttp.request`, etc. | `signoz_external_call_latency_sum` / `signoz_external_call_latency_count` (average only) |
 
 ### From Prometheus Exporters
 

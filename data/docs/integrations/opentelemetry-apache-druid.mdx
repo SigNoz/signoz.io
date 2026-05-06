@@ -1,0 +1,261 @@
+---
+date: 2026-04-26
+id: opentelemetry-apache-druid
+title: Apache Druid Metrics via OpenTelemetry
+description: Send Apache Druid metrics to SigNoz via the StatsD emitter and OpenTelemetry Collector.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Apache Druid has no native OpenTelemetry receiver. Use its built-in **StatsD emitter** to push metrics over UDP to the OpenTelemetry Collector [statsd receiver](https://signoz.io/docs/userguide/opentelemetry-statsd/), which forwards them to SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Access to `conf/druid/_common/common.runtime.properties` in your Druid cluster
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) installed and running
+
+## Setup
+
+<Tabs>
+<TabItem value="docker" label="Docker Compose">
+
+### Step 1: Create the collector config
+
+Create `druid-metrics-collection-config.yaml` in the same directory as your `docker-compose.yml`:
+
+```yaml:druid-metrics-collection-config.yaml
+receivers:
+  statsd:
+    endpoint: 0.0.0.0:8125
+    aggregation_interval: 10s
+
+processors:
+  resourcedetection/system:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+  resource:
+    attributes:
+      - key: service.name
+        value: apache-druid
+        action: upsert
+
+exporters:
+  otlp/druid:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/druid:
+      receivers: [statsd]
+      processors: [resourcedetection/system, resource]
+      exporters: [otlp/druid]
+```
+
+### Step 2: Add the collector service
+
+Add the `otelcol` service to your `docker-compose.yml`:
+
+```yaml:docker-compose.yml
+otelcol:
+  container_name: 'otelcol'
+  image: 'otel/opentelemetry-collector-contrib:0.150.1'
+  volumes:
+    - './druid-metrics-collection-config.yaml:/etc/otelcol/config.yaml'
+  ports:
+    - '8125:8125/udp'
+  environment:
+    - 'OTLP_DESTINATION_ENDPOINT=ingest.<region>.signoz.cloud:443'
+    - 'SIGNOZ_INGESTION_KEY=<your-ingestion-key>'
+  command:
+    - '--config'
+    - '/etc/otelcol/config.yaml'
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3: Configure Druid
+
+Add to your `environment` file. If `druid_extensions_loadList` already exists, append `"statsd-emitter"` to it rather than replacing the array:
+
+```bash:environment
+druid_extensions_loadList=["druid-histogram", "druid-datasketches", "druid-lookups-cached-global", "postgresql-metadata-storage", "statsd-emitter"]
+druid_emitter=statsd
+druid_emitter_statsd_hostname=otelcol
+druid_emitter_statsd_port=8125
+```
+
+`otelcol` is the collector's service name in `docker-compose.yml`. Docker Compose resolves it via built-in DNS.
+
+### Step 4: Start the stack
+
+```bash
+docker compose up -d
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+### Step 1: Configure the SigNoz collector
+
+If you deploy via the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/install/kubernetes/), apply a values override to enable StatsD ingestion:
+
+```yaml:override-values.yaml
+otelDeployment:
+  config:
+    receivers:
+      statsd:
+        endpoint: 0.0.0.0:8125
+        aggregation_interval: 10s
+    processors:
+      resource/druid:
+        attributes:
+          - key: service.name
+            value: apache-druid
+            action: upsert
+    service:
+      pipelines:
+        metrics/statsd:
+          receivers: [statsd]
+          processors: [resource/druid]
+          exporters: [otlp]
+  ports:
+    statsd-udp:
+      enabled: true
+      containerPort: 8125
+      servicePort: 8125
+      hostPort: 8125
+      protocol: UDP
+```
+
+Apply it with Helm:
+
+```bash
+helm upgrade <release-name> signoz/k8s-infra -n <collector-namespace> --values override-values.yaml
+```
+
+### Step 2: Expose UDP port via ClusterIP Service
+
+Create this Service in the Collector's namespace. Druid pods resolve the Collector at `otel-collector-statsd.<collector-namespace>.svc.cluster.local`:
+
+```yaml:clusterip.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector-statsd
+  namespace: <collector-namespace>
+spec:
+  selector:
+    app.kubernetes.io/component: otel-deployment
+  ports:
+    - protocol: UDP
+      port: 8125
+      targetPort: 8125
+```
+
+Replace `<collector-namespace>` with the namespace where the Collector runs.
+
+### Step 3: Allow ingress via NetworkPolicy
+
+Allow UDP from the Druid namespace to the Collector pod:
+
+```yaml:networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-druid-to-otel-statsd
+  namespace: <collector-namespace>
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: otel-deployment
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: druid
+    ports:
+    - protocol: UDP
+      port: 8125
+```
+
+### Step 4: Configure Druid
+
+Add to `conf/druid/_common/common.runtime.properties`. If `druid.extensions.loadList` already exists, append `"statsd-emitter"` to it rather than replacing the array:
+
+```properties
+druid.extensions.loadList=["statsd-emitter"]
+druid.emitter=statsd
+druid.emitter.statsd.hostname=otel-collector-statsd.<collector-namespace>.svc.cluster.local
+druid.emitter.statsd.port=8125
+```
+
+Replace `<collector-namespace>` with the namespace where the Collector runs.
+
+### Step 5: Restart Druid
+
+Restart Druid pods:
+
+```bash
+kubectl rollout restart deployment -n <druid-namespace>
+```
+
+</TabItem>
+</Tabs>
+
+<Admonition type="note" title="Metric naming in SigNoz">
+  The StatsD emitter prefixes every metric with the emitting node type. `query/time` from the broker arrives as `druid.broker.query.time.<datasource>.<queryType>`. Pattern: `druid.<nodetype>.<metric>` where `<nodetype>` is one of `broker`, `coordinator`, `historical`, `middleManager`, or `router`.
+
+  Some coordinator metrics also include the host and port of the emitting node, for example `druid.coordinator.segment.dropQueue.count.<host>.<port>`. You may see this suffix when building dashboards or alerts on segment-level metrics.
+</Admonition>
+
+## Validate
+
+1. Open SigNoz.
+2. Go to **Metrics** > **Metrics Explorer**.
+3. Search for `druid.` to confirm metrics flow.
+
+<Figure
+  src="/img/docs/integrations/apache-druid/druid-metrics-dashboard.webp"
+  caption="Apache Druid metrics in SigNoz"
+  alt="Apache Druid metrics in SigNoz Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Metrics not appearing in SigNoz
+
+- **Network reachability**: Confirm Druid resolves the Collector hostname and that UDP port `8125` is reachable. Run `tcpdump` on the Collector node to verify UDP packets arrive.
+- **Kubernetes network policies**: Check that policies allow UDP from the Druid namespace to the Collector pod on port `8125`.
+- **Extension loading**: Confirm `druid.extensions.loadList` contains `"statsd-emitter"`. A malformed array in `common.runtime.properties` stops all metric emission.
+
+</details>
+
+## Next Steps
+
+- Import the [Apache Druid dashboard](https://signoz.io/docs/dashboards/dashboard-templates/apache-druid-dashboard/).
+- Set up [alerts](https://signoz.io/docs/userguide/alerts-management/) on coordinator segment queue metrics or, if you use Kafka-based ingestion, `druid.<node>.ingest.kafka.lag`.
+
+## Get Help
+
+<GetHelp />

@@ -6,7 +6,7 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors, Guide } from 'contentlayer/generated'
 import type { Comparison } from '../types/transformedContent'
-import { ExternalLink } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
@@ -162,6 +162,7 @@ export default function ArticleLayout({
   const readingTimeText = getReadingTimeText(content)
 
   const MAX_VISIBLE_TAGS = 2
+  const MAX_RELATED_ARTICLES = 3
   const tagsArray = Array.isArray(content.tags) ? content.tags : []
   const primaryTags = tagsArray.slice(0, MAX_VISIBLE_TAGS)
   const hiddenTags = tagsArray.slice(MAX_VISIBLE_TAGS)
@@ -284,60 +285,57 @@ export default function ArticleLayout({
               </div>
             )}
 
+            {/* Related Articles Section */}
+            {showRelatedArticles &&
+              relatedArticles &&
+              Array.isArray(relatedArticles) &&
+              relatedArticles.length > 0 && (
+                <div className="mt-12 border-t border-signoz_ink-300 pt-10">
+                  <div className="mb-6">
+                    <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-signoz_robin-400">
+                      Keep Reading
+                    </p>
+                    <h2 className="text-xl font-semibold text-white">Related Articles</h2>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {relatedArticles.slice(0, MAX_RELATED_ARTICLES).map((article, index) => (
+                      <TrackingLink
+                        key={index}
+                        href={article.url}
+                        target="_blank"
+                        clickType="Nav Click"
+                        clickName="Related Article Link"
+                        clickText={article.title}
+                        clickLocation={`${contentType} Related Articles`}
+                        className="group flex flex-col justify-between rounded-xl border border-signoz_ink-300 bg-signoz_ink-400/50 p-5 transition-all duration-200 hover:border-signoz_robin-500/60 hover:bg-signoz_ink-400"
+                      >
+                        <div>
+                          <p className="mb-3 text-[11px] font-medium uppercase tracking-widest text-signoz_robin-400/70">
+                            {new Date(article.publishedOn || article.date).toLocaleDateString(
+                              'en-US',
+                              { month: 'short', year: 'numeric' }
+                            )}
+                          </p>
+                          <h3 className="text-sm font-medium leading-snug text-white/90 group-hover:text-white">
+                            {article.title}
+                          </h3>
+                        </div>
+                        <div className="mt-4 flex items-center gap-1 text-xs text-signoz_robin-400/60 transition-all duration-200 group-hover:gap-2 group-hover:text-signoz_robin-400">
+                          <span>Read article</span>
+                          <ArrowRight size={12} />
+                        </div>
+                      </TrackingLink>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             {/* Newsletter Section */}
             {showNewsletter && (
               <div className="mb-16 mt-8">
                 <NewsletterSubscription />
               </div>
             )}
-
-            {/* Related Articles Section */}
-            {showRelatedArticles &&
-              relatedArticles &&
-              Array.isArray(relatedArticles) &&
-              relatedArticles.length > 0 && (
-                <div className="pt-8">
-                  <div className="mx-auto flex max-w-4xl flex-col items-start justify-between lg:flex-row">
-                    <h2 className="mb-6 w-full text-xl font-semibold text-white lg:mb-0 lg:w-1/3">
-                      Related Articles
-                    </h2>
-                    <div className="w-full space-y-4 lg:w-2/3">
-                      {relatedArticles.slice(0, 2).map((article, index) => (
-                        <TrackingLink
-                          key={index}
-                          href={article.url}
-                          target="_blank"
-                          clickType="Nav Click"
-                          clickName="Related Article Link"
-                          clickText={article.title}
-                          clickLocation={`${contentType} Related Articles`}
-                          className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 md:p-6"
-                        >
-                          <div>
-                            <h3 className="text-base font-medium text-white md:text-lg">
-                              {article.title}
-                            </h3>
-                            <p className="mt-2 text-sm text-gray-400">
-                              {new Date(article.publishedOn || article.date).toLocaleDateString(
-                                'en-US',
-                                {
-                                  month: 'long',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                }
-                              )}
-                            </p>
-                          </div>
-                          <ExternalLink
-                            size={20}
-                            className="text-gray-400 transition-colors group-hover:text-white"
-                          />
-                        </TrackingLink>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
           </div>
 
           {/* Right sidebar - Desktop only */}

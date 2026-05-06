@@ -1,0 +1,71 @@
+---
+date: 2026-04-30
+id: serving-on-external-url
+title: Serving SigNoz on an External URL
+description: Learn how to serve SigNoz on a custom external URL or base path so it can run behind a reverse proxy alongside other services on the same domain.
+doc_type: howto
+tags: [Self-Host]
+---
+
+SigNoz can be served under a base path, so you can place it behind a reverse proxy alongside other services on the same domain - for example, `https://example.com/signoz/`.
+
+A single environment variable is the only configuration required. Everything under SigNoz derives the base path from its value at startup. No image rebuild is needed.
+
+<Admonition type="info">
+This feature is available from SigNoz v0.121.0 or later.
+</Admonition>
+
+## Configuration
+
+Configure the base path by setting `SIGNOZ_GLOBAL_EXTERNAL__URL` to your external URL:
+
+```bash
+SIGNOZ_GLOBAL_EXTERNAL__URL=https://example.com/signoz
+```
+
+<Admonition type="info">
+SigNoz reads the path component from the URL (e.g. `/signoz`) and uses it as the base path for all API routes and frontend assets. 
+
+Health endpoints (`/api/v1/health`, `/api/v2/healthz`, `/api/v2/readyz`, `/api/v2/livez`) remain accessible without the base path for container health checks.
+</Admonition>
+
+## Validate
+
+After restarting SigNoz with the updated configuration:
+
+1. Open `https://example.com/signoz/` in your browser.
+2. Confirm the SigNoz UI loads and in-app navigation works end to end.
+3. Verify health probes succeed - run the following and confirm it returns `200 OK`:
+
+```bash
+curl -i https://example.com/api/v1/health
+```
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### UI loads but API calls return 404
+
+The base path in `SIGNOZ_GLOBAL_EXTERNAL__URL` must exactly match what your reverse proxy forwards. Check that the proxy is not stripping the base path before passing requests to SigNoz.
+
+### Static assets (JS/CSS) return 404
+
+Ensure the reverse proxy forwards the full path, including the base path, to SigNoz. Stripping the base path on the proxy side breaks asset resolution because SigNoz injects the base path into all asset URLs at startup.
+
+### Health probes failing after adding the base path
+
+Health endpoints do not use the base path. Update your container probe to target `/api/v1/health` directly, without the base path.
+
+### Storage or session conflicts when running multiple instances on the same host
+
+Storage keys are scoped to the base path automatically. If you are seeing conflicts, confirm each instance has a distinct base path set via `SIGNOZ_GLOBAL_EXTERNAL__URL`.
+
+</details>
+
+## Next steps
+
+- [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/)
+- [Root User Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/root-user/)
+- [Relational Database Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/relational-database/)

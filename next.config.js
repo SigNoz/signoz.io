@@ -101,23 +101,18 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/querying/querying-data/',
-          destination: '/docs/userguide/query-builder-v5/',
+          source: '/enterprise-self-hosted/',
+          destination: '/contact-us/?source=redirect-enterprise-self-hosted',
           permanent: true,
         },
         {
-          source: '/docs/querying/querying-data',
-          destination: '/docs/userguide/query-builder-v5/',
+          source: '/enterprise-cloud/',
+          destination: '/contact-us/?source=redirect-enterprise-cloud',
           permanent: true,
         },
         {
-          source: '/docs/userguide/query-builder/',
-          destination: '/docs/userguide/query-builder-v5/',
-          permanent: true,
-        },
-        {
-          source: '/docs/userguide/query-builder',
-          destination: '/docs/userguide/query-builder-v5/',
+          source: '/oss-to-cloud/',
+          destination: '/teams/',
           permanent: true,
         },
         {
@@ -2618,6 +2613,11 @@ module.exports = () => {
         {
           source: '/blog/claude-code-opentelemetry-monitoring/',
           destination: '/blog/claude-code-monitoring-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-collector-processors/',
+          destination: '/blog/opentelemetry-processors/',
           permanent: true,
         },
         {

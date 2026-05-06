@@ -1,106 +1,628 @@
 ---
-date: 2024-06-06
-tags : [SigNoz Cloud]
+date: 2026-04-22
 title: Send Logs from Vector to SigNoz
 id: vector-logs-to-signoz
+doc_type: howto
+description: Learn how to send logs from Vector to SigNoz. Covers SigNoz Cloud (HTTP sink) and self-hosted (OpenTelemetry sink) for VM, Kubernetes, and Docker.
 toc_min_heading_level: 3
-toc_max_heading_level: 1
+toc_max_heading_level: 3
 ---
 
-This guide explains how to forward logs from [Vector](https://vector.dev/) to SigNoz.
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+<a href="https://vector.dev/" target="_blank" rel="noopener noreferrer nofollow">Vector</a> collects, transforms, and ships logs from various sources (syslog, files, Docker, Kubernetes) to SigNoz. SigNoz Cloud uses Vector's `http` sink; self-hosted SigNoz uses the `opentelemetry` sink.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  The self-hosted path uses Vector's `opentelemetry` sink with a `remap` transform instead of the `http` sink. Select the **Self-Hosted** tab in the [Configure Vector](#configure-vector) section below.
+</KeyPointCallout>
+
+## Prerequisites
+
+- Vector installed and running on your system
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Configure Vector
 
 <Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
 
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+To send logs from Vector to SigNoz Cloud, you need to use the `http` sink.
 
-## Configure Vector 
+<Tabs>
+<TabItem value="vm" label="VM" default>
 
-We will configure vector to send logs to **SigNoz Cloud**
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
 
-### Prerequisites
+Use this section if you're deploying Vector directly on a server or VM without containerization.
 
-- Vector running on your system
+</KeyPointCallout>
 
-### Setup
+### Step 1: Install Vector
 
-Follow these steps to set up Vector for forwarding logs to SigNoz Cloud:
+Install Vector on your VM or bare metal server. See the <a href="https://vector.dev/docs/setup/installation/" target="_blank" rel="noopener noreferrer nofollow">official Vector installation guide</a> for your platform.
 
-1. Open your Vector configuration file (usually `config.yaml`)
-2. Add the following sink configuration to the file:
-    ```yaml
+### Step 2: Configure Vector
+
+Open your Vector configuration file (usually `/etc/vector/vector.yaml`):
+
+```bash
+sudo nano /etc/vector/vector.yaml
+```
+
+Add the following configuration to collect logs from system log files and send them to SigNoz:
+
+```yaml:vector.yaml
+sources:
+  system_logs:
+    type: file
+    include:
+      - /var/log/syslog
+      - /var/log/messages
+      - /var/log/*.log
+    read_from: end
+
+sinks:
+  signoz_sink:
+    type: http
+    inputs:
+      - system_logs
+    uri: "https://ingest.<region>.signoz.cloud/logs/vector"
+    encoding:
+      codec: json
+    request:
+      headers:
+        signoz-ingestion-key: "<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+The `http` sink sends log events as JSON to SigNoz Cloud's ingestion endpoint. The `signoz-ingestion-key` header authenticates each request. Vector batches events before sending.
+
+### Step 3: Restart Vector
+
+```bash
+sudo systemctl restart vector
+```
+
+Verify Vector is running:
+
+```bash
+sudo systemctl status vector
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+### Step 1: Install the Vector Helm chart
+
+Deploy Vector using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. Set `role: Agent` to run Vector as a DaemonSet so every node collects logs. Define the full pipeline in `customConfig`.
+
+Add the Vector Helm repo and install the chart:
+
+```bash
+helm repo add vector https://helm.vector.dev
+helm repo update
+```
+
+### Step 2: Configure Vector
+
+Create a `values.yaml` file with `customConfig` for the Vector configuration:
+
+```yaml:values.yaml
+role: Agent
+
+customConfig:
+  data_dir: /vector-data-dir
+  sources:
+    kubernetes_logs:
+      type: kubernetes_logs
+  sinks:
     signoz_sink:
       type: http
       inputs:
-        - <SOURCE_NAME>
-      uri: https://ingest.<region>.signoz.cloud/logs/vector
+        - kubernetes_logs
+      uri: "https://ingest.<region>.signoz.cloud/logs/vector"
       encoding:
         codec: json
       request:
         headers:
           signoz-ingestion-key: "<your-ingestion-key>"
-    ```
 
-`<SOURCE_NAME>`: The name of your [Vector source](https://vector.dev/docs/reference/configuration/sources/) (e.g., docker)
+service:
+  enabled: false
 
-`<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+serviceHeadless:
+  enabled: false
+```
 
-`<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+Verify these values:
 
-Save the configuration file and restart Vector to apply the changes.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
+### Step 3: Apply Configuration
+
+```bash
+helm install vector vector/vector \
+  --namespace vector \
+  --create-namespace \
+  --values values.yaml
+```
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 1: Create Vector Configuration
+
+Create a `vector.yaml` file:
+
+```yaml:vector.yaml
+sources:
+  docker_logs:
+    type: docker_logs
+
+sinks:
+  signoz_sink:
+    type: http
+    inputs:
+      - docker_logs
+    uri: "https://ingest.<region>.signoz.cloud/logs/vector"
+    encoding:
+      codec: json
+    request:
+      headers:
+        signoz-ingestion-key: "<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Step 2: Run Vector Container
+
+```bash
+docker run -d \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /var/lib/docker:/var/lib/docker:ro \
+  -v $(pwd)/vector.yaml:/etc/vector/vector.yaml \
+  --name vector \
+  timberio/vector:latest
+```
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+
+<TabItem value="self-hosted" label="Self-Hosted">
+
+<Admonition type="note">
+  The `opentelemetry` sink used here is in beta. The configuration schema may change before it
+  reaches stable.
+
+  This documentation was tested with Vector version `0.54.0`.
+</Admonition>
+
+Vector's `opentelemetry` sink requires events to be pre-structured as OTLP — raw log events from sources like `file` or `docker_logs` are not. The `remap` transform below builds the required OTLP structure and maps source metadata to <a href="https://opentelemetry.io/docs/specs/semconv/resource/" target="_blank" rel="noopener noreferrer nofollow">OTel semantic conventions</a>.
+
+<Tabs>
+<TabItem value="vm" label="VM / Bare Metal" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying Vector directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+### Step 1: Install Vector
+
+Install Vector on your VM or bare metal server. See the <a href="https://vector.dev/docs/setup/installation/" target="_blank" rel="noopener noreferrer nofollow">official Vector installation guide</a> for your platform.
+
+### Step 2: Configure Vector
+
+Open your Vector configuration file (usually `/etc/vector/vector.yaml`):
+
+```bash
+sudo nano /etc/vector/vector.yaml
+```
+
+Add the following configuration:
+
+```yaml:vector.yaml
+sources:
+  system_logs:
+    type: file
+    include:
+      - /var/log/syslog
+      - /var/log/messages
+      - /var/log/*.log
+    read_from: end
+
+transforms:
+  to_otlp:
+    type: remap
+    inputs:
+      - system_logs
+    source: |
+      msg = del(.message)
+      ts  = del(.timestamp)
+      . = {
+        "resourceLogs": [{
+          "resource": {
+            "attributes": [
+              {"key": "host.name",     "value": {"stringValue": del(.host) || ""}},
+              {"key": "log.file.path", "value": {"stringValue": del(.file) || ""}}
+            ]
+          },
+          "scopeLogs": [{
+            "logRecords": [{
+              "timeUnixNano": to_string(to_unix_timestamp!(ts, unit: "nanoseconds")),
+              "body": {"stringValue": msg},
+              "attributes": [
+                {"key": "source_type", "value": {"stringValue": del(.source_type) || ""}}
+              ]
+            }]
+          }]
+        }]
+      }
+
+sinks:
+  signoz_sink:
+    type: opentelemetry
+    inputs:
+      - to_otlp
+    protocol:
+      type: http
+      uri: http://<signoz-host>:4318/v1/logs
+      method: post
+      encoding:
+        codec: otlp
+```
+
+Replace `<signoz-host>` with the hostname or IP of your SigNoz instance.
+
+The `opentelemetry` sink sends logs over OTLP HTTP to your SigNoz collector on port `4318`. The `remap` transform above shapes each log event into the OTLP `resourceLogs` structure before the sink serializes it.
+
+### Step 3: Restart Vector
+
+```bash
+sudo systemctl restart vector
+```
+
+Verify Vector is running:
+
+```bash
+sudo systemctl status vector
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+### Step 1: Install the Vector Helm chart
+
+Deploy Vector using the official <a href="https://vector.dev/docs/setup/installation/package-managers/helm/" target="_blank" rel="noopener noreferrer nofollow">Vector Helm chart</a>. Set `role: Agent` to run Vector as a DaemonSet so every node collects logs. Define the full pipeline in `customConfig`.
+
+Add the Vector Helm repo and install the chart:
+
+```bash
+helm repo add vector https://helm.vector.dev
+helm repo update
+```
+
+### Step 2: Configure Vector
+
+Create a `values.yaml` file with `customConfig` for the Vector configuration:
+
+```yaml:values.yaml
+role: Agent
+
+customConfig:
+  data_dir: /vector-data-dir
+  api:
+    enabled: true
+    address: 127.0.0.1:8686
+    playground: false
+  sources:
+    kubernetes_logs:
+      type: kubernetes_logs
+  transforms:
+    to_otlp:
+      type: remap
+      inputs:
+        - kubernetes_logs
+      source: |
+        msg = del(.message)
+        ts  = del(.timestamp)
+        . = {
+          "resourceLogs": [{
+            "resource": {
+              "attributes": [
+                {"key": "k8s.pod.name",       "value": {"stringValue": del(.kubernetes.pod_name) || ""}},
+                {"key": "k8s.namespace.name",  "value": {"stringValue": del(.kubernetes.pod_namespace) || ""}},
+                {"key": "k8s.container.name",  "value": {"stringValue": del(.kubernetes.container_name) || ""}},
+                {"key": "k8s.node.name",       "value": {"stringValue": del(.kubernetes.pod_node_name) || ""}}
+              ]
+            },
+            "scopeLogs": [{
+              "logRecords": [{
+                "timeUnixNano": to_string(to_unix_timestamp!(ts, unit: "nanoseconds")),
+                "body": {"stringValue": msg},
+                "attributes": [
+                  {"key": "stream",      "value": {"stringValue": del(.stream) || ""}},
+                  {"key": "source_type", "value": {"stringValue": del(.source_type) || ""}}
+                ]
+              }]
+            }]
+          }]
+        }
+  sinks:
+    signoz_sink:
+      type: opentelemetry
+      inputs:
+        - to_otlp
+      protocol:
+        type: http
+        uri: http://<signoz-host>:4318/v1/logs
+        method: post
+        encoding:
+          codec: otlp
+
+service:
+  enabled: false
+
+serviceHeadless:
+  enabled: false
+```
+
+Replace `<signoz-host>` with the hostname or IP of your SigNoz instance.
+
+### Step 3: Apply Configuration
+
+```bash
+helm install vector vector/vector \
+  --namespace vector \
+  --create-namespace \
+  --values values.yaml
+```
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 1: Create Vector Configuration
+
+Create a `vector.yaml` file:
+
+```yaml:vector.yaml
+sources:
+  docker_logs:
+    type: docker_logs
+
+transforms:
+  to_otlp:
+    type: remap
+    inputs:
+      - docker_logs
+    source: |
+      msg = del(.message)
+      ts  = del(.timestamp)
+      . = {
+        "resourceLogs": [{
+          "resource": {
+            "attributes": [
+              {"key": "container.name",       "value": {"stringValue": del(.container_name) || ""}},
+              {"key": "container.image.name", "value": {"stringValue": del(.image) || ""}},
+              {"key": "container.id",         "value": {"stringValue": del(.container_id) || ""}}
+            ]
+          },
+          "scopeLogs": [{
+            "logRecords": [{
+              "timeUnixNano": to_string(to_unix_timestamp!(ts, unit: "nanoseconds")),
+              "body": {"stringValue": msg},
+              "attributes": [
+                {"key": "stream",      "value": {"stringValue": del(.stream) || ""}},
+                {"key": "source_type", "value": {"stringValue": del(.source_type) || ""}}
+              ]
+            }]
+          }]
+        }]
+      }
+
+sinks:
+  signoz_sink:
+    type: opentelemetry
+    inputs:
+      - to_otlp
+    protocol:
+      type: http
+      uri: http://<signoz-host>:4318/v1/logs
+      method: post
+      encoding:
+        codec: otlp
+```
+
+Replace `<signoz-host>` with the hostname or IP of your SigNoz instance.
+
+### Step 2: Run Vector Container
+
+```bash
+docker run -d \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /var/lib/docker:/var/lib/docker:ro \
+  -v $(pwd)/vector.yaml:/etc/vector/vector.yaml \
+  --name vector \
+  timberio/vector:0.54.0-debian
+```
+
+<Admonition type="note">
+  This documentation was tested with Vector `0.54.0-debian`. As `opentelemetry` sink is in beta, other versions may work but are not
+  actively tested.
+</Admonition>
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+
+</Tabs>
+
+<details>
+<ToggleHeading>
 
 ## Log Mapping for SigNoz
 
-SigNoz processes incoming logs from Vector as follows:
+</ToggleHeading>
 
-- The `timestamp` field is automatically parsed.
-- The `source_type` is moved to resource attributes.
-- The `message` key is mapped to the `body` field.
+SigNoz expects logs in a specific JSON format. You can either transform logs at the Vector level or use SigNoz [pipelines](https://signoz.io/docs/logs-pipelines/introduction/) later.
 
-### OpenTelemetry (OTEL) Schema Transformation
+### Supported Fields
 
-You can consider transforming your logs to the OpenTelemetry schema at the Vector level. The OTEL schema structure is as follows:
-```
+| Field             | Type   | Description                                                                                 |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------- |
+| `timestamp`       | int64  | Nanoseconds since Unix epoch (e.g., `1704061984975797000`)                                  |
+| `body`            | string | Log message (also accepts `message`)                                                        |
+| `trace_id`        | string | 32-character hex string                                                                     |
+| `span_id`         | string | 16-character hex string                                                                     |
+| `trace_flags`     | int    | Integer (0 or 1 for sampled)                                                                |
+| `severity_text`   | string | Log level: TRACE, DEBUG, INFO, WARN, ERROR, FATAL                                           |
+| `severity_number` | int    | OTel severity number: TRACE=1-4, DEBUG=5-8, INFO=9-12, WARN=13-16, ERROR=17-20, FATAL=21-24 |
+| `attributes`      | object | Custom attributes                                                                           |
+| `resources`       | object | Resource attributes                                                                         |
+
+### Example
+
+```json
 {
-  "trace_id": "<hex string>",
-  "span_id": "<hex string>",
-  "trace_flags": "<int>",
-  "severity_text": "<string>",
-  "severity_number": "<int>",
-  "attributes": "<map>",
-  "resources": "<map>",
-  "source_type": "<string>",
-  "message": "<string>"
-}
-```
-
-Example of a transformed log entry:
-```
-{
+  "timestamp": 1704061984975797000,
+  "body": "Request processed successfully",
   "trace_id": "000000000000000018c51935df0b93b9",
   "span_id": "18c51935df0b93b9",
   "trace_flags": 0,
   "severity_text": "info",
-  "severity_number": 4,
+  "severity_number": 9,
   "attributes": {
-      "method": "GET",
-      "path": "/api/users"
+    "method": "GET",
+    "path": "/api/users"
   },
   "resources": {
-      "host": "myhost",
-      "namespace": "prod"
-  },
-  "source_type": "docker",
-  "message": "This is a log line"
+    "host": "myhost",
+    "namespace": "prod"
+  }
 }
 ```
 
-**Note:** Any fields not included in the OTEL schema will be automatically moved to log attributes by SigNoz.
+**Note:** Any fields not in this schema are automatically added to log attributes.
 
+### Self-Hosted
 
-If you prefer not to transform logs at Vector level, you can use SigNoz [pipelines](https://signoz.io/docs/logs-pipelines/introduction/) for processing the logs.
+The Vector `remap` transform in the config above already maps fields to OTel format. Resource attributes (like `host.name`, `k8s.pod.name`) follow <a href="https://opentelemetry.io/docs/specs/semconv/resource/" target="_blank" rel="noopener noreferrer nofollow">OTel semantic conventions</a>.
 
-</TabItem>
+</details>
 
+## Validate
 
-</Tabs>
+After configuring Vector, navigate to **Logs → Logs Explorer** in SigNoz. You should see incoming log entries within a few minutes. Filter by `source_type` to confirm the logs are from Vector.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/vector-logs.webp"
+  caption="Vector logs in SigNoz Logs Explorer"
+  alt="Vector logs in SigNoz Logs Explorer"
+/>
+
+For more details on querying logs, see the [Logs Explorer documentation](https://signoz.io/docs/product-features/logs-explorer/).
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Logs are not appearing in SigNoz
+
+- **Symptom**: No log entries in Logs Explorer after configuring Vector.
+- **Likely cause**: Vector is not running, or endpoint/key is misconfigured.
+- **Fix**:
+  1. Check Vector status: `sudo systemctl status vector` (VM) or `docker ps` (Docker)
+  2. Check Vector logs: `sudo journalctl -u vector -f` (VM) or `docker logs vector` (Docker)
+  3. Verify endpoint and credentials (see below)
+- **Verify**: After fixing, confirm new logs appear in **Logs → Logs Explorer** within a few minutes.
+
+**Endpoint and credentials check**:
+
+- Cloud: `https://ingest.<region>.signoz.cloud/logs/vector` with valid `<your-ingestion-key>`
+- Self-Hosted: `http://<signoz-host>:4318/v1/logs` with collector reachable on port 4318
+- Ensure no firewall is blocking the connection.
+
+### Self-Hosted: OTLP serialization error
+
+If Vector logs show:
+
+```
+Failed serializing frame. error=Log event does not contain OTLP top-level fields (resourceLogs or resourceMetrics)
+```
+
+The `remap` transform is missing or its `inputs` field does not match the source name. Verify the transform's `inputs` matches the source component ID in your config.
+
+### Vector configuration validation
+
+Validate your Vector configuration before restarting:
+
+```bash
+vector validate --config-yaml /etc/vector/vector.yaml
+```
+
+</details>
+
+## Next Steps
+
+- [Log Query/Filtering guides](https://signoz.io/docs/logs-management/overview/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+- [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) for processing and transforming logs
+
+## Get Help
+
+<GetHelp />

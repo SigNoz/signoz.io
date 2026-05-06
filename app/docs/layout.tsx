@@ -1,6 +1,12 @@
-'use client'
-
 import React, { ReactNode } from 'react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | SigNoz Docs',
+    default: 'SigNoz Docs',
+  },
+}
 
 interface LayoutProps {
   children: ReactNode

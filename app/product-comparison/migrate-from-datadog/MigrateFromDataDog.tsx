@@ -1,15 +1,12 @@
 'use client'
 import React from 'react'
 
-import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import MigrateSaving from '../../../components/comparison/migrate-saving'
 
 function MigrateFromDataDog() {
   return (
     <div title="Migrate from Datadog">
-      <HubspotProvider>
-        <MigrateSaving data={DATA} />
-      </HubspotProvider>
+      <MigrateSaving data={DATA} />
     </div>
   )
 }

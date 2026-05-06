@@ -60,7 +60,7 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = OBSERVABILITY_LANDSCAPE_ITEM_DATA.m
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
-  { src: '/svgs/icons/omnicell.svg', alt: 'Omnicell' },
+  { src: '/svgs/icons/lovart.svg', alt: 'Lovart' },
   { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
   { src: '/img/users/comcast.svg', alt: 'Comcast' },
   { src: '/svgs/icons/parallel-ai.svg', alt: 'Parallel AI' },
@@ -387,7 +387,7 @@ export const GETTING_STARTED_CARDS = [
         in your infra - Self-host via Helm chart runs in your own VPC or air-gapped environment. Or
         you can bring your own cloud.
         <TrackingLink
-          href="/enterprise-cloud/"
+          href="/contact-us/?source=why-signoz-page-signoz-offerings"
           clickType="Secondary CTA"
           clickName="Getting Started Section Use SigNoz Cloud or host in your infrastructure"
           clickLocation="Why SigNoz Page"

@@ -210,12 +210,22 @@ export const METRICS_QUICK_START_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Metrics Link',
     },
+    {
+      name: 'Apache Druid',
+      href: '/docs/integrations/opentelemetry-apache-druid',
+      clickName: 'Apache Druid Metrics Link',
+    },
   ] satisfies ComponentItem[],
   webServers: [
     {
       name: 'NGINX',
       href: '/docs/metrics-management/nginx-metrics',
       clickName: 'NGINX Metrics Link',
+    },
+    {
+      name: 'Kong Gateway',
+      href: '/docs/integrations/opentelemetry-kong-gateway',
+      clickName: 'Kong Gateway Metrics Link',
     },
     {
       name: 'GCP Cloud Load Balancer',

@@ -1,5 +1,5 @@
 ---
-date: 2026-02-27
+date: 2026-04-23
 id: otel-collector-config
 title: OpenTelemetry Collector Configuration
 description: Learn how to configure the OpenTelemetry Collector — receivers, processors, exporters, extensions, and service pipelines — to collect, process, and export telemetry data.
@@ -286,6 +286,21 @@ processors:
 ```
 
 For more examples, see the PII scrubbing guides for [logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) and [traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/).
+
+#### GeoIP Processor
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/geoipprocessor" target="_blank" rel="noopener noreferrer nofollow">GeoIP processor</a> reads an IP address from a configured attribute, looks it up in a local MaxMind database, and writes geographic attributes (`geo.city_name`, `geo.country.iso_code`, `geo.location.lat`, `geo.location.lon`, and more) back onto the same record. It works across traces, logs, and metrics.
+
+```yaml
+processors:
+  geoip:
+    providers:
+      maxmind:
+        database_path: /var/lib/GeoLite2-City.mmdb
+    context: record
+```
+
+See the [GeoIP processor guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor/) for setup, configuration options, and troubleshooting.
 
 <Admonition>
   For the full list of available processors, see the
