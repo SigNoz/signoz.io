@@ -13,9 +13,9 @@ import GetHelp from '@/components/shared/get-help.md'
 - **Logs** — forwarded via <a href="https://github.com/superfly/fly-log-shipper" target="_blank" rel="noopener noreferrer nofollow">fly-log-shipper</a>, a Vector-based log draining app. SigNoz is a named provider in fly-log-shipper.
 - **Metrics** — scraped from Fly's Prometheus federation endpoint using the OpenTelemetry Collector. See the full [Fly.io Metrics guide](https://signoz.io/docs/metrics-management/fly-metrics/).
 
-<KeyPointCallout title="Using Self-Hosted version?" defaultCollapsed="true">
+<Admonition type="info">
 If using self-hosted SigNoz, most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ If using self-hosted SigNoz, most steps are identical. To adapt this guide, upda
 - `Fly CLI` installed and a Fly.io account
 
 
-<Tabs>
+<Tabs entityName="signal">
 <TabItem value="logs" label="Logs" default>
 
 ## Forward Logs
@@ -114,7 +114,7 @@ echo '<RAW_TOKEN_AFTER_FlyV1>' > fly_federate_token
 
 ### Step 2: Configure the OpenTelemetry Collector
 
-<Tabs>
+<Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
 
 Follow instructions here to install [OpenTelemetry Binary as an agent](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
@@ -335,9 +335,9 @@ helm install my-release signoz/k8s-infra -f override-values.yaml
 </TabItem>
 </Tabs>
 
-<KeyPointCallout title="Important Configuration" defaultCollapsed="false">
-  Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by default. The `transform/fly_metrics` processor converts the relevant metrics to Sum (counter) type. Add any additional metric names to the processor statements as needed.
-</KeyPointCallout>
+<Admonition type="info">
+Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by default. The `transform/fly_metrics` processor converts the relevant metrics to Sum (counter) type. Add any additional metric names to the processor statements as needed.
+</Admonition>
 
 ### Verify the federation endpoint
 
