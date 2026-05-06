@@ -1,5 +1,5 @@
 ---
-date: 2026-03-16
+date: 2026-05-06
 id: k8s-cronjobs
 title: Monitor Kubernetes CronJobs
 description: Monitor Kubernetes CronJobs in SigNoz with the k8s-infra OpenTelemetry collection agent using CronJob pod logs and Job metrics.
@@ -85,6 +85,10 @@ You should see:
 - A Job created from that CronJob
 - A completed Pod for that Job after the run finishes
 
+<Admonition type="tip">
+Want to see this CronJob in a single pre-built view? Skip to [Visualize with the prebuilt dashboard](#visualize-with-the-prebuilt-dashboard) once a few runs have completed.
+</Admonition>
+
 ## Default telemetry from `k8s-infra`
 
 No extra CronJob-specific Helm values are required for the default monitoring flow. If `k8s-infra` is already installed with metrics and logs collection enabled, it automatically collects CronJob pod logs and Kubernetes Job metrics when the CronJob runs.
@@ -151,6 +155,20 @@ Filter with:
 Replace `<your-cluster-name>` with the `clusterName` you set when you installed `k8s-infra`.
 
 Group by `k8s.job.name` to see each CronJob execution separately.
+
+<details>
+<ToggleHeading>
+## Visualize with the prebuilt dashboard
+</ToggleHeading>
+
+SigNoz publishes a prebuilt **Kubernetes CronJobs** dashboard that uses the same metrics this guide validates. It shows current Job state and recent Job runs in one view, with cluster, namespace, Job, and CronJob filters.
+
+- Dashboard reference page: [Kubernetes CronJobs Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-cronjobs/)
+- Direct JSON: [`k8s-infra-metrics/kubernetes-cronjobs.json`](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-cronjobs.json)
+
+To use it, open **Dashboards** in SigNoz, click **New Dashboard**, choose **Import JSON**, and paste the JSON from the link above.
+
+</details>
 
 <details>
 <ToggleHeading>

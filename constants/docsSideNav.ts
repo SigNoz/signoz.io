@@ -2339,6 +2339,11 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
                 label: 'Kubernetes Node Metrics (Detailed)',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cronjobs',
+                label: 'Kubernetes CronJobs',
+              },
             ],
           },
           {
