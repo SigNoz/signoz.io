@@ -1,12 +1,13 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 
 const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?: string }) => {
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParamsState()
   const router = useRouter()
   const pathname = usePathname()
 
