@@ -5,11 +5,6 @@ import { Info } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 
-export const ENTERPRISE_DEMO_HUBSPOT_DATA = {
-  portalId: '22308423',
-  formId: 'a908efee-9ec5-4969-9ca4-6e91d0a32b8a',
-}
-
 const OBSERVABILITY_LANDSCAPE_SOURCE_LINK_CLASS_NAME =
   'mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400'
 
@@ -65,7 +60,7 @@ export const OBSERVABILITY_LANDSCAPE_CARDS = OBSERVABILITY_LANDSCAPE_ITEM_DATA.m
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
-  { src: '/svgs/icons/omnicell.svg', alt: 'Omnicell' },
+  { src: '/svgs/icons/lovart.svg', alt: 'Lovart' },
   { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
   { src: '/img/users/comcast.svg', alt: 'Comcast' },
   { src: '/svgs/icons/parallel-ai.svg', alt: 'Parallel AI' },
@@ -217,7 +212,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           flexible, no learning curve.
         </p>
         <TrackingLink
-          href="/resource-center/opentelemetry/"
+          href="/opentelemetry/"
           clickType="Secondary CTA"
           clickName="High Growth Teams Section Open Source + OpenTelemetry"
           clickLocation="Why SigNoz Page"
@@ -392,7 +387,7 @@ export const GETTING_STARTED_CARDS = [
         in your infra - Self-host via Helm chart runs in your own VPC or air-gapped environment. Or
         you can bring your own cloud.
         <TrackingLink
-          href="/enterprise-cloud/"
+          href="/contact-us/?source=why-signoz-page-signoz-offerings"
           clickType="Secondary CTA"
           clickName="Getting Started Section Use SigNoz Cloud or host in your infrastructure"
           clickLocation="Why SigNoz Page"

@@ -1,8 +1,9 @@
 ---
-date: 2026-03-24
+date: 2026-04-23
 id: metrics-based-alerts
 title: Metrics based alerts
 description: Learn how to create metrics-based alerts in SigNoz by defining alert conditions, configuring notification settings, and using practical examples for memory usage, error rate, and latency monitoring.
+doc_type: howto
 ---
 
 A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Metric-based alert:
@@ -114,7 +115,8 @@ In addition, there are 3 more advanced options:
 ### Minimum Data Points in Result Group
    - Ensures the alert condition is evaluated only when there's enough data for statistical significance.
    - Helps avoid false alerts due to missing or sparse data points.
-   - E.g. If set to `3`, the query must return at least 3 data points in the evaluation window for the alert to be considered.
+   - When the number of data points in the evaluation window is below this minimum, the alert evaluation is skipped and the alert transitions to the **resolved** state. If the data point count fluctuates around the configured minimum, this can cause repeated resolve → fire cycles (alert flapping).
+   - To avoid flapping, set this value with some margin below the number of data points you expect in the evaluation window. For example, if your collection interval is 1 minute and your evaluation window is 5 minutes, you expect ~5 data points — set the minimum to `3` rather than `5` so the query must return at least 3 data points for the alert to be evaluated.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-metrics-based-2.webp" alt="Define the alert conditions"/>

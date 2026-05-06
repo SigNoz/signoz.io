@@ -15,6 +15,11 @@ const docsSideNav = [
         route: '/docs/what-is-signoz',
       },
       {
+        type: 'doc',
+        label: 'What Is OpenTelemetry?',
+        route: '/docs/overview/what-is-opentelemetry-and-why-it-matters',
+      },
+      {
         label: 'SigNoz Features',
         type: 'category',
         isExpanded: false,
@@ -513,6 +518,11 @@ const docsSideNav = [
                 label: 'Relational Databases Support',
                 isExpanded: false,
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/serving-on-external-url',
+                label: 'Serving on an External URL',
+              },
             ],
           },
           {
@@ -929,6 +939,11 @@ const docsSideNav = [
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector',
           },
+          {
+            type: 'doc',
+            label: 'GeoIP Processor',
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor',
+          },
         ],
       },
     ],
@@ -1159,6 +1174,16 @@ const docsSideNav = [
             route: '/docs/integrations/opentelemetry-hasura',
             label: 'Hasura',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Kong Gateway',
+          },
           // {
           //   type: 'category',
           //   isExpanded: false,
@@ -1287,6 +1312,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/infrastructure-monitoring/overview',
         label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/infrastructure-monitoring/cert-manager',
+        label: 'Cert-Manager',
       },
       {
         type: 'doc',
@@ -1490,6 +1520,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-hasura',
             label: 'Hasura',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Kong Gateway',
           },
           {
             type: 'doc',
@@ -1836,6 +1876,11 @@ const docsSideNav = [
                 route: '/docs/integrations/opentelemetry-hasura',
                 label: 'Hasura',
               },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'Kong Gateway',
+              },
             ],
           },
           {
@@ -2047,6 +2092,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+            label: 'Apache Druid',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
@@ -2102,6 +2152,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/baseten-dashboard',
             label: 'Baseten',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cert-manager-dashboard',
+            label: 'Cert-Manager',
           },
           {
             type: 'doc',
@@ -2237,6 +2292,11 @@ const docsSideNav = [
             label: 'JVM',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+            label: 'Kafka',
+          },
+          {
             label: 'Kubernetes',
             type: 'category',
             isExpanded: false,
@@ -2288,6 +2348,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kong-gateway',
+            label: 'Kong Gateway',
           },
           {
             label: 'LiteLLM',
@@ -2356,6 +2421,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
             label: 'OpenClaw',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+            label: 'OpenCode',
           },
           {
             type: 'doc',
@@ -2896,6 +2966,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/opencode-observability',
+        label: 'OpenCode',
+        type: 'doc',
+      },
+      {
         route: '/docs/openlit',
         label: 'OpenLIT',
         type: 'doc',
@@ -2988,6 +3063,51 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ai/use-cases/alert-correlation-analysis',
             label: 'Alert Correlation Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/post-deployment-monitoring',
+            label: 'Post Deployment Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/oncall-handoff-brief',
+            label: 'On-Call Handoff Brief',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-fatigue-audit',
+            label: 'Alert Fatigue Audit',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/optimize-performance-during-development',
+            label: 'Optimize Performance During Development',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+            label: 'Trace Failing Request',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+            label: 'Dashboard Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/incident-specific-dashboard',
+            label: 'Incident Specific Dashboard Spin-Up',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-creation-natural-language',
+            label: 'Alert Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/postmortem-evidence-pack',
+            label: 'Postmortem Evidence Pack',
           },
         ],
       },
@@ -3398,13 +3518,28 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/vercel-to-signoz',
-        label: 'Vercel Traces',
+        route: '/docs/integrations/opentelemetry-apache-druid',
+        label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
       {
         type: 'doc',
         route: '/docs/integrations/opentelemetry-hasura',
         label: 'Hasura',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-dbos',
+        label: 'DBOS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-kong-gateway',
+        label: 'Kong Gateway',
       },
       {
         type: 'doc',
@@ -3560,6 +3695,18 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/cicd/jenkins/jenkins-tracing',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
+        label: 'GitLab',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/gitlab/gitlab-traces',
             label: 'Traces',
           },
         ],

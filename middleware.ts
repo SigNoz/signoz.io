@@ -8,6 +8,10 @@ import {
   buildDocsMarkdownRewritePath,
   shouldRewriteDocsToMarkdown,
 } from '@/utils/docs/markdownRouting'
+import {
+  buildApiReferenceOpenAPISpecRewritePath,
+  shouldRewriteApiReferenceToOpenAPISpec,
+} from '@/utils/apiReferenceMarkdownRouting'
 
 const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
 
@@ -82,11 +86,20 @@ export function middleware(req: NextRequest) {
 
   // Prepare response
   let res = NextResponse.next()
-  const shouldRewrite = shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
+  const docsMarkdownRewrite = shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
+  const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, prefersMarkdown, isBot)
 
-  if (shouldRewrite) {
+  if (docsMarkdownRewrite) {
     const rewriteUrl = req.nextUrl.clone()
     rewriteUrl.pathname = buildDocsMarkdownRewritePath(pathname)
+    res = NextResponse.rewrite(rewriteUrl)
+    if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
+      res.headers.set('x-markdown-rewrite', 'true')
+    }
+  } else if (apiRefYamlRewrite) {
+    const rewriteUrl = req.nextUrl.clone()
+    rewriteUrl.pathname = buildApiReferenceOpenAPISpecRewritePath(pathname)
+
     res = NextResponse.rewrite(rewriteUrl)
     if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
       res.headers.set('x-markdown-rewrite', 'true')
@@ -150,11 +163,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
+     * - /api/ or /api (App Router API routes) — use api(?:/|$), not "api", so /api-reference/* still runs middleware
+     *   (non-capturing group; capturing groups inside the matcher are invalid in path-to-regexp)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api(?:/|$)|_next/static|_next/image|favicon.ico).*)',
   ],
 }

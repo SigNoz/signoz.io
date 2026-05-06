@@ -1,6 +1,7 @@
 ---
-date: 2025-11-18
+date: 2026-04-23
 id: terraform-provider-signoz
+doc_type: howto
 
 title: Creating SigNoz Alerts with Terraform
 description: How to create SigNoz Alerts with Terraform, and problems faced during creation of terraform alerts.
@@ -16,6 +17,7 @@ This document will guide you on how to:
 - Configure the provider
 - Create a new alert in SigNoz
 - Start managing existing alerts using Terraform
+- Update a managed alert
 
 ## Prerequisites
 
@@ -68,7 +70,7 @@ Add the `provider {}` block to the `.tf` file as follows:
 provider "signoz" {}
 ```
 
-By setting the environment variables below, the signoz provider will automatically read these variables and authorize your SigNoz account:
+By setting the environment variables below, the signoz provider will automatically read these variables and authorize your SigNoz account. Use an API key for `SIGNOZ_ACCESS_TOKEN` — see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one.
 ``` bash
 SIGNOZ_ACCESS_TOKEN="your-api-key"
 SIGNOZ_ENDPOINT="https://your-signoz-endpoint"
@@ -258,6 +260,10 @@ You can do the same with the command:
 ``` bash
 terraform import signoz_alert.example 123
 ```
+
+## Update a Managed Alert
+
+Once an alert is managed by Terraform — either created with a `signoz_alert` resource or imported — you can update it by modifying its definition in your `.tf` file. Run `terraform plan` to preview the changes and `terraform apply` to push them to SigNoz. This follows the standard Terraform resource lifecycle.
 
 ## Conclusion
 

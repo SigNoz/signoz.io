@@ -18,8 +18,7 @@ import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import TestimonialCards from '@/shared/components/molecules/FeaturePages/TestimonialCard'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
-import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
-import PricingForm from '../pricing-form'
+import HubspotCustomForm from '@/components/hubspot-custom-form/HubspotCustomForm'
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
 
 const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className = '' }) => {
@@ -40,19 +39,21 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
         </Button>
       </div>
 
+      <p className="mt-3 text-center text-xs text-signoz_vanilla-400">
+        Available on SigNoz Cloud paid plans
+      </p>
+
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         size="3xl"
-        panelClassName="max-w-2xl rounded-3xl border border-signoz_slate-200 bg-white px-10 py-8 text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]"
+        panelClassName="max-w-2xl rounded-3xl border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-8 shadow-[0_20px_60px_rgba(9,16,29,0.35)]"
       >
-        <HubspotProvider>
-          <PricingForm
-            portalId={HUBSPOT_DATA.portalId}
-            formId={HUBSPOT_DATA.formId}
-            formName="Datadog Migration Tool"
-          />
-        </HubspotProvider>
+        <HubspotCustomForm
+          portalId={HUBSPOT_DATA.portalId}
+          formId={HUBSPOT_DATA.formId}
+          formName="Datadog Migration Tool"
+        />
       </Modal>
     </div>
   )

@@ -8,6 +8,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 
 export const dynamicParams = false
 export const dynamic = 'force-static'
@@ -24,11 +25,13 @@ export async function generateMetadata({
     notFound()
   }
 
+  const fullTitle = post?.title ? `${post.title} | SigNoz Docs` : 'SigNoz Docs'
+
   return {
     title: post?.title,
     description: post?.description,
     openGraph: {
-      title: post?.title,
+      title: fullTitle,
       description: post?.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
@@ -37,7 +40,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: post?.title,
+      title: fullTitle,
     },
   }
 }
@@ -61,10 +64,15 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = mainContent
+  const jsonLd = post.structuredData
 
   return (
     <>
-      <div className="doc">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
+      />
+      <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
           title={title}
           post={post}

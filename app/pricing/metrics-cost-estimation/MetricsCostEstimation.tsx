@@ -1,7 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
+import metricsThumbnail from '@/public/img/metrics-thumbnail.webp'
+import playIconUrl from '@/public/svgs/icons/play-icon.svg?url'
 import { ArrowRight } from 'lucide-react'
 import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
@@ -214,19 +217,27 @@ const MetricsCostEstimation = () => {
               <div className="flex flex-col gap-7">
                 <div className="relative flex flex-col gap-3">
                   <div className="relative">
-                    <img
-                      src="/img/metrics-thumbnail.png"
-                      className="h-auto w-auto"
-                      alt="Metrics Thumnail"
+                    <Image
+                      src={metricsThumbnail}
+                      className="h-auto w-full max-w-full"
+                      alt="Metrics pricing video thumbnail"
+                      sizes="(max-width: 768px) 100vw, 600px"
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <img
-                        src="/svgs/icons/play-icon.svg"
-                        alt="signoz-video-play-btn"
+                      <button
+                        type="button"
+                        className="cursor-pointer border-0 bg-transparent p-0"
                         onClick={() => handleOpenVideo(973012522)}
-                        style={{ cursor: 'pointer' }}
-                        className="h-6 w-6 md:h-20 md:w-20"
-                      />
+                        aria-label="Play metrics pricing video"
+                      >
+                        <Image
+                          src={playIconUrl}
+                          alt=""
+                          width={80}
+                          height={80}
+                          className="h-6 w-6 md:h-20 md:w-20"
+                        />
+                      </button>
                     </div>
                   </div>
                   <div className="text-center text-base font-normal text-signoz_vanilla-400">
@@ -236,13 +247,8 @@ const MetricsCostEstimation = () => {
                 <div className="flex flex-col gap-3">
                   <Link href="/pricing/" className="cursor-default no-underline">
                     <div className="group flex w-full cursor-pointer items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
-                      <div className="mr-4">
-                        <img
-                          src="/svgs/icons/play-icon.svg"
-                          alt="SigNoz Icon"
-                          height={24}
-                          width={24}
-                        />
+                      <div className="mr-4 shrink-0">
+                        <Image src={playIconUrl} alt="" width={24} height={24} />
                       </div>
                       <div className="flex-grow">
                         <div className="cursor-pointer text-[10px] text-signoz_vanilla-400 sm:text-sm">

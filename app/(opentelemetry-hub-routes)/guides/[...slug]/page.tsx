@@ -15,6 +15,7 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import React from 'react'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const defaultLayout = 'GuidesLayout'
 const layouts = {
@@ -114,7 +115,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
 
         <OpenTelemetryHubContent
@@ -146,15 +147,11 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
       />
 
       <div className="container mx-auto">
-        <Button
-          variant={'ghost'}
-          to={`/resource-center/guides/`}
-          className="ml-3.5 mt-10 hover:bg-transparent"
-        >
+        <Button variant={'ghost'} to={`/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
           <span className="flex items-center">
             <SidebarIcons.ArrowLeft />
             <span className="pl-1.5 text-sm">Back to Guides</span>

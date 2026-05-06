@@ -1,0 +1,154 @@
+---
+date: 2026-04-21
+id: vercel
+title: SigNoz for Vercel (Marketplace Integration)
+description: One-click setup to forward logs and distributed traces from Vercel to SigNoz via the Vercel Marketplace integration — no manual drain configuration required.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The <a href="https://vercel.com/marketplace/signoz" target="_blank" rel="noopener noreferrer nofollow">SigNoz integration on the Vercel Marketplace</a> lets you forward logs and distributed traces from your Vercel projects to SigNoz with a one-click install — no manual drain configuration or custom headers required.
+
+<KeyPointCallout title="Want to configure drains yourself?" defaultCollapsed={false}>
+  See [Stream Telemetry from Vercel to SigNoz](https://signoz.io/docs/userguide/vercel-to-signoz/) for step-by-step drain setup, including self-hosted SigNoz.
+</KeyPointCallout>
+
+## Overview
+
+The SigNoz + Vercel integration enables:
+
+- **Automatic log collection** via log drains, scoped to the sources and environments you configure
+- **Distributed tracing** via Vercel's native trace drain with per-environment sampling rules and optional request path filtering
+- **A single pane of glass** for all your observability needs — no more jumping between tools
+
+Under the hood the integration creates two Vercel drains (one for Logs, one for Traces) that push data directly to your SigNoz ingestion endpoint.
+
+## Prerequisites
+
+- A <a href="https://vercel.com/docs/plans" target="_blank" rel="noopener noreferrer nofollow">Vercel Pro or Enterprise</a> account
+- An instance of [SigNoz Cloud](https://signoz.io/teams/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Step 1: Open the SigNoz Marketplace Listing
+
+Go to <a href="https://vercel.com/marketplace/signoz" target="_blank" rel="noopener noreferrer nofollow">vercel.com/marketplace/signoz</a> and click **Connect Account**.
+
+<Figure
+  src="/img/docs/vercel/vercel-marketplace-connect.webp"
+  caption="SigNoz listing on the Vercel Marketplace — click Connect Account"
+  alt="Vercel Marketplace SigNoz listing with Connect Account button highlighted"
+/>
+
+## Step 2: Authorise the Integration
+
+A **Connect SigNoz Account** dialog appears. Fill in the following:
+
+1. **Select a Vercel team** to install the integration to.
+2. **Select which projects** the integration will have access to — choose *All Projects* or pick specific projects.
+3. Review the required permissions (Read for Team/Projects; Read and Write for Drains, Installation, and Integration Resources).
+4. Click **Connect Account**.
+
+<Figure
+  src="/img/docs/vercel/vercel-marketplace-connect-account.webp"
+  caption="Connect SigNoz Account — select team, projects, and grant permissions"
+  alt="Connect SigNoz Account dialog showing team selector, project scope options, and permission list"
+  width={480}
+/>
+
+## Step 3: Configure SigNoz Credentials and Signals
+
+After authorising, Vercel connects to the SigNoz integration configuration page. Enter your SigNoz details and choose which signals to forward:
+
+<Figure
+  src="/img/docs/vercel/vercel-marketplace-config.webp"
+  caption="SigNoz integration configuration — ingestion URL, key, and signal toggles"
+  alt="SigNoz integration config form showing Ingestion URL, Ingestion Key, Logs toggle with source checkboxes, and sampling rule controls"
+/>
+
+### Ingestion credentials
+
+| Field | Value |
+|---|---|
+| **SigNoz Ingestion URL** | The ingestion endpoint for your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) |
+| **Set Ingestion Key** | Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) from SigNoz **Settings > Ingestion Settings** |
+
+### Logs
+
+Toggle **Logs** on to enable log forwarding. Then configure:
+
+- **Set Log Sources** — select one or more sources to forward: *Static*, *External*, *Build*, *Edge*, *Lambda*, *Firewall*, *Redirect*.
+- **Log Sampling Rules** — define sampling rates per environment (production, preview, development). See [Drop Logs](https://signoz.io/docs/logs-management/guides/drop-logs/) for advanced filtering strategies.
+
+### Traces
+
+Toggle **Traces** on to enable trace forwarding. Then configure:
+
+- **Trace Sampling Rules** — set a sampling rate per environment. See [Drop Spans](https://signoz.io/docs/traces-management/guides/drop-spans/) for advanced filtering strategies.
+- **Request Path Filter** *(optional)* — restrict tracing to requests matching a specific path prefix.
+
+### Save
+
+Click **Add Integration**. Vercel creates the log drain and/or trace drain automatically and redirects you to the integration settings page.
+
+## Step 4: Verify the Installation
+
+After saving, Vercel redirects you to the integration settings page where you can confirm:
+
+- The **Permissions** granted to SigNoz.
+- Which **projects** SigNoz has access to.
+
+<Figure
+  src="/img/docs/vercel/vercel-marketplace-installed.webp"
+  caption="SigNoz integration installed — permissions and project access confirmed"
+  alt="Vercel integration settings page showing SigNoz permissions and project access"
+/>
+
+To confirm the drains were created, go to **Team Settings > Drains**. You should see two new drains: one for Logs and one for Traces, both connected to your selected projects.
+
+<Figure
+  src="/img/docs/vercel/vercel-marketplace-drains.webp"
+  caption="Vercel Team Settings > Drains showing the SigNoz log and trace drains"
+  alt="Vercel Drains settings page listing signoz-trace-drain and signoz-drain both connected to the signoz-marketplace project"
+/>
+
+## Step 5: Validate Data in SigNoz
+
+Give it a minute for data to flow, then:
+
+- **Logs** — open **Logs Explorer** in SigNoz and look for entries with Vercel-specific attributes such as `source`, `projectName`, and `deploymentId`.
+- **Traces** — open **Traces** in SigNoz and look for spans originating from your Vercel projects.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No data appearing in SigNoz
+
+- **Incorrect Ingestion URL** — confirm the URL matches your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) exactly.
+- **Invalid Ingestion Key** — re-check the key in **Settings > Ingestion Settings** in SigNoz. Ensure there is no leading/trailing whitespace.
+- **Drain not active** — in Vercel go to **Team Settings > Drains** and check the drain status. Click a drain to see error details if it shows a warning.
+- **Pro/Enterprise plan required** — Vercel drains are only available on paid plans. Verify your plan at **Team Settings > Billing**.
+
+### Integration shows an error after "Add Integration"
+
+- Retry by removing and re-adding the integration from the Vercel Marketplace.
+- Double-check that the Ingestion URL does not have a trailing slash or extra path segment.
+
+</details>
+
+## Next Steps
+
+- [Set up alerts](https://signoz.io/docs/userguide/alerts-management/) to get notified when your Vercel applications contain errors.
+- [Create a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) to visualize telemetry volume, error rates, and latency across your Vercel projects.
+- [Vercel AI SDK Observability](https://signoz.io/docs/vercel-ai-sdk-observability/) — instrument AI/LLM calls in your Vercel app with SigNoz.
+
+## Get Help
+
+<GetHelp />

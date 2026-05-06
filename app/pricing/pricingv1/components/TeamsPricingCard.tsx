@@ -1,6 +1,9 @@
 import React from 'react'
 import { ArrowUpRight, CheckCircle, ChevronDown, Info } from 'lucide-react'
 import Image from 'next/image'
+import draftingCompassIconUrl from '@/public/img/index_features/drafting-compass.svg?url'
+import logsIconUrl from '@/public/img/index_features/logs.svg?url'
+import barChartIconUrl from '@/public/img/index_features/bar-chart-2.svg?url'
 import Button from 'components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
@@ -53,7 +56,7 @@ export default function TeamsPricingCard() {
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div className="flex items-center gap-2">
               <Image
-                src="/img/index_features/drafting-compass.svg"
+                src={draftingCompassIconUrl}
                 alt="Traces Icon"
                 width={20}
                 height={20}
@@ -68,13 +71,7 @@ export default function TeamsPricingCard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Image
-                src="/img/index_features/logs.svg"
-                alt="Logs Icon"
-                width={20}
-                height={20}
-                className="h-5 w-5"
-              />
+              <Image src={logsIconUrl} alt="Logs Icon" width={20} height={20} className="h-5 w-5" />
               <div>
                 <div className="text-xs text-signoz_vanilla-400">Logs</div>
                 <div className="text-sm">
@@ -85,7 +82,7 @@ export default function TeamsPricingCard() {
             </div>
             <div className="flex items-center gap-2">
               <Image
-                src="/img/index_features/bar-chart-2.svg"
+                src={barChartIconUrl}
                 alt="Metrics Icon"
                 width={20}
                 height={20}

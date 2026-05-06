@@ -4,15 +4,22 @@ import DocRenderer from './DocRender'
 import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
+import type { Doc } from 'contentlayer/generated'
 
 interface DocumentationPanelProps {
   currentStep: UpgradePath
   className?: string
   docUrl: string
   version: string
+  docsBySlug: Record<string, Doc>
 }
 
-const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ version, className, docUrl }) => {
+const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
+  version,
+  className,
+  docUrl,
+  docsBySlug,
+}) => {
   const [hasError, setHasError] = useState(false)
 
   return (
@@ -59,7 +66,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ version, classN
                 </div>
               </div>
             ) : (
-              <DocRenderer docUrl={docUrl} setHasError={setHasError} />
+              <DocRenderer docUrl={docUrl} docsBySlug={docsBySlug} setHasError={setHasError} />
             )}
           </div>
         </Card>
