@@ -10,7 +10,6 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
   const router = useRouter()
   const pathname = usePathname()
 
-  const environment = searchParams.get(QUERY_PARAMS.ENVIRONMENT)
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   const childrenArray = React.Children.toArray(children)
@@ -42,23 +41,16 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
       if (urlValue && tabValuesSet.has(urlValue)) return urlValue
     }
 
-    if (environment && tabValuesSet.has(environment)) return environment
-
     return defaultActiveTab
-  }, [urlKey, searchParams, environment, tabValuesSet, defaultActiveTab, entityName])
+  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab, entityName])
 
-  const [activeTab, setActiveTab] = useState(resolveActiveTab)
+  const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
 
-  if (urlKey) {
-    const resolved = resolveActiveTab()
-    if (resolved !== activeTab) {
-      setActiveTab(resolved)
-    }
-  }
+  const activeTab = urlKey ? resolveActiveTab() : localActiveTab
 
   const handleTabChange = useCallback(
     (value: string) => {
-      setActiveTab(value)
+      setLocalActiveTab(value)
 
       if (!urlKey) return
 
