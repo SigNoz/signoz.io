@@ -2293,6 +2293,11 @@ const docsSideNav = [
             label: 'Kafka',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/keda',
+            label: 'KEDA',
+          },
+          {
             label: 'Kubernetes',
             type: 'category',
             isExpanded: false,

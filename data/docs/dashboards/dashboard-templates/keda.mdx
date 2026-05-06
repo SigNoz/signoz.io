@@ -1,0 +1,91 @@
+---
+date: 2026-05-06
+id: keda
+title: KEDA Dashboard
+description: Monitor KEDA autoscaling health in SigNoz, including scaling loop latency, scaler errors, active triggers, and registered resources.
+doc_type: explanation
+---
+
+This dashboard tracks the operational health of [KEDA (Kubernetes Event-Driven Autoscaling)](https://keda.sh/) using the metrics it emits via OpenTelemetry. It works with KEDA v2.12+ and is verified against KEDA v2.16+ metric names.
+
+<Admonition type="note">
+To use this dashboard, configure KEDA to send OpenTelemetry metrics to SigNoz first. Follow [Send KEDA Metrics to SigNoz](https://signoz.io/docs/metrics-management/keda-metrics/) for Helm and `kubectl` setup, validation, and troubleshooting.
+</Admonition>
+
+## Dashboard Preview
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/dashboard-templates/keda.webp" alt="KEDA Dashboard"/>
+    <figcaption><i>KEDA Dashboard</i></figcaption>
+</figure>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/keda/keda-otlp-v1.json"
+    dashboardName="KEDA"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+The dashboard is grouped into five sections:
+
+### General Information
+
+- **Active Scaler Objects**: number of scalers currently active across the selected namespace
+- **Build Info**: `keda.build.info` legend (version, git commit, Go version) — useful as a sentinel that KEDA is reporting metrics
+- **Paused ScaledObjects**: count of ScaledObjects currently paused (`keda.scaled.object.paused`)
+
+### Scaler Metrics
+
+- **Scaler Objects**: time-series view of active scalers grouped by ScaledObject and scaler type
+- **Scaler Metrics Value**: current metric value used for HPA scaling decisions
+- **Scaler Metrics Latency**: time taken to fetch metrics from each scaler source
+- **Scaling Loop Latency**: KEDA control loop execution latency (`keda.internal.scale.loop.latency.seconds`)
+- **ScaledObject Errors**: error rate per ScaledObject (`keda.scaled.object.errors`)
+- **Scaler Errors**: per-scaler error rate (`keda.scaler.errors`)
+- **Total Scaler Errors**: aggregate scaler error rate per namespace (`keda.scaler.errors.total`)
+
+### ScaledJob Metrics
+
+- **ScaledJob Errors**: error rate per ScaledJob (`keda.scaled.job.errors`)
+
+### Resource and Trigger Metrics
+
+- **Registered Resources**: KEDA custom resources by type and namespace
+- **Registered Triggers**: triggers registered per trigger type
+
+### Cloud Event Metrics
+
+- **CloudEventSource Events Emitted**: number of CloudEvents emitted (only populated if you have a CloudEventSource)
+- **CloudEventSource Events Queued**: number of CloudEvents queued
+
+## Metrics Used
+
+- `keda.build.info`
+- `keda.scaler.active`
+- `keda.scaler.metrics.value`
+- `keda.scaler.metrics.latency.seconds`
+- `keda.scaler.errors`
+- `keda.scaler.errors.total`
+- `keda.scaled.object.errors`
+- `keda.scaled.object.paused`
+- `keda.scaled.job.errors`
+- `keda.internal.scale.loop.latency.seconds`
+- `keda.resource.registered.count`
+- `keda.trigger.registered.count`
+- `keda.cloudeventsource.events.emitted.count`
+- `keda.cloudeventsource.events.queued`
+
+KEDA emits metrics with dot-delimited OTel names. SigNoz normalizes them to underscores in the Metrics Explorer (for example, `keda.scaler.active` becomes `keda_scaler_active`). For the full reference and any deprecated metrics, see the [KEDA Metrics Reference](https://signoz.io/docs/metrics-management/keda-metrics/#keda-metrics-reference) section in the setup guide.
+
+## Dashboard Variables
+
+- **namespace**: filter by Kubernetes namespace (defaults to `default`)
+- **scaled_object**: filter by ScaledObject name
+
+## Related Resources
+
+- [Send KEDA Metrics to SigNoz](https://signoz.io/docs/metrics-management/keda-metrics/)
+- [KEDA OpenTelemetry Integration docs](https://keda.sh/docs/latest/integrations/opentelemetry/)
+- [Kubernetes Cluster Metrics Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics/)
