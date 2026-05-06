@@ -25,6 +25,7 @@ const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({
           }}
           title="Newsletter subscription"
           className="w-full"
+          loading="lazy"
         />
       </div>
     </div>

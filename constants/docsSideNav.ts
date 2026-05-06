@@ -763,9 +763,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
+                route: '/docs/opentelemetry-collection-agents/docker/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
+              {
                 route: '/docs/opentelemetry-collection-agents/docker/install',
                 type: 'doc',
                 label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/docker/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
@@ -774,6 +784,11 @@ const docsSideNav = [
             label: 'Swarm',
             isExpanded: false,
             items: [
+              {
+                route: '/docs/opentelemetry-collection-agents/docker-swarm/overview',
+                type: 'doc',
+                label: 'Overview',
+              },
               {
                 route: '/docs/opentelemetry-collection-agents/docker-swarm/install',
                 type: 'doc',
@@ -1056,14 +1071,35 @@ const docsSideNav = [
             ],
           },
           {
-            type: 'doc',
-            label: 'Elixir',
-            route: '/docs/instrumentation/opentelemetry-elixir',
+            type: 'category',
+            isExpanded: false,
+            label: 'Rust',
+            route: '/docs/instrumentation/opentelemetry-rust',
+            items: [
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/rust/manual-instrumentation',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Deno',
+            route: '/docs/instrumentation/opentelemetry-deno',
+            items: [
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/manual-instrumentation/deno/manual-instrumentation',
+              },
+            ],
           },
           {
             type: 'doc',
-            label: 'Rust',
-            route: '/docs/instrumentation/opentelemetry-rust',
+            label: 'Elixir',
+            route: '/docs/instrumentation/opentelemetry-elixir',
           },
           {
             type: 'doc',
@@ -1320,6 +1356,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/zap-to-signoz',
                 label: 'Zap',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-deno',
+                label: 'Deno',
               },
             ],
           },
@@ -1637,6 +1678,21 @@ const docsSideNav = [
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
                 label: 'Python',
               },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-rust',
+                label: 'Rust',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-ruby',
+                label: 'Ruby',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-deno',
+                label: 'Deno',
+              },
             ],
           },
           {
@@ -1648,6 +1704,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/prometheus-metrics',
             label: 'Prometheus Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/opentelemetry-statsd',
+            label: 'StatsD Metrics',
           },
           {
             type: 'category',
@@ -1664,6 +1725,17 @@ const docsSideNav = [
                 route: '/docs/userguide/envoy-metrics',
                 label: 'Envoy Metrics',
               },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/nvidia-dcgm-metrics',
+                label: 'NVIDIA GPU (DCGM)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/slurm-metrics',
+                label: 'SLURM',
+              },
+              { type: 'doc', route: '/docs/metrics-management/render-metrics', label: 'Render' },
               {
                 type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
@@ -1951,6 +2023,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard',
+            label: 'Claude Agent SDK',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/codex-dashboard',
             label: 'Codex (OpenAI)',
           },
@@ -1996,6 +2073,21 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+            label: 'Go Runtime',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/grok-dashboard',
+            label: 'Grok',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
+            label: 'Groq',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
             label: 'HAProxy',
           },
@@ -2019,18 +2111,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
-            label: 'Go Runtime',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/grok-dashboard',
-            label: 'Grok',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
-            label: 'Groq',
+            route: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
+            label: 'Hugging Face',
           },
           {
             type: 'doc',
@@ -2219,9 +2301,21 @@ const docsSideNav = [
         label: 'Field Context & Data Types',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/search-troubleshooting',
-        label: 'Troubleshooting Guide',
+        type: 'category',
+        isExpanded: false,
+        label: 'Troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-troubleshooting',
+            label: 'Troubleshooting Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/query-troubleshooting-faqs',
+            label: 'Query Troubleshooting - FAQs',
+          },
+        ],
       },
       {
         type: 'doc',
@@ -2437,6 +2531,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/alerts-management/no-data-alerts-for-groups',
+            label: 'No Data Alerts for Groups',
+          },
+          {
+            type: 'doc',
             route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
             label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
           },
@@ -2561,6 +2660,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/claude-agent-monitoring',
+        label: 'Claude Agent SDK',
+        type: 'doc',
+      },
+      {
         route: '/docs/codex-monitoring',
         label: 'Codex (OpenAI)',
         type: 'doc',
@@ -2598,6 +2702,11 @@ const docsSideNav = [
       {
         route: '/docs/haystack-monitoring',
         label: 'Haystack',
+        type: 'doc',
+      },
+      {
+        route: '/docs/huggingface-observability',
+        label: 'Hugging Face',
         type: 'doc',
       },
       {

@@ -24,6 +24,7 @@ export const getPageType = (pathname: string): string => {
     '/external-apis',
     '/llm-observability',
     '/observability-for-ai-native-companies',
+    '/cloudwatch-alternative',
   ]
   if (featurePages.includes(normalizedPath)) return 'Feature Page'
 

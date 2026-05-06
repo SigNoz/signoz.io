@@ -107,6 +107,7 @@ module.exports = {
           500: '#161922',
         },
         signoz_forest: {
+          50: '#E9FCF4',
           200: '#A8F3D3',
           300: '#7CEDBE',
           400: '#51E7A8',

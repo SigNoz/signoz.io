@@ -47,7 +47,7 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-      heroImage="/img/platform/AlertsManagementMeta.png"
+      heroImage="/img/platform/AlertsManagementMeta.webp"
       heroImageAlt="Alerts management hero"
     />
   )

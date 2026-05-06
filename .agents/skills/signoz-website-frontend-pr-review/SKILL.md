@@ -125,6 +125,7 @@ If a PR includes docs too, use this skill for code review only.
 - Keep types/constants co-located and exported appropriately.
 - Avoid concurrent async invocations in handlers (loading/ref guards).
 - Be deliberate with DOM cleanup/transforms.
+- If a PR adds or changes MDX components used in `data/docs/**`, verify `utils/docs/agentMarkdownStubs.ts` still handles them, the agent-markdown tests/coverage remain valid, and rendered Copy Markdown behavior in `utils/docs/buildCopyMarkdownFromRendered.ts` still stays clean.
 - Justify dependency additions.
 
 ### 12) Error handling and edge cases

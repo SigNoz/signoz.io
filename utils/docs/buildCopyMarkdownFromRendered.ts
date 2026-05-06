@@ -1,14 +1,11 @@
 import { tagDefinitions } from '@/constants/tagDefinitions'
+import { hastToMarkdown, normalizeWhitespace } from './markdownCore'
 
 export type BuildCopyMarkdownOptions = {
   title: string
   tags: string[]
   includeTagDefinitions: boolean
 }
-
-const CLEANUP_SELECTORS = ['button', 'svg', '.sr-only', '.content-header-link']
-
-const normalizeWhitespace = (content: string) => content.replace(/\n{3,}/g, '\n\n').trim()
 
 const buildTagHeader = (tags: string[], includeTagDefinitions: boolean): string => {
   if (!tags || tags.length === 0) {
@@ -66,15 +63,6 @@ const expandTabsInClone = (clone: HTMLElement) => {
 const cloneAndCleanArticle = (articleEl: HTMLElement): HTMLElement => {
   const clone = articleEl.cloneNode(true) as HTMLElement
   expandTabsInClone(clone)
-  CLEANUP_SELECTORS.forEach((selector) => {
-    clone.querySelectorAll(selector).forEach((node) => node.remove())
-  })
-
-  clone.querySelectorAll('a').forEach((node) => {
-    if (node.textContent?.trim()) return
-    if (node.querySelector('img, svg')) return
-    node.remove()
-  })
   return clone
 }
 
@@ -82,23 +70,11 @@ export async function buildCopyMarkdownFromRendered(
   articleEl: HTMLElement,
   options: BuildCopyMarkdownOptions
 ): Promise<string> {
-  const { unified } = await import('unified')
-  const { default: rehypeRemark } = await import('rehype-remark')
-  const { default: remarkStringify } = await import('remark-stringify')
-  const { default: remarkGfm } = await import('remark-gfm')
   const { fromDom } = await import('hast-util-from-dom')
 
   const cleanedArticle = cloneAndCleanArticle(articleEl)
   const hast = fromDom(cleanedArticle)
-
-  const processor = unified().use(rehypeRemark).use(remarkGfm).use(remarkStringify, {
-    bullet: '-',
-    fences: true,
-    resourceLink: true,
-  })
-
-  const mdast = await processor.run(hast as any)
-  const bodyMarkdown = normalizeWhitespace(processor.stringify(mdast as any))
+  const bodyMarkdown = await hastToMarkdown(hast as any, { cleanForDocsUi: true })
 
   const headerLines = [`# ${options.title}`]
   const tagsHeader = buildTagHeader(options.tags, options.includeTagDefinitions)

@@ -1,0 +1,235 @@
+---
+date: 2026-02-28
+title: Deno OpenTelemetry Instrumentation
+description: Learn how to instrument your Deno application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
+id: deno-instrumentation
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+This guide shows you how to instrument your Deno application with OpenTelemetry and send traces, metrics, and logs to SigNoz. Deno has built-in support for OpenTelemetry, making it easy to get started without complex dependencies.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Deno v2.0 or later
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send telemetry to SigNoz
+
+Deno <a href="https://docs.deno.com/runtime/fundamentals/open_telemetry/#auto-instrumentation" target="_blank" rel="noopener noreferrer nofollow">auto-instrumentation</a> automatically captures:
+
+- **Incoming HTTP requests** (`Deno.serve`)
+- **Outgoing requests** (`fetch`)
+- **Runtime metrics** (Heap usage, GC duration)
+- **Console logs** (`console.log`, `console.error`)
+
+### Run the application
+
+<Tabs entityName="platform">
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+</KeyPointCallout>
+
+### Step 1. Set environment variables
+
+```bash
+export OTEL_DENO=true
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: Name of your service (e.g., `deno-app`).
+
+### Step 2. Run the application
+
+```bash
+deno run --allow-env --allow-net app.ts
+```
+
+<Admonition type="note">
+The `OTEL_DENO=true` flag enables the built-in instrumentation for `http`, `fetch`, runtime metrics, and console logs.
+
+By default, auto-instrumentation captures logs as well, to disable logs set the following environmental variable:
+
+```bash
+export OTEL_DENO_CONSOLE=ignore
+```
+</Admonition>
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+### Step 1. Update deployment manifest
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_DENO
+    value: "true"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+  - name: OTEL_SERVICE_NAME
+    value: "<service-name>"
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: Name of your service (e.g., `deno-app`).
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 1. Create Dockerfile
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile
+FROM deno:2.6.6
+
+WORKDIR /app
+
+# Copy application code
+COPY . .
+
+# Start the application
+CMD ["deno", "run", "--allow-env", "--allow-net", "app.ts"]
+```
+
+### Step 2. Build and run
+
+Set OpenTelemetry environment variables at runtime:
+
+```bash
+docker run \
+  -e OTEL_DENO=true \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_SERVICE_NAME="<service-name>" \
+  -p 8000:8000 \
+  deno-app
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: Name of your service (e.g., `deno-app`).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+### Step 1. Set environment variables (PowerShell)
+
+```powershell
+$env:OTEL_DENO = "true"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: Name of your service (e.g., `deno-app`).
+
+### Step 2. Run the application
+
+```powershell
+deno run --allow-env --allow-net app.ts
+```
+
+<Admonition type="note">
+The `OTEL_DENO=true` flag enables the built-in instrumentation for `http`, `fetch`, runtime metrics, and console logs.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+After running your Deno application with OpenTelemetry enabled, you should see traces appearing in SigNoz:
+
+1. Navigate to the **Services** tab in SigNoz
+2. Look for your service name (the value you set in `OTEL_SERVICE_NAME`)
+3. Click on your service to view traces and spans
+4. You should see spans for HTTP requests handled by `Deno.serve` and outgoing `fetch` calls
+5. Go to the **Logs** tab and filter by `service.name` to see console logs
+6. Go to the **Dashboards** tab to view runtime metrics (e.g. `process.runtime.deno.*` or similar)
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No data in SigNoz
+
+- Ensure `OTEL_DENO=true` is set.
+- Check that `OTEL_EXPORTER_OTLP_ENDPOINT` is correct and includes the protocol (e.g., `https://`).
+- Verify your ingestion key in `OTEL_EXPORTER_OTLP_HEADERS`.
+- Ensure your application runs long enough to export data (OpenTelemetry batches exports).
+
+### Console Logs
+
+Deno captures `console.log` and `console.error` by default when `OTEL_DENO=true`. These are exported as logs to OpenTelemetry.
+
+You can configure this behavior with `OTEL_DENO_CONSOLE`:
+- `capture`: Logs are emitted to stdout/stderr AND exported (default).
+- `ignore`: Logs are ONLY printed to console (not exported).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The OTel Collector acts as a middleman between your app and SigNoz. Instead of sending data directly, your application sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+</details>
+
+## Next Steps
+
+- Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Deno guide](https://signoz.io/docs/instrumentation/manual-instrumentation/deno/manual-instrumentation/) once the base setup is in place.
+- [Explore your traces in SigNoz](https://signoz.io/docs/product-features/trace-explorer/)
+- [Query and filter traces](https://signoz.io/docs/product-features/query-builder/)
+- [Set up alerts for your Deno service](https://signoz.io/docs/product-features/alert-management/)
+
+## Get Help
+
+<GetHelp />

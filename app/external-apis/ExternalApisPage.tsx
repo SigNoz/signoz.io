@@ -57,7 +57,7 @@ const Header: React.FC = () => {
       }
       buttons={headerButtons}
       heroImageAlt="External APIs hero"
-      heroImage="/img/platform/ExternalApisMeta.png"
+      heroImage="/img/platform/ExternalApisMeta.webp"
     />
   )
 }

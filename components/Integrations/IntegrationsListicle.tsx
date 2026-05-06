@@ -14,8 +14,9 @@ import {
   SiMysql,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
-import IconCardGrid from '../Card/IconCardGrid'
 import { FaAws } from 'react-icons/fa'
+import { VscGraphLine } from 'react-icons/vsc'
+import IconCardGrid from '../Card/IconCardGrid'
 
 interface IntegrationsListicleProps {
   category?: 'temporal' | 'databases' | 'aws' | 'all'
@@ -181,6 +182,12 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
             href: '/docs/integrations/nginx',
             icon: <SiNginx className="h-7 w-7 text-green-500" />,
             clickName: 'Nginx Integration Link',
+          },
+          {
+            name: 'StatsD Metrics',
+            href: '/docs/userguide/opentelemetry-statsd',
+            icon: <VscGraphLine className="h-7 w-7 text-blue-500" />,
+            clickName: 'StatsD Integration Link',
           },
         ]}
         sectionName="Other Integrations"

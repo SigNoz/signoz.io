@@ -56,6 +56,7 @@ export default function ArticleSeriesBottom({
         <Link
           href={nextLink.href}
           className="group block p-4 no-underline transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 sm:p-6"
+          prefetch={false}
         >
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
@@ -86,6 +87,7 @@ export default function ArticleSeriesBottom({
           <Link
             href={prevLink.href}
             className="group flex items-center font-medium text-gray-600 no-underline transition-colors hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
+            prefetch={false}
           >
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
             Previous
@@ -98,6 +100,7 @@ export default function ArticleSeriesBottom({
           <Link
             href={seriesOverviewHref}
             className="group flex items-center font-medium text-gray-600 no-underline transition-colors hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
+            prefetch={false}
           >
             View Full Series
             <List className="ml-2 h-4 w-4 transition-transform group-hover:scale-110" />

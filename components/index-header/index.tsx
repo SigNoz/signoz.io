@@ -90,6 +90,7 @@ export async function Header() {
                 experimentId={experimentId}
                 variantId={variantId}
                 className="block w-[220px]"
+                prefetch={false}
               >
                 <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
                   <BookOpen size={14} />

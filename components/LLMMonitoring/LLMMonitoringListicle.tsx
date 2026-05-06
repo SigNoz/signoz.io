@@ -11,6 +11,7 @@ import {
   SiPydantic,
   SiTemporal,
   SiOllama,
+  SiHuggingface,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -70,6 +71,12 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/claude-code-monitoring',
     icon: <SiClaude className="h-7 w-7 text-orange-500" />,
     clickName: 'Claude Code Monitoring',
+  },
+  {
+    name: 'Claude Agent SDK',
+    href: '/docs/claude-agent-monitoring',
+    icon: <SiClaude className="h-7 w-7" style={{ color: '#b55c04' }} />,
+    clickName: 'Claude Agent SDK Monitoring',
   },
   {
     name: 'Codex (OpenAI)',
@@ -142,6 +149,12 @@ const LLMMonitoringData: IconCardData[] = [
       />
     ),
     clickName: 'Haystack Monitoring',
+  },
+  {
+    name: 'Hugging Face',
+    href: '/docs/huggingface-observability',
+    icon: <SiHuggingface className="h-7 w-7" style={{ color: '#fcba03' }} />,
+    clickName: 'Hugging Face Monitoring',
   },
   {
     name: 'Inkeep',

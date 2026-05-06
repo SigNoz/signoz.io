@@ -150,6 +150,7 @@ export default function ProductFeatureShowcase() {
             <Link
               href={feature.href}
               className="inline-flex items-center gap-1 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-500"
+              prefetch={false}
             >
               {feature.ctaLabel}
               <ArrowRight size={14} />

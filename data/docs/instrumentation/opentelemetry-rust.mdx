@@ -1,709 +1,646 @@
 ---
-date: 2026-01-27
+date: 2026-03-05
 id: rust
 
 title: Rust OpenTelemetry Instrumentation
-description: Send events from your Rust application to SigNoz
+description: Instrument your Rust application with OpenTelemetry and send traces to SigNoz. Auto-instrument Axum, Actix Web, reqwest, and tonic with framework integrations or add manual instrumentation for custom spans.
 doc_type: howto
-hide_table_of_contents: true
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
+This guide shows you how to instrument your Rust application with OpenTelemetry and send traces to SigNoz. Learn how to auto-instrument frameworks like Axum, Actix Web, reqwest, and tonic, or add manual instrumentation for custom spans and attributes.
 
-This document contains instructions on how to set up OpenTelemetry (OTel) instrumentation in your Rust applications and view your application traces in SigNoz.
-
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ## Prerequisites
 
-- [Rust](https://www.rust-lang.org/tools/install)
-- [Cargo](https://doc.rust-lang.org/cargo/)
+- Rust 1.75 or newer
+- Cargo (comes with Rust)
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+Tested with OpenTelemetry Rust SDK v0.31.0.
 
 ## Send traces to SigNoz
 
-Based on your application environment, you can choose the setup below to send traces to SigNoz.
-
-<Tabs>
+<Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
 
-From VMs, there are two ways to send data to SigNoz:
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
 
-- **Direct to SigNoz Cloud (recommended for beginners):** no extra installs beyond the SDK; you only need the region endpoint and ingestion key.
-- **Via OTel Collector binary:** it listens at `http://localhost:4318`, forwards telemetry to SigNoz, and does not require an ingestion key from the app. Install it with the [OTel Collector binary guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+Use this section if you're deploying your Rust application directly on a server or VM without containerization.
+</KeyPointCallout>
 
-<Tabs>
-<TabItem value="direct" label="Direct to Cloud" default>
+### Step 1. Set environment variables
 
-### Step 1: Instrument your application with OpenTelemetry
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+```
 
-To configure your Rust application to send data, we need to initialize OpenTelemetry. OpenTelemetry provides crates which you need to add to your `Cargo.toml` file, just below the `[dependencies]` section.
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+
+### Step 2. Add OpenTelemetry dependencies
+
+Add the following to your `Cargo.toml` under `[dependencies]`:
 
 ```toml:Cargo.toml
-opentelemetry = { version = "0.27.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry = { version = "0.31.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.12" }
+tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
-After adding these in `Cargo.toml`, you need to use them in the entry point of your Rust application, which is the `main.rs` file in the majority of applications.
+<Admonition type="info">
+The `tls-roots` feature in `opentelemetry-otlp` and `tls-native-roots` in `tonic` are required for sending data to SigNoz Cloud over HTTPS.
+</Admonition>
+
+### Step 3. Create the tracer initialization
+
+Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
-use opentelemetry_otlp::{SpanExporter, WithExportConfig, WithTonicConfig};
-use opentelemetry_sdk::trace::TracerProvider;
+use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
-```
 
-### Step 2: Initialize the tracer and create the env file
+fn init_tracer() -> SdkTracerProvider {
+    let service_name = std::env::var("OTEL_SERVICE_NAME")
+        .unwrap_or_else(|_| "rust-app".to_string());
 
-Add the following function to your `main.rs` file. The `init_tracer` function initializes an OpenTelemetry tracer with the OpenTelemetry OTLP exporter, which sends data to SigNoz Cloud.
-
-```rust:src/main.rs
-fn init_tracer() -> TracerProvider {
-    let signoz_ingestion_key = std::env::var("SIGNOZ_INGESTION_KEY")
-        .expect("SIGNOZ_INGESTION_KEY not set");
-    let signoz_endpoint = std::env::var("SIGNOZ_ENDPOINT")
-        .expect("SIGNOZ_ENDPOINT not set");
-    let app_name = std::env::var("APP_NAME")
-        .expect("APP_NAME not set");
-
-    let mut metadata = tonic::metadata::MetadataMap::new();
-    metadata.insert(
-        "signoz-ingestion-key",
-        tonic::metadata::MetadataValue::try_from(&signoz_ingestion_key).unwrap(),
-    );
-
+    // The SDK automatically reads these environment variables:
+    // - OTEL_EXPORTER_OTLP_ENDPOINT
+    // - OTEL_EXPORTER_OTLP_HEADERS
+    // - OTEL_EXPORTER_OTLP_TIMEOUT
     let exporter = SpanExporter::builder()
         .with_tonic()
         .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
-        .with_metadata(metadata)
-        .with_endpoint(signoz_endpoint)
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::new(vec![
-        KeyValue::new("service.name", app_name),
-    ]);
+    // Resource::builder() includes SDK telemetry attributes automatically
+    let resource = Resource::builder()
+        .with_service_name(service_name)
+        .build();
 
-    TracerProvider::builder()
+    SdkTracerProvider::builder()
         .with_resource(resource)
-        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
-        .build()
-    }
-```
-
-After adding this function, you need to create a `.env` file in the root of the project. The structure should look like this:
-
-```
-project_root/
-|-- Cargo.toml
-|-- src/
-|   |-- main.rs
-|-- .env
-```
-
-Paste the following in the `.env` file:
-
-```bash
-PORT=3000
-APP_NAME=<service_name>
-SIGNOZ_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-SIGNOZ_INGESTION_KEY=<your-ingestion-key>
-```
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is the name of your service
-- PORT (Optional) - If it is a web app, pass the port; otherwise, you can ignore this variable.
-
-### Step 3: Add the OpenTelemetry instrumentation for your Rust app
-
-Open your `Cargo.toml` file and paste these below `[dependencies]`:
-
-```toml:Cargo.toml
-dotenv = "0.15.0"
-```
-
-Import these at the top so you can use variables from the `.env` file:
-
-```rust:src/main.rs
-use dotenv::dotenv;
-```
-
-After importing, call these functions inside the `main()` function by pasting the following code at the start of the `main()` function:
-
-```rust:src/main.rs
-dotenv().ok();
-let tracer_provider = init_tracer();
-global::set_tracer_provider(tracer_provider.clone());
-```
-
-Also, change:
-
-```rust:src/main.rs
-fn main(){
-    //rest of the code
-}
-```
-
-to
-
-```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    //rest of the code
-}
-```
-
-To send data to SigNoz Cloud, add the following block:
-
-```rust:src/main.rs
-let tracer = global::tracer("my_app");
-
-tracer.in_span("operation", |cx| {
-    let span = cx.span();
-    span.set_attribute(KeyValue::new("KEY", "value"));
-
-    span.add_event(
-        "Operations",
-        vec![
-            KeyValue::new("SigNoz is", "Awesome"),
-        ],
-    );
-});
-
-// Shutdown trace provider
-tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-```
-
-### Step 4: Set environment variables and run app
-
-Go to your `.env` file and update the values of the required variables:
-`APP_NAME`,
-`SIGNOZ_ENDPOINT`, and
-`SIGNOZ_INGESTION_KEY`.
-
-Run `cargo run` in the terminal to start the application.
-
-</TabItem>
-<TabItem value="collector" label="Via OTel Collector">
-
-### Step 1: Install OTel Collector binary
-
-The OTel Collector binary helps to collect logs, hostmetrics, resource, and infra attributes.
-
-You can find instructions to install the OTel Collector binary in the [VM installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-
-### Step 2: Instrument your application with OpenTelemetry
-
-To configure your Rust application to send traces, we need to initialize OpenTelemetry. OpenTelemetry provides crates which you need to add to your `Cargo.toml` file, just below the `[dependencies]` section.
-
-```toml:Cargo.toml
-opentelemetry = { version = "0.27.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
-tokio = { version = "1", features = ["full"] }
-```
-
-After adding these in `Cargo.toml`, you need to use them in the entry point of your Rust application, which is the `main.rs` file in the majority of applications.
-
-```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
-use opentelemetry_otlp::SpanExporter;
-use opentelemetry_sdk::trace::TracerProvider;
-use opentelemetry_sdk::Resource;
-```
-
-### Step 3: Initialize the tracer and create the env file
-
-Add the following function to your `main.rs` file. The `init_tracer` function initializes an OpenTelemetry tracer with the OpenTelemetry OTLP exporter, which sends data to SigNoz Cloud.
-
-This tracer initializes the connection with the OTel Collector from the system variables passed while starting the app.
-
-```rust:src/main.rs
-fn init_tracer() -> TracerProvider {
-    let exporter = SpanExporter::builder()
-        .with_tonic()
-        .build()
-        .expect("Failed to create span exporter");
-
-    TracerProvider::builder()
-        .with_resource(Resource::default())
-        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
+        .with_batch_exporter(exporter)
         .build()
 }
 ```
 
-### Step 4: Add the OpenTelemetry instrumentation for your Rust app
-
-You need to call the `init_tracer` function inside `main()` at the start so that as soon as your Rust application starts, the tracer will be available globally.
+Then initialize it in `main()`:
 
 ```rust:src/main.rs
 let tracer_provider = init_tracer();
-global::set_tracer_provider(tracer_provider.clone());
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 ```
 
-also change
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
 
-```rust:src/main.rs
-fn main(){
-    //rest of the code
-}
-```
-
-to
-
-```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    //rest of the code
-}
-```
-
-To send traces to SigNoz Cloud, add the following block:
-
-```rust:src/main.rs
-let tracer = global::tracer("my_app");
-
-tracer.in_span("operation", |cx| {
-    let span = cx.span();
-    span.set_attribute(KeyValue::new("KEY", "value"));
-
-    span.add_event(
-        "Operations",
-        vec![
-            KeyValue::new("SigNoz is", "Awesome"),
-        ],
-    );
-});
-
-// Shutdown trace provider
-tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-```
-
-### Step 5: Set environment variables and run the app
-
-| Variable                              | Description                                                                                                                                                                      |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OTEL_EXPORTER_OTLP_ENDPOINT           | This is the endpoint of your OTel Collector. If you have hosted it somewhere, provide the URL. Otherwise, the default is `http://localhost:4317` if you have followed our guide. |
-| OTEL_RESOURCE_ATTRIBUTES=service.name | Specify as the value. This will be the name of your Rust application on SigNoz services page, allowing you to uniquely identify the application traces.                          |
-
-Now run:
+### Step 4. Run your application
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 OTEL_RESOURCE_ATTRIBUTES=service.name=sample-rust-app cargo run
+cargo run
 ```
 
-in the terminal to start the application.
-
-</TabItem>
-</Tabs>
+<Admonition type="info">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-### Step 1: Install OTel Collector agent in K8s
+### Step 1. Set environment variables in your deployment
 
-For Rust applications deployed on Kubernetes, you need to install the OTel Collector agent in your K8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install the OTel Collector agent in the [Kubernetes infrastructure installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+Add these environment variables to your Kubernetes deployment manifest:
 
-### Step 2: Instrument your application with OpenTelemetry
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+```
 
-To configure your Rust application to send traces, we need to initialize OpenTelemetry. OpenTelemetry provides crates which you need to add to your `Cargo.toml` file, just below the `[dependencies]` section.
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+
+### Step 2. Add OpenTelemetry dependencies
+
+Add the following to your `Cargo.toml` under `[dependencies]`:
 
 ```toml:Cargo.toml
-opentelemetry = { version = "0.27.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
+opentelemetry = { version = "0.31.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
+tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
-After adding these in `Cargo.toml`, you need to use them in the entry point of your Rust application, which is the `main.rs` file in the majority of applications.
+### Step 3. Create the tracer initialization
+
+Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
-use opentelemetry_otlp::SpanExporter;
-use opentelemetry_sdk::trace::TracerProvider;
+use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
-```
 
-### Step 3: Initialize the tracer and create the env file
+fn init_tracer() -> SdkTracerProvider {
+    let service_name = std::env::var("OTEL_SERVICE_NAME")
+        .unwrap_or_else(|_| "rust-app".to_string());
 
-Add the following function to your `main.rs` file. The `init_tracer` function initializes an OpenTelemetry tracer with the OpenTelemetry OTLP exporter, which sends data to SigNoz Cloud.
-
-This tracer initializes the connection with the OTel Collector from the system variables passed while starting the app.
-
-```rust:src/main.rs
-fn init_tracer() -> TracerProvider {
+    // The SDK automatically reads these environment variables:
+    // - OTEL_EXPORTER_OTLP_ENDPOINT
+    // - OTEL_EXPORTER_OTLP_HEADERS
+    // - OTEL_EXPORTER_OTLP_TIMEOUT
     let exporter = SpanExporter::builder()
         .with_tonic()
+        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
         .build()
         .expect("Failed to create span exporter");
 
-    TracerProvider::builder()
-        .with_resource(Resource::default())
-        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
+    // Resource::builder() includes SDK telemetry attributes automatically
+    let resource = Resource::builder()
+        .with_service_name(service_name)
+        .build();
+
+    SdkTracerProvider::builder()
+        .with_resource(resource)
+        .with_batch_exporter(exporter)
         .build()
 }
 ```
 
-### Step 4: Add the OpenTelemetry instrumentation for your Rust app
-
-You need to call the `init_tracer` function inside `main()` at the start so that as soon as your Rust application starts, the tracer will be available globally.
+Then initialize it in `main()`:
 
 ```rust:src/main.rs
 let tracer_provider = init_tracer();
-global::set_tracer_provider(tracer_provider.clone());
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 ```
 
-also change
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
 
-```rust:src/main.rs
-fn main(){
-    //rest of the code
-}
-```
+### Step 4. Run your application
 
-to
+Build your container image and deploy it to your Kubernetes cluster.
 
-```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    //rest of the code
-}
-```
+<Admonition type="info">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
-To send traces to SigNoz Cloud, add the following block:
+</TabItem>
+<TabItem value="docker" label="Docker">
 
-```rust:src/main.rs
-let tracer = global::tracer("my_app");
+### Step 1. Set environment variables
 
-tracer.in_span("operation", |cx| {
-    let span = cx.span();
-    span.set_attribute(KeyValue::new("KEY", "value"));
-
-    span.add_event(
-        "Operations",
-        vec![
-            KeyValue::new("SigNoz is", "Awesome"),
-        ],
-    );
-});
-
-// Shutdown trace provider
-tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-```
-
-### Step 5: Set environment variables and run the app
-
-| Variable                              | Description                                                                                                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OTEL_EXPORTER_OTLP_ENDPOINT           | This is the endpoint of your OTel Collector via which you will send traces, as you have already installed it the default endpoint is `http://localhost:4317` |
-| OTEL_RESOURCE_ATTRIBUTES=service.name | Specify as the value. This will be the name of your Rust application on SigNoz services page, allowing you to uniquely identify the application traces.      |
-
-Now run:
+Pass environment variables at runtime using `docker run`:
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 OTEL_RESOURCE_ATTRIBUTES=service.name=sample-rust-app cargo run
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    your-image:latest
 ```
 
-in the terminal to start the application.
+Or add them to your Dockerfile:
+
+```dockerfile:Dockerfile
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service-name>"
+```
+
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+
+### Step 2. Add OpenTelemetry dependencies
+
+Add the following to your `Cargo.toml` under `[dependencies]`:
+
+```toml:Cargo.toml
+opentelemetry = { version = "0.31.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+tokio = { version = "1", features = ["full"] }
+tonic = { version = "0.14", features = ["tls-native-roots"] }
+```
+
+### Step 3. Create the tracer initialization
+
+Add the following imports and function to your `main.rs`:
+
+```rust:src/main.rs
+use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::Resource;
+
+fn init_tracer() -> SdkTracerProvider {
+    let service_name = std::env::var("OTEL_SERVICE_NAME")
+        .unwrap_or_else(|_| "rust-app".to_string());
+
+    // The SDK automatically reads these environment variables:
+    // - OTEL_EXPORTER_OTLP_ENDPOINT
+    // - OTEL_EXPORTER_OTLP_HEADERS
+    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    let exporter = SpanExporter::builder()
+        .with_tonic()
+        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .build()
+        .expect("Failed to create span exporter");
+
+    // Resource::builder() includes SDK telemetry attributes automatically
+    let resource = Resource::builder()
+        .with_service_name(service_name)
+        .build();
+
+    SdkTracerProvider::builder()
+        .with_resource(resource)
+        .with_batch_exporter(exporter)
+        .build()
+}
+```
+
+Then initialize it in `main()`:
+
+```rust:src/main.rs
+let tracer_provider = init_tracer();
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+```
+
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
+
+### Step 4. Run your application
+
+```dockerfile:Dockerfile
+FROM rust:1.75 AS builder
+
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=builder /app/target/release/your-app .
+
+CMD ["./your-app"]
+```
+
+```bash
+docker build -t your-image:latest .
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    your-image:latest
+```
+
+<Admonition type="info">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-From Windows, there are two ways to send data to SigNoz:
+### Step 1. Set environment variables (PowerShell)
 
-- **Direct to SigNoz Cloud:** talk straight to the cloud endpoint with the ingestion key.
-- **Via OTel Collector binary:** install the collector on the host, use `http://localhost:4318`, and drop the ingestion key. Install guide: [OTel Collector binary on a VM](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+```
 
-<Tabs>
-<TabItem value="direct" label="Direct to Cloud" default>
+Verify these values:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
 
-### Step 1: Instrument your application with OpenTelemetry
+### Step 2. Add OpenTelemetry dependencies
 
-To configure your Rust application to send data, we need to initialize OpenTelemetry. OpenTelemetry provides crates which you need to add to your `Cargo.toml` file, just below the `[dependencies]` section.
+Add the following to your `Cargo.toml` under `[dependencies]`:
 
 ```toml:Cargo.toml
-opentelemetry = { version = "0.27.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry = { version = "0.31.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.12" }
+tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
-After adding these in `Cargo.toml`, you need to use them in the entry point of your Rust application, which is the `main.rs` file in the majority of applications.
+### Step 3. Create the tracer initialization
+
+Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
-use opentelemetry_otlp::{SpanExporter, WithExportConfig, WithTonicConfig};
-use opentelemetry_sdk::trace::TracerProvider;
+use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
-```
 
-### Step 2: Initialize the tracer and create the env file
+fn init_tracer() -> SdkTracerProvider {
+    let service_name = std::env::var("OTEL_SERVICE_NAME")
+        .unwrap_or_else(|_| "rust-app".to_string());
 
-Add the following function to your `main.rs` file. The `init_tracer` function initializes an OpenTelemetry tracer with the OpenTelemetry OTLP exporter, which sends data to SigNoz Cloud.
-
-```rust:src/main.rs
-fn init_tracer() -> TracerProvider {
-    let signoz_ingestion_key = std::env::var("SIGNOZ_INGESTION_KEY")
-        .expect("SIGNOZ_INGESTION_KEY not set");
-    let signoz_endpoint = std::env::var("SIGNOZ_ENDPOINT")
-        .expect("SIGNOZ_ENDPOINT not set");
-    let app_name = std::env::var("APP_NAME")
-        .expect("APP_NAME not set");
-
-    let mut metadata = tonic::metadata::MetadataMap::new();
-    metadata.insert(
-        "signoz-ingestion-key",
-        tonic::metadata::MetadataValue::try_from(&signoz_ingestion_key).unwrap(),
-    );
-
+    // The SDK automatically reads these environment variables:
+    // - OTEL_EXPORTER_OTLP_ENDPOINT
+    // - OTEL_EXPORTER_OTLP_HEADERS
+    // - OTEL_EXPORTER_OTLP_TIMEOUT
     let exporter = SpanExporter::builder()
         .with_tonic()
         .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
-        .with_metadata(metadata)
-        .with_endpoint(signoz_endpoint)
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::new(vec![
-        KeyValue::new("service.name", app_name),
-    ]);
+    // Resource::builder() includes SDK telemetry attributes automatically
+    let resource = Resource::builder()
+        .with_service_name(service_name)
+        .build();
 
-    TracerProvider::builder()
+    SdkTracerProvider::builder()
         .with_resource(resource)
-        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
-        .build()
-    }
-```
-
-After adding this function, you need to create a `.env` file in the root of the project. The structure should look like this:
-
-```
-project_root/
-|-- Cargo.toml
-|-- src/
-|   |-- main.rs
-|-- .env
-```
-
-Paste the following in the `.env` file:
-
-```bash
-PORT=3000
-APP_NAME=<service_name>
-SIGNOZ_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-SIGNOZ_INGESTION_KEY=<your-ingestion-key>
-```
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is the name of your service
-- PORT (Optional) - If it is a web app, pass the port; otherwise, you can ignore this variable.
-
-### Step 3: Add the OpenTelemetry instrumentation for your Rust app
-
-Open your `Cargo.toml` file and paste these below `[dependencies]`:
-
-```toml:Cargo.toml
-dotenv = "0.15.0"
-```
-
-Import these at the top so you can use variables from the `.env` file:
-
-```rust:src/main.rs
-use dotenv::dotenv;
-```
-
-After importing, call these functions inside the `main()` function by pasting the following code at the start of the `main()` function:
-
-```rust:src/main.rs
-dotenv().ok();
-let tracer_provider = init_tracer();
-global::set_tracer_provider(tracer_provider.clone());
-```
-
-Also, change:
-
-```rust:src/main.rs
-fn main(){
-    //rest of the code
-}
-```
-
-to
-
-```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    //rest of the code
-}
-```
-
-To send data to SigNoz Cloud, add the following block:
-
-```rust:src/main.rs
-let tracer = global::tracer("my_app");
-
-tracer.in_span("operation", |cx| {
-    let span = cx.span();
-    span.set_attribute(KeyValue::new("KEY", "value"));
-
-    span.add_event(
-        "Operations",
-        vec![
-            KeyValue::new("SigNoz is", "Awesome"),
-        ],
-    );
-});
-
-// Shutdown trace provider
-tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-```
-
-### Step 4: Set environment variables and run app
-
-Go to your `.env` file and update the values of the required variables:
-`APP_NAME`,
-`SIGNOZ_ENDPOINT`, and
-`SIGNOZ_INGESTION_KEY`.
-
-Run `cargo run` in the terminal to start the application.
-
-</TabItem>
-<TabItem value="collector" label="Via OTel Collector">
-
-### Step 1 : Install OTel Collector binary
-
-The OTel Collector binary helps to collect logs, hostmetrics, resource, and infra attributes.
-
-You can find instructions to install the OTel Collector binary in the [VM installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-
-### Step 2: Instrument your application with OpenTelemetry
-
-To configure your Rust application to send traces, we need to initialize OpenTelemetry. OpenTelemetry provides crates which you need to add to your `Cargo.toml` file, just below the `[dependencies]` section.
-
-```toml:Cargo.toml
-opentelemetry = { version = "0.27.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
-tokio = { version = "1", features = ["full"] }
-```
-
-After adding these in `Cargo.toml`, you need to use them in the entry point of your Rust application, which is the `main.rs` file in the majority of applications.
-
-```rust:src/main.rs
-use opentelemetry::trace::{TraceContextExt, Tracer};
-use opentelemetry::{global, KeyValue};
-use opentelemetry_otlp::SpanExporter;
-use opentelemetry_sdk::trace::TracerProvider;
-use opentelemetry_sdk::Resource;
-```
-
-### Step 3: Initialize the tracer and create the env file
-
-Add the following function to your `main.rs` file. The `init_tracer` function initializes an OpenTelemetry tracer with the OpenTelemetry OTLP exporter, which sends data to SigNoz Cloud.
-
-This tracer initializes the connection with the OTel Collector from the system variables passed while starting the app.
-
-```rust:src/main.rs
-fn init_tracer() -> TracerProvider {
-    let exporter = SpanExporter::builder()
-        .with_tonic()
-        .build()
-        .expect("Failed to create span exporter");
-
-    TracerProvider::builder()
-        .with_resource(Resource::default())
-        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
+        .with_batch_exporter(exporter)
         .build()
 }
 ```
 
-### Step 4: Add the OpenTelemetry instrumentation for your Rust app
-
-You need to call the `init_tracer` function inside `main()` at the start so that as soon as your Rust application starts, the tracer will be available globally.
+Then initialize it in `main()`:
 
 ```rust:src/main.rs
 let tracer_provider = init_tracer();
-global::set_tracer_provider(tracer_provider.clone());
+opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 ```
 
-also change
+Call `tracer_provider.shutdown()` before your process exits to flush buffered spans.
 
-```rust:src/main.rs
-fn main(){
-    //rest of the code
-}
-```
-
-to
-
-```rust:src/main.rs
-#[tokio::main]
-async fn main() {
-    //rest of the code
-}
-```
-
-To send traces to SigNoz Cloud, add the following block:
-
-```rust:src/main.rs
-let tracer = global::tracer("my_app");
-
-tracer.in_span("operation", |cx| {
-    let span = cx.span();
-    span.set_attribute(KeyValue::new("KEY", "value"));
-
-    span.add_event(
-        "Operations",
-        vec![
-            KeyValue::new("SigNoz is", "Awesome"),
-        ],
-    );
-});
-
-// Shutdown trace provider
-tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
-```
-
-### Step 5: Set environment variables and run the app
-
-| Variable                              | Description                                                                                                                                                                      |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OTEL_EXPORTER_OTLP_ENDPOINT           | This is the endpoint of your OTel Collector. If you have hosted it somewhere, provide the URL. Otherwise, the default is `http://localhost:4317` if you have followed our guide. |
-| OTEL_RESOURCE_ATTRIBUTES=service.name | Specify as the value. This will be the name of your Rust application on SigNoz services page, allowing you to uniquely identify the application traces.                          |
-
-Now run:
+### Step 4. Run your application
 
 ```powershell
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
-$env:OTEL_RESOURCE_ATTRIBUTES="service.name=sample-rust-app"
 cargo run
 ```
 
-in the terminal to start the application.
+<Admonition type="info">
+The steps above configure the trace exporter but does not auto-instrument anything out of the box. You can either add **[framework instrumentation](#framework-instrumentation)** for automatic spans from libraries like Axum, Actix Web, and reqwest, or use **[manual instrumentation](/docs/instrumentation/rust/manual-instrumentation/)** to create custom spans, attributes, and events.
+</Admonition>
 
 </TabItem>
 </Tabs>
 
-</TabItem>
-</Tabs>
+## Framework instrumentation
 
-## Sample Rust Application
+The setup above configures OTLP export for your application. If you use `tracing`, `reqwest`, Axum, or Actix Web, add one of the integrations below to capture spans automatically.
 
-We have included a sample Rust application at [Sample Rust App Github Repo](https://github.com/SigNoz/sample-rust-app).
+All four integrations below emit `tracing` spans. Add this bridge once to your `Cargo.toml` and startup code:
 
-## Get Help
+```toml:Cargo.toml
+tracing-subscriber = { version = "0.3.20", features = ["fmt"] }
+tracing-opentelemetry = "0.32.0"
+```
 
-<GetHelp />
+```rust:src/main.rs
+use opentelemetry::trace::TracerProvider;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+
+let tracer = tracer_provider.tracer("my-app");
+tracing_subscriber::registry()
+    .with(tracing_subscriber::fmt::layer())
+    .with(tracing_opentelemetry::layer().with_tracer(tracer))
+    .init();
+```
+
+<LibraryTabs
+    className="mb-8"
+    defaultCategory="all"
+    defaultLibrary="tracing"
+    categoryLabels={{
+        core: 'Tracing',
+        http: 'HTTP Clients',
+        web: 'Web Frameworks',
+    }}
+>
+    <LibraryTab value="tracing" label="Core tracing" category="core">
+
+        ### Additional dependency
+
+        ```toml:Cargo.toml
+        tracing = "0.1.41"
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        use tracing::instrument;
+
+        #[instrument(skip_all, fields(order.id = %order_id))]
+        async fn process_order(order_id: &str) {
+            validate_order(order_id).await;
+            charge_payment(order_id).await;
+        }
+        ```
+
+        <a href="https://crates.io/crates/tracing" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+        <br />
+
+        <a href="https://crates.io/crates/tracing-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">View OpenTelemetry bridge on crates.io</a>
+
+    </LibraryTab>
+    <LibraryTab value="reqwest" label="Reqwest" category="http">
+
+        ### Additional dependencies
+
+        ```toml:Cargo.toml
+        reqwest = { version = "0.13.2", features = ["json"] }
+        reqwest-middleware = "0.5.0"
+        reqwest-tracing = { version = "0.7.0", features = ["opentelemetry_0_31"] }
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        let client = ClientBuilder::new(reqwest::Client::new())
+            .with(TracingMiddleware::default())
+            .build();
+        ```
+
+        Use this client for outbound HTTP calls to create spans for each request automatically.
+
+        <a href="https://crates.io/crates/reqwest-tracing" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+    </LibraryTab>
+    <LibraryTab value="axum" label="Axum" category="web">
+
+        ### Additional dependencies
+
+        ```toml:Cargo.toml
+        axum = "0.8.4"
+        axum-tracing-opentelemetry = "0.33.0"
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        let app = Router::new()
+            .route("/hello", get(hello))
+            .layer(OtelInResponseLayer::default())
+            .layer(OtelAxumLayer::default());
+        ```
+
+        These layers create server spans for incoming Axum requests and attach trace context to responses.
+
+        <a href="https://crates.io/crates/axum-tracing-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+    </LibraryTab>
+    <LibraryTab value="actix-web" label="Actix Web" category="web">
+
+        ### Additional dependencies
+
+        ```toml:Cargo.toml
+        actix-web = "4.11.0"
+        tracing-actix-web = { version = "0.7.19", features = ["opentelemetry_0_31"] }
+        ```
+
+        ### Minimal setup
+
+        ```rust:src/main.rs
+        let server = HttpServer::new(|| {
+            App::new()
+                .wrap(TracingLogger::default())
+                .route("/health", web::get().to(health))
+        });
+        ```
+
+        `TracingLogger` creates spans for incoming Actix Web requests and propagates context through the request lifecycle.
+
+        <a href="https://crates.io/crates/tracing-actix-web" target="_blank" rel="noopener noreferrer nofollow">View package on crates.io</a>
+
+    </LibraryTab>
+</LibraryTabs>
+
+## Validate
+
+With your application running, verify traces are being sent to SigNoz:
+
+1. Trigger an action in your app that generates a trace. Execute the instrumented code path a few times.
+2. In SigNoz, open the **Services** tab and click **Refresh**. Your application should appear.
+3. Go to the **Traces** tab to see your application's traces.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't traces appear in SigNoz?
+
+**Check environment variables are set:**
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_SERVICE_NAME
+```
+
+**Verify your ingestion key is correct:**
+
+```bash
+echo $OTEL_EXPORTER_OTLP_HEADERS
+```
+
+**Check for TLS errors:**
+
+Ensure you have the `tls-roots` feature enabled in `opentelemetry-otlp` for HTTPS endpoints:
+
+```toml
+opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+```
+
+### Why do OTLP exports fail with `connection refused`?
+
+- **VM**: Verify the endpoint URL and that your firewall allows outbound HTTPS on port 443
+- **Kubernetes**: Ensure the endpoint is reachable from within your pod
+- **Self-hosted**: Confirm the collector is listening on the expected port (default: 4317 for gRPC)
+
+### Why are spans not being exported?
+
+Ensure you call `tracer_provider.shutdown()` before your application exits. The batch exporter buffers spans and only sends them periodically or on shutdown:
+
+```rust
+// At the end of main()
+tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
+```
+
+### Why do I see `failed to create span exporter` errors?
+
+This usually indicates a dependency version mismatch. Ensure all OpenTelemetry crates use compatible versions:
+
+```toml
+opentelemetry = "0.31.0"
+opentelemetry_sdk = "0.31.0"
+opentelemetry-otlp = "0.31.0"
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+### Using the Collector
+
+When using a collector, update your environment variables to point to the collector endpoint:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_SERVICE_NAME="<service-name>"
+# No ingestion key needed when using a collector
+```
+
+You'll also need to remove the `tls-roots` feature if connecting over HTTP:
+
+```toml:Cargo.toml
+opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+```
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next Steps
+
+- [Send Metrics from your Rust application](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-rust/) to correlate traces with metrics for better observability.
+- Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Rust](https://signoz.io/docs/instrumentation/rust/manual-instrumentation/) guide once the base setup is in place.
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your Rust application

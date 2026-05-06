@@ -13,6 +13,7 @@ const Hero = (props) => {
           <Link
             className={`button ${billForComparison.className} ${styles.ctaButton}`}
             href={billForComparison.path}
+            prefetch={false}
           >
             Send your bill for comparison
           </Link>
@@ -21,12 +22,17 @@ const Hero = (props) => {
           <Link
             className={`button primary-gradient bg-signoz_vanilla-300 text-signoz_ink-300`}
             href="/teams"
+            prefetch={false}
           >
             Get Started - Free
           </Link>
         )}
         {selfHost.isVisible && (
-          <Link className={`button ${selfHost.className} ${styles.ctaButton}`} href={selfHost.path}>
+          <Link
+            className={`button ${selfHost.className} ${styles.ctaButton}`}
+            href={selfHost.path}
+            prefetch={false}
+          >
             Self-Host
           </Link>
         )}

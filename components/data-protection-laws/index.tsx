@@ -10,7 +10,7 @@ import TrackingLink from '@/components/TrackingLink'
 const DataProtectionLaws = ({ isInPricingPage = false }) => {
   return (
     <section>
-      <div className="section-container flex h-auto w-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 px-8 py-10 md:px-10">
+      <div className="section-container flex h-auto w-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !py-10 px-8 md:px-10">
         <div className="flex flex-col">
           <div>
             <p className="mb-4 block text-2xl font-semibold text-signoz_vanilla-100 md:mb-2">

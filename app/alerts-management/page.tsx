@@ -8,16 +8,18 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Alerts with multiple thresholds and dynamic routing | SigNoz',
-    description: "Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.",
-    images:"/img/platform/AlertsManagementMeta.png"
+    description:
+      'Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.',
+    images: '/img/platform/AlertsManagementMeta.webp',
   },
   description:
-    "Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.",
-  twitter:{
+    'Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.',
+  twitter: {
     title: 'Alerts with multiple thresholds and dynamic routing | SigNoz',
-    description: "Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.",
-    images:"/img/platform/AlertsManagementMeta.png",
-  }
+    description:
+      'Define warning and critical levels in a single rule. Automatically route to teams based on service, environment, or labels. Group notifications by deployment, customer, or any attribute.',
+    images: '/img/platform/AlertsManagementMeta.webp',
+  },
 }
 
 export default function AlertsManagementPage() {

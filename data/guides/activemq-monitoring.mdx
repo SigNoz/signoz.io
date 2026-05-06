@@ -1,0 +1,1088 @@
+---
+title: How Can I Monitor ActiveMQ [Classic and Artemis]?
+slug: activemq-monitoring
+date: 2026-02-26
+tags: [opentelemetry, activemq]
+authors: [saurabh_patil]
+description: Learn how to monitor ActiveMQ Classic and Artemis using OpenTelemetry. This guide covers key metrics, JMX setup, dashboards, and alerts.
+keywords: [activemq monitoring, activemq metrics, activemq classic monitoring, activemq artemis monitoring, activemq jmx monitoring, opentelemetry activemq, activemq queue monitoring]
+---
+
+ActiveMQ is an open-source message broker that sits between your applications, accepting messages from producers and routing them to consumers through queues (point-to-point) and topics (publish-subscribe). As message volume grows and more services depend on the broker for reliable delivery, issues like queue backlogs, consumer disconnects, or memory exhaustion can silently cascade into application-level failures. These problems can be caught early with an effective ActiveMQ monitoring setup.
+
+This guide covers the steps to set up end-to-end monitoring of ActiveMQ, including collecting broker, queue, and JVM metrics with the OpenTelemetry Collector's JMX receiver, forwarding logs, building dashboards for broker and queue health, and configuring alerts for common failure modes.
+
+## How ActiveMQ Monitoring Works?
+
+ActiveMQ exposes its internal state through JMX (Java Management Extensions). Every broker, address, queue, and connection is represented as an MBean, a Java object that publishes attributes like message count, consumer count, and memory usage. A JMX client can connect to the broker and read these values at regular intervals.
+
+<Figure src="/img/guides/2026/02/activemq-monitoring-flow-diagram.webp" alt="Architecture diagram showing ActiveMQ monitoring flow" caption="Architecture diagram showing ActiveMQ monitoring flow" />
+
+ActiveMQ comes in two flavours, and the monitoring approach differs slightly between them.
+
+**ActiveMQ Classic** uses the MBean domain `org.apache.activemq` and exposes broker, queue, and topic metrics out of the box. The OpenTelemetry Collector's JMX receiver has built-in support for Classic through its `target_system: activemq` setting, so no custom metric definitions are needed.
+
+**ActiveMQ Artemis** uses a different MBean domain, `org.apache.activemq.artemis`, and requires two additional steps: enabling optional metric categories (JVM, GC, threads, netty) in `broker.xml`, and writing custom YAML definitions to map Artemis MBeans to OpenTelemetry metrics.
+
+The rest of the pipeline (collector setup, log collection, dashboards, alerts) is the same for both.
+
+## Key ActiveMQ Metrics to Monitor
+
+Before jumping into the setup, it helps to know which metrics matter and what they tell you about your broker's health.
+
+**Queue and Topic Health**
+
+| Metric | Classic / Artemis | What to watch for |
+| --- | --- | --- |
+| Queue size | `activemq.message.queue.size` / `artemis.queue.message.count` | A steadily growing queue size means consumers are not keeping up with the production rate. If it grows past a few thousand and keeps climbing, you either need more consumers or there is a processing bottleneck downstream. |
+| Consumer count | `activemq.consumer.count` / `artemis.queue.consumer.count` | A sudden drop to zero while the queue size is growing is one of the most common incident patterns, usually caused by a consumer crash, network partition, or misconfigured connection pool. |
+| Producer count | `activemq.producer.count` | Helps you distinguish between "queue is growing because producers ramped up" and "queue is growing because consumers disappeared." |
+| Enqueue count | `activemq.message.enqueued` / `artemis.queue.message.added` | Use the rate of change (messages per second) to understand traffic patterns and spot sudden spikes. |
+| Dequeue count | `activemq.message.dequeued` / `artemis.queue.message.acknowledged` | Comparing enqueue and dequeue rates tells you whether the queue is draining faster than it fills or vice versa. |
+| Expired messages | `activemq.message.expired` / `artemis.queue.message.expired` | A rising expired count means messages are going stale before consumers can process them. Often a sign that consumers are too slow or have stopped entirely. |
+| Dead-lettered messages | `artemis.queue.message.killed` | Messages moved to the DLQ after max delivery attempts. Indicates poison messages or consumer failures. |
+
+**Broker Resource Usage**
+
+| Metric | Classic / Artemis | What to watch for |
+| --- | --- | --- |
+| Memory usage | `activemq.memory.utilization` / `artemis.address.memory.usage_percent` | When this hits 100%, the broker applies flow control and blocks producers. Alert when this crosses 70-80%. |
+| Store usage | `activemq.store.utilization` / `artemis.disk.store.usage_percent` | When store usage approaches 100%, the broker cannot accept new persistent messages. Alert at 80%. |
+| Temp usage | `activemq.temp.utilization` | High temp usage combined with high memory usage indicates the broker is under heavy pressure and may start rejecting messages. |
+
+**Connection Health**
+
+| Metric | Classic / Artemis | What to watch for |
+| --- | --- | --- |
+| Current connections | `activemq.connection.count` / `artemis.connection.count` | A sudden drop indicates a network issue or client-side failure. A sudden spike could signal a reconnection storm after a transient failure. |
+| Total connections | `artemis.connection.total` | Cumulative connection count since broker start. Useful for spotting connection churn over time. |
+
+**JVM Metrics**
+
+Since both Classic and Artemis run on the JVM, these metrics apply to both.
+
+| Metric | Name | What to watch for |
+| --- | --- | --- |
+| Heap memory used | `jvm.memory.heap.used` | A healthy pattern is a sawtooth: steady climbs followed by drops after GC. If heap stays above 85% without dropping, you are heading toward GC thrashing and OutOfMemoryError. |
+| GC pause time | `jvm.gc.collections.elapsed` | Tracks stop-the-world events where the broker cannot process requests. Pauses over 500ms will manifest as client timeouts. |
+| Thread count | `jvm.threads.count` | Unexpected spikes can indicate connection storms or thread pool exhaustion. |
+
+## Prerequisites
+
+Before starting the hands-on setup, make sure you have the following.
+
+- **Docker Engine:** Latest version of Docker installed and running. <a href="https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Install Docker</a>
+- **Docker Compose:** Included with Docker Desktop, or installed separately on Linux. <a href="https://docs.docker.com/compose/install/" rel="noopener noreferrer nofollow" target="_blank">Install Docker Compose</a>
+- **curl:** For downloading the JMX Scraper JAR and configuration files. Pre-installed on most systems. <a href="https://curl.se/download.html" rel="noopener noreferrer nofollow" target="_blank">Install curl</a>
+- **Python 3.x:** For running the demo producer and consumer scripts. <a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank">Download Python</a>
+- **SigNoz Cloud Account:** Sign up for a free [SigNoz Cloud account](https://signoz.io/teams/). You will need your Ingestion Key and Region. If you have not generated an ingestion key yet, follow the [ingestion key guide](/docs/ingestion/signoz-cloud/overview/).
+
+<KeyPointCallout defaultCollapsed="true" title="Already have ActiveMQ running?">
+
+If you already have ActiveMQ running and just need to add monitoring, skip to the [Configuring ActiveMQ Classic](#configuring-activemq-classic) or [Configuring ActiveMQ Artemis](#configuring-activemq-artemis) section depending on which variant you use.
+
+</KeyPointCallout>
+
+## Setting Up the Monitoring Pipeline
+
+The setup comprises three main components: an ActiveMQ broker with JMX enabled, an OpenTelemetry Collector that scrapes metrics and taillogs, and the observability backend (SigNoz). Most of the setup is identical for both Classic and Artemis. We'll cover the shared steps first, then branch into variant-specific configuration. The project structure will look like this.
+
+```bash
+activemq-monitoring/
+├── config/
+│   ├── broker.xml              # It is required for Artemis only
+│   └── log4j2.properties
+├── scripts/
+│   ├── producer.py
+│   ├── consumer.py
+│   └── requirements.txt
+├── Dockerfile
+├── Dockerfile.otel-collector
+├── docker-compose.yml
+├── otel-collector-config.yaml
+└── .env
+```
+
+### Step 1: Configure SigNoz Credentials
+
+Create a `.env` file with your SigNoz Cloud credentials. You can find these at **SigNoz UI → Settings → Ingestion**. Follow the [ingestion key guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) for the same.
+
+```bash
+SIGNOZ_REGION=your-region
+SIGNOZ_INGESTION_KEY=your-ingestion-key-here
+```
+
+### Step 2: Download the JMX Scraper JAR
+
+The OTel Collector's JMX receiver works by launching a Java subprocess that connects to ActiveMQ over JMX. This subprocess runs from a separate JAR file. Download by running the following command.
+
+```bash
+curl -sLO https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/1.53.0-alpha/opentelemetry-jmx-scraper-1.53.0-alpha.jar
+mv opentelemetry-jmx-scraper-1.53.0-alpha.jar opentelemetry-jmx-metrics.jar
+```
+
+<KeyPointCallout defaultCollapsed="true" title="JAR version must match the OTel Collector Version" >
+
+Use a JMX Scraper/Gatherer JAR version that’s supported by your collector build. If you see ‘jar hash does not match known versions’, download a JAR version supported by that collector release.
+
+</KeyPointCallout>
+
+### Step 3: Build the OTel Collector Image
+
+The default contrib image doesn’t include a JRE, so the JMX receiver’s Java subprocess won’t run. Since the JMX receiver launches a Java subprocess, we need a custom image that combines the collector binary with a JRE.
+
+Create `Dockerfile.otel-collector`:
+
+```docker
+# Stage 1: Get the collector binary
+FROM otel/opentelemetry-collector-contrib:latest AS collector
+
+# Stage 2: Java base with collector
+FROM eclipse-temurin:17-jre
+
+# Copy collector binary from stage 1
+COPY --from=collector /otelcol-contrib /otelcol-contrib
+
+# Copy JMX metrics JAR
+COPY opentelemetry-jmx-metrics.jar /opt/opentelemetry-jmx-metrics.jar
+
+# Ensure /tmp is writable for JMX config files
+RUN mkdir -p /tmp && chmod 1777 /tmp
+
+ENTRYPOINT ["/otelcol-contrib"]
+```
+
+This is the base version. If you're setting up Artemis, you'll add one additional `COPY` line for the custom metric definitions, covered in the Artemis section below.
+
+From here, the setup diverges depending on which ActiveMQ variant you're running. Jump to the relevant section.
+
+- [Configuring ActiveMQ Classic](#configuring-activemq-classic)
+- [Configuring ActiveMQ Artemis](#configuring-activemq-artemis)
+
+## Configuring ActiveMQ Classic
+
+ActiveMQ Classic exposes JMX MBeans under the `org.apache.activemq` domain. The OTel Collector's JMX receiver has built-in support for these through `target_system: activemq`, so no custom metric definitions are needed.
+
+### Step 1: Create the ActiveMQ Classic Dockerfile
+
+Classic needs JMX enabled via `ACTIVEMQ_OPTS`. Create a `Dockerfile`:
+
+```docker
+FROM apache/activemq-classic:latest
+
+# Create log directory for OTel Collector to tail
+RUN mkdir -p /var/log/activemq
+
+# Enable remote JMX on port 1099 (no auth/SSL for demo)
+ENV ACTIVEMQ_OPTS="-Dcom.sun.management.jmxremote \
+  -Dcom.sun.management.jmxremote.port=1099 \
+  -Dcom.sun.management.jmxremote.rmi.port=1099 \
+  -Dcom.sun.management.jmxremote.ssl=false \
+  -Dcom.sun.management.jmxremote.authenticate=false \
+  -Djava.rmi.server.hostname=activemq\
+  -Djetty.host=0.0.0.0"
+
+EXPOSE 61616 5672 61613 8161 1099
+```
+
+### Step 2: Configure Logging
+
+By default, Classic logs only to the console. We add a file appender so the OTel Collector can tail the logs. Save this as config/log4j2.properties.
+
+```text
+# Root logger — console + file
+rootLogger.level = INFO
+rootLogger.appenderRef.console.ref = Console
+rootLogger.appenderRef.logfile.ref = RollingFile
+
+# Console appender (default)
+appender.console.type = Console
+appender.console.name = Console
+appender.console.layout.type = PatternLayout
+appender.console.layout.pattern = %d | %-5level | %logger{1} | %msg%n
+
+# File appender — OTel Collector tails this file
+appender.logfile.type = RollingFile
+appender.logfile.name = RollingFile
+appender.logfile.fileName = /var/log/activemq/activemq.log
+appender.logfile.filePattern = /var/log/activemq/activemq.log.%d{yyyy-MM-dd}
+appender.logfile.layout.type = PatternLayout
+appender.logfile.layout.pattern = %d | %-5level | %logger{1} | %msg%n
+appender.logfile.policies.type = Policies
+appender.logfile.policies.time.type = TimeBasedTriggeringPolicy
+appender.logfile.policies.time.interval = 1
+
+# Reduce noise from chatty loggers
+logger.activemq.name = org.apache.activemq
+logger.activemq.level = INFO
+
+logger.spring.name = org.springframework
+logger.spring.level = WARN
+
+logger.jetty.name = org.eclipse.jetty
+logger.jetty.level = WARN
+```
+
+### Step 3: Configure the OTel Collector
+
+Create `otel-collector-config.yaml`. The key line is `target_system: activemq,jvm` which tells the JMX receiver to use its built-in Classic MBean mappings.
+
+```yaml
+receivers:
+  jmx:
+    jar_path: /opt/opentelemetry-jmx-metrics.jar
+    endpoint: activemq:1099
+    target_system: activemq,jvm
+    collection_interval: 10s
+
+  filelog/activemq:
+    include:
+      - /var/log/activemq/activemq.log
+    start_at: beginning
+    operators:
+      - type: regex_parser
+        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) \| (?P<severity>\w+)\s**\| (?P<logger>[^\|]+)\| (?P<message>.**)$'
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%d %H:%M:%S,%L'
+        severity:
+          parse_from: attributes.severity
+
+processors:
+  batch:
+    timeout: 10s
+  resourcedetection:
+    detectors: [env, system]
+  resource:
+    attributes:
+      - key: service.name
+        value: activemq-classic-demo
+        action: upsert
+
+exporters:
+  otlp_grpc:
+    endpoint: https://ingest.${SIGNOZ_REGION}.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    metrics/jmx:
+      receivers: [jmx]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp_grpc, debug]
+    logs/activemq:
+      receivers: [filelog/activemq]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp_grpc, debug]
+```
+
+The regex pattern uses pipe delimiters (`|`) matches Classic's log format: 
+
+```text
+2024-01-15 10:30:45,123 | INFO  | BrokerService | Apache ActiveMQ is running
+```
+
+### Step 4: Create Docker Compose
+
+Create `docker-compose.yml`:
+
+```yaml
+services:
+  activemq:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: activemq
+    ports:
+      - "61616:61616"   # OpenWire
+      - "8161:8161"     # Web console
+      - "61613:61613"   # STOMP
+      - "5672:5672"     # AMQP
+      - "1099:1099"     # JMX
+    environment:
+      ACTIVEMQ_WEB_USER: admin
+      ACTIVEMQ_WEB_PASSWORD: admin
+    volumes:
+      - ./config/log4j2.properties:/opt/apache-activemq/conf/log4j2.properties
+      - activemq-logs:/var/log/activemq
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 2 bash -c '</dev/tcp/localhost/61616' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - monitoring
+
+  otel-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile.otel-collector
+    container_name: otel-collector
+    command: ["--config", "/etc/otel/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel/config.yaml
+      - activemq-logs:/var/log/activemq:ro
+    environment:
+      - SIGNOZ_REGION=${SIGNOZ_REGION}
+      - SIGNOZ_INGESTION_KEY=${SIGNOZ_INGESTION_KEY}
+    depends_on:
+      activemq:
+        condition: service_healthy
+    networks:
+      - monitoring
+
+volumes:
+  activemq-logs:
+
+networks:
+  monitoring:
+    driver: bridge
+```
+
+Key details:
+
+- The shared `activemq-logs` volume lets the collector read log files written by ActiveMQ
+- The `depends_on: service_healthy` ensures ActiveMQ is fully started before the collector tries to connect via JMX
+- Config is mounted directly to `/opt/apache-activemq/conf/` which is where Classic reads its configuration
+
+### Step 5: Start and Verify
+
+```bash
+docker compose up -d --build
+```
+
+Verify both containers are running:
+
+```bash
+docker compose ps
+```
+
+Expected output:
+
+```text
+NAME             STATUS
+activemq         Up (healthy)
+otel-collector   Up
+```
+
+Check the collector is receiving data:
+
+```bash
+docker compose logs otel-collector | grep -E "(Everything|Metrics|Logs)"
+```
+
+Skip to the [Generate Demo Traffic](#generate-demo-traffic) section if you don't need to set up Artemis.
+
+## Configuring ActiveMQ Artemis
+
+Artemis uses a different MBean domain (`org.apache.activemq.artemis`) than Classic, so the OTel Collector's built-in `target_system: activemq` won't work. Artemis requires three additional pieces: enabling metrics in `broker.xml`, custom JMX metric definitions in YAML, and audit log configuration.
+
+### Step 1: Create the Artemis Dockerfile
+
+Artemis needs JMX enabled via `JAVA_ARGS`, and requires root access to create the log directory. Create `Dockerfile`: 
+
+```docker
+FROM apache/artemis:latest
+
+# Create log directory
+USER root
+RUN mkdir -p /var/log/artemis && chown artemis:artemis /var/log/artemis
+USER artemis
+
+# Enable JMX on port 9875 (no auth/SSL for demo)
+ENV JAVA_ARGS="-Dcom.sun.management.jmxremote \
+  -Dcom.sun.management.jmxremote.port=9875 \
+  -Dcom.sun.management.jmxremote.rmi.port=9875 \
+  -Dcom.sun.management.jmxremote.ssl=false \
+  -Dcom.sun.management.jmxremote.authenticate=false \
+  -Djava.rmi.server.hostname=artemis"
+
+EXPOSE 61616 8161 61613 9875
+```
+
+Two differences from Classic: Artemis uses `JAVA_ARGS` instead of `ACTIVEMQ_OPTS`, and JMX runs on port 9875 instead of 1099. The Artemis Docker image runs as the `artemis` user, so we temporarily switch to `root` to create the log directory.
+
+### Step 2: Get Default Configuration Files from Artemis
+
+Artemis generates its configuration at startup, so we need the default `broker.xml` and `log4j2.properties` as a starting point before we can enable metrics and file-based logging. Make sure you have a `config` folder created in your project directory before running these commands.
+
+```bash
+docker run -d --name artemis-tmp apache/artemis:latest
+sleep 5
+docker cp artemis-tmp:/var/lib/artemis-instance/etc/broker.xml config/broker.xml
+docker cp artemis-tmp:/var/lib/artemis-instance/etc/log4j2.properties config/log4j2.properties
+docker rm -f artemis-tmp
+```
+
+### Step 3: Configure broker.xml
+
+Artemis exposes broker/address/queue metrics, for Micrometre optional metrics, JVM memory is enabled by default, while GC/threads/netty/etc are disabled unless enabled. Add the following `<metrics>` block inside the `<core>` section of `config/broker.xml`.
+
+```xml
+<metrics>
+   <jvm-memory>true</jvm-memory>
+   <jvm-gc>true</jvm-gc>
+   <jvm-threads>true</jvm-threads>
+   <netty-pool>true</netty-pool>
+   <file-descriptors>true</file-descriptors>
+   <processor>true</processor>
+   <uptime>true</uptime>
+   <logging>true</logging>
+   <security-caches>true</security-caches>
+   <plugin class-name="org.apache.activemq.artemis.core.server.metrics.plugins.LoggingMetricsPlugin"/>
+</metrics>
+```
+
+Without this block, Artemis still exposes broker and queue MBeans, but the JVM, GC, thread, and netty metrics won't be available.
+
+### Step 4: Configure Logging and Audit Logs
+
+Find and replace the Log file appender section for broker logs in `log4j2.properties` file:
+
+```text
+# Log file appender
+appender.log_file.type = RollingFile
+appender.log_file.name = log_file
+appender.log_file.fileName = /var/log/artemis/artemis.log
+appender.log_file.filePattern = /var/log/artemis/artemis.log.%d{yyyy-MM-dd}
+appender.log_file.layout.type = PatternLayout
+appender.log_file.layout.pattern = %d [%-5level] [%logger] %msg%n
+appender.log_file.policies.type = Policies
+appender.log_file.policies.cron.type = CronTriggeringPolicy
+appender.log_file.policies.cron.schedule = 0 0 0 **?
+appender.log_file.policies.cron.evaluateOnStartup = true
+```
+
+Find and replace the audit log appender for broker logs in `log4j2.properties` file:
+
+```text
+# Audit log file appender
+appender.audit_log_file.type = RollingFile
+appender.audit_log_file.name = audit_log_file
+appender.audit_log_file.fileName = /var/log/artemis/audit.log
+appender.audit_log_file.filePattern = /var/log/artemis/audit.log.%d{yyyy-MM-dd}
+appender.audit_log_file.layout.type = PatternLayout
+appender.audit_log_file.layout.pattern = %d [%-5level] [%logger] %msg%n
+appender.audit_log_file.policies.type = Policies
+appender.audit_log_file.policies.cron.type = CronTriggeringPolicy
+appender.audit_log_file.policies.cron.schedule = 0 0 0** ?
+appender.audit_log_file.policies.cron.evaluateOnStartup = true
+
+# Message audit: tracks message production/consumption
+logger.audit_message.level = INFO
+```
+
+Audit logs give you visibility into who created queues, who produced and consumed messages, and authentication events. These are disabled by default in Artemis.
+
+### Step 5: Write Custom JMX Metric Definitions
+
+Since the OTel Collector's built-in target_system: activemq targets Classic's MBean domain, we need a custom YAML file that tells the JMX receiver how to find Artemis MBeans and translate them into OpenTelemetry metrics.
+
+The following file is organized into three rule blocks: broker-level metrics (connections, memory, disk), address-level metrics (message counts, routing, paging), and queue-level metrics (per-queue depth, consumers, acknowledgements, expiry). Save this as `artemis-jmx.yaml`.
+
+```yaml
+rules:
+  # ──────────────────────────────────────────────
+  # Broker-level metrics
+  # Matches: org.apache.activemq.artemis:broker="<brokerName>"
+  # One MBean per broker. Gives connection counts and memory/disk usage.
+  # ──────────────────────────────────────────────
+  - bean: org.apache.activemq.artemis:broker=**
+    metricAttribute:
+      broker: param(broker)
+    prefix: artemis.
+    mapping:
+      ConnectionCount:
+        metric: connection.count
+        type: updowncounter
+        unit: "{connection}"
+        desc: The total number of current connections.
+      TotalConnectionCount:
+        metric: connection.total
+        type: counter
+        unit: "{connection}"
+        desc: The total number of connections since broker start.
+      AddressMemoryUsage:
+        metric: address.memory.usage
+        type: gauge
+        unit: By
+        desc: The memory used by all addresses for in-memory messages.
+      AddressMemoryUsagePercentage:
+        metric: address.memory.usage_percent
+        type: gauge
+        unit: "%"
+        desc: The percentage of available memory used by addresses.
+      DiskStoreUsage:
+        metric: disk.store.usage_percent
+        type: gauge
+        unit: "%"
+        desc: The percentage of disk store used.
+
+  # ──────────────────────────────────────────────
+  # Address-level metrics
+  # Matches: org.apache.activemq.artemis:broker=*,component=addresses,address=*
+  # One MBean per address. Tracks message flow and paging state.
+  # ──────────────────────────────────────────────
+  - bean: org.apache.activemq.artemis:broker=**,component=addresses,address=**
+    metricAttribute:
+      broker: param(broker)
+      address: param(address)
+    prefix: artemis.address.
+    mapping:
+      MessageCount:
+        metric: message.count
+        type: updowncounter
+        unit: "{message}"
+        desc: The number of messages currently in the address.
+      RoutedMessageCount:
+        metric: message.routed
+        type: counter
+        unit: "{message}"
+        desc: The total number of messages routed to one or more bindings.
+      UnRoutedMessageCount:
+        metric: message.unrouted
+        type: counter
+        unit: "{message}"
+        desc: The total number of messages not routed to any binding.
+      AddressSize:
+        metric: size
+        type: gauge
+        unit: By
+        desc: The size of all messages in the address, in bytes.
+      NumberOfPages:
+        metric: pages.count
+        type: gauge
+        unit: "{page}"
+        desc: The number of pages used by this address.
+
+  # ──────────────────────────────────────────────
+  # Queue-level metrics
+  # Matches: org.apache.activemq.artemis:broker=*,component=addresses,
+  #          address=*,subcomponent=queues,routing-type=*,queue=*
+  # One MBean per queue. The most granular level — per-queue depth,
+  # consumer count, delivery state, and message lifecycle counters.
+  # ──────────────────────────────────────────────
+  - bean: org.apache.activemq.artemis:broker=**,component=addresses,address=**,subcomponent=queues,routing-type=**,queue=**
+    metricAttribute:
+      broker: param(broker)
+      address: param(address)
+      queue: param(queue)
+      routing_type: param(routing-type)
+    prefix: artemis.queue.
+    mapping:
+      MessageCount:
+        metric: message.count
+        type: updowncounter
+        unit: "{message}"
+        desc: The number of messages currently in the queue.
+      MessagesAdded:
+        metric: message.added
+        type: counter
+        unit: "{message}"
+        desc: Total messages added to the queue since creation.
+      MessagesAcknowledged:
+        metric: message.acknowledged
+        type: counter
+        unit: "{message}"
+        desc: Total messages acknowledged from the queue.
+      MessagesExpired:
+        metric: message.expired
+        type: counter
+        unit: "{message}"
+        desc: Total messages that expired from the queue.
+      MessagesKilled:
+        metric: message.killed
+        type: counter
+        unit: "{message}"
+        desc: Total messages removed from the queue (sent to DLQ).
+      ConsumerCount:
+        metric: consumer.count
+        type: updowncounter
+        unit: "{consumer}"
+        desc: Number of consumers consuming from the queue.
+      DeliveringCount:
+        metric: message.delivering
+        type: updowncounter
+        unit: "{message}"
+        desc: Messages currently being delivered to consumers.
+      PersistentSize:
+        metric: size.persistent
+        type: gauge
+        unit: By
+        desc: The persistent size of all messages in the queue.
+      ScheduledCount:
+        metric: message.scheduled
+        type: updowncounter
+        unit: "{message}"
+        desc: The number of scheduled messages in the queue.
+      DurableMessageCount:
+        metric: message.durable
+        type: updowncounter
+        unit: "{message}"
+        desc: The number of durable messages in the queue.
+```
+
+<KeyPointCallout defaultCollapsed="true" title="YAML breakdown">
+The YAML follows a `rules`-based structure where each rule maps one MBean pattern to a set of metrics.
+
+- `bean` is a JMX ObjectName pattern with wildcards. The receiver queries the MBean server for all objects matching this pattern.
+- `metricAttribute` extracts named parameters from the ObjectName (like `broker`, `address`, `queue`) and attaches them as metric attributes, so you can filter and group by queue name in your dashboards.
+- `prefix` is prepended to every metric name in the `mapping` section. For example, with `prefix: artemis.queue.` and a mapping key of `message.count`, the final metric name becomes `artemis.queue.message.count`.
+- Each entry in `mapping` ties one MBean attribute (like `MessageCount` or `ConsumerCount`) to an OpenTelemetry metric with a specified type (`gauge`, `counter`, or `updowncounter`), unit, and description.
+</KeyPointCallout>
+
+### Step 6: Update the OTel Collector Dockerfile
+
+Add the custom Artemis metric definitions to the collector image by including one additional `COPY` line in `Dockerfile.otel-collector`.
+
+```yaml
+# Stage 1: Get the collector binary
+FROM otel/opentelemetry-collector-contrib:latest AS collector
+
+# Stage 2: Java base with collector
+FROM eclipse-temurin:17-jre
+
+COPY --from=collector /otelcol-contrib /otelcol-contrib
+COPY opentelemetry-jmx-metrics.jar /opt/opentelemetry-jmx-metrics.jar
+
+# Artemis-specific: custom JMX metric definitions
+COPY artemis-jmx.yaml /opt/artemis-jmx.yaml
+
+RUN mkdir -p /tmp && chmod 1777 /tmp
+
+ENTRYPOINT ["/otelcol-contrib"]
+```
+
+### Step 7: Configure the OTel Collector
+
+Save the following as `otel-collector-config.yaml`. Unlike Classic, we use `target_system: jvm` (not activemq) and point to our custom `artemis-jmx.yaml` via `jmx_configs`. The filelog receiver also tails two files instead of one (broker logs and audit logs), and the regex uses bracket delimiters (`[...]`) to match Artemis's log format.
+
+```yaml
+receivers:
+  jmx:
+    jar_path: /opt/opentelemetry-jmx-metrics.jar
+    endpoint: artemis:9875
+    target_system: jvm
+    jmx_configs: /opt/artemis-jmx.yaml
+    collection_interval: 10s
+
+  filelog/artemis:
+    include:
+      - /var/log/artemis/artemis.log
+      - /var/log/artemis/audit.log
+    start_at: beginning
+    operators:
+      - type: regex_parser
+        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) \[(?P<severity>\w+)\s**\] \[(?P<logger>[^\]]+)\] (?P<message>.*)$'
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%d %H:%M:%S,%L'
+        severity:
+          parse_from: attributes.severity
+
+processors:
+  batch:
+    timeout: 10s
+  resourcedetection:
+    detectors: [env, system]
+  resource:
+    attributes:
+      - key: service.name
+        value: artemis-demo
+        action: upsert
+
+exporters:
+  otlp_grpc:
+    endpoint: https://ingest.${SIGNOZ_REGION}.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    metrics/jmx:
+      receivers: [jmx]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp_grpc, debug]
+    logs/artemis:
+      receivers: [filelog/artemis]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp_grpc, debug]
+```
+
+An Artemis log line looks like this, which is why the regex expects brackets instead of pipes:
+
+```text
+2024-01-15 10:30:45,123 [INFO ] [org.apache.activemq.artemis] AMQ221007: Server is now live
+```
+
+### Step 8: Create Docker Compose
+
+Save the following as `docker-compose.yml`. Configs are mounted to `/var/lib/artemis-instance/etc-override/`, which is the documented way to override Artemis configuration in Docker. Artemis merges these with its defaults at startup.
+
+```yaml
+services:
+  artemis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: artemis
+    ports:
+      - "61616:61616"   # Core messaging
+      - "8161:8161"     # Web console
+      - "61613:61613"   # STOMP
+      - "5672:5672"     # AMQP
+      - "1883:1883"     # MQTT
+      - "9875:9875"     # JMX
+    environment:
+      ARTEMIS_USER: artemis
+      ARTEMIS_PASSWORD: artemis
+      ANONYMOUS_LOGIN: "true"
+    volumes:
+      - ./config/broker.xml:/var/lib/artemis-instance/etc-override/broker.xml
+      - ./config/log4j2.properties:/var/lib/artemis-instance/etc-override/log4j2.properties
+      - artemis-logs:/var/log/artemis
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 2 bash -c '</dev/tcp/localhost/61616' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - monitoring
+
+  otel-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile.otel-collector
+    container_name: otel-collector
+    command: ["--config", "/etc/otel/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel/config.yaml
+      - artemis-logs:/var/log/artemis:ro
+    environment:
+      - SIGNOZ_REGION=${SIGNOZ_REGION}
+      - SIGNOZ_INGESTION_KEY=${SIGNOZ_INGESTION_KEY}
+    depends_on:
+      artemis:
+        condition: service_healthy
+    networks:
+      - monitoring
+
+volumes:
+  artemis-logs:
+
+networks:
+  monitoring:
+    driver: bridge
+```
+
+### Step 9: Start and Verify
+
+```bash
+docker compose up -d --build
+```
+
+Verify both containers are running:
+
+```bash
+docker compose ps
+```
+
+Expected output:
+
+```text
+NAME             STATUS
+artemis          Up (healthy)
+otel-collector   Up
+```
+
+Check the collector is receiving data:
+
+```bash
+docker compose logs otel-collector | grep -E "(Everything|Metrics|Logs)"
+```
+
+## Generate Demo Traffic
+
+With the broker and collector running, you can generate message traffic to see metrics populate in SigNoz. The producer sends messages to demo queues and topics, while the consumer drains them, giving you both sides of the pipeline in your dashboards.
+
+### Step 1: Install the Python dependency
+
+```bash
+pip3 install stomp.py
+```
+
+### Step 2: Create and Run a Python Producer
+
+Save the following as `scripts/producer.py`. It continuously sends JSON messages to two queues and one topic, with a random delay between batches to simulate realistic traffic patterns.
+
+```python
+# Producer script for ActiveMQ Artemis monitoring demo.
+# Sends messages to demo queues to generate metrics traffic.
+
+# Usage:
+#    python3 producer.py
+
+import stomp
+import time
+import json
+import random
+import sys
+
+# Artemis connection settings
+ARTEMIS_HOST = "localhost"
+ARTEMIS_STOMP_PORT = 61613
+ARTEMIS_USER = "artemis"
+ARTEMIS_PASSWORD = "artemis"
+
+# Demo queues
+QUEUES = [
+    "/queue/demo.orders",
+    "/queue/demo.events",
+]
+
+# Demo topic (multicast address)
+TOPICS = [
+    "/topic/demo.notifications",
+]
+
+def create_order_message():
+    """Generate a sample order message."""
+    return json.dumps({
+        "order_id": random.randint(1000, 9999),
+        "product": random.choice(["laptop", "phone", "tablet", "headphones", "keyboard"]),
+        "quantity": random.randint(1, 10),
+        "price": round(random.uniform(10.0, 1000.0), 2),
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    })
+
+def create_event_message():
+    """Generate a sample event message."""
+    return json.dumps({
+        "event_type": random.choice(["user_login", "page_view", "checkout", "search", "signup"]),
+        "user_id": f"user_{random.randint(1, 100)}",
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    })
+
+def create_notification_message():
+    """Generate a sample notification message."""
+    return json.dumps({
+        "type": random.choice(["order_confirmed", "shipping_update", "promotion"]),
+        "recipient": f"user_{random.randint(1, 100)}@example.com",
+        "message": "This is a demo notification",
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    })
+
+def main():
+    """Connect to Artemis and continuously send messages."""
+    conn = stomp.Connection([(ARTEMIS_HOST, ARTEMIS_STOMP_PORT)])
+    conn.connect(ARTEMIS_USER, ARTEMIS_PASSWORD, wait=True)
+    print(f"Connected to Artemis at {ARTEMIS_HOST}:{ARTEMIS_STOMP_PORT}")
+
+    message_count = 0
+    try:
+        while True:
+            # Send to queues
+            for queue in QUEUES:
+                if "orders" in queue:
+                    msg = create_order_message()
+                else:
+                    msg = create_event_message()
+                conn.send(destination=queue, body=msg, content_type="application/json")
+                message_count += 1
+
+            # Send to topics
+            for topic in TOPICS:
+                msg = create_notification_message()
+                conn.send(destination=topic, body=msg, content_type="application/json")
+                message_count += 1
+
+            print(f"Sent {message_count} messages total", end="\r")
+
+            # Random delay between 0.5 and 2 seconds
+            time.sleep(random.uniform(0.5, 2.0))
+
+    except KeyboardInterrupt:
+        print(f"\nStopping producer. Total messages sent: {message_count}")
+    finally:
+        conn.disconnect()
+
+if __name__ == "__main__":
+    main()
+```
+
+Start the producer in one terminal:
+
+```bash
+python3 scripts/producer.py
+```
+
+### Step 3: Create and Run a Python Consumer
+
+Save the following as `scripts/consumer.py`. It subscribes to the queues and topic, consuming messages as they arrive.
+
+```python
+#Consumer script for ActiveMQ Artemis monitoring demo.
+#Consumes messages from demo queues to generate consumer-side metrics.
+
+#Usage:
+#    python3 consumer.py
+
+import stomp
+import time
+import sys
+import json
+
+# Artemis connection settings
+ARTEMIS_HOST = "localhost"
+ARTEMIS_STOMP_PORT = 61613
+ARTEMIS_USER = "artemis"
+ARTEMIS_PASSWORD = "artemis"
+
+# Queues to consume from
+QUEUES = [
+    "/queue/demo.orders",
+    "/queue/demo.events",
+]
+
+# Topic subscriptions
+TOPICS = [
+    "/topic/demo.notifications",
+]
+
+class MessageListener(stomp.ConnectionListener):
+    """Listener that handles incoming messages."""
+
+    def __init__(self):
+        self.message_count = 0
+
+    def on_message(self, frame):
+        self.message_count += 1
+        destination = frame.headers.get("destination", "unknown")
+        try:
+            body = json.loads(frame.body)
+            print(f"[{self.message_count}] Received from {destination}: {json.dumps(body, indent=None)[:100]}")
+        except json.JSONDecodeError:
+            print(f"[{self.message_count}] Received from {destination}: {frame.body[:100]}")
+
+    def on_error(self, frame):
+        print(f"ERROR: {frame.body}")
+
+    def on_disconnected(self):
+        print("Disconnected from Artemis")
+
+def main():
+    """Connect to Artemis and consume messages from demo queues."""
+    listener = MessageListener()
+
+    conn = stomp.Connection([(ARTEMIS_HOST, ARTEMIS_STOMP_PORT)])
+    conn.set_listener("demo", listener)
+    conn.connect(ARTEMIS_USER, ARTEMIS_PASSWORD, wait=True)
+    print(f"Connected to Artemis at {ARTEMIS_HOST}:{ARTEMIS_STOMP_PORT}")
+
+    # Subscribe to queues
+    sub_id = 0
+    for queue in QUEUES:
+        conn.subscribe(destination=queue, id=sub_id, ack="auto")
+        print(f"Subscribed to {queue}")
+        sub_id += 1
+
+    # Subscribe to topics
+    for topic in TOPICS:
+        conn.subscribe(destination=topic, id=sub_id, ack="auto")
+        print(f"Subscribed to {topic}")
+        sub_id += 1
+
+    print("\nWaiting for messages... Press Ctrl+C to stop.\n")
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print(f"\nStopping consumer. Total messages received: {listener.message_count}")
+    finally:
+        conn.disconnect()
+
+if __name__ == "__main__":
+    main()
+```
+
+Start the consumer in another terminal:
+
+```bash
+python3 scripts/consumer.py
+```
+
+## Monitoring ActiveMQ in SigNoz
+
+Once metrics are flowing into SigNoz, you can explore them and build dashboards.
+
+### Exploring metrics
+
+Go to **Metrics → Explorer** in SigNoz Cloud and search by prefix to find what's available.
+
+1. **ActiveMQ Classic Metrics**
+  Broker and queue metrics are under `activemq.*` . For example, `activemq.message.current` shows messages waiting in a queue. 
+  
+2. **ActiveMQ Artemis Metrics**  
+  Metrics are under `artemis.*`. For example, `artemis.queue.message.count` shows messages waiting in a queue.
+
+3. **JVM metrics**
+  Metrics like heap memory, garbage collection, and thread counts are under `jvm.*` for both variants. For example, `jvm.memory.heap.used`.  
+
+### Building a Dashboard
+
+To build dashboards in SigNoz, follow the [Managing Dashboards guide](/docs/userguide/manage-dashboards/). Here's what a ActiveMQ monitoring dashboards looks like with the demo traffic running.
+
+<Figure src="/img/guides/2026/02/activemq-monitoring-classical-dashboard.webp" alt="Screenshot of a SigNoz ActiveMQ Classic dashboard with time-series panels for queue depth, enqueue/dequeue rate, consumer and producer counts, JVM heap usage, and broker memory usage over a 15-minute time range." caption="ActiveMQ Classic dashboard in SigNoz showing broker and queue metrics." />
+
+### Exploring Logs
+
+Go to Logs → Explorer in SigNoz and filter by `service.name = activemq-classic-demo` or `service.name = artemis-demo`. Narrowing further with `severity = ERROR` or `severity = WARN` helps surface problems quickly.
+
+<Figure src="/img/guides/2026/02/activemq-monitoring-logs.webp" alt="ActiveMQ logs explorer view in SigNoz showing filtered INFO logs and frequency chart." caption="ActiveMQ logs explorer view in SigNoz showing filtered INFO logs and frequency chart." />
+
+For Artemis, audit logs capture queue/address creation events, message production and consumption, and authentication attempts. These are useful for investigating when a consumer disconnected or tracking unauthorised access.
+
+### Setting up alerts
+
+SigNoz supports threshold-based alerts on any metric. To learn how to create alerts, see the [SigNoz Alerts documentation](/docs/alerts/).
+
+You can add the following alerts for ActiveMQ monitoring.
+
+| Alert | Metric (Classic / Artemis) | Condition | Severity |
+| --- | --- | --- | --- |
+| Queue backlog growing | `activemq.message.current` / `artemis.queue.message.count` | > 5000 for 5 min | Warning |
+| No consumers on queue | `activemq.consumer.count` / `artemis.queue.consumer.count` | = 0 for 2 min | Critical |
+| Broker memory high | `activemq.memory.utilization` / `artemis.address.memory.usage_percent` | > 80% for 5 min | Warning |
+| Disk store filling up | `activemq.store.utilization` / `artemis.disk.store.usage_percent` | > 80% for 5 min | Warning |
+| Messages expiring | rate of `activemq.message.expired` / `artemis.queue.message.expired` | > 0 for 5 min | Warning |
+| JVM heap high | `jvm.memory.used` | > 85% of max for 10 min | Warning |
+
+Adjust the thresholds based on your workload patterns. A queue depth of 5000 might be normal for a high-throughput system, but alarming for a low-traffic one.
+
+## Troubleshooting Playbook
+
+Use these patterns to quickly narrow down the root cause of common ActiveMQ issues.
+
+| Symptom | Likely cause | What to check |
+| --- | --- | --- |
+| Queue depth keeps growing | Consumers too slow or disconnected | Check `consumer.count`. If zero, investigate consumer logs. If non-zero, look at dequeue rate vs enqueue rate. |
+| Dequeue rate dropped to zero | Consumer crash or network partition | Check consumer application logs and connectivity. Verify the consumer count metric. |
+| Broker memory at 100% | Messages accumulating faster than consumers drain them | Check queue sizes across all queues. Identify the largest queues. Consider adding consumers or increasing broker memory limit. |
+| Store usage climbing | Persistent messages not being consumed | Same as memory, but also check if disk I/O is a bottleneck. Run `iostat` on the broker host. |
+| Expired messages appearing | TTL set but consumers too slow | Review the TTL settings. Either increase TTL, speed up consumers, or add more consumer instances. |
+| High GC pause times | Heap too small or too many temporary objects | Check heap usage pattern. If sawtooth with high baseline, increase `-Xmx`. If frequent young-gen GCs, check for object allocation hotspots. |
+| Connection count dropped suddenly | Network issue or client reconnection storm | Check broker network logs. Look for `Transport` exceptions in the ActiveMQ log. |
+| JMX connection refused from Collector | JMX not enabled or port not exposed | Verify `ACTIVEMQ_OPTS` / `JAVA_ARGS` include the JMX flags. Check that the JMX port is mapped in Docker and reachable from the Collector container. |
+| Metrics appear in Collector logs but not in SigNoz | Exporter misconfiguration | Verify your SigNoz ingestion key and region. Check the Collector logs for OTLP export errors. |
+
+## Conclusion
+
+ActiveMQ is a critical component in many architectures, and monitoring it shouldn't require proprietary agents or vendor lock-in. With OpenTelemetry's JMX and filelog receivers, you get a single, standards-based pipeline that covers both ActiveMQ Classic and Artemis, collecting broker metrics, queue health, JVM performance, and logs into a single observability backend. The setup you built in this guide provides the foundation to detect queue backlogs, consumer failures, and resource exhaustion before they impact your users.

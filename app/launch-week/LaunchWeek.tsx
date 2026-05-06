@@ -10,7 +10,7 @@ import CountdownTimer from '@/components/Timer'
 import { Linkedin } from '@/components/social-icons/SolidIcons'
 import Youtube from '@/components/VideoPlayer/VideoPlayer'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
-import { Card } from "@/components/ui/Card"
+import { Card } from '@/components/ui/Card'
 
 const MainSection: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -25,7 +25,7 @@ const MainSection: React.FC = () => {
     <>
       <section className="flex w-full flex-col items-start px-20 pt-12 font-medium max-md:max-w-full max-md:px-5">
         <Card
-          className="container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col !px-0 bg-transparent"
+          className="container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col bg-transparent !px-0"
           style={{
             backgroundImage: "url('/img/launch_week/launch-week-3-bg.svg')",
             backgroundRepeat: 'no-repeat',
@@ -74,7 +74,7 @@ const MainSection: React.FC = () => {
             </a>
           </div>
 
-           <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Monday ⎯ Sep 08</div>
               <div className="flex flex-col gap-2">
@@ -111,11 +111,11 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div>
-                  <div className="font-eedium mb-2 text-base">
-                    Interactive Dashboards
-                  </div>
+                  <div className="font-eedium mb-2 text-base">Interactive Dashboards</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Eliminate the current workflow of opening new tabs and manually recreating queries every time you need to investigate a spike or anomaly. Click directly on any data point to drill down and explore.
+                    Eliminate the current workflow of opening new tabs and manually recreating
+                    queries every time you need to investigate a spike or anomaly. Click directly on
+                    any data point to drill down and explore.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -144,7 +144,7 @@ const MainSection: React.FC = () => {
             </Modal>
           </div>
 
-        <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ Sep 09</div>
               <div className="flex flex-col gap-2">
@@ -181,24 +181,23 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div className="min-w-[306px]">
-                  <div className="font-eedium mb-2 text-base">
-                    Query Builder v5
-                  </div>
+                  <div className="font-eedium mb-2 text-base">Query Builder v5</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    v5 brings familiar SQL-like syntax to observability data with expression-based querying that works across logs, metrics, and traces. Write complex queries using the syntax you already know.
+                    v5 brings familiar SQL-like syntax to observability data with expression-based
+                    querying that works across logs, metrics, and traces. Write complex queries
+                    using the syntax you already know.
                   </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
-                  <ArrowRight size={14} />
-
+                    <ArrowRight size={14} />
                   </div>
                 </div>
               </div>
             </Link>
           </div>
 
-           <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ Sep 10</div>
               <div className="flex flex-col gap-2">
@@ -235,16 +234,16 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div>
-                  <div className="font-eedium mb-2 text-base">
-                    OSS Improvements
-                  </div>
+                  <div className="font-eedium mb-2 text-base">OSS Improvements</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Self-hosting SigNoz just got significantly easier with community-focused improvements that remove deployment friction and give you more flexibility in how you run your observability stack.
+                    Self-hosting SigNoz just got significantly easier with community-focused
+                    improvements that remove deployment friction and give you more flexibility in
+                    how you run your observability stack.
                   </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
-                  <ArrowRight size={14} />
+                    <ArrowRight size={14} />
                   </div>
                 </div>
               </div>
@@ -288,16 +287,16 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div>
-                  <div className="font-eedium mb-2 text-base">
-                    Trace Operators
-                  </div>
+                  <div className="font-eedium mb-2 text-base">Trace Operators</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Map service dependencies and validate architectural patterns without manually analyzing trace flows. Trace Operators let you query relationships between services within distributed traces using simple, intuitive syntax.
+                    Map service dependencies and validate architectural patterns without manually
+                    analyzing trace flows. Trace Operators let you query relationships between
+                    services within distributed traces using simple, intuitive syntax.
                   </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
-                  <ArrowRight size={14} />
+                    <ArrowRight size={14} />
                   </div>
                 </div>
               </div>
@@ -341,11 +340,11 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div>
-                  <div className="font-eedium mb-2 text-base">
-                    Cost Control
-                  </div>
+                  <div className="font-eedium mb-2 text-base">Cost Control</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Take control of your observability spending with complete transparency into usage patterns across logs, metrics, and traces. No more surprise bills or blind cost optimization - get the visibility you need to manage budgets effectively.
+                    Take control of your observability spending with complete transparency into
+                    usage patterns across logs, metrics, and traces. No more surprise bills or blind
+                    cost optimization - get the visibility you need to manage budgets effectively.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -359,9 +358,9 @@ const MainSection: React.FC = () => {
 
           {/* Timer */}
           {[
-              //'Monday ⎯ Sep 08',
-              //'Tuesday ⎯ Sep 09',
-              //'Wednesday ⎯ Sep 10',
+            //'Monday ⎯ Sep 08',
+            //'Tuesday ⎯ Sep 09',
+            //'Wednesday ⎯ Sep 10',
             //'Thursday ⎯ Sep 11',
             //'Friday ⎯ Sep 12',
           ].map((day, index) => (
@@ -408,10 +407,10 @@ const GetStarted = ({ page }) => {
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
   return (
-    <Card className="flex flex-col gap-16 px-20 font-medium max-md:max-w-full max-md:px-5 bg-transparent">
-      <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:45%] bg-[center_top_-12rem] sm:bg-no-repeat">
+    <Card className="flex flex-col gap-16 bg-transparent px-20 font-medium max-md:max-w-full max-md:px-5">
+      <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:45%] bg-[center_top_-12rem] sm:bg-no-repeat">
         <section className="container flex max-h-full max-w-full flex-col !px-0">
-          <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[length:110%] bg-[center_top_calc(-250px)] bg-no-repeat">
+          <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[length:110%] bg-[center_top_calc(-250px)] bg-no-repeat">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
                 Get started with <br /> SigNoz Cloud today

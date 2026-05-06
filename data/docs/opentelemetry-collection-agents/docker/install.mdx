@@ -1,207 +1,262 @@
 ---
-date: 2026-02-04
-title: OpenTelemetry Collector for Docker - Install
+date: 2026-02-25
+title: Docker Collection Agent - Install
 id: install
-
-description: Step-by-step guide to install OpenTelemetry Collector for Docker environments
+description: Install the OpenTelemetry Collector on your Docker host to collect metrics, logs, and traces and send them to SigNoz.
+doc_type: howto
 ---
+
+This guide walks you through installing the OpenTelemetry Collector **contrib** image on your Docker host. The collector is configured to collect host metrics, container metrics, container logs, and forward application traces to SigNoz.
 
 ## Prerequisites
 
-Before installing the OpenTelemetry Collector, ensure you have:
-
 - Docker Engine 20.10+ installed and running
-- Administrative access to the Docker host
+- SigNoz Cloud account or self-hosted SigNoz instance
+- Ports `4317`, `4318` available on the host
 
-## Installation
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-### Step 1: Create Configuration Directory
+## Step 1: Create Collector Configuration
 
-Creates a dedicated directory to organize the OpenTelemetry Collector configuration file.
-
-```bash
-mkdir -p ~/opentelemetry-collector
-cd ~/opentelemetry-collector
-```
-
-### Step 2: Create Collector Configuration
-
-Defines how the OpenTelemetry Collector receives, processes, and exports telemetry data to SigNoz.
-
-Create `config.yaml`:
-
-<Tabs>
-<TabItem value="cloud" label="SigNoz Cloud" default>
+Create a `config.yaml` file with the following content. This config is tailored for SigNoz usage: it collects host metrics, container metrics, container logs, and accepts OTLP data from instrumented applications.
 
 ```yaml:config.yaml
 receivers:
+  # OTLP: accept traces, metrics, and logs from instrumented apps (SDKs, agents)
   otlp:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  # Host metrics: CPU, disk, memory, network, etc. (root_path for container)
+  hostmetrics:
+    collection_interval: 60s
+    root_path: /hostfs
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+        mute_process_user_error: true
+      processes: {}
+  # Container metrics from Docker daemon
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 10s
+    timeout: 20s
+  # Container logs: Docker JSON log files
+  filelog:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    start_at: end  # Only new logs collected from this point. Use "beginning" to also collect existing logs.
+    include_file_name: false
+    include_file_path: true
+    operators:
+      - id: container-parser
+        type: container
+        format: docker
+        add_metadata_from_filepath: false
+
 processors:
   batch:
+    send_batch_size: 1000
+    timeout: 10s
+  resourcedetection:
+    detectors: [env, system, docker]
+    timeout: 2s
+    system:
+      hostname_sources: [os]
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 4000
+    spike_limit_mib: 800
 
 exporters:
   otlp:
-    endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
+    endpoint: 'ingest.<region>.signoz.cloud:443'
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": "<your-ingestion-key>"
-  debug:
-    verbosity: normal
+      'signoz-ingestion-key': '<your-ingestion-key>'
 
 extensions:
   health_check:
+    endpoint: 0.0.0.0:13133
   pprof:
+    endpoint: 0.0.0.0:1777
   zpages:
+    endpoint: 0.0.0.0:55679
 
 service:
   extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, resourcedetection, batch]
       exporters: [otlp]
     metrics:
-      receivers: [otlp]
-      processors: [batch]
+      receivers: [otlp, hostmetrics, docker_stats]
+      processors: [memory_limiter, resourcedetection, batch]
       exporters: [otlp]
     logs:
-      receivers: [otlp]
-      processors: [batch]
+      receivers: [otlp, filelog]
+      processors: [memory_limiter, resourcedetection, batch]
       exporters: [otlp]
 ```
 
-**Configuration Steps:**
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+Verify the following values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+## Step 2: Run the Collector
+
+<Tabs>
+<TabItem value="docker-compose" label="Docker Compose" default>
+
+Create a `docker-compose.yaml` file:
+
+```yaml:docker-compose.yaml
+services:
+  signoz-collection-agent:
+    image: otel/opentelemetry-collector-contrib:0.139.0
+    container_name: signoz-collection-agent
+    restart: unless-stopped
+    user: "0:0"
+    network_mode: host
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>
+    volumes:
+      - ./config.yaml:/etc/otelcol-contrib/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/hostfs:ro
+```
+
+Start the collector:
+
+```bash
+docker compose up -d
+```
 
 </TabItem>
-<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+<TabItem value="docker-run" label="Docker Run">
 
-```yaml:config.yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-
-processors:
-  batch:
-
-exporters:
-  otlp:
-    endpoint: "http://<SIGNOZ_HOST>:4317"
-    tls:
-      insecure: true
-  debug:
-    verbosity: normal
-
-extensions:
-  health_check:
-  pprof:
-  zpages:
-
-service:
-  extensions: [health_check, pprof, zpages]
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    logs:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
+```bash
+docker run --name signoz-collection-agent \
+  --restart unless-stopped \
+  --detach \
+  --user 0:0 \
+  --network host \
+  -e OTEL_RESOURCE_ATTRIBUTES="deployment.environment=<your-environment>" \
+  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
+  -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /:/hostfs:ro \
+  otel/opentelemetry-collector-contrib:0.139.0
 ```
-
-**Configuration Steps:**
-- Replace `<SIGNOZ_HOST>` with your SigNoz instance hostname or IP address
 
 </TabItem>
 </Tabs>
 
-### Step 3: Run the OpenTelemetry Collector
+Verify the following values:
 
-Starts the OpenTelemetry Collector as a Docker container to begin receiving and forwarding telemetry data to SigNoz.
+- `<your-environment>`: The environment name for the deployment
+
+## Step 3: Validate
+
+Check that the collector is running:
 
 ```bash
-docker run --name opentelemetry-collector \
-  --restart unless-stopped \
-  --detach \
-  -p 4317:4317 -p 4318:4318 \
-  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
-  otel/opentelemetry-collector-contrib:0.130.1
+docker logs signoz-collection-agent
 ```
 
-## Verification
+You should see log lines indicating the receivers started successfully:
 
-### Check Collector Status
-
-Verifies that the OpenTelemetry Collector container is running and operational.
-
-Check if container is running
-```bash
-docker ps | grep opentelemetry-collector
+```
+... Everything is ready. Begin running and processing data.
 ```
 
-Check collector logs
-```bash
-docker logs opentelemetry-collector
-```
+In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. Check **Logs Explorer** to confirm container logs are flowing.
 
-You will see the OpenTelemetry Collector logs indicating successful startup and readiness to process data.
-
-## Send Docker data
-
-Once you have your collector up and running, you can see your container logs, metrics and application traces by following the below links:
-- [Send Docker logs](https://signoz.io/docs/userguide/collect_docker_logs/)
-- [Send Containers metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/)
-- [Send Application traces](https://signoz.io/docs/instrumentation/)
+<details>
+<ToggleHeading>
 
 ## Troubleshooting
 
+</ToggleHeading>
+
 ### Container Name Already in Use
 
-If you get an error about the container name already being in use:
+```bash
+docker stop signoz-collection-agent
+docker rm signoz-collection-agent
+```
+
+Then re-run the installation command from Step 2.
+
+### Permission Denied on Docker Socket
+
+If the collector logs show permission errors accessing `/var/run/docker.sock`, ensure the container runs with appropriate permissions. The `docker run` and compose examples above use `user: "0:0"` which runs as root. Alternatively, add the Docker group:
 
 ```bash
-# Check existing containers
-docker ps -a | grep opentelemetry-collector
+docker run --group-add $(getent group docker | cut -d: -f3) ...
+```
 
-# Stop and remove the existing container
-docker stop opentelemetry-collector
-docker rm opentelemetry-collector
+### No Host Metrics Appearing
 
-# Then re-run the installation command
+Verify the host filesystem is mounted correctly:
+
+```bash
+docker inspect signoz-collection-agent | grep -A5 hostfs
+```
+
+Ensure the `root_path: /hostfs` setting in the `hostmetrics` receiver matches the mount target.
+
+### docker_stats Receiver Fails to Start
+
+If collector logs show:
+
+```
+Error response from daemon: client version 1.25 is too old. Minimum supported API version is 1.44
+```
+
+Your Docker daemon requires a newer API version than the receiver's default. Add `api_version` to the `docker_stats` receiver in `config.yaml`, matching the minimum version reported in the error:
+
+```yaml
+receivers:
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    api_version: "1.44"
 ```
 
 ### Configuration Errors
 
-If the collector fails to start, check the logs:
+Check the collector logs for configuration parsing errors:
 
 ```bash
-docker logs opentelemetry-collector
+docker logs signoz-collection-agent 2>&1 | head -50
 ```
 
-Common issues:
-- Invalid YAML syntax in config file
-- Missing or incorrect SigNoz credentials
-- Port conflicts with other services
+Common causes:
+- Invalid YAML syntax in `config.yaml`
+- Missing or incorrect SigNoz ingestion key
+- Port conflicts with other services on 4317 or 4318
 
-The OpenTelemetry Collector is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP).
+</details>
 
 ## Next Steps
 
-- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Configure the Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure)
+- [Docker Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
+- [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)

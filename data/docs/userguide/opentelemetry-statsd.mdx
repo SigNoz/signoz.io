@@ -1,0 +1,256 @@
+---
+id: opentelemetry-statsd
+title: Send StatsD Metrics to SigNoz using OpenTelemetry Collector
+description: Learn how to configure the OpenTelemetry Collector to receive and forward StatsD metrics to SigNoz.
+doc_type: howto
+date: 2026-03-09
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<a href="https://github.com/statsd/statsd" target="_blank" rel="noopener noreferrer nofollow">StatsD</a> is a popular network daemon that listens for statistics (like counters, timers, and gauges) sent over UDP or TCP and aggregates them before forwarding to a backend. You can send custom metrics from your applications using StatsD clients to SigNoz by configuring the OpenTelemetry Collector's `statsd` receiver.
+
+This guide explains how to set up the OpenTelemetry Collector to listen for StatsD metrics and send them to SigNoz.
+
+## Prerequisites
+
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- An instance of OpenTelemetry Collector running, if not, follow the [installation instructions](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) for your environment
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Send StatsD Metrics to SigNoz
+
+### Step 1: Configure the StatsD receiver
+
+The OpenTelemetry Collector uses the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/statsdreceiver" target="_blank" rel="noopener noreferrer nofollow">StatsD receiver</a> to ingest metrics in the StatsD format.
+
+Add the `statsd` receiver to your `otel-collector-config.yaml` file. Make sure it listens on the desired address (default for StatsD is UDP port `8125`):
+
+```yaml:otel-collector-config.yaml
+receivers:
+  statsd:
+    endpoint: "0.0.0.0:8125"
+```
+
+**Explanation of the fields:**
+
+- `endpoint`: The address (`host:port`) where the receiver will listen for UDP StatsD packets. Use `0.0.0.0` to listen on all interfaces.
+
+<KeyPointCallout title="Advanced Configuration" defaultCollapsed={true}>
+
+If you need to configure options like sample rates or timing mappings, you can add them to the `statsd` receiver.
+
+```yaml
+receivers:
+  statsd:
+    endpoint: "0.0.0.0:8125"
+    aggregation_interval: 60s
+    enable_metric_type: true
+    is_monotonic_counter: false
+    timer_histogram_mapping:
+      - statsd_type: "histogram"
+        observer_type: "gauge"
+      - statsd_type: "timing"
+        observer_type: "histogram"
+```
+
+- `aggregation_interval`: How often the receiver aggregates the received StatsD metrics before sending them out (default is `60s`).
+- `enable_metric_type`: When `true`, the receiver emits the original StatsD metric type (counter, gauge) as a metric attribute label.
+- `is_monotonic_counter`: When `true`, sets all counter-type metrics received as monotonic (meaning they only ever increase).
+- `timer_histogram_mapping`: Specifies what OpenTelemetry data type to convert received timing or histogram data into. In the example above:
+  - StatsD `histogram` data is converted to an OpenTelemetry `gauge` (no aggregation).
+  - StatsD `timing` data is converted to an OpenTelemetry `histogram` (aggregated over time).
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/statsdreceiver#configuration" target="_blank" rel="noopener noreferrer nofollow">StatsD receiver documentation</a> for more mapping options.
+
+</KeyPointCallout>
+
+### Step 2: Configure the exporter to SigNoz Cloud
+
+If you haven't already configured your Collector to send data to SigNoz Cloud, add an `otlp` exporter:
+
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp/signoz:
+    endpoint: ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3: Enable the receiver and exporter in your pipeline
+
+Enable both the `statsd` receiver and the `otlp/signoz` exporter in your metrics pipeline. Add them to `service.pipelines.metrics`. Append the receiver and exporter to your configuration like:
+
+```yaml:otel-collector-config.yaml {4,5}
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, statsd] # Append statsd to your existing receivers
+      exporters: [otlp/signoz]  # Ensure your exporter is included here
+```
+
+### Step 4: Expose the StatsD port
+
+Depending on how you deploy the OpenTelemetry Collector, you need to ensure the StatsD UDP port (`8125`) is accessible to your applications.
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+No additional port mapping is required, just ensure your firewall allows incoming UDP traffic on port `8125`.
+
+Check if the collector is listening on the port:
+
+```bash
+sudo netstat -ulnp | grep 8125
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+If your Collector runs in Kubernetes (e.g., using the `signoz/k8s-infra` Helm chart), you must expose the UDP port in the Service definition.
+
+Update your `values.yaml` for the `k8s-infra` chart:
+
+```yaml:values.yaml
+otelAgent:
+  ports:
+    statsd:
+      enabled: true
+      containerPort: 8125
+      servicePort: 8125
+      hostPort: 8125
+      protocol: UDP
+```
+
+Then upgrade your Helm release:
+
+```bash
+helm upgrade my-release signoz/k8s-infra -f values.yaml
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+If you run the Collector via Docker, ensure you publish the UDP port using the `-p` flag:
+
+```bash {5}
+docker run -d --name otel-collector \
+  -v $(pwd)/otel-collector-config.yaml:/etc/otel-collector-config.yaml \
+  -p 4317:4317 \
+  -p 4318:4318 \
+  -p 8125:8125/udp \
+  signoz/signoz-otel-collector:latest \
+  --config /etc/otel-collector-config.yaml
+```
+
+If using `docker-compose.yaml`, add the port mapping:
+
+```yaml:docker-compose.yaml {6}
+services:
+  otel-collector:
+    image: signoz/signoz-otel-collector:latest
+    ports:
+      - "4317:4317"
+      - "8125:8125/udp"
+```
+
+</TabItem>
+</Tabs>
+
+### Step 5: Restart the OpenTelemetry Collector
+
+After modifying the configuration file and exposing the necessary ports, restart the OpenTelemetry Collector for the changes to take effect.
+
+Depending on your environment, you can restart the collector using the following commands:
+
+- **Docker**: `docker restart otel-collector`
+- **VM**: `sudo systemctl restart signoz-otel-collector` (or the respective service name)
+
+## Validate
+
+To test if the OpenTelemetry Collector successfully receives your StatsD metrics, you can send a dummy metric using `nc` (netcat):
+
+```bash
+echo "custom.test.metric:1|c" | nc -w 1 -u 127.0.0.1 8125
+```
+
+This command sends a StatsD **counter** metric named `custom.test.metric` with a value of `1`. (Make sure you replace `127.0.0.1` with your Collector instance IP if testing remotely).
+
+Wait for the aggregation interval (e.g., 60 seconds) to pass. Then, navigate to the SigNoz UI to verify:
+
+1. Navigate to **Metrics Explorer**.
+2. Search for `custom.test.metric`.
+3. You should see the metric data in the chart.
+
+<Figure
+  src="/img/docs/metrics/metrics-explorer/statsd-custom-metrics.webp"
+  alt="Custom StatsD metric in Metrics Explorer"
+  caption="Custom StatsD metric in Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+If you don't see your metrics in SigNoz, check the following:
+
+### Port Configuration
+
+Ensure that port `8125/UDP` is open and accessible from your application to the OpenTelemetry Collector.
+
+- **Docker**: Did you map the port when starting the container? Ensure your `docker run` command or `docker-compose.yaml` includes `-p 8125:8125/udp`.
+- **Kubernetes**: If your Collector runs in K8s, ensure the UDP port is exposed in the Service definition and properly mapped in your `otel-agent` daemonset. See [Configure K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#metrics) for exposing additional receiver ports.
+- **Firewall**: Check if firewalls (e.g., AWS Security Groups) are allowing UDP traffic on port `8125`.
+
+### Check Collector Logs
+
+Enable debug logging on your OpenTelemetry Collector to see if it receives the stats. **Merge** this setting with your existing `service.telemetry` configuration rather than replacing it:
+
+```yaml:otel-collector-config.yaml
+service:
+  telemetry:
+    logs:
+      level: debug
+```
+
+Check the Collector's output for any errors related to parsing StatsD messages.
+
+### Metrics Export Errors
+
+If metrics are received but not exported downstream, there might be an issue with your exporter configuration (keys, endpoints). Look for `exporting failed` errors in the OTel Collector logs. Ensure your `otlp/signoz` exporter is correctly pointing to your SigNoz cloud region endpoint with the valid ingestion key.
+
+</details>
+
+## Next Steps
+
+Now that you have your StatsD metrics flowing into SigNoz, you can use them to build custom visualizations and trigger alerts when things go wrong:
+
+- [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)
+- [Create Alerts](https://signoz.io/docs/userguide/alerts-management/)
+
+## Get Help
+
+<GetHelp />

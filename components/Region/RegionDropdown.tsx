@@ -70,6 +70,7 @@ export const RegionDropdown = () => {
       <Link
         href="/docs/ingestion/signoz-cloud/overview#endpoint"
         className="text-xs text-signoz_robin-500"
+        prefetch={false}
       >
         How do I find my workspace region?
       </Link>

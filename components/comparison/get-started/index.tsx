@@ -48,7 +48,11 @@ const GetStartedSection = (props) => {
           OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of glass
         </h3>
         <p className={styles.desc}>SigNoz Cloud is the easiest way to run SigNoz</p>
-        <Link className={`button button--secondary ${styles.trySigNozCtaBtn}`} href="/teams/">
+        <Link
+          className={`button button--secondary ${styles.trySigNozCtaBtn}`}
+          href="/teams/"
+          prefetch={false}
+        >
           Get Started - Free
         </Link>
       </div>
