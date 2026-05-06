@@ -2501,7 +2501,6 @@ const docsSideNav = [
                 route: '/docs/userguide/writing-clickhouse-traces-query',
                 label: 'Traces',
               },
-              { type: 'doc', route: '/docs/userguide/clickhouse-faqs', label: 'FAQs' },
             ],
           },
           {

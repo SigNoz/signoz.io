@@ -9,14 +9,14 @@ doc_type: explanation
 
 ## Overview
 
-The Query Builder is SigNoz's structured query interface that combines the power of expression-based querying with intelligent auto-completion. Whether you're troubleshooting production issues, analyzing performance trends, or creating custom dashboards, the Query Builder gives you the flexibility to write sophisticated search expressions, aggregations, and filtering logic while providing contextual suggestions.
+The Query Builder is SigNoz's structured query interface for logs, traces, and metrics. It combines expression-based querying with intelligent auto-completion so you can filter, aggregate, and visualize telemetry data without writing raw SQL or PromQL.
 
-**What you'll learn:**
-- How to filter data with precision using multiple criteria
-- Advanced aggregation techniques for meaningful insights
-- Performance optimization tips for large datasets
+Key capabilities:
+- **Filter** data using logical expressions with auto-completed attribute names, values, and [operators](https://signoz.io/docs/userguide/operators-reference/)
+- **Aggregate** results with functions like count, sum, avg, percentiles, and rate variants
+- **Group by** any attribute to segment results by service, endpoint, region, or custom dimensions
+- **Manipulate results** with ordering, limits, and having clauses to surface the most relevant data
 
----
 
 ## Quick Start
 
@@ -49,8 +49,6 @@ Notice how you can write logical expressions directly, with auto-completion help
 
 Filtering is your first line of defense against data overload. The Query Builder supports sophisticated filtering that goes beyond simple equality checks. Learn more about search syntax [here](https://signoz.io/docs/userguide/search-syntax).
 
----
-
 ## Filtering (Logs & Traces)
 
 The Query Builder allows you to apply filtering based on various attributes of logs or traces.
@@ -60,7 +58,7 @@ The Query Builder allows you to apply filtering based on various attributes of l
 - **Access**: Navigate to the Query Builder.
 - **Open Filter Options**: Click on the Search Filter field to open a dropdown list of available attributes.
 - **Select Attributes**: Choose the attribute you want to filter by (e.g., `service.name`, `level`, `status`). Start typing to filter the list.
-- **Apply Operators**: Choose the operator (e.g., `=`, `!=`, `IN`, `NOT_IN`) for the selected attribute.
+- **Apply Operators**: Choose the operator (e.g., `=`, `!=`, `IN`, `NOT_IN`) for the selected attribute. See the [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of supported operators.
 - **Input Values**: Input the value(s) you want to filter by.
 - **Combine Filters**: You can add multiple filters by repeating the above steps. Multiple filters are combined with `AND`.
 - **View Results**: Click the Stage & Run Query button to display the logs or traces that match the applied filters.
@@ -76,25 +74,26 @@ Suppose you want to filter logs from a specific service with a particular severi
     <figcaption><i>Example showing the filtering feature of SigNoz Query Builder</i></figcaption>
 </figure>
 
----
 
 ## Metrics Query Builder
 
-SigNoz's Metrics Query Builder has all the features mentioned above like filtering, aggregation, Order by, Multiple Queries etc. but it also has some additional functionalities which can enable users to delve deeper into metrics analysis with ease.
+The Metrics Query Builder supports all the features described above — filtering, aggregation, ordering, and multiple queries — along with additional controls for temporal and spatial aggregation that are specific to metric data. For a deeper understanding of how these aggregation layers work, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
 
 ### Spatial and Temporal Aggregations
 
-Efficiently aggregate metrics data across time and various dimensions to gain comprehensive insights into your system's performance.
+Metrics in SigNoz go through two aggregation layers before being displayed.
 
 #### Temporal Aggregation
 
-Temporal aggregation simplifies metric analysis by consolidating data points over specific time periods. It's essential for managing data from applications that transmit metrics at regular intervals, helping to reduce the volume of data points into a more interpretable format. This aggregation is particularly crucial when dealing with long-term data visualization, where displaying each data point is neither practical nor informative due to limited screen space.
+Temporal aggregation consolidates data points within each time series over the selected time interval. It reduces many raw data points into one value per interval, making long time ranges practical to visualize.
+
+Available temporal aggregation functions: `Latest`, `Sum`, `Avg`, `Min`, `Max`, `Count`, `Count Distinct`.
 
 #### Spatial Aggregation
 
-Modern applications will have many time series across dimensions such as container names, service names, etc.
+Spatial aggregation merges multiple time series into fewer series by combining values across dimensions such as container name, service name, or region.
 
-While temporal aggregations are meant for reducing data points across a single time axis, spatial aggregation refers to the technique of merging metric data across various dimensions or labels, such as container names, service names, or geographical regions.
+Available spatial aggregation functions: `Sum`, `Avg`, `Min`, `Max`.
 
 #### Example
 
@@ -105,7 +104,6 @@ If you select a counter metric called `signoz_calls_total`, you can apply tempor
     <figcaption><i>How to apply temporal and spatial aggregations in metrics query builder of SigNoz</i></figcaption>
 </figure>
 
----
 
 ## Next Steps
 

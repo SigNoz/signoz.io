@@ -10,6 +10,8 @@ Transform raw data into actionable insights using SigNoz's comprehensive aggrega
 
 ## Core Aggregation Functions (Logs & Traces)
 
+These aggregation functions are available for logs and traces in both the **Time Series** and **Table** views.
+
 ### Statistical Functions
 - **Count**: Total occurrences `count()`
 - **Count Distinct**: Unique values `count_distinct(user_id, product_id)`
@@ -17,11 +19,26 @@ Transform raw data into actionable insights using SigNoz's comprehensive aggrega
 - **Average**: Mean values `avg(response_time_ms)`
 - **Min/Max**: Range boundaries `min(latency)`, `max(latency)`
 
-### Advanced Functions
-- **Percentiles**: Distribution analysis `p50(response_time_ms)`, `p95(response_time_ms)`, `p99(response_time_ms)`
-- **Rate**: Total occurrences per time unit `rate()`
-- **Rate Sum**: Change in totals `rate_sum(requests)`
-- **Rate Average**: Change in averages `rate_avg(bytes_sent)`
+### Percentile Functions
+- **Percentiles**: Distribution analysis — `p05`, `p10`, `p20`, `p25`, `p50`, `p75`, `p90`, `p95`, `p99`
+- Useful for latency analysis: `p50(duration)` for median, `p99(duration)` for tail latency
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/product-features/query-builder/percentile-functions-dropdown.webp" alt="Percentile aggregation functions available in SigNoz Query Builder"/>
+    <figcaption><i>Percentile aggregation functions available in the Query Builder</i></figcaption>
+</figure>
+
+### Rate Functions
+- **Rate**: Total occurrences per second `rate()`
+- **Rate Sum**: Sum per second `rate_sum(requests)`
+- **Rate Avg**: Average per second `rate_avg(bytes_sent)`
+- **Rate Max**: Maximum per second `rate_max(duration)`
+- **Rate Min**: Minimum per second `rate_min(duration)`
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/product-features/query-builder/rate-functions-dropdown.webp" alt="Rate aggregation functions available in SigNoz Query Builder"/>
+    <figcaption><i>Rate aggregation functions available in the Query Builder</i></figcaption>
+</figure>
 
 ## Grouping
 
@@ -31,7 +48,7 @@ Grouping allows you to segment your data based on chosen attributes, facilitatin
 - When combined with aggregation, grouping enables you to, for example, find the average response time per service or count errors per endpoint.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/group_by.gif" alt="A gif explaining the Group by feature in SigNoz Query Builder"/>
+    <img className="box-shadowed-image" src="/img/docs/product-features/query-builder/query-builder-group-by.webp" alt="Group by feature in SigNoz Query Builder showing data grouped by service.name and deployment.environment"/>
     <figcaption><i>Group by feature of SigNoz Query Builder</i></figcaption>
 </figure>
 
@@ -125,7 +142,9 @@ Add `key EXISTS` to your search:
 department EXISTS AND [rest of your query]
 ```
 
-**Important:** We don't automatically exclude empty groups because sometimes you want to see them (e.g., finding users without departments).
+<Admonition type="note">
+SigNoz does not automatically exclude empty groups because sometimes you want to see them (e.g., finding users without departments).
+</Admonition>
 
 ## Legend Formatting
 

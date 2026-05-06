@@ -91,6 +91,16 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/docs/userguide/clickhouse-faqs/',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/clickhouse-faqs',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
           source: '/docs/querying/querying-data/',
           destination: '/docs/userguide/query-builder-v5/',
           permanent: true,
