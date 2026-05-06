@@ -101,6 +101,26 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/querying/querying-data/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
           source: '/enterprise-self-hosted/',
           destination: '/contact-us/?source=redirect-enterprise-self-hosted',
           permanent: true,
