@@ -403,6 +403,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/metrics-management/working-with-metrics-guides/',
+          destination: '/docs/metrics-management/metrics-explorer/',
+          permanent: true,
+        },
+        {
           source: '/docs/migration/opentelemetry-datadog-receiver/',
           destination: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/',
           permanent: true,

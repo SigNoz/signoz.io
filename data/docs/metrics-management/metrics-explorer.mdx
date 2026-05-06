@@ -14,7 +14,7 @@ Unlike traditional monitoring workflows that require you to guess metric names f
 
 <figure data-zoomable align="center">
     <img
-      src="/img/docs/metrics/metrics-explorer/overview-interface.webp"
+      src="/img/docs/metrics/metrics-explorer/overview-interface-new.webp"
       alt="Metrics Explorer overview interface showing comprehensive metrics visibility"
     />
     <figcaption>
@@ -61,17 +61,22 @@ The Metrics Explorer main interface provides two primary visualisation modes:
 
 <figure data-zoomable align="center">
     <img
-      src="/img/docs/metrics/metrics-explorer/proportion-view.webp"
-      alt="Proportion view showing metrics consumption and ingestion resource usage"
+      src="/img/docs/metrics/metrics-explorer/proportion-view-new.webp"
+      alt="Proportion view showing metrics distribution by time series and samples"
     />
     <figcaption>
       <i>
-        Proportion view showing metrics consumption and ingestion resource usage
+        Proportion view showing metrics distribution with Time Series and Samples toggle
       </i>
     </figcaption>
 </figure>
 
-The Proportion View presents a treemap visualisation that shows the relative volume of metrics being ingested. Each rectangle represents a metric, with the size proportional to its ingestion volume. This view helps you:
+The Proportion View presents a treemap visualisation that shows the relative volume of metrics being ingested. Each rectangle represents a metric, with the size proportional to its ingestion volume. You can toggle between two modes using the dropdown in the top-right corner:
+
+- **Time Series**: Shows the proportion based on the number of unique time series (unique metric name + label combinations) each metric produces. This helps identify metrics with high cardinality.
+- **Samples**: Shows the proportion based on the total number of data points ingested. This helps identify metrics that generate the most data volume.
+
+This view helps you:
 
 - **Identify high-volume metrics** that consume the most ingestion resources
 - **Spot anomalies** in metric volume distribution
@@ -138,12 +143,12 @@ The top section displays essential metric details:
 
 <figure data-zoomable align="center">
     <img
-      src="/img/docs/metrics/metrics-explorer/metadata-view-detailed.webp"
-      alt="Detailed metadata view showing comprehensive metric information"
+      src="/img/docs/metrics/metrics-explorer/metadata-view-new.webp"
+      alt="Metric detail panel showing metadata, dashboard usage, and Open in Explorer option"
     />
     <figcaption>
       <i>
-        Detailed metadata section showing comprehensive metric information
+        Metric detail panel showing metadata, dashboard usage, and actions
       </i>
     </figcaption>
 </figure>
@@ -152,10 +157,49 @@ The Metadata section provides configurable information about the metric:
 
 - **Metric Type**: Displayed as a colored badge (e.g., "GAUGE")
 - **Description**: Human-readable description of the metric's purpose (editable)
-- **Unit**: Measurement unit specification (e.g., `{pod}`)
+- **Unit**: Measurement unit specification (e.g., `{cpu}`)
 - **Temporality**: Specification of how the metric data is aggregated
+- **Monotonic**: Indicates whether the metric value only increases
 
-If you feel the Metric Type, description, or temporality is incorrect, you can edit them using the **edit button**.
+**Dashboard usage**: The panel shows which dashboards reference this metric (e.g., "1 dashboard"). Clicking the dashboard badge takes you directly to that dashboard, making it easy to see where a metric is being used across your monitoring setup.
+
+**Open in Explorer**: Click the **Open in Explorer** button in the top-right corner of the metric detail panel to open the selected metric directly in the Explorer query interface with the metric pre-populated.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/metrics/metrics-explorer/open-in-explorer.webp"
+      alt="Metric opened in Explorer interface with query builder pre-populated"
+    />
+    <figcaption>
+      <i>
+        Clicking "Open in Explorer" opens the metric directly in the Explorer query interface
+      </i>
+    </figcaption>
+</figure>
+
+**Inspect Metric**: Next to the "Open in Explorer" button, click the **Inspect Metric** icon to open the Metrics Inspector. The inspector provides:
+
+- **Graph View / Table View toggle**: Switch between a time-series chart and a raw data table
+- **Temporal Aggregation guidance**: Helps you align the data by selecting a Temporal Aggregation
+- **Individual time series breakdown**: See each unique time series for the metric plotted separately
+- **Data point details**: Hover over the chart to see exact values, timestamps, and all associated labels for each time series
+- **Query Builder**: Filter by specific attributes (e.g., `k8s_node_name`) and configure aggregation intervals
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/metrics/metrics-explorer/inspect-metric.webp"
+      alt="Metrics Inspector showing time series breakdown and data point details"
+    />
+    <figcaption>
+      <i>
+        Metrics Inspector showing individual time series breakdown and detailed data points
+      </i>
+    </figcaption>
+</figure>
+
+<Admonition type="info">
+If you feel the Metric Type, description, or temporality is incorrect, you can edit them using the **Edit** button in the Metadata section.
+</Admonition>
 
 #### 3. All Attributes Section
 

@@ -1856,7 +1856,7 @@ const docsSideNav = [
         label: 'Working with Metrics',
         type: 'category',
         isExpanded: false,
-        route: '/docs/metrics-management/working-with-metrics-guides',
+        route: '/docs/metrics-management/metrics-explorer',
         items: [
           {
             type: 'doc',
@@ -1869,24 +1869,6 @@ const docsSideNav = [
             label: 'Types and Aggregation',
           },
           { type: 'doc', route: '/docs/metrics-management/data-storage', label: 'Metrics Tables' },
-          {
-            label: 'User Guides',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/metrics-management/working-with-metrics-guides',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/metrics-management/cloud-provider-metric-delay',
-                label: 'Cloud Provider Metric Delay',
-              },
-              {
-                type: 'doc',
-                route: '/docs/metrics-management/configure-custom-buckets',
-                label: 'Configure Custom Buckets',
-              },
-            ],
-          },
         ],
       },
       {
@@ -1907,6 +1889,11 @@ const docsSideNav = [
             label: 'Understanding Metrics Billing & Reducing Costs',
           },
           { type: 'doc', route: '/docs/metrics-management/query-range-api', label: 'Metrics API' },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/configure-custom-buckets',
+            label: 'Configure Custom Histogram Buckets',
+          },
         ],
       },
       {
@@ -1915,6 +1902,11 @@ const docsSideNav = [
         label: 'Troubleshooting',
         isExpanded: false,
         items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/cloud-provider-metric-delay',
+            label: 'Cloud Provider Metric Delay',
+          },
           {
             type: 'doc',
             route: '/docs/metrics-management/troubleshooting/faqs',
