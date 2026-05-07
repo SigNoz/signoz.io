@@ -223,6 +223,11 @@ export const METRICS_QUICK_START_ITEMS = {
       clickName: 'NGINX Metrics Link',
     },
     {
+      name: 'Kong Gateway',
+      href: '/docs/integrations/opentelemetry-kong-gateway',
+      clickName: 'Kong Gateway Metrics Link',
+    },
+    {
       name: 'GCP Cloud Load Balancer',
       href: '/docs/gcp-monitoring/gcp-clb/metrics',
       clickName: 'GCP Cloud Load Balancer Metrics Link',

@@ -1,5 +1,5 @@
 ---
-date: 2026-04-28
+date: 2026-05-05
 id: signoz-mcp-server
 title: SigNoz MCP Server
 description: Connect AI assistants like Claude Desktop, Cursor, GitHub Copilot, Claude Code, OpenAI Codex, Windsurf, Gemini CLI, VS Code, and Zed to your SigNoz observability data using the MCP (Model Context Protocol) server.
@@ -226,14 +226,50 @@ If you run into authentication issues, open the command palette and run **Authen
 </TabItem>
 </Tabs>
 
-### Get your API Key
+### Authenticate from your client
 
 When you add the hosted MCP URL to your client, the MCP client will initiate an authentication flow. You will be prompted to enter:
 1. Your **SigNoz instance URL** (e.g., `https://your-instance.signoz.cloud`)
 2. Your **API key** — go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key (requires **Admin** role). See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
 
+<Admonition type="info" title="How authentication works?" defaultCollapsed={true}>
+SigNoz Cloud's hosted MCP server uses OAuth 2.1 for client-to-MCP authentication. MCP clients discover the auth endpoints from the server metadata, dynamically register as an OAuth client using Dynamic Client Registration (DCR, RFC 7591) when supported, then use Authorization Code + PKCE. During the browser step, SigNoz asks for your SigNoz instance URL and service account API key; the MCP server validates those credentials and issues bearer/refresh tokens for future MCP requests.
+
+SigNoz Cloud's MCP server also supports header-based authentication for clients that can't do OAuth, but the recommended approach is to use OAuth when possible for better security and token management.
+</Admonition>
+
 <Admonition type="warning">
 Only **Admin** users can create API keys. If you don't see the option, contact your workspace administrator.
+</Admonition>
+
+### Header-Based Authentication
+
+Some MCP clients (like Cursor Automations) run entirely in the cloud and cannot perform interactive OAuth authentication. For these clients, use header-based authentication by passing your API key and instance URL directly in the request headers.
+
+<Admonition type="info" title="When to use header-based authentication?">
+If your MCP client doesn't support OAuth flows or stdio transport — for example, Cursor Automations: use this header-based configuration instead.
+</Admonition>
+
+```json title="mcp.json"
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "https://mcp.<region>.signoz.cloud/mcp",
+      "headers": {
+        "SIGNOZ-API-KEY": "<your-api-key>",
+        "X-SigNoz-URL": "<your-signoz-instance-url>"
+      }
+    }
+  }
+}
+```
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-api-key>`: API key from [SigNoz Service accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/)
+- `<your-signoz-instance-url>`: Your SigNoz Cloud instance URL
+
+<Admonition type="warning">
+Keep your API key secure — never commit `mcp.json` to version control when it contains secrets.
 </Admonition>
 
 </TabItem>

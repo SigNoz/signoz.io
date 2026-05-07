@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import { filterData } from 'app/utils/common'
+import { filterData } from 'app/(site)/utils/common'
 import GridLayout from '@/layouts/GridLayout'
 import SectionHeader from './SectionHeader'
-import { POSTS_PER_PAGE } from '../../app/(opentelemetry-hub-routes)/constants'
-import type { ResourceCenterCard } from '../../app/(opentelemetry-hub-routes)/content'
+import { POSTS_PER_PAGE } from '../../app/(site)/(opentelemetry-hub-routes)/constants'
+import type { ResourceCenterCard } from '../../app/(site)/(opentelemetry-hub-routes)/content'
 
 export default function ListingWithSearch({
   posts = [],

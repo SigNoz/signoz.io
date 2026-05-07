@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { filterData } from 'app/utils/common'
+import { filterData } from 'app/(site)/utils/common'
 import SectionHeader from './SectionHeader'
 import FeaturedBlogs from './FeaturedBlogs'
 import AllBlogs from './AllBlogs'
-import type { ResourceCenterBlog } from '../../app/(opentelemetry-hub-routes)/content'
+import type { ResourceCenterBlog } from '../../app/(site)/(opentelemetry-hub-routes)/content'
 
 export default function Blogs({
   posts,
