@@ -84,21 +84,21 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     '/docs/integrations/aws-rds-postgres': <SiPostgresql className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/aws-rds-mysql': <SiMysql className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/aws-elasticache-redis': <SiRedis className="h-7 w-7 text-[#FF9900]" />,
-    'https://signoz.io/docs/integrations/azure/one-click-azure-integrations/': (
+    '/docs/integrations/azure/one-click-azure-integrations': (
       <img
         src="/img/icons/azure-icon.svg"
         alt="Microsoft Azure"
         className="h-7 w-7 object-contain"
       />
     ),
-    'https://signoz.io/docs/integrations/azure/cdn-frontdoor/': (
+    '/docs/integrations/azure/cdn-frontdoor': (
       <img
         src="/img/icons/azure-cdn-frontdoor-icon.svg"
         alt="Azure CDN FrontDoor"
         className="h-7 w-7 object-contain"
       />
     ),
-    'https://signoz.io/docs/integrations/azure/blob-storage/': (
+    '/docs/integrations/azure/blob-storage': (
       <img
         src="/img/icons/azure-blob-storage-icon.svg"
         alt="Azure Blob Storage"

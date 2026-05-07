@@ -5,14 +5,14 @@ import IconCardGrid from '../Card/IconCardGrid'
 import { AZURE_ONE_CLICK_ITEMS } from '@/constants/componentItems'
 
 const ICON_MAP: Record<string, React.ReactNode> = {
-  'https://signoz.io/docs/integrations/azure/cdn-frontdoor/': (
+  '/docs/integrations/azure/cdn-frontdoor': (
     <img
       src="/img/icons/azure-cdn-frontdoor-icon.svg"
       alt="Azure CDN FrontDoor"
       className="h-7 w-7"
     />
   ),
-  'https://signoz.io/docs/integrations/azure/blob-storage/': (
+  '/docs/integrations/azure/blob-storage': (
     <img
       src="/img/icons/azure-blob-storage-icon.svg"
       alt="Azure Blob Storage"

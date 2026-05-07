@@ -82,17 +82,17 @@ export const INTEGRATIONS_ITEMS = {
   azure: [
     {
       name: 'One-Click Azure Integrations',
-      href: 'https://signoz.io/docs/integrations/azure/one-click-azure-integrations/',
+      href: '/docs/integrations/azure/one-click-azure-integrations',
       clickName: 'One-Click Azure Integrations Link',
     },
     {
       name: 'CDN FrontDoor',
-      href: 'https://signoz.io/docs/integrations/azure/cdn-frontdoor/',
+      href: '/docs/integrations/azure/cdn-frontdoor',
       clickName: 'Azure CDN FrontDoor Integration Link',
     },
     {
       name: 'Blob Storage',
-      href: 'https://signoz.io/docs/integrations/azure/blob-storage/',
+      href: '/docs/integrations/azure/blob-storage',
       clickName: 'Azure Blob Storage Integration Link',
     },
   ] satisfies ComponentItem[],
