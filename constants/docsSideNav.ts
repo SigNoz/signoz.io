@@ -3428,13 +3428,13 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/integrations/azure/cdn-frontdoor',
-            label: 'CDN FrontDoor',
+            route: '/docs/integrations/azure/blob-storage',
+            label: 'Blob Storage',
           },
           {
             type: 'doc',
-            route: '/docs/integrations/azure/blob-storage',
-            label: 'Blob Storage',
+            route: '/docs/integrations/azure/cdn-frontdoor',
+            label: 'CDN FrontDoor',
           },
         ],
       },
