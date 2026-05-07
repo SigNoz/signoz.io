@@ -89,7 +89,7 @@ az stack sub create \
   --name signoz-integration \
   --location <azure-region> \
   --template-uri <template-url> \
-  --parameters signozApiUrl=<ingestion-url> signozIngestionKey=<api-key> resourceGroups=<resource-groups> \
+  --parameters <params key value pairs> \
   --action-on-unmanage deleteAll \
   --deny-settings-mode denyDelete
 ```
@@ -105,9 +105,7 @@ New-AzSubscriptionDeploymentStack `
   -Location "<azure-region>" `
   -TemplateUri "<template-url>" `
   -TemplateParameterObject @{
-    signozApiUrl = "<ingestion-url>"
-    signozIngestionKey = "<api-key>"
-    resourceGroups = "<resource-groups>"
+    <params key value pairs>
   } `
   -ActionOnUnmanage "deleteAll" `
   -DenySettingsMode "denyDelete"
@@ -115,14 +113,6 @@ New-AzSubscriptionDeploymentStack `
 
 </TabItem>
 </Tabs>
-
-Replace the following placeholders:
-
-- `<azure-region>`: Azure region to deploy agent resources (e.g., `eastus`)
-- `<template-url>`: template URL from the generated command
-- `<ingestion-url>`: your SigNoz ingestion endpoint
-- `<api-key>`: your SigNoz ingestion key
-- `<resource-groups>`: comma-separated resource group names to monitor
 
 <Figure
   src="/img/docs/integrations/azure/azure-integration-deploy-agent.webp"
@@ -141,7 +131,7 @@ Return to the SigNoz UI after running the command. The page shows your **subscri
 2. In the left menu, navigate to **Deployment stacks**.
 3. Confirm both stacks show a **Succeeded** status:
    - `signoz-integration`: deploys the agent and its supporting infrastructure
-   - `signoz-integration-telemetry`: deploys telemetry resources (Event Hubs and diagnostic settings)
+   - `signoz-integration-telemetry`: deploys telemetry resources (OTel collector, Event Hubs and diagnostic settings)
 
 If either stack shows a failed status, check the stack details for error messages and confirm your account has the required permissions listed in [Prerequisites](#prerequisites).
 
