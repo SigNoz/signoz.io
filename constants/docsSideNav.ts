@@ -3547,6 +3547,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/outposts/flyio',
+        label: 'Fly.io',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/opentelemetry-kong-gateway',
         label: 'Kong Gateway',
       },
