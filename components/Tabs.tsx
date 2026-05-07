@@ -2,16 +2,13 @@
 
 import React, { useState, useCallback, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { QUERY_PARAMS } from '@/constants/queryParams'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?: string }) => {
   const searchParams = useSearchParamsState()
   const router = useRouter()
   const pathname = usePathname()
-
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   const childrenArray = React.Children.toArray(children)
 
@@ -62,7 +59,8 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
     [urlKey, searchParams, router, pathname]
   )
 
-  const hideSelfHostTab = source === ONBOARDING_SOURCE && entityName === 'plans'
+  const isOnboarding = isDocsOnboardingPathname(pathname)
+  const hideSelfHostTab = isOnboarding && entityName === 'plans'
 
   return (
     <div className="w-full" data-tabs-root>

@@ -1,9 +1,9 @@
 'use client'
 
 import './APIReference.styles.css'
+import React, { useState, useEffect } from 'react'
 import { API } from '@stoplight/elements'
 import '@stoplight/elements/styles.min.css'
-import React, { useState, useEffect } from 'react'
 
 interface OpenAPISpecProps {
   specContent: string

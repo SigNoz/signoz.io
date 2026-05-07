@@ -1,5 +1,3 @@
-import ChatbaseServer from './ChatbaseServer'
+import ChatbaseClient from './ChatbaseClient'
 
-export default ChatbaseServer
-export { default as ChatbaseClient } from './ChatbaseClient'
-export { default as ChatbaseServer } from './ChatbaseServer'
+export default ChatbaseClient
