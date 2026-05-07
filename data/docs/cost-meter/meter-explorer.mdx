@@ -1,5 +1,5 @@
 ---
-date: 2026-04-20
+date: 2026-05-07
 id: meter-explorer
 
 title: Meter Explorer
@@ -9,12 +9,17 @@ doc_type: explanation
 
 The **Meter Explorer** provides advanced capabilities to analyze and understand your observability costs through detailed meter metrics. With the powerful SigNoz query interface, you can drill deeper into each meter metric to extract meaningful insights about your ingested telemetry data and optimize your observability spend.
 
+<figure data-zoomable align="center">
+  <img src="/img/docs/cost-meter/meter-explorer/meter-explorer.webp" alt="Meter Explorer showing log count rate filtered by deployment environment and service name" />
+  <figcaption><i>Meter Explorer query interface with filters, aggregation options, and time series chart</i></figcaption>
+</figure>
+
 **What you'll learn:**
 
 - Understanding the structure and components of meter data
 - How to break down signal meter data by specific label dimensions
 - How Cost Meter data is retained for longer-term analysis
-- Where to go next for example queries and setup workflows
+- How to save and reuse queries with Saved Views
 
 ## Overview
 
@@ -52,9 +57,15 @@ SigNoz exposes five core meter metrics that provide comprehensive visibility int
 
 Each meter metric includes a fixed set of labels that enable you to slice and dice your data across different dimensions:
 
-- **`service.name`**: The name of the service generating the telemetry data
+<figure data-zoomable align="center">
+  <img src="/img/docs/cost-meter/meter-explorer/meter-labels.webp" alt="Metric labels dropdown showing available dimensions for grouping" />
+  <figcaption><i>Available metric labels for grouping and filtering meter data</i></figcaption>
+</figure>
+
+- **`connector_id`**: The connector identifier for the telemetry data
 - **`deployment.environment`**: The deployment environment (e.g., production, staging, development)
 - **`host.name`**: The hostname of the system generating the data
+- **`service.name`**: The name of the service generating the telemetry data
 - **`signoz.workspace.key.id`**: The ID of the ingestion key used for ingesting telemetry data
 
 These labels allow you to analyze your metering data across multiple dimensions, helping you identify which services, environments, or hosts are contributing most to your observability costs.
@@ -64,7 +75,17 @@ These labels allow you to analyze your metering data across multiple dimensions,
 Meter data is retained for a period of 1 year. This retention policy ensures that you have access to historical data for long-term analysis and trend identification.
 By maintaining a year-long history, you can make more informed decisions about your observability strategy and cost optimization efforts over time.
 
+## Saved Views
+
+Meter Explorer supports saved views, allowing you to create and reuse common queries for recurring cost analysis. Once you have built a query with the right metric, filters, and groupings, click **Save this view** at the bottom of the Explorer page to save it for later reuse.
+
+You can select a previously saved view from the **Select a view** dropdown to quickly load it without rebuilding the query each time.
+
+For more details on creating and managing saved views, see the [Saved View documentation](https://signoz.io/docs/product-features/saved-view/#how-to-use-saved-views).
+
 ## Next steps
 
-- Follow the [Meter Examples](https://signoz.io/docs/cost-meter/meter-examples/) for example queries, saved views, and common analysis workflows.
+- Try common queries in the [Meter Examples](https://signoz.io/docs/cost-meter/meter-examples/) guide.
+- Set up [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) to get notified when ingestion volumes or costs exceed your thresholds.
+- Follow the [Alert Setup Guide](https://signoz.io/docs/cost-meter/alert-setup-guides/) for step-by-step instructions on creating budget and quota alerts.
 - Use the [Working with Cost Meter overview](https://signoz.io/docs/cost-meter/working-with-cost-meter/overview/) to understand how Meter Explorer fits into the broader Cost Meter experience.
