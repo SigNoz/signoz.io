@@ -1,13 +1,13 @@
 import 'css/tailwind.css'
 import 'css/global.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { GoogleTagManager } from '@next/third-parties/google'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import { AnonymousIdSetter } from './anonymous-id-setter'
+import LazyGTM from '@/components/Analytics/LazyGTM'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -62,7 +62,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`dark ${inter.className}`}
       suppressHydrationWarning
     >
-      <GoogleTagManager gtmId="GTM-N9B6D4H" />
+      {/* Preconnect to third-party domains loaded via GTM to reduce connection time */}
+      <link rel="preconnect" href="https://www.googletagmanager.com" />
+      <link rel="preconnect" href="https://static.reo.dev" />
+      <link rel="preconnect" href="https://www.clarity.ms" />
+      <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+      <LazyGTM />
       <link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png" />
