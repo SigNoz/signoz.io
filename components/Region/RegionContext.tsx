@@ -64,7 +64,7 @@ const FALLBACK_REGIONS: RegionData[] = [
 
 const RegionContext = createContext<RegionContextType | undefined>(undefined)
 
-function RegionProviderInner({ children }: { children: React.ReactNode }) {
+export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [regions, setRegions] = useState<RegionData[]>([])
   const [region, setRegionState] = useState<string | null>(null)
   const [cloudRegion, setCloudRegionState] = useState<string | null>(null)
@@ -160,11 +160,6 @@ function RegionProviderInner({ children }: { children: React.ReactNode }) {
     </RegionContext.Provider>
   )
 }
-
-export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <RegionProviderInner>{children}</RegionProviderInner>
-}
-
 export const useRegion = () => {
   const context = useContext(RegionContext)
   if (context === undefined) {

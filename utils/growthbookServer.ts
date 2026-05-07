@@ -5,19 +5,33 @@ import { cookies, headers } from 'next/headers'
 
 const GROWTHBOOK_ANONYMOUS_ID_HEADER = 'x-gb-anonymous-id'
 
+function debugAnonymousId(label: string, id: string | null | undefined) {
+  // DEBUG: log cookie header and the derived anonymous ID
+  console.log(`[GrowthBook] ${label}:`, id)
+}
+
 function resolveGrowthBookAnonymousId(forceAnonymousId?: string) {
   if (forceAnonymousId) {
+    debugAnonymousId('forceAnonymousId', forceAnonymousId)
     return forceAnonymousId
   }
 
   const requestHeaders = headers()
   const forwardedAnonymousId = requestHeaders.get(GROWTHBOOK_ANONYMOUS_ID_HEADER)
+
+  debugAnonymousId('forwardedAnonymousId', forwardedAnonymousId)
+
   if (forwardedAnonymousId) {
     return forwardedAnonymousId
   }
 
   const cookieValue = cookies().get('gb_anonymous_id')?.value
-  return cookieValue || randomUUID()
+  const finalAnonymousId = cookieValue || randomUUID()
+
+  debugAnonymousId('from cookies', cookieValue)
+  debugAnonymousId('final value', finalAnonymousId)
+
+  return finalAnonymousId
 }
 
 // Configure GrowthBook for Next.js server components

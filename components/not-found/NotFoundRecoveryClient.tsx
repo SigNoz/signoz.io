@@ -79,6 +79,7 @@ export default function NotFoundRecoveryClient() {
               href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=404_page&utm_campaign=newsletter"
               className="text-base leading-6 text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
               target="_blank"
+              prefetch={false}
             >
               Newsletter - Observability Real Talk
             </Link>

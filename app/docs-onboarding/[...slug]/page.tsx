@@ -1,6 +1,5 @@
-export const dynamicParams = false
-
 export {
+  dynamicParams,
   default,
   generateMetadata,
   generateStaticParams,
