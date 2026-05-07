@@ -1,63 +1,65 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { QUERY_PARAMS } from '@/constants/queryParams'
+import React, { useState, useCallback, useMemo } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
-function getWindowParams() {
-  if (typeof window === 'undefined') {
-    return { environment: null, pathname: '' }
-  }
-  const params = new URLSearchParams(window.location.search)
-  return {
-    environment: params.get(QUERY_PARAMS.ENVIRONMENT),
-    pathname: window.location.pathname,
-  }
-}
+const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?: string }) => {
+  const searchParams = useSearchParamsState()
+  const router = useRouter()
+  const pathname = usePathname()
 
-function TabsInner({ children, entityName }) {
-  const [{ environment, pathname }, setParams] = useState(getWindowParams)
-
-  useEffect(() => {
-    setParams(getWindowParams())
-  }, [])
-
-  const isOnboarding = isDocsOnboardingPathname(pathname)
-
-  // Ensure children is always an array
   const childrenArray = React.Children.toArray(children)
 
-  // Type guard to check if the element is a valid React element
   const isValidElement = (element: any): element is React.ReactElement => {
     return React.isValidElement(element)
   }
 
-  const firstValidChild = childrenArray.find(isValidElement)
-  const defaultChild = childrenArray.find(
-    (child): child is React.ReactElement => isValidElement(child) && child.props.default
-  )
-  const defaultActiveTab = defaultChild?.props.value ?? firstValidChild?.props.value ?? null
+  const validChildren = childrenArray.filter(isValidElement)
 
-  let selectedTab
-  if (entityName === 'plans') {
-    selectedTab = defaultActiveTab
-  } else if (
-    environment &&
-    childrenArray.some(
-      (child): child is React.ReactElement =>
-        isValidElement(child) && child.props.value === environment
-    )
-  ) {
-    // If environment matches a tab value directly, use it
-    selectedTab = environment
-  } else if (environment) {
-    // If environment is set but doesn't match any tab directly, use default tab
-    selectedTab = defaultActiveTab
-  } else {
-    // No environment parameter, use default tab
-    selectedTab = defaultActiveTab
-  }
-  const [activeTab, setActiveTab] = useState(selectedTab)
+  const tabValuesKey = validChildren.map((child) => child.props.value).join(',')
+  const tabValuesSet = useMemo(
+    () => new Set(validChildren.map((child) => child.props.value as string)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tabValuesKey]
+  )
+
+  const defaultChild = validChildren.find((child) => child.props.default)
+  const firstChild = validChildren[0]
+  const defaultActiveTab = defaultChild?.props.value ?? firstChild?.props.value ?? null
+
+  const urlKey = entityName && entityName !== 'plans' ? entityName : null
+
+  const resolveActiveTab = useCallback((): string | null => {
+    if (entityName === 'plans') return defaultActiveTab
+
+    if (urlKey) {
+      const urlValue = searchParams.get(urlKey)
+      if (urlValue && tabValuesSet.has(urlValue)) return urlValue
+    }
+
+    return defaultActiveTab
+  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab, entityName])
+
+  const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
+
+  const activeTab = urlKey ? resolveActiveTab() : localActiveTab
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setLocalActiveTab(value)
+
+      if (!urlKey) return
+
+      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      current.set(urlKey, value)
+      router.replace(`${pathname}?${current.toString()}`, { scroll: false })
+    },
+    [urlKey, searchParams, router, pathname]
+  )
+
+  const isOnboarding = isDocsOnboardingPathname(pathname)
   const hideSelfHostTab = isOnboarding && entityName === 'plans'
 
   return (
@@ -77,7 +79,7 @@ function TabsInner({ children, entityName }) {
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
-              onClick={() => setActiveTab(value)}
+              onClick={() => handleTabChange(value)}
             >
               {label}
             </button>
@@ -100,10 +102,6 @@ function TabsInner({ children, entityName }) {
       </div>
     </div>
   )
-}
-
-const Tabs = ({ children, entityName }) => {
-  return <TabsInner entityName={entityName}>{children}</TabsInner>
 }
 
 export default Tabs
