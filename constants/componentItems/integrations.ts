@@ -79,6 +79,23 @@ export const INTEGRATIONS_ITEMS = {
       clickName: 'AWS Elasticache Redis Link',
     },
   ] satisfies ComponentItem[],
+  azure: [
+    {
+      name: 'One-Click Azure Integrations',
+      href: 'https://signoz.io/docs/integrations/azure/one-click-azure-integrations/',
+      clickName: 'One-Click Azure Integrations Link',
+    },
+    {
+      name: 'CDN FrontDoor',
+      href: 'https://signoz.io/docs/integrations/azure/cdn-frontdoor/',
+      clickName: 'Azure CDN FrontDoor Integration Link',
+    },
+    {
+      name: 'Blob Storage',
+      href: 'https://signoz.io/docs/integrations/azure/blob-storage/',
+      clickName: 'Azure Blob Storage Integration Link',
+    },
+  ] satisfies ComponentItem[],
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
     {
