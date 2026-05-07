@@ -4,11 +4,11 @@ import Button from '@/components/ui/Button'
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
-  { src: '/svgs/icons/omnicell.svg', alt: 'Omnicell' },
+  { src: '/svgs/icons/lovart.svg', alt: 'Lovart' },
   { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
   { src: '/img/users/comcast.svg', alt: 'Comcast' },
   { src: '/svgs/icons/parallel-ai.svg', alt: 'Parallel AI' },
-  { src: '/svgs/icons/blackforestlabs.svg', alt: 'Blackforest Labs' },
+  { src: '/svgs/icons/formance.svg', alt: 'Formance' },
   { src: '/svgs/icons/blaxel.svg', alt: 'Blaxel' },
   { src: '/svgs/icons/sarvam.svg', alt: 'sarvam logo' },
 ]
