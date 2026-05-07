@@ -137,6 +137,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Flask Monitoring Dashboard Template',
   },
   {
+    name: 'Fly.io',
+    href: '/docs/dashboards/dashboard-templates/fly-dashboard',
+    clickName: 'Fly.io Dashboard Template',
+  },
+  {
     name: 'Frontend Monitoring',
     href: '/docs/dashboards/dashboard-templates/frontend-monitoring',
     clickName: 'Frontend Monitoring Dashboard Template',

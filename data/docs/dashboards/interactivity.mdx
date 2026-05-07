@@ -1,8 +1,8 @@
 ---
-date: 2025-12-18
+date: 2026-05-06
 id: interactivity
 title: Interactivity in dashboards
-description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, and navigation to Logs and Traces.
+description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
 doc_type: howto
 ---
@@ -21,7 +21,7 @@ These interactive features make dashboards a powerful tool for root cause analys
 
 ## Features
 
-Interactive dashboards include multiple capabilities such as **View Logs and Traces**, **Breakout by**, **Context Links**, **Cross Filtering**, and **Filter in Tables**. 
+Interactive dashboards include multiple capabilities such as **View Logs and Traces**, **Breakout by**, **Context Links**, **Cross Filtering**, **Filter in Tables**, and **Cross-Panel Sync**. 
 Together, these features let you drill deeper, correlate across signals, and debug issues faster.
 
 ### View Logs and Traces
@@ -192,3 +192,81 @@ The **Filter in Tables** option allows you to quickly narrow results by applying
 - **Faster narrowing**: Apply filters directly from the data you are inspecting.
 - **Context-aware operators**: Only valid operators for the column type are shown.
 - **No query editing**: Instantly re-run the query without touching the Query Builder.
+
+### Cross-Panel Sync
+
+When a dashboard has multiple charts describing the same system — request rate, latency, error count — you can synchronize them so that hovering one chart highlights the same point in time on every other chart.
+
+#### How to enable it
+
+1. Open a dashboard and select **Configure**.
+2. Under **Cross-Panel Sync**, choose a sync mode:
+   - **No Sync** — panels behave independently.
+   - **Crosshair** — a vertical time-marker appears on all panels at the hovered timestamp.
+   - **Tooltip** — same as Crosshair, plus matching tooltips appear on related panels.
+3. When **Tooltip** mode is selected, a **Synced Tooltip Series** option appears:
+   - **All** — shows the full tooltip with every series on the synced panels.
+   - **Filtered** — shows only the series that match the hovered series based on shared group-by dimensions.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/cross-panel-sync-config.webp" width="80%" alt="Dashboard Configuration panel showing Tooltip sync mode with Synced Tooltip Series set to Filtered"/>
+    <figcaption><i>Cross-Panel Sync settings with Tooltip mode and Synced Tooltip Series options.</i></figcaption>
+</figure>
+
+#### How it works
+
+When you hover a chart (the **source**), every other chart on the dashboard (the **receivers**) reacts:
+
+- A vertical line (the **crosshair**) appears at the same timestamp on every other chart in that dashboard.
+- The source shows its full tooltip with all of its series at that point in time.
+- Other charts (the receivers) may also show a tooltip, but filtered to only the series that are comparable to what you are focused on.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/cross-panel-sync-demo.webp" width="80%" alt="Two dashboard panels with synchronized crosshair and tooltip showing matching series"/>
+    <figcaption><i>Hovering the source chart shows a crosshair and filtered tooltip on the receiver.</i></figcaption>
+</figure>
+
+#### Y-axis crosshair and matching units
+
+Every chart has a y-axis with a unit (milliseconds, bytes, count, percent, etc.).
+
+- **Same unit on both panels** — the receiver shows both the vertical (time) and horizontal (value) crosshair lines, so you can compare values directly.
+- **Different units** — only the vertical line appears on the receiver. The horizontal line is hidden because aligning a "ms" cursor on a "bytes" chart would suggest a comparison that is not meaningful.
+
+This rule applies to the crosshair lines only — tooltip behavior is covered in the next section.
+
+#### How tooltip matching works
+
+In **Tooltip** mode, receiver tooltips only appear when there is a meaningful match. The matching is based on the **group-by dimensions** of each chart's queries — the labels a chart splits its data by (for example, `service.name`, `http.method`, or `region`). They appear in the legend (e.g. `{service.name="frontend"}`).
+
+A receiver shows a tooltip when all of these are true:
+
+1. **Both charts have at least one group-by dimension.** A chart with no group-by (a single aggregated line) will not trigger or receive a filtered tooltip.
+2. **The two charts share at least one group-by dimension.** For example, if the source groups by `service.name` and the receiver also groups by `service.name`, that is a shared dimension. If the source groups by `service.name` and the receiver groups only by `region`, there is no overlap.
+3. **The receiver has at least one visible series whose values match the source's focused series on every shared dimension.** If the source's focused series is `{service.name="frontend", http.method="GET"}` and the receiver only has series for `service.name="checkout"`, no series matches.
+
+If any condition fails, the receiver tooltip is hidden entirely — no header, no footer, no empty box.
+
+| Source groups by | Receiver groups by | Result on receiver |
+| --- | --- | --- |
+| `service.name` | `service.name` (has matching series) | Tooltip with matched rows |
+| `service.name` | `service.name` (no matching series) | No tooltip |
+| `service.name` | No group-by (single aggregated line) | No tooltip |
+| No group-by | Any | No tooltip |
+| `service.name` | `region` only (no shared dimension) | No tooltip |
+| `service.name, http.method` | `service.name` only | Tooltip filtered by `service.name` |
+
+When a receiver tooltip appears, it lists only the series that match the source's focused series on the shared dimensions:
+
+- Series with data at that timestamp show their value.
+- Series that match the dimension filter but have no value at that timestamp show **No Data**, so you can tell the absence is meaningful (the series exists but has a gap) rather than the series being missing entirely.
+- Series that do not match the dimension filter are not shown.
+
+#### Interaction with the legend
+
+You can toggle individual series on and off through the chart legend. Hidden series are treated as if they do not exist for tooltip matching:
+
+- If you hide a series in the receiver chart, it will not be considered when looking for a match.
+- If every matching series in the receiver is hidden, the receiver tooltip disappears entirely the next time you move the cursor on the source.
+
+This makes it easy to focus comparison on a specific subset by hiding the rest.
