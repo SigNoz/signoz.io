@@ -1,5 +1,5 @@
 ---
-date: 2026-04-26
+date: 2026-05-07
 id: tail-sampling
 title: Tail Sampling
 description: Sample traces at the collector after all spans arrive, using policies based on status, latency, span name, and more.
@@ -14,14 +14,18 @@ Tail sampling evaluates a complete trace before deciding whether to keep or drop
 
 Use tail sampling when your sampling decision depends on trace-level data (error status, total duration, a specific span name) that isn't available until the trace completes.
 
-<Admonition type="warning">
-  The tail sampling processor ships only in `otelcol-contrib`, not the core OpenTelemetry Collector distribution.
+<Admonition type="warning" title="Impact on APM metrics">
+  SigNoz computes APM metrics (`signoz_calls_total`, `signoz_latency_sum`, and related RED metrics) from ingested trace data. When you enable tail-based sampling, those metrics cover only the sampled traces, so absolute values like total request counts undercount real traffic. Latency trends and error spikes stay reliable. SigNoz is working on a fix.
 </Admonition>
 
 ## Prerequisites
 
 - [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed and running
 - Familiarity with [OTel Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
+
+<Admonition type="note">
+  The tail sampling processor ships only in `otelcol-contrib`, not the core OpenTelemetry Collector distribution.
+</Admonition>
 
 ## How it works
 
