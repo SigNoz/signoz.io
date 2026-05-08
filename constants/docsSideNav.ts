@@ -2771,7 +2771,7 @@ const docsSideNav = [
       {
         type: 'category',
         route: '/docs/alerts-management/user-guides/user-guides',
-        label: 'User Guides',
+        label: 'Alerts User Guides',
         isExpanded: false,
         items: [
           {
