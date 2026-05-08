@@ -2458,7 +2458,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'User Guides',
+        label: 'Dashboards User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/user-guides',
