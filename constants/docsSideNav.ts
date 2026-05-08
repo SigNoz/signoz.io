@@ -1972,6 +1972,11 @@ const docsSideNav = [
         route: '/docs/cost-meter/alerts',
         label: 'Alerts',
       },
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/query-api',
+        label: 'Query API',
+      },
     ],
   },
   {
