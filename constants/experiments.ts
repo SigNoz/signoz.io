@@ -82,6 +82,8 @@ export const EXPERIMENTS = {
       VARIANT: 'value-props-social-proof',
     },
     flagName: 'teams-page-value-props',
+    concluded: true,
+    defaultVariant: 'value-props-social-proof',
   },
   CLOUD_FIRST_PRICING_PAGE: {
     id: 'cloud-first-pricing-page',

@@ -106,6 +106,8 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'MetricsDefinition',
   'MultiNodePart1',
   'MultiNodePart2',
+  'OtelOperatorAutoInstrumentation',
+  'OtelOperatorOTLPEndpoint',
   'PrereqsInstrument',
   'RetentionInfo',
   'SigNozCloud',

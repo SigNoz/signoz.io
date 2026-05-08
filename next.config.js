@@ -91,6 +91,21 @@ module.exports = () => {
     async redirects() {
       return [
         {
+          source: '/enterprise-self-hosted/',
+          destination: '/contact-us/?source=redirect-enterprise-self-hosted',
+          permanent: true,
+        },
+        {
+          source: '/enterprise-cloud/',
+          destination: '/contact-us/?source=redirect-enterprise-cloud',
+          permanent: true,
+        },
+        {
+          source: '/oss-to-cloud/',
+          destination: '/teams/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,
@@ -635,7 +650,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3uf4h5hpi-qnBT5dBELJIxWFHjRB28Sw',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3x7z8ihiq-CJ6dU~OCOgp5nS1gTqwFTw',
           basePath: false,
           permanent: true,
         },
@@ -1646,6 +1661,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/integrations/flyio/',
+          destination: '/docs/integrations/outposts/flyio/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/docker-standalone/',
           destination: '/docs/install/docker/',
           permanent: true,
@@ -2588,6 +2608,11 @@ module.exports = () => {
         {
           source: '/blog/claude-code-opentelemetry-monitoring/',
           destination: '/blog/claude-code-monitoring-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-collector-processors/',
+          destination: '/blog/opentelemetry-processors/',
           permanent: true,
         },
         {

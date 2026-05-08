@@ -31,6 +31,7 @@ import {
   SiPython,
   SiDeno,
   SiHasura,
+  SiApachedruid,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import { VscGraphLine } from 'react-icons/vsc'
@@ -116,6 +117,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/integrations/aws-elasticache-redis': <SiAmazon className="h-7 w-7 text-orange-500" />,
   // Web Servers
   '/docs/metrics-management/nginx-metrics': <SiNginx className="h-7 w-7 text-green-600" />,
+  '/docs/integrations/opentelemetry-kong-gateway': (
+    <img src="/img/icons/kong-icon.svg" alt="Kong Gateway" className="h-7 w-7 object-contain" />
+  ),
   '/docs/gcp-monitoring/gcp-clb/metrics': <SiGooglecloud className="h-7 w-7 text-blue-500" />,
   // Messaging
   '/docs/messaging-queues/kafka': <SiApachekafka className="h-7 w-7 text-black dark:text-white" />,
@@ -179,6 +183,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/instrumentation/opentelemetry-deno': <SiDeno className="h-7 w-7 text-blue-500" />,
   '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
+  '/docs/integrations/opentelemetry-apache-druid': (
+    <SiApachedruid className="h-7 w-7 text-[#29F5E6]" />
+  ),
 }
 
 export default function MetricsQuickStartOverview({

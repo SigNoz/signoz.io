@@ -1,5 +1,5 @@
 ---
-date: 2026-04-09
+date: 2026-05-03
 id: alert-correlation-analysis
 title: Alert Correlation Analysis
 description: When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
@@ -11,6 +11,8 @@ import GetHelp from '@/components/shared/get-help.md'
 Your pager explodes. Alerts from multiple services are firing within minutes: `Payment Service error rate >= 5%`, `Checkout Service error rate >= 5%`, `Frontend Service error rate >= 10%`. All these services are related. Before you escalate to all of them, you need to know: is this 3 separate problems, or one cascading failure?
 
 You open your AI assistant, connected to SigNoz via the MCP server, to find the issue.
+
+<YouTube id="_9YH5dPxFHU" mute={false} />
 
 ## Prerequisites
 
@@ -186,7 +188,7 @@ During this investigation, the MCP server called these tools:
 
 | Step | MCP Tool | What It Did |
 |------|----------|-------------|
-| 1 | `signoz_list_alerts` | Retrieved all currently firing alerts with their severity, start times, and conditions to identify which services are affected |
+| 1 | `signoz_list_alerts` | Retrieved currently firing Alertmanager alert instances with their severity, start times, and conditions to identify which services are affected |
 | 2 | `signoz_search_traces` | Found error traces from Checkout and Payment services to identify the relationship and common error patterns (gold-tier token failures) |
 | 3 | `signoz_get_trace_details` | Retrieved the full span tree for trace ID `b0263667e66d3a3fd1fbb0d8be54d792` showing how Payment failures cascade through Checkout to Frontend |
 | 4 | `signoz_search_traces` | Queried error spans from Checkout service filtered by error message patterns to calculate what percentage were caused by Payment failures |

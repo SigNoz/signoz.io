@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { SiGithub, SiJenkins, SiArgo } from 'react-icons/si'
+import { SiGithub, SiJenkins, SiArgo, SiGitlab } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 import { CICD_MONITORING_ITEMS } from '@/constants/componentItems'
 
@@ -12,6 +12,7 @@ export default function CICDMonitoringListicle() {
     { id: 'github', label: 'GitHub' },
     { id: 'jenkins', label: 'Jenkins' },
     { id: 'argocd', label: 'ArgoCD' },
+    { id: 'gitlab', label: 'GitLab' },
   ]
 
   // State to track the active section
@@ -49,6 +50,7 @@ export default function CICDMonitoringListicle() {
       <SiJenkins className="h-7 w-7 text-black dark:text-white" />
     ),
     '/docs/cicd/argocd/argocd-metrics': <SiArgo className="h-7 w-7 text-orange-500" />,
+    '/docs/cicd/gitlab/gitlab-traces': <SiGitlab className="h-7 w-7 text-orange-600" />,
   }
 
   const githubCards = CICD_MONITORING_ITEMS.github.map((item) => ({
@@ -62,6 +64,11 @@ export default function CICDMonitoringListicle() {
   }))
 
   const argocdCards = CICD_MONITORING_ITEMS.argocd.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const gitlabCards = CICD_MONITORING_ITEMS.gitlab.map((item) => ({
     ...item,
     icon: ICON_MAP[item.href],
   }))
@@ -102,6 +109,18 @@ export default function CICDMonitoringListicle() {
     </div>
   )
 
+  // GitLab Section
+  const renderGitLabSection = () => (
+    <div className="mb-10">
+      <h2 className="mb-4 text-2xl font-semibold">GitLab</h2>
+      <IconCardGrid
+        cards={gitlabCards}
+        sectionName="GitLab Monitoring"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+    </div>
+  )
+
   // Render sections based on the active section
   return (
     <div>
@@ -110,6 +129,7 @@ export default function CICDMonitoringListicle() {
       {(activeSection === 'all' || activeSection === 'github') && renderGitHubSection()}
       {(activeSection === 'all' || activeSection === 'jenkins') && renderJenkinsSection()}
       {(activeSection === 'all' || activeSection === 'argocd') && renderArgoCDSection()}
+      {(activeSection === 'all' || activeSection === 'gitlab') && renderGitLabSection()}
     </div>
   )
 }
