@@ -240,14 +240,26 @@ function parseMDXFile(filePath) {
   }
 }
 
+/**
+ * Remove GFM fenced code blocks (```lang … ```) so illustrative JSX/HTML inside
+ * docs — e.g. `<img src="${panel.url}" />` — is not scanned as real assets.
+ */
+function stripFencedCodeBlocks(content) {
+  let out = content.replace(/^```[^\n]*\n[\s\S]*?^```/gm, '\n')
+  out = out.replace(/^~~~[^\n]*\n[\s\S]*?^~~~/gm, '\n')
+  return out
+}
+
 // Helper: Extract asset paths from content and frontmatter
 function extractAssetPaths(content, frontmatter) {
   const paths = new Set()
 
+  const bodyForScan = stripFencedCodeBlocks(content)
+
   const mdImageRegex = /!\[.*?\]\((.*?)\)/g
 
   let match
-  while ((match = mdImageRegex.exec(content)) !== null) {
+  while ((match = mdImageRegex.exec(bodyForScan)) !== null) {
     if (match[1] && !match[1].startsWith('http') && !match[1].startsWith('https')) {
       paths.add(match[1])
     }
@@ -262,7 +274,7 @@ function extractAssetPaths(content, frontmatter) {
     )
 
     let match
-    while ((match = tagRegex.exec(content)) !== null) {
+    while ((match = tagRegex.exec(bodyForScan)) !== null) {
       const srcValue = match[1]
       if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
         paths.add(srcValue)
@@ -275,7 +287,7 @@ function extractAssetPaths(content, frontmatter) {
       'gi'
     )
 
-    while ((match = tagRegexNoQuotes.exec(content)) !== null) {
+    while ((match = tagRegexNoQuotes.exec(bodyForScan)) !== null) {
       const srcValue = match[1]
       if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
         paths.add(srcValue)
