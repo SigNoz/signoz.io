@@ -1949,7 +1949,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'User Guides',
+        label: 'Cost Meter User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/cost-meter/user-guides',
