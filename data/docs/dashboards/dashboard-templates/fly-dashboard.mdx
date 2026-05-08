@@ -1,0 +1,65 @@
+---
+date: 2026-05-04
+id: fly-dashboard
+title: Fly.io Dashboard
+description: Monitor Fly.io application and infrastructure metrics including CPU usage, memory consumption, network throughput, and instance health.
+doc_type: explanation
+---
+
+This dashboard provides comprehensive monitoring of Fly.io applications and infrastructure using Fly's Prometheus federation endpoint, giving you visibility into CPU usage, memory consumption, network throughput, and instance health.
+
+<Admonition type="info">
+To use this dashboard, you need to configure Fly.io metrics collection in SigNoz. Follow the [Fly.io Integration](https://signoz.io/docs/integrations/outposts/flyio/) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/fly-dashboard.webp"
+  alt="Fly.io Dashboard Preview"
+  caption="Fly.io Dashboard - CPU, Memory, and Network Metrics"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/fly/fly-prometheus-v1.json"
+    dashboardName="Fly.io (Prometheus)"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard provides comprehensive monitoring of Fly.io service performance, giving you visibility into:
+
+- **CPU usage and limits**: Track CPU time consumption and configured CPU limits per service instance
+- **Memory usage**: Monitor resident set size (RSS) and memory utilization percentage
+- **Network throughput**: Observe inbound and outbound network data transfer rates
+- **Instance health**: Monitor instance status and performance across your Fly.io organization
+
+## Metrics Included
+
+### CPU
+
+- **CPU Time**: The cumulative amount of CPU time used by a service instance, in seconds. Uses `fly_instance_cpu` metric with rate aggregation.
+- **CPU User Time**: CPU time spent in user-mode execution. Uses `fly_instance_cpu_user_seconds_total`.
+
+### Memory
+
+- **Memory Usage**: The amount of memory a service instance is currently using. Uses `fly_instance_memory_resident` metric.
+- **Memory Utilization**: The percentage of memory used relative to the memory limit.
+
+### Network
+
+- **Network In**: The rate of bytes received by Fly.io services. Uses `fly_instance_net_recv_bytes` with rate aggregation.
+- **Network Out**: The rate of bytes transmitted by Fly.io services. Uses `fly_instance_net_sent_bytes` with rate aggregation.
+
+### Instance Status
+
+- **Instance Count**: Number of active instances per application
+- **Instance Health**: Status and availability monitoring
+
+## Related Docs
+
+- [Fly.io Integration](https://signoz.io/docs/integrations/outposts/flyio/)
+- [Fly.io Metrics](https://signoz.io/docs/metrics-management/fly-metrics/)
+- [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/)

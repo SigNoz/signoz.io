@@ -1,20 +1,18 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import React from 'react'
 import docsSideNav from '@/constants/docsSideNav'
 import { getPrevAndNextRoutes } from '../../utils/common'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import Link from 'next/link'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
-import { QUERY_PARAMS } from '@/constants/queryParams'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 export default function DocsPrevNext() {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const isOnboarding = isDocsOnboardingPathname(pathname)
 
-  if (source === ONBOARDING_SOURCE) {
+  if (isOnboarding) {
     return null
   }
 

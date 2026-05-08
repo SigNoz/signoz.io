@@ -67,6 +67,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Baseten Dashboard Template',
   },
   {
+    name: 'Cert-Manager',
+    href: '/docs/dashboards/dashboard-templates/cert-manager-dashboard',
+    clickName: 'Cert-Manager Dashboard Template',
+  },
+  {
     name: 'CI/CD',
     href: '/docs/dashboards/dashboard-templates/cicd',
     clickName: 'CI/CD Dashboard Template',
@@ -130,6 +135,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Flask Monitoring',
     href: '/docs/dashboards/dashboard-templates/flask-monitoring',
     clickName: 'Flask Monitoring Dashboard Template',
+  },
+  {
+    name: 'Fly.io',
+    href: '/docs/dashboards/dashboard-templates/fly-dashboard',
+    clickName: 'Fly.io Dashboard Template',
   },
   {
     name: 'Frontend Monitoring',
@@ -230,6 +240,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Key Operations',
     href: '/docs/dashboards/dashboard-templates/key-operations',
     clickName: 'Key Operations Dashboard Template',
+  },
+  {
+    name: 'Kong Gateway',
+    href: '/docs/dashboards/dashboard-templates/kong-gateway',
+    clickName: 'Kong Gateway Dashboard Template',
   },
   {
     name: 'LiteLLM',
