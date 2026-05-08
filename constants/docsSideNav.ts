@@ -3534,6 +3534,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/outposts/railway',
+        label: 'Railway',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/opentelemetry-kong-gateway',
         label: 'Kong Gateway',
       },
