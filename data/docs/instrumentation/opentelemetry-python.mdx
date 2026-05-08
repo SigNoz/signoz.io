@@ -1,7 +1,6 @@
 ---
-date: 2026-03-05
+date: 2026-05-08
 id: python
-
 title: Python OpenTelemetry Instrumentation
 description: Send traces to SigNoz using OpenTelemetry instrumentation for Python frameworks like Django, Flask, FastAPI, and Celery.
 doc_type: howto
@@ -10,13 +9,13 @@ doc_type: howto
 This guide shows you how to instrument your Python application with OpenTelemetry and send traces to SigNoz. The auto-instrumentation approach works with Django, Flask, FastAPI, Falcon, Celery, and most Python libraries out of the box.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
 
 - <a href="https://pypi.org/project/opentelemetry-distro/" target="_blank" rel="noopener noreferrer nofollow">Python 3.9+</a>
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
 Tested with <a href="https://docs.python.org/3.11/" target="_blank" rel="noopener noreferrer nofollow">Python 3.11</a> and OpenTelemetry Python SDK <a href="https://pypi.org/project/opentelemetry-sdk/1.27.0/" target="_blank" rel="noopener noreferrer nofollow">v1.27.0</a>.
 
@@ -40,7 +39,7 @@ Use this section if you're deploying your Python application directly on a serve
 export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-export OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_METRICS_EXPORTER="none"
 ```
 
@@ -106,7 +105,7 @@ env:
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_EXPORTER_OTLP_PROTOCOL
-  value: 'grpc'
+  value: 'http/protobuf'
 - name: OTEL_METRICS_EXPORTER
   value: 'none'
 ```
@@ -212,7 +211,7 @@ instrumentation.opentelemetry.io/otel-python-platform: "glibc"  # or "musl" for 
 $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_EXPORTER_OTLP_PROTOCOL = "grpc"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_METRICS_EXPORTER = "none"
 ```
 
@@ -264,7 +263,7 @@ See [Framework instrumentation](#framework-instrumentation) below for framework-
 ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 ENV OTEL_METRICS_EXPORTER=none
 ```
 
@@ -274,7 +273,7 @@ Or pass them at runtime using `docker run`:
 docker run -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>" \
     -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-    -e OTEL_EXPORTER_OTLP_PROTOCOL="grpc" \
+    -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
     -e OTEL_METRICS_EXPORTER="none" \
     your-image:latest
 ```
@@ -463,7 +462,7 @@ Choose your framework below to see the specific run command. The setup steps abo
         from celery.signals import worker_process_init
         from opentelemetry.instrumentation.celery import CeleryInstrumentor
         from opentelemetry import trace
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
         from opentelemetry.sdk.resources import Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -588,16 +587,6 @@ Application servers that spawn multiple worker processes require special handlin
 ### Hot reload breaks instrumentation
 
 Don't run your app in reloader/hot-reload mode. For Flask, avoid `FLASK_ENV=development`. For Django, use `--noreload`. For Uvicorn/FastAPI, don't use `--reload`.
-
-### gRPC installation issues
-
-If `grpcio` installation fails, use the HTTP exporter instead:
-
-```bash
-pip install opentelemetry-exporter-otlp-proto-http
-```
-
-Then set `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`.
 
 ### Database calls not showing in traces
 
