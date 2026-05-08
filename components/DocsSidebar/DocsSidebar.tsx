@@ -27,7 +27,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     setIsClient(true)
   }, [])
 
-  const toggleIsExpandedByLabel = (label, isExpanded?) => {
+  const toggleIsExpandedByLabel = (label, isExpanded) => {
     const toggle = (items) => {
       return items.map((item) => {
         if (item.type === 'category' && item.label === label && item.hasOwnProperty('isExpanded')) {
@@ -46,16 +46,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   function findParentsForRoute(items, route, parents = []) {
     for (const item of items) {
       if (item.route === route) {
-        return item.type === 'category'
-          ? [...parents, item.label]
-          : parents
+        return parents
       }
       if (item.items) {
-        const nextParents =
-          item.type === 'category'
-            ? [...parents, item.label]
-            : parents
-        const result = findParentsForRoute(item.items, route, nextParents)
+        const result = findParentsForRoute(item.items, route, [...parents, item.label])
         if (result) {
           return result
         }
@@ -191,9 +185,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
       <li key={category.label} className="group mx-2 my-1">
         <Link href={category.route ? constructHref(category.route) : ''}>
           <div
-            onClick={() =>
-              toggleIsExpandedByLabel(category.label)
-            }
+            onClick={() => toggleIsExpandedByLabel(category.label)}
             className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
               isActiveRoute
                 ? 'bg-blue-500/10 text-blue-400'
