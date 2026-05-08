@@ -2703,7 +2703,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'User Guides',
+        label: 'Alerts User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/alerts-management/user-guides/user-guides',
