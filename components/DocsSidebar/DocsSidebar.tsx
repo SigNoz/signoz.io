@@ -31,7 +31,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     setIsClient(true)
   }, [])
 
-  const toggleIsExpandedByLabel = (label, isExpanded?) => {
+  const toggleIsExpandedByLabel = (label, isExpanded) => {
     const toggle = (items) => {
       return items.map((item) => {
         if (item.type === 'category' && item.label === label && item.hasOwnProperty('isExpanded')) {
@@ -50,11 +50,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   function findParentsForRoute(items, route, parents = []) {
     for (const item of items) {
       if (item.route === route) {
-        return item.type === 'category' ? [...parents, item.label] : parents
+        return parents
       }
       if (item.items) {
-        const nextParents = item.type === 'category' ? [...parents, item.label] : parents
-        const result = findParentsForRoute(item.items, route, nextParents)
+        const result = findParentsForRoute(item.items, route, [...parents, item.label])
         if (result) {
           return result
         }
