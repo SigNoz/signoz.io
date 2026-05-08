@@ -8,6 +8,7 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'data/opentelemetry',
   'data/case-study',
   'data/faqs',
+  'data/guides',
   'data-assets',
   '.github',
   '.husky',

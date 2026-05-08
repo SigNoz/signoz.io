@@ -19,7 +19,6 @@ import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
 import blogRelatedArticles from './constants/blogRelatedArticles.json'
 import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
-import guidesRelatedArticles from './constants/guidesRelatedArticles.json'
 import allAuthors from './constants/authors.json'
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -338,40 +337,6 @@ export const Newsroom = defineDocumentType(() => ({
   },
 }))
 
-export const Guide = defineDocumentType(() => ({
-  name: 'Guide',
-  filePathPattern: 'guides/**/*.mdx',
-  contentType: 'mdx',
-  fields: {
-    title: { type: 'string', required: true },
-    date: { type: 'date', required: true },
-    tags: { type: 'list', of: { type: 'string' }, default: [] },
-    lastmod: { type: 'date' },
-    draft: { type: 'boolean' },
-    summary: { type: 'string' },
-    description: { type: 'string' },
-    slug: { type: 'string', required: true },
-    images: { type: 'json' },
-    image: { type: 'string' },
-    authors: { type: 'list', of: { type: 'string' } },
-    layout: { type: 'string' },
-    bibliography: { type: 'string' },
-    canonicalUrl: { type: 'string' },
-    keywords: { type: 'list', of: { type: 'string' }, required: false },
-  },
-  computedFields: {
-    ...computedFields,
-    relatedArticles: {
-      type: 'json',
-      resolve: (doc) => getRelatedArticles(doc, guidesRelatedArticles),
-    },
-    structuredData: {
-      type: 'json',
-      resolve: (doc) => buildArticleStructuredData(doc),
-    },
-  },
-}))
-
 export const Doc = defineDocumentType(() => ({
   name: 'Doc',
   filePathPattern: 'docs/**/*.mdx',
@@ -476,7 +441,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Guide, Doc, Newsroom],
+  documentTypes: [Blog, Authors, Doc, Newsroom],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
