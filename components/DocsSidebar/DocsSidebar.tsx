@@ -27,16 +27,11 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     setIsClient(true)
   }, [])
 
-  const getCategoryKey = (item) => `${item.label}::${item.route || item.items?.[0]?.route || ''}`
-
-  const toggleIsExpandedByLabel = (label, isExpanded?, categoryKey?) => {
+  const toggleIsExpandedByLabel = (label, isExpanded) => {
     const toggle = (items) => {
       return items.map((item) => {
         if (item.type === 'category' && item.label === label && item.hasOwnProperty('isExpanded')) {
-          const matches = categoryKey ? getCategoryKey(item) === categoryKey : true
-          if (matches) {
-            return { ...item, isExpanded: isExpanded || !item.isExpanded }
-          }
+          return { ...item, isExpanded: isExpanded || !item.isExpanded }
         }
         if (item.items) {
           return { ...item, items: toggle(item.items) }
@@ -51,16 +46,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   function findParentsForRoute(items, route, parents = []) {
     for (const item of items) {
       if (item.route === route) {
-        return item.type === 'category'
-          ? [...parents, { label: item.label, key: getCategoryKey(item) }]
-          : parents
+        return parents
       }
       if (item.items) {
-        const nextParents =
-          item.type === 'category'
-            ? [...parents, { label: item.label, key: getCategoryKey(item) }]
-            : parents
-        const result = findParentsForRoute(item.items, route, nextParents)
+        const result = findParentsForRoute(item.items, route, [...parents, item.label])
         if (result) {
           return result
         }
@@ -88,7 +77,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     const parents = getParents(docsSideNav, normalizedRoute)
 
     for (const parent of parents) {
-      toggleIsExpandedByLabel(parent.label, true, parent.key)
+      toggleIsExpandedByLabel(parent, true)
     }
 
     const rIC = window.requestIdleCallback ?? setTimeout
@@ -193,12 +182,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     const isActiveRoute = normalizedActiveRoute === normalizedCategoryRoute
 
     return (
-      <li key={getCategoryKey(category)} className="group mx-2 my-1">
+      <li key={category.label} className="group mx-2 my-1">
         <Link href={category.route ? constructHref(category.route) : ''}>
           <div
-            onClick={() =>
-              toggleIsExpandedByLabel(category.label, undefined, getCategoryKey(category))
-            }
+            onClick={() => toggleIsExpandedByLabel(category.label)}
             className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
               isActiveRoute
                 ? 'bg-blue-500/10 text-blue-400'
