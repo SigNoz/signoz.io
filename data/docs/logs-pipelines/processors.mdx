@@ -1,8 +1,9 @@
 ---
-date: 2026-01-04
+date: 2026-05-04
 id: processors
 title: Log Processors
 description: Complete list of log processors available in Signoz.
+doc_type: reference
 ---
 
 Every pipeline includes a chain of processors that define the transformations it will apply to logs.
@@ -15,7 +16,7 @@ defining pipelines.
 ## Regex
 
 The Regex processor can be used to extract information out of text
-using [regular expressions](https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html).
+using <a href="https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html" target="_blank" rel="noopener noreferrer nofollow">regular expressions</a>.
 
 #### Processor Fields
 
@@ -33,14 +34,14 @@ You can follow [Parsing Logs with Regex](https://signoz.io/docs/logs-pipelines/g
 
 The Grok processor can be used to extract information out of text
 using grok patterns.  
-[Grok](https://www.elastic.co/guide/en/elasticsearch/reference/current/grok.html) is a regular expression dialect with convenient [aliases](https://github.com/vjeantet/grok/blob/master/patterns.go) for commonly used expressions.
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/grok.html" target="_blank" rel="noopener noreferrer nofollow">Grok</a> is a regular expression dialect with convenient <a href="https://github.com/vjeantet/grok/blob/master/patterns.go" target="_blank" rel="noopener noreferrer nofollow">aliases</a> for commonly used expressions.
 
 #### Processor Fields
 
 | Field           | Description                                                                                                                                         |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name            | A descriptive name for the processor.                                                                                                               |
-| Pattern         | The [grok pattern](https://grokdebugger.com/) to be used. Must include atleast one named capture group                                              |
+| Pattern         | The <a href="https://grokdebugger.com/" target="_blank" rel="noopener noreferrer nofollow">grok pattern</a> to be used. Must include atleast one named capture group                                              |
 | Parse&#160;From | The log text field to parse from. Eg: `body` or `attributes.sessionInfo`                                                                            |
 | Parse&#160;To   | The path to parse to. Eg: If set to `attributes`, a capture group like `%{WORD:userId}` in the grok pattern would get stored in `attributes.userId` |
 | On&#160;Error   | What to do if the processor fails. Options are to `drop` the log or `send` it to the next processor                                                 |
@@ -109,7 +110,7 @@ The timestamp parsing processor can be used to parse log timestamp out of a log 
 | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Name&#160;of&#160;Timestamp&#160;Parsing&#160;Processor | A descriptive name for the processor.                                                                                                                                                                                                                                                                                                                                                                                       |
 | Parse&#160;Timestamp&#160;Value&#160;From               | The log field containing timestamp value. Eg: `attributes.timestamp`                                                                                                                                                                                                                                                                                                                                                        |
-| Timestamp&#160;Format&#160;Type                         | Type of timestamp value to be parsed. <br/> `epoch` can be used for parsing [unix time](https://en.wikipedia.org/wiki/Unix_time) and `strptime` can be used for parsing human readable values using [ctime-like directives](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/internal/coreinternal/timeutils/internal/ctimefmt/ctimefmt.go#L68) such as %Y (4-digit year) and %H (2-digit hour). |
+| Timestamp&#160;Format&#160;Type                         | Type of timestamp value to be parsed. <br/> `epoch` can be used for parsing <a href="https://en.wikipedia.org/wiki/Unix_time" target="_blank" rel="noopener noreferrer nofollow">unix time</a> and `strptime` can be used for parsing human readable values using <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/internal/coreinternal/timeutils/internal/ctimefmt/ctimefmt.go#L68" target="_blank" rel="noopener noreferrer nofollow">ctime-like directives</a> such as %Y (4-digit year) and %H (2-digit hour). |
 | Timestamp&#160;Format                                   | Format for parsing timestamp value. <br/> For example `%Y-%m-%d` can be used for parsing values like `2023-12-06` when Timestamp Format Type is `strptime`, or `seconds.milliseconds` can be used for parsing unix time values like `1701869406.245` when Timestamp Format Type is `epoch`                                                                                                                                  |
 
 You can follow [Parse Timestamp Information](https://signoz.io/docs/logs-pipelines/guides/timestamp-parsing/) guide for more details.
@@ -154,7 +155,7 @@ The add processor can be used to add a field to the log.
 
 <Admonition>
 
-The value field can be set to an [expression](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md) which will get evaluated for each entry to set the value.  
+The value field can be set to an <a href="https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md" target="_blank" rel="noopener noreferrer nofollow">expression</a> which will get evaluated for each entry to set the value.  
 For example the value can be set to `EXPR(attributes.subtotal + attributes.taxes)` to add a new field for total.  
 Value expressions are also useful for accessing array items that can't be referenced with field paths in operators like `COPY` and `MOVE`, for example `EXPR(attributes.locale[0])`.
 

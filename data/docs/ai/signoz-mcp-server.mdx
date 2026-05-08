@@ -1,5 +1,5 @@
 ---
-date: 2026-04-28
+date: 2026-05-05
 id: signoz-mcp-server
 title: SigNoz MCP Server
 description: Connect AI assistants like Claude Desktop, Cursor, GitHub Copilot, Claude Code, OpenAI Codex, Windsurf, Gemini CLI, VS Code, and Zed to your SigNoz observability data using the MCP (Model Context Protocol) server.
@@ -232,6 +232,12 @@ When you add the hosted MCP URL to your client, the MCP client will initiate an 
 1. Your **SigNoz instance URL** (e.g., `https://your-instance.signoz.cloud`)
 2. Your **API key** — go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key (requires **Admin** role). See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
 
+<Admonition type="info" title="How authentication works?" defaultCollapsed={true}>
+SigNoz Cloud's hosted MCP server uses OAuth 2.1 for client-to-MCP authentication. MCP clients discover the auth endpoints from the server metadata, dynamically register as an OAuth client using Dynamic Client Registration (DCR, RFC 7591) when supported, then use Authorization Code + PKCE. During the browser step, SigNoz asks for your SigNoz instance URL and service account API key; the MCP server validates those credentials and issues bearer/refresh tokens for future MCP requests.
+
+SigNoz Cloud's MCP server also supports header-based authentication for clients that can't do OAuth, but the recommended approach is to use OAuth when possible for better security and token management.
+</Admonition>
+
 <Admonition type="warning">
 Only **Admin** users can create API keys. If you don't see the option, contact your workspace administrator.
 </Admonition>
@@ -240,8 +246,8 @@ Only **Admin** users can create API keys. If you don't see the option, contact y
 
 Some MCP clients (like Cursor Automations) run entirely in the cloud and cannot perform interactive OAuth authentication. For these clients, use header-based authentication by passing your API key and instance URL directly in the request headers.
 
-<Admonition type="info">
-**When to use this:** If your MCP client doesn't support OAuth flows or stdio transport — for example, Cursor Automations — use this header-based configuration instead.
+<Admonition type="info" title="When to use header-based authentication?">
+If your MCP client doesn't support OAuth flows or stdio transport — for example, Cursor Automations: use this header-based configuration instead.
 </Admonition>
 
 ```json title="mcp.json"
