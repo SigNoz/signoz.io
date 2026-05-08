@@ -3539,6 +3539,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/outposts/netlify',
+        label: 'Netlify',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/nomad',
         label: 'Nomad',
       },

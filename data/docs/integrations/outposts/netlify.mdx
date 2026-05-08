@@ -1,0 +1,120 @@
+---
+date: 2026-05-08
+id: netlify
+title: Monitor Netlify with SigNoz
+description: Forward logs from your Netlify sites to SigNoz using Netlify's General HTTP log drain — covers traffic, function, edge function, deploy, and WAF logs.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<a href="https://www.netlify.com" target="_blank" rel="noopener noreferrer nofollow">Netlify</a> is a platform for building, deploying, and scaling web applications. SigNoz supports one signal from Netlify:
+
+- **Logs** — forwarded via Netlify's <a href="https://docs.netlify.com/monitor-sites/log-drains/" target="_blank" rel="noopener noreferrer nofollow">General HTTP log drain</a>. Netlify pushes five log types: traffic, function, edge function, deploy, and WAF.
+
+<Admonition type="info">
+Netlify does not expose metrics or traces. Only logs are available through log drains.
+</Admonition>
+
+<Admonition type="info">
+If using self-hosted SigNoz, most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A Netlify account with **Log Drains** enabled (Enterprise feature)
+- A [SigNoz Cloud](https://signoz.io/teams/) (or self-hosted) workspace
+- Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) and [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+
+## Forward Logs
+
+### Step 1: Build the ingestion URL
+
+Construct the SigNoz ingestion URL with your credentials embedded:
+
+```
+https://signoz:<your-ingestion-key>@ingest.<region>.signoz.cloud:443/logs/json
+```
+
+Replace:
+- `<your-ingestion-key>` — your [SigNoz ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>` — your SigNoz Cloud region (e.g., `us`, `eu`). See [regions](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
+<Admonition type="info">
+Netlify's General HTTP drain supports a URL field and an Authorization header field but does not support arbitrary custom headers. Embedding credentials in the URL sends them as HTTP Basic Authentication, which SigNoz accepts.
+</Admonition>
+
+### Step 2: Configure the log drain in Netlify
+
+1. In the <a href="https://app.netlify.com" target="_blank" rel="noopener noreferrer nofollow">Netlify UI</a>, open your site and go to **Logs & Metrics > Log Drains**.
+2. Select **Enable a log drain**.
+3. Choose **General HTTP endpoint** as the service.
+4. Select the **log types** you want to drain (traffic, functions, edge functions, deploys, WAF).
+5. Optionally enable **Exclude PII** to remove `client_ip` and `user_agent` from traffic logs.
+6. Set **Log Drain Format** to **JSON**.
+7. Paste the ingestion URL from Step 1 into the **Full URL** field.
+8. Leave the **Authorization header** field empty (credentials are in the URL).
+9. Select **Connect**.
+
+<Admonition type="warning">
+Select **JSON**, not NDJSON. SigNoz's `/logs/json` endpoint expects a JSON array payload.
+</Admonition>
+
+### Step 3: Verify logs in SigNoz
+
+Open **Logs Explorer** in SigNoz. Within a few minutes you should see log entries with Netlify-specific attributes such as `log_type`, `site_id`, and `account_id`.
+
+Netlify fields that are not part of the standard OpenTelemetry log model (such as `method`, `status_code`, `url`, `deploy_id`, `function_name`, etc.) appear as log attributes in SigNoz. You can filter and search on any of these attributes in the Logs Explorer.
+
+## Log Types and Attributes
+
+Netlify pushes five log types. Each type includes different attributes:
+
+| Log type | Key attributes | Notes |
+|---|---|---|
+| `traffic` | `method`, `url`, `status_code`, `duration`, `response_size`, `country` | HTTP request logs. Enable **Exclude PII** to remove `client_ip` and `user_agent`. |
+| `functions` | `function_name`, `function_type`, `level`, `message`, `status_code` | Serverless function logs. Output is capped at 4 KB per invocation. |
+| `functions` (edge) | `function_name`, `function_type: "edge"`, `level`, `request_path` | Edge function logs share the `functions` log type. |
+| `deploys` | `deploy_section`, `level`, `message` | Build and deploy lifecycle logs. |
+| `waf` | `action.type`, `request.method`, `request.url`, `rule_sets` | Web Application Firewall logs with matched rule details. |
+
+## Limitations
+
+- **Logs only** — Netlify does not expose metrics or traces through log drains.
+- **Background Functions** — logs from <a href="https://docs.netlify.com/functions/background-functions/" target="_blank" rel="noopener noreferrer nofollow">Background Functions</a> are not available via log drains.
+- **Function log size** — function log output is capped at 4 KB per invocation. Logs exceeding this limit are truncated to the last 4 KB.
+- **Best-effort delivery** — Netlify does not document delivery guarantees, retry policies, or ordering. Logs may be delayed or dropped under heavy load.
+- **Timestamps** — Netlify sends RFC 3339 timestamps. If SigNoz does not parse them, ingest time is used instead. To filter by exact source time, use the `timestamp` attribute.
+- **Configuration delay** — changes to log drain settings may take up to five minutes to take effect.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No logs appearing in SigNoz
+
+- **Log Drains not enabled** — Log Drains is a Netlify Enterprise feature. Confirm your plan supports it in the Netlify billing settings.
+- **Incorrect URL** — double-check the ingestion URL format. The region must match your SigNoz Cloud instance and the ingestion key must be valid.
+- **Wrong format** — ensure you selected **JSON** (not NDJSON) as the log drain format.
+- **Propagation delay** — log drain configuration changes can take up to five minutes. Wait and check again.
+
+### Logs appear but with missing timestamps
+
+Netlify sends timestamps as RFC 3339 strings (e.g., `2024-08-24T18:54:34.831Z`). SigNoz's `/logs/json` endpoint expects timestamps as nanosecond Unix epoch integers. If source timestamps are not parsed, SigNoz uses the ingest time. The original Netlify timestamp is still available as a log attribute for reference.
+
+### Truncated function logs
+
+Function log output is limited to 4 KB per invocation. If your function produces more output, only the last 4 KB is sent. Consider logging structured JSON with key fields to stay within the limit.
+
+</details>
+
+## Next Steps
+
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to get notified on error patterns in Netlify logs.
+- [Create a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) to visualize Netlify traffic patterns, deploy frequency, and error rates.
+- [Sending Logs over HTTP](https://signoz.io/docs/userguide/send-logs-http/) for details on the SigNoz HTTP log ingestion API.
+
+## Get Help
+
+<GetHelp />
