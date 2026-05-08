@@ -2573,7 +2573,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'User Guides',
+        label: 'Querying User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/querying/user-guides',
