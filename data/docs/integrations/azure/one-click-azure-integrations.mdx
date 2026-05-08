@@ -1,0 +1,269 @@
+---
+date: 2026-05-06
+id: one-click-azure-integrations
+title: Azure One-Click Integrations
+description: Monitor Azure CDN FrontDoor and Blob Storage with SigNoz One-Click Azure Integration. Connect your Azure subscription and SigNoz deploys the monitoring infrastructure for you.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+SigNoz One-Click Azure Integration monitors your Azure services without manual setup. Connect your Azure subscription from the SigNoz UI, and SigNoz deploys an agent that provisions Event Hubs, diagnostic settings, and an OpenTelemetry Collector via Azure Deployment Stacks. Each supported service ships with a pre-built dashboard, visible as soon as data starts flowing.
+
+## Supported integrations
+
+<AzureOneClickListicle />
+
+## Key capabilities
+
+- **Automated setup**: SigNoz deploys all monitoring resources into your Azure subscription. No manual resource creation needed.
+- **Auto-discovery**: The agent detects and monitors new resources of an enabled service type. No reconfiguration as your infrastructure grows.
+- **Multi-subscription support**: Monitor resources across multiple Azure subscriptions and resource groups from a single SigNoz workspace.
+- **Pre-built dashboards**: Each supported service ships with a ready-made dashboard, available as soon as data starts flowing.
+
+## Prerequisites
+
+- A SigNoz Cloud or Self-Hosted Enterprise account
+- An active Azure subscription
+- One of the following <a href="https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles" target="_blank" rel="noopener noreferrer nofollow">Azure built-in roles</a> on the subscription:
+  - **Owner** (covers all required permissions)
+  - **Contributor + User Access Administrator** (use this if you prefer not to grant Owner access)
+
+<details>
+<ToggleHeading>
+
+#### Required permissions
+
+</ToggleHeading>
+
+The integration creates a resource group, a custom role (`SigNozAutomationAgent`), and assigns it to a managed identity at the subscription level. Each permission in the custom role covers a specific part of the deployment:
+
+| Permission                                                              | Purpose                                                                                                                  |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `Microsoft.Resources/deployments/*`                                     | Deploy and manage the agent infrastructure                                                                               |
+| `Microsoft.Resources/deploymentStacks/*`                                | Manage collector stacks for idempotent deployments                                                                       |
+| `Microsoft.Authorization/roleAssignments/write`                         | Assign the Event Hubs Data Receiver role to the OTel Collector (restricted by condition to prevent privilege escalation) |
+| `Microsoft.Insights/diagnosticSettings/*`                               | Create diagnostic settings on your Azure resources to forward logs                                                       |
+| `Microsoft.App/containerApps/*`                                         | Deploy and update the collector container app                                                                            |
+| `Microsoft.App/managedEnvironments/join/action`                         | Deploy container apps into the managed environment                                                                       |
+| `Microsoft.ManagedIdentity/userAssignedIdentities/assign/action`        | Assign the managed identity to container apps                                                                            |
+| `Microsoft.EventHub/namespaces/*`                                       | Create and manage Event Hub namespaces for log routing                                                                   |
+| `*/read`                                                                | Discover and monitor resources across your subscription                                                                  |
+| `Microsoft.EventHub/namespaces/messages/receive/action` _(data action)_ | Read log messages from Event Hub into the collector                                                                      |
+
+</details>
+
+## Installation
+
+### Step 1: Connect your Azure subscription
+
+1. In SigNoz, navigate to **Integrations** and click **Microsoft Azure**.
+2. Click **Integrate Now** to open the setup panel.
+3. Select the **Azure region** to deploy SigNoz agent resources.
+4. Add one or more **resource group names** that you want to monitor.
+5. Click **Generate Azure Setup Commands**.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-integration-connect-subscription.webp"
+  alt="SigNoz Azure integration setup panel showing region selection and resource group input"
+  caption="Configure your Azure subscription in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+### Step 2: Deploy the agent
+
+SigNoz generates a deployment command pre-filled with your configuration. Copy it from the SigNoz UI and run it:
+
+<Admonition type="info">
+  The commands below are for reference only. Use the command generated in the SigNoz UI, which includes your actual configuration values.
+</Admonition>
+
+<Tabs entityName="azure-shell">
+<TabItem label="Azure CLI" value="azure-cli">
+
+Run locally or via Bash Cloud Shell in the Azure Portal:
+
+```bash
+az stack sub create \
+  --name signoz-integration \
+  --location <azure-region> \
+  --template-uri <template-url> \
+  --parameters <params key value pairs> \
+  --action-on-unmanage deleteAll \
+  --deny-settings-mode denyDelete
+```
+
+</TabItem>
+<TabItem label="PowerShell" value="powershell">
+
+Run via PowerShell Cloud Shell in the Azure Portal:
+
+```powershell
+New-AzSubscriptionDeploymentStack `
+  -Name "signoz-integration" `
+  -Location "<azure-region>" `
+  -TemplateUri "<template-url>" `
+  -TemplateParameterObject @{
+    <params key value pairs>
+  } `
+  -ActionOnUnmanage "deleteAll" `
+  -DenySettingsMode "denyDelete"
+```
+
+</TabItem>
+</Tabs>
+
+<Figure
+  src="/img/docs/integrations/azure/azure-integration-deploy-agent.webp"
+  alt="SigNoz UI showing the generated Azure CLI and PowerShell deployment commands"
+  caption="Copy the generated command and run it in your Azure CLI or Cloud Shell"
+  className="box-shadowed-image"
+/>
+
+### Step 3: Verify connection
+
+Return to the SigNoz UI after running the command. The page shows your **subscription ID** in the account bar once the agent is up, confirming the connection succeeded.
+
+**Verify on the Azure Portal**
+
+1. Go to **Subscriptions** and select your subscription.
+2. In the left menu, navigate to **Deployment stacks**.
+3. Confirm both stacks show a **Succeeded** status:
+   - `signoz-integration`: deploys the agent and its supporting infrastructure
+   - `signoz-integration-telemetry`: deploys telemetry resources (OTel collector, Event Hubs and diagnostic settings)
+
+If either stack shows a failed status, check the stack details for error messages and confirm your account has the required permissions listed in [Prerequisites](#prerequisites).
+
+<Figure
+  src="/img/docs/integrations/azure/azure-integration-verify-connection.webp"
+  alt="SigNoz UI showing successful Azure subscription connection with subscription ID visible"
+  caption="Subscription ID in the account bar confirms a successful connection"
+  className="box-shadowed-image"
+/>
+
+<Figure
+  src="/img/docs/integrations/azure/azure-integration-azure-portal-stacks.webp"
+  alt="Azure Portal Deployment stacks view showing signoz-integration and signoz-integration-telemetry with Succeeded status"
+  caption="Both deployment stacks showing Succeeded in the Azure Portal"
+  className="box-shadowed-image"
+/>
+
+## Managing integrations
+
+### Enabling or disabling services
+
+Once connected, enable or disable monitoring for each service individually:
+
+1. In the Azure integration page, select a service from the left panel (e.g., **CDN Profile** or **Storage Accounts Blob Storage**).
+2. Toggle **Log Collection** or **Metric Collection** on or off.
+
+The agent updates the telemetry pipeline in the background, deploying or removing resources to match your selection.
+
+### Updating resource groups
+
+1. Click **Edit Account** in the top right of the Azure integration page.
+2. Update the resource groups list in the **Account Settings** panel.
+3. Click **Update Changes**.
+
+### Adding multiple accounts
+
+To monitor multiple Azure subscriptions, click **Add New Account** and follow the same installation steps for each subscription.
+
+### Uninstalling
+
+1. Click **Edit Account**, then click **Disconnect** at the bottom of the Account Settings panel.
+2. Confirm by clicking **Remove Account**.
+
+SigNoz deletes the `signoz-integration-telemetry` stack within ~15 minutes. After that, manually delete the `signoz-integration` stack (~20 minutes to complete):
+
+<Tabs entityName="azure-shell">
+<TabItem label="Azure CLI" value="azure-cli">
+
+```bash
+az stack sub delete \
+  --name signoz-integration \
+  --action-on-unmanage deleteAll \
+  --yes
+```
+
+</TabItem>
+<TabItem label="PowerShell" value="powershell">
+
+```powershell
+Remove-AzSubscriptionDeploymentStack `
+  -Name "signoz-integration" `
+  -ActionOnUnmanage "deleteAll" `
+  -Force
+```
+
+</TabItem>
+</Tabs>
+
+## Limitations
+
+- **Two Azure services are currently supported**: Azure CDN FrontDoor and Azure Blob Storage. More services will be added in future releases.
+- **Large deployments may hit ARM template size limits**: If you have a large number of resources across many regions and resource groups, the deployment may fail. Add only the resource groups you actively want to monitor. Support for larger deployments will be addressed in a future release.
+- **Deployment region is set at connection time and cannot be changed**: To change the region, disconnect and reconnect the account.
+
+## Architecture
+
+When you connect an Azure subscription, SigNoz deploys two deployment stacks:
+
+**`signoz-integration`** (core agent infrastructure):
+
+- A **Container App** running the SigNoz agent, which periodically checks in with SigNoz to fetch your integration configuration
+- A **Managed Identity** (`SigNozAutomationAgent`) with a custom role scoped to your subscription
+- A **Container App Environment** that hosts both the agent and the OTel Collector
+
+**`signoz-integration-telemetry`** (telemetry pipeline, deployed and updated by the agent whenever you enable or disable a service):
+
+- **Event Hub Namespaces** (one per Azure region where your resources live) with an event hub for receiving logs
+- **Diagnostic Settings** on each monitored resource, forwarding logs to the appropriate Event Hub
+- An **OpenTelemetry Collector** (Container App) that reads logs from Event Hubs via the `azureeventhub` receiver and scrapes metrics from Azure Monitor via the `azuremonitor` receiver, then exports everything to SigNoz over OTLP HTTP
+
+The agent continuously discovers new resources in your monitored resource groups using the Azure Resource Graph API. When you enable or disable a service or update resource groups in the SigNoz UI, the agent reconciles the desired state and updates the telemetry stack.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-integration-architecture.webp"
+  alt="Architecture diagram showing the SigNoz agent, Event Hubs, OTel Collector, and data flow to SigNoz"
+  caption="Azure integration architecture: agent manages two deployment stacks that handle telemetry collection"
+  className="box-shadowed-image"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+
+</ToggleHeading>
+
+### Deployment stacks not showing as Succeeded
+
+- Confirm your account has **Owner**, or both **Contributor** and **User Access Administrator** roles on the subscription.
+- Check stack details in the Azure Portal for specific error messages.
+- If a previous deployment attempt is still in progress, wait for it to complete before retrying.
+
+### SigNoz UI stuck on "Waiting for Azure account connection"
+
+The agent hasn't sent a heartbeat yet. Common causes:
+
+- The deployment command hasn't run yet, or is still in progress. Check **Deployment stacks** in the Azure Portal.
+- The agent container app failed to start. Go to **signoz-integration-rg** > **signoz-integration-agent** in the Azure Portal and check the container logs.
+- The SigNoz ingestion URL or API key was incorrect. Re-run the generated command from the SigNoz UI.
+
+### Logs or metrics not appearing after enabling a service
+
+- Wait a few minutes. The agent syncs every 60 seconds and resource deployment takes time.
+- Confirm the resource groups you entered during setup contain the resources you want to monitor.
+- Verify the service is enabled in the SigNoz UI (Log Collection / Metric Collection toggles are on).
+
+### Uninstallation stuck or stacks not deleting
+
+- The `signoz-integration-telemetry` stack deletion can take up to ~15 minutes. Wait before assuming it failed.
+- If the `signoz-integration` stack deletion via CLI fails, delete it directly from the Azure Portal under **Subscriptions** > **Deployment stacks**.
+
+</details>
+
+## Get Help
+
+<GetHelp />

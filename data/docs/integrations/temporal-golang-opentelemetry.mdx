@@ -1,201 +1,850 @@
 ---
-date: 2026-03-12
+date: 2026-05-07
 id: temporal-golang-opentelemetry
-
-title: Instrumenting a Golang Temporal application with OpenTelemetry
-description: Instrument a Temporal Go application with OpenTelemetry and send traces to SigNoz.
+title: Instrumenting a Temporal Go application with OpenTelemetry
+description: Instrument a Temporal Go application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
+doc_type: howto
 ---
 
-We have published a helloworld Temporal application instrumented with OpenTelemetry in the <a href="https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main" target="_blank" rel="noopener noreferrer nofollow">temporal-golang-opentelemetry sample repository</a>. The README.md in the repository explains how to run the application.
+import GetHelp from '@/components/shared/get-help.md'
 
-You should open the repo and browse the code and files as we go through the doc step by step.
+This guide shows how to instrument a Temporal Go application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
 
+For an overview of Temporal and its architecture, see the [Temporal overview](/docs/integrations/temporal).
 
-### Step 1: Add interceptors to `client.Options`
-Refer to <a href="https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/helloworld/connection.go" target="_blank" rel="noopener noreferrer nofollow">`helloworld/connection.go`</a> in the sample project for a complete example of the configuration.
-Client applications and workers connect to the temporal service via `client.Dial` function which takes in client options as input. Here is the config that we use to connect to the temporal service
+## Prerequisites
 
+- Go 1.21+
+- A running Temporal server (local or Temporal Cloud)
+- A SigNoz Cloud account ([sign up here](https://signoz.io/teams/)) or [self-hosted SigNoz](https://signoz.io/docs/install/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Sample Application
+
+We've published a complete example application at <a href="https://github.com/SigNoz/temporal-golang-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">GitHub</a>. Follow along with the code as you work through this guide.
+
+## Architecture Overview
+
+Here's how OpenTelemetry integrates with your Temporal application:
+
+<Figure
+  src="/img/docs/integrations/temporal/golang/architecture.svg"
+  alt="Architecture Diagram"
+  caption="Architecture Diagram"
+/>
+
+Each component (client, worker, workflows, activities) gets instrumented to capture traces, metrics, and logs.
+
+## Setup
+
+### Step 1: Add Dependencies
+
+```bash
+go get go.temporal.io/sdk@latest
+go get go.temporal.io/sdk/contrib/opentelemetry@latest
+go get go.temporal.io/sdk/contrib/envconfig@latest
+go get go.opentelemetry.io/otel@latest
+go get go.opentelemetry.io/otel/sdk@latest
+go get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc@latest
+go get go.opentelemetry.io/otel/sdk/metric@latest
+go get go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc@latest
+go get go.opentelemetry.io/otel/sdk/log@latest
+go get go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc@latest
+go get go.opentelemetry.io/contrib/bridges/otelslog@latest
 ```
-options := client.Options{
-    HostPort:       hostPort,
-    Namespace:      namespace,
-    Interceptors:   []interceptor.ClientInterceptor{tracingInterceptor},
-    MetricsHandler: metricsHandler,
-    Logger:         logger,
-}
-```
-For this to work we need to define `tracingInterceptor`, `metricsHandler` and `logger`. In the next steps, we will see how to properly set these up.
 
-### Step 2: Add code to create `tracingInterceptor`, `metricsHandler` and `logger`
+<Admonition type="note">
+  `go.temporal.io/sdk/contrib/opentelemetry` and `go.temporal.io/sdk/contrib/envconfig` are separate Go modules from the main Temporal SDK. All three `go get` calls are required. These modules are versioned independently — check the <a href="https://github.com/temporalio/sdk-go/releases" target="_blank" rel="noopener noreferrer nofollow">Temporal SDK releases</a> for compatible version combinations if you pin specific versions.
+</Admonition>
 
-Shortcut: Import or copy-paste the content from <a href="https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main/instrument" target="_blank" rel="noopener noreferrer nofollow">the `instrument` directory in the sample repository</a>.
+### Step 2: Configure OpenTelemetry Providers
 
-> You might need to fix lint errors depending on golang version, temporal sdk version and otel-sdk version. Do reach out to us if you are not able to resolve those errors 
+Create `telemetry/setup.go` to initialize trace, metric, and log providers. All three exporters read their endpoint and auth headers from standard OTel environment variables, so no credentials appear in code.
 
-<details>
-<summary> Explanation of files added </summary>
-1. **metrics_handler.go**
-We are just implementing metrics.Handler interface from temporal sdk using opentelemetry
+```go:telemetry/setup.go
+package telemetry
 
-2. **opentelemetry_setup.go** 
-This initiates the otel metric provider and trace provider and returns them in response of `InitializeGlobalTelemetryProvider` function call
+import (
+	"context"
+	"fmt"
 
-3. **tracing_interceptor.go**
-This file contains extended internal implementation of temporal sdks on how they intercept events and add spans, attributes, events, etc. This was needed as temporal's golang sdk does not support adding attributes like `workflowType`, `activityType`, `namespace`, etc which according to us is crucial for slicing and dicing of temporal tracing data. If you don't need these attribtues, you do not need to import this file and you can skip.
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/log/global"
+	"go.opentelemetry.io/otel/propagation"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+)
 
-4. **zerolog_adapter.go**
-```
-// ZerologAdapter wraps zerolog to implement Temporal's log.Logger interface.
-type ZerologAdapter struct {
-	logger zerolog.Logger
-}
-```
-As mentioned in the comment of the struct, ZerologAdapter wraps zerolog to implement Temporal's log.Logger interface. If you use any other logger, you should probably do the same for that logger too.
-
-</details>
-
-### Step 3: Changes in temporal worker and client code
-You can compare your changes against <a href="https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/worker/main.go" target="_blank" rel="noopener noreferrer nofollow">`worker/main.go`</a> and <a href="https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/starter/main.go" target="_blank" rel="noopener noreferrer nofollow">`starter/main.go`</a> in the sample repository.
-
-Add the below code to the start of your worker and client code
-```
-	ctx := context.Background()
-
-	// Create a new Zerolog adapter.
-	logger := instrument.NewZerologAdapter()
-
-	tp, mp, err := instrument.InitializeGlobalTelemetryProvider(ctx)
+// InitProviders initializes OTel trace, metric, and log providers.
+// Call the returned shutdown function before your process exits to flush buffered telemetry.
+func InitProviders(ctx context.Context) (shutdown func(context.Context) error, err error) {
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceName("temporal-go-app"),
+		),
+		resource.WithFromEnv(),
+		resource.WithTelemetrySDK(),
+		resource.WithProcess(),
+		resource.WithHost(),
+	)
 	if err != nil {
-		logger.Error("Unable to create a global trace provider", "error", err)
+		return nil, fmt.Errorf("resource: %w", err)
 	}
 
-	defer func() {
+	// Traces
+	traceExp, err := otlptracegrpc.New(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("trace exporter: %w", err)
+	}
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(traceExp),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	// Metrics
+	metricExp, err := otlpmetricgrpc.New(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("metric exporter: %w", err)
+	}
+	mp := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExp)),
+		sdkmetric.WithResource(res),
+	)
+	otel.SetMeterProvider(mp)
+
+	// Logs
+	logExp, err := otlploggrpc.New(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("log exporter: %w", err)
+	}
+	lp := sdklog.NewLoggerProvider(
+		sdklog.WithProcessor(sdklog.NewBatchProcessor(logExp)),
+		sdklog.WithResource(res),
+	)
+	global.SetLoggerProvider(lp)
+
+	shutdown = func(ctx context.Context) error {
 		if err := tp.Shutdown(ctx); err != nil {
-			logger.Error("Error shutting down trace provider", "error", err)
+			return err
 		}
 		if err := mp.Shutdown(ctx); err != nil {
-			logger.Error("Error shutting down meter provider", "error", err)
+			return err
 		}
-	}()
-
-	// Create interceptor
-	tracingInterceptor, err := instrument.NewTracingInterceptor(instrument.TracerOptions{
-		DisableSignalTracing: false,
-		DisableQueryTracing:  false,
-		DisableBaggage:       false,
-	})
-	if err != nil {
-		logger.Error("Unable to create interceptor", "error", err)
+		return lp.Shutdown(ctx)
 	}
-
-	// Create metrics handler
-	metricsHandler := instrument.NewOpenTelemetryMetricsHandler()
+	return shutdown, nil
+}
 ```
-`instrument` is the package where you copied the files from step 2.
-
-After the above changes, you should be able to pass the right params at Step 1.
-
 
 <details>
-<summary> Explanation of the above code </summary>
+<ToggleHeading>What this does</ToggleHeading>
 
-Below line creates a new instance of zerolog logger which implements the temporal.logger interface
-```
-logger := instrument.NewZerologAdapter()
+- Sets a default service name of `temporal-go-app`; `resource.WithFromEnv()` overwrites it when `OTEL_SERVICE_NAME` is set, and also picks up `OTEL_RESOURCE_ATTRIBUTES`
+- `WithTelemetrySDK()`, `WithProcess()`, and `WithHost()` add SDK version, process, and host attributes to every signal
+- Creates OTLP/gRPC exporters for traces, metrics, and logs — `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are read automatically by the exporters
+- Sets global OTel providers so all instrumentation in the process picks them up
+- Returns a `shutdown` function — call it with `defer` to flush all buffered data before exit
+</details>
+
+### Step 3: Configure Temporal Connection
+
+Create `config/config.go` to handle Temporal connection options. Without `TEMPORAL_PROFILE` set it connects to `localhost:7233` (local dev server). With `TEMPORAL_PROFILE=cloud` it loads address, namespace, and TLS settings from `~/.config/temporalio/temporal.toml`.
+
+```go:config/config.go
+package config
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/contrib/envconfig"
+)
+
+// CreateClientOptions returns Temporal client options.
+// If TEMPORAL_PROFILE is set, it loads connection settings (address, namespace, TLS)
+// from the profile in ~/.config/temporalio/temporal.toml.
+// Otherwise it returns empty options, which connect to localhost:7233.
+func CreateClientOptions() (client.Options, error) {
+	profileName := os.Getenv("TEMPORAL_PROFILE")
+	if profileName == "" {
+		return client.Options{}, nil
+	}
+
+	userDir, err := os.UserConfigDir()
+	if err != nil {
+		return client.Options{}, fmt.Errorf("failed to get user config dir: %w", err)
+	}
+	configFilePath := filepath.Join(userDir, "temporalio", "temporal.toml")
+
+	opts, err := envconfig.LoadClientOptions(envconfig.LoadClientOptionsRequest{
+		ConfigFilePath:    configFilePath,
+		ConfigFileProfile: profileName,
+	})
+	if err != nil {
+		return client.Options{}, fmt.Errorf("failed to load profile %q: %w", profileName, err)
+	}
+
+	return opts, nil
+}
 ```
 
-Below line creates an otel native traceProvider and metricProvider using the otel sdks
-```
-tp, mp, err := instrument.InitializeGlobalTelemetryProvider(ctx)
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
+- With no `TEMPORAL_PROFILE` env var, returns empty `client.Options{}` — the Temporal SDK defaults to `localhost:7233`
+- With `TEMPORAL_PROFILE=cloud` (or any profile name), reads connection settings from `~/.config/temporalio/temporal.toml` — the same config file used by the Temporal CLI
+- This lets the same binary work for local dev and Temporal Cloud without code changes
+</details>
+
+### Step 4: Instrument the Temporal Worker
+
+```go:worker/main.go
+package main
+
+import (
+	"context"
+	"log"
+	"log/slog"
+
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	"go.temporal.io/sdk/client"
+	temporalotel "go.temporal.io/sdk/contrib/opentelemetry"
+	"go.temporal.io/sdk/interceptor"
+	"go.temporal.io/sdk/worker"
+
+	"your-module/activities"
+	"your-module/config"
+	"your-module/telemetry"
+	"your-module/workflows"
+)
+
+func main() {
+	ctx := context.Background()
+
+	shutdown, err := telemetry.InitProviders(ctx)
+	if err != nil {
+		log.Fatalf("failed to init OTel: %v", err)
+	}
+	defer shutdown(ctx)
+
+	tracingInterceptor, err := temporalotel.NewTracingInterceptor(temporalotel.TracerOptions{})
+	if err != nil {
+		log.Fatalf("failed to create tracing interceptor: %v", err)
+	}
+
+	metricsHandler := temporalotel.NewMetricsHandler(temporalotel.MetricsHandlerOptions{})
+
+	clientOpts, err := config.CreateClientOptions()
+	if err != nil {
+		log.Fatalf("failed to create client options: %v", err)
+	}
+	clientOpts.Interceptors = []interceptor.ClientInterceptor{tracingInterceptor}
+	clientOpts.MetricsHandler = metricsHandler
+
+	c, err := client.Dial(clientOpts)
+	if err != nil {
+		log.Fatalf("failed to create Temporal client: %v", err)
+	}
+	defer c.Close()
+
+	// Route slog output to SigNoz via OTel log bridge (set after all setup so log.Fatalf above still reaches stderr)
+	slog.SetDefault(slog.New(otelslog.NewHandler("temporal-worker")))
+
+	w := worker.New(c, "my-task-queue", worker.Options{
+		Interceptors: []interceptor.WorkerInterceptor{tracingInterceptor},
+	})
+	w.RegisterWorkflow(workflows.MyWorkflow)
+	w.RegisterActivity(activities.Greet)
+
+	if err := w.Run(worker.InterruptCh()); err != nil {
+		log.Fatalf("worker exited with error: %v", err)
+	}
+}
 ```
 
-Now, create a new tracing interceptor that can be passed to the cient.Options using
-```
-instrument.NewTracingInterceptor(options)
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
+- `NewTracingInterceptor` automatically traces workflow execution, activity calls, signals, and queries — no manual span creation needed in workflow or activity code
+- `NewMetricsHandler` routes Temporal's SDK metrics (worker health, task queue lag, workflow and activity durations) into the OTel metric pipeline
+- `otelslog.NewHandler` bridges Go's standard `slog` to the OTel log provider, so every `slog.Info` or `slog.Error` call becomes a structured log record in SigNoz
+- Both `NewTracingInterceptor` and `NewMetricsHandler` use the global OTel providers set up in `telemetry.InitProviders`
+</details>
+
+### Step 5: Instrument the Temporal Client
+
+```go:starter/main.go
+package main
+
+import (
+	"context"
+	"log"
+	"log/slog"
+
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	"go.temporal.io/sdk/client"
+	temporalotel "go.temporal.io/sdk/contrib/opentelemetry"
+	"go.temporal.io/sdk/interceptor"
+
+	"your-module/config"
+	"your-module/telemetry"
+	"your-module/workflows"
+)
+
+func main() {
+	ctx := context.Background()
+
+	shutdown, err := telemetry.InitProviders(ctx)
+	if err != nil {
+		log.Fatalf("failed to init OTel: %v", err)
+	}
+	defer shutdown(ctx)
+
+	tracingInterceptor, err := temporalotel.NewTracingInterceptor(temporalotel.TracerOptions{})
+	if err != nil {
+		log.Fatalf("failed to create tracing interceptor: %v", err)
+	}
+
+	metricsHandler := temporalotel.NewMetricsHandler(temporalotel.MetricsHandlerOptions{})
+
+	clientOpts, err := config.CreateClientOptions()
+	if err != nil {
+		log.Fatalf("failed to create client options: %v", err)
+	}
+	clientOpts.Interceptors = []interceptor.ClientInterceptor{tracingInterceptor}
+	clientOpts.MetricsHandler = metricsHandler
+
+	c, err := client.Dial(clientOpts)
+	if err != nil {
+		log.Fatalf("failed to create Temporal client: %v", err)
+	}
+	defer c.Close()
+
+	// Route slog output to SigNoz via OTel log bridge (set after all setup so log.Fatalf above still reaches stderr)
+	slog.SetDefault(slog.New(otelslog.NewHandler("temporal-client")))
+
+	handle, err := c.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
+		ID:        "my-workflow-id",
+		TaskQueue: "my-task-queue",
+	}, workflows.MyWorkflow, "World")
+	if err != nil {
+		log.Fatalf("failed to start workflow: %v", err)
+	}
+
+	slog.Info("workflow started", "workflowID", handle.GetID(), "runID", handle.GetRunID())
+}
 ```
 
-Also, create a otel metrics handler which implements temporal metrics interface
+<details>
+<ToggleHeading>What this does</ToggleHeading>
 
-```
-instrument.NewOpenTelemetryMetricsHandler()
+- Same interceptor, metrics handler, and connection config as the worker — every `c.ExecuteWorkflow` call produces a trace span linked to the workflow execution
+- `config.CreateClientOptions()` connects to `localhost:7233` by default, or loads Temporal Cloud settings from `~/.config/temporalio/temporal.toml` when `TEMPORAL_PROFILE` is set
+- `slog.SetDefault` is called after `client.Dial` so any `log.Fatalf` during setup still writes to stderr rather than silently going to OTel
+- `defer shutdown(ctx)` flushes telemetry before the process exits; skipping this drops the last batch of spans
+</details>
+
+### Step 6: Define Workflows and Activities
+
+The tracing interceptor registered in `client.Options` handles all span creation automatically. Workflow and activity code needs no OTel setup for basic tracing.
+
+```go:workflows/workflow.go
+package workflows
+
+import (
+	"time"
+
+	"go.temporal.io/sdk/workflow"
+
+	"your-module/activities"
+)
+
+func MyWorkflow(ctx workflow.Context, name string) (string, error) {
+	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+		StartToCloseTimeout: 10 * time.Second,
+	})
+
+	var result string
+	err := workflow.ExecuteActivity(ctx, activities.Greet, name).Get(ctx, &result)
+	return result, err
+}
 ```
 
-Pass tracingInterceptor, metricsHandler and logger to client.Options
+```go:activities/activities.go
+package activities
+
+import (
+	"context"
+	"fmt"
+)
+
+func Greet(ctx context.Context, name string) (string, error) {
+	return fmt.Sprintf("Hello, %s!", name), nil
+}
+```
+
+<details>
+<ToggleHeading>What this does</ToggleHeading>
+
+- `workflow.ExecuteActivity` calls are traced end-to-end — you see the full workflow execution as a distributed trace in SigNoz
+- To add custom spans inside an activity, use `trace.SpanFromContext(ctx)` from `go.opentelemetry.io/otel/trace`
+</details>
+
+### Step 7: Deploy and Run
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+**1. Set environment variables:**
+
+```bash
+export OTEL_SERVICE_NAME="temporal-worker"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and `<your-ingestion-key>` with your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+**2. Start the worker:**
+
+```bash
+go run worker/main.go
+```
+
+**3. Start the client (in another terminal):**
+
+Set `OTEL_SERVICE_NAME` to `temporal-client` so it appears as a distinct service in SigNoz:
+
+```bash
+export OTEL_SERVICE_NAME="temporal-client"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+Then run:
+
+```bash
+go run starter/main.go
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+**1. Create a Secret for the ingestion key:**
+
+```bash
+kubectl create secret generic signoz-secrets \
+  --from-literal=OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**2. Create a ConfigMap for OpenTelemetry settings:**
+
+```yaml:otel-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-config
+data:
+  OTEL_EXPORTER_OTLP_ENDPOINT: "https://ingest.<region>.signoz.cloud:443"
+  OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=production"
+```
+
+**3. Deploy the worker:**
+
+```yaml:temporal-worker-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temporal-worker
+  template:
+    metadata:
+      labels:
+        app: temporal-worker
+    spec:
+      containers:
+        - name: worker
+          image: your-registry/temporal-worker:latest
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "temporal-worker"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: otel-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-secrets
+                  key: OTEL_EXPORTER_OTLP_HEADERS
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: otel-config
+                  key: OTEL_RESOURCE_ATTRIBUTES
+```
+
+The client starts a workflow and exits, so run it as a Kubernetes **Job** rather than a Deployment:
+
+```yaml:temporal-client-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: temporal-client
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: client
+          image: your-registry/temporal-client:latest
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "temporal-client"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: otel-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-secrets
+                  key: OTEL_EXPORTER_OTLP_HEADERS
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: otel-config
+                  key: OTEL_RESOURCE_ATTRIBUTES
+```
+
+**4. Apply the manifests:**
+
+```bash
+kubectl apply -f otel-configmap.yaml
+kubectl apply -f temporal-worker-deployment.yaml
+kubectl apply -f temporal-client-job.yaml
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+**Create a `docker-compose.yml`:**
+
+```yaml:docker-compose.yml
+services:
+  temporal-worker:
+    build: .
+    command: ./worker
+    environment:
+      - OTEL_SERVICE_NAME=temporal-worker
+      - OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+      - OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
+      - TEMPORAL_ADDRESS=temporal:7233
+    depends_on:
+      - temporal
+
+  temporal-client:
+    build: .
+    command: ./starter
+    environment:
+      - OTEL_SERVICE_NAME=temporal-client
+      - OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+      - OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
+      - TEMPORAL_ADDRESS=temporal:7233
+    depends_on:
+      - temporal-worker
+
+  temporal:
+    image: temporalio/auto-setup:latest
+    ports:
+      - "7233:7233"
+```
+
+**Create a `Dockerfile`:**
+
+```dockerfile:Dockerfile
+FROM golang:1.23-alpine AS builder
+WORKDIR /app
+COPY go.* ./
+RUN go mod download
+COPY . .
+RUN go build -o worker ./worker && go build -o starter ./starter
+
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/worker ./worker
+COPY --from=builder /app/starter ./starter
+```
+
+**Run the application:**
+
+```bash
+docker compose up -d
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+**1. Set environment variables:**
+
+```powershell
+$env:OTEL_SERVICE_NAME="temporal-worker"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+**2. Start the worker:**
+
+```powershell
+go run worker/main.go
+```
+
+**3. Start the client (in another PowerShell window):**
+
+Set `OTEL_SERVICE_NAME` to `temporal-client` so it appears as a distinct service in SigNoz:
+
+```powershell
+$env:OTEL_SERVICE_NAME="temporal-client"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+Then run:
+
+```powershell
+go run starter/main.go
+```
+
+</TabItem>
+</Tabs>
+
+## Validate in SigNoz
+
+After running your application, verify that data is flowing to SigNoz:
+
+1. **View Traces**:
+   - Go to **Services** and find `temporal-worker` and `temporal-client`
+   - Click into a service to see traces
+   - You'll see spans for workflow starts, activity executions, and signals
+
+2. **View Metrics**:
+   - Go to **Dashboards** and import the <a href="https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20SDK%20Metrics%20-%20golang.json" target="_blank" rel="noopener noreferrer nofollow">Temporal SDK Metrics dashboard</a>
+   - Click **Import JSON** and paste the dashboard JSON
+   - View worker health, task queue metrics, and workflow/activity durations
+
+3. **View Logs**:
+   - Go to **Logs** and find logs from your worker and client
+   - Use the Logs Pipeline feature to parse structured logs:
+     - Add a JSON parser: [JSON parser docs](https://signoz.io/docs/logs-pipelines/processors/#json-parser)
+     - Map trace IDs: [Trace parser docs](https://signoz.io/docs/logs-pipelines/processors/#trace-parser)
+     - Map log levels: [Severity parser docs](https://signoz.io/docs/logs-pipelines/processors/#severity-parser)
+
+<Figure
+  src="/img/docs/integrations/temporal/golang/distributed-trace.webp"
+  alt="Distributed trace from a Temporal application"
+  caption="Distributed trace showing workflow execution across client, worker, and activities"
+/>
+
+<Figure
+  src="/img/docs/integrations/temporal/golang/logs.webp"
+  alt="Logs from a Temporal application"
+  caption="Application logs from your Temporal worker in SigNoz"
+/>
+
+<Figure
+  src="/img/docs/integrations/temporal/golang/sdk-metrics.webp"
+  alt="SDK metrics from a Temporal application"
+  caption="Temporal SDK metrics dashboard showing worker health and task queue metrics"
+/>
+
+<details>
+<ToggleHeading>
+
+## Route Temporal SDK Logs to SigNoz (Optional)
+
+</ToggleHeading>
+
+By default, Temporal SDK internal logs (`Started Worker`, `ExecuteActivity`, etc.) only appear on stderr. To send them to SigNoz, implement a small adapter that satisfies the `go.temporal.io/sdk/log.Logger` interface and delegates to `slog`.
+
+**1. Create `telemetry/logger.go`:**
+
+```go:telemetry/logger.go
+package telemetry
+
+import (
+	"log/slog"
+
+	temporallog "go.temporal.io/sdk/log"
+)
+
+type SlogTemporalLogger struct {
+	l *slog.Logger
+}
+
+// NewTemporalLogger wraps a *slog.Logger so it can be set on client.Options.Logger.
+func NewTemporalLogger(l *slog.Logger) temporallog.Logger {
+	return &SlogTemporalLogger{l: l}
+}
+
+func (s *SlogTemporalLogger) Debug(msg string, keyvals ...interface{}) { s.l.Debug(msg, keyvals...) }
+func (s *SlogTemporalLogger) Info(msg string, keyvals ...interface{})  { s.l.Info(msg, keyvals...) }
+func (s *SlogTemporalLogger) Warn(msg string, keyvals ...interface{})  { s.l.Warn(msg, keyvals...) }
+func (s *SlogTemporalLogger) Error(msg string, keyvals ...interface{}) { s.l.Error(msg, keyvals...) }
+```
+
+**2. Update `worker/main.go` and `starter/main.go`:**
+
+Create the OTel logger before configuring client options, set it on `clientOpts.Logger`, and move `slog.SetDefault` to after `client.Dial`:
+
+```go
+// Create the OTel-backed logger before client options
+otelLogger := slog.New(otelslog.NewHandler("temporal-worker")) // or "temporal-client"
+
+clientOpts.Logger = telemetry.NewTemporalLogger(otelLogger)
+
+c, err := client.Dial(clientOpts)
+// ...
+
+// Set as default after Dial so log.Fatalf above still reaches stderr
+slog.SetDefault(otelLogger)
+```
+
+With this in place, SDK logs like `Started Worker` and `ExecuteActivity` appear in SigNoz as structured `DEBUG`/`INFO` records with fields such as `WorkflowID`, `ActivityType`, and `TaskQueue`.
 
 </details>
 
-### Step 4: Running your temporal worker and client applications
+<details>
+<ToggleHeading>
 
-Pass serviceName, otlp endpoint and authentication headers using native otel environment variables. You can add more resource attributes like `deployment.environment` as per otel conventions using envs
+## Setup OpenTelemetry Collector (Optional)
 
-<Tabs>
+</ToggleHeading>
 
-    <TabItem value="via-collector" label="Via Collector">
-        Worker run command:
-        ```
-        OTEL_SERVICE_NAME='temporal-worker-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run worker/main.go 
-        ```
+### What is the OpenTelemetry Collector?
 
-        A similar run command for temporal client application
-        ```
-        OTEL_SERVICE_NAME='temporal-client-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run starter/main.go
-        ```
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
 
-        This should start sending your sdk metrics and traces to the otel-collector. This does not collect logs yet.
-        
-        Zerolog is not configured to send directly to signoz cloud. In most cases, the logs are output to file and the logs are read by otel-collector and pushed to signoz cloud using
-        1. Adding a filelog receiver at otel-collector following the [filelog receiver guide](https://signoz.io/docs/userguide/collect_logs_from_file/)
-        2. Collecting k8s logs following the [Kubernetes logs collection guide](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/)
+### Why use it?
 
-        To setup otel-collector, read:
-        1. For VM  => follow the [OpenTelemetry binary usage guide for virtual machines](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
-        2. For K8s => review the [Kubernetes infrastructure metrics setup guide](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/)
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
 
-    </TabItem>
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
 
-    <TabItem value="direct-to-cloud" label="Direct from application" default>
-        Worker run command:
-        ```
-        OTEL_SERVICE_NAME='temporal-worker-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go run worker/main.go
-        ```
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 
-        A similar run command for temporal client application
-        ```
-        OTEL_SERVICE_NAME='temporal-client-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go starter/main.go
-        ```
-        
-        Directly sending from application to signoz cloud works by default for exporting metrics and traces. Logs are usually written to a file and needs an otel-collector with a filelog receiver to export logs to signoz cloud. If you do not write logs to file and wish to send logs directly from you applications, do reach out to us for help (chat support for saas users and slack community for OSS users)
-    </TabItem>
+</details>
 
+<details>
+<ToggleHeading>
 
+## Troubleshooting
 
-</Tabs>
+</ToggleHeading>
 
-### Step 5: Build dashboards and parse logs at SigNoz
+### No data appearing in SigNoz
 
-You should be able to see incoming temporal sdk metrics at **Metrics Explorer** page at SigNoz. Once you see them coming, go to Dashboards -> Import Dashboard. The dashboard json for sdk metrics can be found in the <a href="https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20SDK%20Metrics%20-%20golang.json" target="_blank" rel="noopener noreferrer nofollow">Temporal SDK metrics dashboard repository</a>.
+**Symptom**: Worker and client run without errors, but no traces or metrics appear in SigNoz.
 
-If you are successfully sending logs to SigNoz, you need to parse your logs at SigNoz using the Logs Pipeline feature.
-1. Use the [JSON parser](https://signoz.io/docs/logs-pipelines/processors/#json-parser) if your logs are JSON formatted.
-2. Map `traceID` and `spanID` to the right fields using the [trace parser](https://signoz.io/docs/logs-pipelines/processors/#trace-parser). This helps you move seamlessly between logs and traces.
-3. Map `log_level` to `severity_text` in OTel semantics using the [severity parser](https://signoz.io/docs/logs-pipelines/processors/#severity-parser).
-4. (Optional) Map the timestamp from your JSON body to OTel using the [timestamp parser](https://signoz.io/docs/logs-pipelines/processors/#timestamp-parser).
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/temporal/golang/logs-pipeline.webp" alt="Parsing json logs"/>
-    <figcaption><i>Parsing json logs</i></figcaption>
-</figure>
+**Causes and fixes**:
 
+1. **Wrong endpoint or region**:
+   - Verify your endpoint matches your SigNoz region: `https://ingest.<region>.signoz.cloud:443`
+   - Check available regions at [SigNoz Cloud endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
-### Step 6: Enjoy your data at SigNoz. Metrics, Traces and Logs all at the same tool for unified querying and correlation
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/temporal/golang/distributed-trace.webp" alt="Distributed trace from a temporal application"/>
-    <figcaption><i>Distributed trace from a temporal application</i></figcaption>
-</figure>
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/temporal/golang/logs.webp" alt="Json logs from a temporal application"/>
-    <figcaption><i>Json logs from a temporal application</i></figcaption>
-</figure>
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/temporal/golang/sdk-metrics.webp" alt="SDK metrics from a temporal application"/>
-    <figcaption><i>SDK metrics from a temporal application</i></figcaption>
-</figure>
+2. **Invalid ingestion key**:
+   - Confirm your key at [SigNoz ingestion keys page](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+   - Check for typos or extra whitespace in the `OTEL_EXPORTER_OTLP_HEADERS` value
+
+3. **Network or firewall issues**:
+   - Test connectivity: `curl -v https://ingest.us.signoz.cloud:443`
+   - Ensure outbound HTTPS (port 443) is allowed
+
+4. **Shutdown not called**:
+   - Verify `defer shutdown(ctx)` is present in both `worker/main.go` and `starter/main.go`
+   - Without shutdown, buffered spans and logs are not flushed before the process exits
+
+### Error: "failed to create trace exporter"
+
+**Symptom**: Application exits immediately with an error from `telemetry.InitProviders`.
+
+**Cause**: The OTLP endpoint is unreachable or misconfigured.
+
+**Fix**:
+
+1. Check that `OTEL_EXPORTER_OTLP_ENDPOINT` is set correctly: `https://ingest.<region>.signoz.cloud:443`
+2. Test reachability: `curl -v https://ingest.us.signoz.cloud:443`
+3. Check if your network requires a proxy and set `HTTPS_PROXY` accordingly
+
+### Traces appear but logs don't
+
+**Symptom**: Traces and metrics work, but logs are missing in SigNoz.
+
+**Fix**:
+
+1. Verify `slog.SetDefault(slog.New(otelslog.NewHandler(...)))` runs before any `slog.*` calls in application code
+2. Confirm `telemetry.InitProviders` completed successfully — a failed log provider silently drops log records
+3. Note that startup errors use `log.Fatalf` (stdlib `log` package) which writes to stderr, not to SigNoz — this is intentional so errors are always visible in the terminal
+4. Set up a log parsing pipeline in SigNoz (see Validate section above)
+
+### High cardinality warning
+
+**Symptom**: SigNoz shows warnings about high cardinality metrics.
+
+**Cause**: Temporal emits metrics with labels that include workflow type names, activity type names, and task queue names. In large deployments with many unique values, this creates high cardinality.
+
+**Fix**: Use an OpenTelemetry Collector with a `filter` or `transform` processor to drop or aggregate high-cardinality label values before they reach SigNoz. See [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) for details.
+
+</details>
+
+## Next Steps
+
+- **Set up alerts**: Create alerts for workflow failures, high activity latency, or worker health issues in [SigNoz Alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/)
+- **Build dashboards**: Customize the <a href="https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20SDK%20Metrics%20-%20golang.json" target="_blank" rel="noopener noreferrer nofollow">Temporal SDK dashboard</a> or create your own
+- **Explore traces**: Use the [Traces Explorer](https://signoz.io/docs/userguide/traces/) to debug failed workflows
+- **Query logs**: Learn how to search and filter logs in the [Logs Explorer documentation](https://signoz.io/docs/product-features/logs-explorer/)
+- **Monitor activities**: Track activity execution times and error rates
+
+## Get Help
+
+<GetHelp />

@@ -117,7 +117,9 @@ export const getNotFoundSuggestions = async (
 
     const reranked = rerankSuggestions(dedupeByHref(fromAlgolia), tokens)
     return dedupeByHref([...reranked, ...QUICK_LINK_FALLBACK]).slice(0, count)
-  } catch {
+  } catch (e) {
+    console.error(`Failed to send request to Algolia: `, e)
+
     return QUICK_LINK_FALLBACK.slice(0, count)
   }
 }

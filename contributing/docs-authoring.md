@@ -120,9 +120,8 @@ When documenting OpenTelemetry Collector changes:
 
 ## Patterns And Components
 
-- Use `Admonition` for notes, warnings, and tips.
-- Use `KeyPointCallout` for supplementary or optional material.
-- Use `Tabs` and `TabItem` only when flows materially differ by platform or environment.
+- Use `Admonition` for notes, warnings, tips, and supplementary or optional material. Do not use `KeyPointCallout`.
+- Use `Tabs` and `TabItem` only when flows materially differ by platform or environment. Always provide an `entityName` prop on `<Tabs>` (e.g., `<Tabs entityName="environment">`). Ensure for vm, docker, kubernetes it is environment.
 - Prefer numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful.
 

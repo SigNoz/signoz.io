@@ -1,80 +1,234 @@
 ---
-date: 2025-12-04
-title: Collecting Docker Container Logs
-
-description: Collecting Docker Container Logs using OpenTelemetry Collector
+date: 2026-05-07
+title: Collecting Docker Logs
+description: Collect Docker container logs and Docker daemon logs using OpenTelemetry Collector and send them to SigNoz.
 id: collect_docker_logs
+doc_type: howto
 ---
 
-You can easily collect all your Docker container logs using OpenTelemetry Collector and perform advanced queries to analyze them efficiently using SigNoz.
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+Docker writes container output to JSON log files on the host and daemon events to `journald` or syslog. This guide covers collecting both with an OpenTelemetry Collector.
 
 ## Prerequisites
 
 - Docker Engine 20.10+ installed and running
 - Administrative access to the Docker host
+- [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) installed
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ## Setup
 
-### Step 1: Install OpenTelemetry Collector
+<Tabs>
+<TabItem value="container-logs" label="Container Logs" default>
 
-Install the OpenTelemetry Collector by following [this document](https://signoz.io/docs/collection-agents/docker/install). If you have already installed the OpenTelemetry Collector, skip this step.
+### Step 1. Update Collector configuration
 
-### Step 2: Update Collector Configuration
+Two approaches for collecting container logs, pick one:
 
-Add the `filelog` receiver to your existing `config.yaml` file to collect Docker container logs:
+- **<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">filelog</a>**: tails all container log files under a single glob. Simpler setup. Requires only read access to `/var/lib/docker/containers`.
+- **<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/receivercreator/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver_creator</a> + <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/observer/dockerobserver/README.md" target="_blank" rel="noopener noreferrer nofollow">docker_observer</a>**: spawns one receiver per container by watching the Docker socket. Sets `container.name` and `container.image.name` automatically with no regex.
+
+<Tabs>
+<TabItem value="filelog" label="Using filelog receiver (recommended)" default>
+
+Get your Collector's container ID so you can exclude its own logs:
+
+```bash
+docker inspect opentelemetry-collector --format='{{.Id}}'
+```
+
+Add to your `config.yaml`, replacing `<OTEL_COLLECTOR_CONTAINER_ID>` with that ID:
 
 ```yaml:config.yaml
-receivers:  
-  # Add this receiver for Docker logs
-  filelog:
+receivers:
+  filelog/docker:
     include: [/var/lib/docker/containers/*/*-json.log]
+    exclude:
+      - /var/lib/docker/containers/<OTEL_COLLECTOR_CONTAINER_ID>/*
     poll_interval: 200ms
     start_at: end
     include_file_name: false
-    include_file_path: false
+    include_file_path: true
     operators:
       - id: container-parser
         type: container
         format: docker
         add_metadata_from_filepath: false
+      - id: extract-container-id
+        type: regex_parser
+        parse_from: attributes["log.file.path"]
+        regex: '/var/lib/docker/containers/(?P<container_id>[a-f0-9]{64})/'
+        on_error: send
+      - id: move-container-id
+        type: move
+        from: attributes.container_id
+        to: resource["container.id"]
+        if: '"container_id" in attributes'
+      - id: remove-filepath
+        type: remove
+        field: attributes["log.file.path"]
       - id: extract-service-name
         type: regex_parser
         parse_from: body
-        regex: 'service.name":\s*"(?P<svc>[^"]+)"'
+        regex: '"service\.name":\s*"(?P<svc>[^"]+)"'
+        if: 'body matches "service\\.name"'
+        on_error: send
       - id: set-service-name
         type: move
         from: attributes.svc
         to: resource["service.name"]
-        if: 'attributes.svc != nil'
+        if: '"svc" in attributes'
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 4000
+    spike_limit_mib: 800
+  resourcedetection:
+    detectors: [env, system]
+    timeout: 5s
+    system:
+      hostname_sources: [os]
+  transform/docker-meta:
+    log_statements:
+      - context: resource
+        statements:
+          - set(attributes["container.runtime"], "docker")
+  batch:
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+    timeout: 10s
 
 service:
   pipelines:
-    # Add receiver to logs pipeline
     logs:
-      receivers: [otlp, filelog]
-      processors: [batch]
+      receivers: [filelog/docker]
+      processors: [memory_limiter, resourcedetection, transform/docker-meta, batch]
       exporters: [otlp]
 ```
 
-These operators extract `service.name` from JSON-formatted log bodies and move it to the resource level. This is useful when your application emits structured JSON logs with an explicit `service.name` field. If the field is missing, these operators are safely skipped.
+What each operator does:
+
+- **exclude**: Stops the Collector from ingesting its own logs.
+- **include_file_path**: Keeps `log.file.path` in the entry so the next operator can read the container ID.
+- **extract-container-id / move-container-id**: Reads the 64-char container ID from the file path and sets it as `resource["container.id"]`.
+- **remove-filepath**: Drops `log.file.path` after extraction.
+- **extract-service-name / set-service-name**: Runs only when `body` matches `service.name`. Pulls the value into `resource["service.name"]` and skips all other logs.
+- **resourcedetection**: Adds `host.name` and OS info to every log entry.
+- **transform/docker-meta**: Sets `container.runtime = "docker"` on the resource for runtime filtering in SigNoz.
 
 <Admonition type="note">
-If your logs originate from Kubernetes pod log file paths (for example, `/var/log/pods/...` or `/var/log/containers/...`) instead of Docker container log files on the host, set `add_metadata_from_filepath: true` in the container parser operator. 
-This enables automatic extraction of Kubernetes metadata such as pod name, namespace, and container name from the log file path.
+  `format: docker` matches Docker's JSON log driver. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/container.md" target="_blank" rel="noopener noreferrer nofollow">container operator</a> also supports `cri-o` and `containerd`.
 </Admonition>
 
-### Step 3: Update Docker Run Command
+<KeyPointCallout title="Collecting from Kubernetes pod log paths?" defaultCollapsed="true">
+  If your logs are at `/var/log/pods/...` or `/var/log/containers/...` rather than Docker host paths, set both `include_file_path: true` and `add_metadata_from_filepath: true` in the container parser operator. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/container.md" target="_blank" rel="noopener noreferrer nofollow">container operator</a> requires `log.file.path` to be present before it can extract Kubernetes metadata from the file path.
+</KeyPointCallout>
 
-Restart the OpenTelemetry Collector with additional volume mounts to access Docker logs:
+</TabItem>
+<TabItem value="receiver-creator" label="Using docker_observer (advanced)">
 
-#### Stop existing collector
+<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/receivercreator/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver_creator</a> watches the Docker socket via <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/observer/dockerobserver/README.md" target="_blank" rel="noopener noreferrer nofollow">docker_observer</a> and spawns one dedicated `filelog` receiver per container. Docker metadata populates `container.name` and `container.image.name` directly, no regex or manual ID lookup.
+
+Add to your `config.yaml`:
+
+```yaml:config.yaml
+extensions:
+  docker_observer:
+    endpoint: unix:///var/run/docker.sock
+    excluded_images:
+      - 'otel/opentelemetry-collector-contrib*'
+    timeout: 5s
+    cache_sync_interval: 60m
+
+receivers:
+  receiver_creator/docker-logs:
+    watch_observers: [docker_observer]
+    receivers:
+      filelog/per-container:
+        rule: type == "container"
+        resource_attributes:
+          container.id: '`container_id`'
+          container.name: '`name`'
+          container.image.name: '`image`'
+        config:
+          include:
+            - /var/lib/docker/containers/`container_id`/`container_id`-json.log
+          include_file_path: false
+          include_file_name: false
+          start_at: end
+          poll_interval: 200ms
+          operators:
+            - id: container-parser
+              type: container
+              format: docker
+              add_metadata_from_filepath: false
+            - id: extract-service-name
+              type: regex_parser
+              parse_from: body
+              regex: '"service\.name":\s*"(?P<svc>[^"]+)"'
+              if: 'body matches "service\\.name"'
+              on_error: send
+            - id: set-service-name
+              type: move
+              from: attributes.svc
+              to: resource["service.name"]
+              if: '"svc" in attributes'
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 4000
+    spike_limit_mib: 800
+  resourcedetection:
+    detectors: [env, system]
+    timeout: 5s
+    system:
+      hostname_sources: [os]
+  transform/docker-meta:
+    log_statements:
+      - context: resource
+        statements:
+          - set(attributes["container.runtime"], "docker")
+  batch:
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+    timeout: 10s
+
+service:
+  extensions: [docker_observer]
+  pipelines:
+    logs:
+      receivers: [receiver_creator/docker-logs]
+      processors: [memory_limiter, resourcedetection, transform/docker-meta, batch]
+      exporters: [otlp]
+```
+
+What each key part does:
+
+- **`excluded_images`**: Drops the Collector container by image name glob; no container ID lookup needed.
+- **`docker_observer`**: Watches the Docker socket and fires a discovery event per running container.
+- **`receiver_creator`**: Spawns a dedicated `filelog` receiver per discovered container, targeting its exact log file.
+- **`resource_attributes`**: Sets `container.name` and `container.image.name` directly from Docker metadata.
+
+</TabItem>
+</Tabs>
+
+### Step 2. Start the Collector
+
+<Tabs>
+<TabItem value="docker-run" label="Using docker run" default>
+
 ```bash
 docker stop opentelemetry-collector
 docker rm opentelemetry-collector
-```
 
-#### Run with Docker logs access
-```bash
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
@@ -90,50 +244,274 @@ docker run --name opentelemetry-collector \
   -e HOST_PROC=/hostfs/proc \
   -e HOST_SYS=/hostfs/sys \
   -e HOST_ROOT=/hostfs \
-  otel/opentelemetry-collector-contrib:0.130.1
+  otel/opentelemetry-collector-contrib:latest
 ```
 
-### Step 4: Verify Log Collection
+</TabItem>
+<TabItem value="docker-compose" label="Using Docker Compose">
 
-Check that the collector is processing Docker logs:
+Create a `docker-compose.yaml` in the same directory as your `config.yaml`:
 
-#### Check collector logs
+```yaml:docker-compose.yaml
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-signoz
+    restart: unless-stopped
+    user: "0:0"
+    volumes:
+      - ./config.yaml:/etc/otelcol-contrib/config.yaml
+      - /:/hostfs:ro
+      - /proc:/hostfs/proc:ro
+      - /sys:/hostfs/sys:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - HOST_PROC=/hostfs/proc
+      - HOST_SYS=/hostfs/sys
+      - HOST_ROOT=/hostfs
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    logging:
+      options:
+        max-size: 128m
+```
 
 ```bash
-docker logs opentelemetry-collector
+docker compose up -d
 ```
 
-#### Generate test logs
-```
+</TabItem>
+</Tabs>
+
+## Validate
+
+Generate some test logs:
+
+```bash
 docker run --rm alpine sh -c 'for i in $(seq 1 10); do echo "Test log entry $i"; sleep 1; done'
 ```
 
-## View Logs in SigNoz
+Open **Logs Explorer** in SigNoz. The test log lines from the Alpine container appear within seconds.
 
-The Docker container logs will be visible in the `Logs` tab of SigNoz.
+<Figure
+  src="/img/docs/logs-management/send-logs/docker-logs.webp"
+  alt="Docker container logs visible in SigNoz"
+  caption="Docker container logs visible in SigNoz"
+/>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/send-logs/docker-logs.webp" alt="Docker container logs visible in SigNoz"/>
-    <figcaption><i>Docker test logs visible in SigNoz</i></figcaption>
-</figure>
+</TabItem>
+<TabItem value="daemon-logs" label="Daemon Logs">
+
+Docker daemon logs are separate from container stdout/stderr. On Linux, Docker writes them to `journald` or syslog depending on your distribution.
+
+Run on the Docker host to check which applies:
+
+```bash
+sudo journalctl -u docker.service -n 20
+```
+
+If you see output like this, your daemon uses journald:
+
+```
+-- Journal begins at Mon 2025-01-13 08:00:01 UTC. --
+Apr 23 12:01:05 myhost dockerd[1234]: time="2025-04-23T12:01:05Z" level=info msg="Container started" container=abc123
+Apr 23 12:01:06 myhost dockerd[1234]: time="2025-04-23T12:01:06Z" level=info msg="attach stdout" container=abc123
+```
+
+If the command returns no output or an error, your daemon uses syslog instead. Use the matching tab below.
+
+<Tabs>
+<TabItem value="journald" label="journald" default>
+
+### Step 1. Add the journald receiver
+
+Append the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver</a> to your existing `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  journald/docker-daemon:
+    root_path: /hostfs
+    journalctl_path: /usr/bin/journalctl
+    start_at: end
+    units:
+      - docker.service
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, journald/docker-daemon]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+`root_path` tells the receiver to chroot into `/hostfs` (the mounted host filesystem) before running journalctl. `journalctl_path` resolves inside that chroot, so it points to the **host's** journalctl binary — the container image needs none. Update this path if journalctl lives elsewhere on your host (for example, `/bin/journalctl` on some Debian systems).
+
+<Admonition type="note">
+  The journal directory defaults to `/run/log/journal` relative to `root_path`. On systems with persistent journal storage, add `directory: /var/log/journal` to the receiver config.
+</Admonition>
+
+### Step 2. Restart the Collector with journal access
+
+The receiver needs two Linux capabilities to read the host journal. Stop the existing Collector and restart it with the capabilities added:
+
+```bash
+docker stop opentelemetry-collector
+docker rm opentelemetry-collector
+
+docker run --name opentelemetry-collector \
+  --restart unless-stopped \
+  --detach \
+  --user 0:0 \
+  --pid host \
+  --network host \
+  -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /proc:/hostfs/proc:ro \
+  -v /sys:/hostfs/sys:ro \
+  -v /:/hostfs:ro \
+  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
+  --cap-add CAP_DAC_READ_SEARCH \
+  --cap-add CAP_SYS_PTRACE \
+  -e HOST_PROC=/hostfs/proc \
+  -e HOST_SYS=/hostfs/sys \
+  -e HOST_ROOT=/hostfs \
+  otel/opentelemetry-collector-contrib:latest
+```
+
+## Validate
+
+Open **Logs Explorer** in SigNoz and search for `_SYSTEMD_UNIT = docker.service` or filter the message body for `dockerd`. Docker daemon startup messages, warnings, and runtime errors appear.
+
+For advanced configuration, see [Collecting systemd logs (journald)](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/) and the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver documentation</a>.
+
+</TabItem>
+<TabItem value="syslog" label="Syslog">
+
+### Step 1. Add the filelog receiver for syslog files
+
+Append the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">filelog receiver</a> to your existing `config.yaml` to tail the syslog file directly:
+
+```yaml:config.yaml
+receivers:
+  filelog/docker-daemon-syslog:
+    include:
+      - /var/log/syslog
+      - /var/log/messages
+    start_at: end
+    include_file_name: false
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/docker-daemon-syslog]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+<Admonition type="note">
+  List both paths so the config works across distributions; the receiver skips paths that don't exist.
+</Admonition>
+
+<Admonition type="warning">
+  Without filtering, every syslog line goes to SigNoz, including entries from unrelated processes. On a busy host, this raises ingestion costs. Add a filter operator to keep only Docker lines:
+
+  ```yaml
+  operators:
+    - type: filter
+      expr: 'not (body matches "dockerd")'
+  ```
+</Admonition>
+
+### Step 2. Restart the Collector with syslog access
+
+Stop the existing Collector and restart it with `/var/log` mounted read-only:
+
+```bash
+docker stop opentelemetry-collector
+docker rm opentelemetry-collector
+
+docker run --name opentelemetry-collector \
+  --restart unless-stopped \
+  --detach \
+  --user 0:0 \
+  --pid host \
+  --network host \
+  -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /var/log:/var/log:ro \
+  -v /proc:/hostfs/proc:ro \
+  -v /sys:/hostfs/sys:ro \
+  -v /:/hostfs:ro \
+  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
+  -e HOST_PROC=/hostfs/proc \
+  -e HOST_SYS=/hostfs/sys \
+  -e HOST_ROOT=/hostfs \
+  otel/opentelemetry-collector-contrib:latest
+```
+
+## Validate
+
+Open **Logs Explorer** in SigNoz and filter the message body for `dockerd`. Docker daemon events appear mixed with other syslog entries.
+
+For forwarding syslog over the network instead of tailing files directly, see [Collecting Syslogs via OpenTelemetry Collector](https://signoz.io/docs/userguide/collecting_syslogs/).
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+- **Parse log fields**: `dockerd` writes structured log format (`level=info msg="..."`). Use the [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) to extract fields like `level`, `msg`, and `container` into attributes for filtering and alerting.
+- **Set up alerts**: Create [log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to catch errors from `dockerd`.
+- **Explore dashboards**: View container metrics alongside these logs with the [Docker metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/docker-container-metrics/).
+
+<details>
+<ToggleHeading>
 
 ## Troubleshooting
 
-### No Logs Appearing
+</ToggleHeading>
 
-1. **Check file permissions:**
-   ```bash
-   ls -la /var/lib/docker/containers/
-   ```
+### No container logs appearing
 
-2. **Verify collector has access:**
-   ```bash
-   docker run --rm \
-     -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
-     alpine ls /var/lib/docker/containers/
-   ```
+1. Check that Docker container log files exist and are readable:
 
-3. **Check collector logs for errors:**
-   ```bash
-   docker logs opentelemetry-collector | grep -i error
-   ```
+  ```bash
+  ls -la /var/lib/docker/containers/
+  ```
+
+2. Verify the Collector container can read the mounted log directory:
+
+  ```bash
+  docker run --rm \
+    -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+    alpine ls /var/lib/docker/containers/
+  ```
+
+3. Check the Collector logs for errors:
+
+  ```bash
+  docker logs opentelemetry-collector | grep -i error
+  ```
+
+### No Docker daemon logs appearing
+
+1. Confirm where Docker stores daemon logs on your host:
+
+  ```bash
+  sudo journalctl -u docker.service -n 20
+  sudo tail -n 20 /var/log/syslog
+  sudo tail -n 20 /var/log/messages
+  ```
+
+2. For the `journald` receiver: verify the Collector can access `journalctl` and the journal directory. See [Collecting systemd logs (journald)](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/) for container requirements.
+
+3. For the syslog path: check your syslog forwarder configuration in [Collecting Syslogs via OpenTelemetry Collector](https://signoz.io/docs/userguide/collecting_syslogs/).
+
+</details>
+
+## Get Help
+
+<GetHelp />

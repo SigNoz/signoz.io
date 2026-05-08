@@ -79,6 +79,23 @@ export const INTEGRATIONS_ITEMS = {
       clickName: 'AWS Elasticache Redis Link',
     },
   ] satisfies ComponentItem[],
+  azure: [
+    {
+      name: 'One-Click Azure Integrations',
+      href: '/docs/integrations/azure/one-click-azure-integrations',
+      clickName: 'One-Click Azure Integrations Link',
+    },
+    {
+      name: 'CDN FrontDoor',
+      href: '/docs/integrations/azure/cdn-frontdoor',
+      clickName: 'Azure CDN FrontDoor Integration Link',
+    },
+    {
+      name: 'Blob Storage',
+      href: '/docs/integrations/azure/blob-storage',
+      clickName: 'Azure Blob Storage Integration Link',
+    },
+  ] satisfies ComponentItem[],
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
     {
@@ -87,6 +104,11 @@ export const INTEGRATIONS_ITEMS = {
       clickName: 'Kong Gateway Integration Link',
     },
     { name: 'Vercel', href: '/docs/integrations/vercel', clickName: 'Vercel Integration Link' },
+    {
+      name: 'Fly.io',
+      href: '/docs/integrations/outposts/flyio',
+      clickName: 'Fly.io Integration Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 
