@@ -1642,7 +1642,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'User Guides',
+        label: 'Logs User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/logs-management/user-guides',
