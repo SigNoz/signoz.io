@@ -241,12 +241,12 @@ function parseMDXFile(filePath) {
 }
 
 /**
- * Remove GFM fenced code blocks (```lang … ```) so illustrative JSX/HTML inside
- * docs — e.g. `<img src="${panel.url}" />` — is not scanned as real assets.
+ * Remove GFM fenced code blocks so illustrative JSX/HTML in docs is not scanned as assets.
+ * Opening/closing fences must allow leading whitespace: list-nested blocks
  */
 function stripFencedCodeBlocks(content) {
-  let out = content.replace(/^```[^\n]*\n[\s\S]*?^```/gm, '\n')
-  out = out.replace(/^~~~[^\n]*\n[\s\S]*?^~~~/gm, '\n')
+  let out = content.replace(/^[ \t]*```[^\n]*\n[\s\S]*?^[ \t]*```/gm, '\n')
+  out = out.replace(/^[ \t]*~~~[^\n]*\n[\s\S]*?^[ \t]*~~~/gm, '\n')
   return out
 }
 
