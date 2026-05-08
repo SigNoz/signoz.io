@@ -1,7 +1,6 @@
 ---
 
 title: Complete Guide to Apache Logs - Access, Analyze, and Manage
-slug: apache-log
 date: 2024-07-16
 tags: [logging]
 authors: [simran_kumari]
@@ -420,7 +419,7 @@ To send Apache logs to SigNoz, you'll need to follow these steps. The process in
 yum install httpd -y
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%201.webp" alt="Installing Apache server" caption="Installing Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled 1.webp" alt="Installing Apache server" caption="Installing Apache server" />
 
 - Start and enable the Apache service by running the command:
 
@@ -430,7 +429,7 @@ systemctl enable httpd
 systemctl status httpd
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%202.webp" alt="Starting and enabling Apache server" caption="Starting and enabling Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled 2.webp" alt="Starting and enabling Apache server" caption="Starting and enabling Apache server" />
 
 - Access Log Configuration:
     - By default, Apache logs access information to `/var/log/httpd/access_log`.
@@ -441,7 +440,7 @@ systemctl status httpd
         ```
         
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%203.webp" alt="CustomLog directive in Apache Configuration File" caption="CustomLog directive in Apache Configuration File" /> 
+<Figure src="/img/guides/2024/07/apache-log-Untitled 3.webp" alt="CustomLog directive in Apache Configuration File" caption="CustomLog directive in Apache Configuration File" /> 
 
 - Error Log Configuration:
     - Apache logs error information to `/var/log/httpd/error_log`.
@@ -452,7 +451,7 @@ systemctl status httpd
         ```
         
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%204.webp" alt="ErrorLog Configuration in Apache Configuration File" caption="ErrorLog Configuration in Apache Configuration File" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled 4.webp" alt="ErrorLog Configuration in Apache Configuration File" caption="ErrorLog Configuration in Apache Configuration File" />
 
 ### Step 2: Install and Configure OpenTelemetry Collector
 
@@ -465,7 +464,7 @@ Install the OpenTelemetry Collector on your EC2 instance.
     ```
     
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%205.webp" alt="Updating packages" caption="Updating packages" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled 5.webp" alt="Updating packages" caption="Updating packages" />
 
 1. Download and Install OpenTelemetry Collector:
     - Ensure you have the OpenTelemetry Collector installed on your system. If not, install it using the following commands:
@@ -476,7 +475,7 @@ Install the OpenTelemetry Collector on your EC2 instance.
         ```
         
     
-    <Figure src="/img/guides/2024/07/apache-log-Untitled%206.webp" alt="Installing OpenTelemetry collector" caption="Installing OpenTelemetry collector" />
+    <Figure src="/img/guides/2024/07/apache-log-Untitled 6.webp" alt="Installing OpenTelemetry collector" caption="Installing OpenTelemetry collector" />
     
     *Installing OpenTelemetry collector*
     
@@ -580,7 +579,7 @@ Replace the endpoint and ingestion key value with the actual OTLP endpoint and t
     ```
     
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%207.webp" alt="Running Otel-collector" caption="Running Otel-collector" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled 7.webp" alt="Running Otel-collector" caption="Running Otel-collector" />
 
 ### Step 3: Testing Apache Logs on SigNoz
 
@@ -592,7 +591,7 @@ Replace the endpoint and ingestion key value with the actual OTLP endpoint and t
 for i in {1..10}; do curl http://localhost/; done
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%208.webp" alt="Sending GET requests to Apache server" caption="Sending GET requests to Apache server" /> 
+<Figure src="/img/guides/2024/07/apache-log-Untitled 8.webp" alt="Sending GET requests to Apache server" caption="Sending GET requests to Apache server" /> 
 
 - Replace `localhost` with your server's IP address or domain name if you are testing from a different machine.
 - Generate different types of HTTP requests to test various logging scenarios.
@@ -604,11 +603,11 @@ curl -X PUT http://localhost/
 curl -X DELETE http://localhost/
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%209.webp" alt="Sending POST requests to Apache server" caption="Sending POST requests to Apache server" /> 
+<Figure src="/img/guides/2024/07/apache-log-Untitled 9.webp" alt="Sending POST requests to Apache server" caption="Sending POST requests to Apache server" /> 
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2010.webp" alt="Sending PUT requests to Apache server" caption="Sending PUT requests to Apache server" /> 
+<Figure src="/img/guides/2024/07/apache-log-Untitled 10.webp" alt="Sending PUT requests to Apache server" caption="Sending PUT requests to Apache server" /> 
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2011.webp" alt="Sending DELETE requests to Apache server" caption="Sending DELETE requests to Apache server" /> 
+<Figure src="/img/guides/2024/07/apache-log-Untitled 11.webp" alt="Sending DELETE requests to Apache server" caption="Sending DELETE requests to Apache server" /> 
 
 2. Verify Logs in Apache
 
@@ -628,18 +627,18 @@ You should see entries corresponding to the requests you generated.
 sudo tail -f /var/log/httpd/error_log
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2012.webp" alt="Verifying Error logs in Apache" caption="Verifying Error logs in Apache" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled 12.webp" alt="Verifying Error logs in Apache" caption="Verifying Error logs in Apache" />
 
 3. Verify Logs in SigNoz
 
 - Log in to your SigNoz cloud and navigate to the logs section.
 - Verify that you can see the Apache access and error logs in the SigNoz dashboard.
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2013.webp" alt="Visualizing and monitoring Apache logs in Signoz Dashboard" caption="Visualizing and monitoring Apache logs in Signoz Dashboard" /> 
+<Figure src="/img/guides/2024/07/apache-log-Untitled 13.webp" alt="Visualizing and monitoring Apache logs in Signoz Dashboard" caption="Visualizing and monitoring Apache logs in Signoz Dashboard" /> 
 
 - Use the search and filter options to find specific log entries related to the requests you generated.
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2014.webp" alt="Filtering Apache logs based on log file name" caption="Filtering Apache logs based on log file name" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled 14.webp" alt="Filtering Apache logs based on log file name" caption="Filtering Apache logs based on log file name" />
 
 ## Conclusion
 

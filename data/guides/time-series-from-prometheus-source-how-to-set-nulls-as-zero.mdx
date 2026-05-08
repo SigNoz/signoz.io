@@ -1,7 +1,6 @@
 ---
 
 title: How to Handle Null Values in Prometheus Time Series Data
-slug: time-series-from-prometheus-source-how-to-set-nulls-as-zero
 date: 2024-10-14
 tags: [prometheus,missing values, time-series]
 authors: [simran_kumari]
@@ -96,7 +95,7 @@ Handling missing data points in Prometheus is crucial for ensuring accurate visu
     
     - Explanation: This query returns the value of `custom_metric`, and if it’s absent, it defaults to `0`.
     
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%201.webp" alt="Handling missing data using vector(0)" caption="Handling missing data using vector(0)" />
+    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 1.webp" alt="Handling missing data using vector(0)" caption="Handling missing data using vector(0)" />
     
     Use Case: Imagine monitoring server CPU usage. If the server goes offline, rather than seeing a confusing gap, you can treat the missing data as `0`, indicating that the server wasn’t active.
     
@@ -109,7 +108,7 @@ Handling missing data points in Prometheus is crucial for ensuring accurate visu
     
     - Explanation: This query returns a value when `custom_metric` is not present, useful for alerting on missing metrics.
     
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%202.webp" alt="Handling missing data using absent()" caption="Handling missing data using absent()" />
+    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 2.webp" alt="Handling missing data using absent()" caption="Handling missing data using absent()" />
     
     Use Case: In a microservices architecture, you'll want to know if a service’s health metric stops being scraped. `absent()` can alert you that the service may be down or unreachable, helping to detect system failures early.
     
@@ -147,7 +146,7 @@ Handling missing data points in Prometheus is crucial for ensuring accurate visu
     - `group_right`: Ensures all error rates are preserved even if the resource usage data is missing for some instances.
     - `or vector(0)`: Fills missing values with `0` for better visualization.
     
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%203.webp" alt="Handling missing data using group_left()" caption="Handling missing data using group_left()" />
+    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 3.webp" alt="Handling missing data using group_left()" caption="Handling missing data using group_left()" />
     
     Use Case: You’re monitoring CPU usage per instance alongside error rates. By using `group_left`, you ensure that even if there are no errors for certain instances, the CPU usage is still included in your visualizations, and errors are treated as zero instead of missing. Alternatively, use `group_right` if you prioritize error rate data over system resource metrics.
     
@@ -161,7 +160,7 @@ Handling missing data points in Prometheus is crucial for ensuring accurate visu
     
     Explanation: This function returns a value if `custom_metric` has been absent for the last 1 minute, useful for identifying metrics that are not being scraped over extended periods.
     
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%204.webp" alt="Handling missing data using absent_over_time()" caption="Handling missing data using absent_over_time()" />
+    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 4.webp" alt="Handling missing data using absent_over_time()" caption="Handling missing data using absent_over_time()" />
     
 
 ## Best Practices for Handling Null/Missing Values in Time Series Data

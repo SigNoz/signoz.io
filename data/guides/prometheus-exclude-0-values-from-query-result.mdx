@@ -1,7 +1,6 @@
 ---
 
 title: How to Filter Out Zero Values in Prometheus Queries
-slug: prometheus-exclude-0-values-from-query-result
 date: 2024-11-14
 tags: [prometheus, faq]
 authors: [simran_kumari]
@@ -51,7 +50,7 @@ This filters out any metric values that are exactly zero.
 
 <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image.webp" alt="Counts of metric prometheus_http_requests_total" caption="Counts of metric prometheus_http_requests_total" />
 
-<Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%201.webp" alt="Counts of metric prometheus_http_requests_total excluding zeros" caption="Counts of metric prometheus_http_requests_total excluding zeros" />
+<Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 1.webp" alt="Counts of metric prometheus_http_requests_total excluding zeros" caption="Counts of metric prometheus_http_requests_total excluding zeros" />
 
 ### Using Conditional Expressions
 
@@ -63,7 +62,7 @@ prometheus_http_requests_total > 0
 
 This returns only those time series where the metric value is greater than zero, filtering out zeros from your visualizations.
 
-<Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%202.webp" alt="Excluding zeros using Conditional Expressions" caption="Excluding zeros using Conditional Expressions" />
+<Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 2.webp" alt="Excluding zeros using Conditional Expressions" caption="Excluding zeros using Conditional Expressions" />
 
 Here are key best practices for filtering zero values in monitoring:
 
@@ -86,7 +85,7 @@ Prometheus provides flexibility to create advanced filters, which help refine me
     
     The above query filters results to include only metrics where `prometheus_http_requests_total` is greater than 0 and less than 100. This range ensures that only non-zero, low-traffic values are captured, effectively excluding zero values and any high spikes that could distort analysis of low-level traffic patterns.
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%203.webp" alt="Boolean Operators for Complex Queries" caption="Boolean Operators for Complex Queries" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 3.webp" alt="Boolean Operators for Complex Queries" caption="Boolean Operators for Complex Queries" />
     
 2. Combining Multiple Filters
     
@@ -98,7 +97,7 @@ Prometheus provides flexibility to create advanced filters, which help refine me
     
     This example filters out zero values and includes only specific status codes.
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%204.webp" alt="Combining Multiple Filters" caption="Combining Multiple Filters" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 4.webp" alt="Combining Multiple Filters" caption="Combining Multiple Filters" />
     
 3. Handling Edge Cases with Zero Values
     
@@ -110,7 +109,7 @@ Prometheus provides flexibility to create advanced filters, which help refine me
     
     The above query calculates the per-second rate of `prometheus_http_requests_total` over the last 5 minutes and filters out any instances where the rate is zero. This approach ensures that only active traffic is displayed, excluding any periods with no requests, which can help focus on times when the service is actively receiving traffic.
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%205.webp" alt="Handling Edge Cases with Zero Values" caption="Handling Edge Cases with Zero Values" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 5.webp" alt="Handling Edge Cases with Zero Values" caption="Handling Edge Cases with Zero Values" />
     
 4. Time-Based Filtering
     
@@ -122,7 +121,7 @@ Prometheus provides flexibility to create advanced filters, which help refine me
     
     This approach aggregates data over a time range, excluding any series that stayed at zero throughout the period.
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%206.webp" alt="Time-Based Filtering" caption="Time-Based Filtering" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 6.webp" alt="Time-Based Filtering" caption="Time-Based Filtering" />
     
 
 ## Implementing Zero Value Filtering in Grafana
@@ -139,9 +138,9 @@ Follow these steps to set up zero-value filtering for your metrics in Grafana:
     your_metric != 0
     ```
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%207.webp" alt="Grafana graph with zero values" caption="Grafana graph with zero values" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 7.webp" alt="Grafana graph with zero values" caption="Grafana graph with zero values" />
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%208.webp" alt="Grafana graph filtering out zero values" caption="Grafana graph filtering out zero values" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 8.webp" alt="Grafana graph filtering out zero values" caption="Grafana graph filtering out zero values" />
     
 
 ## Alternative Approach: Using SigNoz
@@ -157,11 +156,11 @@ Here are a few reasons why SigNoz can be particularly helpful for filtering out 
     
 2. Integrated Observability for Contextual Filtering: With SigNoz, metrics, traces, and logs are all integrated into one platform. This context allows for more targeted zero-value filtering based on correlated data, enabling users to focus on relevant metrics alongside related traces or logs.
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%209.webp" alt="Integrated Observability for Contextual Filtering" caption="Integrated Observability for Contextual Filtering" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 9.webp" alt="Integrated Observability for Contextual Filtering" caption="Integrated Observability for Contextual Filtering" />
     
 3. Flexible Dashboard Customization: SigNoz provides more intuitive options for setting dynamic thresholds and visual cues, helping users to automatically hide zero-value data or highlight only active metrics. This leads to more streamlined visualizations without needing extensive manual adjustments.
     
-    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%2010.webp" alt="Flexible Dashboard Customization" caption="Flexible Dashboard Customization" />
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image 10.webp" alt="Flexible Dashboard Customization" caption="Flexible Dashboard Customization" />
     
 
 <GetStartedSigNoz />
