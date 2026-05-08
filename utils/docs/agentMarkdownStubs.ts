@@ -363,10 +363,7 @@ const createKnownComponentStubs = (): Record<
   APMQuickStartOverview: createItemListStub(APM_QUICK_START_ITEMS, 'APM Quick Start'),
   AWSMonitoringListicle: createItemListStub(getAllAWSMonitoringItems(), 'AWS Monitoring Guides'),
   AWSOneClickListicle: createItemListStub(getAllAWSOneClickItems(), 'AWS One-Click Integrations'),
-  AzureOneClickListicle: createItemListStub(
-    [...AZURE_ONE_CLICK_ITEMS],
-    'Azure One-Click Integrations'
-  ),
+  AzureOneClickListicle: createItemListStub(AZURE_ONE_CLICK_ITEMS, 'Azure One-Click Integrations'),
   CICDMonitoringListicle: createItemListStub(
     getAllCICDMonitoringItems(),
     'CI/CD Monitoring Guides'
