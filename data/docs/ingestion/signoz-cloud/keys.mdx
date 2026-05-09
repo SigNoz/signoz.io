@@ -1,5 +1,5 @@
 ---
-date: 2026-04-18
+date: 2026-05-09
 title: Ingestion Keys
 tags: [SigNoz Cloud]
 id: ingestion-keys
@@ -14,6 +14,21 @@ You don't need ingestion keys for self-hosted/community edition of SigNoz. Inges
 ## Overview
 
 Ingestion Keys are secure tokens used to authenticate your telemetry Ingestion requests. These keys are unique to your account and should be kept confidential.
+
+Ingestion keys are **write-only** — they can only send telemetry data (traces, logs, metrics) into your account. They cannot be used to query, read, or delete any data. This is in contrast to **API keys**, which allow querying and reading data from your account and should never be exposed in client-side code.
+
+## Using Ingestion Keys in Frontend/Browser Applications
+
+Because ingestion keys are write-only, they can be used in frontend applications where the key is visible in browser code. The primary risk of an exposed ingestion key is that a third party could send unwanted telemetry data to your account, increasing ingestion volume and costs.
+
+To limit this risk, create a dedicated ingestion key for frontend use with the following safeguards:
+
+- **Ingestion limits**: Set daily size and count caps per signal type (see [Add Limits to a Key](#add-limits-to-a-key)) to bound the impact of misuse.
+- **Expiration date**: Set an expiration so the key automatically becomes invalid after a defined period.
+
+<Admonition type="warning">
+API keys allow querying and reading data from your account. Never expose API keys in frontend or client-side code.
+</Admonition>
 
 ## Pre-requisite
 
