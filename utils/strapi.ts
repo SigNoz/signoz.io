@@ -280,7 +280,16 @@ export const fetchMDXContentByPath = async (
 ): Promise<MDXContentByIdApiResponse | MDXContentApiResponse> => {
   try {
     const queryObject: any = {
-      populate: '*',
+      populate: fetchAll
+        ? '*'
+        : {
+            authors: '*',
+            tags: '*',
+            keywords: '*',
+            related_articles: {
+              populate: '*',
+            },
+          },
       pagination: {
         page: 1,
         pageSize: 100,
