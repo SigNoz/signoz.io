@@ -4,10 +4,10 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Alert Management | SigNoz',
+    absolute: 'Alert Management Platform | SigNoz',
   },
   openGraph: {
-    title: 'Alert Management | SigNoz',
+    title: 'Alert Management Platform | SigNoz',
     description:
       'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
     images: '/img/platform/AlertsManagementMeta.webp',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
   twitter: {
-    title: 'Alert Management | SigNoz',
+    title: 'Alert Management Platform | SigNoz',
     description:
       'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
     images: '/img/platform/AlertsManagementMeta.webp',
