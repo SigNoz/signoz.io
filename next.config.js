@@ -1,6 +1,23 @@
 const { withContentlayer } = require('next-contentlayer2')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
+/**
+ * Generate /docs-onboarding/* versions of all /docs/* redirects.
+ * This ensures redirect rules apply consistently in the onboarding context.
+ */
+function withDocsOnboardingRedirects(redirects) {
+  const docsOnboardingRedirects = redirects
+    .filter((r) => r.source.startsWith('/docs/'))
+    .map((r) => ({
+      ...r,
+      source: r.source.replace(/^\/docs\//, '/docs-onboarding/'),
+      destination: r.destination.startsWith('/docs/')
+        ? r.destination.replace(/^\/docs\//, '/docs-onboarding/')
+        : r.destination,
+    }))
+  return [...redirects, ...docsOnboardingRedirects]
+}
+
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
@@ -89,7 +106,7 @@ module.exports = () => {
       ]
     },
     async redirects() {
-      return [
+      return withDocsOnboardingRedirects([
         {
           source: '/enterprise-self-hosted/',
           destination: '/contact-us/?source=redirect-enterprise-self-hosted',
@@ -432,6 +449,11 @@ module.exports = () => {
         {
           source: '/docs/',
           destination: '/docs/introduction',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-pipelines/concepts/',
+          destination: '/docs/logs-pipelines/introduction/',
           permanent: true,
         },
         {
@@ -1315,6 +1337,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/logs-query-troubleshooting/',
+          destination: '/docs/logs-management/troubleshooting/troubleshooting/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs-json-filters/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting/',
           destination: '/docs/traces-management/troubleshooting/troubleshooting/',
           permanent: true,
@@ -1666,6 +1698,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/metrics-management/render-metrics/',
+          destination: '/docs/integrations/outposts/render/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/docker-standalone/',
           destination: '/docs/install/docker/',
           permanent: true,
@@ -1716,8 +1753,23 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/logs',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
           source: '/docs/userguide/logs/',
-          destination: '/docs/logs-management/overview/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer/',
+          destination: '/docs/userguide/logs_query_builder/',
           permanent: true,
         },
         {
@@ -2692,7 +2744,7 @@ module.exports = () => {
           destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
-      ]
+      ])
     },
     webpack: (config, options) => {
       // Find Next.js's existing rule that handles SVG imports

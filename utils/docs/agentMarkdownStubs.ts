@@ -18,6 +18,7 @@ import {
   getAllCICDMonitoringItems,
   getAllAWSMonitoringItems,
   getAllAWSOneClickItems,
+  AZURE_ONE_CLICK_ITEMS,
   DASHBOARD_TEMPLATES_ITEMS,
   APM_DASHBOARDS_ITEMS,
   KUBERNETES_DASHBOARDS_ITEMS,
@@ -51,6 +52,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'APMQuickStartOverview',
   'AWSMonitoringListicle',
   'AWSOneClickListicle',
+  'AzureOneClickListicle',
   'CICDMonitoringListicle',
   'CollectionAgentsListicle',
   'DashboardTemplatesListicle',
@@ -361,6 +363,7 @@ const createKnownComponentStubs = (): Record<
   APMQuickStartOverview: createItemListStub(APM_QUICK_START_ITEMS, 'APM Quick Start'),
   AWSMonitoringListicle: createItemListStub(getAllAWSMonitoringItems(), 'AWS Monitoring Guides'),
   AWSOneClickListicle: createItemListStub(getAllAWSOneClickItems(), 'AWS One-Click Integrations'),
+  AzureOneClickListicle: createItemListStub(AZURE_ONE_CLICK_ITEMS, 'Azure One-Click Integrations'),
   CICDMonitoringListicle: createItemListStub(
     getAllCICDMonitoringItems(),
     'CI/CD Monitoring Guides'

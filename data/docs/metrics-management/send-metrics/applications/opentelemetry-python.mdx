@@ -1,5 +1,5 @@
 ---
-date: 2026-03-06
+date: 2026-05-08
 id: opentelemetry-python
 title: Send Metrics from Python application
 description: Learn how to send metrics from Python applications (Flask, Django, FastAPI, Celery, Runtime) to SigNoz using OpenTelemetry
@@ -17,6 +17,8 @@ This guide shows you how to send metrics from your Python application (Flask, Dj
 
 - <a href="https://pypi.org/project/opentelemetry-distro/" target="_blank" rel="noopener noreferrer nofollow">Python 3.9+</a>
 - A SigNoz Cloud account or self-hosted SigNoz instance
+
+Tested with <a href="https://docs.python.org/3.11/" target="_blank" rel="noopener noreferrer nofollow">Python 3.11</a> and OpenTelemetry Python SDK <a href="https://pypi.org/project/opentelemetry-sdk/1.41.1/" target="_blank" rel="noopener noreferrer nofollow">v1.41.1</a>.
 
 ## Send metrics to SigNoz
 
@@ -36,6 +38,7 @@ Set the following environment variables to configure the OpenTelemetry exporter:
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_SERVICE_NAME="<service-name>"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_TRACES_EXPORTER="none"
@@ -58,6 +61,8 @@ env:
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_EXPORTER_OTLP_PROTOCOL
+  value: 'http/protobuf'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
 - name: OTEL_METRICS_EXPORTER
@@ -80,6 +85,7 @@ Verify these values:
 ```powershell
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_SERVICE_NAME = "<service-name>"
 $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_TRACES_EXPORTER = "none"
@@ -102,6 +108,7 @@ Add environment variables to your Dockerfile:
 # Set OpenTelemetry environment variables
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_SERVICE_NAME="<service-name>"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_TRACES_EXPORTER="none"
@@ -114,6 +121,7 @@ Or pass them at runtime using `docker run`:
 ```bash
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
     -e OTEL_SERVICE_NAME="<service-name>" \
     -e OTEL_METRICS_EXPORTER="otlp" \
     -e OTEL_TRACES_EXPORTER="none" \
@@ -490,11 +498,11 @@ See the OpenTelemetry semantic conventions for the complete list:
 
 ### Metrics not appearing?
 
-1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_ENDPOINT` is set correctly:
-    - For gRPC (default): `https://ingest.<region>.signoz.cloud:443`
-    - For HTTP: `https://ingest.<region>.signoz.cloud:443/v1/metrics`
+1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_PROTOCOL` are set correctly:
+    - Endpoint: `https://ingest.<region>.signoz.cloud:443`
+    - Protocol: `http/protobuf`
 
-2. **Check Exporter Protocol**: This guide uses `otlp-proto-grpc`. If you are behind a proxy that only supports HTTP/1.1, switch to `otlp-proto-http`.
+2. **Check Exporter Protocol**: This guide uses `http/protobuf`. Ensure `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` is set.
 
 3. **Check Console Errors**: The OpenTelemetry SDK prints errors to stderr by default. Check your application logs for any connection refused or authentication errors.
 

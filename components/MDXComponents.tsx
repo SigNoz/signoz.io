@@ -81,6 +81,7 @@ import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
 import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
 import AWSOneClickListicle from './AWS/AWSOneClickListicle'
+import AzureOneClickListicle from './Azure/AzureOneClickListicle'
 import Region from './Region/Region'
 import RegionTable from './Region/RegionTable'
 import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
@@ -192,6 +193,7 @@ export const components: MDXComponents = {
   CommonPrerequisites,
   AWSMonitoringListicle,
   AWSOneClickListicle,
+  AzureOneClickListicle,
   CardinalityExplosion,
   MemoryGauge,
   QueryRace,

@@ -21,7 +21,9 @@ const softwareAppId = `${siteUrl}/#software`
 const webpageId = `${siteUrl}/#webpage`
 
 export const metadata: Metadata = {
-  title: 'SigNoz | The Open Source Datadog Alternative',
+  title: {
+    absolute: 'SigNoz | The Open Source Datadog Alternative',
+  },
   openGraph: {
     title: 'SigNoz | The Open Source Datadog Alternative',
     description:
