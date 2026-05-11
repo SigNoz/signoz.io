@@ -4,7 +4,7 @@ import DatadogPricingCalculator from '@/components/DatadogPricingCalculator/Data
 import DatadogVsSigNoz from '@/components/DatadogVsSigNoz/DatadogVsSigNoz'
 
 export const metadata = {
-  title: 'Datadog Pricing Calculator | SigNoz',
+  title: 'Datadog Pricing Calculator',
   description:
     'Estimate your Datadog costs with our interactive pricing calculator. Compare Datadog pricing for logs, APM, and infrastructure monitoring.',
 }

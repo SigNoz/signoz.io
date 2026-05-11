@@ -1,6 +1,23 @@
 const { withContentlayer } = require('next-contentlayer2')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
+/**
+ * Generate /docs-onboarding/* versions of all /docs/* redirects.
+ * This ensures redirect rules apply consistently in the onboarding context.
+ */
+function withDocsOnboardingRedirects(redirects) {
+  const docsOnboardingRedirects = redirects
+    .filter((r) => r.source.startsWith('/docs/'))
+    .map((r) => ({
+      ...r,
+      source: r.source.replace(/^\/docs\//, '/docs-onboarding/'),
+      destination: r.destination.startsWith('/docs/')
+        ? r.destination.replace(/^\/docs\//, '/docs-onboarding/')
+        : r.destination,
+    }))
+  return [...redirects, ...docsOnboardingRedirects]
+}
+
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
@@ -89,7 +106,7 @@ module.exports = () => {
       ]
     },
     async redirects() {
-      return [
+      return withDocsOnboardingRedirects([
         {
           source: '/enterprise-self-hosted/',
           destination: '/contact-us/?source=redirect-enterprise-self-hosted',
@@ -2722,7 +2739,7 @@ module.exports = () => {
           destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
-      ]
+      ])
     },
     webpack: (config, options) => {
       // Find Next.js's existing rule that handles SVG imports
