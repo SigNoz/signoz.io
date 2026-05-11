@@ -1250,7 +1250,7 @@ const docsSideNav = [
         label: 'Service Map',
       },
       {
-        label: 'User Guides',
+        label: 'Traces User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/traces-management/guides/overview',
