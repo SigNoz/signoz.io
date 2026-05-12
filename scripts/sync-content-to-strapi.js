@@ -927,7 +927,6 @@ async function updateEntry(folderName, documentId, data) {
     console.log(`  🔄 [DEBUG] Document ID: ${documentId}`)
     console.log(`  🔄 [DEBUG] Update URL: ${CMS_API_URL}/api/${schema.endpoint}/${documentId}`)
     console.log(`  🔄 [DEBUG] Data keys:`, Object.keys(data).join(', '))
-    console.log(`  🔄 [DEBUG] Full data:`, JSON.stringify(data, null, 2))
 
     const response = await axios.put(
       `${CMS_API_URL}/api/${schema.endpoint}/${documentId}`,
