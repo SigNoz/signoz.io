@@ -41,6 +41,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/product-features/logs-explorer',
+            label: 'Logs Explorer',
+          },
+          {
+            type: 'doc',
             route: '/docs/product-features/saved-view',
             label: 'Saved View',
           },
@@ -958,20 +963,13 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/instrumentation/overview',
-        label: 'Get Started',
+        label: 'Overview',
       },
       {
-        label: 'Instrument Application',
+        label: 'Send Traces and APM Data',
         type: 'category',
         isExpanded: false,
         route: '/docs/instrumentation',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Instrument your Application',
-        // description:
-        // 'To instrument your application with OpenTelemetry and send data to SigNoz, follow the instructions in the sections below.',
-        // slug: '/docs/instrumentation/index',
-        // },
         items: [
           {
             type: 'category',
@@ -1185,87 +1183,79 @@ const docsSideNav = [
             route: '/docs/integrations/opentelemetry-kong-gateway',
             label: 'Kong Gateway',
           },
-          // {
-          //   type: 'category',
-          //   isExpanded: false,
-          //   label: 'Mobile Instrumentation',
-          //   route: '/docs/mobile-instrumentation',
-          //
-          //   // route: '',
-          //   // link: {
-          //   // type: 'doc',
-          //   // },
-          //   items: [
-
-          //   ],
-          // },
         ],
       },
       {
+        label: 'Services / APM',
         type: 'category',
         isExpanded: false,
-        label: 'APM Product Overview',
-        // route: '',
+        route: '/docs/userguide/metrics',
+        items: [
+          { type: 'doc', route: '/docs/userguide/metrics', label: 'View Services' },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/application-details',
+            label: 'Application Details',
+          },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/database-calls',
+            label: 'Database Calls',
+          },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/external-calls',
+            label: 'External Calls',
+          },
+        ],
+      },
+      {
+        label: 'Traces',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/userguide/traces',
         items: [
           {
             type: 'doc',
-            label: 'View Services',
-            route: '/docs/userguide/metrics',
+            route: '/docs/userguide/traces',
+            label: 'Trace Explorer',
           },
           {
             type: 'doc',
-            label: 'Calculated Fields in Spans',
-            route: '/docs/traces-management/guides/derived-fields-spans',
+            route: '/docs/userguide/span-details',
+            label: 'Trace Details',
           },
           {
             type: 'doc',
-            label: 'Entry Point Spans',
-            route: '/docs/traces-management/guides/entry-point-spans-service-overview',
+            route: '/docs/trace-funnels/overview',
+            label: 'Trace Funnels',
           },
           {
-            type: 'doc',
-            label: 'APM Dashboards/Alerts',
-            route: '/docs/userguide/custom-apm-dashboards-alerts',
-          },
-          {
+            label: 'Traces User Guides',
             type: 'category',
             isExpanded: false,
-            label: 'View Traces',
-            route: '/docs/userguide/traces',
-            // link: {
-            // type: 'doc',
-            // },
+            route: '/docs/apm-and-distributed-tracing/traces-user-guides',
             items: [
               {
                 type: 'doc',
-                label: 'Trace Details',
-                route: '/docs/userguide/span-details',
+                route: '/docs/trace-funnels/setup',
+                label: 'Setup Trace Funnels',
               },
             ],
-          },
-          {
-            type: 'doc',
-            label: 'Service Map (Beta)',
-            route: '/docs/userguide/service-map',
           },
         ],
       },
       {
+        type: 'doc',
+        route: '/docs/userguide/service-map',
+        label: 'Service Map',
+      },
+      {
+        label: 'User Guides',
         type: 'category',
         isExpanded: false,
-        label: 'User Guides',
         route: '/docs/traces-management/guides/overview',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/application-monitoring/api-monitoring',
-            label: 'API Monitoring',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/guides/apm-metrics',
-            label: 'APM Metrics',
-          },
           {
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
@@ -1273,33 +1263,52 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/guides/pii-scrubbing/',
-            label: 'PII Scrubbing',
+            route: '/docs/traces-management/guides/correlate-traces-and-logs',
+            label: 'Correlate Traces & Logs',
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/guides/correlate-traces-and-logs',
-            label: 'Correlate Traces and Logs',
+            route: '/docs/traces-management/guides/pii-scrubbing',
+            label: 'PII Scrubbing',
           },
         ],
       },
       {
+        label: 'Reference',
         type: 'category',
-        route: '/docs/traces-management/troubleshooting/troubleshooting',
-        label: 'Troubleshooting',
         isExpanded: false,
+        route: '/docs/apm-and-distributed-tracing/reference',
         items: [
           {
             type: 'doc',
-            route: '/docs/traces-management/troubleshooting/faqs',
-            label: 'General FAQs',
+            route: '/docs/userguide/custom-apm-dashboards-alerts',
+            label: 'APM Metrics, Dashboards & Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/long-term-storage',
+            label: 'Long Term Storage',
+          },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/traces-api',
+            label: 'Using Traces API',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/derived-fields-spans',
+            label: 'Derived Fields for Spans',
           },
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/traces-management/long-term-storage',
-        label: 'Long Term Storage',
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/traces-management/troubleshooting/troubleshooting',
+        items: [
+          { type: 'doc', route: '/docs/traces-management/troubleshooting/faqs', label: 'FAQs' },
+        ],
       },
     ],
   },
@@ -1936,6 +1945,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/cost-meter/cost-meter-dashboard',
+        label: 'Cost Meter Dashboard',
+      },
+      {
+        type: 'doc',
         route: '/docs/cost-meter/meter-explorer',
         label: 'Meter Explorer',
       },
@@ -1943,6 +1957,16 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/cost-meter/alerts',
         label: 'Alerts',
+      },
+      {
+        label: 'User Guides',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/cost-meter/user-guides',
+        items: [
+          { type: 'doc', route: '/docs/cost-meter/alert-configuration-guide', label: 'Alert Configuration Guide' },
+          { type: 'doc', route: '/docs/cost-meter/meter-explorer-query-guide', label: 'Meter Explorer Query Guide' },
+        ],
       },
     ],
   },
@@ -2739,7 +2763,7 @@ const docsSideNav = [
       {
         type: 'category',
         route: '/docs/alerts-management/user-guides/user-guides',
-        label: 'User Guides',
+        label: 'Alerts User Guides',
         isExpanded: false,
         items: [
           {

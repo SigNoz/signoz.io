@@ -1,0 +1,112 @@
+---
+date: 2026-05-07
+title: Meter Explorer Query Guide
+id: cost-meter-meter-explorer-query-guide
+description: Explore example Meter Explorer queries in SigNoz to analyze cost data, compare ingestion patterns, and save recurring views.
+doc_type: howto
+---
+
+Use these examples to analyze common cost patterns in Meter Explorer and save recurring views for later reuse.
+
+## Querying Meter Data
+
+Meter Explorer uses the same powerful query interface as other SigNoz components, making it easy to analyze your cost data with familiar patterns and syntax.
+
+### Time Range Considerations
+
+<Admonition type="info">
+  **Important**: Meter data is aggregated over hourly intervals. Queries with time ranges under 1
+  hour will not return any data. For real-time analysis, use time ranges of 1 hour or greater.
+</Admonition>
+
+### Query Patterns
+
+The querying patterns for meter data are identical to standard metric querying patterns. You can use the same operators, functions, and syntax that you're familiar with from other SigNoz metrics.
+
+For detailed information about metric querying, refer to our [Metrics Management Guide](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+
+### Example Queries
+
+#### 1. Log Size Analysis by Service
+
+To find the total size of log records ingested by a specific service over the last day:
+
+```
+signoz.meter.log.size{service.name="demo-app"}
+```
+
+This query will show you the total log size for the `demo-app` service, helping you understand which services are generating the most log data.
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/usecase-1.webp"
+  alt="Log size analysis for demo-app service over the last day"
+  caption="Example: Log size analysis for demo-app service showing ingestion patterns over time"
+/>
+
+#### 2. Span Count by Environment
+
+To analyze span ingestion across different environments:
+
+```
+signoz.meter.span.count{deployment.environment="otel-demo"}
+```
+
+This helps you understand the volume of trace data being generated in your environment.
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/usecase-2.webp"
+  alt="Span count analysis for otel-demo environment over the last day"
+  caption="Example: Span count analysis for otel-demo environment over the last day"
+/>
+
+#### 3. Multi-Service Cost Comparison
+
+To compare log ingestion across multiple services:
+
+```
+signoz.meter.log.size{group-by:service.name}
+```
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/usecase-3.webp"
+  alt="Log size analysis group by service.name over the last day"
+  caption="Example: Log size analysis group by service.name over the last day"
+/>
+
+#### 4. Host-Level Analysis
+
+To identify which hosts are generating the most telemetry data:
+
+```
+signoz.meter.log.size{host.name = "x"}
+```
+
+This aggregation helps you identify hosts that might be generating excessive log data.
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/usecase-4.webp"
+  alt="Log size analysis host name: x over the last day"
+  caption="Example: Log size analysis host name: x over the last day"
+/>
+
+#### 5. Ingestion ID-Based Analysis
+
+To analyze telemetry data based on specific ingestion IDs:
+
+```
+signoz.meter.log.size{signoz.workspace.key.id = "01963e56-0bbb-7df5-b26c-2c4aa48b291a"}
+```
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/usecase-5.webp"
+  alt="Log size analysis for ingestion key id: 01963e56-0bbb-7df5-b26c-2c4aa48b291a over the last day"
+  caption="
+      Example: Log size analysis for ingestion key id: 01963e56-0bbb-7df5-b26c-2c4aa48b291a over the
+      last day
+    "
+/>
+
+## Next steps
+
+- Learn how to [save and reuse queries](https://signoz.io/docs/cost-meter/meter-explorer/#saved-views) in Meter Explorer.
+- Set up [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) to get notified when usage crosses your thresholds.
