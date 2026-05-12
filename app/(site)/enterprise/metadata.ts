@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'SigNoz Enterprise | Built for Scale',
+  title: {
+    absolute: 'SigNoz Enterprise | Built for Scale',
+  },
   openGraph: {
     title: 'SigNoz Enterprise | Built for Scale',
     description:

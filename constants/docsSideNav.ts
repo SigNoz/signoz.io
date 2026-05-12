@@ -676,6 +676,12 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0-16',
+                    label: 'Upgrade k8s-infra to v0.16.0',
+                  },
+                  {
+                    type: 'doc',
+                    route:
                       '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-endpoint',
                     label:
                       'Configuring Kubernetes Metrics Collection for IPv6 and Non-Standard Clusters',
@@ -1805,7 +1811,6 @@ const docsSideNav = [
                 route: '/docs/metrics-management/slurm-metrics',
                 label: 'SLURM',
               },
-              { type: 'doc', route: '/docs/metrics-management/render-metrics', label: 'Render' },
               {
                 type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
@@ -3501,6 +3506,16 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/outposts/flyio',
         label: 'Fly.io',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/railway',
+        label: 'Railway',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/render',
+        label: 'Render',
       },
       {
         type: 'doc',

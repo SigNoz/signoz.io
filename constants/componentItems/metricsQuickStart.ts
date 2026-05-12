@@ -101,7 +101,7 @@ export const METRICS_QUICK_START_ITEMS = {
     },
     {
       name: 'Render',
-      href: '/docs/metrics-management/render-metrics',
+      href: '/docs/integrations/outposts/render',
       clickName: 'Render Metrics Link',
     },
   ] satisfies ComponentItem[],
