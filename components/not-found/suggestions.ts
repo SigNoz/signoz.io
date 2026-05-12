@@ -9,14 +9,15 @@ import type { AlgoliaHit, SuggestedDoc } from './types'
 export const hasAlgoliaConfig = (): boolean => {
   return Boolean(
     process.env.NEXT_PUBLIC_ALGOLIA_APP_ID &&
-      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY &&
+      (process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY) &&
       process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
   )
 }
 
 const getAlgoliaConfig = (): { appId: string; apiKey: string; indexName: string } | null => {
   const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
-  const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
+  const apiKey =
+    process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
   const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
 
   if (!appId || !apiKey || !indexName) {
