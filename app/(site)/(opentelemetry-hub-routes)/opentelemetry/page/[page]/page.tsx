@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
   return buildListingMetadata('OpenTelemetry', params.page)
 }
 
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
 export const generateStaticParams = async () => {
   return []
 }
