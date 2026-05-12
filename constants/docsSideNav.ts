@@ -2430,7 +2430,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Dashboards User Guides',
+        label: 'User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/user-guides',
