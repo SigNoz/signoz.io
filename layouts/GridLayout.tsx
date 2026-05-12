@@ -1,13 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { usePathname } from 'next/navigation'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog } from 'contentlayer/generated'
+import { useState } from 'react'
 import Link from '@/components/Link'
-import React from 'react'
-import BlogPostCard from 'app/resource-center/Shared/BlogPostCard'
-import { Frown, HeartCrack, ChevronLeft, ChevronRight } from 'lucide-react'
+import BlogPostCard from '@/components/ResourceCenter/BlogPostCard'
+import { Frown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
 export interface PaginationProps {
@@ -17,14 +13,13 @@ export interface PaginationProps {
 }
 
 interface PaginationInternalProps extends PaginationProps {
-  postsPerPage: number
   totalPosts: number
 }
 
 interface GridLayoutProps {
-  posts: CoreContent<Blog>[]
+  posts: any[]
   title: string
-  initialDisplayPosts?: CoreContent<Blog>[]
+  initialDisplayPosts?: any[]
   pagination?: PaginationProps
   isDarkMode: boolean
 }
@@ -36,35 +31,14 @@ export function Pagination({
   totalPages,
   currentPage,
   pageRoute,
-  postsPerPage,
   totalPosts,
 }: PaginationInternalProps) {
-  const pathname = usePathname()
-  const basePath = pathname.split('/')[1]
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
-  const DEFAULT_POSTS_PER_PAGE = 10
-  const DEFAULT_POSTS_IN_FIRST_PAGE = 9
+  const PAGE_SIZE = 12
 
-  const startPost = useMemo(() => {
-    if (currentPage === 1) {
-      return 1
-    }
-
-    return Math.max(DEFAULT_POSTS_IN_FIRST_PAGE + 1 + (currentPage - 2) * DEFAULT_POSTS_PER_PAGE, 0)
-  }, [currentPage])
-
-  const endPost = useMemo(() => {
-    if (currentPage === 1) {
-      return 9
-    }
-
-    if (currentPage === totalPages) {
-      return totalPosts
-    }
-
-    return Math.max(DEFAULT_POSTS_IN_FIRST_PAGE + (currentPage - 1) * DEFAULT_POSTS_PER_PAGE, 0)
-  }, [currentPage, totalPages])
+  const startPost = (currentPage - 1) * PAGE_SIZE + 1
+  const endPost = Math.min(currentPage * PAGE_SIZE, totalPosts)
 
   const shouldRenderTwoPrevPages = currentPage === totalPages
   const shouldRenderPrevPage = currentPage - 1 > 1
@@ -81,9 +55,7 @@ export function Pagination({
           {prevPage ? (
             <Link
               href={
-                currentPage - 1 === 1
-                  ? `/${basePath}/${pageRoute}`
-                  : `/${basePath}/${pageRoute}/page/${currentPage - 1}`
+                currentPage - 1 === 1 ? `/${pageRoute}` : `/${pageRoute}/page/${currentPage - 1}`
               }
               rel="prev"
               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
@@ -97,51 +69,39 @@ export function Pagination({
           )}
 
           {currentPage !== 1 ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${basePath}/${pageRoute}`}>
+            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}`}>
               1
             </Link>
           ) : null}
           {currentPage - 2 > 1 ? <div className="h-px w-8 bg-signoz_vanilla-400"></div> : null}
 
           {shouldRenderTwoPrevPages ? (
-            <Link
-              className={PAGE_NUMBER_STYLES}
-              href={`/${basePath}/${pageRoute}/page/${currentPage - 2}`}
-            >
+            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage - 2}`}>
               {currentPage - 2}
             </Link>
           ) : null}
 
           {shouldRenderPrevPage ? (
-            <Link
-              className={PAGE_NUMBER_STYLES}
-              href={`/${basePath}/${pageRoute}/page/${currentPage - 1}`}
-            >
+            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage - 1}`}>
               {currentPage - 1}
             </Link>
           ) : null}
 
           <Link
-            href={`/${basePath}/${pageRoute}/page/${currentPage}`}
+            href={`/${pageRoute}/page/${currentPage}`}
             className={`${PAGE_NUMBER_STYLES} bg-signoz_robin-500 text-black`}
           >
             {currentPage}
           </Link>
 
           {shouldRenderNextPage ? (
-            <Link
-              className={PAGE_NUMBER_STYLES}
-              href={`/${basePath}/${pageRoute}/page/${currentPage + 1}`}
-            >
+            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage + 1}`}>
               {currentPage + 1}
             </Link>
           ) : null}
 
           {shouldRenderTwoNextPages ? (
-            <Link
-              className={PAGE_NUMBER_STYLES}
-              href={`/${basePath}/${pageRoute}/page/${currentPage + 2}`}
-            >
+            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage + 2}`}>
               {currentPage + 2}
             </Link>
           ) : null}
@@ -150,17 +110,14 @@ export function Pagination({
             <div className="h-px w-8 bg-signoz_vanilla-400"></div>
           ) : null}
           {currentPage !== totalPages ? (
-            <Link
-              className={PAGE_NUMBER_STYLES}
-              href={`/${basePath}/${pageRoute}/page/${totalPages}`}
-            >
+            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${totalPages}`}>
               {totalPages}
             </Link>
           ) : null}
 
           {nextPage ? (
             <Link
-              href={`/${basePath}/${pageRoute}/page/${currentPage + 1}`}
+              href={`/${pageRoute}/page/${currentPage + 1}`}
               rel="next"
               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
             >
@@ -203,7 +160,6 @@ export default function GridLayout({
   }
 
   const totalPosts = posts.length
-  const postsPerPage = displayPosts.length
 
   return (
     <RegionProvider>
@@ -228,7 +184,6 @@ export default function GridLayout({
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}
             pageRoute={pagination.pageRoute}
-            postsPerPage={postsPerPage}
             totalPosts={totalPosts}
           />
         )}

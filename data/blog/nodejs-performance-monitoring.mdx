@@ -93,20 +93,16 @@ If you want to monitor specific aspects of your Node.js application that are **u
 Install the required OpenTelemetry libraries:
 
 ```powershell
-npm install @opentelemetry/api @opentelemetry/sdk-metrics @opentelemetry/exporter-metrics-otlp-http
+npm install @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/sdk-metrics @opentelemetry/exporter-metrics-otlp-http @opentelemetry/host-metrics
 ```
 
 Then configure the [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) to start collecting and exporting metrics:
 
 ```jsx
-import HostMetrics from '@opentelemetry/host-metrics';
+import { HostMetrics } from '@opentelemetry/host-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-
-// Create host metrics collector
-const hostMetricsCollector = new HostMetrics.HostMetrics();
-hostMetricsCollector.start();
 
 // Configure the OTLP exporter
 const metricExporter = new OTLPMetricExporter({
@@ -118,16 +114,20 @@ const metricExporter = new OTLPMetricExporter({
 
 // Setup the OpenTelemetry Node SDK
 const sdk = new NodeSDK({
-  metricReader: new PeriodicExportingMetricReader({
+  metricReaders: [new PeriodicExportingMetricReader({
     exporter: metricExporter,
-    exportIntervalMillis: 1000,
-  }),
+    exportIntervalMillis: 60000,
+  })],
 });
 
 async function main() {
   try {
     await sdk.start();
     console.log('✅ System metrics collection started');
+
+    // Start host metrics AFTER sdk.start() so they use the registered MeterProvider
+    const hostMetricsCollector = new HostMetrics();
+    hostMetricsCollector.start();
   } catch (err) {
     console.error('❌ Failed to start SDK:', err);
   }
@@ -140,37 +140,12 @@ main();
 
 Now, let’s define metrics tailored to a specific business logic—like a counter for sign-ups and a histogram for request durations:
 
-```
-import './otel.js';
-/// imports the OTLP HTTP metric exporter from OpenTelemetry, 
-/// which is used to send metrics data to a backend like SigNoz.
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-import {
-  MeterProvider,
-  PeriodicExportingMetricReader
-} from '@opentelemetry/sdk-metrics';
+```js
+import './otel.js'; // starts the NodeSDK and registers the global MeterProvider
+import { metrics } from '@opentelemetry/api';
 
-// Create exporter
-const exporter = new OTLPMetricExporter({
-  url: 'https://ingest.in.signoz.cloud/v1/metrics',
-  headers: {
-    'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY',
-  },
-});
-
-// Create reader with exporter
-const reader = new PeriodicExportingMetricReader({
-  exporter,
-  exportIntervalMillis: 1000,
-});
-
-// Provide reader to MeterProvider during creation
-const meterProvider = new MeterProvider({
-  readers: [reader], // ✅ THIS IS REQUIRED
-});
-
-// Use meter
-const meter = meterProvider.getMeter('custom-node-meter');
+// Get a meter from the SDK's registered global MeterProvider
+const meter = metrics.getMeter('custom-node-meter');
 
 // Create the Counter Metric
 const counter = meter.createCounter('custom_node_metric', {
@@ -178,9 +153,9 @@ const counter = meter.createCounter('custom_node_metric', {
 });
 
 // Create the Histogram Metric
+// Bucket boundaries are configured via a View on the NodeSDK (see otel.js), not here
 const histogram = meter.createHistogram('custom_histogram', {
   description: 'Measures the distribution of request durations',
-  boundaries: [0.5, 1, 2, 5, 10], // You can set boundaries based on expected value ranges
 });
 
 // Send metrics
@@ -194,7 +169,6 @@ setInterval(() => {
   histogram.record(randomDuration, { status: 'ok' });
   console.log(`✅ Custom histogram metric sent! Duration: ${randomDuration}s`);
 }, 5000);
-
 ```
 
 After you’ve implemented the above [OpenTelemetry](https://signoz.io/opentelemetry/) setup in your Node.js application, your app will start sending custom metrics — like `custom_node_metric` — to SigNoz every 5 seconds.

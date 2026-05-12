@@ -1,0 +1,261 @@
+---
+date: 2026-04-23
+id: geoip-processor
+title: OpenTelemetry Collector GeoIP Processor
+description: Enrich traces, logs, and metrics with geographic location data by looking up IP addresses against a MaxMind database using the GeoIP processor in otelcol-contrib.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+The GeoIP processor reads an IP address from a configured attribute, looks it up in a local MaxMind database, and writes geographic data back as `geo.*` attributes on the same record. It supports traces, logs, and metrics. Use these attributes for geographic filtering, dashboards, and alerts in SigNoz.
+
+<Admonition type="warning">
+  The GeoIP processor is **alpha** stability for all signal types. Configuration may change in future releases. Only available in `otelcol-contrib`, not the core `otelcol` binary.
+</Admonition>
+
+For processor source and changelog, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/geoipprocessor" target="_blank" rel="noopener noreferrer nofollow">geoipprocessor upstream repository</a>.
+
+## Prerequisites
+
+- **OpenTelemetry Collector Contrib Distribution:** the GeoIP processor ships only in the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib" target="_blank" rel="noopener noreferrer nofollow">otelcol-contrib</a> distribution
+- **MaxMind City database:** the processor requires a local `.mmdb` file. Two options:
+
+  - **GeoLite2-City (free):** requires a <a href="https://www.maxmind.com/en/geolite2/signup" target="_blank" rel="noopener noreferrer nofollow">MaxMind account</a> to download. Use the <a href="https://github.com/maxmind/geoipupdate" target="_blank" rel="noopener noreferrer nofollow">geoipupdate tool</a> to automate downloads.
+  - **GeoIP2-City (commercial):** download from your MaxMind account portal.
+
+  <Admonition type="info">
+    Only City-type databases work. GeoLite2-Country, GeoIP2-Country, and ASN databases are not
+    supported and will cause a startup error.
+  </Admonition>
+
+  Once downloaded, note the absolute path to the `.mmdb` file, you'll need it in the config below.
+
+## Configure the processor
+
+Configuration has two parts: adding the `geoip` processor block with a MaxMind database path, and enabling it in each pipeline where you want enrichment. The diagram below shows how data flows through the processor.
+
+<Figure
+  src="/img/docs/opentelemetry-collection-agents/geoip-processor-flow.svg"
+  alt="GeoIP processor flow: incoming telemetry record with client.address IP passes through the GeoIP processor which looks up the MaxMind database and writes geo.* attributes onto the enriched outgoing record"
+  caption="The GeoIP processor reads an IP attribute, queries the local MaxMind database, and writes geographic attributes back onto the same record"
+/>
+
+### Step 1: Add the processor config
+
+Add the following snippet to your existing `otel-collector-config.yaml`:
+
+```yaml:otel-collector-config.yaml
+processors:
+  geoip:
+    providers:
+      maxmind:
+        database_path: /var/lib/GeoLite2-City.mmdb
+    context: record      # optional; default is "resource"
+    attributes:          # optional; defaults to [client.address, source.address]
+      - client.address
+      - source.address
+```
+
+Replace `/var/lib/GeoLite2-City.mmdb` with the path to your `.mmdb` file.
+
+For a public IP address like `8.8.8.8`, the processor writes `geo.city_name`, `geo.country.iso_code`, `geo.location.lat`, `geo.location.lon`, and more onto the record.
+
+<details>
+<ToggleHeading>Key fields</ToggleHeading>
+
+| Field                             | Default                            | Description                                                                                                                                           |
+| --------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providers.maxmind.database_path` | —                                  | **Required.** Absolute path to the GeoLite2-City or GeoIP2-City `.mmdb` file.                                                                         |
+| `context`                         | `resource`                         | Where to read and write attributes. Use `resource` for resource-level attributes; use `record` for span, log record, or metric data point attributes. |
+| `attributes`                      | `[client.address, source.address]` | Ordered list of attribute keys to check for an IP. The processor uses the **first** key that contains a valid, routable IP address.                   |
+
+</details>
+
+<Admonition type="warning">
+  **Most applications need `context: record`.** The default `context: resource` reads from the OpenTelemetry resource, which holds SDK-level fields like `service.name`. Most apps set the caller IP as a span attribute or log record attribute. For that case, set `context: record`. With the default `resource` context, the processor finds no IP and adds no geo attributes.
+</Admonition>
+
+### Step 2: Enable in pipelines
+
+Add `geoip` to the `processors` list in each pipeline you want to enrich. Place it after `memory_limiter` and before `batch`:
+
+```yaml:otel-collector-config.yaml {5,9,13}
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, geoip, batch]
+      exporters: [otlp/signoz]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, geoip, batch]
+      exporters: [otlp/signoz]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, geoip, batch]
+      exporters: [otlp/signoz]
+```
+
+## Attributes added
+
+When a geo lookup succeeds, the processor writes the following attributes. It skips any field the database doesn't have for that IP, so your record won't contain empty strings.
+
+| Attribute                | Type    | Example             |
+| ------------------------ | ------- | ------------------- |
+| **geo.city_name**        | string  | San Francisco       |
+| **geo.postal_code**      | string  | 94107               |
+| **geo.country_name**     | string  | United States       |
+| **geo.country.iso_code** | string  | US                  |
+| **geo.continent_name**   | string  | North America       |
+| **geo.continent.code**   | string  | NA                  |
+| **geo.region_name**      | string  | California          |
+| **geo.region.iso_code**  | string  | US-CA               |
+| **geo.timezone**         | string  | America/Los_Angeles |
+| **geo.location.lat**     | float64 | 37.7749             |
+| **geo.location.lon**     | float64 | -122.4194           |
+
+The processor writes `geo.location.lat` and `geo.location.lon` together or not at all.
+
+All names are in English. There is no language configuration option.
+
+<details>
+<ToggleHeading>
+See the complete configuration
+</ToggleHeading>
+
+```yaml:otel-collector-config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 1000
+  geoip:
+    providers:
+      maxmind:
+        database_path: /var/lib/GeoLite2-City.mmdb
+    context: record   # use "resource" only if the IP is in a resource attribute
+    attributes:
+      - client.address
+      - source.address
+  batch:
+
+exporters:
+  otlp/signoz:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: "<your-ingestion-key>"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, geoip, batch]
+      exporters: [otlp/signoz]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, geoip, batch]
+      exporters: [otlp/signoz]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, geoip, batch]
+      exporters: [otlp/signoz]
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `/var/lib/GeoLite2-City.mmdb`: Absolute path to your downloaded GeoLite2-City or GeoIP2-City `.mmdb` file.
+
+</details>
+
+## Validate
+
+Restart your collector after updating the config:
+
+```bash
+# systemd
+sudo systemctl restart otelcol-contrib
+
+# Docker
+docker restart <container-name>
+```
+
+Send a trace or log with a known public IP in `client.address` or `source.address`. In SigNoz, open the trace or log and check that `geo.country.iso_code` and related attributes appear on the record.
+
+In the Traces view, select a span and look for `geo.*` attributes in the span details panel:
+
+<Figure
+  src="/img/docs/opentelemetry-collection-agents/geoip-processor-traces-view.webp"
+  alt="SigNoz Traces view showing a span with geo.* attributes including geo.city_name, geo.country.iso_code, geo.location.lat, and geo.location.lon in the attributes panel"
+  caption="geo.* attributes on a span in the SigNoz Traces view"
+/>
+
+In the Logs view, open a log record and confirm the same `geo.*` attributes are present:
+
+<Figure
+  src="/img/docs/opentelemetry-collection-agents/geoip-processor-logs-view.webp"
+  alt="SigNoz Logs view showing a log record with geo.* attributes populated by the GeoIP processor"
+  caption="geo.* attributes on a log record in the SigNoz Logs view"
+/>
+
+<Admonition type="info">
+  Some IPs return no geo data. The MaxMind database has no entries for RFC1918 private ranges (`10.x.x.x`, `192.168.x.x`, `172.16–31.x.x`), loopback (`127.x.x.x`), or reserved/documentation ranges (e.g., `203.0.113.x` per RFC 5737). To confirm the processor works, test with a known public IP like `8.8.8.8`.
+</Admonition>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### Collector fails to start: `unsupported geo IP database type`
+
+Only GeoLite2-City and GeoIP2-City databases work. GeoLite2-Country, GeoIP2-Country, and ASN databases are not supported. Download a City-type database and update `database_path`.
+
+### Collector fails to start: file not found
+
+The `database_path` must be an absolute path accessible when the collector starts. Verify:
+
+```bash
+ls -la /var/lib/GeoLite2-City.mmdb
+```
+
+If running in Docker or Kubernetes, confirm the file is mounted into the container at the same path.
+
+### Geo attributes missing from records
+
+Check two things:
+
+1. **Correct `context`:** if your IP is in a span attribute, set `context: record`. The default `resource` context reads resource-level attributes only.
+2. **Attribute name:** confirm the attribute key in your telemetry matches what's in `attributes`. Open a trace in SigNoz to inspect actual attribute names.
+
+### Geo attributes missing for private IPs
+
+Private and loopback IPs have no entries in commercial geo databases. The processor skips them without logging an error.
+
+### Database is stale
+
+The processor loads the `.mmdb` file once at startup. To update the database, replace the file on disk and restart the collector. Use the <a href="https://github.com/maxmind/geoipupdate" target="_blank" rel="noopener noreferrer nofollow">`geoipupdate` tool</a> on a cron schedule to keep the file current.
+
+</details>
+
+## Next Steps
+
+- [Collector configuration reference](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/): review receivers, processors, and exporters.
+- [Switch to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/): route application telemetry through a central Collector before adding processors.
+- [Routing Connector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector/): route telemetry to different destinations by service or attribute.
+
+## Get Help
+
+<GetHelp />

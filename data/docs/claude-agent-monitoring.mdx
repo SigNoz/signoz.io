@@ -1,5 +1,5 @@
 ---
-date: 2026-04-06
+date: 2026-05-07
 id: claude-agent-monitoring-with-opentelemetry
 
 title: Claude Agent SDK Monitoring & Observability with OpenTelemetry
@@ -9,7 +9,7 @@ doc_type: howto
 
 ## Overview
 
-This guide walks you through setting up monitoring and observability for Claude Agent SDK using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe the performance of various models, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your Claude Code SDK applications.
+This guide walks you through setting up monitoring and observability for Claude Agent SDK using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe the performance of various models, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your Claude Code SDK applications.
 
 Instrumenting Claude Agent SDK in your AI applications with telemetry ensures full observability across your agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
 
@@ -22,185 +22,31 @@ Instrumenting Claude Agent SDK in your AI applications with telemetry ensures fu
 
 ## Monitoring Claude Agent SDK 
 
-<Tabs>
-<TabItem value="No Code" label="No Code (Recommended)" default>
-
-No code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
+For more information on monitoring Claude Agent SDK with OpenTelemetry, refer to the <a href="https://code.claude.com/docs/en/agent-sdk/observability" target="_blank" rel="noopener noreferrer nofollow">official Claude Agent SDK observability documentation</a>.
 
 ### Step 1: Install the necessary packages in your Python environment.
 
 ```bash
-pip install \
-  opentelemetry-distro \
-  opentelemetry-exporter-otlp \
-  httpx \
-  opentelemetry-instrumentation-httpx \
-  opentelemetry-instrumentation-system-metrics \
-  claude-agent-sdk \
-  "langsmith[claude-agent-sdk]"
+pip install claude-agent-sdk
 ```
 
-### Step 2: Add Automatic Instrumentation
+### Step 2: Configure OpenTelemetry environment variables
 
 ```bash
-opentelemetry-bootstrap --action=install
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_TRACES_EXPORTER=otlp
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ```
 
-### Step 3: Configure logging level
-
-To ensure logs are properly captured and exported, configure the root logger to emit logs at the DEBUG level or higher:
-
-```python
-import logging
-
-logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger("httpx").setLevel(logging.DEBUG)
-```
-
-### Step 4: Configure Langsmith OTel environment variables
-
-```python
-import os
-
-os.environ["LANGSMITH_OTEL_ENABLED"] = "true"
-os.environ["LANGSMITH_OTEL_ONLY"] = "true"
-os.environ["LANGSMITH_TRACING"] = "true"
-```
-
-### Step 5: Enable OTel instrumentation
-
-```python
-from langsmith.integrations.claude_agent_sdk import configure_claude_agent_sdk
- 
-configure_claude_agent_sdk()
-```
-
-<details>
-<ToggleHeading>
-### Step 6: Enable token and cost attributes in traces (Optional)
-</ToggleHeading>
-
-In order to send token usage and cost related attributes in your OTel traces, add the following:
-
-```python
-# ===== MONKEY PATCH: Fix token counting and cost tracking for OTEL export =====
-# The LangSmith integration stores token counts and cost in metadata, but the OTEL exporter
-# expects them as top-level fields (prompt_tokens, completion_tokens, total_tokens, total_cost)
-from langsmith.integrations.claude_agent_sdk import _client
-
-# Patch add_usage to set token and cost fields
-def fixed_add_usage(self, metrics):
-    """Attach token usage and cost details to the current run (with fix for OTEL export)."""
-    if not (self.current_run and metrics):
-        return
-
-    # Set top-level token fields as object attributes
-    if "input_tokens" in metrics:
-        object.__setattr__(self.current_run, "prompt_tokens", int(metrics["input_tokens"]))
-        self.current_run.extra["prompt_tokens"] = int(metrics["input_tokens"])
-    if "output_tokens" in metrics:
-        object.__setattr__(self.current_run, "completion_tokens", int(metrics["output_tokens"]))
-        self.current_run.extra["completion_tokens"] = int(metrics["output_tokens"])
-    if "total_tokens" in metrics:
-        object.__setattr__(self.current_run, "total_tokens", int(metrics["total_tokens"]))
-        self.current_run.extra["total_tokens"] = int(metrics["total_tokens"])
-
-    # Set total_cost field if available
-    if "total_cost" in metrics:
-        object.__setattr__(self.current_run, "total_cost", float(metrics["total_cost"]))
-        self.current_run.extra["total_cost"] = float(metrics["total_cost"])
-
-    # Also store in metadata for backwards compatibility
-    meta = self.current_run.extra.setdefault("metadata", {}).setdefault(
-        "usage_metadata", {}
-    )
-    meta.update(metrics)
-
-_client.TurnLifecycle.add_usage = fixed_add_usage
-
-# Patch SerializedRunOperation.deserialize_run_info to move tokens and cost from extra to top level
-from langsmith._internal._operations import SerializedRunOperation
-original_deserialize = SerializedRunOperation.deserialize_run_info
-
-def patched_deserialize_run_info(self):
-    """Deserialize run info and move token and cost fields from extra to top level for OTEL."""
-    run_info = original_deserialize(self)
-
-    # If tokens and cost are in extra, move them to top level for OTEL exporter
-    if "extra" in run_info:
-        for field in ['prompt_tokens', 'completion_tokens', 'total_tokens', 'total_cost']:
-            if field in run_info["extra"]:
-                run_info[field] = run_info["extra"][field]
-
-    return run_info
-
-SerializedRunOperation.deserialize_run_info = patched_deserialize_run_info
-
-# Patch OTEL exporter to also export total_cost
-from langsmith._internal.otel import _otel_exporter
-
-original_set_span_attributes = _otel_exporter.OTELExporter._set_span_attributes
-
-def patched_set_span_attributes(self, span, run_info, op):
-    """Set span attributes including total_cost."""
-    # Call original method to set all standard attributes
-    original_set_span_attributes(self, span, run_info, op)
-
-    # Add total_cost as a custom attribute if available
-    if run_info.get("total_cost") is not None:
-        total_cost = run_info["total_cost"]
-        span.set_attribute("gen_ai.usage.cost", float(total_cost))
-
-_otel_exporter.OTELExporter._set_span_attributes = patched_set_span_attributes
-# ===== END MONKEY PATCH =====
-```
-
-</details>
-
-### Step 7: Create an example Claude Agent SDK workflow
-
-```python:main.py
-import asyncio
-from claude_agent_sdk import query, ClaudeAgentOptions, ClaudeSDKClient
-
-
-async def main():
-    options = ClaudeAgentOptions(
-        model="claude-sonnet-4-6",
-        system_prompt="You are a friendly assistant who helps with answering questions by searching the web for up-to-date information.",
-        allowed_tools=["WebSearch"],
-    )
- 
-    async with ClaudeSDKClient(options=options) as client:
-        await client.query("What is SigNoz and how does it compare to other observability tools?")
-
-        async for message in client.receive_response():
-            print(message)
- 
-asyncio.run(main())
-```
-> 📌 Note: Before running this code, ensure that you have set the environment variable `ANTHROPIC_API_KEY` with your generated API key.
-
-### Step 8: Run your application with auto-instrumentation
-
-Run your application with the following environment variables set. This configures OpenTelemetry to export traces, logs, and metrics to SigNoz Cloud and enables automatic log correlation:
-
-```bash
-OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
-OTEL_TRACES_EXPORTER=otlp \
-OTEL_METRICS_EXPORTER=otlp \
-OTEL_LOGS_EXPORTER=otlp \
-OTEL_PYTHON_LOG_CORRELATION=true \
-OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
-opentelemetry-instrument <your_run_command>
-```
-- **`<service_name>`** is the name of your service
+- **`<service_name>`**: The name of your service
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
 
 <Admonition type="info">
   Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
@@ -208,258 +54,30 @@ opentelemetry-instrument <your_run_command>
   <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
 </Admonition>
 
-</TabItem>
-
-<TabItem value="Manual" label="Manual">
-
-Code-based manual instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
-
-### Step 1: Install additional OpenTelemetry dependencies
-
-```bash
-pip install \
-  opentelemetry-api \
-  opentelemetry-sdk \
-  opentelemetry-exporter-otlp \
-  httpx \
-  opentelemetry-instrumentation-httpx \
-  opentelemetry-instrumentation-system-metrics \
-  claude-agent-sdk \
-  "langsmith[claude-agent-sdk]"
-
-```
-
-### Step 2: Set up Traces
-
-```python
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry import trace
-from langsmith.integrations.claude_agent_sdk import configure_claude_agent_sdk
-import os
-
-
-resource = Resource.create({"service.name": "<service_name>"})
-provider = TracerProvider(resource=resource)
-span_exporter = OTLPSpanExporter(
-    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
-    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
-)
-processor = BatchSpanProcessor(span_exporter)
-provider.add_span_processor(processor)
-trace.set_tracer_provider(provider)
-
-# Start instrumenting Claude Agent SDK
-configure_claude_agent_sdk()
-```
-
-- **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
-- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in
-  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
-</Admonition>
-
-### Step 3: Setup Logs
-
-```python
-from opentelemetry.sdk.resources import Resource
-from opentelemetry._logs import set_logger_provider
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
-import os
-import logging
-
-resource = Resource.create({"service.name": "<service_name>"})
-logger_provider = LoggerProvider(resource=resource)
-set_logger_provider(logger_provider)
-
-otlp_log_exporter = OTLPLogExporter(
-    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
-    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
-)
-logger_provider.add_log_record_processor(
-    BatchLogRecordProcessor(otlp_log_exporter)
-)
-
-# Set logging levels
-logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger('httpx').setLevel(logging.DEBUG)
-
-# Attach OTel logging handler to root logger
-handler = LoggingHandler(level=logging.DEBUG, logger_provider=logger_provider)
-logging.basicConfig(level=logging.DEBUG, handlers=[handler])
-
-logger = logging.getLogger(__name__)
-```
-
-- **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
-- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in
-  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
-</Admonition>
-
-### Step 4: Setup Metrics
-
-```python
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry import metrics
-from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
-from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-import os
-
-resource = Resource.create({"service.name": "<service_name>"})
-metric_exporter = OTLPMetricExporter(
-    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
-    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
-)
-reader = PeriodicExportingMetricReader(metric_exporter)
-metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
-metrics.set_meter_provider(metric_provider)
-
-meter = metrics.get_meter(__name__)
-
-# turn on out-of-the-box metrics
-SystemMetricsInstrumentor().instrument()
-HTTPXClientInstrumentor().instrument()
-```
-
-- **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
-- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in
-  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
-</Admonition>
-
-> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your Claude Agent SDK application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
-
-<details>
-<ToggleHeading>
-### Step 5: Enable token and cost attributes in traces (Optional)
-</ToggleHeading>
-
-In order to send token usage and cost related attributes in your OTel traces, add the following:
-
-```python
-# ===== MONKEY PATCH: Fix token counting and cost tracking for OTEL export =====
-# The LangSmith integration stores token counts and cost in metadata, but the OTEL exporter
-# expects them as top-level fields (prompt_tokens, completion_tokens, total_tokens, total_cost)
-from langsmith.integrations.claude_agent_sdk import _client
-
-# Patch add_usage to set token and cost fields
-def fixed_add_usage(self, metrics):
-    """Attach token usage and cost details to the current run (with fix for OTEL export)."""
-    if not (self.current_run and metrics):
-        return
-
-    # Set top-level token fields as object attributes
-    if "input_tokens" in metrics:
-        object.__setattr__(self.current_run, "prompt_tokens", int(metrics["input_tokens"]))
-        self.current_run.extra["prompt_tokens"] = int(metrics["input_tokens"])
-    if "output_tokens" in metrics:
-        object.__setattr__(self.current_run, "completion_tokens", int(metrics["output_tokens"]))
-        self.current_run.extra["completion_tokens"] = int(metrics["output_tokens"])
-    if "total_tokens" in metrics:
-        object.__setattr__(self.current_run, "total_tokens", int(metrics["total_tokens"]))
-        self.current_run.extra["total_tokens"] = int(metrics["total_tokens"])
-
-    # Set total_cost field if available
-    if "total_cost" in metrics:
-        object.__setattr__(self.current_run, "total_cost", float(metrics["total_cost"]))
-        self.current_run.extra["total_cost"] = float(metrics["total_cost"])
-
-    # Also store in metadata for backwards compatibility
-    meta = self.current_run.extra.setdefault("metadata", {}).setdefault(
-        "usage_metadata", {}
-    )
-    meta.update(metrics)
-
-_client.TurnLifecycle.add_usage = fixed_add_usage
-
-# Patch SerializedRunOperation.deserialize_run_info to move tokens and cost from extra to top level
-from langsmith._internal._operations import SerializedRunOperation
-original_deserialize = SerializedRunOperation.deserialize_run_info
-
-def patched_deserialize_run_info(self):
-    """Deserialize run info and move token and cost fields from extra to top level for OTEL."""
-    run_info = original_deserialize(self)
-
-    # If tokens and cost are in extra, move them to top level for OTEL exporter
-    if "extra" in run_info:
-        for field in ['prompt_tokens', 'completion_tokens', 'total_tokens', 'total_cost']:
-            if field in run_info["extra"]:
-                run_info[field] = run_info["extra"][field]
-
-    return run_info
-
-SerializedRunOperation.deserialize_run_info = patched_deserialize_run_info
-
-# Patch OTEL exporter to also export total_cost
-from langsmith._internal.otel import _otel_exporter
-
-original_set_span_attributes = _otel_exporter.OTELExporter._set_span_attributes
-
-def patched_set_span_attributes(self, span, run_info, op):
-    """Set span attributes including total_cost."""
-    # Call original method to set all standard attributes
-    original_set_span_attributes(self, span, run_info, op)
-
-    # Add total_cost as a custom attribute if available
-    if run_info.get("total_cost") is not None:
-        total_cost = run_info["total_cost"]
-        span.set_attribute("gen_ai.usage.cost", float(total_cost))
-
-_otel_exporter.OTELExporter._set_span_attributes = patched_set_span_attributes
-# ===== END MONKEY PATCH =====
-```
-
-</details>
-
-### Step 6: Run an example Claude Agent SDK workflow
-
-> 📌 Note: Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
+### Step 3: Create an example Claude Agent SDK workflow
 
 ```python:main.py
 import asyncio
-from claude_agent_sdk import query, ClaudeAgentOptions, ClaudeSDKClient
-
+from claude_agent_sdk import query
 
 async def main():
-    options = ClaudeAgentOptions(
-        model="claude-sonnet-4-6",
-        system_prompt="You are a friendly assistant who helps with answering questions by searching the web for up-to-date information.",
-        allowed_tools=["WebSearch"],
-    )
- 
-    async with ClaudeSDKClient(options=options) as client:
-        await client.query("What is SigNoz and how does it compare to other observability tools?")
+    async for message in query(
+        prompt="List the files in this directory"
+    ):
+        print(message)
 
-        async for message in client.receive_response():
-            print(message)
- 
 asyncio.run(main())
 ```
 > 📌 Note: Before running this code, ensure that you have set the environment variable `ANTHROPIC_API_KEY` with your generated API key.
 
-</TabItem>
+### Step 4: Run your application
 
-</Tabs>
+In this case:
+
+```bash
+python main.py
+```
+
 
 ## View Traces, Logs, and Metrics in SigNoz
 

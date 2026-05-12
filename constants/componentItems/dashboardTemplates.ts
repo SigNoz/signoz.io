@@ -17,6 +17,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Anthropic API Dashboard Template',
   },
   {
+    name: 'Apache Druid',
+    href: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+    clickName: 'Apache Druid Dashboard Template',
+  },
+  {
     name: 'Apache Web Server',
     href: '/docs/dashboards/dashboard-templates/apache-web-server',
     clickName: 'Apache Web Server Dashboard Template',
@@ -60,6 +65,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Baseten',
     href: '/docs/dashboards/dashboard-templates/baseten-dashboard',
     clickName: 'Baseten Dashboard Template',
+  },
+  {
+    name: 'Cert-Manager',
+    href: '/docs/dashboards/dashboard-templates/cert-manager-dashboard',
+    clickName: 'Cert-Manager Dashboard Template',
   },
   {
     name: 'CI/CD',
@@ -125,6 +135,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Flask Monitoring',
     href: '/docs/dashboards/dashboard-templates/flask-monitoring',
     clickName: 'Flask Monitoring Dashboard Template',
+  },
+  {
+    name: 'Fly.io',
+    href: '/docs/dashboards/dashboard-templates/fly-dashboard',
+    clickName: 'Fly.io Dashboard Template',
   },
   {
     name: 'Frontend Monitoring',
@@ -207,6 +222,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'JVM Dashboard Template',
   },
   {
+    name: 'Kafka',
+    href: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+    clickName: 'Kafka Dashboard Template',
+  },
+  {
     name: 'Kubernetes',
     href: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
     clickName: 'K8s Infra Metrics Dashboard Template',
@@ -220,6 +240,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Key Operations',
     href: '/docs/dashboards/dashboard-templates/key-operations',
     clickName: 'Key Operations Dashboard Template',
+  },
+  {
+    name: 'Kong Gateway',
+    href: '/docs/dashboards/dashboard-templates/kong-gateway',
+    clickName: 'Kong Gateway Dashboard Template',
   },
   {
     name: 'LiteLLM',
@@ -295,6 +320,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'OpenClaw',
     href: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
     clickName: 'OpenClaw Dashboard Template',
+  },
+  {
+    name: 'OpenCode',
+    href: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+    clickName: 'OpenCode Dashboard Template',
   },
   {
     name: 'OpenRouter',

@@ -8,13 +8,12 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
 import DocsPrevNext from '../DocsPrevNext/DocsPrevNext'
 import TableOfContents from '../DocsTOC/DocsTOC'
-import { QUERY_PARAMS } from '@/constants/queryParams'
-import { useSearchParams } from 'next/navigation'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { DOC_TOC_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
 import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFromRendered'
+import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 
 const DocContent: React.FC<{
   title: string
@@ -23,7 +22,6 @@ const DocContent: React.FC<{
   hideTableOfContents: boolean
   editLink?: string
 }> = ({ title, post, toc, hideTableOfContents, editLink }) => {
-  const searchParams = useSearchParams()
   const pathname = usePathname()
   const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate = lastUpdatedDate
@@ -33,17 +31,15 @@ const DocContent: React.FC<{
         day: 'numeric',
       })
     : null
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
-  const isOnboarding = source === ONBOARDING_SOURCE
+  const isOnboarding = isDocsOnboardingPathname(pathname)
   // Check if this is the introduction page (exclude copy functionality)
   const isIntroductionPage = post.slug === 'introduction'
 
   const hasTabs = !!post?.body?.raw && post.body.raw.includes('<Tabs')
   const effectiveHideTOC = hideTableOfContents && !hasTabs
-  const shouldRenderTOC =
-    !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && source !== ONBOARDING_SOURCE
-  const shouldReserveTocColumn = source !== ONBOARDING_SOURCE
-  const feedbackWrapperClassName = shouldRenderTOC ? 'doc-feedback-mobile-only' : undefined
+  const shouldRenderTOC = !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && !isOnboarding
+  const shouldReserveTocColumn = !isOnboarding
+  const feedbackWrapperClassName = shouldRenderTOC ? 'block lg:hidden' : undefined
   const articleRef = useRef<HTMLElement | null>(null)
 
   const docTags = useMemo(() => post?.docTags || [], [post?.docTags])
@@ -66,8 +62,10 @@ const DocContent: React.FC<{
 
   return (
     <>
-      <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        <div className="doc-title-row mb-4 flex items-center justify-between gap-2">
+      <div
+        className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${isOnboarding ? '!w-full px-4' : ''}`}
+      >
+        <div className="mb-4 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-2">
             {!isOnboarding && post.docTags && post.docTags.length > 0 && (
               <TagsWithTooltips tags={post.docTags} />
@@ -106,11 +104,11 @@ const DocContent: React.FC<{
 
       {shouldRenderTOC ? (
         <>
-          <TableOfContents toc={toc} hideTableOfContents={!shouldRenderTOC} source={source || ''} />
+          <TableOfContents toc={toc} hideTableOfContents={!shouldRenderTOC} source="" />
         </>
       ) : shouldReserveTocColumn ? (
         <>
-          <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+          <div className={`${DOC_TOC_CLASSES} invisible`} aria-hidden="true" />
         </>
       ) : null}
     </>

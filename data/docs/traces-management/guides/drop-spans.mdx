@@ -1,199 +1,315 @@
 ---
-date: 2024-06-06
+date: 2026-04-08
 id: control-spans
-
-title: Control traces volume
+title: Control Traces Volume
+description: Drop spans at the application or collector level using head sampling, tail sampling, or the OTel Collector filter processor with OTTL conditions.
+doc_type: howto
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-There are two stages where you can control the volume of spans:
+You can control span volume at two stages:
 
-1. [At the application](#at-the-application) - by customizing the SDK and/or Instrumentation
-2. [At the collector](#at-the-collector) - with the help of processors
+1. [At the application](#at-the-application) — customize the SDK or instrumentation
+2. [At the collector](#at-the-collector) — use processors in the OTel Collector
+
+## Prerequisites
+
+- **OTel Collector contrib distribution** (`otelcol-contrib`) — the filter, attributes, resource, and sampling processors ship in contrib, not in the core distribution.
+- **Filter processor v0.146.0 or later** for `trace_conditions` syntax. The older `traces.span` format still works but is deprecated and no longer documented upstream.
 
 ## At the application
 
-Dropping spans at the application is often referred to as HEAD sampling because the sampling decision is made at the beginning of the trace.
+Dropping spans at the application is HEAD sampling. The sampling decision happens at the start of the trace.
 
 ### TraceIdRatioBased sampler
 
-The [`TraceIdRatioBased`](https://github.com/open-telemetry/opentelemetry-specification/blob/9758cdddee20c699b620aac1d7f777ccd490f252/specification/trace/sdk.md#traceidratiobased) sampler makes a random sampling result based on the sampling probability given. If the sampling probability is 0.001, then 1 out of 1000 traces will be sampled. This sampler can be configured by setting the `OTEL_TRACES_SAMPLER` environment variable.
+The <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/9758cdddee20c699b620aac1d7f777ccd490f252/specification/trace/sdk.md#traceidratiobased" target="_blank" rel="noopener noreferrer nofollow">`TraceIdRatioBased`</a> sampler drops spans by probability. At `0.001`, 1 in 1000 traces is sampled. Set it with `OTEL_TRACES_SAMPLER`:
 
 ```bash
 OTEL_TRACES_SAMPLER="parentbased_traceidratio"
 OTEL_TRACES_SAMPLER_ARG=0.001
 ```
 
-### Custom Sampler
+### Custom sampler
 
-The `Sampler` interface allows you to implement your own custom sampling logic. This is useful if you want to drop spans based on certain conditions instead of random sampling alone. Your custom sampler should implement the [`ShouldSample`](https://github.com/open-telemetry/opentelemetry-specification/blob/9758cdddee20c699b620aac1d7f777ccd490f252/specification/trace/sdk.md#shouldsample) method. The **ShouldSample** method is called for each span and returns a `SamplingDecision`. The **SamplingDecision** is a struct that contains a `SamplingResult` which can be `DROP`, `RECORD_ONLY` or `RECORD_AND_SAMPLE`. If,
-- `SamplingResult` is `DROP`, then the span is dropped.
-- `SamplingResult` is `RECORD_ONLY`, then the span is sampled but not recorded.
-- `SamplingResult` is `RECORD_AND_SAMPLE`, then the span is sampled and recorded.
+The `Sampler` interface lets you write custom sampling logic. Drop spans by condition, not just by ratio. Your sampler must implement the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/9758cdddee20c699b620aac1d7f777ccd490f252/specification/trace/sdk.md#shouldsample" target="_blank" rel="noopener noreferrer nofollow">`ShouldSample`</a> method, which returns one of:
 
-Please refer to the official SDK documentation for more details on how to implement a custom sampler.
+- `DROP` — span is dropped
+- `RECORD_ONLY` — span is recorded but not exported
+- `RECORD_AND_SAMPLE` — span is recorded and exported
+
+See your SDK's documentation for implementation details.
 
 ### Exclude certain routes
 
-Some instrumentations allow you to exclude certain routes from creating spans using the environment variable or callbacks. For example, OpenTelemetry Python allows you to exclude certain routes from creating spans using the `OTEL_PYTHON_EXCLUDED_URLS` environment variable. Please refer to the instrumentation documentation you are using for more details on how to exclude certain routes.
+Some instrumentation libraries let you exclude routes from generating spans. OpenTelemetry Python uses `OTEL_PYTHON_EXCLUDED_URLS`:
 
 ```bash
 OTEL_PYTHON_EXCLUDED_URLS="https://example.com/exclude"
 ```
 
-## At the Collector
+See your instrumentation library's documentation for the equivalent option.
 
-There are mainly three ways to control the volume of spans at the collector level.
+## At the collector
 
-1. Drop certain attributes from spans
-2. Use Tail Sampling Processor / Probabilistic Sampling Processor to drop entire trace
-3. Use Filter Processor to drop spans
+Three approaches at the collector level:
 
-Dropping spans at the collector is often referred to as TAIL sampling because the sampling decision is made at the end of the trace. 
+1. Drop specific attributes from spans
+2. Drop entire traces with the tail or probabilistic sampling processor
+3. Drop individual spans with the filter processor
+
+Sampling processors (tail, probabilistic) evaluate complete traces at the collector — this is TAIL sampling. The filter and attribute processors operate on individual spans as they arrive.
 
 ### Drop certain attributes from spans
 
-There are two processors to drop certain attributes from spans.
+Two processors handle attribute removal:
 
-1. Attributes Processor (The attributes processor is used to drop span attributes)
-2. Resource Processor (The resource processor is used to drop resource attributes)
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/attributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">**Attributes processor**</a> — removes span-level attributes
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourceprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">**Resource processor**</a> — removes resource-level attributes
 
-<Admonition>
+Add the attributes processor to your traces pipeline in `otel-collector-config.yaml`, for example:
 
-The processor needs to be added to the traces pipeline to take effect. 
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/drop_span_attributes, batch]
+      exporters: [otlp]
 ```
-traces:
-  receivers: [otlp]
-  processors: [attributes/drop_process_attributes, batch]
-  exporters: [otlp]
+
+Or for the resource attributes:
+
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource/drop_span_resource_attributes, batch]
+      exporters: [otlp]
 ```
 
+**Drop a span attribute** (`http.method`):
+
+```yaml
+processors:
+  attributes/drop_span_attributes:
+    actions:
+      - key: http.method
+        action: delete
+```
+
+<Admonition type="info">
+`http.method` is the legacy HTTP attribute name. SDKs on stable HTTP semantic conventions use `http.request.method` instead. Check which name your SDK emits — both work with the attributes processor.
 </Admonition>
 
-1. Drop http.method span attribute
+**Drop multiple resource attributes**:
 
 ```yaml
-attributes/drop_span_attributes:
-  actions:
-    - key: http.method
-      action: delete
+processors:
+  resource/drop_span_resource_attributes:
+    attributes:
+      - key: process.runtime.description
+        action: delete
+      - key: telemetry.distro.name
+        action: delete
+      - key: process.executable.path
+        action: delete
+      - key: process.runtime.name
+        action: delete
+      - key: process.command_args
+        action: delete
 ```
 
-2. Drop span resource attributes
+### Drop entire traces
 
-```
-resource/drop_span_resource_attributes:
-  attributes:
-    - key: process.runtime.description
-      action: delete
-    - key: telemetry.distro.name
-      action: delete
-    - key: process.executable.path
-      action: delete
-    - key: process.runtime.name
-      action: delete
-    - key: process.command_args
-      action: delete
-```
+Two processors drop full traces:
 
+1. **Probabilistic Sampling Processor** — drops traces at a configured ratio
+2. **Tail Sampling Processor** — drops traces based on policies evaluated after all spans arrive
 
-### Drop entire trace
+See the OTel documentation for <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor" target="_blank" rel="noopener noreferrer nofollow">probabilistic sampling</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor" target="_blank" rel="noopener noreferrer nofollow">tail sampling</a>.
 
-There are two processors to drop entire traces.
+### Filter processor
 
-1. Probabilistic Sampling Processor
-2. Tail Sampling Processor
-
-Please refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor) for more details on how to configure the probabilistic sampling processor and [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor) for more details on how to configure the tail sampling processor.
-
-
-### Filter Processor
-
-<Admonition>
-Dropping individual spans at the collector can lead to broken traces.
+<Admonition type="warning">
+  Dropping individual spans can produce broken traces — a dropped parent span leaves its children as orphans. Use the filter processor only when you know the impact on your trace topology.
 </Admonition>
 
-The filter processor in OpenTelemetry allows you to drop spans based on name, status, span kind, attributes, events, etc. This is useful if you want to exclude certain spans from being sent to SigNoz.
+The filter processor drops spans that match <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md" target="_blank" rel="noopener noreferrer nofollow">OTTL</a> conditions. Add it to your `otel-collector-config.yaml` and enable it in the traces pipeline:
 
-The filter processor is configured in the `processors::filter` section of the `otel-collector-config.yaml` file.
-
-<Admonition>
-
-The processor needs to be added to the traces pipeline to take effect. 
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [filter, batch]
+      exporters: [otlp]
 ```
-traces:
-  receivers: [otlp]
-  processors: [filter/drop_spans_by_name, batch]
-  exporters: [otlp]
-```
-</Admonition>
 
-#### Drop Spans
+Each condition in `trace_conditions` uses an OTTL context prefix (`span.`, `resource.`, `spanevent.`, or `scope.`) to identify the field. A span is dropped when **any** condition matches (conditions are OR-ed).
 
-1. Drop spans by name
+Set `error_mode` to control behavior when a condition fails to evaluate:
+
+| `error_mode` | Behavior                                                                      |
+| ------------ | ----------------------------------------------------------------------------- |
+| `ignore`     | Logs the error, continues to the next condition. Recommended for most setups. |
+| `silent`     | Ignores errors without logging.                                               |
+| `propagate`  | Returns the error up the pipeline. The payload is dropped.                    |
+
+#### Drop by span name
 
 ```yaml
 processors:
-  filter/drop_spans_by_name:
-    traces:
-      span:
-        - 'name == "test-span"'
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - span.name == "health-check"
 ```
 
-2. Drop spans by status
+#### Drop by status
 
 ```yaml
 processors:
-  filter/drop_spans_by_status:
-    traces:
-      span:
-        - 'status.code == STATUS_CODE_OK'
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - span.status.code == STATUS_CODE_OK
 ```
 
-3. Drop spans by resource attributes (like service.name, host.name, k8s.pod.name, etc.)
+#### Drop by resource attribute
+
+Drop all spans from a specific pod, service, or host:
 
 ```yaml
 processors:
-  filter/drop_spans_by_attribute_values:
-    traces:
-      span:
-        - 'resource.attributes["k8s.pod.name"] == "test-pod"'
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - resource.attributes["k8s.pod.name"] == "test-pod"
 ```
 
-4. Drop spans by resource attributes regex
+#### Drop by resource attribute (regex)
 
 ```yaml
 processors:
-  filter/drop_spans_by_attribute_values_regex:
-    traces:
-      span:
-        - 'IsMatch(resource.attributes["k8s.pod.name"], "test-pod-.*")'
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - IsMatch(resource.attributes["k8s.pod.name"], "test-pod-.*")
 ```
 
-5. Drop spans by span attributes (like http.method, user_agent.name, etc.)
+#### Drop by span attribute
 
 ```yaml
 processors:
-  filter/drop_spans_by_attribute_values:
-    traces:
-      span:
-        - 'attributes["http.method"] == "GET"'
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - span.attributes["http.method"] == "GET"
 ```
 
-6. Drop spans by span attributes regex
+#### Drop by span attribute (regex)
 
 ```yaml
 processors:
-  filter/drop_spans_by_attribute_values_regex:
-    traces:
-      span:
-        - 'IsMatch(attributes["http.method"], "GET|POST")'
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - IsMatch(span.attributes["http.method"], "GET|POST")
 ```
 
-Refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor) for more details on how to configure the filter processor.
+#### Drop non-error spans under 1 second
+
+Keep only slow spans and error spans. Discard the fast, successful ones:
+
+```yaml
+processors:
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - (span.end_time - span.start_time) < Duration("1s") and span.status.code != STATUS_CODE_ERROR
+```
+
+#### Drop spans using multiple conditions
+
+Conditions are OR-ed. A span matching any one of them is dropped:
+
+```yaml
+processors:
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - span.attributes["container.name"] == "sidecar"
+      - resource.attributes["host.name"] == "localhost"
+      - span.name == "internal-probe"
+```
+
+#### Drop spans missing an attribute
+
+Drop spans that have no `http.request.method` attribute (non-HTTP spans):
+
+```yaml
+processors:
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - span.attributes["http.request.method"] == nil
+```
+
+Flip the condition to drop all HTTP spans instead:
+
+```yaml
+processors:
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - span.attributes["http.request.method"] != nil
+```
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">OTel filter processor documentation</a> for the full OTTL condition reference.
+
+
+## Validate
+
+After applying the processor config and restarting the collector, confirm that spans are being dropped:
+
+1. Open **Traces > Explorer** in SigNoz.
+2. Compare the span count for the affected service before and after the config change.
+3. Verify that spans matching your filter conditions no longer appear.
+
+If the collector exposes Prometheus metrics, check the `otelcol_processor_filter_spans_filtered` counter to see how many spans the filter processor is dropping.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+**Filter conditions not matching as expected**
+
+Enable debug logging in your collector config. The output shows each evaluated condition, whether it matched, and the full transform context:
+
+```yaml
+service:
+  telemetry:
+    logs:
+      level: debug
+```
+
+This output is verbose. Use it to verify conditions, then remove it.
+
+</details>
+
+## Next Steps
+
+- [PII Scrubbing in Traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/) — remove sensitive attribute values from spans before they reach SigNoz
+- [APM Metrics](https://signoz.io/docs/traces-management/guides/apm-metrics/) — monitor request rate, error rate, and latency after controlling trace volume
+- [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) — navigate between traces and logs once your trace data is clean
 
 ## Get Help
 

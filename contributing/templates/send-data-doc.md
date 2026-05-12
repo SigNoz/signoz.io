@@ -8,11 +8,11 @@
 <!-- Mention OpenTelemetry in the title, slug, and overview. -->
 <!-- Use direct export to SigNoz Cloud as the primary path. -->
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed={true}>
   Most steps are identical. Update the endpoint and remove the ingestion key
   header as shown in [Cloud ->
   Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Prerequisites
 
@@ -26,6 +26,9 @@
 1. <Install or configure OpenTelemetry>
 2. <Add direct export to SigNoz Cloud>
 3. <Run or restart the app>
+
+<!-- Prefer OTLP/HTTP (port 4318) over OTLP/gRPC (port 4317) as the default export protocol. -->
+<!-- HTTP is simpler to configure, easier to debug, and works through more proxies and load balancers. -->
 
 <!-- For Collector config, show only the snippet to append and tell users where to enable it. -->
 <!-- Do not present a full otel-collector-config.yaml replacement unless the page is explicitly a full clean-room setup. -->

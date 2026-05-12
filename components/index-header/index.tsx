@@ -1,33 +1,44 @@
 import React from 'react'
 import Hero from '@/components/ui/Hero'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, Calendar } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { VideoModalPlayer } from './VideoModalPlayer'
+import { HeroSectionPill } from './HeroSectionPill'
+import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
 // Server component with single CTA
 export function Header() {
   const primaryCTA = 'Get Started - Free'
 
   return (
-    <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
+    <header className="relative mx-auto mt-16 max-w-8xl md:w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
-      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
-        <div className="absolute left-0 top-[147px] z-[-1] h-10 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[253px] md:!w-[80vw]" />
+
+      <div className="relative mx-auto flex w-full flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 pt-12 text-center md:pt-16">
+        {/* Comment this when the newsletter is not live */}
+
+        <HeroSectionPill
+          href="/agent-native-observability/"
+          text="Introducing Agent Native Observability →"
+        />
+        {/* End of newsletter section */}
         <Hero>
           <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
           <span className="hidden md:inline">Observability on Your Terms,</span>
           <br className="hidden md:inline" />
           <span className="hidden md:inline">Powered by Open Standards.</span>
         </Hero>
-        <p className="m-0 p-3 text-base font-medium sm:p-0">
-          Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple usage-based
-          pricing,
-          <br className="hidden lg:inline" /> no proprietary lock-in, and the freedom to run on our
-          cloud or your infrastructure.
-        </p>
+        <div className="w-full border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 px-6 py-2">
+          <p className="m-0 p-3 text-base font-medium sm:p-0">
+            Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple
+            usage-based pricing,
+            <br className="hidden lg:inline" /> no proprietary lock-in, and the freedom to run on
+            our cloud or your infrastructure.
+          </p>
+        </div>
       </div>
-      <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
+      <div className="mx-auto flex w-full flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:flex-row">
         <div className="flex flex-col items-center gap-3 md:flex-row">
           <div className="group relative flex flex-col items-center">
             <TrackingLink
@@ -48,25 +59,25 @@ export function Header() {
             </p>
           </div>
           <TrackingLink
-            href="/docs/introduction/"
+            href="/contact-us/?source=homepage"
             clickType="Secondary CTA"
-            clickName="Explore Docs Button"
-            clickText="Explore the Docs"
+            clickName="Book a Demo Button"
+            clickText="Book a Demo"
             clickLocation="Hero Section"
             className="block w-[220px]"
             prefetch={false}
           >
             <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
-              <BookOpen size={14} />
-              Explore the Docs
+              <Calendar size={14} />
+              Book a Demo
             </Button>
           </TrackingLink>
         </div>
       </div>
-      <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
-        <div className="w-100 mx-[-28px]">
+      <div className="mx-auto mt-0 w-full border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:border-dashed">
+        <div className="w-full">
           <VideoModalPlayer
-            thumbnailSrc="/img/landing/landing_thumbnail.webp"
+            thumbnailSrc={landingThumbnail}
             thumbnailAlt="SigNoz product demo video thumbnail showing the traces explorer"
             videoId="944340217"
           />

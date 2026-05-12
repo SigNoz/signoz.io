@@ -15,6 +15,11 @@ const docsSideNav = [
         route: '/docs/what-is-signoz',
       },
       {
+        type: 'doc',
+        label: 'What Is OpenTelemetry?',
+        route: '/docs/overview/what-is-opentelemetry-and-why-it-matters',
+      },
+      {
         label: 'SigNoz Features',
         type: 'category',
         isExpanded: false,
@@ -33,11 +38,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/product-features/trace-explorer',
             label: 'Trace Explorer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/logs-explorer',
-            label: 'Logs Explorer',
           },
           {
             type: 'doc',
@@ -513,6 +513,11 @@ const docsSideNav = [
                 label: 'Relational Databases Support',
                 isExpanded: false,
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/serving-on-external-url',
+                label: 'Serving on an External URL',
+              },
             ],
           },
           {
@@ -667,6 +672,12 @@ const docsSideNav = [
                     route:
                       '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0-15',
                     label: 'Upgrade k8s-infra to v0.15.0',
+                  },
+                  {
+                    type: 'doc',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0-16',
+                    label: 'Upgrade k8s-infra to v0.16.0',
                   },
                   {
                     type: 'doc',
@@ -929,6 +940,11 @@ const docsSideNav = [
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/routing-connector',
           },
+          {
+            type: 'doc',
+            label: 'GeoIP Processor',
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor',
+          },
         ],
       },
     ],
@@ -1159,6 +1175,16 @@ const docsSideNav = [
             route: '/docs/integrations/opentelemetry-hasura',
             label: 'Hasura',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Kong Gateway',
+          },
           // {
           //   type: 'category',
           //   isExpanded: false,
@@ -1290,6 +1316,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/infrastructure-monitoring/cert-manager',
+        label: 'Cert-Manager',
+      },
+      {
+        type: 'doc',
         route: '/docs/infrastructure-monitoring/hostmetrics',
         label: 'Host Metrics',
       },
@@ -1329,9 +1360,9 @@ const docsSideNav = [
         label: 'Overview',
       },
       {
+        label: 'Send Logs',
         type: 'category',
         isExpanded: false,
-        label: 'Send Logs to SigNoz',
         route: '/docs/logs-management/send-logs-to-signoz',
         items: [
           {
@@ -1493,6 +1524,16 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/integrations/opentelemetry-dbos',
+            label: 'DBOS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Kong Gateway',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/send-logs-http',
             label: 'Logs via HTTP (JSON)',
           },
@@ -1520,55 +1561,62 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'Working with Log Explorer',
         type: 'category',
         isExpanded: false,
-        label: 'Preprocess Logs',
-        route: '/docs/logs-pipelines/introduction',
-        // link: {
-        // type: 'doc',
-        // },
+        route: '/docs/userguide/logs_query_builder',
         items: [
+          { type: 'doc', route: '/docs/userguide/logs_query_builder', label: 'Logs Explorer' },
           {
             type: 'doc',
-            route: '/docs/logs-pipelines/concepts',
-            label: 'Concepts',
+            route: '/docs/logs-management/features/logs-quick-filters',
+            label: 'Logs Quick Filters',
           },
           {
-            type: 'doc',
-            route: '/docs/logs-pipelines/parsing',
-            label: 'Logs Parsing',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-pipelines/processors',
-            label: 'Log Processors',
-          },
-          {
+            label: 'User Guides',
             type: 'category',
             isExpanded: false,
-            label: 'Guides',
-            route: '/docs/category/guides',
-            // link: {
-            // type: 'generated-index',
-            // title: 'Logs Pipeline Guides',
-            // description:
-            // 'See these guides for detailed walkthroughs on creating Log Pipelines for specific purposes.',
-            // },
+            route: '/docs/logs-management/features/logs-explorer-guides',
             items: [
+              { type: 'doc', route: '/docs/userguide/logs_fields', label: 'Fields in Logs' },
               {
                 type: 'doc',
-                route: '/docs/logs-pipelines/guides/json',
-                label: 'Parse JSON logs',
+                route: '/docs/logs-management/guides/pii-scrubbing',
+                label: 'PII Scrubbing',
               },
               {
                 type: 'doc',
+                route: '/docs/userguide/parse-multiline-logs',
+                label: 'Parse Multiline Logs',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        label: 'Logs Pipelines',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/logs-pipelines/introduction',
+        items: [
+          { type: 'doc', route: '/docs/logs-pipelines/introduction', label: 'Introduction' },
+          { type: 'doc', route: '/docs/logs-pipelines/parsing', label: 'How to Parse Logs' },
+          {
+            label: 'Types of Log Processors',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/category/guides',
+            items: [
+              { type: 'doc', route: '/docs/logs-pipelines/guides/json', label: 'Parse JSON Logs' },
+              {
+                type: 'doc',
                 route: '/docs/logs-pipelines/guides/grok-parser',
-                label: 'Parse Logs with Grok Parser',
+                label: 'Grok Parser',
               },
               {
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/regex-parser',
-                label: 'Parse Logs with Regex Parser',
+                label: 'Regex Parser',
               },
               {
                 type: 'doc',
@@ -1600,53 +1648,12 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'Logs User Guides',
         type: 'category',
         isExpanded: false,
-        label: 'Features',
-        // route: '',
+        route: '/docs/logs-management/user-guides',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs_fields',
-            label: 'Fields in Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs_query_builder',
-            label: 'Logs Query Builder',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs-query-troubleshooting',
-            label: 'Logs Query Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/features/logs-quick-filters',
-            label: 'Logs Quick Filters',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        label: 'User Guide',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/logs-management/guides/drop-logs',
-            label: 'Drop Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/guides/pii-scrubbing',
-            label: 'PII Scrubbing',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/parse-multiline-logs',
-            label: 'Parse Multiline Logs',
-          },
+          { type: 'doc', route: '/docs/logs-management/guides/drop-logs', label: 'Drop Logs' },
           {
             type: 'doc',
             route: '/docs/logs-management/guides/set-resource-attributes-for-logs',
@@ -1660,28 +1667,34 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/logs-management/long-term-storage',
-        label: 'Long Term Storage',
-      },
-      {
+        label: 'Reference',
         type: 'category',
         isExpanded: false,
-        label: 'Troubleshooting',
-        route: '/docs/logs-management/troubleshooting/troubleshooting',
+        route: '/docs/logs-management/reference',
         items: [
+          { type: 'doc', route: '/docs/logs-pipelines/processors', label: 'Log Processors' },
           {
             type: 'doc',
-            route: '/docs/logs-management/troubleshooting/faqs',
-            label: 'General FAQs',
+            route: '/docs/logs-management/features/logs-quick-filters-reference',
+            label: 'Available Quick Filters',
+          },
+          { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/long-term-storage',
+            label: 'Long Term Storage',
           },
         ],
       },
-      // {
-      //   type: 'doc',
-      //   route: '/docs/logs-management/guides/drop-logs',
-      //   label: 'Guide to drop logs',
-      // },
+      {
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/logs-management/troubleshooting/troubleshooting',
+        items: [
+          { type: 'doc', route: '/docs/logs-management/troubleshooting/faqs', label: 'FAQs' },
+        ],
+      },
     ],
   },
   {
@@ -1798,7 +1811,6 @@ const docsSideNav = [
                 route: '/docs/metrics-management/slurm-metrics',
                 label: 'SLURM',
               },
-              { type: 'doc', route: '/docs/metrics-management/render-metrics', label: 'Render' },
               {
                 type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
@@ -1835,6 +1847,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/integrations/opentelemetry-hasura',
                 label: 'Hasura',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'Kong Gateway',
               },
             ],
           },
@@ -2069,6 +2086,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-druid-dashboard',
+            label: 'Apache Druid',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
@@ -2124,6 +2146,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/baseten-dashboard',
             label: 'Baseten',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cert-manager-dashboard',
+            label: 'Cert-Manager',
           },
           {
             type: 'doc',
@@ -2259,6 +2286,11 @@ const docsSideNav = [
             label: 'JVM',
           },
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
+            label: 'Kafka',
+          },
+          {
             label: 'Kubernetes',
             type: 'category',
             isExpanded: false,
@@ -2310,6 +2342,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kong-gateway',
+            label: 'Kong Gateway',
           },
           {
             label: 'LiteLLM',
@@ -2378,6 +2415,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openclaw-dashboard',
             label: 'OpenClaw',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/opencode-dashboard',
+            label: 'OpenCode',
           },
           {
             type: 'doc',
@@ -2918,6 +2960,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/opencode-observability',
+        label: 'OpenCode',
+        type: 'doc',
+      },
+      {
         route: '/docs/openlit',
         label: 'OpenLIT',
         type: 'doc',
@@ -3010,6 +3057,51 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ai/use-cases/alert-correlation-analysis',
             label: 'Alert Correlation Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/post-deployment-monitoring',
+            label: 'Post Deployment Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/oncall-handoff-brief',
+            label: 'On-Call Handoff Brief',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-fatigue-audit',
+            label: 'Alert Fatigue Audit',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/optimize-performance-during-development',
+            label: 'Optimize Performance During Development',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+            label: 'Trace Failing Request',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+            label: 'Dashboard Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/incident-specific-dashboard',
+            label: 'Incident Specific Dashboard Spin-Up',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/alert-creation-natural-language',
+            label: 'Alert Creation from Natural Language',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ai/use-cases/postmortem-evidence-pack',
+            label: 'Postmortem Evidence Pack',
           },
         ],
       },
@@ -3332,9 +3424,28 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'category',
+        isExpanded: false,
+        label: 'Azure One-Click Integrations',
+        route: '/docs/integrations/azure/one-click-azure-integrations',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/blob-storage',
+            label: 'Blob Storage',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/cdn-frontdoor',
+            label: 'CDN FrontDoor',
+          },
+        ],
+      },
+      {
         label: 'Temporal',
         type: 'category',
         isExpanded: false,
+        route: '/docs/integrations/temporal',
         items: [
           {
             type: 'doc',
@@ -3349,7 +3460,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/integrations/temporal-typescript-opentelemetry',
-            label: 'Typescript',
+            label: 'TypeScript',
           },
         ],
       },
@@ -3420,13 +3531,43 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/vercel-to-signoz',
-        label: 'Vercel Traces',
+        route: '/docs/integrations/opentelemetry-apache-druid',
+        label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
       {
         type: 'doc',
         route: '/docs/integrations/opentelemetry-hasura',
         label: 'Hasura',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-dbos',
+        label: 'DBOS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/flyio',
+        label: 'Fly.io',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/railway',
+        label: 'Railway',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/render',
+        label: 'Render',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-kong-gateway',
+        label: 'Kong Gateway',
       },
       {
         type: 'doc',
@@ -3582,6 +3723,18 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/cicd/jenkins/jenkins-tracing',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
+        label: 'GitLab',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/gitlab/gitlab-traces',
             label: 'Traces',
           },
         ],

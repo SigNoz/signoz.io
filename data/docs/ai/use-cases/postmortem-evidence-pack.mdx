@@ -1,0 +1,168 @@
+---
+date: 2026-04-24
+id: postmortem-evidence-pack
+title: Postmortem Evidence Pack
+description: After an incident is resolved, compile a timeline of alerts, log events, trace anomalies, and metric changes into a clean evidence summary.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The incident is resolved. Now comes the harder part: preparing the evidence for the postmortem.
+
+Instead of manually jumping between dashboards, logs, traces, and alerts, ask your AI assistant, connected to SigNoz through the MCP server, to compile the full evidence pack.
+
+## Prerequisites
+
+- Connect your AI assistant to SigNoz using the [MCP Server guide](https://signoz.io/docs/ai/signoz-mcp-server/).
+- Make sure your services are instrumented with distributed tracing. See [Instrument Your Application](https://signoz.io/docs/instrumentation/) if you haven't set this up.
+
+## Compile the Incident Timeline
+
+Ask your AI assistant to compile a complete evidence pack for the incident window:
+
+```text
+Compile an incident timeline for yesterday 14:00-16:00 UTC: alert transitions, metric inflection points, representative errors, and the trace that best captures the failure path.
+```
+
+Your assistant will analyze alert history, metrics, logs, and traces to build a comprehensive timeline.
+
+<details>
+<ToggleHeading>
+#### Example LLM Response
+</ToggleHeading>
+
+```text
+Incident Timeline — April 23, 2026, 14:00–16:00 UTC
+
+Headline
+Two services flapped repeatedly: checkout and payment. The failure mode is a payment
+rejection for app.loyalty.level=gold users. The recommendation P99>2s alert was
+already firing entering the window and remained firing throughout.
+
+1. Alert State Transitions
+
+Payment Service error rate ≥ 5%
+- 9 firing/inactive flap cycles in 2 hours
+- First fired: 14:00:52 UTC (value: 0.25)
+- Peak value: 0.50 at multiple points
+- Last transition in window: 15:57:52 firing (value: 0.33)
+
+Checkout Service error rate ≥ 5%
+- 10 transitions, mirroring payment alert step-for-step
+- First fired: 14:00:15 UTC (value: 0.33)
+- Peak value: 0.50 at 14:48:15 UTC
+- Pattern: flaps follow payment with ~1-2 minute lag
+
+Recommendation Service P99 latency > 2s (critical severity)
+- No transitions — already firing on entry, stayed firing throughout
+- Server-span P99: 180–260ms range
+- Alert firing on different latency stream (likely downstream client span)
+
+2. Metric Inflection Points
+
+Error count spikes (10-min buckets):
+- 14:50–15:00: checkout 30 errors, payment 9 errors (largest spike)
+- 15:30–15:40: checkout 41 errors, payment 17 errors (worst bucket)
+- 14:20–14:30: checkout 12 errors, payment 5 errors (initial bump)
+
+These line up exactly with alert firing transitions.
+
+P99 latency progression:
+- Checkout: climbed from ~2,790ms → 4,330ms steadily
+- Frontend: stayed ~15ms but jumped to 3,200ms at 15:00 and 1,200ms at 15:50
+  (when checkout failures stacked up)
+- Payment: consistently ~1ms (peak 10.9ms at 15:30) — failing fast, not slow
+
+Shape: checkout owns the latency, payment owns the failure rate, both flap
+together — single upstream cause affecting only some requests.
+
+3. Representative Errors
+
+Primary error — checkout/payment path:
+"Payment request failed. Invalid token. app.loyalty.level=gold"
+
+Bubbles up as:
+"failed to charge card: could not charge the card: rpc error: code = Unknown
+ desc = Payment request failed. Invalid token. app.loyalty.level=gold"
+
+Root cause: app.loyalty.level=gold — only gold-tier users fail. Alert flap is a
+function of how many gold users hit the load generator in any 5-min window.
+Fast-failing (~ms) at payment, but checkout's prepareOrderItemsAndShippingQuoteFromCart
+runs first (2–3s) before payment is even called.
+
+Other sporadic errors (low volume):
+- "Can't access cart storage" — sporadic Redis connection failures (3s hangs)
+- "transport is closing" — gRPC session teardowns (~10s durations, small count)
+
+4. Trace That Best Captures the Failure Path
+
+Trace ID: 76fd879f63426af304263cd3ebc30648
+Time: 2026-04-23 15:52:54 UTC
+Duration: 2.08s
+Status: hasError=true
+
+Call chain:
+load-generator → frontend-proxy → frontend → checkout (PlaceOrder)
+  ├─ checkout: prepareOrderItemsAndShippingQuoteFromCart (~230ms) ✓
+  │  ├─ cart: GetCart (Redis) ✓
+  │  ├─ product-catalog: GetProduct (postgresql) ✓
+  │  ├─ currency: Convert ✓
+  │  ├─ shipping: POST /get-quote ✓
+  │  └─ currency: Convert ✓
+  └─ checkout → payment: PaymentService/Charge ✗
+     └─ payment: Charge (server) ✗
+        status: "Payment request failed. Invalid token. app.loyalty.level=gold"
+
+This trace shows the full happy-path up to the charge, then the fast (~ms)
+payment rejection that bubbles back as a 500. It's the canonical "everything
+works except payment for gold users" shape.
+
+Same pattern matches traces:
+- a59e5726… (15:51:46)
+- 6de50072… (15:48:47)
+- d943417a… (15:39:19)
+- b43e327f… (15:36:49)
+
+All with identical statusMessage and similar 1.7–2.8s durations.
+```
+
+</details>
+
+This evidence pack gives you everything you need for the postmortem: precise timing of alert transitions, correlated metric changes, the error pattern with selector criteria, and a representative trace showing the full failure path.
+
+## Final Summary
+
+Instead of manually reconstructing the incident from scattered alerts, dashboards, and trace searches, you asked your AI assistant for a complete evidence pack. In one query, you received:
+- **Alert timeline**: 9 payment flaps, 10 checkout flaps, correlated within minutes
+- **Root cause signature**: Payment rejection for `app.loyalty.level=gold` users only
+- **Quantified impact**: 30-41 checkout errors during peak buckets, P99 latency climbing from 2.8s → 4.3s
+- **Representative trace**: Full span tree showing the exact failure path from payment → checkout → frontend
+
+You now have everything needed for the postmortem doc to share with the team.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+During this workflow, the MCP server called these tools:
+
+| Step | MCP Tool | What It Did |
+|------|----------|-------------|
+| 1 | `signoz_get_alert_history` | Fetched alert state transitions during the incident window |
+| 1 | `signoz_query_metrics` | Identified metric inflection points (error rate, latency, saturation) |
+| 1 | `signoz_search_logs` | Retrieved representative error log events from the incident window |
+| 1 | `signoz_search_traces` | Searched for anomalous traces during the failure period |
+| 1 | `signoz_get_trace_details` | Fetched full span breakdown for the trace that best captures the failure path |
+
+</details>
+
+## Related Use Cases
+
+- [Alert Correlation Analysis](https://signoz.io/docs/ai/use-cases/alert-correlation-analysis/) - When multiple services alert simultaneously, identify whether it's a cascade from one failure or separate incidents.
+- [On-Call Handoff Brief](https://signoz.io/docs/ai/use-cases/oncall-handoff-brief/) - Generate a handoff summary of recent incidents and ongoing issues for the next on-call engineer.
+- [Error Rate Spike Explainer](https://signoz.io/docs/ai/use-cases/error-rate-spike-explainer/) - Investigate where errors originate in the call chain when a single service starts failing.
+
+
+<GetHelp />

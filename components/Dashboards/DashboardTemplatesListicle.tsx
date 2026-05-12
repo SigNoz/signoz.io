@@ -8,6 +8,7 @@ import {
   SiMongodb,
   SiRedis,
   SiApache,
+  SiApachedruid,
   SiNginx,
   SiRabbitmq,
   SiDocker,
@@ -27,6 +28,8 @@ import {
   SiOllama,
   SiHuggingface,
   SiN8N,
+  SiApachekafka,
+  SiPython,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -39,7 +42,6 @@ import {
   Settings,
   GitBranch,
   Layers,
-  Globe,
   Zap,
   Shield,
   HardDrive,
@@ -65,6 +67,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/dashboards/dashboard-templates/anthropic-dashboard': (
     <SiAnthropic className="h-7 w-7 text-orange-600" />
+  ),
+  '/docs/dashboards/dashboard-templates/apache-druid-dashboard': (
+    <SiApachedruid className="h-7 w-7 text-[#29F5E6]" />
   ),
   '/docs/dashboards/dashboard-templates/apache-web-server': (
     <SiApache className="h-7 w-7 text-red-600" />
@@ -96,6 +101,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/dashboards/dashboard-templates/baseten-dashboard': (
     <img src="/svgs/icons/LLMMonitoring/baseten-logo.webp" alt="Baseten Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/cert-manager-dashboard': (
+    <Shield className="h-7 w-7 text-blue-500" />
   ),
   '/docs/dashboards/dashboard-templates/cicd': <Settings className="h-7 w-7 text-green-600" />,
   '/docs/dashboards/dashboard-templates/claude-code-dashboard/': (
@@ -133,7 +141,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/envoy-dashboard': (
     <Network className="h-7 w-7 text-purple-500" />
   ),
-  '/docs/dashboards/dashboard-templates/flask-monitoring': <Globe className="h-7 w-7 text-black" />,
+  '/docs/dashboards/dashboard-templates/flask-monitoring': (
+    <SiPython className="h-7 w-7 text-yellow-400" />
+  ),
   '/docs/dashboards/dashboard-templates/frontend-monitoring': (
     <Network className="h-7 w-7 text-white" />
   ),
@@ -186,6 +196,10 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   'https://github.com/SigNoz/dashboards/tree/main/jmx': <Cpu className="h-7 w-7 text-red-600" />,
   '/docs/dashboards/dashboard-templates/jvm-metrics': <Cpu className="h-7 w-7 text-orange-600" />,
+  '/docs/dashboards/dashboard-templates/kafka-dashboard': <SiApachekafka className="h-7 w-7" />,
+  '/docs/dashboards/dashboard-templates/kong-gateway': (
+    <img src="/img/icons/kong-icon.svg" alt="Kong Gateway" className="h-7 w-7 object-contain" />
+  ),
   '/docs/dashboards/dashboard-templates/kubernetes-dashboards': (
     <SiKubernetes className="h-7 w-7 text-blue-600" />
   ),
@@ -239,6 +253,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <img
       src="/svgs/icons/LLMMonitoring/openclaw-logo.svg"
       alt="OpenClaw Icon"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/dashboards/dashboard-templates/opencode-dashboard': (
+    <img
+      src="/svgs/icons/LLMMonitoring/opencode-logo.webp"
+      alt="OpenCode Icon"
       className="h-7 w-7"
     />
   ),

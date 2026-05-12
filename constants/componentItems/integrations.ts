@@ -46,6 +46,16 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/opentelemetry-hasura',
       clickName: 'Hasura Integration Link',
     },
+    {
+      name: 'DBOS',
+      href: '/docs/integrations/opentelemetry-dbos',
+      clickName: 'DBOS Integration Link',
+    },
+    {
+      name: 'Apache Druid',
+      href: '/docs/integrations/opentelemetry-apache-druid',
+      clickName: 'Apache Druid Integration Link',
+    },
   ] satisfies ComponentItem[],
   aws: [
     {
@@ -69,8 +79,41 @@ export const INTEGRATIONS_ITEMS = {
       clickName: 'AWS Elasticache Redis Link',
     },
   ] satisfies ComponentItem[],
+  azure: [
+    {
+      name: 'One-Click Azure Integrations',
+      href: '/docs/integrations/azure/one-click-azure-integrations',
+      clickName: 'One-Click Azure Integrations Link',
+    },
+    {
+      name: 'CDN FrontDoor',
+      href: '/docs/integrations/azure/cdn-frontdoor',
+      clickName: 'Azure CDN FrontDoor Integration Link',
+    },
+    {
+      name: 'Blob Storage',
+      href: '/docs/integrations/azure/blob-storage',
+      clickName: 'Azure Blob Storage Integration Link',
+    },
+  ] satisfies ComponentItem[],
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
+    {
+      name: 'Kong Gateway',
+      href: '/docs/integrations/opentelemetry-kong-gateway',
+      clickName: 'Kong Gateway Integration Link',
+    },
+    { name: 'Vercel', href: '/docs/integrations/vercel', clickName: 'Vercel Integration Link' },
+    {
+      name: 'Fly.io',
+      href: '/docs/integrations/outposts/flyio',
+      clickName: 'Fly.io Integration Link',
+    },
+    {
+      name: 'Railway',
+      href: '/docs/integrations/outposts/railway',
+      clickName: 'Railway Integration Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 

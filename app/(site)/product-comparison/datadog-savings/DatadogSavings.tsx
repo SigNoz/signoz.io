@@ -1,0 +1,20 @@
+'use client'
+
+import React from 'react'
+import MigrateSaving from '@/components/comparison/migrate-saving'
+
+const DATA = {
+  TITLE: 'SigNoz vs Datadog Cost Savings',
+  DESC: 'Please provide your contact info and we will reach out to you. We will understand your requirements and identify ways to reduce your observability costs.',
+  PORTAL_ID: '22308423',
+  FORM_ID: 'f33f929c-a9ec-4fde-b805-f54265078d19',
+}
+
+function DatadogSaving() {
+  return (
+    <div title="Datadog Saving">
+      <MigrateSaving data={DATA} />
+    </div>
+  )
+}
+export default DatadogSaving

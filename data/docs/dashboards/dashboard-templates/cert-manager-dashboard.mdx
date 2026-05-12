@@ -1,0 +1,101 @@
+---
+date: 2026-04-25
+id: cert-manager-dashboard
+title: Cert-Manager Dashboard
+description: Monitor cert-manager certificate health, expiration, issuer status, controller performance, ACME operations, webhook health, and component resource usage.
+doc_type: explanation
+---
+
+Use this dashboard to track certificate readiness, expiry, controller activity, ACME operations, and resource usage across all Kubernetes namespaces.
+
+<Admonition type="note">
+  To use this dashboard, configure the OpenTelemetry Collector to scrape cert-manager Prometheus metrics and send them to SigNoz. Follow the [Cert-Manager Metrics](https://signoz.io/docs/infrastructure-monitoring/cert-manager/) guide to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/cert-manager/cert-manager-dashboard-overview.webp"
+  caption="cert-manager Dashboard - Overview"
+  alt="cert-manager Dashboard - Overview"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/cert-manager/cert-manager-dashboard.json"
+    dashboardName="Cert-Manager Dashboard"
+  />
+</div>
+
+## Dashboard Variables
+
+- **namespace**: Filter by Kubernetes namespace
+- **issuer_name**: Filter by Issuer or ClusterIssuer name
+- **deployment_environment**: Filter by deployment environment
+
+## What This Dashboard Monitors
+
+- **Certificate health**: readiness status and not-ready counts across all namespaces
+- **Issuer status**: ClusterIssuer and namespace Issuer readiness
+- **Controller performance**: reconciliation call rate and error rate per controller
+- **ACME operations**: outbound ACME request rate, error rate, and average latency by action (ACME issuers only)
+- **Webhook health**: admission request rate by HTTP status code and average admission latency
+- **Work queue**: depth and enqueue rate per controller queue
+- **Resource usage**: CPU and RSS memory per component (controller, webhook, cainjector)
+
+## Metrics Included
+
+### Certificate Health
+
+- **Total Certificates**: all certificates cert-manager is managing
+- **Ready Certificates**: certificates in Ready state, actively serving TLS
+- **Not Ready Certificates**: non-zero triggers a threshold alert
+- **Webhook Requests In-Flight**: current admission requests in progress
+- **Certificate Ready Status per Cert**: ready condition (1/0) per certificate, by name and namespace
+- **Not Ready Certificates by Namespace**: not-ready count aggregated by namespace
+
+### Controller Performance
+
+- **Controller Sync Call Rate**: `sync()` invocations per second, by controller
+- **Controller Sync Error Rate**: failed `sync()` operations per second, by controller
+
+### ACME Operations
+
+These panels populate only when cert-manager uses an ACME issuer such as Let's Encrypt. Self-signed and CA issuers don't generate these metrics.
+
+- **ACME Request Rate by Action**: outbound ACME requests per second, by action (`getNonce`, `createOrder`, `finalizeOrder`, etc.)
+- **ACME Error Rate (non-2xx) by Action**: non-2xx ACME responses per second, by action
+- **ACME Average Request Duration by Action**: mean ACME request latency, by action
+
+<Figure
+  src="/img/docs/dashboards/cert-manager/cert-manager-dashboard-1.webp"
+  caption="cert-manager Dashboard - Controller Performance and ACME Operations Metrics"
+  alt="cert-manager Dashboard - Controller Performance and ACME Operations Metrics"
+/>
+
+### Webhook Health
+
+- **Webhook Request Rate by Status Code**: admission requests per second, grouped by HTTP response code
+- **Webhook Average Admission Latency**: mean webhook processing time
+
+### Work Queue
+
+- **Work Queue Depth by Controller**: current queue depth per controller
+- **Work Queue Add Rate by Controller**: items enqueued per second, by controller
+
+<Figure
+  src="/img/docs/dashboards/cert-manager/cert-manager-dashboard-2.webp"
+  caption="cert-manager Dashboard - Webhook Health and Work Queue Metrics"
+  alt="cert-manager Dashboard - Webhook Health and Work Queue Metrics"
+/>
+
+### Resource Usage
+
+- **CPU Usage by Component**: CPU utilization rate per component
+- **Memory Usage by Component**: RSS memory in bytes per component
+
+## Related Dashboards
+
+- [Kubernetes Pod Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed/)
+- [Kubernetes Node Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed/)
+- [Host Metrics](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-dashboards/)
