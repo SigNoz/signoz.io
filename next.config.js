@@ -2754,6 +2754,16 @@ module.exports = () => {
           destination: '/docs/cost-meter/meter-examples/',
           permanent: true,
         },
+        {
+          source: '/docs/cost-meter/alert-setup-guides/',
+          destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/alert-setup-guides',
+          destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {

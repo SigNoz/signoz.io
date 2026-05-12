@@ -1935,35 +1935,19 @@ const docsSideNav = [
         label: 'Overview',
       },
       {
-        label: 'Working with Cost Meter',
-        type: 'category',
-        isExpanded: false,
+        type: 'doc',
         route: '/docs/cost-meter/working-with-cost-meter/overview',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/cost-meter/working-with-cost-meter/overview',
-            label: 'Overview',
-          },
-          {
-            type: 'doc',
-            route: '/docs/cost-meter/meter-explorer',
-            label: 'Meter Explorer',
-          },
-          {
-            label: 'Alerts',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/cost-meter/alerts',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/cost-meter/alert-setup-guides',
-                label: 'Alert Setup Guide',
-              },
-            ],
-          },
-        ],
+        label: 'Cost Meter Dashboard',
+      },
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/meter-explorer',
+        label: 'Meter Explorer',
+      },
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/alerts',
+        label: 'Alerts',
       },
       {
         label: 'User Guides',
@@ -1971,8 +1955,8 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/cost-meter/user-guides',
         items: [
-          { type: 'doc', route: '/docs/cost-meter/alerts-examples', label: 'Alerts Examples' },
-          { type: 'doc', route: '/docs/cost-meter/meter-examples', label: 'Meter Examples' },
+          { type: 'doc', route: '/docs/cost-meter/alerts-examples', label: 'Alert Configuration Guide' },
+          { type: 'doc', route: '/docs/cost-meter/meter-examples', label: 'Meter Explorer Query Guide' },
         ],
       },
     ],
