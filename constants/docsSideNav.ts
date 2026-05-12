@@ -1913,7 +1913,6 @@ const docsSideNav = [
             route: '/docs/metrics-management/types-and-aggregation',
             label: 'Types and Aggregation',
           },
-          { type: 'doc', route: '/docs/metrics-management/data-storage', label: 'Metrics Tables' },
         ],
       },
       {
@@ -1939,6 +1938,7 @@ const docsSideNav = [
             route: '/docs/metrics-management/configure-custom-buckets',
             label: 'Configure Custom Histogram Buckets',
           },
+          { type: 'doc', route: '/docs/metrics-management/data-storage', label: 'Metrics Tables' },
         ],
       },
       {
