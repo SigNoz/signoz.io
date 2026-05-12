@@ -2662,6 +2662,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/alerts-management/notification-channel/google-chat',
+            label: 'Google Chat',
+          },
+          {
+            type: 'doc',
             route: '/docs/alerts-management/notification-channel/email',
             label: 'Email',
           },

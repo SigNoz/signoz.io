@@ -1,0 +1,109 @@
+---
+date: 2026-05-12
+id: google-chat
+
+title: Configure Google Chat Channel
+description: Set up Google Chat notifications for SigNoz alerts to keep your team informed in real-time.
+---
+
+## Prerequisites
+Before configuring Google Chat as a notification channel in SigNoz, ensure that you have:
+- **Incoming Webhook**: Follow the steps outlined in <a href="https://developers.google.com/workspace/chat/quickstart/webhooks" target="_blank" rel="noopener noreferrer nofollow">Google Chat incoming webhooks documentation</a> to set up an Incoming Webhook in your Google Chat space.
+- **SigNoz Version**: v0.123.0 or later
+
+## Accessing Alert Channels
+
+To manage your alert channels in SigNoz:
+
+- Navigate to `Settings > Alert Channels` tab within SigNoz. This tab displays a list of configured alert channels.
+
+![alert-channels](/img/docs/alert-channels.webp)
+
+## Creating a new Notification channel
+
+To create a new Google Chat notification channel in SigNoz, follow these steps:
+
+- Navigate to `Settings > Alert Channels` and click on `New Channel`.
+- Enter a **Name** for the channel and select Google Chat as the channel type.
+- **Webhook URL**: Paste the Incoming Webhook URL generated in Google Chat (must use `https://chat.googleapis.com`).
+
+<Admonition>
+You can use <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a> for customizing the title and description.
+</Admonition>
+
+![new-notification-channel](/img/docs/google-chat-new-channel.webp)
+
+**Test Configuration**:
+Click the Test button to send a test alert to the configured Google Chat space. This verifies that SigNoz can communicate with your Google Chat webhook.
+
+## Editing a Notification channel
+
+To edit an existing Google Chat notification channel:
+- Navigate to the channel settings in SigNoz.
+- You can edit the Google Chat webhook URL and other parameters. However, note that the channel name and type are not editable after creation.
+
+## Receive Alert in Google Chat
+
+Once the configuration is set up correctly, you will receive alerts in the configured Google Chat space whenever monitored metrics exceed the specified thresholds in alert rules. This ensures you are promptly notified of any issues in your applications or infrastructure components.
+
+Alerts are automatically threaded using the alert's group key, so related alerts appear in the same conversation thread.
+
+![alerts-in-google-chat](/img/docs/alerts-in-google-chat.webp)
+
+## Turn-off Resolved alerts
+
+The resolve alerts toggle is switched on by default. To turn-off receiving the Resolved alerts for your Notification Channel, follow these steps:
+- Navigate to `Settings > Alert Channels` 
+- Click on `Edit` button for a particular alert.
+- Toggle off the **Send resolved alerts** button and hit `Save`.
+
+<Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiving resolved alerts notifications." caption="Turn off receiving resolved alerts notifications." />
+
+## Configure programmatically
+
+You can also configure the Google Chat notification channel programmatically using the SigNoz API.
+
+**API Endpoint:** `POST /api/v1/channels`
+
+To create a new Google Chat notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command. Replace `YOUR_API_KEY` with an API key from **Settings → Service Accounts** — see <a href="https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/" target="_blank" rel="noopener noreferrer nofollow">Service Accounts</a> to create one.
+
+```bash
+curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "Prod Critical Alerts - Google Chat",
+    "googlechat_configs": [
+        {
+            "send_resolved": true,
+            "webhook_url": "https://chat.googleapis.com/v1/spaces/SPACE_ID/messages?key=KEY&token=TOKEN",
+            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}",
+            "text": "{{ range .Alerts -}}\n*Alert:* {{ .Labels.alertname }}{{ if .Labels.severity }}\n*Severity:* {{ .Labels.severity }}{{ end }}{{ if .Annotations.summary }}\n*Summary:* {{ .Annotations.summary }}{{ end }}{{ if .Annotations.description }}\n*Description:* {{ .Annotations.description }}{{ end }}{{ if .Annotations.related_logs }}\n*Related Logs:* {{ .Annotations.related_logs }}{{ end }}{{ if .Annotations.related_traces }}\n*Related Traces:* {{ .Annotations.related_traces }}{{ end }}\n\n*Labels:*\n{{ range .Labels.SortedPairs -}}\n\t• `{{ .Name }}`: {{ .Value }}\n{{ end }}\n{{ end }}"
+        }
+    ]
+}'
+```
+
+**Request Body Attributes:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The name of the receiver/channel. **Required**; must be unique in all the config. |
+| `googlechat_configs` | `array` | List of Google Chat configurations. |
+| `googlechat_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
+| `googlechat_configs[].webhook_url` | `string` | The Google Chat Incoming Webhook URL. **Mandatory**. Must be a valid HTTPS URL using `chat.googleapis.com`. |
+| `googlechat_configs[].title` | `string` | Templated title of the message. Go templates are supported. |
+| `googlechat_configs[].text` | `string` | Templated text of the message. Go templates are supported. |
+
+## Troubleshooting
+If you encounter issues:
+
+- **Check the Webhook URL**: Ensure the webhook URL is correctly entered in SigNoz and uses the `https://chat.googleapis.com` domain.
+- **Verify Google Chat Permissions**: Confirm that the webhook has permissions to post to the desired space.
+- **Test the Webhook**: Use the Test button in SigNoz to verify connectivity. If it fails, check that the webhook is still active in Google Chat.
+
+<Admonition type="tip">
+
+If you encounter any unexpected challenges during the use of this integration, please contact SigNoz Support at <a href="mailto:support@signoz.io" target="_blank" rel="noopener noreferrer nofollow">support@signoz.io</a>
+
+</Admonition>
