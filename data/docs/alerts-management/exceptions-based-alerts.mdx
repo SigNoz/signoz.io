@@ -3,12 +3,12 @@ date: 2026-05-12
 id: exceptions-based-alerts
 title: Exceptions based alerts
 description: Configure exceptions-based alerts in SigNoz using ClickHouse queries to monitor application errors and exception patterns.
-doc_type: howto
+doc_type: reference
 ---
 
 An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met. You can define your exception query using **Query Builder** or **ClickHouse queries**.
 
-Here's a breakdown of the various sections and options available when configuring an Exceptions-based alert:
+This page covers the configuration options available for Exceptions-based alerts — from defining the exception query to setting conditions and notification preferences.
 
 At the top of the alert creation page, you can set:
 
@@ -122,8 +122,21 @@ Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" tar
 ### Group alerts by
 Combine alerts with the same field values into a single notification. Select fields to group by (optional). When empty, all matching alerts are combined into one notification.
 
-### Repeat notifications
-Send periodic notifications while the alert condition remains active. Enable the toggle and set the interval and condition (Firing or No Data).
+### Repeat Notifications
+Configure repeat notifications to retrigger alerts at specified intervals if they remain unresolved. To enable:
+
+1. Scroll to the bottom of the alert configuration
+2. Enable the **Repeat Notification** toggle
+3. Set your desired interval
+4. Configure the condition:
+   - **Firing**: Send repeat notifications when the alert is actively firing
+   - **No Data**: Send repeat notifications when no data is received
+
+<Figure
+  src="/img/docs/repeat-notification.webp"
+  alt="Repeat Notification configuration showing interval and condition options"
+  caption="Repeat Notification configuration"
+/>
 
 ### Test Notification
 Click the **Test Notification** button at the bottom of the page to send a test alert to the configured notification channels. This verifies that your alert pipeline is working correctly before saving.
