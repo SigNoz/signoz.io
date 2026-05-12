@@ -1966,7 +1966,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Cost Meter User Guides',
+        label: 'User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/cost-meter/user-guides',
