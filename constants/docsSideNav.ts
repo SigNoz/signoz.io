@@ -1917,7 +1917,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Metrics User Guides',
+        label: 'User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/metrics-management/user-guides',
