@@ -90,7 +90,7 @@ builder.Services.AddOpenTelemetry()
         .AddHttpClientInstrumentation()
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
+            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443/v1/traces");
             options.Headers = "signoz-ingestion-key=<your-ingestion-key>";
             options.Protocol = OtlpExportProtocol.HttpProtobuf;
         }));
@@ -102,7 +102,7 @@ builder.Services.AddOpenTelemetry()
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Update the endpoint and remove the headers:
 ```csharp
-options.Endpoint = new Uri("http://<collector-host>:4318");
+options.Endpoint = new Uri("http://<collector-host>:4318/v1/traces");
 ```
 </KeyPointCallout>
 
