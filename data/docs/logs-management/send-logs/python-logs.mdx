@@ -1,5 +1,5 @@
 ---
-date: 2026-03-12
+date: 2026-05-08
 title: Send logs from Python to SigNoz using OpenTelemetry
 id: opentelemetry-python-logs
 doc_type: howto
@@ -9,15 +9,15 @@ description: Learn how to send logs from Python to SigNoz using the OpenTelemetr
 import GetHelp from '@/components/shared/get-help.md'
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
-  header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
 
 - Python 3.8 or higher
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+Tested with <a href="https://docs.python.org/3.11/" target="_blank" rel="noopener noreferrer nofollow">Python 3.11</a> and OpenTelemetry Python SDK <a href="https://pypi.org/project/opentelemetry-sdk/1.41.1/" target="_blank" rel="noopener noreferrer nofollow">v1.41.1</a>.
 
 ## Send logs to SigNoz
 
@@ -56,7 +56,7 @@ Use this section if you're deploying your application directly on a server or VM
 </KeyPointCallout>
 
 ```bash
-export OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="python-app"
@@ -70,8 +70,8 @@ Verify these values:
 If using a local OTel Collector, use:
 
 ```bash
-export OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_SERVICE_NAME="python-app"
 ```
 
@@ -83,8 +83,8 @@ Add these environment variables to your deployment manifest:
 
 ```yaml
 env:
-  - name: OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED
-    value: 'true'
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: 'http/protobuf'
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: 'https://ingest.<region>.signoz.cloud:443'
   - name: OTEL_EXPORTER_OTLP_HEADERS
@@ -125,7 +125,7 @@ RUN opentelemetry-bootstrap -a install
 COPY . .
 
 # Set OpenTelemetry environment variables
-ENV OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="python-app"
@@ -155,7 +155,7 @@ Replace the placeholders in the Dockerfile:
 Set environment variables in PowerShell:
 
 ```powershell
-$env:OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED="true"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "python-app"
@@ -168,6 +168,10 @@ Replace the placeholders:
 
 </TabItem>
 </Tabs>
+
+<Admonition type="info">
+  Automatic log capture requires OpenTelemetry Python SDK **1.40.0 or higher**, where `opentelemetry-instrumentation-logging` enables log collection by default. On older SDK versions, set `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true` explicitly to enable it.
+</Admonition>
 
 ### Step 3: Run your application
 
@@ -206,7 +210,7 @@ Use code-level instrumentation when you need fine-grained control over how logs 
 ### Step 1: Install dependencies
 
 ```bash
-pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc
+pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
 ```
 
 ### Step 2: Set environment variables
@@ -272,7 +276,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # Install OpenTelemetry dependencies
-RUN pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc
+RUN pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
 
 # Copy application code
 COPY . .
@@ -326,8 +330,8 @@ Create a file to configure the OpenTelemetry logger with trace correlation:
 import logging
 from opentelemetry import trace
 from opentelemetry._logs import set_logger_provider
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
@@ -392,22 +396,17 @@ python main.py
 
 Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/logs-management/overview/) section.
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/logs-management/send-logs/python-logs.webp" alt="Python Logs" />
-  <figcaption>
-    <i>Python Application Logs</i>
-  </figcaption>
-</figure>
+<Figure 
+  src="/img/docs/logs-management/send-logs/python-logs.webp"
+  alt="Python Application Logs"
+  caption="Python Application Logs"
+/>
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/logs-management/send-logs/python-logs-detailed-view.webp"
-    alt="Python Logs Detailed View"
-  />
-  <figcaption>
-    <i>Python Application Logs Detailed View</i>
-  </figcaption>
-</figure>
+<Figure 
+  src="/img/docs/logs-management/send-logs/python-logs-detailed-view.webp"
+  alt="Python Application Logs Detailed View"
+  caption="Python Application Logs Detailed View"
+/>
 
 <details>
 <ToggleHeading>
@@ -445,13 +444,13 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 This usually happens if the endpoint URL is incorrect.
 
 - Cloud: `https://ingest.<region>.signoz.cloud:443`
-- Self-Hosted: `http://localhost:4317`
+- Self-Hosted (HTTP): `http://localhost:4318`
 
 #### Why are my logs not appearing in SigNoz?
 
 - Check if the application started successfully and is actually generating logs.
 - Verify your `<region>` and `<your-ingestion-key>` are correct.
-- Ensure `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` is set to `true` (if using auto-instrumentation).
+- Ensure `opentelemetry-bootstrap -a install` was run to install instrumentation packages including `opentelemetry-instrumentation-logging`.
 
 </details>
 

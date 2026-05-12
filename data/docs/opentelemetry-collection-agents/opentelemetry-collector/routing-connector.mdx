@@ -1,5 +1,5 @@
 ---
-date: 2026-04-23
+date: 2026-05-11
 id: routing-connector
 title: OpenTelemetry Collector Routing Connector
 description: Learn how to separate telemetry from multiple services using a single OpenTelemetry Collector and send it to different destinations or ingestion keys.
@@ -78,18 +78,18 @@ You can point each exporter to a different SigNoz account, ingestion key, or bac
 
 ```yaml:otel-collector-config.yaml
 exporters:
-  otlp/signoz:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/signoz:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<default-ingestion-key>"
 
-  otlp/vendor-payments:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-payments:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<payments-ingestion-key>"
 
-  otlp/vendor-search:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-search:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<search-ingestion-key>"
 ```
@@ -109,13 +109,13 @@ service:
       exporters: [routing]
     traces/payments:
       receivers: [routing]
-      exporters: [otlp/vendor-payments]
+      exporters: [otlphttp/vendor-payments]
     traces/search:
       receivers: [routing]
-      exporters: [otlp/vendor-search]
+      exporters: [otlphttp/vendor-search]
     traces/default:
       receivers: [routing]
-      exporters: [otlp/signoz]
+      exporters: [otlphttp/signoz]
 ```
 <Admonition type="info">
 A connector appears as an **exporter** in the upstream pipeline and as a **receiver** in each downstream pipeline. This is how the Collector bridges pipelines together.
@@ -147,18 +147,18 @@ connectors:
         pipelines: [traces/search]
 
 exporters:
-  otlp/signoz:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/signoz:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<default-ingestion-key>"
 
-  otlp/vendor-payments:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-payments:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<payments-ingestion-key>"
 
-  otlp/vendor-search:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-search:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<search-ingestion-key>"
 
@@ -170,13 +170,13 @@ service:
       exporters: [routing]
     traces/payments:
       receivers: [routing]
-      exporters: [otlp/vendor-payments]
+      exporters: [otlphttp/vendor-payments]
     traces/search:
       receivers: [routing]
-      exporters: [otlp/vendor-search]
+      exporters: [otlphttp/vendor-search]
     traces/default:
       receivers: [routing]
-      exporters: [otlp/signoz]
+      exporters: [otlphttp/signoz]
 ```
 </details>
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-02-04
+date: 2026-05-11
 
 title: K8s Serverless (EKS Fargate) - Install
 id: install
@@ -74,13 +74,10 @@ metadata:
         sampling_initial: 2
         sampling_thereafter: 500
         verbosity: basic
-      otlp:
+      otlphttp:
         endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
         headers:
           signoz-ingestion-key: ${env:SIGNOZ_API_KEY}
-        tls:
-          insecure: false
-          insecure_skip_verify: false
 
     extensions:
       health_check:
@@ -188,15 +185,15 @@ metadata:
         logs:
           receivers:  [otlp]
           processors: [resourcedetection, k8sattributes, batch]
-          exporters:  [debug, otlp]
+          exporters:  [debug, otlphttp]
         metrics:
           receivers:  [otlp, kubeletstats]
           processors: [resourcedetection, k8sattributes, batch]
-          exporters:  [otlp, debug]
+          exporters:  [otlphttp, debug]
         traces:
           receivers:  [otlp]
           processors: [resourcedetection, k8sattributes, batch]
-          exporters:  [otlp, debug]
+          exporters:  [otlphttp, debug]
 
       telemetry:
         logs:    { encoding: json }
