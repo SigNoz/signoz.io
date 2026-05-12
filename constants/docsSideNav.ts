@@ -1936,7 +1936,7 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/cost-meter/working-with-cost-meter/overview',
+        route: '/docs/cost-meter/cost-meter-dashboard',
         label: 'Cost Meter Dashboard',
       },
       {
@@ -1955,8 +1955,8 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/cost-meter/user-guides',
         items: [
-          { type: 'doc', route: '/docs/cost-meter/alerts-examples', label: 'Alert Configuration Guide' },
-          { type: 'doc', route: '/docs/cost-meter/meter-examples', label: 'Meter Explorer Query Guide' },
+          { type: 'doc', route: '/docs/cost-meter/alert-configuration-guide', label: 'Alert Configuration Guide' },
+          { type: 'doc', route: '/docs/cost-meter/meter-explorer-query-guide', label: 'Meter Explorer Query Guide' },
         ],
       },
     ],

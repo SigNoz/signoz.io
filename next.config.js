@@ -2746,12 +2746,12 @@ module.exports = () => {
         },
         {
           source: '/docs/cost-meter/query-setup-guides/',
-          destination: '/docs/cost-meter/meter-examples/',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
           permanent: true,
         },
         {
           source: '/docs/cost-meter/query-setup-guides',
-          destination: '/docs/cost-meter/meter-examples/',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
           permanent: true,
         },
         {
