@@ -1225,7 +1225,7 @@ const docsSideNav = [
             label: 'Trace Funnels',
           },
           {
-            label: 'User Guides',
+            label: 'Traces User Guides',
             type: 'category',
             isExpanded: false,
             route: '/docs/apm-and-distributed-tracing/traces-user-guides',
@@ -1234,11 +1234,6 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/trace-funnels/setup',
                 label: 'Setup Trace Funnels',
-              },
-              {
-                type: 'doc',
-                route: '/docs/trace-funnels/working-with-trace-funnels',
-                label: 'Analyzing Trace Funnels',
               },
             ],
           },
@@ -1250,7 +1245,7 @@ const docsSideNav = [
         label: 'Service Map',
       },
       {
-        label: 'Traces User Guides',
+        label: 'User Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/traces-management/guides/overview',

@@ -2743,6 +2743,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/trace-funnels/working-with-trace-funnels/',
+          destination: '/docs/trace-funnels/setup/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/',
           destination: '/docs/faqs/general/',
           permanent: true,
