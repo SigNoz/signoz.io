@@ -259,7 +259,7 @@ export const transformGuide = (guide: MDXContent) => {
     type: 'Guide',
     title: guide.title,
     date: guide.date,
-    lastmod: guide.lastmod || guide.updatedAt,
+    lastmod: guide.lastmod || guide.date,
     draft: guide.draft ?? false,
     summary: guide.summary || guide.description,
     tags,
