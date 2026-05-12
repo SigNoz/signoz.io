@@ -1,5 +1,5 @@
 ---
-date: 2026-02-27
+date: 2026-05-11
 title: VM Collection Agent - Install
 id: install
 description: Install the OpenTelemetry Collector binary on your virtual machine to collect telemetry data.
@@ -88,10 +88,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -99,15 +97,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -210,10 +208,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -221,15 +217,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -328,10 +324,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -339,15 +333,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -439,10 +433,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -450,15 +442,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -537,10 +529,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -548,15 +538,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -644,10 +634,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -655,15 +643,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -722,17 +710,17 @@ exporters:
     verbosity: detailed
 ```
 
-Then add `debug` to each pipeline's `exporters` list (before `otlp`):
+Then add `debug` to each pipeline's `exporters` list (before `otlphttp`):
 
 ```yaml:/etc/otelcol-contrib/config.yaml {4-11}
 service:
   pipelines:
     metrics:
-      exporters: [debug, otlp]
+      exporters: [debug, otlphttp]
     traces:
-      exporters: [debug, otlp]
+      exporters: [debug, otlphttp]
     logs:
-      exporters: [debug, otlp]
+      exporters: [debug, otlphttp]
 ```
 
 The `verbosity: detailed` setting logs full telemetry payloads to the Collector output.

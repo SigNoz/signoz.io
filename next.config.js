@@ -1698,6 +1698,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/metrics-management/render-metrics/',
+          destination: '/docs/integrations/outposts/render/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/docker-standalone/',
           destination: '/docs/install/docker/',
           permanent: true,
