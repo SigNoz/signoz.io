@@ -123,7 +123,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     })
     compiledContent = mdxContent
   } catch (error) {
-    console.error('Error compiling MDX:', error)
+    console.error(`Error compiling MDX for guide "${slug}":`, error)
     notFound()
   }
 
