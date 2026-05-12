@@ -1238,7 +1238,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/trace-funnels/working-with-trace-funnels',
-                label: 'Working with Trace Funnels',
+                label: 'Analyzing Trace Funnels',
               },
             ],
           },
