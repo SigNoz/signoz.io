@@ -10,6 +10,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
 export const generateStaticParams = async () => {
   return []
 }
