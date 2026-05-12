@@ -1,5 +1,5 @@
 ---
-date: 2026-05-04
+date: 2026-05-12
 id: set-resource-attributes-for-logs
 title: Guide to add Resource Attributes
 description: Learn how to add resource attributes to your logs to enable better filtering, grouping, and correlation of logs in SigNoz.
@@ -110,7 +110,7 @@ from opentelemetry.semconv.resource import ResourceAttributes
 from opentelemetry._logs import set_logger_provider
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 
 # Create a resource with custom attributes
 resource = Resource.create({
@@ -128,7 +128,7 @@ set_logger_provider(logger_provider)
 # Add log exporter
 logger_provider.add_log_record_processor(
     BatchLogRecordProcessor(
-        OTLPLogExporter(endpoint="http://localhost:4317")
+        OTLPLogExporter(endpoint="http://localhost:4318/v1/logs")
     )
 )
 ```
@@ -144,7 +144,7 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
-import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
 
 // Create a resource with custom attributes
 Resource resource = Resource.getDefault()
@@ -160,8 +160,8 @@ Resource resource = Resource.getDefault()
 SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
     .setResource(resource)
     .addLogRecordProcessor(BatchLogRecordProcessor.builder(
-        OtlpGrpcLogRecordExporter.builder()
-            .setEndpoint("http://localhost:4317")
+        OtlpHttpLogRecordExporter.builder()
+            .setEndpoint("http://localhost:4318/v1/logs")
             .build())
         .build())
     .build();
