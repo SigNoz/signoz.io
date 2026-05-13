@@ -60,6 +60,7 @@ Review each changed doc against these checks in order:
 12. Links directly help readers complete the current step.
 13. Added or edited links resolve and use canonical production paths.
 14. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
+15. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 
@@ -77,6 +78,7 @@ Prioritize verification for:
 - receiver, exporter, and processor names
 - environment variables and CLI flags
 - APIs, semantic conventions, versions, and deprecations
+- **OTLP export protocol**: flag gRPC (port 4317) as the default when HTTP (port 4318) should be used instead — docs should prefer OTLP/HTTP unless there is an explicit reason for gRPC
 
 When a correction depends on verification:
 
@@ -199,6 +201,9 @@ cat contributing/docs-review.md
 
 # likely docs quality issues
 rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|<[^>]+>" data/docs
+
+# image quality — flag images narrower than 1200 px
+identify -format '%w %f\n' public/img/docs/<topic>/*.webp 2>/dev/null | awk '$1 < 1200'
 
 # link health
 curl -sI <URL>

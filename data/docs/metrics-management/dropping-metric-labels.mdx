@@ -1,5 +1,5 @@
 ---
-date: 2025-12-17
+date: 2026-05-06
 title: Dropping Metric Labels (Attributes)
 description: Explains why dropping metric labels (attributes) does not reduce cardinality or sample count and provides correct alternatives.
 doc_type: explanation
@@ -107,7 +107,7 @@ Without the `k8s.pod.*` label, you can't properly distinguish between pods. The 
 
 ## The Correct Approach: Aggregation
 
-If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. Use the [Metrics Transform Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md) for this:
+If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">Metrics Transform Processor</a> for this:
 
 For example, to view network traffic *per interface* (ignoring individual pods), you should `sum` the values of all pods for each interface. 
 

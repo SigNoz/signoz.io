@@ -1,5 +1,5 @@
 ---
-date: 2025-12-16
+date: 2026-05-11
 title: Monitor Multiple K8S Clusters with k8s-Infra
 
 id: k8s-infra-multi-cluster
@@ -41,11 +41,11 @@ global:
   cloud: others                 # or aws/gcp/aks to enable resource detection
   clusterName: <UNIQUE_CLUSTER_NAME>
   deploymentEnvironment: <ENV>  # e.g., production, staging
-otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
 otelInsecure: false
 signozApiKey: <your-ingestion-key>
 presets:
-  otlpExporter:
+  otlphttpExporter:
     enabled: true
 ````
 
@@ -65,10 +65,10 @@ global:
   cloud: others
   clusterName: <UNIQUE_CLUSTER_NAME>
   deploymentEnvironment: <ENV>
-otelCollectorEndpoint: <SIGNOZ_OTLP_ENDPOINT>:4317
+otelCollectorEndpoint: http://<SIGNOZ_OTLP_ENDPOINT>:4318
 otelInsecure: true            # set to false if your endpoint uses TLS
 presets:
-  otlpExporter:
+  otlphttpExporter:
     enabled: true
 ```
 
@@ -94,7 +94,7 @@ helm install k8s-infra-<cluster> signoz/k8s-infra -n signoz-infra --create-names
 
 * Use consistent, unique `global.clusterName` values.
 * Consider separate ingestion keys per cluster for isolation/rotation.
-* Ensure egress to your OTLP endpoint (`4317` for gRPC; `443` for SigNoz Cloud).
+* Ensure egress to your OTLP endpoint (`4318` for OTLP/HTTP; `443` for SigNoz Cloud).
 
 ## Next Steps
 

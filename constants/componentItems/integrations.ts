@@ -109,6 +109,11 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/outposts/flyio',
       clickName: 'Fly.io Integration Link',
     },
+    {
+      name: 'Railway',
+      href: '/docs/integrations/outposts/railway',
+      clickName: 'Railway Integration Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 

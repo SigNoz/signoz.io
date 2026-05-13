@@ -1,5 +1,5 @@
 ---
-date: 2026-02-04
+date: 2026-05-11
 id: install
 
 title: ECS Serverless Collection Agent - Install
@@ -74,8 +74,8 @@ The OpenTelemetry Collector configuration defines what data to collect and where
              - container.duration
 
    exporters:
-     otlp:
-       endpoint: 'ingest.{region}.signoz.cloud:443'
+     otlphttp:
+       endpoint: 'https://ingest.{region}.signoz.cloud:443'
        headers:
          'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY'
 
@@ -85,19 +85,19 @@ The OpenTelemetry Collector configuration defines what data to collect and where
        traces:
          receivers: [otlp]
          processors: [batch]
-         exporters: [otlp]
+         exporters: [otlphttp]
        metrics:
          receivers: [otlp]
          processors: [batch]
-         exporters: [otlp]
+         exporters: [otlphttp]
        metrics/aws:
          receivers: [awsecscontainermetrics]
          processors: [filter]
-         exporters: [otlp]
+         exporters: [otlphttp]
        logs:
          receivers: [otlp, fluentforward]
          processors: [batch]
-         exporters: [otlp]
+         exporters: [otlphttp]
    ```
 
 3. Update the following placeholders in the YAML configuration:
@@ -146,10 +146,8 @@ The OpenTelemetry Collector configuration defines what data to collect and where
              - container.duration
 
    exporters:
-     otlp:
-       endpoint: '<IP of machine hosting SigNoz>:4317'
-       tls:
-         insecure: true
+     otlphttp:
+       endpoint: 'http://<IP of machine hosting SigNoz>:4318'
 
    service:
      extensions: [health_check]
@@ -157,19 +155,19 @@ The OpenTelemetry Collector configuration defines what data to collect and where
        traces:
          receivers: [otlp]
          processors: [batch]
-         exporters: [otlp]
+         exporters: [otlphttp]
        metrics:
          receivers: [otlp]
          processors: [batch]
-         exporters: [otlp]
+         exporters: [otlphttp]
        metrics/aws:
          receivers: [awsecscontainermetrics]
          processors: [filter]
-         exporters: [otlp]
+         exporters: [otlphttp]
        logs:
          receivers: [otlp, fluentforward]
          processors: [batch]
-         exporters: [otlp]
+         exporters: [otlphttp]
    ```
 
 3. Update `<IP of machine hosting SigNoz>` with the address of your SigNoz OTelCollector in the YAML configuration.

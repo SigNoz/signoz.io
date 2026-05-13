@@ -1,25 +1,32 @@
 ---
-date: 2026-04-23
+date: 2026-05-12
 id: log-based-alerts
 title: Log based alerts
 description: Set up log-based alerts in SigNoz using the Logs Query Builder to trigger notifications based on log patterns and thresholds.
-doc_type: howto
+doc_type: reference
 ---
 
-A Log-based alert allows you to define conditions based on log data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Log-based alert:
+A Log-based alert allows you to define conditions based on log data, triggering alerts when these conditions are met. You can define your log query using **Query Builder** or **ClickHouse queries**.
+
+This page covers the configuration options available for Log-based alerts — from defining the log query to setting conditions and notification preferences.
+
+At the top of the alert creation page, you can set:
+
+- **Alert Name**: A field to name the alert for easy identification.
+- **Labels**: Add static labels or tags for categorization. Labels should be added in key-value pairs. First enter key (avoid space in key) and set value.
 
 ## Step 1: Define the Log Metric
 
 In this step, you use the [Logs Query Builder](https://signoz.io/docs/userguide/query-builder/#logs-and-traces-query-builder)
-to apply filters and operations on your logs to define conditions which triggers log based alert Some of the fields that are available in Logs Query Builder includes:
+to apply filters and operations on your logs to define conditions which trigger the alert. The following fields are available:
 
-- **Logs**: A field to filter the specific log data to monitor. 
+- **Filter**: Write a filter expression to search your logs (e.g., `body CONTAINS 'error' AND service.name EXISTS`). Supports logical operators like AND, OR, IN, NOT IN, CONTAINS, EXISTS.
 
-- **Aggregate Attribute**: Allows you to select how the log data should be aggregated (e.g., "Count").
+- **Aggregate Attribute**: Select how the log data should be aggregated (e.g., `count()`, `count_distinct()`, `avg()`, `sum()`, `p95()`).
 
-- **Group by**: Provides options to group log data by various attributes, such as "service.name", "method" or custom attributes.
+- **Group By**: Group log data by various attributes, such as `service.name`, `k8s.namespace.name`, or custom attributes.
 
-- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: Lets you define the format for the legend in the visual representation of the alert.
+- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: Define the format for the legend in the visual representation of the alert.
 
 - **Having**: Apply conditions to filter the results further based on aggregate value.
 
@@ -32,26 +39,26 @@ to apply filters and operations on your logs to define conditions which triggers
 ## Step 2: Define Alert Conditions
 
 In this step, you define the specific conditions for triggering the alert, as well as the frequency of checking those conditions.
-The condition configuration of an alert in SigNoz consists of 5 core parts:
+The condition configuration of an alert in SigNoz consists of these core parts:
 
 ### Query
-    
+
    An alert can consist of multiple queries and formulas. But only 1 of them can be put into consideration while determining the alert condition.
-    
+
    You can define one or more queries or formulas to fetch the data you want to evaluate. However, only one of them can be used as the trigger for the alert condition.
-    
+
    For example:
-    
+
    - `A` = Total request count
    - `B` = Total error count
    - `C` = `B / A` (Error rate)
-    
+
    You can use query `C` as the evaluation target to trigger alerts based on error rate.
-    
+
 ### Condition
-    
-   This defines the logical condition to check against the selected query’s value.
-    
+
+   This defines the logical condition to check against the selected query's value.
+
    | Operator | Description | Example Usage |
    | --- | --- | --- |
    | `Above` | Triggers if the value is greater than | CPU usage `Above 90` (%) |
@@ -60,9 +67,9 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
    | `Not equal to` | Triggers if the value is not equal | Instance status `Not Equal to 1` |
 
 ### Match Type
-    
+
    Specifies how the condition must hold over the evaluation window. This allows for flexible evaluation logic.
-    
+
    | Match Type | Description | Example Use Case |
    | --- | --- | --- |
    | `at least once` | Trigger if condition matches even once in the window | Detect spikes or brief failures |
@@ -71,54 +78,50 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
    | `in total` | Evaluate the total sum over the window | Total errors `Above 100` |
    | `last` | Only the last data point is evaluated | Used when only latest status matters |
 
-### Evaluation Window (For)
-    
-   Specifies how long the condition must be true before the alert is triggered.
-    
-   e.g. `For 5 minutes` = The condition must remain true continuously for 5 minutes before the alert is triggered.
-    
-   This helps reduce false positives due to short-lived spikes.
-    
+### Evaluation Window
+
+   Specifies the time window and mode for evaluating the condition. You can choose between two modes:
+
+   - **Rolling**: Monitors data over a fixed time period that moves forward continuously. For example, a 5-minute rolling window with 1-minute evaluation cadence checks continuously: 14:01:00–14:06:00, 14:02:00–14:07:00, etc.
+   - **Cumulative**: Monitors data accumulated since a fixed starting point. The window grows over time, keeping all historical data from the start.
+
+   Both modes support preset timeframes (Last 5 minutes, Last 10 minutes, Last 15 minutes, Last 30 minutes, Last 1 hour, Last 2 hours, Last 4 hours) as well as a **Custom** time range for specific requirements.
+
 ### Threshold
-    
+
    This is the value you are comparing the query result against.
-    
+
    e.g. If you choose `Condition = Above` and set `Threshold = 500`, the alert will fire when the query result exceeds 500.
-    
+
 ### Threshold Unit
-    
+
    Specifies the unit of the threshold, such as:
-    
+
    - ms (milliseconds) for latency
    - % for CPU usage
    - Count for request totals
-    
+
    Helps interpret the threshold in the correct context and also for correct scaling while comparing 2 values.
-    
+
+### Notification Channels
+
+   Choose the [notification channels](https://signoz.io/docs/alerts-management/notification-channel/slack/) to send alerts to from those configured in Settings > Account Settings > Notification Channels. You can select multiple channels per threshold.
+
 ### Advanced Options
 
-In addition, there are 3 more advanced options:
+Under the **Advanced Options** section, you can configure:
 
-### Alert Frequency
-   - How frequently SigNoz evaluates the alert condition.
-   - Default is `1 min`
-   - e.g. If set to `1 min` the alert will run once every minute.
+- **How often to check**: How frequently SigNoz evaluates the alert condition. Default is every 1 minute.
 
-### Notification for missing data points
-   - Triggers an alert if **no data is received** for the configured time period.
-   - Useful for services where consistent data is expected.
-   - E.g. If set to `5 minutes`, and no metric data is received during that period, the alert will fire.
+- **Alert when data stops coming**: Send a notification if no data is received for a specified time period. Useful for services where consistent data is expected.
 
-### Minimum Data Points in Result Group
-   - Ensures the alert condition is evaluated only when there's enough data for statistical significance.
-   - Helps avoid false alerts due to missing or sparse data points.
-   - E.g. If set to `3`, the query must return at least 3 data points in the evaluation window for the alert to be considered.
+- **Minimum data required**: Only trigger the alert when there are enough data points to make a reliable decision. Helps avoid false alerts due to missing or sparse data.
 
-## Step 3: Alert Configuration
-In this step, you set the alert's metadata, including severity, name, and description:
+## Step 3: Notification Settings
+In this step, you configure how alert notifications are delivered:
 
-### Severity
-Set the severity level for the alert (e.g., "Warning" or "Critical").
+### Notification Message
+Custom message content for alert notifications. Use template variables to include dynamic information. The default template includes the current value and threshold.
 
 ### Alert Name
 A field to name the alert for easy identification.
@@ -142,22 +145,33 @@ You can incorporate template variables in the alert descriptions to make the ale
 
 Log-based alert notifications include a **Related Logs** link that opens the Logs Explorer filtered to the relevant time range and query filters from the alert definition. Use this to view the actual log messages that contributed to the alert.
 
-#### Slack alert format
+Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" target="_blank" rel="noopener noreferrer nofollow">advanced Slack formatting</a> is supported if you are using Slack as a notification channel.
 
-Using [advanced slack formatting](https://api.slack.com/reference/surfaces/formatting#advanced) is supported if you are using Slack as a notification channel.
+### Group alerts by
+Combine alerts with the same field values into a single notification. Select fields to group by (optional). When empty, all matching alerts are combined into one notification.
 
-### Labels
-A field to add static labels or tags for categorization. Labels should be added in key value pairs. First enter key (avoid space in key) and set value.
+### Repeat Notifications
+Configure repeat notifications to retrigger alerts at specified intervals if they remain unresolved. To enable:
 
-### Notification channels
-A field to choose the [notification channels](https://signoz.io/docs/setup-alerts-notification) from those configured in the Alert Channel settings.
+1. Scroll to the bottom of the alert configuration
+2. Enable the **Repeat Notification** toggle
+3. Set your desired interval
+4. Configure the condition:
+   - **Firing**: Send repeat notifications when the alert is actively firing
+   - **No Data**: Send repeat notifications when no data is received
+
+<Figure
+  src="/img/docs/repeat-notification.webp"
+  alt="Repeat Notification configuration showing interval and condition options"
+  caption="Repeat Notification configuration"
+/>
 
 ### Test Notification
-A button to test the alert to ensure that it works as expected.
+Click the **Test Notification** button at the bottom of the page to send a test alert to the configured notification channels. This verifies that your alert pipeline is working correctly before saving.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/alerts/alerts-log-based-3.webp" alt="Configure the alert"/>
-    <figcaption><i>Setting the alert metadata </i></figcaption>
+    <img src="/img/docs/alerts/alerts-log-based-3.webp" alt="Notification settings for the log alert"/>
+    <figcaption><i>Notification settings </i></figcaption>
 </figure>
 
 ## Examples
@@ -165,7 +179,7 @@ A button to test the alert to ensure that it works as expected.
 ### 1. Alert when percentage of `redis timeout` error logs greater than 7% in last 5 mins
 
 
-#### Here's a video tutorial for creating this alert: 
+#### Here's a video tutorial for creating this alert:
 
 <YouTube id="2IgZbpuuEW0" mute={false} />
 <br></br>
@@ -173,36 +187,26 @@ A button to test the alert to ensure that it works as expected.
 #### Step 1: Write Query Builder query to define alert metric
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-metric.png" alt="logs builder query for redis timeout logs percentage"/>
+    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-metric.webp" alt="logs builder query for redis timeout logs percentage"/>
     <figcaption><i>Redis timeout query</i></figcaption>
 </figure>
 
-Here we write 2 queries to calculate error logs percent. First query to count logs which are `redis timeout` error logs.
-Second query to count total logs. Then we add a formula to calculate percentage.
+Here we write 2 queries to calculate error logs percent. Query A counts logs which contain `redis` in the body. Query B counts total logs (no filter). Then we add a formula `(A/B)*100` to calculate the percentage.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-chart.png" alt="error logs percentage chart"/>
-    <figcaption><i>Error log percentage chart</i></figcaption>
-</figure>
-
-<Admonition type="info">
-Remember to select y-axis unit as Percent(0-100) as we want to apply threshold in percent.
-</Admonition>
-<br></br>
 #### Step 2: Set alert conditions
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-conditions.png" alt="redis timeout alert condition"/>
+    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-conditions.webp" alt="redis timeout alert condition"/>
     <figcaption><i>Error logs percentage alert condition</i></figcaption>
 </figure>
 
-The condition is set to trigger a notification if the per-minute error logs percentage exceeds the threshold of 1 second on average in the last five minutes.
+The condition is set to trigger a notification if the per-minute error logs percentage exceeds the threshold of 7% on average in the last five minutes.
 
 #### Step 3: Set alert configuration
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-configuration.png" alt="redis timeout alert configuration"/>
+    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-configuration.webp" alt="redis timeout alert configuration"/>
     <figcaption><i>Error logs percentage alert configuration</i></figcaption>
 </figure>
 
-At last configure the alert as `Warning`, add a name and notification channel.
+Configure the notification message, group alerts by, and repeat notifications as needed.

@@ -4,7 +4,9 @@ import StartUpsLayout from './StartUpsLayout'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
+  title: {
+    absolute: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
+  },
   description:
     'Special pricing for startups: $19/month for the first 12 months (regularly $49) so lean teams get full-stack observability without overspending.',
   openGraph: {
