@@ -452,7 +452,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/userguide/writing-clickhouse-traces-query',
+                route: '/docs/operate/clickhouse/clickhouse-queries',
                 label: 'ClickHouse queries for building dashboards and alerts',
               },
             ],
