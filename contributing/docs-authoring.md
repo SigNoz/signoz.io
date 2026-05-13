@@ -122,7 +122,10 @@ When documenting OpenTelemetry Collector changes:
 ## Patterns And Components
 
 - Use `Admonition` for notes, warnings, tips, and supplementary or optional material. Do not use `KeyPointCallout`.
-- Use `Tabs` and `TabItem` only when flows materially differ by platform or environment. Always provide an `entityName` prop on `<Tabs>` (e.g., `<Tabs entityName="environment">`). Ensure for vm, docker, kubernetes it is environment.
+- Use `Tabs` and `TabItem` only when flows materially differ by platform or environment. Always provide an `entityName` prop on `<Tabs>` that matches what the tabs represent:
+  - `entityName="environment"` — deployment infrastructure tabs: VM, Kubernetes, Docker, Windows. Only use this when the tabs distinguish between these deployment environments.
+  - `entityName="plans"` — SigNoz Cloud vs Self-Hosted tabs.
+  - For other tab groupings, use a short descriptive name (e.g., `"language"`, `"signal"`, `"setup"`).
 - Prefer numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful.
 
