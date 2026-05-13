@@ -2643,7 +2643,7 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/userguide/alerts-management',
         items: [
-          { type: 'doc', route: '/docs/userguide/alerts-management', label: 'Alerts Page' },
+          { type: 'doc', route: '/docs/userguide/alerts-management', label: 'Alert List Page' },
           { type: 'doc', route: '/docs/alerts-management/alerts-history', label: 'Alert History' },
           {
             type: 'doc',
@@ -2737,6 +2737,11 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/k8s-cpu-usage-alert',
             label: 'Kubernetes CPU Usage Alert',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/apdex-alerts',
+            label: 'Apdex Alerts',
+          },
         ],
       },
       {
@@ -2754,11 +2759,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
             label: 'Time Aggregation Best Practices',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/apdex-alerts',
-            label: 'Apdex Alerts',
           },
         ],
       },
