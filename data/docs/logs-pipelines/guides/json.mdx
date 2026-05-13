@@ -1,15 +1,16 @@
 ---
-date: 2024-06-06
+date: 2026-05-04
 id: json
-
 title: Parse JSON logs with Pipelines
+description: Parse serialized JSON log bodies into structured attributes using SigNoz Log Pipelines with flattening and mapping options.
+doc_type: tutorial
 ---
 
 
 ## Overview
 If your logs contain serialized JSON in their bodies, the log detail view in SigNoz UI will
 display the body in a parsed, easy to use structure. You can also
-[filter your logs based on JSON data in the body](/docs/userguide/logs_query_builder/#writing-json-filters-in-the-new-logs-explorer).  
+[filter your logs based on JSON data in the body](https://signoz.io/docs/userguide/logs_query_builder/#filtering-and-search).  
 
 <figure data-zoomable align="center">
   <img
@@ -37,29 +38,17 @@ While these powerful features work out of the box, you can take things up a notc
   </figcaption>
 </figure>
 
-Filtering by log attributes is more efficient and also unlocks aggregations based on fields extracted from your JSON data.  
-
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/avg-order-value-by-country.png"
-    alt="Average Order Value by Country based on log attributes parsed from JSON bodies containing Order details"
-  />
-  <figcaption>
-    <i>
-      Average Order Value by Country based on log attributes parsed from JSON bodies containing Order details
-    </i>
-  </figcaption>
-</figure>
+Filtering by log attributes is more efficient and also unlocks aggregations based on fields extracted from your JSON data.
 
 The parsed attributes can also be used to further enrich your log records. For example, if the serialized JSON contained trace information, you could
-[populate trace details](/docs/logs-pipelines/guides/trace) in your log records from the parsed attributes, enabling correlation of your logs to and from corresponding traces.  
+[populate trace details](https://signoz.io/docs/logs-pipelines/guides/trace) in your log records from the parsed attributes, enabling correlation of your logs to and from corresponding traces.  
 
 In this guide, you will see how to parse interesting fields out of serialized JSON bodies into their own log attributes, and how to use the advanced JSON flattening options for even more control.
 
 ---
 
 ## Prerequisites
- - You are [sending logs to SigNoz](/docs/userguide/logs).
+ - You are [sending logs to SigNoz](https://signoz.io/docs/userguide/logs).
  - Your logs contain **serialized JSON** data in the body.
 
 
@@ -181,81 +170,54 @@ body = "this is the real log"
 
 ## Step-by-Step: Creating a Pipeline with JSON Flattening
 
-### Step 1: Navigate to Logs Pipelines Page
+### Step 1: Navigate to Pipelines Page
 
-Hover over the **Logs** menu in the sidebar and click on the **Logs Pipeline** submenu item. This is where you can manage all your log processing pipelines.
+In SigNoz, go to **Logs** → **Pipelines**
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/navigate-to-logs-pipelines.png"
-    alt="Sidebar navigation for getting to Logs Pipelines page"
-  />
-  <figcaption>
-    <i>
-      Sidebar navigation for getting to Logs Pipelines page
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step1.webp"
+  alt="Navigate to Log Pipelines"
+  caption="Navigate to Log Pipelines"
+/>
 
 ### Step 2: Create a New Pipeline
 
-- Open the "Create New Pipeline" dialog.
-    - If you do not have existing pipelines, press the "**New Pipeline**" button.
-    <figure data-zoomable align="center">
-      <img
-        src="/img/logs/pipelines/empty-state-new-pipeline-button.png"
-        alt="New Pipeline Button"
-      />
-      <figcaption>
-        <i>
-          New Pipeline Button
-        </i>
-      </figcaption>
-    </figure>
-    
-    - If you already have some pipelines, press the "**Enter Edit Mode**" button and then click the "**Add a New Pipeline**" button at the bottom of the list of pipelines.
-    <figure data-zoomable align="center">
-      <img
-        src="/img/logs/pipelines/enter-edit-mode.png"
-        alt="Enter edit mode button"
-      />
-      <figcaption>
-        <i>
-          Enter Edit Mode button
-        </i>
-      </figcaption>
-    </figure>
-    <figure data-zoomable align="center">
-      <img
-        src="/img/logs/pipelines/add-a-new-pipeline.png"
-        alt="Add a New Pipeline button"
-      />
-      <figcaption>
-        <i>
-          Add a New Pipeline button
-        </i>
-      </figcaption>
-    </figure>
+- If you do not have existing pipelines, press the **"New Pipeline"** button.
 
-- Provide details about the pipeline in the Create Pipeline Dialog.
-    - Use the **Name** field to give your pipeline a descriptive short name.
-    - Use the **Description** field to add a detailed description for your pipeline.
-    - Use the **Filter** field to select the logs you want to process with this pipeline. Typically, these are filters identifying the source of the logs you want to process. `service = checkout` for example.
-    - Use the **Filtered Logs Preview** to verify that the logs you want to process will be selected by the pipeline.  Note that while it is not ideal, it is ok if your filter selects other non JSON logs too.
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/logs-parsing-pipeline-step2.webp"
+  alt="New Pipeline Button"
+  caption="New Pipeline Button"
+/>
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/add-new-pipeline-modal.png"
-    alt="Create New Pipeline dialog"
-  />
-  <figcaption>
-    <i>
-      Create New Pipeline dialog
-    </i>
-  </figcaption>
-</figure>
+- If you already have some pipelines, press the **"Enter Edit Mode"** button and then click the **"Add a New Pipeline"** button at the bottom of the list.
 
-- Press the "**Create**" button if everything looks right.
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step3.webp"
+  alt="Enter Edit Mode button"
+  caption="Enter Edit Mode button"
+/>
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step4.webp"
+  alt="Add a New Pipeline button"
+  caption="Add a New Pipeline button"
+/>
+
+Provide details about the pipeline in the Create Pipeline Dialog:
+
+- **Name:** Provide a descriptive pipeline name.
+- **Description:** Add a detailed description for your pipeline (optional).
+- **Filter:** Use the filter field to select the logs you want to process. For example, `service.name = checkout`. Note that while it is not ideal, it is ok if your filter selects other non-JSON logs too.
+- **Filtered Logs Preview:** Verify that the logs you want to process are selected.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step5.webp"
+  alt="Create New Pipeline dialog"
+  caption="Create New Pipeline dialog"
+/>
+
+Press the **"Create"** button to create the pipeline.
 
 ### Step 3: Add a JSON Parser Processor with Flattening
 

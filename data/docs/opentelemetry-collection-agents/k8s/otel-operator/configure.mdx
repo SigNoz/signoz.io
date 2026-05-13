@@ -1,5 +1,5 @@
 ---
-date: 2026-02-04
+date: 2026-05-11
 id: configure
 
 title: OpenTelemetry Operator - Configure
@@ -10,9 +10,9 @@ This guide explains how to configure the OpenTelemetry Operator to deploy collec
 
 **Prerequisites**
 
+- A SigNoz backend (either SigNoz Cloud or self-hosted)
 - A running Kubernetes cluster and `kubectl` access
 - OpenTelemetry Operator installed with CRDs applied (see [Install guide](/docs/collection-agents/k8s/otel-operator/install))
-- A reachable SigNoz OTLP endpoint (gRPC 4317 and/or HTTP 4318)
 
 ## Configuring for DaemonSet
 
@@ -149,13 +149,10 @@ spec:
       mountPropagation: HostToContainer
   config:
     exporters:
-      otlp:
+      otlphttp:
         endpoint: https://ingest.{region}.signoz.cloud:443
         headers:
           signoz-ingestion-key: '<your-ingestion-key>'
-        tls:
-          insecure: false
-          insecure_skip_verify: false
     extensions:
       health_check:
         endpoint: 0.0.0.0:13133
@@ -359,7 +356,7 @@ spec:
       pipelines:
         logs:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - resourcedetection
             - k8sattributes
@@ -369,7 +366,7 @@ spec:
             - filelog/k8s
         metrics:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - resourcedetection
             - k8sattributes
@@ -380,7 +377,7 @@ spec:
             - kubeletstats
         traces:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - resourcedetection
             - k8sattributes
@@ -415,7 +412,7 @@ spec:
   image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
   env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: '<SIGNOZ_OTLP_GRPC_ENDPOINT>'
+      value: '<SIGNOZ_OTLP_HTTP_ENDPOINT>'
     - name: K8S_CLUSTER_NAME
       value: 'ope'
     - name: K8S_NODE_NAME
@@ -472,10 +469,8 @@ spec:
       mountPropagation: HostToContainer
   config:
     exporters:
-      otlp:
+      otlphttp:
         endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
-        tls:
-          insecure: false
     extensions:
       health_check:
         endpoint: 0.0.0.0:13133
@@ -679,7 +674,7 @@ spec:
       pipelines:
         logs:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - resourcedetection
             - k8sattributes
@@ -689,7 +684,7 @@ spec:
             - filelog/k8s
         metrics:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - resourcedetection
             - k8sattributes
@@ -700,7 +695,7 @@ spec:
             - kubeletstats
         traces:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - resourcedetection
             - k8sattributes
@@ -876,13 +871,10 @@ spec:
       mountPropagation: HostToContainer
   config:
     exporters:
-      otlp:
+      otlphttp:
         endpoint: https://ingest.{region}.signoz.cloud:443
         headers:
           signoz-ingestion-key: '<your-ingestion-key>'
-        tls:
-          insecure: false
-          insecure_skip_verify: false
     extensions:
       health_check:
         endpoint: 0.0.0.0:13133
@@ -961,7 +953,7 @@ spec:
       pipelines:
         logs:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - k8sattributes
             - resourcedetection
@@ -970,7 +962,7 @@ spec:
             - k8s_events
         metrics/internal:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - k8sattributes
             - resourcedetection
@@ -1004,7 +996,7 @@ spec:
   image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
   env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: '<SIGNOZ_OTLP_GRPC_ENDPOINT>'
+      value: '<SIGNOZ_OTLP_HTTP_ENDPOINT>'
     - name: OTEL_SECRETS_PATH
       value: /secrets
     - name: K8S_CLUSTER_NAME
@@ -1062,13 +1054,10 @@ spec:
       mountPropagation: HostToContainer
   config:
     exporters:
-      otlp:
+      otlphttp:
         endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
         headers:
           signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-        tls:
-          insecure: false
-          insecure_skip_verify: false
     extensions:
       health_check:
         endpoint: 0.0.0.0:13133
@@ -1147,7 +1136,7 @@ spec:
       pipelines:
         logs:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - k8sattributes
             - resourcedetection
@@ -1156,7 +1145,7 @@ spec:
             - k8s_events
         metrics/internal:
           exporters:
-            - otlp
+            - otlphttp
           processors:
             - k8sattributes
             - resourcedetection
