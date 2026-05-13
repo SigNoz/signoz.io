@@ -1940,8 +1940,12 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/metrics-management/reference',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/querying-metrics',
+            label: 'Querying Metrics',
+          },
           { type: 'doc', route: '/docs/metrics-management/query-range-api', label: 'Metrics API' },
-          { type: 'doc', route: '/docs/metrics-management/data-storage', label: 'Metrics Tables' },
           {
             type: 'doc',
             route: '/docs/metrics-management/reducing-costs',

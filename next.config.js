@@ -1943,6 +1943,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/metrics-management/data-storage/',
+          destination: '/docs/metrics-management/reference/',
+          permanent: true,
+        },
+        {
           source: '/docs/traces/',
           destination: '/docs/instrumentation/overview/',
           permanent: true,
