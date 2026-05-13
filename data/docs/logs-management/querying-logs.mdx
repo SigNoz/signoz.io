@@ -1,0 +1,67 @@
+---
+date: 2026-05-13
+id: querying-logs
+title: Querying Logs
+description: Query logs in SigNoz using the Query Builder in Logs Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
+---
+
+You can query logs in two places in SigNoz:
+
+- **[Logs Explorer](https://signoz.io/docs/logs-management/logs-explorer/)** — Use the Query Builder to search, filter, and visualize logs interactively.
+- **[Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)** — Use the Query Builder or ClickHouse SQL to build persistent log panels.
+
+## Query Builder
+
+The Query Builder is the primary way to query logs. It is available in both Logs Explorer and Dashboards.
+
+### Filtering
+
+Use the **Filter** field to narrow down logs using attributes, body content, and severity. Supported operators include:
+
+| Intent | Operator | Example |
+|---|---|---|
+| Exact match | `=` | `service.name = 'frontend'` |
+| Exclude | `!=` | `service.name != 'redis'` |
+| One of several | `IN` | `severity_text IN ('ERROR', 'WARN')` |
+| Substring | `LIKE` | `body LIKE '%timeout%'` |
+| Case-insensitive | `ILIKE` | `body ILIKE '%connection refused%'` |
+| Text containment | `CONTAINS` | `body CONTAINS 'panic'` |
+| Field exists | `EXISTS` | `trace_id EXISTS` |
+
+Combine filters with `AND` / `OR` for complex queries.
+
+### Aggregation
+
+Log queries support a full set of aggregation functions:
+
+- **Statistical** — Count, Count Distinct, Sum, Avg, Min, Max
+- **Percentiles** — P05, P10, P25, P50, P75, P90, P95, P99
+- **Rate** — Rate, Rate Sum, Rate Avg, Rate Max, Rate Min
+
+### Group By
+
+Segment results by one or more attributes. For example, grouping by `service.name` produces a separate series for each service. Useful in aggregate views to compare error counts across services, namespaces, or any other attribute.
+
+### Having
+
+Filter results after aggregation. For example, `count() > 1000` shows only groups exceeding 1000 log entries.
+
+### Functions
+
+Transform query results with:
+- **Smoothing** — EWMA for noisy data
+- **Arithmetic** — Absolute value, Running Diff, Log2, Log10
+- **Clamping** — Cap values with Clamp Min/Max
+- **Time Shift** — Compare against a previous time period
+
+### Formulas
+
+Combine up to ten queries using formulas. For example, calculate error ratio: `(A / B) * 100`, where A counts error logs and B counts all logs.
+
+For full details on the Query Builder, see the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder/).
+
+## ClickHouse SQL (Dashboards Only)
+
+When building Dashboard panels, you can write raw ClickHouse SQL queries against the logs tables for advanced analytics beyond what the Query Builder supports.
+
+For details and example queries, see the [ClickHouse Logs Query guide](https://signoz.io/docs/userguide/logs_clickhouse_queries/).
