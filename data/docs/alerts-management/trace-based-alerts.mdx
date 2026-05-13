@@ -1,22 +1,30 @@
 ---
-date: 2026-04-01
+date: 2026-05-12
 id: trace-based-alerts
 title: Trace based alerts
 description: Create trace-based alerts in SigNoz using the Traces Query Builder to monitor span attributes, latency, and error rates.
+doc_type: reference
 ---
 
-A Trace-based alert in SigNoz allows you to define conditions based on trace data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Trace-based alert:
+A Trace-based alert in SigNoz allows you to define conditions based on trace data, triggering alerts when these conditions are met. You can define your trace query using **Query Builder** or **ClickHouse queries**.
+
+This page covers the configuration options available for Trace-based alerts — from defining the trace query to setting conditions and notification preferences.
+
+At the top of the alert creation page, you can set:
+
+- **Alert Name**: A field to name the alert for easy identification.
+- **Labels**: Add static labels or tags for categorization. Labels should be added in key-value pairs. First enter key (avoid space in key) and set value.
 
 ## Step 1: Define the Trace Metric
 
 In this step, you use the [Traces Query Builder](https://signoz.io/docs/userguide/query-builder/#logs-and-traces-query-builder)
-to perform operations on your Traces to define conditions based on traces data. Some of the fields that are available in Traces Query Builder includes
+to perform operations on your Traces to define conditions based on traces data. The following fields are available:
 
-- **Traces**: A field to filter the trace data to monitor. 
+- **Filter**: Write a filter expression to search your traces (e.g., `service.name = 'frontend' AND http.status_code >= 500`). Select the span scope (`All Spans`, `Root Spans`, etc.) from the dropdown.
 
-- **Aggregate Attribute**: Allows you to choose how the trace data should be aggregated. You can use functions like "Count"
+- **Aggregate Attribute**: Select how the trace data should be aggregated. You can use functions like `count()`, `p90(duration_nano)`, `avg(duration_nano)`, etc.
 
-- **Group by**: Lets you group trace data by different span/trace attributes, like "serviceName", "Status" or other custom attributes.
+- **Group By**: Group trace data by different span/trace attributes, like `serviceName`, `status`, or other custom attributes.
 
 - **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to define the format for the legend in the visual representation of the alert.
 
@@ -31,26 +39,26 @@ to perform operations on your Traces to define conditions based on traces data. 
 ## Step 2: Define Alert Conditions
 
 In this step, you define the specific conditions for triggering the alert, as well as the frequency of checking those conditions.
-The condition configuration of an alert in SigNoz consists of 5 core parts:
+The condition configuration of an alert in SigNoz consists of these core parts:
 
 ### Query
-    
+
    An alert can consist of multiple queries and formulas. But only 1 of them can be put into consideration while determining the alert condition.
-    
+
    You can define one or more queries or formulas to fetch the data you want to evaluate. However, only one of them can be used as the trigger for the alert condition.
-    
+
    For example:
-    
+
    - `A` = Total request count
    - `B` = Total error count
    - `C` = `B / A` (Error rate)
-    
+
    You can use query `C` as the evaluation target to trigger alerts based on error rate.
-    
+
 ### Condition
-    
-   This defines the logical condition to check against the selected query’s value.
-    
+
+   This defines the logical condition to check against the selected query's value.
+
    | Operator | Description | Example Usage |
    | --- | --- | --- |
    | `Above` | Triggers if the value is greater than | CPU usage `Above 90` (%) |
@@ -59,9 +67,9 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
    | `Not equal to` | Triggers if the value is not equal | Instance status `Not Equal to 1` |
 
 ### Match Type
-    
+
    Specifies how the condition must hold over the evaluation window. This allows for flexible evaluation logic.
-    
+
    | Match Type | Description | Example Use Case |
    | --- | --- | --- |
    | `at least once` | Trigger if condition matches even once in the window | Detect spikes or brief failures |
@@ -70,84 +78,90 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
    | `in total` | Evaluate the total sum over the window | Total errors `Above 100` |
    | `last` | Only the last data point is evaluated | Used when only latest status matters |
 
-### Evaluation Window (For)
-    
-   Specifies how long the condition must be true before the alert is triggered.
-    
-   e.g. `For 5 minutes` = The condition must remain true continuously for 5 minutes before the alert is triggered.
-    
-   This helps reduce false positives due to short-lived spikes.
-    
+### Evaluation Window
+
+   Specifies the time window and mode for evaluating the condition. You can choose between two modes:
+
+   - **Rolling**: Monitors data over a fixed time period that moves forward continuously. For example, a 5-minute rolling window with 1-minute evaluation cadence checks continuously: 14:01:00–14:06:00, 14:02:00–14:07:00, etc.
+   - **Cumulative**: Monitors data accumulated since a fixed starting point. The window grows over time, keeping all historical data from the start.
+
+   Both modes support preset timeframes (Last 5 minutes, Last 10 minutes, Last 15 minutes, Last 30 minutes, Last 1 hour, Last 2 hours, Last 4 hours) as well as a **Custom** time range for specific requirements.
+
 ### Threshold
-    
+
    This is the value you are comparing the query result against.
-    
+
    e.g. If you choose `Condition = Above` and set `Threshold = 500`, the alert will fire when the query result exceeds 500.
-    
+
 ### Threshold Unit
-    
+
    Specifies the unit of the threshold, such as:
-    
+
    - ms (milliseconds) for latency
    - % for CPU usage
    - Count for request totals
-    
+
    Helps interpret the threshold in the correct context and also for correct scaling while comparing 2 values.
-    
+
+### Notification Channels
+
+   Choose the [notification channels](https://signoz.io/docs/alerts-management/notification-channel/slack/) to send alerts to from those configured in Settings > Account Settings > Notification Channels. You can select multiple channels per threshold.
+
 ### Advanced Options
 
-In addition, there are 3 more advanced options:
+Under the **Advanced Options** section, you can configure:
 
-### Alert Frequency
-   - How frequently SigNoz evaluates the alert condition.
-   - Default is `1 min`
-   - e.g. If set to `1 min` the alert will run once every minute.
+- **How often to check**: How frequently SigNoz evaluates the alert condition. Default is every 1 minute.
 
-### Notification for missing data points
-   - Triggers an alert if **no data is received** for the configured time period.
-   - Useful for services where consistent data is expected.
-   - E.g. If set to `5 minutes`, and no metric data is received during that period, the alert will fire.
+- **Alert when data stops coming**: Send a notification if no data is received for a specified time period. Useful for services where consistent data is expected.
 
-### Minimum Data Points in Result Group
-   - Ensures the alert condition is evaluated only when there's enough data for statistical significance.
-   - Helps avoid false alerts due to missing or sparse data points.
-   - E.g. If set to `3`, the query must return at least 3 data points in the evaluation window for the alert to be considered.
+- **Minimum data required**: Only trigger the alert when there are enough data points to make a reliable decision. Helps avoid false alerts due to missing or sparse data.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/alerts/alerts-trace-based-2.webp" alt="Define the alert conditions"/>
-    <figcaption><i>Define the alert conditions </i></figcaption>
+    <img src="/img/docs/alerts/alerts-trace-based-2.webp" alt="Set alert conditions"/>
+    <figcaption><i>Set alert conditions </i></figcaption>
 </figure>
 
 
-## Step 3: Alert Configuration
-In this step, you set the alert's metadata, including severity, name, and description:
+## Step 3: Notification Settings
+In this step, you configure how alert notifications are delivered:
 
-### Severity
-Set the severity level for the alert (e.g., "Warning" or "Critical").
+### Notification Message
+Custom message content for alert notifications. Use template variables to include dynamic information. The default template includes the current value and threshold.
 
-### Alert Name
-A field to name the alert for easy identification.
-
-### Alert Description
-
-Add a detailed description for the alert, explaining its purpose and trigger conditions.
-
-You can incorporate result attributes in the alert descriptions to make the alerts more informative:
+You can incorporate result attributes in the alert message to make notifications more informative:
 
 **Syntax**: Use `$<attribute-name>` to insert attribute values. Attribute values can be any attribute used in group by.
 
-**Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the alert description, you will use `$service.name`.
+**Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the notification message, you will use `$service.name`.
 
-#### Slack alert format
+Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" target="_blank" rel="noopener noreferrer nofollow">advanced Slack formatting</a> is supported if you are using Slack as a notification channel.
 
-Using [advanced slack formatting](https://api.slack.com/reference/surfaces/formatting#advanced) is supported if you are using Slack as a notification channel.
+### Group alerts by
+Combine alerts with the same field values into a single notification. Select fields to group by (optional). When empty, all matching alerts are combined into one notification.
+
+### Repeat Notifications
+Configure repeat notifications to retrigger alerts at specified intervals if they remain unresolved. To enable:
+
+1. Scroll to the bottom of the alert configuration
+2. Enable the **Repeat Notification** toggle
+3. Set your desired interval
+4. Configure the condition:
+   - **Firing**: Send repeat notifications when the alert is actively firing
+   - **No Data**: Send repeat notifications when no data is received
+
+<Figure
+  src="/img/docs/repeat-notification.webp"
+  alt="Repeat Notification configuration showing interval and condition options"
+  caption="Repeat Notification configuration"
+/>
 
 ### Test Notification
-A button to test the alert to ensure that it works as expected.
+Click the **Test Notification** button at the bottom of the page to send a test alert to the configured notification channels. This verifies that your alert pipeline is working correctly before saving.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/alerts/alerts-trace-based-3.webp" alt="Configure the alert"/>
-    <figcaption><i>Setting the alert metadata </i></figcaption>
+    <img src="/img/docs/alerts/alerts-trace-based-3.webp" alt="Notification settings for the alert"/>
+    <figcaption><i>Notification settings </i></figcaption>
 </figure>
 
 ## Examples
@@ -161,14 +175,14 @@ A button to test the alert to ensure that it works as expected.
 #### Step 1: Write Query Builder query to define alert metric
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/traces/external-api-metric.png" alt="traces builder query for external API latency(p90)"/>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric.webp" alt="traces builder query for external API latency(p90)"/>
     <figcaption><i>External API latency (P90) query</i></figcaption>
 </figure>
 
-Using `externalHttpUrl` attribute we can filter specific external API endpoint and then set aggregation attribute to durationNano with P90 aggregation operation to plot a chart which measures 90th percentile latency. You can also choose `Avg` or anyother operation as aggregate operation depending on your needs.
+Using the `external_http_url` attribute we filter for a specific external API endpoint and then set the aggregation attribute to `duration_nano` with P90 aggregation operation to plot a chart which measures 90th percentile latency. You can also choose `Avg` or any other operation as aggregate operation depending on your needs.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/traces/external-api-metric-chart.png" alt="external API latency(p90) chart"/>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric-chart.webp" alt="external API latency(p90) chart"/>
     <figcaption><i>External API latency (P90) chart</i></figcaption>
 </figure>
 
@@ -179,7 +193,7 @@ Remember to select y-axis unit as nanoseconds as our aggregate key is durationNa
 #### Step 2: Set alert conditions
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/traces/external-api-metric-condition.png" alt="external API latency(p90) condition"/>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric-condition.webp" alt="external API latency(p90) condition"/>
     <figcaption><i>External API latency (P90) alert condition</i></figcaption>
 </figure>
 
@@ -188,9 +202,8 @@ The condition is set to trigger a notification if the per-minute external API la
 #### Step 3: Set alert configuration
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/traces/external-api-metric-configuration.png" alt="external API latency(p90) alert configuration"/>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric-configuration.webp" alt="external API latency(p90) alert configuration"/>
     <figcaption><i>External API latency (P90) alert configuration</i></figcaption>
 </figure>
 
-At last configure the alert as `Warning`, add a name and notification channel.
-
+Configure the notification message, group alerts by, and repeat notifications as needed.

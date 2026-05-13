@@ -1,0 +1,45 @@
+---
+date: 2026-05-08
+id: database-calls
+title: Database Calls
+description: Monitor database call metrics for your services in SigNoz — call rate, latency, and required span attributes.
+doc_type: reference
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The **Database Calls** pane in the service details page shows metrics for all database operations made by your application.
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/db-call-metrics.webp"
+  alt="DB Call Metrics tab showing Database Calls RPS and Average Duration charts"
+  caption="DB Call Metrics — calls per second and average duration"
+/>
+
+## Required span attributes
+
+For a span to appear in this pane:
+
+- `span.kind != 2` — spans of any kind except `SERVER`. See <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind" target="_blank" rel="noopener noreferrer nofollow">SpanKind</a> for details.
+- `db.system` must be present as a span attribute.
+
+If your services are making DB calls but the Database Calls panel is empty, verify that:
+1. Your spans include the attributes above.
+2. You are using instrumentation libraries that capture DB call spans (e.g., the OTel SQL or MongoDB instrumentation packages).
+
+## Metrics displayed
+
+- **Database calls per second** — throughput of DB operations over time.
+- **Average call duration (ms)** — mean latency of DB operations over the selected time range.
+
+## Pre-built Dashboard
+
+Import the <a href="https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json" target="_blank" rel="noopener noreferrer nofollow">DB Calls Monitoring Dashboard</a> for a ready-made view of database call metrics including transaction rate, error rate, top DB statements, and slowest DB calls.
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/db-calls-monitoring-dashboard.webp"
+  alt="DB Calls Monitoring Dashboard showing transaction rate, error rate, top statements, and slowest calls"
+  caption="DB Calls Monitoring Dashboard"
+/>
+
+<GetHelp />

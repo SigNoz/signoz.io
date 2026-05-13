@@ -1,122 +1,233 @@
 ---
-date: 2026-03-05
+date: 2026-05-12
 id: traces
-
-title: View Traces in SigNoz
-description: Learn how to use distributed tracing in SigNoz to monitor application performance. Visualize, filter, and inspect traces to gain detailed insights into your applications.
+title: Trace Explorer
+description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
+doc_type: explanation
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
 import PrereqsInstrument from '@/components/shared/prereqs-instrument.md'
-import UseHotRod from '@/components/shared/use-hotrod.md'
 
-This page shows how you can use distributed tracing to retrieve detailed telemetry data and see how your applications are performing. This section explains:
-
-- How to visualize aggregate metrics from traces
-- How to filter your spans
-- How to inspect a span
+A trace is a recording of the path a request takes through your system — from the first service it hits to every downstream call it makes. Each trace is made up of spans, where each span represents a single unit of work in one service.
 
 ## Prerequisites
 
 <PrereqsInstrument />
 
-## Open the Traces Section
+## Introduction
 
-From the sidebar, select **Traces**:
+The Traces Explorer page in SigNoz enables developers to filter, examine, and analyze traces. There are four different views available in Traces Explorer which include:
+
+- [List View](#list-view)
+- [Trace View](#traces-view)
+- [Time Series View](#time-series-view)
+- [Table View](#table-view)
+
+### List View
+
+The List View is the default view on the Traces Explorer page. It shows individual spans matching your filters.
 
 <figure data-zoomable align='center'>
-    <img src="/img/traces-explorer-v0.53.0.png" alt="Traces Explorer"/>
-    <figcaption><i> Traces Explorer </i></figcaption>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-list-view.webp" alt="List View in the Trace Explorer"/>
+    <figcaption><i>List View in Trace Explorer</i></figcaption>
 </figure>
 
-## Visualize Aggregate Metrics from Traces
+**Span Scope**
 
-SigNoz allows you to create aggregates of your filtered traces with various aggregate functions. Refer to [query builder aggregation docs](https://signoz.io/docs/userguide/query-builder/#aggregation)
+Use the **All Spans / Root Spans / Entrypoint Spans** dropdown on the right to control which spans are shown:
 
-## Filter Spans by Tags/Attributes
+- **All Spans** — shows every span matching your filters, regardless of position in the trace.
+- **Root Spans** — shows only the top-level span of each trace (the span with no parent).
+- **Entrypoint Spans** — shows only the first span when a request enters a service from an upstream service, giving a high-level view of cross-service traffic.
 
-The Traces Explorer in SigNoz provides a feature for quick filtering of spans using various parameters. This functionality allows users to quickly search their specific spans, making it easier to analyze and debug applications.
+**Customize Columns**
 
-There are two ways in which you can filter traces by tags:
+Click the **Options** button on the right side of the toolbar to add or remove columns from the list. For example, you can add `service.name`, `http_method`, `response_status_code`, or `event_type` to display alongside each span.
 
-- You can select a filter from the **Quick Filter**. More details on available quick filters are [here](https://signoz.io/docs/product-features/trace-explorer/#quick-filters)
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-list-view-options.webp" alt="Options panel to add or remove columns in List View"/>
+    <figcaption><i>Customize columns using the Options panel in List View</i></figcaption>
+</figure>
+
+<Admonition>
+Timestamp column can't be removed.
+</Admonition>
+
+**Number of Spans to display**
+
+You can increase the number of spans displayed up to 200/page using the dropdown on the top right.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-list-view-3.webp" alt="Spans per page dropdown in List View"/>
+    <figcaption><i>Increase the number of spans displayed in List View</i></figcaption>
+</figure>
+
+<Admonition>
+**Group By**, **Add Formula**, and **Order By** are not supported in List View or Trace View. Use Time Series or Table View for aggregation and grouping.
+</Admonition>
+
+### Traces View
+
+The Traces View focuses on root spans — the starting span of each trace. Each row represents a single trace, showing the root service name, root operation name, root duration, number of spans, and Trace ID. Traces are sorted by descending root duration, which helps identify the longest running traces. You can increase the number of traces displayed up to 200/page using the dropdown on the top right.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-3.webp" alt="Traces per page dropdown in Traces View"/>
+    <figcaption><i>Traces View — root duration and number of traces per page</i></figcaption>
+</figure>
+
+### Time Series View
+
+The Time Series View provides a graphical representation of trace data over time.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-timeseries-view.webp" alt="Timeseries View in the Trace Explorer"/>
+    <figcaption><i>Timeseries View in Trace Explorer</i></figcaption>
+</figure>
+
+### Table View
+
+The Table View provides a tabular representation of the trace data.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-table-view.webp" alt="Table View in the Trace Explorer"/>
+    <figcaption><i>Table View in Trace Explorer</i></figcaption>
+</figure>
+
+**Query Builder**
+
+Both Time Series and Table views use the Query Builder for filtering, aggregation, and grouping. This lets you chart request rates or latency percentiles directly from trace data without needing a separate metrics pipeline. The Query Builder supports `count`, `avg`, `p99`, and more — with Group By, Having, Order By, and Limit. Refer to the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder/) for more details.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-timeseries-view-1.webp" alt="Query Builder showing Group By, Having, Order By, and Limit fields"/>
+    <figcaption><i>Query Builder in Time Series and Table views</i></figcaption>
+</figure>
+
+## Trace Matching
+
+Trace Matching lets you define multiple span queries and combine them with **trace-level operators** — going beyond single-span filtering to find spans based on their relationships within a trace. Click **Add Trace Matching** below the filter bar to open the multi-query input.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-trace-matching.webp" alt="Add Trace Matching panel showing Query A, Query B, and expression input"/>
+    <figcaption><i>Trace Matching — define multiple queries and combine with trace operators</i></figcaption>
+</figure>
+
+Each query (A, B, C…) is a standard span filter. The **Expression** field combines them using trace operators:
+
+| Operator | Symbol | What it returns |
+|---|---|---|
+| Has Direct Child | `=>` | Spans from A that have a **direct child** matching B |
+| Has Descendant | `->` | Spans from A that are **ancestors** (at any depth) of B |
+| AND | `&&` | Spans from A in traces that **also contain** spans matching B |
+| OR | `\|\|` | **Union** of spans from both A and B |
+| NOT | `A NOT B` | Spans from A in traces that **do not contain** any spans matching B |
+
+**Example — Has Descendant:**
+- Query A: `service.name = 'frontend'`
+- Query B: `service.name = 'customer' AND has_error = true`
+- Expression: `A -> B`
+- **Result:** Returns frontend spans that are ancestors of erroring customer spans at any depth.
+
+For full operator reference and more examples, see [Multi-Query Analysis with Trace Operators](https://signoz.io/docs/userguide/query-builder-v5/#multi-query-analysis-trace-operators).
+
+## Quick Filters
+
+The Traces Explorer provides quick filtering of spans using various parameters on the left panel. Select a filter category to expand it, set values, and the view updates automatically.
+
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/trace-explorer/trace-explorer-quick-filters.webp" alt="Quick Filters in Traces Explorer"/>
-    <figcaption><i> Quick Filters in Traces Explorer </i></figcaption>
+    <figcaption><i>Quick Filters in Traces Explorer</i></figcaption>
 </figure>
-- You can use the query builder. To access the query builder, select the **Search Filter** input. Then, use the dropdown list to select a key from the list of your attributes, select an operator and enter a value. When you’ve finished, select the **Stage and Run Query** button. Refer to [this doc](https://signoz.io/docs/userguide/query-builder/#using-the-filtering-feature) for more details on Query Builder.
-
-
-## Inspect a Span
-
-To further troubleshoot your application, you can select a span from the list to view its details. For details, see the [Span Details](https://signoz.io/docs/userguide/span-details) page.
-
-## Missing Spans
-
-A "missing span" occurs when a span's parent span is not found in the collected trace.
-
-### Common Causes
-
-- **Tail Sampling**: If you have configured tail sampling in your OpenTelemetry Collector pipeline, the sampler randomly selects a subset of spans to keep and drops the rest. This means some spans from a trace may be retained while others are discarded, resulting in incomplete traces with missing spans.
-
-- **Network Issues**: Spans may be dropped in transit due to network issues between your application and the OpenTelemetry Collector, or between the Collector and SigNoz. This can happen due to transient connectivity failures, timeouts, or packet loss.
-
-- **Misconfigured Services**: If a service in your request chain is not exporting its spans to SigNoz, the spans it generates will be missing from the trace. Since its span ID is used as the parent span ID by downstream services, those downstream spans will appear as missing spans.
-
-<Figure
-  src="/img/docs/missing-spans-diagram.webp"
-  alt="Diagram showing a normal trace with all spans present vs a trace with a missing span where no collected span matches the referenced Parent ID"
-  caption="Normal trace vs trace with missing span"
-/>
 
 <details>
-<summary>Click to read more details</summary>
+<summary>Default Filters</summary>
 
-Every span has two key identifiers: a **Span ID** (its own unique ID) and a **Parent Span ID** (the ID of the span that called it). When a service makes a call to a downstream service, it propagates context via the `traceparent` header. This header carries the current span's Span ID, which the downstream service uses as the Parent Span ID of the new span it creates. A span is flagged as "missing" when no span in the collected trace matches its Parent Span ID — the parent span exists but was never collected.
+1. **Duration**:
+   - **Description**: Filter spans based on their duration.
+   - **Usage**: Specify a minimum and maximum duration in milliseconds to find spans that fall within this time range. This is useful for identifying spans that are unusually long or short.
 
-Learn more about <a href="https://opentelemetry.io/docs/concepts/signals/traces/" target="_blank" rel="noopener noreferrer nofollow">how traces work in OpenTelemetry</a>.
+2. **Status**:
+   - **Description**: Filter spans by their status.
+   - **Usage**: Options can include `Error` and `Ok`. Use this filter to quickly identify spans that resulted in errors or were successful.
 
-The **root span** is the first span in a trace — it does not have a Parent Span ID because no upstream service initiated it.
+3. **Service Name**:
+   - **Description**: Filter spans by the name of the service that generated them.
+   - **Usage**: Select from a list of service names to isolate spans from a specific service. This can be helpful in microservices architectures where multiple services generate spans.
 
-For example, consider three services — `Frontend`, `Auth`, and `Database`:
+4. **Operation / Name**:
+   - **Description**: Filter spans based on the operation or name.
+   - **Usage**: Select specific operations, such as HTTP GET requests or SQL SELECT queries, to focus on particular types of operations within your spans.
 
-1. `Frontend` creates the root span (Span ID: `abc1`, Parent ID: none).
-2. `Frontend` calls `Auth`, passing its Span ID `abc1` in the `traceparent` header. `Auth` creates a new span (Span ID: `def2`, Parent ID: `abc1`).
-3. `Auth` calls `Database`, passing its Span ID `def2`. `Database` creates a new span (Span ID: `ghi3`, Parent ID: `def2`).
+5. **RPC Method**:
+   - **Description**: Filter spans by the RPC method used.
+   - **Usage**: Useful for isolating spans based on the remote procedure call methods.
 
-If `Auth` fails to export its span (Span ID: `def2`), the `Database` span will reference a Parent Span ID (`def2`) that does not exist in the collected trace — resulting in a missing span.
+6. **Status Code**:
+   - **Description**: Filter spans by their HTTP status code.
+   - **Usage**: Select from common status codes like `200`, `404`, `500`, etc., to find spans that resulted in specific HTTP responses.
+
+7. **HTTP Host**:
+   - **Description**: Filter spans by the HTTP host.
+   - **Usage**: Specify the host to find spans related to particular HTTP hosts.
+
+8. **HTTP Method**:
+   - **Description**: Filter spans by the HTTP method.
+   - **Usage**: Choose HTTP methods such as `GET`, `POST`, etc., to filter spans based on the type of HTTP request.
+
+9. **HTTP Route**:
+   - **Description**: Filter spans by the HTTP route.
+   - **Usage**: Specify routes to find spans related to specific paths in your application.
+
+10. **HTTP URL**:
+    - **Description**: Filter spans by the full HTTP URL.
+    - **Usage**: Useful for isolating spans related to specific URLs, providing a more granular filter compared to HTTP routes.
+
+11. **Trace ID**:
+    - **Description**: Filter spans by their unique Trace ID.
+    - **Usage**: Enter a specific Trace ID to find and analyze an individual trace. This is particularly useful for deep dives into specific transactions.
+
+To clear a filter, click **Clear All** next to the filter category. To reset all filters at once, use the Reset button at the top.
 
 </details>
 
-## Span Gaps
+### Adding Custom Quick Filters
 
-Sometimes it's possible that there are gaps between consequent spans. This happens when some process/code are not traced. For Example, by default OpenTelemetry auto instrumentation libraries do not trace the custom functions/methods. This can be fixed by adding manual instrumentation to the code.
+The quick filters panel shows a set of default filters (like Duration, Service Name, HTTP Method, etc.), but you can add any span or resource attribute as a custom quick filter.
 
-Example of span gaps:
-![Span Gap](/img/docs/span-gap.png)
+To customize: click the **settings icon** at the top-right of the quick filters panel, then select **Edit quick filters**. This opens an editor showing your currently added filters and all other available attributes. Search for any attribute and add it to the panel.
 
-## Understanding Trace Duration Discrepancies
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/product-features/trace-explorer/traces-edit-quick-filters.webp"
+    alt="Edit quick filters panel showing added and available filters for traces"
+  />
+  <figcaption>
+    <i>Edit quick filters — added filters appear at the top, all other available attributes are listed below</i>
+  </figcaption>
+</figure>
 
-When analyzing latency metrics in the traces list, you may notice that the duration shown differs from what appears in the trace details. This is because:
+<Admonition type="info">
+Only users with the **Admin** role can edit quick filters. Users with the Viewer or Editor role do not have access to this feature.
+</Admonition>
 
-**The duration column in the traces list shows the duration of the root span, not the entire trace duration.**
+## Bottom Bar
 
-This can lead to apparent discrepancies for several reasons:
+The bar at the bottom of each view provides quick actions for saving views, creating alerts, and adding panels to a dashboard.
 
-- **The root span may complete before all child spans finish** - The root operation might return a response while background tasks continue processing
-- **Asynchronous operations** - Child spans can run longer than the root span when operations are performed asynchronously
-- **Total trace duration** - The trace details view shows the complete duration including all spans, which may be longer than just the root span
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-save-view.webp" alt="Bottom bar showing Save this view, Create an Alert, and Add to Dashboard"/>
+    <figcaption><i>Bottom bar — Save view, Create an Alert, Add to Dashboard</i></figcaption>
+</figure>
 
-### Example Scenario
+- **Save this view** — saves the current filter and query configuration as a named view, accessible later from the **Views** tab at the top or the **Select a view** dropdown. See the [Saved View docs](https://signoz.io/docs/product-features/saved-view/) for details. To manage all saved views, switch to the **Views** tab — it lists every view with creator, timestamp, and a search bar.
+- **Create an Alert** — instantly creates a [Trace based Alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/) based on the current filters.
+- **Add to Dashboard** — adds the current panel to a new or existing dashboard.
 
-You might see a trace listed as **38.9 seconds** in the traces page, but when you open the trace details, it shows a total duration of **1 minute**. This happens when:
+To manage all your saved views, switch to the **Views** tab at the top of the page.
 
-1. The root span (the initial request handler) completed in 38.9 seconds
-2. Other spans in the trace (such as background jobs, async tasks, or queued operations) continued running
-3. The total time from the first span start to the last span end was 1 minute
-
-This behavior is expected and reflects how distributed systems actually work. If you need to measure specific service-to-service latencies rather than root span duration, see the [writing ClickHouse queries documentation](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/#querying-for-specific-service-latencies) for guidance on using `kind_string = 'Client'` filters.
-
-## Get Help
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-views-page.webp" alt="Views tab showing all saved trace views"/>
+    <figcaption><i>Views page — manage all saved trace views</i></figcaption>
+</figure>
 
 <GetHelp />

@@ -1,6 +1,6 @@
 ---
-date: 2026-04-15
-title: Metrics Query API 
+date: 2026-05-06
+title: Metrics API
 id: metrics-query-api
 description: API reference for querying SigNoz metrics.
 doc_type: reference
@@ -8,19 +8,22 @@ doc_type: reference
 
 ## Overview
 
-The Query Range API is a robust interface which enables developers to query metrics over a range of time. This API facilitates various operations:
+The SigNoz Metrics API enables you to programmatically query metrics over a range of time. You can use it to:
+
+- Query gauge, counter, and histogram metrics with temporal and spatial aggregations
+- Filter and group results by attributes
+- Combine multiple queries using formulas (e.g., error rate = errors / total)
+- Use variables for dynamic filtering
 
 ## API Endpoint
 
-Endpoint for Query Range API:
-
 `POST` `https://{URL}/api/v5/query_range`
 
-Replace `{URL}` with your instance URL.
+Replace `{URL}` with your instance URL, e.g., `example.signoz.io`.
 
 ## Prerequisites
 
-API Keys: To access this API, you need an API key. Go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key from its **Keys** tab. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for step-by-step instructions.
+API key: To access this API, you need an API key. Go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key from its **Keys** tab. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for step-by-step instructions.
 
 <img width="1101" alt="api key" src="/img/docs/service-account/create-key.webp" />
 
@@ -28,7 +31,7 @@ API keys can only be created/managed by users with the `Admin` role. If you don'
 
 ## Authentication
 
-Using the API key: Add the API key to your request header as follows: 
+Add the API key to your request header:
 
 ```bash
 SIGNOZ-API-KEY:{YOUR_API_KEY}
@@ -40,32 +43,17 @@ Secure storage and handling of your API key is crucial to prevent unauthorized a
 
 ## API Specification
 
-The API specification is available in the [OpenAPI Specification](https://signoz.io/api-reference/).
+The full API specification is available in the [OpenAPI Reference](https://signoz.io/api-reference/).
 
-## JSON Request Payload Examples
+## Example Requests
 
-### CpuUsageExample (with variables)
+### Query a Gauge Metric (CPU Usage)
 
 ```json
 {
   "start": 1742602572000,
   "end": 1742604372000,
   "requestType": "time_series",
-  "variables": {
-    "k8s.node.name": {
-      "type": "custom",
-      "value": [
-        "gke-application-eu-c-pl-addon-n2dhc4--c80039c0-2gjz"
-      ]
-    },
-    "k8s.cluster.name": {
-      "type": "custom",
-      "value": "application-eu-central"
-    }
-  },
-  "formatOptions": {
-    "fillGaps": false
-  },
   "compositeQuery": {
     "queries": [
       {
@@ -83,13 +71,9 @@ The API specification is available in the [OpenAPI Specification](https://signoz
             }
           ],
           "filter": {
-            "expression": "k8s.cluster.name = $k8s.cluster.name AND k8s.node.name in $k8s.node.name"
+            "expression": "k8s.cluster.name = 'my-cluster' AND k8s.node.name IN ['node-1', 'node-2']"
           },
-          "groupBy": [
-            {
-              "name": "k8s.node.name",
-            }
-          ],
+          "groupBy": [{ "name": "k8s.node.name" }],
           "legend": "{{k8s.node.name}}",
           "disabled": false
         }
@@ -97,9 +81,9 @@ The API specification is available in the [OpenAPI Specification](https://signoz
     ]
   }
 }
-``` 
+```
 
-### HttpDurationExample (querying histogram metric)
+### Query a Histogram Metric (P90 Latency)
 
 ```json
 {
@@ -120,11 +104,7 @@ The API specification is available in the [OpenAPI Specification](https://signoz
               "spaceAggregation": "p90"
             }
           ],
-          "groupBy": [
-            {
-              "name": "service.name",
-            }
-          ],
+          "groupBy": [{ "name": "service.name" }],
           "legend": "{{service.name}}",
           "disabled": false
         }
@@ -134,94 +114,9 @@ The API specification is available in the [OpenAPI Specification](https://signoz
 }
 ```
 
-### MemoryUsedExample (with variables)
+### Compute Error Rate Using a Formula
 
-```json
-{
-  "start": 1742603085000,
-  "end": 1742604885000,
-  "requestType": "time_series",
-  "variables": {
-    "k8s.node.name": {
-      "type": "custom",
-      "value": [
-        "gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"
-      ]
-    },
-    "k8s.cluster.name": {
-      "type": "custom",
-      "value": "application"
-    }
-  },
-  "compositeQuery": {
-    "queries": [
-      {
-        "type": "builder_query",
-        "spec": {
-          "name": "A",
-          "signal": "metrics",
-          "stepInterval": 60,
-          "aggregations": [
-            {
-              "metricName": "k8s.node.memory.usage",
-              "timeAggregation": "avg",
-              "spaceAggregation": "sum"
-            }
-          ],
-          "filter": {
-            "expression": "k8s.cluster.name = $k8s.cluster.name AND k8s.node.name IN $k8s.node.name"
-          },
-          "groupBy": [
-            {
-              "name": "k8s.node.name",
-            }
-          ],
-          "legend": "used",
-          "disabled": false
-        }
-      }
-    ]
-  }
-}
-```
-
-### RequestCountExample
-
-```json
-{
-  "start": 1742603295000,
-  "end": 1742605095000,
-  "requestType": "time_series",
-  "compositeQuery": {
-    "queries": [
-      {
-        "type": "builder_query",
-        "spec": {
-          "name": "A",
-          "signal": "metrics",
-          "stepInterval": 60,
-          "aggregations": [
-            {
-              "metricName": "signoz_calls_total",
-              "timeAggregation": "rate",
-              "spaceAggregation": "sum"
-            }
-          ],
-          "groupBy": [
-            {
-              "name": "service.name",
-            }
-          ],
-          "legend": "{{service.name}}",
-          "disabled": false
-        }
-      }
-    ]
-  }
-}
-```
-
-### ErrorRateExample (using formula with one or more queries)
+Use two queries and a formula (`A/B`) to calculate error rate:
 
 ```json
 {
@@ -246,14 +141,7 @@ The API specification is available in the [OpenAPI Specification](https://signoz
           "filter": {
             "expression": "status.code = 'STATUS_CODE_ERROR'"
           },
-          "groupBy": [
-            {
-              "name": "service.name",
-              "dataType": "string",
-              "type": "tag"
-            }
-          ],
-          "legend": "{{service.name}}",
+          "groupBy": [{ "name": "service.name" }],
           "disabled": true
         }
       },
@@ -270,11 +158,7 @@ The API specification is available in the [OpenAPI Specification](https://signoz
               "spaceAggregation": "sum"
             }
           ],
-          "groupBy": [
-            {
-              "name": "service.name",
-            }
-          ],
+          "groupBy": [{ "name": "service.name" }],
           "disabled": true
         }
       },
