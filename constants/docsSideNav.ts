@@ -1959,8 +1959,16 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/cost-meter/user-guides',
         items: [
-          { type: 'doc', route: '/docs/cost-meter/alert-configuration-guide', label: 'Alert Configuration Guide' },
-          { type: 'doc', route: '/docs/cost-meter/meter-explorer-query-guide', label: 'Meter Explorer Query Guide' },
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/alert-configuration-guide',
+            label: 'Alert Configuration Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/meter-explorer-query-guide',
+            label: 'Meter Explorer Query Guide',
+          },
         ],
       },
     ],
@@ -2616,6 +2624,7 @@ const docsSideNav = [
         label: 'Alert Types',
         type: 'category',
         isExpanded: false,
+        route: '/docs/alerts-management/alert-types',
         items: [
           { type: 'doc', route: '/docs/alerts-management/metrics-based-alerts', label: 'Metrics' },
           { type: 'doc', route: '/docs/alerts-management/log-based-alerts', label: 'Logs' },
@@ -2629,7 +2638,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Alerts Page',
+        label: 'Alert Management',
         type: 'category',
         isExpanded: false,
         route: '/docs/userguide/alerts-management',
