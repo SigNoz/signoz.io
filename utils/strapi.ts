@@ -270,6 +270,41 @@ let pathsCache: string[] | null = null
 let pathsCacheTimestamp: number = 0
 const PATHS_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
+// For related articles component, populate: '*' does shallow populate, so nested relations in related_articles component are not populated.
+// Specific fields that do not exist on a content type make the API throw.
+// Example: keywords do not exist on faqs, so each collection gets its own populate map.
+const relatedArticlesPopulate = {
+  populate: '*',
+}
+
+const commonContentPopulate = {
+  authors: '*',
+  related_articles: relatedArticlesPopulate,
+}
+
+const singleContentPopulateByCollection: Record<string, Record<string, unknown>> = {
+  faqs: {
+    ...commonContentPopulate,
+    tags: '*',
+  },
+  'case-studies': commonContentPopulate,
+  comparisons: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+  guides: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+  opentelemetries: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+}
+
 // Fetch MDX content by path or all content for a collection
 export const fetchMDXContentByPath = async (
   collectionName: string,
@@ -280,7 +315,7 @@ export const fetchMDXContentByPath = async (
 ): Promise<MDXContentByIdApiResponse | MDXContentApiResponse> => {
   try {
     const queryObject: any = {
-      populate: '*',
+      populate: fetchAll ? '*' : singleContentPopulateByCollection[collectionName] || '*',
       pagination: {
         page: 1,
         pageSize: 100,
@@ -429,8 +464,9 @@ export const fetchMDXContentByPath = async (
       addQueryPrefix: true,
       arrayFormat: 'repeat',
     })
+    const requestUrl = `${API_URL}/api/${collectionName}${queryParams}`
 
-    const response = await fetch(`${API_URL}/api/${collectionName}${queryParams}`, {
+    const response = await fetch(requestUrl, {
       cache: 'force-cache',
       next: {
         tags: [`${collectionName}-${path}`, `mdx-content-${path}`],
