@@ -570,6 +570,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/manage-panels/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
           source: '/docs/userguide/overview/',
           destination: '/docs/what-is-signoz/',
           permanent: true,
