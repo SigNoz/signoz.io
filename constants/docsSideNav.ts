@@ -1964,8 +1964,16 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/cost-meter/user-guides',
         items: [
-          { type: 'doc', route: '/docs/cost-meter/alert-configuration-guide', label: 'Alert Configuration Guide' },
-          { type: 'doc', route: '/docs/cost-meter/meter-explorer-query-guide', label: 'Meter Explorer Query Guide' },
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/alert-configuration-guide',
+            label: 'Alert Configuration Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/meter-explorer-query-guide',
+            label: 'Meter Explorer Query Guide',
+          },
         ],
       },
     ],
@@ -2860,6 +2868,11 @@ const docsSideNav = [
       {
         route: '/docs/deepseek-monitoring',
         label: 'DeepSeek',
+        type: 'doc',
+      },
+      {
+        route: '/docs/dify-observability',
+        label: 'Dify',
         type: 'doc',
       },
       {
