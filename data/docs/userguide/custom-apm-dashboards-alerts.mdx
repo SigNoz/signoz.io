@@ -1,8 +1,9 @@
 ---
-date: 2024-06-06
+date: 2026-05-12
 id: custom-apm-dashboards-alerts
-
 title: APM Dashboards and Alerts
+description: Understand auto-generated APM metrics from traces, and use pre-built dashboard templates for request rate, error rate, latency, DB calls, and external calls.
+doc_type: reference
 ---
 
 ## Auto Generated APM Metrics
@@ -53,9 +54,68 @@ Common attributes across these metrics:
 - `deployment_environment`
 - `service_namespace`
 
+<details>
+<summary>Understanding Request, Duration, DB, and External Call metrics in detail</summary>
+
+**Request** counts are computed as the number of spans seen per unique set of dimensions, including Errors.
+For example, the following metric shows 142 calls:
+```
+signoz_calls_total{http_status_code="200",operation="/Address",service_name="shippingservice",span_kind="SPAN_KIND_SERVER",status_code="STATUS_CODE_UNSET"} 142
+```
+Multiple metrics can be aggregated if, for instance, a user wishes to view call counts just on `service_name` and `operation`.
+
+**Error** counts are computed from the Request counts which have an "Error" Status Code metric dimension.
+For example, the following metric indicates 220 errors:
+```
+signoz_calls_total{http_status_code="503",operation="/checkout",service_name="frontend",span_kind="SPAN_KIND_CLIENT",status_code="STATUS_CODE_ERROR"} 220
+```
+
+**Duration** is computed from the difference between the span start and end times and inserted into the
+relevant latency histogram time bucket for each unique set dimensions.
+For example, the following latency buckets indicate the vast majority of spans (9K) have a 100ms latency:
+```
+signoz_latency_bucket{http_status_code="200",label1="value1",operation="/Address",service_name="shippingservice",span_kind="SPAN_KIND_SERVER",status_code="STATUS_CODE_UNSET",le="2"} 327
+signoz_latency_bucket{http_status_code="200",label1="value1",operation="/Address",service_name="shippingservice",span_kind="SPAN_KIND_SERVER",status_code="STATUS_CODE_UNSET",le="6"} 751
+signoz_latency_bucket{http_status_code="200",label1="value1",operation="/Address",service_name="shippingservice",span_kind="SPAN_KIND_SERVER",status_code="STATUS_CODE_UNSET",le="10"} 1195
+signoz_latency_bucket{http_status_code="200",label1="value1",operation="/Address",service_name="shippingservice",span_kind="SPAN_KIND_SERVER",status_code="STATUS_CODE_UNSET",le="100"} 10180
+signoz_latency_bucket{http_status_code="200",label1="value1",operation="/Address",service_name="shippingservice",span_kind="SPAN_KIND_SERVER",status_code="STATUS_CODE_UNSET",le="250"} 10180
+...
+```
+
+Each metric will have the following dimensions because they are common across all spans:
+- Service name
+- Operation
+- Span kind
+- Status code
+- HTTP status code
+
+**DB Latency** is computed from the difference between the span start and end times and inserted into the
+relevant latency histogram time bucket for each unique set dimensions. The average DB latency is computed by dividing the sum of the DB latency by the count of the DB latency.
+
+Each metric will have the following dimensions:
+- Service name
+- Operation
+- Span kind
+- Status code
+- Database system
+- Database name
+
+**External Call Latency** is computed from the difference between the span start and end times and inserted into the
+relevant latency histogram time bucket for each unique set dimensions. The average external call latency is computed by dividing the sum of the external call latency by the count of the external call latency.
+
+Each metric will have the following dimensions:
+- Service name
+- Operation
+- Span kind
+- Status code
+- External service address
+- HTTP status code
+
+</details>
+
 ## APM Metrics Dashboard
 
-SigNoz provides a dashboard template based on the auto-generated metrics. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json) into your SigNoz instance.
+SigNoz provides a dashboard template based on the auto-generated metrics. You can import this <a href="https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json" target="_blank" rel="noopener noreferrer nofollow">JSON dashboard</a> into your SigNoz instance.
 
 The dashboard includes the following charts:
 - Latency
@@ -73,7 +133,7 @@ The dashboard includes the following charts:
 
 ## HTTP API Monitoring Dashboard
 
-This dashboard template is built on top of available [HTTP attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/http/) from OpenTelemetry. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json) into your SigNoz instance.
+This dashboard template is built on top of available <a href="https://opentelemetry.io/docs/specs/semconv/attributes-registry/http/" target="_blank" rel="noopener noreferrer nofollow">HTTP attributes</a> from OpenTelemetry. You can import this <a href="https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json" target="_blank" rel="noopener noreferrer nofollow">JSON dashboard</a> into your SigNoz instance.
 
 The dashboard includes the following charts:
 - Latency(P90) chart for each Endpoint
@@ -88,7 +148,7 @@ The dashboard includes the following charts:
 
 ## DB Calls Monitoring Dashboard
 
-This dashboard template is built on top of available [DB client call attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/db/) from OpenTelemetry. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json) into your SigNoz instance.
+This dashboard template is built on top of available <a href="https://opentelemetry.io/docs/specs/semconv/attributes-registry/db/" target="_blank" rel="noopener noreferrer nofollow">DB client call attributes</a> from OpenTelemetry. You can import this <a href="https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json" target="_blank" rel="noopener noreferrer nofollow">JSON dashboard</a> into your SigNoz instance.
 
 The dashboard includes the following charts:
 - DB Transaction Rate
@@ -99,4 +159,21 @@ The dashboard includes the following charts:
 <figure data-zoomable align='center'>
     <img src="/img/docs/dashboards/templates/db-calls-monitoring.png" alt="DB Calls Monitoring Dashboard"/>
     <figcaption><i> DB Calls Monitoring Dashboard </i></figcaption>
+</figure>
+
+## Key Operations Dashboard
+
+The Key Operations dashboard gives you a per-operation breakdown of latency, error rate, and request rate for your services. You can import this <a href="https://github.com/SigNoz/dashboards/tree/main/key-operations" target="_blank" rel="noopener noreferrer nofollow">Key Operations Dashboard</a> into your SigNoz instance.
+
+The dashboard includes:
+- P99 Latency (top 20) — bar chart of the slowest operations
+- Average P99/P95/P50 Latency (all) — table with percentile breakdown per operation
+- Error Percentage (top 20) — bar chart of operations with highest error rates
+- Average error percentage (all) — table of error rates per operation
+- Request rate (top 20) — bar chart of highest-traffic operations
+- Average reqs/s (all) — table of request rates per operation
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apm-and-distributed-tracing/key-operations-dashboard.webp" alt="Key Operations dashboard showing latency, error rate, and request rate per operation"/>
+    <figcaption><i>Key Operations Dashboard</i></figcaption>
 </figure>

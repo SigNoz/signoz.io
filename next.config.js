@@ -108,6 +108,26 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/docs/product-features/trace-explorer',
+          destination: '/docs/userguide/traces/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/trace-explorer/',
+          destination: '/docs/userguide/traces/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/alert-management',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/alert-management/',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
           source: '/enterprise-self-hosted/',
           destination: '/contact-us/?source=redirect-enterprise-self-hosted',
           permanent: true,
@@ -120,6 +140,56 @@ module.exports = () => {
         {
           source: '/oss-to-cloud/',
           destination: '/teams/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/apm-metrics',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/apm-metrics/',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/application-monitoring/api-monitoring',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/application-monitoring/api-monitoring/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies/',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview/',
+          destination: '/docs/alerts/',
           permanent: true,
         },
         {
@@ -502,6 +572,11 @@ module.exports = () => {
           source: '/docs/metrics-management/send-metrics/runtimes/java-metrics/jmx-metrics/',
           destination:
             '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/working-with-metrics-guides/',
+          destination: '/docs/metrics-management/metrics-explorer/',
           permanent: true,
         },
         {
@@ -1939,11 +2014,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/userguide/trac',
-          destination: '/docs/userguide/traces/',
-          permanent: true,
-        },
-        {
           source: '/firebase-alternatives',
           destination: '/comparisons/firebase-alternatives/',
           permanent: true,
@@ -1997,6 +2067,11 @@ module.exports = () => {
         {
           source: '/docs/metrics/',
           destination: '/docs/metrics-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/data-storage/',
+          destination: '/docs/metrics-management/reference/',
           permanent: true,
         },
         {
@@ -2725,6 +2800,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/trace-funnels/working-with-trace-funnels/',
+          destination: '/docs/trace-funnels/setup/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/',
           destination: '/docs/faqs/general/',
           permanent: true,
@@ -2747,6 +2827,26 @@ module.exports = () => {
         {
           source: '/docs/logs-management/send-logs/deno-logs/',
           destination: '/docs/instrumentation/opentelemetry-deno/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/query-setup-guides/',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/query-setup-guides',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/alert-setup-guides/',
+          destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/alert-setup-guides',
+          destination: '/docs/cost-meter/alerts/',
           permanent: true,
         },
       ])
