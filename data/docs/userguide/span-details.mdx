@@ -1,5 +1,5 @@
 ---
-date: 2026-05-08
+date: 2026-05-13
 id: span-details
 title: Trace Details
 description: Visualize and analyze individual traces using the flamegraph, waterfall chart, and span inspection tools in SigNoz.
@@ -38,9 +38,31 @@ Select a trace from the Trace Explorer to open the Trace Details page. You will 
     <figcaption><i>Trace Details Interface</i></figcaption>
 </figure>
 
+## Interacting with the Flame Graph
+
+The flame graph is a canvas-based visualization that supports interactive navigation:
+
+- **Zoom** — use the mouse scroll wheel to zoom in and out, adjusting the vertical row height for more or less detail.
+- **Pan and Drag** — click and drag horizontally to navigate through the timeline.
+- **Click to Select** — click any span to open its details in the span details panel.
+- **Hover Tooltip** — hover over a span to see a rich preview card showing the span name, status, start time, duration, and key attributes.
+- **Event Dots** — colored dots on spans indicate span events. Hover over them to see the event name, timestamp offset, error status, and associated attributes.
+- **Sampled Warning** — for very large traces, the flamegraph shows a warning when displaying a sampled subset of spans.
+
+## Interacting with the Waterfall
+
+The waterfall view uses a split-panel design:
+
+- **Left Panel** — shows the hierarchical span tree with expand/collapse controls. Supports horizontal scrolling for deeply nested span names.
+- **Right Panel** — displays duration bars aligned to a timeline ruler.
+- **Resizable Divider** — drag the handle between panels to adjust their relative sizes.
+- **HTTP Status Badges** — spans with HTTP response status codes display a visual badge for quick identification of request success or failure.
+- **Child Count** — each span shows the number of child spans, helping you understand trace depth at a glance.
+- **Add to Trace Funnel** — click the list icon on any span row to add it to a Trace Funnel for correlating similar traces.
+
 ## Inspecting a Span
 
-Click on a specific span in either the flame graph or waterfall view to inspect detailed information, including:
+Click on a specific span in either the flame graph or waterfall view to open a detailed span panel. The panel can float as a draggable overlay or dock to the side. It includes:
 
 - **Span context and attributes** — key-value metadata attached to the span.
 - **Span events** — timestamped log messages recorded during the span.
@@ -86,6 +108,28 @@ You can further refine this analysis by adding more resource attributes to narro
     <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/span-percentile-custom.webp" alt="Span percentile with custom attribute"/>
     <figcaption><i>Span Percentile With Custom Attribute</i></figcaption>
 </figure>
+
+### Pretty View
+
+The span attributes panel offers a **Pretty View** that goes beyond simple key-value display:
+
+- **Tree Structure** — attributes are displayed in a collapsible, hierarchical tree. Nested objects and arrays can be expanded or collapsed individually.
+- **Search** — use the built-in search bar to filter attributes by key or value in real time.
+- **Pin Fields** — pin frequently referenced attributes to the top of the list so they remain visible as you browse.
+- **JSON View** — switch to a raw JSON view using the dropdown selector for a complete, copyable representation of the span data.
+
+### Linked Spans
+
+If a span contains references (links) to other spans in different traces — for example, from asynchronous operations or background tasks — a **Links** section appears in the span details panel. Each linked span is displayed with its trace ID, and you can click to navigate directly to that span in its trace.
+
+### Analytics Panel
+
+The span details panel includes a floating **Analytics** section that shows aggregated statistics for the trace:
+
+- **% Exec Time** — a breakdown of execution time percentage by service, displayed as colored bars. This helps you quickly see which service consumed the most time.
+- **Span Count** — the number of spans contributed by each service, helping identify chatty or overloaded services.
+
+The analytics panel is resizable and can be repositioned within the view.
 
 ### Synchronized Navigation
 
