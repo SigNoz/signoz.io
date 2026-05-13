@@ -1,17 +1,12 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
-
-// Extend the Blog type to include CTA fields
-interface OpenTelemetryContent extends Blog {
-  cta_title?: string
-  cta_text?: string
-}
+import type { Blog } from '../types/transformedContent'
 
 interface LayoutProps {
-  content: CoreContent<OpenTelemetryContent>
+  content: CoreContent<Blog>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode

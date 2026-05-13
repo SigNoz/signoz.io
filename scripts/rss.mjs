@@ -5,7 +5,6 @@ import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 const tagData = require('../app/tag-data.json')
 import {
-  allBlogs,
   allDocs,
 } from '../.contentlayer/generated/index.mjs'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
@@ -41,8 +40,9 @@ function generateRSS(config, allCollections) {
 }
 
 const rss = () => {
+  // Blogs are now CMS-backed; runtime RSS is served via /rss/route.ts
+  // Build-time RSS only includes docs
   generateRSS(siteMetadata, [
-    ...allBlogs,
     ...allDocs,
   ])
   console.log('RSS feed generated...')

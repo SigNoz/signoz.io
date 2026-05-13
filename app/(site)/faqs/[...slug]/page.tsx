@@ -10,11 +10,12 @@ import Button from '@/components/ui/Button'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import { Blog, Authors } from 'contentlayer/generated'
+import { Authors } from 'contentlayer/generated'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { Blog } from '@/types/transformedContent'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -146,7 +147,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const structuredData = generateStructuredData('faqs', content)
 
   // Prepare content for FAQLayout
-  const mainContent: CoreContent<Blog> = {
+  const mainContent = {
     title: content.title,
     date: content.date,
     lastmod: content.updatedAt,
@@ -221,7 +222,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       </div>
 
       <FAQLayout
-        content={mainContent}
+        content={mainContent as unknown as CoreContent<Blog>}
         authorDetails={authorDetails}
         authors={content.authors?.map((author) => author?.name) || []}
         toc={toc}

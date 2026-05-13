@@ -1,10 +1,9 @@
 import 'css/prism.css'
 
 import { components } from '@/components/MDXComponents'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allBlogs, allAuthors } from 'contentlayer/generated'
-import type { Authors, Blog } from 'contentlayer/generated'
+import { coreContent } from 'pliny/utils/contentlayer'
+import { allAuthors } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import BlogLayout from '@/layouts/BlogLayout'
@@ -16,6 +15,10 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { fetchBlogBySlug } from '@/utils/cachedData'
+import { mdxOptions } from '@/utils/mdxUtils'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const defaultLayout = 'BlogLayout'
 const layouts = {
@@ -24,7 +27,8 @@ const layouts = {
   NewsroomLayout,
 }
 
-export const dynamicParams = false
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamicParams = true
 
 export async function generateMetadata({
   params,
@@ -32,13 +36,14 @@ export async function generateMetadata({
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allBlogs.find((p) => p.slug === slug)
+
+  const post = await fetchBlogBySlug(slug)
 
   if (!post) {
     return notFound()
   }
 
-  const authorList = post?.authors || ['default']
+  const authorList = post.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
@@ -82,10 +87,11 @@ export async function generateMetadata({
   }
 }
 
+// ISR: all blog paths generated on-demand at runtime, not at build time.
+// Required by Next.js for ISR to work with dynamicParams=true.
+// See: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
 export const generateStaticParams = async () => {
-  const paths = allBlogs.map((p) => ({ slug: p.slug?.split('/') }))
-
-  return paths
+  return []
 }
 
 export default async function Page(props: { params: { slug: string[] } }) {
@@ -94,15 +100,14 @@ export default async function Page(props: { params: { slug: string[] } }) {
     .suppressStructuredData
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/blog/${slug}`
-  // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allBlogs))
-  const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
-  if (postIndex === -1) {
+
+  const post = await fetchBlogBySlug(slug)
+
+  if (!post) {
     return notFound()
   }
 
-  const post = allBlogs.find((p) => p.slug === slug) as Blog
-  const authorList = post?.authors || ['default']
+  const authorList = post.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
@@ -111,6 +116,19 @@ export default async function Page(props: { params: { slug: string[] } }) {
   const jsonLd = post.structuredData
 
   const hubContext = await getHubContextForRoute(currentRoute)
+
+  let compiledContent
+  try {
+    const { content: mdxContent } = await compileMDX({
+      source: post.content,
+      components,
+      options: mdxOptions as MDXRemoteProps['options'],
+    })
+    compiledContent = mdxContent
+  } catch (error) {
+    console.error(`Error compiling MDX for blog "${slug}":`, error)
+    notFound()
+  }
 
   if (hubContext) {
     return (
@@ -128,19 +146,17 @@ export default async function Page(props: { params: { slug: string[] } }) {
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
         >
-          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          {compiledContent}
         </OpenTelemetryHubContent>
       </>
     )
   }
 
-  let layoutName = post.layout || defaultLayout
+  let layoutName: string = defaultLayout
   if (post.is_newsroom) {
     layoutName = 'NewsroomLayout'
   } else if (slug.includes('opentelemetry')) {
     layoutName = 'OpenTelemetryLayout'
-  } else {
-    layoutName = 'BlogLayout'
   }
 
   // @ts-ignore
@@ -160,10 +176,7 @@ export default async function Page(props: { params: { slug: string[] } }) {
         authors={authorList}
         toc={post.toc}
       >
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-        {/* NewsroomLayout is the only layout that needs inline PageFeedback here
-            because it doesn't extend ArticleLayout, which handles feedback placement internally
-            for BlogLayout and OpenTelemetryLayout. */}
+        {compiledContent}
         {layoutName === 'NewsroomLayout' && <PageFeedback />}
       </Layout>
     </>

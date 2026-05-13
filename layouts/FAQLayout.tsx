@@ -2,7 +2,8 @@
 
 import { ReactNode, useRef, useState, useEffect } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
+import type { Blog } from '../types/transformedContent'
 import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import FAQHeader, { AuthorProps } from '@/components/FAQHeader/FAQHeader'

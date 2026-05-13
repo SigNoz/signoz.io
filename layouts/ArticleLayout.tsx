@@ -4,8 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
-import type { Comparison, Guide } from '../types/transformedContent'
+import type { Authors } from 'contentlayer/generated'
+import type { Blog, Comparison, Guide } from '../types/transformedContent'
 import { ArrowRight } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
@@ -32,8 +32,6 @@ export interface TocItemProps {
 type ContentType = Blog | Guide | Comparison
 
 type ArticleContent = ContentType & {
-  cta_title?: string
-  cta_text?: string
   relatedArticles?: Array<{ title: string; url: string; publishedOn: string }>
 }
 

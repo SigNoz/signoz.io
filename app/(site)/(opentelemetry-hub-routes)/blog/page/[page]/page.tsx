@@ -1,18 +1,25 @@
 import Blogs from '@/components/ResourceCenter/Blogs'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
-import { allBlogs } from 'contentlayer/generated'
-import { buildListingMetadata, buildStaticPaginationParams } from '../../../metadata'
+import { buildListingMetadata } from '../../../metadata'
 import { getResourceCenterBlogs } from '../../../content'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export async function generateMetadata({ params }: { params: { page: string } }) {
   return buildListingMetadata('Blog', params.page)
 }
 
-export const generateStaticParams = async () => buildStaticPaginationParams(allBlogs.length)
+export const revalidate = CMS_REVALIDATE_INTERVAL
 
-const blogPosts = getResourceCenterBlogs()
+// ISR: pagination pages generated on-demand at runtime.
+// Required by Next.js for ISR to work with dynamicParams=true.
+// See: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
+export const generateStaticParams = async () => {
+  return []
+}
 
-export default function Page({ params }: { params: { page: string } }) {
+export default async function Page({ params }: { params: { page: string } }) {
+  const blogPosts = await getResourceCenterBlogs()
+
   return (
     <ListingPageLayout>
       <Blogs posts={blogPosts} pageNumber={parseInt(params.page)} />

@@ -120,6 +120,33 @@ const COLLECTION_SCHEMAS = {
       },
     },
   },
+  blog: {
+    apiPath: 'api::blog.blog',
+    endpoint: 'blogs',
+    fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status', 'date'],
+    hasRelatedArticles: true,
+    relations: {
+      authors: {
+        endpoint: 'authors',
+        matchField: 'key',
+        frontmatterField: 'authors',
+      },
+      keywords: {
+        endpoint: 'keywords',
+        matchField: 'key',
+        frontmatterField: 'keywords',
+        filterKey: true,
+        matchValue: true,
+      },
+      tags: {
+        endpoint: 'tags',
+        matchField: 'key',
+        frontmatterField: 'tags',
+        filterKey: true,
+        matchValue: true,
+      },
+    },
+  },
   guides: {
     apiPath: 'api::guide.guide',
     endpoint: 'guides',

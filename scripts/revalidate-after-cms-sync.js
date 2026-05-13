@@ -32,7 +32,7 @@ try {
     process.env.SYNC_FOLDERS || '["faqs","case-study","opentelemetry","comparisons","guides"]'
   )
 } catch {
-  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides']
+  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog']
 }
 
 const FOLDER_TO_URL_PREFIX = {
@@ -41,6 +41,7 @@ const FOLDER_TO_URL_PREFIX = {
   'case-study': 'case-study',
   comparisons: 'comparisons',
   guides: 'guides',
+  blog: 'blog',
 }
 
 function getFolderName(filePath) {
@@ -109,6 +110,9 @@ function buildPayload() {
   }
   if (cmsUrls.some((u) => u.startsWith('/guides/'))) {
     extraTags.push('guides-list')
+  }
+  if (cmsUrls.some((u) => u.startsWith('/blog/'))) {
+    extraTags.push('blogs-list')
   }
 
   return {
