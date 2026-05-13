@@ -2036,6 +2036,7 @@ const docsSideNav = [
             ],
           },
           { type: 'doc', route: '/docs/userguide/manage-variables', label: 'Variables' },
+          { type: 'doc', route: '/docs/dashboards/interactivity', label: 'Interactivity' },
           {
             type: 'doc',
             route: '/docs/dashboards/terraform-provider-signoz',
@@ -2474,7 +2475,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/dashboards/user-guides',
         items: [
-          { type: 'doc', route: '/docs/dashboards/interactivity', label: 'Interactivity' },
           { type: 'doc', route: '/docs/dashboards/import-dashboard', label: 'Import Dashboard' },
           { type: 'doc', route: '/docs/dashboards/public-sharing', label: 'Public Sharing' },
           {
