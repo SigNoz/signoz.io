@@ -31,13 +31,13 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/product-features/alert-management',
-            label: 'Alert Management',
+            route: '/docs/product-features/trace-explorer',
+            label: 'Trace Explorer',
           },
           {
             type: 'doc',
-            route: '/docs/product-features/trace-explorer',
-            label: 'Trace Explorer',
+            route: '/docs/product-features/logs-explorer',
+            label: 'Logs Explorer',
           },
           {
             type: 'doc',
@@ -958,20 +958,13 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/instrumentation/overview',
-        label: 'Get Started',
+        label: 'Overview',
       },
       {
-        label: 'Instrument Application',
+        label: 'Send Traces and APM Data',
         type: 'category',
         isExpanded: false,
         route: '/docs/instrumentation',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Instrument your Application',
-        // description:
-        // 'To instrument your application with OpenTelemetry and send data to SigNoz, follow the instructions in the sections below.',
-        // slug: '/docs/instrumentation/index',
-        // },
         items: [
           {
             type: 'category',
@@ -1185,87 +1178,79 @@ const docsSideNav = [
             route: '/docs/integrations/opentelemetry-kong-gateway',
             label: 'Kong Gateway',
           },
-          // {
-          //   type: 'category',
-          //   isExpanded: false,
-          //   label: 'Mobile Instrumentation',
-          //   route: '/docs/mobile-instrumentation',
-          //
-          //   // route: '',
-          //   // link: {
-          //   // type: 'doc',
-          //   // },
-          //   items: [
-
-          //   ],
-          // },
         ],
       },
       {
+        label: 'Services / APM',
         type: 'category',
         isExpanded: false,
-        label: 'APM Product Overview',
-        // route: '',
+        route: '/docs/userguide/metrics',
+        items: [
+          { type: 'doc', route: '/docs/userguide/metrics', label: 'View Services' },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/application-details',
+            label: 'Application Details',
+          },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/database-calls',
+            label: 'Database Calls',
+          },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/external-calls',
+            label: 'External Calls',
+          },
+        ],
+      },
+      {
+        label: 'Traces',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/userguide/traces',
         items: [
           {
             type: 'doc',
-            label: 'View Services',
-            route: '/docs/userguide/metrics',
+            route: '/docs/userguide/traces',
+            label: 'Trace Explorer',
           },
           {
             type: 'doc',
-            label: 'Calculated Fields in Spans',
-            route: '/docs/traces-management/guides/derived-fields-spans',
+            route: '/docs/userguide/span-details',
+            label: 'Trace Details',
           },
           {
             type: 'doc',
-            label: 'Entry Point Spans',
-            route: '/docs/traces-management/guides/entry-point-spans-service-overview',
+            route: '/docs/trace-funnels/overview',
+            label: 'Trace Funnels',
           },
           {
-            type: 'doc',
-            label: 'APM Dashboards/Alerts',
-            route: '/docs/userguide/custom-apm-dashboards-alerts',
-          },
-          {
+            label: 'Traces User Guides',
             type: 'category',
             isExpanded: false,
-            label: 'View Traces',
-            route: '/docs/userguide/traces',
-            // link: {
-            // type: 'doc',
-            // },
+            route: '/docs/apm-and-distributed-tracing/traces-user-guides',
             items: [
               {
                 type: 'doc',
-                label: 'Trace Details',
-                route: '/docs/userguide/span-details',
+                route: '/docs/trace-funnels/setup',
+                label: 'Setup Trace Funnels',
               },
             ],
-          },
-          {
-            type: 'doc',
-            label: 'Service Map (Beta)',
-            route: '/docs/userguide/service-map',
           },
         ],
       },
       {
+        type: 'doc',
+        route: '/docs/userguide/service-map',
+        label: 'Service Map',
+      },
+      {
+        label: 'User Guides',
         type: 'category',
         isExpanded: false,
-        label: 'User Guides',
         route: '/docs/traces-management/guides/overview',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/application-monitoring/api-monitoring',
-            label: 'API Monitoring',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/guides/apm-metrics',
-            label: 'APM Metrics',
-          },
           {
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
@@ -1273,33 +1258,52 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/guides/pii-scrubbing/',
-            label: 'PII Scrubbing',
+            route: '/docs/traces-management/guides/correlate-traces-and-logs',
+            label: 'Correlate Traces & Logs',
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/guides/correlate-traces-and-logs',
-            label: 'Correlate Traces and Logs',
+            route: '/docs/traces-management/guides/pii-scrubbing',
+            label: 'PII Scrubbing',
           },
         ],
       },
       {
+        label: 'Reference',
         type: 'category',
-        route: '/docs/traces-management/troubleshooting/troubleshooting',
-        label: 'Troubleshooting',
         isExpanded: false,
+        route: '/docs/apm-and-distributed-tracing/reference',
         items: [
           {
             type: 'doc',
-            route: '/docs/traces-management/troubleshooting/faqs',
-            label: 'General FAQs',
+            route: '/docs/userguide/custom-apm-dashboards-alerts',
+            label: 'APM Metrics, Dashboards & Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/long-term-storage',
+            label: 'Long Term Storage',
+          },
+          {
+            type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/traces-api',
+            label: 'Using Traces API',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/derived-fields-spans',
+            label: 'Derived Fields for Spans',
           },
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/traces-management/long-term-storage',
-        label: 'Long Term Storage',
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/traces-management/troubleshooting/troubleshooting',
+        items: [
+          { type: 'doc', route: '/docs/traces-management/troubleshooting/faqs', label: 'FAQs' },
+        ],
       },
     ],
   },
@@ -1870,44 +1874,60 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
+        label: 'Working with Metrics',
+        type: 'category',
+        isExpanded: false,
         route: '/docs/metrics-management/metrics-explorer',
-        label: 'Metrics Explorer',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/metrics-explorer',
+            label: 'Metrics Explorer',
+          },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/types-and-aggregation',
+            label: 'Types and Aggregation',
+          },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/configure-custom-buckets',
+            label: 'Configure Custom Histogram Buckets',
+          },
+        ],
       },
       {
-        type: 'doc',
-        route: '/docs/metrics-management/types-and-aggregation',
-        label: 'Types and Aggregation',
+        label: 'User Guides',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/metrics-management/user-guides',
+        items: [
+          { type: 'doc', route: '/docs/userguide/drop-metrics', label: 'Drop Metrics' },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/dropping-metric-labels',
+            label: 'Dropping Metric Labels',
+          },
+        ],
       },
       {
-        type: 'doc',
-        route: '/docs/metrics-management/data-storage',
-        label: 'Metrics Tables',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/cloud-provider-metric-delay',
-        label: 'Cloud provider metric delay',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/configure-custom-buckets',
-        label: 'Configure custom buckets for histograms',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/drop-metrics',
-        label: 'Drop Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/dropping-metric-labels',
-        label: 'Dropping Metric Labels (Attributes)',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/reducing-costs',
-        label: 'Understanding Metrics Billing and Reducing Costs',
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/metrics-management/reference',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/querying-metrics',
+            label: 'Querying Metrics',
+          },
+          { type: 'doc', route: '/docs/metrics-management/query-range-api', label: 'Metrics API' },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/reducing-costs',
+            label: 'Understanding Metrics Billing & Reducing Costs',
+          },
+        ],
       },
       {
         type: 'category',
@@ -1915,6 +1935,11 @@ const docsSideNav = [
         label: 'Troubleshooting',
         isExpanded: false,
         items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/cloud-provider-metric-delay',
+            label: 'Cloud Provider Metric Delay',
+          },
           {
             type: 'doc',
             route: '/docs/metrics-management/troubleshooting/faqs',
@@ -1936,6 +1961,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/cost-meter/cost-meter-dashboard',
+        label: 'Cost Meter Dashboard',
+      },
+      {
+        type: 'doc',
         route: '/docs/cost-meter/meter-explorer',
         label: 'Meter Explorer',
       },
@@ -1943,6 +1973,24 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/cost-meter/alerts',
         label: 'Alerts',
+      },
+      {
+        label: 'User Guides',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/cost-meter/user-guides',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/alert-configuration-guide',
+            label: 'Alert Configuration Guide',
+          },
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/meter-explorer-query-guide',
+            label: 'Meter Explorer Query Guide',
+          },
+        ],
       },
     ],
   },
@@ -1953,84 +2001,48 @@ const docsSideNav = [
     // route: '',
     items: [
       {
-        label: 'Manage',
+        type: 'doc',
+        route: '/docs/dashboards/overview',
+        label: 'Overview',
+      },
+      {
+        label: 'Working with Dashboards',
         type: 'category',
         isExpanded: false,
+        route: '/docs/userguide/manage-dashboards',
         items: [
+          { type: 'doc', route: '/docs/userguide/manage-dashboards', label: 'Manage Dashboards' },
           {
-            type: 'doc',
-            route: '/docs/userguide/manage-dashboards',
-            label: 'Manage Dashboards',
+            label: 'Panel Types',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/panel-types',
+            items: [
+              { type: 'doc', route: '/docs/dashboards/panel-types/bar', label: 'Bar Chart' },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/panel-types/histogram',
+                label: 'Histogram',
+              },
+              { type: 'doc', route: '/docs/dashboards/panel-types/list', label: 'List' },
+              { type: 'doc', route: '/docs/dashboards/panel-types/pie', label: 'Pie' },
+              { type: 'doc', route: '/docs/dashboards/panel-types/table', label: 'Table' },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/panel-types/timeseries',
+                label: 'Timeseries',
+              },
+              { type: 'doc', route: '/docs/dashboards/panel-types/value', label: 'Number' },
+            ],
           },
-          {
-            type: 'doc',
-            route: '/docs/userguide/manage-panels',
-            label: 'Manage Panels',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/manage-variables',
-            label: 'Manage Variables',
-          },
+          { type: 'doc', route: '/docs/userguide/manage-variables', label: 'Variables' },
+          { type: 'doc', route: '/docs/dashboards/interactivity', label: 'Interactivity' },
           {
             type: 'doc',
             route: '/docs/dashboards/terraform-provider-signoz',
             label: 'Terraform Provider',
           },
         ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        route: '/docs/dashboards/panel-types',
-        label: 'Panel Types',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/bar',
-            label: 'Bar Chart',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/histogram',
-            label: 'Histogram',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/list',
-            label: 'List',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/pie',
-            label: 'Pie',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/table',
-            label: 'Table',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/timeseries',
-            label: 'Timeseries',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/panel-types/value',
-            label: 'Value',
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/dashboards/interactivity',
-        label: 'Interactivity',
-      },
-      {
-        type: 'doc',
-        route: '/docs/dashboards/import-dashboard',
-        label: 'Import Dashboard',
       },
       {
         type: 'category',
@@ -2458,16 +2470,27 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'User Guides',
         type: 'category',
-        route: '/docs/dashboards/troubleshooting/troubleshooting',
-        label: 'Troubleshooting',
         isExpanded: false,
+        route: '/docs/dashboards/user-guides',
         items: [
+          { type: 'doc', route: '/docs/dashboards/import-dashboard', label: 'Import Dashboard' },
+          { type: 'doc', route: '/docs/dashboards/public-sharing', label: 'Public Sharing' },
           {
             type: 'doc',
-            route: '/docs/dashboards/troubleshooting/faqs',
-            label: 'General FAQs',
+            route: '/docs/dashboards/using-variables-in-queries',
+            label: 'Using Variables in Queries',
           },
+        ],
+      },
+      {
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/dashboards/troubleshooting/troubleshooting',
+        items: [
+          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
         ],
       },
     ],
@@ -2587,38 +2610,55 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     route: '/docs/alerts',
-    // link: {
-    //   type: 'generated-index',
-    //   title: 'Alert Management in SigNoz',
-    //   description:
-    //     'This documentation helps you in understanding the Alerts feature in SigNoz and how you can create different types of alerts.',
-    //   slug: '/docs/alerts',
-    // },
     items: [
       {
         type: 'doc',
-        route: '/docs/userguide/alerts-management',
-        label: 'Alert Management',
+        route: '/docs/alerts',
+        label: 'Overview',
       },
-      // {
-      //   type: 'doc',
-      //   route: 'product-features/alerts/alerts-notification-channel',
-      //   label: 'Notification Channel',
-      // },
       {
-        label: 'Setup Alerts Notification',
+        label: 'Alert Types',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/alerts-management/alert-types',
+        items: [
+          { type: 'doc', route: '/docs/alerts-management/metrics-based-alerts', label: 'Metrics' },
+          { type: 'doc', route: '/docs/alerts-management/log-based-alerts', label: 'Logs' },
+          { type: 'doc', route: '/docs/alerts-management/trace-based-alerts', label: 'Traces' },
+          { type: 'doc', route: '/docs/alerts-management/anomaly-based-alerts', label: 'Anomaly' },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/exceptions-based-alerts',
+            label: 'Exceptions',
+          },
+        ],
+      },
+      {
+        label: 'Alert Management',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/userguide/alerts-management',
+        items: [
+          { type: 'doc', route: '/docs/userguide/alerts-management', label: 'Alert List Page' },
+          { type: 'doc', route: '/docs/alerts-management/alerts-history', label: 'Alert History' },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/planned-maintenance',
+            label: 'Planned Maintenance',
+          },
+          { type: 'doc', route: '/docs/alerts-management/routing-policy', label: 'Routing Policy' },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/terraform-provider-signoz',
+            label: 'Terraform Provider',
+          },
+        ],
+      },
+      {
+        label: 'Setup Notifications',
         type: 'category',
         isExpanded: false,
         route: '/docs/setup-alerts-notification',
-        // link: {
-        //   type: 'generated-index',
-        //   title: 'Setup Alerts Notifications Channel',
-        //   description:
-        //     'You can setup notification channel for sending the generated alerts to other applications. Currently, the following channels are supported.',
-        //   slug: '/docs/setup-alerts-notification',
-        // type: "doc",
-        // route: "product-features/alerts/alerts-notification-channel",
-        // },
         items: [
           {
             type: 'doc',
@@ -2673,79 +2713,43 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/alerts-management/anomaly-based-alerts',
-        label: 'Anomaly based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/metrics-based-alerts',
-        label: 'Metrics based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/log-based-alerts',
-        label: 'Log based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/trace-based-alerts',
-        label: 'Trace based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/exceptions-based-alerts',
-        label: 'Exceptions based Alert',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/planned-maintenance',
-        label: 'Planned Maintenance',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/routing-policy',
-        label: 'Routing Policies',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/alerts-history',
-        label: 'Alerts History',
-      },
-      {
-        type: 'doc',
-        route: '/docs/alerts-management/terraform-provider-signoz',
-        label: 'Terraform Provider',
-      },
-      {
+        label: 'User Guides',
         type: 'category',
-        route: '/docs/alerts-management/troubleshooting/troubleshooting',
-        label: 'Troubleshooting',
         isExpanded: false,
+        route: '/docs/alerts-management/user-guides/user-guides',
         items: [
           {
             type: 'doc',
-            route: '/docs/alerts-management/troubleshooting/faqs',
-            label: 'General FAQs',
+            route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
+            label: 'Configure Alerts for Missing Data',
           },
           {
             type: 'doc',
-            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
-            label: 'Missing Alerts in SigNoz',
+            route: '/docs/alerts-management/no-data-alerts-for-groups',
+            label: 'No Data Alerts for Groups',
           },
           {
             type: 'doc',
-            route:
-              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
-            label: 'Alerts Firing Without Visible Threshold Breach',
+            route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
+            label: 'Kubernetes Pod Startup Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/k8s-cpu-usage-alert',
+            label: 'Kubernetes CPU Usage Alert',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/apdex-alerts',
+            label: 'Apdex Alerts',
           },
         ],
       },
       {
+        label: 'Reference',
         type: 'category',
-        route: '/docs/alerts-management/user-guides/user-guides',
-        label: 'User Guides',
         isExpanded: false,
+        route: '/docs/alerts-management/reference',
         items: [
           {
             type: 'doc',
@@ -2757,27 +2761,27 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
             label: 'Time Aggregation Best Practices',
           },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
-            label: 'How to Configure Alerts for Missing Data',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/no-data-alerts-for-groups',
-            label: 'No Data Alerts for Groups',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts',
-            label: 'How to Create Alerts for Slow-Starting Kubernetes Pods',
-          },
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/alerts-management/apdex-alerts',
-        label: 'Apdex Alerts',
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/alerts-management/troubleshooting/troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/missing-alerts-in-signoz',
+            label: 'Missing Alerts',
+          },
+          {
+            type: 'doc',
+            route:
+              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
+            label: 'Alerts Firing Without Threshold Breach',
+          },
+          { type: 'doc', route: '/docs/alerts-management/troubleshooting/faqs', label: 'FAQs' },
+        ],
       },
     ],
   },

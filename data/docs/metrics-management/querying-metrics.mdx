@@ -1,0 +1,76 @@
+---
+date: 2026-05-13
+id: querying-metrics
+title: Querying Metrics
+description: Query metrics in SigNoz using the Query Builder in Metrics Explorer and Dashboards, with ClickHouse SQL and PromQL available in Dashboards.
+---
+
+SigNoz supports querying metrics using the visual **[Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)** in both the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/), with **ClickHouse SQL** and **PromQL** available as additional options in Dashboards.
+
+## Query Builder
+
+The Query Builder is the primary way to query metrics. It is available in both Metrics Explorer and Dashboards.
+
+### Selecting a Metric
+
+Choose the metric you want to query from the **Metric** dropdown. You can search by name to find the right metric.
+
+### Filtering
+
+Use the **Filter** field to narrow down the data. Filters use metric attributes (labels) to select specific time series. For example:
+- `service.name = 'frontend'` — only data from the frontend service
+- `k8s.namespace.name IN ('production', 'staging')` — data from specific namespaces
+
+### Aggregation
+
+Metrics queries use a two-stage aggregation model:
+
+1. **Temporal aggregation** (Aggregate within time series) — consolidates data points within each time series over time intervals. Available functions depend on the metric type:
+
+   | Metric Type | Available Functions |
+   |---|---|
+   | Gauge | Latest, Sum, Avg, Min, Max, Count, Count Distinct |
+   | Counter | Rate, Increase |
+   | Histogram / Exp. Histogram | P50, P75, P90, P95, P99 |
+
+2. **Spatial aggregation** (Aggregate across time series) — merges multiple time series into fewer series. Functions include Sum, Avg, Min, and Max.
+
+For a deeper understanding of metric types and how aggregation works, see [Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+
+### Group By
+
+Use **Group By** to segment results by one or more attributes. For example, grouping by `service.name` produces a separate time series for each service.
+
+### Having
+
+The **Having** clause filters results after aggregation. For example, `count() > 1000` shows only groups where the count exceeds 1000.
+
+### Functions
+
+You can apply additional functions to transform query results:
+- **Smoothing** — EWMA (Exponentially Weighted Moving Average) for noisy data
+- **Arithmetic** — Absolute value, Running Diff, Log2, Log10
+- **Clamping** — Clamp Min/Max to cap values
+- **Time Shift** — Compare current data against a previous time period
+
+### Formulas
+
+Plot up to ten queries on the same panel and combine them using formulas. For example, to calculate error rate: `(A / B) * 100`, where A is error count and B is total count.
+
+For full details on the Query Builder, see the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder-v5/).
+
+## ClickHouse SQL (Dashboards Only)
+
+When building Dashboard panels, you can write raw ClickHouse SQL queries against the metrics tables. This is useful for advanced analytics that go beyond what the Query Builder supports.
+
+For details on the metrics table schema and example queries, see the [ClickHouse Metrics Query guide](https://signoz.io/docs/userguide/write-a-metrics-clickhouse-query/).
+
+## PromQL (Dashboards Only)
+
+Dashboard panels also support PromQL (Prometheus Query Language) for users familiar with Prometheus-style queries. SigNoz supports UTF-8 quoted selector syntax for OpenTelemetry metric names with dots:
+
+```
+{"system.cpu.utilization", "service.name"="frontend"}
+```
+
+For details and examples, see the [PromQL guide](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
