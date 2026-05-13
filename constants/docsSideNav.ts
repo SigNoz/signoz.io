@@ -2629,18 +2629,18 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Alert Management',
+        label: 'Alerts Page',
         type: 'category',
         isExpanded: false,
         route: '/docs/userguide/alerts-management',
         items: [
-          { type: 'doc', route: '/docs/userguide/alerts-management', label: 'Alert Management' },
+          { type: 'doc', route: '/docs/userguide/alerts-management', label: 'Alerts Page' },
+          { type: 'doc', route: '/docs/alerts-management/alerts-history', label: 'Alert History' },
           {
             type: 'doc',
             route: '/docs/alerts-management/planned-maintenance',
             label: 'Planned Maintenance',
           },
-          { type: 'doc', route: '/docs/alerts-management/alerts-history', label: 'Alert History' },
           { type: 'doc', route: '/docs/alerts-management/routing-policy', label: 'Routing Policy' },
           {
             type: 'doc',
@@ -2710,16 +2710,6 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/alerts-management/user-guides/understanding-alert-evaluation-patterns',
-            label: 'Understanding Alert Evaluation Patterns',
-          },
-          {
-            type: 'doc',
-            route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
-            label: 'Time Aggregation Best Practices',
-          },
-          {
-            type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'Configure Alerts for Missing Data',
           },
@@ -2737,6 +2727,24 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/k8s-cpu-usage-alert',
             label: 'Kubernetes CPU Usage Alert',
+          },
+        ],
+      },
+      {
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/alerts-management/reference',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/understanding-alert-evaluation-patterns',
+            label: 'Understanding Alert Evaluation Patterns',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
+            label: 'Time Aggregation Best Practices',
           },
           {
             type: 'doc',
