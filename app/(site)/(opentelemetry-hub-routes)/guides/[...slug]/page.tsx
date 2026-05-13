@@ -16,6 +16,7 @@ import React from 'react'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { shouldBuildStaticPages, dynamicParamsForEnv } from '@/utils/buildConfig'
 
 const defaultLayout = 'GuidesLayout'
 const layouts = {
@@ -23,7 +24,7 @@ const layouts = {
   GuidesLayout,
 }
 
-export const dynamicParams = false
+export const dynamicParams = dynamicParamsForEnv
 
 export async function generateMetadata({
   params,
@@ -81,6 +82,9 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
+  if (!shouldBuildStaticPages()) {
+    return []
+  }
   const paths = allGuides.map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths

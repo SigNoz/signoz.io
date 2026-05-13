@@ -3,12 +3,16 @@ import { allDocs } from 'contentlayer/generated'
 import type { Doc } from 'contentlayer/generated'
 import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
+import { shouldBuildStaticPages } from '@/utils/buildConfig'
 
 export const runtime = 'nodejs'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
 export async function generateStaticParams() {
+  if (!shouldBuildStaticPages()) {
+    return []
+  }
   return [
     { slug: [] },
     ...allDocs

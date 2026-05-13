@@ -7,8 +7,9 @@ import tagData from 'app/tag-data.json'
 import { genPageMetadata } from 'app/(site)/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { shouldBuildStaticPages, dynamicParamsForEnv } from '@/utils/buildConfig'
 
-export const dynamicParams = false
+export const dynamicParams = dynamicParamsForEnv
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURI(params.tag)
@@ -25,9 +26,11 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
 }
 
 export const generateStaticParams = async () => {
+  if (!shouldBuildStaticPages()) {
+    return []
+  }
   const tagCounts = tagData as Record<string, number>
   const tagKeys = Object.keys(tagCounts)
-  // Only generate pages for tags that have at least one post
   const paths = tagKeys
     .filter((tag) => tagCounts[tag] > 0)
     .map((tag) => ({

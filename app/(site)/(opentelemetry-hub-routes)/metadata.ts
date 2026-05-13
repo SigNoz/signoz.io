@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { POSTS_PER_PAGE } from './constants'
+import { shouldBuildStaticPages } from '@/utils/buildConfig'
 
 export function buildListingMetadata(section: string, page?: string): Metadata {
   const title = page ? `${section} - Page ${page}` : section
@@ -41,6 +42,9 @@ export function buildListingMetadata(section: string, page?: string): Metadata {
 }
 
 export function buildStaticPaginationParams(totalItems: number) {
+  if (!shouldBuildStaticPages()) {
+    return []
+  }
   const totalPages = Math.ceil(totalItems / POSTS_PER_PAGE)
   return Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
 }

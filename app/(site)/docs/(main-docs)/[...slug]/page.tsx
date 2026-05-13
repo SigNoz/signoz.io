@@ -9,8 +9,9 @@ import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { shouldBuildStaticPages, dynamicParamsForEnv } from '@/utils/buildConfig'
 
-export const dynamicParams = false
+export const dynamicParams = dynamicParamsForEnv
 
 export async function generateMetadata({
   params,
@@ -45,9 +46,12 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
+  if (!shouldBuildStaticPages()) {
+    return []
+  }
   const paths = allDocs
     .filter((p) => p.slug !== 'introduction')
-    .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
+    .map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
 }

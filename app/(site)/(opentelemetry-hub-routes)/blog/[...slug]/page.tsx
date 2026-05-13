@@ -16,6 +16,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { shouldBuildStaticPages, dynamicParamsForEnv } from '@/utils/buildConfig'
 
 const defaultLayout = 'BlogLayout'
 const layouts = {
@@ -24,7 +25,7 @@ const layouts = {
   NewsroomLayout,
 }
 
-export const dynamicParams = false
+export const dynamicParams = dynamicParamsForEnv
 
 export async function generateMetadata({
   params,
@@ -83,6 +84,9 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
+  if (!shouldBuildStaticPages()) {
+    return []
+  }
   const paths = allBlogs.map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
