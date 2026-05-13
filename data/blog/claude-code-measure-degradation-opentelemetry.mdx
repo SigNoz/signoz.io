@@ -18,11 +18,20 @@ alt="claude-code-measure-degradation-opentelemetry"
 
 Something has been quietly frustrating developers who use Claude Code regularly. The complaints are showing up across forums, channels, and developer communities: Claude feels worse than it used to. The edits aren't as accurate. It takes more back-and-forth to get the same result. The output quality seems to have dipped. Most of these complaints are anecdotal, and that's exactly the problem.
 
-The deeper issue is that most teams aren't measuring the right thing. They might track token usage or API costs, but tokens are an input. What actually matters is what you're getting for those tokens: lines of code written, commits created, pull requests merged. If your token consumption stays flat but your output per token quietly declines week over week, Claude Code is becoming less productive for your team. Without the right telemetry, you'd never know until the drop in developer velocity makes itself felt.
+The deeper issue is that most teams aren't measuring the right thing. They might track token usage or API costs, but tokens are an input. What actually matters is what you're getting for those tokens: 
 
-**Efficiency degradation is invisible until it's significant. By the time you notice it in your team's output, it's already been happening for weeks.**
+- Lines of code written
+- Commits created
+- Pull requests merged. 
 
-By the end of this post, you'll know which signals to track to catch efficiency degradation before it shows up in your team's velocity, how to turn them into actionable dashboards, and what specific patterns to look out for.
+If your token consumption stays flat but your output per token quietly declines week over week, Claude Code is becoming less productive for your team. Without the right telemetry, you'd never know until the drop in developer velocity makes itself felt.
+
+Efficiency degradation is invisible until it's significant. By the time you notice it in your team's output, it's already been happening for weeks.
+
+By the end of this post, you'll know:
+- Which signals to track to catch efficiency degradation before it shows up in team velocity
+- How to turn them into actionable dashboards
+- What specific patterns to look out for
 
 ## Why Output-Per-Token Is the Metric That Actually Matters
 
@@ -112,7 +121,7 @@ caption="Lines of code added per 1M tokens"
 
 Where lines of code per 1M tokens measures raw output, commits per 1M tokens measures completed units of work. A commit represents a coherent, accepted change, so this ratio captures not just how much code Claude Code is producing, but how much of it is making it through to completion.
 
-A divergence between this panel and lines of code per 1M tokens is important. If lines per 1M tokens is stable but commits per 1M tokens is falling, Claude Code may be producing code that isn't making it to commit. Worth cross-referencing with the edit rejection rate panel.
+Watch for divergence between this panel and lines of code per 1M tokens. If lines per 1M tokens is stable but commits per 1M tokens is falling, Claude Code may be producing code that isn't making it to commit. Worth cross-referencing with the edit rejection rate panel.
 
 <Figure
 src="/img/blog/2026/05/commits-token.webp"
@@ -144,7 +153,12 @@ Once your headline metrics show a declining trend, these panels tell you which o
 
 Cache hit rate is the first thing to check when efficiency ratios start declining. When prompt caching is working well, repeated context is served from cache at a fraction of the standard input token cost, meaning more of your token budget goes toward generating useful output rather than re-processing the same context.
 
-A falling cache hit rate is a direct drag on every output per token ratio. Common causes are frequently changing system prompts, sessions that are too short to benefit from cache warming, or context being restructured between requests in a way that invalidates the cache. A sudden drop from a previously stable level is a strong signal that something in your workflow changed.
+A falling cache hit rate is a direct drag on every output per token ratio. Common causes:
+- Frequently changing system prompts
+- Sessions too short to benefit from cache warming
+- Context being restructured between requests in a way that invalidates the cache
+
+A sudden drop from a previously stable level is a strong signal that something in your workflow changed.
 
 <Figure
 src="/img/blog/2026/05/cache-hit.webp"
@@ -192,9 +206,13 @@ caption="Subagent token spend vs main"
 
 Every rejected edit represents tokens spent generating output that contributed nothing. A stable, low rejection rate is healthy. A rising rejection rate means an increasing share of your token spend is producing edits that get thrown away.
 
-This panel is particularly useful for distinguishing between two types of efficiency degradation: degradation in token efficiency (more tokens consumed per edit) and degradation in output quality (more edits rejected regardless of token count). If your lines of code per token is falling but your rejection rate is rising, the quality of Claude Code's output is likely the primary driver, not context bloat or cache issues.
+This panel is particularly useful for distinguishing between two types of efficiency degradation:
+- **Token efficiency degradation** — more tokens consumed per edit
+- **Output quality degradation** — more edits rejected regardless of token count
 
-You can also break this down by `language` attribute to see if rejection rates are higher for specific programming languages which is useful for identifying whether degradation is general or concentrated in a particular part of your codebase.
+If your lines of code per token is falling but your rejection rate is rising, the quality of Claude Code's output is likely the primary driver, not context bloat or cache issues.
+
+You can also break this down by `language` attribute to see if rejection rates are higher for specific programming languages. This is useful for identifying whether degradation is general or concentrated in a particular part of your codebase.
 
 <Figure
 src="/img/blog/2026/05/edit-tool-rejection.webp"
