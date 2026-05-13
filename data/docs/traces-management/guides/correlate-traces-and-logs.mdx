@@ -8,7 +8,7 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-When a slow request hits, you want to jump from the trace to the exact logs that fired during that span. When an error appears in logs, you want to find the trace that produced it. Neither is possible unless your logs carry `trace_id` and `span_id`.
+When a slow request hits, you want the logs that fired during that span. When an error surfaces in logs, you want the trace that caused it. Neither works without `trace_id` and `span_id` in your logs.
 
 ## How Correlation Works
 
@@ -23,7 +23,7 @@ SigNoz links logs to traces through two fields: `trace_id` and `span_id`. A log 
 }
 ```
 
-A log emitted inside an active span carries both, and SigNoz can connect it to the exact span that produced it:
+A log emitted inside an active span carries both. SigNoz uses them to connect that log to the exact span:
 
 ```json
 {
@@ -37,11 +37,11 @@ A log emitted inside an active span carries both, and SigNoz can connect it to t
 }
 ```
 
-The `trace_id` matches the trace in SigNoz. The `span_id` identifies which span within that trace produced the log.
+The `trace_id` matches the trace in SigNoz. The `span_id` identifies which span produced the log.
 
 ## Automatic Correlation with OpenTelemetry SDK
 
-OpenTelemetry SDKs inject `trace_id` and `span_id` into every log emitted during an active span. The setup step varies by language.
+OpenTelemetry SDKs inject `trace_id` and `span_id` into every log emitted during an active span. The setup varies by language.
 
 <Tabs entityName="language">
 <TabItem value="python" label="Python" default>
@@ -58,20 +58,20 @@ from opentelemetry.instrumentation.logging import LoggingInstrumentor
 LoggingInstrumentor().instrument(set_logging_format=True)
 ```
 
-This patches Python's standard `logging` module. Every log emitted inside a span picks up `trace_id` and `span_id` automatically.
+Calling it patches Python's standard `logging` module. Logs emitted inside spans carry `trace_id` and `span_id` from that point on.
 
 </TabItem>
 <TabItem value="java" label="Java">
 
 **Using the Java agent (recommended)**
 
-Attach the agent at startup. It injects `trace_id`, `span_id`, and `trace_flags` into the MDC for Logback and Log4j2 automatically. You still need those keys in your pattern layout to emit them:
+Attach the agent at startup. It injects `trace_id`, `span_id`, and `trace_flags` into the MDC for Logback and Log4j2:
 
 ```bash
 java -javaagent:opentelemetry-javaagent.jar -jar myapp.jar
 ```
 
-Add the MDC keys to your encoder pattern:
+Add those keys to your encoder pattern to emit them:
 
 ```
 %d{HH:mm:ss.SSS} trace_id=%X{trace_id} span_id=%X{span_id} trace_flags=%X{trace_flags} %msg%n
@@ -85,7 +85,7 @@ Add the dependency:
 <dependency>
   <groupId>io.opentelemetry.instrumentation</groupId>
   <artifactId>opentelemetry-logback-mdc-1.0</artifactId>
-  <version>2.27.0-alpha</version>
+  <version>2.27.0-alpha</version> <!-- check Maven Central for the latest version -->
 </dependency>
 ```
 
@@ -131,14 +131,14 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-The instrumentation patches the logger and adds `trace_id`, `span_id`, and `trace_flags` to each log entry when a span is active.
+Each log entry gets `trace_id`, `span_id`, and `trace_flags` injected when a span is active.
 
 </TabItem>
 <TabItem value="go" label="Go">
 
 Go has no automatic context propagation for logs. Set up a logger bridge and pass `context.Context` on every log call. The bridge extracts `trace_id` and `span_id` from the active span in that context.
 
-Initialize your `LoggerProvider` and register it globally before calling `NewLogger` — without this, no logs export:
+Initialize your `LoggerProvider` and register it globally before calling `NewLogger`. Skip this and nothing exports. `go.opentelemetry.io/otel/log/global` is experimental; its import path may change when the Go log API stabilizes.
 
 ```go
 import (
@@ -150,7 +150,7 @@ provider := sdklog.NewLoggerProvider(/* your exporter + resource */)
 global.SetLoggerProvider(provider)
 ```
 
-Then create the bridge logger and pass `ctx` on every log call:
+Create the bridge logger and pass `ctx` on every log call:
 
 ```bash
 go get go.opentelemetry.io/contrib/bridges/otelslog
@@ -183,7 +183,7 @@ Use this path when:
 
 ### Setting Up Log Pipelines
 
-Follow the detailed guide:
+Follow this guide:
 
 **[Parse Trace Information for your Logs](https://signoz.io/docs/logs-pipelines/guides/trace/)**
 
@@ -200,26 +200,23 @@ It covers:
 3. Click **"Go to related logs"**
 4. Check that `trace_id` and `span_id` fields appear in the matching log entries
 
-<figure data-zoomable align='center'>
-<img src="/img/docs/traces-management/correlate-traces-with-logs.gif" alt="Related logs of a trace in Logs Explorer"/>
-<figcaption><i>Related logs of a trace in Logs Explorer</i></figcaption>
-</figure>
+<Figure src="/img/docs/traces-management/correlate-traces-with-logs.gif" alt="Related logs of a trace in Logs Explorer" caption="Related logs of a trace in Logs Explorer" />
 
-You can also go the other direction: in **Logs Explorer**, filter by a specific `trace_id` to find all logs from that trace.
+In **Logs Explorer**, filter by `trace_id` to find all logs from a specific trace.
 
 ## Troubleshooting
 
 **"Go to related logs" shows no results**
 
-Your logs reach SigNoz but lack `trace_id`. You likely haven't initialized SDK logging instrumentation, or called it after loggers were already created. Move `.instrument()` (Python) or `sdk.start()` (Node.js) to before your first log statement.
+Your logs reach SigNoz but lack `trace_id`. You haven't initialized SDK logging instrumentation, or you called it after creating your loggers. Move `.instrument()` (Python) or `sdk.start()` (Node.js) before your first log statement.
 
 **`trace_id` in logs is `00000000000000000000000000000000`**
 
-This log fired outside an active span. Your logging calls need to sit inside instrumented request handlers, not at startup or in background goroutines with no span context.
+This log fired outside an active span. Move logging calls inside instrumented request handlers, not startup code or background goroutines without span context.
 
 **Logs have a `trace_id` but the trace doesn't appear in SigNoz**
 
-Sampling dropped the trace. The log exported but the trace did not. Lower your sampling rate or switch to tail-based sampling so traces with errors always export.
+Sampling dropped the trace. The log exported but the trace did not. Lower your sampling rate or switch to tail-based sampling so SigNoz receives traces with errors.
 
 **Go: logs emit but `trace_id` stays empty**
 
@@ -227,10 +224,10 @@ The bridge reads context from the `ctx` argument, not a global. Every log call m
 
 ## Best Practices
 
-- **Prefer OpenTelemetry SDKs** over manual pipeline parsing; auto-injection is consistent and requires no collector changes
-- **Use structured logging** (JSON) so pipelines can reliably extract `trace_id` and `span_id`
+- **Prefer OpenTelemetry SDKs** over manual pipeline parsing. Auto-injection needs no collector config.
+- **Use structured logging** (JSON) so pipelines can extract `trace_id` and `span_id`
 - **Propagate trace context across all services** so logs from downstream calls link to the same root trace
-- **Add service-level attributes** (`service.name`, `host.name`) to filter correlated logs across a distributed system
+- **Add service-level attributes** (`service.name`, `host.name`) to filter correlated logs when debugging multi-service traces
 
 ## Get Help
 
