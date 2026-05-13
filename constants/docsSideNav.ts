@@ -1913,6 +1913,11 @@ const docsSideNav = [
             route: '/docs/metrics-management/types-and-aggregation',
             label: 'Types and Aggregation',
           },
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/configure-custom-buckets',
+            label: 'Configure Custom Histogram Buckets',
+          },
         ],
       },
       {
@@ -1927,18 +1932,21 @@ const docsSideNav = [
             route: '/docs/metrics-management/dropping-metric-labels',
             label: 'Dropping Metric Labels',
           },
+        ],
+      },
+      {
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/metrics-management/reference',
+        items: [
+          { type: 'doc', route: '/docs/metrics-management/query-range-api', label: 'Metrics API' },
+          { type: 'doc', route: '/docs/metrics-management/data-storage', label: 'Metrics Tables' },
           {
             type: 'doc',
             route: '/docs/metrics-management/reducing-costs',
             label: 'Understanding Metrics Billing & Reducing Costs',
           },
-          { type: 'doc', route: '/docs/metrics-management/query-range-api', label: 'Metrics API' },
-          {
-            type: 'doc',
-            route: '/docs/metrics-management/configure-custom-buckets',
-            label: 'Configure Custom Histogram Buckets',
-          },
-          { type: 'doc', route: '/docs/metrics-management/data-storage', label: 'Metrics Tables' },
         ],
       },
       {
