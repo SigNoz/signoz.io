@@ -3,7 +3,7 @@ import ContactUsLayout from './ContactUsLayout'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Enterprise Grade Observability at any scale | SigNoz',
+  title: 'Enterprise Grade Observability at any scale',
   description:
     'Enterprise cloud environment, BYOC (managed by SigNoz in your cloud), or self-hosted options with dedicated support, volume discounts, and dashboard migration.',
   openGraph: {

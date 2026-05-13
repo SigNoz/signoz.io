@@ -1,8 +1,9 @@
 ---
-date: 2026-04-08
+date: 2026-05-13
 id: manage-variables
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
+doc_type: howto
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -22,6 +23,12 @@ Variables allow you to build dynamic dashboards where multiple panels can instan
 - Allow viewers to modify displayed data without altering underlying queries 
 
 ## How to add a Variable to a Dashboard?
+
+<Figure
+  src="/img/docs/dashboards/variables/variable-configuration.webp"
+  alt="Variable configuration panel in SigNoz"
+  caption="Variable configuration — set the name, type, default value, and select panels to apply the variable to."
+/>
 
 To add a variable to a dashboard, follow the steps below:
 
@@ -46,7 +53,7 @@ SigNoz supports four ways of creating variables: dynamic, query, custom, and tex
 
 Dynamic variables automatically retrieve attribute values without requiring manual queries. They are configured using two parameters.
 
-1. Field - either an OTEL telemetry intrinsic field (like span name or log severity_text) or a custom [attribute](https://opentelemetry.io/docs/concepts/glossary/#attribute) from logs, traces, or metrics
+1. Field - either an OTEL telemetry intrinsic field (like span name or log severity_text) or a custom <a href="https://opentelemetry.io/docs/concepts/glossary/#attribute" target="_blank" rel="noopener noreferrer nofollow">attribute</a> from logs, traces, or metrics
 
 2. Source: Pick where to search - it checks logs, traces, and metrics by default, but choosing just one source makes it faster. Some of the fields have identical values across signals (e.g., k8s.pod.name is the same whether from logs or traces), so one source is sufficient. Use 'All sources' only when the same field contains distinct values across different signal types.
 
@@ -77,7 +84,7 @@ Example: If k8s.pod.name = ALL, the query includes data from all pods, regardles
 
 ### Query variable
 
-1. Query - A ClickHouse SQL query that fetches data from ClickHouse
+Query - A ClickHouse SQL query that fetches data from ClickHouse
 
     Example: You want to query the list of host names from the metrics database and use them as a variable. Any ClickHouse SQL query that returns a column with desired values is valid. For instance, a query to fetch all host names that are reporting the CPU metric collection would be
 
@@ -94,7 +101,7 @@ Example: If k8s.pod.name = ALL, the query includes data from all pods, regardles
 
 ### Custom variable
 
-2. Custom  - A comma-separated list of values as a Variable
+Custom - A comma-separated list of values as a Variable
 
     Example: It is common to have some attributes with a known and small number of unique values, such as the region or availability zone of the application deployment. The custom variable type allows you to achieve this with comma-delimited values. An example for reference
 
@@ -102,69 +109,11 @@ Example: If k8s.pod.name = ALL, the query includes data from all pods, regardles
 
 ### Textbox variable
 
-3. Textbox - A free text input field with an optional default value
+Textbox - A free text input field with an optional default value
 
     Example: Free text as a variable
 
     ![Variables-with-Text](/img/docs/dashboards/variables/text-box-trace_id.png)
-
-## Using Variables in Queries
-
-Variables are referenced using `$var` syntax across all query types.
-
-### Query Builder
-
-**Single-select variables**: Use the variable name directly
-
-```
-service.name = $service.name AND has_error = true AND http.route EXISTS
-```
-
-<Admonition type="tip">
-Name your variable the same as the field to avoid confusion (e.g., variable `service.name` for field `service.name`)
-</Admonition>
-
-**Multi-select variables**: Use `IN` operator for multiple values
-
-```
-k8s.namespace.name = $k8s.namespace.name AND k8s.pod.name IN $k8s.pod.name
-```
-
-### ClickHouse Queries
-
-Reference variables with `$` prefix in your SQL:
-
-```sql
-SELECT 
-    toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval,
-    attributes_string['http.method'] AS method,
-    toFloat64(avg(durationNano)) AS value
-FROM 
-    signoz_traces.distributed_signoz_index_v3
-WHERE 
-    attributes_string['http.method'] != ''
-    AND attributes_string['http.method'] = $http.method  -- Variable usage
-    AND timestamp > now() - INTERVAL 30 MINUTE
-    AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
-GROUP BY 
-    (method, interval)
-ORDER BY 
-    (method, interval) ASC;
-```
-
-### PromQL
-
-**Single-select variables**: Use the `=` matcher with the variable:
-
-```
-sum(rate(http_requests_total{job="$job_name"}[5m]))
-```
-
-**Multi-select variables**: Use the `=~` regex matcher instead of `=`. When multiple values are selected, SigNoz expands the variable into a regex pattern (e.g., `value1|value2|value3`), which requires `=~` to match correctly.
-
-```
-sum(rate(http_requests_total{service_name=~"$service_name", deployment_environment=~"$deployment_environment"}[5m]))
-```
 
 ## Chaining Variables
 
@@ -221,6 +170,10 @@ If you have a specific use case where dynamic variables don't work:
 2. Or reach out to support for assistance
 
 We're actively working on dynamic variables and all feedback is welcome.
+
+## Next Steps
+
+- [Using Variables in Queries](https://signoz.io/docs/dashboards/using-variables-in-queries/) — Learn how to reference variables in Query Builder, ClickHouse SQL, and PromQL queries.
 
 ## Get Help
 

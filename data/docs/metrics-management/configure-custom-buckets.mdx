@@ -1,48 +1,73 @@
 ---
-date: 2024-10-28
-title: Configure custom buckets for histograms
-
+date: 2026-05-06
+title: Configure Custom Histogram Buckets
+description: Configure custom histogram buckets for OpenTelemetry metrics in SigNoz.
+doc_type: howto
 id: configure-custom-buckets
 ---
 
-This page describes how to configure custom buckets for histograms. The default buckets for histograms are as follows:
+Histogram metrics distribute values into predefined buckets. The OpenTelemetry SDK provides default bucket boundaries (in seconds):
 
-- [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
+```
+[0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
+```
 
-The unit of the above buckets is seconds.
+These defaults work well for measuring latencies in seconds, but if your metric uses different units or value ranges (for example, response sizes in bytes or durations in milliseconds), you should define custom bucket boundaries that match your data.
 
-You can configure custom buckets for histograms by adding a view for the metric and specifying the buckets in the view. This needs to be done at the time the meter provider is initialized. The following example shows how to do this:
+## How to Configure Custom Buckets
+
+Custom buckets are configured in your application code when you initialize the OpenTelemetry `MeterProvider`. You define a `View` that overrides the default bucket boundaries for histogram instruments.
+
+### Python Example
+
+The following example uses the [OpenTelemetry Python SDK](https://signoz.io/docs/instrumentation/python/) to configure custom histogram buckets:
 
 ```python
-    from opentelemetry.metrics import set_meter_provider
-    from opentelemetry.sdk.metrics import MeterProvider, Histogram
-    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-    from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
-    from opentelemetry.sdk.metrics.view import ExplicitBucketHistogramAggregation, View
+from opentelemetry.metrics import set_meter_provider
+from opentelemetry.sdk.metrics import MeterProvider, Histogram
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.view import ExplicitBucketHistogramAggregation, View
 
-    # the following boundaries are in milliseconds
-    # change this to the desired boundaries based on your metric and how you record the metric
-    # i.e in your code if you record the metric in milliseconds, then the boundaries should be in milliseconds
-    # if you record the metric in seconds, then the boundaries should be in seconds
-    boundaries = [0.0,100.0,250.0,500.0,750.0,1000.0,2500.0,5000.0,7500.0,10000.0,15000.0,20000.0,30000.0,45000.0,60000.0]
+# Define custom bucket boundaries (in milliseconds in this example).
+# Choose boundaries that match the unit you use when recording the metric.
+boundaries = [0.0, 100.0, 250.0, 500.0, 750.0, 1000.0, 2500.0, 5000.0,
+              7500.0, 10000.0, 15000.0, 20000.0, 30000.0, 45000.0, 60000.0]
 
-    # the following view updates the bucket boundaries for all histogram metrics
-    custom_buckets_for_all_histograms = View(
-        instrument_type=Histogram,
-        aggregation=ExplicitBucketHistogramAggregation(boundaries=boundaries)
-    )
+# Option 1: Apply custom buckets to ALL histogram metrics
+custom_buckets_for_all_histograms = View(
+    instrument_type=Histogram,
+    aggregation=ExplicitBucketHistogramAggregation(boundaries=boundaries),
+)
 
-    # the following view updates the bucket boundaries for a histogram metric with name "my-histogram"
-    custom_buckets_for_specific_metric = View(
-        instrument_type="my-histogram",
-        aggregation=ExplicitBucketHistogramAggregation(boundaries=boundaries)
-    )
+# Option 2: Apply custom buckets to a specific histogram metric by name
+custom_buckets_for_specific_metric = View(
+    instrument_name="my-histogram",
+    aggregation=ExplicitBucketHistogramAggregation(boundaries=boundaries),
+)
 
-    reader = PeriodicExportingMetricReader(
-        OTLPMetricExporter(),
-    )
-    set_meter_provider(MeterProvider(
+reader = PeriodicExportingMetricReader(OTLPMetricExporter())
+
+set_meter_provider(
+    MeterProvider(
         metric_readers=[reader],
-        views=[custom_buckets_for_all_histograms]
-    ))
+        views=[custom_buckets_for_all_histograms],
+    )
+)
 ```
+
+<Admonition type="info">
+The same concept applies to other languages — you configure Views on the `MeterProvider` at initialization. See the OpenTelemetry instrumentation docs for your language:
+[Go](https://signoz.io/docs/instrumentation/golang/) |
+[Java](https://signoz.io/docs/instrumentation/java/) |
+[JavaScript/Node.js](https://signoz.io/docs/instrumentation/javascript/) |
+[.NET](https://signoz.io/docs/instrumentation/dotnet/) |
+[Ruby](https://signoz.io/docs/instrumentation/ruby/) |
+[Rust](https://signoz.io/docs/instrumentation/rust/)
+</Admonition>
+
+## Choosing the Right Boundaries
+
+- **Match the unit**: If your code records values in milliseconds, define boundaries in milliseconds.
+- **Cover the expected range**: Include boundaries that capture both typical and tail-end values for your metric.
+- **Avoid too many buckets**: Each bucket adds a time series. Keep boundaries to 10–20 for a good balance between granularity and cost.

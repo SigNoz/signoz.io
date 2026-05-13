@@ -1,95 +1,310 @@
 ---
-date: 2026-03-12
+date: 2026-05-07
 id: temporal-cloud-metrics
-
 title: Getting Temporal Cloud Metrics into SigNoz
-description: Collect Temporal Cloud metrics in SigNoz by configuring the Temporal Cloud metrics endpoint and OpenTelemetry Collector.
+description: Collect Temporal Cloud metrics in SigNoz by configuring an OpenTelemetry Collector to scrape the Temporal Cloud OpenMetrics endpoint.
+doc_type: howto
 ---
 
-We need to configure metrics endpoint using Temporal Cloud UI. The steps are available at https://docs.temporal.io/production-deployment/cloud/metrics/general-setup. After this you should have:
-1. Temporal metrics endpoint
-2. The certificate and key files 
+import GetHelp from '@/components/shared/get-help.md'
 
+This guide shows how to collect Temporal Cloud metrics in SigNoz. You run an OpenTelemetry Collector in your infrastructure, configure it to scrape the <a href="https://docs.temporal.io/cloud/metrics/openmetrics/" target="_blank" rel="noopener noreferrer nofollow">Temporal Cloud OpenMetrics endpoint</a>, and forward the metrics to SigNoz via OTLP.
 
-### Step 1: Run `promql-to-scrape` to expose metrics to endpoint
+## Prerequisites
 
-https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/
+- A Temporal Cloud account with metrics access enabled
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed in your infrastructure
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Setup
+
+### Step 1: Create a Temporal API key
+
+Create a service account with the **Metrics Read-Only** role in the Temporal Cloud UI, then generate an API key for that service account. Full instructions are in the <a href="https://docs.temporal.io/cloud/metrics/openmetrics/migration-guide#create-an-api-key" target="_blank" rel="noopener noreferrer nofollow">Temporal API key guide</a>.
+
+Verify the key works before proceeding:
+
+```bash
+curl -H "Authorization: Bearer <TEMPORAL_API_KEY>" https://metrics.temporal.io/v1/metrics
+```
+
+Replace `<TEMPORAL_API_KEY>` with the key you generated. A successful response returns a text stream of Prometheus metric lines.
+
+### Step 2: Configure the OpenTelemetry Collector
+
+Choose the setup that matches your environment:
 
 <Tabs>
+<TabItem value="vm" label="VM / Binary" default>
 
-    <TabItem value="vm" label="Binary" default>
-        ```bash
-        go mod tidy
-        go build -o promql-to-scrape cmd/promql-to-scrape/main.go
-        ./promql-to-scrape --client-cert=/path/to/client.crt --client-
-        key=/path/to/tls.key --prom-endpoint=https://<account>.tmprl.cloud/prometheus --config-file examples/config.yaml --debug
-        ```
-        You metrics would now be available at http://localhost:9001/metrics for getting scraped
-    </TabItem>
+Add the `prometheus` receiver and SigNoz `otlp` exporter to your `otel-collector-config.yaml`. If your collector already has other receivers, append the `prometheus` block and add it to the pipeline — do not replace your existing config.
 
-    <TabItem value="k8s" label="Kubernetes">
-        Relevant yaml files to run in k8s are at:
-        1. [Deployment](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/deployment.yaml). Configure [these](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/deployment.yaml#L21-L24) args to your environment
-        2. [ConfigMap](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/configmap.yaml)
-        3. [Secret](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/secret.yaml). Add your cert and key [here](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/secret.yaml#L9-L10)
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: temporal-cloud
+          static_configs:
+            - targets:
+                - 'metrics.temporal.io'
+          scheme: https
+          metrics_path: /v1/metrics
+          scrape_interval: 60s
+          honor_timestamps: true
+          authorization:
+            type: Bearer
+            credentials: '<TEMPORAL_API_KEY>'
 
-    </TabItem>
+processors:
+  batch:
 
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Replace these placeholders:
+
+- `<TEMPORAL_API_KEY>`: the API key you created in Step 1
+- `<region>`: your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<SIGNOZ_INGESTION_KEY>`: your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="note">
+  The `credentials` field inlines the API key directly in the config file. Anyone with read access to this file can extract the key. For production deployments, consider using `credentials_file` with a path to a file containing the key (as shown in the Kubernetes tab), or restrict file permissions to the collector's service account.
+</Admonition>
+
+Restart the collector to apply the config:
+
+```bash
+./otelcol-contrib --config ./otel-collector-config.yaml
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+On Kubernetes, store your API key as a Secret and mount it into the collector — do not inline credentials in ConfigMaps.
+
+#### 1. Create Secrets for your API keys
+
+```bash
+# Temporal Cloud API key
+kubectl create secret generic tcloud-api-key --from-literal=token=<TEMPORAL_API_KEY>
+
+# SigNoz ingestion key
+kubectl create secret generic signoz-secret --from-literal=SIGNOZ_API_KEY=<SIGNOZ_INGESTION_KEY>
+```
+
+Replace `<TEMPORAL_API_KEY>` with your Temporal API key and `<SIGNOZ_INGESTION_KEY>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+#### 2. Deploy the collector
+
+Apply the manifest below. Before applying, replace `<region>` in the `SIGNOZ_OTLP_ENDPOINT` env var with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
+```yaml:collector.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-config
+  labels:
+    app.kubernetes.io/name: collector-config
+data:
+  collector-config: |
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: temporal-cloud
+              static_configs:
+                - targets:
+                    - "metrics.temporal.io"
+              scheme: https
+              metrics_path: /v1/metrics
+              scrape_interval: 60s
+              honor_timestamps: true
+              authorization:
+                type: Bearer
+                credentials_file: /etc/tcloud-api-key/token
+
+    processors:
+      batch:
+
+    exporters:
+      otlp:
+        endpoint: ${SIGNOZ_OTLP_ENDPOINT}
+        tls:
+          insecure: false
+        headers:
+          "signoz-ingestion-key": "${SIGNOZ_API_KEY}"
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [prometheus]
+          processors: [batch]
+          exporters: [otlp]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  labels:
+    app.kubernetes.io/name: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: otel-collector
+    spec:
+      containers:
+        - name: collector
+          image: otel/opentelemetry-collector-contrib:0.148.0
+          env:
+            - name: SIGNOZ_OTLP_ENDPOINT
+              value: "ingest.<region>.signoz.cloud:443"
+            - name: SIGNOZ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-secret
+                  key: SIGNOZ_API_KEY
+          volumeMounts:
+            - name: collector-config-vol
+              mountPath: /etc/otelcol-contrib
+            - name: tcloud-api-key
+              mountPath: /etc/tcloud-api-key
+              readOnly: true
+      volumes:
+        - name: tcloud-api-key
+          secret:
+            secretName: tcloud-api-key
+        - name: collector-config-vol
+          configMap:
+            name: collector-config
+            items:
+              - key: collector-config
+                path: config.yaml
+```
+
+#### 3. Apply the manifest
+
+```bash
+kubectl apply -f collector.yaml
+```
+
+#### 4. Verify the collector is running
+
+```bash
+kubectl get pods -l app.kubernetes.io/name=otel-collector
+kubectl logs -l app.kubernetes.io/name=otel-collector
+```
+
+The logs should show `Everything is ready. Begin running and processing data.` with no errors from `prometheusreceiver`.
+
+</TabItem>
 </Tabs>
 
-### Step 2: Run otel-collector to scrape the metrics
-Install otel-collector:
-1. Using Binary - https://signoz.io/docs/opentelemetry-collection-agents/vm/install/
-2. At Kubernetes - https://signoz.io/docs/tutorial/kubernetes-infra-metrics/
+### Step 3: Reduce scrape cardinality (optional)
 
-[This guide](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver) can also be useful if you are new to scraping prometheus metrics using otel-collector
+If you have many Temporal namespaces, use query parameters on `metrics_path` to filter what is scraped:
 
-Add below scrape config to the otel-collector config
-```bash
-    receivers:
-        ...
-        prometheus:
-            config:
-                global:
-                    scrape_interval: 30s
-                scrape_configs:
-                    - job_name: temporal-cloud
-                        static_configs:
-                            - targets:
-                                - localhost:9001
-```
-Replace `localhost:9001` with the endpoint where your metrics are available for scrape after **Step 1**. 
-
-
-Also, add `prometheus` to the list of receivers in the metrics pipeline of otel-collector. Keep the remaining part of your config intact.
-```
-    ...
-    pipelines:
-        ...
-        metrics:
-            receivers: [otlp, prometheus]
-            processors: [batch]
-            exporters: [otlp]
-        ...
+```yaml
+metrics_path: '/v1/metrics?namespaces=<your-namespace>'
 ```
 
-### Step 3: Import dashboard
+You can also filter by metric name: `?metrics=temporal_cloud_v1_workflow_success_count`. See <a href="https://docs.temporal.io/cloud/metrics/openmetrics/migration-guide#high-cardinality-management" target="_blank" rel="noopener noreferrer nofollow">high-cardinality management</a> in the Temporal docs for details.
 
-Go to Dashboards => New Dashboard => Import JSON
+### Step 4: Import the dashboard
 
-Download JSON from [link](https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20Cloud%20Metrics.json)
+In SigNoz, go to **Dashboards → New Dashboard → Import JSON**.
 
-Feel free to reach out to us if data does not start appearing in the dashboard after 2-3 minutes. Here are sample screenshots from the dashboard:
+Download the dashboard JSON from [Temporal Cloud Metrics](https://raw.githubusercontent.com/SigNoz/dashboards/main/temporal.io/Temporal%20Cloud%20Metrics.json). The dashboard includes panels for workflow success rate, service request counts, latency percentiles, and worker poll metrics.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-1.webp" alt="Temporal Actions Metrics"/>
-    <figcaption><i>Temporal Actions Metrics</i></figcaption>
-</figure>
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-2.webp" alt="Temporal Worker Poll metrics"/>
-    <figcaption><i>Temporal Worker Poll metrics</i></figcaption>
-</figure>
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-3.webp" alt="Temporal Service Requests metrics"/>
-    <figcaption><i>Temporal Service Requests metrics</i></figcaption>
-</figure>
+## Validate
+
+Metrics should appear in SigNoz within 2–3 minutes of the collector starting. To confirm:
+
+1. Go to **Metrics Explorer** in SigNoz and search for `temporal_cloud_v1_`. You should see metrics like `temporal_cloud_v1_service_request_count` and `temporal_cloud_v1_workflow_success_count`.
+2. Open the imported dashboard and verify panels are populated.
+
+<Figure
+  src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-1.webp"
+  alt="Temporal Actions Metrics dashboard panel in SigNoz"
+  caption="Temporal Actions Metrics"
+/>
+<Figure
+  src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-2.webp"
+  alt="Temporal Worker Poll metrics dashboard panel in SigNoz"
+  caption="Temporal Worker Poll Metrics"
+/>
+<Figure
+  src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-3.webp"
+  alt="Temporal Service Requests metrics dashboard panel in SigNoz"
+  caption="Temporal Service Requests Metrics"
+/>
+
+<details>
+<ToggleHeading>
+
+## Migrating from the Prometheus query endpoint (v0)
+
+</ToggleHeading>
+
+If you were previously using the Temporal Cloud Prometheus query endpoint (v0), note these breaking changes in the v1 OpenMetrics endpoint:
+
+- **Metric names** changed from `temporal_cloud_v0_*` to `temporal_cloud_v1_*`
+- **No `rate()` needed**: metrics are pre-computed per-second rates with delta temporality — do not wrap them with `rate()`, `increase()`, or `irate()`
+- **Latency percentiles** are now explicit metrics (e.g., `temporal_cloud_v1_service_latency_p99`) instead of histogram buckets — `histogram_quantile()` no longer applies
+- **Authentication** changed from mTLS certificates to API keys with the global endpoint `https://metrics.temporal.io/v1/metrics`
+
+See the <a href="https://docs.temporal.io/cloud/metrics/openmetrics/migration-guide" target="_blank" rel="noopener noreferrer nofollow">full migration guide</a> for the complete metric name mapping table.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No metrics appear after 3 minutes
+
+- **Likely cause**: invalid API key, misconfigured receiver, or `prometheus` missing from the pipeline receivers list.
+- **Fix**: run the `curl` command from Step 1 to confirm the key is valid. Check collector logs for errors from `prometheusreceiver`. Confirm `prometheus` is listed under `receivers` in the metrics pipeline.
+- **Verify**: metrics with the prefix `temporal_cloud_v1_` appear in Metrics Explorer.
+
+### Dashboard shows no data after metrics are visible
+
+- **Likely cause**: dashboard queries may reference old v0 metric names if you imported an older dashboard version.
+- **Fix**: confirm the dashboard queries use `temporal_cloud_v1_*` names. Re-download the latest dashboard JSON from the link in Step 4.
+- **Verify**: individual metric panels populate in the dashboard.
+
+</details>
+
+## Next Steps
+
+- [Set up alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on Temporal metrics such as `temporal_cloud_v1_workflow_failed_count`
+- Explore end-to-end tracing with the [Temporal Golang OpenTelemetry guide](https://signoz.io/docs/integrations/temporal-golang-opentelemetry/) or the [Temporal TypeScript OpenTelemetry guide](https://signoz.io/docs/integrations/temporal-typescript-opentelemetry/)
+
+## Get Help
+
+<GetHelp />

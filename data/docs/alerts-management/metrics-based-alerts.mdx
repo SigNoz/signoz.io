@@ -1,26 +1,38 @@
 ---
-date: 2026-04-23
+date: 2026-05-12
 id: metrics-based-alerts
 title: Metrics based alerts
 description: Learn how to create metrics-based alerts in SigNoz by defining alert conditions, configuring notification settings, and using practical examples for memory usage, error rate, and latency monitoring.
-doc_type: howto
+doc_type: reference
 ---
 
-A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Metric-based alert:
+A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met. You can define your metric query using **Query Builder**, **ClickHouse queries**, or **PromQL**.
+
+This page covers the configuration options available for Metric-based alerts — from defining the metric query to setting conditions and notification preferences.
+
+At the top of the alert creation page, you can set:
+
+- **Alert Name**: A field to name the alert for easy identification.
+- **Labels**: Add static labels or tags for categorization. Labels should be added in key-value pairs. First enter key (avoid space in key) and set value.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alert-name-labels.webp" alt="Alert name and labels at the top of the alert creation page"/>
+    <figcaption><i>Set alert name and labels</i></figcaption>
+</figure>
 
 ## Step 1: Define the Metric
-In this step, you use the [Metrics Query Builder](https://signoz.io/docs/userguide/query-builder/#metrics-query-builder)
-to choose the metric to monitor. The following fields that are available in Metrics Query Builder includes:
+In this step, you use the [Metrics Query Builder](https://signoz.io/docs/userguide/query-builder/)
+to choose the metric to monitor. The following fields are available:
 
-- **Metric**: A field to select the specific metric you want to monitor (e.g., CPU usage, memory utilization).
+- **Metric**: Select the specific metric you want to monitor (e.g., `k8s.pod.memory_request_utilization`, `system.cpu.utilization`).
 
-- **Time aggregation**: A field to select the time aggregation function to use for the metric. Learn more about [time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation)
+- **Filter**: Write a filter expression to narrow the data (e.g., `service.name = 'frontend'`). Supports logical operators like AND, OR, IN, NOT IN.
 
-- **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN".
+- **Aggregate within time series**: Select the time aggregation function (Avg, Sum, Min, Max, Count, Rate, etc.) and the step interval. Learn more about [time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation).
 
-- **Space aggregation**: A field to select the space aggregation function to use for the metric. Learn more about [space aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation)
+- **Aggregate across time series**: Select the space aggregation function and optional group-by dimensions. Learn more about [space aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation).
 
-- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to customize the legend's format in the visual representation of the alert.
+- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: Customize the legend's format in the visual representation of the alert.
 
 - **Having**: Apply conditions to filter the results further based on aggregate value.
 
@@ -74,13 +86,23 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
    | `in total` | Evaluate the total sum over the window | Total errors `Above 100` |
    | `last` | Only the last data point is evaluated | Used when only latest status matters |
 
-### Evaluation Window (For)
-    
-   Specifies how long the condition must be true before the alert is triggered.
-    
-   e.g. `For 5 minutes` = The condition must remain true continuously for 5 minutes before the alert is triggered.
-    
-   This helps reduce false positives due to short-lived spikes.
+### Evaluation Window
+
+   Specifies the time window and mode for evaluating the condition. You can choose between two modes:
+
+   - **Rolling**: Monitors data over a fixed time period that moves forward continuously. For example, a 5-minute rolling window with 1-minute evaluation cadence checks continuously: 14:01:00–14:06:00, 14:02:00–14:07:00, etc.
+   - **Cumulative**: Monitors data accumulated since a fixed starting point. The window grows over time, keeping all historical data from the start. For example, an hourly cumulative window for error count alerts when errors exceed 100 — starting at the top of the hour, it tracks: 20 errors by :15, 55 by :30, 105 by :45 (alert fires).
+
+   Both modes support preset timeframes (Last 5 minutes, Last 10 minutes, Last 15 minutes, Last 30 minutes, Last 1 hour, Last 2 hours, Last 4 hours) as well as a **Custom** time range for specific requirements.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/evaluation-window-rolling.webp" alt="Evaluation window options showing Rolling and Cumulative modes"/>
+    <figcaption><i>Evaluation window with Rolling and Cumulative options</i></figcaption>
+</figure>
+
+### Notification Channels
+
+   Choose the [notification channels](https://signoz.io/docs/alerts-management/notification-channel/slack/) to send alerts to from those configured in Settings > Account Settings > Notification Channels. You can select multiple channels per threshold.
     
 ### Threshold
     
@@ -100,17 +122,11 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
     
 ### Advanced Options
 
-In addition, there are 3 more advanced options:
+Under the **Advanced Options** section, you can configure:
 
-### Alert Frequency
-   - How frequently SigNoz evaluates the alert condition.
-   - Default is `1 min`
-   - e.g. If set to `1 min` the alert will run once every minute.
+- **How often to check**: How frequently SigNoz evaluates the alert condition. Default is every 1 minute.
 
-### Notification for missing data points
-   - Triggers an alert if **no data is received** for the configured time period.
-   - Useful for services where consistent data is expected.
-   - E.g. If set to `5 minutes`, and no metric data is received during that period, the alert will fire.
+- **Alert when data stops coming**: Send a notification if no data is received for a specified time period. Useful for services where consistent data is expected.
 
 ### Minimum Data Points in Result Group
    - Ensures the alert condition is evaluated only when there's enough data for statistical significance.
@@ -119,46 +135,50 @@ In addition, there are 3 more advanced options:
    - To avoid flapping, set this value with some margin below the number of data points you expect in the evaluation window. For example, if your collection interval is 1 minute and your evaluation window is 5 minutes, you expect ~5 data points — set the minimum to `3` rather than `5` so the query must return at least 3 data points for the alert to be evaluated.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/alerts/alerts-metrics-based-2.webp" alt="Define the alert conditions"/>
-    <figcaption><i>Define the alert conditions </i></figcaption>
+    <img src="/img/docs/alerts/alerts-metrics-based-2.webp" alt="Set alert conditions with threshold, routing policies, and advanced options"/>
+    <figcaption><i>Set alert conditions </i></figcaption>
 </figure>
 
 
-## Step 3: Alert Configuration
-In this step, you set the alert's metadata, including severity, name, and description:
+## Step 3: Notification Settings
+In this step, you configure how alert notifications are delivered:
 
-### Severity
-Set the severity level for the alert (e.g., "Warning" or "Critical").
+### Notification Message
+Custom message content for alert notifications. Use template variables to include dynamic information. The default template includes the current value and threshold.
 
-### Alert Name
-A field to name the alert for easy identification.
-
-### Alert Description
-
-Add a detailed description for the alert, explaining its purpose and trigger conditions.
-
-You can incorporate result attributes in the alert descriptions to make the alerts more informative:
+You can incorporate result attributes in the alert message to make notifications more informative:
 
 **Syntax**: Use `$<attribute-name>` to insert attribute values. Attribute values can be any attribute used in group by.
 
-**Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the alert description, you will use `$service.name`.
+**Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the notification message, you will use `$service.name`.
 
-#### Slack alert format
+Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" target="_blank" rel="noopener noreferrer nofollow">advanced Slack formatting</a> is supported if you are using Slack as a notification channel.
 
-Using [advanced slack formatting](https://api.slack.com/reference/surfaces/formatting#advanced) is supported if you are using Slack as a notification channel.
+### Group alerts by
+Combine alerts with the same field values into a single notification. Select fields to group by (optional). When empty, all matching alerts are combined into one notification.
 
-### Labels
-A field to add static labels or tags for categorization. Labels should be added in key value pairs. First enter key (avoid space in key) and set value.
+### Repeat Notifications
+Configure repeat notifications to retrigger alerts at specified intervals if they remain unresolved. To enable:
 
-### Notification channels
-A field to choose the [notification channels](https://signoz.io/docs/setup-alerts-notification) from those configured in the Alert Channel settings.
+1. Scroll to the bottom of the alert configuration
+2. Enable the **Repeat Notification** toggle
+3. Set your desired interval
+4. Configure the condition:
+   - **Firing**: Send repeat notifications when the alert is actively firing
+   - **No Data**: Send repeat notifications when no data is received
+
+<Figure
+  src="/img/docs/repeat-notification.webp"
+  alt="Repeat Notification configuration showing interval and condition options"
+  caption="Repeat Notification configuration"
+/>
 
 ### Test Notification
-A button to test the alert to ensure that it works as expected.
+Click the **Test Notification** button at the bottom of the page to send a test alert to the configured notification channels. This verifies that your alert pipeline is working correctly before saving.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/alerts/alerts-metrics-based-3.webp" alt="Configure the alert"/>
-    <figcaption><i>Setting the alert metadata </i></figcaption>
+    <img src="/img/docs/alerts/alerts-metrics-based-3.webp" alt="Notification settings for the alert"/>
+    <figcaption><i>Notification settings </i></figcaption>
 </figure>
 
 ## Examples
@@ -173,13 +193,13 @@ A button to test the alert to ensure that it works as expected.
 #### Step 1: Write Query Builder query to define alert metric
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder.png" alt="metrics builder query for memory usage"/>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder.webp" alt="metrics builder query for memory usage"/>
     <figcaption><i>Memory usage metric builder query</i></figcaption>
 </figure>
 
-The [`hostmetricsreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver) creates several host system metrics, including [`system_memory_usage`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/memoryscraper/documentation.md#systemmemoryusage), which contains the memory usage for each [state](https://www.kernel.org/doc/Documentation/filesystems/proc.txt) from `/proc/meminfo`. 
-The states can be `free`, `used`, `cached`, etc. We want to alert when the total memory usage of a host exceeds the threshold, so the WHERE clause excludes the `free` state. 
-We calculate the average value for each state and then sum them up by host to get the per-host memory usage. 
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver" target="_blank" rel="noopener noreferrer nofollow">hostmetricsreceiver</a> creates several host system metrics, including <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/memoryscraper/documentation.md#systemmemoryusage" target="_blank" rel="noopener noreferrer nofollow">system_memory_usage</a>, which contains the memory usage for each <a href="https://www.kernel.org/doc/Documentation/filesystems/proc.txt" target="_blank" rel="noopener noreferrer nofollow">state</a> from `/proc/meminfo`. 
+The states can be `free`, `used`, `cached`, etc. We want to alert when the total memory usage of a host exceeds the threshold, so the filter expression excludes the `free` state with `state!= 'free'`.
+We calculate the average value within each time series and then sum across time series grouped by `host.name` to get the per-host memory usage. 
 
 <Admonition type="info">
 Remember to set the unit of the `y-axis` to bytes, as that is the unit of the mentioned metric.
@@ -188,7 +208,7 @@ Remember to set the unit of the `y-axis` to bytes, as that is the unit of the me
 #### Step 2: Set alert conditions
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder-condition.png" alt="metrics builder query for memory usage"/>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder-condition.webp" alt="metrics builder query for memory usage"/>
     <figcaption><i>Memory usage alert condition</i></figcaption>
 </figure>
 
@@ -199,14 +219,14 @@ The condition is set to trigger a notification if the per-minute memory usage ex
 You might want to alert based on the percentage rather than a fixed threshold. There are two ways to get the percentage: the convenient option is when the usage percentage is reported directly by the source, or when the source only sends the exact usage in bytes and you need to derive the percentage yourself. This example demonstrates how to derive the percentage from the original bytes metric.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder.png" alt="metrics builder query for memory usage"/>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder.webp" alt="metrics builder query for memory usage"/>
     <figcaption><i>Memory usage percentage query</i></figcaption>
 </figure>
 
-We use a formula to derive the percentage value from the exact memory usage in bytes. In the example, query `A` calculates the per-host memory usage, while query `B`, as shown in the image, doesn't have any WHERE clause filter, thus providing the total memory available. The formula for `A`/`B` is interpreted as (memory usage in bytes) / (total memory available in bytes). We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
+We use a formula to derive the percentage value from the exact memory usage in bytes. In the example, query `A` calculates the per-host memory usage (with the `state!= 'free'` filter), while query `B` has no filter expression, thus providing the total memory available. The formula `A/B` is interpreted as (memory usage in bytes) / (total memory available in bytes). We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder-condition.png" alt="metrics builder query for memory usage"/>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder-condition.webp" alt="metrics builder query for memory usage"/>
     <figcaption><i>Memory usage percentage condition</i></figcaption>
 </figure>
 
@@ -217,14 +237,14 @@ The condition is set to trigger a notification if the per-minute memory usage ex
 SigNoz creates a metric `signoz_calls_total` from the trace data. The default attributes of the metric are `service_name`, `operation`, `span_kind`, `status_code`, and `http_status_code`. There is no separate metric for counting errors; instead, the `status_code` attribute is used to determine if a request counts as an error. This example demonstrates how to calculate the error percentage and alert on it.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder.png" alt="metrics builder query for error percentage"/>
+    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder.webp" alt="metrics builder query for error percentage"/>
     <figcaption><i>Error percentage query</i></figcaption>
 </figure>
 
-We use a formula to derive the error percentage from the total calls metric. In the example, query `A` calculates the per-endpoint error rate, while query `B`, as shown in the image, doesn't have any WHERE clause filter for `status_code`, thus providing the per-endpoint total request rate. The formula for `A`/`B` is interpreted as (error request rate) / (total request rate), which gives the error percentage per endpoint. We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
+We use a formula to derive the error percentage from the total calls metric. In the example, query `A` filters for error status codes and `SPAN_KIND_SERVER` spans to calculate the per-endpoint error rate, while query `B` filters only for `SPAN_KIND_SERVER` without a status code filter, providing the per-endpoint total request rate. The formula `A/B` gives the error percentage per endpoint. We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder-condition.png" alt="metrics builder query for error percentage"/>
+    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder-condition.webp" alt="metrics builder query for error percentage"/>
     <figcaption><i>Error percentage condition</i></figcaption>
 </figure>
 
@@ -235,14 +255,14 @@ The condition is set to trigger a notification if the per-minute error percentag
 SigNoz creates a metric `signoz_latency_bucket` from the trace data. The default attributes of the metric are `service_name`, `operation`, `span_kind`, `status_code`, and `http_status_code`. This example demonstrates how to calculate the P95 latency for an endpoint and alert on it.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder.png" alt="metrics builder query for latency"/>
+    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder.webp" alt="metrics builder query for latency"/>
     <figcaption><i>Endpoint latency query</i></figcaption>
 </figure>
 
 We use the P95 aggregation, which gives the 95th-percentile request latency per endpoint. We set the unit of the y-axis to milliseconds to match the unit of the metric.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder-condition.png" alt="metrics builder query for latency"/>
+    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder-condition.webp" alt="metrics builder query for latency"/>
     <figcaption><i>Endpoint latency condition</i></figcaption>
 </figure>
 

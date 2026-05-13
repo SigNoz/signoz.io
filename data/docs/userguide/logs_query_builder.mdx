@@ -1,249 +1,239 @@
 ---
-date: 2026-03-31
-title: Logs Query Builder
-
+date: 2026-05-08
+title: Logs Explorer
 id: logs_query_builder
-description: Learn how to use the SigNoz Logs Query Builder to search, filter, and analyze your log data with powerful query capabilities.
+description: Learn how to use the SigNoz Logs Explorer to search, filter, and analyze your log data with powerful query capabilities.
+doc_type: howto
 ---
 
+The Logs Explorer in SigNoz provides a powerful interface for searching, filtering, and analyzing your log data. It includes quick filters on the left panel, a filter expression bar, and three view modes — List View, Time Series, and Table.
 
-We recently released an updated logs explorer page and query builder in SigNoz to make experience of our logs product much more intuitive and seamless.
+<Figure
+  src="/img/docs/logs-management/ui/logs-explorer-overview.webp"
+  alt="Logs Explorer with quick filters and list view"
+  caption="Logs Explorer with quick filters, filter expression, and list view"
+/>
 
-Some of the key features:
-1. Advanced filtering based on attributes and auto suggestions for filters<br></br>
+## Filtering and Search
 
-    You can now create more complex queries for how you match attributes, and the query field will automatically suggest both attributes and values for your query.
+The search feature allows you to filter logs using different attributes (like `service.name`, `status` etc.) with operators (like `IN`, `=`, `!=`, `NOT IN`, `CONTAINS`, `EXISTS`). You can filter using multiple attributes simultaneously and combine them with `AND`/`OR`.
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/02.webp)
+Just like search, the Query Builder also allows you to filter your logs data based on different attributes using operators. The Query Builder provides you with additional powerful features like aggregation, grouping etc. on your data. To learn more about the Query Builder, refer to this [documentation](https://signoz.io/docs/userguide/query-builder/).
 
-    After entering your query hit 'run query' to see a default bar chart and results down below:
+After entering your query, click **Run Query** to see results in the selected view mode.
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/03.webp)
+## Live View
 
-    To explore additional ways to filter your query, click 'view details' on any log line to get a list of parameters on the log, and click any value to automatically add a `{attribute} IN {value}` to your query.
+The Live View streams new log entries continuously as they occur, helping you debug real-time incidents. Live View is only available in the **List View**.
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/04.webp)
+<Figure
+  src="/img/docs/logs-management/ui/logs-live-view.webp"
+  alt="Live View in Logs Explorer"
+  caption="Live View streaming logs in real time"
+/>
 
-2. Aggregation options like Group By, ability to specificy aggregation intervals, etc.<br></br>
+It supports:
+- **Search filters** with a histogram showing log counts over time
+- **Format options** — Raw, Default, and Column. You can also adjust **Max Lines Per Row** by hovering over the Format button.
+- **Pause and Resume** — stop the real-time feed to scroll through logs, then resume when ready
 
-    The Group By drop down is automatically populated with common attributes, and selecting one, like log level in this example, gets us a few things right away
+## Views
 
-    * A comparitive bar chart, with a legend (you can enter a format for the legend including explanatory text eg in this case you might enter `The log level is {{level}}` to make the chart more readable by others)
+There are three views available in the Logs Explorer.
 
-    * A timeseries comparing the relative volume of results by time
+### List View
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/05.webp)
+The List View displays logs as individual rows with timestamp and body columns.
 
-3. Plot multiple queries and formulae based on them in the same charts<br></br>
+<Figure
+  src="/img/docs/logs-management/ui/logs-list-view.webp"
+  alt="List View in Logs Explorer"
+  caption="List View in Logs Explorer"
+/>
 
-    For comparing two timeseries or values, you can now add multiple queries or formulae on the same chart, which is especially useful if you are comparing similar data across two different services.
+#### Frequency Chart
 
-4. Modify your query with a click<br></br>
+Toggle on the **Frequency chart** to see a bar chart of log volume over time, color-coded by severity text (INFO, WARN, ERROR, etc.). This gives you a quick visual overview of log distribution and helps identify spikes in errors or warnings.
 
-    By clicking on the details of any log line, you can see the attributes for that item. Click any value, and your query will be modified to require that attribute and value.
+<Figure
+  src="/img/docs/logs-management/ui/logs-frequency-chart.webp"
+  alt="Frequency chart in List View showing log distribution by severity"
+  caption="Frequency chart showing log volume over time, grouped by severity text"
+/>
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/06.webp)
+#### Download Logs
 
-5. Create Dashboards and Alerts in a single click from logs query builder<br></br>
+You can download your logs by choosing the export format (JSONL or CSV), specifying the number of rows to export (10k, 30k, or 50k), and selecting which columns to include. Click the download icon in the toolbar to configure and export.
 
-    Directly from results you can add the query to a dashboard and set up an alert. This makes the timeseries view especially useful, as you can now create an alert when a certain event is logged beyond a certain rate.
+#### Settings
 
-    ![Logs Query Builder Interface](/img/docs/query-builder/07.webp)
+The settings panel (accessible via the gear icon in the toolbar) has four sections:
 
-With the alert query you can perform sophisticated comparisons or other math on your measurement from your logs.
+**Format**
 
+There are three formats available which display logs in different layouts:
+1. **Raw** — Shows log entries in the raw format as they appear in the logging system.
+2. **Default** — Provides a balanced view by formatting a raw log based on different attributes to make it more readable.
+3. **Column** — Organizes the logs data into different attribute columns to provide a tabular view of logs.
 
-## Writing JSON Filters In The New Logs Explorer
+**Font Size**
 
-In the new logs explorer, you can query your JSON data present inside the body. JSON data in the body will be rendered like this:
-![JSON Data in log body](/img/logs/json_log.webp)
+Adjust the font size for log entries to improve readability based on your preference.
 
-You can click on one of the keys and then filter them out
-![JSON Data filter](/img/logs/json_log_filter.webp)
+**Max Lines Per Row**
 
-If you want to write the query on your own in the filter bar then you can follow the following rules.
+Set the maximum number of lines of text that each log entry is allowed to display. Useful for controlling how much of each log body is visible in the list.
 
-* For json query inside body it starts with a prefix `body.`
-* To access a value of a key you can use the notation `body.key_name`
-* If it is nested key then use `.` to signify nested keys like `body.level1.level2.key`
-* If the type of value is array use  `[*]`
-* operators supported for arrays are `HAS` and `NHAS`
+**Columns**
 
+Add or remove columns for different attributes available in your logs. This works for **Default** and **Column** formats. By default, logs are formatted into `Timestamp` and `Body` columns.
 
-### Example for JSON filter
+<Figure
+  src="/img/docs/logs-management/ui/logs-list-view-settings.webp"
+  alt="List View Settings in Logs Explorer"
+  caption="List View settings showing Format, Font Size, Max Lines Per Row, and Columns options"
+/>
 
-Lets say we have this example data in your json log body
-```json
-{
-  "message": "hello",
-  "request": {
-    "services": [
-      "service_1",
-      "service_2"
-    ],
-    "service_meta": [
-      {
-        "name": "service_1",
-        "latency": 101,
-        "tags": [
-          "tag1",
-          "tag2"
-        ]
-      },
-      {
-        "name": "service_2",
-        "latency": 200,
-        "tags": [
-          "tag1",
-          "tag2"
-        ]
-      }
-    ]
-  }
-}
-```
+#### Show in Context
 
-* logs where value of message is `hello`
-  
-    ```
-    body.message = hello
-    ```
-* logs where value of message is contains `he`
-  
-    ```
-    body.message CONTAINS he
-    ```
-* logs where value of latency of service_1 is >100
-  
-    ```
-    body.request.service_meta[*].latency > 100
-    ```
-* logs where `tag1` is present in service tags
-  
-    ```
-    body.request.service_meta[*].tags[*] HAS tag1
-    ```
-* logs where `tag2` is not present in service tags
-  
-    ```
-    body.request.service_meta[*].tags[*] NHAS tag2
-    ```
+When you hover over a log line, you will find a **Show in Context** option on the right side. This shows 10 logs before and 10 logs after the selected log by default, which is useful for faster debugging. You can load more logs and filter them by a particular attribute.
 
+<Figure
+  src="/img/docs/logs-management/ui/logs-show-in-context.webp"
+  alt="Show in Context feature in List View"
+  caption="Show in Context feature showing surrounding log entries"
+/>
 
+#### Copy Link
 
+You can copy a direct link to a particular log line, which can be shared with anyone who has access to the same SigNoz instance.
 
-## Logs Query Builder in old Logs Explorer
+<Figure
+  src="/img/docs/logs-management/ui/logs-copy-link.webp"
+  alt="Copy Link feature in List View"
+  caption="Copy Link feature for sharing a specific log line"
+/>
 
-This section will walk you through the query language that is used by SigNoz for filtering logs in the old logs explorer.
+### Time Series View
 
-This query language for logs is a simplified version of SQL. The current state of the query language is good enough for daily uses. As of now we don't support nesting and parenthesis for explicit ordering due to added complexity. 
+The Time Series View provides a graphical representation of logs data over time based on the filters or operations applied. Use the **Group By** dropdown to break down results by attributes like `service.name`, `k8s.pod.name`, or any custom attribute.
 
-If you have a use case which you are not able to fullfill with the current features please reach out to us on our slack community or Github issues. We plan to improve the query as we go forward while keeping it simple 
+The query builder supports:
+- **Aggregate functions**: `count()`, `count_distinct()`, `avg()`, `sum()`, `p50()`, `p90()`, `p95()`, `p99()`
+- **Group By**: Split results by one or more attributes
+- **Having / Order By / Limit / Legend format**: Refine and customize the output
 
-### Types of queries supported by SigNoz:
-*  **Freehand query** <br></br>
-    When a user writes a plan text query without using any kind of operators, the query is directly searched against the log body. ( inefficient over huge log data)
+<Figure
+  src="/img/docs/logs-management/ui/logs-timeseries-view.webp"
+  alt="Time Series View in Logs Explorer"
+  caption="Time Series View in Logs Explorer"
+/>
 
-    eg:-`Dispatch Successful`
-    
-    ![Freehand](/img/logs/logs_query_freehand.webp)
-        
-*  **Filtering queries** <br></br>
-    When a user writes queries using a `key`, `operator` and  a `value` separated by `and` , `or` operators it is a filtering query.
-    This kind of queries are faster as they reduce the search space by using indexes.
-    
-    eg:- `id IN ('2DCVZOsKHioCeuvbObzVzzL1eZ5') AND fulltext contains 'Dispatch Successful'`
-    
-    ![Filtering](/img/logs/logs_query_filtering.webp)
-        
-### List of Operators supported by SigNoz
-* Here is a list of all the operators that are supported:
+### Table View
 
-    | Operator  | Multivalued | Examples                                             | Meaning                  |
-    | --------- | ----------- | ---------------------------------------------------- | ------------------------ |
-    | IN        | yes         | num in (1,2,3)<br></br> strdata in ('a', 'b', 'c')   | In                       |
-    | NIN       | yes         | num nin (1,2,3)<br></br> strdata nin ('a', 'b', 'c') | Not In                   |
-    | GTE       | no          | num gte 10<br></br> dict_word gte 'cat'              | Greater than or Equal to |
-    | GT        | no          | num gt 10<br></br> dict_word gt 'cat'                | Greater than             |
-    | LTE       | no          | num lte 10<br></br> dict_word lte 'cat'              | Less than or Equal to    |
-    | LT        | no          | num lt 10<br></br> dict_word lt 'cat'                | Less than                |
-    | CONTAINS  | no          | stream contains 'err'                                | Contains                 |
-    | NCONTAINS | no          | stream ncontains 'err'                               | Doesn't Contain          |
-    
-### Fulltext Key
-    
-The fulltext key is used when we want to write freehand queries and combine them with filters.
+The Table View provides a tabular representation of different operations like the count of logs, average of duration etc., based on the filters applied.
 
-eg:- 
-```
-id IN ('2DCVZOsKHioCeuvbObzVzzL1eZ5') AND fulltext contains 'Dispatch Successful'
-```
-In this cases we are searching `Dispatch Successful` as fulltext along with the id filter.
+<Figure
+  src="/img/docs/logs-management/ui/logs-table-view.webp"
+  alt="Table View in Logs Explorer"
+  caption="Table View in Logs Explorer"
+/>
 
-<Admonition>
-The `fulltext` keyword can be only used with `contains` and the `ncontains` operator.
-</Admonition>
-    
+## Log Details
 
-### Pointers to note while writing queries
-- Text always needs to be **enclosed in single quotes** in **filtering queries**
+Click on any log line to open the **Log details** panel. This gives a comprehensive view of your log including the full body, attributes, and resource fields. The detail panel has four tabs — Overview, JSON, Context, and Metrics.
 
-    eg:-
-    If you want to search for logs with stream error and which contains Mozilla in body, the corresponding query on the ui will be 
+<Figure
+  src="/img/docs/logs-management/ui/logs-detail-view.webp"
+  alt="Log Details Panel in Logs Explorer"
+  caption="Log Details Panel in Logs Explorer"
+/>
 
-    ```
-    stream IN ('stderr') AND fulltext contains 'Mozilla'
-    ```
+### Overview
 
-    as we can see `Mozilla` is enclosed in single quotes as well as `stderr`.
+The Overview tab has two sections:
 
-- Order of execution is similar to sql i.e left to right and `and` has higher precedence over `or` , but currently SigNoz doesn’t support combining explicitly using parenthesis.
-    
-    **correct** ✅ :-
-    ```
-    stream IN ('stdout') and fulltext contains 'Mozilla' or stream IN ('stderr')
-    ``` 
+**Body**
 
-    **incorrect** ❌ :- 
-    ```
-    (stream IN ('stdout') and fulltext contains 'Mozilla') or stream IN ('stderr')
-    ```  
-    
-    While the above to evaluates to the same expression, it’s not necessarily same for the one below
-    
-     **correct** ✅ :-
-    ```
-    stream IN ('stdout') and fulltext contains 'Mozilla' or stream IN ('stderr'
-    ``` 
+Shows the complete body of the log. You can toggle **Wrap text** to switch between formatted and raw display.
 
-    **incorrect** ❌ :- 
-    ```
-    stream IN ('stdout') and (fulltext contains 'Mozilla' or stream IN ('stderr'))
-    ``` 
+<Figure
+  src="/img/docs/logs-management/ui/logs-detail-body.webp"
+  alt="Log Body in Overview section of Log Details"
+  caption="Log Body in the Overview section showing body content with Wrap text toggle"
+/>
 
-Here both the statements are not equivalent of each other **i.e it is currently not supported**
+**Attributes**
 
-### Query Examples
+Shows all log attributes in a tabular format with the attribute name and its value. You can search for specific attributes using the search bar.
 
-Here are a few examples of valid and invalid queries:
+<Figure
+  src="/img/docs/logs-management/ui/logs-detail-search-attribute.webp"
+  alt="Search for an attribute in Log Details"
+  caption="Search for a specific attribute in the Log Details panel"
+/>
 
-* **Valid Queries**
+In the log details panel, hover over any attribute value to see quick action icons. These let you instantly filter for or against a value, group by the attribute, or replace the current filters — all without manually editing the query.
 
-    | Query                                                      | Description                   |
-    | ---------------------------------------------------------- | ----------------------------- |
-    | OPERATION in ('add') AND FULLTEXT contains 'search string' | fulltext with filtering query |
-    | my fulltext search                                         | fulltext search query         |
-    | status gte 200 AND FULLTEXT contains 'search string'       | fulltext with filtering query |
-    | service IN ('name>100') AND length GT 100                  | filtering query               |
-    | service IN ('name > 100') AND name GT 'myname'             | filtering query               |
-    | hello in 2                                                 | fulltext search query         |
-    | hello in (2,3)                                             | filtering query               |
-    | hello lt 2                                                 | filtering query               |
+From the attribute values, you can:
+- **Filter for value** — add the attribute as an `IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter for Value will create a filter `container_id IN debian`. This will list the logs where the `container_id` attribute is `debian`.
+- **Filter out value** — add the attribute as a `NOT IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter out Value will create a filter `container_id NOT_IN debian`. This will list the logs where the `container_id` attribute is not `debian`.
+- **Group By Attribute** — add the attribute to Group By
+- **Replace filters with this value** — replace the current filter with this specific value
 
-* **Invalid Queries**
+<Figure
+  src="/img/docs/logs-management/ui/logs-detail-overview-actions.webp"
+  alt="Quick actions on attribute values in Log Details"
+  caption="Quick actions on attribute values: Filter for value, Filter out value, Group By Attribute, Replace filters"
+/>
 
-    | Query                                                             | Description                             |
-    | ----------------------------------------------------------------- | --------------------------------------- |
-    | OPERATION in ('bcd') AND 'abcd' FULLTEXT contains 'search string' | AND missing between 'abcd' and FULLTEXT |
-    | OPERATION in ('bcd') AND 'search string'                          | Operator missing before 'search string' |
+### JSON
 
+Displays the log in JSON format. You can toggle **Wrap text** to switch to raw format, and use **Copy Log** to copy your log in either JSON or raw form.
+
+<Figure
+  src="/img/docs/logs-management/ui/logs-detail-json.webp"
+  alt="JSON tab in Log Details panel"
+  caption="JSON tab showing the complete log in JSON format with Copy Log option"
+/>
+
+### Context
+
+Shows surrounding logs for the selected log entry — 10 logs before and 10 logs after by default. You can load more logs and filter by a particular attribute. This is useful for faster debugging by seeing what happened around a specific log event.
+
+<Figure
+  src="/img/docs/logs-management/ui/logs-detail-context.webp"
+  alt="Context tab in Log Details panel"
+  caption="Context tab showing surrounding log entries for debugging"
+/>
+
+### Metrics
+
+The Metrics tab shows infrastructure metrics (CPU usage, Memory usage, Pod CPU/Memory usage) for the node and pod associated with the selected log entry. This helps you correlate log events with resource utilization.
+
+<Figure
+  src="/img/docs/logs-management/ui/logs-detail-metrics.webp"
+  alt="Metrics tab in Log Details panel"
+  caption="Metrics tab showing CPU and Memory usage for the associated node and pod"
+/>
+
+## Create Dashboards and Alerts
+
+At the bottom of the Logs Explorer, you can:
+- **Save this view** — preserve your query configuration for quick access later
+- **Create an Alert** — set up a log-based alert directly from your current query
+- **Add to Dashboard** — export the current query as a dashboard panel
+
+<Figure
+  src="/img/docs/logs-management/ui/logs-create-dashboard-alert.webp"
+  alt="Create dashboard and alert from logs explorer"
+  caption="Save view, create alert, or add to dashboard directly from the Logs Explorer"
+/>
+
+## Multiple Queries and Formulas
+
+You can plot multiple queries and formulas on the same chart. This is useful for comparing log volumes across different services or calculating rates like error percentages.
+
+## Related
+
+- [Logs Quick Filters](https://signoz.io/docs/logs-management/features/logs-quick-filters/) — use the quick filter panel on the left
