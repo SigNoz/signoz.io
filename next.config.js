@@ -118,6 +118,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/product-features/alert-management',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/alert-management/',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
           source: '/enterprise-self-hosted/',
           destination: '/contact-us/?source=redirect-enterprise-self-hosted',
           permanent: true,
@@ -170,6 +180,16 @@ module.exports = () => {
         {
           source: '/docs/apm-and-distributed-tracing/trace-anomalies/',
           destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview/',
+          destination: '/docs/alerts/',
           permanent: true,
         },
         {
@@ -555,6 +575,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/metrics-management/working-with-metrics-guides/',
+          destination: '/docs/metrics-management/metrics-explorer/',
+          permanent: true,
+        },
+        {
           source: '/docs/migration/opentelemetry-datadog-receiver/',
           destination: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/',
           permanent: true,
@@ -616,6 +641,11 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/manage-dashboards-and-panels/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/manage-panels/',
           destination: '/docs/userguide/manage-dashboards/',
           permanent: true,
         },
@@ -2037,6 +2067,11 @@ module.exports = () => {
         {
           source: '/docs/metrics/',
           destination: '/docs/metrics-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/data-storage/',
+          destination: '/docs/metrics-management/reference/',
           permanent: true,
         },
         {
