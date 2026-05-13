@@ -1822,6 +1822,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/tutorial/k8s-hpa-signoz-metrics-adapter',
+                label: 'Kubernetes HPA with SigNoz Metrics',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/fly-metrics',
                 label: 'Fly.io metrics',
               },
@@ -2489,9 +2494,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
-        items: [
-          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
-        ],
+        items: [{ type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' }],
       },
     ],
   },
