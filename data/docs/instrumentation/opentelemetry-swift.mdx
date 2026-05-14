@@ -1,5 +1,5 @@
 ---
-date: 2026-03-16
+date: 2026-05-14
 id: swift
 title: Swift OpenTelemetry Instrumentation
 description: Send events from your Swift application to SigNoz
@@ -85,9 +85,9 @@ struct SwiftExample {
         let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
         let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-        // Replace <service_name> with the name of your service
         let resource = Resource(attributes: [
-            "service.name": AttributeValue.string("<service_name>")
+            "service.name": AttributeValue.string("<service_name>"),
+            "service.version": AttributeValue.string("<service_version>")
         ])
 
         let tracerProvider = TracerProviderBuilder()
@@ -103,7 +103,12 @@ Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>`: A name to identify your service in SigNoz (e.g., `my-swift-app`)
+- `<service_name>`: A name to identify your service in SigNoz (e.g., `my-swift-app`).
+- `<service_version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 3: Instrument your application
 
@@ -270,9 +275,9 @@ let grpcChannel = ClientConnection(configuration: configuration)
 let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
 let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-// Replace <service_name> with the name of your service
 let resource = Resource(attributes: [
-    "service.name": AttributeValue.string("<service_name>")
+    "service.name": AttributeValue.string("<service_name>"),
+    "service.version": AttributeValue.string("<service_version>")
 ])
 
 let tracerProvider = TracerProviderBuilder()

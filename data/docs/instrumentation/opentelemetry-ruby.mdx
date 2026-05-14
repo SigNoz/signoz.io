@@ -1,9 +1,8 @@
 ---
-date: 2026-03-06
+date: 2026-05-14
 id: opentelemetry-ruby
 title: Ruby OpenTelemetry Instrumentation
 description: Learn how to instrument your Ruby application (Rails, Sinatra, Sidekiq, Resque, Redis, PostgreSQL) with OpenTelemetry and send telemetry data to SigNoz
-
 doc_type: howto
 ---
 This guide shows you how to instrument your Ruby application including Rails, Sinatra, Sidekiq, Resque, Redis, and PostgreSQL with OpenTelemetry and send traces to SigNoz. The `opentelemetry-instrumentation-all` gem provides automatic instrumentation for 53+ popular Ruby libraries.
@@ -18,6 +17,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 - A SigNoz Cloud account or self-hosted SigNoz instance
 
 ## Send traces to SigNoz
+
 <Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
         <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
@@ -35,11 +35,17 @@ Set the following environment variables to configure the OpenTelemetry exporter:
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 </TabItem>
 
 <TabItem value="k8s" label="Kubernetes">
@@ -53,11 +59,18 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 </TabItem>
 
 <TabItem value="windows" label="Windows">
@@ -66,11 +79,17 @@ Verify these values:
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 </TabItem>
 
 <TabItem value="docker" label="Docker">
@@ -89,6 +108,7 @@ COPY . .
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 
 EXPOSE 3000
 CMD ["rails", "server", "-b", "0.0.0.0"]
@@ -99,6 +119,7 @@ Or pass them at runtime using `docker run`:
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
     your-image:latest
 ```
 
@@ -106,6 +127,11 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 </TabItem>
 </Tabs>
 

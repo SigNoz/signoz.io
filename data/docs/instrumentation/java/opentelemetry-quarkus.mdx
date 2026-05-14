@@ -1,7 +1,6 @@
 ---
-date: 2026-03-06
+date: 2026-05-14
 id: quarkus
-
 title: Quarkus OpenTelemetry Instrumentation
 description: Send traces from Quarkus applications to SigNoz using the built-in OpenTelemetry extension.
 doc_type: howto
@@ -27,7 +26,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 <TabItem value="vm" label="VM" default>
 
 ```bash
-export OTEL_RESOURCE_ATTRIBUTES="service.name=my-quarkus-app"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=my-quarkus-app,service.version=<service-version>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
@@ -40,7 +39,7 @@ Add these environment variables to your deployment manifest:
 ```yaml
 env:
 - name: OTEL_RESOURCE_ATTRIBUTES
-  value: 'service.name=my-quarkus-app'
+  value: 'service.name=my-quarkus-app,service.version=<service-version>'
 - name: OTEL_EXPORTER_OTLP_ENDPOINT
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
@@ -51,7 +50,7 @@ env:
 <TabItem value="windows" label="Windows">
 
 ```powershell
-$env:OTEL_RESOURCE_ATTRIBUTES = "service.name=my-quarkus-app"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.name=my-quarkus-app,service.version=<service-version>"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 ```
@@ -62,7 +61,7 @@ $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 Add to your Dockerfile:
 
 ```dockerfile
-ENV OTEL_RESOURCE_ATTRIBUTES="service.name=my-quarkus-app"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=my-quarkus-app,service.version=<service-version>"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
@@ -71,7 +70,7 @@ Or pass at runtime:
 
 ```bash
 docker run -p 8080:8080 \
-  -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-quarkus-app" \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-quarkus-app,service.version=<service-version>" \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
   my-quarkus-app
@@ -83,6 +82,11 @@ docker run -p 8080:8080 \
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Add the OpenTelemetry extension
 

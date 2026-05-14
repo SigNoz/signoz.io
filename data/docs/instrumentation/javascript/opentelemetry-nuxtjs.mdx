@@ -1,7 +1,6 @@
 ---
-date: 2026-03-05
+date: 2026-05-14
 id: opentelemetry-nuxtjs
-
 title: Nuxt.js OpenTelemetry Instrumentation
 description: Learn how to instrument your Nuxt.js application with OpenTelemetry and send traces to SigNoz
 doc_type: howto
@@ -41,6 +40,7 @@ export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 ```
@@ -49,6 +49,11 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>`: Name of your service.
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -91,6 +96,8 @@ env:
   value: 'env,host,os'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: NODE_OPTIONS
@@ -101,6 +108,11 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service.
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -170,6 +182,7 @@ $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 $env:OTEL_SERVICE_NAME="<service_name>"
+$env:OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 $env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 ```
@@ -178,6 +191,11 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>`: Name of your service.
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -219,11 +237,22 @@ ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 
 CMD ["node", ".output/server/index.mjs"]
 ```
+
+Replace the following:
+- `<service_name>`: Name of your service (e.g., `nuxt-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Build and run
 

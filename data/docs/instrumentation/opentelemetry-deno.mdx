@@ -1,5 +1,5 @@
 ---
-date: 2026-02-28
+date: 2026-05-14
 title: Deno OpenTelemetry Instrumentation
 description: Learn how to instrument your Deno application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
 id: deno-instrumentation
@@ -49,12 +49,18 @@ export OTEL_DENO=true
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Run the application
 
@@ -90,12 +96,19 @@ env:
     value: "signoz-ingestion-key=<your-ingestion-key>"
   - name: OTEL_SERVICE_NAME
     value: "<service-name>"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: 'service.version=<service-version>'
 ```
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 </TabItem>
 
@@ -127,6 +140,7 @@ docker run \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
   -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
   -p 8000:8000 \
   deno-app
 ```
@@ -135,6 +149,11 @@ Replace the following:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 </TabItem>
 
@@ -147,12 +166,18 @@ $env:OTEL_DENO = "true"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 ```
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>`: Version of your service (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Run the application
 
