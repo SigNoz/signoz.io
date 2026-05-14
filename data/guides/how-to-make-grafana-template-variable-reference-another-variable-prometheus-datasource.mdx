@@ -1,7 +1,6 @@
 ---
 
 title: How to Create Dynamic Grafana Templates with Chained Variables
-slug: how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource
 date: 2024-11-14
 tags: [grafana, faq]
 authors: [simran_kumari]
@@ -73,15 +72,15 @@ Let’s create a basic setup with Prometheus to see how chained variables work.
         
     - Select Query as the variable type and choose Prometheus as the data source.
         
-        <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%201.webp" alt="Defining variable parameters" caption="Defining variable parameters" />
+        <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 1.webp" alt="Defining variable parameters" caption="Defining variable parameters" />
         
     - In the Query field, use a query like `label_values(job)` to retrieve all available jobs.
         
-        <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%202.webp" alt="Writing query to populate values in the variable" caption="Writing query to populate values in the variable" />
+        <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 2.webp" alt="Writing query to populate values in the variable" caption="Writing query to populate values in the variable" />
         
     - Give the variable a name, e.g., `job`, and click on the Apply button.
         
-        <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%203.webp" alt="Saving the variable" caption="Saving the variable" />
+        <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 3.webp" alt="Saving the variable" caption="Saving the variable" />
         
 2. Configure the Dependent Variable
     - Add a new variable and select Query as the type.
@@ -89,7 +88,7 @@ Let’s create a basic setup with Prometheus to see how chained variables work.
     - In the Query field, use `label_values({job="$job"}, instance)` to populate instances based on the selected `job` value. This example uses `$job` as a reference to the primary variable.
     - Name the variable `instance` and save it.
     
-    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%204.webp" alt="Creating Dependent Variable" caption="Creating Dependent Variable" />
+    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 4.webp" alt="Creating Dependent Variable" caption="Creating Dependent Variable" />
     
 
 ### Understanding Variable Syntax
@@ -168,7 +167,7 @@ Steps to set up cascading dropdowns:
     - Select a `job` in the first dropdown.
     - The `instance` dropdown will automatically update to display only instances associated with the selected job, letting you refine data selections efficiently.
     
-    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%205.webp" alt="Cascading Dropdowns" caption="Cascading Dropdowns" />
+    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 5.webp" alt="Cascading Dropdowns" caption="Cascading Dropdowns" />
     
 
 To make use of these variables in a panel, you might use a query like:
@@ -179,7 +178,7 @@ up{job="$job", instance="$instance"}
 
 This query will filter based on both the selected job and instance, displaying data specific to the chosen cascading options.
 
-<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%206.webp" alt="Displaying data specific to the chosen cascading options." caption="Displaying data specific to the chosen cascading options." />
+<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 6.webp" alt="Displaying data specific to the chosen cascading options." caption="Displaying data specific to the chosen cascading options." />
 
 ### Create Dynamic Query Variables
 
@@ -187,15 +186,15 @@ Grafana’s `query` variable type allows you to define a Prometheus query direct
 
 Use Prometheus functions like `label_values(<label>)` and `label_values(<metric>, <label>)` to create dynamic lists based on live metrics. Example: label_values(job) populates based on available labels in Prometheus.
 
-<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%207.webp" alt="Dynamic Query Variables" caption="Dynamic Query Variables" />
+<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 7.webp" alt="Dynamic Query Variables" caption="Dynamic Query Variables" />
 
 ### Multi-Value Selections
 
 Enable multi-value selection for variables, allowing users to select multiple jobs or instances. This is particularly useful when you want to aggregate or compare data across multiple systems.
 
-<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%208.webp" alt="Enabling multi-value selections" caption="Enabling multi-value selections" />
+<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 8.webp" alt="Enabling multi-value selections" caption="Enabling multi-value selections" />
 
-<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%209.webp" alt="Using multi-value selections" caption="Using multi-value selections" />
+<Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 9.webp" alt="Using multi-value selections" caption="Using multi-value selections" />
 
 ### Optimizing Variable Performance in Grafana
 
@@ -232,11 +231,11 @@ Here’s how SigNoz enhances monitoring:
 
 - [Unified Observability](https://signoz.io/unified-observability/): SigNoz integrates metrics, traces, and logs, providing a comprehensive view of application health that simplifies troubleshooting.
     
-    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%2010.webp" alt="Unified Observability" caption="Unified Observability" />
+    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 10.webp" alt="Unified Observability" caption="Unified Observability" />
     
 - Real-time Performance Monitoring: Unlike Grafana, which focuses on historical data, SigNoz enables real-time analysis of application performance, helping identify bottlenecks and issues as they occur.
     
-    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image%2011.webp" alt="Real-time Performance Monitoring" caption="Real-time Performance Monitoring" />
+    <Figure src="/img/guides/2024/11/how-to-make-grafana-template-variable-reference-another-variable-prometheus-datasource-image 11.webp" alt="Real-time Performance Monitoring" caption="Real-time Performance Monitoring" />
     
 - Cost-Effective and Simplified Setup: As an open-source solution, SigNoz offers a cost-effective alternative to paid services. Its built-in support for [OpenTelemetry](https://signoz.io/opentelemetry/) simplifies the setup process, allowing developers to start monitoring quickly without extensive configuration.
 

@@ -1,7 +1,6 @@
 ---
 
 title: What is the Difference Between Prometheus Vectors - Instant vs Range Explained
-slug: prometheus-instant-vector-vs-range-vector
 date: 2024-10-14
 tags: [Prometheus, Monitoring, Time Series Data, PromQL]
 authors: [simran_kumari]
@@ -69,7 +68,7 @@ Let's explore some practical examples of instant vector queries:
     app_requests_total
     ```
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%201.webp" alt="Simple metric selection using instant vector" caption="Simple metric selection using instant vector" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 1.webp" alt="Simple metric selection using instant vector" caption="Simple metric selection using instant vector" />
     
     This query returns the requests based on the metric specified.
     
@@ -79,7 +78,7 @@ Let's explore some practical examples of instant vector queries:
     app_requests_total{endpoint="/error"}
     ```
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%202.webp" alt="Label matching using instant vector" caption="Label matching using instant vector" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 2.webp" alt="Label matching using instant vector" caption="Label matching using instant vector" />
     
     This query returns the requests based on specified metric and matching label
     
@@ -89,7 +88,7 @@ Let's explore some practical examples of instant vector queries:
     sum(app_requests_total)
     ```
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%203.webp" alt="Applying functions using instant vector" caption="Applying functions using instant vector" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 3.webp" alt="Applying functions using instant vector" caption="Applying functions using instant vector" />
     
     This query returns the summation for all values based on the metric specified.
     
@@ -116,7 +115,7 @@ To query range vectors in PromQL, you append a time range selector to the metric
 app_requests_total{endpoint="/"}[2m]
 ```
 
-<Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%204.webp" alt="Range Vectors in Prometheus" caption="Range Vectors in Prometheus" />
+<Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 4.webp" alt="Range Vectors in Prometheus" caption="Range Vectors in Prometheus" />
 
 This query returns the values of the `app_requests_total` metric with an `endpoint` of "/" over the last 2 minutes.
 
@@ -132,7 +131,7 @@ Range vectors excel in scenarios that require historical context:
     
     This calculates the per-second average increase in the `app_requests_total` counter over the last 15 minutes.
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%205.webp" alt="Calculating rates using range vector" caption="Calculating rates using range vector" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 5.webp" alt="Calculating rates using range vector" caption="Calculating rates using range vector" />
     
 2. Detecting anomalies:
     
@@ -142,9 +141,9 @@ Range vectors excel in scenarios that require historical context:
     
     This checks if the average value of `app_requests_total` over the past hour is greater than 90.
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%206.webp" alt="Detecting anomalies using range vector" caption="Detecting anomalies using range vector" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 6.webp" alt="Detecting anomalies using range vector" caption="Detecting anomalies using range vector" />
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%207.webp" alt="Prometheus range vector example showing aggregated request rate by method" caption="" />3. Aggregating data:
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 7.webp" alt="Prometheus range vector example showing aggregated request rate by method" caption="" />3. Aggregating data:
     
     ```
     sum by (method) (rate(app_requests_total[1h]))
@@ -152,7 +151,7 @@ Range vectors excel in scenarios that require historical context:
     
     This query will show you the average request rate, aggregated by HTTP method, over the last 1 hour.
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%208.webp" alt="Aggregating data using range vector" caption="Aggregating data using range vector" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 8.webp" alt="Aggregating data using range vector" caption="Aggregating data using range vector" />
     
 
 Best practice: Choose an appropriate time range for your range vector queries. Too short, and you may miss important trends; too long, and you risk performance issues.
@@ -226,12 +225,12 @@ While Prometheus offers powerful querying capabilities, tools like SigNoz can fu
 
 - Enhanced Visualization: SigNoz offers out-of-the-box dashboards that improve the readability of vector-based queries.
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%209.webp" alt="Enhanced Visualization of vectors using SigNoz" caption="Enhanced Visualization of vectors using SigNoz" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 9.webp" alt="Enhanced Visualization of vectors using SigNoz" caption="Enhanced Visualization of vectors using SigNoz" />
     
 - Improved Performance: SigNoz optimizes large data sets and vector queries, making it faster to handle complex queries.
 - Traceability and Context: SigNoz provides a holistic view of your application by integrating traces, logs, and metrics. This enables you to correlate metrics from Prometheus with traces to identify the root cause of performance issues more efficiently.
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image%2010.webp" alt="Holistic view of traces, logs and metrics using SigNoz" caption="Holistic view of traces, logs and metrics using SigNoz" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 10.webp" alt="Holistic view of traces, logs and metrics using SigNoz" caption="Holistic view of traces, logs and metrics using SigNoz" />
     
 - Customizable Alerts: SigNoz allows for setting up advanced alerting mechanisms based on your vector queries, ensuring that you receive timely notifications about any anomalies or performance degradation in your application.
     

@@ -1,7 +1,6 @@
 ---
 
 title: How to Fix "Context Deadline Exceeded" Errors in Prometheus
-slug: context-deadline-exceeded-prometheus
 date: 2024-09-06
 tags: [faq, prometheus]
 authors: [simran_kumari]
@@ -50,11 +49,11 @@ Effective troubleshooting starts with proper diagnosis. Here's how to identify a
 1. Check the Prometheus UI:
     - Navigate to the "Targets" page in the Prometheus web interface
         
-        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image%201.webp" alt="Navigate to the Targets section in the Prometheus Web Interface" caption="Navigate to the Targets section in the Prometheus Web Interface" />
+        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image 1.webp" alt="Navigate to the Targets section in the Prometheus Web Interface" caption="Navigate to the Targets section in the Prometheus Web Interface" />
         
     - Look for targets marked as "down" with error messages containing "context deadline exceeded"
         
-        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image%202.webp" alt="Look for ContextDeadline Error in targets that are down" caption="Look for ContextDeadline Error in targets that are down" />
+        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image 2.webp" alt="Look for ContextDeadline Error in targets that are down" caption="Look for ContextDeadline Error in targets that are down" />
         
 2. Analyze Prometheus logs:
     - Examine Prometheus server logs for entries containing "context deadline exceeded"
@@ -63,11 +62,11 @@ Effective troubleshooting starts with proper diagnosis. Here's how to identify a
     - Access the `/debug/pprof` endpoint on your Prometheus server
     - Look for goroutines stuck in scrape operations
         
-        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image%203.webp" alt="Accessing the /debug/pprof endpoint on Prometheus server" caption="Accessing the /debug/pprof endpoint on Prometheus server" />
+        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image 3.webp" alt="Accessing the /debug/pprof endpoint on Prometheus server" caption="Accessing the /debug/pprof endpoint on Prometheus server" />
         
         You will notice a lot of data, which may appear difficult to read.
         
-        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image%204.webp" alt="Prometheus error output showing context deadline exceeded" caption="" />Let’s decode it one by one :
+        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image 4.webp" alt="Prometheus error output showing context deadline exceeded" caption="" />Let’s decode it one by one :
         
         - There are 31 goroutines active at the time of the profile capture.
             
@@ -96,7 +95,7 @@ Effective troubleshooting starts with proper diagnosis. Here's how to identify a
 4. Leverage external tools:
     - Use network diagnostic tools like `ping` or `traceroute` to check connectivity. For example, sending GET requests to the server throws an error, hinting at something wrong on the target app’s end.
         
-        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image%205.webp" alt="Checking target sever for Context Deadline Exceeded Errors" caption="Checking target sever for Context Deadline Exceeded Errors" />
+        <Figure src="/img/guides/2024/09/context-deadline-exceeded-prometheus-image 5.webp" alt="Checking target sever for Context Deadline Exceeded Errors" caption="Checking target sever for Context Deadline Exceeded Errors" />
         
     - Employ monitoring tools like [SigNoz](https://signoz.io/) to gain deeper insights into your infrastructure.
 
