@@ -1,6 +1,7 @@
 ---
 
 title: How to Monitor Kubernetes CronJobs with Prometheus - A Guide
+slug: is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus
 date: 2024-11-29
 tags: [prometheus, faq]
 authors: [simran_kumari]
@@ -55,7 +56,7 @@ The monitoring setup:
     
     Verify the installation using the command `kubectl get pods`.
     
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 1.webp" alt="Prometheus and PushGateway Installation Verification" caption="Prometheus and PushGateway Installation Verification" />
+    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%201.webp" alt="Prometheus and PushGateway Installation Verification" caption="Prometheus and PushGateway Installation Verification" />
     
     The `-n monitoring` filters out the list of pods in the namespace name `monitoring`. 
     
@@ -110,7 +111,7 @@ This CronJob will attempt to push a metric named `example_metric` to PushGateway
 
 Check if your cronjob is configured properly by running the command `kubectl get jobs`:
 
-<Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 2.webp" alt="CronJob Running" caption="CronJob Running" />
+<Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%202.webp" alt="CronJob Running" caption="CronJob Running" />
 
 ### 2. Create a Secret for Scraping Metrics from PushGateway
 
@@ -151,7 +152,7 @@ The next step is to configure the Prometheus Custom Resource (CR) to reference t
     kubectl get prometheus -n monitoring
     ```
     
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 3.webp" alt="Find the Prometheus Custom Resource" caption="Find the Prometheus Custom Resource" /> 
+    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%203.webp" alt="Find the Prometheus Custom Resource" caption="Find the Prometheus Custom Resource" /> 
     
 2. Once you’ve identified the name of your Prometheus CR, edit it:
     
@@ -159,7 +160,7 @@ The next step is to configure the Prometheus Custom Resource (CR) to reference t
     kubectl edit prometheus <your-prometheus-cr-name> -n monitoring
     ```
     
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 4.webp" alt="Editing the Custom Resource" caption="Editing the Custom Resource" />
+    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%204.webp" alt="Editing the Custom Resource" caption="Editing the Custom Resource" />
     
 3. In the `spec` section of the Prometheus CR, add a reference to the new Secret you just created:
     
@@ -181,7 +182,7 @@ To confirm that Prometheus is now scraping metrics from PushGateway, check the P
 1. Open the Prometheus UI in your browser.
 2. Go to Status > Targets and verify if the PushGateway target is listed and actively being scraped.
 
-<Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 5.webp" alt="Prometheus is scraping metrics from PushGateway" caption="Prometheus is scraping metrics from PushGateway" />
+<Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%205.webp" alt="Prometheus is scraping metrics from PushGateway" caption="Prometheus is scraping metrics from PushGateway" />
 
 By completing these steps, Prometheus will now collect metrics from the PushGateway, allowing you to monitor your CronJob's metrics effectively.
 
@@ -351,7 +352,7 @@ To stay informed of any issues with your CronJobs, set up alerting rules based o
     - Access Prometheus Alerting Page: Go to the Prometheus UI (`http://<prometheus-server>:9090/alerts`).
     - Check Alerts: You should see the alerts like `CronJobFailed` and `CronJobDurationTooLong` if your simulated conditions met the threshold.
     
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 6.webp" alt="Configuring Alerting Rules for K8s CronJob" caption="Configuring Alerting Rules for K8s CronJob" /> 
+    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%206.webp" alt="Configuring Alerting Rules for K8s CronJob" caption="Configuring Alerting Rules for K8s CronJob" /> 
     
 
 ## Implementing Monitoring Best Practices
@@ -412,11 +413,11 @@ To ensure your CronJobs are properly monitored and perform efficiently, follow t
 - It helps track key performance metrics, such as job success rates, execution durations, and failure counts, all in real time.
 - SigNoz's ability to collect and visualize these [metrics in intuitive dashboards](https://signoz.io/metrics-and-dashboards/) allows you to quickly identify issues, optimize job performance, and ensure that your CronJobs run smoothly.
     
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 7.webp" alt="SigNoz: metrics and dashboards" caption="SigNoz: metrics and dashboards" />
+    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%207.webp" alt="SigNoz: metrics and dashboards" caption="SigNoz: metrics and dashboards" />
     
 - With advanced [alerting capabilities](https://signoz.io/alerts-management/), SigNoz can notify you of critical failures or performance bottlenecks, making it an essential tool for [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) and faster troubleshooting.
     
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image 8.webp" alt="SigNoz: Alerting Capabilities" caption="SigNoz: Alerting Capabilities" />
+    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%208.webp" alt="SigNoz: Alerting Capabilities" caption="SigNoz: Alerting Capabilities" />
     
 
 <GetStartedSigNoz />
