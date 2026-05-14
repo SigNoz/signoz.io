@@ -1,9 +1,8 @@
 ---
-date: 2026-05-06
+date: 2026-05-11
 id: opentelemetry-golang
 title: Go OpenTelemetry Instrumentation
 description: Learn how to instrument your Go application with OpenTelemetry and send telemetry data to SigNoz
-
 doc_type: howto
 ---
 This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz. Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
@@ -120,7 +119,7 @@ Run the following command in your project directory:
 go get \
   go.opentelemetry.io/otel \
   go.opentelemetry.io/otel/sdk \
-  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp \
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
 ```
 
@@ -136,7 +135,7 @@ import (
 	"log"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -145,7 +144,7 @@ import (
 
 func initTracer(ctx context.Context) (func(context.Context) error, error) {
 	// Reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS from environment
-	exporter, err := otlptracegrpc.New(ctx)
+	exporter, err := otlptracehttp.New(ctx)
 	if err != nil {
 		return nil, err
 	}

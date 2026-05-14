@@ -1,5 +1,5 @@
 ---
-date: 2026-05-04
+date: 2026-05-12
 id: zerolog-to-signoz
 title: Send Zerolog Logs to SigNoz
 description: Learn how to send Zerolog logs with trace correlation to SigNoz for unified observability.
@@ -186,36 +186,18 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // InitTracer initializes the OpenTelemetry tracer
 func InitTracer(serviceName string) func() {
 	ctx := context.Background()
 
-	// Get environment variables
-	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	if endpoint == "" {
-		endpoint = "localhost:4317" // default endpoint
-	}
-
-	// Create OTLP exporter with non-blocking connection
-	conn, err := grpc.Dial(endpoint,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		// Remove WithBlock to make it non-blocking
-	)
-	if err != nil {
-		log.Printf("Warning: Failed to create gRPC connection to collector: %v", err)
-		// Return a no-op cleanup function
-		return func() {}
-	}
-
-	exporter, err := otlptrace.New(ctx, otlptracegrpc.NewClient(otlptracegrpc.WithGRPCConn(conn)))
+	// Create OTLP HTTP exporter
+	exporter, err := otlptrace.New(ctx, otlptracehttp.NewClient())
 	if err != nil {
 		log.Printf("Warning: Failed to create trace exporter: %v", err)
 		// Return a no-op cleanup function
@@ -254,7 +236,7 @@ func InitTracer(serviceName string) func() {
 }
 ```
 
-- `OTEL_EXPORTER_OTLP_ENDPOINT` is the endpoint where the collector is running, by default it's taken as `localhost:4317` in the above code.
+- The exporter reads `OTEL_EXPORTER_OTLP_ENDPOINT` (default `http://localhost:4318`) and `OTEL_EXPORTER_OTLP_HEADERS` from environment variables automatically.
 
 ### Step 4: Create logger context helper
 
