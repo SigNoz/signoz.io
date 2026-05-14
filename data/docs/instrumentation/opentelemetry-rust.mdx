@@ -1,7 +1,6 @@
 ---
-date: 2026-03-05
+date: 2026-05-12
 id: rust
-
 title: Rust OpenTelemetry Instrumentation
 description: Instrument your Rust application with OpenTelemetry and send traces to SigNoz. Auto-instrument Axum, Actix Web, reqwest, and tonic with framework integrations or add manual instrumentation for custom spans.
 doc_type: howto
@@ -55,13 +54,12 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 <Admonition type="info">
-The `tls-roots` feature in `opentelemetry-otlp` and `tls-native-roots` in `tonic` are required for sending data to SigNoz Cloud over HTTPS.
+The `tls-roots` and `reqwest-client` features in `opentelemetry-otlp` are required for sending data to SigNoz Cloud over HTTPS.
 </Admonition>
 
 ### Step 3. Create the tracer initialization
@@ -69,7 +67,7 @@ The `tls-roots` feature in `opentelemetry-otlp` and `tls-native-roots` in `tonic
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
@@ -82,8 +80,7 @@ fn init_tracer() -> SdkTracerProvider {
     // - OTEL_EXPORTER_OTLP_HEADERS
     // - OTEL_EXPORTER_OTLP_TIMEOUT
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
@@ -147,9 +144,8 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 ### Step 3. Create the tracer initialization
@@ -157,7 +153,7 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
@@ -170,8 +166,7 @@ fn init_tracer() -> SdkTracerProvider {
     // - OTEL_EXPORTER_OTLP_HEADERS
     // - OTEL_EXPORTER_OTLP_TIMEOUT
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
@@ -238,9 +233,8 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 ### Step 3. Create the tracer initialization
@@ -248,7 +242,7 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
@@ -261,8 +255,7 @@ fn init_tracer() -> SdkTracerProvider {
     // - OTEL_EXPORTER_OTLP_HEADERS
     // - OTEL_EXPORTER_OTLP_TIMEOUT
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
@@ -340,9 +333,8 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 ### Step 3. Create the tracer initialization
@@ -350,7 +342,7 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
@@ -363,8 +355,7 @@ fn init_tracer() -> SdkTracerProvider {
     // - OTEL_EXPORTER_OTLP_HEADERS
     // - OTEL_EXPORTER_OTLP_TIMEOUT
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
@@ -566,17 +557,17 @@ echo $OTEL_EXPORTER_OTLP_HEADERS
 
 **Check for TLS errors:**
 
-Ensure you have the `tls-roots` feature enabled in `opentelemetry-otlp` for HTTPS endpoints:
+Ensure you have the `tls-roots` and `reqwest-client` features enabled in `opentelemetry-otlp` for HTTPS endpoints:
 
 ```toml
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 ```
 
 ### Why do OTLP exports fail with `connection refused`?
 
 - **VM**: Verify the endpoint URL and that your firewall allows outbound HTTPS on port 443
 - **Kubernetes**: Ensure the endpoint is reachable from within your pod
-- **Self-hosted**: Confirm the collector is listening on the expected port (default: 4317 for gRPC)
+- **Self-hosted**: Confirm the collector is listening on the expected port (default: 4318 for HTTP)
 
 ### Why are spans not being exported?
 
@@ -622,7 +613,7 @@ Think of the OTel Collector as a middleman between your app and SigNoz. Instead 
 When using a collector, update your environment variables to point to the collector endpoint:
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_SERVICE_NAME="<service-name>"
 # No ingestion key needed when using a collector
 ```
@@ -630,7 +621,7 @@ export OTEL_SERVICE_NAME="<service-name>"
 You'll also need to remove the `tls-roots` feature if connecting over HTTP:
 
 ```toml:Cargo.toml
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client"] }
 ```
 
 See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions.
