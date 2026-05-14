@@ -1,5 +1,5 @@
 ---
-date: 2026-03-06
+date: 2026-05-12
 id: dotnet-manual-instrumentation
 title: Manual Instrumentation for .NET
 description: Add OpenTelemetry instrumentation to your .NET application using code for fine-grained control over traces
@@ -73,6 +73,7 @@ builder.Services.AddSingleton<Instrumentation>();
 Set up the TracerProvider and register your ActivitySource:
 
 ```csharp:Program.cs
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -89,8 +90,9 @@ builder.Services.AddOpenTelemetry()
         .AddHttpClientInstrumentation()
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
+            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443/v1/traces");
             options.Headers = "signoz-ingestion-key=<your-ingestion-key>";
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
         }));
 ```
 
@@ -100,7 +102,7 @@ builder.Services.AddOpenTelemetry()
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Update the endpoint and remove the headers:
 ```csharp
-options.Endpoint = new Uri("http://<collector-host>:4317");
+options.Endpoint = new Uri("http://<collector-host>:4318/v1/traces");
 ```
 </KeyPointCallout>
 

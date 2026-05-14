@@ -1,5 +1,5 @@
 ---
-date: 2026-05-06
+date: 2026-05-11
 id: opentelemetry-nodejs
 title: Send Metrics from Node.js application
 description: Learn how to send metrics from Node.js applications (Express, Fastify, Koa, NestJS, Runtime) to SigNoz using OpenTelemetry
@@ -37,6 +37,7 @@ Set the following environment variables to configure the OpenTelemetry exporter:
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_SERVICE_NAME="<service-name>"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_TRACES_EXPORTER="none"
@@ -61,6 +62,8 @@ env:
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_EXPORTER_OTLP_PROTOCOL
+  value: 'http/protobuf'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
 - name: OTEL_METRICS_EXPORTER
@@ -87,6 +90,7 @@ Verify these values:
 ```powershell
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_SERVICE_NAME = "<service-name>"
 $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_TRACES_EXPORTER = "none"
@@ -111,6 +115,7 @@ Add environment variables to your Dockerfile:
 # Set OpenTelemetry environment variables
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_SERVICE_NAME="<service-name>"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_TRACES_EXPORTER="none"
@@ -125,6 +130,7 @@ Or pass them at runtime using `docker run`:
 ```bash
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
     -e OTEL_SERVICE_NAME="<service-name>" \
     -e OTEL_METRICS_EXPORTER="otlp" \
     -e OTEL_TRACES_EXPORTER="none" \
@@ -370,8 +376,7 @@ See the OpenTelemetry semantic conventions for the complete list:
 ### Metrics not appearing?
 
 1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_ENDPOINT` is set correctly:
-    - For gRPC (default): `https://ingest.<region>.signoz.cloud:443`
-    - For HTTP: `https://ingest.<region>.signoz.cloud:443` (SDK appends `/v1/metrics` automatically)
+    - `https://ingest.<region>.signoz.cloud:443` (the SDK appends `/v1/metrics` automatically when using `http/protobuf`)
 
 2. **Check Metrics Exporter**: Ensure `OTEL_METRICS_EXPORTER` is set to `otlp` (this is the default).
 
