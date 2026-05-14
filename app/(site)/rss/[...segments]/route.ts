@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import siteMetadata from '@/data/siteMetadata.js'
-import tagData from 'app/tag-data.json'
 import { filterPostsByTag, generateRss } from '../../../../scripts/rssFeed.mjs'
 import { loadPublishedPosts } from '../rssUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
@@ -27,7 +26,7 @@ export async function GET(request: Request, { params }: { params: { segments?: s
 
   const tagSlug = segments[1]
 
-  if (!tagSlug || !Object.prototype.hasOwnProperty.call(tagData, tagSlug)) {
+  if (!tagSlug) {
     return notFoundResponse()
   }
 

@@ -2,7 +2,6 @@ import { slug } from 'github-slugger'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import siteMetadata from '@/data/siteMetadata'
 import ListLayout from '@/layouts/ListLayoutWithTags'
-import tagData from 'app/tag-data.json'
 import { genPageMetadata } from 'app/(site)/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -33,6 +32,21 @@ export const generateStaticParams = async () => {
   return []
 }
 
+function computeTagCounts(posts: { tags?: string[]; draft?: boolean }[]): Record<string, number> {
+  const counts: Record<string, number> = {}
+
+  posts.forEach((post) => {
+    if (post.tags && post.draft !== true) {
+      post.tags.forEach((t) => {
+        const formattedTag = slug(t)
+        counts[formattedTag] = (counts[formattedTag] || 0) + 1
+      })
+    }
+  })
+
+  return counts
+}
+
 export default async function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURI(params.tag)
   const blogs = await fetchAllBlogsForPage()
@@ -45,6 +59,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
     notFound()
   }
 
+  const tagCounts = computeTagCounts(blogs)
   const title = tag[0].toUpperCase() + tag.split(' ').join('-').slice(1)
-  return <ListLayout posts={filteredPosts} title={title} />
+  return <ListLayout posts={filteredPosts} title={title} tagCounts={tagCounts} />
 }
