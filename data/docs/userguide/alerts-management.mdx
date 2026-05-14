@@ -1,38 +1,37 @@
 ---
-date: 2026-04-23
+date: 2026-05-13
 doc_type: howto
 id: alerts-management
-description: Learn how to configure and manage alerts in SigNoz to monitor your application and infrastructure, set thresholds, and receive notifications for critical issues.
-title: Alerts 
+description: Learn how to view and manage alert rules, triggered alerts, and alert configurations in SigNoz.
+title: Alert List Page
 ---
 
-Alerts in SigNoz can help you to define which data to monitor, set thresholds to detect potential problems, and specify who should be notified and how. This can help you to identify critical issues and reduce noise. This document will help you in understanding how to set up and use alerts effectively.
+The Alerts page in SigNoz has three tabs — **Alert Rules** for managing your configured alert rules, **Triggered Alerts** for seeing which alerts are currently firing, and **Configurations** for routing policies and planned downtime.
 
-## Managing Alerts
+## Alert Rules Tab
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/alerts/alerts-alert-rules-tab.gif" alt="A gif explaining the Alerts Rules Tab in SigNoz"/>
     <figcaption><i>Features of Alert Rules Tab </i></figcaption>
 </figure>
 
-
-The Alert Rules Tab in SigNoz provides an overview of the alert defined by the user. This section allows you to view, edit, or manage alert rules, along with their associated metadata. Here's a breakdown of the features available:
+The Alert Rules tab provides an overview of all configured alert rules. Here's a breakdown of the features:
 
 ### Alert Rule Columns
 - **Status**: Indicates whether the alert rule is enabled (OK) or disabled.
 - **Alert Name**: The name given to the alert rule for easy identification.
-- **Severity**: The level of severity assigned to the alert. For example, `warning`, `critical` etc.
-- **Labels**: Displays any labels associated with the alert rule. Labels can help in categorizing alerts.
+- **Severity**: The level of severity assigned to the alert (e.g., `warning`, `critical`).
+- **Labels**: Displays any labels associated with the alert rule.
 
-### Additional Alert Rule Options
-- **Filter by Created At, Created By, Updated At, and Updated By**: The filter option in the top-right corner allows you to customize which fields are displayed. You can choose to show fields like when was the alert created who created the alert, when it was last updated, and who updated it.
-- **Sorting Columns**: By hovering over a column name and clicking it, you can sort the list of alert rules in ascending or descending order based on that column's data. 
-- **New Alert**: At the top-right corner, the "**+ New Alert**" button lets you create a new alert rule. 
+### Additional Options
+- **Filter by Created At, Created By, Updated At, and Updated By**: Customize which fields are displayed using the filter option in the top-right corner.
+- **Sorting Columns**: Click a column header to sort the list in ascending or descending order.
+- **New Alert**: Click the **+ New Alert** button at the top-right corner to create a new alert rule. 
 
 ### Navigation and Search
-- **Search Bar**: At the top of the tab, you can search for specific alert rules by **name**, **severity**, or **label**.
-- **Pagination Controls**: At the bottom-right corner, you can navigate through multiple pages of alert rules.
-- **Actions Menu**: Found on the right side of each row, this menu allows you to perform additional actions on the alert, such as **Enable**, **Edit**, **Clone** and **Delete**.
+- **Search Bar**: Search for specific alert rules by **name**, **severity**, or **label**.
+- **Pagination Controls**: Navigate through multiple pages of alert rules.
+- **Actions Menu**: Found on the right side of each row — **Enable**, **Edit**, **Clone**, and **Delete**.
 
 ## Triggered Alerts Tab
 
@@ -41,58 +40,36 @@ The Alert Rules Tab in SigNoz provides an overview of the alert defined by the u
     <figcaption><i>Features of Triggered Alerts Tab </i></figcaption>
 </figure>
 
-
-The Triggered Alerts Tab shows the currently firing alerts. It provides a real-time view of alerts, allowing you to quickly assess which alerts are active and require attention. Here's a detailed description of the tab's features:
+The Triggered Alerts tab shows currently firing alerts in real-time.
 
 ### Triggered Alert Columns
-- **Status**: Shows whether the alert is currently firing. It can have values like "Firing."
+- **Status**: Shows whether the alert is currently firing.
 - **Alert Name**: The name of the triggered alert.
-- **Severity**: Indicates the severity of the triggered alert (e.g., "warning").
-- **Tags**: Displays additional information or tags related to the alert.
-- **Firing Since**: The timestamp indicating when the alert started firing.
+- **Severity**: The severity of the triggered alert.
+- **Tags**: Additional information or tags related to the alert.
+- **Firing Since**: The timestamp when the alert started firing.
 
-### Additional Triggered Alert Options
-- **Filter by Tags**: You can apply filters to narrow down the list of triggered alerts based on specific tags.
-- **Group by**: The "Group by" feature allows you to group alerts based on various criteria, such as alert name, severity etc.
-
-## Creating a New Alert in SigNoz
-
-After setting up a new notification channel, you can create an alert by clicking the "New Alert" button in the Alerts Tab. You will see five types of alerts to choose from:
-
-- **[Anomaly-based Alert](https://signoz.io/docs/alerts-management/anomaly-based-alerts)**: Sends a notification when a condition occurs in metric data (e.g., CPU usage, memory utilization, request rates). You can set thresholds or rate-based conditions.
-
-- **[Metric-based Alert](https://signoz.io/docs/alerts-management/metrics-based-alerts)**: Sends a notification when a condition occurs in metric data (e.g., CPU usage, memory utilization, request rates). You can set thresholds or rate-based conditions.
-
-- **[Log-based Alert](https://signoz.io/docs/alerts-management/log-based-alerts)**: Sends a notification when a condition occurs in log data (e.g., specific patterns, keywords, error messages). You can set conditions based on log entries or error codes.
-
-- **[Trace-based Alert](https://signoz.io/docs/alerts-management/trace-based-alerts)**: Sends a notification when a condition occurs in trace data (e.g., latency, errors, specific trace events). You can define conditions to trigger the alert based on distributed system traces.
-
-- **[Exceptions-based Alert](https://signoz.io/docs/alerts-management/exceptions-based-alerts)**: Sends a notification when a condition occurs in exceptions data (e.g., application exceptions or errors). You can set conditions to trigger the alert when specific exceptions are detected.
-
-These five types of alerts offer flexibility in monitoring different system aspects. 
-
-### Repeat Notification
-Configure repeat notifications to retrigger alerts at specified intervals if they remain unresolved. This feature allows you to receive follow-up notifications for ongoing issues.
-
-To enable repeat notifications:
-1. Scroll to the bottom of the alert configuration
-2. Look for the "Repeat Notification" option
-3. Enable the toggle switch
-4. Set your desired interval
-5. Configure the condition:
-   - **Firing**: Send repeat notifications when the alert is actively firing
-   - **No Data**: Send repeat notifications when no data is received
-
-<Figure
-  src="/img/docs/repeat-notification.webp"
-  alt="Repeat Notification configuration showing interval and condition options"
-  caption="Repeat Notification configuration"
-/>
+### Additional Options
+- **Filter by Tags**: Narrow down the list based on specific tags (e.g., `severity:warning`).
+- **Group by**: Group alerts based on alert name, severity, etc.
 
 ## Managing Alerts via the API
 
-You can manage alert rules programmatically using the SigNoz API. Use `GET /api/v1/rules` to retrieve all alert rules and `POST /api/v1/rules` to create a new alert rule. This is useful for transferring alerts between SigNoz instances — retrieve the rules from one instance and create them on another.
+You can manage alert rules programmatically using the SigNoz API. Use `GET /api/v1/rules` to retrieve all alert rules and `POST /api/v1/rules` to create a new alert rule. This is useful for transferring alerts between SigNoz instances.
 
 For an infrastructure-as-code approach, you can also use the [Terraform provider](https://signoz.io/docs/alerts-management/terraform-provider-signoz/).
 
-See the [SigNoz API reference](https://signoz.io/api-reference/) for full details on available endpoints and request formats.
+See the [SigNoz API reference](https://signoz.io/api-reference/) for full details.
+
+## Next Steps
+
+### Configurations Tab
+- **[Routing Policy](https://signoz.io/docs/alerts-management/routing-policy/)** — Route alerts to specific notification channels based on labels or severity.
+- **[Planned Maintenance](https://signoz.io/docs/alerts-management/planned-maintenance/)** — Silence alerts during scheduled maintenance windows.
+
+### Alert Types
+- **[Metric-based Alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/)** — Alert on CPU usage, memory, request rates, and other metrics.
+- **[Log-based Alert](https://signoz.io/docs/alerts-management/log-based-alerts/)** — Alert on log patterns, keywords, or error messages.
+- **[Trace-based Alert](https://signoz.io/docs/alerts-management/trace-based-alerts/)** — Alert on latency, errors, or specific trace events.
+- **[Exceptions-based Alert](https://signoz.io/docs/alerts-management/exceptions-based-alerts/)** — Alert on application exceptions.
+- **[Anomaly-based Alert](https://signoz.io/docs/alerts-management/anomaly-based-alerts/)** — Alert when metrics deviate from expected patterns.

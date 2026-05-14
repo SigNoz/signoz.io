@@ -1,11 +1,12 @@
 ---
-date: 2024-12-08
-title: Docker container metrics
-
+date: 2026-05-06
+title: Docker Container Metrics
 id: docker-container-metrics
+description: Monitor Docker container metrics using the OpenTelemetry Collector and SigNoz.
+doc_type: howto
 ---
 
-This document provides an explains how to monitor Docker container Metrics using OTel Collector and SigNoz.
+This document explains how to monitor Docker container Metrics using OTel Collector and SigNoz.
 
 ## Pre-requisites
 
@@ -18,7 +19,7 @@ OpenTelemetry Collector is required to collect metrics from Docker containers. P
 
 ## Collecting Docker metrics
 
-You will need to configure [`docker_stats` OpenTelemetry receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/README.md) for collecting Docker metrics. The receiver queries the local Docker daemon's container stats API for all desired running containers on a configured interval.
+You will need to configure the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">`docker_stats` OpenTelemetry receiver</a> for collecting Docker metrics. The receiver queries the local Docker daemon's container stats API for all desired running containers on a configured interval.
 
 ### Configuring the receiver
 
@@ -51,7 +52,7 @@ receivers:
 
 If you are running OTel Collector on the same machine as Docker daemon, you can remove the `endpoint` line. In case you are running OTel Collector inside a Docker container, make sure you mount the Docker socket from the host machine to the container (`-v /var/run/docker.sock:/var/run/docker.sock`).
 
-The receiver also supports additional parameters like `initial_delay`, `collection_interval`, `timeout` and others. For more details, refer to the [official receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/README.md#configuration).
+The receiver also supports additional parameters like `initial_delay`, `collection_interval`, `timeout` and others. For more details, refer to the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/README.md#configuration" target="_blank" rel="noopener noreferrer nofollow">official receiver documentation</a>.
 
 ### Configuring the processor
 
@@ -131,7 +132,7 @@ service:
 
 Once you have configured OTel Collector to send Docker metrics to SigNoz, you can start visualizing the metrics in the SigNoz UI.
 
-You can use the pre-configured dashboard for Docker metrics or [create your own custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from [here](https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json) and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
+You can use the pre-configured dashboard for Docker metrics or [create your own custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from <a href="https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json" target="_blank" rel="noopener noreferrer nofollow">here</a> and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/dashboards/dashboard-templates/docker-container-metrics.webp" alt="Docker Container Metrics Dashboard"/>
@@ -202,4 +203,4 @@ The dashboard also includes a "Block IO" panel based on `container.blockio.io_se
     <figcaption><i>Block IO Panel</i></figcaption>
 </figure>
 
-You can find the full list of metrics collected by the `docker_stats` receiver and available for querying in dashboards [in the official receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/documentation.md).
+You can find the full list of metrics collected by the `docker_stats` receiver and available for querying in dashboards in the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/documentation.md" target="_blank" rel="noopener noreferrer nofollow">official receiver documentation</a>.

@@ -1,0 +1,130 @@
+---
+date: 2026-05-07
+title: Alert Configuration Guide
+id: cost-meter-alert-configuration-guide
+description: Explore worked meter alert examples in SigNoz for monthly budgets, total cost thresholds, ingestion key quotas, and per-service span limits.
+doc_type: howto
+---
+
+Use these examples to configure common cost monitoring scenarios with meter alerts.
+
+## Examples
+
+### Example 1: Alert for Monthly Log Costs Exceeding $500
+
+- Go to the billing section to find your per-GB log price, which may vary based on your retention settings.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-1.1.webp"
+  alt="Per GB logs price from billing page"
+  caption="Fetch the price of logs (per GB) from billing page"
+/>
+
+- In the query builder, select the `signoz.meter.log.size` meter metric and set `timeAggregation` to `Increase` to sum the total log usage.
+
+- Use a formula to convert usage to cost: `(A / 1e9) * (cost per GB)`.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-1.2.webp"
+  alt="Query for logs ingestion size with formula for calculating the price"
+  caption="Query for logs ingestion size with formula for calculating the price"
+/>
+
+- Set the alert threshold on this formula with `In Total` aggregation.
+
+- Choose a `Cumulative` window alert with time range set to `Current Month`, and ensure the start date matches your billing cycle as specified on the billing page.
+
+- For accuracy, set the evaluation window to start at `00:00:00` UTC (since billing is calculated in UTC), or pick the corresponding time window in your local timezone.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-1.3.webp"
+  alt="Threshold condition for monthly log billing"
+  caption="Threshold condition for monthly log billing"
+/>
+
+- Select your preferred notification channel and save the alert.
+
+### Example 2: Alert for Monthly Total Costs Exceeding $1000
+
+- On the billing page, identify the per-GB price for logs and spans, and the per-million data point price for metrics.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-2.1.webp"
+  alt="Per GB price for logs and spans, per million data point price for metrics from billing page"
+  caption="Per GB price for logs and spans, per million data point price for metrics from billing page"
+/>
+
+- In the query builder, select `signoz.meter.log.size` with `timeAggregation` set to `Increase`.
+
+- Additionally, add queries for `signoz.meter.span.size` and `signoz.meter.metric.datapoint.count` with the same aggregation.
+
+- Combine these with a formula to calculate total cost:
+
+  - Logs: `(A / 1e9) * (cost per GB of logs)`
+  - Spans: `(B / 1e9) * (cost per GB of spans)`
+  - Metrics: `(C / 1e6) * (cost per million data points)`
+  - Total: Sum all three components.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-2.2.webp"
+  alt="Query for total ingestion with formula for calculating the price"
+  caption="Query for total ingestion with formula for calculating the price"
+/>
+
+- Apply the formula as the threshold condition with `In Total` aggregation.
+
+- Use a `Cumulative` window alert, select `Current Month` as the time range, and set the start date based on your billing cycle.
+
+- Make sure the evaluation window aligns with `00:00:00` UTC, or select the appropriate range for your timezone.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-2.3.webp"
+  alt="Threshold condition for monthly billing"
+  caption="Threshold condition for monthly billing"
+/>
+
+- Choose a notification channel and save the alert.
+
+### Example 3: Alert When an Ingestion Key Is Nearing Its Daily Quota
+
+- Go to the ingestion keys page and expand the key you want to monitor.
+
+- Click the `bell` icon next to the daily limit for the relevant signal type.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-3.1.webp"
+  alt="Ingestion Keys Page for alerting"
+  caption="Ingestion Keys Page for alerting"
+/>
+
+- You will be redirected to the alerts page with a pre-filled query that includes all the necessary fields.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-3.2.webp"
+  alt="Query for ingestion key limits based alert"
+  caption="Query for ingestion key limits based alert"
+/>
+
+- Give the alert a meaningful name, choose a notification channel, and save.
+
+### Example 4: Alert When Any Service Ingests Over 1 Million Spans in a Day
+
+- Select the `signoz.meter.span.count` metric, and add a `group by` for `service.name` to monitor spans per service.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-4.1.webp"
+  alt="Query for span count per service"
+  caption="Query for span count per service"
+/>
+
+- Set the threshold to 1,000,000 spans, using `In Total` aggregation.
+
+- Set the evaluation window to `Cumulative` and pick `Current Day` since we are interested in daily usage limits.
+
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-4.2.webp"
+  alt="Threshold for any service exceeding 1M spans in a day"
+  caption="Threshold for any service exceeding 1M spans in a day"
+/>
+
+- Configure notifications and save the alert.
