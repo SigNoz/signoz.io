@@ -18,6 +18,7 @@ import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
 import blogRelatedArticles from './constants/blogRelatedArticles.json'
+import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
 import allAuthors from './constants/authors.json'
 
 const isProduction = process.env.NODE_ENV === 'production'
