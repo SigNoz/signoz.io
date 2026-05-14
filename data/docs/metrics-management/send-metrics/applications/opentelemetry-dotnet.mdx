@@ -1,9 +1,8 @@
 ---
-date: 2026-03-05
+date: 2026-05-11
 id: opentelemetry-dotnet
 title: Send Metrics from .NET Application using OpenTelemetry
 description: Send custom and runtime metrics from your .NET application to SigNoz using OpenTelemetry automatic instrumentation.
-
 doc_type: howto
 ---
 
@@ -45,6 +44,7 @@ sh ./otel-dotnet-auto-install.sh
 export OTEL_SERVICE_NAME="<service-name>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
 export OTEL_TRACES_EXPORTER="none"
@@ -130,6 +130,8 @@ env:
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_EXPORTER_OTLP_PROTOCOL
+  value: 'http/protobuf'
 - name: OTEL_METRICS_EXPORTER
   value: 'otlp'
 - name: OTEL_METRIC_EXPORT_INTERVAL
@@ -167,6 +169,7 @@ Install-OpenTelemetryCore
 $env:OTEL_SERVICE_NAME = "<service-name>"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
 $env:OTEL_TRACES_EXPORTER = "none"
@@ -211,6 +214,7 @@ RUN apt-get update && apt-get install -y curl \
 ENV OTEL_SERVICE_NAME="<service-name>"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
 ENV OTEL_TRACES_EXPORTER="none"
@@ -240,6 +244,7 @@ docker run -p 8080:8080 \
   -e OTEL_SERVICE_NAME="my-service" \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
+  -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
   -e OTEL_METRICS_EXPORTER="otlp" \
   -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
   -e OTEL_TRACES_EXPORTER="none" \

@@ -1,5 +1,5 @@
 ---
-date: 2026-03-12
+date: 2026-05-11
 title: Send logs from Java to SigNoz using OpenTelemetry
 id: java-logs
 doc_type: howto
@@ -79,7 +79,7 @@ Verify these values:
 If using a local OTel Collector (e.g., self-hosted), use:
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_SERVICE_NAME="java-app"
 
 java -javaagent:./opentelemetry-javaagent.jar -jar your-app.jar
@@ -587,8 +587,8 @@ Controls where the application logs are exported. By default, it is set to `otlp
 
 When using the `otlp` log exporter, you can further fine-tune how logs are exported via the OTLP protocol.
 
-- `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`: The specific endpoint to send logs to (e.g., `https://ingest.<region>.signoz.cloud:443`). Overrides `OTEL_EXPORTER_OTLP_ENDPOINT`.
-- `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`: The transport protocol. Options include `grpc` (default), `http/protobuf`, and `http/json`.
+- `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`: The specific endpoint to send logs to (e.g., `https://ingest.<region>.signoz.cloud:443/v1/logs`). Overrides `OTEL_EXPORTER_OTLP_ENDPOINT`.
+- `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`: The transport protocol. Options include `http/protobuf` (default in Java agent 2.x), `grpc`, and `http/json`.
 - `OTEL_EXPORTER_OTLP_LOGS_TIMEOUT`: The maximum time (in milliseconds) the exporter will wait for a batch to be exported before timing out. Default is `10000` (10 seconds).
 - `OTEL_EXPORTER_OTLP_LOGS_HEADERS`: Key-value pairs separated by commas to pass as request headers (e.g., `signoz-ingestion-key=<your-ingestion-key>`). Overrides `OTEL_EXPORTER_OTLP_HEADERS`.
 
