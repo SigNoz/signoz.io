@@ -136,8 +136,6 @@ When you query metrics, SigNoz applies two aggregation layers:
 
 Temporal aggregation consolidates raw data points **within each individual time series** over each time interval. Instead of plotting every raw sample (which can be thousands), it reduces them into one value per interval per series.
 
-**Think of it as:** "How do I summarize this one series over time?"
-
 For example, if you have CPU utilization samples every 10 seconds and your chart shows 1-minute intervals, temporal aggregation decides how those 6 raw values become a single point — by taking the latest value, averaging them, summing them, etc.
 
 Available functions: `Latest`, `Sum`, `Avg`, `Min`, `Max`, `Count`, `Count Distinct`
@@ -147,8 +145,6 @@ For counter metrics, additional rate-based functions are available: `Rate` and `
 #### Spatial Aggregation (Across Time Series)
 
 Spatial aggregation merges **multiple time series into fewer series** by combining values across dimensions. This is how you go from seeing one line per host to seeing a single line for the entire service.
-
-**Think of it as:** "How do I combine different series together?"
 
 For example, if `system.cpu.utilization` has 10 time series (one per host), spatial aggregation with `Avg` gives you the average CPU across all hosts as a single line.
 

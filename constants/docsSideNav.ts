@@ -2501,7 +2501,7 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Querying',
+    label: 'Querying Data',
     type: 'category',
     isExpanded: false,
     // route: '',
@@ -2512,58 +2512,50 @@ const docsSideNav = [
         label: 'Overview',
       },
       {
-        label: 'Querying Data',
+        label: 'Query Builder',
         type: 'category',
         isExpanded: false,
         route: '/docs/userguide/query-builder-v5',
         items: [
           {
-            label: 'Query Builder',
-            type: 'category',
-            isExpanded: false,
+            type: 'doc',
             route: '/docs/userguide/query-builder-v5',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/userguide/query-builder-v5',
-                label: 'Overview',
-              },
-              {
-                type: 'doc',
-                route: '/docs/querying/aggregation-grouping',
-                label: 'Aggregation & Grouping',
-              },
-              {
-                type: 'doc',
-                route: '/docs/querying/result-manipulation',
-                label: 'Result Manipulation',
-              },
-            ],
-          },
-          {
-            label: 'ClickHouse',
-            type: 'category',
-            isExpanded: false,
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/userguide/write-a-metrics-clickhouse-query',
-                label: 'Metrics',
-              },
-              { type: 'doc', route: '/docs/userguide/logs_clickhouse_queries', label: 'Logs' },
-              {
-                type: 'doc',
-                route: '/docs/userguide/writing-clickhouse-traces-query',
-                label: 'Traces',
-              },
-            ],
+            label: 'Overview',
           },
           {
             type: 'doc',
-            route: '/docs/userguide/write-a-prom-query-with-new-format',
-            label: 'PromQL',
+            route: '/docs/querying/aggregation-grouping',
+            label: 'Aggregation & Grouping',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/result-manipulation',
+            label: 'Result Manipulation',
           },
         ],
+      },
+      {
+        label: 'ClickHouse',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/write-a-metrics-clickhouse-query',
+            label: 'Metrics',
+          },
+          { type: 'doc', route: '/docs/userguide/logs_clickhouse_queries', label: 'Logs' },
+          {
+            type: 'doc',
+            route: '/docs/userguide/writing-clickhouse-traces-query',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/write-a-prom-query-with-new-format',
+        label: 'PromQL',
       },
       {
         label: 'User Guides',
