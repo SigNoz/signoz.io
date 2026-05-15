@@ -1,5 +1,5 @@
 ---
-date: 2026-03-05
+date: 2026-05-14
 id: dotnet
 title: .NET OpenTelemetry Instrumentation
 description: Send events from your .NET application to SigNoz
@@ -62,14 +62,19 @@ OTEL_TRACES_EXPORTER=otlp \
 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
-OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,service.version=1.0.0 \
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,service.version=<service-version> \
 dotnet run
 ```
 
-Replace:
+Verify these values:
 - `<service-name>`: Your service name (e.g., `payment-service`)
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 </TabItem>
 
@@ -112,13 +117,18 @@ env:
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_RESOURCE_ATTRIBUTES
-  value: 'deployment.environment=production,service.version=1.0.0'
+  value: 'deployment.environment=production,service.version=<service-version>'
 ```
 
-Replace:
+Verify these values:
 - `<service-name>`: Your service name (e.g., `payment-service`)
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 3. Update your Dockerfile entrypoint
 
@@ -196,12 +206,20 @@ ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-ENV OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,service.version=1.0.0"
+ENV OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,service.version=<service-version>"
 
 CMD . $HOME/.otel-dotnet-auto/instrument.sh && dotnet MyApp.dll
 ```
 
-Replace `<service-name>`, `<region>`, and `<your-ingestion-key>` with your values.
+Verify these values:
+- `<service-name>`: Your service name (e.g., `payment-service`)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Build and run
 
@@ -237,16 +255,21 @@ $env:OTEL_TRACES_EXPORTER = "otlp"
 $env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production,service.version=1.0.0"
+$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production,service.version=<service-version>"
 
 Register-OpenTelemetryForCurrentSession -OTelServiceName "<service-name>"
 dotnet run
 ```
 
-Replace:
+Verify these values:
 - `<service-name>`: Your service name (e.g., `payment-service`)
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 </TabItem>
 </Tabs>

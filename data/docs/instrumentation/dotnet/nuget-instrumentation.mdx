@@ -1,5 +1,5 @@
 ---
-date: 2026-05-12
+date: 2026-05-14
 id: dotnet-nuget-instrumentation
 title: NuGet based Instrumentation for .NET
 description: Add OpenTelemetry to your .NET application using NuGet packages and configure in Program.cs
@@ -59,7 +59,7 @@ builder.Services.AddOpenTelemetry()
         .AddAttributes(new Dictionary<string, object>
         {
             ["deployment.environment"] = builder.Environment.EnvironmentName,
-            ["service.version"] = "1.0.0"
+            ["service.version"] = "<service-version>"
         }))
     .WithTracing(tracing => tracing
         .AddAspNetCoreInstrumentation()
@@ -78,10 +78,15 @@ app.MapGet("/", () => "Hello World!");
 app.Run();
 ```
 
-Replace:
+Verify these values:
 - `my-dotnet-service`: Your service name
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ## Step 3. Configure using environment variables (optional)
 

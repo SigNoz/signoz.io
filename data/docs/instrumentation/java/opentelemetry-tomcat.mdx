@@ -1,5 +1,5 @@
 ---
-date: 2026-03-06
+date: 2026-05-14
 id: tomcat
 
 title: Tomcat OpenTelemetry Instrumentation
@@ -47,7 +47,7 @@ Create a file at `$CATALINA_HOME/bin/setenv.sh` with the following contents:
 
 ```bash:$CATALINA_HOME/bin/setenv.sh
 export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/opt/tomcat/lib/opentelemetry-javaagent.jar"
-export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>,service.version=<service-version>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_METRICS_EXPORTER="none"
@@ -70,6 +70,11 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 3. Restart Tomcat
 
@@ -121,7 +126,7 @@ Add these environment variables to your deployment manifest:
 ```yaml
 env:
 - name: OTEL_RESOURCE_ATTRIBUTES
-  value: 'service.name=<service-name>'
+  value: 'service.name=<service-name>,service.version=<service-version>'
 - name: OTEL_EXPORTER_OTLP_ENDPOINT
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
@@ -142,6 +147,11 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 </TabItem>
 <TabItem value="otel-operator" label="OTel Operator">
@@ -209,6 +219,7 @@ spec:
       annotations:
         instrumentation.opentelemetry.io/inject-java: "true"
         resource.opentelemetry.io/service.name: "<service-name>"
+        resource.opentelemetry.io/service.version: "<service-version>"
     spec:
       containers:
       - name: tomcat
@@ -224,6 +235,14 @@ kubectl apply -f deployment.yaml
 ```
 
 The operator will automatically inject the Java agent into your Tomcat pods.
+
+Verify these values:
+- `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 </TabItem>
 </Tabs>
@@ -245,7 +264,7 @@ Create a file at `%CATALINA_HOME%\bin\setenv.bat` with the following contents:
 
 ```batch:%CATALINA_HOME%\bin\setenv.bat
 set "CATALINA_OPTS=%CATALINA_OPTS% -javaagent:C:\tomcat\lib\opentelemetry-javaagent.jar"
-set "OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>"
+set "OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>,service.version=<service-version>"
 set "OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
 set "OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
 set "OTEL_METRICS_EXPORTER=none"
@@ -262,7 +281,12 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 - Update the agent path if your Tomcat is installed elsewhere.
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 3. Restart Tomcat
 
@@ -299,7 +323,7 @@ RUN echo 'export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/usr/local/tomcat/lib/
 COPY target/*.war /usr/local/tomcat/webapps/
 
 # Set default environment variables (can be overridden at runtime)
-ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>,service.version=<service-version>"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_METRICS_EXPORTER="none"
@@ -315,9 +339,15 @@ The OpenTelemetry Java agent enables all three signals (traces, metrics, and log
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
 </KeyPointCallout>
 
-Replace `<service-name>` with your values.
+Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+- `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+</Admonition>
 
 ### Step 2. Build and run
 
