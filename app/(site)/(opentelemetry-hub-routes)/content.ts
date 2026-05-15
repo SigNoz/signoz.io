@@ -13,6 +13,7 @@ type ResourceCenterCardSource = {
   summary?: string | null
   tags?: string[] | null
   authors?: unknown[] | null
+  authorObjects?: { key?: string; name?: string; image_url?: string }[] | null
   readingTime?: {
     text?: string | null
   } | null
@@ -52,7 +53,7 @@ export function pickResourceCenterCardFields(source: ResourceCenterCardSource): 
     description: source.description ?? undefined,
     summary: source.summary ?? undefined,
     tags: source.tags ?? undefined,
-    authors: source.authors ?? undefined,
+    authors: source.authorObjects?.length ? source.authorObjects : (source.authors ?? undefined),
     readingTime: {
       text: source.readingTime?.text ?? '5 min read',
     },

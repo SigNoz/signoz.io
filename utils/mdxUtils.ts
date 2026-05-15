@@ -171,6 +171,17 @@ function transformRelatedArticles(content: MDXContent): any[] {
   return legacyArticles
 }
 
+// Extract lightweight author objects suitable for card display (name + image).
+function extractAuthorObjects(raw: unknown): { key?: string; name?: string; image_url?: string }[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((a: string | MDXContent) => {
+      if (typeof a === 'string') return { key: a, name: a }
+      return { key: a.key, name: a.name, image_url: a.image_url }
+    })
+    .filter((a) => a.name)
+}
+
 export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`
@@ -180,6 +191,7 @@ export const transformComparison = (comparison: MDXContent) => {
         typeof author === 'string' ? author : author.key
       )
     : []
+  const authorObjects = extractAuthorObjects(comparison.authors)
 
   const tags = Array.isArray(comparison.tags)
     ? comparison.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
@@ -210,6 +222,7 @@ export const transformComparison = (comparison: MDXContent) => {
     tags,
     description: comparison.description,
     authors,
+    authorObjects,
     keywords,
     slug,
     content: comparison.content,
@@ -232,6 +245,7 @@ export const transformBlog = (blog: MDXContent) => {
         typeof author === 'string' ? author : author.key
       )
     : []
+  const authorObjects = extractAuthorObjects(blog.authors)
 
   const tags = Array.isArray(blog.tags)
     ? blog.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
@@ -267,6 +281,7 @@ export const transformBlog = (blog: MDXContent) => {
     image: blog.image,
     images: blog.images,
     authors,
+    authorObjects,
     keywords,
     slug,
     content: blog.content,
@@ -295,6 +310,7 @@ export const transformGuide = (guide: MDXContent) => {
         typeof author === 'string' ? author : author.key
       )
     : []
+  const authorObjects = extractAuthorObjects(guide.authors)
 
   const tags = Array.isArray(guide.tags)
     ? guide.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
@@ -329,6 +345,7 @@ export const transformGuide = (guide: MDXContent) => {
     description: guide.description,
     image: guide.image,
     authors,
+    authorObjects,
     keywords,
     slug,
     content: guide.content,
