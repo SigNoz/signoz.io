@@ -3,36 +3,36 @@ import { notFound } from 'next/navigation'
 
 import siteMetadata from '@/data/siteMetadata'
 import { safeJsonLdStringify } from '@/utils/structuredData'
-import { allBlogs } from 'contentlayer/generated'
+import { fetchBlogBySlug } from '@/utils/cachedData'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-import BlogArticlePage, {
-  dynamicParams as blogDynamicParams,
-  generateMetadata as generateBlogMetadata,
-} from '../blog/[...slug]/page'
+import BlogArticlePage, { generateMetadata as generateBlogMetadata } from '../blog/[...slug]/page'
 
 const LANDING_PARAMS = { slug: ['what-is-opentelemetry'] }
 const LANDING_CANONICAL = `${siteMetadata.siteUrl}/opentelemetry/`
 const BlogArticlePageWithOptions = BlogArticlePage as any
 
-export const dynamicParams = blogDynamicParams
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamicParams = true
 
 export async function generateMetadata(): Promise<Metadata | undefined> {
   return generateBlogMetadata({ params: LANDING_PARAMS })
 }
 
-export default function OpenTelemetryLanding() {
+export default async function OpenTelemetryLanding() {
   const slug = LANDING_PARAMS.slug.join('/')
-  const post = allBlogs.find((entry) => entry.slug === slug)
+  const post = await fetchBlogBySlug(slug)
 
   if (!post) {
     return notFound()
   }
 
-  const jsonLd = post.structuredData
+  const sd = post.structuredData as any
+  const jsonLd = sd
     ? {
-        ...post.structuredData,
+        ...sd,
         mainEntityOfPage: {
-          ...(post.structuredData.mainEntityOfPage || { '@type': 'WebPage' }),
+          ...(sd.mainEntityOfPage || { '@type': 'WebPage' }),
           '@id': LANDING_CANONICAL,
         },
         url: LANDING_CANONICAL,

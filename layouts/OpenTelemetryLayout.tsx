@@ -1,21 +1,18 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
+import type { Blog } from '../types/transformedContent'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
-// Extend the Blog type to include CTA fields
-interface OpenTelemetryContent extends Blog {
-  cta_title?: string
-  cta_text?: string
-}
+type AuthorDetail = { name?: string; url?: string; image_url?: string; [key: string]: any }
 
 interface LayoutProps {
-  content: CoreContent<OpenTelemetryContent>
-  authorDetails: CoreContent<Authors>[]
+  content: CoreContent<Blog>
+  authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
   toc: TocItemProps[]
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
 }
 
 export default function OpenTelemetryLayout({
@@ -24,6 +21,7 @@ export default function OpenTelemetryLayout({
   authors,
   children,
   toc,
+  authorDirectory,
 }: LayoutProps) {
   return (
     <RegionProvider>
@@ -35,6 +33,7 @@ export default function OpenTelemetryLayout({
         contentType="blog"
         showNewsletter={true}
         showRelatedArticles={true}
+        authorDirectory={authorDirectory}
       >
         {children}
       </ArticleLayout>

@@ -1,14 +1,14 @@
 import { slug } from 'github-slugger'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import siteMetadata from '@/data/siteMetadata'
 import ListLayout from '@/layouts/ListLayoutWithTags'
-import { allBlogs } from 'contentlayer/generated'
-import tagData from 'app/tag-data.json'
 import { genPageMetadata } from 'app/(site)/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { fetchAllBlogsForPage } from '@/utils/cachedData'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const dynamicParams = false
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamicParams = true
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURI(params.tag)
@@ -25,28 +25,35 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
 }
 
 export const generateStaticParams = async () => {
-  const tagCounts = tagData as Record<string, number>
-  const tagKeys = Object.keys(tagCounts)
-  // Only generate pages for tags that have at least one post
-  const paths = tagKeys
-    .filter((tag) => tagCounts[tag] > 0)
-    .map((tag) => ({
-      tag: encodeURI(tag),
-    }))
-  return paths
+  return []
 }
 
-export default function TagPage({ params }: { params: { tag: string } }) {
+export default async function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURI(params.tag)
-  const filteredPosts = allCoreContent(
-    sortPosts(allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag)))
-  )
 
-  // Return 404 for empty tag pages
+  const allBlogPosts = await fetchAllBlogsForPage()
+
+  // Compute tag counts dynamically
+  const tagCounts: Record<string, number> = {}
+  for (const post of allBlogPosts) {
+    if (post.tags && post.draft !== true) {
+      for (const t of post.tags) {
+        const formattedTag = slug(t)
+        tagCounts[formattedTag] = (tagCounts[formattedTag] || 0) + 1
+      }
+    }
+  }
+
+  const filteredPosts = allBlogPosts
+    .filter(
+      (post) => post.draft !== true && post.tags && post.tags.map((t) => slug(t)).includes(tag)
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
   if (filteredPosts.length === 0) {
-    notFound() // Next.js function to return 404
+    notFound()
   }
 
   const title = tag[0].toUpperCase() + tag.split(' ').join('-').slice(1)
-  return <ListLayout posts={filteredPosts} title={title} />
+  return <ListLayout posts={filteredPosts} title={title} tagCounts={tagCounts} />
 }

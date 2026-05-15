@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import type { CoreContent } from 'pliny/utils/contentlayer'
-import type { Authors, Blog } from 'contentlayer/generated'
-import type { Comparison, Guide } from '../../types/transformedContent'
+import type { Blog, Comparison, Guide } from '../../types/transformedContent'
 import type { MDXContent } from '@/utils/strapi'
 
 export interface TocItemProps {
@@ -48,9 +47,11 @@ export type SidebarDoc = {
 
 export type SidebarItem = SidebarCategory | SidebarDoc
 
+type AuthorDetail = { name?: string; url?: string; image_url?: string; [key: string]: any }
+
 export interface LayoutProps {
   content: CoreContent<Blog | Comparison | Guide | MDXContent>
-  authorDetails: CoreContent<Authors | MDXContent>[]
+  authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
   toc: TocItemProps[]

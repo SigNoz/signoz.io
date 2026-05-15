@@ -1,4 +1,5 @@
 const URL_PREFIX_TO_COLLECTION: { prefix: string; collectionName: string }[] = [
+  { prefix: '/blog/', collectionName: 'blogs' },
   { prefix: '/opentelemetry/', collectionName: 'opentelemetries' },
   { prefix: '/faqs/', collectionName: 'faqs' },
   { prefix: '/case-study/', collectionName: 'case-studies' },

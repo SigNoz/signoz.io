@@ -223,6 +223,69 @@ export const transformComparison = (comparison: MDXContent) => {
   }
 }
 
+export const transformBlog = (blog: MDXContent) => {
+  const slug = blog.path?.split('/').pop() || ''
+  const path = `blog/${slug}`
+
+  const authors = Array.isArray(blog.authors)
+    ? blog.authors.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      )
+    : []
+
+  const tags = Array.isArray(blog.tags)
+    ? blog.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
+    : []
+
+  const keywords = Array.isArray(blog.keywords)
+    ? blog.keywords.map((keyword: string | MDXContent) =>
+        typeof keyword === 'string' ? keyword : keyword.value
+      )
+    : []
+
+  const readingTimeStats = readingTime(blog.content || '')
+
+  const contentForStructuredData = {
+    ...blog,
+    slug,
+    path,
+    publishedAt: blog.date || blog.updatedAt || blog.publishedAt,
+  } as MDXContent
+
+  return {
+    ...blog,
+    _id: blog.documentId || String(blog.id),
+    _raw: {},
+    type: 'Blog',
+    title: blog.title,
+    date: blog.date,
+    lastmod: blog.lastmod || blog.date,
+    draft: blog.draft ?? false,
+    summary: blog.summary || blog.description,
+    tags,
+    description: blog.description,
+    image: blog.image,
+    images: blog.images,
+    authors,
+    keywords,
+    slug,
+    content: blog.content,
+    body: { raw: '', code: '' },
+    toc: generateTOC(blog.content || ''),
+    readingTime: readingTimeStats,
+    path,
+    filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
+    structuredData: generateStructuredData('blog', contentForStructuredData),
+    relatedArticles: transformRelatedArticles(blog),
+    is_newsroom: blog.is_newsroom ?? false,
+    hide_table_of_contents: blog.hide_table_of_contents ?? false,
+    excludeFromSitemap: blog.excludeFromSitemap ?? false,
+    cta_title: blog.cta_title,
+    cta_text: blog.cta_text,
+    canonicalUrl: blog.canonicalUrl,
+  }
+}
+
 export const transformGuide = (guide: MDXContent) => {
   const slug = guide.path?.split('/').pop() || ''
   const path = `guides/${slug}`

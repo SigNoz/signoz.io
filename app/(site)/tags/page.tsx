@@ -1,13 +1,27 @@
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import { slug } from 'github-slugger'
-import tagData from 'app/tag-data.json'
 import { genPageMetadata } from 'app/(site)/seo'
+import { fetchAllBlogsForPage } from '@/utils/cachedData'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const metadata = genPageMetadata({ title: 'Tags', description: 'Things I blog about' })
+export const revalidate = CMS_REVALIDATE_INTERVAL
 
 export default async function Page() {
-  const tagCounts = tagData as Record<string, number>
+  const allBlogPosts = await fetchAllBlogsForPage()
+
+  // Compute tag counts dynamically
+  const tagCounts: Record<string, number> = {}
+  for (const post of allBlogPosts) {
+    if (post.tags && post.draft !== true) {
+      for (const t of post.tags) {
+        const formattedTag = slug(t)
+        tagCounts[formattedTag] = (tagCounts[formattedTag] || 0) + 1
+      }
+    }
+  }
+
   const tagKeys = Object.keys(tagCounts)
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a])
   return (

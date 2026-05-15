@@ -3,8 +3,6 @@ import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
 import { coreContent } from 'pliny/utils/contentlayer'
-import { allAuthors } from 'contentlayer/generated'
-import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import ComparisonsLayout from '@/layouts/ComparisonsLayout'
@@ -18,6 +16,7 @@ import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -41,10 +40,11 @@ export async function generateMetadata({
     return notFound()
   }
 
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
 
   const publishedAt = new Date(post.date).toISOString()
@@ -100,10 +100,11 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   const currentRoute = `/comparisons/${slug}`
 
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
@@ -136,6 +137,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           authors={authorList}
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
+          authorDirectory={authorDirectory}
         >
           {compiledContent}
         </OpenTelemetryHubContent>
@@ -165,6 +167,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authorDetails={authorDetails}
         authors={authorList}
         toc={post.toc}
+        authorDirectory={authorDirectory}
       >
         {compiledContent}
       </Layout>

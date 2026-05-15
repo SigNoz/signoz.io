@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { fetchMDXContentByPath } from './strapi'
-import { transformComparison, transformGuide } from './mdxUtils'
+import { transformBlog, transformComparison, transformGuide } from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 async function getCachedMDXContent<T>(
@@ -221,6 +221,94 @@ export async function fetchGuideBySlug(slug: string) {
       return await fetchSingleGuide(slug, deploymentStatus)
     } catch (directError) {
       console.error(`Direct single guide fetch also failed for "${slug}":`, directError)
+      return undefined
+    }
+  }
+}
+
+// --- Blogs ---
+
+async function fetchBlogs(deploymentStatus: string) {
+  const blogs = await fetchMDXContentByPath('blogs', undefined, deploymentStatus, true, [
+    'title',
+    'path',
+    'date',
+    'description',
+    'updatedAt',
+    'publishedAt',
+    'content',
+  ])
+
+  if ('data' in blogs && Array.isArray(blogs.data)) {
+    return blogs.data.map((blog) => transformBlog(blog))
+  }
+
+  throw new Error('Unexpected response structure from blogs API')
+}
+
+export function getCachedBlogs(deploymentStatus: string) {
+  return getCachedMDXContent('cached-blogs-list', deploymentStatus, ['blogs-list'], () =>
+    fetchBlogs(deploymentStatus)
+  )
+}
+
+export async function fetchAllBlogsForPage() {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedBlogs(deploymentStatus)
+  } catch (cacheError) {
+    console.warn('Cached blogs fetch failed, retrying without cache:', cacheError)
+
+    try {
+      return await fetchBlogs(deploymentStatus)
+    } catch (directError) {
+      console.error('Direct blogs fetch also failed:', directError)
+      return []
+    }
+  }
+}
+
+async function fetchSingleBlog(slug: string, deploymentStatus: string) {
+  const response = await fetchMDXContentByPath('blogs', slug, deploymentStatus)
+
+  if ('data' in response && !Array.isArray(response.data)) {
+    const blog = transformBlog(response.data)
+    if (!blog || !blog.title || !blog.content) {
+      throw new Error(`Empty or invalid blog content for slug: ${slug}`)
+    }
+    return blog
+  }
+
+  throw new Error(`Unexpected response structure from single blog API for slug: ${slug}`)
+}
+
+export function getCachedSingleBlog(slug: string, deploymentStatus: string) {
+  return getCachedSingleMDXContent(
+    `cached-blog-${slug}`,
+    deploymentStatus,
+    [`blogs-${slug}`, `mdx-content-${slug}`],
+    () => fetchSingleBlog(slug, deploymentStatus)
+  )
+}
+
+export async function fetchBlogBySlug(slug: string) {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedSingleBlog(slug, deploymentStatus)
+  } catch (cacheError) {
+    console.warn(
+      `Cached single blog fetch failed for "${slug}", retrying without cache:`,
+      cacheError
+    )
+
+    try {
+      return await fetchSingleBlog(slug, deploymentStatus)
+    } catch (directError) {
+      console.error(`Direct single blog fetch also failed for "${slug}":`, directError)
       return undefined
     }
   }
