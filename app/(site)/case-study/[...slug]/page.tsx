@@ -80,7 +80,7 @@ export async function generateMetadata({
   }
 }
 
-// Generate static params - returning empty array to generate all pages at runtime
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
 export async function generateStaticParams() {
   return []
 }

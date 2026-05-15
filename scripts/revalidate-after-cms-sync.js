@@ -29,10 +29,10 @@ const CHANGED_ASSETS = getAssetsListFromEnv('CHANGED_ASSETS', 'CHANGED_ASSETS_PA
 let SYNC_FOLDERS
 try {
   SYNC_FOLDERS = JSON.parse(
-    process.env.SYNC_FOLDERS || '["faqs","case-study","opentelemetry","comparisons"]'
+    process.env.SYNC_FOLDERS || '["faqs","case-study","opentelemetry","comparisons","guides"]'
   )
 } catch {
-  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons']
+  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides']
 }
 
 const FOLDER_TO_URL_PREFIX = {
@@ -40,6 +40,7 @@ const FOLDER_TO_URL_PREFIX = {
   faqs: 'faqs',
   'case-study': 'case-study',
   comparisons: 'comparisons',
+  guides: 'guides',
 }
 
 function getFolderName(filePath) {
@@ -105,6 +106,9 @@ function buildPayload() {
   const extraTags = []
   if (cmsUrls.some((u) => u.startsWith('/comparisons/'))) {
     extraTags.push('comparisons-list')
+  }
+  if (cmsUrls.some((u) => u.startsWith('/guides/'))) {
+    extraTags.push('guides-list')
   }
 
   return {

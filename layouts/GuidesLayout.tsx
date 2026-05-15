@@ -1,17 +1,12 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Guide, Authors } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
-
-// Extend the Guide type to include CTA fields
-interface GuideContent extends Guide {
-  cta_title?: string
-  cta_text?: string
-}
+import type { Guide } from '../types/transformedContent'
 
 interface LayoutProps {
-  content: CoreContent<GuideContent>
+  content: CoreContent<Guide>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode

@@ -1,5 +1,5 @@
 ---
-date: 2026-03-06
+date: 2026-05-12
 id: dotnet-nuget-instrumentation
 title: NuGet based Instrumentation for .NET
 description: Add OpenTelemetry to your .NET application using NuGet packages and configure in Program.cs
@@ -66,8 +66,8 @@ builder.Services.AddOpenTelemetry()
         .AddHttpClientInstrumentation()
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
-            options.Protocol = OtlpExportProtocol.Grpc;
+            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443/v1/traces");
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
             options.Headers = "signoz-ingestion-key=<your-ingestion-key>";
         }));
 
@@ -103,6 +103,7 @@ Then set environment variables when running:
 OTEL_SERVICE_NAME=my-dotnet-service \
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
 dotnet run
 ```
 
@@ -197,15 +198,15 @@ dotnet add package OpenTelemetry.Exporter.Console
 - Check the package is compatible with your library version
 - Some libraries need explicit configuration (like SQL statement capture)
 
-### gRPC vs HTTP export
+### Export protocol
 
-By default, `AddOtlpExporter()` uses gRPC. If you're behind a proxy that doesn't support HTTP/2:
+The examples above use HTTP export. If you need gRPC export, set the protocol explicitly:
 
 ```csharp
 .AddOtlpExporter(options =>
 {
-    options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443/v1/traces");
-    options.Protocol = OtlpExportProtocol.HttpProtobuf;
+    options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
+    options.Protocol = OtlpExportProtocol.Grpc;
     options.Headers = "signoz-ingestion-key=<your-key>";
 });
 ```

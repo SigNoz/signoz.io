@@ -1,6 +1,6 @@
 import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
-import FAQLayout from '@/layouts/FAQLayout'
+import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -18,6 +18,56 @@ import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
+
+const relatedArticleRoutePrefix: Record<string, string> = {
+  guide: 'guides',
+  comparison: 'comparisons',
+  blog: 'blog',
+  faq: 'faqs',
+  opentelemetry: 'opentelemetry',
+  case_study: 'case-study',
+}
+
+function getRelatedArticleDoc(entry: MDXContent): { doc: MDXContent; contentType: string } | null {
+  const contentType = entry.content_type
+  const doc = contentType ? entry[contentType] : undefined
+
+  if (doc && doc.title) {
+    return { doc, contentType }
+  }
+
+  return null
+}
+
+function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
+  if (Array.isArray(content.related_articles) && content.related_articles.length > 0) {
+    return content.related_articles
+      .map((entry: MDXContent) => {
+        const result = getRelatedArticleDoc(entry)
+        if (!result) return null
+
+        const { doc, contentType } = result
+        const routePrefix = relatedArticleRoutePrefix[contentType] || contentType
+
+        return {
+          title: doc.title,
+          publishedOn: doc.date || doc.updatedAt || doc.publishedAt,
+          url: `/${routePrefix}${doc.path || ''}`,
+        }
+      })
+      .filter(Boolean) as RelatedArticleProps[]
+  }
+
+  if (Array.isArray(content.related_faqs)) {
+    return content.related_faqs.map((faq: MDXContent) => ({
+      title: faq.title,
+      publishedOn: faq.date,
+      url: `/faqs${faq.path || ''}`,
+    }))
+  }
+
+  return []
+}
 
 export async function generateMetadata({
   params,
@@ -85,7 +135,7 @@ export async function generateMetadata({
   }
 }
 
-// Generate static params - returning empty array to generate all pages at runtime
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
 export async function generateStaticParams() {
   return []
 }
@@ -144,6 +194,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   // Generate structured data
   const structuredData = generateStructuredData('faqs', content)
+  const relatedArticles = buildRelatedArticles(content)
 
   // Prepare content for FAQLayout
   const mainContent: CoreContent<Blog> = {
@@ -162,12 +213,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     filePath: `/faqs/${path}`,
     structuredData: structuredData,
     toc: toc,
-    relatedArticles:
-      content.related_faqs?.data?.map((faq) => ({
-        title: faq.attributes?.title,
-        slug: faq.attributes?.path,
-        date: faq.attributes?.date,
-      })) || [],
+    relatedArticles,
   }
 
   // Prepare author details from the authors relation
@@ -226,13 +272,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authors={content.authors?.map((author) => author?.name) || []}
         toc={toc}
         tags={content.tags?.map((tag) => tag?.value) || []}
-        relatedArticles={
-          content.related_faqs?.map((faq) => ({
-            title: faq?.title,
-            publishedOn: faq?.date,
-            url: `/faqs/${faq?.path}`,
-          })) || []
-        }
+        relatedArticles={relatedArticles}
       >
         <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
           {compiledContent}

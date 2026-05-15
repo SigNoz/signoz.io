@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
       revalidateTag('comparisons-list')
+      revalidateTag('guides-list')
 
       results.push({
         path: '/',
@@ -168,6 +169,7 @@ export async function GET(request: NextRequest) {
       revalidatePath('/', 'layout')
       revalidateTag('mdx-content-list')
       revalidateTag('comparisons-list')
+      revalidateTag('guides-list')
 
       results.push({
         path: '/',

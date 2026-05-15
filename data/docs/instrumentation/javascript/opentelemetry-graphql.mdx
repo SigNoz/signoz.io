@@ -1,0 +1,413 @@
+---
+date: 2026-05-12
+id: opentelemetry-graphql
+title: GraphQL OpenTelemetry Instrumentation
+description: Instrument your Node.js GraphQL API with OpenTelemetry and send traces to SigNoz. Works with Apollo Server, graphql-http, and any GraphQL.js-compatible server.
+doc_type: howto
+---
+
+Use this guide to instrument a Node.js GraphQL server with OpenTelemetry and send traces to SigNoz. The <a href="https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/packages/instrumentation-graphql" target="_blank" rel="noopener noreferrer nofollow">GraphQL instrumentation</a> captures `graphql.parse`, `graphql.validate`, per-operation spans named after the operation type (for example, `query`), and per-resolver `graphql.resolve` spans without application code changes.
+
+Works with <a href="https://www.apollographql.com/docs/apollo-server/" target="_blank" rel="noopener noreferrer nofollow">Apollo Server</a>, <a href="https://github.com/graphql/graphql-http" target="_blank" rel="noopener noreferrer nofollow">graphql-http</a>, and any server built on <a href="https://github.com/graphql/graphql-js" target="_blank" rel="noopener noreferrer nofollow">graphql-js</a>.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Use the same setup with two changes: update the endpoint and remove the ingestion key header. See [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/upgrade-to-2.x.md#-nodejs-supported-versions" target="_blank" rel="noopener noreferrer nofollow">Node.js 20.6.0+</a>
+- If you're on Node 18, use <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/upgrade-to-2.x.md#-nodejs-supported-versions" target="_blank" rel="noopener noreferrer nofollow">18.19.0+</a>. Node 18 reached <a href="https://nodejs.org/en/about/eol" target="_blank" rel="noopener noreferrer nofollow">end of life on March 27, 2025</a>.
+- A GraphQL server using <a href="https://www.npmjs.com/package/graphql" target="_blank" rel="noopener noreferrer nofollow">graphql-js</a> v14+
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send traces to SigNoz
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+<Admonition type="info" title="VM deployment targets" defaultCollapsed="true">
+Use the VM path for:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix
+
+Use this section when you run your GraphQL application on a server or VM without containerization.
+
+</Admonition>
+
+### Step 1. Set environment variables
+
+```bash
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: Name of your service (e.g., `graphql-api`)
+
+### Step 2. Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
+```
+
+`@opentelemetry/auto-instrumentations-node` includes and enables `@opentelemetry/instrumentation-graphql`.
+
+### Step 3. Run your server
+
+```bash
+node server.js
+```
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+<Tabs entityName="k8s-method">
+<TabItem value="direct" label="Direct" default>
+
+<Admonition type="tip" title="Managing multiple services?" defaultCollapsed="true">
+  Select the OTel Operator tab if you manage instrumentation across several services in the same cluster.
+</Admonition>
+
+### Step 1. Set environment variables
+
+Add OpenTelemetry environment variables to your Kubernetes deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_TRACES_EXPORTER
+    value: 'otlp'
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_NODE_RESOURCE_DETECTORS
+    value: 'env,host,os'
+  - name: OTEL_SERVICE_NAME
+    value: '<service-name>'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: NODE_OPTIONS
+    value: '--require @opentelemetry/auto-instrumentations-node/register'
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: Name of your service (e.g., `graphql-api`)
+
+### Step 2. Install OpenTelemetry packages
+
+Ensure your application image includes the OpenTelemetry packages:
+
+```bash
+npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
+```
+
+### Step 3. Deploy and run
+
+Apply your deployment to the cluster. Node.js loads OpenTelemetry when your application starts.
+
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
+
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) injects instrumentation into your Node.js pods without modifying your application image.
+
+### Step 1. Set up the OpenTelemetry Operator
+
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
+
+### Step 2. Create the Instrumentation resource
+
+Create `instrumentation.yaml` to configure Node.js auto-instrumentation:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: graphql-instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector-collector:4318
+  propagators:
+    - tracecontext
+    - baggage
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+```
+
+Deploy this resource to your cluster.
+
+### Step 3. Add annotations to your deployment
+
+Add these annotations to your pod template's `metadata.annotations`:
+
+```yaml
+instrumentation.opentelemetry.io/inject-nodejs: 'true'
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 1. Add OpenTelemetry to your Dockerfile
+
+```dockerfile:Dockerfile
+# ... your existing build steps ...
+
+# Install OpenTelemetry packages
+RUN npm install @opentelemetry/api @opentelemetry/auto-instrumentations-node
+
+# Set OpenTelemetry environment variables
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+# ... your CMD or ENTRYPOINT ...
+```
+
+Or pass them at runtime:
+
+```bash
+docker run \
+  -e OTEL_TRACES_EXPORTER="otlp" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_NODE_RESOURCE_DETECTORS="env,host,os" \
+  -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
+  your-image:latest
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: Name of your service (e.g., `graphql-api`)
+
+### Step 2. Build and run
+
+```bash
+docker build -t my-graphql-app . && docker run -d -p 4000:4000 my-graphql-app
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+Send a query to your GraphQL server, then open SigNoz:
+
+1. Go to **Services** and find your service. Click **Refresh** if it does not appear.
+2. Go to **Traces** and filter by your service name.
+3. Open a trace to see the operation span (for example, `query`), and `graphql.resolve` spans. Depending on your setup, you may also see `graphql.parse` and `graphql.validate` spans.
+
+<Figure
+  src="/img/docs/instrumentation/javascript/graphql-traces-list.webp"
+  alt="Sample Traces in SigNoz"
+  caption="Sample Traces in SigNoz"
+/>
+
+<Figure
+  src="/img/docs/instrumentation/javascript/graphql-traces-details.webp"
+  alt="Detailed Trace in SigNoz"
+  caption="Detailed Trace in SigNoz"
+/>
+
+<details>
+<ToggleHeading>
+
+## GraphQL-specific configuration
+</ToggleHeading>
+
+`@opentelemetry/auto-instrumentations-node` enables GraphQL instrumentation with default settings. To tune those settings, install the GraphQL instrumentation package and configure it in code.
+
+### Step 1. Install the package
+
+```bash
+npm install --save @opentelemetry/instrumentation-graphql
+```
+
+### Step 2. Create a tracing file
+
+<Tabs entityName="language">
+<TabItem value="javascript" label="JavaScript" default>
+
+```js:tracing.js
+'use strict'
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { GraphQLInstrumentation } = require('@opentelemetry/instrumentation-graphql');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { resourceFromAttributes } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+
+const sdk = new NodeSDK({
+  traceExporter: new OTLPTraceExporter({
+    url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+    headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
+  }),
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      // Disable the built-in GraphQL instrumentation so the explicit one below takes effect
+      '@opentelemetry/instrumentation-graphql': { enabled: false },
+    }),
+    new GraphQLInstrumentation({
+      // Record resolver spans up to this depth (default: all)
+      depth: 2,
+      // Merge array resolver spans into one span instead of one per item
+      mergeItems: true,
+      // Skip resolvers that return a field value without custom logic
+      ignoreTrivialResolveSpans: true,
+    }),
+  ],
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: '<service-name>',
+  }),
+});
+
+sdk.start();
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```ts:tracing.ts
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+
+const sdk = new NodeSDK({
+  traceExporter: new OTLPTraceExporter({
+    url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+    headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
+  }),
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      // Disable the built-in GraphQL instrumentation so the explicit one below takes effect
+      '@opentelemetry/instrumentation-graphql': { enabled: false },
+    }),
+    new GraphQLInstrumentation({
+      // Record resolver spans up to this depth (default: all)
+      depth: 2,
+      // Merge array resolver spans into one span instead of one per item
+      mergeItems: true,
+      // Skip resolvers that return a field value without custom logic
+      ignoreTrivialResolveSpans: true,
+    }),
+  ],
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: '<service-name>',
+  }),
+});
+
+sdk.start();
+```
+
+</TabItem>
+</Tabs>
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: Name of your service (e.g., `graphql-api`)
+
+### Step 3. Load the tracing file before your server
+
+<Tabs entityName="language-run">
+<TabItem value="javascript" label="JavaScript" default>
+
+```bash
+node -r ./tracing.js server.js
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+Compile `tracing.ts` to `tracing.js` with your TypeScript build, then preload the emitted JavaScript file:
+
+```bash
+node -r ./tracing.js server.js
+```
+
+</TabItem>
+</Tabs>
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No GraphQL spans appearing
+
+- Confirm `graphql-js` is installed in your project. The instrumentation patches the `graphql` package; it does not work if GraphQL is bundled inside another package without a top-level `graphql` dependency.
+- Set `OTEL_LOG_LEVEL=debug` and restart. Look for lines mentioning `@opentelemetry/instrumentation-graphql` to confirm the instrumentation loaded.
+
+### Only HTTP spans appear, no resolver spans
+
+`ignoreTrivialResolveSpans` defaults to `false`, so GraphQL instrumentation includes trivial resolvers. If you enabled it and resolver spans are missing, disable it to confirm the resolvers are being called.
+
+### Enable debug logging
+
+```bash
+export OTEL_LOG_LEVEL=debug
+```
+
+Look for `query`, `graphql.parse`, `graphql.validate`, or `graphql.resolve` in the span output.
+
+### Service not appearing in SigNoz
+
+- Verify `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are set correctly.
+- Check network connectivity to the SigNoz endpoint.
+- Make sure your server receives GraphQL requests. Spans appear after a query runs.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The OTel Collector sits between your application and SigNoz. Your application sends telemetry to the Collector, and the Collector forwards it to SigNoz.
+
+### Why use it?
+
+- **Clean up data**: Filter noisy traces or remove sensitive fields before telemetry leaves your servers.
+- **Keep your app lightweight**: Let the Collector handle batching, retries, and compression instead of your application code.
+- **Add resource context**: Tag telemetry with details such as the Kubernetes pod or cloud region.
+- **Route telemetry to more backends**: Send data to multiple destinations without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions.
+
+</details>
+
+## Next steps
+
+- [Manual instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-manual-instrumentation/) for adding custom spans and attributes to your resolvers
+- [Selective instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/) to enable or disable specific libraries
+- [Send Node.js metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs/) alongside traces
+- [Send Node.js logs](https://signoz.io/docs/logs-management/send-logs/nodejs-logs/) to correlate logs with traces

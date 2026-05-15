@@ -1,5 +1,5 @@
 import { sortPosts } from 'pliny/utils/contentlayer.js'
-import { allBlogs, allDocs, allGuides } from 'contentlayer/generated'
+import { allBlogs, allDocs } from 'contentlayer/generated'
 import { MDXContentApiResponse } from '@/utils/strapi'
 import { normaliseSlug } from '../../../scripts/rssFeed.mjs'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
@@ -57,20 +57,40 @@ const mapOpentelemetryEntries = (opentelemetries: MDXContentApiResponse | undefi
   }))
 }
 
+const buildGuideSlug = (path = '') => {
+  const cleanedPath = path.startsWith('/') ? path : `/${path}`
+  return normaliseSlug(`guides${cleanedPath}`)
+}
+
+const mapGuideEntries = (guides: MDXContentApiResponse | undefined) => {
+  if (!guides?.data?.length) {
+    return []
+  }
+
+  return guides.data.map((guide) => ({
+    ...guide,
+    slug: buildGuideSlug(guide.path),
+    date: guide.date ?? guide.publishedAt ?? guide.updatedAt ?? guide.createdAt,
+    tags: guide.tags?.map((tag) => tag?.value),
+    authors: guide?.authors?.map((author) => author?.key),
+  }))
+}
+
 export const loadPublishedPosts = async () => {
   const deploymentStatus = getDeploymentStatus()
-  const { faqs, opentelemetries, comparisons } = await fetchAllCMSContent(deploymentStatus)
+  const { faqs, opentelemetries, comparisons, guides } = await fetchAllCMSContent(deploymentStatus)
 
   const faqPosts = mapFaqEntries(faqs)
   const opentelemetryPosts = mapOpentelemetryEntries(opentelemetries)
   const comparisonPosts = mapComparisonEntries(comparisons)
+  const guidePosts = mapGuideEntries(guides)
 
   const combinedPosts = [
     ...faqPosts,
     ...allBlogs,
     ...(opentelemetryPosts || []),
     ...allDocs,
-    ...allGuides,
+    ...guidePosts,
     ...(comparisonPosts || []),
   ]
 

@@ -1,9 +1,10 @@
 import 'css/prism.css'
+import 'katex/dist/katex.css'
+
 import { components } from '@/components/MDXComponents'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allGuides, allAuthors } from 'contentlayer/generated'
-import type { Authors, Guide } from 'contentlayer/generated'
+import { coreContent } from 'pliny/utils/contentlayer'
+import { allAuthors } from 'contentlayer/generated'
+import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import GuidesLayout from '@/layouts/GuidesLayout'
@@ -11,11 +12,15 @@ import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import React from 'react'
+import { fetchGuideBySlug } from '@/utils/cachedData'
+import { mdxOptions } from '@/utils/mdxUtils'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import { SidebarIcons } from '@/components/sidebar-icons/icons'
 
 const defaultLayout = 'GuidesLayout'
 const layouts = {
@@ -23,7 +28,8 @@ const layouts = {
   GuidesLayout,
 }
 
-export const dynamicParams = false
+export const revalidate = CMS_REVALIDATE_INTERVAL
+export const dynamicParams = true
 
 export async function generateMetadata({
   params,
@@ -31,7 +37,8 @@ export async function generateMetadata({
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allGuides.find((p) => p.slug === slug)
+
+  const post = await fetchGuideBySlug(slug)
 
   if (!post) {
     return notFound()
@@ -44,11 +51,11 @@ export async function generateMetadata({
   })
 
   const publishedAt = new Date(post.date).toISOString()
-  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
+  const modifiedAt = new Date(post.date).toISOString()
   const authors = authorDetails.map((author) => author.name)
   let imageList = [siteMetadata.socialBanner]
-  if (post.image) {
-    imageList = typeof post.image === 'string' ? [post.image] : post.image
+  if (post?.image) {
+    imageList = typeof post?.image === 'string' ? [post.image] : post.image
   }
   const ogImages = imageList.map((img) => {
     return {
@@ -58,10 +65,10 @@ export async function generateMetadata({
 
   return {
     title: post.title,
-    description: post.description,
+    description: post?.description,
     openGraph: {
       title: post.title,
-      description: post.description,
+      description: post?.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'article',
@@ -74,31 +81,30 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: post.title,
-      description: post.summary,
+      description: post?.description,
       images: imageList,
     },
   }
 }
 
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
 export const generateStaticParams = async () => {
-  const paths = allGuides.map((p) => ({ slug: p.slug?.split('/') }))
-
-  return paths
+  return []
 }
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
-  const currentRoute = `/guides/${slug}`
-  const isGrafanaOrPrometheusArticle =
-    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
-  // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allGuides))
-  const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
-  if (postIndex === -1) {
+
+  const post = await fetchGuideBySlug(slug)
+
+  if (!post) {
     return notFound()
   }
 
-  const post = allGuides.find((p) => p.slug === slug) as Guide
+  const currentRoute = `/guides/${slug}`
+  const isGrafanaOrPrometheusArticle =
+    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
+
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
@@ -109,6 +115,19 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
+  let compiledContent
+  try {
+    const { content: mdxContent } = await compileMDX({
+      source: post?.content,
+      components,
+      options: mdxOptions as MDXRemoteProps['options'],
+    })
+    compiledContent = mdxContent
+  } catch (error) {
+    console.error(`Error compiling MDX for guide "${slug}":`, error)
+    notFound()
+  }
+
   if (hubContext) {
     return (
       <>
@@ -116,7 +135,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
-
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -124,7 +142,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
         >
-          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          {compiledContent}
           {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
         </OpenTelemetryHubContent>
       </>
@@ -132,7 +150,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   }
 
   // Choose layout based on slug or post layout
-  let layoutName = post.layout || defaultLayout
+  let layoutName = post?.layout || defaultLayout
   if (slug.includes('opentelemetry')) {
     layoutName = 'OpenTelemetryLayout'
   } else {
@@ -164,10 +182,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authors={authorList}
         toc={post.toc}
       >
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        {compiledContent}
       </Layout>
 
-      {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}
       {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
     </>
   )
