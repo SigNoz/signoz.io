@@ -14,6 +14,19 @@ const inter = Inter({
   display: 'swap',
 })
 
+/**
+ * Restore Next 14's default-cache behavior for `fetch()` across the app.
+ * Next 15 changed the default to "no cache unless opted in" — this brings back
+ * implicit caching so existing `fetch(...)` calls (CMS via Strapi, GitHub APIs,
+ * etc.) continue to cache as they did pre-upgrade.
+ *
+ * Inherited by all child route segments; any page can opt out by exporting its
+ * own `fetchCache = 'force-no-store'` (or `'auto'` for the Next 15 default).
+ *
+ * NOTE: Next 15 segment-config static analyzer only accepts string literals here.
+ */
+export const fetchCache = 'default-cache'
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
   title: {
