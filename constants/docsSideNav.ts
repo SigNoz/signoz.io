@@ -20,43 +20,6 @@ const docsSideNav = [
         route: '/docs/overview/what-is-opentelemetry-and-why-it-matters',
       },
       {
-        label: 'SigNoz Features',
-        type: 'category',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/product-features/query-builder',
-            label: 'Query Builder',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/trace-explorer',
-            label: 'Trace Explorer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/logs-explorer',
-            label: 'Logs Explorer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/saved-view',
-            label: 'Saved View',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/invite-team-member',
-            label: 'Invite Team Member',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/keyboard-shortcuts',
-            label: 'Keyboard Shortcuts',
-          },
-        ],
-      },
-      {
         type: 'doc',
         label: "What's Coming",
         route: '/docs/roadmap',
@@ -488,6 +451,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/invite-team-member',
+                label: 'Invite Team Member',
+              },
+              {
+                type: 'doc',
                 route: '/docs/manage/administrator-guide/iam/service-accounts',
                 label: 'Service Accounts',
               },
@@ -628,6 +596,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/reset-admin-password',
             label: 'Reset Admin Password',
+          },
+          {
+            type: 'doc',
+            route: '/docs/manage/keyboard-shortcuts',
+            label: 'Keyboard Shortcuts',
           },
         ],
       },

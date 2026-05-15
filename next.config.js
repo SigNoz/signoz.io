@@ -107,6 +107,46 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/docs/product-features/saved-view',
+          destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/saved-view/',
+          destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/query-builder',
+          destination: '/docs/userguide/query-builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/query-builder/',
+          destination: '/docs/userguide/query-builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/invite-team-member',
+          destination: '/docs/manage/administrator-guide/iam/invite-team-member/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/invite-team-member/',
+          destination: '/docs/manage/administrator-guide/iam/invite-team-member/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/keyboard-shortcuts',
+          destination: '/docs/manage/keyboard-shortcuts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/keyboard-shortcuts/',
+          destination: '/docs/manage/keyboard-shortcuts/',
+          permanent: true,
+        },
+        {
           source: '/docs/product-features/trace-explorer',
           destination: '/docs/userguide/traces/',
           permanent: true,
