@@ -3,7 +3,7 @@ import { metadata as docsMetadata } from '../../(site)/docs/introduction/page'
 import siteMetadata from '@/data/siteMetadata'
 
 export {
-  /* @next-codemod-error `default` export is re-exported. Check if this component uses `params` or `searchParams`*/
+  /* @next-codemod-ignore -- verified: source `DocsIntroductionPage` takes no params */
   default,
 } from '../../(site)/docs/introduction/page'
 
