@@ -1,7 +1,11 @@
 import { sortPosts } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
 import hubConfig from '@/constants/opentelemetry_hub.json'
-import { fetchAllGuidesForPage, fetchAllBlogsForPage } from '@/utils/cachedData'
+import {
+  fetchAllGuidesForPage,
+  fetchAllBlogsForPage,
+  fetchAllComparisonsForPage,
+} from '@/utils/cachedData'
 
 type ResourceCenterCardSource = {
   slug?: string | null
@@ -96,6 +100,11 @@ export async function getResourceCenterBlogs(): Promise<ResourceCenterBlog[]> {
 export async function getResourceCenterGuides(): Promise<ResourceCenterGuide[]> {
   const guides = await fetchAllGuidesForPage()
   return sortPosts(guides).map(pickResourceCenterCardFields)
+}
+
+export async function getResourceCenterComparisons(): Promise<ResourceCenterComparison[]> {
+  const comparisons = await fetchAllComparisonsForPage()
+  return sortPosts(comparisons).map(pickResourceCenterCardFields)
 }
 
 type HubConfigNode = {

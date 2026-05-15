@@ -1,9 +1,8 @@
 import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
-import { fetchAllComparisonsForPage } from '@/utils/cachedData'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { buildListingMetadata } from '../../../metadata'
+import { getResourceCenterComparisons } from '../../../content'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 
@@ -12,8 +11,7 @@ export async function generateMetadata({ params }: { params: { page: string } })
 }
 
 export default async function Page({ params }: { params: { page: string } }) {
-  const comparisons = await fetchAllComparisonsForPage()
-  const posts = allCoreContent(sortPosts(comparisons))
+  const posts = await getResourceCenterComparisons()
 
   return (
     <ListingPageLayout>
