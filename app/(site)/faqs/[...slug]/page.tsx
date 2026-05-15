@@ -16,7 +16,7 @@ import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = 86400 // 1 day
+export const revalidate = CMS_REVALIDATE_INTERVAL // 1 day
 export const dynamicParams = true
 
 const relatedArticleRoutePrefix: Record<string, string> = {

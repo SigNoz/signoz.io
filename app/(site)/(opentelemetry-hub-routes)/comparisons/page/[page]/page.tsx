@@ -5,7 +5,7 @@ import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { buildListingMetadata } from '../../../metadata'
 
-export const revalidate = 86400 // 1 day
+export const revalidate = CMS_REVALIDATE_INTERVAL  // 1 day
 
 export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
   const params = await props.params
