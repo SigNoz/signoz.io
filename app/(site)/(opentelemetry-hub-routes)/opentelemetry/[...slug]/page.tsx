@@ -29,7 +29,7 @@ const layouts = {
   OpenTelemetryLayout,
 }
 
-export const revalidate = CMS_REVALIDATE_INTERVAL // 1 day
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
 export async function generateMetadata(props: {

@@ -11,7 +11,7 @@ import { API_SPEC_REVALIDATE_SECONDS } from '@/constants/apiReference'
 import OpenAPISpec from '@/components/OpenAPISpec'
 import APIVersionSwitcher from '@/components/APIVersionSwitcher'
 
-export const revalidate = API_SPEC_REVALIDATE_SECONDS // 24h
+export const revalidate = 86400 // 24h — see API_SPEC_REVALIDATE_SECONDS
 
 interface PageProps {
   params: Promise<{ version: string }>

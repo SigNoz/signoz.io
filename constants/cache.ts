@@ -1,3 +1,17 @@
+/**
+ * CMS revalidation interval used for ISR + Cache-Control headers across CMS-driven
+ * routes (faqs, case studies, comparisons, guides, opentelemetry hub, etc.).
+ *
+ * NOTE: Next 15's segment-config static analyzer only accepts primitive literals
+ * for `export const revalidate = ...`. It does not follow imports or evaluate
+ * identifiers. Pages that need this value must inline the literal `86400` and
+ * leave a `// see CMS_REVALIDATE_INTERVAL` comment so future edits stay in sync.
+ *
+ * This constant is still imported by route handlers that interpolate it into
+ * runtime values (e.g. `Cache-Control` header strings) — those uses are fine.
+ *
+ * To find inlined call sites: `grep -rn "revalidate = 86400" app/`
+ */
 export const CMS_REVALIDATE_INTERVAL = 86400 // 1 day
 
 export const GITHUB_RELEASES_REVALIDATE_SECONDS = 86400 // 24h
