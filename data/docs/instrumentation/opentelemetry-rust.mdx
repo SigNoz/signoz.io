@@ -81,6 +81,17 @@ fn init_tracer() -> SdkTracerProvider {
     let service_name = std::env::var("OTEL_SERVICE_NAME")
         .unwrap_or_else(|_| "rust-app".to_string());
 
+    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
+    // parse it and forward all key=value pairs to the resource.
+    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|kv| {
+            let (k, v) = kv.trim().split_once('=')?;
+            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
+        })
+        .collect();
+
     // The SDK automatically reads these environment variables:
     // - OTEL_EXPORTER_OTLP_ENDPOINT
     // - OTEL_EXPORTER_OTLP_HEADERS
@@ -90,9 +101,9 @@ fn init_tracer() -> SdkTracerProvider {
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
     let resource = Resource::builder()
         .with_service_name(service_name)
+        .with_attributes(resource_attrs)
         .build();
 
     SdkTracerProvider::builder()
@@ -174,6 +185,17 @@ fn init_tracer() -> SdkTracerProvider {
     let service_name = std::env::var("OTEL_SERVICE_NAME")
         .unwrap_or_else(|_| "rust-app".to_string());
 
+    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
+    // parse it and forward all key=value pairs to the resource.
+    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|kv| {
+            let (k, v) = kv.trim().split_once('=')?;
+            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
+        })
+        .collect();
+
     // The SDK automatically reads these environment variables:
     // - OTEL_EXPORTER_OTLP_ENDPOINT
     // - OTEL_EXPORTER_OTLP_HEADERS
@@ -183,9 +205,9 @@ fn init_tracer() -> SdkTracerProvider {
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
     let resource = Resource::builder()
         .with_service_name(service_name)
+        .with_attributes(resource_attrs)
         .build();
 
     SdkTracerProvider::builder()
@@ -270,6 +292,17 @@ fn init_tracer() -> SdkTracerProvider {
     let service_name = std::env::var("OTEL_SERVICE_NAME")
         .unwrap_or_else(|_| "rust-app".to_string());
 
+    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
+    // parse it and forward all key=value pairs to the resource.
+    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|kv| {
+            let (k, v) = kv.trim().split_once('=')?;
+            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
+        })
+        .collect();
+
     // The SDK automatically reads these environment variables:
     // - OTEL_EXPORTER_OTLP_ENDPOINT
     // - OTEL_EXPORTER_OTLP_HEADERS
@@ -279,9 +312,9 @@ fn init_tracer() -> SdkTracerProvider {
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
     let resource = Resource::builder()
         .with_service_name(service_name)
+        .with_attributes(resource_attrs)
         .build();
 
     SdkTracerProvider::builder()
@@ -377,6 +410,17 @@ fn init_tracer() -> SdkTracerProvider {
     let service_name = std::env::var("OTEL_SERVICE_NAME")
         .unwrap_or_else(|_| "rust-app".to_string());
 
+    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
+    // parse it and forward all key=value pairs to the resource.
+    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
+        .unwrap_or_default()
+        .split(',')
+        .filter_map(|kv| {
+            let (k, v) = kv.trim().split_once('=')?;
+            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
+        })
+        .collect();
+
     // The SDK automatically reads these environment variables:
     // - OTEL_EXPORTER_OTLP_ENDPOINT
     // - OTEL_EXPORTER_OTLP_HEADERS
@@ -386,9 +430,9 @@ fn init_tracer() -> SdkTracerProvider {
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
     let resource = Resource::builder()
         .with_service_name(service_name)
+        .with_attributes(resource_attrs)
         .build();
 
     SdkTracerProvider::builder()

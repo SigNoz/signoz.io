@@ -85,10 +85,15 @@ Verify these values:
 - `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
 - `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 
-The YAML config does not support `service_version` directly. Set it via environment variable before starting NGINX:
+The YAML config does not support `service_version` directly. Create a systemd drop-in so the NGINX service process inherits the variable:
 
 ```bash
-export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
+sudo mkdir -p /etc/systemd/system/nginx.service.d
+sudo tee /etc/systemd/system/nginx.service.d/otel.conf > /dev/null <<EOF
+[Service]
+Environment="OTEL_RESOURCE_ATTRIBUTES=service.version=<service-version>"
+EOF
+sudo systemctl daemon-reload
 ```
 
 <Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
@@ -170,10 +175,15 @@ Verify these values:
 - `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
 - `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 
-The YAML config does not support `service_version` directly. Set it via environment variable before starting NGINX:
+The YAML config does not support `service_version` directly. Create a systemd drop-in so the NGINX service process inherits the variable:
 
 ```bash
-export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
+sudo mkdir -p /etc/systemd/system/nginx.service.d
+sudo tee /etc/systemd/system/nginx.service.d/otel.conf > /dev/null <<EOF
+[Service]
+Environment="OTEL_RESOURCE_ATTRIBUTES=service.version=<service-version>"
+EOF
+sudo systemctl daemon-reload
 ```
 
 <Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
@@ -322,10 +332,15 @@ Verify these values:
 - `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
 - `<service-version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 
-The YAML config does not support `service_version` directly. Set it via environment variable before starting NGINX:
+The YAML config does not support `service_version` directly. Create a systemd drop-in so the NGINX service process inherits the variable:
 
 ```bash
-export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
+sudo mkdir -p /etc/systemd/system/nginx.service.d
+sudo tee /etc/systemd/system/nginx.service.d/otel.conf > /dev/null <<EOF
+[Service]
+Environment="OTEL_RESOURCE_ATTRIBUTES=service.version=<service-version>"
+EOF
+sudo systemctl daemon-reload
 ```
 
 <Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">

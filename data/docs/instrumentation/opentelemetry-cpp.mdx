@@ -104,6 +104,7 @@ Add the following content to `main.cpp`:
 #include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
 #include "opentelemetry/exporters/otlp/otlp_http_exporter_options.h"
 #include "opentelemetry/sdk/common/global_log_handler.h"
+#include "opentelemetry/sdk/resource/resource.h"
 #include "opentelemetry/sdk/trace/processor.h"
 #include "opentelemetry/sdk/trace/recordable.h"
 #include "opentelemetry/sdk/trace/simple_processor_factory.h"
@@ -113,9 +114,10 @@ Add the following content to `main.cpp`:
 #include "opentelemetry/trace/span_id.h"
 #include "opentelemetry/trace/tracer_provider.h"
 
-namespace trace     = opentelemetry::trace;
-namespace trace_sdk = opentelemetry::sdk::trace;
-namespace otlp      = opentelemetry::exporter::otlp;
+namespace trace        = opentelemetry::trace;
+namespace trace_sdk    = opentelemetry::sdk::trace;
+namespace otlp         = opentelemetry::exporter::otlp;
+namespace resource_sdk = opentelemetry::sdk::resource;
 
 namespace internal_log = opentelemetry::sdk::common::internal_log;
 
@@ -129,7 +131,9 @@ void InitTracer()
 {
   auto exporter  = otlp::OtlpHttpExporterFactory::Create(opts);
   auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
-  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor));
+  // Resource::Create reads OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES from the environment
+  auto resource  = resource_sdk::Resource::Create({});
+  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor), resource);
   std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = provider;
   trace::Provider::SetTracerProvider(api_provider);
 }
@@ -257,6 +261,7 @@ Add the following content to `main.cpp`:
 #include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
 #include "opentelemetry/exporters/otlp/otlp_http_exporter_options.h"
 #include "opentelemetry/sdk/common/global_log_handler.h"
+#include "opentelemetry/sdk/resource/resource.h"
 #include "opentelemetry/sdk/trace/processor.h"
 #include "opentelemetry/sdk/trace/recordable.h"
 #include "opentelemetry/sdk/trace/simple_processor_factory.h"
@@ -266,9 +271,10 @@ Add the following content to `main.cpp`:
 #include "opentelemetry/trace/span_id.h"
 #include "opentelemetry/trace/tracer_provider.h"
 
-namespace trace     = opentelemetry::trace;
-namespace trace_sdk = opentelemetry::sdk::trace;
-namespace otlp      = opentelemetry::exporter::otlp;
+namespace trace        = opentelemetry::trace;
+namespace trace_sdk    = opentelemetry::sdk::trace;
+namespace otlp         = opentelemetry::exporter::otlp;
+namespace resource_sdk = opentelemetry::sdk::resource;
 
 namespace internal_log = opentelemetry::sdk::common::internal_log;
 
@@ -282,7 +288,9 @@ void InitTracer()
 {
   auto exporter  = otlp::OtlpHttpExporterFactory::Create(opts);
   auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
-  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor));
+  // Resource::Create reads OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES from the environment
+  auto resource  = resource_sdk::Resource::Create({});
+  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor), resource);
   std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = provider;
   trace::Provider::SetTracerProvider(api_provider);
 }
