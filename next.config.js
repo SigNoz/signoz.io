@@ -2116,7 +2116,12 @@ module.exports = () => {
         },
         {
           source: '/docs/configuration/deep_storage',
-          destination: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/userguide/retention-period/',
           permanent: true,
         },
         {

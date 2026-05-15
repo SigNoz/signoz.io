@@ -1683,11 +1683,6 @@ const docsSideNav = [
             label: 'Available Quick Filters',
           },
           { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
         ],
       },
       {
@@ -2489,9 +2484,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
-        items: [
-          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
-        ],
+        items: [{ type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' }],
       },
     ],
   },
