@@ -19,11 +19,11 @@ The Query Builder is SigNoz's visual query interface for logs, traces, and metri
 
 The Query Builder is available across multiple surfaces in SigNoz:
 
-- **Logs Explorer** — filter and aggregate log data
-- **Traces Explorer** — search spans, filter by service/operation, and analyze trace data
-- **Metrics Explorer** — explore and query metric data with temporal and spatial aggregations
-- **Dashboards** — build custom panels with any telemetry signal
-- **Alert rules** — define alert conditions on logs, traces, or metrics
+- **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** — filter and aggregate log data
+- **[Traces Explorer](https://signoz.io/docs/userguide/traces/)** — search spans, filter by service/operation, and analyze trace data
+- **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** — explore and query metric data with temporal and spatial aggregations
+- **[Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)** — build custom panels with any telemetry signal
+- **[Alert rules](https://signoz.io/docs/alerts/)** — define alert conditions on logs, traces, or metrics
 
 ## Core Capabilities
 
@@ -74,11 +74,11 @@ Available aggregation functions for logs and traces:
 | **Percentile** | `p05`, `p10`, `p20`, `p25`, `p50`, `p75`, `p90`, `p95`, `p99` |
 | **Rate** | `rate` (per-second), `rate_sum`, `rate_avg`, `rate_max`, `rate_min` |
 
-For detailed usage and examples, see [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/).
+For detailed usage, real-world examples, and legend formatting, see [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/).
 
 ### Group By
 
-Group By segments your aggregated results by one or more attributes. This is how you break down metrics by service, endpoint, region, or any custom dimension.
+Group By segments your aggregated results by one or more attributes. This is how you break down data by service, endpoint, region, or any custom dimension.
 
 <Figure
   src="/img/docs/product-features/query-builder/query-builder-group-by.webp"
@@ -86,7 +86,9 @@ Group By segments your aggregated results by one or more attributes. This is how
   caption="Grouping results by an attribute"
 />
 
-For example, grouping `count` of error spans by `service.name` shows you which services produce the most errors.
+For example, grouping `count` of error spans by `service.name` shows you which services produce the most errors. You can group by multiple attributes simultaneously to create more granular breakdowns.
+
+For details on how grouping interacts with aggregation, how missing values are handled, and how to format legends, see [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/#grouping).
 
 ### Result Manipulation
 
@@ -102,7 +104,7 @@ After aggregation and grouping, you can further refine results:
   caption="Sorting, limiting, and filtering aggregated results"
 />
 
-For a deep dive, see [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/).
+For sorting mechanics, limit behavior with group by, and common HAVING patterns, see [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/).
 
 ### Multiple Queries & Formulas
 
@@ -114,7 +116,7 @@ You can run multiple queries simultaneously and combine them using formulas. Thi
   caption="Combining two queries with a formula to calculate error percentage"
 />
 
-For formula syntax and trace matching operators, see [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/).
+For formula syntax, available mathematical functions, and trace matching operators (`=>`, `->`, `&&`, `||`), see [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/).
 
 ## Metrics Query Builder
 
@@ -126,11 +128,11 @@ The Metrics Query Builder includes all the capabilities above — filtering, agg
   caption="Temporal and spatial aggregation controls in the Metrics Query Builder"
 />
 
-### Understanding Temporal and Spatial Aggregation
+### Temporal and Spatial Aggregation
 
 Metrics are fundamentally different from logs and traces. A single metric (e.g., `system.cpu.utilization`) produces multiple **time series** — one per unique combination of labels like `host.name`, `cpu.state`, and `service.name`. Each time series contains many **data points** over time.
 
-When you query metrics, SigNoz applies two aggregation layers:
+When you query metrics, SigNoz applies two aggregation layers in sequence:
 
 #### Temporal Aggregation (Within Each Time Series)
 
@@ -140,7 +142,11 @@ For example, if you have CPU utilization samples every 10 seconds and your chart
 
 Available functions: `Latest`, `Sum`, `Avg`, `Min`, `Max`, `Count`, `Count Distinct`
 
-For counter metrics, additional rate-based functions are available: `Rate` and `Increase`.
+For counter metrics, additional functions are available: `Rate` (per-second rate of change) and `Increase` (total change over interval).
+
+<Admonition type="info">
+The time interval used for temporal aggregation is automatically calculated based on your selected time range. For details on how SigNoz determines step intervals, see [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/).
+</Admonition>
 
 #### Spatial Aggregation (Across Time Series)
 
@@ -152,12 +158,10 @@ Available functions: `Sum`, `Avg`, `Min`, `Max`
 
 #### How They Work Together
 
-The two layers execute in sequence:
-
 1. **Temporal first** — each individual time series is reduced to one value per time interval
 2. **Spatial second** — the resulting time series are combined across the dimensions you didn't group by
 
-This means temporal aggregation always happens within a single series, and spatial aggregation always happens across series — they never mix.
+Temporal aggregation always happens within a single series, and spatial aggregation always happens across series — they never mix.
 
 <Figure
   src="/img/docs/product-features/query-builder/temporal-spatial-aggregations.webp"
@@ -165,11 +169,11 @@ This means temporal aggregation always happens within a single series, and spati
   caption="Temporal aggregation reduces data points within each time series, spatial aggregation combines multiple time series"
 />
 
-For a deeper understanding of how metric types affect which aggregations are valid, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+For a deeper understanding of how different metric types (Gauge, Counter, Histogram) affect which aggregation functions are valid, including worked examples with real data, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
 
 ### Functions
 
-The Metrics Query Builder supports additional functions that can be applied on top of your query results for extended analysis:
+The Metrics Query Builder supports additional functions for extended analysis:
 
 - **Exclusion functions** — cut off values above or below thresholds
 - **Clamping functions** — constrain values to a range
@@ -183,11 +187,46 @@ The Metrics Query Builder supports additional functions that can be applied on t
   caption="Functions available in the Metrics Query Builder"
 />
 
-For the full list and examples, see [Functions for Extended Analysis](https://signoz.io/docs/querying/functions-extended-analysis/).
+For the full list, chaining behavior, and examples, see [Functions for Extended Analysis](https://signoz.io/docs/querying/functions-extended-analysis/).
 
-## Next Steps
+## Related
 
-- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — detailed guide to aggregation functions, group-by, and legend formatting
-- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — sort, limit, and conditionally filter aggregated results
-- [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) — formulas, trace matching operators, and cross-signal comparisons
-- [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how SigNoz calculates step intervals for time series queries
+<DocCardContainer>
+
+<DocCard
+    title="Aggregation & Grouping"
+    description="Extract insights with aggregation functions, group-by segmentation, and legend formatting"
+    href="https://signoz.io/docs/querying/aggregation-grouping"
+/>
+
+<DocCard
+    title="Result Manipulation"
+    description="Sort, limit, and conditionally filter aggregated results with Order By, Limit, and Having"
+    href="https://signoz.io/docs/querying/result-manipulation"
+/>
+
+<DocCard
+    title="Multi-Query Analysis"
+    description="Combine queries with formulas, trace matching operators, and cross-signal comparisons"
+    href="https://signoz.io/docs/querying/multi-query-analysis"
+/>
+
+<DocCard
+    title="Metric Types & Aggregation"
+    description="How Gauge, Counter, and Histogram metrics work with temporal and spatial aggregation"
+    href="https://signoz.io/docs/metrics-management/types-and-aggregation"
+/>
+
+<DocCard
+    title="Time Aggregation Windows"
+    description="How SigNoz calculates step intervals for time series queries based on time range"
+    href="https://signoz.io/docs/querying/time-aggregation"
+/>
+
+<DocCard
+    title="Functions for Extended Analysis"
+    description="Exclusion, arithmetic, smoothing, and time shift functions for the Metrics Query Builder"
+    href="https://signoz.io/docs/querying/functions-extended-analysis"
+/>
+
+</DocCardContainer>
