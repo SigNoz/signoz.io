@@ -1,7 +1,12 @@
 import { GrowthBook, setPolyfills, configureCache, FeatureResult } from '@growthbook/growthbook'
 import { randomUUID } from 'crypto'
 import { cache } from 'react'
-import { cookies, headers } from 'next/headers'
+import {
+  cookies,
+  headers,
+  type UnsafeUnwrappedCookies,
+  type UnsafeUnwrappedHeaders,
+} from 'next/headers'
 
 const GROWTHBOOK_ANONYMOUS_ID_HEADER = 'x-gb-anonymous-id'
 
@@ -16,7 +21,7 @@ function resolveGrowthBookAnonymousId(forceAnonymousId?: string) {
     return forceAnonymousId
   }
 
-  const requestHeaders = headers()
+  const requestHeaders = headers() as unknown as UnsafeUnwrappedHeaders
   const forwardedAnonymousId = requestHeaders.get(GROWTHBOOK_ANONYMOUS_ID_HEADER)
 
   debugAnonymousId('forwardedAnonymousId', forwardedAnonymousId)
@@ -25,7 +30,7 @@ function resolveGrowthBookAnonymousId(forceAnonymousId?: string) {
     return forwardedAnonymousId
   }
 
-  const cookieValue = cookies().get('gb_anonymous_id')?.value
+  const cookieValue = (cookies() as unknown as UnsafeUnwrappedCookies).get('gb_anonymous_id')?.value
   const finalAnonymousId = cookieValue || randomUUID()
 
   debugAnonymousId('from cookies', cookieValue)

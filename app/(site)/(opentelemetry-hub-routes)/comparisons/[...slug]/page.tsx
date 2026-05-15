@@ -25,14 +25,13 @@ const layouts = {
   ComparisonsLayout,
 }
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day
 export const dynamicParams = true
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchComparisonBySlug(slug)
@@ -89,7 +88,8 @@ export const generateStaticParams = async () => {
   return []
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchComparisonBySlug(slug)
