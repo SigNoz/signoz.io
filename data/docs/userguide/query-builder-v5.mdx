@@ -1,37 +1,41 @@
 ---
-date: 2026-05-06
+date: 2026-05-15
 id: query-builder
 
-title: Query Builder v5 Guide
-description: Learn how to use SigNoz Query Builder to filter, aggregate, and visualize data. Simplify complex queries and gain actionable insights with advanced features.
+title: Query Builder
+description: Build queries visually in SigNoz — filter, aggregate, group, and visualize logs, traces, and metrics without writing SQL or PromQL.
 doc_type: explanation
 ---
 
-## Overview
+The Query Builder is SigNoz's visual query interface for logs, traces, and metrics. It combines expression-based filtering with intelligent auto-completion so you can query telemetry data without writing raw SQL or PromQL.
 
-The Query Builder is SigNoz's structured query interface for logs, traces, and metrics. It combines expression-based querying with intelligent auto-completion so you can filter, aggregate, and visualize telemetry data without writing raw SQL or PromQL.
+<Figure
+  src="/img/docs/product-features/query-builder/product-features-query-builder.webp"
+  alt="Query Builder interface in SigNoz showing filters, aggregation, and group by options"
+  caption="Query Builder interface in SigNoz"
+/>
 
-Key capabilities:
-- **Filter** data using logical expressions with auto-completed attribute names, values, and [operators](https://signoz.io/docs/userguide/operators-reference/)
-- **Aggregate** results with functions like count, sum, avg, percentiles, and rate variants
-- **Group by** any attribute to segment results by service, endpoint, region, or custom dimensions
-- **Manipulate results** with ordering, limits, and having clauses to surface the most relevant data
+## Where You Can Use Query Builder
 
+The Query Builder is available across multiple surfaces in SigNoz:
 
-## Quick Start
+- **Logs Explorer** — filter and aggregate log data
+- **Traces Explorer** — search spans, filter by service/operation, and analyze trace data
+- **Dashboards** — build custom panels with any telemetry signal
+- **Alert rules** — define alert conditions on logs, traces, or metrics
 
-### Your First Query
+## Core Capabilities
 
-Let's start with a practical example. Suppose you want to find all error spans from your recommendationservice service in the last 6 hours:
+### Filtering
 
-1. **Navigate** to Traces → Explorer
-2. **Write filter expression**: `service.name = 'recommendationservice' AND has_error = true`
-3. **Set time range**: Last 6 hours
-4. **Run query** to see results instantly
+Filtering is the foundation of every query. The Query Builder supports expression-based filters with auto-completed attribute names, values, and operators.
 
-<Admonition type="tip">
-Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to quickly execute Stage & Run Query.
-</Admonition>
+**How to filter:**
+1. Click the **Search Filter** field to see available attributes
+2. Select an attribute (e.g., `service.name`, `severity_text`, `status_code`)
+3. Choose an operator (`=`, `!=`, `IN`, `NOT_IN`, `LIKE`, `EXISTS`, etc.)
+4. Enter the value to match
+5. Combine multiple filters — they are joined with `AND`
 
 <figure data-zoomable align='center'>
     <video
@@ -42,72 +46,151 @@ Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to q
     >
         Your browser does not support the video tag.
     </video>
-    <figcaption><i>Example showing the filtering feature of SigNoz Query Builder</i></figcaption>
+    <figcaption><i>Filtering spans in the Query Builder with auto-complete</i></figcaption>
 </figure>
 
-Notice how you can write logical expressions directly, with auto-completion helping you discover available attributes and operators as you type. This basic pattern—filter, refine, visualize—forms the foundation of all Query Builder operations.
+<Admonition type="tip">
+Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to quickly execute Stage & Run Query.
+</Admonition>
 
-Filtering is your first line of defense against data overload. The Query Builder supports sophisticated filtering that goes beyond simple equality checks. Learn more about search syntax [here](https://signoz.io/docs/userguide/search-syntax).
+For the full list of supported operators and syntax patterns, see the [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) and [Search Syntax](https://signoz.io/docs/userguide/search-syntax/).
 
-## Filtering (Logs & Traces)
+### Aggregation
 
-The Query Builder allows you to apply filtering based on various attributes of logs or traces.
-
-### Using the Filtering Feature
-
-- **Access**: Navigate to the Query Builder.
-- **Open Filter Options**: Click on the Search Filter field to open a dropdown list of available attributes.
-- **Select Attributes**: Choose the attribute you want to filter by (e.g., `service.name`, `level`, `status`). Start typing to filter the list.
-- **Apply Operators**: Choose the operator (e.g., `=`, `!=`, `IN`, `NOT_IN`) for the selected attribute. See the [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of supported operators.
-- **Input Values**: Input the value(s) you want to filter by.
-- **Combine Filters**: You can add multiple filters by repeating the above steps. Multiple filters are combined with `AND`.
-- **View Results**: Click the Stage & Run Query button to display the logs or traces that match the applied filters.
-
-### Example
-
-Suppose you want to filter logs from a specific service with a particular severity level. You can achieve this using the following filters:
-- selecting the service name: `service.name = demo-app`
-- selecting the severity text: `severity_text = DEBUG`
+Aggregation functions reduce your filtered data into summary values — counts, averages, percentiles, rates, and more.
 
 <Figure
-  src="/img/docs/product-features/query-builder/query-builder-filtering.gif"
-  alt="A gif explaining the Filtering feature in SigNoz Query Builder"
-  caption="Example showing the filtering feature of SigNoz Query Builder"
+  src="/img/docs/product-features/query-builder/aggregation.gif"
+  alt="Selecting aggregation functions in the Query Builder"
+  caption="Selecting an aggregation function in the Query Builder"
 />
 
+Available aggregation functions for logs and traces:
+
+| Category | Functions |
+|----------|-----------|
+| **Statistical** | `count`, `count_distinct`, `sum`, `avg`, `min`, `max` |
+| **Percentile** | `p05`, `p10`, `p20`, `p25`, `p50`, `p75`, `p90`, `p95`, `p99` |
+| **Rate** | `rate` (per-second), `rate_sum`, `rate_avg`, `rate_max`, `rate_min` |
+
+For detailed usage and examples, see [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/).
+
+### Group By
+
+Group By segments your aggregated results by one or more attributes. This is how you break down metrics by service, endpoint, region, or any custom dimension.
+
+<Figure
+  src="/img/docs/product-features/query-builder/query-builder-group-by.webp"
+  alt="Group By selector showing available attributes"
+  caption="Grouping results by an attribute"
+/>
+
+For example, grouping `count` of error spans by `service.name` shows you which services produce the most errors.
+
+### Result Manipulation
+
+After aggregation and grouping, you can further refine results:
+
+- **Order By** — sort results ascending or descending by any aggregated column
+- **Limit** — restrict the number of results returned
+- **Having** — filter aggregated results (e.g., show only services where error count > 100)
+
+<Figure
+  src="/img/docs/product-features/query-builder/query-builder-result-manipulation.gif"
+  alt="Result manipulation options in the Query Builder"
+  caption="Sorting, limiting, and filtering aggregated results"
+/>
+
+For a deep dive, see [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/).
+
+### Multiple Queries & Formulas
+
+You can run multiple queries simultaneously and combine them using formulas. This is useful for computing ratios (e.g., error rate = errors / total requests) or comparing different signals side by side.
+
+<Figure
+  src="/img/docs/product-features/query-builder/query-builder-multiple-queries.gif"
+  alt="Multiple queries and formulas in the Query Builder"
+  caption="Combining two queries with a formula to calculate error percentage"
+/>
+
+For formula syntax and trace matching operators, see [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/).
 
 ## Metrics Query Builder
 
-The Metrics Query Builder supports all the features described above — filtering, aggregation, ordering, and multiple queries — along with additional controls for temporal and spatial aggregation that are specific to metric data. For a deeper understanding of how these aggregation layers work, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
-
-### Spatial and Temporal Aggregations
-
-Metrics in SigNoz go through two aggregation layers before being displayed.
-
-#### Temporal Aggregation
-
-Temporal aggregation consolidates data points within each time series over the selected time interval. It reduces many raw data points into one value per interval, making long time ranges practical to visualize.
-
-Available temporal aggregation functions: `Latest`, `Sum`, `Avg`, `Min`, `Max`, `Count`, `Count Distinct`.
-
-#### Spatial Aggregation
-
-Spatial aggregation merges multiple time series into fewer series by combining values across dimensions such as container name, service name, or region.
-
-Available spatial aggregation functions: `Sum`, `Avg`, `Min`, `Max`.
-
-#### Example
-
-If you select a counter metric called `signoz_calls_total`, you can apply temporal aggregations like `Rate` and `Increase` on it. Similarly, you can apply spatial aggregations across many dimensions, such as `service_name`, `operation`, `deployment_environment`, etc.
+The Metrics Query Builder includes all the capabilities above — filtering, aggregation, group by, ordering — plus two additional aggregation layers that are specific to metric data: **temporal aggregation** and **spatial aggregation**.
 
 <Figure
   src="/img/docs/product-features/query-builder/metrics-query-builder-aggregations.webp"
-  alt="Spatial and temporal aggregations in the metrics query builder of SigNoz"
-  caption="How to apply temporal and spatial aggregations in metrics query builder of SigNoz"
+  alt="Temporal and spatial aggregation controls in the metrics query builder"
+  caption="Temporal and spatial aggregation controls in the Metrics Query Builder"
 />
 
+### Understanding Temporal and Spatial Aggregation
+
+Metrics are fundamentally different from logs and traces. A single metric (e.g., `system.cpu.utilization`) produces multiple **time series** — one per unique combination of labels like `host.name`, `cpu.state`, and `service.name`. Each time series contains many **data points** over time.
+
+When you query metrics, SigNoz applies two aggregation layers:
+
+#### Temporal Aggregation (Within Each Time Series)
+
+Temporal aggregation consolidates raw data points **within each individual time series** over each time interval. Instead of plotting every raw sample (which can be thousands), it reduces them into one value per interval per series.
+
+**Think of it as:** "How do I summarize this one series over time?"
+
+For example, if you have CPU utilization samples every 10 seconds and your chart shows 1-minute intervals, temporal aggregation decides how those 6 raw values become a single point — by taking the latest value, averaging them, summing them, etc.
+
+Available functions: `Latest`, `Sum`, `Avg`, `Min`, `Max`, `Count`, `Count Distinct`
+
+For counter metrics, additional rate-based functions are available: `Rate` and `Increase`.
+
+#### Spatial Aggregation (Across Time Series)
+
+Spatial aggregation merges **multiple time series into fewer series** by combining values across dimensions. This is how you go from seeing one line per host to seeing a single line for the entire service.
+
+**Think of it as:** "How do I combine different series together?"
+
+For example, if `system.cpu.utilization` has 10 time series (one per host), spatial aggregation with `Avg` gives you the average CPU across all hosts as a single line.
+
+Available functions: `Sum`, `Avg`, `Min`, `Max`
+
+#### How They Work Together
+
+The two layers execute in sequence:
+
+1. **Temporal first** — each individual time series is reduced to one value per time interval
+2. **Spatial second** — the resulting time series are combined across the dimensions you didn't group by
+
+This means temporal aggregation always happens within a single series, and spatial aggregation always happens across series — they never mix.
+
+<Figure
+  src="/img/docs/product-features/query-builder/temporal-spatial-aggregations.webp"
+  alt="Diagram showing temporal and spatial aggregation flow"
+  caption="Temporal aggregation reduces data points within each time series, spatial aggregation combines multiple time series"
+/>
+
+For a deeper understanding of how metric types affect which aggregations are valid, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+
+### Functions
+
+The Metrics Query Builder supports additional functions that can be applied on top of your query results for extended analysis:
+
+- **Exclusion functions** — cut off values above or below thresholds
+- **Clamping functions** — constrain values to a range
+- **Arithmetic functions** — absolute value, running diff, logarithms
+- **Smoothing functions** — exponential weighted moving average (EWMA)
+- **Time shift functions** — compare current data with a previous time period
+
+<Figure
+  src="/img/docs/product-features/query-builder/metrics-functions-dropdown.webp"
+  alt="Functions dropdown in the Metrics Query Builder"
+  caption="Functions available in the Metrics Query Builder"
+/>
+
+For the full list and examples, see [Functions for Extended Analysis](https://signoz.io/docs/querying/functions-extended-analysis/).
 
 ## Next Steps
 
-- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — Extract insights with aggregation functions and group-by
-- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — Sort, limit, and filter aggregated results
+- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — detailed guide to aggregation functions, group-by, and legend formatting
+- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — sort, limit, and conditionally filter aggregated results
+- [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) — formulas, trace matching operators, and cross-signal comparisons
+- [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how SigNoz calculates step intervals for time series queries

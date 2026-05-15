@@ -2559,16 +2559,9 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'doc',
+            route: '/docs/userguide/write-a-prom-query-with-new-format',
             label: 'PromQL',
-            type: 'category',
-            isExpanded: false,
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/userguide/write-a-prom-query-with-new-format',
-                label: 'PromQL Guide',
-              },
-            ],
           },
         ],
       },
@@ -2583,11 +2576,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/search-advanced-examples',
             label: 'Advanced Examples',
-          },
-          {
-            type: 'doc',
-            route: '/docs/querying/time-aggregation',
-            label: 'Time Aggregation Windows',
           },
           {
             type: 'doc',
@@ -2623,6 +2611,11 @@ const docsSideNav = [
             route: '/docs/userguide/field-context-data-types',
             label: 'Field Context & Data Types',
           },
+          {
+            type: 'doc',
+            route: '/docs/querying/time-aggregation',
+            label: 'Time Aggregation Windows',
+          },
         ],
       },
       {
@@ -2631,16 +2624,16 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/querying/troubleshooting',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/search-troubleshooting',
-            label: 'Troubleshooting Guide',
-          },
           { type: 'doc', route: '/docs/userguide/query-troubleshooting-faqs', label: 'FAQs' },
           {
             type: 'doc',
             route: '/docs/querying/query-performance',
-            label: 'Query Performance & Common Issues',
+            label: 'Slow Queries & Missing Results',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-troubleshooting',
+            label: 'Search Syntax Errors',
           },
         ],
       },
