@@ -78,33 +78,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
-    // parse it and forward all key=value pairs to the resource.
-    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
-        .unwrap_or_default()
-        .split(',')
-        .filter_map(|kv| {
-            let (k, v) = kv.trim().split_once('=')?;
-            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
-        })
-        .collect();
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .with_attributes(resource_attrs)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -182,33 +164,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
-    // parse it and forward all key=value pairs to the resource.
-    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
-        .unwrap_or_default()
-        .split(',')
-        .filter_map(|kv| {
-            let (k, v) = kv.trim().split_once('=')?;
-            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
-        })
-        .collect();
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .with_attributes(resource_attrs)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -289,33 +253,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
-    // parse it and forward all key=value pairs to the resource.
-    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
-        .unwrap_or_default()
-        .split(',')
-        .filter_map(|kv| {
-            let (k, v) = kv.trim().split_once('=')?;
-            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
-        })
-        .collect();
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .with_attributes(resource_attrs)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -407,33 +353,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // Resource::builder() does not read OTEL_RESOURCE_ATTRIBUTES automatically;
-    // parse it and forward all key=value pairs to the resource.
-    let resource_attrs: Vec<opentelemetry::KeyValue> = std::env::var("OTEL_RESOURCE_ATTRIBUTES")
-        .unwrap_or_default()
-        .split(',')
-        .filter_map(|kv| {
-            let (k, v) = kv.trim().split_once('=')?;
-            Some(opentelemetry::KeyValue::new(k.trim().to_owned(), v.trim().to_owned()))
-        })
-        .collect();
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .with_attributes(resource_attrs)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
