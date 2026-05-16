@@ -14,21 +14,15 @@ Permissions are **additive**. When a principal has multiple roles, they receive 
 
 ## Key Concepts
 
-**Principal** — A user or service account in SigNoz. Principals are the entities that authenticate and perform actions on resources.
-
-**Subject** — The principal that is performing a specific action. When a principal makes a request, they become the subject of that request.
-
-**Resource** — A type of entity in SigNoz, such as a dashboard, alert rule, pipeline, role, or service account.
-
-**Object** — A specific instance of a resource, identified by its unique ID. For example, a dashboard with ID `0198a868-c04a-747f-af6b-ae42d3ef23ee`.
-
-**Relation** — An action that can be performed on a resource. SigNoz defines seven relations: `create`, `read`, `update`, `delete`, `list`, `attach`, and `detach`.
-
-**Permission** — A relation combined with a resource and scope. For example, "create any dashboard" or "read dashboard `abc-123`". Permissions define what a principal is allowed to do.
+**Principal** — A user or service account in SigNoz. Principals are the entities that authenticate and perform actions on objects.
 
 **Role** — A named collection of permissions. Principals are assigned roles, and through those roles they receive permissions. Roles can be *managed* (built-in, immutable) or *custom* (configurable).
 
-**Scope** — Determines which objects a permission applies to. When configuring a custom role, each resource type can be set to *All* (every instance), *Only selected* (specific instances), or *None* (no instances).
+**Permission** — Defines what a principal is allowed to do. A permission combines a relation with a resource type. For example, "create dashboard" or "read alert rule".
+
+**Relation** — The action in a permission. SigNoz defines seven relations: `create`, `read`, `update`, `delete`, `list`, `attach`, and `detach`.
+
+**Scope** — Determines which instances a permission applies to. When configuring a custom role, each resource can be set to *All* (every instance), *Only selected* (specific instances), or *None* (no instances).
 
 ## Relations
 
@@ -45,12 +39,12 @@ Every permission in SigNoz is built from one of these seven relations:
 | `detach` | Remove a relationship between two resources. For example, unassigning a role from a service account removes that relationship. |
 
 <Admonition type="info">
-**Dual authorization for attach and detach** — Attach and detach operations require the subject to have the relation on **both** resources involved. For example, assigning a role to a service account requires `attach` on both the service account and the role.
+**Dual authorization for attach and detach** — Attach and detach operations require the principal to have the relation on **both** resources involved. For example, assigning a role to a service account requires `attach` on both the service account and the role.
 </Admonition>
 
 ## Managed Roles
 
-SigNoz includes three built-in managed roles. These roles cannot be edited or deleted.
+SigNoz includes four built-in managed roles. These roles cannot be edited or deleted.
 
 **SigNoz-Admin** — Full administrative access to all SigNoz resources, including user management, role management, service account management, billing, and SSO configuration.
 
