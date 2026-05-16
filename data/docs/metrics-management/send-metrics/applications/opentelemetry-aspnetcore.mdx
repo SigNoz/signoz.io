@@ -8,9 +8,9 @@ doc_type: howto
 
 Instrument your ASP.NET Core application with OpenTelemetry NuGet packages and send HTTP, Kestrel, and .NET runtime metrics to SigNoz.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Prerequisites
 
@@ -26,6 +26,7 @@ Instrument your ASP.NET Core application with OpenTelemetry NuGet packages and s
   <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
   <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
   <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
+  <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.15.1-beta.1" />
   <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
 </ItemGroup>
 ```
@@ -36,6 +37,7 @@ Or with the .NET CLI:
 dotnet add package OpenTelemetry.Extensions.Hosting --version 1.15.3
 dotnet add package OpenTelemetry.Instrumentation.AspNetCore --version 1.15.2
 dotnet add package OpenTelemetry.Instrumentation.Runtime --version 1.15.1
+dotnet add package OpenTelemetry.Instrumentation.Process --version 1.15.1-beta.1
 dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol --version 1.15.3
 ```
 
@@ -44,7 +46,6 @@ dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol --version 1.15.3
 ```csharp:Program.cs
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,10 +56,11 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(m => m
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
-        .AddMeter("Microsoft.AspNetCore.MemoryPool")
-        .AddOtlpExporter())
-    .WithTracing(t => t
-        .AddAspNetCoreInstrumentation()
+        .AddProcessInstrumentation()
+        .AddMeter(
+            "Microsoft.AspNetCore.Server.Kestrel",
+            "Microsoft.AspNetCore.Routing",
+            "Microsoft.AspNetCore.MemoryPool")
         .AddOtlpExporter());
 
 var app = builder.Build();
@@ -66,7 +68,7 @@ var app = builder.Build();
 app.Run();
 ```
 
-The OTel SDK reads `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` automatically.
+The OTel SDK reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and `OTEL_EXPORTER_OTLP_PROTOCOL` automatically.
 
 <Admonition type="info">
   `.AddMeter("Microsoft.AspNetCore.MemoryPool")` enables `aspnetcore.memory_pool.*` metrics. These only emit on .NET 10+ and only when Kestrel reads a request body (POST endpoints that consume `req.Body`). On .NET 8, these panels stay empty.
@@ -75,16 +77,18 @@ The OTel SDK reads `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS
 ### Step 3. Set environment variables
 
 ```bash
-OTEL_SERVICE_NAME="my-aspnetcore-app"
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+export OTEL_SERVICE_NAME="my-aspnetcore-app"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
 ```
 
 Verify these values:
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `OTEL_EXPORTER_OTLP_PROTOCOL`: Keeps the OTLP exporter on HTTP/protobuf
 - `OTEL_RESOURCE_ATTRIBUTES`: Sets `deployment.environment` on all telemetry — the [ASP.NET Core Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aspnet-metrics) uses this to filter by environment
 
 <Admonition type="note">
