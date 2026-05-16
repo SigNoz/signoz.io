@@ -1,0 +1,75 @@
+---
+date: 2026-05-16
+id: iam-overview
+title: Authorization Overview
+description: Understand how role-based access control works in SigNoz — principals, permissions, roles, and how they connect.
+doc_type: explanation
+---
+
+## Overview
+
+SigNoz uses role-based access control to manage what principals can do. Roles group permissions together — when a principal is assigned a role, they receive all the permissions that role contains.
+
+Permissions are **additive**. When a principal has multiple roles, they receive the union of all permissions from each role.
+
+## Key Concepts
+
+**Principal** — A user or service account in SigNoz. Principals are the entities that authenticate and perform actions on resources.
+
+**Subject** — The principal that is performing a specific action. When a principal makes a request, they become the subject of that request.
+
+**Resource** — A type of entity in SigNoz, such as a dashboard, alert rule, pipeline, role, or service account.
+
+**Object** — A specific instance of a resource, identified by its unique ID. For example, a dashboard with ID `0198a868-c04a-747f-af6b-ae42d3ef23ee`.
+
+**Relation** — An action that can be performed on a resource. SigNoz defines seven relations: `create`, `read`, `update`, `delete`, `list`, `attach`, and `detach`.
+
+**Permission** — A relation combined with a resource and scope. For example, "create any dashboard" or "read dashboard `abc-123`". Permissions define what a principal is allowed to do.
+
+**Role** — A named collection of permissions. Principals are assigned roles, and through those roles they receive permissions. Roles can be *managed* (built-in, immutable) or *custom* (configurable).
+
+**Scope** — Determines which objects a permission applies to. A permission can cover *all* instances of a resource type, or only *specific* instances selected when configuring the role.
+
+## Relations
+
+Every permission in SigNoz is built from one of these seven relations:
+
+| Relation | Description |
+|----------|-------------|
+| `create` | Create a new instance of a resource. |
+| `read` | View a specific resource instance. |
+| `update` | Modify an existing resource instance. |
+| `delete` | Remove a resource instance. |
+| `list` | List all instances of a resource type. |
+| `attach` | Create a relationship between two resources. For example, assigning a role to a service account creates a relationship between them. |
+| `detach` | Remove a relationship between two resources. For example, unassigning a role from a service account removes that relationship. |
+
+<Admonition type="info">
+**Dual authorization for attach and detach** — Attach and detach operations require the subject to have the relation on **both** resources involved. For example, assigning a role to a service account requires `attach` on both the service account and the role.
+</Admonition>
+
+## Managed Roles
+
+SigNoz includes three built-in managed roles. These roles cannot be edited or deleted.
+
+**SigNoz-Admin** — Full administrative access to all SigNoz resources, including user management, role management, service account management, billing, and SSO configuration.
+
+**SigNoz-Editor** — Can create and modify observability resources such as dashboards, alerts, and pipelines. Cannot manage users, roles, or service accounts.
+
+**SigNoz-Viewer** — Read-only access to observability data and resources. Cannot create or modify any resources.
+
+<Admonition type="note">
+For the complete list of permissions each managed role includes, see the [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions).
+</Admonition>
+
+## Custom Roles
+
+Principals with the appropriate permissions can create custom roles with granular permissions. When creating a custom role, you choose which relations to grant on which resource types, and set the scope to all instances or only selected ones. Custom roles require an active SigNoz license.
+
+See [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles) for a step-by-step walkthrough.
+
+## Next Steps
+
+- [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions) — Look up permissions for each resource
+- [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles) — Create and manage roles
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts) — Set up programmatic API access
