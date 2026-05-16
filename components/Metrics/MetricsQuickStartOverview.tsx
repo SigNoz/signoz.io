@@ -175,6 +175,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet': (
     <SiDotnet className="h-7 w-7 text-blue-600" />
   ),
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore': (
+    <SiDotnet className="h-7 w-7 text-purple-600" />
+  ),
   '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs': (
     <SiNodedotjs className="h-7 w-7 text-green-500" />
   ),

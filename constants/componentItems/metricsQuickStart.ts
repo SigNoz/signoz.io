@@ -127,6 +127,11 @@ export const METRICS_QUICK_START_ITEMS = {
       clickName: '.NET Metrics Link',
     },
     {
+      name: 'ASP.NET Core',
+      href: '/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore',
+      clickName: 'ASP.NET Core Metrics Link',
+    },
+    {
       name: 'Node.js',
       href: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
       clickName: 'Node.js Metrics Link',

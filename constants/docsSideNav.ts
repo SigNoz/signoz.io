@@ -2087,11 +2087,6 @@ const docsSideNav = [
             label: 'Apache Web Server',
           },
           {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/aspnet-metrics',
-            label: 'ASP.NET Core',
-          },
-          {
             label: 'APM',
             type: 'category',
             isExpanded: false,
@@ -2118,6 +2113,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/argocd-dashboard',
             label: 'ArgoCD',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/aspnet-metrics',
+            label: 'ASP.NET Core',
           },
           {
             type: 'doc',

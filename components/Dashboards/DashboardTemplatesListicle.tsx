@@ -21,6 +21,7 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiDotnet,
   SiGo,
   SiTemporal,
   SiOpenai,
@@ -79,6 +80,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/dashboards/dashboard-templates/argocd-dashboard': (
     <GitBranch className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/aspnet-metrics': (
+    <SiDotnet className="h-7 w-7 text-blue-600" />
   ),
   '/docs/dashboards/dashboard-templates/autogen-dashboard': (
     <img src="/svgs/icons/LLMMonitoring/autogen-logo.webp" alt="Autogen Icon" className="h-7 w-7" />
