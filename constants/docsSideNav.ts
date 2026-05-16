@@ -1755,6 +1755,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route:
+                  '/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore',
+                label: 'ASP.NET Core',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
                 label: 'Node.js',
               },
@@ -2079,6 +2085,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/aspnet-metrics',
+            label: 'ASP.NET Core',
           },
           {
             label: 'APM',
@@ -2494,9 +2505,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
-        items: [
-          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
-        ],
+        items: [{ type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' }],
       },
     ],
   },
