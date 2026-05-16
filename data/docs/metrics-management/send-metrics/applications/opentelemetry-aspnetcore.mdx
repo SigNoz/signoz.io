@@ -26,7 +26,6 @@ Instrument your ASP.NET Core application with OpenTelemetry NuGet packages and s
   <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
   <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
   <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
-  <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.15.1-beta.1" />
   <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
 </ItemGroup>
 ```
@@ -37,7 +36,6 @@ Or with the .NET CLI:
 dotnet add package OpenTelemetry.Extensions.Hosting --version 1.15.3
 dotnet add package OpenTelemetry.Instrumentation.AspNetCore --version 1.15.2
 dotnet add package OpenTelemetry.Instrumentation.Runtime --version 1.15.1
-dotnet add package OpenTelemetry.Instrumentation.Process --version 1.15.1-beta.1
 dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol --version 1.15.3
 ```
 
@@ -56,11 +54,7 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(m => m
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
-        .AddProcessInstrumentation()
-        .AddMeter(
-            "Microsoft.AspNetCore.Server.Kestrel",
-            "Microsoft.AspNetCore.Routing",
-            "Microsoft.AspNetCore.MemoryPool")
+        .AddMeter("Microsoft.AspNetCore.MemoryPool")
         .AddOtlpExporter());
 
 var app = builder.Build();
