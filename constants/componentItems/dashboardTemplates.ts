@@ -207,6 +207,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Inkeep Dashboard Template',
   },
   {
+    name: 'Istio',
+    href: '/docs/dashboards/dashboard-templates/istio-dashboard',
+    clickName: 'Istio Dashboard Template',
+  },
+  {
     name: 'Jenkins',
     href: 'https://github.com/SigNoz/dashboards/tree/main/jenkins',
     clickName: 'Jenkins Dashboard Template',
