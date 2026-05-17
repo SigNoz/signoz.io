@@ -2,45 +2,25 @@
 
 title: Winston Logger - Complete Node.js Logging Guide [2026]
 slug: winston-logger
-date: 2026-04-21
-tags: [logging, nodejs]
+date: 2026-05-17
+tags: [nodejs, logging]
 authors: [saurabh_patil]
-description: Getting started with Winston logger in Node.js - install, configure transports and log levels, format logs as JSON, and ship them to a log management tool.
+description: Learn Winston logger for Node.js with examples. Explore logging levels, configuration, and best practices to implement efficient logging in your applications with SigNoz
 keywords: [Winston logger, nodejs, log management, structured logging, winston profiling, winston transports, winston custom formats, nodejs observability]
 
 ---
 
-<a href="https://github.com/winstonjs/winston" rel="noopener noreferrer nofollow" target="_blank">Winston</a> is a popular [Node.js logging](/guides/nodejs-logging/) library. It is designed to be a simple and universal tool for managing and storing logs across multiple destinations in Node.js applications.
+Winston logger is a simple [Node.js logging](/guides/nodejs-logging/) library. It was created to give your Node.js applications a flexible and centralized way to manage logs across multiple destinations, formats, and severity levels without tying the application to a single logging output or storage mechanism.
 
-Using Winston, you can set up multiple **transports** in a single logger, where each transport acts as a storage device for your logs. Each transport can be configured to handle specific [log levels](/blog/logging-levels/), allowing you to route different logs to different places. For example, you might configure transport so that error logs go to a database, while all logs just print to the console during development. Winston also gives you full control over log formatting and lets you define custom severity levels to suit your application's needs.
+Developers choose the Winston logger when building internal tools, enterprise applications, traditional backend systems, or when they need multiple transports. A transport can be described as a storage device for your logs. Multiple transports can be configured on a single Winston logger instance at different logging levels. For example, you can configure a transport to send error logs to a database, while all logs can be just printed to the console during development.
 
-## Key Features of Winston Logger
+Winston offers key features such as multiple transports, logging levels, custom formatting, child loggers, profiling, querying and exception handling. Each of these features is explained in detail in this article with the help of an example for each.
 
-Here are the key features of Winston:
+## Quick Start - Install and Setup Winston Logger
 
-1. **Multiple Transports:** Send logs to different destinations (console, files, databases, HTTP endpoints) simultaneously from a single logger.
+In this section, we will install Winston and set up a basic logger in a Node.js application.
 
-2. **Log Levels:** Comes with built-in severity levels like `error`, `warn`, `info`, `debug`, etc. You can also define your own custom levels.
-
-3. **Custom Formatting**: Control how your log messages look using built-in formatters like `json`, `simple`, `colorize`, `timestamp`, or combine them to build your own format.
-
-4. **Exception & Rejection Handling:** Automatically catch and log uncaught exceptions and unhandled promise rejections so your app doesn't silently crash.
-
-5. **Querying Logs:** Supports querying and streaming logs from specific transports, useful for reviewing historical log data.
-
-6. **Profiling:** Winston has built-in support for measuring how long operations take between two points of code. It is helpful in tracking performance.
-
-7. **Child Loggers:** You can create child loggers that inherit the parent's configuration while adding extra metadata, useful for adding context such as a request ID or module name.
-
-## Getting Started with Winston Logger
-
-In this section, we will install Winston and create a basic logger that logs messages to the console.
-
-### Prerequisites
-
-Before you proceed with the next steps, make sure you have <a href="https://nodejs.org/en/download" rel="noopener noreferrer nofollow" target="_blank">Node.js</a> installed on your machine.
-
-### Step 1: Install Winston
+### Step 1: Install NPM Winston
 
 ```bash
 npm install winston
@@ -48,14 +28,21 @@ npm install winston
 
 ### Step 2: Create a Basic Logger
 
-Create a file called `logger.js` and add the following code:
+Create a file called `logger.js` and create a basic logger.
 
-```jsx:logger.js
+```jsx:logger.js {3-9}
 const winston = require('winston');
 
+// Create a new Winston logger instance
 const logger = winston.createLogger({
+
+  // Set the minimum log level to record Logs with level "info" and above
   level: 'info',
+
+  // Define the log message format
   format: winston.format.simple(),
+  
+  // Configure where logs should be sent
   transports: [
     new winston.transports.Console()
   ]
@@ -66,7 +53,9 @@ logger.warn('This is a warning message');
 logger.error('This is an error message');
 ```
 
-### Step 3: Run and verify output
+### Step 3: Run and Verify
+
+Run the `logger.js` file and view the generated output in the console.
 
 ```bash
 node logger.js
@@ -78,13 +67,78 @@ warn: This is a warning message
 error: This is an error message
 ```
 
-Now that we have a basic logger up and running, let's explore each of Winston's core features in detail, starting with logging levels.
+The basic Winston logger is now configured. You can modify this logger as per your needs. Follow the next sections to understand each feature in detail and how to use them with the logger.
+
+## Transports in Winston
+
+Transports are the simple destination where your logs are sent. The basic example is to send logs to the console during development.
+
+```jsx:logger.js {6-8}
+const winston = require('winston');
+
+const logger = winston.createLogger({
+
+  // Configured transposts to send log to console
+  transports: [
+    new winston.transports.Console()
+  ]
+});
+
+// Log will only be printed in the console
+logger.info('Hello from basic transport!');
+```
+
+You can set up multiple transports simultaneously in a single Winston logger instance. They can be used to route the logs of different severity levels to different destinations or to apply different formats depending on the destination (e.g., colorized text for the console, pure JSON for a file).
+
+This is helpful in production, where you want real-time visibility in the console while also persisting logs to disk for later analysis. Each transport can have its own log level, so you could send only errors to a file but all messages to the console.
+
+```jsx:logger.js {4-7}
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  transports: [
+
+    // Print the logs to console
+    new winston.transports.Console({ level: 'info' }),
+
+    // Send error logs to app.log file
+    new winston.transports.File({ filename: 'app.log', level: 'error' })
+  ]
+});
+
+logger.info('Shown only in console');
+logger.error('Shown in console AND saved to app.log');
+
+// Output: 
+// {"level":"info","message":"Shown only in console"}
+// {"level":"error","message":"Shown in console AND saved to app.log"}
+```
+
+You can also build a custom transport yourself by extending the base Transport class. It gives you full control over where and how logs are handled, such as sending them to a database, Slack, or an external API. You just need to implement a `log()` method that defines exactly what happens when a message arrives. This is the go-to approach when built-in transports don't fit your specific needs.
+
+```jsx:logger.js {4-9, 12, 15}
+const Transport = require('winston-transport');
+const winston = require('winston');
+
+class MyCustomTransport extends Transport {
+  log(info, callback) {
+    console.log(`[CUSTOM] ${info.level}: ${info.message}`);
+    callback();
+  }
+}
+
+const logger = winston.createLogger({
+  transports: [new MyCustomTransport()]
+});
+
+logger.info('Handled by my custom transport!');
+
+//Output: [CUSTOM] info: Handled by my custom transport!
+```
 
 ## Logging Levels in Winston
 
-By default, logging levels in Winston follow the severity ordering specified by <a href="https://tools.ietf.org/html/rfc5424" rel="noopener noreferrer nofollow" target="_blank">RFC5424</a>: all levels are assumed to be numerically ordered from most to least important.
-
-By default, Winston uses NPM style logging levels, prioritized from 0 to 6 (highest to lowest):
+The Winston log levels follow the severity ordering specified by <a href="https://tools.ietf.org/html/rfc5424" rel="noopener noreferrer nofollow" target="_blank">RFC5424</a>, which assumes the levels to be numerically ordered from most important to least important. By default, Winston uses NPM style [logging levels](/blog/logging-levels/) (`0-highest`  to `6-lowest`):
 
 ```jsx
 {
@@ -98,9 +152,10 @@ By default, Winston uses NPM style logging levels, prioritized from 0 to 6 (high
 }
 ```
 
-You can log a message in one of two ways: either call the level name directly as a method, or pass it as a string to `log()`:
+The messages can be logged by calling the level name as a method or by passing the level as a string to the `log()` method.
 
-```jsx
+```jsx:logger.js {3-4, 7-8}
+...
 // Using the level as a method (preferred, cleaner)
 logger.info('User signed up successfully');
 logger.error('Failed to connect to database');
@@ -108,17 +163,16 @@ logger.error('Failed to connect to database');
 // Using log() with the level as a string
 logger.log('info', 'User signed up successfully');
 logger.log('error', 'Failed to connect to database');
+...
 ```
 
-Both approaches do exactly the same thing. The method-based style is more common because it's shorter and easier to read. 
+Both approaches output the same result. The method-based style is more common because it is shorter and easier to read.
 
-Winston also allows you to add levels on transport so that Winston will only log that level and everything above it (i.e., everything with a lower number). Messages below that threshold are ignored. For example, if you set a transport's level to `warn`, it will log `warn` (1) and `error` (0), but skip `info` (2), `debug` (5), and everything else. This lets you keep your console clean during production while still capturing detailed logs in a file.
+Winston logger also allows you to add levels on transport so that Winston will only log that level and everything above it (i.e., everything with a lower number). Messages below that threshold are ignored. For example, if you set a transport's level to `warn`, it will log `warn` (1) and `error` (0), but skip `info` (2), `debug` (5), and everything else. This lets you keep your console clean during production while still capturing detailed logs in a file.
 
-## Custom Logging Levels in Winston
+Along with the pre-defined  `npm`, `syslog`, and `cli` log levels available in `winston`, you can also customize them. Just pass an object mapping level names to numeric priorities:
 
-Along with the pre-defined  `npm`, `syslog`, and `cli` levels available in `winston`, you can also choose to define your own. Just pass an object mapping level names to numeric priorities:
-
-```jsx:logger.js
+```jsx:logger.js {3-8, 11}
 const winston = require('winston');
 
 const customLevels = {
@@ -132,8 +186,8 @@ const logger = winston.createLogger({
   levels: customLevels,
   level: 'normal',
   transports: [
-		new winston.transports.Console()
-	]
+    new winston.transports.Console()
+  ]
 });
 
 // Winston automatically creates methods for each custom level
@@ -147,54 +201,93 @@ logger.trivial('Button hover event tracked');
 {"level":"normal","message":"User updated their profile"}
 ```
 
-## Log Formatting in Winston
+## Winston Formats
 
-In Winston (specifically Winston 3.x), **formatting** refers to the mechanism that dictates how log messages are transformed, structured, and serialized before they are output to a specific transport (like the console, a file, or a network stream).
-
-At its core, a format in Winston is a function that takes an `info` object (which always contains at least `level` and `message` properties) and modifies it.
+In Winston logger, formats dictate how log messages are transformed, structured, and serialized before they are output to a specific transports. Every log entry starts as an info object containing properties like level, message, timestamp, and metadata. Formats modify this object step by step before generating the final output.
 
 ```jsx
-{
+const info = {
   level: 'info',
   message: 'Server started on port 3000'
 }
 ```
 
-The transport then takes this modified `info` object and writes it to the destination.
-
-Formatting in Winston can be categorized into three main types based on how they are constructed and applied:
+The following are the different types of Winston Formats.
 
 1. **Built-in Formats**
 
-    Winston provides a standard library of pre-defined formatters accessible via `winston.format`. They handle common logging requirements out of the box.
+    Winston provides several built-in formats for common logging needs such as JSON logging, timestamps, colorized console output, metadata handling, and custom message formatting. These formats can be accessed by using `winston.format`. Below are some of the most commonly used built-in Winston formats.
 
-    Key built-in formats include:
+    `json()` - It converts log entries into structured JSON format.
 
-    - **`winston.format.json()`:** Serializes the `info` object into a JSON string. Standard for production environments, parsing logs to systems like ELK or Datadog.
-    - **`winston.format.simple()`:** Returns a basic string representation: `level: message`.
-    - **`winston.format.colorize()`:** Adds ANSI colour codes to the `level` or `message` for terminal readability.
-    - **`winston.format.timestamp()`:** Appends a timestamp property to the `info` object.
-    - **`winston.format.printf()`:** Allows you to define a custom string layout using a callback function.
-    - **`winston.format.errors({ stack: true })`:** Catches standard JavaScript `Error` objects and ensures their stack traces are included in the log output.
+    ```jsx
+    const jsonFormat = format.json();
 
-    For example:
-
-    ```jsx:logger.js {4}
-    const winston = require('winston');
-    
-    const jsonLogger = winston.createLogger({
+    const info = jsonFormat.transform({
       level: 'info',
-      format: winston.format.json(),
-      transports: [new winston.transports.Console()]
+      message: 'my message',
     });
-    
-    jsonLogger.info('Server started', { port: 8080 });
-    // Output: {"port":8080,"level":"info","message":"Server started"}
     ```
 
-2. **Combined Formats (`winston.format.combine`)**
+    `simple()` - It generates a plain-text log output containing the log level and message.
 
-    Winston allows you to chain multiple formats together using `winston.format.combine()`. The formats are executed in the order they are defined, operating on the `info` object sequentially like a pipeline.
+    ```jsx
+    const simpleFormat = format.simple();
+
+    const info = simpleFormat.transform({
+      level: 'info',
+      message: 'my message',
+      number: 123
+    });
+    ```
+
+    `colorize()` - Adds ANSI colour codes to the `level` or `message` for terminal readability.
+
+    ```jsx
+    const colorizeFormat = format.colorize({ colors: { info: 'blue' }});
+
+    const info = colorizeFormat.transform({
+      [LEVEL]: 'info',
+      level: 'info',
+      message: 'my message'
+    }, { all: true });
+    ```
+
+    `timestamp()` - It appends a timestamp property to the `info` object.
+
+    ```jsx
+    const timestampFormat = format.timestamp();
+
+    const info = timestampFormat.transform({
+      level: 'info',
+      message: 'my message'
+    });
+    ```
+
+    `printf()` - It allows you to define a completely custom log message format.
+
+    ```jsx
+    const myFormat = format.printf((info) => {
+      return `${info.level} ${info.message}`;
+    })
+
+    const info = myFormat.transform({
+      level: 'info',
+      message: 'my message'
+    });
+    ```
+
+    `errors({ stack: true })` - Catches standard JavaScript `Error` objects and ensures their stack traces are included in the log output.
+
+    ```jsx
+    const errorsFormat = errors({ stack: true })
+
+    const info = errorsFormat.transform(new Error('Oh no!'));
+    ```
+
+2. **Combined Formats (`format.combine`)**
+
+    Winston allows you to chain multiple formats together using `format.combine()`. The formats are then executed in the order they are defined, operating on the `info` object sequentially like a pipeline.
 
     For example:
 
@@ -223,7 +316,7 @@ Formatting in Winston can be categorized into three main types based on how they
 
 3. **Custom Formats**
 
-    If the built-in formats do not meet your exact requirements, you can create a custom format using `winston.format(transformFn)`. The transform function takes the `info` object and an optional `opts` object, modifies `info`, and returns it. If the function returns `false`, the log message is completely ignored (filtered out).
+    If the built in Winston formats do not meet your exact requirements, you can create a custom format using `format(transformFn)`. The transform function takes the `info` object and an optional `opts` object, modifies the `info` object, and returns it. If the function returns `false`, the log message is completely ignored or filtered out.
 
     For example:
 
@@ -258,77 +351,17 @@ Formatting in Winston can be categorized into three main types based on how they
     //Output: {"level":"info","message":"User registration attempt","password":"[REDACTED]","user":"admin"}
     ```
 
-## Transports in Winston
-
-A transport is simply a destination where your logs get sent. The most basic example is logging to the console, where you configure a single transport, and every log message flows to that one place. This is useful during development when you just want to see output in your terminal.
-
-```jsx:logger.js
-const winston = require('winston');
-
-const logger = winston.createLogger({
-  transports: [
-    new winston.transports.Console()
-  ]
-});
-
-logger.info('Hello from basic transport!');
-```
-
-A single Winston logger instance can utilize multiple transports simultaneously. This allows you to route logs of different severity levels to different destinations, or to apply different formats depending on the destination (e.g., colorized text for the console, pure JSON for a file). This is helpful in production where you want real-time visibility in the terminal while also persisting logs to disk for later analysis. Each transport can have its own log level, so you could send only errors to a file but all messages to the console.
-
-```jsx:logger.js
-const winston = require('winston');
-
-const logger = winston.createLogger({
-  transports: [
-    new winston.transports.Console({ level: 'info' }),
-    new winston.transports.File({ filename: 'app.log', level: 'error' })
-  ]
-});
-
-logger.info('Shown only in console');
-logger.error('Shown in console AND saved to app.log');
-
-// Output: 
-// {"level":"info","message":"Shown only in console"}
-// {"level":"error","message":"Shown in console AND saved to app.log"}
-```
-
-You can also build a custom transport yourself by extending the base Transport class, giving you full control over where and how logs are handled, such as sending them to a database, Slack, or an external API. You implement a `log()` method that defines exactly what happens when a message arrives. This is the go-to approach when built-in transports don't fit your specific needs.
-
-```jsx:logger.js
-const Transport = require('winston-transport');
-const winston = require('winston');
-
-class MyCustomTransport extends Transport {
-  log(info, callback) {
-    console.log(`[CUSTOM] ${info.level}: ${info.message}`);
-    callback();
-  }
-}
-
-const logger = winston.createLogger({
-  transports: [new MyCustomTransport()]
-});
-
-logger.info('Handled by my custom transport!');
-
-//Output: [CUSTOM] info: Handled by my custom transport!
-```
-
-There are dozens of <a href="https://github.com/winstonjs/winston/blob/master/docs/transports.md#additional-transports" rel="noopener noreferrer nofollow" target="_blank">community-maintained external transports</a> for routing logs directly to databases (MongoDB, Redis), cloud services (AWS CloudWatch, Datadog), or message brokers.
-
 ## Exceptions and Rejections in Winston
 
 Winston logger intercepts and logs unhandled errors that would otherwise cause your Node.js process to crash. By default, Winston only logs what you explicitly tell it to. However, these two features allow it to "listen" for global failures.
 
-### Handling Uncaught Exceptions
+#### Handling Uncaught Exceptions
 
-An uncaught exception occurs when a synchronous error is thrown and not caught by a `try...catch` block. Normally, Node.js prints the stack trace to `stderr` and exits with code `1`. When you configure `exceptionHandlers` in Winston, the logger attaches a listener to the `process.on('uncaughtException')` event.
+An uncaught exception occurs when a synchronous error is thrown and not caught by a `try...catch` block. Normally, Node.js prints the stack trace to the `stderr` stream and exits with code `1`. When you configure `exceptionHandlers` Winston logger, the logger attaches a listener to the `process.on('uncaughtException')` event.
 
 By default, Winston will exit the process after logging an exception. You can override this by setting `exitOnError: false`, though this is generally discouraged as the process state may be corrupted. You can also direct exceptions to a specific file or remote endpoint separate from your standard application logs.
 
-```jsx:logger.js
+```jsx:logger.js {7-10}
 const winston = require('winston');
 
 const logger = winston.createLogger({
@@ -345,13 +378,13 @@ const logger = winston.createLogger({
 throw new Error('This will be caught by the exceptionHandler');
 ```
 
-### Handling Unhandled Rejections
+#### Handling Unhandled Rejections
 
 An unhandled rejection occurs when a Promise is rejected (e.g., an API call fails) and there is no `.catch()` block or `await` inside a `try...catch` to handle it.
 
 For example:
 
-```jsx:logger.js
+```jsx:logger.js {7-10}
 const winston = require('winston');
 
 const logger = winston.createLogger({
@@ -376,16 +409,16 @@ Profiling in Winston is a lightweight mechanism for measuring the execution time
 
 The profiling system uses a stateful timer keyed by a unique string (the "id"). The profiling can be split into two phases.
 
-**Start Phase:** When `logger.profile(id)` is called for the first time with a specific ID, Winston stores the current timestamp in an internal map associated with that ID.
+Start Phase - When `logger.profile(id)` is called for the first time with a specific ID, Winston stores the current timestamp in an internal map associated with that ID.
 
-**End Phase:** When `logger.profile(id)` is called a second time with the same ID, Winston retrieves the stored timestamp, calculates the difference against the current time, deletes the ID from the internal map to free memory, and finally outputs a log message at the `info` level (by default) containing the duration in milliseconds.
+End Phase - When `logger.profile(id)` is called a second time with the same ID, Winston logger retrieves the stored timestamp, calculates the difference against the current time, deletes the ID from the internal map to free memory, and finally outputs a log message at the `info` level (by default) containing the duration in milliseconds.
 
 The following example demonstrates how to profile a synchronous or asynchronous operation without using external hooks or abstractions.
 
 ```jsx:logger.js
 const winston = require('winston');
 
-// 1. Setup a basic logger
+// 1. Set up a basic logger
 const logger = winston.createLogger({
   level: 'debug',
   format: winston.format.combine(
@@ -415,7 +448,7 @@ heavyTask();
 
 The output will include a `durationMs` field, which is injected automatically by the profiling logic.
 
-```jsx:Output
+```jsx:Output {5}
 {
   "level": "debug",
   "message": "Completed fetching user records",
@@ -426,16 +459,16 @@ The output will include a `durationMs` field, which is injected automatically by
 
 ## Centralizing Logs in a Log Management Tool
 
-A running Node.js service emits logs from multiple sources: the application process, its dependencies, the runtime, and any sidecars or middleware in the request path. When these logs only live on the local filesystem or inside container stdout, debugging a production incident requires SSH access to individual hosts or `kubectl logs` against short-lived pods whose output disappears upon recycling. This breaks down as soon as the deployment scales beyond a single instance.
+A Node.js service usually writes logs to stdout, local files, or both. That works during local development, but it becomes painful in production. If logs stay on individual hosts or short-lived containers, debugging often means SSHing into a server or running `kubectl logs` before the pod is replaced and the output is gone. Once you have more than one instance, that workflow does not scale.
 
-A [log management tool](/blog/best-open-source-log-management-tools/) solves this by collecting logs from all your services in one place, where you can search, filter, visualise, and set up [alerts](/alerts-management/). For this section, we'll send our Winston logs to [SigNoz](https://signoz.io/), an open-source observability platform that supports logs, metrics, and traces under one roof. Because SigNoz is built on <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a>, the same setup works whether you use SigNoz Cloud or any other OTel-compatible backend without rewriting your logging code.
+A [log management tool](/blog/best-open-source-log-management-tools/) centralizes those logs so you can search them, filter by metadata, build dashboards, and create alerts. In this section, we will send Winston logs from a Node.js application to [SigNoz](https://signoz.io/), an all-in-one observability platform for logs, metrics, and traces. SigNoz supports [OpenTelemetry](/opentelemetry/), so the same logging approach can also be adapted for other OTLP-compatible backends, usually by changing exporter configuration rather than rewriting your logging calls.
 
-One of the biggest payoffs of shipping Winston logs through OpenTelemetry is automatic [correlation](/opentelemetry/correlating-traces-logs-metrics-nodejs/) between logs and traces. Logs emitted inside a trace span are enriched with `trace_id` and `span_id`, so when you are looking at a slow request in the traces view, you can jump straight to the exact log lines that were produced during that request. You also get structured search over your log metadata, log-based alerts, and dashboards, all without touching your existing `logger.info()` and `logger.error()` calls.
+The main benefit is log-trace correlation. When Winston logs are emitted inside an active OpenTelemetry span, they can include fields such as `trace_id` and `span_id`. That lets you move from a slow or failing trace to the log lines created during the same request. You can also query [structured log](https://signoz.io/blog/structured-logs/) attributes, [create log-based alerts](/docs/alerts-management/log-based-alerts/), and build dashboards without changing every existing `logger.info()` or `logger.error()` call site.
 
-For step-by-step setup instructions, including both the no-code auto-instrumentation path and the code-level SDK setup, head over to the official guide: [Send logs from Node.js Winston logger to SigNoz](/docs/logs-management/send-logs/nodejs-winston-logs/).
+For setup instructions, including both the no-code auto-instrumentation path and the code-level SDK setup, head over to the official guide, [Send logs from Node.js Winston logger to SigNoz](/docs/logs-management/send-logs/nodejs-winston-logs/).
 
 ## Conclusion
 
-Winston covers the full range of what a Node.js application needs from a logging library: multiple transports, configurable log levels, a pipeline-style formatting system, automatic handling of uncaught exceptions and unhandled rejections, and built-in profiling for measuring operation duration. These features are enough to handle logging inside a single process, and the flexibility to plug in custom transports and formats means you can shape it to fit almost any workflow.
+Winston logger gives Node.js applications the core pieces needed for application logging. The key features, such as transports for sending logs to different destinations, configurable log levels, flexible formatting, exception and rejection handling, and simple profiling for measuring how long operations take, make it a better choice for logging inside a single Node.js process, especially when you need control over where logs go and how they are structured.
 
-Once your application moves to production and runs across multiple instances, local log files are no longer useful on their own. Pairing Winston with a centralized log management tool like SigNoz gives you a single place to search, filter, and alert on logs from every service, along with automatic correlation between logs and traces when you ship them through OpenTelemetry.
+In production, Winston works best as part of a centralized logging setup. Local files and container output are difficult to search across once an application runs on multiple instances. Sending Winston logs to a tool like SigNoz gives teams one place to query logs, create alerts, and connect log records with traces when OpenTelemetry instrumentation is enabled.
