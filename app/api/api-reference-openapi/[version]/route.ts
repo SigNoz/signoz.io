@@ -15,8 +15,7 @@ const notFoundResponse = () =>
     },
   })
 
-export async function GET(_: Request, props: { params: Promise<{ version: string }> }) {
-  const params = await props.params
+export async function GET(_: Request, { params }: { params: { version: string } }) {
   const raw = params.version
   const version = raw === 'latest' ? await resolveLatestVersion() : raw
 

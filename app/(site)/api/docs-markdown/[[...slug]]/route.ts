@@ -27,8 +27,7 @@ const notFoundResponse = () =>
     },
   })
 
-export async function GET(_: Request, props: { params: Promise<{ slug?: string[] }> }) {
-  const params = await props.params
+export async function GET(_: Request, { params }: { params: { slug?: string[] } }) {
   const slug = resolveDocsMarkdownSlug(params.slug)
   const doc = allDocs.find((candidate) => candidate.slug === slug) as Doc | undefined
 

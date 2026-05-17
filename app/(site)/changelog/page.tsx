@@ -6,10 +6,10 @@ import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
 interface ChangelogProps {
-  searchParams: Promise<{
+  searchParams: {
     page?: string
     deploymentType?: string
-  }>
+  }
 }
 
 export const metadata: Metadata = {
@@ -39,8 +39,7 @@ export const metadata: Metadata = {
   },
 }
 
-const Changelog = async (props: ChangelogProps) => {
-  const searchParams = await props.searchParams
+const Changelog = async ({ searchParams }: ChangelogProps) => {
   const currentPage = searchParams?.page ? parseInt(searchParams.page as string, 10) : 1
   const deploymentType = searchParams?.deploymentType
     ? (decodeURIComponent(searchParams.deploymentType) as DeploymentType)

@@ -11,13 +11,14 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
+export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug: string[] }>
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string[] }
 }): Promise<Metadata> {
-  const params = await props.params
   try {
     // Handle root case
     if (!params.slug || params.slug.length === 0) {
@@ -84,8 +85,7 @@ export async function generateStaticParams() {
   return []
 }
 
-export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
-  const params = await props.params
+export default async function Page({ params }: { params: { slug: string[] } }) {
   const path = params.slug.join('/')
 
   // Fetch content from Strapi with error handling
