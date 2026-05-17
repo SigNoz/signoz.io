@@ -1813,7 +1813,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/metrics-management/istio-metrics',
-                label: 'Istio',
+                label: 'Istio Metrics',
               },
               {
                 type: 'doc',

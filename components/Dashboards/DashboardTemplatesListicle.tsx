@@ -21,7 +21,6 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
-  SiDotnet,
   SiGo,
   SiIstio,
   SiTemporal,
