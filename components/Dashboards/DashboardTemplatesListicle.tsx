@@ -21,7 +21,9 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiDotnet,
   SiGo,
+  SiIstio,
   SiTemporal,
   SiOpenai,
   SiSupabase,
@@ -192,7 +194,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
   ),
   '/docs/dashboards/dashboard-templates/istio-dashboard': (
-    <Network className="h-7 w-7 text-blue-400" />
+    <SiIstio className="h-7 w-7 text-blue-400" />
   ),
   'https://github.com/SigNoz/dashboards/tree/main/jenkins': (
     <SiJenkins className="h-7 w-7 text-blue-700" />

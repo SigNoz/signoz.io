@@ -1812,6 +1812,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/istio-metrics',
+                label: 'Istio',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/nvidia-dcgm-metrics',
                 label: 'NVIDIA GPU (DCGM)',
               },
