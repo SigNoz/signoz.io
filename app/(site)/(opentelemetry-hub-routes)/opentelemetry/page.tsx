@@ -14,10 +14,10 @@ const LANDING_PARAMS = { slug: ['what-is-opentelemetry'] }
 const LANDING_CANONICAL = `${siteMetadata.siteUrl}/opentelemetry/`
 const BlogArticlePageWithOptions = BlogArticlePage as any
 
-export const dynamicParams = blogDynamicParams
+export const dynamicParams = false // inlined from blog/[...slug]
 
 export async function generateMetadata(): Promise<Metadata | undefined> {
-  return generateBlogMetadata({ params: LANDING_PARAMS })
+  return generateBlogMetadata({ params: Promise.resolve(LANDING_PARAMS) })
 }
 
 export default function OpenTelemetryLanding() {

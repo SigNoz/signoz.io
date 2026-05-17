@@ -96,9 +96,13 @@ import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
 import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
 import dynamic from 'next/dynamic'
-const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'), { ssr: false })
+const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'))
 
-export const components: MDXComponents = {
+// MDXComponents type from @types/mdx@2.0.13 expects React-18-shape components
+// (props: any) => Element | null, while @types/react@19 widens FC return to
+// ReactNode | Promise<ReactNode> to support async components. The runtime
+// shape is unchanged. Casting through unknown until @types/mdx catches up.
+export const components = {
   Region,
   region: Region,
   RegionTable,
@@ -203,4 +207,4 @@ export const components: MDXComponents = {
   DatabaseTable,
   InlineCTA,
   MCPInstallButton,
-}
+} as unknown as MDXComponents

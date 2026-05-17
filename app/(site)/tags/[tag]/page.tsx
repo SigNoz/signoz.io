@@ -10,7 +10,10 @@ import { notFound } from 'next/navigation'
 
 export const dynamicParams = false
 
-export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
+export async function generateMetadata(props: {
+  params: Promise<{ tag: string }>
+}): Promise<Metadata> {
+  const params = await props.params
   const tag = decodeURI(params.tag)
   return genPageMetadata({
     title: tag,
@@ -36,7 +39,8 @@ export const generateStaticParams = async () => {
   return paths
 }
 
-export default function TagPage({ params }: { params: { tag: string } }) {
+export default async function TagPage(props: { params: Promise<{ tag: string }> }) {
+  const params = await props.params
   const tag = decodeURI(params.tag)
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag)))

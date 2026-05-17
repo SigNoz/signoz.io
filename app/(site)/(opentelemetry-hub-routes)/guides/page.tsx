@@ -6,7 +6,7 @@ import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 export const metadata = buildListingMetadata('Guides')
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 
 export default async function GuidesHome() {
   const guidePosts = await getResourceCenterGuides()

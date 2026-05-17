@@ -11,13 +11,14 @@ import { API_SPEC_REVALIDATE_SECONDS } from '@/constants/apiReference'
 import OpenAPISpec from '@/components/OpenAPISpec'
 import APIVersionSwitcher from '@/components/APIVersionSwitcher'
 
-export const revalidate = API_SPEC_REVALIDATE_SECONDS
+export const revalidate = 86400
 
 interface PageProps {
-  params: { version: string }
+  params: Promise<{ version: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params
   const { version } = params
 
   if (version === 'latest') {
@@ -51,7 +52,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function APIReferencePage({ params }: PageProps) {
+export default async function APIReferencePage(props: PageProps) {
+  const params = await props.params
   const { version } = params
 
   if (version === 'latest') {

@@ -14,6 +14,9 @@ const inter = Inter({
   display: 'swap',
 })
 
+// Restore Next 14 implicit fetch caching — Next 15 defaults to no-cache.
+export const fetchCache = 'default-cache'
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
   title: {

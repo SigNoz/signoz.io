@@ -10,7 +10,7 @@ interface ChangelogTitleProps {
 
 const ChangelogTitle: React.FC<ChangelogTitleProps> = ({ title, link }) => {
   const [isCopied, setIsCopied] = useState<boolean>(false)
-  const timeout = useRef<ReturnType<typeof setTimeout>>()
+  const timeout = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
     return (): void => {

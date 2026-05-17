@@ -1,8 +1,8 @@
-import { LucidePlus, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { LucidePlus, X } from 'lucide-react'
+import React, { useState, type JSX } from 'react'
 
 const Card = ({ title, body, idx }: CardProps): JSX.Element => {
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(false)
 
   return (
     <div>
@@ -20,7 +20,7 @@ const Card = ({ title, body, idx }: CardProps): JSX.Element => {
           borderBottom: 'hidden',
           borderLeft: 0,
           borderRight: 0,
-          ...(idx === 0 ? {borderTop: 0} : {})
+          ...(idx === 0 ? { borderTop: 0 } : {}),
         }}
         onClick={() => setIsActive((state) => !state)}
       >
@@ -35,33 +35,32 @@ const Card = ({ title, body, idx }: CardProps): JSX.Element => {
             style={{
               marginLeft: '0.5rem',
             }}
-            className="font-bold text-signoz_vanilla-100 w-9/12"
+            className="w-9/12 font-bold text-signoz_vanilla-100"
           >
             {title}
           </div>
 
-          <div className="text-signoz_vanilla-400">
-            {!isActive ? <LucidePlus /> : <X />}
-          </div>
+          <div className="text-signoz_vanilla-400">{!isActive ? <LucidePlus /> : <X />}</div>
         </div>
         <div
-          className={`overflow-hidden transition-max-height duration-500 ease-in-out ${isActive ? 'max-h-screen' : 'max-h-0'
-            }`}
+          className={`transition-max-height overflow-hidden duration-500 ease-in-out ${
+            isActive ? 'max-h-screen' : 'max-h-0'
+          }`}
         >
           <div
-            className="card__body text-signoz_vanilla-400 p-4"
+            className="card__body p-4 text-signoz_vanilla-400"
             dangerouslySetInnerHTML={{ __html: body }}
           />
         </div>
       </div>
     </div>
-  );
-};
-
-interface CardProps {
-  title: string;
-  body: string;
-  idx?: number;
+  )
 }
 
-export default Card;
+interface CardProps {
+  title: string
+  body: string
+  idx?: number
+}
+
+export default Card
