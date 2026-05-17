@@ -76,9 +76,16 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const isOnboarding = isDocsOnboardingPathname(pathname)
 
   useEffect(() => {
+    const baseUrl = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL
+    if (!baseUrl) {
+      setRegions(FALLBACK_REGIONS)
+      setIsLoading(false)
+      return
+    }
+
     const fetchRegions = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/regions`)
+        const response = await fetch(`${baseUrl}/regions`)
         const data: RegionResponse = await response.json()
         if (data.status === 'success' && data.data && data.data.length > 0) {
           setRegions(data.data)
