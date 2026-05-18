@@ -6,6 +6,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { fetchAllBlogsForPage } from '@/utils/cachedData'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { computeTagCounts } from '@/utils/tagCounts'
 
 export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -32,17 +33,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURI(params.tag)
 
   const allBlogPosts = await fetchAllBlogsForPage()
-
-  // Compute tag counts dynamically
-  const tagCounts: Record<string, number> = {}
-  for (const post of allBlogPosts) {
-    if (post.tags && post.draft !== true) {
-      for (const t of post.tags) {
-        const formattedTag = slug(t)
-        tagCounts[formattedTag] = (tagCounts[formattedTag] || 0) + 1
-      }
-    }
-  }
+  const tagCounts = computeTagCounts(allBlogPosts)
 
   const filteredPosts = allBlogPosts
     .filter(
