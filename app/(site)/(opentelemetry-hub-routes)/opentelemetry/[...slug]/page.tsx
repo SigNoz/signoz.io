@@ -162,8 +162,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     notFound()
   }
 
-  // Generate structured data
-  const structuredData = generateStructuredData('opentelemetry', content)
+  // Generate structured data — override path with route prefix for correct URL
+  const contentForStructuredData = {
+    ...content,
+    path: `opentelemetry${content.path || `/${path}`}`,
+  }
+  const structuredData = generateStructuredData('opentelemetry', contentForStructuredData)
 
   // Prepare content for Layout
   const mainContent: CoreContent<MDXContent> = {
@@ -197,7 +201,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/opentelemetry/${slug}`
-  const canonicalUrl = `${siteMetadata.siteUrl}/opentelemetry/${content.slug}`
+  const canonicalUrl = `${siteMetadata.siteUrl}/opentelemetry${content.path || `/${path}`}`
   const jsonLd = structuredData
     ? {
         ...structuredData,
