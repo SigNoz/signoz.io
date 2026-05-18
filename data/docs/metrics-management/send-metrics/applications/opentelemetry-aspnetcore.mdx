@@ -14,8 +14,8 @@ Instrument your ASP.NET Core application with OpenTelemetry NuGet packages and s
 
 ## Prerequisites
 
-- .NET 8 or later
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- .NET 10 or later
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
 ## Send Metrics to SigNoz
 
@@ -65,10 +65,13 @@ app.Run();
 The OTel SDK reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and `OTEL_EXPORTER_OTLP_PROTOCOL` automatically.
 
 <Admonition type="info">
-  `.AddMeter("Microsoft.AspNetCore.MemoryPool")` enables `aspnetcore.memory_pool.*` metrics. These only emit on .NET 10+ and only when Kestrel reads a request body (POST endpoints that consume `req.Body`). On .NET 8, these panels stay empty.
+  `.AddMeter("Microsoft.AspNetCore.MemoryPool")` enables `aspnetcore.memory_pool.*` metrics, which only emit on .NET 10+. On .NET 8 or 9, all other HTTP, Kestrel, and runtime metrics populate as expected. The memory pool panels stay empty.
 </Admonition>
 
 ### Step 3. Set environment variables
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM / Linux" default>
 
 ```bash
 export OTEL_SERVICE_NAME="my-aspnetcore-app"
@@ -78,16 +81,55 @@ export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
 ```
 
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+```powershell
+$env:OTEL_SERVICE_NAME = "my-aspnetcore-app"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
+$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production"
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+```bash
+docker run \
+  -e OTEL_SERVICE_NAME="my-aspnetcore-app" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+  -e OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production" \
+  your-image:latest
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+```yaml
+env:
+  - name: OTEL_SERVICE_NAME
+    value: "my-aspnetcore-app"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: "http/protobuf"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "deployment.environment=production"
+```
+
+</TabItem>
+</Tabs>
+
 Verify these values:
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `OTEL_EXPORTER_OTLP_PROTOCOL`: Keeps the OTLP exporter on HTTP/protobuf
 - `OTEL_RESOURCE_ATTRIBUTES`: Sets `deployment.environment` on all telemetry — the [ASP.NET Core Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aspnet-metrics) uses this to filter by environment
-
-<Admonition type="note">
-  Pass these variables through your deployment mechanism: shell `export`, Docker `-e` flags, a Kubernetes `env:` block, or your CI/CD system. The application code does not need to change.
-</Admonition>
 
 ### Step 4. Validate
 
@@ -127,7 +169,7 @@ OTEL_METRIC_EXPORT_INTERVAL=10000
 
 Verify the header is exactly `signoz-ingestion-key=<your-key>` with no extra spaces or quotes.
 
-### `aspnetcore.memory_pool.*` not appearing
+### Metric `aspnetcore.memory_pool.*` not appearing
 
 These metrics require .NET 10+ and only emit when Kestrel reads request bodies. Add POST endpoints that read `req.Body` to trigger them.
 
