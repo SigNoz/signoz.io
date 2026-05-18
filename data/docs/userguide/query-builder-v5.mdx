@@ -25,14 +25,33 @@ The Query Builder is available across multiple surfaces in SigNoz:
 - **[Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)** — build custom panels with any telemetry signal
 - **[Alert rules](https://signoz.io/docs/alerts/)** — define alert conditions on logs, traces, or metrics
 
+## View Modes
+
+The view modes available depend on the signal you are querying.
+
+**Logs Explorer** supports three view modes:
+
+- **List View** — shows individual log lines. Useful for browsing raw logs and drilling into specific records.
+- **Time Series** — plots aggregated results as a chart over time. Requires an aggregation function to be selected.
+- **Table** — displays aggregated results in a tabular format. Like Time Series, requires an aggregation function.
+
+**Traces Explorer** supports four view modes:
+
+- **List View** — shows individual spans. Useful for browsing raw span data.
+- **Traces** — groups spans into full traces, showing the end-to-end request flow. Click a trace to open the trace detail view with the flamegraph/waterfall.
+- **Time Series** — plots aggregated span data as a chart over time. Requires an aggregation function.
+- **Table** — displays aggregated span data in tabular format. Requires an aggregation function.
+
+Aggregation, Group By, Result Manipulation, and Formulas are available in **Time Series** and **Table** views. List View and Traces view show raw records without aggregation.
+
 ## Core Capabilities
 
 ### Filtering
 
-Filtering is the foundation of every query. The Query Builder supports expression-based filters with auto-completed attribute names, values, and operators.
+Filtering is the foundation of every query. The Query Builder supports expression-based filters with auto-completed attribute names, values, and operators. You can either use the point-and-click dropdowns or type expressions directly into the filter bar (e.g., `service.name = 'frontend' AND http.status_code >= 400`).
 
 **How to filter:**
-1. Click the **Search Filter** field to see available attributes
+1. Click the **Search Filter** field to see available attributes (or start typing an expression)
 2. Select an attribute (e.g., `service.name`, `severity_text`, `status_code`)
 3. Choose an operator (`=`, `!=`, `IN`, `NOT_IN`, `LIKE`, `EXISTS`, etc.)
 4. Enter the value to match
@@ -56,12 +75,22 @@ Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to q
 
 For the full list of supported operators and syntax patterns, see the [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) and [Search Syntax](https://signoz.io/docs/userguide/search-syntax/).
 
+### Full-Text Search
+
+In the **Logs Explorer**, you can search log bodies without specifying a field name. Wrap your search phrase in single quotes and enter it in the filter bar:
+
+```
+'database connection timeout'
+```
+
+This searches across log body content. Full-text search is only available for logs — traces and metrics require field-based filters. For details on quoted vs unquoted search behavior, see [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/).
+
 ### Aggregation
 
 Aggregation functions reduce your filtered data into summary values — counts, averages, percentiles, rates, and more.
 
 <Figure
-  src="/img/docs/product-features/query-builder/aggregation.gif"
+  src="/img/docs/product-features/query-builder/query-builder-aggregation.webp"
   alt="Selecting aggregation functions in the Query Builder"
   caption="Selecting an aggregation function in the Query Builder"
 />
@@ -90,6 +119,12 @@ For example, grouping `count` of error spans by `service.name` shows you which s
 
 For details on how grouping interacts with aggregation, how missing values are handled, and how to format legends, see [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/#grouping).
 
+### Legend Format
+
+When using Group By in Time Series view, each group becomes a separate line on the chart. The **Legend format** field lets you control how these lines are labeled. Use `{{attribute_name}}` placeholders to insert group-by values into the legend text.
+
+For example, if you group by `service.name` and set the legend format to `{{service.name}} - errors`, each line is labeled like `frontend - errors`, `cartservice - errors`, etc.
+
 ### Result Manipulation
 
 After aggregation and grouping, you can further refine results:
@@ -98,11 +133,17 @@ After aggregation and grouping, you can further refine results:
 - **Limit** — restrict the number of results returned
 - **Having** — filter aggregated results (e.g., show only services where error count > 100)
 
-<Figure
-  src="/img/docs/product-features/query-builder/query-builder-result-manipulation.gif"
-  alt="Result manipulation options in the Query Builder"
-  caption="Sorting, limiting, and filtering aggregated results"
-/>
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/show-order-by.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Sorting, limiting, and filtering aggregated results</i></figcaption>
+</figure>
 
 For sorting mechanics, limit behavior with group by, and common HAVING patterns, see [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/).
 
@@ -110,20 +151,26 @@ For sorting mechanics, limit behavior with group by, and common HAVING patterns,
 
 You can run multiple queries simultaneously and combine them using formulas. This is useful for computing ratios (e.g., error rate = errors / total requests) or comparing different signals side by side.
 
-<Figure
-  src="/img/docs/product-features/query-builder/query-builder-multiple-queries.gif"
-  alt="Multiple queries and formulas in the Query Builder"
-  caption="Combining two queries with a formula to calculate error percentage"
-/>
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/error-percentage.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Formula feature of SigNoz Query Builder</i></figcaption>
+</figure>
 
 For formula syntax, available mathematical functions, and trace matching operators (`=>`, `->`, `&&`, `||`), see [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/).
 
 ## Metrics Query Builder
 
-The Metrics Query Builder includes all the capabilities above — filtering, aggregation, group by, ordering — plus two additional aggregation layers that are specific to metric data: **temporal aggregation** and **spatial aggregation**.
+The Metrics Query Builder includes all the capabilities above — filtering, aggregation, group by, ordering — plus two additional aggregation layers that are specific to metric data: **temporal aggregation** and **spatial aggregation**. For a detailed explanation of how different metric types (Gauge, Counter, Histogram) affect which aggregation functions are valid, see [Metric Types & Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
 
 <Figure
-  src="/img/docs/product-features/query-builder/metrics-query-builder-aggregations.webp"
+  src="/img/docs/product-features/query-builder/metrics-temporal-spatial-aggregation.webp"
   alt="Temporal and spatial aggregation controls in the metrics query builder"
   caption="Temporal and spatial aggregation controls in the Metrics Query Builder"
 />
@@ -163,14 +210,6 @@ Available functions: `Sum`, `Avg`, `Min`, `Max`
 
 Temporal aggregation always happens within a single series, and spatial aggregation always happens across series — they never mix.
 
-<Figure
-  src="/img/docs/product-features/query-builder/temporal-spatial-aggregations.webp"
-  alt="Diagram showing temporal and spatial aggregation flow"
-  caption="Temporal aggregation reduces data points within each time series, spatial aggregation combines multiple time series"
-/>
-
-For a deeper understanding of how different metric types (Gauge, Counter, Histogram) affect which aggregation functions are valid, including worked examples with real data, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
-
 ### Functions
 
 The Metrics Query Builder supports additional functions for extended analysis:
@@ -197,3 +236,5 @@ For the full list, chaining behavior, and examples, see [Functions for Extended 
 - [Metric Types & Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/) — how Gauge, Counter, and Histogram metrics work with temporal and spatial aggregation
 - [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how SigNoz calculates step intervals for time series queries
 - [Functions for Extended Analysis](https://signoz.io/docs/querying/functions-extended-analysis/) — exclusion, arithmetic, smoothing, and time shift functions
+- [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) — search log bodies without specifying field names
+- [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) — complete reference for filter bar expressions and operators
