@@ -22,6 +22,10 @@ export default function BlogPostCard({ blog }: { blog: BlogPostCardContent }) {
       return authorID
     }
 
+    if (typeof authorID === 'string') {
+      return { name: authorID }
+    }
+
     return {}
   }
 

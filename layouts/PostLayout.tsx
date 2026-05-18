@@ -2,7 +2,7 @@
 
 import { ReactNode, useRef, useState, useEffect } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog } from '../types/transformedContent'
+import type { AuthorDetail, Blog } from '../types/transformedContent'
 import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import BlogHeader from '@/components/BlogHeader/BlogHeader'
@@ -21,8 +21,6 @@ export interface RelatedArticleProps {
   publishedOn: string
   url: string
 }
-
-type AuthorDetail = { name?: string; url?: string; image_url?: string; [key: string]: any }
 
 interface LayoutProps {
   content: CoreContent<Blog>

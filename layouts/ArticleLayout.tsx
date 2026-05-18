@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Comparison, Guide } from '../types/transformedContent'
+import type { AuthorDetail, Blog, Comparison, Guide } from '../types/transformedContent'
 import { ArrowRight } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
@@ -26,8 +26,6 @@ export interface TocItemProps {
   depth: number
   value: string
 }
-
-type AuthorDetail = { name?: string; url?: string; image_url?: string; [key: string]: any }
 
 type ContentType = Blog | Guide | Comparison
 

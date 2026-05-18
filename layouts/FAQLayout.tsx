@@ -8,6 +8,7 @@ import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import GetStartedSigNoz from '@/components/GetStartedSigNoz/GetStartedSigNoz'
 import { RegionProvider } from '@/components/Region/RegionContext'
+import type { AuthorDetail } from '../types/transformedContent'
 
 export interface tocItemProps {
   url: string
@@ -28,8 +29,6 @@ type FAQContentData = {
   readingTime: { text: string; minutes?: number; time?: number; words?: number }
   [key: string]: unknown
 }
-
-type AuthorDetail = { name?: string; url?: string; image_url?: string }
 
 interface LayoutProps {
   content: FAQContentData

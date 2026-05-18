@@ -1,10 +1,8 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog } from '../types/transformedContent'
+import type { AuthorDetail, Blog } from '../types/transformedContent'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
-
-type AuthorDetail = { name?: string; url?: string; image_url?: string; [key: string]: any }
 
 interface LayoutProps {
   content: CoreContent<Blog>

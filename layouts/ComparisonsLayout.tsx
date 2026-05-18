@@ -2,9 +2,7 @@ import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import type { Comparison } from '../types/transformedContent'
-
-type AuthorDetail = { name?: string; url?: string; image_url?: string; [key: string]: any }
+import type { AuthorDetail, Comparison } from '../types/transformedContent'
 
 interface LayoutProps {
   content: CoreContent<Comparison>
