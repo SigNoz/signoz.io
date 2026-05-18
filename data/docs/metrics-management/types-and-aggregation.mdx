@@ -1,5 +1,5 @@
 ---
-date: 2026-05-06
+date: 2026-05-18
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 id: types-and-aggregation
@@ -380,5 +380,17 @@ This step is the same as the Cumulative Counter.
 ## Histogram & Exponential Histogram
 
 The aggregation of Histogram metrics is similar to that of Counter metrics. The difference is that Histogram metrics store the distribution of a set of values. There is no configuration required for temporal aggregation as the values get aggregated into buckets based on the histogram configuration. The result of the temporal aggregation is a single aggregated histogram for each interval within the time series.
+
+### How Histograms Affect Metric Volume
+
+In SigNoz, each histogram metric is decomposed into multiple time series per unique label combination:
+
+- **One series per bucket** — each bucket (e.g., `le="0.005"`, `le="0.01"`, ..., `le="+Inf"`) is stored as a separate time series. The default OpenTelemetry SDK histogram configuration defines 14 explicit bucket boundaries, which produces 15 bucket series (one per boundary plus the always-present `+Inf` bucket).
+- **A `_sum` series** — tracks the sum of all observed values.
+- **A `_count` series** — tracks the total number of observations.
+
+Each of these series produces a separate datapoint every scrape/export interval. For example, a histogram with the default 14 bucket boundaries and one unique label combination generates 17 datapoints per interval (15 bucket series + `_sum` + `_count`). If that histogram has 10 unique label combinations, it generates 170 datapoints per interval.
+
+This is standard OTLP histogram behavior. When evaluating metric volume, account for this multiplier effect — histograms naturally produce significantly more datapoints than counters or gauges with the same number of label combinations.
 
 The spatial aggregation step aggregates the values across multiple time series. The result of this step is a single numerical value indicating the percentile value for each interval for a group of time series. The grouping is done based on the group tags specified in the query. If no group tags are specified, all time series are considered as a single group.
