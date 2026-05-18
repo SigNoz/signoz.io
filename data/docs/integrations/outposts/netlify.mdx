@@ -1,5 +1,5 @@
 ---
-date: 2026-05-08
+date: 2026-05-18
 id: netlify
 title: Monitor Netlify with SigNoz
 description: Forward logs from your Netlify sites to SigNoz using Netlify's General HTTP log drain — covers traffic, function, edge function, deploy, and WAF logs.
@@ -84,7 +84,7 @@ Netlify pushes five log types. Each type includes different attributes:
 - **Background Functions** — logs from <a href="https://docs.netlify.com/functions/background-functions/" target="_blank" rel="noopener noreferrer nofollow">Background Functions</a> are not available via log drains.
 - **Function log size** — function log output is capped at 4 KB per invocation. Logs exceeding this limit are truncated to the last 4 KB.
 - **Best-effort delivery** — Netlify does not document delivery guarantees, retry policies, or ordering. Logs may be delayed or dropped under heavy load.
-- **Timestamps** — Netlify sends RFC 3339 timestamps. If SigNoz does not parse them, ingest time is used instead. To filter by exact source time, use the `timestamp` attribute.
+- **Timestamps** — Netlify sends RFC 3339 timestamps, but SigNoz's `/logs/json` endpoint expects nanosecond Unix epoch integers. SigNoz uses the ingest time as the log timestamp. The original Netlify timestamp is still available as a log attribute.
 - **Configuration delay** — changes to log drain settings may take up to five minutes to take effect.
 
 <details>
@@ -98,10 +98,6 @@ Netlify pushes five log types. Each type includes different attributes:
 - **Incorrect URL** — double-check the ingestion URL format. The region must match your SigNoz Cloud instance and the ingestion key must be valid.
 - **Wrong format** — ensure you selected **JSON** (not NDJSON) as the log drain format.
 - **Propagation delay** — log drain configuration changes can take up to five minutes. Wait and check again.
-
-### Logs appear but with missing timestamps
-
-Netlify sends timestamps as RFC 3339 strings (e.g., `2024-08-24T18:54:34.831Z`). SigNoz's `/logs/json` endpoint expects timestamps as nanosecond Unix epoch integers. If source timestamps are not parsed, SigNoz uses the ingest time. The original Netlify timestamp is still available as a log attribute for reference.
 
 ### Truncated function logs
 
