@@ -7,7 +7,11 @@ authors: [anushka_karmakar, nitya]
 description: Learn how SigNoz achieved 99.5% query performance improvement using hierarchical resource fingerprinting for ClickHouse sparse indexing. 
 image: /img/blog/2025/07/95-percent-faster-queries.webp
 keywords: [clickhouse, performance, query optimization, sparse index, hierarchical fingerprinting, observability, logs, SigNoz, database optimization, data blocks]
-related_articles: ['/blog/query-builder-v5', '/blog/clickhouse-storage-monitoring', '/blog/clickhouse-query-compare-two-spans', '/blog/building-a-high-performance-log-store']
+related_articles:
+  - '/blog/query-builder-v5'
+  - '/blog/clickhouse-storage-monitoring'
+  - '/blog/clickhouse-query-compare-two-spans'
+  - '/blog/building-a-high-performance-log-store'
 ---
 We cut log-query scanning from ~100% of data blocks to < 1% by reorganizing how logs are stored in ClickHouse. Instead of relying on bloom-filter skip indexes, they generate a deterministic “resource fingerprint” (hash of cluster + namespace + pod, etc.) for every log source and sort the table by this fingerprint in the primary-key ORDER BY clause. This packs logs from the same pod/service contiguously, letting ClickHouse’s sparse primary-key index skip irrelevant blocks. Result: a namespace filter now reads 222/26,135 blocks (0.85 %), slashing I/O and latency while remaining schema-compatible and extensible to AWS, Docker, etc.
 <Figure src="/img/blog/2025/07/95-percent-faster-queries.webp" alt="How we made our queries 99.5% faster" />
