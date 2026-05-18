@@ -95,8 +95,7 @@ import Tooltip from './ui/Tooltip'
 import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
 import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
-import dynamic from 'next/dynamic'
-const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'))
+import IncidentCostGraphic from './Blog/IncidentCostGraphic.lazy'
 
 // MDXComponents type from @types/mdx@2.0.13 expects React-18-shape components
 // (props: any) => Element | null, while @types/react@19 widens FC return to
