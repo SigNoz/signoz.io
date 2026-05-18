@@ -15,7 +15,7 @@ Tail sampling evaluates a complete trace before deciding whether to keep or drop
 Use tail sampling when your sampling decision depends on trace-level data (error status, total duration, a specific span name) that isn't available until the trace completes.
 
 <Admonition type="warning" title="Impact on APM metrics">
-  SigNoz computes APM metrics (`signoz_calls_total`, `signoz_latency_sum`, and related RED metrics) from ingested trace data. When you enable tail-based sampling, those metrics cover only the sampled traces, so absolute values like total request counts undercount real traffic. Latency trends and error spikes stay reliable. SigNoz is working on a fix.
+  SigNoz computes APM metrics (`signoz_calls_total`, `signoz_latency_sum`, and related RED metrics) from ingested trace data. When you enable tail-based sampling, those metrics cover only the sampled traces, so absolute values like total request counts undercount real traffic. Latency trends and error spikes stay reliable. SigNoz is aware of this gap and plans to address it in a future release.
 </Admonition>
 
 ## Prerequisites
@@ -71,13 +71,14 @@ service:
 | `num_traces`                        | `50000` | Maximum traces buffered in memory                                             |
 | `expected_new_traces_per_sec`       | `0`     | Hint for pre-allocating memory                                                |
 | `sample_on_first_match`             | `false` | Short-circuit policy evaluation as soon as any policy matches, without evaluating remaining policies |
+| `maximum_trace_size_bytes`          | `0`     | Drop traces exceeding this size (bytes); `0` disables the limit                                      |
 
 ## Policies
 
 Each policy defines a condition for keeping a trace. Policies are OR-ed: a trace is sampled if any policy matches. A `drop` policy overrides any `sample` decision.
 
 <Admonition type="tip" title="Recommended policy order">
-  Place `drop` policies first. You reduce the spans buffered in memory by discarding noisy, low-value traces (health checks, probes) before the keep policies run:
+  Place `drop` policies first. With `sample_on_first_match: true`, the processor short-circuits evaluation as soon as a policy matches. Putting `drop` policies first means the processor drops noisy traces (health checks, probes) before running the remaining policies:
 
   1. **Drop** — health checks, probes, known-noise spans
   2. **Keep** — errors and slow traces
@@ -287,7 +288,7 @@ After restarting the collector, confirm sampling is working:
 
 The processor holds all spans for each trace in memory until a decision is made. If trace volume exceeds `num_traces`, the oldest traces are evicted before evaluation — they are dropped without sampling.
 
-Monitor `otelcol_processor_tail_sampling_sampling_trace_dropped_too_early` for early drops. If this metric rises, increase `num_traces` or reduce `decision_wait`. Both changes increase memory usage.
+Monitor `otelcol_processor_tail_sampling_sampling_trace_dropped_too_early` for early drops. If this metric rises, increase `num_traces` or reduce `decision_wait`. Both changes increase memory usage. Set `maximum_trace_size_bytes` to drop oversized traces before they exhaust the buffer.
 
 ### Late-arriving spans
 
@@ -320,7 +321,7 @@ All spans for a single trace must arrive at the same collector instance. Without
 
 1. Reduce `num_traces` or `decision_wait` to lower the in-memory buffer.
 2. Enable `sample_on_first_match: true` to decide early when a policy matches.
-3. Set `maximum_trace_size_bytes` to drop abnormally large traces before they consume memory.
+3. Set `maximum_trace_size_bytes` to drop oversized traces before they exhaust memory.
 
 ### Sampling decisions seem inconsistent
 
