@@ -1,12 +1,13 @@
 ---
-date: 2024-06-06
+date: 2026-05-04
 id: trace
-
 title: Parse Trace Information for your Logs
+description: Parse trace ID, span ID, and trace flags from log attributes into standard OpenTelemetry fields using SigNoz Log Pipelines.
+doc_type: tutorial
 ---
 
 ## Overview
-If your logs contain trace information outside the [standard OpenTelemetry fields](https://opentelemetry.io/docs/specs/otel/logs/data-model/#log-and-event-record-definition), you can use log pipelines to parse that information into the right fields and enable correlation of your logs to and from corresponding traces.  
+If your logs contain trace information outside the <a href="https://opentelemetry.io/docs/specs/otel/logs/data-model/#log-and-event-record-definition" target="_blank" rel="noopener noreferrer nofollow">standard OpenTelemetry fields</a>, you can use log pipelines to parse that information into the right fields and enable correlation of your logs to and from corresponding traces.  
 
 <figure data-zoomable align="center">
   <img
@@ -37,12 +38,12 @@ If your logs contain trace information outside the [standard OpenTelemetry field
 In this guide, you will see how to parse values from log attributes into the trace_id, span_id and trace_flags fields.
 
  ## Prerequisites
- - You are [sending logs to SigNoz](/docs/userguide/logs).
+ - You are [sending logs to SigNoz](https://signoz.io/docs/userguide/logs).
  - Your logs contain trace information in log attributes.
 
 <Admonition>
 
-If your logs contain trace information in the body, you can [parse them](/docs/logs-pipelines/guides/json) out into their own attributes before populating trace information based on them.
+If your logs contain trace information in the body, you can [parse them](https://signoz.io/docs/logs-pipelines/guides/json) out into their own attributes before populating trace information based on them.
 
 </Admonition>
 
@@ -53,86 +54,54 @@ You can follow the steps below to create a log pipeline for populating trace
 information based on data in log attributes.
 
 
-### Step 1: Navigate to Logs Pipelines Page
+### Step 1: Navigate to Pipelines Page
 
-Hover over the **Logs** menu in the sidebar and click on the **Logs Pipeline** submenu item.
+In SigNoz, go to **Logs** → **Pipelines**
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/navigate-to-logs-pipelines.png"
-    alt="Sidebar navigation for getting to Logs Pipelines page"
-  />
-  <figcaption>
-    <i>
-      Sidebar navigation for getting to Logs Pipelines page
-    </i>
-  </figcaption>
-</figure>
-
-
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step1.webp"
+  alt="Navigate to Log Pipelines"
+  caption="Navigate to Log Pipelines"
+/>
 
 ### Step 2: Create a New Pipeline
-- Open the "Create New Pipeline" dialog.
-    - If you do not have existing pipelines, press the "**New Pipeline**" button.
-    <figure data-zoomable align="center">
-      <img
-        src="/img/logs/pipelines/empty-state-new-pipeline-button.png"
-        alt="New Pipeline Button"
-      />
-      <figcaption>
-        <i>
-          New Pipeline Button
-        </i>
-      </figcaption>
-    </figure>
-    
 
-    - If you already have some pipelines, press the "**Enter Edit Mode**" button and then click the "**Add a New Pipeline**" button at the bottom of the list of pipelines.
-    <figure data-zoomable align="center">
-      <img
-        src="/img/logs/pipelines/enter-edit-mode.png"
-        alt="Enter edit mode button"
-      />
-      <figcaption>
-        <i>
-          Enter Edit Mode button
-        </i>
-      </figcaption>
-    </figure>
-    
-    <figure data-zoomable align="center">
-      <img
-        src="/img/logs/pipelines/add-a-new-pipeline.png"
-        alt="Add a New Pipeline button"
-      />
-      <figcaption>
-        <i>
-          Add a New Pipeline button
-        </i>
-      </figcaption>
-    </figure>
-    
+- If you do not have existing pipelines, press the **"New Pipeline"** button.
 
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/logs-parsing-pipeline-step2.webp"
+  alt="New Pipeline Button"
+  caption="New Pipeline Button"
+/>
 
-- Provide details about the pipeline in the Create Pipeline Dialog.
-    - Use the **Name** field to give your pipeline a descriptive short name.
-    - Use the **Description** field to add a detailed description for your pipeline.
-    - Use the **Filter** field to select the logs you want to process with this pipeline. Typically, these are filters identifying the source of the logs you want to process. `service = checkout` for example.
-    - Use the **Filtered Logs Preview** to verify that the logs you want to process will be selected by the pipeline.
-    
-    <figure data-zoomable align="center">
-      <img
-        src="/img/logs/pipelines/create-new-trace-parsing-pipeline.png"
-        alt="Create New Pipeline dialog"
-        width='70%'      />
-      <figcaption>
-        <i>
-          Create New Pipeline dialog
-        </i>
-      </figcaption>
-    </figure>
+- If you already have some pipelines, press the **"Enter Edit Mode"** button and then click the **"Add a New Pipeline"** button at the bottom of the list.
 
-- Press the "**Create**" button if everything looks right.
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step3.webp"
+  alt="Enter Edit Mode button"
+  caption="Enter Edit Mode button"
+/>
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step4.webp"
+  alt="Add a New Pipeline button"
+  caption="Add a New Pipeline button"
+/>
+
+Provide details about the pipeline in the Create Pipeline Dialog:
+
+- **Name:** Provide a descriptive pipeline name.
+- **Description:** Add a detailed description for your pipeline (optional).
+- **Filter:** Use the filter field to select the logs you want to process. For example, `service.name = checkout`.
+- **Filtered Logs Preview:** Verify that the logs you want to process are selected.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step5.webp"
+  alt="Create New Pipeline dialog"
+  caption="Create New Pipeline dialog"
+/>
+
+Press the **"Create"** button to create the pipeline.
 
 
 ### Step 3: Add Processors for Parsing Trace Information

@@ -6,8 +6,9 @@ import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import docsSideNav from 'constants/docsSideNav'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
+import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 
 interface DocsSidebarProps {
   onNavItemClick?: () => void
@@ -15,13 +16,16 @@ interface DocsSidebarProps {
 
 const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const regionParam = searchParams.get('region')
-  const cloudRegionParam = searchParams.get('cloud_region')
+  const search = useBrowserSearch()
   const [sideNav, setSideNav] = useState(docsSideNav)
   const [isClient, setIsClient] = useState(false)
   const [activeRoute, setActiveRoute] = useState<string | null>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
+
+  // Only parse after client-side mount
+  const searchParams = isClient ? new URLSearchParams(search) : null
+  const regionParam = searchParams?.get('region')
+  const cloudRegionParam = searchParams?.get('cloud_region')
 
   useEffect(() => {
     setIsClient(true)

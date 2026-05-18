@@ -48,29 +48,35 @@ const s3Client = new S3Client({
   },
 })
 
+// URL prefix to Strapi endpoint/content_type mapping for related_articles component
+const RELATED_ARTICLE_TYPE_MAP = {
+  guides: { endpoint: 'guides', content_type: 'guide' },
+  comparisons: { endpoint: 'comparisons', content_type: 'comparison' },
+  blog: { endpoint: 'blogs', content_type: 'blog' },
+  faqs: { endpoint: 'faqs', content_type: 'faq' },
+  opentelemetry: { endpoint: 'opentelemetries', content_type: 'opentelemetry' },
+  'case-study': { endpoint: 'case-studies', content_type: 'case_study' },
+}
+
 // Strapi Collection Type Schemas
 const COLLECTION_SCHEMAS = {
   faqs: {
     apiPath: 'api::faq.faq',
     endpoint: 'faqs',
     fields: ['title', 'description', 'date', 'path', 'content', 'deployment_status'],
+    hasRelatedArticles: true,
     relations: {
       authors: {
         endpoint: 'authors',
-        matchField: 'key', // Match against author.key
-        frontmatterField: 'authors', // Array of author keys in frontmatter
+        matchField: 'key',
+        frontmatterField: 'authors',
       },
       tags: {
         endpoint: 'tags',
-        matchField: 'key', // Match against tag.key
-        frontmatterField: 'tags', // Array of tag values in frontmatter
-        filterKey: true, // Also check if tag.key contains 'faq' or 'faqs'
-        matchValue: true, // Match against tag.value (case insensitive)
-      },
-      related_faqs: {
-        endpoint: 'faqs',
-        matchField: 'path', // Match against faq.path
-        frontmatterField: 'related_faqs', // Array of FAQ paths in frontmatter
+        matchField: 'key',
+        frontmatterField: 'tags',
+        filterKey: true,
+        matchValue: true,
       },
     },
   },
@@ -78,11 +84,12 @@ const COLLECTION_SCHEMAS = {
     apiPath: 'api::case-study.case-study',
     endpoint: 'case-studies',
     fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status'],
+    hasRelatedArticles: true,
     relations: {
       authors: {
         endpoint: 'authors',
-        matchField: 'key', // Match against author.key
-        frontmatterField: 'authors', // Array of author keys in frontmatter
+        matchField: 'key',
+        frontmatterField: 'authors',
       },
     },
   },
@@ -90,35 +97,26 @@ const COLLECTION_SCHEMAS = {
     apiPath: 'api::comparison.comparison',
     endpoint: 'comparisons',
     fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status'],
+    hasRelatedArticles: true,
     relations: {
       authors: {
         endpoint: 'authors',
-        matchField: 'key', // Match against author.key
-        frontmatterField: 'authors', // Array of author keys in frontmatter
+        matchField: 'key',
+        frontmatterField: 'authors',
       },
       tags: {
         endpoint: 'tags',
-        matchField: 'key', // Match against tag.key
-        frontmatterField: 'tags', // Array of tag values in frontmatter
-        filterKey: true, // Also check if tag.key contains 'faq' or 'faqs'
-        matchValue: true, // Match against tag.value (case insensitive)
-      },
-      related_comparisons: {
-        endpoint: 'comparisons',
-        matchField: 'path', // Match against comparison.path
-        frontmatterField: 'related_comparisons', // Array of comparison paths in frontmatter
-      },
-      related_blogs: {
-        endpoint: 'blogs',
-        matchField: 'path', // Match against blog.path
-        frontmatterField: 'related_blogs', // Array of blog paths in frontmatter
+        matchField: 'key',
+        frontmatterField: 'tags',
+        filterKey: true,
+        matchValue: true,
       },
       keywords: {
         endpoint: 'keywords',
-        matchField: 'key', // Match against keyword.key
-        frontmatterField: 'keywords', // Array of keyword values in frontmatter
-        filterKey: true, // Also check if keyword.key contains 'comparison' or 'comparisons'
-        matchValue: true, // Match against keyword.value (case insensitive)
+        matchField: 'key',
+        frontmatterField: 'keywords',
+        filterKey: true,
+        matchValue: true,
       },
     },
   },
@@ -126,40 +124,26 @@ const COLLECTION_SCHEMAS = {
     apiPath: 'api::guide.guide',
     endpoint: 'guides',
     fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status', 'date'],
+    hasRelatedArticles: true,
     relations: {
       authors: {
         endpoint: 'authors',
-        matchField: 'key', // Match against author.key
-        frontmatterField: 'authors', // Array of author keys in frontmatter
+        matchField: 'key',
+        frontmatterField: 'authors',
       },
       keywords: {
         endpoint: 'keywords',
-        matchField: 'key', // Match against keyword.key
-        frontmatterField: 'keywords', // Array of keyword values in frontmatter
-        filterKey: true, // Also check if keyword.key contains 'comparison' or 'comparisons'
-        matchValue: true, // Match against keyword.value (case insensitive)
+        matchField: 'key',
+        frontmatterField: 'keywords',
+        filterKey: true,
+        matchValue: true,
       },
       tags: {
         endpoint: 'tags',
-        matchField: 'key', // Match against tag.key
-        frontmatterField: 'tags', // Array of tag values in frontmatter
-        filterKey: true, // Also check if tag.key contains 'faq' or 'faqs'
-        matchValue: true, // Match against tag.value (case insensitive)
-      },
-      related_guides: {
-        endpoint: 'guides',
-        matchField: 'path', // Match against guide.path
-        frontmatterField: 'related_guides', // Array of guide paths in frontmatter
-      },
-      related_blogs: {
-        endpoint: 'blogs',
-        matchField: 'path', // Match against blog.path
-        frontmatterField: 'related_blogs', // Array of blog paths in frontmatter
-      },
-      related_comparisons: {
-        endpoint: 'comparisons',
-        matchField: 'path', // Match against comparison.path
-        frontmatterField: 'related_comparisons', // Array of comparison paths in frontmatter
+        matchField: 'key',
+        frontmatterField: 'tags',
+        filterKey: true,
+        matchValue: true,
       },
     },
   },
@@ -167,25 +151,26 @@ const COLLECTION_SCHEMAS = {
     apiPath: 'api::opentelemetry.opentelemetry',
     endpoint: 'opentelemetries',
     fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status', 'date'],
+    hasRelatedArticles: true,
     relations: {
       authors: {
         endpoint: 'authors',
-        matchField: 'key', // Match against author.key
-        frontmatterField: 'authors', // Array of author keys in frontmatter
+        matchField: 'key',
+        frontmatterField: 'authors',
       },
       tags: {
         endpoint: 'tags',
-        matchField: 'key', // Match against tag.key
-        frontmatterField: 'tags', // Array of tag values in frontmatter
-        filterKey: true, // Also check if tag.key contains 'faq' or 'faqs'
-        matchValue: true, // Match against tag.value (case insensitive)
+        matchField: 'key',
+        frontmatterField: 'tags',
+        filterKey: true,
+        matchValue: true,
       },
       keywords: {
         endpoint: 'keywords',
-        matchField: 'key', // Match against keyword.key
-        frontmatterField: 'keywords', // Array of keyword values in frontmatter
-        filterKey: true, // Also check if keyword.key contains 'comparison' or 'comparisons'
-        matchValue: true, // Match against keyword.value (case insensitive)
+        matchField: 'key',
+        frontmatterField: 'keywords',
+        filterKey: true,
+        matchValue: true,
       },
     },
   },
@@ -240,14 +225,26 @@ function parseMDXFile(filePath) {
   }
 }
 
+/**
+ * Remove GFM fenced code blocks so illustrative JSX/HTML in docs is not scanned as assets.
+ * Opening/closing fences must allow leading whitespace: list-nested blocks
+ */
+function stripFencedCodeBlocks(content) {
+  let out = content.replace(/^[ \t]*```[^\n]*\n[\s\S]*?^[ \t]*```/gm, '\n')
+  out = out.replace(/^[ \t]*~~~[^\n]*\n[\s\S]*?^[ \t]*~~~/gm, '\n')
+  return out
+}
+
 // Helper: Extract asset paths from content and frontmatter
 function extractAssetPaths(content, frontmatter) {
   const paths = new Set()
 
+  const bodyForScan = stripFencedCodeBlocks(content)
+
   const mdImageRegex = /!\[.*?\]\((.*?)\)/g
 
   let match
-  while ((match = mdImageRegex.exec(content)) !== null) {
+  while ((match = mdImageRegex.exec(bodyForScan)) !== null) {
     if (match[1] && !match[1].startsWith('http') && !match[1].startsWith('https')) {
       paths.add(match[1])
     }
@@ -262,7 +259,7 @@ function extractAssetPaths(content, frontmatter) {
     )
 
     let match
-    while ((match = tagRegex.exec(content)) !== null) {
+    while ((match = tagRegex.exec(bodyForScan)) !== null) {
       const srcValue = match[1]
       if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
         paths.add(srcValue)
@@ -275,7 +272,7 @@ function extractAssetPaths(content, frontmatter) {
       'gi'
     )
 
-    while ((match = tagRegexNoQuotes.exec(content)) !== null) {
+    while ((match = tagRegexNoQuotes.exec(bodyForScan)) !== null) {
       const srcValue = match[1]
       if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
         paths.add(srcValue)
@@ -520,6 +517,109 @@ async function createTagOrKeyword(endpoint, value, folderName) {
   }
 }
 
+// Helper: Parse a related article URL into prefix and path
+// e.g. '/guides/what-is-prometheus/' -> { prefix: 'guides', path: '/what-is-prometheus' }
+function parseRelatedArticleUrl(url) {
+  const cleaned = url.replace(/^\/+|\/+$/g, '')
+  const slashIdx = cleaned.indexOf('/')
+  if (slashIdx === -1) return null
+
+  const prefix = cleaned.substring(0, slashIdx)
+  const slug = cleaned.substring(slashIdx + 1)
+  const articlePath = `/${slug.replace(/\/+$/, '')}`
+
+  return { prefix, path: articlePath }
+}
+
+// Cache for entity lookups during related articles resolution
+const _relatedArticleEntityCache = {}
+
+// Helper: Resolve related_articles frontmatter into component data with actual document relations.
+// Each component entry sets content_type + the matching relation field to the document ID.
+// Articles not found in Strapi are skipped (they'll be picked up on next sync after migration).
+async function resolveRelatedArticlesComponent(frontmatter) {
+  const urls = frontmatter.related_articles
+  if (!urls || !Array.isArray(urls) || urls.length === 0) {
+    return { components: [], warnings: [] }
+  }
+
+  const components = []
+  const warnings = []
+
+  // Collect unique types to prefetch
+  const typesToFetch = new Set()
+  const parsedUrls = []
+
+  for (const url of urls) {
+    const parsed = parseRelatedArticleUrl(url)
+    if (!parsed) {
+      warnings.push({ url, reason: 'Could not parse URL' })
+      parsedUrls.push(null)
+      continue
+    }
+
+    const typeInfo = RELATED_ARTICLE_TYPE_MAP[parsed.prefix]
+    if (!typeInfo) {
+      warnings.push({ url, reason: `Unknown content type prefix: ${parsed.prefix}` })
+      parsedUrls.push(null)
+      continue
+    }
+
+    typesToFetch.add(parsed.prefix)
+    parsedUrls.push({ ...parsed, typeInfo, originalUrl: url })
+  }
+
+  // Prefetch entities for each referenced type (cached across calls within a sync run)
+  for (const prefix of typesToFetch) {
+    if (!_relatedArticleEntityCache[prefix]) {
+      const typeInfo = RELATED_ARTICLE_TYPE_MAP[prefix]
+      try {
+        let entities = await fetchAllEntities(typeInfo.endpoint)
+        entities = filterEntitiesByDeploymentStatus(entities)
+        _relatedArticleEntityCache[prefix] = entities
+        console.log(`    Cached ${entities.length} ${prefix} entities for related articles lookup`)
+      } catch (err) {
+        console.warn(`    Could not fetch ${prefix} from Strapi: ${err.message}`)
+        _relatedArticleEntityCache[prefix] = []
+      }
+    }
+  }
+
+  for (const parsed of parsedUrls) {
+    if (!parsed) continue
+
+    const { prefix, path: articlePath, typeInfo, originalUrl } = parsed
+    const entities = _relatedArticleEntityCache[prefix] || []
+
+    // Look up by path in Strapi to get documentId for the relation
+    const match = entities.find((e) => e.path === articlePath)
+
+    if (!match || !match.documentId) {
+      warnings.push({
+        url: originalUrl,
+        reason: `Document not found in Strapi (${typeInfo.endpoint}). Will be resolved after content is migrated.`,
+      })
+      continue
+    }
+
+    console.log(
+      `    Resolved "${originalUrl}" -> ${typeInfo.content_type} documentId: ${match.documentId}`
+    )
+
+    // Build component entry: set content_type + the matching relation field
+    // Relation field name matches content_type (case-study -> case_study for field name)
+    const relationFieldName = typeInfo.content_type.replace(/-/g, '_')
+    const entry = {
+      content_type: typeInfo.content_type,
+      [relationFieldName]: match.documentId,
+    }
+
+    components.push(entry)
+  }
+
+  return { components, warnings }
+}
+
 // Helper: Resolve relation IDs
 async function resolveRelations(folderName, frontmatter) {
   const schema = COLLECTION_SCHEMAS[folderName]
@@ -677,6 +777,20 @@ async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
     }
   }
 
+  // Clean up legacy related_* frontmatter fields that are no longer schema relations
+  const legacyRelatedFields = [
+    'related_guides',
+    'related_comparisons',
+    'related_blogs',
+    'related_faqs',
+  ]
+  for (const field of legacyRelatedFields) {
+    if (data[field]) {
+      console.log(`    🗑️ [DEBUG] Removing legacy frontmatter field: ${field}`)
+      delete data[field]
+    }
+  }
+
   if (Object.keys(relations).length > 0) {
     console.log(
       `  ➕ [DEBUG] Adding resolved relations to data:`,
@@ -685,6 +799,36 @@ async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
     Object.assign(data, relations)
   } else {
     console.log(`  ℹ️ [DEBUG] No relations were successfully resolved, none will be added`)
+  }
+
+  // Resolve related_articles component (interleaved, ordered)
+  if (schema.hasRelatedArticles) {
+    console.log(`  🔗 Resolving related_articles component...`)
+    const { components: relatedArticleComponents, warnings: raWarnings } =
+      await resolveRelatedArticlesComponent(frontmatter)
+
+    if (relatedArticleComponents.length > 0) {
+      data.related_articles = relatedArticleComponents
+      console.log(`  ✅ related_articles: Resolved ${relatedArticleComponents.length} component(s)`)
+    } else {
+      // Send empty array to clear any existing component entries
+      data.related_articles = []
+      console.log(`  ℹ️ related_articles: No components resolved`)
+    }
+
+    // Remove raw frontmatter field so it's not sent as a plain value
+    delete data.related_articles_raw
+    if (raWarnings.length > 0) {
+      raWarnings.forEach((w) => {
+        console.warn(`    ⚠️ related_articles: ${w.url} - ${w.reason}`)
+      })
+      warnings.push(
+        ...raWarnings.map((w) => ({
+          relationName: 'related_articles',
+          unmatchedValues: [w.url],
+        }))
+      )
+    }
   }
 
   // Check for missing required fields
@@ -783,7 +927,6 @@ async function updateEntry(folderName, documentId, data) {
     console.log(`  🔄 [DEBUG] Document ID: ${documentId}`)
     console.log(`  🔄 [DEBUG] Update URL: ${CMS_API_URL}/api/${schema.endpoint}/${documentId}`)
     console.log(`  🔄 [DEBUG] Data keys:`, Object.keys(data).join(', '))
-    console.log(`  🔄 [DEBUG] Full data:`, JSON.stringify(data, null, 2))
 
     const response = await axios.put(
       `${CMS_API_URL}/api/${schema.endpoint}/${documentId}`,
@@ -1014,6 +1157,9 @@ async function syncToStrapi() {
               allRelationNames.add(relationName)
             })
           }
+          if (schema.hasRelatedArticles) {
+            allRelationNames.add('related_articles')
+          }
         }
       })
 
@@ -1133,6 +1279,9 @@ async function syncToStrapi() {
             Object.keys(schema.relations).forEach((relationName) => {
               allRelationNames.add(relationName)
             })
+          }
+          if (schema.hasRelatedArticles) {
+            allRelationNames.add('related_articles')
           }
         }
       })

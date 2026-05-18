@@ -8,12 +8,17 @@ import {
   buildDocsMarkdownRewritePath,
   shouldRewriteDocsToMarkdown,
 } from '@/utils/docs/markdownRouting'
+import { buildDocsOnboardingPath, isDocsPathname } from '@/utils/docs/onboardingPath'
+import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { QUERY_PARAMS } from '@/constants/queryParams'
 import {
   buildApiReferenceOpenAPISpecRewritePath,
   shouldRewriteApiReferenceToOpenAPISpec,
 } from '@/utils/apiReferenceMarkdownRouting'
 
 const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
+
+const GROWTHBOOK_ANONYMOUS_ID_HEADER = 'x-gb-anonymous-id'
 
 // Extract OS from user agent (server-side version)
 const getOSFromUserAgent = (userAgent: string): string => {
@@ -33,12 +38,9 @@ const getOSFromUserAgent = (userAgent: string): string => {
 
 export function middleware(req: NextRequest) {
   // Get or generate anonymous ID
-  let anonymousId = req.cookies.get('gb_anonymous_id')?.value
+  const anonymousId = req.cookies.get('gb_anonymous_id')?.value
   const shouldSetCookie = !anonymousId
-
-  if (!anonymousId) {
-    anonymousId = uuidv4()
-  }
+  const growthBookAnonymousId = anonymousId ?? uuidv4()
 
   // Get user agent and detect bot
   const userAgent = req.headers.get('user-agent') || ''
@@ -51,10 +53,27 @@ export function middleware(req: NextRequest) {
 
   // Get request details
   const pathname = req.nextUrl.pathname
+
+  // Redirect legacy ?source=onboarding URLs to /docs-onboarding/ path
+  const isLegacyOnboardingDocsRequest =
+    isDocsPathname(pathname) &&
+    req.nextUrl.searchParams.get(QUERY_PARAMS.SOURCE) === ONBOARDING_SOURCE
+
+  if (isLegacyOnboardingDocsRequest) {
+    const redirectUrl = req.nextUrl.clone()
+    redirectUrl.pathname = buildDocsOnboardingPath(pathname)
+    redirectUrl.searchParams.delete(QUERY_PARAMS.SOURCE)
+
+    return NextResponse.redirect(redirectUrl)
+  }
+
   const referer = req.headers.get('referer') || req.headers.get('referrer') || 'direct'
   const ip =
     req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
   const vercelIp = ipAddress(req) || 'unknown'
+
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set(GROWTHBOOK_ANONYMOUS_ID_HEADER, growthBookAnonymousId)
 
   // Log bot requests
   if (isBot) {
@@ -79,20 +98,28 @@ export function middleware(req: NextRequest) {
           custom_content_type_header: contentTypeHeader,
           custom_prefers_markdown: prefersMarkdown,
         },
-        anonymousId,
+        anonymousId: growthBookAnonymousId,
       })
     )
   }
 
   // Prepare response
-  let res = NextResponse.next()
+  let res = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
   const docsMarkdownRewrite = shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
   const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, prefersMarkdown, isBot)
 
   if (docsMarkdownRewrite) {
     const rewriteUrl = req.nextUrl.clone()
     rewriteUrl.pathname = buildDocsMarkdownRewritePath(pathname)
-    res = NextResponse.rewrite(rewriteUrl)
+    res = NextResponse.rewrite(rewriteUrl, {
+      request: {
+        headers: requestHeaders,
+      },
+    })
     if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
       res.headers.set('x-markdown-rewrite', 'true')
     }
@@ -100,7 +127,11 @@ export function middleware(req: NextRequest) {
     const rewriteUrl = req.nextUrl.clone()
     rewriteUrl.pathname = buildApiReferenceOpenAPISpecRewritePath(pathname)
 
-    res = NextResponse.rewrite(rewriteUrl)
+    res = NextResponse.rewrite(rewriteUrl, {
+      request: {
+        headers: requestHeaders,
+      },
+    })
     if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
       res.headers.set('x-markdown-rewrite', 'true')
     }
@@ -141,8 +172,8 @@ export function middleware(req: NextRequest) {
   }
 
   // Set cookie if it wasn't already set
-  if (shouldSetCookie && anonymousId) {
-    res.cookies.set('gb_anonymous_id', anonymousId, {
+  if (shouldSetCookie) {
+    res.cookies.set('gb_anonymous_id', growthBookAnonymousId, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365, // one year
       sameSite: 'lax',

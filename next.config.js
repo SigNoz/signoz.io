@@ -1,6 +1,23 @@
 const { withContentlayer } = require('next-contentlayer2')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
+/**
+ * Generate /docs-onboarding/* versions of all /docs/* redirects.
+ * This ensures redirect rules apply consistently in the onboarding context.
+ */
+function withDocsOnboardingRedirects(redirects) {
+  const docsOnboardingRedirects = redirects
+    .filter((r) => r.source.startsWith('/docs/'))
+    .map((r) => ({
+      ...r,
+      source: r.source.replace(/^\/docs\//, '/docs-onboarding/'),
+      destination: r.destination.startsWith('/docs/')
+        ? r.destination.replace(/^\/docs\//, '/docs-onboarding/')
+        : r.destination,
+    }))
+  return [...redirects, ...docsOnboardingRedirects]
+}
+
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
@@ -89,7 +106,27 @@ module.exports = () => {
       ]
     },
     async redirects() {
-      return [
+      return withDocsOnboardingRedirects([
+        {
+          source: '/docs/product-features/trace-explorer',
+          destination: '/docs/userguide/traces/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/trace-explorer/',
+          destination: '/docs/userguide/traces/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/alert-management',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/alert-management/',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
         {
           source: '/docs/userguide/clickhouse-faqs/',
           destination: '/docs/userguide/query-troubleshooting-faqs/',
@@ -133,6 +170,56 @@ module.exports = () => {
         {
           source: '/oss-to-cloud/',
           destination: '/teams/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/apm-metrics',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/apm-metrics/',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/application-monitoring/api-monitoring',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/application-monitoring/api-monitoring/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies/',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview/',
+          destination: '/docs/alerts/',
           permanent: true,
         },
         {
@@ -465,6 +552,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/logs-pipelines/concepts/',
+          destination: '/docs/logs-pipelines/introduction/',
+          permanent: true,
+        },
+        {
           source: '/docs/logs-pipelines/guides/severity/',
           destination: '/docs/logs-pipelines/guides/severity-parsing/',
           permanent: true,
@@ -510,6 +602,11 @@ module.exports = () => {
           source: '/docs/metrics-management/send-metrics/runtimes/java-metrics/jmx-metrics/',
           destination:
             '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/working-with-metrics-guides/',
+          destination: '/docs/metrics-management/metrics-explorer/',
           permanent: true,
         },
         {
@@ -574,6 +671,11 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/manage-dashboards-and-panels/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/manage-panels/',
           destination: '/docs/userguide/manage-dashboards/',
           permanent: true,
         },
@@ -680,7 +782,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3uf4h5hpi-qnBT5dBELJIxWFHjRB28Sw',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3x7z8ihiq-CJ6dU~OCOgp5nS1gTqwFTw',
           basePath: false,
           permanent: true,
         },
@@ -1345,6 +1447,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/logs-query-troubleshooting/',
+          destination: '/docs/logs-management/troubleshooting/troubleshooting/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs-json-filters/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting/',
           destination: '/docs/traces-management/troubleshooting/troubleshooting/',
           permanent: true,
@@ -1691,6 +1803,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/integrations/flyio/',
+          destination: '/docs/integrations/outposts/flyio/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/render-metrics/',
+          destination: '/docs/integrations/outposts/render/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/docker-standalone/',
           destination: '/docs/install/docker/',
           permanent: true,
@@ -1741,8 +1863,23 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/logs',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
           source: '/docs/userguide/logs/',
-          destination: '/docs/logs-management/overview/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer/',
+          destination: '/docs/userguide/logs_query_builder/',
           permanent: true,
         },
         {
@@ -1907,11 +2044,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/userguide/trac',
-          destination: '/docs/userguide/traces/',
-          permanent: true,
-        },
-        {
           source: '/firebase-alternatives',
           destination: '/comparisons/firebase-alternatives/',
           permanent: true,
@@ -1965,6 +2097,11 @@ module.exports = () => {
         {
           source: '/docs/metrics/',
           destination: '/docs/metrics-management/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/data-storage/',
+          destination: '/docs/metrics-management/reference/',
           permanent: true,
         },
         {
@@ -2693,6 +2830,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/trace-funnels/working-with-trace-funnels/',
+          destination: '/docs/trace-funnels/setup/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/',
           destination: '/docs/faqs/general/',
           permanent: true,
@@ -2717,7 +2859,27 @@ module.exports = () => {
           destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
-      ]
+        {
+          source: '/docs/cost-meter/query-setup-guides/',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/query-setup-guides',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/alert-setup-guides/',
+          destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/alert-setup-guides',
+          destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+      ])
     },
     webpack: (config, options) => {
       // Find Next.js's existing rule that handles SVG imports
