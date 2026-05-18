@@ -473,6 +473,21 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/overview',
+                label: 'Overview',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/permissions',
+                label: 'Permissions',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/roles',
+                label: 'Roles',
+              },
+              {
+                type: 'doc',
                 route: '/docs/manage/administrator-guide/iam/service-accounts',
                 label: 'Service Accounts',
               },
@@ -2494,9 +2509,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
-        items: [
-          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
-        ],
+        items: [{ type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' }],
       },
     ],
   },

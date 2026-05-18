@@ -20,6 +20,7 @@ import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -187,38 +188,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   }
 
   // Prepare author details
-  const authorDetails: CoreContent<MDXContent>[] = content.authors?.map((author) => ({
-    name: author?.name || 'Unknown Author',
-    avatar: author?.image_url || '/static/images/signoz-logo.png',
-    occupation: author?.title || 'Developer Tools',
-    company: 'SigNoz',
-    email: 'team@signoz.io',
-    twitter: 'https://twitter.com/SigNozHQ',
-    linkedin: 'https://www.linkedin.com/company/signoz',
-    github: 'https://github.com/SigNoz/signoz',
-    path: `/authors/${author?.key || 'default'}`,
-    type: 'Authors',
-    slug: author?.key || 'default',
-    readingTime: { text: '', minutes: 0, time: 0, words: 0 },
-    filePath: `/data/authors/${author?.key || 'default'}.mdx`,
-  })) || [
-    {
-      // Fallback author if no authors are found
-      name: 'SigNoz Team',
-      avatar: '/static/images/signoz-logo.png',
-      occupation: 'Developer Tools',
-      company: 'SigNoz',
-      email: 'team@signoz.io',
-      twitter: 'https://twitter.com/SigNozHQ',
-      linkedin: 'https://www.linkedin.com/company/signoz',
-      github: 'https://github.com/SigNoz/signoz',
-      path: '/authors/default',
-      type: 'Authors',
-      slug: 'default',
-      readingTime: { text: '', minutes: 0, time: 0, words: 0 },
-      filePath: '/data/authors/default.mdx',
-    },
-  ]
+  const authorDirectory = await getCachedAuthors()
+  const authorList = content.authors?.map((author) => author?.key) || ['default']
+  const authorDetails = authorList.map((author) => {
+    const a = authorDirectory[author]
+    return a || { name: author }
+  })
 
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/opentelemetry/${slug}`
@@ -249,9 +224,10 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
-          authors={content.authors?.map((author) => author?.key) || []}
+          authors={authorList}
           toc={toc}
           showSidebar={showSidebar}
+          authorDirectory={authorDirectory}
         >
           <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
             {compiledContent}
@@ -277,8 +253,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <Layout
         content={mainContent}
         authorDetails={authorDetails as any}
-        authors={content.authors?.map((author) => author?.key) || []}
+        authors={authorList}
         toc={toc}
+        authorDirectory={authorDirectory}
       >
         <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
           {compiledContent}

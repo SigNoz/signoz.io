@@ -22,8 +22,9 @@ async function fetchAuthorsFromCMS(): Promise<AuthorDirectory> {
   const directory: AuthorDirectory = {}
   let page = 1
   const pageSize = 100
+  let maxPages = 50
 
-  while (true) {
+  while (page <= maxPages) {
     const queryParams = qs.stringify(
       {
         fields: ['key', 'name', 'title', 'url', 'image_url'],
@@ -60,6 +61,8 @@ async function fetchAuthorsFromCMS(): Promise<AuthorDirectory> {
 
     const { pageCount } = data?.meta?.pagination || {}
     if (!pageCount || page >= pageCount) break
+    // If actual page count exceeds safety cap, extend to actual count
+    if (pageCount > maxPages) maxPages = pageCount
     page++
   }
 
