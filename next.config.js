@@ -90,7 +90,6 @@ module.exports = () => {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
     trailingSlash: true,
-    swcMinify: true,
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
