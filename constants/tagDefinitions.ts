@@ -9,5 +9,6 @@
 export const tagDefinitions: Record<string, string> = {
   'SigNoz Cloud': 'This page is relevant for SigNoz Cloud editions.',
   'Self-Host': 'This page is relevant for self-hosted SigNoz editions.',
+  'Self-Host Enterprise': 'This page is relevant for self-hosted SigNoz Enterprise editions.',
   'Self-Hosted Community': 'This page is relevant for self-hosted SigNoz Community editions.',
 }
