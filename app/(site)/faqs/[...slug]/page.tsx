@@ -190,8 +190,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     notFound()
   }
 
-  // Generate structured data
-  const structuredData = generateStructuredData('faqs', content)
+  // Generate structured data — override path with route prefix for correct URL
+  const contentForStructuredData = { ...content, path: `faqs${content.path || `/${path}`}` }
+  const structuredData = generateStructuredData('faqs', contentForStructuredData)
   const relatedArticles = buildRelatedArticles(content)
 
   // Prepare content for FAQLayout
