@@ -47,7 +47,7 @@ export default function OpenTelemetryLanding() {
           dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
       )}
-      <BlogArticlePageWithOptions params={LANDING_PARAMS} suppressStructuredData />
+      <BlogArticlePageWithOptions params={Promise.resolve(LANDING_PARAMS)} suppressStructuredData />
     </>
   )
 }

@@ -19,7 +19,6 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -29,7 +28,7 @@ const layouts = {
   OpenTelemetryLayout,
 }
 
-export const revalidate = 86400
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
 export async function generateMetadata(props: {

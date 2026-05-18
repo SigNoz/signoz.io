@@ -14,9 +14,8 @@ import { Blog, Authors } from 'contentlayer/generated'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = 86400
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
 const relatedArticleRoutePrefix: Record<string, string> = {

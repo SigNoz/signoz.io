@@ -16,7 +16,6 @@ import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { safeJsonLdStringify } from '@/utils/structuredData'
 
 const defaultLayout = 'ComparisonsLayout'
