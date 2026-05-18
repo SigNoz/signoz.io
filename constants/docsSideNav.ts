@@ -1975,11 +1975,6 @@ const docsSideNav = [
         label: 'Alerts',
       },
       {
-        type: 'doc',
-        route: '/docs/cost-meter/query-api',
-        label: 'Query API',
-      },
-      {
         label: 'User Guides',
         type: 'category',
         isExpanded: false,
@@ -1994,6 +1989,19 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/cost-meter/meter-explorer-query-guide',
             label: 'Meter Explorer Query Guide',
+          },
+        ],
+      },
+      {
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/cost-meter/reference',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/query-api',
+            label: 'Query Meter Data via API',
           },
         ],
       },
@@ -2494,9 +2502,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
-        items: [
-          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
-        ],
+        items: [{ type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' }],
       },
     ],
   },
