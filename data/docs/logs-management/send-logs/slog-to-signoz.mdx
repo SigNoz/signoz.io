@@ -29,13 +29,11 @@ Install the required modules:
 go get go.opentelemetry.io/contrib/bridges/otelslog
 go get go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp
 go get go.opentelemetry.io/otel/sdk/log
-go get go.opentelemetry.io/otel/trace
 ```
 
 - **otelslog**: bridges `log/slog` to the OpenTelemetry log pipeline
 - **otlploghttp**: OTLP exporter that ships logs over HTTP to SigNoz
 - **sdk/log**: log processor and provider
-- **otel/trace**: required only if you follow the Correlating Traces and Logs section
 
 ### Step 2: Set environment variables
 
@@ -166,7 +164,9 @@ logger := otelslog.NewLogger("my/pkg/name", otelslog.WithLoggerProvider(provider
 ```go:main.go
 logger.Info("server listening", "addr", ":8080", "env", "production", "version", "v2.4.1")
 logger.Info("order received", "order_id", "ord-8821", "customer_id", "cust-441", "amount_usd", 149.99)
+logger.Info("payment authorized", "order_id", "ord-8821", "gateway", "stripe", "duration_ms", 212)
 logger.Warn("inventory below threshold", "sku", "SNZ-PRO-12", "stock", 4, "reorder_point", 10)
+logger.Info("order dispatched", "order_id", "ord-8821", "carrier", "fedex", "tracking_id", "FX-99102847")
 logger.Error("notification delivery failed", "order_id", "ord-8821", "channel", "email", "error", "smtp: connection timeout")
 ```
 
@@ -216,7 +216,9 @@ func main() {
 
 	logger.Info("server listening", "addr", ":8080", "env", "production", "version", "v2.4.1")
 	logger.Info("order received", "order_id", "ord-8821", "customer_id", "cust-441", "amount_usd", 149.99)
+	logger.Info("payment authorized", "order_id", "ord-8821", "gateway", "stripe", "duration_ms", 212)
 	logger.Warn("inventory below threshold", "sku", "SNZ-PRO-12", "stock", 4, "reorder_point", 10)
+	logger.Info("order dispatched", "order_id", "ord-8821", "carrier", "fedex", "tracking_id", "FX-99102847")
 	logger.Error("notification delivery failed", "order_id", "ord-8821", "channel", "email", "error", "smtp: connection timeout")
 }
 ```
@@ -239,6 +241,12 @@ Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/produc
 ## Correlating Traces and Logs
 
 </ToggleHeading>
+
+Install the additional dependency:
+
+```bash
+go get go.opentelemetry.io/otel/trace
+```
 
 Pass a context with an active span and the SDK sets `trace_id` and `span_id` on the log record automatically. No manual extraction needed.
 
