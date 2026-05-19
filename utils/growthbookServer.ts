@@ -10,13 +10,13 @@ function debugAnonymousId(label: string, id: string | null | undefined) {
   console.log(`[GrowthBook] ${label}:`, id)
 }
 
-function resolveGrowthBookAnonymousId(forceAnonymousId?: string) {
+async function resolveGrowthBookAnonymousId(forceAnonymousId?: string) {
   if (forceAnonymousId) {
     debugAnonymousId('forceAnonymousId', forceAnonymousId)
     return forceAnonymousId
   }
 
-  const requestHeaders = headers()
+  const requestHeaders = await headers()
   const forwardedAnonymousId = requestHeaders.get(GROWTHBOOK_ANONYMOUS_ID_HEADER)
 
   debugAnonymousId('forwardedAnonymousId', forwardedAnonymousId)
@@ -25,7 +25,8 @@ function resolveGrowthBookAnonymousId(forceAnonymousId?: string) {
     return forwardedAnonymousId
   }
 
-  const cookieValue = cookies().get('gb_anonymous_id')?.value
+  const cookieStore = await cookies()
+  const cookieValue = cookieStore.get('gb_anonymous_id')?.value
   const finalAnonymousId = cookieValue || randomUUID()
 
   debugAnonymousId('from cookies', cookieValue)
@@ -66,7 +67,7 @@ export function configureServerSideGrowthBook() {
 export const getServerGrowthBook = cache(async (forceAnonymousId?: string) => {
   // Configure the server-side polyfills
   configureServerSideGrowthBook()
-  const anonymousId = resolveGrowthBookAnonymousId(forceAnonymousId)
+  const anonymousId = await resolveGrowthBookAnonymousId(forceAnonymousId)
 
   // Create and initialize GrowthBook instance
   const gb = new GrowthBook({
@@ -97,7 +98,7 @@ export async function evaluateFeatureFlag(
   key: string,
   forceAnonymousId?: string
 ): Promise<boolean> {
-  const id = resolveGrowthBookAnonymousId(forceAnonymousId)
+  const id = await resolveGrowthBookAnonymousId(forceAnonymousId)
   const gb = await getServerGrowthBook(id)
   return gb.isOn(key)
 }
@@ -108,7 +109,7 @@ export async function getFeatureValue<T>(
   defaultValue: T,
   forceAnonymousId?: string
 ): Promise<T> {
-  const id = resolveGrowthBookAnonymousId(forceAnonymousId)
+  const id = await resolveGrowthBookAnonymousId(forceAnonymousId)
   const gb = await getServerGrowthBook(id)
   return gb.getFeatureValue(key, defaultValue) as T
 }
@@ -118,7 +119,7 @@ export async function getFeatureDetails<T>(
   key: string,
   forceAnonymousId?: string
 ): Promise<FeatureResult<T>> {
-  const id = resolveGrowthBookAnonymousId(forceAnonymousId)
+  const id = await resolveGrowthBookAnonymousId(forceAnonymousId)
   const gb = await getServerGrowthBook(id)
   return gb.evalFeature(key) as FeatureResult<T>
 }

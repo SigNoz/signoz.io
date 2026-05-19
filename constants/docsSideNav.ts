@@ -1278,6 +1278,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/traces-management/guides/tail-sampling',
+            label: 'Tail Sampling',
+          },
+          {
+            type: 'doc',
             route: '/docs/traces-management/guides/correlate-traces-and-logs',
             label: 'Correlate Traces & Logs',
           },
@@ -1770,6 +1775,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route:
+                  '/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore',
+                label: 'ASP.NET Core',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
                 label: 'Node.js',
               },
@@ -1824,6 +1835,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/envoy-metrics',
                 label: 'Envoy Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/istio-metrics',
+                label: 'Istio Metrics',
               },
               {
                 type: 'doc',
@@ -2125,6 +2141,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/aspnet-metrics',
+            label: 'ASP.NET Core',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/autogen-dashboard',
             label: 'Autogen',
           },
@@ -2280,6 +2301,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
             label: 'Inkeep',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/istio-dashboard',
+            label: 'Istio',
           },
           {
             type: 'doc',

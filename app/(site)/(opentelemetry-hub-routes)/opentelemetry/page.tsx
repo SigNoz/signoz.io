@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation'
 import siteMetadata from '@/data/siteMetadata'
 import { safeJsonLdStringify } from '@/utils/structuredData'
 import { fetchBlogBySlug } from '@/utils/cachedData'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 import BlogArticlePage, { generateMetadata as generateBlogMetadata } from '../blog/[...slug]/page'
 
@@ -12,11 +11,11 @@ const LANDING_PARAMS = { slug: ['what-is-opentelemetry'] }
 const LANDING_CANONICAL = `${siteMetadata.siteUrl}/opentelemetry/`
 const BlogArticlePageWithOptions = BlogArticlePage as any
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
 export async function generateMetadata(): Promise<Metadata | undefined> {
-  return generateBlogMetadata({ params: LANDING_PARAMS })
+  return generateBlogMetadata({ params: Promise.resolve(LANDING_PARAMS) })
 }
 
 export default async function OpenTelemetryLanding() {
@@ -47,7 +46,7 @@ export default async function OpenTelemetryLanding() {
           dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
         />
       )}
-      <BlogArticlePageWithOptions params={LANDING_PARAMS} suppressStructuredData />
+      <BlogArticlePageWithOptions params={Promise.resolve(LANDING_PARAMS)} suppressStructuredData />
     </>
   )
 }

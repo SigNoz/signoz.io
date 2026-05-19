@@ -128,10 +128,17 @@ processors:
 
 Two processors drop full traces:
 
-1. **Probabilistic Sampling Processor** — drops traces at a configured ratio
-2. **Tail Sampling Processor** — drops traces based on policies evaluated after all spans arrive
+1. **Probabilistic Sampling Processor**: keeps a configured percentage of traces at ingestion time, dropping the rest. Set `sampling_percentage` to the fraction you want to keep (for example, `10` keeps 10% and drops 90%).
 
-See the OTel documentation for <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor" target="_blank" rel="noopener noreferrer nofollow">probabilistic sampling</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor" target="_blank" rel="noopener noreferrer nofollow">tail sampling</a>.
+   ```yaml
+   processors:
+     probabilistic_sampler:
+       sampling_percentage: 10
+   ```
+
+   See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor" target="_blank" rel="noopener noreferrer nofollow">probabilistic sampler documentation</a> for all options.
+
+2. **Tail Sampling Processor**: buffers all spans for a trace, then evaluates the complete trace against policies — keep errors, drop health probes, sample by latency, and more. See the [Tail Sampling](https://signoz.io/docs/traces-management/guides/tail-sampling/) guide for configuration and examples.
 
 ### Filter processor
 
@@ -271,7 +278,6 @@ processors:
 ```
 
 See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">OTel filter processor documentation</a> for the full OTTL condition reference.
-
 
 ## Validate
 

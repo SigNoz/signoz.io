@@ -1,0 +1,284 @@
+---
+title: Is Claude Code Getting Worse? How to Measure Degradation with OpenTelemetry
+slug: claude-code-measure-degradation-opentelemetry
+date: 2026-05-08
+tags: [OpenTelemetry]
+authors: [goutham_karthi]
+description: Developers report that Claude Code feels less productive over time, but anecdotes aren't actionable. Learn how to measure efficiency degradation using OpenTelemetry by tracking output-per-token ratios across commits, PRs, and lines of code to know for certain whether Claude Code is becoming less effective for your team.
+image: /img/blog/2026/05/claude-blog-cover.webp
+keywords: [Claude Code, OpenTelemetry, observability, monitoring]
+---
+
+<Figure
+src="/img/blog/2026/05/claude-blog-cover.webp"
+alt="claude-code-measure-degradation-opentelemetry"
+/>
+
+## The Productivity Problem Nobody Is Measuring
+
+Something has been quietly frustrating developers who use Claude Code regularly. The complaints are showing up across forums, channels, and developer communities: Claude feels worse than it used to. The edits aren't as accurate. It takes more back-and-forth to get the same result. The output quality seems to have dipped. Most of these complaints are anecdotal, and that's exactly the problem.
+
+The deeper issue is that most teams aren't measuring the right thing. They might track token usage or API costs, but tokens are an input. What actually matters is what you're getting for those tokens: 
+
+- Lines of code written
+- Commits created
+- Pull requests merged. 
+
+If your token consumption stays flat but your output per token quietly declines week over week, Claude Code is becoming less productive for your team. Without the right telemetry, you'd never know until the drop in developer velocity makes itself felt.
+
+> Efficiency degradation is invisible until it's significant. By the time you notice it in your team's output, it's already been happening for weeks.
+
+By the end of this post, you'll know:
+- Which signals to track to catch efficiency degradation before it shows up in team velocity
+- How to turn them into actionable dashboards
+- What specific patterns to look out for
+
+## Why Output-Per-Token Is the Metric That Actually Matters
+
+Tokens are an input, not an outcome. Spending 100,000 tokens on a session tells you nothing about whether that session was productive. What tells you that is how many lines of code were added, how many commits were created, how many pull requests were opened, which are the actual outputs that move your codebase forward.
+
+The ratio between those outputs and the tokens consumed is your efficiency signal. A healthy Claude Code deployment shows stable or improving output-per-token ratios over time. Degradation shows up as those ratios declining, with more tokens being consumed for the same or less output.
+
+What causes efficiency to degrade? There are four patterns that consistently appear:
+
+| Driver | What happens | How it shows up |
+| --- | --- | --- |
+| **Context bloat** | Sessions grow heavier over time; the full conversation history is sent with every request, so input tokens compound as a session runs longer | More tokens consumed per session, no corresponding output increase |
+| **Cache misses** | Repeated context is re-processed at full input cost instead of being served cheaply from cache | Falling cache hit rate drags every output-per-token ratio down |
+| **Subagent multiplication** | Agentic workflows spawn independent background API calls via the Task tool, multiplying token consumption several times over | Subagent token share grows while output ratios decline |
+| **Rejected edits** | Tokens spent generating an edit that gets thrown away contribute nothing to output | Rising rejection rate; token spend increases without corresponding lines-of-code output |
+
+None of these patterns are visible in aggregate cost or token usage data alone. You need output per token ratios to see them and that's what the panels in this post are designed to give you.
+
+## How Claude Code Exposes Telemetry
+
+Claude Code exports observability data through OpenTelemetry, the open standard for collecting and exporting telemetry. It supports three signal types: metrics, logs, and traces. For efficiency monitoring you'll work primarily with metrics and logs.
+
+Getting telemetry flowing requires just a handful of environment variables:
+
+```bash
+# Enable telemetry
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+
+# Configure exporters
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_LOGS_EXPORTER=otlp
+
+# Point to your collector
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+```
+
+This works with any OTLP-compatible backend. Check out detailed instructions on [setting up OpenTelemetry for Claude Code](https://signoz.io/docs/claude-code-monitoring/).
+
+The metrics that form the foundation of efficiency monitoring are:
+
+| Metric | What it tracks |
+| --- | --- |
+| `claude_code.token.usage` | Tokens consumed per API request, broken down by `type` |
+| `claude_code.lines_of_code.count` | Lines of code added or removed |
+| `claude_code.commit.count` | Git commits created via Claude Code |
+| `claude_code.pull_request.count` | Pull requests created via Claude Code |
+| `claude_code.code_edit_tool.decision` | Accept/reject decisions on code edits |
+
+The key attributes that make segmentation possible:
+
+| Attribute | What it enables |
+| --- | --- |
+| `type` | Break token usage into `input`, `output`, `cacheRead`, `cacheCreation` |
+| `query_source` | Separate `main` from agentic (`subagent`) token spend |
+| `decision` | Split edit decisions into `accept` and `reject` |
+| `session.id` | Per-session efficiency rollups |
+| `user.email` | Per-user efficiency tracking |
+
+For multi-team orgs, `OTEL_RESOURCE_ATTRIBUTES` lets you attach custom dimensions like `department`, `team.id`, or `cost_center` to every metric and log, enabling team-level efficiency tracking without any changes to how developers use the tool.
+
+## The Panels That Actually Matter and What They Tell You
+
+Raw telemetry data is only useful if it's shaped into something you can actually read and act on. The panels below are organized around three questions: are we degrading, where is efficiency being lost, and what specifically is causing it.
+
+### Are we degrading?
+
+These are your headline metrics. They give you a direct, quantitative answer to whether Claude Code is becoming less productive over time. Track them as time series and watch the trend. The absolute values matter less than the direction.
+
+#### Lines of Code Added Per 1M Tokens
+
+- **Metric:** `claude_code.lines_of_code.count` (`type = added`) ÷ `claude_code.token.usage` × 1,000,000
+
+This is the most direct efficiency signal available. It tells you how many lines of code Claude Code is producing per million tokens consumed. A stable or rising line means efficiency is holding or improving. A declining trend is your clearest signal that something is degrading.
+
+Be careful not to over-index on short-term dips. A single day of low output could just mean developers were working on complex refactors that produce fewer net lines. What you're watching for is a consistent downward trend across multiple days or weeks.
+
+<Figure
+src="/img/blog/2026/05/lines-tokens.webp"
+alt="Lines of code added per 1M tokens"
+caption="Lines of code added per 1M tokens"
+/>
+
+#### Commits Per 1M Tokens
+
+- **Metric:** `claude_code.commit.count` ÷ `claude_code.token.usage` × 1,000,000
+
+Where lines of code per 1M tokens measures raw output, commits per 1M tokens measures completed units of work. A commit represents a coherent, accepted change, so this ratio captures not just how much code Claude Code is producing, but how much of it is making it through to completion.
+
+Watch for divergence between this panel and lines of code per 1M tokens. If lines per 1M tokens is stable but commits per 1M tokens is falling, Claude Code may be producing code that isn't making it to commit. Worth cross-referencing with the edit rejection rate panel.
+
+<Figure
+src="/img/blog/2026/05/commits-token.webp"
+alt="Commits per 1M tokens"
+caption="Commits per 1M tokens"
+/>
+
+#### PRs Per 1M Tokens
+
+- **Metric:** `claude_code.pull_request.count` ÷ `claude_code.token.usage` × 1,000,000
+
+Pull requests represent the highest-level unit of completed output: code that's been written, committed, and submitted for review. PRs per 1M tokens is your broadest efficiency signal and one indicator of Claude Code's contribution to your development workflow.
+
+This ratio tends to move more slowly than the others because PRs accumulate over longer time windows. Use it as a weekly or monthly trend rather than a daily one. A quarter-over-quarter decline in PRs per 1M tokens is a strong signal that Claude Code's contribution to your development workflow is eroding.
+
+<Figure
+src="/img/blog/2026/05/prs-token.webp"
+alt="PRs per 1M tokens"
+caption="PRs per 1M tokens"
+/>
+
+### Where is efficiency being lost?
+
+Once your headline metrics show a declining trend, these panels tell you which of the four efficiency drivers is responsible.
+
+#### Cache Hit Rate
+
+- **Metric:** `claude_code.token.usage` (`type = cacheRead`) ÷ (`claude_code.token.usage` (`type = input`) + `claude_code.token.usage` (`type = cacheRead`))
+
+Cache hit rate is the first thing to check when efficiency ratios start declining. When prompt caching is working well, repeated context is served from cache at a fraction of the standard input token cost, meaning more of your token budget goes toward generating useful output rather than re-processing the same context.
+
+A falling cache hit rate is a direct drag on every output per token ratio. Common causes:
+- Frequently changing system prompts
+- Sessions too short to benefit from cache warming
+- Context being restructured between requests in a way that invalidates the cache
+
+A sudden drop from a previously stable level is a strong signal that something in your workflow changed.
+
+<Figure
+src="/img/blog/2026/05/cache-hit.webp"
+alt="Cache hit rate"
+caption="Cache hit rate"
+/>
+
+#### Input Tokens Per Session Over Time
+
+- **Metric:** `claude_code.token.usage` (`type = input`) ÷ count(`session.id`)
+
+This panel tracks how heavy the average session is becoming over time. As sessions grow longer, input tokens compound on every subsequent request. That extra context cost dilutes your output per token ratios without contributing anything to output.
+
+This is one of those panels where the trend matters far more than the absolute number:
+
+- **Flat or stable line** - healthy; session weight is being managed well
+- **Trending upward** - context bloat is setting in. Possible causes:
+    - Long sessions left open instead of starting fresh
+    - Large files loaded into context repeatedly across requests
+    - Compaction not triggering often enough to trim history
+
+<Figure
+src="/img/blog/2026/05/token-per-session.webp"
+alt="Input tokens per session over time"
+caption="Input tokens per session over time"
+/>
+
+#### Subagent Token Spend vs Main
+
+- **Metric:** `claude_code.token.usage` (`query_source = subagent`) stacked against `claude_code.token.usage` (`query_source = main`)
+
+When Claude Code delegates work to subagents via the Task tool, each subagent makes its own independent API calls, complete with their own input context, output generation, and cache behavior. A single user prompt that triggers a multi-step agentic workflow can result in many background API calls, consuming tokens that don't map directly to visible output in your lines of code or commit metrics.
+
+This panel makes that dynamic visible. If subagent spend is growing as a share of total token consumption while your output ratios are declining, your agentic workflows are consuming an increasing portion of your token budget without producing proportional output. That's a direct efficiency leak worth investigating at the workflow level.
+
+<Figure
+src="/img/blog/2026/05/subagent-token.webp"
+alt="Subagent token spend vs main"
+caption="Subagent token spend vs main"
+/>
+
+#### Tool Edit Rejection Rate
+
+- **Metric:** `claude_code.code_edit_tool.decision` (`decision = reject`) ÷ (`claude_code.code_edit_tool.decision` (`decision = accept`) + `claude_code.code_edit_tool.decision` (`decision = reject`))
+
+Every rejected edit represents tokens spent generating output that contributed nothing. A stable, low rejection rate is healthy. A rising rejection rate means an increasing share of your token spend is producing edits that get thrown away.
+
+This panel is particularly useful for distinguishing between two types of efficiency degradation:
+- **Token efficiency degradation** — more tokens consumed per edit
+- **Output quality degradation** — more edits rejected regardless of token count
+
+If your lines of code per token is falling but your rejection rate is rising, the quality of Claude Code's output is likely the primary driver, not context bloat or cache issues.
+
+You can also break this down by `language` attribute to see if rejection rates are higher for specific programming languages. This is useful for identifying whether degradation is general or concentrated in a particular part of your codebase.
+
+<Figure
+src="/img/blog/2026/05/edit-tool-rejection.webp"
+alt="Tool edit rejection rate"
+caption="Tool edit rejection rate"
+/>
+
+### What specifically is causing it?
+
+Once you've identified which efficiency driver is responsible, these panels help you pinpoint the exact session or failure mode.
+
+#### Most Expensive Sessions by Output Ratio
+
+- **Metric:** `claude_code.token.usage` summed by `session.id` and `user.email`, cross-referenced against `claude_code.lines_of_code.count` by `session.id`
+
+This is your investigation starting point. A session-level table that shows tokens consumed alongside lines of code produced lets you immediately spot sessions with a high token cost and low output. The clearest signature of efficiency degradation at the session level.
+
+Add `user.email` as a grouping dimension so each row tells you who ran the session. What you're looking for are sessions consuming significantly more tokens than the median while producing the same or less output. These are your highest-priority investigation targets. Understanding what happened in those sessions will usually point you directly at the underlying cause.
+
+<Figure
+src="/img/blog/2026/05/sessions-output.webp"
+alt="Most expensive sessions by output ratio"
+caption="Most expensive sessions by output ratio"
+/>
+
+#### API Retry Cost Waste
+
+- **Log (Event):** `claude_code.api_retries_exhausted` (`total_attempts`)
+
+Retries are a silent efficiency drain. When an API request fails and Claude Code retries it, each attempt consumes tokens while contributing zero output. If your output per token ratios are declining and retry exhaustion events are spiking at the same time, retries may be responsible for a significant portion of the drop.
+
+A flat line close to zero is normal. Spikes indicate periods where requests were consistently failing and being retried, burning tokens on each attempt before eventually either succeeding or giving up.
+
+<Figure
+src="/img/blog/2026/05/retries.webp"
+alt="API retry cost waste"
+caption="API retry cost waste"
+/>
+
+## Going Further: Alerting on Efficiency
+
+Dashboards tell you what happened. Alerts tell you when it's happening. For efficiency monitoring, the most valuable alerts are thresholds on your output per token ratios, configured to fire when a ratio drops below a baseline you've established from your historical data.
+
+A starting point for threshold-based alerts. Adjust these once you've accumulated two to four weeks of baseline data:
+
+| Signal | Alert condition | Urgency |
+| --- | --- | --- |
+| Lines of code per token | Drops more than 20% below your 7-day baseline | Warning |
+| Cache hit rate | Falls below 60%, or drops more than 15 points week-over-week | Warning |
+| Edit rejection rate | Rises above 30%, or increases more than 10 points week-over-week | Warning |
+| `api_retries_exhausted` events | Any spike meaningfully above your baseline | Critical |
+
+For orgs managing Claude Code across multiple teams, `OTEL_RESOURCE_ATTRIBUTES` lets you track efficiency ratios by team or department:
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="department=engineering,team.id=platform"
+```
+
+This enables team-level efficiency dashboards, making it possible to see whether degradation is org-wide or concentrated in a specific team's workflow, which narrows the scope when something goes wrong.
+
+## Conclusion
+
+So is Claude Code actually as productive as it used to be? You can answer quantitatively. Output per token ratios give you a precise, measurable signal that anecdotal complaints never can. A declining ratio is actionable. A feeling that things are just worse is not.
+
+The OTel telemetry Claude Code exposes makes this straightforward to set up. The same pipeline that powers usage/cost monitoring gives you everything you need for efficiency monitoring. It's a question of which metrics you choose to derive and which panels you choose to build.
+
+The most important thing is to start tracking before you need the data. By the time efficiency degradation is visible, you've already lost weeks of signal that would have told you what changed and when. Start the telemetry pipeline now, establish your baseline, and you'll have the data you need to answer the question the next time someone says Claude Code doesn't feel as sharp as it used to.
+
+The full list of metrics, logs, and attributes Claude Code exports is documented in the <a href="https://code.claude.com/docs/en/monitoring-usage/" target="_blank" rel="noopener noreferrer nofollow">Claude Code monitoring documentation</a>.
