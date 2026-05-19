@@ -1,26 +1,21 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
 import TrackingLink from '@/components/TrackingLink'
 import { productDropdownItems, POPOVER_CONTENT_CLASS, SECTION_HEADING_CLASS } from './constants'
+import { useNavDropdown } from './NavDropdownContext'
 
 export default function ProductDropdown() {
-  const [isOpen, setIsOpen] = useState(false)
-  const close = () => setIsOpen(false)
+  const { isOpen, open, close } = useNavDropdown('product')
 
   return (
-    <div
-      onPointerEnter={() => setIsOpen(true)}
-      onPointerLeave={() => setIsOpen(false)}
-      className="flex items-center"
-    >
+    <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
       <Popover.Root
         open={isOpen}
-        onOpenChange={(open) => {
-          if (!open) setIsOpen(false)
+        onOpenChange={(o) => {
+          if (!o) close()
         }}
         modal={false}
       >

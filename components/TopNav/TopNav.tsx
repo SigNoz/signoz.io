@@ -15,6 +15,7 @@ import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
 import CompareSignozDropdown from './CompareSignozDropdown'
+import { NavDropdownProvider } from './NavDropdownContext'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
 
@@ -87,50 +88,52 @@ export default function TopNav() {
             </TrackingLink>
 
             {!isLoginRoute && (
-              <div
-                className={`hidden items-center gap-x-6 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
-              >
-                {visibility.showProduct && <ProductDropdown />}
-                {visibility.showDocs && (
-                  <TrackingLink
-                    href="/docs"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Docs Link"
-                    clickText="Docs"
-                    clickLocation="Top Navbar"
-                    prefetch={false}
-                  >
-                    Docs
-                  </TrackingLink>
-                )}
-                {visibility.showResources && <ResourcesDropdown />}
-                {visibility.showPricing && (
-                  <TrackingLink
-                    href="/pricing"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Pricing Link"
-                    clickText="Pricing"
-                    clickLocation="Top Navbar"
-                  >
-                    Pricing
-                  </TrackingLink>
-                )}
-                {visibility.showCompareSignoz && <CompareSignozDropdown />}
-                {visibility.showCustomerStories && (
-                  <TrackingLink
-                    href="/case-study"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Customer Stories Link"
-                    clickText="Customer Stories"
-                    clickLocation="Top Navbar"
-                  >
-                    Customer Stories
-                  </TrackingLink>
-                )}
-              </div>
+              <NavDropdownProvider>
+                <div
+                  className={`hidden items-center gap-x-6 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                >
+                  {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showDocs && (
+                    <TrackingLink
+                      href="/docs"
+                      className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                      clickType="Nav Click"
+                      clickName="Docs Link"
+                      clickText="Docs"
+                      clickLocation="Top Navbar"
+                      prefetch={false}
+                    >
+                      Docs
+                    </TrackingLink>
+                  )}
+                  {visibility.showResources && <ResourcesDropdown />}
+                  {visibility.showPricing && (
+                    <TrackingLink
+                      href="/pricing"
+                      className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                      clickType="Nav Click"
+                      clickName="Pricing Link"
+                      clickText="Pricing"
+                      clickLocation="Top Navbar"
+                    >
+                      Pricing
+                    </TrackingLink>
+                  )}
+                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
+                  {visibility.showCustomerStories && (
+                    <TrackingLink
+                      href="/case-study"
+                      className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                      clickType="Nav Click"
+                      clickName="Customer Stories Link"
+                      clickText="Customer Stories"
+                      clickLocation="Top Navbar"
+                    >
+                      Customer Stories
+                    </TrackingLink>
+                  )}
+                </div>
+              </NavDropdownProvider>
             )}
           </div>
 
