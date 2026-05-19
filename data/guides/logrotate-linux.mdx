@@ -3,24 +3,27 @@ title: Logrotate Linux—Config, Examples & Log Rotation Guide (2026)
 date: 2026-05-19
 tags: [Linux, Logging]
 authors: [dhruv_ahuja]
-description: Learn How to Set up and Manage Log Rotation using Logrotate in Linux. Explore configuration, examples, commands and best practices to prevent log file overflow with SigNoz.
+description: Learn how to set up and manage log rotation using logrotate on Linux. Explore configuration, examples, commands, and best practices to prevent log file overflow with SigNoz.
 keywords: [logrotate, linux log rotation, logrotate configuration, log rotation in linux, manage disk space linux logs, logrotate copytruncate, logrotate postrotate, logrotate examples, signoz]
 related_articles: ['/guides/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps', '/blog/best-open-source-log-management-tools', '/guides/systemctl-logs', '/guides/default-logging-file-for-spring-boot-application', '/blog/docker-log-rotation', '/guides/error-log']
 ---
 
-Logs are crucial for debugging, auditing, and troubleshooting production workloads, but they can also grow rapidly and consume valuable disk space if left unmanaged. Application outages, particularly in self-hosted setups, are often caused due to logs exhausting available disk space.  
-And so, it becomes vital that you maintain your log files frequently, add guardrails around the the log generation and storage behaviour for logs generated from user as well as system services.
+Logs are crucial for debugging, auditing, and troubleshooting production workloads, but they can also grow rapidly and consume valuable disk space if left unmanaged. Application outages, particularly in self-hosted setups, are often caused by logs exhausting available disk space.
 
-This is where The Linux logrotate utility comes in handy. It helps solve such problems by providing capabilities to configure automatic log rotation, compression, and deletion based on configured schedules or file sizes.
+That makes it important to manage log files regularly and put guardrails around log generation, storage, and retention for both user and system services.
 
-This guide will walk you through the process of implementing and managing log rotation using `logrotate`, plus some best practices and advanced techniques for managing <Tooltip text="locked files" content="A log file that is being actively held open by a running application, such as a web server or a background worker." />, enabling you to keep your logs organized and your systems healthy, even under varying usage patterns.<br />
+This is where the Linux `logrotate` utility helps. It lets you configure automatic log rotation, compression, and deletion based on schedules or file size thresholds.
+
+This guide will walk you through the process of implementing and managing log rotation using `logrotate`, along with best practices and advanced techniques for managing <Tooltip text="locked files" content="A log file that is being actively held open by a running application, such as a web server or a background worker." />, enabling you to keep your logs organized and your systems healthy, even under varying usage patterns.<br />
 We will also explore how to ingest and monitor your logs using an [OpenTelemetry-native observability backend](https://signoz.io/blog/opentelemetry-backend/) like SigNoz.
 
-## What is logrotate and Why Use It?
+## What is logrotate and why use it?
 
-When managing log rotation in Linux, `logrotate` is the go-to system utility designed to simplify the administration of log files on systems that generate a lot of log data. It allows for the automatic rotation, compression, removal, and mailing of log files.
+When managing log rotation in Linux, `logrotate` is the go-to system utility designed to simplify the administration of log files on systems that generate a lot of log data. It supports automatic rotation, compression, removal, and mailing of log files.
 
-By configuring `logrotate`, you can prevent disk exhaustion by automatically pruning old logs before they fill up your storage. It allows you to rotate logs on a specific time schedule, such as daily or weekly, or strictly by size when they exceed a specified threshold. To further save disk space, the utility can compress archived logs using tools like gzip. It also helps you enforce a strict retention policy by keeping only a fixed number of historical files, and can even run post-rotation scripts to gracefully instruct applications to reopen their log files without any downtime.
+By configuring `logrotate`, you can prevent disk exhaustion by automatically pruning old logs before they fill up your storage. It allows you to rotate logs on a specific time schedule, such as daily or weekly, or strictly by size when they exceed a specified threshold.
+
+To further save disk space, the utility can compress archived logs using tools like gzip. It also helps you enforce a strict retention policy by keeping only a fixed number of historical files, and can even run post-rotation scripts to gracefully instruct applications to reopen their log files without any downtime.
 
 On most Linux systems, `logrotate` is run automatically once per day by either `cron` or a `systemd` timer. If you want rotation to happen more frequently than daily (e.g., hourly), you must also schedule `logrotate` to run more frequently.
 
@@ -104,7 +107,7 @@ To build effective rotation policies, it helps to understand the most common dir
 
 ### Rotation Schedule and Size
 
-You can dictate how frequently logs should rotate using either time-based intervals or file size thresholds. This allows you to tailor your rotation policy to the specific logging volume of each application. 
+You can dictate how frequently logs should rotate using either time-based intervals or file size thresholds. This allows you to tailor your rotation policy to the specific logging volume of each application.
 
 By using `daily`, `weekly`, `monthly`, or `yearly`, `logrotate` will rotate the log on that specific time schedule. You can also rotate logs `hourly`, though this requires ensuring that `logrotate` itself is invoked by cron or systemd on an hourly basis.
 
@@ -112,7 +115,7 @@ Alternatively, if your logs are highly variable, you can rotate them based on si
 
 ### Retention and Compression
 
-Once logs are rotated, you need rules to determine how long they are kept and how they are stored. 
+Once logs are rotated, you need rules to determine how long they are kept and how they are stored.
 
 The `rotate <count>` directive specifies the exact number of old log files to keep before deleting the oldest one. For instance, setting `rotate 7` alongside a `daily` schedule ensures you keep exactly one week of historical logs as part of your [retention policy](https://signoz.io/guides/log-retention/).
 
@@ -122,7 +125,7 @@ To save disk space, you can tell `logrotate` to `compress` the rotated files, wh
 
 Logrotate also provides granular control over how the new log files are created and what happens if a file is missing.
 
-If you don't want to see error messages when a specified log file doesn't exist, use the `missingok` directive. You can also prevent `logrotate` from rotating empty files by using `notifempty`. 
+If you don't want to see error messages when a specified log file doesn't exist, use the `missingok` directive. You can also prevent `logrotate` from rotating empty files by using `notifempty`.
 
 When a rotation occurs, the `create <mode> <owner> <group>` directive tells the utility to immediately create an empty log file with the specified permissions, user, and group. If your logs reside in directories owned by non-root services, using the `su <user> <group>` directive ensures that `logrotate` rotates files as that specific user and group, avoiding permission denied errors.
 
@@ -135,13 +138,13 @@ You can specify a shell script to run after rotation using the `postrotate` and 
 If you use wildcards to target multiple logs (such as `/var/log/myapp/*.log`), `logrotate` will normally run the `postrotate` script once for each rotated log. Adding the `sharedscripts` directive ensures that the script is executed only a single time for the matching set of logs.
 
 <KeyPointCallout title="The copytruncate vs. create dilemma">
-When an application holds an open file descriptor to a log file, simply renaming it (which is what `logrotate` does by default) means the application will continue writing to the renamed (rotated) file instead of the new one. 
+When an application holds an open file descriptor to a log file, simply renaming it (which is what `logrotate` does by default) means the application will continue writing to the renamed (rotated) file instead of the new one.
 
-**`create` + `postrotate` (Recommended)**: 
+**`create` + `postrotate` (Recommended)**:
 The best practice is to move the old log file, `create` a new one, and then send a signal (like `SIGHUP`) to the application in the `postrotate` block to instruct it to reopen its log files.
 
 **`copytruncate` (The Fallback)**:
-If an application cannot be signaled to reopen its log file, you can use `copytruncate`. It copies the current log file to an archive and then truncates the original file in place to zero bytes. 
+If an application cannot be signaled to reopen its log file, you can use `copytruncate`. It copies the current log file to an archive and then truncates the original file in place to zero bytes.<br />
 *Warning:* There is a small race window between the copy and the truncate operations where log lines written by the application can be lost. Use this only when signaling is not possible.
 </KeyPointCallout>
 
@@ -168,7 +171,7 @@ Let's apply these directives to real-world scenarios.
 
 This pattern safely rotates all `.log` files in `/var/log/myapp/` weekly, keeps 4 weeks of history, and signals the `myapp.service` so it can cleanly reopen its log files.
 
-The `-HUP` signal is commonly used to ask a daemon to reload its configuration or reopen log files, though the exact behavior depends on the daemon. In this example, `systemctl kill` sends the signal to our application service running directly.  
+The `-HUP` signal is commonly used to ask a daemon to reload its configuration or reopen log files, though the exact behavior depends on the daemon. In this example, `systemctl kill` sends the signal to our application service running directly.<br />
 For managing system log files, you would typically send the signal to the `rsyslogd` process.
 
 ### 2. Rotate Nginx Web Server Logs
@@ -208,7 +211,7 @@ If your application has bursty traffic, time-based rotation might not prevent di
 }
 ```
 
-This will rotate `debug.log` whenever it exceeds 200MB, keeping 10 rotated copies. 
+This will rotate `debug.log` whenever it exceeds 200MB, keeping 10 rotated copies.
 
 *(Remember: `logrotate` must be invoked often enough for the size threshold to be checked. If `logrotate` runs daily, the file could still grow past 200MB within that day before being rotated).*
 
@@ -311,14 +314,14 @@ service:
       exporters: [otlp]
 ```
 
-The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md#log-rotation" target="_blank" rel="noopener noreferrer">official documentation</a> for the File Log Receiver goes into more detail about its in-built support for log rotation, and configuring the receiver to handle log truncation.
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md#log-rotation" target="_blank" rel="noopener noreferrer nofollow">official documentation</a> for the File Log Receiver goes into more detail about its built-in support for log rotation and how to configure the receiver to handle log truncation.
 
 ## Conclusion
 
-While <a href="https://github.com/logrotate/logrotate" target="_blank" rel="noopener noreferrer">logrotate</a> is an older utility, it remains one of the most reliable and indispensable tools for Linux system administration. Setting up a small, well-tested configuration serves as an excellent first line of defense against disk space exhaustion.  
+While <a href="https://github.com/logrotate/logrotate" target="_blank" rel="noopener noreferrer nofollow">logrotate</a> is an older utility, it remains one of the most reliable and indispensable tools for Linux system administration. Setting up a small, well-tested configuration serves as an excellent first line of defense against disk space exhaustion.<br />
 It keeps your log retention predictable, prevents surprise application crashes, and ensures that local troubleshooting remains easy by keeping active log files reasonably sized.
 
-Finally, while `logrotate` handles the local file lifecycle, pairing it with a centralized OpenTelemetry-native observability platform like SigNoz guarantees that your historical logs remain highly searchable across your entire infrastructure. This unified approach ensures you have complete visibility into your applications and that critical failures never go unnoticed.
+Finally, while `logrotate` handles the local file lifecycle, pairing it with a centralized OpenTelemetry-native observability platform like SigNoz helps keep historical logs searchable across your infrastructure. This unified approach gives you better visibility into your applications and makes it easier to catch critical failures.
 
 If you're interested in trying out SigNoz for your system and application logging needs, [sign up](https://signoz.io/teams/) for a 30-day free trial (no credit card required).
 
@@ -334,7 +337,7 @@ Log rotation is the automated process of archiving, compressing, and eventually 
 
 ### How do I rotate logs by size in Linux?
 
-Use the `size` directive in your configuration. For example, `size 100M` ensures the log file rotates once it exceeds 100 Megabytes. Remember that `logrotate` must run frequently enough (via cron) to catch the size threshold.
+Use the `size` directive in your configuration. For example, `size 100M` ensures the log file rotates once it exceeds 100 megabytes. Remember that `logrotate` must run frequently enough (via cron) to catch the size threshold.
 
 ### Where is the logrotate configuration file located?
 
