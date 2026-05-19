@@ -118,6 +118,11 @@ function MainMenuContent({
         subtopics={[...resourcesDropdownItems.learn, ...resourcesDropdownItems.explore]}
         onLinkClick={onClose}
       />
+      <Accordion
+        topic="Compare SigNoz"
+        subtopics={[...comparisonItems, ...migrationItems]}
+        onLinkClick={onClose}
+      />
       <TrackingLink
         href="/pricing"
         className={MOBILE_LINK_CLASS}
@@ -129,11 +134,6 @@ function MainMenuContent({
       >
         Pricing
       </TrackingLink>
-      <Accordion
-        topic="Compare SigNoz"
-        subtopics={[...comparisonItems, ...migrationItems]}
-        onLinkClick={onClose}
-      />
       <TrackingLink
         href="/case-study"
         className={MOBILE_LINK_CLASS}

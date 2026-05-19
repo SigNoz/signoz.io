@@ -16,6 +16,7 @@ import ProductDropdown from './ProductDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
 import CompareSignozDropdown from './CompareSignozDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
+import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
 
@@ -107,6 +108,7 @@ export default function TopNav() {
                     </TrackingLink>
                   )}
                   {visibility.showResources && <ResourcesDropdown />}
+                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
                   {visibility.showPricing && (
                     <TrackingLink
                       href="/pricing"
@@ -119,7 +121,6 @@ export default function TopNav() {
                       Pricing
                     </TrackingLink>
                   )}
-                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
                   {visibility.showCustomerStories && (
                     <TrackingLink
                       href="/case-study"
@@ -133,6 +134,7 @@ export default function TopNav() {
                     </TrackingLink>
                   )}
                 </div>
+                <NavDropdownPanel />
               </NavDropdownProvider>
             )}
           </div>

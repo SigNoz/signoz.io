@@ -2,48 +2,32 @@
 
 import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
-import * as Popover from '@radix-ui/react-popover'
 import TrackingLink from '@/components/TrackingLink'
-import { productDropdownItems, POPOVER_CONTENT_CLASS, SECTION_HEADING_CLASS } from './constants'
+import { productDropdownItems, SECTION_HEADING_CLASS } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
 
 export default function ProductDropdown() {
-  const { isOpen, open, close } = useNavDropdown('product')
+  const { isOpen, open, close, triggerRef } = useNavDropdown('product')
 
   return (
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
-      <Popover.Root
-        open={isOpen}
-        onOpenChange={(o) => {
-          if (!o) close()
-        }}
-        modal={false}
+      <Button
+        ref={triggerRef}
+        className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500"
       >
-        <Popover.Trigger asChild>
-          <Button className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500">
-            <div className="flex items-center">
-              Product
-              <ChevronDown
-                size={12}
-                className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
-              />
-            </div>
-          </Button>
-        </Popover.Trigger>
-        <Popover.Content
-          side="bottom"
-          align="start"
-          sideOffset={4}
-          className={POPOVER_CONTENT_CLASS}
-        >
-          <ProductModulesSection onClose={close} />
-        </Popover.Content>
-      </Popover.Root>
+        <div className="flex items-center">
+          Product
+          <ChevronDown
+            size={12}
+            className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+          />
+        </div>
+      </Button>
     </div>
   )
 }
 
-function ProductModulesSection({ onClose }: { onClose: () => void }) {
+export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
       <div className={SECTION_HEADING_CLASS}>Product Modules</div>
