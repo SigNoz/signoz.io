@@ -114,6 +114,11 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/outposts/railway',
       clickName: 'Railway Integration Link',
     },
+    {
+      name: 'Kong (SigNoz plugin)',
+      href: '/docs/integrations/outposts/kong',
+      clickName: 'Kong SigNoz Plugin Integration Link',
+    },
   ] satisfies ComponentItem[],
 } as const
 

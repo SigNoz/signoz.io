@@ -3588,6 +3588,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/outposts/kong',
+        label: 'Kong (SigNoz plugin)',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/nomad',
         label: 'Nomad',
       },
