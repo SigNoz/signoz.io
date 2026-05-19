@@ -14,6 +14,7 @@ export default function ProductDropdown() {
       <Button
         ref={triggerRef}
         className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500"
+        onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">
           Product

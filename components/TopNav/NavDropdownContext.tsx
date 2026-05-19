@@ -5,31 +5,34 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
 } from 'react'
 
-type DropdownId = string
-
 interface NavDropdownContextValue {
-  activeId: DropdownId | null
-  openDropdown: (id: DropdownId) => void
+  activeId: string | null
+  openDropdown: (id: string) => void
   closeDropdown: () => void
   cancelClose: () => void
   closeImmediate: () => void
-  registerTrigger: (id: DropdownId, el: HTMLElement | null) => void
-  getTriggerRect: (id: DropdownId) => DOMRect | null
+  registerTrigger: (id: string, el: HTMLElement | null) => void
+  getTriggerRect: (id: string) => DOMRect | null
 }
 
 const NavDropdownContext = createContext<NavDropdownContextValue | null>(null)
 
 export function NavDropdownProvider({ children }: { children: ReactNode }) {
-  const [activeId, setActiveId] = useState<DropdownId | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const triggerRefs = useRef<Record<string, HTMLElement>>({})
   const closeRef = useRef<ReturnType<typeof setTimeout>>()
 
-  const openDropdown = useCallback((id: DropdownId) => {
+  useEffect(() => {
+    return () => clearTimeout(closeRef.current)
+  }, [])
+
+  const openDropdown = useCallback((id: string) => {
     clearTimeout(closeRef.current)
     setActiveId(id)
   }, [])
@@ -49,34 +52,41 @@ export function NavDropdownProvider({ children }: { children: ReactNode }) {
     setActiveId(null)
   }, [])
 
-  const registerTrigger = useCallback((id: DropdownId, el: HTMLElement | null) => {
+  const registerTrigger = useCallback((id: string, el: HTMLElement | null) => {
     if (el) triggerRefs.current[id] = el
     else delete triggerRefs.current[id]
   }, [])
 
-  const getTriggerRect = useCallback((id: DropdownId) => {
+  const getTriggerRect = useCallback((id: string) => {
     const el = triggerRefs.current[id]
     return el ? el.getBoundingClientRect() : null
   }, [])
 
-  return (
-    <NavDropdownContext.Provider
-      value={{
-        activeId,
-        openDropdown,
-        closeDropdown,
-        cancelClose,
-        closeImmediate,
-        registerTrigger,
-        getTriggerRect,
-      }}
-    >
-      {children}
-    </NavDropdownContext.Provider>
+  const value = useMemo(
+    () => ({
+      activeId,
+      openDropdown,
+      closeDropdown,
+      cancelClose,
+      closeImmediate,
+      registerTrigger,
+      getTriggerRect,
+    }),
+    [
+      activeId,
+      openDropdown,
+      closeDropdown,
+      cancelClose,
+      closeImmediate,
+      registerTrigger,
+      getTriggerRect,
+    ]
   )
+
+  return <NavDropdownContext.Provider value={value}>{children}</NavDropdownContext.Provider>
 }
 
-export function useNavDropdown(id: DropdownId) {
+export function useNavDropdown(id: string) {
   const ctx = useContext(NavDropdownContext)
   if (!ctx) throw new Error('useNavDropdown must be used within NavDropdownProvider')
 
