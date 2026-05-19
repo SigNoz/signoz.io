@@ -1022,6 +1022,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/java/opentelemetry-scala',
+                label: 'Scala',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/java/manual-instrumentation',
                 label: 'Manual Instrumentation',
               },
