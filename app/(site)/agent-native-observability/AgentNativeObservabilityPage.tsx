@@ -273,7 +273,7 @@ const FeatureSections: React.FC = () => {
             <h2 className="text-center text-4xl font-semibold text-signoz_vanilla-100">
               Why Agent Native Observability
             </h2>
-            <div className="text-center text-base text-signoz_vanilla-100">
+            <div className="text-center text-base text-signoz_vanilla-400">
               Debug faster. Ship with confidence. All from your dev environment.
             </div>
           </div>
