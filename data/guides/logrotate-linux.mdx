@@ -318,10 +318,6 @@ The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/b
 While <a href="https://github.com/logrotate/logrotate" target="_blank" rel="noopener noreferrer">logrotate</a> is an older utility, it remains one of the most reliable and indispensable tools for Linux system administration. Setting up a small, well-tested configuration serves as an excellent first line of defense against disk space exhaustion.  
 It keeps your log retention predictable, prevents surprise application crashes, and ensures that local troubleshooting remains easy by keeping active log files reasonably sized.
 
-To get the most out of your log management strategy, keep application-specific rules neatly isolated in the `/etc/logrotate.d/` directory rather than cluttering the global configuration. When dealing with application logs, always avoid `copytruncate` where possible.
- 
-This significantly reduces the risk of dropping active log lines during rotation. Furthermore, you should verify any new policies using the `logrotate -d` debug flag before deploying them to production environments.
-
 Finally, while `logrotate` handles the local file lifecycle, pairing it with a centralized OpenTelemetry-native observability platform like SigNoz guarantees that your historical logs remain highly searchable across your entire infrastructure. This unified approach ensures you have complete visibility into your applications and that critical failures never go unnoticed.
 
 If you're interested in trying out SigNoz for your system and application logging needs, [sign up](https://signoz.io/teams/) for a 30-day free trial (no credit card required).
@@ -347,6 +343,18 @@ The main configuration file is located at `/etc/logrotate.conf`. However, applic
 ### Does logrotate run automatically?
 
 Yes, on most Linux distributions, `logrotate` is scheduled to run daily via a cron job (usually found in `/etc/cron.daily/logrotate`) or a systemd timer (`logrotate.timer`).
+
+### Where should I put application-specific logrotate rules?
+
+Keep application-specific rules in the `/etc/logrotate.d/` directory instead of cluttering the global `/etc/logrotate.conf` file. This keeps each application's rotation policy isolated and easier to audit or update.
+
+### Should I use copytruncate for application logs?
+
+Avoid `copytruncate` where possible for application logs. Prefer the `create` directive paired with a `postrotate` signal so the application reopens its log file cleanly. This reduces the risk of dropping active log lines during rotation.
+
+### How do I validate a logrotate policy before using it in production?
+
+Use the `logrotate -d` debug flag before deploying a new policy. It shows what `logrotate` would do without modifying files or updating the state file.
 
 ### What is the difference between copytruncate and create?
 
