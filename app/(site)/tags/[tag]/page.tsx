@@ -5,13 +5,15 @@ import { genPageMetadata } from 'app/(site)/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { fetchAllBlogsForPage } from '@/utils/cachedData'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { computeTagCounts } from '@/utils/tagCounts'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
-export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
+export async function generateMetadata(props: {
+  params: Promise<{ tag: string }>
+}): Promise<Metadata> {
+  const params = await props.params
   const tag = decodeURI(params.tag)
   return genPageMetadata({
     title: tag,
@@ -29,7 +31,8 @@ export const generateStaticParams = async () => {
   return []
 }
 
-export default async function TagPage({ params }: { params: { tag: string } }) {
+export default async function TagPage(props: { params: Promise<{ tag: string }> }) {
+  const params = await props.params
   const tag = decodeURI(params.tag)
 
   const allBlogPosts = await fetchAllBlogsForPage()

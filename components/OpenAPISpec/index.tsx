@@ -1,30 +1,17 @@
 'use client'
 
-import './APIReference.styles.css'
-import React, { useState, useEffect } from 'react'
-import { API } from '@stoplight/elements'
-import '@stoplight/elements/styles.min.css'
+import dynamic from 'next/dynamic'
+
+// @stoplight/elements@9 touches `window` during render (its mosaic styling layer
+// and react-router-dom v6 internals), which throws under Next 15's SSR pass.
+const OpenAPISpecInner = dynamic(() => import('./OpenAPISpecInner'), {
+  ssr: false,
+})
 
 interface OpenAPISpecProps {
   specContent: string
 }
 
 export default function OpenAPISpec({ specContent }: OpenAPISpecProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // SSR placeholder: renders the full spec in a hidden div so crawlers/SEO bots
-  // can index endpoint content. The `hidden` class prevents visual display but
-  // Stoplight still parses the spec in the DOM — accepted trade-off for SEO coverage.
-  if (!mounted)
-    return (
-      <div className="hidden h-screen w-screen">
-        <API apiDescriptionDocument={specContent} router="static" layout="stacked" hideTryIt />
-      </div>
-    )
-
-  return <API apiDescriptionDocument={specContent} router="hash" layout="responsive" hideTryIt />
+  return <OpenAPISpecInner specContent={specContent} />
 }
