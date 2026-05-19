@@ -2,8 +2,9 @@
 id: timeseries-viz
 
 title: Timeseries Panel Type
-date: 2026-03-31
+date: 2026-05-13
 description: Learn how to use the Timeseries Chart panel type in SigNoz dashboards to visualize metrics over time.
+doc_type: reference
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -26,25 +27,48 @@ This panel type supports any time series data. The time series data can be from 
 
 The following graph shows the requests per second (req/s) for a service over a period of time in line chart.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/dashboards/panel-types/line-chart.png" width="80%" alt="Line chart for req/s over period of time"/>
-    <figcaption><i>Line chart for req/s over period of time.</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/dashboards/panel-types/timeseries.webp"
+  alt="Time series chart for req/s over period of time"
+  caption="Line chart for req/s over period of time."
+/>
 
 
 ### Configuration
 
-#### Fill gaps
+<Figure
+  src="/img/docs/dashboards/panel-types/timeseries-config.webp"
+  alt="Time series configuration options"
+  caption="Time series configuration panel."
+/>
 
-The `Fill Gaps` option fills the gaps in the result data with zero. This is useful when you want to interpret the no data as zero. It is more appropriate for when the data is sparse. For example, if the result of a query for 10 minutes is `{t1: 12, t3: 21, t5: 42, t7:29}`, the `Fill Gaps` option will result in `{t1: 12, t2: 0, t3: 21, t4: 0, t5: 42, t6: 0, t7: 29, t8: 0, t9: 0, t10: 0}`.
+#### Visualization
 
-#### Y-axis Unit
+- **Panel Time Preference** — Override the global dashboard time range for this panel. Set to `Global Time` to use the dashboard's time picker, or choose a fixed time range.
+- **Fill Gaps** — The `Fill Gaps` option fills the gaps in the result data with zero. This is useful when you want to interpret the no data as zero. It is more appropriate for when the data is sparse. For example, if the result of a query for 10 minutes is `{t1: 12, t3: 21, t5: 42, t7:29}`, the `Fill Gaps` option will result in `{t1: 12, t2: 0, t3: 21, t4: 0, t5: 42, t6: 0, t7: 29, t8: 0, t9: 0, t10: 0}`.
 
-The unit of the y-axis. The default unit is `None`.
+#### Formatting & Units
 
-#### Soft Min Max
+- **Y Axis Unit** — The unit of the y-axis (for example, `Milliseconds (ms)`, `Bytes`, `Percent`). The default is `None`.
+- **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
 
-The soft min max is used to adjust the y-axis scale for better visualization. By default, the soft min max is disabled and the y-axis range will be auto-adjusted based on the data. If the soft min max is enabled, the y-axis range will be adjusted to use the soft min max values. It is particularly useful when you want to prevent small values in the result from being magnified too much.
+#### Axes
+
+- **Soft Min / Soft Max** — Adjust the y-axis scale for better visualization. When set, the y-axis range uses these values instead of auto-adjusting based on the data. Useful when you want to prevent small values from being magnified too much.
+- **Y Axis Scale** — Choose between `Linear` and `Logarithmic` scale for the y-axis.
+
+#### Legend
+
+- **Position** — Set the legend position (`Bottom` or `Right`).
+- **Legend Colors** — Customize colors for individual series in the legend.
+
+#### Alerts
+
+Link existing alert rules to this panel or create new alerts directly from the panel configuration.
+
+#### Context Links
+
+Add context links to enable click-through navigation from the panel to other dashboards, external URLs, or filtered views. See [Interactivity](https://signoz.io/docs/dashboards/interactivity/) for details.
 
 #### Thresholds
 

@@ -1,14 +1,50 @@
 ---
-date: 2026-04-01
+date: 2026-05-12
 id: routing-policy
 title: Routing Policies
 description: Configure routing policies in SigNoz to dynamically route alerts to different notification channels based on alert labels.
+doc_type: howto
 ---
 
 
 ## Overview
 
 Routing policies in SigNoz allow you to dynamically route alerts to different notification channels based on alert labels using custom expressions. Instead of hardcoding alert destinations, you can create flexible rules that automatically send alerts to the appropriate teams or channels based on conditions like service name, threshold, environment, or any other alert label.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/routing-policy-page.webp" alt="Routing Policies page under Alerts Configuration"/>
+    <figcaption><i>Routing Policies page in Alerts Configuration</i></figcaption>
+</figure>
+
+## Creating a New Routing Policy
+
+<figure data-zoomable align='center'>
+    <img 
+        className="box-shadowed-image"
+        src="/img/docs/product-features/alerts/create-routing-policy.png"
+        alt="SigNoz routing policy creation form in Alerts configuration"
+        style={{ width: '80%', maxWidth: '900px', height: 'auto' }}
+    />
+    <figcaption><i>Example showing routing policy creation</i></figcaption>
+</figure>
+
+To create a routing policy:
+
+1. Navigate to **Alerts** > **Configuration** > **Routing Policies**
+2. Click the **"+ New routing policy"** button
+3. Fill in the following fields:
+
+### Required Fields
+
+- **Routing Policy Name**: A descriptive name for your policy (e.g., "Checkout team critical alerts")
+- **Expression**: The condition that determines when this policy applies (e.g., `service.name = "checkout" AND type = "application" AND threshold.name = "critical"`)
+- **Notification Channels**: Select one or more channels where matching alerts should be sent
+
+### Optional Fields
+
+- **Description**: Additional context about the policy's purpose
+
+4. Click **"Save Routing Policy"** to create the policy
 
 ## Types of Labels in Routing Policy Expressions
 
@@ -58,36 +94,6 @@ These labels come from the GROUP BY clause in your alert query. They represent t
 k8s.namespace.name = "production" AND service.name CONTAINS "api"
 host.name IN ["prod-server-1", "prod-server-2"] AND cloud.region = "us-east-1"
 ```
-
-## Creating a New Routing Policy
-
-<figure data-zoomable align='center'>
-    <img 
-        className="box-shadowed-image"
-        src="/img/docs/product-features/alerts/create-routing-policy.png"
-        alt="SigNoz routing policy creation form in Alerts configuration"
-        style={{ width: '80%', maxWidth: '900px', height: 'auto' }}
-    />
-    <figcaption><i>Example showing routing policy creation</i></figcaption>
-</figure>
-
-To create a routing policy:
-
-1. Navigate to **Alerts** > **Configuration** > **Routing Policies**
-2. Click the **"+ New routing policy"** button
-3. Fill in the following fields:
-
-### Required Fields
-
-- **Routing Policy Name**: A descriptive name for your policy (e.g., "Checkout team critical alerts")
-- **Expression**: The condition that determines when this policy applies (e.g., `service.name = "checkout" AND type = "application" AND threshold.name = "critical"`)
-- **Notification Channels**: Select one or more channels where matching alerts should be sent
-
-### Optional Fields
-
-- **Description**: Additional context about the policy's purpose
-
-4. Click **"Save Routing Policy"** to create the policy
 
 ## Managing Routing Policies
 
@@ -164,7 +170,7 @@ This alert would match policies with expressions like:
 
 ## Expression Syntax
 
-Routing policy expressions support the subset of the [search syntax](/docs/userguide/search-syntax):
+Routing policy expressions support the subset of the [search syntax](https://signoz.io/docs/userguide/search-syntax):
 
 ### Basic Operators
 

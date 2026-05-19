@@ -1,0 +1,102 @@
+---
+date: 2026-05-06
+id: cdn-frontdoor
+title: Azure CDN FrontDoor Integration
+description: Monitor Azure CDN FrontDoor with SigNoz. Collect access logs and metrics from your CDN profiles using One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure CDN FrontDoor integration collects access logs and metrics from your CDN profiles. Once enabled, the SigNoz agent discovers CDN FrontDoor resources in your monitored resource groups and configures telemetry collection.
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **CDN Profile** from the left panel.
+3. Toggle **Log Collection** and **Metric Collection** on.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-cdn-frontdoor-enable.webp"
+  alt="SigNoz Azure integration panel showing CDN Profile with Log Collection and Metric Collection toggles enabled"
+  caption="Enable log and metric collection for Azure CDN FrontDoor in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+The agent deploys the necessary Event Hubs and diagnostic settings in the background. Data starts flowing within a few minutes. Navigate to **Dashboards** and open the **CDN FrontDoor Overview** dashboard to confirm metrics are appearing.
+
+## What's collected
+
+<details>
+<summary>Logs</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Resource ID | `resources.azure.resource.id` | string |
+
+</details>
+
+<details>
+<summary>Metrics</summary>
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `azure_activewebsocketconnections_total` | Count | Gauge |
+| `azure_averagewebsocketconnectionduration_average` | Milliseconds | Gauge |
+| `azure_backendhealthpercentage_average` | Percent | Gauge |
+| `azure_backendrequestcount_total` | Count | Gauge |
+| `azure_backendrequestlatency_average` | Milliseconds | Gauge |
+| `azure_billableresponsesize_total` | Bytes | Gauge |
+| `azure_bytehitratio_average` | Percent | Gauge |
+| `azure_originhealthpercentage_average` | Percent | Gauge |
+| `azure_originlatency_average` | Milliseconds | Gauge |
+| `azure_originrequestcount_total` | Count | Gauge |
+| `azure_originshieldoriginrequestcount_total` | Count | Gauge |
+| `azure_originshieldratelimitrequestcount_total` | Count | Gauge |
+| `azure_originshieldrequestcount_total` | Count | Gauge |
+| `azure_originshieldrequestsize_total` | Bytes | Gauge |
+| `azure_percentage4xx_average` | Percent | Gauge |
+| `azure_percentage5xx_average` | Percent | Gauge |
+| `azure_requestcount_total` | Count | Gauge |
+| `azure_requestsize_total` | Bytes | Gauge |
+| `azure_responsesize_total` | Bytes | Gauge |
+| `azure_totallatency_average` | Milliseconds | Gauge |
+| `azure_webapplicationfirewallrequestcount_total` | Count | Gauge |
+| `azure_webapplicationfirewallcaptcharequestcount_total` | Count | Gauge |
+| `azure_webapplicationfirewalljsrequestcount_total` | Count | Gauge |
+| `azure_websocketconnections_total` | Count | Gauge |
+
+</details>
+
+## Dashboards
+
+The integration includes a pre-built CDN FrontDoor dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-cdn-frontdoor-dashboard.webp"
+  alt="SigNoz dashboard showing Azure CDN FrontDoor metrics including request count, latency, cache hit ratio, and error rate"
+  caption="Azure CDN FrontDoor dashboard in SigNoz"
+  className="box-shadowed-image"
+/>
+
+Key panels include:
+- Request count, 4xx rate, and 5xx rate
+- Total latency and origin latency
+- Byte hit ratio and origin health percentage
+- Request and response size
+- WAF request count
+- WebSocket connections
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on error rate spikes or latency increases
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to combine CDN metrics with application traces
+
+## Get Help
+
+<GetHelp />

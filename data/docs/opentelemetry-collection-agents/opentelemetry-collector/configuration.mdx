@@ -1,5 +1,5 @@
 ---
-date: 2026-04-23
+date: 2026-05-11
 id: otel-collector-config
 title: OpenTelemetry Collector Configuration
 description: Learn how to configure the OpenTelemetry Collector — receivers, processors, exporters, extensions, and service pipelines — to collect, process, and export telemetry data.
@@ -368,8 +368,6 @@ Exports data via HTTP using OpenTelemetry protocol.
 exporters:
   otlphttp:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
-    tls:
-      insecure: false
     headers:
       'signoz-ingestion-key': '<your-ingestion-key>'
 ```
@@ -581,10 +579,8 @@ Then reference these environment variables in `otel-collector-config.yaml`:
 
 ```yaml
 exporters:
-  otlp:
-    endpoint: 'ingest.${SIGNOZ_REGION}.signoz.cloud:443'
-    tls:
-      insecure: false
+  otlphttp:
+    endpoint: 'https://ingest.${SIGNOZ_REGION}.signoz.cloud:443'
     headers:
       'signoz-ingestion-key': '${SIGNOZ_INGESTION_KEY}'
 ```
@@ -639,7 +635,7 @@ You can configure these settings under the `sending_queue` and `retry_on_failure
 
 ```yaml
 exporters:
-  otlp:
+  otlphttp:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
     compression: gzip
     sending_queue:
@@ -666,7 +662,7 @@ Wherever possible, use compression in exporters to reduce network bandwidth and 
 
 ```yaml
 exporters:
-  otlp:
+  otlphttp:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
     compression: gzip
 ```

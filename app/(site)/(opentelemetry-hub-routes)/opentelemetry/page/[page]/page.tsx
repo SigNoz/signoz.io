@@ -5,7 +5,7 @@ import {
   pickOpenTelemetryArticleFields,
   type ResourceCenterCard,
 } from '../../../content'
-import { buildListingMetadata, buildStaticPaginationParams } from '../../../metadata'
+import { buildListingMetadata } from '../../../metadata'
 import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } from '@/utils/strapi'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
@@ -15,10 +15,10 @@ export async function generateMetadata({ params }: { params: { page: string } })
   return buildListingMetadata('OpenTelemetry', params.page)
 }
 
-const contentLayerArticles = getOpenTelemetryHubContentLayerArticles()
-
-export const generateStaticParams = async () =>
-  buildStaticPaginationParams(contentLayerArticles.length)
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
+export const generateStaticParams = async () => {
+  return []
+}
 
 export default async function Page({ params }: { params: { page: string } }) {
   // Fetch CMS opentelemetries articles
@@ -38,6 +38,9 @@ export default async function Page({ params }: { params: { page: string } }) {
   } catch (error) {
     console.error('Error fetching OpenTelemetry CMS articles:', error)
   }
+
+  // Fetch contentlayer + CMS hub articles
+  const contentLayerArticles = await getOpenTelemetryHubContentLayerArticles()
 
   // Merge contentlayer articles with CMS articles, deduplicating by path
   const allArticles: ResourceCenterCard[] = [...contentLayerArticles]

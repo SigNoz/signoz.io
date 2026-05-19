@@ -7,7 +7,8 @@
  * If no definition is provided, the tag will be displayed, but the tooltip will not be shown.
  */
 export const tagDefinitions: Record<string, string> = {
-  'SigNoz Cloud': 'This page is relevant for SigNoz Cloud editions.',
-  'Self-Host': 'This page is relevant for self-hosted SigNoz editions.',
-  'Self-Hosted Community': 'This page is relevant for self-hosted SigNoz Community editions.',
+  'SigNoz Cloud': 'This page applies to SigNoz Cloud editions.',
+  'Self-Host': 'This page applies to self-hosted SigNoz editions.',
+  'Self-Hosted Enterprise': 'This page applies to self-hosted SigNoz with an active license.',
+  'Self-Hosted Community': 'This page applies to self-hosted SigNoz without a license.',
 }

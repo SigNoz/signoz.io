@@ -1,0 +1,112 @@
+---
+date: 2026-05-08
+id: railway
+title: Monitor Railway with SigNoz
+description: Forward logs from your Railway apps to SigNoz using Locomotive — a community log forwarder with first-class SigNoz support.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+<a href="https://railway.com" target="_blank" rel="noopener noreferrer nofollow">Railway</a> is an infrastructure platform that lets you deploy apps, databases, and cron jobs instantly. SigNoz supports log forwarding from Railway using <a href="https://github.com/brody192/locomotive" target="_blank" rel="noopener noreferrer nofollow">Locomotive</a> — a community-built log forwarder with a dedicated SigNoz mode.
+
+Locomotive forwards logs in standard OTLP JSON format (`resourceLogs`), compatible with SigNoz's `/v1/logs` endpoint out of the box.
+
+## Prerequisites
+
+- A `SigNoz Cloud` (or self-hosted) workspace
+- A <a href="https://railway.com" target="_blank" rel="noopener noreferrer nofollow">Railway</a> account with at least one deployed service
+
+<Admonition type="info">
+If using self-hosted SigNoz, use the `otel_http` webhook mode instead of `signoz`. Set `LOCOMOTIVE_WEBHOOK_URL` to `http://<SIGNOZ_HOSTNAME>:4318/v1/logs` and remove the ingestion key header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted) for details.
+</Admonition>
+
+## Forward Logs
+
+### Step 1: Deploy Locomotive on Railway
+
+Click the button below to deploy Locomotive directly to your Railway project:
+
+<a href="https://railway.com/deploy/locomotive" target="_blank" rel="noopener noreferrer nofollow">
+  <img src="https://railway.com/button.svg" alt="Deploy Locomotive on Railway" />
+</a>
+
+
+### Step 2: Configure environment variables
+
+Set the following environment variables on the Locomotive service in your Railway project:
+
+<Tabs entityName="setup">
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+| Variable | Value |
+|---|---|
+| `LOCOMOTIVE_SERVICE_IDS` | Service ID(s) to ship logs from (comma-separated) |
+| `LOCOMOTIVE_WEBHOOK_URL` | `https://ingest.<REGION>.signoz.cloud:443/v1/logs` |
+| `LOCOMOTIVE_WEBHOOK_MODE` | `signoz` |
+| `LOCOMOTIVE_RAILWAY_API_KEY` | Your Railway account-scoped API token |
+| `LOCOMOTIVE_ADDITIONAL_HEADERS` | `signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>` |
+
+Replace:
+- `<REGION>` — your SigNoz Cloud region (e.g. `us`, `eu`, `in`). See [regions](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>` — your [SigNoz ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Figure
+  src="/img/docs/integrations/railway/railway-locomotive-env-vars.webp"
+ 
+  caption="Locomotive environment variables configured for SigNoz Cloud"
+  data-zoomable
+/>
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+| Variable | Value |
+|---|---|
+| `LOCOMOTIVE_SERVICE_IDS` | Service ID(s) to ship logs from (comma-separated) |
+| `LOCOMOTIVE_WEBHOOK_URL` | `http://<SIGNOZ_HOSTNAME>:4318/v1/logs` |
+| `LOCOMOTIVE_WEBHOOK_MODE` | `otel_http` |
+| `LOCOMOTIVE_RAILWAY_API_KEY` | Your Railway account-scoped API token |
+
+Replace `<SIGNOZ_HOSTNAME>` with the hostname or IP of your SigNoz installation.
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/integrations/railway/railway-locomotive-env-vars-self-hosted.webp" alt="Locomotive environment variables for Self-Hosted SigNoz on Railway" />
+  <figcaption>
+    <i>Locomotive environment variables configured for Self-Hosted SigNoz</i>
+  </figcaption>
+</figure>
+
+</TabItem>
+</Tabs>
+
+### Step 3: Redeploy Locomotive
+
+After setting the environment variables, redeploy the Locomotive service. Railway will restart the service automatically when variables are updated.
+
+### Step 4: Verify logs in SigNoz
+
+Open **Logs Explorer** in SigNoz. Within a minute you should see log entries from your Railway services.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+- **Locomotive not forwarding logs** — check the Locomotive service logs in Railway for errors. Ensure the service is in a running state.
+- **401 or 403 errors** — verify your `SIGNOZ_INGESTION_KEY` is correct and that the `LOCOMOTIVE_ADDITIONAL_HEADERS` variable is formatted as `signoz-ingestion-key=<key>` (no spaces around `=`).
+- **Wrong region** — confirm your SigNoz Cloud region in `LOCOMOTIVE_WEBHOOK_URL`. Available regions are listed in [SigNoz Cloud regions](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- **Self-hosted: connection refused** — ensure your SigNoz instance is reachable from Railway and that port `4318` is open.
+
+</details>
+
+## Next Steps
+
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to get notified on error patterns in your Railway logs.
+- [Create a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) to visualise your Railway logs in a single view.
+
+## Get Help
+
+<GetHelp />

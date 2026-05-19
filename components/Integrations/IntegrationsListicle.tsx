@@ -21,7 +21,7 @@ import IconCardGrid from '../Card/IconCardGrid'
 import { INTEGRATIONS_ITEMS } from '@/constants/componentItems'
 
 interface IntegrationsListicleProps {
-  category?: 'temporal' | 'databases' | 'aws' | 'all'
+  category?: 'temporal' | 'databases' | 'aws' | 'azure' | 'all'
 }
 
 export default function IntegrationsListicle({ category = 'all' }: IntegrationsListicleProps) {
@@ -31,6 +31,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     { id: 'temporal', label: 'Temporal' },
     { id: 'databases', label: 'Databases' },
     { id: 'aws', label: 'AWS' },
+    { id: 'azure', label: 'Azure' },
     { id: 'other', label: 'Other' },
   ]
 
@@ -83,6 +84,27 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     '/docs/integrations/aws-rds-postgres': <SiPostgresql className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/aws-rds-mysql': <SiMysql className="h-7 w-7 text-[#FF9900]" />,
     '/docs/integrations/aws-elasticache-redis': <SiRedis className="h-7 w-7 text-[#FF9900]" />,
+    '/docs/integrations/azure/one-click-azure-integrations': (
+      <img
+        src="/img/icons/azure-icon.svg"
+        alt="Microsoft Azure"
+        className="h-7 w-7 object-contain"
+      />
+    ),
+    '/docs/integrations/azure/cdn-frontdoor': (
+      <img
+        src="/img/icons/azure-cdn-frontdoor-icon.svg"
+        alt="Azure CDN FrontDoor"
+        className="h-7 w-7 object-contain"
+      />
+    ),
+    '/docs/integrations/azure/blob-storage': (
+      <img
+        src="/img/icons/azure-blob-storage-icon.svg"
+        alt="Azure Blob Storage"
+        className="h-7 w-7 object-contain"
+      />
+    ),
     '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
     '/docs/integrations/vercel': <SiVercel className="h-7 w-7 text-black dark:text-white" />,
     '/docs/integrations/flyio': <SiFlydotio className="h-7 w-7 text-purple-500" />,
@@ -109,6 +131,11 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
   }))
 
   const awsCards = INTEGRATIONS_ITEMS.aws.map((item) => ({
+    ...item,
+    icon: ICON_MAP[item.href],
+  }))
+
+  const azureCards = INTEGRATIONS_ITEMS.azure.map((item) => ({
     ...item,
     icon: ICON_MAP[item.href],
   }))
@@ -154,6 +181,18 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     </div>
   )
 
+  // Azure integrations
+  const renderAzureSection = () => (
+    <div className="mb-10">
+      <h2 className="mb-4 text-2xl font-semibold">Azure Integrations</h2>
+      <IconCardGrid
+        cards={azureCards}
+        sectionName="Azure Integrations"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+    </div>
+  )
+
   // Other integrations
   const renderOtherSection = () => (
     <div className="mb-10">
@@ -175,6 +214,7 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
       {(activeSection === 'all' || activeSection === 'temporal') && renderTemporalSection()}
       {(activeSection === 'all' || activeSection === 'databases') && renderDatabasesSection()}
       {(activeSection === 'all' || activeSection === 'aws') && renderAWSSection()}
+      {(activeSection === 'all' || activeSection === 'azure') && renderAzureSection()}
       {(activeSection === 'all' || activeSection === 'other') && renderOtherSection()}
     </div>
   )

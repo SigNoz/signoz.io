@@ -1,38 +1,74 @@
 ---
-date: 2026-04-17
+date: 2026-05-13
 id: manage-dashboards
-description: Learn how to create, edit, delete, and manage dashboards within SigNoz and utilize helpful dashboard management features.
+description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
 title: Manage Dashboards in SigNoz
 doc_type: howto
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
+import PrereqsInstrument from '@/components/shared/prereqs-instrument.md'
 
-This section shows how you can create, update, and remove dashboards.
+This section shows how you can create, update, and remove dashboards and panels.
 
-<Admonition type="tip">
+<Figure
+  src="/img/docs/userguide/manage-dashboards/dashboards-page.webp"
+  alt="Dashboards page in SigNoz"
+  caption="Dashboards page — browse templates, create new dashboards, or import from JSON."
+/>
 
-We have shared some commonly used dashboard JSON files [here](https://github.com/SigNoz/dashboards). You can import them directly to create dashboards in SigNoz.
+From the Dashboards page, you can:
 
-</Admonition>
+- **Browse dashboard templates** — Select the link at the top to explore [60+ pre-built dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/) for popular integrations. If a template you need is not available, you can request a new one from the templates page.
+- **New Dashboard** — Create a dashboard from scratch by entering a name and selecting **+ New Dashboard**.
+- **Import JSON** — Import a dashboard from a JSON file or a Grafana export.
+- **View templates** — Quickly jump to the templates library to import a pre-built dashboard.
+
+## Prerequisites
+
+<PrereqsInstrument />
 
 ## Create a Custom Dashboard
 
 1. From the sidebar, choose **Dashboards**.
 2. Select the **New Dashboard** button.
-3. Select the **Edit** button at the far right, and then enter the following information:
+3. Select the **Configure** icon, and then enter the following information:
 
    1. A descriptive name for your new dashboard.
-   2. _(Optional)_ Add one or more tags by selecting the **New Tag** button.
-   3. _(Optional)_ A brief description of your new dashboard.
+   2. _(Optional)_ A brief description of your new dashboard.
+   3. _(Optional)_ Add one or more tags by typing a tag name and pressing enter.
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/dashboard-configuration.webp"
+  alt="Dashboard configuration — set name, description, and tags"
+  caption="Dashboard configuration — set the name, description, and tags for your dashboard."
+/>
 
 4. Select the **Save** button at the far right.
 
-5. For each panel you wish to add to your new dashboard, follow the steps in the [Add a Panel to a Dashboard](/docs/userguide/manage-panels#add-a-panel-to-a-dashboard) section.
+5. For each panel you wish to add, follow the steps in the [Add a Panel to a Dashboard](#add-a-panel-to-a-dashboard) section below.
 
 6. _(Optional)_ You can change the order of your panels by dragging and dropping them.
 
-7. When you’ve finished, select the **Save Layout** button.
+7. When you've finished, select the **Save Layout** button.
+
+## Dashboard Options Menu
+
+Click the **...** (three-dot) menu at the top of any dashboard to access the following options:
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/dashboard-options-menu.webp"
+  alt="Dashboard options menu in SigNoz"
+  caption="Dashboard options menu — lock, rename, export, and more."
+/>
+
+- **Lock Dashboard** — Prevent accidental edits by locking the dashboard. When locked, panels cannot be added, removed, resized, or rearranged. Unlock the dashboard from the same menu to resume editing.
+- **Rename** — Quickly rename the dashboard without opening the full configuration drawer.
+- **Full screen** — View the dashboard in full-screen mode for presentations or wall displays.
+- **New section** — Add a section to organize panels into logical groups within the dashboard.
+- **Export JSON** — Download the dashboard configuration as a JSON file for backup or sharing.
+- **Copy as JSON** — Copy the dashboard JSON to your clipboard.
+- **Delete dashboard** — Permanently delete the dashboard.
 
 ## Update a Custom Dashboard
 
@@ -51,47 +87,60 @@ To resize a panel:
 To change the position of a panel:
 
 1. Drag and drop a panel to the new position.
-2. When you’ve finished, select the **Save Layout** button.
+2. When you've finished, select the **Save Layout** button.
 
 ## Remove a Custom Dashboard
 
 1. From the sidebar, choose **Dashboard**.
 2. Find the dashboard you wish to remove. In the **Action** column, select the **Delete** button.
 
-## Export Dashboard JSON
+## Add a Panel to a Dashboard
 
-You can export an existing dashboard's configuration as JSON for backup, sharing, or as a starting point for creating similar dashboards.
+SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, and Histogram. To add a panel to a dashboard, follow the steps below:
 
-1. From the sidebar, choose **Dashboards** and select the dashboard you want to export.
-2. Select the ellipsis (**⋯**) button at the top of the dashboard.
-3. Choose one of the following options:
-   - **Export JSON** — Downloads the dashboard configuration as a `.json` file.
-   - **Copy as JSON** — Copies the dashboard configuration JSON to your clipboard.
+1. From the sidebar, choose **Dashboards**.
+2. Find the dashboard to which you want to add a new panel.
+3. Select **Add Panel**.
+4. Choose a panel type from the dialog.
 
-You can then import the exported JSON into another SigNoz instance or use it to create a new dashboard by following the steps in [Import Dashboard in SigNoz](/docs/dashboards/import-dashboard/).
+<Figure
+  src="/img/docs/userguide/manage-panels/new-panel-dialog.webp"
+  alt="New Panel dialog showing available panel types"
+  caption="Choose from seven panel types when adding a new panel."
+/>
+5. Populate the following fields:
+    1. **Panel Title**: Enter a descriptive name for your panel.
+    2. **Description**: Enter a brief and meaningful description of your new panel.
+    3. _(Optional)_ **Panel Time Preference**: You can use the the drop-down list to specify the time range for which you want to view data. The time range you specify here overrides the global value.
+    4. _(Optional)_ **Y Axis Unit**: Specify the unit of measurement for the y-axis.
+6. To specify the data displayed on your panel, you can use:
+    - The query builder. The query builder provides an easy-to-use graphical interface that allows you create custom queries. For instructions, see the [Create a Custom Query](https://signoz.io/docs/userguide/create-a-custom-query) page.
+    - The declarative query language based on SQL that ClickHouse supports. For details, see the <a href="https://clickhouse.com/docs/en/sql-reference/" target="_blank" rel="noopener noreferrer nofollow">SQL Reference</a> page of the ClickHouse documentation.
+    - PromQL. For details see the <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener noreferrer nofollow">Prometheus Querying Language</a> page of the Prometheus documentation.
+7. _(Optional)_ If you're using the query builder, you can also transform your data by adding mathematical functions. For example, you can divide the value that a query returns by a number. The following mathematical functions are supported: *exp*, *log*, *ln*, *exp2*, *log2*, *exp10*, *log10*, *sqrt*, *cbrt*, *erf*, *erfc*, *lgamma*, *tgamma*, *sin*, *cos*, *tan*, *asin*, *acos*, *atan*, *degrees*, *radians.*
+8. _(Optional)_ The result of the panel query returns a timestamp, float value, and optional set of attributes. The attributes from the response can be used in legend formatting.
+9. _(Optional)_ You can plot up to ten queries on the same panel. To plot a new query, select the **+ Query** button.
+10.  When you've finished, select the **Save** button.
 
-## Enable Public Sharing
+Note the following about panels:
 
-1. From the sidebar, choose **Dashboards** and select the respective dashboard you want to share publicly.
-2. Open the configuration drawer for that dashboard by clicking the **Configure** icon.
-3. In the configuration drawer, select **Publish**.
-4. To allow viewers to change the time range on the public dashboard, toggle the **Enable time range** option.
-5. Choose the **Default time range** that the public dashboard should use.
+- The total number of queries and functions you can plot on a single panel must be less or equal to ten.
+- Every time you add or modify a function or formula, you must select the **Stage & Run Query** button. If you do not select this button, the panel will not be updated and your changes will be lost whenever you move to a different tab.
+- You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
+- When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](https://signoz.io/docs/userguide/send-metrics) section.
 
-<Admonition type="info">
-  **Important**: If the time range option is disabled, viewers will only be able to see the
-  dashboard for the specified default time range.
-</Admonition>
+## Update a Panel
 
-6. Click the **Publish Dashboard** button to enable public sharing.
-7. A publicly shareable link will be generated, which you can use to provide public access to the dashboard.
+1. From the sidebar, choose **Dashboard**.
+2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
+3. Make the changes.
+4. When you've finished, select the **Save** button.
 
-## Disable Public Sharing
+## Next Steps
 
-1. From the sidebar, choose **Dashboards** and select the respective dashboard for which you want to revoke public access.
-2. Open the configuration drawer for that dashboard by clicking the **Configure** icon.
-3. Navigate to the dashboard configuration section and select **Publish**.
-4. To disable public sharing for the dashboard, click the **Revoke** button.
+- [Panel Types](https://signoz.io/docs/dashboards/panel-types/) — Choose the best visualization for your query.
+- [Manage Variables](https://signoz.io/docs/userguide/manage-variables/) — Create dynamic variables for your dashboards.
+- [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/) — Enable or disable public sharing for your dashboards.
 
 ## Get Help
 

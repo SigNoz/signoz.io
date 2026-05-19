@@ -1,5 +1,5 @@
 ---
-date: 2026-02-25
+date: 2026-05-13
 title: Docker Collection Agent - Install
 id: install
 description: Install the OpenTelemetry Collector on your Docker host to collect metrics, logs, and traces and send them to SigNoz.
@@ -81,10 +81,8 @@ processors:
     spike_limit_mib: 800
 
 exporters:
-  otlp:
-    endpoint: 'ingest.<region>.signoz.cloud:443'
-    tls:
-      insecure: false
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
     headers:
       'signoz-ingestion-key': '<your-ingestion-key>'
 
@@ -102,15 +100,15 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
     metrics:
       receivers: [otlp, hostmetrics, docker_stats]
       processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp, filelog]
       processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 
 Verify the following values:
@@ -187,6 +185,14 @@ You should see log lines indicating the receivers started successfully:
 ```
 
 In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your host appears. Check **Logs Explorer** to confirm container logs are flowing.
+
+## Video Walkthrough
+
+If you are someone who understands things better through video implementation, here is a video to help you. Check it out:
+
+**OpenTelemetry Docker Setup Guide: Scalable Collector Configs with SigNoz**
+
+<YouTube id="5YMbyJ7X2ss" />
 
 <details>
 <ToggleHeading>

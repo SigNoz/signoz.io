@@ -1,7 +1,8 @@
-import { allBlogs, allGuides } from 'contentlayer/generated'
+import { allBlogs } from 'contentlayer/generated'
 import { sortPosts } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
 import hubConfig from '@/constants/opentelemetry_hub.json'
+import { fetchAllGuidesForPage } from '@/utils/cachedData'
 
 type ResourceCenterCardSource = {
   slug?: string | null
@@ -91,8 +92,9 @@ export function getResourceCenterBlogs(): ResourceCenterBlog[] {
   return sortPosts(allBlogs).map(pickResourceCenterCardFields)
 }
 
-export function getResourceCenterGuides(): ResourceCenterGuide[] {
-  return sortPosts(allGuides).map(pickResourceCenterCardFields)
+export async function getResourceCenterGuides(): Promise<ResourceCenterGuide[]> {
+  const guides = await fetchAllGuidesForPage()
+  return sortPosts(guides).map(pickResourceCenterCardFields)
 }
 
 type HubConfigNode = {
@@ -125,10 +127,10 @@ function normalizeUrlToPath(url: string): string {
 }
 
 /**
- * Returns contentlayer-based articles (blogs + guides) that are referenced
+ * Returns articles (blogs from contentlayer + guides from CMS) that are referenced
  * in the OpenTelemetry hub config (learn chapters excl. comparisons + quick-start).
  */
-export function getOpenTelemetryHubContentLayerArticles(): ResourceCenterCard[] {
+export async function getOpenTelemetryHubContentLayerArticles(): Promise<ResourceCenterCard[]> {
   const paths = (hubConfig as any).paths || []
   const learnPath = paths.find((p: any) => p.key === 'learn')
   const quickStartPath = paths.find((p: any) => p.key === 'quick-start')
@@ -148,14 +150,22 @@ export function getOpenTelemetryHubContentLayerArticles(): ResourceCenterCard[] 
     extractArticleUrls(quickStartPath).forEach((url) => hubPaths.add(normalizeUrlToPath(url)))
   }
 
-  // Match against contentlayer blogs + guides
-  const allDocs = [...allBlogs, ...allGuides]
+  // Fetch CMS guides
+  let cmsGuides: ResourceCenterCard[] = []
+  try {
+    cmsGuides = await getResourceCenterGuides()
+  } catch (error) {
+    console.error('Error fetching CMS guides for hub articles:', error)
+  }
+
+  // Match against contentlayer blogs + CMS guides
+  const allDocs = [...allBlogs.map(pickResourceCenterCardFields), ...cmsGuides]
   const matched = new Map<string, ResourceCenterCard>()
 
   for (const doc of allDocs) {
     const docPath = (doc.path || '').replace(/^\/+/, '').replace(/\/+$/, '')
     if (hubPaths.has(docPath) && !matched.has(docPath)) {
-      matched.set(docPath, pickResourceCenterCardFields(doc))
+      matched.set(docPath, doc)
     }
   }
 
