@@ -22,12 +22,24 @@ This tutorial walks through deploying the adapter and wiring up an HPA to a SigN
 
 - A Kubernetes cluster with `kubectl` access
 - <a href="https://helm.sh/docs/intro/install/" target="_blank" rel="noopener noreferrer nofollow">Helm 3</a> installed
-- [SigNoz Cloud](https://signoz.io/teams/) running with at least one metric ingested, and a service account API key
+- [SigNoz Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/) with at least one metric ingested, and a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key
 - Your pods must send metrics to SigNoz with `k8s.pod.name` set as a resource attribute
   - The [SigNoz k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) handles this automatically via an OTel Collector with Kubernetes resource detection
-  - For custom app metrics, configure your OTel SDK or Collector to include `k8s.pod.name` as a resource attribute
+  - For custom app metrics, configure your OTel SDK or Collector to include `k8s.pod.name` as a resource attribute. See [Setting resource attributes](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/)
 
-## Step 1: Clone the adapter repository
+## Architecture
+
+Your pods emit metrics to SigNoz via an OTel Collector. The collector enriches each metric with the `k8s.pod.name` resource attribute. The adapter queries SigNoz for those metrics and serves the values through the Kubernetes Custom Metrics API (`custom.metrics.k8s.io`). The HPA reads from that API and scales your Deployment up or down based on the configured target value.
+
+<Figure
+  src="/img/docs/k8s-hpa-signoz-adapter-arch.svg"
+  alt="Architecture: pods send metrics via OTel Collector to SigNoz"
+  caption="How the signoz-metrics-adapter connects SigNoz metrics to the Kubernetes HPA"
+/>
+
+## Steps
+
+### Step 1: Clone the adapter repository
 
 The adapter is deployed using its Helm chart, which is included in the repository.
 
@@ -36,7 +48,7 @@ git clone https://github.com/brainpodnl/signoz-metrics-adapter.git
 cd signoz-metrics-adapter
 ```
 
-## Step 2: Create the SigNoz credentials secret
+### Step 2: Create the SigNoz credentials secret
 
 <Admonition type="info">
   This guide uses SigNoz Cloud. For self-hosted SigNoz, replace the instance URL with your own host and follow the same steps — service accounts work the same way in both deployments.
@@ -53,16 +65,16 @@ kubectl create secret generic signoz-credentials \
   --from-literal=token=<your-api-key>
 ```
 
-Replace the placeholders:
+Verify these values:
 
-- `<your-signoz-url>` — your SigNoz Cloud instance URL, e.g. `https://<your-instance>.signoz.cloud`
-- `<your-api-key>` — a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key with the `SigNoz-Viewer` role
+- `<your-signoz-url>`: your SigNoz Cloud instance URL, for example: `https://<your-instance>.signoz.cloud`
+- `<your-api-key>`: a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key with the `SigNoz-Viewer` role
 
 <Admonition type="warning">
   The adapter queries SigNoz via the [Metrics Query API](https://signoz.io/docs/metrics-management/query-range-api/), which requires the instance URL and a service account API key. The ingestion endpoint and ingestion key will not work.
 </Admonition>
 
-## Step 3: Configure the adapter
+### Step 3: Configure the adapter
 
 Create a `my-values.yaml` file. The pre-built image is public, so set `imagePullSecrets` to an empty list. Add the SigNoz metrics you want the HPA to use:
 
@@ -85,19 +97,19 @@ Key fields:
 | ------------------ | -------------------------------------------------------------------- |
 | `metrics`          | List of SigNoz metric names to expose to the HPA                     |
 | `timeRangeMinutes` | Lookback window the adapter uses when querying SigNoz (default: `5`) |
-| `filterExpression` | Optional SigNoz filter expression to scope metric values             |
+| `filterExpression` | Optional SigNoz filter expression to scope metric values. Example: `deployment.environment = 'prod'` |
 
 To find available metric names, open **Metrics Explorer** in SigNoz.
 
-## Step 4: Deploy the adapter
+### Step 4: Deploy the adapter
 
-The adapter image is published to GHCR. Check the <a href="https://github.com/orgs/brainpodnl/packages?repo_name=signoz-metrics-adapter" target="_blank" rel="noopener noreferrer nofollow">GHCR package page</a> for the latest tag and replace `<latest-tag>` below:
+The adapter image is published to GHCR. The command below uses the latest known tag. Check the <a href="https://github.com/orgs/brainpodnl/packages?repo_name=signoz-metrics-adapter" target="_blank" rel="noopener noreferrer nofollow">GHCR package page</a> and update the tag if a newer version is available:
 
 ```bash
 helm upgrade --install signoz-metrics-adapter helm/ \
   --namespace signoz-metric-adapter \
   --values my-values.yaml \
-  --set steiger.adapter.image=ghcr.io/brainpodnl/signoz-metrics-adapter/adapter:<latest-tag>
+  --set steiger.adapter.image=ghcr.io/brainpodnl/signoz-metrics-adapter/adapter:0789de
 ```
 
 Verify the adapter pod is running:
@@ -106,9 +118,9 @@ Verify the adapter pod is running:
 kubectl get pods --namespace signoz-metric-adapter
 ```
 
-The adapter pod shows `Running`.
+The adapter pod shows **Running**.
 
-## Step 5: Configure the HPA
+### Step 5: Configure the HPA
 
 <Admonition type="info">
   The adapter implements the Kubernetes Custom Metrics API (`custom.metrics.k8s.io`). It queries SigNoz and maps metric values per pod using the `k8s.pod.name` resource attribute. Pods must have metrics in SigNoz with `k8s.pod.name` set — see the Prerequisites section above.
@@ -139,12 +151,12 @@ spec:
           averageValue: "100"
 ```
 
-Replace:
+Verify these values:
 
-- `<your-namespace>` — the namespace where your Deployment runs
-- `my-app` — the name of your Deployment
-- `<your-metric-name>` — the metric name you added to `my-values.yaml`
-- `"100"` — the target average value per replica at which the HPA scales
+- `<your-namespace>`: the namespace where your Deployment runs
+- `my-app`: the name of your Deployment
+- `<your-metric-name>`: the metric name you added to `my-values.yaml`
+- `"100"`: the target average value per replica at which the HPA scales
 
 Apply the HPA:
 
