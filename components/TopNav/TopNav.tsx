@@ -14,6 +14,7 @@ import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
+import CompareSignozDropdown from './CompareSignozDropdown'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
 
@@ -90,19 +91,6 @@ export default function TopNav() {
                 className={`hidden items-center gap-x-6 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
               >
                 {visibility.showProduct && <ProductDropdown />}
-                {visibility.showWhySignoz && (
-                  <TrackingLink
-                    href="/why-signoz"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Why Signoz Link"
-                    clickText="Why Signoz"
-                    clickLocation="Top Navbar"
-                    prefetch={false}
-                  >
-                    Why SigNoz
-                  </TrackingLink>
-                )}
                 {visibility.showDocs && (
                   <TrackingLink
                     href="/docs"
@@ -129,6 +117,7 @@ export default function TopNav() {
                     Pricing
                   </TrackingLink>
                 )}
+                {visibility.showCompareSignoz && <CompareSignozDropdown />}
                 {visibility.showCustomerStories && (
                   <TrackingLink
                     href="/case-study"

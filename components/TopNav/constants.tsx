@@ -35,6 +35,7 @@ export interface ComparisonItem {
   key: string
   url: string
   name: string
+  description: string
 }
 
 export interface ResourceItem {
@@ -154,26 +155,71 @@ export const comparisonItems: ComparisonItem[] = [
     key: 'signozvsdatadog',
     url: '/product-comparison/signoz-vs-datadog/',
     name: 'SigNoz vs DataDog',
+    description: 'Save up to 80% on monitoring costs',
   },
   {
     key: 'signozvsgrafana',
     url: '/product-comparison/signoz-vs-grafana/',
     name: 'SigNoz vs Grafana',
+    description: 'One platform replaces the LGTM stack',
   },
   {
     key: 'signozvsnewrelic',
     url: '/product-comparison/signoz-vs-newrelic/',
     name: 'SigNoz vs New Relic',
+    description: 'No user-based pricing surprises',
   },
   {
     key: 'cloudwatch-alternative',
     url: '/cloudwatch-alternative/',
     name: 'SigNoz vs CloudWatch',
+    description: 'Unified view, transparent billing',
   },
   {
     key: 'clickstack-alternative',
     url: '/clickstack-alternative/',
     name: 'SigNoz vs ClickStack',
+    description: 'Ingest-based pricing, no per-query costs',
+  },
+]
+
+export interface MigrationItem {
+  key: string
+  url: string
+  name: string
+  description: string
+}
+
+export const migrationItems: MigrationItem[] = [
+  {
+    key: 'migrate-datadog',
+    url: '/docs/migration/migrate-from-datadog-to-signoz/',
+    name: 'Migrate from Datadog',
+    description: 'Metrics, traces, logs, dashboards & alerts',
+  },
+  {
+    key: 'migrate-grafana',
+    url: '/docs/migration/migrate-from-grafana-to-signoz/',
+    name: 'Migrate from Grafana',
+    description: 'Replace the LGTM stack end-to-end',
+  },
+  {
+    key: 'migrate-newrelic',
+    url: '/docs/migration/migrate-from-newrelic-to-signoz/',
+    name: 'Migrate from New Relic',
+    description: 'Move to open-source, keep full visibility',
+  },
+  {
+    key: 'migrate-elk',
+    url: '/docs/migration/migrate-from-elk-to-signoz/',
+    name: 'Migrate from ELK',
+    description: 'Simplify log management with ClickHouse',
+  },
+  {
+    key: 'migrate-honeycomb',
+    url: '/docs/migration/migrate-from-honeycomb-to-signoz/',
+    name: 'Migrate from Honeycomb',
+    description: 'Full observability with cost control',
   },
 ]
 
@@ -233,12 +279,12 @@ export const resourcesDropdownItems = {
 export const NAV_BREAKPOINTS = {
   SIGN_IN: 640,
   PRODUCT: 840,
-  WHY_SIGNOZ: 900,
-  DOCS: 960,
-  RESOURCES: 1020,
-  PRICING: 1100,
-  GITHUB_STARS: 1180,
-  FULL_NAV: 1280,
+  DOCS: 900,
+  RESOURCES: 960,
+  PRICING: 1040,
+  COMPARE_SIGNOZ: 1140,
+  GITHUB_STARS: 1220,
+  FULL_NAV: 1320,
 } as const
 
 export const POPOVER_CONTENT_CLASS =
