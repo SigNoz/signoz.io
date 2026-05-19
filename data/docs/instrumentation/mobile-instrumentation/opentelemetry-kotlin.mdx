@@ -137,12 +137,16 @@ class OpenTelemetryUtil {
 
 Verify these values:
 - `<service_name>`: logical name of your mobile service; this is what you will see in SigNoz.
-- `<service_version>`: Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+- `<service_version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
-Set `service.version` to your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`). SigNoz uses this to automatically detect deployments and show change markers on your dashboards.
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
 </Admonition>
 
 <Admonition type="info">
