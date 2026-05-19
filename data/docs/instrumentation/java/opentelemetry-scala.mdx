@@ -19,7 +19,7 @@ This guide walks you through instrumenting your Scala application with OpenTelem
 - <a href="https://github.com/open-telemetry/opentelemetry-java#requirements" target="_blank" rel="noopener noreferrer nofollow">Java 8+</a>
 - Scala 2.x or 3.x
 - SBT, Maven, or Gradle
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
 ## Auto-instrumented frameworks
 
@@ -98,8 +98,7 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 
 SBT runs tasks in the same JVM process by default, so the agent can't attach. Enable forking in your `build.sbt`:
 
-```scala
-// build.sbt
+```scala:build.sbt
 fork := true
 run / javaOptions += "-javaagent:/path/to/opentelemetry-javaagent.jar"
 ```
@@ -142,7 +141,7 @@ java -javaagent:./opentelemetry-javaagent.jar -jar your-app-assembly.jar
 
 ### Step 1. Add the agent to your Dockerfile
 
-```dockerfile
+```dockerfile:Dockerfile
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
@@ -153,11 +152,13 @@ RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/re
 ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
 ```
 
+Replace `<my-app>` with your assembled JAR name.
+
 ### Step 2. Deploy to Kubernetes
 
 Add these environment variables to your deployment manifest:
 
-```yaml
+```yaml:deployment.yaml
 env:
   - name: OTEL_RESOURCE_ATTRIBUTES
     value: 'service.name=<service-name>,service.version=<service-version>'
@@ -243,7 +244,7 @@ Deploy this resource to your cluster.
 
 Add these annotations to your pod template's `metadata.annotations`:
 
-```yaml
+```yaml:deployment.yaml
 instrumentation.opentelemetry.io/inject-java: 'true'
 resource.opentelemetry.io/service.name: '<service-name>'
 resource.opentelemetry.io/service.version: '<service-version>'
@@ -270,7 +271,7 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 
 ### Step 1. Add the agent to your Dockerfile
 
-```dockerfile
+```dockerfile:Dockerfile
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
@@ -366,8 +367,7 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 
 Add to your `build.sbt`:
 
-```scala
-// build.sbt
+```scala:build.sbt
 fork := true
 run / javaOptions += "-javaagent:C:\\path\\to\\opentelemetry-javaagent.jar"
 ```
@@ -408,7 +408,7 @@ The most common cause: SBT shares its JVM with your application by default, so t
 
 Fix: add `fork := true` to your `build.sbt`:
 
-```scala
+```scala:build.sbt
 fork := true
 run / javaOptions += "-javaagent:/path/to/opentelemetry-javaagent.jar"
 ```
@@ -435,6 +435,16 @@ Look for span output in stdout. If spans appear locally but not in SigNoz, check
 ```bash
 curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
 ```
+
+### "Sharing is only supported for boot loader classes" warning
+
+SBT prints this as `[error]` but it is harmless:
+
+```
+[error] OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+```
+
+The Java agent modifies the bootstrap classpath, which disables JVM class-data sharing (CDS). It does not affect instrumentation or trace collection.
 
 ### Agent not attaching
 
