@@ -6,7 +6,6 @@ import { safeJsonLdStringify } from '@/utils/structuredData'
 import { allBlogs } from 'contentlayer/generated'
 
 import BlogArticlePage, {
-  dynamicParams as blogDynamicParams,
   generateMetadata as generateBlogMetadata,
 } from '../blog/[...slug]/page'
 
