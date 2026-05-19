@@ -2001,7 +2001,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/cost-meter/query-api',
-            label: 'Query Meter Data via API',
+            label: 'Cost Meter API',
           },
         ],
       },
