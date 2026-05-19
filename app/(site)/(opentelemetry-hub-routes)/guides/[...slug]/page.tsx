@@ -16,7 +16,6 @@ import React from 'react'
 import { fetchGuideBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { safeJsonLdStringify } from '@/utils/structuredData'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
@@ -28,14 +27,14 @@ const layouts = {
   GuidesLayout,
 }
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+// 1 day — see CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamicParams = true
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchGuideBySlug(slug)
@@ -92,7 +91,8 @@ export const generateStaticParams = async () => {
   return []
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchGuideBySlug(slug)

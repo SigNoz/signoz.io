@@ -68,8 +68,7 @@ export function middleware(req: NextRequest) {
   }
 
   const referer = req.headers.get('referer') || req.headers.get('referrer') || 'direct'
-  const ip =
-    req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
   const vercelIp = ipAddress(req) || 'unknown'
 
   const requestHeaders = new Headers(req.headers)

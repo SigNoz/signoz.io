@@ -90,6 +90,11 @@ export const METRICS_QUICK_START_ITEMS = {
     },
     { name: 'Envoy', href: '/docs/userguide/envoy-metrics', clickName: 'Envoy Metrics Link' },
     {
+      name: 'Istio',
+      href: '/docs/metrics-management/istio-metrics',
+      clickName: 'Istio Metrics Link',
+    },
+    {
       name: 'NVIDIA GPU (DCGM)',
       href: '/docs/metrics-management/nvidia-dcgm-metrics',
       clickName: 'NVIDIA DCGM Metrics Link',
@@ -125,6 +130,11 @@ export const METRICS_QUICK_START_ITEMS = {
       name: '.NET',
       href: '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet',
       clickName: '.NET Metrics Link',
+    },
+    {
+      name: 'ASP.NET Core',
+      href: '/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore',
+      clickName: 'ASP.NET Core Metrics Link',
     },
     {
       name: 'Node.js',

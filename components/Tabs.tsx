@@ -10,9 +10,15 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
   const router = useRouter()
   const pathname = usePathname()
 
+  type TabItemProps = {
+    value: string
+    label: React.ReactNode
+    default?: boolean
+    children?: React.ReactNode
+  }
   const childrenArray = React.Children.toArray(children)
 
-  const isValidElement = (element: any): element is React.ReactElement => {
+  const isValidElement = (element: unknown): element is React.ReactElement<TabItemProps> => {
     return React.isValidElement(element)
   }
 
