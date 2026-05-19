@@ -3,8 +3,6 @@ import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
 import { coreContent } from 'pliny/utils/contentlayer'
-import { allAuthors } from 'contentlayer/generated'
-import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import GuidesLayout from '@/layouts/GuidesLayout'
@@ -16,11 +14,11 @@ import React from 'react'
 import { fetchGuideBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { safeJsonLdStringify } from '@/utils/structuredData'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'GuidesLayout'
 const layouts = {
@@ -28,14 +26,14 @@ const layouts = {
   GuidesLayout,
 }
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+// 1 day — see CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamicParams = true
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchGuideBySlug(slug)
@@ -44,10 +42,11 @@ export async function generateMetadata({
     return notFound()
   }
 
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
 
   const publishedAt = new Date(post.date).toISOString()
@@ -92,7 +91,8 @@ export const generateStaticParams = async () => {
   return []
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchGuideBySlug(slug)
@@ -105,10 +105,11 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const isGrafanaOrPrometheusArticle =
     slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
 
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
@@ -141,6 +142,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           authors={authorList}
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
+          authorDirectory={authorDirectory}
         >
           {compiledContent}
           {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
@@ -181,6 +183,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authorDetails={authorDetails}
         authors={authorList}
         toc={post.toc}
+        authorDirectory={authorDirectory}
       >
         {compiledContent}
       </Layout>

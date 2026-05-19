@@ -17,6 +17,11 @@ export const JAVASCRIPT_INSTRUMENTATION_ITEMS = {
       href: '/docs/instrumentation/javascript/opentelemetry-nuxtjs',
       clickName: 'Nuxt.js Instrumentation Link',
     },
+    {
+      name: 'GraphQL',
+      href: '/docs/instrumentation/javascript/opentelemetry-graphql',
+      clickName: 'GraphQL Instrumentation Link',
+    },
   ] satisfies ComponentItem[],
   frontend: [
     {

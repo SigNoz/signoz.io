@@ -10,6 +10,8 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'data/faqs',
   'data/guides',
   'data-assets',
+  '.agents',
+  '.claude',
   '.github',
   '.husky',
   '.vscode',

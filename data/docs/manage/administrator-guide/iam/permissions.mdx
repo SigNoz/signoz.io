@@ -1,0 +1,73 @@
+---
+date: 2026-05-16
+id: iam-permissions
+title: Permissions Reference
+description: Complete reference of permissions for each resource in SigNoz — relations, descriptions, and managed role access.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: reference
+---
+
+<Admonition type="warning">
+Fine-grained access control is currently in private beta. Contact the SigNoz team for more information.
+</Admonition>
+
+## Overview
+
+This page lists the permissions available for each resource in SigNoz. Each table shows the supported relations, what they mean for that resource, and which managed roles have access.
+
+For an explanation of relations and how permissions work, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview).
+
+<Admonition type="info">
+This page currently covers IAM resources (roles, service accounts, API keys). Permissions for observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+</Admonition>
+
+## Role
+
+Resource: `role` | Kind: `role` | Selector: role name (for example, `my-custom-role`)
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a new custom role. | signoz-admin |
+| `list` | List all roles (managed and custom). | signoz-admin |
+| `read` | View a role's details and its configured permissions. | signoz-admin |
+| `update` | Modify a custom role's description or change its permissions. | signoz-admin |
+| `delete` | Delete a custom role (the role must have no assigned principals). | signoz-admin |
+| `attach` | Create a relationship with the role — assign this role to a principal. | signoz-admin |
+| `detach` | Remove a relationship from the role — unassign this role from a principal. | signoz-admin |
+
+## Service Account
+
+Resource: `serviceaccount` | Kind: `serviceaccount` | Selector: service account ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a new service account. | signoz-admin |
+| `list` | List all service accounts in the organization. | signoz-admin |
+| `read` | View a service account's details and its assigned roles. | signoz-admin |
+| `update` | Modify a service account (for example, rename it). | signoz-admin |
+| `delete` | Delete a service account and revoke all its API keys. | signoz-admin |
+| `attach` | Create a relationship with the service account — assign a role to it, or add an API key to it. | signoz-admin |
+| `detach` | Remove a relationship from the service account — unassign a role from it, or revoke an API key from it. | signoz-admin |
+
+## API Key
+
+Resource: `metaresource` | Kind: `factor-api-key` | Selector: API key ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Generate a new API key for a service account. | signoz-admin |
+| `list` | List all API keys belonging to a service account. | signoz-admin |
+| `read` | View API key metadata (name, expiration, last used). | signoz-admin |
+| `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
+| `delete` | Permanently revoke an API key. | signoz-admin |
+
+## Compound Permissions
+
+Some operations require permissions on multiple resources. Both permissions must be satisfied for the operation to succeed.
+
+| Operation | Permissions Required |
+|-----------|---------------------|
+| Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
+| Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
+| Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
+| Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |

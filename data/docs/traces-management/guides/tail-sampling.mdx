@@ -1,0 +1,341 @@
+---
+date: 2026-05-18
+id: tail-sampling
+title: Tail Sampling
+description: Sample traces at the collector after all spans arrive, using policies based on status, latency, span name, and more.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+Tail sampling evaluates a complete trace before deciding whether to keep or drop it. Unlike head sampling (which decides at the start of a request), tail sampling waits for all spans to arrive at the collector, then applies policies against the full trace.
+
+Use tail sampling when your sampling decision depends on trace-level data (error status, total duration, a specific span name) that isn't available until the trace completes.
+
+<Admonition type="warning" title="Impact on APM metrics">
+  SigNoz computes APM metrics (`signoz_calls_total`, `signoz_latency_sum`, and related RED metrics) from ingested trace data. When you enable tail-based sampling, those metrics cover only the sampled traces, so absolute values like total request counts undercount real traffic. Latency trends and error spikes stay reliable. SigNoz is aware of this gap and plans to address it in a future release.
+</Admonition>
+
+## Prerequisites
+
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed and running
+- Familiarity with [OTel Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
+
+<Admonition type="note">
+  The tail sampling processor ships only in `otelcol-contrib`, not the core OpenTelemetry Collector distribution.
+</Admonition>
+
+## How it works
+
+The processor buffers incoming spans in memory, grouped by trace ID. When `decision_wait` expires, it evaluates the buffered trace against your policies. A trace is sampled if **any** policy returns a sample decision. `drop` policies override sample decisions.
+
+## Setup
+
+Add `tail_sampling` to the `processors` section of your collector config and wire it into the traces pipeline. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor" target="_blank" rel="noopener noreferrer nofollow">official processor docs</a> for the full config reference.
+
+```yaml:config.yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    policies:
+      - name: keep-errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [tail_sampling, batch]
+      exporters: [otlp]
+```
+
+<Admonition type="warning">
+  Place `tail_sampling` **after** any context-dependent processors such as `k8sattributes`, and **just before** `batch`. The processor reassembles spans into new batches, discarding the original context. Putting `batch` after `tail_sampling` ensures only sampled spans are batched for export.
+</Admonition>
+
+<Admonition type="info">
+  When running multiple collector instances, all spans for a trace ID must arrive at the same instance. Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/loadbalancingexporter" target="_blank" rel="noopener noreferrer nofollow">load balancing exporter</a> in a first collector layer to route by trace ID, then apply tail sampling in a second layer.
+</Admonition>
+
+## Configuration reference
+
+| Option                              | Default | Description                                                                   |
+| ----------------------------------- | ------- | ----------------------------------------------------------------------------- |
+| `decision_wait`                     | `30s`   | Wait time before evaluating a trace                                           |
+| `decision_wait_after_root_received` | `0s`    | Additional wait after root span arrives; `0s` disables root-span acceleration |
+| `num_traces`                        | `50000` | Maximum traces buffered in memory                                             |
+| `expected_new_traces_per_sec`       | `0`     | Hint for pre-allocating memory                                                |
+| `sample_on_first_match`             | `false` | Short-circuit policy evaluation as soon as any policy matches, without evaluating remaining policies |
+| `maximum_trace_size_bytes`          | `0`     | Drop traces exceeding this size (bytes); `0` disables the limit                                      |
+
+## Policies
+
+Each policy defines a condition for keeping a trace. Policies are OR-ed: a trace is sampled if any policy matches. A `drop` policy overrides any `sample` decision.
+
+<Admonition type="tip" title="Recommended policy order">
+  Place `drop` policies first. With `sample_on_first_match: true`, the processor short-circuits evaluation as soon as a policy matches. Putting `drop` policies first means the processor drops noisy traces (health checks, probes) before running the remaining policies:
+
+  1. **Drop** — health checks, probes, known-noise spans
+  2. **Keep** — errors and slow traces
+  3. **Probabilistic fallback** — sample remaining traffic at a fixed rate
+  4. **Service-specific overrides** — different rates per service if needed
+</Admonition>
+
+### Drop health-check and probe traces
+
+The `drop` policy prevents sampling when any sub-policy matches. Use it to exclude noisy low-value traces by URL path.
+
+```yaml:config.yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    policies:
+      - name: drop-health-probes
+        type: drop
+        drop:
+          drop_sub_policy:
+            - name: match-probe-paths
+              type: string_attribute
+              string_attribute:
+                key: url.path
+                values: [/health, /ready, /live, /metrics]
+```
+
+To match with a single regex instead of exact values (uses <a href="https://github.com/google/re2/wiki/Syntax" target="_blank" rel="noopener noreferrer nofollow">RE2 syntax</a>):
+
+```yaml:config.yaml
+- name: match-probe-paths-regex
+  type: string_attribute
+  string_attribute:
+    key: url.path
+    values: ['^/(health|ready|live|metrics)$']
+    enabled_regex_matching: true
+```
+
+### Drop traces by span name
+
+The `string_attribute` policy matches span and resource attributes, not the span name itself. To match on span name, use the `ottl_condition` policy with `span.name`.
+
+Drop all traces that contain a span named `health-check`:
+
+```yaml:config.yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    policies:
+      - name: drop-by-span-name
+        type: drop
+        drop:
+          drop_sub_policy:
+            - name: match-span-name
+              type: ottl_condition
+              ottl_condition:
+                error_mode: ignore
+                span:
+                  - 'span.name == "health-check"'
+```
+
+Use regex to match a pattern across multiple span names (see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md" target="_blank" rel="noopener noreferrer nofollow">OTTL docs</a> for available functions):
+
+```yaml:config.yaml
+- name: drop-probe-spans-by-name
+  type: drop
+  drop:
+    drop_sub_policy:
+      - name: match-span-name-regex
+        type: ottl_condition
+        ottl_condition:
+          error_mode: ignore
+          span:
+            - 'IsMatch(span.name, "^(health|ready|live).*")'
+```
+
+<Admonition type="info">
+  To drop individual spans (not the entire trace) by span name, use the [filter
+  processor](https://signoz.io/docs/traces-management/guides/drop-spans/#filter-processor) instead.
+  Tail sampling always operates on the complete trace.
+</Admonition>
+
+### Keep only error traces
+
+Sample traces containing at least one error span. Traces without errors are implicitly not sampled.
+
+```yaml:config.yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    policies:
+      - name: keep-errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+```
+
+### Keep slow traces
+
+Sample traces where total duration exceeds a threshold.
+
+```yaml:config.yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    policies:
+      - name: keep-slow-traces
+        type: latency
+        latency:
+          threshold_ms: 1000
+```
+
+Set `upper_threshold_ms` to keep only traces within a duration band:
+
+```yaml:config.yaml
+- name: keep-medium-traces
+  type: latency
+  latency:
+    threshold_ms: 500
+    upper_threshold_ms: 5000
+```
+
+### Keep errors and slow traces, sample the rest
+
+Always keep errors and slow traces, then sample 5% of everything else as a baseline.
+
+```yaml:config.yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    policies:
+      - name: keep-errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      - name: keep-slow-traces
+        type: latency
+        latency:
+          threshold_ms: 1000
+      - name: sample-rest
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 5
+```
+
+### Sample specific services differently
+
+Use `and` to combine policies: all sub-policies must match for the trace to be sampled. This example samples 1% of health-probe traces from `api-gateway` and 100% of error traces from any service.
+
+```yaml:config.yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    policies:
+      # Policy 1: keep 100% of error traces from any service
+      - name: keep-all-errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      # Policy 2: AND — all three sub-policies must match
+      - name: low-sample-probes
+        type: and
+        and:
+          and_sub_policy:
+            # Sub-policy A: only traces from api-gateway
+            - name: match-service
+              type: string_attribute
+              string_attribute:
+                key: service.name
+                values: [api-gateway]
+            # Sub-policy B: only health/ready probe routes
+            - name: match-probe-route
+              type: string_attribute
+              string_attribute:
+                key: http.route
+                values: [/health, /ready]
+            # Sub-policy C: keep 1% of matching traces
+            - name: probabilistic-1pct
+              type: probabilistic
+              probabilistic:
+                sampling_percentage: 1
+```
+
+## Validate
+
+After restarting the collector, confirm sampling is working:
+
+1. Trigger traces from your services, including both success and error scenarios.
+2. Open **Traces > Explorer** in SigNoz and verify only expected traces appear.
+3. Check the collector's `otelcol_processor_tail_sampling_count_traces_sampled` metric to confirm decisions are being made. Query by label:
+  - Sampled traces: `otelcol_processor_tail_sampling_count_traces_sampled{sampled="true"}`
+  - Not sampled: `otelcol_processor_tail_sampling_count_traces_sampled{sampled="false"}`
+
+<details>
+<ToggleHeading>
+
+## Limitations
+</ToggleHeading>
+
+### Memory pressure
+
+The processor holds all spans for each trace in memory until a decision is made. If trace volume exceeds `num_traces`, the oldest traces are evicted before evaluation — they are dropped without sampling.
+
+Monitor `otelcol_processor_tail_sampling_sampling_trace_dropped_too_early` for early drops. If this metric rises, increase `num_traces` or reduce `decision_wait`. Both changes increase memory usage. Set `maximum_trace_size_bytes` to drop oversized traces before they exhaust the buffer.
+
+### Late-arriving spans
+
+A span arriving after its trace's sampling decision is made inherits the existing decision. If the decision has already been evicted from memory and no decision cache is configured, the late span triggers a new evaluation cycle — which can produce a different decision for that span.
+
+Configure `decision_cache` (`sampled_cache_size` and `non_sampled_cache_size`) to persist decisions beyond the in-memory buffer. Set cache sizes well above `num_traces` to reduce the chance of a late span missing its cached decision.
+
+### Shutdown behavior
+
+Pending traces are evaluated with partial data on shutdown, which can produce incomplete sampling decisions. Set `drop_pending_traces_on_shutdown: true` to discard incomplete traces instead.
+
+### Collector scaling
+
+All spans for a single trace must arrive at the same collector instance. Without trace-ID-aware routing across instances, sampling decisions will be based on incomplete data. See the load balancing exporter note in the [Setup](#setup) section.
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### Traces missing after enabling tail sampling
+
+1. Verify the processor is in the traces pipeline, not logs or metrics.
+2. Check `decision_wait` — if too short, spans may not have arrived before evaluation. Start with `10s` and increase if traces are long-running.
+3. Confirm `otelcol-contrib` is running, not the core distribution.
+
+### High memory usage on the collector
+
+1. Reduce `num_traces` or `decision_wait` to lower the in-memory buffer.
+2. Enable `sample_on_first_match: true` to decide early when a policy matches.
+3. Set `maximum_trace_size_bytes` to drop oversized traces before they exhaust memory.
+
+### Sampling decisions seem inconsistent
+
+1. Check for late-arriving spans — compare span arrival times against `decision_wait`.
+2. If running multiple collectors, verify trace-ID routing is working (load balancing exporter).
+3. Review your policies — `drop` overrides any `sample` decision regardless of policy order. If a `drop` policy matches, the trace is dropped even if another policy would have sampled it.
+
+</details>
+
+## Next Steps
+
+- [Control Traces Volume](https://signoz.io/docs/traces-management/guides/drop-spans/): drop individual spans, attributes, or use the filter processor alongside tail sampling
+- [PII Scrubbing in Traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/): remove sensitive attribute values before traces reach SigNoz
+
+## Get Help
+
+<GetHelp />

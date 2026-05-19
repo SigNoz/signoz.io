@@ -1,15 +1,14 @@
 'use client'
 
 import { ReactNode, useRef, useState, useEffect } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
-import FAQHeader, { AuthorProps } from '@/components/FAQHeader/FAQHeader'
+import FAQHeader from '@/components/FAQHeader/FAQHeader'
 import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import GetStartedSigNoz from '@/components/GetStartedSigNoz/GetStartedSigNoz'
 import { RegionProvider } from '@/components/Region/RegionContext'
+import type { AuthorDetail } from '../types/transformedContent'
 
 export interface tocItemProps {
   url: string
@@ -23,9 +22,17 @@ export interface RelatedArticleProps {
   url: string
 }
 
+type FAQContentData = {
+  slug: string
+  date: string
+  title: string
+  readingTime: { text: string; minutes?: number; time?: number; words?: number }
+  [key: string]: unknown
+}
+
 interface LayoutProps {
-  content: CoreContent<Blog>
-  authorDetails: CoreContent<Authors>[]
+  content: FAQContentData
+  authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
   toc: tocItemProps[]

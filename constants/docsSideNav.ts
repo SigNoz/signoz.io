@@ -473,6 +473,21 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/overview',
+                label: 'Overview',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/permissions',
+                label: 'Permissions',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/roles',
+                label: 'Roles',
+              },
+              {
+                type: 'doc',
                 route: '/docs/manage/administrator-guide/iam/service-accounts',
                 label: 'Service Accounts',
               },
@@ -1040,6 +1055,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/javascript/opentelemetry-graphql',
+                label: 'GraphQL',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/javascript/nodejs-manual-instrumentation',
                 label: 'Manual Instrumentation',
               },
@@ -1255,6 +1275,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/tail-sampling',
+            label: 'Tail Sampling',
           },
           {
             type: 'doc',
@@ -1750,6 +1775,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route:
+                  '/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore',
+                label: 'ASP.NET Core',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
                 label: 'Node.js',
               },
@@ -1804,6 +1835,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/envoy-metrics',
                 label: 'Envoy Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/istio-metrics',
+                label: 'Istio Metrics',
               },
               {
                 type: 'doc',
@@ -2105,6 +2141,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/aspnet-metrics',
+            label: 'ASP.NET Core',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/autogen-dashboard',
             label: 'Autogen',
           },
@@ -2260,6 +2301,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
             label: 'Inkeep',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/istio-dashboard',
+            label: 'Istio',
           },
           {
             type: 'doc',
@@ -2489,9 +2535,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
-        items: [
-          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
-        ],
+        items: [{ type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' }],
       },
     ],
   },
