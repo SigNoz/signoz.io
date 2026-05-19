@@ -65,6 +65,7 @@ wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releas
 export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_METRICS_EXPORTER="none"
 export OTEL_LOGS_EXPORTER="none"
 ```
@@ -155,6 +156,8 @@ env:
     value: 'https://ingest.<region>.signoz.cloud:443'
   - name: OTEL_EXPORTER_OTLP_HEADERS
     value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: 'http/protobuf'
   - name: OTEL_METRICS_EXPORTER
     value: 'none'
   - name: OTEL_LOGS_EXPORTER
@@ -199,6 +202,8 @@ spec:
     - tracecontext
     - baggage
   env:
+    - name: OTEL_EXPORTER_OTLP_PROTOCOL
+      value: "http/protobuf"
     - name: OTEL_METRICS_EXPORTER
       value: "none"
     - name: OTEL_LOGS_EXPORTER
@@ -241,47 +246,36 @@ COPY target/scala-2.13/<my-app>-assembly.jar app.jar
 
 RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
 
-ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-ENV OTEL_METRICS_EXPORTER="none"
-ENV OTEL_LOGS_EXPORTER="none"
-
 ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
 ```
 
-<Admonition type="info" title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
-The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
-
-If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
-
-</Admonition>
-
-Verify these values:
-
-- `<my-app>-assembly.jar` with your built Scala application JAR file
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service (e.g., `checkout-service`).
+Replace `<my-app>` with your assembled JAR name.
 
 ### Step 2. Build and run
 
 ```bash
 docker build -t my-scala-app .
-docker run -p 8080:8080 my-scala-app
-```
-
-Or pass environment variables at runtime:
-
-```bash
 docker run -p 8080:8080 \
   -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>" \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
   -e OTEL_METRICS_EXPORTER="none" \
   -e OTEL_LOGS_EXPORTER="none" \
   my-scala-app
 ```
+
+<Admonition type="info" title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
+The agent enables traces, metrics, and logs by default. Setting both exporters to `none` avoids sending data you didn't ask for.
+
+To collect metrics or logs later, set the exporter to `otlp` or remove the variable entirely.
+</Admonition>
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `checkout-service`).
 
 </TabItem>
 <TabItem value="windows" label="Windows">
@@ -298,6 +292,7 @@ Invoke-WebRequest -Uri "https://github.com/open-telemetry/opentelemetry-java-ins
 $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_METRICS_EXPORTER = "none"
 $env:OTEL_LOGS_EXPORTER = "none"
 ```
