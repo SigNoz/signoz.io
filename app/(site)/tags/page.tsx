@@ -3,11 +3,10 @@ import Tag from '@/components/Tag'
 import { slug } from 'github-slugger'
 import { genPageMetadata } from 'app/(site)/seo'
 import { fetchAllBlogsForPage } from '@/utils/cachedData'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { computeTagCounts } from '@/utils/tagCounts'
 
 export const metadata = genPageMetadata({ title: 'Tags', description: 'Things I blog about' })
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
 export default async function Page() {
   const allBlogPosts = await fetchAllBlogsForPage()

@@ -17,8 +17,6 @@ import { fetchBlogBySlug } from '@/utils/cachedData'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
-
 const defaultLayout = 'BlogLayout'
 const layouts = {
   OpenTelemetryLayout,
@@ -26,7 +24,7 @@ const layouts = {
   NewsroomLayout,
 }
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
 export async function generateMetadata(props: {

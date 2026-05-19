@@ -5,10 +5,9 @@ import { genPageMetadata } from 'app/(site)/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { fetchAllBlogsForPage } from '@/utils/cachedData'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { computeTagCounts } from '@/utils/tagCounts'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
 export async function generateMetadata(props: {
