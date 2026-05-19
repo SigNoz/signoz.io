@@ -9,6 +9,7 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'data/case-study',
   'data/faqs',
   'data/guides',
+  'data/blog',
   'data-assets',
   '.agents',
   '.claude',
