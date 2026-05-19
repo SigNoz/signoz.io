@@ -8,7 +8,7 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-When a slow request hits, you want the logs that fired during that span. When an error surfaces in logs, you want the trace that caused it. Neither works without `trace_id` and `span_id` in your logs.
+SigNoz lets you jump from a trace directly to the logs that fired during it, and from a log entry back to the trace that caused it. This works because OpenTelemetry SDKs inject `trace_id` and `span_id` into every log emitted inside an active span. Without those fields in your logs, trace-to-log navigation returns no results.
 
 ## How Correlation Works
 
@@ -174,7 +174,7 @@ See the [instrumentation docs](https://signoz.io/docs/instrumentation/) for full
 
 ## Manual Correlation for File-based and Kubernetes Logs
 
-If logs go to files that a collector reads, or Kubernetes agents (FluentBit, FluentD) collect them from stdout/stderr, use SigNoz Log Pipelines to extract trace context.
+If logs go to files that a collector reads, or Kubernetes agents collect them from stdout/stderr, use SigNoz Log Pipelines to extract trace context. See the setup guides for [FluentBit](https://signoz.io/docs/userguide/fluentbit_to_signoz/) and [FluentD](https://signoz.io/docs/userguide/fluentd_to_signoz/).
 
 Use this path when:
 - Your application writes logs to files read by a collector
@@ -204,23 +204,30 @@ It covers:
 
 In **Logs Explorer**, filter by `trace_id` to find all logs from a specific trace.
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting
 
-**"Go to related logs" shows no results**
+</ToggleHeading>
+
+### "Go to related logs" shows no results
 
 Your logs reach SigNoz but lack `trace_id`. You haven't initialized SDK logging instrumentation, or you called it after creating your loggers. Move `.instrument()` (Python) or `sdk.start()` (Node.js) before your first log statement.
 
-**`trace_id` in logs is `00000000000000000000000000000000`**
+### `trace_id` in logs is `00000000000000000000000000000000`
 
 This log fired outside an active span. Move logging calls inside instrumented request handlers, not startup code or background goroutines without span context.
 
-**Logs have a `trace_id` but the trace doesn't appear in SigNoz**
+### Logs have a `trace_id` but the trace doesn't appear in SigNoz
 
 Sampling dropped the trace. The log exported but the trace did not. Lower your sampling rate or switch to tail-based sampling so SigNoz receives traces with errors.
 
-**Go: logs emit but `trace_id` stays empty**
+### Go: logs emit but `trace_id` stays empty
 
 The bridge reads context from the `ctx` argument, not a global. Every log call must pass the `ctx` that holds the active span.
+
+</details>
 
 ## Best Practices
 
