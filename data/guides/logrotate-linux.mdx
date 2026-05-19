@@ -1,152 +1,86 @@
 ---
-title: How to Set Up and Manage Log Rotation Using logrotate in Linux
-date: 2024-07-11
+title: Logrotate Linux—Config, Examples & Log Rotation Guide (2026)
+date: 2026-05-19
 tags: [Linux, Logging]
-authors: [simran_kumari]
-description: Learn how to set up and Manage Log Rotation using Logrotate in Linux. Explore configuration, examples, commands and best practices to prevent log file overflow with SigNoz.
-keywords: [logs, logrotate, linux logrotate, log rotation, what is log rotation, logrotate configuration, ubuntu log rotate, logrotate examples]
+authors: [dhruv_ahuja]
+description: Learn how to set up and manage log rotation using logrotate on Linux. Explore configuration, examples, commands, and best practices to prevent log file overflow with SigNoz.
+keywords: [logrotate, linux log rotation, logrotate configuration, log rotation in linux, manage disk space linux logs, logrotate copytruncate, logrotate postrotate, logrotate examples, signoz]
 related_articles: ['/guides/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps', '/blog/best-open-source-log-management-tools', '/guides/systemctl-logs', '/guides/default-logging-file-for-spring-boot-application', '/blog/docker-log-rotation', '/guides/error-log']
 ---
 
-Effective [log management](/log-management/) in Linux is crucial for maintaining system health, performance, and security. Logs are invaluable records of system events, application behaviour, and security incidents. However, these logs can quickly grow out of control without proper management, consuming valuable disk space and potentially causing system issues. This is where log rotation comes into play. Regularly rotating logs ensures they are archived systematically, preventing disk space exhaustion and enhancing overall system performance.
+Logs are crucial for debugging, auditing, and troubleshooting production workloads, but they can also grow rapidly and consume valuable disk space if left unmanaged. Application outages, particularly in self-hosted setups, are often caused by logs exhausting available disk space.
 
-This article walks through Logrotate Linux setup, configuration, and real-world usage, along with how [SigNoz](https://signoz.io/) can help you monitor logrotate logs at scale.
+That makes it important to manage log files regularly and put guardrails around log generation, storage, and retention for both user and system services.
 
-## What is Logrotate?
+This is where the Linux `logrotate` utility helps. It lets you configure automatic log rotation, compression, and deletion based on schedules or file size thresholds.
 
-`Logrotate` is a utility that automates the rotation, compression, and deletion of log files. For anyone managing a Linux server, it is one of the first tools worth learning. It keeps log files at manageable sizes and automatically archives old logs without manual effort.
+This guide will walk you through the process of implementing and managing log rotation using `logrotate`, along with best practices and advanced techniques for managing <Tooltip text="locked files" content="A log file that is being actively held open by a running application, such as a web server or a background worker." />, enabling you to keep your logs organized and your systems healthy, even under varying usage patterns.<br />
+We will also explore how to ingest and monitor your logs using an [OpenTelemetry-native observability backend](https://signoz.io/blog/opentelemetry-backend/) like SigNoz.
 
-### Why use Logrotate?
+## What is logrotate and why use it?
 
-`Logrotate` is an essential tool for managing log files in Linux environments. It offers several key benefits:
+When managing log rotation in Linux, `logrotate` is the go-to system utility designed to simplify the administration of log files on systems that generate a lot of log data. It supports automatic rotation, compression, removal, and mailing of log files.
 
-- **Preventing Disk Space Exhaustion:** By rotating and compressing logs, `logrotate` helps prevent logs from consuming all available disk space.
-- **Maintaining Log File Organization:** Regular rotation ensures logs are archived systematically, making them easier to manage and search through.
-- **Enhancing System Performance:** Proper log rotation reduces the risk of system slowdowns caused by overly large log files.
+By configuring `logrotate`, you can prevent disk exhaustion by automatically pruning old logs before they fill up your storage. It allows you to rotate logs on a specific time schedule, such as daily or weekly, or strictly by size when they exceed a specified threshold.
 
-Ready to keep your Linux system healthy and efficient? Learn how to install and configure logrotate on your system to ensure optimal log management.
+To further save disk space, the utility can compress archived logs using tools like gzip. It also helps you enforce a strict retention policy by keeping only a fixed number of historical files, and can even run post-rotation scripts to gracefully instruct applications to reopen their log files without any downtime.
 
-## Logrotate Linux Setup
+On most Linux systems, `logrotate` is run automatically once per day by either `cron` or a `systemd` timer. If you want rotation to happen more frequently than daily (e.g., hourly), you must also schedule `logrotate` to run more frequently.
 
-Installing `logrotate` on your Linux system is straightforward. Below are the step-by-step instructions for different Linux distributions, including Ubuntu/Debian, CentOS/Red Hat, and Arch Linux.
+## Installing logrotate
 
-### Ubuntu/Debian
+On many Linux distributions, `logrotate` is already installed out of the box. If it is not, you can install it using your system's package manager.
 
-For Ubuntu and Debian-based systems, `logrotate` is usually included in the default repositories, making installation simple with `apt`. If you need to set up Ubuntu log rotation from scratch, the process takes less than a minute.
-
-Before installing any new package, it's a good practice to update your package lists to ensure you get the latest version. Post that you can install logrotate.
+### Debian and Ubuntu
 
 ```bash
 sudo apt update
 sudo apt install logrotate
 ```
 
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled.webp"
-  alt="Updating package lists"
-  caption="Updating package lists"
-/>
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 1.webp"
-  alt="Installing logrotate on Ubuntu"
-  caption="Installing logrotate on Ubuntu"
-/>
-
-Once installed, Ubuntu log rotate settings are managed through the same `/etc/logrotate.conf` and `/etc/logrotate.d/` structure used by every other distribution.
-
-### CentOS/Red Hat
-
-For CentOS and Red Hat systems, you can use `yum` to install `logrotate`.
-
-Use the following command to install `logrotate`:
+### RHEL, CentOS, Rocky, AlmaLinux
 
 ```bash
-sudo yum install logrotate
+sudo dnf install logrotate
 ```
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 2.webp"
-  alt="Installing logrotate on CentOS"
-  caption="Installing logrotate on CentOS"
-/>
+*(On RHEL/CentOS 7 and older releases, use `sudo yum install logrotate`.)*
 
 ### Arch Linux
 
-For Arch Linux, `logrotate` is available in the Arch User Repository (AUR) and can be installed using `pacman`.
-
-First, ensure your package database is up-to-date, then install `logrotate` using `pacman`:
-
 ```bash
-sudo pacman -Syu
 sudo pacman -S logrotate
 ```
 
-### Verifying the Installation
+### Verify the installation
 
-After installation, you can verify that `logrotate` is installed correctly by checking its version:
+Verify that `logrotate` is successfully installed by checking its version:
 
 ```bash
 logrotate --version
 ```
 
-You should see output similar to the following:
+## Understanding the logrotate Configuration File
 
-```bash
-logrotate 3.21.0
-```
+Your Linux log rotation configuration is governed by a few key files. The system usually reads a main logrotate configuration file that sets global defaults, and then includes application-specific rules.
 
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 3.webp"
-  alt="Checking the logrotate version"
-  caption="Checking the logrotate version"
-/>
+- `/etc/logrotate.conf`: The main configuration file for global defaults.
+- `/etc/logrotate.d/`: A directory containing application-specific rotation rules.
 
-## Logrotate Configuration Basics
+The main `/etc/logrotate.conf` file typically includes the `include /etc/logrotate.d` directive, which lets packages (like Nginx, Apache, or your custom applications) drop their own rotation policies into that directory without modifying the main file.
 
-Once `logrotate` is installed, you need to configure it to manage your log files. Understanding the locations, syntax, and common directives of the logrotate configuration file is essential for effective log rotation.
+## Basic logrotate Syntax
 
-### Configuration File Locations
-
-`logrotate` has a global configuration file and can also include additional configuration files for specific applications or log files.
-
-**Global Configuration File:** `/etc/logrotate.conf`
-
-The global configuration file defines the default settings and behaviours for logrotate. It specifies the rotation frequency, compression options, and other global parameters that apply to all log files unless overridden by more specific configurations. This is the starting point for any Linux log rotation configuration.
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 4.webp"
-  alt="logrotate Global Configuration file"
-  caption="logrotate Global Configuration file"
-/>
-
-**Additional Configuration Files Directory:** `/etc/logrotate.d/`
-
-This directory contains additional configuration files that can override or extend the global settings. Each file in this directory typically corresponds to a specific application or log file, allowing for fine-tuned control over log rotation policies. For instance, you might have separate logrotate configuration files for web server logs, database logs, and system logs, each with its own rotation schedule and parameters.
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-9a1791a9-da17-4ba9-83aa-1275585e8a4f.webp"
-  alt="logrotate additional configuration files directory"
-  caption="logrotate additional configuration files directory"
-/>
-
-The global configuration file sets the default parameters and includes any additional configuration files from `/etc/logrotate.d/`.
-
-### Basic Syntax and Structure
-
-`logrotate` configuration files use a straightforward syntax. Each log file or set of log files to be managed is defined within a block that specifies how they should be rotated.
-
-Basic Structure/Syntax :
+A `logrotate` rule targets a specific log file (or multiple files using wildcards) and defines a block of directives.
 
 ```bash
 /path/to/logfile {
-    option1
-    option2
+    directive1
+    directive2
     ...
 }
 ```
 
-Example:
+The following is a practical example for configuring log rotation for Linux system logs.
 
 ```bash
 /var/log/syslog {
@@ -155,83 +89,70 @@ Example:
     compress
     missingok
     notifempty
-    create 640 root adm
+    create 0640 root adm
 }
 ```
 
-### Common Directives
+This configuration tells `logrotate` to:
+1. Rotate `/var/log/syslog` **daily**.
+2. Keep exactly **seven** old copies (`rotate 7`).
+3. **Compress** the rotated files (usually into `.gz`).
+4. Ignore errors if the log file is missing (`missingok`).
+5. Skip rotation if the file is empty (`notifempty`).
+6. **Create** a new log file after rotation with permissions `0640`, owned by `root` and the `adm` group.
 
-The logrotate configuration files include various directives that control how and when log files are rotated, compressed, and managed. These directives allow you to customize the behaviour of logrotate to suit the needs of your system and applications. Below are some of the most commonly used directives:
+## Common logrotate Directives Explained
 
-**Frequency of Rotation:**
+To build effective rotation policies, it helps to understand the most common directives.
 
-  - `daily`: This directive specifies that the log files should be rotated every day.
-  - `weekly`: This directive specifies that the log files should be rotated every week.
-  - `monthly`: This directive specifies that the log files should be rotated every month.
+### Rotation Schedule and Size
 
-**Number of Rotations to Keep:**
-  - `rotate <count>`: This directive specifies the number of old log files to keep. For example, `rotate 7` keeps the last seven rotated logs.
+You can dictate how frequently logs should rotate using either time-based intervals or file size thresholds. This allows you to tailor your rotation policy to the specific logging volume of each application.
 
-**Compression:**
-  
-  - `compress`: This directive compresses the rotated log files to save space.
-  - `nocompress`: This directive ensures that the rotated log files are not compressed.
+By using `daily`, `weekly`, `monthly`, or `yearly`, `logrotate` will rotate the log on that specific time schedule. You can also rotate logs `hourly`, though this requires ensuring that `logrotate` itself is invoked by cron or systemd on an hourly basis.
 
-**Handling Missing Log Files:**
-  - `missingok`: If the log file is missing, `logrotate` will skip it without issuing an error.
-  - `nomissingok`: If the log file is missing, `logrotate` will issue an error message.
+Alternatively, if your logs are highly variable, you can rotate them based on size. You can set the `size <limit>` directive (for example, `size 100M` or `size 10G`), right after the schedule directive. Once configured this way, the log file will only rotate once it grows beyond the specified threshold, regardless of how much time has passed.
 
-**Empty Log Files:**
+### Retention and Compression
 
-  - `notifempty`: This directive ensures that empty log files are not rotated.
-  - `ifempty`: This directive ensures that log files are rotated even if they are empty.
+Once logs are rotated, you need rules to determine how long they are kept and how they are stored.
 
-**Creating New Log Files:**
-  - `create <mode> <owner> <group>`: After rotation, this directive creates a new log file with the specified permissions and ownership. For example, `create 640 root adm` creates a new log file with read/write permissions for the owner and read-only permissions for the group.
+The `rotate <count>` directive specifies the exact number of old log files to keep before deleting the oldest one. For instance, setting `rotate 7` alongside a `daily` schedule ensures you keep exactly one week of historical logs as part of your [retention policy](https://signoz.io/guides/log-retention/).
 
-**Post-Rotation Scripts:**
-  - `postrotate`/`endscript`: These directives specify commands to run after the log file is rotated. This is useful for tasks such as restarting a service to ensure it writes to the new log file.
+To save disk space, you can tell `logrotate` to `compress` the rotated files, which defaults to using gzip. If your application might still briefly write to the old log file immediately after it is rotated, you can use `delaycompress`. This postpones compression of the previous log file to the next rotation cycle, preventing any data loss. Conversely, if you prefer not to compress archived logs at all, you can explicitly set `nocompress`.
 
-  Example with Post-Rotation Script:
+### File Handling
 
-  ```bash
-  /var/log/httpd/access.log {
-      daily
-      rotate 5
-      compress
-      missingok
-      notifempty
-      create 644 root root
-      postrotate
-          /usr/sbin/apachectl graceful > /dev/null
-      endscript
-  }
-  ```
+Logrotate also provides granular control over how the new log files are created and what happens if a file is missing.
 
-The directives above form the building blocks of every Linux log rotation configuration you will write. By understanding these common directives and their usage, you can customize `logrotate` to manage your log files efficiently and effectively.
+If you don't want to see error messages when a specified log file doesn't exist, use the `missingok` directive. You can also prevent `logrotate` from rotating empty files by using `notifempty`.
 
-## Logrotate Configuration Examples
+When a rotation occurs, the `create <mode> <owner> <group>` directive tells the utility to immediately create an empty log file with the specified permissions, user, and group. If your logs reside in directories owned by non-root services, using the `su <user> <group>` directive ensures that `logrotate` rotates files as that specific user and group, avoiding permission denied errors.
 
-Configuring `logrotate` to handle your log files can be tailored to your specific needs. Here are some practical examples demonstrating different configurations for various scenarios.
+### Post-Rotation Actions
 
-### Simple Log Rotation Example
+Executing commands after a log is rotated is a crucial part of the process, particularly for notifying services to start using the new file.
 
-This example rotates the `syslog` log file daily, keeps the last seven rotated logs, compresses them, and creates a new log file with specific permissions.
+You can specify a shell script to run after rotation using the `postrotate` and `endscript` block. This is most commonly used to send a signal to an application to reload its configuration or reopen its log files.
 
-```bash
-/var/log/syslog {
-    daily
-    rotate 7
-    compress
-    missingok
-    notifempty
-    create 640 root adm
-}
-```
+If you use wildcards to target multiple logs (such as `/var/log/myapp/*.log`), `logrotate` will normally run the `postrotate` script once for each rotated log. Adding the `sharedscripts` directive ensures that the script is executed only a single time for the matching set of logs.
 
-### Rotating Logs for a Specific Application
+<KeyPointCallout title="The copytruncate vs. create dilemma">
+When an application holds an open file descriptor to a log file, simply renaming it (which is what `logrotate` does by default) means the application will continue writing to the renamed (rotated) file instead of the new one.
 
-This example shows how to log rotate in Linux for a custom application. The logs are located in `/var/log/myapp/`, rotated weekly, and the last four logs are kept. The log files are compressed, and after rotation, the application is signalled to reopen them.
+**`create` + `postrotate` (Recommended)**:
+The best practice is to move the old log file, `create` a new one, and then send a signal (like `SIGHUP`) to the application in the `postrotate` block to instruct it to reopen its log files.
+
+**`copytruncate` (The Fallback)**:
+If an application cannot be signaled to reopen its log file, you can use `copytruncate`. It copies the current log file to an archive and then truncates the original file in place to zero bytes.<br />
+*Warning:* There is a small race window between the copy and the truncate operations where log lines written by the application can be lost. Use this only when signaling is not possible.
+</KeyPointCallout>
+
+## Practical logrotate Examples
+
+Let's apply these directives to real-world scenarios.
+
+### 1. Rotate Application Logs and Signal the Process
 
 ```bash
 /var/log/myapp/*.log {
@@ -240,225 +161,151 @@ This example shows how to log rotate in Linux for a custom application. The logs
     compress
     missingok
     notifempty
-    create 644 myuser mygroup
-    postrotate
-        /usr/bin/killall -HUP myapp
-    endscript
-}
-```
-
-### Using Wildcards for Multiple Log Files
-
-This example uses wildcards to manage multiple log files generated by the Apache web server. The log files in `/var/log/httpd/` are rotated daily, with the last five logs kept and compressed. The Apache server is gracefully restarted after log rotation. This is one of the more common logrotate examples you will encounter in production.
-
-```bash
-/var/log/httpd/*.log {
-    daily
-    rotate 5
-    compress
-    missingok
-    notifempty
-    create 644 root root
+    create 0640 myapp myapp
     sharedscripts
     postrotate
-        /usr/sbin/apachectl graceful > /dev/null
+        systemctl kill -s HUP myapp.service >/dev/null 2>&1 || true
     endscript
 }
 ```
 
-### Customizing Log Rotation Frequency
+This pattern safely rotates all `.log` files in `/var/log/myapp/` weekly, keeps 4 weeks of history, and signals the `myapp.service` so it can cleanly reopen its log files.
 
-This example demonstrates how to customize the log rotation frequency for the [cron logs](/guides/crontab-logs/). The logs are rotated monthly, and the last twelve logs are kept. The logs are compressed, and empty logs are not rotated.
+The `-HUP` signal is commonly used to ask a daemon to reload its configuration or reopen log files, though the exact behavior depends on the daemon. In this example, `systemctl kill` sends the signal to our application service running directly.<br />
+For managing system log files, you would typically send the signal to the `rsyslogd` process.
+
+### 2. Rotate Nginx Web Server Logs
 
 ```bash
-/var/log/cron {
-    monthly
-    rotate 12
-    compress
+/var/log/nginx/*.log {
+    daily
     missingok
-    notifempty
-    create 640 root adm
-}
-```
-
-### Demo: Rotating Application Logs Every 10 Minutes
-
-To enable log rotation for your application logs every 10 minutes, follow these steps. This demo shows how to log rotate in Linux on a custom schedule that goes beyond the built-in daily/weekly/monthly options.
-
-**Step 1: Create a Custom logrotate Configuration**
-
-Create a custom logrotate configuration file for your application logs.
-
-```bash
-sudo nano /etc/logrotate.d/myapp
-```
-
-Add the following logrotate configuration to rotate logs every 10 minutes based on their size:
-
-```bash
-/var/log/myapp/*.log {
-    size 1M
-    rotate 7
+    rotate 14
     compress
-    missingok
+    delaycompress
     notifempty
-    create 644 root root
+    create 0640 www-data adm
+    sharedscripts
     postrotate
-        /usr/bin/killall -HUP myapp
+        if [ -f /var/run/nginx.pid ]; then
+            kill -USR1 `cat /var/run/nginx.pid`
+        fi
     endscript
 }
 ```
 
-Explanation:
+Here, we keep 14 days of [Nginx logs](https://signoz.io/blog/nginx-logging/). We use `delaycompress` so the most recently rotated log is not compressed immediately, which is safer if Nginx briefly continues writing to the old file before reopening logs. The `postrotate` script sends a `USR1` signal to Nginx, which tells Nginx to reopen its log files.
 
-- `/var/log/myapp/*.log` : This is the log files location, specifying the log files to be managed. It includes all log files in the `/var/log/myapp/` directory with a `.log` extension.
-- size 1M: This directive tells `logrotate` to rotate the log file when it reaches 1 megabytes in size.
-- rotate 7: This specifies that `logrotate` should keep 7 rotated log files before deleting the oldest one.
-- compress: This directive tells `logrotate` to compress the rotated log files to save space.
-- missingok: This means that if the log file is missing, `logrotate` will not issue an error. It will continue with the rest of the log rotation process.
-- notifempty: This directive ensures that empty log files are not rotated. Rotation only happens if the log file is not empty.
-- create 644 root root: After rotation, this directive creates a new log file with permissions `644` and ownership set to the `root` user and group.
-- postrotate ... endscript: The commands between `postrotate` and `endscript` are executed after the log file is rotated. In this example, it sends a `HUP` signal to the `myapp` process, typically to make the application re-read its log file or perform necessary cleanup.
+### 3. Rotate by Size Limit
 
-**Step 2: Create a Script to Trigger logrotate**
-
-Create a script to manually trigger logrotate.
+If your application has bursty traffic, time-based rotation might not prevent disk exhaustion. Use size-based rotation instead:
 
 ```bash
-sudo nano /usr/local/bin/rotate-logs.sh
+/var/log/myapp/debug.log {
+    size 200M
+    rotate 10
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
 ```
 
-Add the following content to the script:
+This will rotate `debug.log` whenever it exceeds 200MB, keeping 10 rotated copies.
+
+*(Remember: `logrotate` must be invoked often enough for the size threshold to be checked. If `logrotate` runs daily, the file could still grow past 200MB within that day before being rotated).*
+
+## How to Test Your logrotate Configuration
+
+Before you rely on a new rule in production, you should test it to ensure you haven't introduced syntax errors or misconfigured permissions.
+
+### Dry-run (Debug Mode)
 
 ```bash
-#!/bin/bash
-/usr/sbin/logrotate /etc/logrotate.d/myapp
+sudo logrotate -d /etc/logrotate.d/myapp
 ```
 
-The script above automates log rotation for the `myapp` logs, ensuring they are rotated according to the specified logrotate configuration. You can include this script in a cron job for regular execution.
+The debug flag (`-d`) shows exactly what `logrotate` would do, which files it would rotate, and which scripts it would run, _without making any actual changes_ to files or the state file. You can also attach the `-v` flag to get more verbose output.
 
-Make the script executable:
+### How to Force logrotate to Run
 
 ```bash
-sudo chmod +x /usr/local/bin/rotate-logs.sh
+sudo logrotate -vf /etc/logrotate.d/myapp
 ```
 
-**Step 3: Schedule the Script to Run Every 10 Minutes**
+- `-v` prints verbose output.
+- `-f` forces rotation even if `logrotate` thinks it is not yet due (e.g., the file hasn't reached the target size or the day hasn't ended).
 
-Create a cron job to run the script every 10 minutes.
+This is highly useful for validating that your `postrotate` scripts work and that the new files are created with the correct permissions.
+
+## Running logrotate More Frequently
+
+The standard daily schedule is sufficient for many systems, but high-volume applications may require more frequent checks (e.g., checking size limits every 15 minutes).
+
+To achieve this, you need to schedule `logrotate` explicitly using `cron`.
+
+Create a file at `/etc/cron.d/logrotate-frequent` with the following content to check specific configurations every 15 minutes:
 
 ```bash
-sudo nano /etc/cron.d/rotate-logs
+*/15 * * * * root /usr/sbin/logrotate /etc/logrotate.conf
 ```
 
-Add the following line:
+This doesn't mean logs rotate every 15 minutes; it means `logrotate` *evaluates* the rules (like `size 200M`) every 15 minutes and rotates **only if the conditions are met**.
 
-```bash
-*/10 * * * * root /usr/local/bin/rotate-logs.sh
-```
+## Troubleshooting Common logrotate Issues
 
-The above cron job configuration instructs the system to run the `rotate-logs.sh` script as the root user every 10 minutes.
+If your logs aren't rotating as expected, check these common pitfalls:
 
-**Step 4: Generate Logs for Demonstration**
+### 1. Logs are not rotating
+- **Cron/Systemd:** Ensure that `logrotate` is actually being triggered by the system scheduler.
+- **State File:** `logrotate` stores its state in `/var/lib/logrotate/status`. If the state file records that a daily rotation just happened, it won't rotate again until tomorrow unless you use `-f`.
+- **Condition Mismatch:** The log file might not be large enough (`size`) or old enough to satisfy the rule.
 
-Create a script to generate logs continuously for the demo.
+### 2. Application keeps writing to the old rotated file
+This typically means the application did not reopen its log file after the rotation.
+- Verify that your `postrotate` script is sending the correct signal (like `SIGHUP` or `SIGUSR1`).
+- Check if you need to use `copytruncate` instead if the application lacks support for log reopening.
 
-```bash
-sudo nano /usr/local/bin/generate-logs.sh
-```
+### 3. Permission denied errors
+If the new log file is created with the wrong owner or directory permissions are too restrictive, the application might crash or stop logging.
+- Double-check the `create <mode> <owner> <group>` directive.
+- Consider using the `su <user> <group>` directive if the logs are in a user-owned directory.
 
-Add the following content:
+## Monitoring Your Logs with SigNoz
 
-```bash
-#!/bin/bash
-while true; do
-    echo "$(date) - Sample log entry" >> /var/log/myapp/myapp.log
-    sleep 1
-done
-```
+While `logrotate` keeps your disk usage in check locally, managing logs on individual servers doesn't scale in a distributed microservices environment. You need [centralized logging](https://signoz.io/blog/centralized-logging/) and alerting to gain true observability.
 
-The above script continuously writes a sample log entry, including the date, to the application log file every second.
+[SigNoz](https://signoz.io/) is an OpenTelemetry-native observability platform that unifies logs, traces, and metrics in a single pane of glass.
 
-Make the script executable:
-
-```bash
-sudo chmod +x /usr/local/bin/generate-logs.sh
-```
-
-Run the script in the background:
-
-```bash
-nohup /usr/local/bin/generate-logs.sh &
-```
+By centralizing your logs in SigNoz, you can:
+- Search across all your servers and containers instantly.
+- Correlate application logs with distributed traces to debug complex issues.
+- Set up alerts for error spikes or rotation failures.
 
 <Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 5.webp"
-  alt="Running the generate-logs script in the background"
-  caption="Running the generate-logs script in the background"
+  src="/img/blog/2025/09/live-tailing.webp"
+  alt="SigNoz provides a powerful log management interface to query, filter, and analyze centralized logs efficiently."
+  caption="SigNoz provides a powerful log management interface to query, filter, and analyze centralized logs efficiently."
 />
 
-**Step 5: Monitor Log Rotation**
+### Ingesting Logs via OpenTelemetry Collector
 
-Open a new terminal and run the following command to watch the log directory:
+The recommended pattern is to collect application log files using the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)'s `filelog` receiver. This works well alongside `logrotate` because the `filelog` receiver is designed to handle common log rotation patterns and track file progress so it can continue collecting logs across rotations.
 
-```bash
-watch -n 1 ls -l /var/log/myapp
-```
+Here is an example OpenTelemetry Collector configuration to ingest logs:
 
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 6.webp"
-  alt="Watch the log directory to get the list of files generated by logrotate"
-  caption="Watch the log directory to get the list of files generated by logrotate"
-/>
-
-This command updates the file listing every second, allowing you to see new log files being
-created and old ones being compressed and archived.
-
-## Monitoring Logrotate Linux Logs with SigNoz
-
-Effective log management is crucial for maintaining system performance and preventing issues like disk space exhaustion. Manual monitoring via terminal commands can be challenging due to the lack of real-time alerts, scalability across multiple systems, and difficulty in promptly identifying patterns or anomalies.
-
-SigNoz offers a robust solution by providing real-time monitoring capabilities. It allows you to track log rotation activities in real time and set up [alerts for specific log patterns](/docs/alerts-management/log-based-alerts/) or anomalies. With SigNoz, logs from various sources are centralized, simplifying management and ensuring proactive detection of issues like failed rotations or disk space concerns.
-
-Compared to other tools, SigNoz stands out as an open-source platform, offering flexibility, comprehensive observability with metrics and tracing, and an intuitive interface that makes it easy to use. It is cost-effective and supported by an active community, making it a reliable choice for effective log management and system monitoring.
-
-### Setting Up Log Monitoring in SigNoz
-
-To monitor logrotate logs using SigNoz and ensure the logs are correctly forwarded, you can configure the [OpenTelemetry Collector](/blog/opentelemetry-collector-complete-guide/) to use the [syslog receiver](/docs/userguide/collecting_syslogs/). Here's how you can achieve this, along with setting up monitoring and alerts in SigNoz.
-
-**Step 1: Configure logrotate to Send Rotated Logs to SigNoz**
-
-Ensure the OpenTelemetry Collector is installed on your system. If not, install it using the following commands:
-
-```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
-```
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 7.webp"
-  alt="Installing OpenTelemetry collector"
-  caption="Installing OpenTelemetry collector"
-/>
-
-<KeyPointCallout defaultCollapsed="true" title="Note">
-Ensure you have the latest version of the OpenTelemetry Collector. The commands above use version 0.116.0, which is the latest at the time of writing. To verify and download the most current version, visit the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Releases</a> page.
-</KeyPointCallout>
-
-Create the OpenTelemetry configuration file, `config.yaml`,~ in the folder otelcol-contrib, with the content below.
-
-```yaml:config.yaml
+```yaml
 receivers:
   filelog:
-    include: [/var/log/myapp/*.log]
+    include:
+      - /var/log/myapp/*.log
     start_at: end
+
 exporters:
   otlp:
-    endpoint: '<cloud endpoint goes here>'
-    tls:
-      insecure: false
+    endpoint: "https://ingest.<your-region>.signoz.cloud:443"
     headers:
-      'signoz-ingestion-key': '<ingestion key goes here>'
+      signoz-ingestion-key: "<YOUR_INGESTION_KEY>"
 
 service:
   pipelines:
@@ -467,187 +314,51 @@ service:
       exporters: [otlp]
 ```
 
-You can update the [ingestion key](/docs/ingestion/signoz-cloud/keys/) and [ingestion endpoint](/docs/ingestion/signoz-cloud/overview/#how-do-i-find-my-ingestion-url) with the values specified in the Otel-collector Setup step.
-
-To run otel-collector, run the following command inside the `otelcol-contrib` directory:
-
-```bash
-./otelcol-contrib --config ./otel-collector-config.yml &> otelcol-output.log & echo "$!" > otel-pid
-```
-
-**Step 2: Modify logrotate Configuration**
-
-Create a logrotate configuration file in the `/etc/logrotate.d/` directory for your application, which contains logrotate configurations for various applications. Here's a sample configuration file located at `/etc/logrotate.d/myapp`:
-
-```bash
-/var/log/myapp/*.log {
-    size 1M
-    rotate 7
-    compress
-    missingok
-    notifempty
-    create 644 ec2-user ec2-user
-    postrotate
-        /usr/bin/killall -HUP myapp
-    endscript
-}
-```
-
-This logrotate configuration rotates logs in the `/var/log/myapp` directory when they reach 1MB in size, keeps 7 rotated logs, compresses them, and ensures the log rotation process doesn't break if a log file is missing or empty. After rotation, it signals the `myapp` process to reopen the log files.
-
-**Step 3: Setting Up Log Monitoring in SigNoz**
-
-To connect your application logs to SigNoz, you will need a [SigNoz Cloud](/teams/) account. This account provides access to the SigNoz platform, where you can configure and view your logs.
-
-- Access your SigNoz cloud account by navigating to your SigNoz URL and logging in.
-- Go to the "Logs" section. You will start receiving logs in the log explorer section from the [OpenTelemetry](/opentelemetry/) Collector.
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 8.webp"
-  alt="Exploring logs in the SigNoz Dashboard"
-  caption="Exploring logs in the SigNoz Dashboard"
-/>
-
-- You can filter logs on various parameters, for example, if the body contains "Error"
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 9.webp"
-  alt="Filtering logs in SigNoz Logs Explorer"
-  caption="Filtering logs in SigNoz Logs Explorer"
-/>
-
-What if you want to set up alerts if some error logs are received? You can make use of the [alert management](/alerts-management/) solution provided by SigNoz in that case.
-
-### Creating Alerts in SigNoz
-
-1. Set Up Alerts Based on Log Monitoring Rules:
-
-   In the SigNoz dashboard, go to the "Alerts" section and create a new alert based on the logs received. Configure the alert with conditions such as error counts, log patterns, or specific log messages.
-
-   Example: Alert on Log Rotation Errors
-
-   - Condition: If the log message contains "error" or "failed".
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 10.webp"
-  alt="Setting up conditions for SigNoz alerts"
-  caption="Setting up conditions for SigNoz alerts"
-/>
-
-- Threshold: 1 occurrence within the last 60 minutes.
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 11.webp"
-  alt="Configuring threshold for SigNoz alerts"
-  caption="Configuring threshold for SigNoz alerts"
-/>
-
-- Action: Send an email or trigger a webhook.
-
-<Figure
-  src="/img/guides/2024/07/logrotate-linux-Untitled 12.webp"
-  alt="Configuring notification channel for SigNoz alerts"
-  caption="Configuring notification channel for SigNoz alerts"
-/>
-
-### Generating Sample Logs to Test Monitoring and Alerts
-
-1. Generate Logs
-
-  Generate sample logs by running `logrotate` or manually creating log entries to simulate rotation and alert triggering.
-
-  Open your terminal and run the following commands to generate sample log entries:
-
-  ```bash
-  echo "$(date) - logrotate test log entry" >> /var/log/myapp/myapp.log
-  echo "$(date) - logrotate error: failed to rotate" >> /var/log/myapp/myapp.log
-  ```
-
-  These commands append log entries to the `/var/log/myapp/myapp.log` file. Adjust the path and file name according to your application's log location.
-
-2. Verify Alerts
-
-  Check the SigNoz Alerts dashboard to verify that alerts are triggered based on the configured rules.
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md#log-rotation" target="_blank" rel="noopener noreferrer nofollow">official documentation</a> for the File Log Receiver goes into more detail about its built-in support for log rotation and how to configure the receiver to handle log truncation.
 
 ## Conclusion
 
-This guide outlines the importance of effective log management using logrotate in Linux systems. It highlights the critical role of log rotation in maintaining system health, optimizing performance, and ensuring security by systematically managing log files.
+While <a href="https://github.com/logrotate/logrotate" target="_blank" rel="noopener noreferrer nofollow">logrotate</a> is an older utility, it remains one of the most reliable and indispensable tools for Linux system administration. Setting up a small, well-tested configuration serves as an excellent first line of defense against disk space exhaustion.<br />
+It keeps your log retention predictable, prevents surprise application crashes, and ensures that local troubleshooting remains easy by keeping active log files reasonably sized.
 
-Key takeaways:
+Finally, while `logrotate` handles the local file lifecycle, pairing it with a centralized OpenTelemetry-native observability platform like SigNoz helps keep historical logs searchable across your infrastructure. This unified approach gives you better visibility into your applications and makes it easier to catch critical failures.
 
-- `logrotate` automates the rotation, compression, and deletion of log files, preventing disk space exhaustion and enhancing system performance.
-- Regular log rotation ensures logs are archived systematically, making them easier to manage and reducing the risk of system slowdowns.
-- You can customize logrotate configurations to suit specific needs, adjusting rotation intervals, compression settings, and post-rotation actions as required.
-- Integrating logrotate logs with monitoring tools like SigNoz helps you track log rotation activities and set up alerts before small issues become outages.
+If you're interested in trying out SigNoz for your system and application logging needs, [sign up](https://signoz.io/teams/) for a 30-day free trial (no credit card required).
 
 ## FAQs
 
+### What is log rotation?
+
+Log rotation is the automated process of archiving, compressing, and eventually deleting old log files to ensure they do not consume all available disk space, while keeping recent logs available for troubleshooting.
+
 ### What is logrotate in Linux?
 
-`logrotate` in Linux is a utility that automates the rotation, compression, and deletion of log files. It helps prevent log files from growing too large, thereby optimizing disk space and system performance. If you are new to Linux logrotate, the default configuration at `/etc/logrotate.conf` is a good starting point.
+`logrotate` is a system utility that automatically rotates, compresses, and removes old log files to prevent logs from consuming all available disk space.
 
-### How do I run the Logrotate command?
+### How do I rotate logs by size in Linux?
 
-To run the logrotate command manually in Linux, use the following syntax:
+Use the `size` directive in your configuration. For example, `size 100M` ensures the log file rotates once it exceeds 100 megabytes. Remember that `logrotate` must run frequently enough (via cron) to catch the size threshold.
 
-```bash
-logrotate -vf /etc/logrotate.conf
-```
+### Where is the logrotate configuration file located?
 
-Replace `/etc/logrotate.conf` with the path to the specific logrotate configuration file you want to execute.
+The main configuration file is located at `/etc/logrotate.conf`. However, application-specific configurations are typically placed in the `/etc/logrotate.d/` directory.
 
 ### Does logrotate run automatically?
 
-Yes, logrotate is typically configured to run automatically through cron jobs. These jobs trigger log rotation according to predefined schedules defined in the logrotate configuration files. On most distributions, a daily cron entry in `/etc/cron.daily/logrotate` handles this.
+Yes, on most Linux distributions, `logrotate` is scheduled to run daily via a cron job (usually found in `/etc/cron.daily/logrotate`) or a systemd timer (`logrotate.timer`).
 
-### How to Force logrotate to Run
+### Where should I put application-specific logrotate rules?
 
-To force logrotate to run immediately and override its normal schedule, use the following command:
+Keep application-specific rules in the `/etc/logrotate.d/` directory instead of cluttering the global `/etc/logrotate.conf` file. This keeps each application's rotation policy isolated and easier to audit or update.
 
-```bash
-logrotate -vf /etc/logrotate.conf
-```
+### Should I use copytruncate for application logs?
 
-This command forces logrotate to execute with verbose output (`-v`) and in force mode (`-f`).
+Avoid `copytruncate` where possible for application logs. Prefer the `create` directive paired with a `postrotate` signal so the application reopens its log file cleanly. This reduces the risk of dropping active log lines during rotation.
 
-### Why do we need logrotate?
+### How do I validate a logrotate policy before using it in production?
 
-`logrotate` is essential in Linux to manage log files efficiently. It prevents log files from filling up disk space, ensures logs are organized and archived, and helps maintain system performance by managing log size. Any Linux logrotate setup — even a basic one — is better than letting logs grow unchecked.
+Use the `logrotate -d` debug flag before deploying a new policy. It shows what `logrotate` would do without modifying files or updating the state file.
 
-### What is the Purpose of Log Rotation?
+### What is the difference between copytruncate and create?
 
-The primary purpose of log rotation is to manage log files systematically. It involves rotating logs periodically, compressing older logs to save disk space, and deleting outdated logs. Understanding what log rotation is helps you appreciate why every production Linux server should have a logrotate configuration in place.
-
-### How do I test logrotate?
-
-You can test logrotate by running it manually with verbose output to simulate log rotation without waiting for the scheduled job. Use the command:
-
-```bash
-logrotate -vf /etc/logrotate.conf
-```
-
-This command will perform log rotation as configured in `/etc/logrotate.conf` and display detailed output (`-v`).
-
-### Does logrotate delete logs?
-
-Yes, logrotate can delete old logs based on the configuration specified in the logrotate configuration files. It typically deletes logs that exceed the specified retention period or number of rotations.
-
-### What is rotate 7 in logrotate?
-
-In the logrotate configuration, `rotate 7` means that logrotate keeps up to 7 rotated log files. This directive specifies how many historical log files to retain before deleting the oldest log file during rotation.
-
-### Where is logrotate installed?
-
-`logrotate` is usually installed by default on most Linux distributions. You can find its executable and configuration files in `/usr/sbin/logrotate` and `/etc/logrotate.conf`, respectively.
-
-### Where can I find logrotate logs?
-
-`logrotate` itself does not maintain logs of its operations. However, you can view logs related to logrotate's activity in the system log files located in `/var/log/`, such as `/var/log/syslog` or `/var/log/messages`.
-
-### Is logrotate a service?
-
-`logrotate` itself is not a service but is often triggered by the system's cron scheduler. It runs periodically as specified by cron jobs to manage log files according to the configured rotation rules.
-
-### Does logrotate delete old logs?
-
-Yes, logrotate can delete old logs based on the rules specified in its configuration files. It deletes logs that exceed the configured retention period or the number of rotations specified with the `rotate` directive.
+`create` moves the old log file, creates a new empty one, and requires you to signal the application to write to the new file. `copytruncate` copies the log contents to an archive and then zeroes out the original file, allowing the application to keep writing to the same file descriptor. `create` is safer and preferred, while `copytruncate` is a fallback for apps that cannot handle signals.
