@@ -1,6 +1,7 @@
 import AgentNativeObservabilityPage from './AgentNativeObservabilityPage'
 import { Metadata } from 'next'
 
+// 1 year
 export const revalidate = 31536000
 
 export const metadata: Metadata = {

@@ -27,6 +27,7 @@ const layouts = {
   GuidesLayout,
 }
 
+// 1 day — see CMS_REVALIDATE_INTERVAL
 export const revalidate = 86400
 export const dynamicParams = true
 
