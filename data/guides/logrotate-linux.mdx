@@ -39,7 +39,7 @@ sudo apt install logrotate
 ```bash
 sudo dnf install logrotate
 ```
-*(On older releases, `yum install logrotate` may be the available command.)*
+*(On RHEL/CentOS 7 and older releases, use `sudo yum install logrotate`.)*
 
 ### Arch Linux
 
@@ -113,7 +113,7 @@ Alternatively, if your logs are highly variable, you can rotate them based on si
 
 Once logs are rotated, you need rules to determine how long they are kept and how they are stored. 
 
-The `rotate <count>` directive specifies the exact number of old log files to keep before deleting the oldest one. For instance, setting `rotate 7` alongside a `daily` schedule ensures you keep exactly one week of historical logs.
+The `rotate <count>` directive specifies the exact number of old log files to keep before deleting the oldest one. For instance, setting `rotate 7` alongside a `daily` schedule ensures you keep exactly one week of historical logs as part of your [retention policy](https://signoz.io/guides/log-retention/).
 
 To save disk space, you can tell `logrotate` to `compress` the rotated files, which defaults to using gzip. If your application might still briefly write to the old log file immediately after it is rotated, you can use `delaycompress`. This postpones compression of the previous log file to the next rotation cycle, preventing any data loss. Conversely, if you prefer not to compress archived logs at all, you can explicitly set `nocompress`.
 
@@ -190,7 +190,7 @@ For managing system log files, you would typically send the signal to the `rsysl
 }
 ```
 
-Here, we keep 14 days of Nginx logs. We use `delaycompress` so the most recently rotated log is not compressed immediately, which is safer if Nginx briefly continues writing to the old file before reopening logs. The `postrotate` script sends a `USR1` signal to Nginx, which tells Nginx to reopen its log files.
+Here, we keep 14 days of [Nginx logs](https://signoz.io/blog/nginx-logging/). We use `delaycompress` so the most recently rotated log is not compressed immediately, which is safer if Nginx briefly continues writing to the old file before reopening logs. The `postrotate` script sends a `USR1` signal to Nginx, which tells Nginx to reopen its log files.
 
 ### 3. Rotate by Size Limit
 
@@ -269,7 +269,7 @@ If the new log file is created with the wrong owner or directory permissions are
 
 ## Monitoring Your Logs with SigNoz
 
-While `logrotate` keeps your disk usage in check locally, managing logs on individual servers doesn't scale in a distributed microservices environment. You need centralized monitoring and alerting to gain true observability.
+While `logrotate` keeps your disk usage in check locally, managing logs on individual servers doesn't scale in a distributed microservices environment. You need [centralized logging](https://signoz.io/blog/centralized-logging/) and alerting to gain true observability.
 
 [SigNoz](https://signoz.io/) is an OpenTelemetry-native observability platform that unifies logs, traces, and metrics in a single pane of glass.
 
@@ -286,7 +286,7 @@ By centralizing your logs in SigNoz, you can:
 
 ### Ingesting Logs via OpenTelemetry Collector
 
-The recommended pattern is to collect application log files using the OpenTelemetry Collector's `filelog` receiver. This works well alongside `logrotate` because the `filelog` receiver is designed to handle common log rotation patterns and track file progress so it can continue collecting logs across rotations.
+The recommended pattern is to collect application log files using the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)'s `filelog` receiver. This works well alongside `logrotate` because the `filelog` receiver is designed to handle common log rotation patterns and track file progress so it can continue collecting logs across rotations.
 
 Here is an example OpenTelemetry Collector configuration to ingest logs:
 
