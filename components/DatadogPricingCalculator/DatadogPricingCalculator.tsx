@@ -281,7 +281,7 @@ const DatadogPricingCalculator = () => {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <Legend itemSorter="dataKey" />
               </PieChart>
             </ResponsiveContainer>
           </div>

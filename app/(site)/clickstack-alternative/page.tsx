@@ -1,7 +1,8 @@
 import ClickStackAlternativePage from './ClickStackAlternativePage'
 import { Metadata } from 'next'
 
-export const revalidate = 60 * 60 * 24 * 365
+// 1 year
+export const revalidate = 31536000
 
 export const metadata: Metadata = {
   title: {

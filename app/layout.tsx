@@ -14,6 +14,9 @@ const inter = Inter({
   display: 'swap',
 })
 
+// Restore Next 14 implicit fetch caching — Next 15 defaults to no-cache.
+export const fetchCache = 'default-cache'
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
   title: {
@@ -92,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
-        <SpeedInsights />
+         <SpeedInsights />
         <Suspense fallback={null}>
           <PageViewTracker />
         </Suspense>

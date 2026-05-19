@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { fetchAvailableAPIVersions } from '@/utils/apiReference'
-import { API_SPEC_REVALIDATE_SECONDS } from '@/constants/apiReference'
 
-export const revalidate = API_SPEC_REVALIDATE_SECONDS
+export const revalidate = 86400 // 24h — see API_SPEC_REVALIDATE_SECONDS
 
 export default async function APIReferenceVersionsPage() {
   const versions = await fetchAvailableAPIVersions()
