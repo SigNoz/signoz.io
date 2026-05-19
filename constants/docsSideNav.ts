@@ -533,6 +533,11 @@ const docsSideNav = [
                 route: '/docs/manage/administrator-guide/configuration/serving-on-external-url',
                 label: 'Serving on an External URL',
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/no-auth-mode',
+                label: 'No-Auth Mode',
+              },
             ],
           },
           {
