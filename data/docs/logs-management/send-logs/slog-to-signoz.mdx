@@ -131,7 +131,8 @@ ctx := context.Background()
 
 exporter, err := otlploghttp.New(ctx)
 if err != nil {
-	fmt.Println(err)
+	fmt.Println("failed to create exporter:", err)
+	return
 }
 ```
 
@@ -163,9 +164,10 @@ logger := otelslog.NewLogger("my/pkg/name", otelslog.WithLoggerProvider(provider
 ### Step 6: Log messages
 
 ```go:main.go
-logger.Info("server started", "port", 8080)
-logger.Warn("rate limit reached", "user_id", "u-123", "limit", 100)
-logger.Error("database query failed", "error", err)
+logger.Info("server listening", "addr", ":8080", "env", "production", "version", "v2.4.1")
+logger.Info("order received", "order_id", "ord-8821", "customer_id", "cust-441", "amount_usd", 149.99)
+logger.Warn("inventory below threshold", "sku", "SNZ-PRO-12", "stock", 4, "reorder_point", 10)
+logger.Error("notification delivery failed", "order_id", "ord-8821", "channel", "email", "error", "smtp: connection timeout")
 ```
 
 <details>
@@ -195,7 +197,8 @@ func main() {
 
 	exporter, err := otlploghttp.New(ctx)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("failed to create exporter:", err)
+		return
 	}
 
 	processor := log.NewBatchProcessor(exporter)
@@ -211,8 +214,10 @@ func main() {
 
 	logger := otelslog.NewLogger("my/pkg/name", otelslog.WithLoggerProvider(provider))
 
-	logger.Info("application started", "version", "1.0.0")
-	logger.Warn("config value missing, using default", "key", "timeout")
+	logger.Info("server listening", "addr", ":8080", "env", "production", "version", "v2.4.1")
+	logger.Info("order received", "order_id", "ord-8821", "customer_id", "cust-441", "amount_usd", 149.99)
+	logger.Warn("inventory below threshold", "sku", "SNZ-PRO-12", "stock", 4, "reorder_point", 10)
+	logger.Error("notification delivery failed", "order_id", "ord-8821", "channel", "email", "error", "smtp: connection timeout")
 }
 ```
 
