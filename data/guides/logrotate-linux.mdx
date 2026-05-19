@@ -8,16 +8,17 @@ keywords: [logrotate, linux log rotation, logrotate configuration, log rotation 
 related_articles: ['/guides/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps', '/blog/best-open-source-log-management-tools', '/guides/systemctl-logs', '/guides/default-logging-file-for-spring-boot-application', '/blog/docker-log-rotation', '/guides/error-log']
 ---
 
-Effective [log management](https://signoz.io/log-management/) is essential on Linux systems. Logs are crucial for debugging, auditing, and troubleshooting production workloads, but they can also grow rapidly and consume valuable disk space if left unmanaged. Application outages, particularly in self-hosted setups, are often caused due to logs exhausting available disk space.
+Logs are crucial for debugging, auditing, and troubleshooting production workloads, but they can also grow rapidly and consume valuable disk space if left unmanaged. Application outages, particularly in self-hosted setups, are often caused due to logs exhausting available disk space.  
+And so, it becomes vital that you maintain your log files frequently, add guardrails around the the log generation and storage behaviour for logs generated from user as well as system services.
 
-The Linux logrotate utility solves this problem by automatically rotating, compressing, and removing old logs based on a defined schedule or when they reach a specific size threshold. 
+This is where The Linux logrotate utility comes in handy. It helps solve such problems by providing capabilities to configure automatic log rotation, compression, and deletion based on configured schedules or file sizes.
 
-This guide will walk you through the process of implementing and managing log rotation using `logrotate`, plus some best practices and advanced techniques for managing <Tooltip text="locked files" content="A log file that is being actively held open by a running application, such as a web server or a background worker." />, enabling you to keep your system healthy and your logs organized.<br />
+This guide will walk you through the process of implementing and managing log rotation using `logrotate`, plus some best practices and advanced techniques for managing <Tooltip text="locked files" content="A log file that is being actively held open by a running application, such as a web server or a background worker." />, enabling you to keep your logs organized and your systems healthy, even under varying usage patterns.<br />
 We will also explore how to ingest and monitor your logs using an [OpenTelemetry-native observability backend](https://signoz.io/blog/opentelemetry-backend/) like SigNoz.
 
 ## What is logrotate and Why Use It?
 
-When managing log rotation in Linux, <a href="https://github.com/logrotate/logrotate" target="_blank" rel="noopener noreferrer">logrotate</a> is the go-to system utility designed to simplify the administration of log files on systems that generate a lot of log data. It allows for the automatic rotation, compression, removal, and mailing of log files.
+When managing log rotation in Linux, `logrotate` is the go-to system utility designed to simplify the administration of log files on systems that generate a lot of log data. It allows for the automatic rotation, compression, removal, and mailing of log files.
 
 By configuring `logrotate`, you can prevent disk exhaustion by automatically pruning old logs before they fill up your storage. It allows you to rotate logs on a specific time schedule, such as daily or weekly, or strictly by size when they exceed a specified threshold. To further save disk space, the utility can compress archived logs using tools like gzip. It also helps you enforce a strict retention policy by keeping only a fixed number of historical files, and can even run post-rotation scripts to gracefully instruct applications to reopen their log files without any downtime.
 
@@ -25,7 +26,7 @@ On most Linux systems, `logrotate` is run automatically once per day by either `
 
 ## Installing logrotate
 
-On many modern Linux distributions, `logrotate` is already installed out of the box. If it is not, you can install it using your system's package manager.
+On many Linux distributions, `logrotate` is already installed out of the box. If it is not, you can install it using your system's package manager.
 
 ### Debian and Ubuntu
 
@@ -314,9 +315,10 @@ The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/b
 
 ## Conclusion
 
-While `logrotate` is an older utility, it remains one of the most reliable and indispensable tools for Linux system administration. Setting up a small, well-tested configuration serves as an excellent first line of defense against disk space exhaustion. It keeps your log retention predictable, prevents surprise application crashes, and ensures that local troubleshooting remains easy by keeping active log files reasonably sized.
+While <a href="https://github.com/logrotate/logrotate" target="_blank" rel="noopener noreferrer">logrotate</a> is an older utility, it remains one of the most reliable and indispensable tools for Linux system administration. Setting up a small, well-tested configuration serves as an excellent first line of defense against disk space exhaustion.  
+It keeps your log retention predictable, prevents surprise application crashes, and ensures that local troubleshooting remains easy by keeping active log files reasonably sized.
 
-To get the most out of your log management strategy, keep application-specific rules neatly isolated in the `/etc/logrotate.d/` directory rather than cluttering the global configuration. When dealing with live application logs, always prefer the `create` directive paired with a `postrotate` signal over `copytruncate` whenever possible. 
+To get the most out of your log management strategy, keep application-specific rules neatly isolated in the `/etc/logrotate.d/` directory rather than cluttering the global configuration. When dealing with application logs, always avoid `copytruncate` where possible.
  
 This significantly reduces the risk of dropping active log lines during rotation. Furthermore, you should verify any new policies using the `logrotate -d` debug flag before deploying them to production environments.
 
