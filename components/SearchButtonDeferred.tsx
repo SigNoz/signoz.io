@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, Command } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useCallback, useEffect, useState, type ComponentType } from 'react'
 
 import siteMetadata from '@/data/siteMetadata'
@@ -20,11 +20,9 @@ type SearchButtonProps = {
 }
 
 const SearchButtonPreview = ({
-  disableShortcut,
   onHydrate,
   onClick,
 }: {
-  disableShortcut: boolean
   onHydrate: () => void
   onClick: () => void
 }) => (
@@ -33,19 +31,14 @@ const SearchButtonPreview = ({
     onMouseEnter={onHydrate}
     onClick={onClick}
     className={cn(
-      'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
+      'group flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 text-xs text-slate-300 transition',
       'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
       'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
     )}
     aria-label="Open docs search"
   >
     <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
-    <span className="hidden text-xs sm:inline">Search docs...</span>
-    {!disableShortcut && (
-      <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-1 py-[1px] text-[10px] font-medium text-slate-400 sm:flex">
-        <Command className="h-2.5 w-2.5" />K
-      </span>
-    )}
+    <span className="text-xs">Docs</span>
   </button>
 )
 
@@ -118,13 +111,7 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
     )
   }
 
-  return (
-    <SearchButtonPreview
-      disableShortcut={disableShortcut}
-      onHydrate={hydrateSearch}
-      onClick={handlePreviewClick}
-    />
-  )
+  return <SearchButtonPreview onHydrate={hydrateSearch} onClick={handlePreviewClick} />
 }
 
 export default SearchButtonDeferred
