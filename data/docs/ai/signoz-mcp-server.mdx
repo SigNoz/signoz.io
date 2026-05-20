@@ -1,5 +1,5 @@
 ---
-date: 2026-05-05
+date: 2026-05-13
 id: signoz-mcp-server
 title: SigNoz MCP Server
 description: Connect AI assistants like Claude Desktop, Cursor, GitHub Copilot, Claude Code, OpenAI Codex, Windsurf, Gemini CLI, VS Code, and Zed to your SigNoz observability data using the MCP (Model Context Protocol) server.
@@ -794,6 +794,8 @@ Environment variables for the self-hosted MCP server. SigNoz Cloud users do not 
 | `MCP_SERVER_PORT` | Port for HTTP server (when `TRANSPORT_MODE=http`) | `8000` |
 | `LOG_LEVEL` | Logging verbosity: `debug`, `info`, `warn`, `error` | `info` |
 | `SIGNOZ_CUSTOM_HEADERS` | Extra HTTP headers added to every SigNoz API request, such as reverse-proxy auth headers. Format: `Key1:Value1,Key2:Value2` | _(optional)_ |
+| `SIGNOZ_DOCS_REFRESH_INTERVAL` | Refresh interval for the embedded docs sitemap used by `signoz_search_docs` / `signoz_fetch_doc` (Go duration) | `6h` |
+| `SIGNOZ_DOCS_FULL_REFRESH_INTERVAL` | Full refresh interval for the embedded docs corpus (Go duration) | `24h` |
 | `OAUTH_ENABLED` | Enable OAuth 2.1 authentication (`true`/`false`) | `false` |
 | `OAUTH_TOKEN_SECRET` | Encryption key for OAuth tokens (min 32 bytes) | _(required when `OAUTH_ENABLED=true`)_ |
 | `OAUTH_ISSUER_URL` | Public URL of this MCP server | _(required when `OAUTH_ENABLED=true`)_ |
@@ -842,6 +844,8 @@ Alert-rule and notification-channel tools use newer SigNoz rules and channels AP
 | `signoz_create_dashboard` | Create a new dashboard |
 | `signoz_update_dashboard` | Update an existing dashboard |
 | `signoz_delete_dashboard` | Delete a dashboard by UUID |
+| `signoz_list_dashboard_templates` | List the bundled SigNoz dashboard template catalog so the model can pick one |
+| `signoz_import_dashboard` | Create a dashboard from a curated SigNoz dashboard template by path |
 | `signoz_list_services` | List services within a time range |
 | `signoz_get_service_top_operations` | Get top operations for a service |
 | `signoz_list_views` | List saved Explorer views for traces, logs, or metrics |
@@ -855,6 +859,8 @@ Alert-rule and notification-channel tools use newer SigNoz rules and channels AP
 | `signoz_search_traces` | Search traces with flexible filtering |
 | `signoz_get_trace_details` | Get full trace with all spans |
 | `signoz_execute_builder_query` | Execute a raw Query Builder v5 query |
+| `signoz_search_docs` | Search official SigNoz docs for product, setup, instrumentation, config, API, deployment, or troubleshooting questions |
+| `signoz_fetch_doc` | Fetch full markdown for one official SigNoz docs page or heading |
 | `signoz_list_notification_channels` | List notification channels |
 | `signoz_get_notification_channel` | Get a single notification channel by ID |
 | `signoz_create_notification_channel` | Create a notification channel and send a test notification |

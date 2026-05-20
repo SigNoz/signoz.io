@@ -1,5 +1,5 @@
 ---
-date: 2026-05-08
+date: 2026-05-13
 id: metrics
 title: View Services
 description: Understand the Services section in SigNoz — RED metrics, filtering, sorting, global time, refresh interval, and sharing.
@@ -11,10 +11,11 @@ import MetricsDefinition from '@/components/shared/metrics-definition.md'
 
 The **Services** section in SigNoz gives you an overview of all your instrumented applications in one place. It surfaces the RED metrics — Rate, Errors, and Duration — for every service, so you can quickly spot which services are degraded, slow, or erroring without drilling into individual traces.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/services-overview.webp" alt="SigNoz UI showing the Services section"/>
-    <figcaption><i>Services Section</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/services-overview.webp"
+  alt="SigNoz UI showing the Services section"
+  caption="Services Section"
+/>
 
 ## Prerequisites
 
@@ -38,19 +39,21 @@ The **Services** section relies on the rate, errors, and duration ("RED") method
 
 You can switch the sorting order of the values in a column by clicking its heading: first click for ascending order, second click for descending order, and a third click to cancel the sorting.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/sort-list-applications.webp" alt="SigNoz UI showing how to sort the applications in the Services Section"/>
-    <figcaption><i>Sort Applications</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/sort-list-applications.webp"
+  alt="SigNoz UI showing how to sort the applications in the Services Section"
+  caption="Sort Applications"
+/>
 
 ## Filter the List of Applications
 
 You can add attributes to applications and filter based on these attributes. 
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/resource-attribute-filtering.webp" alt="SigNoz UI showing how to filter your application using attributes"/>
-    <figcaption><i>Attributes based filtering</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/resource-attribute-filtering.webp"
+  alt="SigNoz UI showing how to filter your application using attributes"
+  caption="Attributes based filtering"
+/>
 
 You can add attributes with `OTEL_RESOURCE_ATTRIBUTES` flag when starting the application. The below example shows how to set values for `service.namespace` and `deployment.environment`
 
@@ -67,37 +70,41 @@ To add custom filter dimensions in Services, update the `dimensions` section in 
 
 Use the time range selector at the top right of the Services page to set the time frame for all metric columns. Options range from the last 5 minutes to the past week, with a custom date range picker.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/apm-and-distributed-tracing/global-time-selector.webp" alt="SigNoz Services page showing the time range selector at the top right"/>
-    <figcaption><i>Global Time — select the time range for all service metrics</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/global-time-selector.webp"
+  alt="SigNoz Services page showing the time range selector at the top right"
+  caption="Global Time — select the time range for all service metrics"
+/>
 
 ## Refresh Interval
 
 Click the refresh dropdown next to the time range selector to control how often the Services page updates. You can enable **Auto Refresh** and choose an interval — from every 5 seconds up to once per day.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/apm-and-distributed-tracing/services-refresh-interval.webp" alt="Refresh interval options including Auto Refresh with intervals from 5 seconds to 1 day"/>
-    <figcaption><i>Refresh Interval — set auto refresh frequency</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/services-refresh-interval.webp"
+  alt="Refresh interval options including Auto Refresh with intervals from 5 seconds to 1 day"
+  caption="Refresh Interval — set auto refresh frequency"
+/>
 
 ## Share
 
 Click **Share** in the top-right corner to copy a shareable link to the current Services page — including the active time range and filters — so you can send it to a teammate and have them land on exactly the same view.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/apm-and-distributed-tracing/services-share.webp" alt="Share panel showing Enable absolute time toggle and Copy page link button"/>
-    <figcaption><i>Share — copy the current page link to share with your team</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/services-share.webp"
+  alt="Share panel showing Enable absolute time toggle and Copy page link button"
+  caption="Share — copy the current page link to share with your team"
+/>
 
 ## How Services and RED Metrics Are Determined 
 
 We rely on the semantic conventions provided by OpenTelemetry. Every unique `service.name` configured and received is part of the service list.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/trace-request-shop.webp" alt="A trace Request in SigNoz UI"/>
-    <figcaption><i>A typical trace request</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/trace-request-shop.webp"
+  alt="A trace Request in SigNoz UI"
+  caption="A typical trace request"
+/>
 
 The following logic is used for the RED metrics generation of each service.
 In a distributed trace, a request goes through several entities performing various kinds of work. There is an entry point span for each service that took part in the trace journey. This can be thought of as a sub-root span for the service. This sub-root span can have many child spans which could be doing work in parallel or sequential or a combination of both. From an outside perspective this sub-root span work is an operation done by the service and how much time it took to complete this operation is the duration metric. For a web server, this is an API endpoint returning some data and request time is the duration metric. For a messaging consumer service, this is a consume trigger, and till it is done with the message received. For a mobile client application, this could be a button click to submit a form and the time taken to fulfill the request.

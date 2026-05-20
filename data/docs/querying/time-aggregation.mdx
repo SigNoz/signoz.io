@@ -1,0 +1,94 @@
+---
+date: 2026-05-18
+id: time-aggregation
+title: Time Aggregation Windows
+description: Understand how SigNoz manages step intervals for time series queries across traces, logs, and metrics data.
+doc_type: explanation
+---
+
+When querying time series data (traces, logs, or metrics), the system divides your selected time range into equal-width buckets and aggregates the raw data points inside each bucket into a single plotted value. The width of these buckets is the **step interval** (also called the aggregation interval).
+
+<Figure
+  src="/img/docs/querying/time-aggregation-step-interval.webp"
+  alt="Step interval dropdown in the SigNoz Query Builder showing available interval options"
+  caption="The step interval dropdown in the Query Builder. The default is Auto, which calculates the best interval for the current time range."
+/>
+
+## Automatic Step Interval
+
+If you don't specify a step interval, the system automatically calculates one based on:
+
+- **Time range** of your query (end time − start time)
+- **Signal type** (traces/logs vs metrics)
+- A target of approximately **300 data points** for optimal visualization
+
+For most use cases, the automatic value provides a good balance between granularity and performance.
+
+## 1,500-Point Limit
+
+To keep queries responsive, the system enforces a maximum of **1,500 data points per series**. If your manually specified step interval would produce more than 1,500 points, the system automatically raises it until the point count fits within the limit.
+
+This applies per series — a query with a `GROUP BY` that produces many groups still respects the cap for each individual group.
+
+## Traces and Logs
+
+**Minimum step interval:** 5 seconds
+
+**Calculation rules:**
+- **Automatic:** `time_range ÷ 300`, rounded down to the nearest 5 seconds
+- **Limit enforcement:** `time_range ÷ 1500`, rounded down to the nearest 5 seconds
+- The step interval is always a multiple of 5 seconds
+
+**Examples:**
+
+| Query time range | Auto calculation | Final step interval | Data points |
+|---|---|---|---|
+| 1 hour | 3,600s ÷ 300 = 12s | 10 seconds (rounded to nearest 5s) | ~360 |
+| 24 hours | 86,400s ÷ 300 = 288s | 285 seconds (~5 minutes) | ~303 |
+
+**Manual override example:**
+- You set **1 second** steps for a **1 hour** query → that would produce 3,600 points (exceeds the 1,500 limit) → system enforces `3,600 ÷ 1,500 = 2.4s` → rounds up to **5 seconds** (minimum)
+
+## Metrics
+
+**Minimum step interval:** 60 seconds
+
+Metrics use coarser rounding to align with typical collection intervals. The rounding unit depends on the time range:
+
+| Query time range | Rounding unit |
+|---|---|
+| Less than 1 day | 60 seconds |
+| 1–7 days | 5 minutes (300 seconds) |
+| More than 7 days | 30 minutes (1,800 seconds) |
+
+**Examples:**
+
+| Query time range | Auto calculation | Final step interval | Data points |
+|---|---|---|---|
+| 6 hours | 21,600s ÷ 300 = 72s | 60 seconds (rounded to nearest 60s) | 360 |
+| 3 days | 259,200s ÷ 300 = 864s | 900 seconds / 15 minutes (rounded to nearest 300s) | 288 |
+| 2 weeks | 1,209,600s ÷ 300 = 4,032s | 3,600 seconds / 1 hour (rounded to nearest 1,800s) | 336 |
+
+Note: The 60-second minimum for metrics is being updated. Soon, you'll be able to set step intervals matching your collection interval, as long as the query stays within the 1,500 point limit. Follow progress on <a href="https://github.com/SigNoz/signoz/issues/7248" target="_blank" rel="noopener noreferrer nofollow">issue #7248</a>
+
+## How Step Intervals Interact with Other Query Features
+
+- **Filters:** Applied to raw data before the step interval bucketing — they work the same regardless of interval
+- **Aggregations:** Applied within each step interval window (e.g., `Avg` computes the average of all data points inside each bucket)
+- **Group By:** Each distinct group produces its own series, and each series independently counts toward the 1,500-point limit
+
+## Best Practices
+
+1. **Let the system choose:** The automatic calculation works well for most queries. Override only when you have a specific reason.
+2. **Narrow the time range for more detail:** Instead of forcing a tiny step interval across a wide range, zoom into the period you care about. This gives you finer granularity without hitting the point limit.
+3. **Keep the point limit in mind for manual intervals:** If you set a custom step interval, check that `time_range ÷ step_interval` stays under 1,500. If it doesn't, the system will silently raise your interval.
+
+## Troubleshooting
+
+**"My specified step interval was ignored"**
+- The resulting point count likely exceeded 1,500 — the system raised the interval automatically
+- Verify the interval meets the minimum: 5 seconds for traces/logs, 60 seconds for metrics
+- Try narrowing your time range to allow a smaller interval
+
+**"I need more than 1,500 data points"**
+- Leave a comment <a href="https://github.com/SigNoz/signoz/issues/7248" target="_blank" rel="noopener noreferrer nofollow">here</a> explaining your use case.

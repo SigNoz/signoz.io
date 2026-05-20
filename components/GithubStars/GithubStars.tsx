@@ -56,24 +56,18 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
       clickName="GitHub Repository"
       clickText={stars === null ? 'GitHub Icon' : `${displayedStarsText} Stars`}
       clickLocation={location}
-      className={`inline-flex rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-400 ${
-        stars === null ? 'h-8 w-8' : ''
-      }`}
+      className="inline-flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 pl-2 pr-2.5 text-signoz_ink-300 transition-colors hover:bg-slate-700/50"
     >
-      <div
-        className={`box-border flex h-8 items-center rounded-full bg-signoz_slate-500 text-signoz_ink-300 ${
-          stars === null ? 'w-8 justify-center p-0' : '-ml-1 gap-2 py-2 pl-2 pr-2.5'
-        }`}
-      >
-        <div className="github-icon box-border rounded-full p-1">
-          <Github className="fill-signoz_vanilla-100" width={16} />
-        </div>
-        {stars !== null && (
-          <div className="text-right font-medium tabular-nums text-signoz_vanilla-100">
-            {displayedStarsText}
-          </div>
-        )}
+      <div className="github-icon box-border rounded-full p-1">
+        <Github className="fill-signoz_vanilla-100" width={16} />
       </div>
+      {stars === null ? (
+        <div className="h-4 w-[33px] animate-pulse rounded bg-signoz_slate-400" />
+      ) : (
+        <div className="text-right text-xs font-medium tabular-nums text-signoz_vanilla-100">
+          {displayedStarsText}
+        </div>
+      )}
     </TrackingLink>
   )
 }

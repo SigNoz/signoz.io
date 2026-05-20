@@ -1,9 +1,8 @@
 ---
-date: 2026-03-05
+date: 2026-05-14
 id: rust
-
-title: Rust OpenTelemetry Instrumentation
-description: Instrument your Rust application with OpenTelemetry and send traces to SigNoz. Auto-instrument Axum, Actix Web, reqwest, and tonic with framework integrations or add manual instrumentation for custom spans.
+title: Rust OpenTelemetry Instrumentation Guide
+description: Instrument your Rust application with OpenTelemetry and send traces to SigNoz. Supports Axum, Actix Web, reqwest, and tonic with auto and manual instrumentation.
 doc_type: howto
 ---
 
@@ -41,12 +40,22 @@ Use this section if you're deploying your Rust application directly on a server 
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -55,13 +64,12 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 <Admonition type="info">
-The `tls-roots` feature in `opentelemetry-otlp` and `tls-native-roots` in `tonic` are required for sending data to SigNoz Cloud over HTTPS.
+The `tls-roots` and `reqwest-client` features in `opentelemetry-otlp` are required for sending data to SigNoz Cloud over HTTPS.
 </Admonition>
 
 ### Step 3. Create the tracer initialization
@@ -69,28 +77,20 @@ The `tls-roots` feature in `opentelemetry-otlp` and `tls-native-roots` in `tonic
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -133,12 +133,23 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -147,9 +158,8 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 ### Step 3. Create the tracer initialization
@@ -157,28 +167,20 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -215,6 +217,7 @@ Pass environment variables at runtime using `docker run`:
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
     your-image:latest
 ```
 
@@ -224,12 +227,22 @@ Or add them to your Dockerfile:
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -238,9 +251,8 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 ### Step 3. Create the tracer initialization
@@ -248,28 +260,20 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -310,6 +314,7 @@ docker build -t your-image:latest .
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
     your-image:latest
 ```
 
@@ -326,12 +331,22 @@ The steps above configure the trace exporter but does not auto-instrument anythi
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -340,9 +355,8 @@ Add the following to your `Cargo.toml` under `[dependencies]`:
 ```toml:Cargo.toml
 opentelemetry = { version = "0.31.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.31.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.14", features = ["tls-native-roots"] }
 ```
 
 ### Step 3. Create the tracer initialization
@@ -350,28 +364,20 @@ tonic = { version = "0.14", features = ["tls-native-roots"] }
 Add the following imports and function to your `main.rs`:
 
 ```rust:src/main.rs
-use opentelemetry_otlp::{SpanExporter, WithTonicConfig};
+use opentelemetry_otlp::{SpanExporter, WithHttpConfig};
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
-        .with_tonic()
-        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
+        .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -566,17 +572,17 @@ echo $OTEL_EXPORTER_OTLP_HEADERS
 
 **Check for TLS errors:**
 
-Ensure you have the `tls-roots` feature enabled in `opentelemetry-otlp` for HTTPS endpoints:
+Ensure you have the `tls-roots` and `reqwest-client` features enabled in `opentelemetry-otlp` for HTTPS endpoints:
 
 ```toml
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace", "tls-roots"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client", "tls-roots"] }
 ```
 
 ### Why do OTLP exports fail with `connection refused`?
 
 - **VM**: Verify the endpoint URL and that your firewall allows outbound HTTPS on port 443
 - **Kubernetes**: Ensure the endpoint is reachable from within your pod
-- **Self-hosted**: Confirm the collector is listening on the expected port (default: 4317 for gRPC)
+- **Self-hosted**: Confirm the collector is listening on the expected port (default: 4318 for HTTP)
 
 ### Why are spans not being exported?
 
@@ -622,7 +628,7 @@ Think of the OTel Collector as a middleman between your app and SigNoz. Instead 
 When using a collector, update your environment variables to point to the collector endpoint:
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_SERVICE_NAME="<service-name>"
 # No ingestion key needed when using a collector
 ```
@@ -630,7 +636,7 @@ export OTEL_SERVICE_NAME="<service-name>"
 You'll also need to remove the `tls-roots` feature if connecting over HTTP:
 
 ```toml:Cargo.toml
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry-otlp = { version = "0.31.0", features = ["http-proto", "trace", "reqwest-client"] }
 ```
 
 See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions.

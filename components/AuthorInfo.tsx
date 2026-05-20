@@ -1,27 +1,35 @@
 'use client'
 
 import Image from 'next/image'
-import Authors from '../constants/authors.json'
 import React from 'react'
 
-export default function AuthorInfo({ author }: { author: string }) {
+interface AuthorInfoProps {
+  author: string
+  authorData?: { name?: string; url?: string; image_url?: string }
+}
+
+export default function AuthorInfo({ author, authorData }: AuthorInfoProps) {
   const handelAuthorClick = () => {
-    window.open(Authors[author]?.url, '_blank')
+    if (authorData?.url) {
+      window.open(authorData.url, '_blank')
+    }
   }
 
   return (
     <div className="my-2 flex h-9 cursor-pointer items-center gap-4" onClick={handelAuthorClick}>
-      <Image
-        className="m-0 rounded-full"
-        src={Authors[author]?.image_url}
-        alt="Rounded avatar"
-        width={30}
-        height={30}
-      />
+      {authorData?.image_url && (
+        <Image
+          className="m-0 rounded-full"
+          src={authorData.image_url}
+          alt="Rounded avatar"
+          width={30}
+          height={30}
+        />
+      )}
 
       <div className="flex flex-col">
         <h4 className="m-0 text-sm font-medium capitalize text-stone-700 dark:text-white">
-          {Authors[author]?.name}
+          {authorData?.name || author}
         </h4>
       </div>
     </div>

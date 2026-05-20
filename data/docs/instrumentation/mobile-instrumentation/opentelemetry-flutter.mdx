@@ -1,5 +1,5 @@
 ---
-date: 2025-11-22
+date: 2026-05-14
 id: flutter-mobile-app
 
 title: Android/iOS App in Flutter Instrumentation
@@ -57,16 +57,28 @@ final exporter = CollectorExporter(
 final processor = BatchSpanProcessor(exporter);
 final provider = TracerProviderBase(
   processors: [processor],
-  resource: Resource([Attribute.fromString('service.name', '<service_name>')]), // set your service name
+  resource: Resource([
+    Attribute.fromString('service.name', '<service_name>'),
+    Attribute.fromString('service.version', '<service_version>'),
+  ]), // set your service name and version
 );
 
 registerGlobalTracerProvider(provider);
 ```
 
-Replace the placeholders:
+Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<service_name>`: service name that will show up under **Traces Explorer** in SigNoz.
+- `<service_version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 <Admonition type="info">
 Using self-hosted SigNoz? Most steps are identical. Update the endpoint and remove the ingestion key header as shown in <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer nofollow">Cloud → Self-Hosted</a>.

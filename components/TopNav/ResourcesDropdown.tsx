@@ -1,61 +1,38 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
-import * as Popover from '@radix-ui/react-popover'
 import TrackingLink from '@/components/TrackingLink'
-import {
-  resourcesDropdownItems,
-  ResourceItem,
-  POPOVER_CONTENT_CLASS,
-  SECTION_HEADING_CLASS,
-} from './constants'
+import { resourcesDropdownItems, ResourceItem, SECTION_HEADING_CLASS } from './constants'
+import { useNavDropdown } from './NavDropdownContext'
 
 export default function ResourcesDropdown() {
-  const [isOpen, setIsOpen] = useState(false)
-  const close = () => setIsOpen(false)
+  const { isOpen, open, close, triggerRef } = useNavDropdown('resources')
 
   return (
-    <div
-      onPointerEnter={() => setIsOpen(true)}
-      onPointerLeave={() => setIsOpen(false)}
-      className="flex items-center"
-    >
-      <Popover.Root
-        open={isOpen}
-        onOpenChange={(open) => {
-          if (!open) setIsOpen(false)
-        }}
-        modal={false}
+    <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
+      <Button
+        ref={triggerRef}
+        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
+        onClick={() => (isOpen ? close() : open())}
       >
-        <Popover.Trigger asChild>
-          <Button className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500">
-            <div className="flex items-center">
-              Resources
-              <ChevronDown
-                size={12}
-                className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
-              />
-            </div>
-          </Button>
-        </Popover.Trigger>
-        <Popover.Content
-          side="bottom"
-          align="start"
-          sideOffset={4}
-          className={POPOVER_CONTENT_CLASS}
-        >
-          <div className="flex min-w-0 flex-row">
-            <ResourceSection title="Learn" items={resourcesDropdownItems.learn} onClose={close} />
-            <ResourceSection
-              title="Explore"
-              items={resourcesDropdownItems.explore}
-              onClose={close}
-            />
-          </div>
-        </Popover.Content>
-      </Popover.Root>
+        <div className="flex items-center">
+          Resources
+          <ChevronDown
+            size={12}
+            className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+          />
+        </div>
+      </Button>
+    </div>
+  )
+}
+
+export function ResourcesDropdownContent({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="flex min-w-0 flex-row">
+      <ResourceSection title="Learn" items={resourcesDropdownItems.learn} onClose={onClose} />
+      <ResourceSection title="Explore" items={resourcesDropdownItems.explore} onClose={onClose} />
     </div>
   )
 }
