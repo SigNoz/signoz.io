@@ -51,7 +51,7 @@ export interface ResourceItem {
   name: string
 }
 
-const PRODUCT_ICON_CLASS = 'h-5 w-5 shrink-0 text-signoz_vanilla-100'
+const PRODUCT_ICON_CLASS = 'h-4 w-4 shrink-0 pt-0.5 text-signoz_vanilla-100'
 
 export const productDropdownItems: ProductItem[] = [
   {

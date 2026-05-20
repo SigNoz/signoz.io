@@ -78,7 +78,7 @@ function LinkSection({
             onClick={onClose}
             prefetch={false}
           >
-            <div className="flex h-8 w-4 items-center justify-center">{icon}</div>
+            <div className="flex h-8 w-4 items-start pt-0.5">{icon}</div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1">
                 <span className="whitespace-nowrap text-sm text-signoz_vanilla-100">

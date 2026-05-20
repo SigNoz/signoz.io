@@ -58,9 +58,7 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
       href="https://github.com/SigNoz/signoz"
       variant="ghost"
       rounded="full"
-      className={`h-8 gap-2 bg-signoz_slate-500 px-2 text-signoz_ink-300 hover:bg-slate-700/50 ${
-        stars === null ? 'w-8' : 'pl-2 pr-2.5'
-      }`}
+      className="h-8 gap-2 bg-signoz_slate-500 pl-2 pr-2.5 text-signoz_ink-300 hover:bg-slate-700/50"
       onClick={() => {
         logEvent({
           eventName: 'Website Click',
@@ -78,7 +76,9 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
       <div className="github-icon box-border rounded-full p-1">
         <Github className="fill-signoz_vanilla-100" width={16} />
       </div>
-      {stars !== null && (
+      {stars === null ? (
+        <div className="h-4 w-[33px] animate-pulse rounded bg-signoz_slate-400" />
+      ) : (
         <div className="text-right text-xs font-medium tabular-nums text-signoz_vanilla-100">
           {displayedStarsText}
         </div>

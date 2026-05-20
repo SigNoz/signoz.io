@@ -37,7 +37,7 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
           <TrackingLink
             href={item.url || ''}
             disabled={item.url === undefined}
-            className={`group flex h-auto min-w-0 items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
+            className={`group flex h-auto min-w-0 items-start gap-2 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
             key={item.key}
             clickType="Nav Click"
             clickName={`${item.name} Product Link`}
