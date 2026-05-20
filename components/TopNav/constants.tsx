@@ -1,12 +1,18 @@
-import { Brain, Cone, Logs, ShieldPlus, WorkflowIcon } from 'lucide-react'
+import {
+  BarChart2,
+  Boxes,
+  Brain,
+  Bug,
+  Cone,
+  ConciergeBell,
+  DraftingCompass,
+  LayoutGrid,
+  Logs,
+  ScrollText,
+  ShieldPlus,
+  WorkflowIcon,
+} from 'lucide-react'
 import React from 'react'
-import BarChartFeatureIcon from '@/public/img/index_features/bar-chart-2_feature.svg'
-import ConciergeBellFeatureIcon from '@/public/img/index_features/concierge-bell_feature.svg'
-import DraftingCompassFeatureIcon from '@/public/img/index_features/drafting-compass_feature.svg'
-import LayoutGridFeatureIcon from '@/public/img/index_features/layout-grid_feature.svg'
-import LogsFeatureIcon from '@/public/img/index_features/logs_feature.svg'
-import BugFeatureIcon from '@/public/img/index_features/bug_feature.svg'
-import BoxesIcon from '@/public/img/index_features/boxes.svg'
 
 export enum TABS {
   BLOG = 'blog-tab',
@@ -45,13 +51,13 @@ export interface ResourceItem {
   name: string
 }
 
-const PRODUCT_ICON_CLASS = 'h-5 w-5 shrink-0'
+const PRODUCT_ICON_CLASS = 'h-5 w-5 shrink-0 text-signoz_vanilla-100'
 
 export const productDropdownItems: ProductItem[] = [
   {
     key: 'apm',
     url: '/application-performance-monitoring',
-    icon: <BarChartFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    icon: <BarChart2 className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Monitor your applications',
     name: 'APM',
     order: 1,
@@ -59,7 +65,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'Alerts',
     url: '/alerts-management',
-    icon: <ConciergeBellFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    icon: <ConciergeBell className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Multiple thresholds and dynamic routing at scale',
     name: 'Alerts',
     order: 5,
@@ -67,9 +73,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'external-apis',
     url: '/external-apis/',
-    icon: (
-      <WorkflowIcon className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />
-    ),
+    icon: <WorkflowIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Track third-party API performance',
     name: 'External API Monitoring',
     order: 9,
@@ -77,7 +81,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'DistributedTracing',
     url: '/distributed-tracing',
-    icon: <DraftingCompassFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    icon: <DraftingCompass className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Track requests across your services',
     name: 'Distributed Tracing',
     order: 2,
@@ -85,7 +89,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'MetricsDashboards',
     url: '/metrics-and-dashboards',
-    icon: <LayoutGridFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    icon: <LayoutGrid className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Monitor key metrics and build dashboards',
     name: 'Metrics & Dashboards',
     order: 6,
@@ -93,7 +97,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'messaging-queues',
     url: '/docs/messaging-queues/overview/',
-    icon: <Logs className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />,
+    icon: <Logs className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Monitor Kafka, Celery lag & throughput',
     name: 'Messaging Queues',
     order: 10,
@@ -101,7 +105,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'LogManagement',
     url: '/log-management',
-    icon: <LogsFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    icon: <ScrollText className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Fast queries with columnar database',
     name: 'Log Management',
     order: 3,
@@ -109,7 +113,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'Exceptions',
     url: '/exceptions-monitoring',
-    icon: <BugFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    icon: <Bug className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Record exceptions automatically',
     name: 'Exceptions',
     order: 7,
@@ -117,7 +121,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'llm-observability',
     url: '/llm-observability/',
-    icon: <Brain className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />,
+    icon: <Brain className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Monitor AI and LLM workflows',
     name: 'LLM Observability',
     order: 11,
@@ -125,7 +129,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'InfraMonitoring',
     url: '/docs/infrastructure-monitoring/overview/',
-    icon: <BoxesIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    icon: <Boxes className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Monitor your infrastructure',
     name: 'Infrastructure Monitoring',
     order: 4,
@@ -133,7 +137,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'trace-funnels',
     url: '/trace-funnels/',
-    icon: <Cone className={`${PRODUCT_ICON_CLASS} text-signoz_sakura-400`} aria-hidden="true" />,
+    icon: <Cone className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Track drop-offs in multi-step flows',
     name: 'Trace Funnels',
     order: 8,
@@ -141,9 +145,7 @@ export const productDropdownItems: ProductItem[] = [
   {
     key: 'agent-native-observability',
     url: '/agent-native-observability/',
-    icon: (
-      <ShieldPlus className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />
-    ),
+    icon: <ShieldPlus className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Observability in your Coding Agents via MCP',
     name: 'Agent Native Observability',
     order: 12,
