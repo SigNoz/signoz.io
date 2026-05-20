@@ -13,7 +13,7 @@ export default function ProductDropdown() {
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
       <Button
         ref={triggerRef}
-        className="truncate px-1.5 py-1 text-sm outline-none hover:text-signoz_robin-500"
+        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
         onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">

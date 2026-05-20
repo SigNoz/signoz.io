@@ -98,7 +98,7 @@ export default function TopNav() {
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs"
-                      className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Docs Link"
                       clickText="Docs"
@@ -113,7 +113,7 @@ export default function TopNav() {
                   {visibility.showPricing && (
                     <TrackingLink
                       href="/pricing"
-                      className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Pricing Link"
                       clickText="Pricing"
@@ -125,7 +125,7 @@ export default function TopNav() {
                   {visibility.showCustomerStories && (
                     <TrackingLink
                       href="/case-study"
-                      className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Customer Stories Link"
                       clickText="Customers"
