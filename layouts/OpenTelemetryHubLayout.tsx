@@ -6,7 +6,6 @@ import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableO
 import ArticleMetaDetailsCard, {
   type RenderedAuthor,
 } from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
-import authorsDirectory from '@/constants/authors.json'
 import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 
@@ -26,6 +25,7 @@ export interface HubContentProps {
   children: React.ReactNode
   toc: { url: string; depth: number; value: string }[]
   showSidebar: boolean
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
 }
 
 export function buildRenderedAuthors(
@@ -102,15 +102,12 @@ export default function OpenTelemetryHubContent({
   children,
   toc,
   showSidebar,
+  authorDirectory = {},
 }: HubContentProps) {
   const title = content.title || ''
   const hasToc = Array.isArray(toc) && toc.length > 0
 
-  const renderedAuthors = buildRenderedAuthors(
-    authorDetails,
-    authors,
-    authorsDirectory as Record<string, { name?: string; url?: string; image_url?: string }>
-  )
+  const renderedAuthors = buildRenderedAuthors(authorDetails, authors, authorDirectory)
   const formattedUpdatedDate = getFormattedDate(content)
   const readingTimeText = getReadingTimeText(content)
 

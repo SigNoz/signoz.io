@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button } from '@headlessui/react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
@@ -10,10 +9,14 @@ import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import { Button } from '@/components/ui/Button'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
+import CompareSignozDropdown from './CompareSignozDropdown'
+import { NavDropdownProvider } from './NavDropdownContext'
+import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
 
@@ -66,9 +69,9 @@ export default function TopNav() {
 
   return (
     <div className="fixed left-0 right-0 z-[50]">
-      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
+      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
         <nav
-          className="container flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100 md:px-8"
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
@@ -86,66 +89,57 @@ export default function TopNav() {
             </TrackingLink>
 
             {!isLoginRoute && (
-              <div
-                className={`hidden items-center gap-x-6 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
-              >
-                {visibility.showProduct && <ProductDropdown />}
-                {visibility.showWhySignoz && (
-                  <TrackingLink
-                    href="/why-signoz"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Why Signoz Link"
-                    clickText="Why Signoz"
-                    clickLocation="Top Navbar"
-                    prefetch={false}
-                  >
-                    Why SigNoz
-                  </TrackingLink>
-                )}
-                {visibility.showDocs && (
-                  <TrackingLink
-                    href="/docs"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Docs Link"
-                    clickText="Docs"
-                    clickLocation="Top Navbar"
-                    prefetch={false}
-                  >
-                    Docs
-                  </TrackingLink>
-                )}
-                {visibility.showResources && <ResourcesDropdown />}
-                {visibility.showPricing && (
-                  <TrackingLink
-                    href="/pricing"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Pricing Link"
-                    clickText="Pricing"
-                    clickLocation="Top Navbar"
-                  >
-                    Pricing
-                  </TrackingLink>
-                )}
-                {visibility.showCustomerStories && (
-                  <TrackingLink
-                    href="/case-study"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Customer Stories Link"
-                    clickText="Customer Stories"
-                    clickLocation="Top Navbar"
-                  >
-                    Customer Stories
-                  </TrackingLink>
-                )}
-              </div>
+              <NavDropdownProvider>
+                <div
+                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                >
+                  {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showDocs && (
+                    <TrackingLink
+                      href="/docs"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      clickType="Nav Click"
+                      clickName="Docs Link"
+                      clickText="Docs"
+                      clickLocation="Top Navbar"
+                      prefetch={false}
+                    >
+                      Docs
+                    </TrackingLink>
+                  )}
+                  {visibility.showResources && <ResourcesDropdown />}
+                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
+                  {visibility.showPricing && (
+                    <TrackingLink
+                      href="/pricing"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      clickType="Nav Click"
+                      clickName="Pricing Link"
+                      clickText="Pricing"
+                      clickLocation="Top Navbar"
+                    >
+                      Pricing
+                    </TrackingLink>
+                  )}
+                  {visibility.showCustomerStories && (
+                    <TrackingLink
+                      href="/case-study"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      clickType="Nav Click"
+                      clickName="Customer Stories Link"
+                      clickText="Customers"
+                      clickLocation="Top Navbar"
+                    >
+                      Customers
+                    </TrackingLink>
+                  )}
+                </div>
+                <NavDropdownPanel />
+              </NavDropdownProvider>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-2">
             {!isLoginRoute && (
               <>
                 <SearchButtonDeferred />
@@ -153,7 +147,7 @@ export default function TopNav() {
                 {visibility.showSignInGetStarted && (
                   <>
                     <TrackingButton
-                      className="-ml-1 box-border flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
+                      className="box-border flex h-8 items-center rounded-full bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
                       clickType="Secondary CTA"
                       clickName="Sign In Button"
                       clickText="Sign In"
@@ -164,15 +158,20 @@ export default function TopNav() {
                     </TrackingButton>
                     <TrackingLink
                       href="/teams"
-                      className="start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
                       clickType="Primary CTA"
                       clickName="Sign Up Button"
                       clickText="Get Started - Free"
                       clickLocation="Top Navbar"
                     >
-                      <Button id="btn-get-started-website-navbar" className="flex-center">
-                        Get Started - Free
-                        <ArrowRight size={14} />
+                      <Button
+                        asChild
+                        rounded="full"
+                        className="start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
+                      >
+                        <span id="btn-get-started-website-navbar">
+                          Get Started - Free
+                          <ArrowRight size={14} />
+                        </span>
                       </Button>
                     </TrackingLink>
                   </>

@@ -163,7 +163,7 @@ export default function GridLayout({
 
   return (
     <RegionProvider>
-      <div className="container mx-auto p-0">
+      <div className="mx-auto max-w-8xl p-0">
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           <div className="my-8 flex flex-col">
             <div

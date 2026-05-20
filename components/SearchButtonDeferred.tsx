@@ -1,10 +1,15 @@
 'use client'
 
-import { Search, Command } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useCallback, useEffect, useState, type ComponentType } from 'react'
 
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
+import { Button } from '@/components/ui/Button'
+import { AppTooltip } from '@/components/ui/AppTooltip'
+import { TooltipProvider } from '@radix-ui/react-tooltip'
+import { useLogEvent } from 'hooks/useLogEvent'
+import { usePathname } from 'next/navigation'
 
 type SearchButtonDeferredProps = {
   disableShortcut?: boolean
@@ -20,33 +25,31 @@ type SearchButtonProps = {
 }
 
 const SearchButtonPreview = ({
-  disableShortcut,
   onHydrate,
   onClick,
 }: {
-  disableShortcut: boolean
   onHydrate: () => void
   onClick: () => void
 }) => (
-  <button
-    type="button"
-    onMouseEnter={onHydrate}
-    onClick={onClick}
-    className={cn(
-      'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
-      'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-      'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
-    )}
-    aria-label="Open docs search"
-  >
-    <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
-    <span className="hidden text-xs sm:inline">Search docs...</span>
-    {!disableShortcut && (
-      <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-1 py-[1px] text-[10px] font-medium text-slate-400 sm:flex">
-        <Command className="h-2.5 w-2.5" />K
-      </span>
-    )}
-  </button>
+  <TooltipProvider delayDuration={400}>
+    <AppTooltip content="Search Docs" side="left">
+      <Button
+        isButton
+        variant="ghost"
+        rounded="full"
+        aria-label="Search Docs"
+        onMouseEnter={onHydrate}
+        onClick={onClick}
+        className={cn(
+          'group h-8 w-8 shrink-0 bg-signoz_slate-500 !p-0 text-slate-300 transition',
+          'hover:bg-slate-700/50 hover:text-white',
+          'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80'
+        )}
+      >
+        <Search className="h-4 w-4 text-slate-400 transition group-hover:text-white" />
+      </Button>
+    </AppTooltip>
+  </TooltipProvider>
 )
 
 const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredProps) => {
@@ -54,6 +57,8 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
   const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
   const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
   const hasAlgoliaConfig = Boolean(siteMetadata.search && appId && apiKey && indexName)
+  const logEvent = useLogEvent()
+  const pathname = usePathname()
   const [shouldHydrate, setShouldHydrate] = useState(false)
   const [shouldOpenOnMount, setShouldOpenOnMount] = useState(false)
   const [LoadedSearchButton, setLoadedSearchButton] =
@@ -95,15 +100,39 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
       }
 
       event.preventDefault()
+      logEvent({
+        eventName: 'Website Click',
+        eventType: 'track',
+        attributes: {
+          clickType: 'Search',
+          clickName: 'Cmd+K Search',
+          clickText: 'Search Docs',
+          clickLocation: 'Top Navbar',
+          pageLocation: pathname,
+          trigger: 'cmd+k',
+        },
+      })
       setShouldOpenOnMount(true)
       hydrateSearch()
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [disableShortcut, hydrateSearch, shouldHydrate, LoadedSearchButton])
+  }, [disableShortcut, hydrateSearch, shouldHydrate, LoadedSearchButton, logEvent, pathname])
 
   const handlePreviewClick = () => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Search',
+        clickName: 'Search Icon Click',
+        clickText: 'Search Docs',
+        clickLocation: 'Top Navbar',
+        pageLocation: pathname,
+        trigger: 'click',
+      },
+    })
     setShouldOpenOnMount(true)
     hydrateSearch()
   }
@@ -118,13 +147,7 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
     )
   }
 
-  return (
-    <SearchButtonPreview
-      disableShortcut={disableShortcut}
-      onHydrate={hydrateSearch}
-      onClick={handlePreviewClick}
-    />
-  )
+  return <SearchButtonPreview onHydrate={hydrateSearch} onClick={handlePreviewClick} />
 }
 
 export default SearchButtonDeferred

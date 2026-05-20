@@ -15,7 +15,7 @@ interface TableOfContentsProps {
   toc: TocItemProps[]
   activeSection: string
   setActiveSection: (section: string) => void
-  scrollableContainerRef: RefObject<HTMLDivElement>
+  scrollableContainerRef: RefObject<HTMLDivElement | null>
 }
 
 const TableOfContents = ({

@@ -5,9 +5,11 @@ import { getResourceCenterGuides } from '../content'
 
 export const metadata = buildListingMetadata('Guides')
 
-const guidePosts = getResourceCenterGuides()
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
-export default function GuidesHome() {
+export default async function GuidesHome() {
+  const guidePosts = await getResourceCenterGuides()
+
   return (
     <ListingPageLayout>
       <Guides posts={guidePosts} />

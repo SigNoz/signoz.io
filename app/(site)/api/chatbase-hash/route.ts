@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Secret not configured' }, { status: 500 })
   }
 
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const anonymousId = cookieStore.get('app_anonymous_id')?.value
 
   if (!anonymousId) {
