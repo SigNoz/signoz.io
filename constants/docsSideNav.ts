@@ -1279,6 +1279,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/querying-traces',
+            label: 'Querying Traces',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/custom-apm-dashboards-alerts',
             label: 'APM Metrics, Dashboards & Alerts',
           },
@@ -1684,6 +1689,11 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/logs-management/reference',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/querying-logs',
+            label: 'Querying Logs',
+          },
           { type: 'doc', route: '/docs/logs-pipelines/processors', label: 'Log Processors' },
           {
             type: 'doc',
