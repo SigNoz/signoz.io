@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState, type ComponentType } from 'react'
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
 import { Button } from '@/components/ui/Button'
+import { AppTooltip } from '@/components/ui/AppTooltip'
 
 type SearchButtonDeferredProps = {
   disableShortcut?: boolean
@@ -27,21 +28,23 @@ const SearchButtonPreview = ({
   onHydrate: () => void
   onClick: () => void
 }) => (
-  <Button
-    isButton
-    variant="ghost"
-    rounded="full"
-    aria-label="Open docs search"
-    onMouseEnter={onHydrate}
-    onClick={onClick}
-    className={cn(
-      'group h-8 w-8 shrink-0 bg-signoz_slate-500 !p-0 text-slate-300 transition',
-      'hover:bg-slate-700/50 hover:text-white',
-      'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80'
-    )}
-  >
-    <Search className="h-4 w-4 text-slate-400 transition group-hover:text-white" />
-  </Button>
+  <AppTooltip content="Search Docs" side="left">
+    <Button
+      isButton
+      variant="ghost"
+      rounded="full"
+      aria-label="Search Docs"
+      onMouseEnter={onHydrate}
+      onClick={onClick}
+      className={cn(
+        'group h-8 w-8 shrink-0 bg-signoz_slate-500 !p-0 text-slate-300 transition',
+        'hover:bg-slate-700/50 hover:text-white',
+        'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80'
+      )}
+    >
+      <Search className="h-4 w-4 text-slate-400 transition group-hover:text-white" />
+    </Button>
+  </AppTooltip>
 )
 
 const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredProps) => {
