@@ -19,6 +19,7 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -160,8 +161,12 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     notFound()
   }
 
-  // Generate structured data
-  const structuredData = generateStructuredData('opentelemetry', content)
+  // Generate structured data — override path with route prefix for correct URL
+  const contentForStructuredData = {
+    ...content,
+    path: `opentelemetry${content.path || `/${path}`}`,
+  }
+  const structuredData = generateStructuredData('opentelemetry', contentForStructuredData)
 
   // Prepare content for Layout
   const mainContent: CoreContent<MDXContent> = {
@@ -186,42 +191,16 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   }
 
   // Prepare author details
-  const authorDetails: CoreContent<MDXContent>[] = content.authors?.map((author) => ({
-    name: author?.name || 'Unknown Author',
-    avatar: author?.image_url || '/static/images/signoz-logo.png',
-    occupation: author?.title || 'Developer Tools',
-    company: 'SigNoz',
-    email: 'team@signoz.io',
-    twitter: 'https://twitter.com/SigNozHQ',
-    linkedin: 'https://www.linkedin.com/company/signoz',
-    github: 'https://github.com/SigNoz/signoz',
-    path: `/authors/${author?.key || 'default'}`,
-    type: 'Authors',
-    slug: author?.key || 'default',
-    readingTime: { text: '', minutes: 0, time: 0, words: 0 },
-    filePath: `/data/authors/${author?.key || 'default'}.mdx`,
-  })) || [
-    {
-      // Fallback author if no authors are found
-      name: 'SigNoz Team',
-      avatar: '/static/images/signoz-logo.png',
-      occupation: 'Developer Tools',
-      company: 'SigNoz',
-      email: 'team@signoz.io',
-      twitter: 'https://twitter.com/SigNozHQ',
-      linkedin: 'https://www.linkedin.com/company/signoz',
-      github: 'https://github.com/SigNoz/signoz',
-      path: '/authors/default',
-      type: 'Authors',
-      slug: 'default',
-      readingTime: { text: '', minutes: 0, time: 0, words: 0 },
-      filePath: '/data/authors/default.mdx',
-    },
-  ]
+  const authorDirectory = await getCachedAuthors()
+  const authorList = content.authors?.map((author) => author?.key) || ['default']
+  const authorDetails = authorList.map((author) => {
+    const a = authorDirectory[author]
+    return a || { name: author }
+  })
 
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/opentelemetry/${slug}`
-  const canonicalUrl = `${siteMetadata.siteUrl}/opentelemetry/${content.slug}`
+  const canonicalUrl = `${siteMetadata.siteUrl}/opentelemetry${content.path || `/${path}`}`
   const jsonLd = structuredData
     ? {
         ...structuredData,
@@ -248,9 +227,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
-          authors={content.authors?.map((author) => author?.key) || []}
+          authors={authorList}
           toc={toc}
           showSidebar={showSidebar}
+          authorDirectory={authorDirectory}
         >
           <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
             {compiledContent}
@@ -276,8 +256,9 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <Layout
         content={mainContent}
         authorDetails={authorDetails as any}
-        authors={content.authors?.map((author) => author?.key) || []}
+        authors={authorList}
         toc={toc}
+        authorDirectory={authorDirectory}
       >
         <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
           {compiledContent}
