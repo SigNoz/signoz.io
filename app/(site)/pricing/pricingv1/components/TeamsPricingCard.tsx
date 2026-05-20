@@ -133,6 +133,10 @@ export default function TeamsPricingCard() {
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">Access to MCP Server and AI Assistant</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
               Need more?{' '}
               <TrackingLink
