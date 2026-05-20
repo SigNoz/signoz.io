@@ -26,14 +26,18 @@ const NavDropdownContext = createContext<NavDropdownContextValue | null>(null)
 export function NavDropdownProvider({ children }: { children: ReactNode }) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const triggerRefs = useRef<Record<string, HTMLElement>>({})
-  const closeRef = useRef<ReturnType<typeof setTimeout>>()
+  const closeRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    return () => clearTimeout(closeRef.current)
+    return () => {
+      if (closeRef.current) {
+        clearTimeout(closeRef.current)
+      }
+    }
   }, [])
 
   const openDropdown = useCallback((id: string) => {
-    clearTimeout(closeRef.current)
+    closeRef.current && clearTimeout(closeRef.current)
     setActiveId(id)
   }, [])
 
@@ -44,11 +48,11 @@ export function NavDropdownProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const cancelClose = useCallback(() => {
-    clearTimeout(closeRef.current)
+    closeRef.current && clearTimeout(closeRef.current)
   }, [])
 
   const closeImmediate = useCallback(() => {
-    clearTimeout(closeRef.current)
+    closeRef.current && clearTimeout(closeRef.current)
     setActiveId(null)
   }, [])
 
