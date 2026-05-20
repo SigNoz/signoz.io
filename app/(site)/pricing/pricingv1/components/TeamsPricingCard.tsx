@@ -133,7 +133,33 @@ export default function TeamsPricingCard() {
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Access to MCP Server and AI Assistant</span>
+            <span className="text-signoz_vanilla-400">
+              <span className="flex items-center gap-1">
+                Access to MCP Server and AI Assistant
+                <Tooltip
+                  content={
+                    <div className="max-w-xs">
+                      <p className="text-sm text-signoz_vanilla-400">
+                        <TrackingLink
+                          href="/agent-native-observability/#ai-assistant"
+                          clickType="In Page Link"
+                          clickName="Agent Native Link"
+                          clickText="Learn more"
+                          clickLocation="Teams Pricing Card"
+                        >
+                          <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
+                            Request Early Access
+                          </span>
+                        </TrackingLink>
+                      </p>
+                    </div>
+                  }
+                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                >
+                  <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
+                </Tooltip>
+              </span>
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
