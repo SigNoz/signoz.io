@@ -23,13 +23,13 @@ const Header: React.FC = () => {
         className="flex-center flex min-w-[200px] items-center gap-2"
       >
         <TrackingLink
-          href="/teams/"
+          href="#ai-assistant"
           clickType="Secondary CTA"
-          clickName="Agent Native Page Hero Get Started Free"
+          clickName="Agent Native Page Hero SigNoz AI Assistant"
           clickLocation="Agent Native Observability Page Hero"
-          clickText="Get Started Free"
+          clickText="SigNoz AI Assistant"
         >
-          Get Started Free
+          SigNoz AI Assistant
           <ArrowRight size={14} />
         </TrackingLink>
       </Button>
@@ -176,6 +176,7 @@ const EarlyAccessForm: React.FC = () => {
         <Button
           type="submit"
           disabled={isSubmitting}
+          isButton
           variant="default"
           className="gap-1 rounded-l-none rounded-r-md"
         >
@@ -210,13 +211,15 @@ const InContextObservability: React.FC = () => {
           <Card variant="gradient" className="h-full">
             <div className="m-6 flex h-[calc(100%-48px)] flex-col gap-4">
               <div className="flex items-center gap-3">
-                <Terminal className="size-6 text-signoz_robin-500" />
-                <h3 className="text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
+                <Terminal className="size-6 shrink-0 text-signoz_robin-500" />
+                <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
+                  SigNoz MCP Server
+                </h3>
               </div>
               <p className="text-base text-signoz_vanilla-400">
-                Plug into Claude Code, Cursor in minutes. Get full observability context — traces,
-                logs, metrics, service topology, deployment history — in every session. Start
-                debugging in your terminal today.
+                Plug directly into Claude Code, Cursor in minutes. Get full observability context -
+                traces, logs, metrics, service topology, deployment history - in every session.
+                Start debugging in your terminal today.
               </p>
               <div className="mt-auto">
                 <Button
@@ -240,12 +243,14 @@ const InContextObservability: React.FC = () => {
             </div>
           </Card>
         </div>
-        <div className="w-full md:w-1/2">
+        <div id="ai-assistant" className="w-full md:w-1/2">
           <Card variant="aqua" className="h-full">
             <div className="m-6 flex h-[calc(100%-48px)] flex-col gap-4">
               <div className="flex items-center gap-3">
-                <Bot className="size-6 text-signoz_robin-500" />
-                <h3 className="text-2xl font-bold text-signoz_vanilla-100">SigNoz AI Assistant</h3>
+                <Bot className="size-6 shrink-0 text-signoz_robin-500" />
+                <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
+                  SigNoz AI Assistant
+                </h3>
               </div>
               <p className="text-base text-signoz_vanilla-400">
                 Pre-built, customisable agents that run investigations, correlate signals, enrich
@@ -322,13 +327,13 @@ const BottomCTA: React.FC = () => {
             className="flex-center flex !w-fit items-center gap-2"
           >
             <TrackingLink
-              href="/teams/"
+              href="#ai-assistant"
               clickType="Secondary CTA"
-              clickName="Agent Native Page Bottom CTA Get Started Free"
+              clickName="Agent Native Page Bottom CTA SigNoz AI Assistant"
               clickLocation="Agent Native Observability Page Bottom CTA"
-              clickText="Get Started Free"
+              clickText="SigNoz AI Assistant"
             >
-              Get Started Free
+              SigNoz AI Assistant
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
