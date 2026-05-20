@@ -26,33 +26,25 @@ Use the **Filter** field to narrow down spans using attributes. Supported operat
 
 Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) guide and [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of operators and syntax details.
 
-### Aggregation
+### Aggregation (Time Series & Table views)
 
-Trace queries support a full set of aggregation functions:
+Trace queries support a full set of [aggregation functions](https://signoz.io/docs/querying/aggregation-grouping/) in the **Time Series** and **Table** views:
 
 - **Statistical** — Count, Count Distinct, Sum, Avg, Min, Max
 - **Percentiles** — P05, P10, P25, P50, P75, P90, P95, P99 (commonly used for latency analysis)
 - **Rate** — Rate, Rate Sum, Rate Avg, Rate Max, Rate Min
 
-### Group By
+### Group By (Time Series & Table views)
 
-Segment results by one or more attributes. For example, grouping by `service.name` and `operation` produces a separate series for each service-operation pair. Useful for comparing latency or error rates across services, endpoints, or status codes.
+Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` and `operation` produces a separate series for each service-operation pair. Useful for comparing latency or error rates across services, endpoints, or status codes.
 
 ### Having
 
-Filter results after aggregation. For example, `p99(duration) > 500` shows only groups where P99 latency exceeds 500ms.
-
-### Functions
-
-Transform query results with:
-- **Smoothing** — EWMA for noisy data
-- **Arithmetic** — Absolute value, Running Diff, Log2, Log10
-- **Clamping** — Cap values with Clamp Min/Max
-- **Time Shift** — Compare against a previous time period
+Filter results after aggregation. For example, `p99(duration) > 500` shows only groups where P99 latency exceeds 500ms. See [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) for sorting, limiting, and conditional filtering options.
 
 ### Formulas
 
-Combine up to ten queries using formulas. For example, calculate error rate: `(A / B) * 100`, where A counts errored spans and B counts total spans.
+Combine up to ten queries using formulas. For example, calculate error rate: `(A / B) * 100`, where A counts errored spans and B counts total spans. See [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) for formula functions and examples.
 
 For full details on the Query Builder, see the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder-v5/).
 
@@ -79,7 +71,11 @@ For details and example queries, see the [ClickHouse Traces Query guide](https:/
 ## Next Steps
 
 - [Trace Details](https://signoz.io/docs/userguide/span-details/) — inspect individual traces with flamegraph and waterfall views
+- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — detailed reference for aggregation functions and group by
+- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — sorting, limiting, and Having clause patterns
+- [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) — formulas, error rate calculations, and trace matching operators
+- [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how step intervals work for time series queries
+- [Advanced Query Examples](https://signoz.io/docs/userguide/search-advanced-examples/) — complex query patterns and real-world use cases
 - [Trace-based Alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) — get notified on latency spikes or error rate changes
 - [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) — navigate between related traces and logs
-- [Advanced Query Examples](https://signoz.io/docs/userguide/search-advanced-examples/) — complex query patterns and real-world use cases
 - [Traces API](https://signoz.io/docs/traces-management/trace-api/search-traces/) — search and aggregate traces programmatically

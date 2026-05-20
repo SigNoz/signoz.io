@@ -30,35 +30,25 @@ Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](h
 
 You can also use [Quick Filters](https://signoz.io/docs/logs-management/features/logs-quick-filters/) in the Logs Explorer sidebar to narrow results by common attributes without writing filter expressions. See the [Default Quick Filters Reference](https://signoz.io/docs/logs-management/features/logs-quick-filters-reference/) for the full list of available filter attributes.
 
-### Aggregation
+### Aggregation (Time Series & Table views)
 
-Log queries support a full set of aggregation functions:
+Log queries support a full set of [aggregation functions](https://signoz.io/docs/querying/aggregation-grouping/) in the **Time Series** and **Table** views:
 
 - **Statistical** — Count, Count Distinct, Sum, Avg, Min, Max
 - **Percentiles** — P05, P10, P25, P50, P75, P90, P95, P99
 - **Rate** — Rate, Rate Sum, Rate Avg, Rate Max, Rate Min
 
-### Group By
+### Group By (Time Series & Table views)
 
-Segment results by one or more attributes. For example, grouping by `service.name` produces a separate series for each service. Useful in aggregate views to compare error counts across services, namespaces, or any other attribute.
+Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` produces a separate series for each service. Useful in aggregate views to compare error counts across services, namespaces, or any other attribute.
 
 ### Having
 
-Filter results after aggregation. For example, `count() > 1000` shows only groups exceeding 1000 log entries.
-
-### Functions
-
-Transform query results with:
-- **Smoothing** — EWMA for noisy data
-- **Arithmetic** — Absolute value, Running Diff, Log2, Log10
-- **Clamping** — Cap values with Clamp Min/Max
-- **Time Shift** — Compare against a previous time period
-
-See the [Functions Reference](https://signoz.io/docs/userguide/functions-reference/) for details on array functions for querying JSON data.
+Filter results after aggregation. For example, `count() > 1000` shows only groups exceeding 1000 log entries. See [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) for sorting, limiting, and conditional filtering options.
 
 ### Formulas
 
-Combine up to ten queries using formulas. For example, calculate error ratio: `(A / B) * 100`, where A counts error logs and B counts all logs.
+Combine up to ten queries using formulas. For example, calculate error ratio: `(A / B) * 100`, where A counts error logs and B counts all logs. See [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) for formula functions and examples.
 
 For full details on the Query Builder, see the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder-v5/).
 
@@ -70,11 +60,14 @@ For details and example queries, see the [ClickHouse Logs Query guide](https://s
 
 ## Next Steps
 
-- [Save a View](https://signoz.io/docs/product-features/saved-view/) — save filter and query configurations for quick access
+- [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) — search log bodies without specifying field names
+- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — detailed reference for aggregation functions and group by
+- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — sorting, limiting, and Having clause patterns
+- [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) — formulas, error rate calculations, and multi-query comparisons
+- [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how step intervals work for time series queries
+- [Advanced Query Examples](https://signoz.io/docs/userguide/search-advanced-examples/) — complex query patterns and real-world use cases
+- [Fields in Logs](https://signoz.io/docs/userguide/logs_fields/) — understand log attributes, parsing, and sensitive data masking
 - [Log-based Alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) — get notified when log patterns match your conditions
 - [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) — transform and enrich logs before storage using processors
-- [Fields in Logs](https://signoz.io/docs/userguide/logs_fields/) — understand log attributes, parsing, and sensitive data masking
-- [Field Context & Data Types](https://signoz.io/docs/userguide/field-context-data-types/) — work with ambiguous fields and field contexts
-- [Advanced Query Examples](https://signoz.io/docs/userguide/search-advanced-examples/) — complex query patterns and real-world use cases
 - [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) — navigate between related logs and traces
 - [Logs API](https://signoz.io/docs/logs-management/logs-api/overview/) — query and aggregate logs programmatically
