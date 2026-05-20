@@ -26,6 +26,7 @@ import { Clock3, Loader2, Search, Sparkles } from 'lucide-react'
 
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
+import { Button } from '@/components/ui/Button'
 
 type SearchButtonProps = {
   disableShortcut?: boolean
@@ -184,18 +185,20 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
 
   return (
     <>
-      <button
-        type="button"
-        onClick={open}
+      <Button
+        isButton
+        variant="ghost"
+        rounded="full"
         aria-label="Open docs search"
+        onClick={open}
         className={cn(
-          'group flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-signoz_slate-500 text-slate-300 transition',
-          'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-          'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
+          'group h-8 w-8 shrink-0 bg-signoz_slate-500 !p-0 text-slate-300 transition',
+          'hover:bg-slate-700/50 hover:text-white',
+          'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80'
         )}
       >
         <Search className="h-4 w-4 text-slate-400 transition group-hover:text-white" />
-      </button>
+      </Button>
 
       <SearchModal
         isOpen={isOpen}

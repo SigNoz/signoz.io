@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button } from '@headlessui/react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
@@ -9,7 +8,8 @@ import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
-import TrackingButton from '@/components/TrackingButton'
+import { Button } from '@/components/ui/Button'
+import { useLogEvent } from 'hooks/useLogEvent'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
@@ -23,6 +23,7 @@ import LoginActions from './LoginActions'
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const logEvent = useLogEvent()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isDocsBasePath, setIsDocsBasePath] = useState(false)
@@ -146,29 +147,51 @@ export default function TopNav() {
                 {visibility.showGithubStars && <GitHubStars location="Top Navbar" />}
                 {visibility.showSignInGetStarted && (
                   <>
-                    <TrackingButton
-                      className="-ml-1 box-border flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
-                      clickType="Secondary CTA"
-                      clickName="Sign In Button"
-                      clickText="Sign In"
-                      clickLocation="Top Navbar"
-                      onClick={() => router.push('/login')}
+                    <Button
+                      isButton
+                      variant="ghost"
+                      rounded="full"
+                      className="h-8 bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 hover:bg-slate-700/50 hover:text-white"
+                      onClick={() => {
+                        logEvent({
+                          eventName: 'Website Click',
+                          eventType: 'track',
+                          attributes: {
+                            clickType: 'Secondary CTA',
+                            clickName: 'Sign In Button',
+                            clickText: 'Sign In',
+                            clickLocation: 'Top Navbar',
+                            pageLocation: pathname,
+                          },
+                        })
+                        router.push('/login')
+                      }}
                     >
                       Sign In
-                    </TrackingButton>
-                    <TrackingLink
+                    </Button>
+                    <Button
+                      id="btn-get-started-website-navbar"
+                      isButton
                       href="/teams"
-                      className="start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
-                      clickType="Primary CTA"
-                      clickName="Sign Up Button"
-                      clickText="Get Started - Free"
-                      clickLocation="Top Navbar"
+                      rounded="full"
+                      className="start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
+                      onClick={() => {
+                        logEvent({
+                          eventName: 'Website Click',
+                          eventType: 'track',
+                          attributes: {
+                            clickType: 'Primary CTA',
+                            clickName: 'Sign Up Button',
+                            clickText: 'Get Started - Free',
+                            clickLocation: 'Top Navbar',
+                            pageLocation: pathname,
+                          },
+                        })
+                      }}
                     >
-                      <Button id="btn-get-started-website-navbar" className="flex-center">
-                        Get Started - Free
-                        <ArrowRight size={14} />
-                      </Button>
-                    </TrackingLink>
+                      Get Started - Free
+                      <ArrowRight size={14} />
+                    </Button>
                   </>
                 )}
               </>
