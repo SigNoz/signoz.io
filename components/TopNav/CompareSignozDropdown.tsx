@@ -17,7 +17,7 @@ export default function CompareSignozDropdown() {
         onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">
-          Compare SigNoz
+          Compare
           <ChevronDown
             size={12}
             className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
@@ -32,13 +32,13 @@ export function CompareSignozDropdownContent({ onClose }: { onClose: () => void 
   return (
     <div className="flex min-w-0 flex-row">
       <LinkSection
-        icon={<Scale size={16} className="shrink-0 text-signoz_robin-400" />}
+        icon={<Scale size={16} className="shrink-0 text-signoz_vanilla-100" />}
         items={comparisonItems}
         trackingSuffix="Comparison"
         onClose={onClose}
       />
       <LinkSection
-        icon={<MoveRight size={16} className="shrink-0 text-signoz_robin-400" />}
+        icon={<MoveRight size={16} className="shrink-0 text-signoz_vanilla-100" />}
         items={migrationItems}
         trackingSuffix="Migration"
         onClose={onClose}

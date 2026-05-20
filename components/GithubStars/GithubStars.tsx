@@ -69,7 +69,7 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
           <Github className="fill-signoz_vanilla-100" width={16} />
         </div>
         {stars !== null && (
-          <div className="text-right font-medium tabular-nums text-signoz_vanilla-100">
+          <div className="text-right text-xs font-medium tabular-nums text-signoz_vanilla-100">
             {displayedStarsText}
           </div>
         )}

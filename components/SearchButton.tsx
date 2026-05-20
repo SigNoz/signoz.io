@@ -189,13 +189,12 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
         onClick={open}
         aria-label="Open docs search"
         className={cn(
-          'group flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 text-xs text-slate-300 transition',
+          'group flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-signoz_slate-500 text-slate-300 transition',
           'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
           'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
         )}
       >
-        <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
-        <span className="text-xs">Docs</span>
+        <Search className="h-4 w-4 text-slate-400 transition group-hover:text-white" />
       </button>
 
       <SearchModal

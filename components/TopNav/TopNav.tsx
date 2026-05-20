@@ -69,9 +69,9 @@ export default function TopNav() {
 
   return (
     <div className="fixed left-0 right-0 z-[50]">
-      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
+      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
         <nav
-          className="container flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className="mx-auto flex w-full max-w-8xl justify-between px-8 text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
@@ -91,7 +91,7 @@ export default function TopNav() {
             {!isLoginRoute && (
               <NavDropdownProvider>
                 <div
-                  className={`hidden items-center gap-x-6 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
                 >
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showDocs && (
@@ -127,10 +127,10 @@ export default function TopNav() {
                       className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
                       clickType="Nav Click"
                       clickName="Customer Stories Link"
-                      clickText="Customer Stories"
+                      clickText="Customers"
                       clickLocation="Top Navbar"
                     >
-                      Customer Stories
+                      Customers
                     </TrackingLink>
                   )}
                 </div>
@@ -139,7 +139,7 @@ export default function TopNav() {
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-2">
             {!isLoginRoute && (
               <>
                 <SearchButtonDeferred />
