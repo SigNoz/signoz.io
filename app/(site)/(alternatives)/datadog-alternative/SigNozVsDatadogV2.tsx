@@ -92,10 +92,10 @@ const ValueComparisonChart = () => {
             <Legend
               wrapperStyle={{
                 color: '#fff',
-              }} 
+              }}
               itemSorter={(item) => (item.dataKey === 'SigNoz' ? 0 : 1)}
             />
-          
+
             <Bar dataKey="SigNoz" fill="#ff7f50" />
             <Bar dataKey="Datadog" fill="#9333ea" />
           </BarChart>

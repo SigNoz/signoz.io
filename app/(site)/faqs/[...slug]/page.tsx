@@ -9,8 +9,6 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import Button from '@/components/ui/Button'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import { Blog, Authors } from 'contentlayer/generated'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
@@ -191,23 +189,24 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     notFound()
   }
 
-  // Generate structured data
-  const structuredData = generateStructuredData('faqs', content)
+  // Generate structured data — override path with route prefix for correct URL
+  const contentForStructuredData = { ...content, path: `faqs${content.path || `/${path}`}` }
+  const structuredData = generateStructuredData('faqs', contentForStructuredData)
   const relatedArticles = buildRelatedArticles(content)
 
   // Prepare content for FAQLayout
-  const mainContent: CoreContent<Blog> = {
+  const mainContent = {
     title: content.title,
     date: content.date,
     lastmod: content.updatedAt,
-    tags: content.tags?.data?.map((tag) => tag.attributes?.name) || [],
+    tags: content.tags?.map((tag: MDXContent) => tag.value) || [],
     draft: content.deployment_status === 'draft',
     summary: content.description,
     images: content.images || [],
-    authors: content.authors?.map((author) => author?.name) || [],
+    authors: content.authors?.map((author: MDXContent) => author?.name) || [],
     slug: path,
     path: content.path || `/faqs/${path}`,
-    type: 'Blog',
+    type: 'FAQ' as const,
     readingTime: readingTimeData,
     filePath: `/faqs/${path}`,
     structuredData: structuredData,
@@ -216,38 +215,13 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   }
 
   // Prepare author details from the authors relation
-  const authorDetails: CoreContent<Authors>[] = content.authors?.data?.map((author) => ({
-    name: author.attributes?.name || 'Unknown Author',
-    avatar: author.attributes?.image_url || '/static/images/signoz-logo.png',
-    occupation: author.attributes?.title || 'Developer Tools',
-    company: 'SigNoz',
-    email: 'team@signoz.io',
-    twitter: 'https://twitter.com/SigNozHQ',
-    linkedin: 'https://www.linkedin.com/company/signoz',
-    github: 'https://github.com/SigNoz/signoz',
-    path: `/authors/${author.attributes?.key || 'default'}`,
-    type: 'Authors',
-    slug: author.attributes?.key || 'default',
-    readingTime: { text: '', minutes: 0, time: 0, words: 0 },
-    filePath: `/data/authors/${author.attributes?.key || 'default'}.mdx`,
-  })) || [
-    {
-      // Fallback author if no authors are found
-      name: 'SigNoz Team',
-      avatar: '/static/images/signoz-logo.png',
-      occupation: 'Developer Tools',
-      company: 'SigNoz',
-      email: 'team@signoz.io',
-      twitter: 'https://twitter.com/SigNozHQ',
-      linkedin: 'https://www.linkedin.com/company/signoz',
-      github: 'https://github.com/SigNoz/signoz',
-      path: '/authors/default',
-      type: 'Authors',
-      slug: 'default',
-      readingTime: { text: '', minutes: 0, time: 0, words: 0 },
-      filePath: '/data/authors/default.mdx',
-    },
-  ]
+  const authorDetails: { name: string; url?: string; image_url?: string }[] = content.authors?.map(
+    (author: MDXContent) => ({
+      name: author.name || 'Unknown Author',
+      url: author.url,
+      image_url: author.image_url,
+    })
+  ) || [{ name: 'SigNoz Team' }]
 
   return (
     <>

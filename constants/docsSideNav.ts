@@ -447,7 +447,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/userguide/writing-clickhouse-traces-query',
+                route: '/docs/operate/clickhouse/clickhouse-queries',
                 label: 'ClickHouse queries for building dashboards and alerts',
               },
             ],
@@ -1858,6 +1858,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/tutorial/k8s-hpa-signoz-metrics-adapter',
+                label: 'Kubernetes HPA with SigNoz Metrics',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/fly-metrics',
                 label: 'Fly.io metrics',
               },
@@ -2025,6 +2030,19 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/cost-meter/meter-explorer-query-guide',
             label: 'Meter Explorer Query Guide',
+          },
+        ],
+      },
+      {
+        label: 'Reference',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/cost-meter/reference',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cost-meter/query-api',
+            label: 'Cost Meter API',
           },
         ],
       },
@@ -2540,110 +2558,131 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Querying',
+    label: 'Querying Data',
     type: 'category',
     isExpanded: false,
     // route: '',
     items: [
-      // {
-      //   type: 'doc',
-      //   route: '/docs/userguide/create-a-custom-query',
-      //   label: 'Create a Custom Query',
-      // },
       {
         type: 'doc',
-        route: '/docs/userguide/query-builder',
+        route: '/docs/querying/overview',
+        label: 'Overview',
+      },
+      {
         label: 'Query Builder',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/query-builder-v5',
-        label: 'Query Builder (new)',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/search-syntax',
-        label: 'Search Syntax',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/operators-reference',
-        label: 'Operators Reference',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/full-text-search',
-        label: 'Full-Text Search Guide',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/functions-reference',
-        label: 'Functions Reference',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/field-context-data-types',
-        label: 'Field Context & Data Types',
-      },
-      {
         type: 'category',
         isExpanded: false,
-        label: 'Troubleshooting',
+        route: '/docs/userguide/query-builder-v5',
         items: [
           {
             type: 'doc',
-            route: '/docs/userguide/search-troubleshooting',
-            label: 'Troubleshooting Guide',
+            route: '/docs/userguide/query-builder-v5',
+            label: 'Overview',
           },
           {
             type: 'doc',
-            route: '/docs/userguide/query-troubleshooting-faqs',
-            label: 'Query Troubleshooting - FAQs',
+            route: '/docs/querying/aggregation-grouping',
+            label: 'Aggregation & Grouping',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/result-manipulation',
+            label: 'Result Manipulation',
           },
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/search-advanced-examples',
-        label: 'Advanced Examples',
-      },
-      {
+        label: 'ClickHouse',
         type: 'category',
         isExpanded: false,
-        // route: '',
-        label: 'ClickHouse Query',
         items: [
           {
             type: 'doc',
             route: '/docs/userguide/write-a-metrics-clickhouse-query',
             label: 'Metrics',
           },
-          {
-            type: 'doc',
-            route: '/docs/userguide/logs_clickhouse_queries',
-            label: 'Logs',
-          },
+          { type: 'doc', route: '/docs/userguide/logs_clickhouse_queries', label: 'Logs' },
           {
             type: 'doc',
             route: '/docs/userguide/writing-clickhouse-traces-query',
             label: 'Traces',
           },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/write-a-prom-query-with-new-format',
+        label: 'PromQL',
+      },
+      {
+        label: 'User Guides',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/querying/user-guides',
+        items: [
+          { type: 'doc', route: '/docs/userguide/full-text-search', label: 'Full-Text Log Search' },
           {
             type: 'doc',
-            route: '/docs/userguide/clickhouse-faqs',
-            label: 'FAQs',
+            route: '/docs/userguide/search-advanced-examples',
+            label: 'Advanced Examples',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/multi-query-analysis',
+            label: 'Multi-Query Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/functions-extended-analysis',
+            label: 'Functions for Extended Analysis',
           },
         ],
       },
       {
+        label: 'Reference',
         type: 'category',
         isExpanded: false,
-        label: 'PromQl Query',
+        route: '/docs/querying/reference',
         items: [
+          { type: 'doc', route: '/docs/userguide/search-syntax', label: 'Search Syntax' },
           {
             type: 'doc',
-            route: '/docs/userguide/write-a-prom-query-with-new-format',
-            label: 'PromQl Query New Format',
+            route: '/docs/userguide/operators-reference',
+            label: 'Operators Reference',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/functions-reference',
+            label: 'Functions Reference',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/field-context-data-types',
+            label: 'Field Context & Data Types',
+          },
+          {
+            type: 'doc',
+            route: '/docs/querying/time-aggregation',
+            label: 'Time Aggregation Windows',
+          },
+        ],
+      },
+      {
+        label: 'Troubleshooting',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/querying/troubleshooting',
+        items: [
+          { type: 'doc', route: '/docs/userguide/query-troubleshooting-faqs', label: 'FAQs' },
+          {
+            type: 'doc',
+            route: '/docs/querying/query-performance',
+            label: 'Slow Queries & Missing Results',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/search-troubleshooting',
+            label: 'Search Syntax Errors',
           },
         ],
       },

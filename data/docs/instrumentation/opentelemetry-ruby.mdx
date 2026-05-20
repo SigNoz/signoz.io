@@ -3,14 +3,13 @@ date: 2026-05-18
 id: opentelemetry-ruby
 title: Ruby OpenTelemetry Instrumentation Guide
 description: Instrument your Ruby application with OpenTelemetry and send traces to SigNoz. Supports Rails, Sinatra, Sidekiq, Redis, PostgreSQL, and 53+ libraries.
-
 doc_type: howto
 ---
 This guide shows you how to instrument your Ruby application including Rails, Sinatra, Sidekiq, Resque, Redis, and PostgreSQL with OpenTelemetry and send traces to SigNoz. The `opentelemetry-instrumentation-all` gem provides automatic instrumentation for 53+ popular Ruby libraries.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Prerequisites
 - <a href="https://rubygems.org/gems/opentelemetry-instrumentation-all" target="_blank" rel="noopener noreferrer nofollow">Ruby 3.2+</a>
@@ -18,16 +17,17 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 - A SigNoz Cloud account or self-hosted SigNoz instance
 
 ## Send traces to SigNoz
+
 <Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
-        <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
-            A VM is a virtual computer that runs on physical hardware. This includes:
-            - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
-            - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
-            - **Bare metal servers**: Physical servers running Linux/Unix directly
+<Admonition type="info" title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
 
-            Use this section if you're deploying your Rails application directly on a server or VM without containerization.
-        </KeyPointCallout>
+Use this section if you're deploying your Rails application directly on a server or VM without containerization.
+</Admonition>
 
 ### Step 1. Set environment variables
 Set the following environment variables to configure the OpenTelemetry exporter:
@@ -142,6 +142,24 @@ end
 ```
 
 The SDK automatically reads `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and `OTEL_EXPORTER_OTLP_HEADERS` from the environment variables you set in Step 1.
+
+<Admonition type="tip" title="Skip instrumentation in development">
+If you don't set OTEL environment variables in development, the SDK will attempt to export to `http://localhost:4318` (the OTel Collector default), which may produce noise or errors. Add an environment guard to skip initialization in development:
+
+```ruby:config/initializers/opentelemetry.rb
+require 'opentelemetry/sdk'
+require 'opentelemetry/exporter/otlp'
+require 'opentelemetry/instrumentation/all'
+
+unless Rails.env.development?
+  OpenTelemetry::SDK.configure do |c|
+    c.use_all
+  end
+end
+```
+
+This prevents noisy connection errors in development when OTEL env vars aren't set, such as when running `rails console`.
+</Admonition>
 
 ### Step 4. Run your application
 

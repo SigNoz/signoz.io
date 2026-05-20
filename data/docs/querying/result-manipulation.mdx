@@ -1,0 +1,94 @@
+---
+date: 2026-05-18
+id: result-manipulation
+title: Result Manipulation
+description: Fine-tune query results with sorting, limiting, and conditional filtering using the SigNoz Query Builder.
+doc_type: reference
+---
+
+Fine-tune your query results with result manipulation options that help you focus on what matters most. These options are available for logs and traces in both **Time Series** and **Table** views, as well as in the **Metrics Explorer**.
+
+## Sorting & Limiting
+
+**Order By**: Control result ordering
+- Ascending: `avg(response_time) asc`
+- Descending: `count() desc`
+- Multiple: `sum(quantity) desc, userId asc`
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/show-order-by.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the order by feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+**Limit**: Focus on top results
+- Top performers: `LIMIT 10`
+- Combined with ordering for "Top N" analysis
+
+### How Limit Works for Time Series
+
+When you apply a `limit` to a time series query with `group by` fields, the limit determines which groups (series) are included in the results:
+
+1. **Without limit or limit = 0**: All groups matching your filter are included
+2. **With limit > 0**: Only the top N groups are included based on your ordering
+
+### Behind the Scenes
+
+When a limit is specified with group by:
+
+1. First, a query runs to identify the top N groups based on:
+   - Your aggregation (e.g., `count()`, `sum(duration)`)
+   - Your ordering (e.g., `order by count() desc`)
+   - The entire time range
+
+2. Then, the time series query runs but only includes data for those top N groups
+
+### Example
+
+```
+Query: count() by service.name
+Time Range: Last 24 hours
+Limit: 5
+Order: count() desc
+
+Result: Time series data for only the 5 services with the highest total count over 24 hours
+```
+
+### Important Notes
+
+- The limit applies to the number of series (groups), not individual data points
+- The "top N" selection is based on the aggregate value across the entire time range, not per time bucket
+- Without group by, limit has no effect on time series queries
+- Each group selected will have data points for all time intervals in your query range
+
+## Conditional Filtering with Having
+
+Use `Having` clause to filter aggregated results:
+
+```
+Aggregation: count()
+Group By: endpoint
+Having: count() > 1000 AND count() < 5000
+Result: Only endpoints with more than 1000 requests and less than 5000 requests
+```
+
+**Common Having Patterns**:
+- High-traffic endpoints: `count() > 10000`
+- Slow operations: `avg(duration) > 500`
+- Error-prone services: `sum(errors) > 10`
+
+**Combining Multiple Conditions**:
+
+Use parentheses with AND/OR operators to create complex conditions:
+
+```
+Having: (count() > 1000) AND (count() < 5000)
+```
+
+Note: Always use parentheses when combining conditions to ensure correct evaluation order, especially when mixing AND and OR operators.

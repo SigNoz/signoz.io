@@ -1,0 +1,282 @@
+---
+date: 2026-05-18
+id: cost-meter-query-api
+title: Query Meter Data via API
+description: Extract daily data volumes and costs for logs, traces, and metrics using the SigNoz Query Range API.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The SigNoz Query Range API exposes all meter metrics. Pull daily ingestion volumes and compute costs outside the SigNoz UI: in a billing script, cost report, or automated workflow.
+
+## Prerequisites
+
+- A **SigNoz Cloud** account
+- A **read-only API key:** see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for how to create one.
+
+<Admonition type="note">
+  Meter data aggregates at hourly intervals. Queries under 1 hour return no data.
+</Admonition>
+
+## Meter Metrics
+
+SigNoz exposes five meter metrics. All use `Sum` / `Delta` temporality: each data point is the volume ingested in that interval, not a cumulative total.
+
+| Metric                                | Description                | Unit  |
+| ------------------------------------- | -------------------------- | ----- |
+| `signoz.meter.log.count`              | Log records ingested       | count |
+| `signoz.meter.log.size`               | Log data ingested          | bytes |
+| `signoz.meter.span.count`             | Spans ingested             | count |
+| `signoz.meter.span.size`              | Span data ingested         | bytes |
+| `signoz.meter.metric.datapoint.count` | Metric datapoints ingested | count |
+
+Filter or group any metric by `service.name`, `deployment.environment`, `host.name`, or `signoz.workspace.key.id` to break costs down by team, environment, or ingestion key.
+
+SigNoz retains meter data for 1 year. 90-day queries are within the retention window.
+
+## API Endpoint
+
+```
+POST https://<your-instance-url>/api/v5/query_range
+```
+
+Add your API key to every request:
+
+```
+SIGNOZ-API-KEY: <your-api-key>
+```
+
+Find the full specification in the [API Reference](https://signoz.io/api-reference/).
+
+## Query Daily Volumes
+
+Set `stepInterval` to `86400` (seconds per day) to get one data point per day. Use `timeAggregation: "increase"` to sum the delta values within each day's window into a single total.
+
+Provide `start` and `end` as Unix timestamps in milliseconds. For the last 90 days:
+
+- `end` = current Unix time in ms
+- `start` = `end - (90 × 86400 × 1000)`
+
+## Calculate Cost from Volumes
+
+The API returns raw bytes for logs and spans, and counts for metric datapoints. Find your per-unit prices on **Settings → Billing**.
+
+<Figure
+  src="/img/docs/cost-meter/billing-settings.webp"
+  alt="Settings → Billing page showing per-unit prices for logs, traces, and metrics"
+  caption="Settings → Billing"
+/>
+
+| Signal                                          | Formula                             |
+| ----------------------------------------------- | ----------------------------------- |
+| Logs (`signoz.meter.log.size`)                  | `(bytes / 1e9) × price_per_GB`      |
+| Traces (`signoz.meter.span.size`)               | `(bytes / 1e9) × price_per_GB`      |
+| Metrics (`signoz.meter.metric.datapoint.count`) | `(count / 1e6) × price_per_million` |
+
+## Examples
+
+<Tabs entityName="language">
+
+<TabItem value="curl" label="curl" default>
+
+Query daily log size for the last 90 days. The shell computes timestamps at runtime.
+
+```bash
+NOW_MS=$(( $(date +%s) * 1000 ))
+START_MS=$(( NOW_MS - 90 * 86400 * 1000 ))
+
+curl -X POST 'https://<your-instance-url>/api/v5/query_range' \
+  -H 'SIGNOZ-API-KEY: <your-api-key>' \
+  -H 'Content-Type: application/json' \
+  -d "{
+    \"start\": $START_MS,
+    \"end\": $NOW_MS,
+    \"requestType\": \"time_series\",
+    \"compositeQuery\": {
+      \"queries\": [
+        {
+          \"type\": \"builder_query\",
+          \"spec\": {
+            \"name\": \"A\",
+            \"signal\": \"metrics\",
+            \"source\": \"meter\",
+            \"stepInterval\": 86400,
+            \"aggregations\": [{
+              \"metricName\": \"signoz.meter.log.size\",
+              \"timeAggregation\": \"increase\",
+              \"spaceAggregation\": \"sum\"
+            }],
+            \"disabled\": false
+          }
+        }
+      ]
+    }
+  }" | jq .
+```
+
+Verify these values:
+
+- `<your-instance-url>` — your SigNoz Cloud URL, for example `acme.in.signoz.cloud`
+- `<your-api-key>` — API key from Settings → Service Accounts
+
+Each data point covers one day. The value is total bytes of logs ingested that day.
+
+<Admonition type="info">
+  Data points at the edges of your time range may carry `"partial": true`. These mark day buckets cut off by `start` or `end`. **Exclude them** from cost totals as they under-report that day's usage.
+</Admonition>
+
+</TabItem>
+
+<TabItem value="python" label="Python">
+
+Queries all three cost signals and prints a per-day breakdown. Requires Python 3.8+ and `requests` (`pip install requests`).
+
+```python
+import time
+import requests
+from datetime import datetime, timezone
+
+SIGNOZ_URL = "https://<your-instance-url>/api/v5/query_range"
+API_KEY = "<your-api-key>"
+
+# Prices from Settings → Billing (USD)
+LOG_PRICE_PER_GB = 0.30
+SPAN_PRICE_PER_GB = 0.30
+METRIC_PRICE_PER_MILLION = 0.10
+
+DAYS = 90
+
+now_ms = int(time.time() * 1000)
+start_ms = now_ms - (DAYS * 86400 * 1000)
+
+
+def query_meter(metric_name):
+    payload = {
+        "start": start_ms,
+        "end": now_ms,
+        "requestType": "time_series",
+        "compositeQuery": {
+            "queries": [
+                {
+                    "type": "builder_query",
+                    "spec": {
+                        "name": "A",
+                        "signal": "metrics",
+                        "source": "meter",
+                        "stepInterval": 86400,
+                        "aggregations": [
+                            {
+                                "metricName": metric_name,
+                                "timeAggregation": "increase",
+                                "spaceAggregation": "sum",
+                            }
+                        ],
+                        "disabled": False,
+                    },
+                }
+            ]
+        },
+    }
+    resp = requests.post(
+        SIGNOZ_URL,
+        json=payload,
+        headers={
+            "SIGNOZ-API-KEY": API_KEY,
+            "Content-Type": "application/json",
+        },
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def extract_daily_values(data):
+    """Return list of (date_str, value) tuples, skipping partial day buckets."""
+    points = []
+    for result in data.get("data", {}).get("data", {}).get("results", []):
+        for agg in result.get("aggregations", []):
+            for series in agg.get("series", []):
+                for pt in series.get("values", []):
+                    if pt.get("partial"):
+                        continue  # skip incomplete day windows at range edges
+                    ts_s = pt["timestamp"] / 1000
+                    date_str = datetime.fromtimestamp(ts_s, tz=timezone.utc).strftime("%Y-%m-%d")
+                    points.append((date_str, float(pt["value"])))
+    return sorted(points)
+
+
+log_data    = extract_daily_values(query_meter("signoz.meter.log.size"))
+span_data   = extract_daily_values(query_meter("signoz.meter.span.size"))
+metric_data = extract_daily_values(query_meter("signoz.meter.metric.datapoint.count"))
+
+# Build a per-day cost summary
+days = sorted({d for d, _ in log_data + span_data + metric_data})
+
+print(f"{'Date':<12} {'Logs ($)':>10} {'Traces ($)':>12} {'Metrics ($)':>13} {'Total ($)':>11}")
+print("-" * 60)
+
+total_cost = 0.0
+log_by_day    = dict(log_data)
+span_by_day   = dict(span_data)
+metric_by_day = dict(metric_data)
+
+for day in days:
+    log_cost    = log_by_day.get(day, 0) / 1e9 * LOG_PRICE_PER_GB
+    span_cost   = span_by_day.get(day, 0) / 1e9 * SPAN_PRICE_PER_GB
+    metric_cost = metric_by_day.get(day, 0) / 1e6 * METRIC_PRICE_PER_MILLION
+    day_total   = log_cost + span_cost + metric_cost
+    total_cost += day_total
+    print(f"{day:<12} {log_cost:>10.4f} {span_cost:>12.4f} {metric_cost:>13.4f} {day_total:>11.4f}")
+
+if not days:
+    print("No data returned — check your instance URL, API key, and time range.")
+else:
+    print("-" * 60)
+    print(f"{days[0]} to {days[-1]} total: ${total_cost:.4f}")
+```
+
+Verify these values:
+
+- `<your-instance-url>` — your SigNoz Cloud URL, for example `acme.in.signoz.cloud`
+- `<your-api-key>` — API key from Settings → Service Accounts
+- `LOG_PRICE_PER_GB`, `SPAN_PRICE_PER_GB`, `METRIC_PRICE_PER_MILLION` — from Settings → Billing
+- `DAYS` — change to query a different window
+
+<Admonition type="info">
+  Meter data uses UTC. Set your billing cycle start to `00:00:00 UTC` to match the values on the SigNoz billing page.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+**No data returned**
+
+Your query window is under 1 hour. Meter data aggregates hourly. For daily data, use `stepInterval: 86400` and a `start`/`end` range of at least 24 hours.
+
+**Values do not match the SigNoz billing page**
+
+Meter data uses UTC. If your script converts timestamps to local time, align the billing cycle start to `00:00:00 UTC` before comparing.
+
+**401 Unauthorized**
+
+Your API key is missing or expired. Regenerate it from **Settings → Service Accounts**.
+</details>
+
+## Next Steps
+
+- [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/) — query meter data interactively without leaving SigNoz
+- [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) — alert when spend crosses a threshold
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — manage API keys
+- [Metrics Query API](https://signoz.io/docs/metrics-management/query-range-api/) — general Query Range API reference with additional examples
+- [API Reference](https://signoz.io/api-reference/) — full Query Range API specification
+
+## Get Help
+
+<GetHelp />

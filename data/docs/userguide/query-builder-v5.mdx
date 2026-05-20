@@ -7,530 +7,234 @@ description: Master SigNoz Query Builder with filtering, aggregations, trace ope
 doc_type: explanation
 ---
 
-## Overview
+The Query Builder is SigNoz's visual query interface for logs, traces, and metrics. It combines expression-based filtering with intelligent auto-completion so you can query telemetry data without writing raw SQL or PromQL.
 
-The Query Builder is SigNoz's structured query interface that combines the power of expression-based querying with intelligent auto-completion. Whether you're troubleshooting production issues, analyzing performance trends, or creating custom dashboards, the Query Builder gives you the flexibility to write sophisticated search expressions, aggregations, and filtering logic while providing contextual suggestions.
+<Figure
+  src="/img/docs/product-features/query-builder/product-features-query-builder.webp"
+  alt="Query Builder interface in SigNoz showing filters, aggregation, and group by options"
+  caption="Query Builder interface in SigNoz"
+/>
 
-**What you'll learn:**
-- How to filter data with precision using multiple criteria
-- Advanced aggregation techniques for meaningful insights  
-- Performance optimization tips for large datasets
+## Where You Can Use Query Builder
 
----
+The Query Builder is available across multiple surfaces in SigNoz:
 
-## Quick Start
+- **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** — filter and aggregate log data
+- **[Traces Explorer](https://signoz.io/docs/userguide/traces/)** — search spans, filter by service/operation, and analyze trace data
+- **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** — explore and query metric data with temporal and spatial aggregations
+- **[Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)** — build custom panels with any telemetry signal
+- **[Alert rules](https://signoz.io/docs/alerts/)** — define alert conditions on logs, traces, or metrics
 
-### Your First Query
+## View Modes
 
-Let's start with a practical example. Suppose you want to find all error spans from your recommendationservice service in the last 6 hours:
+The view modes available depend on the signal you are querying.
 
-1. **Navigate** to Traces → Explorer
-2. **Write filter expression**: `service.name = 'recommendationservice' AND has_error = true`
-3. **Set time range**: Last 6 hours
-4. **Run query** to see results instantly
+**Logs Explorer** supports three view modes:
 
-<Admonition type="tip">
-Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to quickly execute Stage & Run Query.
-</Admonition>
+- **List View** — shows individual log lines. Useful for browsing raw logs and drilling into specific records.
+- **Time Series** — plots aggregated results as a chart over time. Requires an aggregation function to be selected.
+- **Table** — displays aggregated results in a tabular format. Like Time Series, requires an aggregation function.
 
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/query-builder-filtering-spans.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the filtering feature of SigNoz Query Builder</i></figcaption>
-</figure>
+**Traces Explorer** supports four view modes:
 
-Notice how you can write logical expressions directly, with auto-completion helping you discover available attributes and operators as you type. This basic pattern—filter, refine, visualize—forms the foundation of all Query Builder operations.
+- **List View** — shows individual spans. Useful for browsing raw span data.
+- **Traces** — groups spans into full traces, showing the end-to-end request flow. Click a trace to open the trace detail view with the flamegraph/waterfall.
+- **Time Series** — plots aggregated span data as a chart over time. Requires an aggregation function.
+- **Table** — displays aggregated span data in tabular format. Requires an aggregation function.
 
----
+Aggregation, Group By, Result Manipulation, and Formulas are available in **Time Series** and **Table** views. List View and Traces view show raw records without aggregation.
 
-## Filtering:
+## Core Capabilities
 
-Filtering is your first line of defense against data overload. The Query Builder supports sophisticated filtering that goes beyond simple equality checks. Learn more about search syntax [here](/docs/userguide/search-syntax)
+### Filtering
 
----
+Filtering is the foundation of every query. The Query Builder supports expression-based filters with auto-completed attribute names, values, and operators. You can either use the point-and-click dropdowns or type expressions directly into the filter bar (e.g., `service.name = 'frontend' AND http.status_code >= 400`).
 
-## Aggregation & Grouping: Extracting Insights
-
-Transform raw data into actionable insights using SigNoz's comprehensive aggregation functions.
-
-### Core Aggregation Functions
-
-#### Statistical Functions
-- **Count**: Total occurrences `count()`
-- **Count Distinct**: Unique values `count_distinct(user_id, product_id)`
-- **Sum**: Numerical totals `sum(bytes_sent)`
-- **Average**: Mean values `avg(response_time_ms)`
-- **Min/Max**: Range boundaries `min(latency)`, `max(latency)`
-
-#### Advanced Functions
-- **Percentiles**: Distribution analysis `p50(response_time_ms)`, `p95(response_time_ms)`, `p99(response_time_ms)`
-- **Rate**: Total occurrences per time unit `rate()` 
-- **Rate Sum**: Change in totals `rate_sum(requests)`
-- **Rate Average**: Change in averages `rate_avg(bytes_sent)`
-
-### Grouping
-
-Grouping transforms aggregations from single values into comparative datasets:
-
-### Real-World Examples: Cart Service Analytics
-
-#### Example 1: Product Popularity Analysis
-- **Goal**: Identify which products are being added to carts most frequently
-- **Insight**: Top 5 most popular products being added to shopping carts
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/most-frequently-added-products.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the count aggregation feature of SigNoz Query Builder</i></figcaption>
-</figure>
-
-
-#### Example 2: User Shopping Behavior
-- **Goal**: Analyze quantity patterns per user to identify bulk buyers
-- **Insight**: Users adding large quantities (potential bulk buyers or businesses)
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/bulk-quantity-buyers.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the sum aggregation feature of SigNoz Query Builder</i></figcaption>
-</figure>
-
-#### Example 3: Cart Activity Timeline
-- **Goal**: Track cart additions over time to understand shopping patterns
-- **Insight**: Shopping patterns throughout the day
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/cart-additions-over-one-day.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the count aggregation feature of SigNoz Query Builder</i></figcaption>
-</figure>
-
-#### Example 4: Average Quantity per Product
-- **Goal**: Understand typical purchase quantities for different products
-- **Insight**: Products typically bought in larger quantities vs. single items
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/per-product-avg-quantity.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the avg aggregation feature of SigNoz Query Builder</i></figcaption>
-</figure>
-
-#### How Grouping Handles Missing Values
-
-When you group data and some records don't have the grouping key:
-- These records get grouped under an "empty" value
-- Your results will show groups with blank/empty labels
-
-**Example:** Grouping users by `department`:
-- Users with no department → grouped as "" (empty)
-- Users with department → grouped normally ("Sales", "Marketing", etc.)
-
-**To exclude empty groups:**
-Add `key EXISTS` to your search:
-```
-department EXISTS AND [rest of your query]
-```
-
-**Important:** We don't automatically exclude empty groups because sometimes you want to see them (e.g., finding users without departments).
-
----
-
-## Result Manipulation: Refining Your Analysis
-
-Fine-tune your query results with result manipulation options that help you focus on what matters most.
-
-### Sorting & Limiting
-
-**Order By**: Control result ordering
-- Ascending: `avg(response_time) asc`
-- Descending: `count() desc`
-- Multiple: `sum(quantity) desc, userId asc`
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/show-order-by.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the order by feature of SigNoz Query Builder</i></figcaption>
-</figure>
-
-**Limit**: Focus on top results
-- Top performers: `LIMIT 10`
-- Combined with ordering for "Top N" analysis
-
-#### How Limit Works for Time Series
-
-When you apply a `limit` to a time series query with `group by` fields, the limit determines which groups (series) are included in the results:
-
-1. **Without limit or limit = 0**: All groups matching your filter are included
-2. **With limit > 0**: Only the top N groups are included based on your ordering
-
-#### Behind the Scenes
-
-When a limit is specified with group by:
-
-1. First, a query runs to identify the top N groups based on:
-   - Your aggregation (e.g., `count()`, `sum(duration)`)
-   - Your ordering (e.g., `order by count() desc`)
-   - The entire time range
-
-2. Then, the time series query runs but only includes data for those top N groups
-
-#### Example
-
-```
-Query: count() by service.name
-Time Range: Last 24 hours
-Limit: 5
-Order: count() desc
-
-Result: Time series data for only the 5 services with the highest total count over 24 hours
-```
-
-#### Important Notes
-
-- The limit applies to the number of series (groups), not individual data points
-- The "top N" selection is based on the aggregate value across the entire time range, not per time bucket
-- Without group by, limit has no effect on time series queries
-- Each group selected will have data points for all time intervals in your query range
-
-### Conditional Filtering with Having
-
-Use `Having` clause to filter aggregated results:
-
-```
-Aggregation: count()
-Group By: endpoint
-Having: count() > 1000 AND count() < 5000
-Result: Only endpoints with more than 1000 requests and less then 5000 requests
-```
-
-**Common Having Patterns**:
-- High-traffic endpoints: `count() > 10000`
-- Slow operations: `avg(duration) > 500`
-- Error-prone services: `sum(errors) > 10`
-
-**Combining Multiple Conditions**:
-
-Use parentheses with AND/OR operators to create complex conditions:
-
-```
-Having: (count() > 1000) AND (count() < 5000)
-```
-
-Note: Always use parentheses when combining conditions to ensure correct evaluation order, especially when mixing AND and OR operators.
-
-### Time Aggregation Windows
-
-When querying time series data (traces, logs, or metrics), the system automatically manages the step interval (also known as aggregation interval) to ensure optimal performance and visualization. The step interval determines how data points are aggregated over time.
-
-#### Automatic Step Interval Assignment
-
-If you don't specify a step interval in your query, the system automatically calculates an optimal value based on:
-- The time range of your query (end time - start time)
-- The type of data you're querying (traces/logs vs metrics)
-- A target of approximately 300 data points for optimal visualization
-
-#### Step Interval Limits
-
-To prevent performance issues and ensure responsive queries, the system enforces a maximum of 1,500 data points per series. If your specified step interval would result in more than 1,500 points, it will be automatically adjusted upward. The behavior is different by telemetry data type
-
-#### Traces and Logs
-
-**Minimum step interval:** 5 seconds
-
-**Calculation rules:**
-- For automatic assignment: `(time_range / 300) rounded down to nearest 5 seconds`
-- For limit enforcement: `(time_range / 1500) rounded down to nearest 5 seconds`
-- The step interval is always a multiple of 5 seconds
-
-**Examples:**
-- 1 hour query → 12 second steps (300 points) → rounded down 10 second steps
-- 24 hour query → 288 second steps (~5 minute steps, 300 points)
-- If you set 1 second steps for a 1 hour query (3,600 points), it adjusts to 2.4 seconds → 5 seconds
-
-#### Metrics
-
-**Minimum step interval:** 60 seconds
-
-Note: The 60-second minimum for metrics is being updated. Soon, you'll be able to set step intervals matching your collection interval, as long as the query stays within the 1,500 point limit. Follow progress on [issue #7248](https://github.com/SigNoz/signoz/issues/7248)
-
-**Calculation rules:**
-- Base calculation same as traces/logs but with additional adjustments:
-  - For time ranges < 1 day: Multiple of 60 seconds
-  - For time ranges 1-7 days: Multiple of 5 minutes (300 seconds)
-  - For time ranges > 7 days: Multiple of 30 minutes (1,800 seconds)
-
-**Examples:**
-- 6 hour query → 72 seconds → 60 seconds (360 points)
-- 3 day query → 864 seconds → 900 seconds (15 minutes, 288 points)
-- 2 week query → 4,032 seconds → 3,600 seconds (1 hour, 336 points)
-
-#### Best Practices
-
-1. **Let the system choose:** For most use cases, don't specify a step interval. The automatic calculation provides a good balance between detail and performance.
-
-2. **Adjusting for more detail:** If you need more granular data:
-   - Reduce your time range
-   - Or specify a smaller step interval (keeping in mind the 1,500 point limit)
-
-#### Impact on Your Queries
-
-- **Filters:** Applied regardless of step interval
-- **Group By:** Each group counts toward the series limit
-- **Aggregations:** Applied within each step interval window
-
-#### Troubleshooting
-
-**"My specified step interval was ignored"**
-- Check if it would exceed 1,500 points
-- Ensure it meets the minimum requirements (5s for traces/logs, 60s for metrics)
-
-**"I need more than 1,500 data points"**
-- Leave a comment [here](https://github.com/SigNoz/signoz/issues/7248) explaining your use case.
-
-### Legend Formatting
-
-Customize the legend in your query's visual output to give more clarity, by formatting how grouped data will be labeled in your charts or graphs. We use the double curly braces - `{{}}` format to show the attribute.
-
-**Format**: `{{service.name}}`
-
-For example, if you have grouped by `service.name` attribute then you can write `{{service.name}}` in your legend. You can also add text along with the attribute like `{{service.name}} - Application Service` which will be shown as `user-auth-service - Application Service`.
-
-You can combine multiple attributes and add custom text to create descriptive legends:
-- `{{service.name}} ({{environment}})` → `payment-api (production)`
-- `Service: {{service.name}} | Version: {{service.version}}` → `Service: user-service | Version: v2.1.0`
-
----
-
-## Multi-Query Analysis: Advanced Comparisons
-
-Combine multiple queries to perform sophisticated analysis that single queries cannot achieve.
-
-### Use Cases for Multiple Queries
-
-**Error Rate Calculation**
-- Query A: Count of error requests
-- Query B: Count of all requests
-- Formula: `(A/B) * 100` (error percentage)
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/error-percentage.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the Formula feature feature of SigNoz Query Builder</i></figcaption>
-</figure>
-
-**SLA Monitoring**
-- Query A: Requests under 200ms
-- Query B: Total requests
-- Formula: `(A/B) * 100` (SLA compliance percentage)
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/product-features/query-builder/sla-monitoring-with-duration.mp4" 
-        width="100%" 
-        controls
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>Example showing the Formula feature feature of SigNoz Query Builder</i></figcaption>
-</figure>
-
-### Available Mathematical Functions in Formula
-
-- **Basic Operations**: `+`, `-`, `*`, `/`
-- **Logarithmic**: `log`, `ln`, `log2`, `log10`
-- **Exponential**: `exp`, `exp2`, `exp10`
-- **Trigonometric**: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
-- **Mathematical**: `sqrt`, `cbrt`, `abs`
-- **Utility**: `now`, `degrees`, `radians`
-
-### Multi-Query Best Practices
-
-1. **Align time ranges**: Ensure all queries use the same time window
-2. **Consistent grouping**: Use identical `Group By` clauses for meaningful comparisons
-
----
-
-## Multi-Query Analysis: Trace Operators
-
-Trace operators let you combine multiple trace queries to express span relationships within a trace: parent-child hierarchies, co-occurrence, exclusion, and union.
-
-<Admonition type="info">
-**Important: Trace operators return left-hand side spans.** For all operators except OR (`||`), the result set contains spans matching the **left** operand. The right operand acts as a condition/filter. For example, `A => B` returns spans from A that have a direct child matching B, not the B spans themselves.
-</Admonition>
-
-### Available Trace Operators
-
-- **Has Direct Child** (`=>`): Returns left (A) spans. Spans from A that have a **direct child** matching B.
-- **Has Descendant** (`->`): Returns left (A) spans. Spans from A that have a **descendant** (at any depth) matching B.
-- **AND** (`&&`): Returns left (A) spans. Spans from A in traces that **also contain** spans matching B.
-- **OR** (`||`): Returns **both** A and B spans. **Union** of spans from both A and B (deduplicated).
-- **NOT** (binary, `A NOT B`): Returns left (A) spans. Spans from A in traces that **do not contain** any spans matching B.
-- **NOT** (unary, `NOT A`): Returns all other spans. All spans in the time range whose trace does **not** contain any spans matching A.
-
-### Expression Syntax
-
-- **Identifiers**: Query labels like `A`, `B`, `C` (letters followed by optional digits)
-- **Parentheses**: Use `()` to group sub-expressions, e.g., `(A => B) && (C -> D)`
-- **Max operators**: Up to 10 operators per expression
-- **Operator precedence** (lowest to highest): `->`, `=>`, `&&`, `||`, `NOT`
-
-<Admonition type="note">
-Unlike standard Boolean logic where AND binds tighter than OR, trace operators give `||` higher precedence than `&&`. Use parentheses to make your intent explicit when combining these operators.
-</Admonition>
-
-For example, `A => B && C` is parsed as `A => (B && C)` because `&&` has higher precedence than `=>`. Use parentheses to override precedence when combining multiple operators.
-
-### Examples
-
-#### Has Direct Child (`=>`)
-
-Find frontend spans that are direct parents of customer service spans:
-- Query A: `service.name = 'frontend'`
-- Query B: `service.name = 'customer'`
-- Expression: `A => B`
-- **Result**: Returns the frontend spans (A) that directly called the customer service
+**How to filter:**
+1. Click the **Search Filter** field to see available attributes (or start typing an expression)
+2. Select an attribute (e.g., `service.name`, `severity_text`, `status_code`)
+3. Choose an operator (`=`, `!=`, `IN`, `NOT_IN`, `LIKE`, `EXISTS`, etc.)
+4. Enter the value to match
+5. Combine multiple filters — they are joined with `AND`
 
 <figure data-zoomable align='center'>
     <video
         className="box-shadowed-image"
-        src="/img/docs/product-features/query-builder/direct-descedant-operator.mp4"
+        src="/img/docs/product-features/query-builder/query-builder-filtering-spans.mp4"
         width="100%"
         controls
     >
         Your browser does not support the video tag.
     </video>
-    <figcaption><i>Example showing the Has Direct Child Trace Operator</i></figcaption>
+    <figcaption><i>Filtering spans in the Query Builder with auto-complete</i></figcaption>
 </figure>
 
-#### Has Descendant (`->`)
+<Admonition type="tip">
+Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to quickly execute Stage & Run Query.
+</Admonition>
 
-Find frontend spans that are ancestors (at any depth) of erroring customer service spans:
-- Query A: `service.name = 'frontend'`
-- Query B: `service.name = 'customer' AND has_error = true`
-- Expression: `A -> B`
-- **Result**: Returns the frontend spans (A) that are ancestors of the erroring customer spans at any depth.
+For the full list of supported operators and syntax patterns, see the [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) and [Search Syntax](https://signoz.io/docs/userguide/search-syntax/).
+
+### Full-Text Search
+
+In the **Logs Explorer**, you can search log bodies without specifying a field name. Wrap your search phrase in single quotes and enter it in the filter bar:
+
+```
+'database connection timeout'
+```
+
+This searches across log body content. Full-text search is only available for logs — traces and metrics require field-based filters. For details on quoted vs unquoted search behavior, see [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/).
+
+### Aggregation
+
+Aggregation functions reduce your filtered data into summary values — counts, averages, percentiles, rates, and more.
+
+<Figure
+  src="/img/docs/product-features/query-builder/query-builder-aggregation.webp"
+  alt="Selecting aggregation functions in the Query Builder"
+  caption="Selecting an aggregation function in the Query Builder"
+/>
+
+Available aggregation functions for logs and traces:
+
+| Category | Functions |
+|----------|-----------|
+| **Statistical** | `count`, `count_distinct`, `sum`, `avg`, `min`, `max` |
+| **Percentile** | `p05`, `p10`, `p20`, `p25`, `p50`, `p75`, `p90`, `p95`, `p99` |
+| **Rate** | `rate` (per-second), `rate_sum`, `rate_avg`, `rate_max`, `rate_min` |
+
+For detailed usage, real-world examples, and legend formatting, see [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/).
+
+### Group By
+
+Group By segments your aggregated results by one or more attributes. This is how you break down data by service, endpoint, region, or any custom dimension.
+
+<Figure
+  src="/img/docs/product-features/query-builder/query-builder-group-by.webp"
+  alt="Group By selector showing available attributes"
+  caption="Grouping results by an attribute"
+/>
+
+For example, grouping `count` of error spans by `service.name` shows you which services produce the most errors. You can group by multiple attributes simultaneously to create more granular breakdowns.
+
+For details on how grouping interacts with aggregation, how missing values are handled, and how to format legends, see [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/#grouping).
+
+### Legend Format
+
+When using Group By in Time Series view, each group becomes a separate line on the chart. The **Legend format** field lets you control how these lines are labeled. Use `{{attribute_name}}` placeholders to insert group-by values into the legend text.
+
+For example, if you group by `service.name` and set the legend format to `{{service.name}} - errors`, each line is labeled like `frontend - errors`, `cartservice - errors`, etc.
+
+### Result Manipulation
+
+After aggregation and grouping, you can further refine results:
+
+- **Order By** — sort results ascending or descending by any aggregated column
+- **Limit** — restrict the number of results returned
+- **Having** — filter aggregated results (e.g., show only services where error count > 100)
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/indirect-descedant-operator.webp" alt="SigNoz UI showing Indirect Descendant Trace Operator"/>
-    <figcaption><i>Example showing the Has Descendant Trace Operator</i></figcaption>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/show-order-by.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Sorting, limiting, and filtering aggregated results</i></figcaption>
 </figure>
 
-#### AND (`&&`)
+For sorting mechanics, limit behavior with group by, and common HAVING patterns, see [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/).
 
-Find cartservice spans in traces that also have non-200 status codes:
-- Query A: `service.name = 'cartservice'`
-- Query B: `status_code != 200`
-- Expression: `A && B`
-- **Result**: Returns the cartservice spans (A), only from traces where at least one span matches the status_code condition (B)
+### Multiple Queries & Formulas
+
+You can run multiple queries simultaneously and combine them using formulas. This is useful for computing ratios (e.g., error rate = errors / total requests) or comparing different signals side by side.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/and-operator.webp" alt="SigNoz UI showing AND Trace Operator"/>
-    <figcaption><i>Example showing the AND Trace Operator</i></figcaption>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/error-percentage.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Formula feature of SigNoz Query Builder</i></figcaption>
 </figure>
 
-#### OR (`||`)
+For formula syntax, available mathematical functions, and trace matching operators (`=>`, `->`, `&&`, `||`), see [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/).
 
-Get spans from either the frontend or the backend service:
-- Query A: `service.name = 'frontend'`
-- Query B: `service.name = 'backend'`
-- Expression: `A || B`
-- **Result**: Returns spans from **both** A and B (deduplicated union)
+## Metrics Query Builder
 
-#### NOT
+The Metrics Query Builder includes all the capabilities above — filtering, aggregation, group by, ordering — plus two additional aggregation layers that are specific to metric data: **temporal aggregation** and **spatial aggregation**. For a detailed explanation of how different metric types (Gauge, Counter, Histogram) affect which aggregation functions are valid, see [Metric Types & Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
 
-**Binary NOT** - Find cartservice spans in traces that have no errors:
-- Query A: `service.name = 'cartservice'`
-- Query B: `has_error = true`
-- Expression: `A NOT B`
-- **Result**: Returns cartservice spans (A) only from traces that contain zero erroring spans
+<Figure
+  src="/img/docs/product-features/query-builder/metrics-temporal-spatial-aggregation.webp"
+  alt="Temporal and spatial aggregation controls in the metrics query builder"
+  caption="Temporal and spatial aggregation controls in the Metrics Query Builder"
+/>
 
-**Unary NOT** - Find all spans in traces that don't involve the payment service:
-- Query A: `service.name = 'paymentservice'`
-- Expression: `NOT A`
-- **Result**: Returns all spans in the time range from traces that have no payment service spans
+### Temporal and Spatial Aggregation
 
-#### Nested Expressions
+Metrics are fundamentally different from logs and traces. A single metric (e.g., `system.cpu.utilization`) produces multiple **time series** — one per unique combination of labels like `host.name`, `cpu.state`, and `service.name`. Each time series contains many **data points** over time.
 
-Combine operators with parentheses:
-- Expression: `(A => B) && (C -> D)`
-- **Result**: Returns spans from `A => B` (A spans that are direct parents of B spans) that are also in traces containing the `C -> D` relationship
+When you query metrics, SigNoz applies two aggregation layers in sequence:
 
----
+#### Temporal Aggregation (Within Each Time Series)
 
-## Troubleshooting & Performance
+Temporal aggregation consolidates raw data points **within each individual time series** over each time interval. Instead of plotting every raw sample (which can be thousands), it reduces them into one value per interval per series.
 
-### Common Query Issues
+For example, if you have CPU utilization samples every 10 seconds and your chart shows 1-minute intervals, temporal aggregation decides how those 6 raw values become a single point — by taking the latest value, averaging them, summing them, etc.
 
-**Query Performance Problems**
-- **Symptom**: Slow query execution
-- **Potential Solutions**: 
-  - Check time range selection
-  - Use resource attributes in WHERE clauses
-  - Reduce GROUP BY cardinality
-  - Increase aggregation intervals
+Available functions: `Latest`, `Sum`, `Avg`, `Min`, `Max`, `Count`, `Count Distinct`
 
-**No Results Returned**
-- **Check**: Filter syntax and attribute names
-- **Verify**: Time range includes expected data
-- **Confirm**: Service/attribute existence in the time period
+For counter metrics, additional functions are available: `Rate` (per-second rate of change) and `Increase` (total change over interval).
 
-**Unexpected Results**
-- **Review**: Filter combinations (AND vs OR logic)
-- **Validate**: Aggregation functions match your intent
-- **Check**: Group By attributes for proper categorization
+<Admonition type="info">
+The time interval used for temporal aggregation is automatically calculated based on your selected time range. For details on how SigNoz determines step intervals, see [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/).
+</Admonition>
 
-### Performance Optimization
+#### Spatial Aggregation (Across Time Series)
 
-**Query**
-1. **Filter early**: Apply restrictive filters first
-2. **Limit scope**: Use specific time ranges
-3. **Resource attribute awareness**: Leverage resource attributes to speed up queries
-4. **Aggregation efficiency**: Choose appropriate time windows
+Spatial aggregation merges **multiple time series into fewer series** by combining values across dimensions. This is how you go from seeing one line per host to seeing a single line for the entire service.
 
-**Dashboard Performance**
-1. **Adjust refresh frequency**: Balance freshness with performance
-2. **Optimize time ranges**: Avoid unnecessarily wide windows  
-3. **Limit concurrent queries**: Stagger dashboard loads
+For example, if `system.cpu.utilization` has 10 time series (one per host), spatial aggregation with `Avg` gives you the average CPU across all hosts as a single line.
+
+Available functions: `Sum`, `Avg`, `Min`, `Max`
+
+#### How They Work Together
+
+1. **Temporal first** — each individual time series is reduced to one value per time interval
+2. **Spatial second** — the resulting time series are combined across the dimensions you didn't group by
+
+Temporal aggregation always happens within a single series, and spatial aggregation always happens across series — they never mix.
+
+### Functions
+
+The Metrics Query Builder supports additional functions for extended analysis:
+
+- **Exclusion functions** — cut off values above or below thresholds
+- **Clamping functions** — constrain values to a range
+- **Arithmetic functions** — absolute value, running diff, logarithms
+- **Smoothing functions** — exponential weighted moving average (EWMA)
+- **Time shift functions** — compare current data with a previous time period
+
+<Figure
+  src="/img/docs/product-features/query-builder/product-features-query-builder.webp"
+  alt="Functions available in the Metrics Query Builder"
+  caption="Functions available in the Metrics Query Builder"
+/>
+
+For the full list, chaining behavior, and examples, see [Functions for Extended Analysis](https://signoz.io/docs/querying/functions-extended-analysis/).
+
+## Related
+
+- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — aggregation functions, group-by segmentation, and legend formatting
+- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — sort, limit, and conditionally filter aggregated results
+- [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) — formulas, trace matching operators, and cross-signal comparisons
+- [Metric Types & Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/) — how Gauge, Counter, and Histogram metrics work with temporal and spatial aggregation
+- [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how SigNoz calculates step intervals for time series queries
+- [Functions for Extended Analysis](https://signoz.io/docs/querying/functions-extended-analysis/) — exclusion, arithmetic, smoothing, and time shift functions
+- [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) — search log bodies without specifying field names
+- [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) — complete reference for filter bar expressions and operators
