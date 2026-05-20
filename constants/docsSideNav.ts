@@ -3582,14 +3582,22 @@ const docsSideNav = [
         label: 'Render',
       },
       {
-        type: 'doc',
-        route: '/docs/integrations/opentelemetry-kong-gateway',
         label: 'Kong Gateway',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/outposts/kong',
-        label: 'Kong (SigNoz plugin)',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/integrations/opentelemetry-kong-gateway',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Manual',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/outposts/kong',
+            label: 'SigNoz Plugin',
+          },
+        ],
       },
       {
         type: 'doc',
