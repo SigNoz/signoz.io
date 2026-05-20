@@ -29,6 +29,8 @@ import { cn } from 'app/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { AppTooltip } from '@/components/ui/AppTooltip'
 import { TooltipProvider } from '@radix-ui/react-tooltip'
+import { useLogEvent } from 'hooks/useLogEvent'
+import { usePathname } from 'next/navigation'
 
 type SearchButtonProps = {
   disableShortcut?: boolean
@@ -120,7 +122,27 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
   }, [baseClient])
 
   const router = useRouter()
+  const logEvent = useLogEvent()
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+
+  const trackSearchOpen = useCallback(
+    (trigger: 'click' | 'cmd+k') => {
+      logEvent({
+        eventName: 'Website Click',
+        eventType: 'track',
+        attributes: {
+          clickType: 'Search',
+          clickName: trigger === 'cmd+k' ? 'Cmd+K Search' : 'Search Icon Click',
+          clickText: 'Search Docs',
+          clickLocation: 'Top Navbar',
+          pageLocation: pathname,
+          trigger,
+        },
+      })
+    },
+    [logEvent, pathname]
+  )
 
   const open = useCallback(() => setIsOpen(true), [])
   const close = useCallback(() => setIsOpen(false), [])
@@ -138,7 +160,10 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
 
       if (event.key.toLowerCase() === 'k') {
         event.preventDefault()
-        setIsOpen((current) => !current)
+        setIsOpen((current) => {
+          if (!current) trackSearchOpen('cmd+k')
+          return !current
+        })
       }
     }
 
@@ -194,7 +219,10 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
             variant="ghost"
             rounded="full"
             aria-label="Search Docs"
-            onClick={open}
+            onClick={() => {
+              trackSearchOpen('click')
+              open()
+            }}
             className={cn(
               'group h-8 w-8 shrink-0 bg-signoz_slate-500 !p-0 text-slate-300 transition',
               'hover:bg-slate-700/50 hover:text-white',

@@ -1,7 +1,5 @@
 import { Github } from '@/components/social-icons/SolidIcons'
-import { Button } from '@/components/ui/Button'
-import { useLogEvent } from 'hooks/useLogEvent'
-import { usePathname } from 'next/navigation'
+import TrackingLink from '@/components/TrackingLink'
 import React, { useState, useEffect } from 'react'
 
 interface GitHubStarsProps {
@@ -21,8 +19,6 @@ const formatStars = (num: number) => {
 
 const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) => {
   const [stars, setStars] = useState<number | null>(null)
-  const logEvent = useLogEvent()
-  const pathname = usePathname()
 
   useEffect(() => {
     let isMounted = true
@@ -53,25 +49,14 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
   const displayedStarsText = stars === null ? '' : formatStars(stars)
 
   return (
-    <Button
-      isButton
+    <TrackingLink
       href="https://github.com/SigNoz/signoz"
-      variant="ghost"
-      rounded="full"
-      className="h-8 gap-2 bg-signoz_slate-500 pl-2 pr-2.5 text-signoz_ink-300 hover:bg-slate-700/50"
-      onClick={() => {
-        logEvent({
-          eventName: 'Website Click',
-          eventType: 'track',
-          attributes: {
-            clickType: 'External Click',
-            clickName: 'GitHub Repository',
-            clickText: stars === null ? 'GitHub Icon' : `${displayedStarsText} Stars`,
-            clickLocation: location,
-            pageLocation: pathname,
-          },
-        })
-      }}
+      target="_blank"
+      clickType="External Click"
+      clickName="GitHub Repository"
+      clickText={stars === null ? 'GitHub Icon' : `${displayedStarsText} Stars`}
+      clickLocation={location}
+      className="inline-flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 pl-2 pr-2.5 text-signoz_ink-300 transition-colors hover:bg-slate-700/50"
     >
       <div className="github-icon box-border rounded-full p-1">
         <Github className="fill-signoz_vanilla-100" width={16} />
@@ -83,7 +68,7 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
           {displayedStarsText}
         </div>
       )}
-    </Button>
+    </TrackingLink>
   )
 }
 
