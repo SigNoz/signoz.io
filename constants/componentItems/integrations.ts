@@ -110,6 +110,11 @@ export const INTEGRATIONS_ITEMS = {
       clickName: 'Fly.io Integration Link',
     },
     {
+      name: 'Netlify',
+      href: '/docs/integrations/outposts/netlify',
+      clickName: 'Netlify Integration Link',
+    },
+    {
       name: 'Railway',
       href: '/docs/integrations/outposts/railway',
       clickName: 'Railway Integration Link',
