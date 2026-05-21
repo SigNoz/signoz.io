@@ -1,0 +1,107 @@
+---
+date: 2026-05-16
+id: aspnet-metrics
+title: ASP.NET Core Metrics Dashboard
+description: Monitor ASP.NET Core application performance including HTTP request latency, Kestrel connections, GC and memory, thread pool health, and routing metrics.
+doc_type: explanation
+---
+
+Monitor ASP.NET Core application performance across five areas: HTTP request throughput and latency, process memory, GC and heap health, thread pool, and routing.
+
+<Admonition type="note">
+  This dashboard requires OpenTelemetry NuGet instrumentation. Follow the [ASP.NET Core Metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore) guide to instrument your application and start sending metrics.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aspnet-core-metrics.webp"
+  alt="ASP.NET Core Metrics Dashboard"
+  caption="ASP.NET Core Metrics Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/aspnetcore/aspnetcore-otlp-v1.json"
+    dashboardName="ASP.NET Core Metrics"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Request & Response**: HTTP request rate, latency percentiles (P50/P95/P99), active requests, and error breakdown by route
+- **Process**: Working set memory and CPU time
+- **GC & Memory**: Collection counts by generation (Gen0/Gen1/Gen2), total allocated bytes, heap size and fragmentation, GC pause time, and committed memory
+- **Threading & Exceptions**: Thread pool thread count, queue length, work item throughput, and exceptions by type
+- **Routing & Memory Pool**: Route match success and failure rates; Kestrel memory pool rental, allocation, pooling, and eviction (.NET 10+ only)
+
+## Metrics Included
+
+### Request & Response
+
+- **HTTP Request Duration**: Shows request latency percentiles (P50, P95, P99) over time
+- **Active Requests**: Shows in-flight HTTP requests over time
+- **Kestrel Active Connections**: Shows open Kestrel connections over time
+- **Kestrel Connection Duration**: Shows Kestrel connection lifetime over time
+
+### Process
+
+- **Memory Working Set**: Shows process working set over time
+- **CPU Time**: Shows CPU time consumed by state over time
+
+### GC & Memory
+
+- **GC Collections**: Shows garbage collection counts by generation (Gen0, Gen1, Gen2) over time
+- **Heap Total Allocated**: Shows total bytes allocated on the managed heap over time
+- **Heap Size After GC**: Shows heap size after the last collection over time
+- **Committed Memory**: Shows memory committed after the last collection over time
+- **Heap Fragmentation**: Shows heap fragmentation after the last collection over time
+- **GC Pause Time**: Shows time spent in GC pause over time
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aspnetcore-gc-memory.webp"
+  alt="ASP.NET Core GC & Memory"
+  caption="ASP.NET Core GC & Memory"
+/>
+
+### Threading & Exceptions
+
+- **Thread Pool Thread Count**: Shows the number of active thread pool threads over time
+- **Thread Pool Queue Length**: Shows the work queue length over time
+- **Work Items Completed**: Shows thread pool work items completed over time
+- **Exceptions**: Shows exceptions thrown over time, grouped by `error.type`
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aspnetcore-threads-exceptions.webp"
+  alt="ASP.NET Core Threads & Exceptions"
+  caption="ASP.NET Core Threads & Exceptions"
+/>
+
+### Routing & Memory Pool
+
+- **Route Match Attempts**: Shows route match attempts grouped by status (`success` / `failure`) over time
+- **Memory Pool Rented**: Shows bytes rented from the Kestrel memory pool over time
+- **Memory Pool Allocated**: Shows bytes allocated from the OS for the pool over time
+- **Memory Pool Pooled**: Shows bytes currently held in the pool over time
+- **Memory Pool Evicted**: Shows bytes evicted from the pool over time
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aspnetcore-routing-memorypool.webp"
+  alt="ASP.NET Core Routing & Memory Pool"
+  caption="ASP.NET Core Routing & Memory Pool"
+/>
+
+<Admonition type="info">
+  Memory pool panels populate only on .NET 10+ and only when your application has endpoints that read request bodies. On .NET 8, those panels stay empty.
+</Admonition>
+
+## Dashboard Variables
+
+- **deployment.environment**: Filter by deployment environment. Set by adding `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<value>` to your application's environment.
+- **service.name**: Filter by service name. Populated from `OTEL_SERVICE_NAME`.
+
+The variables cascade: picking an environment narrows the service name dropdown to services running in that environment.
+
+## Related Dashboards
+
+- [Go Runtime Metrics](https://signoz.io/docs/dashboards/dashboard-templates/go-runtime-metrics)
+- [JVM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/jvm-metrics)
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics)

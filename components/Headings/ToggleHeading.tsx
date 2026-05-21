@@ -34,7 +34,7 @@ const ToggleHeading = ({ children }: { children: React.ReactNode }) => {
 
   const childrenWithProps = React.Children.map(children, (child) => {
     if (React.isValidElement(child)) {
-      return React.cloneElement(child as React.ReactElement, {
+      return React.cloneElement(child as React.ReactElement<any>, {
         className: `toggle-heading relative inline-block pr-6 align-middle ${(child.props as any).className || ''}`,
         style: {
           margin: 0,

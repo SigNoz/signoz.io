@@ -1,7 +1,6 @@
 import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer2/source-files'
-import { writeFileSync } from 'fs'
 import readingTime from 'reading-time'
-import GithubSlugger, { slug } from 'github-slugger'
+import GithubSlugger from 'github-slugger'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 // Remark packages
 import remarkGfm from 'remark-gfm'
@@ -17,10 +16,6 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
-import blogRelatedArticles from './constants/blogRelatedArticles.json'
-import allAuthors from './constants/authors.json'
-
-const isProduction = process.env.NODE_ENV === 'production'
 
 // heroicon mini link
 const icon = fromHtmlIsomorphic(
@@ -93,7 +88,6 @@ const computedFields: ComputedFields = {
     type: 'string',
     resolve: (doc) => doc._raw.sourceFilePath,
   },
-  // toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
   toc: {
     type: 'json',
     resolve: async (doc) => {
@@ -120,221 +114,10 @@ const computedFields: ComputedFields = {
   },
 }
 
-/**
- * Count the occurrences of all tags across blog posts and write to json file
- */
-function createTagCount(allBlogs) {
-  const tags: Record<string, number> = {}
-  allBlogs.forEach((file) => {
-    if (file.tags && (!isProduction || file.draft !== true)) {
-      file.tags.forEach((tag) => {
-        const formattedTag = slug(tag)
-        if (formattedTag in tags) {
-          tags[formattedTag] += 1
-        } else {
-          tags[formattedTag] = 1
-        }
-      })
-    }
-  })
-  writeFileSync('./app/tag-data.json', JSON.stringify(tags, null, 2), {
-    flag: 'w',
-    encoding: 'utf-8',
-  })
-}
-
-function getRelatedArticles(doc, relatedArticles) {
-  const blogSlug = doc._raw.flattenedPath
-
-  const blog = relatedArticles.find((blog) => {
-    return blog.blogURL === blogSlug
-  })
-
-  if (blog) {
-    return blog.relatedArticles
-  } else {
-    return []
-  }
-}
-
 function getImageUrl(doc) {
   const raw = doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)
   return raw.startsWith('http') ? raw : `${siteMetadata.siteUrl}${raw}`
 }
-
-const getAuthorDetails = (authorID) => {
-  if (allAuthors[authorID]) {
-    return allAuthors[authorID]
-  }
-
-  return {}
-}
-
-function getAuthors(doc) {
-  const authorsArr = doc?.authors._array || ['SigNoz Team']
-
-  return authorsArr.map((author) => {
-    const details = getAuthorDetails(author)
-    return {
-      '@type': 'Person',
-      name: details.name || 'SigNoz Team',
-      ...(details.url && { url: details.url }),
-    }
-  })
-}
-
-function buildArticleStructuredData(doc) {
-  const postUrl = `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`
-  const tags = Array.isArray(doc.tags) ? doc.tags : []
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: doc.title,
-    description: doc.description || doc.summary || `Read about ${doc.title}`,
-    image: {
-      '@type': 'ImageObject',
-      url: getImageUrl(doc),
-      width: 1200,
-      height: 630,
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': postUrl,
-    },
-    url: postUrl,
-    datePublished: doc.date,
-    dateModified: doc.lastmod || doc.date,
-    inLanguage: siteMetadata.language,
-    wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
-    author: getAuthors(doc),
-    publisher: {
-      '@type': 'Organization',
-      name: siteMetadata.title,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
-        width: 600,
-        height: 60,
-      },
-      sameAs: [
-        siteMetadata.linkedin,
-        siteMetadata.x,
-        siteMetadata.github,
-        siteMetadata.youtube,
-        siteMetadata.hackernews,
-      ],
-    },
-    ...(tags.length > 0 ? { articleSection: tags[0] } : {}),
-  }
-}
-
-export const Page = defineDocumentType(() => ({
-  name: 'Page',
-  filePathPattern: 'blog/**/*.mdx',
-  contentType: 'mdx',
-}))
-
-export const Blog = defineDocumentType(() => ({
-  name: 'Blog',
-  filePathPattern: 'blog/**/*.mdx',
-  contentType: 'mdx',
-  fields: {
-    title: { type: 'string', required: true },
-    date: { type: 'date', required: true },
-    tags: { type: 'list', of: { type: 'string' }, default: [] },
-    lastmod: { type: 'date' },
-    draft: { type: 'boolean' },
-    /** When true, omit this post from sitemap.xml (e.g. /blog/what-is-opentelemetry redirects to /opentelemetry but uses the same blog slug and params, /opentelemetry/ is added to sitemap. */
-    excludeFromSitemap: { type: 'boolean', required: false },
-    summary: { type: 'string' },
-    description: { type: 'string' },
-    images: { type: 'json' },
-    image: { type: 'string' },
-    authors: { type: 'list', of: { type: 'string' }, required: true },
-    layout: { type: 'string' },
-    bibliography: { type: 'string' },
-    canonicalUrl: { type: 'string' },
-    keywords: { type: 'list', of: { type: 'string' }, required: false },
-    slug: { type: 'string', required: false },
-    hide_table_of_contents: { type: 'boolean', required: false },
-    toc_min_heading_level: { type: 'number', required: false },
-    toc_max_heading_level: { type: 'number', required: false },
-    cta_title: { type: 'string', required: false },
-    cta_text: { type: 'string', required: false },
-    is_newsroom: { type: 'boolean', required: false },
-  },
-  computedFields: {
-    ...computedFields,
-    relatedArticles: {
-      type: 'json',
-      resolve: (doc) => getRelatedArticles(doc, blogRelatedArticles),
-    },
-    structuredData: {
-      type: 'json',
-      resolve: (doc) => buildArticleStructuredData(doc),
-    },
-  },
-}))
-
-export const Newsroom = defineDocumentType(() => ({
-  name: 'Newsroom',
-  filePathPattern: 'newsroom/**/*.mdx',
-  contentType: 'mdx',
-  fields: {
-    title: { type: 'string', required: true },
-    date: { type: 'date', required: true },
-    tags: { type: 'list', of: { type: 'string' }, default: [] },
-    lastmod: { type: 'date' },
-    draft: { type: 'boolean' },
-    summary: { type: 'string' },
-    description: { type: 'string' },
-    images: { type: 'json' },
-    image: { type: 'string' },
-    authors: { type: 'list', of: { type: 'string' } },
-    layout: { type: 'string' },
-    bibliography: { type: 'string' },
-    canonicalUrl: { type: 'string' },
-    keywords: { type: 'list', of: { type: 'string' }, required: false },
-    slug: { type: 'string', required: false },
-    hide_table_of_contents: { type: 'boolean', required: false },
-    toc_min_heading_level: { type: 'number', required: false },
-    toc_max_heading_level: { type: 'number', required: false },
-    cta_title: { type: 'string', required: false },
-    cta_text: { type: 'string', required: false },
-  },
-  computedFields: {
-    ...computedFields,
-    structuredData: {
-      type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': `https://signoz.io/newsroom/${doc.slug}`,
-        },
-        author: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-        },
-        publisher: {
-          '@type': 'Organization',
-          name: 'SigNoz',
-          logo: {
-            '@type': 'ImageObject',
-            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
-          },
-        },
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.description,
-        image: getImageUrl(doc),
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
-    },
-  },
-}))
 
 export const Doc = defineDocumentType(() => ({
   name: 'Doc',
@@ -417,30 +200,9 @@ export const Doc = defineDocumentType(() => ({
   },
 }))
 
-export const Authors = defineDocumentType(() => ({
-  name: 'Authors',
-  filePathPattern: 'constants/authors.json',
-  contentType: 'mdx',
-  fields: {
-    name: { type: 'string', required: true },
-    title: { type: 'string' },
-    url: { type: 'string' },
-    image_url: { type: 'string' },
-    avatar: { type: 'string' },
-    occupation: { type: 'string' },
-    company: { type: 'string' },
-    email: { type: 'string' },
-    twitter: { type: 'string' },
-    linkedin: { type: 'string' },
-    github: { type: 'string' },
-    layout: { type: 'string' },
-  },
-  computedFields,
-}))
-
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Doc, Newsroom],
+  documentTypes: [Doc],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
@@ -465,9 +227,5 @@ export default makeSource({
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
       rehypePresetMinify,
     ],
-  },
-  onSuccess: async (importData) => {
-    const { allBlogs } = await importData()
-    createTagCount(allBlogs)
   },
 })

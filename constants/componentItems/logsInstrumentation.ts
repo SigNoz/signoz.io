@@ -106,6 +106,11 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       href: '/docs/logs-management/send-logs/zap-to-signoz',
       clickName: 'Zap Logs Link',
     },
+    {
+      name: 'slog (Go)',
+      href: '/docs/logs-management/send-logs/slog-to-signoz',
+      clickName: 'slog Logs Link',
+    },
     { name: 'Deno', href: '/docs/instrumentation/opentelemetry-deno', clickName: 'Deno Logs Link' },
   ] satisfies ComponentItem[],
   collectors: [

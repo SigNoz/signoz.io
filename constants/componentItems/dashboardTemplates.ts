@@ -37,6 +37,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'ArgoCD Dashboard Template',
   },
   {
+    name: 'ASP.NET Core',
+    href: '/docs/dashboards/dashboard-templates/aspnet-metrics',
+    clickName: 'ASP.NET Core Dashboard Template',
+  },
+  {
     name: 'Autogen',
     href: '/docs/dashboards/dashboard-templates/autogen-dashboard',
     clickName: 'Autogen Dashboard Template',
@@ -115,6 +120,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'DeepSeek API',
     href: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
     clickName: 'DeepSeek API Dashboard Template',
+  },
+  {
+    name: 'Dify',
+    href: '/docs/dashboards/dashboard-templates/dify-dashboard',
+    clickName: 'Dify Dashboard Template',
   },
   {
     name: 'Docker Container Metrics',
@@ -205,6 +215,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Inkeep',
     href: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
     clickName: 'Inkeep Dashboard Template',
+  },
+  {
+    name: 'Istio',
+    href: '/docs/dashboards/dashboard-templates/istio-dashboard',
+    clickName: 'Istio Dashboard Template',
   },
   {
     name: 'Jenkins',

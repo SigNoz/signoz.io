@@ -1,0 +1,162 @@
+---
+date: 2026-05-18
+id: aggregation-grouping
+title: Aggregation & Grouping
+description: Transform raw data into actionable insights using SigNoz's aggregation functions and grouping capabilities in the Query Builder.
+doc_type: reference
+---
+
+Transform raw data into actionable insights using SigNoz's comprehensive aggregation functions.
+
+## Core Aggregation Functions (Logs & Traces)
+
+These aggregation functions are available for logs and traces in both the **Time Series** and **Table** views.
+
+### Statistical Functions
+- **Count**: Total occurrences `count()`
+- **Count Distinct**: Unique values `count_distinct(user_id, product_id)`
+- **Sum**: Numerical totals `sum(bytes_sent)`
+- **Average**: Mean values `avg(response_time_ms)`
+- **Min/Max**: Range boundaries `min(latency)`, `max(latency)`
+
+### Percentile Functions
+- **Percentiles**: Distribution analysis — `p05`, `p10`, `p20`, `p25`, `p50`, `p75`, `p90`, `p95`, `p99`
+- Useful for latency analysis: `p50(duration)` for median, `p99(duration)` for tail latency
+
+<Figure
+  src="/img/docs/product-features/query-builder/percentile-functions-dropdown.webp"
+  alt="Percentile aggregation functions available in SigNoz Query Builder"
+  caption="Percentile aggregation functions available in the Query Builder"
+/>
+
+### Rate Functions
+- **Rate**: Total occurrences per second `rate()`
+- **Rate Sum**: Sum per second `rate_sum(requests)`
+- **Rate Avg**: Average per second `rate_avg(bytes_sent)`
+- **Rate Max**: Maximum per second `rate_max(duration)`
+- **Rate Min**: Minimum per second `rate_min(duration)`
+
+<Figure
+  src="/img/docs/product-features/query-builder/rate-functions-dropdown.webp"
+  alt="Rate aggregation functions available in SigNoz Query Builder"
+  caption="Rate aggregation functions available in the Query Builder"
+/>
+
+## Grouping
+
+Grouping allows you to segment your data based on chosen attributes, facilitating comparative analysis across different categories of the selected attributes. Grouping works across all three signal types — logs, traces, and metrics.
+
+- You can group data by attributes like `service.name` or `method` to analyze patterns per service or HTTP method.
+- When combined with aggregation, grouping enables you to, for example, find the average response time per service or count errors per endpoint.
+
+<Figure
+  src="/img/docs/product-features/query-builder/query-builder-group-by.webp"
+  alt="Group by feature in SigNoz Query Builder showing data grouped by service.name and deployment.environment"
+  caption="Group by feature of SigNoz Query Builder"
+/>
+
+### Using Aggregation and Grouping Together
+
+- Select an aggregation function from the dropdown, such as `Avg`.
+- Then, choose an attribute to apply it to, like `response_time`.
+- To group the data, you would then specify an attribute in the `Group by` field.
+- After running the query, you'll see the average response times for each group, allowing you to identify areas that may need optimization.
+
+### Real-World Examples: Cart Service Analytics
+
+#### Example 1: Product Popularity Analysis
+- **Goal**: Identify which products are being added to carts most frequently
+- **Insight**: Top 5 most popular products being added to shopping carts
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/most-frequently-added-products.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the count aggregation feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+
+#### Example 2: User Shopping Behavior
+- **Goal**: Analyze quantity patterns per user to identify bulk buyers
+- **Insight**: Users adding large quantities (potential bulk buyers or businesses)
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/bulk-quantity-buyers.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the sum aggregation feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+#### Example 3: Cart Activity Timeline
+- **Goal**: Track cart additions over time to understand shopping patterns
+- **Insight**: Shopping patterns throughout the day
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/cart-additions-over-one-day.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the count aggregation feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+#### Example 4: Average Quantity per Product
+- **Goal**: Understand typical purchase quantities for different products
+- **Insight**: Products typically bought in larger quantities vs. single items
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/per-product-avg-quantity.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the avg aggregation feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+### How Grouping Handles Missing Values
+
+When you group data and some records don't have the grouping key:
+- These records get grouped under an "empty" value
+- Your results will show groups with blank/empty labels
+
+**Example:** Grouping users by `department`:
+- Users with no department → grouped as "" (empty)
+- Users with department → grouped normally ("Sales", "Marketing", etc.)
+
+**To exclude empty groups:**
+Add `key EXISTS` to your search:
+```
+department EXISTS AND [rest of your query]
+```
+
+<Admonition type="note">
+SigNoz does not automatically exclude empty groups because sometimes you want to see them (e.g., finding users without departments).
+</Admonition>
+
+## Legend Formatting
+
+Customize the legend in your query's visual output to give more clarity, by formatting how grouped data will be labeled in your charts or graphs. We use the double curly braces - `{{}}` format to show the attribute.
+
+**Format**: `{{service.name}}`
+
+For example, if you have grouped by `service.name` attribute then you can write `{{service.name}}` in your legend. You can also add text along with the attribute like `{{service.name}} - Application Service` which will be shown as `user-auth-service - Application Service`.
+
+You can combine multiple attributes and add custom text to create descriptive legends:
+- `{{service.name}} ({{environment}})` → `payment-api (production)`
+- `Service: {{service.name}} | Version: {{service.version}}` → `Service: user-service | Version: v2.1.0`

@@ -333,6 +333,37 @@ tags: ["test"]
       assert.strictEqual(warnings.length, 0)
     })
 
+    it('should allow older dates when previousContent has no trailing newline', () => {
+      const oldDate = new Date()
+      oldDate.setDate(oldDate.getDate() - 30)
+      const oldDateStr = oldDate.toISOString().split('T')[0]
+
+      const previousContent = `---
+title: Previous Title
+date: ${oldDateStr}
+description: Previous description
+tags: ["test"]
+---
+
+# Content`
+
+      const currentContent = `---
+title: Updated Title
+date: ${oldDateStr}
+description: Updated description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const filePath = createTestFile('trimmed-previous.mdx', currentContent)
+      const { errors, warnings } = validateMetadata(filePath, { previousContent })
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
     it('should still require a recent date when body content changes', () => {
       const oldDate = new Date()
       oldDate.setDate(oldDate.getDate() - 30)

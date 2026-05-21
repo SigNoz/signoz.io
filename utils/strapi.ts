@@ -303,6 +303,11 @@ const singleContentPopulateByCollection: Record<string, Record<string, unknown>>
     tags: '*',
     keywords: '*',
   },
+  blogs: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
 }
 
 // Fetch MDX content by path or all content for a collection

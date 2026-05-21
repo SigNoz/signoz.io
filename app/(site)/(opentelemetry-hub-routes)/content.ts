@@ -1,8 +1,11 @@
-import { allBlogs } from 'contentlayer/generated'
 import { sortPosts } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
 import hubConfig from '@/constants/opentelemetry_hub.json'
-import { fetchAllGuidesForPage } from '@/utils/cachedData'
+import {
+  fetchAllGuidesForPage,
+  fetchAllBlogsForPage,
+  fetchAllComparisonsForPage,
+} from '@/utils/cachedData'
 
 type ResourceCenterCardSource = {
   slug?: string | null
@@ -14,6 +17,7 @@ type ResourceCenterCardSource = {
   summary?: string | null
   tags?: string[] | null
   authors?: unknown[] | null
+  authorObjects?: { key?: string; name?: string; image_url?: string }[] | null
   readingTime?: {
     text?: string | null
   } | null
@@ -53,7 +57,7 @@ export function pickResourceCenterCardFields(source: ResourceCenterCardSource): 
     description: source.description ?? undefined,
     summary: source.summary ?? undefined,
     tags: source.tags ?? undefined,
-    authors: source.authors ?? undefined,
+    authors: source.authorObjects?.length ? source.authorObjects : (source.authors ?? undefined),
     readingTime: {
       text: source.readingTime?.text ?? '5 min read',
     },
@@ -88,13 +92,19 @@ export function pickOpenTelemetryArticleFields(
   })
 }
 
-export function getResourceCenterBlogs(): ResourceCenterBlog[] {
-  return sortPosts(allBlogs).map(pickResourceCenterCardFields)
+export async function getResourceCenterBlogs(): Promise<ResourceCenterBlog[]> {
+  const blogs = await fetchAllBlogsForPage()
+  return sortPosts(blogs).map(pickResourceCenterCardFields)
 }
 
 export async function getResourceCenterGuides(): Promise<ResourceCenterGuide[]> {
   const guides = await fetchAllGuidesForPage()
   return sortPosts(guides).map(pickResourceCenterCardFields)
+}
+
+export async function getResourceCenterComparisons(): Promise<ResourceCenterComparison[]> {
+  const comparisons = await fetchAllComparisonsForPage()
+  return sortPosts(comparisons).map(pickResourceCenterCardFields)
 }
 
 type HubConfigNode = {
@@ -127,7 +137,7 @@ function normalizeUrlToPath(url: string): string {
 }
 
 /**
- * Returns articles (blogs from contentlayer + guides from CMS) that are referenced
+ * Returns articles (blogs from CMS + guides from CMS) that are referenced
  * in the OpenTelemetry hub config (learn chapters excl. comparisons + quick-start).
  */
 export async function getOpenTelemetryHubContentLayerArticles(): Promise<ResourceCenterCard[]> {
@@ -150,16 +160,19 @@ export async function getOpenTelemetryHubContentLayerArticles(): Promise<Resourc
     extractArticleUrls(quickStartPath).forEach((url) => hubPaths.add(normalizeUrlToPath(url)))
   }
 
-  // Fetch CMS guides
+  // Fetch CMS blogs and guides
+  let cmsBlogs: ResourceCenterCard[] = []
   let cmsGuides: ResourceCenterCard[] = []
   try {
-    cmsGuides = await getResourceCenterGuides()
+    ;[cmsBlogs, cmsGuides] = await Promise.all([
+      getResourceCenterBlogs(),
+      getResourceCenterGuides(),
+    ])
   } catch (error) {
-    console.error('Error fetching CMS guides for hub articles:', error)
+    console.error('Error fetching CMS content for hub articles:', error)
   }
 
-  // Match against contentlayer blogs + CMS guides
-  const allDocs = [...allBlogs.map(pickResourceCenterCardFields), ...cmsGuides]
+  const allDocs = [...cmsBlogs, ...cmsGuides]
   const matched = new Map<string, ResourceCenterCard>()
 
   for (const doc of allDocs) {

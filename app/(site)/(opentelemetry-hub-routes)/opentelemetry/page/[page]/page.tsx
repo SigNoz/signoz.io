@@ -7,11 +7,11 @@ import {
 } from '../../../content'
 import { buildListingMetadata } from '../../../metadata'
 import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } from '@/utils/strapi'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
-export async function generateMetadata({ params }: { params: { page: string } }) {
+export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   return buildListingMetadata('OpenTelemetry', params.page)
 }
 
@@ -20,7 +20,8 @@ export const generateStaticParams = async () => {
   return []
 }
 
-export default async function Page({ params }: { params: { page: string } }) {
+export default async function Page(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   // Fetch CMS opentelemetries articles
   let cmsArticles: ResourceCenterCard[] = []
   try {
