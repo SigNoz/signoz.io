@@ -9,7 +9,7 @@ tags: [Self-Host]
 
 Impersonation mode lets you run SigNoz without user accounts or login. Every request is automatically treated as admin - there is no login screen, no sign-up, and no session to manage.
 
-This is designed for:
+Common use cases include:
 
 - Single-developer setups
 - Small teams operating entirely behind a VPN or firewall
@@ -20,25 +20,11 @@ This is designed for:
 This feature is available from SigNoz v0.126.0 or later.
 </Admonition>
 
-<Admonition type="warning" title="Network is the trust boundary">
-In impersonation mode, authentication is disabled. **Anyone who can reach your SigNoz instance has full admin access.** Only enable this when network-level controls (VPN, private network, firewall) prevent unauthorized access.
-</Admonition>
-
 ## How it works
 
-When impersonation mode is enabled, SigNoz treats every incoming request as the root admin user - no credentials, tokens, or API keys are checked. There are no individual user identities, no sessions, and no login flow.
+When impersonation mode is enabled, SigNoz treats every incoming request as the [root admin user](https://signoz.io/docs/manage/administrator-guide/configuration/root-user/) - no credentials, tokens, or API keys are checked. There are no individual user identities, no sessions, and no login flow.
 
-Your network perimeter becomes the sole access control layer. If a request reaches SigNoz, it has full admin access. This is why impersonation mode is only appropriate when the network itself enforces who can connect (for example, a private subnet, a VPN, or a firewall allowlist).
-
-<Admonition type="info" title="When not to use impersonation mode">
-Avoid impersonation mode when:
-
-- Multiple people access SigNoz and individual accountability matters.
-- You need role-based access control (RBAC) or per-user permissions.
-- Your instance is exposed to the internet or a shared network without strict access controls.
-
-Use [SSO](https://signoz.io/docs/manage/administrator-guide/sso/overview/) or standard authentication for those cases.
-</Admonition>
+Your network perimeter becomes the sole access control layer. If a request reaches SigNoz, it has full admin access. 
 
 ## Configuration
 
@@ -51,14 +37,6 @@ SIGNOZ_IDENTN_APIKEY_ENABLED=false
 ```
 
 All three are required - setting only `SIGNOZ_IDENTN_IMPERSONATION_ENABLED` without disabling the tokenizer and API key authenticators will not fully activate impersonation mode.
-
-## What to expect
-
-When impersonation mode is active:
-
-- Accessing SigNoz takes you directly to the home page - no login prompt.
-- A banner confirms you are operating as admin: *"Impersonation mode: authentication is disabled. Anyone with access to this instance has admin privileges."*
-- All features and settings are fully accessible.
 
 ## Validate
 
