@@ -1,8 +1,8 @@
 ---
 date: 2026-05-19
 id: kong
-title: Monitor Kong with SigNoz
-description: Ship traces and logs from Kong Gateway to SigNoz using the kong-plugin-signoz LuaRocks plugin — traces delegate to Kong's bundled OpenTelemetry plugin, logs go over the plugin's own OTLP/HTTP pipeline.
+title: Kong Gateway Monitoring - Ship Traces and Logs to SigNoz
+description: Setup Kong Gateway monitoring with SigNoz. Install kong-plugin-signoz to ship OpenTelemetry traces and logs with minimal configuration.
 doc_type: howto
 ---
 
@@ -19,14 +19,14 @@ import GetHelp from '@/components/shared/get-help.md'
 For an alternative setup using only Kong's native OpenTelemetry plugin (Kong Enterprise 3.13+ also adds metrics), see [OpenTelemetry Kong Gateway](https://signoz.io/docs/integrations/opentelemetry-kong-gateway/).
 </Admonition>
 
-<Admonition type="info" title="Using self-hosted SigNoz?">
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed={true}>
 Most steps remain identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud vs Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
 ## Prerequisites
 
 - A [SigNoz Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/) workspace
-- `Kong Gateway 3.6+` (open-source or Enterprise)
+- **Kong Gateway 3.6+** (open-source or Enterprise)
 - Access to every Kong node's filesystem (to install the plugin's Lua sources)
 
 ## Step 1: Install the plugin
@@ -37,13 +37,23 @@ The plugin's Lua sources need to be on every Kong node. Install via LuaRocks:
 luarocks install kong-plugin-signoz
 ```
 
+<Admonition type="info" title="Running Kong 3.6 to 3.8?" defaultCollapsed={true}>
+On Kong 3.6 through 3.8, the command above fails with `Error: No results matching query were found for Lua 5.1.` because the luarocks.org manifest has grown past LuaJIT's 65536-constant bytecode limit on these versions. Install from the direct rockspec URL instead:
+
+```bash
+luarocks install https://luarocks.org/manifests/signoz/kong-plugin-signoz-0.0.1-1.rockspec
+```
+
+This URL also works on Kong 3.9+.
+</Admonition>
+
 For other install routes (custom images, Kubernetes), see Kong's <a href="https://developer.konghq.com/custom-plugins/installation-and-distribution/" target="_blank" rel="noopener noreferrer nofollow">installation and distribution guide</a>.
 
 ## Step 2: Load the plugin in Kong
 
 Add `signoz` to the loaded plugins in `kong.conf` (or via the `KONG_PLUGINS` environment variable) on every node:
 
-```ini
+```ini:kong.conf
 plugins = bundled,signoz
 ```
 
@@ -51,7 +61,7 @@ plugins = bundled,signoz
 
 The plugin enriches Kong's root request span before export, so Kong's tracer must be on. Set the following in `kong.conf` (or via environment variables):
 
-```ini
+```ini:kong.conf
 tracing_instrumentations = all
 tracing_sampling_rate    = 1.0
 ```
@@ -70,16 +80,16 @@ Enable the plugin globally on the gateway via Kong's Admin API:
 ```bash
 curl -X POST http://localhost:8001/plugins \
   --data "name=signoz" \
-  --data "config.exporter.endpoint=https://ingest.<REGION>.signoz.cloud:443" \
-  --data "config.exporter.key=<SIGNOZ_INGESTION_KEY>" \
+  --data "config.exporter.endpoint=https://ingest.<region>.signoz.cloud:443" \
+  --data "config.exporter.key=<your-ingestion-key>" \
   --data "config.resource.service_name=kong" \
   --data "config.resource.deployment_environment=production" \
   --data "config.logs.instrumentations=access"
 ```
 
-Replace:
-- `<REGION>` — your SigNoz Cloud region (e.g. `us`, `eu`, `in`). See [regions](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<SIGNOZ_INGESTION_KEY>` — your [SigNoz ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 </TabItem>
 <TabItem value="self-hosted" label="Self-Hosted SigNoz">
@@ -87,13 +97,14 @@ Replace:
 ```bash
 curl -X POST http://localhost:8001/plugins \
   --data "name=signoz" \
-  --data "config.exporter.endpoint=http://<SIGNOZ_OTEL_COLLECTOR_HOST>:4318" \
+  --data "config.exporter.endpoint=http://<your-collector-host>:4318" \
   --data "config.resource.service_name=kong" \
   --data "config.resource.deployment_environment=production" \
   --data "config.logs.instrumentations=access"
 ```
 
-Replace `<SIGNOZ_OTEL_COLLECTOR_HOST>` with the hostname or IP of your SigNoz OTel Collector.
+Verify this value:
+- `<your-collector-host>`: Hostname or IP of your SigNoz OTel Collector
 
 </TabItem>
 </Tabs>
