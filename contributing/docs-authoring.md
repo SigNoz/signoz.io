@@ -71,10 +71,9 @@ The `title` field is both the page heading and the meta title shown in search re
   - Lead with the primary keyword.
   - Use action words: Learn, Setup, Guide, Monitor, Debug, Optimize.
   - Include a feature or benefit qualifier when it fits naturally: Fast, Real-time, Open-source, Distributed.
-- **Examples:**
-  - `Monitor Kubernetes Pod Metrics with OpenTelemetry`
-  - `Debug Slow Traces in Trace Explorer`
-  - `Setup Log Pipelines for JSON Parsing`
+- **Example:** `Logs Pipelines - Parse & Transform Logs`
+  - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
+  - In search results: *Logs Pipelines - Parse & Transform Logs | SigNoz Docs*
 
 ### Description Guidelines
 
@@ -87,9 +86,8 @@ The `description` field appears as the meta description in search results and li
   - Use action-oriented language.
   - Highlight benefits.
   - Include primary keywords naturally — do not stuff them.
-- **Examples:**
-  - `Learn how to send Kubernetes pod metrics to SigNoz using OpenTelemetry Collector. Monitor CPU, memory, and network with pre-built dashboards.`
-  - `Debug slow traces using filters, trace matching, and flamegraph views in SigNoz Trace Explorer. Identify bottlenecks across microservices.`
+- **Example:** `Learn how SigNoz Logs Pipelines parse and transform logs into structured data for better debugging and observability.`
+  - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
 
 Tags:
 
