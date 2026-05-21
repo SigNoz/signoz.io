@@ -84,7 +84,12 @@ export default function TopNav() {
               clickLocation="Top Navbar"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <SigNozLogo className="h-5 w-auto shrink-0" aria-hidden="true" />
+              <SigNozLogo
+                className="h-5 w-auto shrink-0"
+                role="img"
+                aria-label="Datadog Alternative"
+                title="Open Source Datadog Alternative"
+              />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
 
