@@ -68,7 +68,7 @@ http {
 Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
 
 ```yaml:opentelemetry_config.yaml
-service_name: <service_name>
+service_name: <service-name>
 sampler:
   type: always_on
 exporter:
@@ -78,9 +78,11 @@ exporter:
       signoz-ingestion-key: <your-ingestion-key>
 ```
 
+Verify these values:
+
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
+- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
 
 **Step 4: Restart NGINX**
 
@@ -144,7 +146,7 @@ http {
 Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
 
 ```yaml:opentelemetry_config.yaml
-service_name: <service_name>
+service_name: <service-name>
 sampler:
   type: always_on
 exporter:
@@ -152,7 +154,9 @@ exporter:
     endpoint: http://localhost:4318/v1/traces
 ```
 
-- `<service_name>` is name of your service
+Verify these values:
+
+- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
 
 **Step 5: Restart NGINX**
 
@@ -185,7 +189,6 @@ RUN cd /opt && \
 RUN cd /opt/opentelemetry-webserver-sdk && ./install.sh
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/opentelemetry-webserver-sdk/sdk_lib/lib
-
 RUN echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.26.0/ngx_http_opentelemetry_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
 
 COPY opentelemetry_module.conf /etc/nginx/conf.d
@@ -202,17 +205,21 @@ NginxModuleOtelExporterEndpoint https://ingest.<region>.signoz.cloud:443;
 NginxModuleOtelSpanProcessor batch;
 NginxModuleOtelSampler AlwaysOn;
 NginxModuleOtelExporterOtlpHeaders signoz-ingestion-key=<your-ingestion-key>;
-NginxModuleServiceName DemoService;
-NginxModuleServiceNamespace DemoServiceNamespace;
-NginxModuleServiceInstanceId DemoInstanceId;
+NginxModuleServiceName <service-name>;
+NginxModuleServiceNamespace <service-namespace>;
+NginxModuleServiceInstanceId <service-instance-id>;
 NginxModuleResolveBackends ON;
 NginxModuleTrustIncomingSpans ON;
 NginxModuleTraceAsError ON;
 ```
 
+Verify these values:
+
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
+- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
+- `<service-namespace>`: A namespace for the service (e.g., `my-team`).
+- `<service-instance-id>`: A unique identifier for this instance (e.g., `nginx-prod-1`).
 
 **Step 3: Build and run your Docker image**
 
@@ -274,7 +281,7 @@ http {
 Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
 
 ```yaml:opentelemetry_config.yaml
-service_name: <service_name>
+service_name: <service-name>
 sampler:
   type: always_on
 exporter:
@@ -282,8 +289,10 @@ exporter:
     endpoint: <SIGNOZ_URL>
 ```
 
-- Set the `<SIGNOZ_URL>` to match your Self Hosted SigNoz endpoint.
-- `<service_name>` is name of your service
+Verify these values:
+
+- `<SIGNOZ_URL>`: Your self-hosted SigNoz endpoint (e.g., `http://localhost:4318/v1/traces`).
+- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
 
 **Step 4: Restart NGINX**
 

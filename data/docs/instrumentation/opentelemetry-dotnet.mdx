@@ -62,14 +62,23 @@ OTEL_TRACES_EXPORTER=otlp \
 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
-OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,service.version=1.0.0 \
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,service.version=<service-version> \
 dotnet run
 ```
 
-Replace:
+Verify these values:
 - `<service-name>`: Your service name (e.g., `payment-service`)
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 
@@ -112,13 +121,22 @@ env:
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_RESOURCE_ATTRIBUTES
-  value: 'deployment.environment=production,service.version=1.0.0'
+  value: 'deployment.environment=production,service.version=<service-version>'
 ```
 
-Replace:
+Verify these values:
 - `<service-name>`: Your service name (e.g., `payment-service`)
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 3. Update your Dockerfile entrypoint
 
@@ -162,7 +180,21 @@ Add these annotations to your pod template's `metadata.annotations`:
 
 ```yaml
 instrumentation.opentelemetry.io/inject-dotnet: "true"
+resource.opentelemetry.io/service.name: "<service-name>"
+resource.opentelemetry.io/service.version: "<service-version>"
 ```
+
+Verify these values:
+- `<service-name>`: Your service name (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 </Tabs>
@@ -196,12 +228,24 @@ ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-ENV OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,service.version=1.0.0"
+ENV OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,service.version=<service-version>"
 
 CMD . $HOME/.otel-dotnet-auto/instrument.sh && dotnet MyApp.dll
 ```
 
-Replace `<service-name>`, `<region>`, and `<your-ingestion-key>` with your values.
+Verify these values:
+- `<service-name>`: Your service name (e.g., `payment-service`)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Build and run
 
@@ -237,16 +281,25 @@ $env:OTEL_TRACES_EXPORTER = "otlp"
 $env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production,service.version=1.0.0"
+$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production,service.version=<service-version>"
 
 Register-OpenTelemetryForCurrentSession -OTelServiceName "<service-name>"
 dotnet run
 ```
 
-Replace:
+Verify these values:
 - `<service-name>`: Your service name (e.g., `payment-service`)
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 </Tabs>

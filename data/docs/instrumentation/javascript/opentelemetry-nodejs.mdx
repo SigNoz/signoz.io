@@ -39,6 +39,7 @@ export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 ```
@@ -47,6 +48,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -89,6 +99,8 @@ env:
   value: 'env,host,os'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: NODE_OPTIONS
@@ -99,6 +111,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -152,7 +173,21 @@ Add these annotations to your pod template's `metadata.annotations`:
 
 ```yaml
 instrumentation.opentelemetry.io/inject-nodejs: "true"
+resource.opentelemetry.io/service.name: "<service-name>"
+resource.opentelemetry.io/service.version: "<service-version>"
 ```
+
+Verify these values:
+- `<service-name>`: A descriptive name for your service (e.g., `my-node-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 </Tabs>
@@ -168,6 +203,7 @@ $env:OTEL_TRACES_EXPORTER = "otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_NODE_RESOURCE_DETECTORS = "env,host,os"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
 ```
@@ -176,6 +212,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service.
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -210,6 +255,7 @@ ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 
@@ -224,6 +270,7 @@ docker run \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_NODE_RESOURCE_DETECTORS="env,host,os" \
   -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
   -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
   your-image:latest
@@ -233,6 +280,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Build and run
 

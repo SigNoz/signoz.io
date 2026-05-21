@@ -1,204 +1,383 @@
 ---
-date: 2026-02-25
+date: 2026-05-18
 id: search-troubleshooting
 title: Search Query Troubleshooting Guide
 description: Diagnose and fix common SigNoz search query errors including syntax errors, ambiguous fields, missing keys, and function-related issues with clear examples.
 ---
 
-This section helps you resolve common errors when writing search queries.
+This page covers common error messages from the SigNoz filter bar (used in Logs Explorer, Traces Explorer, alert rules, and dashboards) and how to fix them.
 
 ## Syntax Errors
 
-### 'found syntax errors while parsing the filter expression'
+### Q. I'm getting `found syntax errors while parsing the filter expression` — what's wrong?
 
-This error occurs when the query parser cannot understand your query syntax. Common causes:
+A. The query parser cannot understand your syntax. This is usually caused by missing quotes, unmatched parentheses, or incorrect operator placement.
+
+<details>
+
+<summary>Show causes and fixes</summary>
 
 **1. Missing quotes around special characters**
+
+Characters like `[`, `]`, `(`, `)`, `{`, `}`, `*`, and spaces inside a value confuse the parser.
+
 ```
-# Wrong - brackets cause parsing error
+# Wrong — brackets are interpreted as syntax
 message = [error]
 
-# Correct - use quotes for special characters
+# Correct — wrap the value in single quotes
 message = '[error]'
 ```
 
 **2. Unmatched parentheses or quotes**
+
+Every opening parenthesis or quote must have a matching closing one.
+
 ```
-# Wrong - missing closing parenthesis
-(service = 'api' AND status = 'error'
+# Wrong — missing closing parenthesis
+(service.name = 'api' AND status = 'error'
 
 # Correct
-(service = 'api' AND status = 'error')
+(service.name = 'api' AND status = 'error')
 ```
 
-**3. Invalid operator usage**
 ```
-# Wrong - invalid operator combination
-field NOT = 'value'
-
-# Correct - use proper NOT syntax
-field != 'value'
-# OR
-NOT field = 'value'
-```
-
-## Expression Parsing Errors
-
-### 'full text search is not supported'
-
-This error appears when using full-text search syntax on signals that don't support it (currently only logs support full-text search).
-
-```
-# Wrong - using full-text search on traces/metrics
-'database connection failed'  # when querying traces
-
-# Correct - use field-based search for non-log signals
-message CONTAINS 'database connection failed'
-```
-
-### 'key `<fieldname>` not found'
-
-The specified field doesn't exist in your telemetry data. Common causes:
-
-**1. Typo in field name**
-```
-# Wrong
-sevice.name = 'api'  # typo: sevice instead of service
+# Wrong — missing closing quote
+service.name = 'api
 
 # Correct
 service.name = 'api'
 ```
 
-**2. Incorrect JSON body field syntax**
-```
-# Wrong - missing body prefix for JSON search
-status = 'error'
+**3. Invalid operator placement**
 
-# Correct - use body prefix for JSON fields
-body.status = 'error'
-```
-
-### 'key `<fieldname>` is ambiguous'
-
-This indicates the same field name exists in multiple contexts (i.e resource attribute and attribute of span/log). Please use explicit context by prefixing `resource.` or `attribute.` to the key.
-
-```
-# Warning - ambiguous field
-status_code = 200
-# Could match: span.status_code, attribute.status_code, etc.
-
-# Better - be explicit
-attribute.http.status_code = 200
-```
-
-### 'missing key for body json search'
-
-When searching JSON body fields, you must specify the key after `body.`
-
-```
-# Wrong - incomplete body search
-body. = 'error'
-
-# Correct - specify the JSON key
-body.error_message = 'timeout'
-```
-
-## Function-Related Errors
-
-### 'unknown function `<name>`'
-
-Only specific functions are supported. Check for typos:
-
-Supported functions:
-- `has()` - check if array contains a value
-
-### 'function expects key and value parameters'
-
-Array functions require at least two parameters:
-
-```
-# Wrong - missing parameters
-has(body.tags)
-
-# Correct - provide field and value
-has(body.tags, 'production')
-```
-
-### 'function supports only body JSON search'
-
-Currently, array functions only work with JSON body fields:
-
-```
-# Wrong - using function on non-body field
-has(attribute.tags, 'prod')
-
-# Correct - use with body fields
-has(body.tags, 'prod')
-```
-
-## Value Type Errors
-
-### 'unsupported value type'
-
-Ensure values are one of the supported types:
-
-```
-# Supported value types:
-'text value'      # String (quoted)
-123               # Number
-true              # Boolean
-['a', 'b', 'c']   # Array (for IN clauses and functions)
-```
-
-### 'failed to parse number'
-
-Number parsing failed. Check for invalid formats:
+The `NOT` keyword must appear before the entire condition, not between the field and operator.
 
 ```
 # Wrong
-field = 123.456.789  # Invalid number format
+field NOT = 'value'
 
 # Correct
-field = 123.456
+field != 'value'
+# OR
+NOT field = 'value'
 ```
 
-## Common Patterns and Solutions
+**4. Operator keywords used as plain text**
 
-### 1. Searching for operator keywords as text
+Words like `AND`, `OR`, and `NOT` are reserved. If they appear in the value you are searching for, quote the entire phrase.
+
 ```
-# Wrong - AND interpreted as operator
+# Wrong — AND is interpreted as a logical operator
 searching for AND operator
 
-# Correct - use quotes
+# Correct — quote the phrase
 'searching for AND operator'
 ```
 
-### 2. Complex conditions with wrong precedence
+</details>
+
+## Field and Key Errors
+
+### Q. I'm getting `key '<fieldname>' not found` — why can't it find my field?
+
+A. The field you referenced does not exist in the selected signal. This is usually a typo, a missing `body.` prefix, or using a field that belongs to a different signal type.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+**1. Typo in the field name**
+
+Field names are case-sensitive.
+
 ```
-# Wrong - unclear precedence
+# Wrong — "sevice" instead of "service"
+sevice.name = 'api'
+
+# Correct
+service.name = 'api'
+```
+
+**Tip:** Use the autocomplete dropdown in the filter bar to pick the correct field name.
+
+**2. Missing `body.` prefix for JSON log fields**
+
+When searching inside structured (JSON) log bodies, every key must be prefixed with `body.`.
+
+```
+# Wrong — "status" is inside the JSON body, not a top-level field
+status = 'error'
+
+# Correct
+body.status = 'error'
+```
+
+**3. Field does not exist in the selected signal**
+
+Some fields are signal-specific. For example, `duration` exists in traces but not in logs. If you copy a filter from Traces Explorer into Logs Explorer, any trace-only field triggers this error.
+
+Check which fields are available by opening the autocomplete dropdown in the explorer.
+
+</details>
+
+### Q. I'm getting `key '<fieldname>' is ambiguous` — what does that mean?
+
+A. The same field name exists in multiple contexts (e.g., as both a resource attribute and a span/log attribute). You need to disambiguate with an explicit prefix.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+OpenTelemetry allows the same attribute name to appear as a resource attribute and as a span or log attribute. When both exist, the parser can't determine which one you mean.
+
+```
+# Ambiguous — could match span.status_code or attribute.http.status_code
+status_code = 200
+
+# Correct — specify the context
+attribute.http.status_code = 200
+```
+
+Use `resource.` for resource-level attributes (like `resource.service.name`) and `attribute.` for span or log-level attributes.
+
+</details>
+
+### Q. I'm getting `missing key for body json search` — what's missing?
+
+A. You typed `body.` followed by an operator or value, but didn't specify which JSON key to search.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+The parser expects a key name after the `body.` prefix.
+
+```
+# Wrong — no key after body.
+body. = 'error'
+
+# Correct — specify the JSON key
+body.error_message = 'timeout'
+
+# Also correct — nested keys
+body.response.status = 'failed'
+```
+
+</details>
+
+## Full-Text Search Errors
+
+### Q. I'm getting `full text search is not supported` — why?
+
+A. Full-text search (searching by just typing a quoted phrase without a field name) is only supported for **logs**. Traces and metrics require field-based filters.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+```
+# Wrong — full-text search on traces
+'database connection failed'    # in Traces Explorer → error
+
+# Correct — use a field-based filter for traces
+attribute.db.statement CONTAINS 'database connection failed'
+```
+
+```
+# Correct — full-text search works in Logs Explorer
+'database connection failed'
+```
+
+If you are querying traces or metrics, rewrite the query to target a specific field using an operator like `=`, `CONTAINS`, or `LIKE`.
+
+</details>
+
+## Function Errors
+
+### Q. I'm getting `unknown function '<name>'` — which functions are supported?
+
+A. Only specific functions are supported in the filter bar. Currently the only supported function is `has()`, which checks if a JSON array field contains a value.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+```
+# Wrong — "contains" is not a function name
+contains(body.tags, 'production')
+
+# Correct
+has(body.tags, 'production')
+```
+
+Check for typos in the function name — the parser treats any unrecognized name as an error.
+
+</details>
+
+### Q. I'm getting `function expects key and value parameters` — what's wrong with my function call?
+
+A. The `has()` function requires exactly two parameters: the array field and the value to search for.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+```
+# Wrong — only one parameter
+has(body.tags)
+
+# Correct — field and value
+has(body.tags, 'production')
+```
+
+</details>
+
+### Q. I'm getting `function supports only body JSON search` — can I use functions on other fields?
+
+A. Array functions like `has()` currently only work with `body.*` fields (structured JSON log bodies). They cannot be used on top-level attributes or resource attributes.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+```
+# Wrong — attribute field, not a body field
+has(attribute.tags, 'prod')
+
+# Correct — use a body field
+has(body.tags, 'prod')
+```
+
+If you need to check for a value in a non-body array field, use a standard operator instead:
+
+```
+attribute.tags CONTAINS 'prod'
+```
+
+</details>
+
+## Value Type Errors
+
+### Q. I'm getting `unsupported value type` — what value formats does the parser accept?
+
+A. The filter parser supports four value types: strings (single-quoted), numbers, booleans, and arrays.
+
+<details>
+
+<summary>Show supported types and fixes</summary>
+
+| Type | Syntax | Example |
+|---|---|---|
+| String | Single-quoted | `'payment-service'` |
+| Number | Unquoted integer or decimal | `200`, `3.14` |
+| Boolean | Unquoted `true` or `false` | `true` |
+| Array | Square brackets, comma-separated | `['a', 'b', 'c']` |
+
+```
+# Wrong — double quotes are not supported for strings
+field = "some value"
+
+# Correct — use single quotes
+field = 'some value'
+```
+
+```
+# Wrong — unquoted string
+field = some-value
+
+# Correct
+field = 'some-value'
+```
+
+</details>
+
+### Q. I'm getting `failed to parse number` — what's wrong with my number?
+
+A. The value contains characters that make it an invalid number, such as multiple decimal points, trailing letters, or comma separators.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+```
+# Wrong — two decimal points
+field = 123.456.789
+
+# Wrong — comma as thousands separator
+field = 1,000
+
+# Correct
+field = 123.456
+field = 1000
+```
+
+</details>
+
+## Common Patterns
+
+### Q. My query runs but returns unexpected results — what could be wrong?
+
+A. If you're using mixed `AND`/`OR` operators without parentheses, operator precedence may be changing the meaning of your query. `AND` binds tighter than `OR`.
+
+<details>
+
+<summary>Show detailed explanation</summary>
+
+```
+# What you wrote — intending: (a OR b) AND c
 a = 1 OR b = 2 AND c = 3
 
-# Correct - use parentheses
+# What the parser evaluates — a OR (b AND c)
 a = 1 OR (b = 2 AND c = 3)
+
+# Fix — add parentheses to make your intent explicit
+(a = 1 OR b = 2) AND c = 3
 ```
 
-### 3. Variable not found
-When using dashboard variables:
+Always use parentheses in compound queries with mixed `AND`/`OR` operators, even when precedence already matches your intent.
+
+</details>
+
+### Q. My dashboard query using a variable like `$service_name` fails or returns no results — why?
+
+A. Either the variable is not defined in the dashboard, or its query returned no results for the current time range.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+**1. Variable is not defined**
+
+The variable referenced in the query does not exist in the current dashboard's variable list.
+
 ```
-# If variable $service_name isn't defined
-service = $service_name  # Error
-
-# Define the variable or use a literal value
-service = 'api-gateway'
+# Fails if $service_name is not defined
+service.name = $service_name
 ```
 
-## Getting Help
+Open the dashboard settings → Variables section and confirm the variable name matches exactly (case-sensitive). To test, replace the variable with a literal value:
 
-If you encounter an error not listed here:
-1. Check the search query syntax
-2. Verify field names exist in your data
-3. Try simplifying the query to isolate the issue
-4. Check for typos and proper quotation
-5. Ensure you're using the correct operators for your data type
+```
+service.name = 'api-gateway'
+```
 
-If the issue still persists, reach out to support.
+**2. Variable returns an empty value**
+
+The variable is defined but its query returned no results, so the substituted value is empty.
+
+Click the variable dropdown in the dashboard to check whether it has selectable values. If empty, review the variable's own query to ensure it returns data for the current time range.
+
+</details>
+
+## General Debugging Steps
+
+If you encounter an error not listed above:
+
+1. **Simplify the query** — remove conditions one at a time until the error disappears. The last condition you removed is the one causing the issue.
+2. **Check field names with autocomplete** — start typing in the filter bar and pick from the dropdown.
+3. **Verify the signal type** — make sure you are using operators and fields valid for the signal you are querying (logs, traces, or metrics).
+4. **Check quoting** — wrap string values in single quotes. Do not use double quotes.
+5. **Check parentheses** — count opening and closing parentheses to make sure they match.
+
+If the issue persists, reach out to <a href="https://signoz.io/slack/" target="_blank" rel="noopener noreferrer nofollow">SigNoz Community Slack</a> with the exact query and the full error message.

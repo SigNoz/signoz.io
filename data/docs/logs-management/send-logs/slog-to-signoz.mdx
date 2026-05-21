@@ -1,0 +1,312 @@
+---
+date: 2026-05-19
+title: Send Logs from log/slog to SigNoz
+id: slog-to-signoz
+description: Learn how to send logs from Go's standard log/slog package to SigNoz using the OpenTelemetry otelslog bridge.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Send logs from Go's standard <a href="https://pkg.go.dev/log/slog" target="_blank" rel="noopener noreferrer nofollow">log/slog</a> package to SigNoz using the OpenTelemetry `otelslog` bridge.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Go 1.21 or later (`log/slog` is a Go 1.21 standard library package)
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Steps
+
+### Step 1: Install dependencies
+
+Install the required modules:
+
+```bash
+go get go.opentelemetry.io/contrib/bridges/otelslog
+go get go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp
+go get go.opentelemetry.io/otel/sdk/log
+```
+
+- **otelslog**: bridges `log/slog` to the OpenTelemetry log pipeline
+- **otlploghttp**: OTLP exporter that ships logs over HTTP to SigNoz
+- **sdk/log**: log processor and provider
+
+### Step 2: Set environment variables
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service_name>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: '<service_name>'
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+<Admonition type="warning">
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Pass environment variables at runtime:
+
+```bash
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service_name>" \
+    your-image:latest
+```
+
+For deployed containers, inject these values through your container platform's environment variable or secret manager.
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service_name>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+</Tabs>
+
+### Step 3: Create an exporter
+
+`otlploghttp.New(ctx)` reads `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` from the environment automatically.
+
+```go:main.go
+ctx := context.Background()
+
+exporter, err := otlploghttp.New(ctx)
+if err != nil {
+	fmt.Println("failed to create exporter:", err)
+	return
+}
+```
+
+### Step 4: Create a log processor and provider
+
+```go:main.go
+processor := log.NewBatchProcessor(exporter)
+
+provider := log.NewLoggerProvider(
+	log.WithProcessor(processor),
+)
+defer func() {
+	if err := provider.Shutdown(context.Background()); err != nil {
+		fmt.Println(err)
+	}
+}()
+```
+
+`NewBatchProcessor` batches log records before export. Always defer `provider.Shutdown` so pending records flush before the process exits.
+
+### Step 5: Initialize the slog logger
+
+```go:main.go
+logger := otelslog.NewLogger("my/pkg/name", otelslog.WithLoggerProvider(provider))
+```
+
+`otelslog.NewLogger` returns a standard `*slog.Logger` backed by the OpenTelemetry log pipeline. Use it anywhere you would use `slog.Default()`.
+
+### Step 6: Log messages
+
+```go:main.go
+logger.Info("server listening", "addr", ":8080", "env", "production", "version", "v2.4.1")
+logger.Info("order received", "order_id", "ord-8821", "customer_id", "cust-441", "amount_usd", 149.99)
+logger.Info("payment authorized", "order_id", "ord-8821", "gateway", "stripe", "duration_ms", 212)
+logger.Warn("inventory below threshold", "sku", "SNZ-PRO-12", "stock", 4, "reorder_point", 10)
+logger.Info("order dispatched", "order_id", "ord-8821", "carrier", "fedex", "tracking_id", "FX-99102847")
+logger.Error("notification delivery failed", "order_id", "ord-8821", "channel", "email", "error", "smtp: connection timeout")
+```
+
+<details>
+<ToggleHeading>
+
+### Complete example
+
+</ToggleHeading>
+
+```go:main.go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	"go.opentelemetry.io/otel/sdk/log"
+)
+
+func main() {
+	// Reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS from the environment.
+	// ctx here is used only to initialize the exporter; it carries no span,
+	// so logs emitted against this context will not be correlated with a trace.
+	ctx := context.Background()
+
+	exporter, err := otlploghttp.New(ctx)
+	if err != nil {
+		fmt.Println("failed to create exporter:", err)
+		return
+	}
+
+	processor := log.NewBatchProcessor(exporter)
+
+	provider := log.NewLoggerProvider(
+		log.WithProcessor(processor),
+	)
+	defer func() {
+		if err := provider.Shutdown(context.Background()); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	logger := otelslog.NewLogger("my/pkg/name", otelslog.WithLoggerProvider(provider))
+
+	logger.Info("server listening", "addr", ":8080", "env", "production", "version", "v2.4.1")
+	logger.Info("order received", "order_id", "ord-8821", "customer_id", "cust-441", "amount_usd", 149.99)
+	logger.Info("payment authorized", "order_id", "ord-8821", "gateway", "stripe", "duration_ms", 212)
+	logger.Warn("inventory below threshold", "sku", "SNZ-PRO-12", "stock", 4, "reorder_point", 10)
+	logger.Info("order dispatched", "order_id", "ord-8821", "carrier", "fedex", "tracking_id", "FX-99102847")
+	logger.Error("notification delivery failed", "order_id", "ord-8821", "channel", "email", "error", "smtp: connection timeout")
+}
+```
+
+</details>
+
+## Validate
+
+Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/) section.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/slog-logs.webp"
+  caption="Sample slog logs in SigNoz Logs Explorer"
+  alt="Sample slog logs in SigNoz Logs Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Correlating Traces and Logs
+
+</ToggleHeading>
+
+Install the additional dependency:
+
+```bash
+go get go.opentelemetry.io/otel/trace
+```
+
+Pass a context with an active span and the SDK sets `trace_id` and `span_id` on the log record automatically. No manual extraction needed.
+
+Use `InfoContext`, `WarnContext`, and `ErrorContext` to carry trace context in logs:
+
+```go:handler.go
+// Inside a handler or function whose ctx carries an active span:
+logger.InfoContext(ctx, "request received", "method", r.Method, "path", r.URL.Path)
+logger.ErrorContext(ctx, "upstream call failed", "service", "payments", "error", err)
+```
+
+For `ctx` to carry an active span, your code must run inside a tracer started with `tracer.Start(ctx, ...)` or inside an HTTP handler wrapped by `otelhttp.NewHandler`. Calling with `context.Background()` produces no `trace_id` or `span_id`.
+
+**Example HTTP handler:**
+
+```go:handler.go
+import (
+	"net/http"
+)
+
+func (s *Server) handleOrder(w http.ResponseWriter, r *http.Request) {
+	// r.Context() carries the active span injected by the otelhttp middleware.
+	logger.InfoContext(r.Context(), "processing order", "order_id", r.URL.Query().Get("id"))
+	// ... handler logic
+}
+```
+
+For HTTP tracing setup, see [Instrument a Go HTTP server](https://signoz.io/docs/instrumentation/opentelemetry-golang/).
+
+To jump between correlated logs and traces in SigNoz, see [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Logs not appearing in SigNoz
+
+- Confirm `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are set and correct.
+- Confirm `provider.Shutdown` runs before process exit — buffered logs flush at shutdown.
+- If the process calls `os.Exit` directly, deferred cleanup is skipped. Call `provider.Shutdown` explicitly before exiting instead of relying on `defer`.
+
+### trace_id and span_id are empty
+
+- Confirm you are calling `logger.InfoContext(ctx, ...)` not `logger.Info(...)`.
+- Confirm `ctx` carries a recording span. Spans started by `tracer.Start` are recording by default. `context.Background()` carries no span.
+- Confirm your OTel tracer is initialized before the first request. See [OpenTelemetry Go instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-golang/).
+
+</details>
+
+## Next Steps
+
+- [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/)
+- [Explore logs in SigNoz](https://signoz.io/docs/product-features/logs-explorer/)
+- [Create log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/)
+
+## Get Help
+
+<GetHelp />

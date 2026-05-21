@@ -118,16 +118,27 @@ const config: ResolveConfigFn = (env: Env, _trigger) => {
             url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
             headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
         },
-        service: { name: '<service-name>' },
+        service: { name: '<service-name>', version: '<service-version>' },
     }
 }
 
 export default instrument(handler, config)
 ```
 
+Verify these values:
+
 - `<region>`: Your SigNoz [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- Replace `<service-name>` with the name of the service associated with this trace
+- `<service-name>`: A descriptive name for your service (e.g., `my-worker`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 4: Deploy the project
 

@@ -137,6 +137,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       className="h-7 w-7"
     />
   ),
+  '/docs/dashboards/dashboard-templates/dify-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/dify-logo.svg" alt="Dify Icon" className="h-7 w-7" />
+  ),
   '/docs/dashboards/dashboard-templates/docker-container-metrics': (
     <SiDocker className="h-7 w-7 text-blue-400" />
   ),

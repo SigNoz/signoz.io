@@ -22,6 +22,11 @@ export const JAVA_INSTRUMENTATION_ITEMS = {
       href: '/docs/instrumentation/java/opentelemetry-jboss',
       clickName: 'JBoss WildFly Instrumentation Link',
     },
+    {
+      name: 'Scala',
+      href: '/docs/instrumentation/java/opentelemetry-scala',
+      clickName: 'Scala Instrumentation Link',
+    },
   ] satisfies ComponentItem[],
   advanced: [
     {

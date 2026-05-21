@@ -122,6 +122,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'DeepSeek API Dashboard Template',
   },
   {
+    name: 'Dify',
+    href: '/docs/dashboards/dashboard-templates/dify-dashboard',
+    clickName: 'Dify Dashboard Template',
+  },
+  {
     name: 'Docker Container Metrics',
     href: '/docs/dashboards/dashboard-templates/docker-container-metrics',
     clickName: 'Docker Container Metrics Dashboard Template',

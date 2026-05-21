@@ -1,5 +1,5 @@
 ---
-date: 2026-05-12
+date: 2026-05-14
 id: rust
 title: Rust OpenTelemetry Instrumentation Guide
 description: Instrument your Rust application with OpenTelemetry and send traces to SigNoz. Supports Axum, Actix Web, reqwest, and tonic with auto and manual instrumentation.
@@ -40,12 +40,22 @@ Use this section if you're deploying your Rust application directly on a server 
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -72,22 +82,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -130,12 +133,23 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -158,22 +172,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -210,6 +217,7 @@ Pass environment variables at runtime using `docker run`:
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
     your-image:latest
 ```
 
@@ -219,12 +227,22 @@ Or add them to your Dockerfile:
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -247,22 +265,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)
@@ -303,6 +314,7 @@ docker build -t your-image:latest .
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
     your-image:latest
 ```
 
@@ -319,12 +331,22 @@ The steps above configure the trace exporter but does not auto-instrument anythi
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 ```
 
 Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Add OpenTelemetry dependencies
 
@@ -347,22 +369,15 @@ use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::Resource;
 
 fn init_tracer() -> SdkTracerProvider {
-    let service_name = std::env::var("OTEL_SERVICE_NAME")
-        .unwrap_or_else(|_| "rust-app".to_string());
-
-    // The SDK automatically reads these environment variables:
-    // - OTEL_EXPORTER_OTLP_ENDPOINT
-    // - OTEL_EXPORTER_OTLP_HEADERS
-    // - OTEL_EXPORTER_OTLP_TIMEOUT
+    // Resource::builder() reads OTEL_SERVICE_NAME (via SdkProvidedResourceDetector)
+    // and OTEL_RESOURCE_ATTRIBUTES (via EnvResourceDetector) automatically.
+    // The exporter reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
     let exporter = SpanExporter::builder()
         .with_http()
         .build()
         .expect("Failed to create span exporter");
 
-    // Resource::builder() includes SDK telemetry attributes automatically
-    let resource = Resource::builder()
-        .with_service_name(service_name)
-        .build();
+    let resource = Resource::builder().build();
 
     SdkTracerProvider::builder()
         .with_resource(resource)

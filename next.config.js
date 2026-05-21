@@ -127,6 +127,36 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/clickhouse-faqs/',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/clickhouse-faqs',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
           source: '/enterprise-self-hosted/',
           destination: '/contact-us/?source=redirect-enterprise-self-hosted',
           permanent: true,
@@ -1447,7 +1477,7 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/query-handles-missing-values/',
-          destination: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
           permanent: true,
         },
         {
