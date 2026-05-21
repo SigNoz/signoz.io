@@ -1,0 +1,110 @@
+---
+date: 2026-05-20
+id: impersonation-mode
+title: Impersonation Mode
+description: Learn how to enable impersonation mode in SigNoz to run without user authentication - suitable for single-developer, VPN-protected, or CI/automation deployments.
+doc_type: howto
+tags: [Self-Host]
+---
+
+Impersonation mode lets you run SigNoz without user accounts or login. Every request is automatically treated as admin - there is no login screen, no sign-up, and no session to manage.
+
+This is designed for:
+
+- Single-developer setups
+- Small teams operating entirely behind a VPN or firewall
+- Air-gapped environments
+- CI/automation pipelines where managing user accounts adds unnecessary friction
+
+<Admonition type="info">
+This feature is available from SigNoz v0.126.0 or later.
+</Admonition>
+
+<Admonition type="warning" title="Network is the trust boundary">
+In impersonation mode, authentication is disabled. **Anyone who can reach your SigNoz instance has full admin access.** Only enable this when network-level controls (VPN, private network, firewall) prevent unauthorized access.
+</Admonition>
+
+## How it works
+
+When impersonation mode is enabled, SigNoz treats every incoming request as the root admin user - no credentials, tokens, or API keys are checked. There are no individual user identities, no sessions, and no login flow.
+
+Your network perimeter becomes the sole access control layer. If a request reaches SigNoz, it has full admin access. This is why impersonation mode is only appropriate when the network itself enforces who can connect (for example, a private subnet, a VPN, or a firewall allowlist).
+
+<Admonition type="info" title="When not to use impersonation mode">
+Avoid impersonation mode when:
+
+- Multiple people access SigNoz and individual accountability matters.
+- You need role-based access control (RBAC) or per-user permissions.
+- Your instance is exposed to the internet or a shared network without strict access controls.
+
+Use [SSO](https://signoz.io/docs/manage/administrator-guide/sso/overview/) or standard authentication for those cases.
+</Admonition>
+
+## Configuration
+
+Set the following environment variables:
+
+```bash
+SIGNOZ_IDENTN_IMPERSONATION_ENABLED=true
+SIGNOZ_IDENTN_TOKENIZER_ENABLED=false
+SIGNOZ_IDENTN_APIKEY_ENABLED=false
+```
+
+All three are required - setting only `SIGNOZ_IDENTN_IMPERSONATION_ENABLED` without disabling the tokenizer and API key authenticators will not fully activate impersonation mode.
+
+## What to expect
+
+When impersonation mode is active:
+
+- Accessing SigNoz takes you directly to the home page - no login prompt.
+- A banner confirms you are operating as admin: *"Impersonation mode: authentication is disabled. Anyone with access to this instance has admin privileges."*
+- All features and settings are fully accessible.
+
+## Validate
+
+After restarting SigNoz with the updated configuration, confirm impersonation mode is active by calling the global config endpoint:
+
+```bash
+curl http://<your-signoz-host>/api/v1/global/config
+```
+
+The response should show `enabled: true` under `identN.impersonation`:
+
+```json
+{
+  "data": {
+    "identN": {
+      "impersonation": {
+        "enabled": true
+      }
+    }
+  }
+}
+```
+
+## Disable impersonation mode
+
+To re-enable authentication, remove or set `SIGNOZ_IDENTN_IMPERSONATION_ENABLED` to `false`. For `SIGNOZ_IDENTN_TOKENIZER_ENABLED` and `SIGNOZ_IDENTN_APIKEY_ENABLED`, set them according to your authentication requirements.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Login page still appears after enabling impersonation mode
+
+- Confirm all three environment variables are set correctly.
+- Check SigNoz logs for startup errors related to the identity configuration.
+- Verify `GET /api/v1/global/config` returns `identN.impersonation.enabled: true`.
+
+### `GET /api/v1/global/config` returns `enabled: false`
+
+- Confirm the environment variables are set on the correct service and that the service was restarted after the change.
+
+</details>
+
+## Next steps
+
+- [Root User Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/root-user/)
+- [Authentication and User Management](https://signoz.io/docs/userguide/authentication/)
+- [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/)

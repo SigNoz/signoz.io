@@ -535,8 +535,8 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/manage/administrator-guide/configuration/no-auth-mode',
-                label: 'No-Auth Mode',
+                route: '/docs/manage/administrator-guide/configuration/impersonation-mode',
+                label: 'Impersonation Mode',
               },
             ],
           },
