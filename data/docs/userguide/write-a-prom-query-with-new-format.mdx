@@ -1,46 +1,44 @@
 ---
 title: PromQL UTF-8 Syntax Guide
 id: write-promql-new-format
-
 slug: promQL-utf-support
-date: 2026-03-12
+date: 2026-05-18
 authors: [aniket_agarwal]
 description: Learn SigNoz's new PromQL UTF-8 syntax with quoted metric and label names. Includes migration examples for counters, gauges, histograms, and OTel metric names.
 ---
 
-## Enhanced PromQL Syntax
+<Admonition type="info">
+PromQL only supports querying **metrics** and is only available in **Dashboards**. To write a PromQL query, go to **Dashboards**, create a new dashboard or open an existing one, add a new panel, and select the **PromQL** tab. To query logs and traces, use the [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/) or [ClickHouse SQL](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/).
+</Admonition>
 
-We're excited to announce that our monitoring platform now supports **UTF-8 characters in Prometheus metric and label names**! This enhancement enables compatibility with OpenTelemetry that use characters like dots (`.`) in metric names.
+<Figure
+  src="/img/docs/product-features/query-builder/promql-query-editor.webp"
+  alt="PromQL Query editor in SigNoz Dashboards"
+  caption="PromQL Query editor in SigNoz Dashboards"
+/>
 
-## What's Changed
+## What Changed and Why
 
-Due to our ongoing migration to support UTF-8 metric names, **PromQL queries will use new format**. This change allows us to handle metrics with previously unsupported characters while maintaining full backward compatibility.
+SigNoz now supports **UTF-8 characters in Prometheus metric and label names**. This is needed for OpenTelemetry compatibility, since OpenTelemetry uses dots (`.`) in metric names (e.g., `container.cpu.utilization`) while traditional Prometheus only allowed letters, numbers, and underscores.
 
-### New Syntax Overview
+To support these characters, PromQL queries in SigNoz use a **new quoted syntax**. All pre-existing queries continue to work — this change is backward compatible.
 
-The key changes include:
-- **Quoted metric names**: Metrics with special characters (like dots) are now enclosed in quotes within curly braces
-- **Quoted label names**: Labels containing special characters are similarly quoted
-- **Unified selector syntax**: All selectors now use the `{...}` format for consistency
+## New Syntax Rules
 
-## Key Syntax Rules
-
-1. **Quoted strings**: Metric names with special characters must be quoted using double quotes
-2. **First parameter**: The metric name (without a label operator) should be the first parameter inside the curly braces
-3. **Label quoting**: Label names containing special characters also need quotes
-4. **Backward compatibility**: Traditional metric names (letters, numbers, underscores only) continue to work as before
-5. All pre-existing queries will continue to work. If a metric has no previously-invalid characters
+1. **Metric names with special characters** (like dots) must be quoted with double quotes and placed inside curly braces as the first parameter
+2. **Label names with special characters** also need double quotes
+3. **Traditional metric names** (letters, numbers, underscores only) continue to work without quotes
+4. All pre-existing queries continue to work unchanged
 
 ```promql
-# the new syntax is:
+# New syntax for metrics with dots
 {"my.noncompliant.metric", "noncompliant.label"="value"}
 ```
 
 ## Migration Examples
 
-Here are some common query patterns and their new equivalents:
+### Container CPU Utilization
 
-### Example 1: Container CPU Utilization
 ```promql
 # Old format
 sum(rate(container_cpu_utilization{k8s_namespace_name="ns"}[5m])) by (k8s_pod_name)
@@ -49,7 +47,8 @@ sum(rate(container_cpu_utilization{k8s_namespace_name="ns"}[5m])) by (k8s_pod_na
 sum by ("k8s.pod.name") (rate({"container.cpu.utilization","k8s.namespace.name"="ns"}[5m]))
 ```
 
-### Example 2: Histogram Quantile
+### Histogram Quantile
+
 ```promql
 # Old format
 histogram_quantile(0.95, sum(rate(request_duration_bucket{job="api"}[5m])) by (le))
@@ -58,7 +57,8 @@ histogram_quantile(0.95, sum(rate(request_duration_bucket{job="api"}[5m])) by (l
 histogram_quantile(0.95, sum by (le) (rate({"request.duration.bucket",job="api"}[5m])))
 ```
 
-### Example 3: Complex Query with Functions
+### Complex Query with Functions
+
 ```promql
 # Old format
 max_over_time(foo_bar_total{env=~"prod|stag"}[1h] offset 30m) / ignoring(instance) group_left sum(rate(other_metric[5m])) without (pod)
@@ -67,9 +67,9 @@ max_over_time(foo_bar_total{env=~"prod|stag"}[1h] offset 30m) / ignoring(instanc
 max_over_time({"foo.bar.total",env=~"prod|stag"}[1h] offset 30m) / ignoring ("instance") group_left () sum without ("pod") (rate({"other.metric"}[5m]))
 ```
 
-### Example 4: Metrics and attributes without dot in their name
+### Metrics Without Dots in the Name
 
-For queries which don't have metrics and attributes containing dot in the name, any below format will work, but still we urge to use the ```New format``` for consistency.
+For metrics and attributes that don't contain dots, both old and new formats work. We recommend using the new format for consistency.
 
 ```promql
 # Old format
@@ -81,88 +81,74 @@ sum by (foo_attr) (
 sum by ("foo_attr") (
     rate({"foo_bar_total", env =~"prod|stage"}[1h] offset 30m)
 )
-
-# both format will work
 ```
 
-### Example 5: Examples by each metric type
+### By Metric Type
+
+**Counter**
+
 ```promql
-
-#COUNTER
-
 # Old format
 rate(http_requests_total{job="api",status!~"5.."}[5m])
 
 # New format
 rate({"http_requests_total", job="api", status!~"5.."})[5m])
+```
 
-#GAUGE
+**Gauge**
 
+```promql
 # Old format
 avg_over_time(kube_pod_container_resource_requests_cpu_cores{namespace="prod"}[10m])
 
 # New format
 avg_over_time({"kube_pod_container_resource_requests_cpu_cores",namespace="prod"}[10m])
+```
 
-#Histogram
+**Histogram**
 
+```promql
 # Old format
 histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="api"}[5m])) by (le))
 
 # New format
 histogram_quantile(0.95, sum by (le) (rate({"http_request_duration_seconds.bucket",job="api"}[5m])))
+```
 
-#Summary
+**Summary**
+
+```promql
 # Old format
 sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m]))
 
 # New format
 sum(rate({"http_request_duration_seconds.sum"}[5m])) / sum(rate({"http_request_duration_seconds.count"}[5m]))
-
 ```
 
-For Histogram metrics we will be adding .min, .max, .count, .bucket, .sum suffices instead of previous ```_``` suffices.
-Same goes for Summary metrics we will be adding .count, .quantile, .sum suffices.
+For Histogram metrics, the new format uses `.min`, `.max`, `.count`, `.bucket`, `.sum` suffixes instead of the previous `_` suffixes.
+Same for Summary metrics: `.count`, `.quantile`, `.sum` suffixes.
 
+## Migration
 
-## Migration Support
+### Cloud Users
 
-### For Self-Hosted Users
-- **Migration scripts**: We will provide automated scripts to convert existing PromQL queries in your dashboards and alerts
-- **Gradual rollout**: The new syntax will be introduced incrementally to minimize disruption
-- **Documentation**: Comprehensive guides and examples will be available
+Your existing queries have already been migrated automatically — no action is required. Dashboards and alerts continue working as before.
 
-### For Cloud Users
-- **Automatic migration**: We have already migrated your existing queries to the new format
-- **No action required**: Your dashboards and alerts should continue working seamlessly
-- **Monitoring**: Our team is actively monitoring the migration to ensure smooth operation
+### Self-Hosted Users
 
-## Benefits of the New Syntax
-
-✅ **Full UTF-8 support**: Use any Unicode characters in metric and label names
-✅ **OpenTelemetry compatibility**: Seamless integration with modern observability tools
-✅ **Improved clarity**: Consistent quoting syntax reduces ambiguity
-✅ **Future-proof**: Compatible with upcoming PromQL enhancements
-
-## Need Help?
-
-- **Questions**: Contact our support team for assistance with query migration
-- **Documentation**: Detailed migration guides available in our knowledge base
-- **Migration scripts**: Will be provided for bulk query conversion
-
-## Related Documents
-
-- [Migration Docs for Self Hosted Users](https://signoz.io/guides/metrics-migration/)
-- [Migration Docs for Cloud Users](https://signoz.io/guides/metrics-migration-cloud-users/)
-- [PromQL Proposal](https://github.com/prometheus/proposals/blob/main/proposals/2023-08-21-utf8.md)
+- **Migration scripts** are provided to convert existing PromQL queries in your dashboards and alerts automatically
+- The new syntax is introduced incrementally to minimize disruption
+- See the migration docs linked below for step-by-step instructions
 
 ## Backward Compatibility
 
-Don't worry! The new system maintains full backward compatibility:
-- Existing queries with traditional metric names continue to work
+The new syntax is fully backward compatible:
+- Existing queries with traditional metric names (no dots or special characters) continue to work unchanged
 - Migration is non-breaking for existing workflows
-- Scripts will be shared to migrate old promQL queries, for those dashboards and alerts which will now contain previously-invalid characters post migration
+- Migration scripts are available for dashboards and alerts that will now contain previously-invalid characters post migration
 
----
+## Related
 
-*This migration enables our platform to support the latest observability standards while maintaining the reliability you depend on. Thank you for your patience as we enhance our monitoring capabilities!*
+- [Migration Guide for Self-Hosted Users](https://signoz.io/guides/metrics-migration/)
+- [Migration Guide for Cloud Users](https://signoz.io/guides/metrics-migration-cloud-users/)
+- <a href="https://github.com/prometheus/proposals/blob/main/proposals/2023-08-21-utf8.md" target="_blank" rel="noopener noreferrer nofollow">PromQL UTF-8 Proposal</a>

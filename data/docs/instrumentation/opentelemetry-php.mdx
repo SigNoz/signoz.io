@@ -35,14 +35,15 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 
 ```bash
 export OTEL_PHP_AUTOLOAD_ENABLED=true
-export OTEL_SERVICE_NAME=<service-name>
-export OTEL_TRACES_EXPORTER=otlp
-export OTEL_METRICS_EXPORTER=none
-export OTEL_LOGS_EXPORTER=none
-export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-export OTEL_PROPAGATORS=baggage,tracecontext
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_METRICS_EXPORTER="none"
+export OTEL_LOGS_EXPORTER="none"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_PROPAGATORS="baggage,tracecontext"
 ```
 
 <KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
@@ -55,6 +56,15 @@ Verify these values:
 - `<region>`: Your SigNoz Cloud region. See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install the OpenTelemetry extension
 
@@ -90,6 +100,8 @@ env:
   value: "true"
 - name: OTEL_SERVICE_NAME
   value: "<service-name>"
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: "service.version=<service-version>"
 - name: OTEL_TRACES_EXPORTER
   value: "otlp"
 - name: OTEL_METRICS_EXPORTER
@@ -110,6 +122,15 @@ Verify these values:
 - `<region>`: Your SigNoz Cloud region. See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install the OpenTelemetry extension in your Dockerfile
 
@@ -128,6 +149,7 @@ Set in your Dockerfile:
 ```dockerfile
 ENV OTEL_PHP_AUTOLOAD_ENABLED=true
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_METRICS_EXPORTER="none"
 ENV OTEL_LOGS_EXPORTER="none"
@@ -143,6 +165,7 @@ Or pass them at runtime:
 docker run -d -p 8080:80 \
     -e OTEL_PHP_AUTOLOAD_ENABLED=true \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
     -e OTEL_TRACES_EXPORTER="otlp" \
     -e OTEL_METRICS_EXPORTER="none" \
     -e OTEL_LOGS_EXPORTER="none" \
@@ -157,6 +180,15 @@ Verify these values:
 - `<region>`: Your SigNoz Cloud region. See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install the OpenTelemetry extension in your Dockerfile
 
@@ -173,6 +205,7 @@ RUN pecl install opentelemetry \
 ```powershell
 $env:OTEL_PHP_AUTOLOAD_ENABLED = "true"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 $env:OTEL_TRACES_EXPORTER = "otlp"
 $env:OTEL_METRICS_EXPORTER = "none"
 $env:OTEL_LOGS_EXPORTER = "none"
@@ -186,6 +219,15 @@ Verify these values:
 - `<region>`: Your SigNoz Cloud region. See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install the OpenTelemetry extension
 
@@ -328,6 +370,7 @@ OpenTelemetry PHP provides auto-instrumentation packages for popular frameworks 
         ```ini
         env[OTEL_PHP_AUTOLOAD_ENABLED] = true
         env[OTEL_SERVICE_NAME] = <service-name>
+        env[OTEL_RESOURCE_ATTRIBUTES] = service.version=<service-version>
         env[OTEL_TRACES_EXPORTER] = otlp
         env[OTEL_METRICS_EXPORTER] = none
         env[OTEL_LOGS_EXPORTER] = none

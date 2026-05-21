@@ -85,9 +85,9 @@ struct SwiftExample {
         let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
         let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-        // Replace <service_name> with the name of your service
         let resource = Resource(attributes: [
-            "service.name": AttributeValue.string("<service_name>")
+            "service.name": AttributeValue.string("<service_name>"),
+            "service.version": AttributeValue.string("<service_version>")
         ])
 
         let tracerProvider = TracerProviderBuilder()
@@ -103,7 +103,16 @@ Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>`: A name to identify your service in SigNoz (e.g., `my-swift-app`)
+- `<service_name>`: A name to identify your service in SigNoz (e.g., `my-swift-app`).
+- `<service_version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 3: Instrument your application
 
@@ -270,9 +279,9 @@ let grpcChannel = ClientConnection(configuration: configuration)
 let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
 let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-// Replace <service_name> with the name of your service
 let resource = Resource(attributes: [
-    "service.name": AttributeValue.string("<service_name>")
+    "service.name": AttributeValue.string("<service_name>"),
+    "service.version": AttributeValue.string("<service_version>")
 ])
 
 let tracerProvider = TracerProviderBuilder()

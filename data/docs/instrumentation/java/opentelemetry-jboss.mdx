@@ -50,6 +50,7 @@ Add the following lines:
 ```bash
 JAVA_OPTS="$JAVA_OPTS -javaagent:/opt/jboss/lib/opentelemetry-javaagent.jar"
 JAVA_OPTS="$JAVA_OPTS -Dotel.service.name=<service-name>"
+JAVA_OPTS="$JAVA_OPTS -Dotel.resource.attributes=service.version=<service-version>"
 JAVA_OPTS="$JAVA_OPTS -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443"
 JAVA_OPTS="$JAVA_OPTS -Dotel.exporter.otlp.headers=signoz-ingestion-key=<your-ingestion-key>"
 JAVA_OPTS="$JAVA_OPTS -Dotel.metrics.exporter=none"
@@ -66,6 +67,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `jboss-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 3. Restart JBoss/WildFly
 
@@ -133,7 +143,7 @@ Add these environment variables to your deployment manifest:
 ```yaml
 env:
 - name: OTEL_RESOURCE_ATTRIBUTES
-  value: 'service.name=<service-name>'
+  value: 'service.name=<service-name>,service.version=<service-version>'
 - name: OTEL_EXPORTER_OTLP_ENDPOINT
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
@@ -154,6 +164,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `jboss-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 <TabItem value="otel-operator" label="OTel Operator">
@@ -221,6 +240,7 @@ spec:
       annotations:
         instrumentation.opentelemetry.io/inject-java: "true"
         resource.opentelemetry.io/service.name: "<service-name>"
+        resource.opentelemetry.io/service.version: "<service-version>"
     spec:
       containers:
       - name: jboss
@@ -234,6 +254,18 @@ Apply the deployment:
 ```bash
 kubectl apply -f deployment.yaml
 ```
+
+Verify these values:
+- `<service-name>`: A descriptive name for your service (e.g., `jboss-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 </Tabs>
@@ -258,6 +290,7 @@ Add the following lines:
 ```batch
 set "JAVA_OPTS=%JAVA_OPTS% -javaagent:C:\jboss\lib\opentelemetry-javaagent.jar"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.service.name=<service-name>"
+set "JAVA_OPTS=%JAVA_OPTS% -Dotel.resource.attributes=service.version=<service-version>"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.headers=signoz-ingestion-key=<your-ingestion-key>"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.metrics.exporter=none"
@@ -270,8 +303,19 @@ The OpenTelemetry Java agent enables all three signals (traces, metrics, and log
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the line entirely.
 </KeyPointCallout>
 
+Verify these values:
+- `<service-name>`: A descriptive name for your service (e.g., `jboss-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 3. Restart JBoss/WildFly
 
@@ -299,7 +343,7 @@ COPY target/<my-app>.war /opt/jboss/wildfly/standalone/deployments/
 
 # Set OpenTelemetry environment variables
 ENV JAVA_OPTS="-javaagent:/opt/jboss/opentelemetry-javaagent.jar"
-ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>,service.version=<service-version>"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_METRICS_EXPORTER="none"
@@ -316,9 +360,20 @@ The OpenTelemetry Java agent enables all three signals (traces, metrics, and log
 If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
 </KeyPointCallout>
 
-Replace `<my-app>.war` and `<service-name>` with your values.
+Verify these values:
+- `<my-app>.war`: Your application WAR file name.
+- `<service-name>`: A descriptive name for your service (e.g., `jboss-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Build and run
 
@@ -331,7 +386,7 @@ Or pass environment variables at runtime:
 
 ```bash
 docker run -p 8080:8080 \
-  -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-jboss-app" \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-jboss-app,service.version=<service-version>" \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
   -e OTEL_METRICS_EXPORTER="none" \

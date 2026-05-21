@@ -171,6 +171,17 @@ function transformRelatedArticles(content: MDXContent): any[] {
   return legacyArticles
 }
 
+// Extract lightweight author objects suitable for card display (name + image).
+function extractAuthorObjects(raw: unknown): { key?: string; name?: string; image_url?: string }[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((a: string | MDXContent) => {
+      if (typeof a === 'string') return { key: a, name: a }
+      return { key: a.key, name: a.name, image_url: a.image_url }
+    })
+    .filter((a) => a.name)
+}
+
 export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`
@@ -180,6 +191,7 @@ export const transformComparison = (comparison: MDXContent) => {
         typeof author === 'string' ? author : author.key
       )
     : []
+  const authorObjects = extractAuthorObjects(comparison.authors)
 
   const tags = Array.isArray(comparison.tags)
     ? comparison.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
@@ -210,6 +222,7 @@ export const transformComparison = (comparison: MDXContent) => {
     tags,
     description: comparison.description,
     authors,
+    authorObjects,
     keywords,
     slug,
     content: comparison.content,
@@ -223,6 +236,71 @@ export const transformComparison = (comparison: MDXContent) => {
   }
 }
 
+export const transformBlog = (blog: MDXContent) => {
+  const slug = blog.path?.split('/').pop() || ''
+  const path = `blog/${slug}`
+
+  const authors = Array.isArray(blog.authors)
+    ? blog.authors.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      )
+    : []
+  const authorObjects = extractAuthorObjects(blog.authors)
+
+  const tags = Array.isArray(blog.tags)
+    ? blog.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
+    : []
+
+  const keywords = Array.isArray(blog.keywords)
+    ? blog.keywords.map((keyword: string | MDXContent) =>
+        typeof keyword === 'string' ? keyword : keyword.value
+      )
+    : []
+
+  const readingTimeStats = readingTime(blog.content || '')
+
+  const contentForStructuredData = {
+    ...blog,
+    slug,
+    path,
+    publishedAt: blog.date || blog.updatedAt || blog.publishedAt,
+  } as MDXContent
+
+  return {
+    ...blog,
+    _id: blog.documentId || String(blog.id),
+    _raw: {},
+    type: 'Blog',
+    title: blog.title,
+    date: blog.date,
+    lastmod: blog.lastmod || blog.date,
+    draft: blog.draft ?? false,
+    summary: blog.summary || blog.description,
+    tags,
+    description: blog.description,
+    image: blog.image,
+    images: blog.images,
+    authors,
+    authorObjects,
+    keywords,
+    slug,
+    content: blog.content,
+    body: { raw: '', code: '' },
+    toc: generateTOC(blog.content || ''),
+    readingTime: readingTimeStats,
+    path,
+    filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
+    structuredData: generateStructuredData('blog', contentForStructuredData),
+    relatedArticles: transformRelatedArticles(blog),
+    is_newsroom: blog.is_newsroom ?? false,
+    hide_table_of_contents: blog.hide_table_of_contents ?? false,
+    excludeFromSitemap: blog.excludeFromSitemap ?? false,
+    cta_title: blog.cta_title,
+    cta_text: blog.cta_text,
+    canonicalUrl: blog.canonicalUrl,
+  }
+}
+
 export const transformGuide = (guide: MDXContent) => {
   const slug = guide.path?.split('/').pop() || ''
   const path = `guides/${slug}`
@@ -232,6 +310,7 @@ export const transformGuide = (guide: MDXContent) => {
         typeof author === 'string' ? author : author.key
       )
     : []
+  const authorObjects = extractAuthorObjects(guide.authors)
 
   const tags = Array.isArray(guide.tags)
     ? guide.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
@@ -266,6 +345,7 @@ export const transformGuide = (guide: MDXContent) => {
     description: guide.description,
     image: guide.image,
     authors,
+    authorObjects,
     keywords,
     slug,
     content: guide.content,

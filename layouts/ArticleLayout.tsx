@@ -4,8 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
-import type { Comparison, Guide } from '../types/transformedContent'
+import type { AuthorDetail, Blog, Comparison, Guide } from '../types/transformedContent'
 import { ArrowRight } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
@@ -17,7 +16,6 @@ import ArticleMetaDetailsCard, {
 import TrackingLink from '@/components/TrackingLink'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
-import authorsDirectory from '@/constants/authors.json'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 
@@ -39,13 +37,14 @@ type ArticleContent = ContentType & {
 
 interface LayoutProps {
   content: CoreContent<ArticleContent>
-  authorDetails: CoreContent<Authors>[]
+  authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
   toc: TocItemProps[]
   contentType?: 'blog' | 'guide' | 'comparison'
   showNewsletter?: boolean
   showRelatedArticles?: boolean
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
 }
 
 const buildRenderedAuthors = (
@@ -117,6 +116,7 @@ export default function ArticleLayout({
   contentType = 'blog',
   showNewsletter = true,
   showRelatedArticles = true,
+  authorDirectory = {},
 }: LayoutProps) {
   const { title, relatedArticles } = content
   const mainRef = useRef<HTMLElement | null>(null)
@@ -153,11 +153,7 @@ export default function ArticleLayout({
 
   const hasToc = Array.isArray(toc) && toc.length > 0
 
-  const renderedAuthors = buildRenderedAuthors(
-    authorDetails,
-    authors,
-    authorsDirectory as Record<string, { name?: string; url?: string; image_url?: string }>
-  )
+  const renderedAuthors = buildRenderedAuthors(authorDetails, authors, authorDirectory)
   const formattedUpdatedDate = getFormattedDate(content)
   const readingTimeText = getReadingTimeText(content)
 

@@ -40,6 +40,7 @@ export const LLM_MONITORING_ITEMS: ComponentItem[] = [
   },
   { name: 'Crew AI', href: '/docs/crewai-observability', clickName: 'Crew AI Monitoring' },
   { name: 'DeepSeek API', href: '/docs/deepseek-monitoring', clickName: 'DeepSeek Monitoring' },
+  { name: 'Dify', href: '/docs/dify-observability', clickName: 'Dify Monitoring' },
   {
     name: 'Google ADK',
     href: '/docs/google-adk-observability',

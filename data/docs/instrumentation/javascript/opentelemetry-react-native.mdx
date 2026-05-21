@@ -62,6 +62,7 @@ import {
     ATTR_OS_NAME,
     ATTR_SERVICE_NAME,
 } from '@opentelemetry/semantic-conventions/incubating';
+import { ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
@@ -69,6 +70,7 @@ import { Platform } from 'react-native';
 const Tracer = async () => {
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: "<service_name>",
+    [ATTR_SERVICE_VERSION]: "<service_version>",
     [ATTR_OS_NAME]: Platform.OS,
   });
 
@@ -150,6 +152,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>`: Name of your app (e.g., `my-react-native-app`).
+- `<service_version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 3. Initialize the tracer in your app
 

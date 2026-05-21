@@ -1,7 +1,6 @@
 import { writeFileSync } from 'fs'
 import siteMetadata from '../data/siteMetadata.js'
 import {
-  allBlogs,
   allDocs,
 } from '../.contentlayer/generated/index.mjs'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
@@ -23,9 +22,7 @@ function createSearchIndex(content) {
 }
 
 const searchIndexes = () => {
-  // Guides are now CMS-backed and not available from contentlayer at build time
   createSearchIndex([
-    ...allBlogs,
     ...allDocs,
   ])
   console.log('Search Indexes generated...')

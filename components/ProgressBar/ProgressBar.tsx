@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 type ProgressBarProps = {
-  target: React.RefObject<HTMLElement>
+  target: React.RefObject<HTMLElement | null>
 }
 
 export const ProgressBar = ({ target }: ProgressBarProps) => {

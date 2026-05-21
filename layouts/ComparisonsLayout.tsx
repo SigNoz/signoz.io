@@ -1,16 +1,16 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Authors } from 'contentlayer/generated'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import type { Comparison } from '../types/transformedContent'
+import type { AuthorDetail, Comparison } from '../types/transformedContent'
 
 interface LayoutProps {
   content: CoreContent<Comparison>
-  authorDetails: CoreContent<Authors>[]
+  authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
   toc: TocItemProps[]
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
 }
 
 export default function ComparisonsLayout({
@@ -19,6 +19,7 @@ export default function ComparisonsLayout({
   authors,
   children,
   toc,
+  authorDirectory,
 }: LayoutProps) {
   return (
     <RegionProvider>
@@ -30,6 +31,7 @@ export default function ComparisonsLayout({
         contentType="comparison"
         showNewsletter={true}
         showRelatedArticles={true}
+        authorDirectory={authorDirectory}
       >
         {children}
       </ArticleLayout>

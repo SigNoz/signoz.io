@@ -90,7 +90,6 @@ module.exports = () => {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
     trailingSlash: true,
-    swcMinify: true,
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
@@ -125,6 +124,36 @@ module.exports = () => {
         {
           source: '/docs/product-features/alert-management/',
           destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/clickhouse-faqs/',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/clickhouse-faqs',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder',
+          destination: '/docs/userguide/query-builder-v5/',
           permanent: true,
         },
         {
@@ -1448,7 +1477,7 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/query-handles-missing-values/',
-          destination: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
           permanent: true,
         },
         {

@@ -58,3 +58,22 @@ In the Formula field:
 4. **Check for zero or near-zero values**: While near-zero values shouldn't prevent formula evaluation, ensure your data contains the expected values for both queries.
 
 </details>
+
+### Q. What timezone is used for timestamp functions in SigNoz queries?
+
+A. The timestamp for functions like `toDate(timestamp)` uses the server's timezone, which is currently UTC.
+
+<details>
+
+<summary> Show detailed explanation and solution </summary>
+
+If you want to use a different timezone, you can apply a timezone parameter to the function in your ClickHouse query. For example:
+
+```sql
+toDate(timestamp, 'Asia/Kolkata')
+```
+
+This allows you to convert timestamps to your desired timezone for proper date grouping and analysis in your queries.
+
+For more details on timezone functions and available timezone options, refer to the <a href="https://clickhouse.com/docs/sql-reference/functions/date-time-functions" rel="noopener noreferrer nofollow" target="_blank">ClickHouse documentation</a>.
+</details>

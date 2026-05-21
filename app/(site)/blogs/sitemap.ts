@@ -1,11 +1,9 @@
 import { MetadataRoute } from 'next'
-import { allBlogs } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from 'utils/cmsContent'
 import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
@@ -13,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
-  const { faqs, caseStudies, opentelemetries, comparisons, guides } =
+  const { faqs, caseStudies, opentelemetries, comparisons, guides, blogs } =
     await fetchAllCMSContent(deploymentStatus)
 
   let faqRoutes: MetadataRoute.Sitemap = []
@@ -60,14 +58,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   }
 
-  const blogRoutes = allBlogs
-    .filter((post) => !post.draft && !post?.excludeFromSitemap)
-    .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
-      lastModified: post.lastmod || post.date,
-      changeFrequency: 'weekly' as const,
-      priority: 0.5,
-    }))
+  let blogRoutes: MetadataRoute.Sitemap = []
+  if (blogs) {
+    blogRoutes = blogs.data
+      .filter((post) => !post.excludeFromSitemap)
+      .map((post) => ({
+        url: `${siteUrl}/blog${post.path}/`,
+        lastModified: post.date || post.updatedAt || post.publishedAt,
+        changeFrequency: 'weekly' as const,
+        priority: 0.5,
+      }))
+  }
 
   const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry', 'comparisons'].map(
     (route) => ({
