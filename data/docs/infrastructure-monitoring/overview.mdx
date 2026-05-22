@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-05-22
 id: overview
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
@@ -29,46 +29,54 @@ Both views share common controls for time range, filtering, and navigation so yo
 
 ### Host List View
 
-The main screen of the Host interface displays a list of all monitored hosts in your infrastructure along with some key metrics in a tabular format.
+The main screen of the Host interface displays a list of all monitored hosts along with key metrics. The table uses color-coded progress bars for CPU and memory usage so you can spot outliers at a glance.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/hosts-list.webp" alt="Host List"/>
-    <figcaption><i>Host List</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/hosts-list.webp"
+  alt="Host List with progress bars, filters sidebar, and total count"
+  caption="Host List"
+  className="box-shadowed-image"
+/>
 
 #### Table Columns
 
-- **Host Name**: System hostname or identifier
-- **Status**: Current operational status of the host - `ACTIVE` or `INACTIVE`
-- **CPU**: CPU utilization percentage
-- **Memory**: Memory usage percentage
-- **IOWait**: Percentage of time CPU is waiting for I/O operations to complete
-- **Load Average**: System load average value 
+- **Hostname**: System hostname or identifier
+- **Status**: Current operational status — `ACTIVE` or `INACTIVE`
+- **CPU Usage**: CPU utilization percentage with a progress bar
+- **Memory Usage**: Memory usage percentage with a progress bar
+- **IOWait**: Percentage of time the CPU is waiting for I/O operations
+- **Load Avg**: System load average value
 
 **Features:**
-- A search functionality to quickly locate specific hosts using different attributes
-- Paginated results for efficient navigation through large host sets
-- Sortable columns for easy comparison
-- Real-time metric updates
+- **Filters sidebar** on the left to narrow hosts by Host Name, OS Type, or Environment
+- **Search Filter** bar to query hosts by any attribute
+- **Group By** dropdown to group hosts by a selected attribute
+- **Sortable columns** — click any column header to sort
+- **Total count** displayed at the bottom (e.g., "Showing 1 - 4 of 4 Hosts")
+- **Paginated results** with configurable page size
 
 ### Host Details
 
-Selecting a host opens a detailed view with three main sections: Metrics, Traces, and Logs.
+Click a hostname to open the detail view. The header displays the host's status, operating system, CPU usage, and memory usage at a glance.
+
+The detail view includes five tabs: **Metrics**, **Logs**, **Traces**, **Containers**, and **Processes**.
 
 ### Metrics Tab
 
-Monitor host performance metrics across customizable time periods.
+Monitor host performance metrics across customizable time periods. Charts are zoomable — click and drag to zoom into a specific time range.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/host-metrics-details.webp" alt="Metrics Tab"/>
-    <figcaption><i>Metrics Tab</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-metrics-details.webp"
+  alt="Host Metrics Tab showing CPU Usage, Memory Usage, System Load Average, and Network usage charts"
+  caption="Metrics Tab"
+  className="box-shadowed-image"
+/>
 
 **Available Metrics:**
 
 ##### System Performance
-- **CPU Usage**: Overall CPU utilization percentage
-- **Memory Usage**: Physical memory consumption percentage
+- **CPU Usage**: Overall CPU utilization broken down by idle, user, system, wait, softirq, steal, and interrupt
+- **Memory Usage**: Physical memory consumption showing free, used, cached, slab reclaimable, and slab unreclaimable
 - **System Load Average**: Average system load over time
 - **Queue Size**: Number of processes waiting for CPU time
 
@@ -85,7 +93,7 @@ Monitor host performance metrics across customizable time periods.
 - **Disk Operations Time**: Average time taken for disk operations
 
 **Time Range Selection:**
-- Choose from preset time ranges (e.g., last hour, last 24 hours)
+- Choose from preset time ranges (e.g., last 30 minutes, last 24 hours)
 - Set custom time ranges using the date-time picker
 - Change your timezone according to your preference
 
@@ -93,16 +101,17 @@ Monitor host performance metrics across customizable time periods.
 
 View and analyze distributed traces associated with the selected host.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/host-traces-details.webp" alt="Traces Tab"/>
-    <figcaption><i>Traces Tab</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-traces-details.webp"
+  alt="Host Traces Tab showing trace list with timestamps, service names, and durations"
+  caption="Traces Tab"
+  className="box-shadowed-image"
+/>
 
 **Features:**
 - Adjustable time range selection for trace analysis
-- Advanced filtering capabilities to focus on specific trace attributes
-- Direct integration with the Traces Explorer feature for deeper analysis
-- The "Explore in Traces Explorer" button opens the trace in the full interface, retaining time ranges and filters
+- Advanced filtering capabilities using the query builder
+- Direct integration with the Traces Explorer — click **Explore in Traces Explorer** to open the full interface retaining time ranges and filters
 
 **Filter Options:**
 - **Service name**: Focus on traces from specific services
@@ -114,23 +123,25 @@ View and analyze distributed traces associated with the selected host.
 
 Access and search through host logs with powerful filtering capabilities.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/host-logs-details.webp" alt="Logs Tab"/>
-    <figcaption><i>Logs Tab</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-logs-details.webp"
+  alt="Host Logs Tab showing log lines with timestamps and a query builder"
+  caption="Logs Tab"
+  className="box-shadowed-image"
+/>
 
 **Features:**
-- Configurable time range selection for log analysis.
-- Comprehensive filtering system.
-- Seamless integration with the Logs Explorer feature.
-- The "Explore in Logs Explorer" button opens the full logs interface, keeping time ranges and filters.
-- Highlighted warning and error messages.
+- Configurable time range selection for log analysis
+- Query builder for filtering by attributes such as `http.status_code` or `service.name`
+- Click **Run Query** to execute your filter
+- Click **Explore in Logs Explorer** to open the full Logs Explorer retaining time ranges and filters
+- Highlighted warning and error messages
 
 **Filter Categories:**
-- **Log Levels**: Filter logs by severity (e.g., INFO, WARN, ERROR).
-- **Service Components**: Focus on specific services or application components generating the logs.
-- **Message Content**: Search for specific keywords or patterns in log messages.
-- **Custom Fields**: Apply filters based on user-defined metadata fields for more tailored insights.
+- **Log Levels**: Filter logs by severity (e.g., INFO, WARN, ERROR)
+- **Service Components**: Focus on specific services or application components generating the logs
+- **Message Content**: Search for specific keywords or patterns in log messages
+- **Custom Fields**: Apply filters based on user-defined metadata fields
 
 </TabItem>
 
@@ -138,155 +149,132 @@ Access and search through host logs with powerful filtering capabilities.
 
 ### Kubernetes Cluster View
 
-The Kubernetes monitoring interface provides real-time visibility into your Kubernetes cluster, tracking Pods, Nodes, Namespaces, Clusters, and Deployments along 
-with their performance metrics.
+The Kubernetes monitoring interface provides real-time visibility into your Kubernetes cluster. The left sidebar lets you switch between different resource types, and each list uses color-coded progress bars to highlight resource utilization.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-list.webp" alt="Kubernetes Cluster View"/>
-    <figcaption><i>Kubernetes Cluster Overview</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-list.webp"
+  alt="Kubernetes Pods View showing pod list with CPU and memory progress bars"
+  caption="Kubernetes Cluster Overview — Pods View"
+  className="box-shadowed-image"
+/>
 
 ### Kubernetes Monitoring Views
 
-The Kubernetes monitoring interface offers multiple views to analyze different aspects of your Kubernetes cluster. Users can switch between:
-- **Pods View** *(Default)*: Displays all active pods and their resource consumption.
-- **Nodes View**: Provides insights into the performance of individual nodes.
-- **Namespaces View**: Allows monitoring of resource usage per namespace.
-- **Clusters View**: Offers an overview of resource allocation across different clusters.
-- **Deployments View**: Tracks deployment statuses, availability, and resource consumption.
-- **Jobs, DaemonSets, StatefulSets, and Volumes Views**: Enable monitoring of specific Kubernetes workloads.
+The sidebar on the left lists all available resource types. Click any to switch views:
 
-By default, the **Pods View** is selected, offering a detailed breakdown of pod-level resource utilization.
-
+- **Pods** *(Default)*: Displays all active pods with CPU and memory utilization progress bars
+- **Nodes**: Performance and resource allocation for individual nodes
+- **Namespaces**: Resource usage aggregated per namespace
+- **Clusters**: Overview of resource allocation across clusters
+- **Deployments**: Deployment statuses, availability, and resource consumption
+- **Jobs, DaemonSets, StatefulSets, and Volumes**: Monitoring of specific Kubernetes workloads
 
 ### Pods View: Monitoring Kubernetes Pods
 
-The **Pods View** provides real-time visibility into pod resource utilization, enabling users to track CPU, memory, and network performance.
+The **Pods View** provides real-time visibility into pod resource utilization with color-coded progress bars — green for normal, yellow for elevated, and red for critical usage.
 
 #### Table Columns
 
-- **Pod Name**: Name of the Kubernetes pod.
-- **Available**: Number of available pod replicas.
-- **Desired**: Desired number of pod replicas.
-- **CPU Request Usage (%)**: Percentage of requested CPU being utilized.
-- **CPU Limit Usage (%)**: Percentage of CPU limit being used.
-- **CPU Usage (Cores)**: Actual CPU consumption in cores.
-- **Memory Request Usage (%)**: Percentage of requested memory being used.
-- **Memory Limit Usage (%)**: Percentage of allocated memory limit being used.
-- **Memory Usage**: Total memory consumption in bytes.
-- **Namespace Name**: The namespace where the pod is running.
+- **Pod Name**: Name of the Kubernetes pod
+- **CPU Req Usage (%)**: Percentage of requested CPU being utilized, shown as a progress bar
+- **CPU Limit Usage (%)**: Percentage of CPU limit being used, shown as a progress bar
+- **CPU Usage (cores)**: Actual CPU consumption in cores
+- **Memory Req Usage (%)**: Percentage of requested memory being used
+- **Memory Limit Usage (%)**: Percentage of allocated memory limit being used
+- **Memory Usage**: Total memory consumption in bytes
 
 **Features:**
-- **Search & Filtering**: Quickly locate specific pods using various filters.
-- **Group By Attribute**: Group pods by Namespace, Node, or Deployment.
-- **Sortable Metrics**: Sort columns for better trend analysis.
+- **Filters sidebar** on the left with checkboxes for Pod, Namespace, Node, and Cluster
+- **Search Filter** bar to query pods by any attribute
+- **Group By** dropdown to group pods by Namespace, Node, or Deployment
+- **Sortable columns** — click any column header to sort alphabetically or by value
+- **Total count** displayed at the bottom (e.g., "Showing 1 - 10 of 51 Pods")
+- **Paginated results** with configurable page size
 
-### Filtering and Selection Panel
+### Pod Details
 
-The left-side **Filters Panel** allows users to navigate through different Kubernetes resources, applying filters to refine their view.
+Click a pod name to open the detail view. The header shows the pod's **Namespace**, **Cluster Name**, and **Node**.
 
-
-#### Available Filters:
-
-- **Pods**: View and filter by active Kubernetes pods.
-- **Nodes**: Monitor resource utilization for different Kubernetes nodes.
-- **Namespaces**: Filter metrics based on Kubernetes namespaces.
-- **Clusters**: Select and monitor specific clusters.
-- **Deployments**: Track resource utilization and availability at the deployment level.
-- **Jobs**: Monitor Kubernetes jobs and their execution status.
-- **DaemonSets**: Analyze DaemonSet performance metrics.
-- **StatefulSets**: Monitor StatefulSets and their associated workloads.
-- **Volumes**: Track storage usage and volume allocations.
-
----
+The detail view includes four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
 
 ### Metrics Tab: Pod Performance Monitoring
 
-The **Metrics Tab** provides an in-depth visualization of CPU, memory, and network performance for a selected pod. Users can analyze historical trends and identify resource bottlenecks over a custom time range.
+The **Metrics Tab** provides zoomable charts for CPU, memory, and network performance. Click and drag on any chart to zoom into a specific time range.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-pod-metrics.webp" alt="Pod Metrics"/>
-    <figcaption><i>Pod Metrics View</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pod-metrics.webp"
+  alt="Pod Metrics showing CPU Usage and CPU Request/Limit Utilization charts"
+  caption="Pod Metrics View"
+  className="box-shadowed-image"
+/>
 
 ### Available Metrics
 
 #### CPU Metrics
-- **CPU Usage (Cores)**: Displays real-time and historical CPU consumption using min, avg, and max values.
-- **CPU Request, Limit Utilization (%)**: Tracks CPU requests vs. limits to prevent over-allocation.
+- **CPU Usage (Cores)**: Real-time and historical CPU consumption with min, avg, and max values
+- **CPU Request, Limit Utilization (%)**: CPU requests vs. limits to prevent over-allocation
 
 #### Memory Metrics
-- **Memory Usage (Bytes)**: Shows real-time memory consumption trends.
-- **Memory Request, Limit Utilization (%)**: Highlights memory utilization compared to requests and limits.
-- **Memory by State**: Differentiates memory into **RSS memory, working set memory, and cache memory**.
-- **Memory Major Page Faults**: Tracks page faults affecting performance.
+- **Memory Usage (Bytes)**: Real-time memory consumption trends
+- **Memory Request, Limit Utilization (%)**: Memory utilization compared to requests and limits
+- **Memory by State**: Differentiates memory into RSS memory, working set memory, and cache memory
+- **Memory Major Page Faults**: Tracks page faults affecting performance
 
 #### Container-Specific Metrics
-- **CPU Usage by Container**: Displays CPU utilization at the container level within the pod.
-- **CPU Request, Limit Utilization by Container**: Monitors container-level CPU constraints.
-- **Memory Usage by Container**: Tracks memory usage for each container in the pod.
-- **Memory Request, Limit Utilization by Container**: Ensures container memory efficiency.
+- **CPU Usage by Container**: CPU utilization at the container level within the pod
+- **CPU Request, Limit Utilization by Container**: Container-level CPU constraints
+- **Memory Usage by Container**: Memory usage for each container in the pod
+- **Memory Request, Limit Utilization by Container**: Container memory efficiency
 
 #### Network Metrics
-- **Network Rate (Bytes/s)**: Monitors network traffic sent (`transmit`) and received (`receive`).
-- **Network Errors**: Tracks network-related failures at the interface level.
+- **Network Rate (Bytes/s)**: Network traffic sent (transmit) and received (receive)
+- **Network Errors**: Network-related failures at the interface level
 
 #### File System Metrics
-- **File System Usage (Bytes)**: Displays disk space usage over time.
+- **File System Usage (Bytes)**: Disk space usage over time
 
-### Time Range Selection:
-- Choose from preset time ranges (e.g., last 30 minutes, last 24 hours).
-- Customize time ranges using the date-time picker.
-- Change your timezone according to your preference.
+### Traces Tab: Pod Trace Analysis
 
-### Traces Tab: Pod Performance Monitoring
+The **Traces Tab** shows distributed traces for requests processed by the selected pod, helping you analyze latency and debug microservices performance.
 
-The **Traces Tab** provides a detailed view of distributed traces for requests processed by a selected pod. It helps users analyze request latency, identify slow operations, and debug microservices performance.
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-pod-traces.webp" alt="Pod Traces"/>
-    <figcaption><i>Pod Traces View</i></figcaption>
-</figure>
-
-### Features
-- Adjustable time range selection for trace analysis
-- Advanced filtering capabilities to focus on specific trace attributes
-- Direct integration with the Traces Explorer feature for deeper analysis
-- The "Explore in Traces Explorer" button opens the trace in the full interface, retaining time ranges and filters
-
-### Filter Options
-Users can apply various filters to refine trace analysis:
-
-- **Service name**: Focus on traces from specific services
-- **Operation type**: Filter by specific operations or endpoints (e.g., GET, POST)
-- **Status/Error codes**: Identify traces with specific success or error statuses
-- **Custom attributes**: Refine traces using user-defined tags or metadata
-
-### Logs Tab: Pod Performance Monitoring
-
-The **Logs** tab provides real-time logs from selected Kubernetes pods, helping to debug issues and monitor system events.
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-pod-logs.webp" alt="Logs Tab"/>
-    <figcaption><i>Pod Logs</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pod-traces.webp"
+  alt="Pod Traces showing trace list with timestamps, service names, and durations"
+  caption="Pod Traces View"
+  className="box-shadowed-image"
+/>
 
 **Features:**
-- Configurable time range selection for log analysis.
-- Comprehensive filtering system.
-- Seamless integration with the Logs Explorer feature.
-- The "Explore in Logs Explorer" button opens the full logs interface, keeping time ranges and filters.
-- Highlighted warning and error messages.
+- Adjustable time range selection for trace analysis
+- Advanced filtering capabilities using the query builder
+- Direct integration with the Traces Explorer for deeper analysis
+
+### Logs Tab: Pod Log Analysis
+
+The **Logs Tab** provides real-time logs from the selected pod with a query builder for filtering.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pod-logs.webp"
+  alt="Pod Logs Tab with query builder"
+  caption="Pod Logs"
+  className="box-shadowed-image"
+/>
+
+**Features:**
+- Query builder for filtering by attributes
+- Click **Run Query** to execute your filter
+- Click **Explore in Logs Explorer** to open the full Logs Explorer retaining time ranges and filters
 
 ### Consistent Monitoring Across Views
 
-Each **Kubernetes View**—Pods, Nodes, Namespaces, Clusters, Deployments, and more includes **Metrics, Logs, Traces and Events tabs** for performance monitoring and 
-debugging.
+Each Kubernetes resource view — Pods, Nodes, Namespaces, Clusters, Deployments, and more — includes **Metrics, Logs, Traces, and Events tabs** for performance monitoring and debugging.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-nodes-view.webp" alt="Nodes View"/>
-    <figcaption><i>Nodes View</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-nodes-view.webp"
+  alt="Kubernetes Nodes View showing node list and sidebar with all resource types"
+  caption="Nodes View with sidebar navigation"
+  className="box-shadowed-image"
+/>
 
 </TabItem>
 
@@ -296,5 +284,5 @@ debugging.
 
 To get the most value from Infrastructure Monitoring:
 
-- [Send host metrics to SigNoz](https://signoz.io/docs/userguide/hostmetrics/) to populate the Hosts view.
-- [Configure Kubernetes metrics collection](https://signoz.io/docs/userguide/k8s-metrics/) to power the Kubernetes views.
+- <a href="https://signoz.io/docs/userguide/hostmetrics/" target="_blank" rel="noopener noreferrer nofollow">Send host metrics to SigNoz</a> to populate the Hosts view.
+- <a href="https://signoz.io/docs/userguide/k8s-metrics/" target="_blank" rel="noopener noreferrer nofollow">Configure Kubernetes metrics collection</a> to power the Kubernetes views.
