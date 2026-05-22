@@ -2,6 +2,8 @@ import Guides from '@/components/ResourceCenter/Guides'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { buildListingMetadata } from '../../../metadata'
 import { getResourceCenterGuides } from '../../../content'
+import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
+import { safeJsonLdStringify } from '@/utils/structuredData'
 
 export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
   const params = await props.params
@@ -18,10 +20,17 @@ export const generateStaticParams = async () => {
 export default async function Page(props: { params: Promise<{ page: string }> }) {
   const params = await props.params
   const guidePosts = await getResourceCenterGuides()
+  const breadcrumbJsonLd = generateSectionHubBreadcrumb('guides', params.page)
 
   return (
-    <ListingPageLayout>
-      <Guides posts={guidePosts} pageNumber={parseInt(params.page)} />
-    </ListingPageLayout>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
+      />
+      <ListingPageLayout>
+        <Guides posts={guidePosts} pageNumber={parseInt(params.page)} />
+      </ListingPageLayout>
+    </>
   )
 }

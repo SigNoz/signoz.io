@@ -15,6 +15,7 @@ import { fetchGuideBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
@@ -113,6 +114,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+  const breadcrumbJsonLd = generateSectionArticleBreadcrumb('guides', post.title, slug)
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -135,6 +137,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
         />
         <OpenTelemetryHubContent
           content={mainContent}
@@ -167,6 +173,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
       />
 
       <div className="container mx-auto">

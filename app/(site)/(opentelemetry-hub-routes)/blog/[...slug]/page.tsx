@@ -13,6 +13,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
 import { fetchBlogBySlug } from '@/utils/cachedData'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { mdxOptions } from '@/utils/mdxUtils'
@@ -108,6 +109,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+  const breadcrumbJsonLd = generateSectionArticleBreadcrumb('blog', post.title, slug)
 
   let compiledContent
   try {
@@ -128,10 +130,16 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     return (
       <>
         {!suppressStructuredData && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-          />
+          <>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
+            />
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
+            />
+          </>
         )}
         <OpenTelemetryHubContent
           content={mainContent}
@@ -162,10 +170,16 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   return (
     <>
       {!suppressStructuredData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
+          />
+        </>
       )}
       <Layout
         content={mainContent}

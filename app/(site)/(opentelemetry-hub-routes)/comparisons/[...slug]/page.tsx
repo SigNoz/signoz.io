@@ -15,6 +15,7 @@ import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import { safeJsonLdStringify } from '@/utils/structuredData'
+import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'ComparisonsLayout'
@@ -108,6 +109,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+  const breadcrumbJsonLd = generateSectionArticleBreadcrumb('comparisons', post.title, slug)
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -130,6 +132,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
         />
         <OpenTelemetryHubContent
           content={mainContent}
@@ -161,6 +167,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
       />
       <Layout
         content={mainContent}
