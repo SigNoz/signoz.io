@@ -25,7 +25,9 @@ For an alternative setup using only Kong's native OpenTelemetry plugin (Kong Ent
 - **Kong Gateway 3.6+** (open-source or Enterprise)
 - Access to every Kong node's filesystem (to install the plugin's Lua sources)
 
-## Step 1: Install the plugin
+## Setup
+
+### Step 1: Install the plugin
 
 Install the plugin's Lua sources on every Kong node via LuaRocks:
 
@@ -45,7 +47,7 @@ This URL also works on Kong 3.9+.
 
 For other install routes (custom images, Kubernetes), see Kong's <a href="https://developer.konghq.com/custom-plugins/installation-and-distribution/" target="_blank" rel="noopener noreferrer nofollow">installation and distribution guide</a>.
 
-## Step 2: Load the plugin in Kong
+### Step 2: Load the plugin in Kong
 
 Add `signoz` to the loaded plugins in `kong.conf` (or via the `KONG_PLUGINS` environment variable) on every node:
 
@@ -53,7 +55,7 @@ Add `signoz` to the loaded plugins in `kong.conf` (or via the `KONG_PLUGINS` env
 plugins = bundled,signoz
 ```
 
-## Step 3: Enable Kong's tracer
+### Step 3: Enable Kong's tracer
 
 The plugin enriches Kong's root request span before export, so Kong's tracer must be on. Set in `kong.conf` (or via environment variables):
 
@@ -66,7 +68,7 @@ See Kong's <a href="https://developer.konghq.com/gateway/tracing/" target="_blan
 
 Restart Kong to pick up both the new plugin and the tracer settings.
 
-## Step 4: Enable the plugin
+### Step 4: Enable the plugin
 
 Enable the plugin globally on the gateway via Kong's Admin API:
 
@@ -107,7 +109,7 @@ Verify this value:
 
 Scope the plugin per-service, per-route, or per-consumer using Kong's <a href="https://developer.konghq.com/admin-api/" target="_blank" rel="noopener noreferrer nofollow">Admin API</a>. See Kong's <a href="https://developer.konghq.com/gateway/entities/plugin/" target="_blank" rel="noopener noreferrer nofollow">Plugin entity</a> docs for scoping syntax.
 
-## Step 5: Verify in SigNoz
+### Step 5: Verify in SigNoz
 
 Send a request through Kong:
 
