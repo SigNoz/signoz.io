@@ -1,0 +1,77 @@
+---
+date: 2026-05-20
+id: querying-logs
+title: Querying Logs
+description: Query logs in SigNoz using the Query Builder in Logs Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
+doc_type: reference
+---
+
+SigNoz supports querying logs using the visual **[Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)** in both the [Logs Explorer](https://signoz.io/docs/logs-management/logs-explorer/) and [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/), with **ClickHouse SQL** available as an additional option in Dashboards.
+
+## Query Builder
+
+The Query Builder is the primary way to query logs. It is available in both Logs Explorer and Dashboards.
+
+### Filtering
+
+Use the **Filter** field to narrow down logs using attributes, body content, and severity. Supported operators include:
+
+| Intent | Operator | Example |
+|---|---|---|
+| Exact match | `=` | `service.name = 'frontend'` |
+| Exclude | `!=` | `service.name != 'redis'` |
+| One of several | `IN` | `severity_text IN ('ERROR', 'WARN')` |
+| Substring | `LIKE` | `body LIKE '%timeout%'` |
+| Case-insensitive | `ILIKE` | `body ILIKE '%connection refused%'` |
+| Text containment | `CONTAINS` | `body CONTAINS 'panic'` |
+| Field exists | `EXISTS` | `trace_id EXISTS` |
+
+Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) guide and [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of operators and syntax details.
+
+You can also use [Quick Filters](https://signoz.io/docs/logs-management/features/logs-quick-filters/) in the Logs Explorer sidebar to narrow results by common attributes without writing filter expressions. See the [Default Quick Filters Reference](https://signoz.io/docs/logs-management/features/logs-quick-filters-reference/) for the full list of available filter attributes.
+
+### Aggregation (Time Series & Table views)
+
+Log queries support a full set of [aggregation functions](https://signoz.io/docs/querying/aggregation-grouping/) in the **Time Series** and **Table** views:
+
+- **Statistical** — Count, Count Distinct, Sum, Avg, Min, Max
+- **Percentiles** — P05, P10, P25, P50, P75, P90, P95, P99
+- **Rate** — Rate, Rate Sum, Rate Avg, Rate Max, Rate Min
+
+### Group By (Time Series & Table views)
+
+Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` produces a separate series for each service. Useful in aggregate views to compare error counts across services, namespaces, or any other attribute.
+
+### Having
+
+Filter results after aggregation. For example, `count() > 1000` shows only groups exceeding 1000 log entries. See [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) for sorting, limiting, and conditional filtering options.
+
+### Functions (Time Series & Table views)
+
+Log queries support the **Time Shift** function, which lets you compare the current result against a previous time period (e.g., compare error counts now vs. one hour ago). See [Comparing Service Performance with Time Shift](https://signoz.io/docs/querying/functions-extended-analysis/#example-comparing-service-performance-with-time-shift) for an example.
+
+### Formulas
+
+Combine up to ten queries using formulas. For example, calculate error ratio: `(A / B) * 100`, where A counts error logs and B counts all logs. See [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) for formula functions and examples.
+
+For full details on the Query Builder, see the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder-v5/).
+
+## ClickHouse SQL (Dashboards Only)
+
+When building Dashboard panels, you can write raw ClickHouse SQL queries against the logs tables for advanced analytics beyond what the Query Builder supports.
+
+For details and example queries, see the [ClickHouse Logs Query guide](https://signoz.io/docs/userguide/logs_clickhouse_queries/).
+
+## Next Steps
+
+- [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) — search log bodies without specifying field names
+- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — detailed reference for aggregation functions and group by
+- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — sorting, limiting, and Having clause patterns
+- [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) — formulas, error rate calculations, and multi-query comparisons
+- [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how step intervals work for time series queries
+- [Advanced Query Examples](https://signoz.io/docs/userguide/search-advanced-examples/) — complex query patterns and real-world use cases
+- [Fields in Logs](https://signoz.io/docs/userguide/logs_fields/) — understand log attributes, parsing, and sensitive data masking
+- [Log-based Alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) — get notified when log patterns match your conditions
+- [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) — transform and enrich logs before storage using processors
+- [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) — navigate between related logs and traces
+- [Logs API](https://signoz.io/docs/logs-management/logs-api/overview/) — query and aggregate logs programmatically

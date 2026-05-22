@@ -1,8 +1,9 @@
 ---
-date: 2026-03-02
+date: 2026-05-12
 id: no-data-alerts-for-groups
-description: This document descibes how to use alerting feature to detect when specific groups of resources/entities stop sending data.
+description: This document describes how to use alerting feature to detect when specific groups of resources/entities stop sending data.
 title: No Data Alerts for Groups in SigNoz
+doc_type: howto
 ---
 
 ## Overview
@@ -37,9 +38,9 @@ Let's walk through setting up an alert that notifies you when a specific host st
 
 ### Step 1: Configure the Query
 
-- *Select your metric*: Choose system.cpu.utilization
-- *Set aggregation*: Select `Count` as the aggregation method
-- *Group by host*: In the "Sum By" field, select `host.name`
+- *Select your metric*: Choose `system.cpu.utilization`
+- *Aggregate within time series*: Select `Count`
+- *Aggregate across time series*: Select `Sum` and group by `host.name`
 
 ### Step 2: Add Time-Shift Conditions
 
@@ -60,10 +61,10 @@ This divides current data (Query B) by historical data (Query A). When a group s
 
 Set up the alert to trigger when the formula equals zero:
 
-- Condition: Set to "is equal to"
-- Threshold: Enter 0
-- Evaluation: Select "all the times" to ensure the condition is met consistently
-- Duration: Choose your evaluation window (e.g., "10 mins"), should be the same as the timeshift duration
+- Condition: Set to `Equal to`
+- Threshold: Enter `0`
+- Match type: Select `All the time` to ensure the condition is met consistently
+- Evaluation window: Choose `Last 10 minutes` with `Rolling` mode — should match the timeshift duration
 
 ## Multi-Attribute Grouping
 You can group by multiple attributes for more granular monitoring:

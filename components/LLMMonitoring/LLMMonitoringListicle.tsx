@@ -48,6 +48,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       className="h-7 w-7"
     />
   ),
+  '/docs/dify-observability': (
+    <img src="/svgs/icons/LLMMonitoring/dify-logo.svg" alt="Dify Icon" className="h-7 w-7" />
+  ),
   '/docs/google-adk-observability': (
     <img
       src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"

@@ -27,6 +27,9 @@
 2. <Add direct export to SigNoz Cloud>
 3. <Run or restart the app>
 
+<!-- Prefer OTLP/HTTP (port 4318) over OTLP/gRPC (port 4317) as the default export protocol. -->
+<!-- HTTP is simpler to configure, easier to debug, and works through more proxies and load balancers. -->
+
 <!-- For Collector config, show only the snippet to append and tell users where to enable it. -->
 <!-- Do not present a full otel-collector-config.yaml replacement unless the page is explicitly a full clean-room setup. -->
 

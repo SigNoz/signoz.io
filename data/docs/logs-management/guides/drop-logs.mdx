@@ -1,8 +1,9 @@
 ---
-date: 2026-02-06
+date: 2026-05-04
 id: drop-logs
 title: Guide to drop logs
 description: Learn how to drop unwanted logs at the Collector level to reduce storage and billing.
+doc_type: howto
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -17,7 +18,7 @@ The filter processor is configured in the `processors::filter` section of the `c
 
 The processor needs to be added to the logs pipeline in `config.yaml` to take effect.
 
-```config.yaml
+```yaml:config.yaml
 logs:
   receivers: [otlp]
   processors: [filter/drop_logs_by_severity_text, batch]
@@ -30,7 +31,7 @@ logs:
 
 1. Drop logs by log level / severity text
 
-```config.yaml
+```yaml:config.yaml
 processors:
   filter/drop_logs_by_level:
     logs:
@@ -40,7 +41,7 @@ processors:
 
 2. Drop logs by body regex
 
-```config.yaml
+```yaml:config.yaml
 processors:
   filter/drop_logs_by_body_regex:
     logs:
@@ -50,7 +51,7 @@ processors:
 
 3. Drop logs by resource attributes (like service.name, host.name, k8s.pod.name, etc.)
 
-```config.yaml
+```yaml:config.yaml
 processors:
   filter/drop_logs_by_label_values:
     logs:
@@ -60,7 +61,7 @@ processors:
 
 4. Drop logs by resource attributes regex
 
-```config.yaml
+```yaml:config.yaml
 processors:
   filter/drop_logs_by_label_values_regex:
     logs:
@@ -70,7 +71,7 @@ processors:
 
 5. Drop logs by logs attributes (like remote_addr, user_agent.name, etc.)
 
-```config.yaml
+```yaml:config.yaml
 processors:
   filter/drop_logs_by_label_values:
     logs:
@@ -80,7 +81,7 @@ processors:
 
 6. Drop logs by logs attributes regex
 
-```config.yaml
+```yaml:config.yaml
 processors:
   filter/drop_logs_by_label_values_regex:
     logs:
@@ -98,7 +99,7 @@ See our [Kubernetes pod logs collection guide](https://signoz.io/docs/userguide/
 - Including only logs from specific namespaces, pods, or containers
 - Using filter operators for expression-based filtering
 
-Refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor) for more details on how to configure the filter processor.
+Refer to the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry documentation</a> for more details on how to configure the filter processor.
 
 ## Limit Log Body Size
 
@@ -113,7 +114,7 @@ This is useful to:
 
 Add the [transform processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#transform-processor) to your OpenTelemetry Collector configuration to truncate log bodies to a maximum size:
 
-```config.yaml
+```yaml:config.yaml
 processors:
   transform/truncate_logs:
     log_statements:
@@ -128,7 +129,7 @@ In this example, log bodies will be truncated to 4096 characters. You can adjust
 
 The processor needs to be added to the logs pipeline in `config.yaml` to take effect.
 
-```config.yaml
+```yaml:config.yaml
 logs:
   receivers: [otlp]
   processors: [transform/truncate_logs, batch]

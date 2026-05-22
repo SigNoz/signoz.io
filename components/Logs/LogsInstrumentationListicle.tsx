@@ -94,6 +94,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/logs-management/send-logs/logrus-to-signoz': <SiGo className="h-7 w-7 text-cyan-500" />,
   '/docs/logs-management/send-logs/zap-to-signoz': <SiGo className="h-7 w-7 text-cyan-600" />,
+  '/docs/logs-management/send-logs/slog-to-signoz': <SiGo className="h-7 w-7 text-cyan-400" />,
   '/docs/instrumentation/opentelemetry-deno': <SiDeno className="h-7 w-7 text-blue-500" />,
   // Collectors
   '/docs/userguide/collect_logs_from_file': <FaFileAlt className="h-7 w-7 text-orange-500" />,

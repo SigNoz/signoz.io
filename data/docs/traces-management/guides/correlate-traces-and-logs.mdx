@@ -1,60 +1,241 @@
 ---
-date: 2025-07-01
+date: 2026-05-12
 title: Correlate Traces and Logs
-
 id: correlate-traces-and-logs
-description: Learn how to establish correlation between logs and traces in SigNoz to enable seamless navigation from traces to logs and vice versa.
+description: Learn how to correlate logs and traces in SigNoz so you can navigate between them when debugging issues.
+doc_type: howto
 ---
 
-When you navigate from traces to logs and see "No logs found for this trace," it means your logs and traces are not properly correlated. This guide will help you establish the connection.
+import GetHelp from '@/components/shared/get-help.md'
+
+SigNoz lets you jump from a trace directly to the logs that fired during it, and from a log entry back to the trace that caused it. This works because OpenTelemetry SDKs inject `trace_id` and `span_id` into every log emitted inside an active span. Without those fields in your logs, trace-to-log navigation returns no results.
+
+## How Correlation Works
+
+SigNoz links logs to traces through two fields: `trace_id` and `span_id`. A log emitted outside any active span carries neither:
+
+```json
+{
+  "timestamp": "2024-01-15T10:30:00Z",
+  "severity": "ERROR",
+  "body": "Payment failed",
+  "service.name": "payment-service"
+}
+```
+
+A log emitted inside an active span carries both. SigNoz uses them to connect that log to the exact span:
+
+```json
+{
+  "timestamp": "2024-01-15T10:30:00Z",
+  "severity": "ERROR",
+  "body": "Payment failed",
+  "trace_id": "5b8aa5a2d2c872e8321cf37308d69df2",
+  "span_id": "051581bf3cb55c13",
+  "trace_flags": "01",
+  "service.name": "payment-service"
+}
+```
+
+The `trace_id` matches the trace in SigNoz. The `span_id` identifies which span produced the log.
 
 ## Automatic Correlation with OpenTelemetry SDK
 
-If you're using OpenTelemetry SDKs for instrumentation, they automatically inject trace context (trace_id and span_id) into your logs. Simply enable the logging instrumentation for your language and your existing logs will include trace correlation.
+OpenTelemetry SDKs inject `trace_id` and `span_id` into every log emitted during an active span. The setup varies by language.
 
-Auto-instrumentation is available for these languages - Java, .NET, Python, Go, Node.js, and PHP. Check out our [instrumentation documentation](https://signoz.io/docs/instrumentation/) for auto-instrumenting your application.
+<Tabs entityName="language">
+<TabItem value="python" label="Python" default>
 
-This is the recommended approach as it requires minimal configuration and provides consistent trace context across all your logs.
+Install the logging instrumentation package and call `.instrument()` before your app logs anything:
+
+```bash
+pip install opentelemetry-instrumentation-logging
+```
+
+```python
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+
+LoggingInstrumentor().instrument(set_logging_format=True)
+```
+
+Calling it patches Python's standard `logging` module. Logs emitted inside spans carry `trace_id` and `span_id` from that point on.
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+**Using the Java agent (recommended)**
+
+Attach the agent at startup. It injects `trace_id`, `span_id`, and `trace_flags` into the MDC for Logback and Log4j2:
+
+```bash
+java -javaagent:opentelemetry-javaagent.jar -jar myapp.jar
+```
+
+Add those keys to your encoder pattern to emit them:
+
+```
+%d{HH:mm:ss.SSS} trace_id=%X{trace_id} span_id=%X{span_id} trace_flags=%X{trace_flags} %msg%n
+```
+
+**Using Logback without the agent**
+
+Add the dependency:
+
+```xml
+<dependency>
+  <groupId>io.opentelemetry.instrumentation</groupId>
+  <artifactId>opentelemetry-logback-mdc-1.0</artifactId>
+  <version>2.27.0-alpha</version> <!-- check Maven Central for the latest version -->
+</dependency>
+```
+
+Wrap your appender in `logback.xml`:
+
+```xml
+<appender name="OTEL"
+  class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender">
+  <appender-ref ref="CONSOLE"/>
+</appender>
+
+<root level="INFO">
+  <appender-ref ref="OTEL"/>
+</root>
+```
+
+Add the MDC keys to your encoder pattern:
+
+```
+%d{HH:mm:ss.SSS} trace_id=%X{trace_id} span_id=%X{span_id} trace_flags=%X{trace_flags} %msg%n
+```
+
+For Log4j2, use `opentelemetry-log4j-context-data-2.17-autoconfigure` instead.
+
+</TabItem>
+<TabItem value="nodejs" label="Node.js">
+
+Install the instrumentation package for your logger (Pino, Winston, or Bunyan), then register it in your SDK setup:
+
+```bash
+npm install @opentelemetry/instrumentation-winston
+# or @opentelemetry/instrumentation-pino
+# or @opentelemetry/instrumentation-bunyan
+```
+
+```js
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { WinstonInstrumentation } = require('@opentelemetry/instrumentation-winston');
+
+const sdk = new NodeSDK({
+  instrumentations: [new WinstonInstrumentation()],
+});
+sdk.start();
+```
+
+Each log entry gets `trace_id`, `span_id`, and `trace_flags` injected when a span is active.
+
+</TabItem>
+<TabItem value="go" label="Go">
+
+Go has no automatic context propagation for logs. Set up a logger bridge and pass `context.Context` on every log call. The bridge extracts `trace_id` and `span_id` from the active span in that context.
+
+Initialize your `LoggerProvider` and register it globally before calling `NewLogger`. Skip this and nothing exports. `go.opentelemetry.io/otel/log/global` is experimental; its import path may change when the Go log API stabilizes.
+
+```go
+import (
+  "go.opentelemetry.io/otel/log/global"
+  sdklog "go.opentelemetry.io/otel/sdk/log"
+)
+
+provider := sdklog.NewLoggerProvider(/* your exporter + resource */)
+global.SetLoggerProvider(provider)
+```
+
+Create the bridge logger and pass `ctx` on every log call:
+
+```bash
+go get go.opentelemetry.io/contrib/bridges/otelslog
+```
+
+```go
+import "go.opentelemetry.io/contrib/bridges/otelslog"
+
+logger := otelslog.NewLogger("my-service")
+
+// ctx must carry an active span
+logger.InfoContext(ctx, "payment processed", "order_id", "abc123")
+```
+
+Other bridges: `otelzap` for Zap, `otellogrus` for Logrus, `otellogr` for logr.
+
+</TabItem>
+</Tabs>
+
+See the [instrumentation docs](https://signoz.io/docs/instrumentation/) for full per-language setup.
 
 ## Manual Correlation for File-based and Kubernetes Logs
 
-If your logs contain trace information but it's not in the standard OpenTelemetry format, you need to use SigNoz log pipelines to extract it.
+If logs go to files that a collector reads, or Kubernetes agents collect them from stdout/stderr, use SigNoz Log Pipelines to extract trace context. See the setup guides for [FluentBit](https://signoz.io/docs/userguide/fluentbit_to_signoz/) and [FluentD](https://signoz.io/docs/userguide/fluentd_to_signoz/).
 
-This applies when:
-- Your application logs to files that are read by log collectors
-- You're using Kubernetes and logs are collected by agents like FluentBit or FluentD
-- Your logs contain trace IDs and span IDs in the message body or custom attributes
+Use this path when:
+- Your application writes logs to files read by a collector
+- Kubernetes agents collect logs and they reach SigNoz without OTel SDK injection
+- Logs carry trace IDs in the message body or non-standard attributes
 
 ### Setting Up Log Pipelines
 
-Follow our detailed guide on parsing trace information from logs:
+Follow this guide:
 
 **[Parse Trace Information for your Logs](https://signoz.io/docs/logs-pipelines/guides/trace/)**
 
-This guide shows you how to:
-1. Create a log pipeline in SigNoz
-2. Use the Trace Parser processor to extract trace_id and span_id
-3. Configure regex or JSON parsers if needed
-4. Test and deploy your pipeline
+It covers:
+1. Creating a log pipeline in SigNoz
+2. Using the Trace Parser processor to extract `trace_id` and `span_id`
+3. Configuring regex or JSON parsers when needed
+4. Testing and deploying your pipeline
 
-## Verification
+## Verifying Correlation
 
-After setting up log-trace correlation:
+1. Generate traffic in your application
+2. Open **Traces** in SigNoz and click on any trace
+3. Click **"Go to related logs"**
+4. Check that `trace_id` and `span_id` fields appear in the matching log entries
 
-1. Generate some traffic in your application
-2. Go to the **Traces** section in SigNoz
-3. Click on a trace to view its details
-4. Click **"Go to related logs"** button which will take you to the related logs
-5. In the **Logs** section, you should see `trace_id` and `span_id` fields populated
+<Figure src="/img/docs/traces-management/correlate-traces-with-logs.gif" alt="Related logs of a trace in Logs Explorer" caption="Related logs of a trace in Logs Explorer" />
 
-<figure data-zoomable align='center'>
-<img src="/img/docs/traces-management/correlate-traces-with-logs.gif" alt="Related logs of a trace in Logs Explorer"/>
-<figcaption><i>Related logs of a trace in Logs Explorer</i></figcaption>
-</figure>
+In **Logs Explorer**, filter by `trace_id` to find all logs from a specific trace.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### "Go to related logs" shows no results
+
+Your logs reach SigNoz but lack `trace_id`. You haven't initialized SDK logging instrumentation, or you called it after creating your loggers. Move `.instrument()` (Python) or `sdk.start()` (Node.js) before your first log statement.
+
+### `trace_id` in logs is `00000000000000000000000000000000`
+
+This log fired outside an active span. Move logging calls inside instrumented request handlers, not startup code or background goroutines without span context.
+
+### Logs have a `trace_id` but the trace doesn't appear in SigNoz
+
+Sampling dropped the trace. The log exported but the trace did not. Lower your sampling rate or switch to tail-based sampling so SigNoz receives traces with errors.
+
+### Go: logs emit but `trace_id` stays empty
+
+The bridge reads context from the `ctx` argument, not a global. Every log call must pass the `ctx` that holds the active span.
+
+</details>
 
 ## Best Practices
 
-- **Use OpenTelemetry SDKs** when possible for automatic correlation
-- **Use structured logging** (JSON format) for easier parsing
-- **Include relevant context** like user IDs, request IDs, and other identifiers in your logs
-- **Ensure consistent trace propagation** across all services in your application
+- **Prefer OpenTelemetry SDKs** over manual pipeline parsing. Auto-injection needs no collector config.
+- **Use structured logging** (JSON) so pipelines can extract `trace_id` and `span_id`
+- **Propagate trace context across all services** so logs from downstream calls link to the same root trace
+- **Add service-level attributes** (`service.name`, `host.name`) to filter correlated logs when debugging multi-service traces
+
+## Get Help
+
+<GetHelp />

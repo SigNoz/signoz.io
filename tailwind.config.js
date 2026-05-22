@@ -18,17 +18,17 @@ module.exports = {
     extend: {
       keyframes: {
         'nav-popover-in': {
-          '0%': { transform: 'translateY(-8px) scale(0.7)' },
-          '100%': { transform: 'translateY(0) scale(1)' },
+          '0%': { opacity: '0', transform: 'translateY(-4px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
         },
         'nav-popover-out': {
-          '0%': { transform: 'translateY(0) scale(1)' },
-          '100%': { transform: 'translateY(-6px) scale(0.7)' },
+          '0%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+          '100%': { opacity: '0', transform: 'translateY(-4px) scale(0.96)' },
         },
       },
       animation: {
-        'nav-popover-in': 'nav-popover-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both',
-        'nav-popover-out': 'nav-popover-out 150ms cubic-bezier(0.4, 0, 1, 1) both',
+        'nav-popover-in': 'nav-popover-in 150ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'nav-popover-out': 'nav-popover-out 100ms cubic-bezier(0.4, 0, 1, 1) both',
       },
       maxWidth: {
         '8xl': '1440px',

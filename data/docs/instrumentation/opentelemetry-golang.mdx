@@ -1,9 +1,8 @@
 ---
-date: 2026-03-05
+date: 2026-05-18
 id: opentelemetry-golang
-title: Go OpenTelemetry Instrumentation
-description: Learn how to instrument your Go application with OpenTelemetry and send telemetry data to SigNoz
-
+title: Go OpenTelemetry Instrumentation Guide
+description: Learn how to instrument your Go application with the OpenTelemetry Go SDK. Send traces to SigNoz Cloud or self-hosted for distributed tracing and debugging.
 doc_type: howto
 ---
 This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz. Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
@@ -18,7 +17,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 - Your application code
 
 ## Send traces to SigNoz
-<Tabs entityName="deployment">
+<Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
         <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
             A VM is a virtual computer that runs on physical hardware. This includes:
@@ -35,11 +34,21 @@ Set the following environment variables to configure the OpenTelemetry exporter:
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 </TabItem>
     
 <TabItem value="k8s" label="Kubernetes">
@@ -53,11 +62,22 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 </TabItem>
     
 <TabItem value="windows" label="Windows">
@@ -66,11 +86,21 @@ Verify these values:
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 </TabItem>
     
 <TabItem value="docker" label="Docker">
@@ -94,6 +124,7 @@ COPY --from=builder /app/main .
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 
 CMD ["./main"]
 ```
@@ -103,6 +134,7 @@ Or pass them at runtime using `docker run`:
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
     your-image:latest
 ```
 
@@ -110,6 +142,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 </TabItem>
 </Tabs>
 ### Step 2. Install OpenTelemetry packages
@@ -120,7 +161,7 @@ Run the following command in your project directory:
 go get \
   go.opentelemetry.io/otel \
   go.opentelemetry.io/otel/sdk \
-  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp \
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
 ```
 
@@ -136,7 +177,7 @@ import (
 	"log"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -145,7 +186,7 @@ import (
 
 func initTracer(ctx context.Context) (func(context.Context) error, error) {
 	// Reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS from environment
-	exporter, err := otlptracegrpc.New(ctx)
+	exporter, err := otlptracehttp.New(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -719,8 +760,8 @@ Use the categories below to pick a specific integration.
         ### Install Fiber instrumentation
 
         ```bash
-        go get github.com/gofiber/fiber/v2
-        go get github.com/gofiber/contrib/otelfiber
+        go get github.com/gofiber/fiber/v3
+        go get github.com/gofiber/contrib/v3/otel
         ```
 
         ### Complete example
@@ -734,8 +775,8 @@ Use the categories below to pick a specific integration.
         	"os"
         	"os/signal"
 
-        	"github.com/gofiber/contrib/otelfiber"
-        	"github.com/gofiber/fiber/v2"
+        	fiberotel "github.com/gofiber/contrib/v3/otel"
+        	"github.com/gofiber/fiber/v3"
         	"go.opentelemetry.io/otel"
         	"go.opentelemetry.io/otel/attribute"
         	"go.opentelemetry.io/otel/trace"
@@ -760,11 +801,11 @@ Use the categories below to pick a specific integration.
         	app := fiber.New()
 
         	// Add OpenTelemetry middleware to instrument all routes
-        	app.Use(otelfiber.Middleware())
+        	app.Use(fiberotel.Middleware())
 
-        	app.Get("/", func(c *fiber.Ctx) error {
-        		// Important: Use UserContext() for Fiber (fasthttp-based)
-        		span := trace.SpanFromContext(c.UserContext())
+        	app.Get("/", func(c fiber.Ctx) error {
+        		// Important: Use Context() for Fiber (fasthttp-based)
+        		span := trace.SpanFromContext(c.Context())
 
         		span.SetAttributes(attribute.String("custom.key", "value"))
         		span.AddEvent("manual.event")
@@ -782,12 +823,12 @@ Use the categories below to pick a specific integration.
         Create additional spans to trace specific operations within your handlers:
 
         ```go
-        app.Get("/process", func(c *fiber.Ctx) error {
+        app.Get("/process", func(c fiber.Ctx) error {
         	tracer := otel.Tracer("my-service")
 
         	// Create a child span (parent created by otelfiber middleware)
-        	// Important: Use UserContext() for Fiber (fasthttp-based)
-        	ctx, span := tracer.Start(c.UserContext(), "process-data")
+        	// Important: Use Context() for Fiber (fasthttp-based)
+        	ctx, span := tracer.Start(c.Context(), "process-data")
         	defer span.End()
 
         	span.SetAttributes(attribute.String("operation", "data-processing"))
@@ -800,9 +841,9 @@ Use the categories below to pick a specific integration.
 
         ```text
         Tested with:
-        - Go 1.25.1
-        - OpenTelemetry Go SDK v1.38.0
-        - go.opentelemetry.io/contrib/instrumentation/github.com/gofiber/fiber/v2/otelfiber v0.63.0
+        - Go 1.25.6
+        - OpenTelemetry Go SDK v1.40.0
+        - github.com/gofiber/contrib/v3/otel v1.0.0
         ```
 
     </LibraryTab>

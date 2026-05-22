@@ -21,7 +21,9 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiDotnet,
   SiGo,
+  SiIstio,
   SiTemporal,
   SiOpenai,
   SiSupabase,
@@ -80,6 +82,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/argocd-dashboard': (
     <GitBranch className="h-7 w-7 text-orange-500" />
   ),
+  '/docs/dashboards/dashboard-templates/aspnet-metrics': (
+    <SiDotnet className="h-7 w-7 text-blue-600" />
+  ),
   '/docs/dashboards/dashboard-templates/autogen-dashboard': (
     <img src="/svgs/icons/LLMMonitoring/autogen-logo.webp" alt="Autogen Icon" className="h-7 w-7" />
   ),
@@ -131,6 +136,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       alt="DeepSeek Icon"
       className="h-7 w-7"
     />
+  ),
+  '/docs/dashboards/dashboard-templates/dify-dashboard': (
+    <img src="/svgs/icons/LLMMonitoring/dify-logo.svg" alt="Dify Icon" className="h-7 w-7" />
   ),
   '/docs/dashboards/dashboard-templates/docker-container-metrics': (
     <SiDocker className="h-7 w-7 text-blue-400" />
@@ -190,6 +198,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/dashboards/dashboard-templates/inkeep-dashboard': (
     <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
+  ),
+  '/docs/dashboards/dashboard-templates/istio-dashboard': (
+    <SiIstio className="h-7 w-7 text-blue-400" />
   ),
   'https://github.com/SigNoz/dashboards/tree/main/jenkins': (
     <SiJenkins className="h-7 w-7 text-blue-700" />
