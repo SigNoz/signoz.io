@@ -1,0 +1,46 @@
+---
+date: 2026-05-22
+id: clusters-reference
+title: Clusters - Columns & Widgets Reference
+description: Detailed reference for every column and chart in the SigNoz Clusters view — underlying OpenTelemetry metrics and alerting best practices.
+doc_type: reference
+---
+
+This page documents every column and chart in the **Infrastructure Monitoring > Kubernetes > Clusters** view.
+
+## Columns
+
+| Column | Metric | Description |
+|--------|--------|-------------|
+| **Cluster Name** | `k8s.cluster.name` resource attribute | Kubernetes cluster name. |
+| **CPU Usage (cores)** | Aggregated `k8s.node.cpu.usage` | Total CPU consumption across all cluster nodes. |
+| **CPU Alloc (cores)** | Aggregated `k8s.node.allocatable_cpu` | Total allocatable CPU across all nodes. |
+| **Memory Usage** | Aggregated `k8s.node.memory.usage` | Total memory consumption across all nodes. |
+| **Memory Alloc** | Aggregated `k8s.node.allocatable_memory` | Total allocatable memory across all nodes. |
+
+---
+
+## Widgets (Cluster Detail Page)
+
+### Cluster CPU Usage
+
+| Property | Value |
+|----------|-------|
+| **Metric** | Aggregated `k8s.node.cpu.usage` |
+| **Unit** | Cores |
+| **What it indicates** | Total CPU across the cluster. Compare against total allocatable. |
+
+**Alerting:** Alert when > **80% of total allocatable CPU** for **15 min** — scale up or add nodes.
+
+### Cluster Memory Usage
+
+| Property | Value |
+|----------|-------|
+| **Metric** | Aggregated `k8s.node.memory.usage` |
+| **Unit** | Bytes |
+
+**Alerting:** Alert when > **80% of total allocatable memory** for **15 min**.
+
+### Metric Sources
+
+Cluster metrics are aggregated from node-level data. See [Nodes Reference](https://signoz.io/docs/infrastructure-monitoring/user-guides/nodes/) for individual node metrics.

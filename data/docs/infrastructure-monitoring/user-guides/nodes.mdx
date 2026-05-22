@@ -1,0 +1,115 @@
+---
+date: 2026-05-22
+id: nodes-reference
+title: Nodes - Columns & Widgets Reference
+description: Detailed reference for every column and chart in the SigNoz Nodes view — underlying OpenTelemetry metrics, color-coding, and alerting best practices.
+doc_type: reference
+---
+
+This page documents every column and chart in the **Infrastructure Monitoring > Kubernetes > Nodes** view.
+
+## Columns
+
+| Column | Metric | Description |
+|--------|--------|-------------|
+| **Node Name** | `k8s.node.name` resource attribute | Kubernetes node name. |
+| **Cluster Name** | `k8s.cluster.name` resource attribute | Cluster this node belongs to. |
+| **CPU Usage (cores)** | `k8s.node.cpu.usage` | Actual CPU consumption by all pods on this node. |
+| **CPU Alloc (cores)** | `k8s.node.allocatable_cpu` | CPU available for pod scheduling after system reservations. Requires `allocatable_types_to_report` to include `cpu` in the k8scluster receiver. |
+
+### Metric Sources for Columns
+
+| Receiver | Metrics |
+|----------|---------|
+| <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver" target="_blank" rel="noopener noreferrer nofollow">kubeletstats</a> | `k8s.node.cpu.usage` |
+| <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver" target="_blank" rel="noopener noreferrer nofollow">k8scluster</a> | `k8s.node.allocatable_cpu` |
+
+**Important:** `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` require the `allocatable_types_to_report` config:
+
+```yaml
+receivers:
+  k8s_cluster:
+    allocatable_types_to_report:
+      - cpu
+      - memory
+```
+
+See [Kubernetes Metrics Collection Guide](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/) for setup.
+
+---
+
+## Widgets (Node Detail Page)
+
+### Node CPU Usage
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.node.cpu.usage` |
+| **Unit** | Cores |
+| **What it indicates** | Total CPU by all pods on this node. Compare against allocatable CPU. |
+
+**Alerting:** Alert when > **85% of allocatable CPU** for **10 min**.
+
+### Node Memory Working Set
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.node.memory.working_set` |
+| **Unit** | Bytes |
+| **What it indicates** | Active memory. Kubernetes uses this for eviction decisions. |
+
+**Alerting:** Alert when > **90% of allocatable memory** for **5 min**.
+
+### Node Memory RSS
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.node.memory.rss` |
+| **Unit** | Bytes |
+| **What it indicates** | Resident Set Size — non-swappable physical memory. |
+
+### Node Memory Available
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.node.memory.available` |
+| **Unit** | Bytes |
+| **What it indicates** | Memory available for new workloads. Near zero = pod evictions will begin. |
+
+**Alerting:** Alert when < **500 MB** for **5 min**.
+
+### Node Network I/O
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.node.network.io` |
+| **Unit** | Bytes/s |
+| **Breakdown** | `transmit`, `receive` |
+
+**Alerting:** Alert when > **80%** of NIC capacity for **5 min**.
+
+### Node Network Errors
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.node.network.errors` |
+| **Unit** | Count/s |
+
+**Alerting:** Alert on any sustained non-zero rate for **5 min**.
+
+### Node Filesystem Usage
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.node.filesystem.usage` |
+| **Unit** | Bytes |
+| **What it indicates** | Disk space consumed. High usage can trigger pod evictions via disk pressure. |
+
+**Alerting:** Alert when > **85%** of capacity for **10 min**.
+
+### Node Filesystem Available / Capacity
+
+| Property | Value |
+|----------|-------|
+| **Metrics** | `k8s.node.filesystem.available`, `k8s.node.filesystem.capacity` |
+| **Unit** | Bytes |

@@ -1,0 +1,77 @@
+---
+date: 2026-05-22
+id: volumes-reference
+title: Volumes - Columns & Widgets Reference
+description: Detailed reference for every column and chart in the SigNoz Volumes view — underlying OpenTelemetry metrics and alerting best practices.
+doc_type: reference
+---
+
+This page documents every column and chart in the **Infrastructure Monitoring > Kubernetes > Volumes** view.
+
+## Columns
+
+| Column | Metric | Description |
+|--------|--------|-------------|
+| **Volume Name** | `k8s.persistentvolumeclaim.name` resource attribute | PersistentVolumeClaim (PVC) name. |
+| **Namespace** | `k8s.namespace.name` resource attribute | Namespace the PVC belongs to. |
+| **Available (bytes)** | `k8s.volume.available` | Free space remaining. |
+| **Capacity (bytes)** | `k8s.volume.capacity` | Total volume capacity. |
+| **Usage (%)** | Derived: `(capacity - available) / capacity * 100` | Percentage of capacity in use. |
+
+### Column Color-Coding
+
+| Color | Range | Meaning |
+|-------|-------|---------|
+| **Green** | 0 – 60 % | Normal — plenty of free space |
+| **Yellow** | 60 – 80 % | Elevated — consider expanding |
+| **Red** | 80 – 100 % | Critical — risk of running out |
+
+### Metric Sources
+
+Volume metrics are collected by the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver" target="_blank" rel="noopener noreferrer nofollow">kubeletstats receiver</a> with the `volume` metric group enabled. The `k8s.persistentvolumeclaim.name` attribute requires the `k8s.volume.type` extra metadata label:
+
+```yaml
+receivers:
+  kubeletstats:
+    metric_groups:
+      - container
+      - pod
+      - node
+      - volume
+    extra_metadata_labels:
+      - container.id
+      - k8s.volume.type
+```
+
+---
+
+## Widgets (Volume Detail Page)
+
+### Volume Usage
+
+| Property | Value |
+|----------|-------|
+| **Metric** | Derived from `k8s.volume.capacity` - `k8s.volume.available` |
+| **Unit** | Bytes |
+| **What it indicates** | How much capacity is consumed. Full volumes cause application failures. |
+
+**Alerting:** Alert when > **80%** for **15 min**. Alert when > **95%** immediately.
+
+### Volume Available / Capacity
+
+| Property | Value |
+|----------|-------|
+| **Metrics** | `k8s.volume.available`, `k8s.volume.capacity` |
+| **Unit** | Bytes |
+
+**Alerting:** Alert when available < **1 GB** for database volumes. Alert when available < **500 MB** for log volumes.
+
+### Volume Inodes
+
+| Property | Value |
+|----------|-------|
+| **Metrics** | `k8s.volume.inodes.used`, `k8s.volume.inodes.free`, `k8s.volume.inodes` |
+| **Unit** | Count |
+| **What it indicates** | A volume can run out of inodes before space if it contains many small files. |
+
+**Alerting:** Alert when inode usage > **80%** for **15 min**.
