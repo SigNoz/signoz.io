@@ -1,8 +1,7 @@
 ---
 title: "Using SigNoz MCP for Dashboard Automation"
-slug: signoz-mcp-dashboard-automation
 date: 2026-04-29
-tags: [SigNoz, MCP, Observability, Dashboards]
+tags: [MCP, Observability]
 authors: [goutham_karthi]
 image: /img/blog/2026/04/mcp-blog-cover-2.webp
 description: Learn how the SigNoz MCP server lets you create and spin up dashboards from plain English. Whether you're onboarding a new service or responding to an active incident.
@@ -19,6 +18,8 @@ Dashboards are one of the fundamental parts of observability. They give you visi
 That's a lot of manual work you tend to put off until you really need it.
 
 That delay has real consequences. A new service goes to production without proper monitoring because nobody had time to build the dashboard before the release. Or an incident starts and the on-call engineer doesn't have the exact panels they're looking for. During an active incident, every minute spent clicking through the UI to set up a focused view is a minute not spent on the actual investigation. Dashboards exist to give you visibility, but there's often a lot of friction to build them.
+
+This is the friction the MCP is designed to remove: turning dashboard setup from a manual UI task into a prompt-driven workflow.
 
 <figure data-zoomable align='center'>
     <img
@@ -60,6 +61,8 @@ Teams know they need better dashboard coverage. The friction of building them ma
 
 ## Creating Dashboards from Natural Language
 
+Use this when a new service has just shipped and you need a first-pass monitoring dashboard quickly.
+
 When a new service gets deployed, there are some things you immediately need to know:
 
 - Is it healthy?
@@ -87,6 +90,7 @@ The MCP first verifies the service is actually ingesting telemetry, a useful che
         src="/img/blog/2026/04/recommendation-dashboard-detailed.webp"
         alt="Dashboard for recommendation-service showing error rate, p99 latency, and throughput panels"
     />
+<figcaption><i>Example output: a service-level dashboard with RED-style panels generated from a plain-English prompt.</i></figcaption>
 </figure>
 
 If you're not sure where to start, you can also ask the AI to reason on what the most important panels would be for your service. Based on the telemetry your service is sending, it can suggest what's worth monitoring, whether that's golden signals like error rate, latency, and throughput, or more specific metrics relevant to what your service actually does.
@@ -133,6 +137,7 @@ The MCP:
         src="/img/blog/2026/04/incident-dashboard-detailed.webp"
         alt="Incident dashboard scoped to checkout-service"
     />
+<figcaption><i>Example output: an incident-scoped dashboard centered on current failures, dependencies, and infrastructure signals.</i></figcaption>
 </figure>
 
 If a service is throwing errors, the MCP identifies other services that it depends on and builds dependency health panels for all of them without you needing to list them out. You can now create detailed, incident-specific dashboards in seconds, even in the middle of an active incident without any manual effort.
