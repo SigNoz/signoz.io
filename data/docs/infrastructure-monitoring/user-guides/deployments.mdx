@@ -1,0 +1,52 @@
+---
+date: 2026-05-22
+id: deployments-reference
+title: Deployments - Columns & Widgets Reference
+description: Detailed reference for every column and chart in the SigNoz Deployments view — underlying OpenTelemetry metrics and alerting best practices.
+doc_type: reference
+---
+
+This page documents every column and chart in the **Infrastructure Monitoring > Kubernetes > Deployments** view.
+
+## Columns
+
+| Column | Metric | Description |
+|--------|--------|-------------|
+| **Deployment Name** | `k8s.deployment.name` resource attribute | Kubernetes deployment name. |
+| **Available** | `k8s.deployment.available` | Number of ready pod replicas. |
+| **Desired** | `k8s.deployment.desired` | Number of desired pod replicas from the spec. |
+| **CPU Req/Limit Usage (%)** | Aggregated from pod metrics | Average CPU utilization across all deployment pods. |
+| **CPU Usage (cores)** | Aggregated `k8s.pod.cpu.usage` | Total CPU consumption across all pods. |
+| **Memory Req/Limit Usage (%)** | Aggregated from pod metrics | Average memory utilization across all pods. |
+| **Memory Usage** | Aggregated `k8s.pod.memory.usage` | Total memory consumption across all pods. |
+
+### Column Color-Coding
+
+Percentage columns use the same green/yellow/red progress bars as the Pods view. If **Available < Desired**, the deployment is degraded.
+
+### Metric Sources
+
+| Receiver | Metrics |
+|----------|---------|
+| <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver" target="_blank" rel="noopener noreferrer nofollow">k8scluster</a> | `k8s.deployment.available`, `k8s.deployment.desired` |
+| <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver" target="_blank" rel="noopener noreferrer nofollow">kubeletstats</a> | Pod-level CPU/memory (aggregated per deployment) |
+
+---
+
+## Widgets (Deployment Detail Page)
+
+### Available vs Desired
+
+| Property | Value |
+|----------|-------|
+| **Metrics** | `k8s.deployment.available`, `k8s.deployment.desired` |
+| **Unit** | Count |
+| **What it indicates** | A gap means pods are crashing, pending, or failing to schedule. |
+
+**Alerting:** Alert when `available < desired` for **5 min**. Alert when `available = 0` immediately.
+
+### Aggregated CPU and Memory
+
+The deployment detail page shows aggregate CPU and memory charts across all pods. See the [Pods Reference](https://signoz.io/docs/infrastructure-monitoring/user-guides/pods/) for details on individual pod metrics.
+
+**Alerting:** Set alerts on individual pod-level metrics for more precise detection.

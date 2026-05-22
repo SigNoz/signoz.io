@@ -1,0 +1,49 @@
+---
+date: 2026-05-22
+id: daemonsets-reference
+title: DaemonSets - Columns & Widgets Reference
+description: Detailed reference for every column and chart in the SigNoz DaemonSets view — underlying OpenTelemetry metrics and alerting best practices.
+doc_type: reference
+---
+
+This page documents every column and chart in the **Infrastructure Monitoring > Kubernetes > DaemonSets** view.
+
+## Columns
+
+| Column | Metric | Description |
+|--------|--------|-------------|
+| **DaemonSet Name** | `k8s.daemonset.name` resource attribute | Kubernetes DaemonSet name. |
+| **Current Scheduled** | `k8s.daemonset.current_scheduled_nodes` | Nodes currently running a pod from this DaemonSet. |
+| **Desired Scheduled** | `k8s.daemonset.desired_scheduled_nodes` | Nodes that should run a pod from this DaemonSet. |
+| **Ready** | `k8s.daemonset.ready_nodes` | Nodes where the DaemonSet pod is ready. |
+
+### Column Color-Coding
+
+If **Current** or **Ready** < **Desired**, the DaemonSet is not fully rolled out — possible scheduling, resource, or taint issues.
+
+---
+
+## Widgets (DaemonSet Detail Page)
+
+### Current vs Desired Nodes
+
+| Property | Value |
+|----------|-------|
+| **Metrics** | `k8s.daemonset.current_scheduled_nodes`, `k8s.daemonset.desired_scheduled_nodes` |
+| **Unit** | Count |
+| **What it indicates** | Whether every eligible node runs the DaemonSet pod. |
+
+**Alerting:** Alert when `current < desired` for **5 min**. Common causes: taints without tolerations, insufficient resources, cordoned nodes.
+
+### Ready Nodes
+
+| Property | Value |
+|----------|-------|
+| **Metric** | `k8s.daemonset.ready_nodes` |
+| **What it indicates** | If ready < current, pods are running but unhealthy. |
+
+**Alerting:** Alert when `ready < current` for **5 min**.
+
+### Metric Sources
+
+All DaemonSet metrics come from the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver" target="_blank" rel="noopener noreferrer nofollow">k8scluster receiver</a>.

@@ -1391,6 +1391,56 @@ const docsSideNav = [
             route: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics',
             label: 'Understanding CPU Utilization Metrics and Aggregation Intervals',
           },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/hosts',
+            label: 'Hosts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/pods',
+            label: 'Pods',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/nodes',
+            label: 'Nodes',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/namespaces',
+            label: 'Namespaces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/clusters',
+            label: 'Clusters',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/deployments',
+            label: 'Deployments',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/jobs',
+            label: 'Jobs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/daemonsets',
+            label: 'DaemonSets',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/statefulsets',
+            label: 'StatefulSets',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/volumes',
+            label: 'Volumes',
+          },
         ],
       },
     ],
