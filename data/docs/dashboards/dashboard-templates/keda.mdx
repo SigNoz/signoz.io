@@ -1,7 +1,7 @@
 ---
-date: 2026-05-06
+date: 2026-05-22
 id: keda
-title: KEDA Dashboard
+title: Monitor KEDA Autoscaling Health with SigNoz Dashboard
 description: Monitor KEDA autoscaling health in SigNoz, including scaling loop latency, scaler errors, active triggers, and registered resources.
 doc_type: explanation
 ---
@@ -42,13 +42,13 @@ The dashboard is grouped into five sections:
 - **Scaler Metrics Value**: current metric value used for HPA scaling decisions
 - **Scaler Metrics Latency**: time taken to fetch metrics from each scaler source
 - **Scaling Loop Latency**: KEDA control loop execution latency (`keda.internal.scale.loop.latency.seconds`)
-- **ScaledObject Errors**: error rate per ScaledObject (`keda.scaled.object.errors`)
+- **ScaledObject Errors**: error rate per ScaledObject (`keda.scaledobject.errors`)
 - **Scaler Errors**: per-scaler error rate (`keda.scaler.errors`)
-- **Total Scaler Errors**: aggregate scaler error rate per namespace (`keda.scaler.errors.total`)
+- **Total Scaler Errors**: aggregate of `keda.scaler.errors` summed across all scalers in the selected namespaces
 
 ### ScaledJob Metrics
 
-- **ScaledJob Errors**: error rate per ScaledJob (`keda.scaled.job.errors`)
+- **ScaledJob Errors**: error rate per ScaledJob (`keda.scaledjob.errors`)
 
 ### Resource and Trigger Metrics
 
@@ -60,24 +60,29 @@ The dashboard is grouped into five sections:
 - **CloudEventSource Events Emitted**: number of CloudEvents emitted (only populated if you have a CloudEventSource)
 - **CloudEventSource Events Queued**: number of CloudEvents queued
 
+<details>
+<ToggleHeading>
+
 ## Metrics Used
+</ToggleHeading>
 
-- `keda.build.info`
-- `keda.scaler.active`
-- `keda.scaler.metrics.value`
-- `keda.scaler.metrics.latency.seconds`
-- `keda.scaler.errors`
-- `keda.scaler.errors.total`
-- `keda.scaled.object.errors`
-- `keda.scaled.object.paused`
-- `keda.scaled.job.errors`
-- `keda.internal.scale.loop.latency.seconds`
-- `keda.resource.registered.count`
-- `keda.trigger.registered.count`
-- `keda.cloudeventsource.events.emitted.count`
-- `keda.cloudeventsource.events.queued`
+- `keda.build.info`: KEDA build metadata (version, git commit, Go version, OS/arch). Emitted once per operator pod start.
+- `keda.scaler.active`: Indicates whether each scaler is active (1) or inactive (0).
+- `keda.scaler.metrics.value`: Current metric value each scaler reports to the HPA.
+- `keda.scaler.metrics.latency.seconds`: Time taken to fetch the current metric from each scaler source.
+- `keda.scaler.errors`: Cumulative count of errors per scaler.
+- `keda.scaledobject.errors`: Cumulative count of errors per ScaledObject.
+- `keda.scaled.object.paused`: Indicates whether each ScaledObject is paused (1) or active (0).
+- `keda.scaledjob.errors`: Cumulative count of errors per ScaledJob.
+- `keda.internal.scale.loop.latency.seconds`: KEDA reconcile loop execution time per ScaledObject and ScaledJob.
+- `keda.resource.registered.count`: Number of registered KEDA custom resources per namespace and resource type.
+- `keda.trigger.registered.count`: Number of registered triggers per trigger type.
+- `keda.cloudeventsource.events.emitted.count`: Cumulative count of CloudEvents emitted, tagged by destination and state (`emitted` or `failed`).
+- `keda.cloudeventsource.events.queued`: Current count of CloudEvents pending in the emit queue per namespace.
 
-KEDA emits metrics with dot-delimited OTel names. SigNoz normalizes them to underscores in the Metrics Explorer (for example, `keda.scaler.active` becomes `keda_scaler_active`). For the full reference and any deprecated metrics, see the [KEDA Metrics Reference](https://signoz.io/docs/metrics-management/keda-metrics/#keda-metrics-reference) section in the setup guide.
+For the full reference and any deprecated metrics, see the <a href="https://keda.sh/docs/latest/integrations/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">KEDA OpenTelemetry Integration docs</a>.
+
+</details>
 
 ## Dashboard Variables
 
