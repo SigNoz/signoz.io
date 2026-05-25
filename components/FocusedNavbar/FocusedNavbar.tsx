@@ -42,7 +42,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
               src="/img/SigNozLogo-orange.svg"
               width={160}
               height={60}
-              alt="Datadog Alternative"
+              alt="SigNoz - Open Source Datadog Alternative"
               title="Open Source Datadog Alternative"
             />
             <span className="text-[17.111px] font-medium">SigNoz</span>

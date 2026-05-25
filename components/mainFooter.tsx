@@ -193,18 +193,18 @@ function Footer() {
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col items-end shadow-sm max-md:mt-10">
                 <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
-                  <Link href="/" prefetch={false}>
+                  <Link href="/" prefetch={false} className="flex items-center gap-2">
                     <Image
                       className="h-5 w-auto"
                       src="/img/SigNozLogo-orange.svg"
                       width={50}
                       height={50}
-                      alt="Datadog Alternative"
+                      alt="SigNoz - Open Source Datadog Alternative"
                       title="Open Source Datadog Alternative"
                       loading="lazy"
                     />
+                    <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
-                  <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>

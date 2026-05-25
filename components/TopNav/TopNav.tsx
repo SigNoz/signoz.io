@@ -86,8 +86,7 @@ export default function TopNav() {
             >
               <SigNozLogo
                 className="h-5 w-auto shrink-0"
-                role="img"
-                aria-label="Datadog Alternative"
+                aria-hidden="true"
                 title="Open Source Datadog Alternative"
               />
               <span className="text-[17.111px] font-medium">SigNoz</span>
