@@ -9,7 +9,7 @@ doc_type: howto
 
 ## Overview
 
-Use planned maintenance to schedule maintenance windows for your services. This helps you to avoid alerting during maintenance windows and to resume alerts after the maintenance window is over. The alert evaluation is paused during the maintenance window.
+Use planned maintenance to schedule maintenance windows for your services. This helps you to avoid alerting during maintenance windows and to resume alerts after the maintenance window is over. The alerts continue to be evaluated, but the notifications are suppressed during the maintenance window.
 
 ## Create a Maintenance Window
 
@@ -31,7 +31,7 @@ SigNoz supports two types of maintenance schedules:
 #### One-time Maintenance Window
 
 <Figure
-  src="/img/docs/product-features/alerts/one-time.png"
+  src="/img/docs/product-features/alerts/one-time.webp"
   alt="one-time maintenance window"
   caption="One-time maintenance window"
 />
@@ -58,11 +58,12 @@ This means that the maintenance window is scheduled for 22:00:00 to 23:00:00 in 
 The following fields are optional:
 
 - **Silence Alerts**: The alerts that are silenced during the maintenance window. If nothing is selected, all alerts are silenced.
+- **Scope**: A label expression that further filters which alert instances are suppressed. See [Scoping with Label Expressions](#scoping-with-label-expressions).
 
 #### Recurring Maintenance Window
 
 <Figure
-  src="/img/docs/product-features/alerts/recurring-daily.png"
+  src="/img/docs/product-features/alerts/recurring-daily.webp"
   alt="recurring maintenance window"
   caption="Recurring maintenance window"
 />
@@ -87,6 +88,7 @@ The following fields are optional:
 
 - **Ends**: The end date of the maintenance window.
 - **Silence Alerts**: The alerts that are silenced during the maintenance window. If nothing is selected, all alerts are silenced.
+- **Scope**: A label expression that further filters which alert instances are suppressed. See [Scoping with Label Expressions](#scoping-with-label-expressions).
 
 Examples:
 
@@ -117,3 +119,27 @@ Repeats every: Monthly
 Duration: 1 hour
 Timezone: America/New_York
 ```
+
+## Scoping with Label Expressions
+
+By default, a maintenance window silences all firing instances of the selected alerts (or every alert, if none are selected). **Scope** lets you narrow this further so that only alert instances whose labels match the expression are suppressed.
+
+### How it works
+
+- **No Scope set**: every firing instance of the selected alerts is silenced during the window.
+- **Scope set, no alerts selected**: every alert whose labels match the expression is silenced, regardless of which alert rule fired it.
+- **Both Scope and alerts selected**: only instances that belong to one of the selected alerts *and* match the expression are silenced.
+
+### Expression syntax
+
+Scope expressions use the <a href="https://expr-lang.org/" target="_blank" rel="noopener noreferrer nofollow">expr-lang</a> expression language. The expression must evaluate to a boolean (`true` = suppress, `false` = pass through). Each alert label is available as a variable with the same name.
+
+| Pattern | Example |
+|---|---|
+| Equality | `severity = "critical"` |
+| Inequality | `http.route != "/health"` |
+| Logical AND | `env = "production" AND service.name = "payments"` |
+| Logical OR | `url.scheme = "https" OR host = "localhost"` |
+| `in` list | `k8s.cluster.region in ["us-east-1", "eu-central-1"]` |
+
+References to labels that are not present on an alert instance are treated as `undefined` and evaluate to `false`, so the instance is not suppressed.

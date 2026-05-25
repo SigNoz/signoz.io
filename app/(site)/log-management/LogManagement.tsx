@@ -5,14 +5,8 @@ import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
-import { Badge } from '@signozhq/badge'
 import Image from 'next/image'
-import {
-  CARDS,
-  CORRELATION_CAROUSEL_DATA,
-  QUERY_BUILDER_CARDS,
-  STORAGE_DATA,
-} from './LogManagement.constants'
+import { CARDS, CORRELATION_CAROUSEL_DATA, QUERY_BUILDER_CARDS } from './LogManagement.constants'
 import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
@@ -199,88 +193,6 @@ const VisualQueryBuilder: React.FC = () => {
   )
 }
 
-const StorageSection: React.FC = () => {
-  return (
-    <div className="border-y-1 mb-12 border-dashed border-signoz_slate-400 bg-transparent p-0">
-      <div className="flex h-full flex-col items-start gap-12 p-6 md:flex-row">
-        <div className="flex h-full flex-1 flex-col justify-between">
-          <h2 className="mb-6 font-semibold text-signoz_vanilla-100">
-            Configure hot and cold storage
-          </h2>
-          <p className="mb-24 leading-relaxed text-signoz_vanilla-400">
-            Set retention from 15-180 days in hot storage for fast queries. Older logs move to cold
-            storage where they remain queryable at 3x slower speeds for compliance needs.
-          </p>
-          <div className="flex gap-12">
-            <div className="border-r border-dashed border-signoz_slate-400/60 pr-12">
-              <h3 className="mb-4 font-semibold text-signoz_vanilla-100">50%</h3>
-              <div className="text-signoz_vanilla-400">Storage Savings</div>
-            </div>
-            <div>
-              <h3 className="mb-4 font-semibold text-signoz_vanilla-100">2 years</h3>
-              <div className="text-signoz_vanilla-400">Configurable Retention</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 max-md:w-full">
-          <div className="w-full max-md:flex max-md:justify-center max-md:overflow-x-auto">
-            <table className="w-full border-collapse max-md:mx-auto max-md:min-w-[80vw]">
-              <thead className="!border-1 !border-signoz_slate-400">
-                <tr className="border-y-1 !border-signoz_slate-400">
-                  <td className="!border-none bg-signoz_ink-400/60 px-2 py-4">
-                    <div className="text-xs font-medium text-signoz_vanilla-400">
-                      {STORAGE_DATA.headers.hot}
-                    </div>
-                  </td>
-                  <td className="!border-none bg-signoz_ink-400 px-2 py-4 text-center" colSpan={5}>
-                    <div className="text-xs font-medium text-signoz_vanilla-400">
-                      {STORAGE_DATA.headers.cold}
-                    </div>
-                  </td>
-                </tr>
-                <tr className="border-y-1 !border-signoz_slate-400">
-                  <td className="!border-none bg-signoz_ink-400 p-2" />
-                  {STORAGE_DATA.coldPeriods.map((period, index) => (
-                    <td key={index} className="!border-none p-4 text-center">
-                      <div className="text-xs font-medium text-signoz_vanilla-400">
-                        {period.value} {period.unit}
-                      </div>
-                    </td>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="!border-1 w-full !border-signoz_slate-400">
-                {STORAGE_DATA.rows.map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    className="border-y-1 !border-signoz_slate-400 bg-signoz_ink-400/40"
-                  >
-                    <td className="!border-none bg-signoz_ink-400/60 p-2">
-                      <div className="flex items-center justify-between text-xs text-signoz_robin-400">
-                        {row.period.value} {row.period.unit}
-                        <Badge color="vanilla">{STORAGE_DATA.subHeader}</Badge>
-                      </div>
-                    </td>
-                    {row.prices.map((price, priceIndex) => (
-                      <td
-                        key={priceIndex}
-                        className="!border-none p-2 text-center text-xs text-signoz_vanilla-100"
-                      >
-                        {price}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // Main Component
 const LogsManagement: React.FC = () => {
   return (
@@ -304,7 +216,6 @@ const LogsManagement: React.FC = () => {
 
         <CarouselCards cards={CORRELATION_CAROUSEL_DATA} />
         <VisualQueryBuilder />
-        <StorageSection />
       </SectionLayout>
 
       <UsageBasedPricing show={['logs']} />

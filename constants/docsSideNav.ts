@@ -584,16 +584,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/s3-integration-iam-role-eks',
-            label: 'S3 Integration With AWS IAM role in EKS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/tutorial/oci-bucket-cold-storage-integration',
-            label: 'OCI Bucket Cold Storage Integration',
-          },
-          {
-            type: 'doc',
             route: '/docs/userguide/otlp-http-enable-cors',
             label: 'CORS in OTLP HTTP Receiver',
           },
@@ -1706,11 +1696,6 @@ const docsSideNav = [
             label: 'Available Quick Filters',
           },
           { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
         ],
       },
       {
