@@ -8,6 +8,7 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     label: 'Overview',
+    route: '/docs/what-is-signoz',
     items: [
       {
         type: 'doc',
@@ -45,6 +46,11 @@ const docsSideNav = [
     label: 'Setup',
     route: '/docs/install/',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/install/',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -219,6 +225,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/manage/overview',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/manage/overview',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -617,6 +628,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/opentelemetry-collection-agents/get-started',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/opentelemetry-collection-agents/get-started',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -3961,6 +3977,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/migration/migrate-to-signoz',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-to-signoz',
+        label: 'Overview',
+      },
       {
         label: 'From Datadog',
         type: 'category',
