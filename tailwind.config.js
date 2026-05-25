@@ -25,10 +25,20 @@ module.exports = {
           '0%': { opacity: '1', transform: 'translateY(0) scale(1)' },
           '100%': { opacity: '0', transform: 'translateY(-4px) scale(0.96)' },
         },
+        'nav-content-in': {
+          '0%': { opacity: '0', transform: 'translateX(-12px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        'nav-content-out': {
+          '0%': { opacity: '1', transform: 'translateX(0)' },
+          '100%': { opacity: '0', transform: 'translateX(12px)' },
+        },
       },
       animation: {
         'nav-popover-in': 'nav-popover-in 150ms cubic-bezier(0.16, 1, 0.3, 1) both',
         'nav-popover-out': 'nav-popover-out 100ms cubic-bezier(0.4, 0, 1, 1) both',
+        'nav-content-in': 'nav-content-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'nav-content-out': 'nav-content-out 200ms cubic-bezier(0.4, 0, 1, 1) both',
       },
       maxWidth: {
         '8xl': '1440px',

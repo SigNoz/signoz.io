@@ -44,7 +44,7 @@ export function NavDropdownProvider({ children }: { children: ReactNode }) {
   const closeDropdown = useCallback(() => {
     closeRef.current = setTimeout(() => {
       setActiveId(null)
-    }, 100)
+    }, 180)
   }, [])
 
   const cancelClose = useCallback(() => {
