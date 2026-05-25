@@ -127,6 +127,18 @@ const getAncestryMap = (): Map<string, BreadcrumbCrumb[]> => {
 
 // --- Exported functions ---
 
+// https://developers.google.com/search/docs/appearance/structured-data/breadcrumb#breadcrumb-list
+// The example in google docs shows that the last breadcrumb's item URL omitted but,
+// We always include `item` on every ListItem, including the last one.
+// 1. Google's docs show omission as acceptable, but including it ensures
+// spec-complete schema.org markup, compatibility with Bing/Yandex,
+// and consistency with other search engines.
+// 2. Also, the last breadcrumb's item URL acts as a canonical reinforcement. Example: If /docs/instrumentation/python/ has variants like ?tab=auto or ?ref=sidebar, the breadcrumb item anchors the
+// canonical version unambiguously in structured data.
+// 3. Programmatic consumers beyond Google -  Google's rich results renderer may not need the last item, but other consumers do:
+//   - AI assistants / RAG pipelines parsing the structured data to build navigation or cite sources
+//   - Accessibility tools that read structured data to build skip-navigation
+//   - Aggregators indexing schema
 export function buildBreadcrumbSchema(crumbs: BreadcrumbCrumb[]): BreadcrumbListSchema {
   return {
     '@context': 'https://schema.org',
