@@ -616,16 +616,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/s3-integration-iam-role-eks',
-            label: 'S3 Integration With AWS IAM role in EKS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/tutorial/oci-bucket-cold-storage-integration',
-            label: 'OCI Bucket Cold Storage Integration',
-          },
-          {
-            type: 'doc',
             route: '/docs/userguide/otlp-http-enable-cors',
             label: 'CORS in OTLP HTTP Receiver',
           },

@@ -586,6 +586,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/tutorial/s3-integration-iam-role-eks/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/oci-bucket-cold-storage-integration/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
           source: '/docs/tutorial/jvm-metrics/',
           destination:
             '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
