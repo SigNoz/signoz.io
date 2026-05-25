@@ -3,7 +3,7 @@ import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { buildListingMetadata } from '../metadata'
 import { getResourceCenterGuides } from '../content'
 import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
 
 export const metadata = buildListingMetadata('Guides')
 
@@ -15,10 +15,7 @@ export default async function GuidesHome() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-      />
+      <JsonLdScript data={breadcrumbJsonLd} />
       <ListingPageLayout>
         <Guides posts={guidePosts} />
       </ListingPageLayout>

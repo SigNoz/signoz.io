@@ -14,7 +14,7 @@ import React from 'react'
 import { fetchGuideBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
 import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
@@ -134,14 +134,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   if (hubContext) {
     return (
       <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-        />
+        <JsonLdScript data={jsonLd} />
+        <JsonLdScript data={breadcrumbJsonLd} />
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -170,14 +164,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-      />
+      <JsonLdScript data={jsonLd} />
+      <JsonLdScript data={breadcrumbJsonLd} />
 
       <div className="container mx-auto">
         <Button variant={'ghost'} to={`/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">

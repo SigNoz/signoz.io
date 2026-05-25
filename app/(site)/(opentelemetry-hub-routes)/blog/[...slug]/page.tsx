@@ -12,7 +12,7 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
 import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
 import { fetchBlogBySlug } from '@/utils/cachedData'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
@@ -131,14 +131,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <>
         {!suppressStructuredData && (
           <>
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-            />
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-            />
+            <JsonLdScript data={jsonLd} />
+            <JsonLdScript data={breadcrumbJsonLd} />
           </>
         )}
         <OpenTelemetryHubContent
@@ -171,14 +165,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     <>
       {!suppressStructuredData && (
         <>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-          />
+          <JsonLdScript data={jsonLd} />
+          <JsonLdScript data={breadcrumbJsonLd} />
         </>
       )}
       <Layout

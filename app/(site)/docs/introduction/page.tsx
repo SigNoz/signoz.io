@@ -14,7 +14,7 @@ import { Metadata } from 'next'
 import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
 import HoverableSidebar from '@/components/HoverableSidebar'
 import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
 
 export const metadata: Metadata = {
   title: 'Introduction to SigNoz - Open Source Observability Platform',
@@ -27,10 +27,7 @@ export default function DocsIntroductionPage() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-      />
+      <JsonLdScript data={breadcrumbJsonLd} />
       <HoverableSidebar />
       <Header showSearchBar />
       <SendData />

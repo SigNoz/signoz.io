@@ -14,7 +14,7 @@ import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
 import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 
@@ -129,14 +129,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   if (hubContext) {
     return (
       <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-        />
+        <JsonLdScript data={jsonLd} />
+        <JsonLdScript data={breadcrumbJsonLd} />
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -164,14 +158,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(breadcrumbJsonLd) }}
-      />
+      <JsonLdScript data={jsonLd} />
+      <JsonLdScript data={breadcrumbJsonLd} />
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
