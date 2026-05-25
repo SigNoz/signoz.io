@@ -1,0 +1,149 @@
+---
+date: 2026-05-17
+id: istio-metrics
+title: Send Istio Metrics to SigNoz using OpenTelemetry
+description: Collect Istio service mesh metrics in SigNoz using the OpenTelemetry Collector Prometheus receiver.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Configure the OpenTelemetry Collector to scrape Istio's Prometheus endpoints and send metrics to SigNoz. This covers both the istiod control plane and Envoy sidecar data plane.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Istio installed in your Kubernetes cluster
+- OpenTelemetry Collector deployed in the same cluster. See [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) to get started
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## How Istio exposes metrics
+
+Istio exposes Prometheus-format metrics on two sets of endpoints:
+
+- **istiod** (control plane): port `15014`, scraped via Kubernetes endpoint discovery in the `istio-system` namespace
+- **Envoy sidecars and gateways** (data plane): port `15090`, path `/stats/prometheus`, scraped via pod discovery using the port name `.*-envoy-prom`
+
+For metric names and labels, see the official <a href="https://istio.io/latest/docs/reference/config/metrics/" target="_blank" rel="noopener noreferrer nofollow">Istio standard metrics reference</a>.
+
+## Send Metrics to SigNoz
+
+### Step 1. Configure the OpenTelemetry Collector
+
+Merge the following into your existing Collector config. It adds two Prometheus scrape jobs (one for istiod, one for Envoy proxies) and an OTLP exporter pointing to SigNoz.
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'istiod'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - istio-system
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_service_name
+                - __meta_kubernetes_endpoint_port_name
+              action: keep
+              regex: istiod;http-monitoring
+
+        - job_name: 'envoy-stats'
+          metrics_path: /stats/prometheus
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: '.*-envoy-prom'
+
+exporters:
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      signoz-ingestion-key: '<your-ingestion-key>'
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      exporters: [otlphttp]
+```
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  The Collector needs `ClusterRole` permissions for Kubernetes pod and endpoint discovery. The [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) guide covers the required RBAC setup.
+</Admonition>
+
+### Step 2. Restart the Collector
+
+```bash
+kubectl rollout restart deployment/otel-collector -n <collector-namespace>
+```
+
+### Step 3. Validate
+
+After the Collector restarts:
+
+1. In SigNoz, go to **Metrics** > **Metrics Explorer**.
+2. Search for `istio_requests_total` to verify data plane metrics are flowing.
+3. Search for `pilot_xds` to verify control plane metrics are flowing.
+
+SigNoz shows metrics within the first scrape interval (default: 60 seconds).
+
+<Figure
+  src="/img/docs/metrics/istio/sample-metrics.webp"
+  alt="Istio Metrics"
+  caption="Istio Metrics"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No metrics appearing
+
+Verify the Collector pod has RBAC permissions to discover Kubernetes endpoints and pods. Run:
+
+```bash
+kubectl logs deployment/otel-collector -n <collector-namespace>
+```
+
+Look for scrape errors or permission-denied messages.
+
+### Only istiod metrics, no sidecar metrics
+
+Verify your pods have Istio injection enabled (`istio-injection: enabled` on the namespace) and that the sidecar container port is named with the `-envoy-prom` suffix.
+
+### Metrics delayed
+
+The default Prometheus scrape interval is 60 seconds. Reduce it for faster feedback:
+
+```yaml
+scrape_configs:
+  - job_name: 'istiod'
+    scrape_interval: 15s
+    # ...
+```
+
+</details>
+
+## Next steps
+
+- [Istio Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/istio-dashboard)
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on your metrics
+
+## Get Help
+
+<GetHelp />

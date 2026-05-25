@@ -1,0 +1,45 @@
+---
+date: 2026-05-12
+id: external-calls
+title: External Calls
+description: Monitor outbound HTTP and gRPC calls from your services in SigNoz — error rate, latency, and required span attributes.
+doc_type: reference
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The **External Calls** pane in the service details page tracks all outbound calls your application makes to external services, including HTTP APIs, gRPC endpoints, and AWS Lambda functions.
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/external-calls-metrics.webp"
+  alt="External Metrics tab showing error percentage, average duration, RPS by address, and duration by address"
+  caption="External Metrics — error rate, latency, and throughput by address"
+/>
+
+## Required span attributes
+
+For a span to appear in this pane:
+
+- `span.kind = 3` — spans of kind <a href="https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/trace/v1/trace.proto#L139" target="_blank" rel="noopener noreferrer nofollow">`CLIENT`</a>.
+- One of the following attribute sets must be present:
+  - `rpc.system`, `rpc.service`, `rpc.method`
+  - `rpc.system`, `net.peer.name`, `net.peer.port`
+  - `rpc.system`, `net.peer.ip`, `net.peer.port`
+  - `http.host`
+  - `net.peer.name`, `net.peer.port`
+  - `net.peer.ip`, `net.peer.port`
+  - `http.url`
+  - `peer.service`
+
+The remote host address is resolved from the first matching attribute set in the order above.
+
+If your services are making external calls but the panel is empty, verify that your spans include the required attributes.
+
+## Metrics displayed
+
+- **Error percentage** — share of external calls that returned errors.
+- **Average duration (ms)** — mean latency of all outbound calls.
+- **Calls per second by address** — throughput broken down by remote host.
+- **Average duration by address** — latency broken down by remote host.
+
+<GetHelp />

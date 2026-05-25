@@ -1,0 +1,81 @@
+---
+date: 2026-05-20
+id: querying-traces
+title: Querying Traces
+description: Query traces in SigNoz using the Query Builder in Trace Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
+doc_type: reference
+---
+
+SigNoz supports querying traces using the visual **[Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)** in both the [Trace Explorer](https://signoz.io/docs/userguide/traces/) and [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/), with **ClickHouse SQL** available as an additional option in Dashboards.
+
+## Query Builder
+
+The Query Builder is the primary way to query traces. It is available in both Trace Explorer and Dashboards.
+
+### Filtering
+
+Use the **Filter** field to narrow down spans using attributes. Supported operators include:
+
+| Intent | Operator | Example |
+|---|---|---|
+| Exact match | `=` | `service.name = 'frontend'` |
+| Exclude | `!=` | `service.name != 'redis'` |
+| One of several | `IN` | `httpMethod IN ('GET', 'POST')` |
+| Substring | `LIKE` | `name LIKE '%payment%'` |
+| Field exists | `EXISTS` | `db.system EXISTS` |
+
+Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) guide and [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of operators and syntax details.
+
+### Aggregation (Time Series & Table views)
+
+Trace queries support a full set of [aggregation functions](https://signoz.io/docs/querying/aggregation-grouping/) in the **Time Series** and **Table** views:
+
+- **Statistical** — Count, Count Distinct, Sum, Avg, Min, Max
+- **Percentiles** — P05, P10, P25, P50, P75, P90, P95, P99 (commonly used for latency analysis)
+- **Rate** — Rate, Rate Sum, Rate Avg, Rate Max, Rate Min
+
+### Group By (Time Series & Table views)
+
+Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` and `operation` produces a separate series for each service-operation pair. Useful for comparing latency or error rates across services, endpoints, or status codes.
+
+### Having
+
+Filter results after aggregation. For example, `p99(duration) > 500` shows only groups where P99 latency exceeds 500ms. See [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) for sorting, limiting, and conditional filtering options.
+
+### Formulas
+
+Combine up to ten queries using formulas. For example, calculate error rate: `(A / B) * 100`, where A counts errored spans and B counts total spans. See [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) for formula functions and examples.
+
+For full details on the Query Builder, see the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder-v5/).
+
+### Trace Matching
+
+Trace Matching goes beyond single-span filtering — it lets you define multiple span queries and combine them with **trace-level operators** to find spans based on their relationships within a trace.
+
+| Operator | Symbol | What it returns |
+|---|---|---|
+| Has Direct Child | `=>` | Spans from A that have a **direct child** matching B |
+| Has Descendant | `->` | Spans from A that are **ancestors** (at any depth) of B |
+| AND | `&&` | Spans from A in traces that **also contain** spans matching B |
+| OR | `\|\|` | **Union** of spans from both A and B |
+| NOT | `A NOT B` | Spans from A in traces that **do not contain** any spans matching B |
+
+For full operator reference and examples, see [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/).
+
+## ClickHouse SQL (Dashboards Only)
+
+When building Dashboard panels, you can write raw ClickHouse SQL queries against the traces tables for advanced analytics beyond what the Query Builder supports.
+
+For details and example queries, see the [ClickHouse Traces Query guide](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/).
+
+## Next Steps
+
+- [Trace Details](https://signoz.io/docs/userguide/span-details/) — inspect individual traces with flamegraph and waterfall views
+- [Aggregation & Grouping](https://signoz.io/docs/querying/aggregation-grouping/) — detailed reference for aggregation functions and group by
+- [Result Manipulation](https://signoz.io/docs/querying/result-manipulation/) — sorting, limiting, and Having clause patterns
+- [Multi-Query Analysis](https://signoz.io/docs/querying/multi-query-analysis/) — formulas, error rate calculations, and trace matching operators
+- [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how step intervals work for time series queries
+- [Advanced Query Examples](https://signoz.io/docs/userguide/search-advanced-examples/) — complex query patterns and real-world use cases
+- [Trace-based Alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) — get notified on latency spikes or error rate changes
+- [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) — navigate between related traces and logs
+- [Traces API](https://signoz.io/docs/traces-management/trace-api/search-traces/) — search and aggregate traces programmatically

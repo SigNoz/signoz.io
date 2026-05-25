@@ -155,7 +155,14 @@ function extractFrontmatter(filePath) {
 }
 
 function getFileContentAtRef(ref, filePath) {
-  return tryRun(`git show ${ref}:"${filePath}"`)
+  try {
+    return execSync(`git show ${ref}:"${filePath}"`, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+  } catch (error) {
+    return null
+  }
 }
 
 function hasOnlyTitleAndDescriptionChanges(filePath, options = {}) {
@@ -171,7 +178,7 @@ function hasOnlyTitleAndDescriptionChanges(filePath, options = {}) {
   const { frontmatter: currentFrontmatter, body: currentBody } = splitFrontmatter(currentContent)
   const { frontmatter: previousFrontmatter, body: previousBody } = splitFrontmatter(previousContent)
 
-  if (currentBody !== previousBody) {
+  if (currentBody.trimEnd() !== previousBody.trimEnd()) {
     return false
   }
 
@@ -308,7 +315,9 @@ function main() {
   const comparisonRef = isPreCommit ? 'HEAD' : resolveComparisonRef(baseBranch)
 
   // Get changed files
-  const changedFiles = isPreCommit ? getStagedDocFiles() : getChangedDocFiles(baseBranch, comparisonRef)
+  const changedFiles = isPreCommit
+    ? getStagedDocFiles()
+    : getChangedDocFiles(baseBranch, comparisonRef)
 
   if (changedFiles.length === 0) {
     console.log('No documentation files to check')

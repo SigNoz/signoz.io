@@ -1,6 +1,5 @@
 ---
-date: 2026-04-27
-
+date: 2026-05-13
 title: K8s Infra - Configure
 id: k8s-infra-otel-config
 description: Configure the k8s-infra OpenTelemetry collection agent to send Kubernetes metrics, logs, and traces to SigNoz.
@@ -13,15 +12,12 @@ To install K8s-Infra in your Kubernetes cluster, please check out the [k8s-infra
 
 ## Send Data from Instrumented Applications
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/data-flow-2x.webp" alt="Data flow from your application to SigNoz"/>
-    <figcaption>
-      <i>
-        OpenTelemetry instrumented application sends data to OTelAgent Daemon deployed in
-        your k8s infra. The OTelAgent daemon sends the collected data to SigNoz.
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/data-flow-2x.webp"
+  alt="Data flow from your application to SigNoz"
+  caption="OpenTelemetry instrumented application sends data to OTelAgent Daemon deployed in
+        your k8s infra. The OTelAgent daemon sends the collected data to SigNoz."
+/>
 
 <Admonition>
 In case of **GKE Autopilot**, you will not be able to send data to OTelAgent Daemon
@@ -104,14 +100,14 @@ SigNoz allows you to use the presets in the k8s-infra Helm chart to easily confi
 <Admonition>
   The `presets` section in the `values.yaml` file allows you to enable or disable specific configurations. To check the available presets, refer to the [k8s-infra Helm chart documentation](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/README.md#presets-configuration).
 </Admonition>
-### 1. OTLP Exporter
+### 1. OTLP/HTTP Exporter
 ```yaml
 presets:
-  otlpExporter:
+  otlphttpExporter:
     enabled: true  # Must be enabled for data to reach SigNoz
 ```
 
-**What it does**: Enables sending telemetry data to SigNoz backend. This is required for SigNoz to receive any data.
+**What it does**: Enables sending telemetry data to SigNoz backend over OTLP/HTTP. This is required for SigNoz to receive any data.
 
 ### 2. Host Metrics Collection
 ```yaml
@@ -386,7 +382,7 @@ When you override a pipeline's `processors` list, Helm replaces the entire list 
 ### Production Cluster with Full Monitoring
 ```yaml
 presets:
-  otlpExporter:
+  otlphttpExporter:
     enabled: true
   hostMetrics:
     enabled: true
@@ -411,7 +407,7 @@ presets:
 ### Resource-Constrained Environment
 ```yaml
 presets:
-  otlpExporter:
+  otlphttpExporter:
     enabled: true
   hostMetrics:
     enabled: true

@@ -1,5 +1,4 @@
 import siteMetadata from '@/data/siteMetadata'
-import Authors from '../../constants/authors.json'
 import { Clock4 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -23,8 +22,8 @@ export default function BlogPostCard({ blog }: { blog: BlogPostCardContent }) {
       return authorID
     }
 
-    if (Authors?.[authorID]) {
-      return Authors?.[authorID]
+    if (typeof authorID === 'string') {
+      return { name: authorID }
     }
 
     return {}

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { SiSpringboot, SiApachetomcat } from 'react-icons/si'
+import { SiSpringboot, SiApachetomcat, SiScala } from 'react-icons/si'
 import { TbCoffee } from 'react-icons/tb'
 import { FaJava } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -18,6 +18,7 @@ const FRAMEWORKS_ICON_MAP: Record<string, React.ReactNode> = {
     <SiApachetomcat className="h-7 w-7 text-yellow-500" />
   ),
   '/docs/instrumentation/java/opentelemetry-jboss': <FaJava className="h-7 w-7 text-red-500" />,
+  '/docs/instrumentation/java/opentelemetry-scala': <SiScala className="h-7 w-7 text-red-600" />,
 }
 
 const ADVANCED_ICON_MAP: Record<string, React.ReactNode> = {

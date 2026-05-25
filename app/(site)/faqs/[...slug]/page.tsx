@@ -1,0 +1,256 @@
+import 'css/prism.css'
+import { components } from '@/components/MDXComponents'
+import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
+import { Metadata } from 'next'
+import siteMetadata from '@/data/siteMetadata'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { SidebarIcons } from '@/components/sidebar-icons/icons'
+import Button from '@/components/ui/Button'
+import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
+import { generateStructuredData } from '@/utils/structuredData'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import readingTime from 'reading-time'
+import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
+export const dynamicParams = true
+
+const relatedArticleRoutePrefix: Record<string, string> = {
+  guide: 'guides',
+  comparison: 'comparisons',
+  blog: 'blog',
+  faq: 'faqs',
+  opentelemetry: 'opentelemetry',
+  case_study: 'case-study',
+}
+
+function getRelatedArticleDoc(entry: MDXContent): { doc: MDXContent; contentType: string } | null {
+  const contentType = entry.content_type
+  const doc = contentType ? entry[contentType] : undefined
+
+  if (doc && doc.title) {
+    return { doc, contentType }
+  }
+
+  return null
+}
+
+function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
+  if (Array.isArray(content.related_articles) && content.related_articles.length > 0) {
+    return content.related_articles
+      .map((entry: MDXContent) => {
+        const result = getRelatedArticleDoc(entry)
+        if (!result) return null
+
+        const { doc, contentType } = result
+        const routePrefix = relatedArticleRoutePrefix[contentType] || contentType
+
+        return {
+          title: doc.title,
+          publishedOn: doc.date || doc.updatedAt || doc.publishedAt,
+          url: `/${routePrefix}${doc.path || ''}`,
+        }
+      })
+      .filter(Boolean) as RelatedArticleProps[]
+  }
+
+  if (Array.isArray(content.related_faqs)) {
+    return content.related_faqs.map((faq: MDXContent) => ({
+      title: faq.title,
+      publishedOn: faq.date,
+      url: `/faqs${faq.path || ''}`,
+    }))
+  }
+
+  return []
+}
+
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
+}): Promise<Metadata> {
+  const params = await props.params
+  try {
+    // Convert slug array to path
+    const path = params.slug.join('/')
+
+    const isProduction = process.env.VERCEL_ENV === 'production'
+
+    try {
+      const deployment_status = isProduction ? 'live' : 'staging'
+      const { data: content } = await fetchMDXContentByPath('faqs', path, deployment_status)
+
+      // Extract author names from the content
+      const authorNames = (content as MDXContent)?.authors?.map((author) => author?.name) || [
+        'SigNoz Team',
+      ]
+
+      return {
+        title: (content as MDXContent).title,
+        description:
+          (content as MDXContent)?.description || `${(content as MDXContent)?.title} - SigNoz FAQ`,
+        authors: authorNames.map((name) => ({ name })),
+        openGraph: {
+          title: (content as MDXContent)?.title,
+          description:
+            (content as MDXContent)?.description ||
+            `${(content as MDXContent)?.title} - SigNoz FAQ`,
+          siteName: siteMetadata.title,
+          locale: 'en_US',
+          type: 'article',
+          publishedTime: (content as MDXContent)?.date,
+          modifiedTime: (content as MDXContent)?.updatedAt,
+          url: (content as MDXContent)?.path || './',
+          authors: authorNames,
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: (content as MDXContent)?.title,
+          description:
+            (content as MDXContent)?.description ||
+            `${(content as MDXContent)?.title} - SigNoz FAQ`,
+        },
+      }
+    } catch (error) {
+      // Content not found, return 404 metadata
+      return {
+        title: 'Page Not Found',
+        description: 'The requested FAQ page could not be found.',
+        robots: {
+          index: false,
+          follow: false,
+        },
+      }
+    }
+  } catch (error) {
+    console.error('Error generating metadata:', error)
+    return {
+      title: 'Error',
+      description: 'An error occurred while loading the FAQ page.',
+    }
+  }
+}
+
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
+export async function generateStaticParams() {
+  return []
+}
+
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
+  if (!params.slug || params.slug.length === 0) {
+    return <div className="min-h-screen">Redirecting to FAQs index...</div>
+  }
+
+  const path = params.slug.join('/')
+
+  const isProduction = process.env.VERCEL_ENV === 'production'
+
+  // Fetch content from Strapi with error handling
+  let content: MDXContent
+  try {
+    if (!process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL) {
+      throw new Error('Strapi API URL is not configured')
+    }
+
+    const deployment_status = isProduction ? 'live' : 'staging'
+
+    const response = await fetchMDXContentByPath('faqs', path, deployment_status)
+    if (!response || !response.data) {
+      console.error(`Invalid response for path: ${path}`)
+      notFound()
+    }
+    content = response.data as MDXContent
+  } catch (error) {
+    console.error('Error fetching FAQ content:', error)
+    notFound()
+  }
+
+  if (!content) {
+    console.log(`No content returned for path: ${path}`)
+    notFound()
+  }
+
+  // Generate computed fields
+  const readingTimeData = readingTime(content?.content)
+  const toc = generateTOC(content?.content)
+
+  // Compile MDX content with all plugins
+  let compiledContent
+  try {
+    const { content: mdxContent } = await compileMDX({
+      source: content?.content,
+      components,
+      options: mdxOptions as MDXRemoteProps['options'],
+    })
+    compiledContent = mdxContent
+  } catch (error) {
+    console.error('Error compiling MDX:', error)
+    notFound()
+  }
+
+  // Generate structured data — override path with route prefix for correct URL
+  const contentForStructuredData = { ...content, path: `faqs${content.path || `/${path}`}` }
+  const structuredData = generateStructuredData('faqs', contentForStructuredData)
+  const relatedArticles = buildRelatedArticles(content)
+
+  // Prepare content for FAQLayout
+  const mainContent = {
+    title: content.title,
+    date: content.date,
+    lastmod: content.updatedAt,
+    tags: content.tags?.map((tag: MDXContent) => tag.value) || [],
+    draft: content.deployment_status === 'draft',
+    summary: content.description,
+    images: content.images || [],
+    authors: content.authors?.map((author: MDXContent) => author?.name) || [],
+    slug: path,
+    path: content.path || `/faqs/${path}`,
+    type: 'FAQ' as const,
+    readingTime: readingTimeData,
+    filePath: `/faqs/${path}`,
+    structuredData: structuredData,
+    toc: toc,
+    relatedArticles,
+  }
+
+  // Prepare author details from the authors relation
+  const authorDetails: { name: string; url?: string; image_url?: string }[] = content.authors?.map(
+    (author: MDXContent) => ({
+      name: author.name || 'Unknown Author',
+      url: author.url,
+      image_url: author.image_url,
+    })
+  ) || [{ name: 'SigNoz Team' }]
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
+      <div className="container mx-auto">
+        <Button variant={'ghost'} isButton={true} className="ml-3.5 mt-10 hover:bg-transparent">
+          <Link href={`/faqs/`} className="flex items-center">
+            <SidebarIcons.ArrowLeft />
+            <span className="pl-1.5 text-sm">Back to FAQs</span>
+          </Link>
+        </Button>
+      </div>
+
+      <FAQLayout
+        content={mainContent}
+        authorDetails={authorDetails}
+        authors={content.authors?.map((author) => author?.name) || []}
+        toc={toc}
+        tags={content.tags?.map((tag) => tag?.value) || []}
+        relatedArticles={relatedArticles}
+      >
+        <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
+          {compiledContent}
+        </div>
+      </FAQLayout>
+    </>
+  )
+}

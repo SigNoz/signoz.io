@@ -1,0 +1,145 @@
+---
+date: 2026-05-18
+id: multi-query-analysis
+title: Multi-Query Analysis
+description: Combine multiple queries with formulas and trace operators for advanced comparisons like error rates, SLA monitoring, and parent-child trace relationships.
+doc_type: howto
+---
+
+Combine multiple queries to perform sophisticated analysis that single queries cannot achieve.
+
+Formulas and multiple queries are available in the **SigNoz Query Builder** across: Metrics Explorer, Logs Explorer (Time Series and Table views), and Traces Explorer (Time Series and Table views).
+
+## Advanced Comparisons
+
+### Use Cases for Multiple Queries
+
+**Error Rate Calculation**
+- Query A: Count of error requests
+- Query B: Count of all requests
+- Formula: `(A/B) * 100` (error percentage)
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/error-percentage.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Formula feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+**SLA Monitoring**
+- Query A: Requests under 200ms
+- Query B: Total requests
+- Formula: `(A/B) * 100` (SLA compliance percentage)
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/sla-monitoring-with-duration.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Formula feature of SigNoz Query Builder</i></figcaption>
+</figure>
+
+### Available Mathematical Functions in Formula
+
+- **Basic Operations**: `+`, `-`, `*`, `/`
+- **Logarithmic**: `log`, `ln`, `log2`, `log10`
+- **Exponential**: `exp`, `exp2`, `exp10`
+- **Trigonometric**: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
+- **Mathematical**: `sqrt`, `cbrt`, `abs`
+- **Utility**: `now`, `degrees`, `radians`
+
+### Multi-Query Best Practices
+
+1. **Align time ranges**: Ensure all queries use the same time window
+2. **Consistent grouping**: Use identical `Group By` clauses for meaningful comparisons
+
+## Trace Matching
+
+Trace matching lets you combine multiple trace queries to analyze parent-child span relationships within a trace. It is available in the Traces Explorer across **Trace View**, **List View**, **Table View**, and **Time Series** views. For an overview of the Traces Explorer and its views, see the [Traces](https://signoz.io/docs/userguide/traces/) user guide.
+
+### Available Operators
+
+| Operator | Syntax | Description |
+|---|---|---|
+| **Direct Descendant** | `A => B` | B is an immediate child span of A |
+| **Indirect Descendant** | `A -> B` | B appears anywhere below A in the trace tree (any depth) |
+| **AND** | `A && B` | Both A and B exist within the same trace |
+| **OR** | `A \|\| B` | Either A or B exists within the trace |
+| **NOT** | `NOT A` | Excludes traces containing spans matching A |
+
+### Use Cases
+
+**Direct Descendants (`=>`)** — Find spans where one service directly calls another.
+
+- Query A: Span with `service.name = 'frontend'` being the root span
+- Query B: Span with `service.name = 'customer'` as the direct child of the frontend span
+- Trace Matching: `A => B`
+
+Use this when you need to verify that a specific service-to-service call is happening as expected, or to measure latency at a specific call boundary.
+
+<figure data-zoomable align='center'>
+    <video
+        className="box-shadowed-image"
+        src="/img/docs/product-features/query-builder/direct-descedant-operator.mp4"
+        width="100%"
+        controls
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>Example showing the Direct Descendant Trace Operator</i></figcaption>
+</figure>
+
+**Indirect Descendants (`->`)** — Find spans where one service eventually calls another, regardless of how many intermediate services are in between.
+
+- Query A: Span with `service.name = 'frontend'` as the root span
+- Query B: Span with `service.name = 'customer'` and `has_error = true` anywhere below A in the trace tree
+- Trace Matching: `A -> B`
+
+Use this to find error propagation paths or to trace a request through multiple service hops.
+
+<Figure
+  src="/img/docs/product-features/query-builder/indirect-descedant-operator.webp"
+  alt="SigNoz UI showing Indirect Descendant Trace Operator"
+  caption="Indirect Descendant operator in Trace Explorer"
+/>
+
+**AND (`&&`)** — Find traces that contain both matching span patterns, regardless of their parent-child relationship.
+
+- Query A: Span with `service.name = 'cartservice'`
+- Query B: Any span in the same trace with `status_code != 200`
+- Trace Matching: `A && B`
+
+Use this to correlate spans across services within the same trace — for example, finding all cart service traces that also contain a non-200 status code somewhere.
+
+<Figure
+  src="/img/docs/product-features/query-builder/and-operator.webp"
+  alt="SigNoz UI showing AND Trace Operator"
+  caption="AND operator in Trace Explorer"
+/>
+
+**OR (`||`)** — Find traces that contain either of the matching span patterns.
+
+**NOT** — Exclude traces that contain spans matching the specified query.
+
+### Expression Syntax
+
+- **Identifiers**: Query labels like `A`, `B`, `C` (letters followed by optional digits)
+- **Parentheses**: Use `()` to group sub-expressions, e.g., `(A => B) && (C -> D)`
+- **Max operators**: Up to 10 operators per expression
+
+**Operator precedence** (lowest to highest): `->`, `=>`, `&&`, `||`, `NOT`
+
+<Admonition type="note">
+Unlike standard Boolean logic where AND binds tighter than OR, trace operators give `||` higher precedence than `&&`. Use parentheses to make your intent explicit when combining these operators.
+
+For example, `A => B && C` is parsed as `A => (B && C)` because `&&` has higher precedence than `=>`. Use parentheses to override precedence when combining multiple operators.
+</Admonition>

@@ -46,20 +46,23 @@ Shared snippets imported into docs should **prefer React (`.tsx`)** over new **`
 
 Review each changed doc against these checks in order:
 
-1. Intended personas are clear from the content and assumptions.
-2. The primary job is obvious and the page does not mix unrelated jobs in one mandatory flow.
-3. The happy path is easy to follow end to end.
-4. Time-to-first-success is short and the default path is clear.
-5. Steps are concrete, concise, and unambiguous.
-6. Only required actions stay in the main path.
-7. Recommended defaults are the default, and advanced options are moved out of the main flow.
-8. Critical prerequisites, attributes, or concepts have a direct step or high-value link.
-9. Troubleshooting starts from symptoms and points to exact next actions.
-10. Validation tells users what success looks like in SigNoz.
-11. Next steps help users complete the broader job.
-12. Links directly help readers complete the current step.
-13. Added or edited links resolve and use canonical production paths.
-14. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
+1. Title is 50–60 characters, leads with the primary keyword, and uses an action word. No brand suffix.
+2. Description is 120–160 characters, explains what the page covers and what the reader will learn, and uses action-oriented language.
+3. Intended personas are clear from the content and assumptions.
+4. The primary job is obvious and the page does not mix unrelated jobs in one mandatory flow.
+5. The happy path is easy to follow end to end.
+6. Time-to-first-success is short and the default path is clear.
+7. Steps are concrete, concise, and unambiguous.
+8. Only required actions stay in the main path.
+9. Recommended defaults are the default, and advanced options are moved out of the main flow.
+10. Critical prerequisites, attributes, or concepts have a direct step or high-value link.
+11. Troubleshooting starts from symptoms and points to exact next actions.
+12. Validation tells users what success looks like in SigNoz.
+13. Next steps help users complete the broader job.
+14. Links directly help readers complete the current step.
+15. Added or edited links resolve and use canonical production paths.
+16. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
+17. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 
@@ -77,6 +80,7 @@ Prioritize verification for:
 - receiver, exporter, and processor names
 - environment variables and CLI flags
 - APIs, semantic conventions, versions, and deprecations
+- **OTLP export protocol**: flag gRPC (port 4317) as the default when HTTP (port 4318) should be used instead — docs should prefer OTLP/HTTP unless there is an explicit reason for gRPC
 
 When a correction depends on verification:
 
@@ -199,6 +203,9 @@ cat contributing/docs-review.md
 
 # likely docs quality issues
 rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|<[^>]+>" data/docs
+
+# image quality — flag images narrower than 1200 px
+identify -format '%w %f\n' public/img/docs/<topic>/*.webp 2>/dev/null | awk '$1 < 1200'
 
 # link health
 curl -sI <URL>
