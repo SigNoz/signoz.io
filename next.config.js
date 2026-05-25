@@ -1883,12 +1883,37 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/hostmetrics/',
-          destination: '/docs/infrastructure-monitoring/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/hostmetrics/',
           permanent: true,
         },
         {
           source: '/docs/userguide/k8s-metrics/',
-          destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/hostmetrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/cert-manager/',
+          destination: '/docs/infrastructure-monitoring/user-guides/cert-manager/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/',
+          destination: '/docs/infrastructure-monitoring/reference/telemetry-data-requirements/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics/',
+          destination: '/docs/infrastructure-monitoring/reference/understanding-cpu-metrics/',
           permanent: true,
         },
         {

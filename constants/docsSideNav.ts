@@ -1324,7 +1324,7 @@ const docsSideNav = [
     label: 'Infrastructure Monitoring',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/infrastructure-monitoring/overview',
     items: [
       {
         type: 'doc',
@@ -1333,33 +1333,52 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/cert-manager',
-        label: 'Cert-Manager',
+        route: '/docs/infrastructure-monitoring/host-monitoring',
+        label: 'Host Monitoring',
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/hostmetrics',
-        label: 'Host Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/infrastructure-monitoring/k8s-metrics',
-        label: 'Kubernetes Metrics',
+        route: '/docs/infrastructure-monitoring/kubernetes-monitoring',
+        label: 'Kubernetes Monitoring',
       },
       {
         type: 'category',
         isExpanded: false,
+        route: '/docs/infrastructure-monitoring/user-guides',
         label: 'User Guides',
         items: [
           {
             type: 'doc',
-            route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
-            label: 'Telemetry Data Requirements for Infrastructure Monitoring',
+            route: '/docs/infrastructure-monitoring/user-guides/hostmetrics',
+            label: 'Setup Host Metrics',
           },
           {
             type: 'doc',
-            route: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics',
-            label: 'Understanding CPU Utilization Metrics and Aggregation Intervals',
+            route: '/docs/infrastructure-monitoring/user-guides/k8s-metrics',
+            label: 'Setup Kubernetes Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/cert-manager',
+            label: 'Cert-Manager',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/infrastructure-monitoring/reference',
+        label: 'Reference',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/reference/telemetry-data-requirements',
+            label: 'Telemetry Data Requirements',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/reference/understanding-cpu-metrics',
+            label: 'Understanding CPU Utilization Metrics',
           },
         ],
       },
@@ -1992,6 +2011,7 @@ const docsSideNav = [
     label: 'Cost Meter',
     type: 'category',
     isExpanded: false,
+    route: '/docs/cost-meter/overview',
     items: [
       {
         type: 'doc',
@@ -2050,7 +2070,7 @@ const docsSideNav = [
     label: 'Dashboards',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/dashboards/overview',
     items: [
       {
         type: 'doc',
@@ -2564,7 +2584,7 @@ const docsSideNav = [
     label: 'Querying Data',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/querying/overview',
     items: [
       {
         type: 'doc',
@@ -2874,6 +2894,11 @@ const docsSideNav = [
 
     items: [
       {
+        route: '/docs/llm-observability',
+        label: 'Overview',
+        type: 'doc',
+      },
+      {
         route: '/docs/agno-monitoring',
         label: 'Agno',
         type: 'doc',
@@ -3179,6 +3204,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/aws-monitoring/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
         route: '/docs/aws-monitoring/one-click-vs-manual',
         label: 'One-Click vs Manual',
       },
@@ -3342,6 +3372,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/frontend-monitoring',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
         route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
         label: 'Sending Logs',
       },
@@ -3388,6 +3423,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/mobile-monitoring',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
         label: 'Swift UI',
         route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
       },
@@ -3414,6 +3454,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/integrations/integrations-list',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/integrations/integrations-list',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -3644,7 +3689,7 @@ const docsSideNav = [
     label: 'Messaging Queues',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/messaging-queues/overview',
     items: [
       {
         type: 'doc',
@@ -3716,6 +3761,7 @@ const docsSideNav = [
     label: 'External API Monitoring',
     type: 'category',
     isExpanded: false,
+    route: '/docs/external-api-monitoring/overview',
     items: [
       {
         type: 'doc',
@@ -3725,23 +3771,6 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/external-api-monitoring/setup',
-        label: 'Setup',
-      },
-    ],
-  },
-  {
-    label: 'Trace Funnels',
-    type: 'category',
-    isExpanded: false,
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/trace-funnels/overview',
-        label: 'Overview',
-      },
-      {
-        type: 'doc',
-        route: '/docs/trace-funnels/setup',
         label: 'Setup',
       },
     ],
@@ -3824,6 +3853,7 @@ const docsSideNav = [
     label: 'Ingestion',
     type: 'category',
     isExpanded: false,
+    route: '/docs/ingestion/signoz-cloud/overview',
     items: [
       {
         label: 'SigNoz Cloud',
@@ -4128,6 +4158,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/azure-monitoring',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/azure-monitoring',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,

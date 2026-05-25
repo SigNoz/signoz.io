@@ -22,7 +22,7 @@ export const AWS_MONITORING_ITEMS = {
   ] satisfies ComponentItem[],
   networking: [
     { name: 'ALB', href: '/docs/aws-monitoring/alb', clickName: 'ALB Monitoring Link' },
-    { name: 'ELB', href: '/docs/aws-monitoring/elb-logs', clickName: 'ELB Monitoring Link' },
+    { name: 'ELB', href: '/docs/aws-monitoring/elb', clickName: 'ELB Monitoring Link' },
     { name: 'VPC', href: '/docs/aws-monitoring/vpc', clickName: 'VPC Monitoring Link' },
     {
       name: 'API Gateway',
