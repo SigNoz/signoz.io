@@ -1354,7 +1354,7 @@ const docsSideNav = [
     label: 'Infrastructure Monitoring',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/infrastructure-monitoring/overview',
     items: [
       {
         type: 'doc',
@@ -1363,33 +1363,52 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/cert-manager',
-        label: 'Cert-Manager',
+        route: '/docs/infrastructure-monitoring/host-monitoring',
+        label: 'Host Monitoring',
       },
       {
         type: 'doc',
-        route: '/docs/infrastructure-monitoring/hostmetrics',
-        label: 'Host Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/infrastructure-monitoring/k8s-metrics',
-        label: 'Kubernetes Metrics',
+        route: '/docs/infrastructure-monitoring/kubernetes-monitoring',
+        label: 'Kubernetes Monitoring',
       },
       {
         type: 'category',
         isExpanded: false,
+        route: '/docs/infrastructure-monitoring/user-guides',
         label: 'User Guides',
         items: [
           {
             type: 'doc',
-            route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
-            label: 'Telemetry Data Requirements for Infrastructure Monitoring',
+            route: '/docs/infrastructure-monitoring/user-guides/hostmetrics',
+            label: 'Setup Host Metrics',
           },
           {
             type: 'doc',
-            route: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics',
-            label: 'Understanding CPU Utilization Metrics and Aggregation Intervals',
+            route: '/docs/infrastructure-monitoring/user-guides/k8s-metrics',
+            label: 'Setup Kubernetes Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/cert-manager',
+            label: 'Cert-Manager',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/infrastructure-monitoring/reference',
+        label: 'Reference',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/reference/telemetry-data-requirements',
+            label: 'Telemetry Data Requirements',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/reference/understanding-cpu-metrics',
+            label: 'Understanding CPU Utilization Metrics',
           },
         ],
       },

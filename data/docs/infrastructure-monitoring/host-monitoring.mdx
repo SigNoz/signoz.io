@@ -1,0 +1,156 @@
+---
+date: 2026-05-25
+id: host-monitoring
+title: Host Monitoring
+description: Monitor host performance in SigNoz — CPU, memory, disk, network metrics with correlated traces, logs, containers, and processes.
+doc_type: explanation
+hide_table_of_contents: true
+---
+
+The Host Monitoring interface displays all monitored hosts with key performance metrics. Use it to identify resource bottlenecks, correlate infrastructure issues with application behavior, and drill into individual hosts for detailed analysis.
+
+## Host List View
+
+The main screen displays a list of all monitored hosts along with key metrics. The table uses color-coded progress bars for CPU and memory usage so you can spot outliers at a glance.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/hosts-list.webp"
+  alt="Host List with progress bars, filters sidebar, and total count"
+  caption="Host List"
+  className="box-shadowed-image"
+/>
+
+### Table Columns
+
+- **Hostname**: System hostname or identifier
+- **Status**: Current operational status — `ACTIVE` or `INACTIVE`
+- **CPU Usage**: CPU utilization percentage with a progress bar
+- **Memory Usage**: Memory usage percentage with a progress bar
+- **IOWait**: Percentage of time the CPU is waiting for I/O operations
+- **Load Avg**: System load average value
+
+### Features
+
+- **Filters sidebar** on the left to narrow hosts by Host Name, OS Type, or Environment
+- **Search Filter** bar to query hosts by any attribute
+- **Group By** dropdown to group hosts by a selected attribute
+- **Columns selector** to choose which columns are visible in the table
+- **Sortable columns** — click any column header to sort
+- **Total count** displayed at the bottom (e.g., "Showing 1 - 4 of 4 Hosts")
+- **Paginated results** with configurable page size
+
+### Group By
+
+Use the **Group By** dropdown to group hosts by an attribute such as `os.type`, `host.name`, `cloud.platform`, or `k8s.cluster.name`. When a group is selected, the table displays group header rows that you can expand to see individual hosts within each group.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/hosts-group-by.webp"
+  alt="Host List grouped by os.type showing group header rows"
+  caption="Host List grouped by os.type"
+  className="box-shadowed-image"
+/>
+
+### Columns Selector
+
+Click the columns icon in the toolbar to open the **Columns** panel. It shows the currently added columns and lets you add or remove columns to customize the table view. Click any added column to remove it, or click an available column to add it.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/hosts-columns-selector.webp"
+  alt="Columns selector panel showing added and available columns"
+  caption="Columns selector for customizing table columns"
+  className="box-shadowed-image"
+/>
+
+## Host Details
+
+Click a hostname to open the detail view. The header displays the host's status, operating system, CPU usage, and memory usage at a glance.
+
+The detail view includes five tabs: **Metrics**, **Logs**, **Traces**, **Containers**, and **Processes**.
+
+### Metrics Tab
+
+Monitor host performance metrics across customizable time periods. Charts are zoomable — click and drag to zoom into a specific time range.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-metrics-details.webp"
+  alt="Host Metrics Tab showing CPU Usage, Memory Usage, System Load Average, and Network usage charts"
+  caption="Metrics Tab"
+  className="box-shadowed-image"
+/>
+
+**Available Metrics:**
+
+#### System Performance
+- **CPU Usage**: Overall CPU utilization broken down by idle, user, system, wait, softirq, steal, and interrupt
+- **Memory Usage**: Physical memory consumption showing free, used, cached, slab reclaimable, and slab unreclaimable
+- **System Load Average**: Average system load over time
+- **Queue Size**: Number of processes waiting for CPU time
+
+#### Network Performance
+- **Network Usage (Bytes)**: Inbound and outbound network traffic in bytes
+- **Network Usage (Packets/s)**: Packet rate for network interfaces
+- **Network Errors**: Count of network interface errors
+- **Network Drops**: Number of dropped network packets
+- **Network Connections**: Active network connection count
+
+#### Disk Performance
+- **System Disk I/O (Bytes)**: Total bytes read/written to disk
+- **System Disk Operations/s**: Rate of read/write operations
+- **Disk Operations Time**: Average time taken for disk operations
+
+**Time Range Selection:**
+- Choose from preset time ranges (e.g., last 30 minutes, last 24 hours)
+- Set custom time ranges using the date-time picker
+- Change your timezone according to your preference
+
+### Traces Tab
+
+View and analyze distributed traces associated with the selected host.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-traces-details.webp"
+  alt="Host Traces Tab showing trace list with timestamps, service names, and durations"
+  caption="Traces Tab"
+  className="box-shadowed-image"
+/>
+
+**Features:**
+- Adjustable time range selection for trace analysis
+- Advanced filtering capabilities using the query builder
+- Direct integration with the Traces Explorer — click **Explore in Traces Explorer** to open the full interface retaining time ranges and filters
+
+**Filter Options:**
+- **Service name**: Focus on traces from specific services
+- **Operation type**: Filter by specific operations or endpoints (e.g., GET, POST)
+- **Status/Error codes**: Identify traces with specific success or error statuses
+- **Custom attributes**: Refine traces using user-defined tags or metadata
+
+### Logs Tab
+
+Access and search through host logs with powerful filtering capabilities.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-logs-details.webp"
+  alt="Host Logs Tab showing log lines with timestamps and a query builder"
+  caption="Logs Tab"
+  className="box-shadowed-image"
+/>
+
+**Features:**
+- Configurable time range selection for log analysis
+- Query builder for filtering by attributes such as `http.status_code` or `service.name`
+- Click **Run Query** to execute your filter
+- Click **Explore in Logs Explorer** to open the full Logs Explorer retaining time ranges and filters
+- Highlighted warning and error messages
+
+**Filter Categories:**
+- **Log Levels**: Filter logs by severity (e.g., INFO, WARN, ERROR)
+- **Service Components**: Focus on specific services or application components generating the logs
+- **Message Content**: Search for specific keywords or patterns in log messages
+- **Custom Fields**: Apply filters based on user-defined metadata fields
+
+## Next steps
+
+- [Setup Host Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) — Configure the OpenTelemetry hostmetrics receiver to start collecting data.
+- [Telemetry Data Requirements](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/) — Required resource attributes and metrics.
+- [Understanding CPU Utilization Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics/) — How aggregation intervals affect CPU metric values.

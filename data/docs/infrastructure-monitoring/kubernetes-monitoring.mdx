@@ -1,0 +1,143 @@
+---
+date: 2026-05-25
+id: kubernetes-monitoring
+title: Kubernetes Monitoring
+description: Monitor Kubernetes clusters in SigNoz — Pods, Nodes, Namespaces, Clusters, Deployments, Jobs, DaemonSets, StatefulSets, and Volumes with correlated traces, logs, and events.
+doc_type: explanation
+hide_table_of_contents: true
+---
+
+The Kubernetes Monitoring interface provides real-time visibility into your Kubernetes cluster. The left sidebar lets you switch between different resource types, and each list uses color-coded progress bars to highlight resource utilization.
+
+## Kubernetes Cluster View
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-list.webp"
+  alt="Kubernetes Pods View showing pod list with CPU and memory progress bars"
+  caption="Kubernetes Cluster Overview — Pods View"
+  className="box-shadowed-image"
+/>
+
+### Kubernetes Monitoring Views
+
+The sidebar on the left lists all available resource types. Click any to switch views:
+
+- **Pods** *(Default)*: Displays all active pods with CPU and memory utilization progress bars
+- **Nodes**: Performance and resource allocation for individual nodes
+- **Namespaces**: Resource usage aggregated per namespace
+- **Clusters**: Overview of resource allocation across clusters
+- **Deployments**: Deployment statuses, availability, and resource consumption
+- **Jobs, DaemonSets, StatefulSets, and Volumes**: Monitoring of specific Kubernetes workloads
+
+## Pods View: Monitoring Kubernetes Pods
+
+The **Pods View** provides real-time visibility into pod resource utilization with color-coded progress bars — green for normal, yellow for elevated, and red for critical usage.
+
+### Table Columns
+
+- **Pod Name**: Name of the Kubernetes pod
+- **CPU Req Usage (%)**: Percentage of requested CPU being utilized, shown as a progress bar
+- **CPU Limit Usage (%)**: Percentage of CPU limit being used, shown as a progress bar
+- **CPU Usage (cores)**: Actual CPU consumption in cores
+- **Memory Req Usage (%)**: Percentage of requested memory being used
+- **Memory Limit Usage (%)**: Percentage of allocated memory limit being used
+- **Memory Usage**: Total memory consumption in bytes
+
+### Features
+
+- **Filters sidebar** on the left with checkboxes for Pod, Namespace, Node, and Cluster
+- **Search Filter** bar to query pods by any attribute
+- **Group By** dropdown to group pods by Namespace, Node, or Deployment
+- **Sortable columns** — click any column header to sort alphabetically or by value
+- **Total count** displayed at the bottom (e.g., "Showing 1 - 10 of 51 Pods")
+- **Paginated results** with configurable page size
+
+## Pod Details
+
+Click a pod name to open the detail view. The header shows the pod's **Namespace**, **Cluster Name**, and **Node**.
+
+The detail view includes four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
+
+### Metrics Tab: Pod Performance Monitoring
+
+The **Metrics Tab** provides zoomable charts for CPU, memory, and network performance. Click and drag on any chart to zoom into a specific time range.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pod-metrics.webp"
+  alt="Pod Metrics showing CPU Usage and CPU Request/Limit Utilization charts"
+  caption="Pod Metrics View"
+  className="box-shadowed-image"
+/>
+
+### Available Metrics
+
+#### CPU Metrics
+- **CPU Usage (Cores)**: Real-time and historical CPU consumption with min, avg, and max values
+- **CPU Request, Limit Utilization (%)**: CPU requests vs. limits to prevent over-allocation
+
+#### Memory Metrics
+- **Memory Usage (Bytes)**: Real-time memory consumption trends
+- **Memory Request, Limit Utilization (%)**: Memory utilization compared to requests and limits
+- **Memory by State**: Differentiates memory into RSS memory, working set memory, and cache memory
+- **Memory Major Page Faults**: Tracks page faults affecting performance
+
+#### Container-Specific Metrics
+- **CPU Usage by Container**: CPU utilization at the container level within the pod
+- **CPU Request, Limit Utilization by Container**: Container-level CPU constraints
+- **Memory Usage by Container**: Memory usage for each container in the pod
+- **Memory Request, Limit Utilization by Container**: Container memory efficiency
+
+#### Network Metrics
+- **Network Rate (Bytes/s)**: Network traffic sent (transmit) and received (receive)
+- **Network Errors**: Network-related failures at the interface level
+
+#### File System Metrics
+- **File System Usage (Bytes)**: Disk space usage over time
+
+### Traces Tab: Pod Trace Analysis
+
+The **Traces Tab** shows distributed traces for requests processed by the selected pod, helping you analyze latency and debug microservices performance.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pod-traces.webp"
+  alt="Pod Traces showing trace list with timestamps, service names, and durations"
+  caption="Pod Traces View"
+  className="box-shadowed-image"
+/>
+
+**Features:**
+- Adjustable time range selection for trace analysis
+- Advanced filtering capabilities using the query builder
+- Direct integration with the Traces Explorer for deeper analysis
+
+### Logs Tab: Pod Log Analysis
+
+The **Logs Tab** provides real-time logs from the selected pod with a query builder for filtering.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pod-logs.webp"
+  alt="Pod Logs Tab with query builder"
+  caption="Pod Logs"
+  className="box-shadowed-image"
+/>
+
+**Features:**
+- Query builder for filtering by attributes
+- Click **Run Query** to execute your filter
+- Click **Explore in Logs Explorer** to open the full Logs Explorer retaining time ranges and filters
+
+### Consistent Monitoring Across Views
+
+Each Kubernetes resource view — Pods, Nodes, Namespaces, Clusters, Deployments, and more — includes **Metrics, Logs, Traces, and Events tabs** for performance monitoring and debugging.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-nodes-view.webp"
+  alt="Kubernetes Nodes View showing node list and sidebar with all resource types"
+  caption="Nodes View with sidebar navigation"
+  className="box-shadowed-image"
+/>
+
+## Next steps
+
+- [Setup Kubernetes Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/) — Configure the kubeletstats and k8scluster receivers to start collecting data.
+- [Telemetry Data Requirements](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/) — Required resource attributes and metrics.
