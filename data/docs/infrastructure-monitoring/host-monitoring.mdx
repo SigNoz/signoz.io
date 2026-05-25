@@ -79,6 +79,11 @@ Click the columns icon in the toolbar to open the **Columns** panel. It shows th
 - This column relies on the OTel metric(s): `system.cpu.time`.
 - Share of CPU time when at least one process is blocked on **disk** I/O and the CPU is otherwise idle (does not include network wait). Sustained values above ~10% usually point to storage as the bottleneck — the CPU is fine but operations are stuck on slow disks.
 
+### Disk Usage
+
+- This column relies on the OTel metric(s): `system.filesystem.usage`.
+- Share of filesystem space in actual use across all mounted filesystems on the host. Values approaching 100% mean writes will start failing — logs unable to rotate, databases halting, applications crashing. Investigate when sustained above ~85%, and remember a single full mountpoint (e.g. `/var`) can break things even if the host's overall percentage looks healthy.
+
 ### Load Avg
 
 - This column relies on the OTel metric(s): `system.cpu.load_average.15m`.
@@ -104,57 +109,57 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 #### CPU Usage
 
 - This chart relies on the OTel metric(s): `system.cpu.time`.
-- Overall CPU utilization broken down by idle, user, system, wait, softirq, steal, and interrupt.
+- Plots `(non-idle / total)` CPU time per `state` as separate colored lines — `user`, `system`, `wait`, `softirq`, `steal`, `nice`, `interrupt`, `idle`. High `user` means application work, high `system` means kernel work, sustained `wait` points to disk I/O blocking, and any sustained `steal` on a cloud VM signals the hypervisor is giving cycles to other tenants.
 
 #### Memory Usage
 
 - This chart relies on the OTel metric(s): `system.memory.usage`.
-- Physical memory consumption showing free, used, cached, slab reclaimable, and slab unreclaimable.
+- Plots bytes of physical memory in each `state` over time, one colored line per state — `used`, `cached`, `buffers`, `free`. Watch `used` — a steady upward climb usually signals a memory leak while spiky patterns reflect workload bursts; `cached` and `buffers` are reclaimable kernel cache and shouldn't cause alarm even when large.
 
 #### System Load Average
 
 - This chart relies on the OTel metric(s): `system.cpu.load_average.1m`, `system.cpu.load_average.5m`, `system.cpu.load_average.15m`.
-- Average system load over time.
+- Plots three load-average values on the same chart as separate lines — `1m`, `5m`, and `15m`. Read them together to see direction of pressure: 1m rising above 5m and 15m means load is building right now; 15m above 1m means load is easing.
 
 #### Queue Size
 
 - This chart relies on the OTel metric(s): `system.disk.pending_operations`.
-- Number of processes waiting for CPU time.
+- Plots the maximum disk request-queue depth per `device` over each step interval, one line per device. Sustained values above what the device tolerates — typically a handful for spinning disks, dozens for SSDs/NVMe — mean the storage layer is saturated and requests are waiting.
 
 #### Network Usage (Bytes)
 
 - This chart relies on the OTel metric(s): `system.network.io`.
-- Inbound and outbound network traffic in bytes.
+- Plots throughput in bytes/s with one colored line per `device::direction` combination (e.g., `eth0::transmit`, `eth0::receive`). Use this to identify which NIC is saturating, compare egress vs ingress, and spot when a sustained line approaches the NIC's rated bandwidth — a strong indicator of a network bottleneck.
 
 #### Network Usage (Packets/s)
 
 - This chart relies on the OTel metric(s): `system.network.packets`.
-- Packet rate for network interfaces.
+- Plots packets per second per `device::direction`, one line per NIC and direction. A NIC can saturate on packets-per-second long before it does on bytes — small-packet workloads like DNS, many short keepalives, or SYN floods; flat bytes but rising packets is a signal worth investigating.
 
 #### Network Errors
 
 - This chart relies on the OTel metric(s): `system.network.errors`.
-- Count of network interface errors.
+- Plots the rate of interface-level network errors per `device::direction`, one line per NIC and direction. Any sustained non-zero value warrants attention — common causes are faulty cabling, NIC hardware issues, driver bugs, or a misconfigured switch port.
 
 #### Network Drops
 
 - This chart relies on the OTel metric(s): `system.network.dropped`.
-- Number of dropped network packets.
+- Plots the rate of dropped packets per `device::direction`, one line per NIC and direction. Unlike errors, drops without errors usually point to buffer overflow — the kernel or NIC can't drain the queue fast enough; common causes are under-sized rx/tx ring buffers, the CPU being too busy, or QoS/traffic shaping in effect.
 
 #### Network Connections
 
 - This chart relies on the OTel metric(s): `system.network.connections`.
-- Active network connection count.
+- Plots active connection counts per `protocol::state` (e.g., `tcp::ESTABLISHED`, `tcp::TIME_WAIT`, `tcp::SYN_RECV`), one line per combination. A steady climb in `ESTABLISHED` often indicates a connection leak; spikes in `TIME_WAIT` typically reflect high connection churn; rising `SYN_RECV` can signal a SYN-flood or a slow accept loop.
 
 #### System Disk I/O (Bytes)
 
 - This chart relies on the OTel metric(s): `system.disk.io`.
-- Total bytes read/written to disk.
+- Plots aggregate disk throughput in bytes per second as a single line across all devices (no per-device breakdown on this chart). Sustained spikes correlate with heavy file I/O, backup jobs, or database flushes — pair with disk-time charts to tell whether each I/O is slow or just frequent.
 
 #### System Disk Operations/s
 
 - This chart relies on the OTel metric(s): `system.disk.operation_time`.
-- Rate of read/write operations.
+- Plots the per-second rate of `system.disk.operation_time` per `device::direction`, one line per device and direction. Values approaching `1s/s` on a single line indicate that device is effectively saturated servicing reads/writes — i.e., the disk is busy nearly all the time.
 
 #### Disk Operations Time
 
