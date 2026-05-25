@@ -1,5 +1,5 @@
 ---
-date: 2026-05-22
+date: 2026-03-31
 title: Kubernetes Metrics - Monitor K8s Clusters
 description: Setup Kubernetes monitoring with OpenTelemetry kubeletstats and k8scluster receivers. Track node, pod, container, and volume metrics in SigNoz dashboards.
 doc_type: howto
@@ -238,7 +238,7 @@ receivers:
   k8scluster:
     collection_interval: 30s
     node_conditions_to_report: [Ready, DiskPressure, MemoryPressure, PIDPressure, NetworkUnavailable]
-    allocatable_types_to_report: [cpu, memory, ephemeral-storage, storage]
+    allocatable_types_to_report: [cpu, memory, ephemeral-storage]
     distribution: kubernetes
     metrics:
       k8s.node.condition:
@@ -247,11 +247,9 @@ receivers:
         enabled: true
 ```
 
-**`allocatable_types_to_report`** controls which allocatable resource types are reported as metrics. The `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` metrics are only available when `cpu` and `memory` are included in this list. Add `storage` to also report allocatable storage for volumes.
-
 #### 2. Enable Kubernetes Metadata
 
-Configure the k8sattributes processor to add Kubernetes context. Include `k8s.persistentvolumeclaim.name` if you are monitoring PersistentVolumeClaims in the Volumes view:
+Configure the k8sattributes processor to add Kubernetes context:
 
 ```yaml
 processors:
