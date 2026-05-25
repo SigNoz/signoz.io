@@ -57,32 +57,32 @@ Click the columns icon in the toolbar to open the **Columns** panel. It shows th
 ### Hostname
 
 - This column is derived from the resource attribute `host.name`.
-- System hostname or identifier.
+- Identifier for the machine reporting telemetry. Use it to locate a specific host when investigating an issue.
 
 ### Status
 
-- This column relies on the OTel metric(s): `system.cpu.time`, `system.memory.usage`, `system.cpu.load_average.15m`, `system.filesystem.usage` (host is ACTIVE if any of these reported in the last 10 minutes).
-- Current operational status — `ACTIVE` or `INACTIVE`.
+- This column relies on the OTel metric(s): `system.cpu.time`, `system.memory.usage`, `system.cpu.load_average.15m`, `system.filesystem.usage` ( host is `ACTIVE` if any of these reported in the last 10 minutes ).
+- Tells you whether the host is actively reporting data right now. `ACTIVE` means SigNoz received at least one metric sample from this host in the last 10 minutes; `INACTIVE` is a signal to investigate — the host may be down, the collector may have crashed, or networking may be blocking telemetry.
 
 ### CPU Usage
 
 - This column relies on the OTel metric(s): `system.cpu.time`.
-- CPU utilization percentage with a progress bar.
+- Share of CPU time being actively spent across all non-idle states (user, system, wait, softirq, steal, etc.), aggregated across all cores. Sustained values above ~80% signal CPU pressure — processes start queuing for cores and request latency tends to rise.
 
 ### Memory Usage
 
 - This column relies on the OTel metric(s): `system.memory.usage`.
-- Memory usage percentage with a progress bar.
+- Share of physical RAM in actual use, excluding the kernel's reclaimable page cache and buffers. Values approaching 100% leave no headroom — the OS may start swapping (which slows everything) or kill processes via OOM. Investigate when sustained above ~85%.
 
 ### IOWait
 
 - This column relies on the OTel metric(s): `system.cpu.time`.
-- Percentage of time the CPU is waiting for I/O operations.
+- Share of CPU time when at least one process is blocked on **disk** I/O and the CPU is otherwise idle (does not include network wait). Sustained values above ~10% usually point to storage as the bottleneck — the CPU is fine but operations are stuck on slow disks.
 
 ### Load Avg
 
 - This column relies on the OTel metric(s): `system.cpu.load_average.15m`.
-- System load average value.
+- Average number of processes that are either running or in uninterruptible sleep (almost always waiting on disk I/O), smoothed over the last 15 minutes so brief spikes don't dominate. Rule of thumb: sustained load above the host's core count means the system is over-committed — on a 4-core host, a load of 4 is full utilization and anything materially higher means processes are queuing.
 
 ## Host Details
 
@@ -162,6 +162,7 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 - Average time taken for disk operations.
 
 **Time Range Selection:**
+
 - Choose from preset time ranges (e.g., last 30 minutes, last 24 hours)
 - Set custom time ranges using the date-time picker
 - Change your timezone according to your preference
@@ -178,11 +179,13 @@ View and analyze distributed traces associated with the selected host.
 />
 
 **Features:**
+
 - Adjustable time range selection for trace analysis
 - Advanced filtering capabilities using the query builder
 - Direct integration with the Traces Explorer — click **Explore in Traces Explorer** to open the full interface retaining time ranges and filters
 
 **Filter Options:**
+
 - **Service name**: Focus on traces from specific services
 - **Operation type**: Filter by specific operations or endpoints (e.g., GET, POST)
 - **Status/Error codes**: Identify traces with specific success or error statuses
@@ -200,6 +203,7 @@ Access and search through host logs with powerful filtering capabilities.
 />
 
 **Features:**
+
 - Configurable time range selection for log analysis
 - Query builder for filtering by attributes such as `http.status_code` or `service.name`
 - Click **Run Query** to execute your filter
@@ -207,6 +211,7 @@ Access and search through host logs with powerful filtering capabilities.
 - Highlighted warning and error messages
 
 **Filter Categories:**
+
 - **Log Levels**: Filter logs by severity (e.g., INFO, WARN, ERROR)
 - **Service Components**: Focus on specific services or application components generating the logs
 - **Message Content**: Search for specific keywords or patterns in log messages
