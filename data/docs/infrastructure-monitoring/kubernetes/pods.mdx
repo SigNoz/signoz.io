@@ -1,0 +1,59 @@
+---
+date: 2026-05-25
+id: k8s-pods
+title: Pods
+description: Monitor Kubernetes pod CPU, memory, and network performance in SigNoz — request/limit utilization, per-container breakdowns, and correlated traces and logs.
+doc_type: explanation
+---
+
+The **Pods** view is the default Kubernetes monitoring view. It shows all active pods with color-coded progress bars — green for normal (0–60%), yellow for elevated (60–80%), and red for critical (80–100%+) usage.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pods-list.webp"
+  alt="Kubernetes Pods list view showing pod names with CPU and memory progress bars"
+  caption="Pods List View"
+  className="box-shadowed-image"
+/>
+
+## Columns
+
+| Column | Description |
+|--------|-------------|
+| **Pod Name** | Kubernetes pod name |
+| **CPU Req Usage (%)** | CPU usage as a percentage of request. Values above 100% mean the pod exceeds its request but may still be within its limit. |
+| **CPU Limit Usage (%)** | CPU usage as a percentage of limit. Approaching 100% means throttling risk. |
+| **CPU Usage (cores)** | Actual CPU consumption in cores |
+| **Mem Req Usage (%)** | Memory usage as a percentage of request |
+| **Mem Limit Usage (%)** | Memory usage as a percentage of limit. Near 100% = OOMKill risk. |
+| **Mem Usage (WSS)** | Working Set Size — the actively used memory. Kubernetes uses this for OOMKill decisions. |
+
+Additional columns available via the Columns selector: **Namespace**, **Node**, **Cluster**.
+
+## Pod Detail Page
+
+Click a pod name to open the detail page. The header shows **Namespace**, **Cluster Name**, and **Node**. The detail page includes four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-pods-detail.webp"
+  alt="Pod detail page showing CPU and memory charts"
+  caption="Pod Detail — Metrics Tab"
+  className="box-shadowed-image"
+/>
+
+### Metrics Tab
+
+| Widget | Description |
+|--------|-------------|
+| **CPU Usage (cores)** | Actual CPU consumption over time |
+| **CPU Request, Limit Utilization** | CPU usage as percentage of request and limit |
+| **Memory Usage (bytes)** | Working set memory over time |
+| **Memory Request, Limit Utilization** | Memory usage as percentage of request and limit |
+| **Memory by State** | Breakdown into RSS, working set, and total usage (includes cache) |
+| **Memory Major Page Faults** | Sustained high values indicate memory pressure |
+| **CPU Usage by Container (cores)** | Per-container CPU — identifies which container uses the most CPU |
+| **CPU Request, Limit Utilization by Container** | Per-container CPU against requests and limits |
+| **Memory Usage by Container (bytes)** | Per-container memory usage |
+| **Memory Request, Limit Utilization by Container** | Per-container memory against requests and limits |
+| **Network Rate** | Network throughput (transmit and receive) in bytes/s |
+| **Network Errors** | Network error count per second |
+| **File System (bytes)** | Disk consumed by pod containers |

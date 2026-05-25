@@ -1,0 +1,53 @@
+---
+date: 2026-05-25
+id: k8s-nodes
+title: Nodes
+description: Monitor Kubernetes node CPU, memory, and network performance in SigNoz — usage vs allocatable capacity, top pods by resource, and filesystem utilization.
+doc_type: explanation
+---
+
+The **Nodes** view shows CPU and memory usage alongside allocatable capacity for each node, helping you assess node saturation and plan scaling.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-nodes-list.webp"
+  alt="Kubernetes Nodes list view showing node names with CPU and memory columns"
+  caption="Nodes List View"
+  className="box-shadowed-image"
+/>
+
+## Columns
+
+| Column | Description |
+|--------|-------------|
+| **Node Name** | Kubernetes node name |
+| **Cluster Name** | Cluster the node belongs to |
+| **CPU Usage (cores)** | Actual CPU consumption by all pods on this node |
+| **CPU Alloc (cores)** | CPU available for pod scheduling after system reservations |
+| **Memory Usage (WSS)** | Working set memory across all pods on the node |
+| **Memory Allocatable** | Memory available for pod scheduling. When usage approaches this, evictions begin. |
+
+## Node Detail Page
+
+Click a node name to open the detail page. The header shows **Node Name** and **Cluster Name**. The detail page includes four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-nodes-detail.webp"
+  alt="Node detail page showing CPU and memory charts with top pods"
+  caption="Node Detail — Metrics Tab"
+  className="box-shadowed-image"
+/>
+
+### Metrics Tab
+
+| Widget | Description |
+|--------|-------------|
+| **CPU Usage (cores)** | Total CPU consumed by all pods on this node |
+| **Memory Usage (bytes)** | Working set memory — Kubernetes uses this for eviction decisions |
+| **CPU Usage (%)** | CPU utilization as percentage of allocatable capacity |
+| **Memory Usage (%)** | Memory utilization as percentage of allocatable capacity |
+| **Pods by CPU (top 10)** | Top CPU-consuming pods — identifies noisy neighbors |
+| **Pods by Memory (top 10)** | Top memory-consuming pods — identifies OOMKill risks |
+| **Network Error Count** | Network errors per second |
+| **Network IO Rate** | Network throughput (transmit and receive) in bytes/s |
+| **Filesystem Usage (bytes)** | Disk space consumed — high usage triggers pod evictions |
+| **Filesystem Usage (%)** | Disk utilization as percentage of capacity |

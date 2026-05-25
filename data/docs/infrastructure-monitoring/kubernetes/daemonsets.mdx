@@ -1,0 +1,51 @@
+---
+date: 2026-05-25
+id: k8s-daemonsets
+title: DaemonSets
+description: Monitor Kubernetes DaemonSet rollout status and resource usage in SigNoz — available vs desired nodes with CPU and memory metrics.
+doc_type: explanation
+---
+
+The **DaemonSets** view shows rollout status and aggregated resource usage. If Available < Desired, the DaemonSet is not fully rolled out — possible causes include taints without tolerations, insufficient resources, or cordoned nodes.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-daemonsets-list.webp"
+  alt="Kubernetes DaemonSets list view showing available/desired counts and resource columns"
+  caption="DaemonSets List View"
+  className="box-shadowed-image"
+/>
+
+## Columns
+
+| Column | Description |
+|--------|-------------|
+| **DaemonSet Name** | Kubernetes DaemonSet name |
+| **Namespace Name** | Namespace the DaemonSet belongs to |
+| **Available** | Nodes where the DaemonSet pod is running and ready |
+| **Desired** | Nodes that should run a pod from this DaemonSet |
+| **CPU Req Usage (%)** | Average CPU request utilization across all DaemonSet pods |
+| **CPU Limit Usage (%)** | Average CPU limit utilization |
+| **CPU Usage (cores)** | Total CPU consumption across all DaemonSet pods |
+| **Mem Req Usage (%)** | Average memory request utilization |
+| **Mem Limit Usage (%)** | Average memory limit utilization — near 100% = OOMKill risk |
+| **Mem Usage (WSS)** | Total working set memory across all DaemonSet pods |
+
+## DaemonSet Detail Page
+
+Click a DaemonSet name to open the detail page. The header shows **DaemonSet Name**, **Cluster Name**, and **Namespace Name**. The detail page includes four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-daemonsets-detail.webp"
+  alt="DaemonSet detail page showing CPU and memory charts"
+  caption="DaemonSet Detail — Metrics Tab"
+  className="box-shadowed-image"
+/>
+
+### Metrics Tab
+
+| Widget | Description |
+|--------|-------------|
+| **CPU Usage, Request, Limits** | CPU consumption plotted against aggregate requests and limits |
+| **Memory Usage, Request, Limits** | Memory consumption against aggregate requests and limits |
+| **Network IO** | Total network throughput across all DaemonSet pods |
+| **Network Errors Count** | Aggregated network errors |

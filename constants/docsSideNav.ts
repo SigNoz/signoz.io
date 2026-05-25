@@ -1367,9 +1367,57 @@ const docsSideNav = [
         label: 'Host Monitoring',
       },
       {
-        type: 'doc',
+        type: 'category',
+        isExpanded: false,
         route: '/docs/infrastructure-monitoring/kubernetes-monitoring',
         label: 'Kubernetes Monitoring',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/pods',
+            label: 'Pods',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/nodes',
+            label: 'Nodes',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/namespaces',
+            label: 'Namespaces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/clusters',
+            label: 'Clusters',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/deployments',
+            label: 'Deployments',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/jobs',
+            label: 'Jobs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/daemonsets',
+            label: 'DaemonSets',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/statefulsets',
+            label: 'StatefulSets',
+          },
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/kubernetes/volumes',
+            label: 'Volumes',
+          },
+        ],
       },
       {
         type: 'category',
