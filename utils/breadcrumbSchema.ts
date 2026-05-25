@@ -188,7 +188,10 @@ export function generateSectionHubBreadcrumb(
   const crumbs: BreadcrumbCrumb[] = [HOME_CRUMB, { name: config.name, url: config.url }]
 
   if (page) {
-    crumbs.push({ name: `Page ${page}`, url: `${BASE_URL}/${section}/page/${page}/` })
+    const pageNum = parseInt(page, 10)
+    if (!Number.isNaN(pageNum) && pageNum > 0) {
+      crumbs.push({ name: `Page ${pageNum}`, url: `${BASE_URL}/${section}/page/${pageNum}/` })
+    }
   }
 
   return buildBreadcrumbSchema(crumbs)
