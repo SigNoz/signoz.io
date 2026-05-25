@@ -2875,9 +2875,9 @@ const docsSideNav = [
 
     items: [
       {
+        type: 'doc',
         route: '/docs/llm-observability',
         label: 'Overview',
-        type: 'doc',
       },
       {
         route: '/docs/agno-monitoring',
