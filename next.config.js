@@ -962,6 +962,11 @@ module.exports = () => {
           destination: '/blog/monitoring-openclaw-with-opentelemetry/',
           permanent: true,
         },
+        {
+          source: '/docs/openclaw-monitoring/',
+          destination: '/docs/openclaw-observability/',
+          permanent: true,
+        },
         // Keep /opentelemetry/ as the canonical hub landing instead of redirecting to the Resource Center.
         {
           source: '/opentelemetry/series/nextjs/',

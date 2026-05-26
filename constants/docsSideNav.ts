@@ -3019,7 +3019,7 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/openclaw-monitoring',
+        route: '/docs/openclaw-observability',
         label: 'OpenClaw',
         type: 'doc',
       },
