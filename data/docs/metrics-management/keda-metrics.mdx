@@ -25,10 +25,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ## How KEDA exposes metrics
 
-The **keda-operator** Deployment runs an OpenTelemetry SDK in-process and pushes metrics to an OTLP endpoint, skipping Prometheus scrape jobs and sidecars. Set two flags on the operator:
-
-- `--enable-opentelemetry-metrics=true` on the operator binary
-- **OTEL_EXPORTER_OTLP_ENDPOINT** (with **OTEL_EXPORTER_OTLP_HEADERS** for auth) as container env vars
+The **keda-operator** Deployment runs an OpenTelemetry SDK in-process and pushes metrics to an OTLP endpoint directly, skipping Prometheus scrape jobs and sidecars.
 
 KEDA emits metrics for scaler activity, scale-loop latency, errors, registered resources and triggers, and optional CloudEventSource queue stats. For the full list, see the <a href="https://keda.sh/docs/latest/integrations/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">KEDA OpenTelemetry Integration docs</a>.
 
@@ -66,6 +63,11 @@ helm upgrade keda kedacore/keda \
   --set "env[0].value=signoz-ingestion-key=<your-ingestion-key>"
 ```
 
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
 </TabItem>
 <TabItem value="kubectl" label="kubectl">
 
@@ -94,13 +96,13 @@ kubectl apply -f keda-operator-otel.yaml
 kubectl apply -f keda-operator-otel.yaml
 ```
 
-</TabItem>
-</Tabs>
-
 Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
 
 <Admonition type="tip" title="Customize service.name and resource attributes" defaultCollapsed={true}>
 KEDA does not set a custom OpenTelemetry Resource, so the Go OTel SDK honors `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES`. Set them on the `keda-operator` container to tag metrics with a custom service name or extra resource attributes.
