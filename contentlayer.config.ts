@@ -125,6 +125,7 @@ export const Doc = defineDocumentType(() => ({
   contentType: 'mdx',
   fields: {
     title: { type: 'string', required: true },
+    meta_title: { type: 'string', required: false },
     id: { type: 'string', required: true },
     slug: { type: 'string', required: false },
     date: { type: 'date', required: false },
