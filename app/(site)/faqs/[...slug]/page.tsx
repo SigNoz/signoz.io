@@ -80,12 +80,10 @@ export async function generateMetadata(props: {
       const deployment_status = isProduction ? 'live' : 'staging'
       const { data: content } = await fetchMDXContentByPath('faqs', path, deployment_status)
 
-      // Extract author names from the content
-      const authorNames = (content as MDXContent)?.authors?.map((author) => author?.name) || [
-        'SigNoz Team',
-      ]
-
       const faqContent = content as MDXContent
+
+      // Extract author names from the content
+      const authorNames = faqContent?.authors?.map((author) => author?.name) || ['SigNoz Team']
       const seoTitle = faqContent.meta_title || faqContent.title
 
       return {
