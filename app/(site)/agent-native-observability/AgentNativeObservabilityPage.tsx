@@ -219,7 +219,7 @@ const InContextObservability: React.FC = () => {
               <p className="text-base text-signoz_vanilla-400">
                 Plug directly into Claude Code, Cursor in minutes. Get full observability context -
                 traces, logs, metrics, service topology, deployment history - in every session.
-                Start debugging in your terminal today.
+                Start debugging in your terminal.
               </p>
               <div className="mt-auto">
                 <Button
