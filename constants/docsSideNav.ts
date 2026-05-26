@@ -20,43 +20,6 @@ const docsSideNav = [
         route: '/docs/overview/what-is-opentelemetry-and-why-it-matters',
       },
       {
-        label: 'SigNoz Features',
-        type: 'category',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/product-features/query-builder',
-            label: 'Query Builder',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/trace-explorer',
-            label: 'Trace Explorer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/logs-explorer',
-            label: 'Logs Explorer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/saved-view',
-            label: 'Saved View',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/invite-team-member',
-            label: 'Invite Team Member',
-          },
-          {
-            type: 'doc',
-            route: '/docs/product-features/keyboard-shortcuts',
-            label: 'Keyboard Shortcuts',
-          },
-        ],
-      },
-      {
         type: 'doc',
         label: "What's Coming",
         route: '/docs/roadmap',
@@ -488,6 +451,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/invite-team-member',
+                label: 'Invite Team Member',
+              },
+              {
+                type: 'doc',
                 route: '/docs/manage/administrator-guide/iam/service-accounts',
                 label: 'Service Accounts',
               },
@@ -532,6 +500,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/manage/administrator-guide/configuration/serving-on-external-url',
                 label: 'Serving on an External URL',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/impersonation-mode',
+                label: 'Impersonation Mode',
               },
             ],
           },
@@ -591,6 +564,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/manage/administrator-guide/workspace-url',
+            label: 'Edit Workspace URL',
+          },
+          {
+            type: 'doc',
             route: '/docs/telemetry',
             label: 'Statistics Reporting',
           },
@@ -611,16 +589,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/s3-integration-iam-role-eks',
-            label: 'S3 Integration With AWS IAM role in EKS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/tutorial/oci-bucket-cold-storage-integration',
-            label: 'OCI Bucket Cold Storage Integration',
-          },
-          {
-            type: 'doc',
             route: '/docs/userguide/otlp-http-enable-cors',
             label: 'CORS in OTLP HTTP Receiver',
           },
@@ -628,6 +596,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/reset-admin-password',
             label: 'Reset Admin Password',
+          },
+          {
+            type: 'doc',
+            route: '/docs/manage/keyboard-shortcuts',
+            label: 'Keyboard Shortcuts',
           },
         ],
       },
@@ -1728,11 +1701,6 @@ const docsSideNav = [
             label: 'Available Quick Filters',
           },
           { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
         ],
       },
       {

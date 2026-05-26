@@ -61,6 +61,34 @@ Required keys:
 - `description`
 - `doc_type`
 
+### Title Guidelines
+
+The `title` field is both the page heading and the meta title shown in search results.
+
+- **Length:** 50–60 characters.
+- **Structure:** Primary keyword + feature or action. No brand suffix — "SigNoz Docs" is appended programmatically.
+- **Best practices:**
+  - Lead with the primary keyword.
+  - Use action words: Learn, Setup, Guide, Monitor, Debug, Optimize.
+  - Include a feature or benefit qualifier when it fits naturally: Fast, Real-time, Open-source, Distributed.
+- **Example:** `Logs Pipelines - Parse & Transform Logs`
+  - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
+  - In search results: *Logs Pipelines - Parse & Transform Logs | SigNoz Docs*
+
+### Description Guidelines
+
+The `description` field appears as the meta description in search results and link previews.
+
+- **Length:** 120–160 characters.
+- **Structure:** What the page covers + what the reader will learn or do + benefit.
+- **Best practices:**
+  - Clearly explain what the page is about and what the user will learn.
+  - Use action-oriented language.
+  - Highlight benefits.
+  - Include primary keywords naturally — do not stuff them.
+- **Example:** `Learn how SigNoz Logs Pipelines parse and transform logs into structured data for better debugging and observability.`
+  - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
+
 Tags:
 
 - omit `tags` when the doc applies to both Cloud and Self-Host
@@ -280,6 +308,8 @@ node --test tests/component-items-sync.test.js
 Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-checklists.md#docs-changes) when preparing or reviewing docs work.
 
 - Frontmatter includes `date`, `id`, `title`, `description`, `doc_type`, and correct tags.
+- Title is 50–60 characters, leads with the primary keyword, and uses an action word.
+- Description is 120–160 characters, action-oriented, and explains what the page covers and what the reader will learn.
 - Content matches the chosen `doc_type`.
 - The primary job is clear and the happy path is easy to follow end to end.
 - Steps are concise, minimal, and ordered for first success.

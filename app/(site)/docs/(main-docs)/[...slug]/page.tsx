@@ -8,7 +8,8 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
+import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
 
 export const dynamicParams = false
 
@@ -64,13 +65,12 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = mainContent
   const jsonLd = post.structuredData
+  const breadcrumbJsonLd = generateDocsBreadcrumb(slug, title)
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-      />
+      <JsonLdScript data={jsonLd} />
+      <JsonLdScript data={breadcrumbJsonLd} />
       <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
           title={title}

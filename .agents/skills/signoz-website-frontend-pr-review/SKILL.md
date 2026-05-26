@@ -26,7 +26,7 @@ This skill file defines the review rubric (the 13 categories below). Project-spe
 1. Get PR context and changed files.
 2. **Read `contributing/site-code.md` in full before starting the review.** It contains the project's icon policy, UI primitive expectations, componentItems data placement rules, async/DOM safety rules, MDX rendering constraints, dependency policy, and required verification commands. Reviewing without reading it first leads to missed project-specific findings.
 3. Scan for high-impact issues first (duplication, architecture, performance).
-4. Evaluate against the categories below.
+4. Evaluate against the categories below, including analytics tracking when events or tracked CTAs change.
 5. Leave inline comments for specific issues only.
 6. Post exactly one concise summary grouped by severity.
 
@@ -94,14 +94,37 @@ This skill file defines the review rubric (the 13 categories below). Project-spe
 - Check logging/error messages quality.
 - Flag stale TODO/FIXME items when they introduce risk.
 
-### 8) Folder structure and organization
+### 8) Analytics and event tracking
+
+- Review every new or changed tracked interaction that uses `TrackingLink`, `TrackingButton`, `useLogEvent`, HubSpot form tracking, signup tracking, or manual `Website Click` events.
+- Use the common event names already present in the website unless there is a strong reason to introduce a new event:
+  - `Website Click`
+  - `Website Page View`
+  - `User Signed Up`
+  - `HubSpot Form Submitted`
+- For `Website Click`, keep `clickName` reusable and query-friendly. It should describe the stable action/object, not the page, section, clicked item label, or campaign context.
+  - Good: `Sign Up Button`, `Contact Us Button`, `Docs Link`, `Comparison Link`, `Migration Link`, `Search Icon Click`
+  - Bad: `Agent Native Page Hero Get Started - Free`, `Migrate from Datadog Migration Link`
+- Put distinctions in attributes intended for breakdowns:
+  - `clickText`: exact visible label or item text, for example `Get Started - Free`, `Migrate from Datadog`, `Read Documentation`
+  - `clickLocation`: placement/context, for example `Top Navbar`, `Hero Section`, `Teams Pricing Card`, `Agent Native Observability Page Hero`
+  - `pageLocation`: current route, for example `/`, `/teams`, `/contact-us`
+- For repeated menu or list items, sibling items should usually share the same `clickName`; use `clickText` to distinguish the clicked item.
+  - Good: `clickName = "Migration Link"`, `clickText = "Migrate from Datadog"`, `clickLocation = "Top Navbar"`
+  - Bad: `clickName = "Migrate from Datadog Migration Link"`
+- Avoid duplicating context across attributes. If the page or section is already captured by `clickLocation` and `pageLocation`, do not repeat it in `clickName`.
+- Reuse existing names before inventing new ones. Search for similar `clickName` values such as `Sign Up Button`, `Contact Us Button`, `Docs Link`, and `Search Icon Click` before approving new tracking.
+- Avoid PII in click events. Do not add email, free-form descriptions, or other personal data to `Website Click` attributes unless there is a clear existing product requirement.
+- For conversion funnels, verify the chosen properties make common Mixpanel questions easy: count clicks by action, break down by item text/location, and funnel click -> page view -> signup/form submit.
+
+### 9) Folder structure and organization
 
 - Validate placement under `app/`, `components/`, `shared/components/`, `layouts/`, `hooks/`, `utils/`, `constants/`.
 - Ensure separation of concerns and consistent naming.
 - Flag misplaced/orphaned files.
 - Check proper path alias usage.
 
-### 9) Styling and CSS
+### 10) Styling and CSS
 
 - Check Tailwind consistency and duplication.
 - Treat avoidable `.module.css` additions/expansions as findings when equivalent Tailwind classes/utilities can be used.
@@ -110,7 +133,7 @@ This skill file defines the review rubric (the 13 categories below). Project-spe
 - Flag avoidable inline styles.
 - Check responsive utilities and token consistency where applicable.
 
-### 10) Dependencies and imports
+### 11) Dependencies and imports
 
 - Remove unused imports.
 - Check import order/organization.
@@ -118,20 +141,20 @@ This skill file defines the review rubric (the 13 categories below). Project-spe
 - Avoid duplicate functionality from existing deps.
 - Ensure new deps are justified (per `contributing/site-code.md`).
 
-### 11) Project-specific rules (`contributing/site-code.md`)
+### 12) Project-specific rules (`contributing/site-code.md`)
 
 - Apply the project-specific rules from `contributing/site-code.md`.
 - Pay extra attention to icon usage, existing UI primitives, `constants/componentItems*.ts` data placement, async handler safety, MDX rendering compatibility, and dependency justification.
 - Treat hardcoded `slice()` boundaries for logical sub-sections as a `High` finding.
 
-### 12) Error handling and edge cases
+### 13) Error handling and edge cases
 
 - Verify async error handling (`try/catch` where needed).
 - Check null/undefined handling.
 - Validate loading/error state handling.
 - Look for race conditions.
 
-### 13) Accessibility (A11Y)
+### 14) Accessibility (A11Y)
 
 - Validate ARIA labels and semantic HTML.
 - Check keyboard navigation/focus behavior.

@@ -64,36 +64,3 @@ export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [
     isActive: false,
   },
 ]
-
-export const STORAGE_DATA = {
-  headers: {
-    hot: 'HOT STORAGE PERIOD',
-    cold: 'PERIOD IN COLD STORAGE AFTER HOT STORAGE',
-  },
-  subHeader: '$ / GB',
-  coldPeriods: [
-    { value: '0', unit: 'days' },
-    { value: '90', unit: 'days' },
-    { value: '180', unit: 'days' },
-    { value: '1', unit: 'year' },
-    { value: '2', unit: 'years' },
-  ],
-  rows: [
-    {
-      period: { value: '15', unit: 'days' },
-      prices: [0.3, 0.45, 0.6, 0.9, 1.3],
-    },
-    {
-      period: { value: '30', unit: 'days' },
-      prices: [0.4, 0.55, 0.7, 1.0, 1.4],
-    },
-    {
-      period: { value: '90', unit: 'days' },
-      prices: [0.6, 0.75, 0.9, 1.2, 1.6],
-    },
-    {
-      period: { value: '180', unit: 'days' },
-      prices: [0.8, 0.95, 1.1, 1.4, 1.8],
-    },
-  ],
-}

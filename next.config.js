@@ -107,6 +107,46 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/docs/product-features/saved-view',
+          destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/saved-view/',
+          destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/query-builder',
+          destination: '/docs/userguide/query-builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/query-builder/',
+          destination: '/docs/userguide/query-builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/invite-team-member',
+          destination: '/docs/manage/administrator-guide/iam/invite-team-member/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/invite-team-member/',
+          destination: '/docs/manage/administrator-guide/iam/invite-team-member/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/keyboard-shortcuts',
+          destination: '/docs/manage/keyboard-shortcuts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/keyboard-shortcuts/',
+          destination: '/docs/manage/keyboard-shortcuts/',
+          permanent: true,
+        },
+        {
           source: '/docs/product-features/trace-explorer',
           destination: '/docs/userguide/traces/',
           permanent: true,
@@ -583,6 +623,16 @@ module.exports = () => {
         {
           source: '/docs/instrumentation/opentelemetry-wordpress/',
           destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/s3-integration-iam-role-eks/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/oci-bucket-cold-storage-integration/',
+          destination: '/docs/userguide/retention-period/',
           permanent: true,
         },
         {
@@ -2145,7 +2195,12 @@ module.exports = () => {
         },
         {
           source: '/docs/configuration/deep_storage',
-          destination: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/userguide/retention-period/',
           permanent: true,
         },
         {
