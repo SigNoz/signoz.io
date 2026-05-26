@@ -3658,13 +3658,13 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Manual',
+            route: '/docs/integrations/outposts/kong',
+            label: 'SigNoz Plugin',
           },
           {
             type: 'doc',
-            route: '/docs/integrations/outposts/kong',
-            label: 'SigNoz Plugin',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'Manual',
           },
         ],
       },
