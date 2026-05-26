@@ -35,6 +35,10 @@ const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
     }
   }
 
+  if (typeof resolvedHref === 'string' && resolvedHref.startsWith('/')) {
+    resolvedHref = `https://signoz.io${resolvedHref}`
+  }
+
   const isInternalLink =
     (resolvedHref && (resolvedHref.startsWith('/') || resolvedHref.startsWith('.'))) ||
     (typeof resolvedHref === 'string' && resolvedHref.startsWith('https://signoz.io'))
@@ -60,7 +64,7 @@ const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
       return <Link href={resolvedHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
     }
 
-    return <Link href={resolvedHref} {...rest} prefetch={prefetch ?? false} />
+    return <Link href={resolvedHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
   }
 
   if (isAnchorLink) {
