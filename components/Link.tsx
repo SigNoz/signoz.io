@@ -14,7 +14,12 @@ import {
 
 type CustomLinkProps = LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>
 
-const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
+const CustomLink = ({
+  href,
+  prefetch,
+  'data-mdx': isMdx,
+  ...rest
+}: CustomLinkProps & { 'data-mdx'?: boolean }) => {
   const pathname = usePathname()
   const search = useBrowserSearch()
   const searchParams = new URLSearchParams(search)
@@ -35,7 +40,8 @@ const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
     }
   }
 
-  if (typeof resolvedHref === 'string' && resolvedHref.startsWith('/')) {
+  // MDX content: prepend domain to site-relative URLs
+  if (isMdx && typeof resolvedHref === 'string' && resolvedHref.startsWith('/')) {
     resolvedHref = `https://signoz.io${resolvedHref}`
   }
 
@@ -64,7 +70,12 @@ const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
       return <Link href={resolvedHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
     }
 
-    return <Link href={resolvedHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
+    // MDX content: open all non-anchor links in new tab
+    if (isMdx) {
+      return <Link href={resolvedHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
+    }
+
+    return <Link href={resolvedHref} {...rest} prefetch={prefetch ?? false} />
   }
 
   if (isAnchorLink) {
