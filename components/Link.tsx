@@ -14,14 +14,7 @@ import {
 
 type CustomLinkProps = LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>
 
-const CustomLink = ({
-  href,
-  prefetch,
-  target,
-  'data-mdx': isMdx,
-  ...rest
-}: CustomLinkProps & { 'data-mdx'?: boolean }) => {
-  const blankTarget = target ?? '_blank'
+const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
   const pathname = usePathname()
   const search = useBrowserSearch()
   const searchParams = new URLSearchParams(search)
@@ -42,11 +35,6 @@ const CustomLink = ({
     }
   }
 
-  // MDX content: prepend domain to site-relative URLs
-  if (isMdx && typeof resolvedHref === 'string' && resolvedHref.startsWith('/')) {
-    resolvedHref = `https://signoz.io${resolvedHref}`
-  }
-
   const isInternalLink =
     (resolvedHref && (resolvedHref.startsWith('/') || resolvedHref.startsWith('.'))) ||
     (typeof resolvedHref === 'string' && resolvedHref.startsWith('https://signoz.io'))
@@ -65,20 +53,16 @@ const CustomLink = ({
         newHref = `${newHref}&cloud_region=${cloudRegionParam}`
       }
 
-      return <Link href={newHref} {...rest} target={blankTarget} prefetch={prefetch ?? false} />
+      return <Link href={newHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
     }
 
     if (typeof resolvedHref === 'string' && resolvedHref.startsWith('https://signoz.io/')) {
-      return (
-        <Link href={resolvedHref} {...rest} target={blankTarget} prefetch={prefetch ?? false} />
-      )
+      return <Link href={resolvedHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
     }
 
-    // MDX content: open all non-anchor links in new tab
-    if (isMdx) {
-      return (
-        <Link href={resolvedHref} {...rest} target={blankTarget} prefetch={prefetch ?? false} />
-      )
+    // Prepend domain to site-relative URLs
+    if (typeof resolvedHref === 'string' && resolvedHref.startsWith('/')) {
+      resolvedHref = `https://signoz.io${resolvedHref}`
     }
 
     return <Link href={resolvedHref} {...rest} prefetch={prefetch ?? false} />
@@ -88,7 +72,7 @@ const CustomLink = ({
     return <a href={resolvedHref} {...rest} />
   }
 
-  return <a target={blankTarget} rel="noopener noreferrer nofollow" href={resolvedHref} {...rest} />
+  return <a target="_blank" rel="noopener noreferrer nofollow" href={resolvedHref} {...rest} />
 }
 
 export default CustomLink

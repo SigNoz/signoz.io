@@ -108,7 +108,7 @@ export const components = {
   ToggleHeading,
   Image,
   TOCInline,
-  a: (props: any) => <CustomLink {...props} data-mdx />,
+  a: CustomLink,
   pre: RegionAwarePre,
   code: RegionAwareCode,
   table: TableWrapper,
