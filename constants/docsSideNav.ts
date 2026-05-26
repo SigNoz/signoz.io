@@ -576,6 +576,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/manage/administrator-guide/workspace-url',
+            label: 'Edit Workspace URL',
+          },
+          {
+            type: 'doc',
             route: '/docs/telemetry',
             label: 'Statistics Reporting',
           },
@@ -2494,9 +2499,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/troubleshooting/troubleshooting',
-        items: [
-          { type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' },
-        ],
+        items: [{ type: 'doc', route: '/docs/dashboards/troubleshooting/faqs', label: 'FAQs' }],
       },
     ],
   },
