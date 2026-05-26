@@ -161,7 +161,7 @@ const EarlyAccessForm: React.FC = () => {
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-1.5">
+    <form noValidate onSubmit={handleSubmit} className="relative flex flex-col gap-1.5 pb-5">
       <div className="flex h-10 items-stretch">
         <input
           type="email"
@@ -184,10 +184,12 @@ const EarlyAccessForm: React.FC = () => {
           Submit
         </Button>
       </div>
-      {touched.email && errors.email && (
-        <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
-      )}
-      {submitError && <span className="text-xs text-signoz_cherry-500">{submitError}</span>}
+      <div className="absolute -bottom-3 left-0">
+        {touched.email && errors.email && (
+          <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
+        )}
+        {submitError && <span className="text-xs text-signoz_cherry-500">{submitError}</span>}
+      </div>
     </form>
   )
 }
@@ -221,7 +223,7 @@ const InContextObservability: React.FC = () => {
                 traces, logs, metrics, service topology, deployment history - in every session.
                 Start debugging in your terminal.
               </p>
-              <div className="mt-auto">
+              <div className="mt-auto pb-5">
                 <Button
                   asChild
                   variant="default"
