@@ -68,11 +68,13 @@ Click the columns icon in the toolbar to open the **Columns** panel. It shows th
 
 - This column relies on the OTel metric(s): `system.cpu.time`.
 - Share of CPU time being actively spent across all non-idle states (user, system, wait, softirq, steal, etc.), aggregated across all cores. Sustained values above ~80% signal CPU pressure — processes start queuing for cores and request latency tends to rise.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy), **amber** between 60% and 90% (elevated), and **red** at or above 90% (critical CPU pressure).
 
 ### Memory Usage
 
 - This column relies on the OTel metric(s): `system.memory.usage`.
 - Share of physical RAM in actual use, excluding the kernel's reclaimable page cache and buffers. Values approaching 100% leave no headroom — the OS may start swapping (which slows everything) or kill processes via OOM. Investigate when sustained above ~85%.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **amber** between 60% and 90% (elevated), and **dark red** at or above 90% (critical — risk of swapping or OOM-kills).
 
 ### IOWait
 
@@ -83,6 +85,7 @@ Click the columns icon in the toolbar to open the **Columns** panel. It shows th
 
 - This column relies on the OTel metric(s): `system.filesystem.usage`.
 - Share of filesystem space in actual use across all mounted filesystems on the host. Values approaching 100% mean writes will start failing — logs unable to rotate, databases halting, applications crashing. Investigate when sustained above ~85%, and remember a single full mountpoint (e.g. `/var`) can break things even if the host's overall percentage looks healthy.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **amber** between 60% and 90% (elevated), and **dark red** at or above 90% (critical — writes likely to start failing).
 
 ### Load Avg
 
