@@ -253,9 +253,8 @@ const InContextObservability: React.FC = () => {
                 </h3>
               </div>
               <p className="text-base text-signoz_vanilla-400">
-                Pre-built, customisable agents that run investigations, correlate signals, enrich
-                runbooks, and post incident summaries automatically. Deploy once, extend infinitely.
-                Your stack, your workflows, your heuristics.
+                A sidepane as you work, or full-screen view to dig in. Ask about logs, traces,
+                metrics in plain English — pulls up the right explorer view with the query.
               </p>
               <div className="mt-auto">
                 <p className="mb-2 text-sm font-medium text-signoz_vanilla-100">Get early access</p>
