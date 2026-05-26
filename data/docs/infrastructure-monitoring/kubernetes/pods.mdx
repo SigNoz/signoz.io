@@ -78,52 +78,65 @@ Click a pod name to open the detail page. The header shows **Namespace**, **Clus
 
 #### CPU Usage (cores)
 
-Actual CPU consumption over time.
+- This chart relies on the OTel metric(s): `k8s.pod.cpu.usage`.
+- Plots the pod's CPU consumption in CPU-core units over time, using three time-aggregations of `k8s.pod.cpu.usage` (per the kubeletstats receiver) within each step interval — one line each for **Avg**, **Max**, and **Min**. The gap between Max and Min shows intra-interval volatility — a narrow band means steady CPU use, a wide band means bursty workloads.
 
 #### CPU Request, Limit Utilization
 
-CPU usage as percentage of request and limit.
+- This chart relies on the OTel metric(s): `k8s.pod.cpu_request_utilization`, `k8s.pod.cpu_limit_utilization`.
+- Plots the pod's CPU usage as fractions of its containers' total CPU requests and total CPU limits over time, using `k8s.pod.cpu_request_utilization` and `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver. Six lines — three per ratio (**Request util % - Avg / Max / Min** and **Limit util % - Avg / Max / Min**) showing both typical value and bursting envelope. Request lines crossing 100% just mean the pod uses more CPU than reserved (allowed); Limit lines crossing 100% indicate active CPU throttling by the kernel.
 
 #### Memory Usage (bytes)
 
-Working set memory over time.
+- This chart relies on the OTel metric(s): `k8s.pod.memory.usage`.
+- Plots the pod's total memory consumption in bytes over time using `k8s.pod.memory.usage` from the kubeletstats receiver, with three lines showing **Avg**, **Max**, and **Min** within each step interval. Note: `k8s.pod.memory.usage` typically includes reclaimable page cache, so this value can read higher than the working-set value the kubelet uses for OOM and eviction decisions.
 
 #### Memory Request, Limit Utilization
 
-Memory usage as percentage of request and limit.
+- This chart relies on the OTel metric(s): `k8s.pod.memory_request_utilization`, `k8s.pod.memory_limit_utilization`.
+- Plots the pod's memory usage as fractions of its containers' total memory requests and total memory limits over time, using `k8s.pod.memory_request_utilization` and `k8s.pod.memory_limit_utilization` from the kubeletstats receiver. Six lines — three per ratio (**Request util % - Avg / Max / Min** and **Limit util % - Avg / Max / Min**). Request lines crossing 100% just mean the pod uses more memory than reserved; Limit lines crossing 100% risk an OOMKill once the kernel detects memory pressure.
 
 #### Memory by State
 
-Breakdown into RSS, working set, and total usage (includes cache).
+- This chart relies on the OTel metric(s): `k8s.pod.memory.rss`, `k8s.pod.memory.working_set`.
+- Plots three memory components of the pod over time: `k8s.pod.memory.rss` (anonymous and tmpfs memory) as **RSS Memory**, `k8s.pod.memory.working_set` (active in-use memory the kubelet tracks for OOM/eviction) as **Working Set Memory**, and a formula `working_set − rss` as **Cache Memory** (the slice of working set attributable to file-backed cache pages). Rising RSS without rising Working Set usually means an application heap leak; rising Cache without rising RSS typically reflects more file I/O activity.
 
 #### Memory Major Page Faults
 
-Sustained high values indicate memory pressure.
+- This chart relies on the OTel metric(s): `k8s.pod.memory.major_page_faults`.
+- Plots the pod's major-page-fault rate over time using `k8s.pod.memory.major_page_faults` (from kubeletstats), as a single line. A major page fault means the kernel had to read a page from disk because the data wasn't in RAM — sustained high values indicate the pod's working set exceeds its allocated memory and the system is paging from disk (very expensive; usually correlates with severe performance drops).
 
 #### CPU Usage by Container (cores)
 
-Per-container CPU — identifies which container uses the most CPU.
+- This chart relies on the OTel metric(s): `container.cpu.usage`.
+- Plots each container's CPU consumption in CPU-core units over time using `container.cpu.usage` (from kubeletstats) grouped by `k8s.container.name`, with one line per container labeled by container name. Use this when a pod has multiple containers (sidecars, init-after, etc.) to identify which container is driving the pod's overall CPU consumption.
 
 #### CPU Request, Limit Utilization by Container
 
-Per-container CPU against requests and limits.
+- This chart relies on the OTel metric(s): `container.cpu.usage`, `k8s.container.cpu_request`, `k8s.container.cpu_limit`.
+- Plots each container's CPU usage as a fraction of its own request and limit, computed via `usage / request` and `usage / limit` formulas using `container.cpu.usage` and the kubeletstats `k8s.container.cpu_request` / `k8s.container.cpu_limit` metrics, grouped by `k8s.container.name`. Two lines per container — `Req % : <container>` and `Limit % : <container>`. Useful for identifying which container in a multi-container pod is throttling or under-utilizing its allocated CPU.
 
 #### Memory Usage by Container (bytes)
 
-Per-container memory usage.
+- This chart relies on the OTel metric(s): `container.memory.usage`, `container.memory.working_set`, `container.memory.rss`.
+- Plots three per-container memory metrics over time — `container.memory.usage`, `container.memory.working_set`, and `container.memory.rss` (all from the kubeletstats receiver) — grouped by `k8s.container.name`. Three lines per container labeled `usage :: <container>`, `working set :: <container>`, and `rss :: <container>`. Useful for identifying which container's memory is growing and whether the growth is in active workload memory (`rss`, `working set`) or reclaimable cache (the gap between `usage` and `working set`).
 
 #### Memory Request, Limit Utilization by Container
 
-Per-container memory against requests and limits.
+- This chart relies on the OTel metric(s): `container.memory.usage`, `k8s.container.memory_request`, `k8s.container.memory_limit`.
+- Plots each container's memory usage as a fraction of its own request and limit, computed via `usage / request` and `usage / limit` using `container.memory.usage` and the kubeletstats `k8s.container.memory_request` / `k8s.container.memory_limit` metrics, grouped by `k8s.container.name`. Two lines per container labeled `Req % : <container>` and `Limit % : <container>`. Limit % approaching 100% on any single container is a per-container OOMKill signal — even if the pod's overall memory ratio looks fine, a single container hitting its limit will be terminated.
 
 #### Network Rate
 
-Network throughput (transmit and receive) in bytes/s.
+- This chart relies on the OTel metric(s): `k8s.pod.network.io`.
+- Plots the pod's network throughput in bytes per second (rate of `k8s.pod.network.io` from the kubeletstats receiver) grouped by `direction` (transmit / receive) and `network.interface.name`, with one line per `direction :: interface` combination. Use this to separate ingress vs egress traffic and spot when a specific interface is saturating. If the chart shows "No Data", the pod isn't reporting network activity — possible reasons include the CNI plugin not exposing per-pod network metrics, or the pod sharing host networking.
 
 #### Network Errors
 
-Network error count per second.
+- This chart relies on the OTel metric(s): `k8s.pod.network.errors`.
+- Plots the rate of network errors observed on the pod's interfaces using `k8s.pod.network.errors` (from kubeletstats) grouped by `direction` and `network.interface.name` — one line per `direction :: interface`. Any sustained non-zero value warrants attention — common causes are misconfigured CNI plugins, faulty node NICs, MTU mismatches, or noisy neighbors saturating the underlying host network.
 
 #### File System (bytes)
 
-Disk consumed by pod containers.
+- This chart relies on the OTel metric(s): `k8s.pod.filesystem.capacity`, `k8s.pod.filesystem.available`, `k8s.pod.filesystem.usage`.
+- Plots three values of the pod's local filesystem over time using kubeletstats metrics: **Capacity** (`k8s.pod.filesystem.capacity` — total provisioned space), **Available** (`k8s.pod.filesystem.available` — remaining free space), and **Usage** (`k8s.pod.filesystem.usage` — currently consumed). When `Available` trends toward zero or `Usage` approaches `Capacity`, the pod's local filesystem is filling up — common causes are log accumulation, downloaded artifacts, or local temp/cache files that aren't being cleaned up.
