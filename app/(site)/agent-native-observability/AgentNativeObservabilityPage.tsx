@@ -254,7 +254,7 @@ const InContextObservability: React.FC = () => {
               </div>
               <p className="text-base text-signoz_vanilla-400">
                 A sidepane as you work, or full-screen view to dig in. Ask about logs, traces,
-                metrics in plain English — pulls up the right explorer view with the query.
+                metrics in plain English - pulls up the right explorer view with the query.
               </p>
               <div className="mt-auto">
                 <p className="mb-2 text-sm font-medium text-signoz_vanilla-100">Get early access</p>
