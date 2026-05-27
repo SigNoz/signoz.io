@@ -135,11 +135,11 @@ export default function TeamsPricingCard() {
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
               <span className="flex items-center gap-1">
-                Access to MCP Server and AI Assistant
+                Access to MCP Server and Noz: Our new AI Assistant
                 <Tooltip
                   content={
                     <div className="max-w-xs">
-                      <p className="text-sm text-signoz_vanilla-400">
+                      <p className="m-0 text-sm text-signoz_vanilla-400">
                         <TrackingLink
                           href="/agent-native-observability/#ai-assistant"
                           clickType="In Page Link"
