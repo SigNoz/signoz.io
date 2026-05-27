@@ -63,11 +63,13 @@ export async function generateMetadata(props: {
         }
       })
 
+      const seoTitle = content.meta_title || content.title
+
       return {
-        title: content.title,
+        title: seoTitle,
         description: content.description,
         openGraph: {
-          title: content.title,
+          title: seoTitle,
           description: content.description,
           siteName: siteMetadata.title,
           locale: 'en_US',
@@ -80,7 +82,7 @@ export async function generateMetadata(props: {
         },
         twitter: {
           card: 'summary_large_image',
-          title: content.title,
+          title: seoTitle,
           description: content.description,
           images: imageList,
         },

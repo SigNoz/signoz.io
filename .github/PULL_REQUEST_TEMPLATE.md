@@ -1,99 +1,85 @@
-## Summary
-<!-- What does this PR do? Provide a concise overview of the change. -->
-
-## Motivation / Problem
-<!-- Why is this change needed? What problem does it solve? -->
-<!-- Link issues if applicable (e.g. Fixes #123) -->
-
-## Changes
-<!-- Describe the key changes introduced in this PR -->
--
--
--
-
-## Description
-<!-- Briefly describe what this PR does and why -->
-
-## Type of Change
-<!-- Check all that apply -->
-
-- [ ] **Docs** – Changes to `data/docs/**`
-- [ ] **Blog** – Changes to `data/blog/**`
-- [ ] **Site Code** – Changes to `app/**`, `components/**`, `hooks/**`, `utils/**`, config, etc.
-- [ ] **Redirects** – Renamed/moved docs or updated `next.config.js` redirects
-- [ ] **Dependencies / CI / Scripts**
-- [ ] **Other** – Explain below
-
-## Impact
-<!-- Who or what is affected by this change? -->
-- [ ] Documentation only
-- [ ] UI changes
-- [ ] Developer workflow
-- [ ] Performance impact
-- [ ] Breaking change
-
-If breaking change, describe migration steps:
-
-## Context & Screenshots
-<!-- Add screenshots for UI or docs changes when helpful -->
-
-## Before / After (if applicable)
-<!-- Show how things changed -->
-<!-- Screenshots, gifs, or code examples -->
-
-## Checklist
-
-<!-- Complete the sections that apply to your changes -->
-
-### General
-- [ ] Branch is up to date with `main`
-- [ ] PR title follows conventional format (`type: description`)
-- [ ] Self-reviewed the code
-- [ ] Comments added for complex logic
-
-### For all changes
-- [ ] Built locally (`yarn build`) with no errors
-- [ ] Ran `yarn lint` and fixed any issues
-- [ ] Pre-commit hooks passed (or ran `yarn check:doc-redirects` / `yarn check:docs-metadata` if applicable)
-
-### For docs changes (`data/docs/**`)
-- [ ] Followed the docs author checklist in [contributing/docs-authoring.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/docs-authoring.md)
-- [ ] Added/updated the page in `constants/docsSideNav.ts` if adding or moving a doc
-- [ ] Any added docs images use WebP format and live under `public/img/docs/<topic>/`
-
-### For blog changes
-- [ ] Followed the blog workflow in [contributing/blog-workflow.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/blog-workflow.md)
-- [ ] Frontmatter includes `title`, `date`, `author`, `tags` (and `canonicalUrl` if applicable)
-- [ ] Images use WebP format and live under `public/img/blog/<YYYY-MM>/`
-
-### For site code changes
-- [ ] Followed the site code playbook in [contributing/site-code.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/site-code.md)
-- [ ] New dependencies are justified in the PR description (if any)
-
-### For renamed or moved docs
-- [ ] Followed the redirects and discovery section in [contributing/docs-authoring.md](https://github.com/SigNoz/signoz.io/blob/main/contributing/docs-authoring.md)
-- [ ] Added permanent redirect in `next.config.js` under `async redirects()`
-- [ ] Updated internal links and sidebar in `constants/docsSideNav.ts`
-- [ ] Ran `yarn check:doc-redirects` to verify
-
-## Testing
-<!-- Describe how the change was tested -->
-- [ ] Tested locally
-- [ ] Edge cases considered
-- [ ] Existing functionality verified
-- [ ] New tests added (if applicable)
-
-Steps to test:
-1.
-2.
-3.
-
-## Rollout / Deployment Notes
-<!-- Any special steps required during deployment -->
-
-## Additional Context
-<!-- Anything reviewers should know -->
+## Pull Request
 
 ---
 
-**Note:** Submit as Draft by default. Mark "Ready for review" when checks pass and content is ready.
+### 📄 Summary
+> Why does this change exist?  
+> What problem does it solve, and why is this the right approach?
+
+
+
+#### Screenshots / Screen Recordings (if applicable)
+> Include screenshots or screen recordings that clearly show the behavior before the change and the result after the change. This helps reviewers quickly understand the impact and verify the update.
+
+
+#### Issues closed by this PR
+> Reference issues using `Closes #issue-number` to enable automatic closure on merge.
+
+---
+
+### ✅ Change Type
+_Select all that apply_
+
+- [ ] ✨ Feature
+- [ ] 🐛 Bug fix
+- [ ] ♻️ Refactor
+- [ ] 🛠️ Infra / Tooling
+- [ ] 🧪 Test-only
+
+---
+
+### 🐛 Bug Context
+> Required if this PR fixes a bug
+
+#### Root Cause
+> What caused the issue?  
+> Regression, faulty assumption, edge case, refactor, etc.
+
+#### Fix Strategy
+> How does this PR address the root cause?
+
+---
+
+### 🧪 Testing Strategy
+> How was this change validated?
+
+- Tests added/updated:
+- Manual verification:
+- Edge cases covered:
+
+---
+
+### ⚠️ Risk & Impact Assessment
+> What could break? How do we recover?
+
+- Blast radius:
+- Potential regressions:
+- Rollback plan:
+
+---
+
+### 📝 Changelog
+> Fill only if this affects users, APIs, UI, or documented behavior  
+> Use **N/A** for internal or non-user-facing changes
+
+| Field | Value |
+|------|-------|
+| Deployment Type | Cloud / OSS / Enterprise |
+| Change Type | Feature / Bug Fix / Maintenance |
+| Description | User-facing summary |
+
+---
+
+### 📋 Checklist
+- [ ] Tests added or explicitly not required
+- [ ] Manually tested
+- [ ] Breaking changes documented
+- [ ] Backward compatibility considered
+
+---
+
+## 👀 Notes for Reviewers
+
+<!-- Anything reviewers should keep in mind while reviewing -->
+
+---

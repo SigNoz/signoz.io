@@ -40,12 +40,13 @@ export async function generateMetadata(props: {
     try {
       const response = await fetchMDXContentByPath('case-studies', path, deploymentStatus)
       const content = Array.isArray(response.data) ? response.data[0] : response.data
+      const seoTitle = content?.meta_title || content?.title
 
       return {
-        title: content?.title,
+        title: seoTitle,
         description: content?.description || content?.title,
         openGraph: {
-          title: content?.title,
+          title: seoTitle,
           description: content?.description || content?.title,
           siteName: siteMetadata.title,
           locale: 'en_US',
@@ -54,7 +55,7 @@ export async function generateMetadata(props: {
         },
         twitter: {
           card: 'summary_large_image',
-          title: content?.title,
+          title: seoTitle,
           description: content?.description || content?.title,
         },
       }
