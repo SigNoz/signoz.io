@@ -55,9 +55,14 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       clickName: 'DBOS Logs Link',
     },
     {
-      name: 'Kong Gateway',
+      name: 'Kong (SigNoz plugin)',
+      href: '/docs/integrations/outposts/kong',
+      clickName: 'Kong SigNoz Plugin Logs Link',
+    },
+    {
+      name: 'Kong (OpenTelemetry plugin)',
       href: '/docs/integrations/opentelemetry-kong-gateway',
-      clickName: 'Kong Gateway Logs Link',
+      clickName: 'Kong OpenTelemetry Plugin Logs Link',
     },
   ] satisfies ComponentItem[],
   languages: [

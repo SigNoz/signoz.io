@@ -14,6 +14,7 @@ import {
   SiOpentelemetry,
   SiTraefikproxy,
   SiClickhouse,
+  SiRender,
   SiHashicorp,
   SiDatadog,
   SiGithubactions,
@@ -100,6 +101,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/metrics-management/nvidia-dcgm-metrics': <FaServer className="h-7 w-7 text-green-500" />,
   '/docs/metrics-management/slurm-metrics': <FaServer className="h-7 w-7 text-blue-600" />,
   '/docs/metrics-management/render-metrics': <FaCloud className="h-7 w-7 text-purple-500" />,
+  '/docs/integrations/outposts/render': <SiRender className="h-7 w-7 text-black dark:text-white" />,
   // Databases
   '/docs/integrations/clickhouse': <SiClickhouse className="h-7 w-7 text-yellow-400" />,
   '/docs/integrations/snowflake': <SiSnowflake className="h-7 w-7 text-blue-500" />,

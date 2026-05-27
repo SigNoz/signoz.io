@@ -1164,6 +1164,24 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Kong Gateway',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/integrations/kong-gateway',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/outposts/kong',
+                label: 'SigNoz Plugin',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'OpenTelemetry Plugin',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'Elixir',
             route: '/docs/instrumentation/opentelemetry-elixir',
@@ -1197,11 +1215,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Kong Gateway',
           },
         ],
       },
@@ -1537,6 +1550,24 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Kong Gateway',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/integrations/kong-gateway',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/outposts/kong',
+                label: 'SigNoz Plugin',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'OpenTelemetry Plugin',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/logs-management/send-logs/collection-methods',
             label: 'Collection Methods',
@@ -1570,11 +1601,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Kong Gateway',
           },
           {
             type: 'doc',
@@ -3528,6 +3554,24 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'Kong Gateway',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/integrations/kong-gateway',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/outposts/kong',
+            label: 'SigNoz Plugin',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'OpenTelemetry Plugin',
+          },
+        ],
+      },
+      {
         label: 'Temporal',
         type: 'category',
         isExpanded: false,
@@ -3649,24 +3693,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/outposts/render',
         label: 'Render',
-      },
-      {
-        label: 'Kong Gateway',
-        type: 'category',
-        isExpanded: false,
-        route: '/docs/integrations/kong-gateway',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/integrations/outposts/kong',
-            label: 'SigNoz Plugin',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'OpenTelemetry Plugin',
-          },
-        ],
       },
       {
         type: 'doc',
