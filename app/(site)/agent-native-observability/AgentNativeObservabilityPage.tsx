@@ -165,6 +165,7 @@ const EarlyAccessForm: React.FC = () => {
       <div className="flex h-10 items-stretch">
         <input
           type="email"
+          aria-label="Email address for early access"
           placeholder="you@company.com"
           autoComplete="off"
           value={typeof values.email === 'string' ? values.email : ''}
@@ -185,10 +186,11 @@ const EarlyAccessForm: React.FC = () => {
         </Button>
       </div>
       <div className="absolute -bottom-3 left-0">
-        {touched.email && errors.email && (
+        {touched.email && errors.email ? (
           <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
-        )}
-        {submitError && <span className="text-xs text-signoz_cherry-500">{submitError}</span>}
+        ) : submitError ? (
+          <span className="text-xs text-signoz_cherry-500">{submitError}</span>
+        ) : null}
       </div>
     </form>
   )
@@ -211,7 +213,7 @@ const InContextObservability: React.FC = () => {
       <div className="mx-auto flex max-w-4xl flex-col justify-center gap-10 md:flex-row md:items-stretch">
         <div className="w-full md:w-1/2">
           <Card variant="gradient" className="h-full">
-            <div className="m-6 flex h-[calc(100%-48px)] flex-col gap-4">
+            <div className="flex h-full flex-col gap-4 p-6">
               <div className="flex items-center gap-3">
                 <Terminal className="size-6 shrink-0 text-signoz_robin-500" />
                 <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
@@ -247,7 +249,7 @@ const InContextObservability: React.FC = () => {
         </div>
         <div id="ai-assistant" className="w-full md:w-1/2">
           <Card variant="aqua" className="h-full">
-            <div className="m-6 flex h-[calc(100%-48px)] flex-col gap-4">
+            <div className="flex h-full flex-col gap-4 p-6">
               <div className="flex items-center gap-3">
                 <Bot className="size-6 shrink-0 text-signoz_robin-500" />
                 <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
