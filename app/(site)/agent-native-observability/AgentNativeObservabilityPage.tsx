@@ -25,11 +25,11 @@ const Header: React.FC = () => {
         <TrackingLink
           href="#ai-assistant"
           clickType="Secondary CTA"
-          clickName="Agent Native Page Hero SigNoz AI Assistant"
+          clickName="Agent Native Page Hero Noz: SigNoz AI Assistant"
           clickLocation="Agent Native Observability Page Hero"
-          clickText="SigNoz AI Assistant"
+          clickText="Noz: SigNoz AI Assistant"
         >
-          SigNoz AI Assistant
+          Noz: SigNoz AI Assistant
           <ArrowRight size={14} />
         </TrackingLink>
       </Button>
@@ -65,7 +65,7 @@ const Header: React.FC = () => {
           Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
           issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
           logs, metrics, service topology, and your actual codebase — all in one place. Or use our
-          AI Assistant out-of-the-box. No AI SRE required.
+          Noz, our new AI Assistant out-of-the-box. No AI SRE required.
         </span>
       }
       buttonGroup={headerButtonGroup}
@@ -251,7 +251,7 @@ const InContextObservability: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Bot className="size-6 shrink-0 text-signoz_robin-500" />
                 <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
-                  SigNoz AI Assistant
+                  Noz: SigNoz AI Assistant
                 </h3>
               </div>
               <p className="text-base text-signoz_vanilla-400">
@@ -330,11 +330,11 @@ const BottomCTA: React.FC = () => {
             <TrackingLink
               href="#ai-assistant"
               clickType="Secondary CTA"
-              clickName="Agent Native Page Bottom CTA SigNoz AI Assistant"
+              clickName="Agent Native Page Bottom CTA Noz: SigNoz AI Assistant"
               clickLocation="Agent Native Observability Page Bottom CTA"
-              clickText="SigNoz AI Assistant"
+              clickText="Noz: SigNoz AI Assistant"
             >
-              SigNoz AI Assistant
+              Noz: SigNoz AI Assistant
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
