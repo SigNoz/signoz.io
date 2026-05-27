@@ -3654,7 +3654,7 @@ const docsSideNav = [
         label: 'Kong Gateway',
         type: 'category',
         isExpanded: false,
-        route: '/docs/integrations/opentelemetry-kong-gateway',
+        route: '/docs/integrations/kong-gateway',
         items: [
           {
             type: 'doc',
@@ -3664,7 +3664,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Manual',
+            label: 'OpenTelemetry Plugin',
           },
         ],
       },
