@@ -18,13 +18,13 @@ const Header: React.FC = () => {
     <div className="flex flex-col items-start gap-3 md:flex-row">
       <Button
         asChild
-        variant="secondary"
+        variant="default"
         rounded="full"
-        className="flex-center flex min-w-[200px] items-center gap-2"
+        className="!w-fit min-w-[200px] items-center gap-2"
       >
         <TrackingLink
           href="#ai-assistant"
-          clickType="Secondary CTA"
+          clickType="Primary CTA"
           clickName="Agent Native Page Hero Noz: SigNoz AI Assistant"
           clickLocation="Agent Native Observability Page Hero"
           clickText="Noz: SigNoz AI Assistant"
@@ -35,13 +35,13 @@ const Header: React.FC = () => {
       </Button>
       <Button
         asChild
-        variant="default"
+        variant="secondary"
         rounded="full"
-        className="flex-center flex min-w-[200px] items-center gap-2"
+        className="!w-fit min-w-[200px] items-center gap-2"
       >
         <TrackingLink
           href="/docs/ai/signoz-mcp-server/"
-          clickType="Primary CTA"
+          clickType="Secondary CTA"
           clickName="Agent Native Page Hero Connect SigNoz MCP"
           clickLocation="Agent Native Observability Page Hero"
           clickText="Connect SigNoz MCP"
@@ -64,8 +64,8 @@ const Header: React.FC = () => {
         <span className="text-base">
           Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
           issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
-          logs, metrics, service topology, and your actual codebase — all in one place. Or use our
-          Noz, our new AI Assistant out-of-the-box. No AI SRE required.
+          logs, metrics, service topology, and your actual codebase — all in one place. Or use Noz,
+          our new AI Assistant out-of-the-box. No AI SRE required.
         </span>
       }
       buttonGroup={headerButtonGroup}
@@ -228,7 +228,7 @@ const InContextObservability: React.FC = () => {
                   asChild
                   variant="default"
                   rounded="full"
-                  className="flex-center flex !w-fit items-center gap-2"
+                  className="!w-fit items-center gap-2"
                 >
                   <TrackingLink
                     href="/docs/ai/signoz-mcp-server/"
@@ -304,37 +304,27 @@ const BottomCTA: React.FC = () => {
       </h2>
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-          <Button
-            asChild
-            variant="default"
-            rounded="full"
-            className="flex-center flex !w-fit items-center gap-2"
-          >
-            <TrackingLink
-              href="/docs/ai/signoz-mcp-server/"
-              clickType="Primary CTA"
-              clickName="Agent Native Page Bottom CTA Connect MCP"
-              clickLocation="Agent Native Observability Page Bottom CTA"
-              clickText="Connect SigNoz MCP"
-            >
-              Connect SigNoz MCP
-              <ArrowRight size={14} />
-            </TrackingLink>
-          </Button>
-          <Button
-            asChild
-            variant="secondary"
-            rounded="full"
-            className="flex-center flex !w-fit items-center gap-2"
-          >
+          <Button asChild variant="default" rounded="full" className="!w-fit items-center gap-2">
             <TrackingLink
               href="#ai-assistant"
-              clickType="Secondary CTA"
+              clickType="Primary CTA"
               clickName="Agent Native Page Bottom CTA Noz: SigNoz AI Assistant"
               clickLocation="Agent Native Observability Page Bottom CTA"
               clickText="Noz: SigNoz AI Assistant"
             >
               Noz: SigNoz AI Assistant
+              <ArrowRight size={14} />
+            </TrackingLink>
+          </Button>
+          <Button asChild variant="secondary" rounded="full" className="!w-fit items-center gap-2">
+            <TrackingLink
+              href="/docs/ai/signoz-mcp-server/"
+              clickType="Secondary CTA"
+              clickName="Agent Native Page Bottom CTA Connect MCP"
+              clickLocation="Agent Native Observability Page Bottom CTA"
+              clickText="Connect SigNoz MCP"
+            >
+              Connect SigNoz MCP
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
