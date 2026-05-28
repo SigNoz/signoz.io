@@ -1,16 +1,17 @@
 ---
-date: 2026-05-18
+date: 2026-05-28
 id: crewai-observability-with-opentelemetry
 
 title: CrewAI Observability & Monitoring with OpenTelemetry
-description: Setup CrewAI observability with OpenTelemetry and SigNoz. Monitor agent, tool, and model performance with real-time traces, logs, and metrics.
+description: Set up CrewAI observability with OpenTelemetry and SigNoz for full CrewAI monitoring. Track agent, tool, and model performance with traces, logs, and metrics.
+doc_type: howto
 ---
 
-## Overview
+## What is CrewAI Observability?
 
-This guide walks you through setting up observability and monitoring for Crew AI using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe agent, model, tool performance, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your Crew AI applications.
+CrewAI observability gives you real-time visibility into agent, model, and tool performance across your AI workflows. This guide walks you through instrumenting CrewAI with <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, logs, and metrics to SigNoz, so you can track latency, error rates, and usage trends in your CrewAI applications.
 
-Instrumenting Crew AI in your LLM applications with telemetry ensures full observability across your AI workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+With full CrewAI observability in SigNoz, you can correlate traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to improve reliability and responsiveness. CrewAI monitoring across your AI workflows makes it straightforward to debug failed tasks, identify slow agents, and understand LLM usage patterns.
 
 ## Prerequisites
 
@@ -22,7 +23,7 @@ Instrumenting Crew AI in your LLM applications with telemetry ensures full obser
 - Basic understanding of AI Agents and tool calling workflow
 - For Python: `pip` installed for managing Python packages and _(optional but recommended)_ a Python virtual environment to isolate dependencies
 
-## Monitoring Crew AI
+## CrewAI Monitoring with OpenTelemetry
 
 <Tabs>
 <TabItem value="python" label="Python" default>
@@ -126,7 +127,7 @@ print("######################")
 print(result)
 ```
 
-> 📌 Note: Before running this code, ensure that the API key of the specific LLM you are choosing is set as an env variable. In this example, since OpenAI is being used, set `OPENAI_API_KEY` with your working API key. Additionally, for this specific example, you need to create a [Serper account](https://serper.dev/), generate an API key, and set it as the environment variable `SERPER_API_KEY`.
+> 📌 Note: Before running this code, ensure that the API key of the specific LLM you are choosing is set as an env variable. In this example, since OpenAI is being used, set `OPENAI_API_KEY` with your working API key. Additionally, for this specific example, you need to create a <a href="https://serper.dev/" target="_blank" rel="noopener noreferrer nofollow">Serper account</a>, generate an API key, and set it as the environment variable `SERPER_API_KEY`.
 
 **Step 5:** Run your application with auto-instrumentation
 
@@ -161,9 +162,9 @@ Code-based instrumentation gives you fine-grained control over your telemetry co
 
 **Step 1:** Install the necessary packages in your Python environment.
 
-CrewAI supports a variety of LLM providers for agent workflows, including OpenAI, Anthropic, Google (Gemini/Vertex AI), Azure, AWS Bedrock, Mistral, Groq, Ollama, and more. See the [full list of supported LLM providers](https://docs.crewai.com/en/concepts/llms).
+CrewAI supports a variety of LLM providers for agent workflows, including OpenAI, Anthropic, Google (Gemini/Vertex AI), Azure, AWS Bedrock, Mistral, Groq, Ollama, and more. See the <a href="https://docs.crewai.com/en/concepts/llms" target="_blank" rel="noopener noreferrer nofollow">full list of supported LLM providers</a>.
 
-Based on which LLM provider you're using with CrewAI, you'll need to install the corresponding OpenInference instrumentor to track LLM-related traces. See the [OpenInference documentation](https://arize.com/docs/ax/observe/tracing/configure-tracing-options/instrument-with-openinference-helpers) for available instrumentors.
+Based on which LLM provider you're using with CrewAI, you'll need to install the corresponding OpenInference instrumentor to track LLM-related traces. See the <a href="https://arize.com/docs/ax/observe/tracing/configure-tracing-options/instrument-with-openinference-helpers" target="_blank" rel="noopener noreferrer nofollow">OpenInference documentation</a> for available instrumentors.
 
 For this example using OpenAI:
 
@@ -259,7 +260,7 @@ OpenAIInstrumentor().instrument(tracer_provider=provider)
 
 > 📌 Important: You must instrument both Crew AI and the LLM provider you're using with Crew AI. In this example, we're using OpenAI, so we instrument both `CrewAIInstrumentor` and `OpenAIInstrumentor`. If you're using a different LLM provider (e.g., Anthropic, Bedrock, Mistral), replace `OpenAIInstrumentor` with the appropriate instrumentor for your provider.
 >
-> 📌 Important: Place this code at the start of your application logic — before any Crew AI functions are called or used — to ensure telemetry is correctly captured.
+> 📌 Important: Place this code at the start of your application logic - before any CrewAI functions are called or used - to ensure telemetry is correctly captured.
 
 **Step 5**: Setup Logs
 
@@ -400,7 +401,7 @@ print("######################")
 print(result)
 ```
 
-> 📌 Note: Before running this code, ensure that the API key of the specific LLM you are choosing is set as an env variable. In this example, since OpenAI is being used, set `OPENAI_API_KEY` with your working API key. Additionally, for this specific example, you need to create a [Serper account](https://serper.dev/), generate an API key, and set it as the environment variable `SERPER_API_KEY`.
+> 📌 Note: Before running this code, ensure that the API key of the specific LLM you are choosing is set as an env variable. In this example, since OpenAI is being used, set `OPENAI_API_KEY` with your working API key. Additionally, for this specific example, you need to create a <a href="https://serper.dev/" target="_blank" rel="noopener noreferrer nofollow">Serper account</a>, generate an API key, and set it as the environment variable `SERPER_API_KEY`.
 
 </TabItem>
 </Tabs>
@@ -408,11 +409,11 @@ print(result)
 </TabItem>
 </Tabs>
 
-## View Traces, Logs, and Metrics in SigNoz
+## View CrewAI Traces, Logs, and Metrics in SigNoz
 
-Your Crew AI commands should now automatically emit traces, logs, and metrics.
+Once configured, your CrewAI application automatically emits traces, logs, and metrics.
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+CrewAI traces are available in SigNoz under the Traces tab:
 
 <Figure
   src="/img/docs/llm/crewai/crew-traces.webp"
@@ -428,7 +429,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="Crew AI Detailed Trace View"
 />
 
-You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+CrewAI logs are available in SigNoz under the Logs tab. You can also view correlated logs by clicking the “Related Logs” button in the trace view:
 
 <figure data-zoomable align="center">
   <img src="/img/docs/llm/crewai/crew-related-logs.webp" alt="Related logs" width="300" />
@@ -451,7 +452,7 @@ When you click on any of these logs in SigNoz, you'll see a detailed view of the
   caption="Crew AI Detailed Logs View"
 />
 
-You should be able to see Crew AI related metrics in Signoz Cloud under the metrics tab:
+CrewAI metrics are available in SigNoz under the Metrics tab:
 
 <Figure
   src="/img/docs/llm/deepseek/deepseek-metrics.webp"
@@ -467,9 +468,9 @@ When you click on any of these metrics in SigNoz, you'll see a detailed view of 
   caption="Crew AI Detailed Metrics View"
 />
 
-## Dashboard
+## CrewAI Monitoring Dashboard
 
-You can also check out our custom Crew AI dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/crewai-dashboard/) which provides specialized visualizations for monitoring your Crew AI usage in applications. The dashboard includes pre-built charts specifically tailored for Crew AI usage, along with import instructions to get started quickly.
+The [CrewAI Monitoring Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/crewai-dashboard/) provides specialized visualizations for CrewAI observability, including pre-built charts for agent performance, tool usage, and LLM call metrics, along with import instructions to get started quickly.
 
 <Figure
   src="/img/docs/llm/crewai/crew-dashboard.webp"
