@@ -1,6 +1,7 @@
 'use client'
 
-import { ArrowRight, Terminal } from 'lucide-react'
+import { ArrowRight, Terminal, Bot, Loader2, Check } from 'lucide-react'
+import DOMPurify from 'dompurify'
 import Button from '@/components/ui/Button'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
@@ -10,36 +11,37 @@ import { TRUSTED_BY_LOGOS, FEATURE_CARDS } from './AgentNativeObservabilityPage.
 import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
 import { Card } from '@/components/ui/Card'
+import { useHubspotCustomForm } from '@/components/hubspot-custom-form/useHubspotCustomForm'
 
 const Header: React.FC = () => {
   const headerButtonGroup = (
     <div className="flex flex-col items-start gap-3 md:flex-row">
       <Button
         asChild
-        variant="secondary"
+        variant="default"
         rounded="full"
-        className="flex-center flex min-w-[200px] items-center gap-2"
+        className="!w-fit min-w-[200px] items-center gap-2"
       >
         <TrackingLink
-          href="/teams/"
-          clickType="Secondary CTA"
-          clickName="Agent Native Page Hero Get Started - Free"
+          href="#ai-assistant"
+          clickType="Primary CTA"
+          clickName="Agent Native Page Hero Noz: SigNoz AI Assistant"
           clickLocation="Agent Native Observability Page Hero"
-          clickText="Get Started - Free"
+          clickText="Noz: SigNoz AI Assistant"
         >
-          Get Started - Free
+          Noz: SigNoz AI Assistant
           <ArrowRight size={14} />
         </TrackingLink>
       </Button>
       <Button
         asChild
-        variant="default"
+        variant="secondary"
         rounded="full"
-        className="flex-center flex min-w-[200px] items-center gap-2"
+        className="!w-fit min-w-[200px] items-center gap-2"
       >
         <TrackingLink
           href="/docs/ai/signoz-mcp-server/"
-          clickType="Primary CTA"
+          clickType="Secondary CTA"
           clickName="Agent Native Page Hero Connect SigNoz MCP"
           clickLocation="Agent Native Observability Page Hero"
           clickText="Connect SigNoz MCP"
@@ -62,8 +64,8 @@ const Header: React.FC = () => {
         <span className="text-base">
           Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
           issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
-          logs, metrics, service topology, and your actual codebase — all in one place. No separate
-          AI SRE product required.
+          logs, metrics, service topology, and your actual codebase — all in one place. Or use Noz,
+          our new AI Assistant out-of-the-box. No AI SRE required.
         </span>
       }
       buttonGroup={headerButtonGroup}
@@ -123,6 +125,77 @@ const TrustedByTeams: React.FC = () => {
   )
 }
 
+const EarlyAccessForm: React.FC = () => {
+  const {
+    definition,
+    values,
+    errors,
+    touched,
+    status,
+    submitError,
+    setFieldValue,
+    setFieldTouched,
+    handleSubmit,
+  } = useHubspotCustomForm({
+    portalId: '22308423',
+    formId: '3789c0c2-72d1-4adf-95d9-83587f8d9fda',
+    formName: 'Agent Native AI Assistant Early Access',
+  })
+
+  const isSubmitting = status === 'submitting'
+
+  if (status === 'success') {
+    const thankYouMessage = definition?.thankYouMessage
+    return (
+      <div className="flex items-center gap-2 py-1">
+        {thankYouMessage ? (
+          <div
+            className="text-sm text-signoz_vanilla-300 [&_p]:mb-1 [&_p]:last:mb-0"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(thankYouMessage) }}
+          />
+        ) : (
+          <span className="text-sm text-signoz_vanilla-300">We&apos;ll be in touch soon.</span>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <form noValidate onSubmit={handleSubmit} className="relative flex flex-col gap-1.5 pb-5">
+      <div className="flex h-10 items-stretch">
+        <input
+          type="email"
+          aria-label="Email address for early access"
+          placeholder="you@company.com"
+          autoComplete="off"
+          value={typeof values.email === 'string' ? values.email : ''}
+          onChange={(e) => setFieldValue('email', e.target.value)}
+          onBlur={() => setFieldTouched('email')}
+          disabled={isSubmitting}
+          className="min-w-0 flex-1 rounded-l-md border border-r-0 border-signoz_slate-400 bg-signoz_ink-300 px-3 text-sm text-stone-300 placeholder-gray-500/50 focus:outline-none disabled:opacity-60"
+        />
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          isButton
+          variant="default"
+          className="gap-1 rounded-l-none rounded-r-md"
+        >
+          {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          Submit
+        </Button>
+      </div>
+      <div className="absolute -bottom-3 left-0">
+        {touched.email && errors.email ? (
+          <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
+        ) : submitError ? (
+          <span className="text-xs text-signoz_cherry-500">{submitError}</span>
+        ) : null}
+      </div>
+    </form>
+  )
+}
+
 const InContextObservability: React.FC = () => {
   return (
     <SectionLayout
@@ -137,36 +210,60 @@ const InContextObservability: React.FC = () => {
           In the tools you need. At the time you need.
         </p>
       </div>
-      <div className="mx-auto flex max-w-4xl justify-center gap-10">
+      <div className="mx-auto flex max-w-4xl flex-col justify-center gap-10 md:flex-row md:items-stretch">
         <div className="w-full md:w-1/2">
-          <Card variant="gradient">
-            <div className="m-6 flex flex-grow flex-col gap-4">
+          <Card variant="gradient" className="h-full">
+            <div className="flex h-full flex-col gap-4 p-6">
               <div className="flex items-center gap-3">
-                <Terminal className="size-6 text-signoz_robin-500" />
-                <h3 className="text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
+                <Terminal className="size-6 shrink-0 text-signoz_robin-500" />
+                <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
+                  SigNoz MCP Server
+                </h3>
               </div>
               <p className="text-base text-signoz_vanilla-400">
-                Plug into Claude Code, Cursor in minutes. Get full observability context — traces,
-                logs, metrics, service topology, deployment history — in every session. Start
-                debugging in your terminal today.
+                Plug directly into Claude Code, Cursor in minutes. Get full observability context -
+                traces, logs, metrics, service topology, deployment history - in every session.
+                Start debugging in your terminal.
               </p>
-              <Button
-                asChild
-                variant="default"
-                rounded="full"
-                className="flex-center flex !w-fit items-center gap-2"
-              >
-                <TrackingLink
-                  href="/docs/ai/signoz-mcp-server/"
-                  clickType="Primary CTA"
-                  clickName="Agent Native Page MCP Server Get Started"
-                  clickLocation="Agent Native Observability Page In-Context Section"
-                  clickText="Get started in minutes"
+              <div className="mt-auto pb-5">
+                <Button
+                  asChild
+                  variant="default"
+                  rounded="full"
+                  className="!w-fit items-center gap-2"
                 >
-                  Get started in minutes
-                  <ArrowRight size={14} />
-                </TrackingLink>
-              </Button>
+                  <TrackingLink
+                    href="/docs/ai/signoz-mcp-server/"
+                    clickType="Primary CTA"
+                    clickName="Agent Native Page MCP Server Get Started"
+                    clickLocation="Agent Native Observability Page In-Context Section"
+                    clickText="Get started in minutes"
+                  >
+                    Get started in minutes
+                    <ArrowRight size={14} />
+                  </TrackingLink>
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+        <div id="ai-assistant" className="w-full md:w-1/2">
+          <Card variant="aqua" className="h-full">
+            <div className="flex h-full flex-col gap-4 p-6">
+              <div className="flex items-center gap-3">
+                <Bot className="size-6 shrink-0 text-signoz_robin-500" />
+                <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
+                  Noz: SigNoz AI Assistant
+                </h3>
+              </div>
+              <p className="text-base text-signoz_vanilla-400">
+                A sidepane as you work, or full-screen view to dig in. Ask about logs, traces,
+                metrics in plain English - pulls up the right explorer view with the query.
+              </p>
+              <div className="mt-auto">
+                <p className="mb-2 text-sm font-medium text-signoz_vanilla-100">Get early access</p>
+                <EarlyAccessForm />
+              </div>
             </div>
           </Card>
         </div>
@@ -184,7 +281,7 @@ const FeatureSections: React.FC = () => {
             <h2 className="text-center text-4xl font-semibold text-signoz_vanilla-100">
               Why Agent Native Observability
             </h2>
-            <div className="text-center text-base text-signoz_vanilla-100">
+            <div className="text-center text-base text-signoz_vanilla-400">
               Debug faster. Ship with confidence. All from your dev environment.
             </div>
           </div>
@@ -209,37 +306,27 @@ const BottomCTA: React.FC = () => {
       </h2>
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-          <Button
-            asChild
-            variant="default"
-            rounded="full"
-            className="flex-center flex !w-fit items-center gap-2"
-          >
+          <Button asChild variant="default" rounded="full" className="!w-fit items-center gap-2">
+            <TrackingLink
+              href="#ai-assistant"
+              clickType="Primary CTA"
+              clickName="Agent Native Page Bottom CTA Noz: SigNoz AI Assistant"
+              clickLocation="Agent Native Observability Page Bottom CTA"
+              clickText="Noz: SigNoz AI Assistant"
+            >
+              Noz: SigNoz AI Assistant
+              <ArrowRight size={14} />
+            </TrackingLink>
+          </Button>
+          <Button asChild variant="secondary" rounded="full" className="!w-fit items-center gap-2">
             <TrackingLink
               href="/docs/ai/signoz-mcp-server/"
-              clickType="Primary CTA"
+              clickType="Secondary CTA"
               clickName="Agent Native Page Bottom CTA Connect MCP"
               clickLocation="Agent Native Observability Page Bottom CTA"
               clickText="Connect SigNoz MCP"
             >
               Connect SigNoz MCP
-              <ArrowRight size={14} />
-            </TrackingLink>
-          </Button>
-          <Button
-            asChild
-            variant="secondary"
-            rounded="full"
-            className="flex-center flex !w-fit items-center gap-2"
-          >
-            <TrackingLink
-              href="/teams/"
-              clickType="Secondary CTA"
-              clickName="Agent Native Page Bottom CTA Get Started - Free"
-              clickLocation="Agent Native Observability Page Bottom CTA"
-              clickText="Get Started - Free"
-            >
-              Get Started - Free
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>

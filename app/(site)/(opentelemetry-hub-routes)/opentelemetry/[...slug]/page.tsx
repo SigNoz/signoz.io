@@ -14,7 +14,8 @@ import React from 'react'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
-import { generateStructuredData, safeJsonLdStringify } from '@/utils/structuredData'
+import { generateStructuredData } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
@@ -62,11 +63,13 @@ export async function generateMetadata(props: {
         }
       })
 
+      const seoTitle = content.meta_title || content.title
+
       return {
-        title: content.title,
+        title: seoTitle,
         description: content.description,
         openGraph: {
-          title: content.title,
+          title: seoTitle,
           description: content.description,
           siteName: siteMetadata.title,
           locale: 'en_US',
@@ -79,7 +82,7 @@ export async function generateMetadata(props: {
         },
         twitter: {
           card: 'summary_large_image',
-          title: content.title,
+          title: seoTitle,
           description: content.description,
           images: imageList,
         },
@@ -218,12 +221,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     const showSidebar = hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0
     return (
       <>
-        {jsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-          />
-        )}
+        {jsonLd && <JsonLdScript data={jsonLd} />}
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -247,12 +245,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      {jsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
-      )}
+      {jsonLd && <JsonLdScript data={jsonLd} />}
       <Layout
         content={mainContent}
         authorDetails={authorDetails as any}

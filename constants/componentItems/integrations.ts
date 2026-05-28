@@ -99,7 +99,12 @@ export const INTEGRATIONS_ITEMS = {
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
     {
-      name: 'Kong Gateway',
+      name: 'Kong (SigNoz plugin)',
+      href: '/docs/integrations/outposts/kong',
+      clickName: 'Kong SigNoz Plugin Integration Link',
+    },
+    {
+      name: 'Kong (OpenTelemetry plugin)',
       href: '/docs/integrations/opentelemetry-kong-gateway',
       clickName: 'Kong Gateway Integration Link',
     },

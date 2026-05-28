@@ -8,6 +8,7 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     label: 'Overview',
+    route: '/docs/what-is-signoz',
     items: [
       {
         type: 'doc',
@@ -45,6 +46,11 @@ const docsSideNav = [
     label: 'Setup',
     route: '/docs/install/',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/install/',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -219,6 +225,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/manage/overview',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/manage/overview',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -564,6 +575,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/manage/administrator-guide/workspace-url',
+            label: 'Edit Workspace URL',
+          },
+          {
+            type: 'doc',
             route: '/docs/telemetry',
             label: 'Statistics Reporting',
           },
@@ -581,16 +597,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/tutorial/infinite-retention-aws-s3',
             label: 'Infinite Retention using AWS S3',
-          },
-          {
-            type: 'doc',
-            route: '/docs/tutorial/s3-integration-iam-role-eks',
-            label: 'S3 Integration With AWS IAM role in EKS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/tutorial/oci-bucket-cold-storage-integration',
-            label: 'OCI Bucket Cold Storage Integration',
           },
           {
             type: 'doc',
@@ -617,6 +623,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/opentelemetry-collection-agents/get-started',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/opentelemetry-collection-agents/get-started',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -653,6 +664,12 @@ const docsSideNav = [
                     route:
                       '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
                     label: 'Monitoring Kubernetes Clusters using Opentelemetry Collection Agents',
+                  },
+                  {
+                    type: 'doc',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cronjobs',
+                    label: 'Monitor Kubernetes CronJobs',
                   },
                   {
                     type: 'doc',
@@ -1142,6 +1159,24 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Kong Gateway',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/integrations/kong-gateway',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/outposts/kong',
+                label: 'SigNoz Plugin',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'OpenTelemetry Plugin',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'Elixir',
             route: '/docs/instrumentation/opentelemetry-elixir',
@@ -1175,11 +1210,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Kong Gateway',
           },
         ],
       },
@@ -1515,6 +1545,24 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Kong Gateway',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/integrations/kong-gateway',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/outposts/kong',
+                label: 'SigNoz Plugin',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'OpenTelemetry Plugin',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/logs-management/send-logs/collection-methods',
             label: 'Collection Methods',
@@ -1548,11 +1596,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Kong Gateway',
           },
           {
             type: 'doc',
@@ -1706,11 +1749,6 @@ const docsSideNav = [
             label: 'Available Quick Filters',
           },
           { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
         ],
       },
       {
@@ -1997,6 +2035,7 @@ const docsSideNav = [
     label: 'Cost Meter',
     type: 'category',
     isExpanded: false,
+    route: '/docs/cost-meter/overview',
     items: [
       {
         type: 'doc',
@@ -2055,7 +2094,7 @@ const docsSideNav = [
     label: 'Dashboards',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/dashboards/overview',
     items: [
       {
         type: 'doc',
@@ -2394,6 +2433,11 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
                 label: 'Kubernetes Node Metrics (Detailed)',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cronjobs',
+                label: 'Kubernetes CronJobs',
+              },
             ],
           },
           {
@@ -2574,7 +2618,7 @@ const docsSideNav = [
     label: 'Querying Data',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/querying/overview',
     items: [
       {
         type: 'doc',
@@ -2884,6 +2928,11 @@ const docsSideNav = [
 
     items: [
       {
+        type: 'doc',
+        route: '/docs/llm-observability',
+        label: 'Overview',
+      },
+      {
         route: '/docs/agno-monitoring',
         label: 'Agno',
         type: 'doc',
@@ -3029,7 +3078,7 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/openclaw-monitoring',
+        route: '/docs/openclaw-observability',
         label: 'OpenClaw',
         type: 'doc',
       },
@@ -3187,6 +3236,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/aws-monitoring/overview',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/overview',
+        label: 'Overview',
+      },
       {
         type: 'doc',
         route: '/docs/aws-monitoring/one-click-vs-manual',
@@ -3352,6 +3406,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/frontend-monitoring',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
         route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
         label: 'Sending Logs',
       },
@@ -3398,6 +3457,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/mobile-monitoring',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
         label: 'Swift UI',
         route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
       },
@@ -3424,6 +3488,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/integrations/integrations-list',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/integrations/integrations-list',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -3512,6 +3581,24 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/azure/cdn-frontdoor',
             label: 'CDN FrontDoor',
+          },
+        ],
+      },
+      {
+        label: 'Kong Gateway',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/integrations/kong-gateway',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/outposts/kong',
+            label: 'SigNoz Plugin',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'OpenTelemetry Plugin',
           },
         ],
       },
@@ -3640,11 +3727,6 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/integrations/opentelemetry-kong-gateway',
-        label: 'Kong Gateway',
-      },
-      {
-        type: 'doc',
         route: '/docs/integrations/nomad',
         label: 'Nomad',
       },
@@ -3654,7 +3736,7 @@ const docsSideNav = [
     label: 'Messaging Queues',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/messaging-queues/overview',
     items: [
       {
         type: 'doc',
@@ -3726,6 +3808,7 @@ const docsSideNav = [
     label: 'External API Monitoring',
     type: 'category',
     isExpanded: false,
+    route: '/docs/external-api-monitoring/overview',
     items: [
       {
         type: 'doc',
@@ -3735,23 +3818,6 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/external-api-monitoring/setup',
-        label: 'Setup',
-      },
-    ],
-  },
-  {
-    label: 'Trace Funnels',
-    type: 'category',
-    isExpanded: false,
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/trace-funnels/overview',
-        label: 'Overview',
-      },
-      {
-        type: 'doc',
-        route: '/docs/trace-funnels/setup',
         label: 'Setup',
       },
     ],
@@ -3834,6 +3900,7 @@ const docsSideNav = [
     label: 'Ingestion',
     type: 'category',
     isExpanded: false,
+    route: '/docs/ingestion/signoz-cloud/overview',
     items: [
       {
         label: 'SigNoz Cloud',
@@ -3960,6 +4027,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/migration/migrate-to-signoz',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-to-signoz',
+        label: 'Overview',
+      },
       {
         label: 'From Datadog',
         type: 'category',
@@ -4139,6 +4211,11 @@ const docsSideNav = [
     route: '/docs/azure-monitoring',
     items: [
       {
+        type: 'doc',
+        route: '/docs/azure-monitoring',
+        label: 'Overview',
+      },
+      {
         type: 'category',
         isExpanded: false,
         label: 'Bootstrapping',
@@ -4294,6 +4371,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/gcp-monitoring',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/gcp-monitoring',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,

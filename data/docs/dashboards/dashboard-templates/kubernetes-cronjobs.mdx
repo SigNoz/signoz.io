@@ -1,0 +1,79 @@
+---
+date: 2026-05-27
+id: kubernetes-cronjobs
+title: Kubernetes CronJobs Dashboard
+description: Monitor Kubernetes CronJobs and their Job runs in SigNoz, including active CronJobs, success and failure counts, and per-Job pod state.
+doc_type: explanation
+---
+
+This dashboard provides current state and recent run visibility for Kubernetes CronJobs and the Jobs they create. It uses metrics emitted by the [`k8sclusterreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md) so it works with any Kubernetes distribution.
+
+<Admonition type="note">
+To use this dashboard, install K8s Infra in your cluster so the cluster collector emits CronJob and Job metrics. Follow the [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) guide. For a complete CronJob monitoring walkthrough that includes a sample CronJob, see [Monitor Kubernetes CronJobs](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cronjobs/).
+</Admonition>
+
+## Dashboard Preview
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/dashboard-templates/kubernetes-cronjobs.webp" alt="Kubernetes CronJobs Dashboard"/>
+    <figcaption><i>Kubernetes CronJobs Dashboard</i></figcaption>
+</figure>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/k8s-infra-metrics/kubernetes-cronjobs.json"
+    dashboardName="Kubernetes CronJobs"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard is split into two areas:
+
+- **Current state**: the Jobs Kubernetes still keeps in the cluster (controlled by `successfulJobsHistoryLimit` and `failedJobsHistoryLimit` on the CronJob)
+- **Recent runs**: the Job executions SigNoz observed during the selected time range
+
+### Current State
+
+- **Current Active CronJob Count**: number of CronJobs with at least one active Job right now
+- **Current Successful, Failed, Desired Success, and Max Parallel Pod Counts**: per-Job pod state aggregated across the selected scope
+- **Current Job Status**: time-series view of active CronJobs vs successful and failed pods
+- **Current Desired Success vs Parallel Limit**: scheduling constraints applied to currently kept Jobs
+- **Current Active, Successful, and Failed Pods by Job**: per-Job breakdown of pod state
+- **Current Desired Success vs Parallel Limit by Job**: per-Job scheduling constraints
+
+### Recent Runs in Selected Time Range
+
+- **Job Run Count**: total Job runs SigNoz observed
+- **Successful Job Run Count**: Jobs that completed at least one successful pod
+- **Failed Job Run Count**: Jobs that recorded at least one failed pod
+- **Peak Concurrent Job Count**: the highest number of CronJob runs seen at the same time
+- **Recent Job Run Details**: per-Job table with successful pods, failed pods, desired successful pods, max parallel pods, and the latest sample timestamp
+
+## Metrics Used
+
+The dashboard uses these metrics from the `k8sclusterreceiver`:
+
+- `k8s.cronjob.active_jobs`: active Jobs for a CronJob
+- `k8s.job.active_pods`: active pods for a Job
+- `k8s.job.successful_pods`: successfully completed pods for a Job
+- `k8s.job.failed_pods`: failed pods for a Job
+- `k8s.job.desired_successful_pods`: desired successful pod count for a Job
+- `k8s.job.max_parallel_pods`: maximum parallel pod limit for a Job
+
+## Dashboard Variables
+
+This dashboard includes four hierarchical variables for filtering:
+
+- **k8s.cluster.name**: filter by Kubernetes cluster (multi-select)
+- **k8s.namespace.name**: filter by namespace (multi-select, depends on cluster)
+- **k8s.job.name**: filter by Job execution name (multi-select, depends on cluster and namespace)
+- **k8s.cronjob.name**: filter by CronJob name (multi-select, depends on cluster and namespace)
+
+Use `k8s.cronjob.name` to look across all runs for one CronJob, and `k8s.job.name` to focus on one specific execution.
+
+## Related Dashboards
+
+- [Kubernetes Cluster Metrics](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics/)
+- [Kubernetes Pod Metrics (Detailed)](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed/)
+- [Kubernetes Node Metrics (Detailed)](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed/)

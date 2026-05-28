@@ -122,6 +122,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/integrations/opentelemetry-kong-gateway': (
     <img src="/img/icons/kong-icon.svg" alt="Kong Gateway" className="h-7 w-7 object-contain" />
   ),
+  '/docs/integrations/outposts/kong': (
+    <img src="/img/icons/kong-icon.svg" alt="Kong" className="h-7 w-7 object-contain" />
+  ),
 }
 
 export default function APMInstrumentationListicle({

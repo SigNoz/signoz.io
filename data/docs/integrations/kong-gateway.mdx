@@ -1,0 +1,92 @@
+---
+date: 2026-05-27
+id: kong-gateway
+title: Kong Gateway Monitoring with SigNoz - Choose an Approach
+description: Compare the two ways to monitor Kong Gateway with SigNoz - the kong-plugin-signoz plugin and Kong's native OpenTelemetry plugin. Learn which to pick.
+doc_type: explanation
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+You can ship Kong Gateway telemetry to SigNoz in two ways: the SigNoz-built <a href="https://github.com/SigNoz/kong-plugin-signoz" target="_blank" rel="noopener noreferrer nofollow">`kong-plugin-signoz`</a> plugin, or Kong's bundled OpenTelemetry plugin. Pick based on the trade-offs below.
+
+For step-by-step setup, see [SigNoz Plugin](https://signoz.io/docs/integrations/outposts/kong/) or [OpenTelemetry Plugin](https://signoz.io/docs/integrations/opentelemetry-kong-gateway/).
+
+## Quick Decision Guide
+
+| Your Situation                                      | Recommended Approach                                            | Why                                                           |
+| --------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------- |
+| Want traces and structured logs with minimal config | [SigNoz Plugin](#approach-1-signoz-plugin)                      | Single plugin, SigNoz-tuned defaults, per-request log records |
+| Need metrics (Enterprise 3.13+)                     | [Native OpenTelemetry](#approach-2-native-opentelemetry-plugin) | Only the native plugin exports Kong metrics                   |
+| Want zero install dependencies                      | [Native OpenTelemetry](#approach-2-native-opentelemetry-plugin) | Bundled with Kong, no LuaRocks step                           |
+| Prefer Kong's officially maintained plugin          | [Native OpenTelemetry](#approach-2-native-opentelemetry-plugin) | Bundled and maintained by Kong                                |
+| Running Kong 3.0 to 3.5                             | [Native OpenTelemetry](#approach-2-native-opentelemetry-plugin) | The SigNoz plugin needs Kong 3.6+                             |
+
+---
+
+## Approach 1: SigNoz Plugin
+
+The <a href="https://github.com/SigNoz/kong-plugin-signoz" target="_blank" rel="noopener noreferrer nofollow">`kong-plugin-signoz`</a> plugin ships traces and logs to SigNoz. It delegates trace export to Kong's bundled OpenTelemetry plugin and runs its own OTLP/HTTP pipeline for logs.
+
+```
+┌─────────────────────┐                       ┌─────────────────────┐
+│    Kong Gateway     │  traces + logs (OTLP) │       SigNoz        │
+│  (kong-plugin-      │ ───────────────────▶  │                     │
+│      signoz)        │                       │                     │
+└─────────────────────┘                       └─────────────────────┘
+```
+
+**Benefits:**
+
+- ✅ Traces and structured logs from a single plugin
+- ✅ One OTLP log record per request, body shaped `"<METHOD> <path> <status> <duration>ms"`, severity by status class, correlated to the request trace
+- ✅ Enriches Kong's root span with `kong.service.name` and `kong.route.name`
+- ✅ SigNoz-tuned exporter defaults (endpoint, ingestion key, queue)
+
+**Trade-offs:**
+
+- ❌ No metrics
+- ❌ Requires a LuaRocks install on every Kong node (Kong 3.6 to 3.8 need a direct rockspec URL)
+- ❌ Kong 3.6+ only
+
+→ [Setup guide](https://signoz.io/docs/integrations/outposts/kong/)
+
+---
+
+## Approach 2: Native OpenTelemetry Plugin
+
+Kong's bundled <a href="https://developer.konghq.com/plugins/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry plugin</a> exports traces, logs, and metrics directly to SigNoz over OTLP. No extra install.
+
+```
+┌─────────────────────┐                       ┌─────────────────────┐
+│    Kong Gateway     │ traces+logs+metrics   │       SigNoz        │
+│  (bundled otel      │ ───────────────────▶  │                     │
+│      plugin)        │       (OTLP)          │                     │
+└─────────────────────┘                       └─────────────────────┘
+```
+
+**Benefits:**
+
+- ✅ No install — bundled with Kong
+- ✅ Exports metrics (Kong Enterprise 3.13+)
+- ✅ Uses Kong's standard OpenTelemetry plugin
+
+**Trade-offs:**
+
+- ❌ Traces, logs, and metrics each need separate configuration
+- ❌ Logs require Kong 3.8+; metrics require Enterprise 3.13+ (OSS 3.9.x predates metrics)
+- ❌ No SigNoz-specific span enrichment or log shaping
+
+→ [Setup guide](https://signoz.io/docs/integrations/opentelemetry-kong-gateway/)
+
+---
+
+## Recommendation
+
+For most setups, we recommend the **SigNoz Plugin**. It ships traces and ready-made structured logs from a single plugin, enriches Kong's spans with service and route names, and comes with SigNoz-tuned exporter defaults.
+
+Choose the **Native OpenTelemetry Plugin** if you need metrics (Enterprise 3.13+) or want to avoid the LuaRocks install.
+
+## Get Help
+
+<GetHelp />

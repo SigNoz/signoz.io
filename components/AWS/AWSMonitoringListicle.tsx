@@ -63,7 +63,7 @@ export default function AWSMonitoringListicle() {
     '/docs/aws-monitoring/dynamodb': <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
     '/docs/aws-monitoring/elasticache': <MdMemory className="h-7 w-7 text-blue-500" />,
     '/docs/aws-monitoring/alb': <MdRouter className="h-7 w-7 text-purple-500" />,
-    '/docs/aws-monitoring/elb-logs': <MdRouter className="h-7 w-7 text-purple-500" />,
+    '/docs/aws-monitoring/elb': <MdRouter className="h-7 w-7 text-purple-500" />,
     '/docs/aws-monitoring/vpc': <MdSecurity className="h-7 w-7 text-green-500" />,
     '/docs/aws-monitoring/api-gateway': <MdHttp className="h-7 w-7 text-purple-500" />,
     '/docs/aws-monitoring/msk': <MdCloudQueue className="h-7 w-7 text-black dark:text-white" />,

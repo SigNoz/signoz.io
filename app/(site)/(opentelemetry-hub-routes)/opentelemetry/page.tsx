@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import siteMetadata from '@/data/siteMetadata'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
 import { fetchBlogBySlug } from '@/utils/cachedData'
 
 import BlogArticlePage, { generateMetadata as generateBlogMetadata } from '../blog/[...slug]/page'
@@ -40,12 +40,7 @@ export default async function OpenTelemetryLanding() {
 
   return (
     <>
-      {jsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
-      )}
+      {jsonLd && <JsonLdScript data={jsonLd} />}
       <BlogArticlePageWithOptions params={Promise.resolve(LANDING_PARAMS)} suppressStructuredData />
     </>
   )
