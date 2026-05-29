@@ -69,7 +69,7 @@ const DocContent: React.FC<{
         className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${isOnboarding ? '!w-full px-4' : ''}`}
       >
         {breadcrumbs && !isOnboarding && <Breadcrumb crumbs={breadcrumbs} />}
-        <div className="mb-4 flex items-center justify-between gap-2">
+        <div className="m-0 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-2">
             <h1 className="mt-2 text-3xl leading-tight">{title}</h1>
           </div>
