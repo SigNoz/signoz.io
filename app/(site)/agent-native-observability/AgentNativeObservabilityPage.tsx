@@ -11,6 +11,7 @@ import { TRUSTED_BY_LOGOS, FEATURE_CARDS } from './AgentNativeObservabilityPage.
 import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
 import { useHubspotCustomForm } from '@/components/hubspot-custom-form/useHubspotCustomForm'
+import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 
 const Header: React.FC = () => {
   const headerButtonGroup = (
@@ -53,32 +54,34 @@ const Header: React.FC = () => {
   )
 
   return (
-    <FeaturePageHeader
-      title={
-        <>
-          Introducing Agent Native <br /> Observability
-        </>
-      }
-      description={
-        <span className="text-base">
-          Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
-          issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
-          logs, metrics, service topology, and your actual codebase — all in one place. Or use Noz,
-          our new AI Assistant out-of-the-box. No AI SRE required.
-        </span>
-      }
-      buttonGroup={headerButtonGroup}
-      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
-      heroImageAlt="Agent Native Observability hero"
-      heroImage={'/img/platform/AgentNativeObservabilityMeta.webp'}
-      buttonDescription={
-        <div className="text-sm text-signoz_vanilla-400">
-          No learning new Dashboard UX. In-context Observability in your workflows.
-        </div>
-      }
-      className="mt-0"
-      align="left"
-    />
+    <DitherCanvas enableClick>
+      <FeaturePageHeader
+        title={
+          <>
+            Introducing Agent Native <br /> Observability
+          </>
+        }
+        description={
+          <span className="text-base">
+            Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
+            issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
+            logs, metrics, service topology, and your actual codebase — all in one place. Or use
+            Noz, our new AI Assistant out-of-the-box. No AI SRE required.
+          </span>
+        }
+        buttonGroup={headerButtonGroup}
+        sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+        heroImageAlt="Agent Native Observability hero"
+        heroImage={'/img/platform/AgentNativeObservabilityMeta.webp'}
+        buttonDescription={
+          <div className="text-sm text-signoz_vanilla-400">
+            No learning new Dashboard UX. In-context Observability in your workflows.
+          </div>
+        }
+        className="mt-0"
+        align="left"
+      />
+    </DitherCanvas>
   )
 }
 
@@ -290,12 +293,15 @@ const InContextObservability: React.FC = () => {
           In the tools you need. At the time you need.
         </p>
       </div>
-      <div className="mx-auto w-full rounded-xl border border-signoz_slate-400/50">
+      <div className="mx-auto w-full overflow-hidden rounded-xl border border-signoz_slate-400/50">
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="border-b border-signoz_slate-400/50 p-8 md:border-b-0 md:border-r">
-            <div className="flex h-full flex-col gap-4">
+          <DitherCanvas
+            fadeToLeft
+            enableClick
+            className="border-b border-signoz_slate-400/50 md:border-b-0 md:border-r"
+          >
+            <div className="flex h-full flex-col gap-4 p-8">
               <div>
-                {/* TODO: Replace with actual MCP Server icon asset */}
                 <Image
                   src="/img/agent-native-observability/mcp-server-icon.svg"
                   alt="SigNoz MCP Server icon"
@@ -329,9 +335,9 @@ const InContextObservability: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </div>
-          <div id="ai-assistant" className="p-8">
-            <div className="flex h-full flex-col gap-4">
+          </DitherCanvas>
+          <DitherCanvas fadeToLeft enableClick id="ai-assistant">
+            <div className="flex h-full flex-col gap-4 p-8">
               <NozAnimatedIcon size={40} />
               <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
                 Noz : SigNoz AI Assistant
@@ -347,7 +353,7 @@ const InContextObservability: React.FC = () => {
                 <EarlyAccessForm />
               </div>
             </div>
-          </div>
+          </DitherCanvas>
         </div>
       </div>
     </SectionLayout>
