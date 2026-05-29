@@ -193,8 +193,8 @@ export default function ArticleLayout({
           <div className="mx-auto box-border w-full min-w-0 max-w-[780px] flex-auto md:px-0 lg:px-4">
             {hasToc && <div className="mb-4 lg:hidden" />}
 
-            <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
               {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
+            <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
               <h1 className="text-3xl font-bold">{title}</h1>
               {(formattedUpdatedDate || readingTimeText) && (
                 <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
