@@ -294,12 +294,12 @@ const InContextObservability: React.FC = () => {
           In the tools you need. At the time you need.
         </p>
       </div>
-      <div className="mx-auto w-full overflow-hidden rounded-xl border border-signoz_slate-400/50">
+      <div className="mx-auto w-full overflow-hidden border-y border-dashed border-signoz_slate-400/50">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <DitherCanvas
             fadeToLeft
             enableClick
-            className="border-b border-signoz_slate-400/50 md:border-b-0 md:border-r"
+            className="border-b border-dashed border-signoz_slate-400/50 md:border-b-0 md:border-r"
           >
             <div className="flex h-full flex-col gap-4 p-8">
               <div>
