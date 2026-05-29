@@ -220,17 +220,23 @@ export default function DitherCanvas({
 
     let rafId: number
     const start = performance.now()
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    const render = () => {
-      timeRef.current = (performance.now() - start) / 1000
-      gl.uniform1f(uTime, timeRef.current)
+    if (prefersReducedMotion) {
+      gl.uniform1f(uTime, 0)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-      rafId = requestAnimationFrame(render)
+    } else {
+      const render = () => {
+        timeRef.current = (performance.now() - start) / 1000
+        gl.uniform1f(uTime, timeRef.current)
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+        rafId = requestAnimationFrame(render)
+      }
+      render()
     }
-    render()
 
     return () => {
-      cancelAnimationFrame(rafId)
+      if (!prefersReducedMotion) cancelAnimationFrame(rafId)
       ro.disconnect()
       clickRef.current = null
       gl.deleteProgram(prog)

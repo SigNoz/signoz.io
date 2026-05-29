@@ -8,7 +8,7 @@ const CTASection = () => {
   return (
     <div className="relative bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
       <section className="!mx-auto !w-[100vw] border-t border-dashed border-signoz_slate-400 md:!w-[80vw]">
-        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+        <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
               <h2 className="mb-0 mt-20 text-center font-bold">

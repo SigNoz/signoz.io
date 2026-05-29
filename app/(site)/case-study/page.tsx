@@ -150,8 +150,8 @@ function caseStudies() {
           className="container mx-auto border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400"
           style={{ marginTop: '2rem', paddingBottom: '64px' }}
         >
-          <div className="absolute left-0 right-0 top-0 z-[0] h-screen bg-[url('/img/background_blur/Perlin_noise.webp')] bg-[length:55%]  bg-[center_top_-1rem] bg-no-repeat" />
-          <div className="absolute left-0 right-0 top-0 z-[0] h-screen bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-55rem] " />
+          <div className="bg-blur-perlin-noise absolute left-0 right-0 top-0 z-[0] h-screen" />
+          <div className="bg-blur-ellipse-388 absolute left-0 right-0 top-0 z-[0] h-screen" />
           <div className="relative mb-3 pt-24 text-center font-mono text-sm font-medium uppercase text-signoz_sakura-400">
             {' '}
             Customer Stories{' '}
@@ -223,7 +223,7 @@ const GetStarted = ({ page }) => {
   return (
     <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
       <section className="container mx-auto border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0">
-        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+        <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
