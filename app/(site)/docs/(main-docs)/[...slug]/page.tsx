@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
 import JsonLdScript from '@/components/JsonLdScript'
-import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
+import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 
 export const dynamicParams = false
 
@@ -66,7 +66,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = mainContent
   const jsonLd = post.structuredData
-  const breadcrumbJsonLd = generateDocsBreadcrumb(slug, title)
+  const breadcrumbs = getDocsBreadcrumbs(slug, title)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   return (
     <>
@@ -79,6 +80,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           toc={toc}
           hideTableOfContents={hide_table_of_contents || false}
           editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
+          breadcrumbs={breadcrumbs}
         />
       </div>
       <Chatbase disableFloatingMessages />
