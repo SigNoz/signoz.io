@@ -363,7 +363,7 @@ const InContextObservability: React.FC = () => {
 
 const FeatureSections: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 pt-14 md:w-[80vw]">
+    <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14 md:w-[80vw]">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -386,7 +386,7 @@ const FeatureSections: React.FC = () => {
 const BottomCTA: React.FC = () => {
   return (
     <SectionLayout
-      variant="bordered"
+      variant="full-width"
       className="flex flex-col items-center justify-center gap-6 !px-8 !py-20 md:!px-0"
     >
       <h2 className="mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold text-signoz_vanilla-100">

@@ -129,8 +129,8 @@ const TopHeroSection: React.FC = () => {
 const LlmPoweredIntelligenceSection: React.FC = () => {
   return (
     <SectionLayout
-      variant="bordered"
-      className="!border-t-1 !border-dashed !border-signoz_slate-400 bg-signoz_ink-500"
+      variant="full-width"
+      className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500"
     >
       <div className="mb-6 max-w-4xl px-8 py-6">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">
