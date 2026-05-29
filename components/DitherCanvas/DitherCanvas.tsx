@@ -123,6 +123,11 @@ function initGL(canvas: HTMLCanvasElement) {
   gl.shaderSource(vs, VERT)
   gl.compileShader(vs)
 
+  if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+    console.error('DitherCanvas vertex shader:', gl.getShaderInfoLog(vs))
+    return null
+  }
+
   const fs = gl.createShader(gl.FRAGMENT_SHADER)!
   gl.shaderSource(fs, FRAG)
   gl.compileShader(fs)
