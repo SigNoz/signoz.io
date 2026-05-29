@@ -19,7 +19,7 @@ With full CrewAI observability in SigNoz, you can correlate traces, logs, and me
   - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
   - Self-hosted SigNoz instance
 - Internet access to send telemetry data to SigNoz Cloud
-- Crew AI integrated into your app
+- CrewAI integrated into your app
 - Basic understanding of AI Agents and tool calling workflow
 - For Python: `pip` installed for managing Python packages and _(optional but recommended)_ a Python virtual environment to isolate dependencies
 
@@ -248,7 +248,7 @@ trace.set_tracer_provider(provider)
 
 </Admonition>
 
-**Step 4:** Instrument Crew AI and your LLM provider using their respective instrumentors with the configured Tracer Provider
+**Step 4:** Instrument CrewAI and your LLM provider using their respective instrumentors with the configured Tracer Provider
 
 ```python
 from openinference.instrumentation.crewai import CrewAIInstrumentor
@@ -258,7 +258,7 @@ CrewAIInstrumentor().instrument(tracer_provider=provider)
 OpenAIInstrumentor().instrument(tracer_provider=provider)
 ```
 
-> 📌 Important: You must instrument both Crew AI and the LLM provider you're using with Crew AI. In this example, we're using OpenAI, so we instrument both `CrewAIInstrumentor` and `OpenAIInstrumentor`. If you're using a different LLM provider (e.g., Anthropic, Bedrock, Mistral), replace `OpenAIInstrumentor` with the appropriate instrumentor for your provider.
+> 📌 Important: You must instrument both CrewAI and the LLM provider you're using with CrewAI. In this example, we're using OpenAI, so we instrument both `CrewAIInstrumentor` and `OpenAIInstrumentor`. If you're using a different LLM provider (e.g., Anthropic, Bedrock, Mistral), replace `OpenAIInstrumentor` with the appropriate instrumentor for your provider.
 >
 > 📌 Important: Place this code at the start of your application logic - before any CrewAI functions are called or used - to ensure telemetry is correctly captured.
 
@@ -331,7 +331,7 @@ HTTPXClientInstrumentor().instrument()
 - **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not Crew AI-specific metrics. Crew AI does not expose metrics as part of their SDK. If you want to add custom metrics to your Crew AI application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not CrewAI-specific metrics. CrewAI does not expose metrics as part of their SDK. If you want to add custom metrics to your CrewAI application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
 
 <Admonition type="info">
   Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -417,16 +417,16 @@ CrewAI traces are available in SigNoz under the Traces tab:
 
 <Figure
   src="/img/docs/llm/crewai/crew-traces.webp"
-  alt="Crew AI Trace View"
-  caption="Crew AI Trace View"
+  alt="CrewAI Trace View"
+  caption="CrewAI Trace View"
 />
 
 When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
 
 <Figure
   src="/img/docs/llm/crewai/crew-detailed-traces.webp"
-  alt="Crew AI Detailed Trace View"
-  caption="Crew AI Detailed Trace View"
+  alt="CrewAI Detailed Trace View"
+  caption="CrewAI Detailed Trace View"
 />
 
 CrewAI logs are available in SigNoz under the Logs tab. You can also view correlated logs by clicking the “Related Logs” button in the trace view:
@@ -440,32 +440,32 @@ CrewAI logs are available in SigNoz under the Logs tab. You can also view correl
 
 <Figure
   src="/img/docs/llm/crewai/crew-logs.webp"
-  alt="Crew AI Logs View"
-  caption="Crew AI Logs View"
+  alt="CrewAI Logs View"
+  caption="CrewAI Logs View"
 />
 
 When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
 
 <Figure
   src="/img/docs/llm/crewai/crew-detailed-logs.webp"
-  alt="Crew AI Detailed Log View"
-  caption="Crew AI Detailed Logs View"
+  alt="CrewAI Detailed Log View"
+  caption="CrewAI Detailed Logs View"
 />
 
 CrewAI metrics are available in SigNoz under the Metrics tab:
 
 <Figure
   src="/img/docs/llm/deepseek/deepseek-metrics.webp"
-  alt="Crew AI Metrics View"
-  caption="Crew AI Metrics View"
+  alt="CrewAI Metrics View"
+  caption="CrewAI Metrics View"
 />
 
 When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
 
 <Figure
   src="/img/docs/llm/deepseek/deepseek-detailed-metrics.webp"
-  alt="Crew AI Detailed Metrics View"
-  caption="Crew AI Detailed Metrics View"
+  alt="CrewAI Detailed Metrics View"
+  caption="CrewAI Detailed Metrics View"
 />
 
 ## CrewAI Monitoring Dashboard
@@ -474,6 +474,6 @@ The [CrewAI Monitoring Dashboard](https://signoz.io/docs/dashboards/dashboard-te
 
 <Figure
   src="/img/docs/llm/crewai/crew-dashboard.webp"
-  alt="Crew AI Dashboard"
-  caption="Crew AI Dashboard Template"
+  alt="CrewAI Dashboard"
+  caption="CrewAI Dashboard Template"
 />
