@@ -58,6 +58,7 @@ const Header: React.FC = () => {
       <FeaturePageHeader
         title={
           <>
+            <NozAnimatedIcon size={40} />
             Introducing Agent Native <br /> Observability
           </>
         }
