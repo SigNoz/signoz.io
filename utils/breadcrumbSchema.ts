@@ -34,6 +34,7 @@ const SECTION_CONFIG: Record<string, BreadcrumbCrumb> = {
   blog: { name: 'Blog', url: `${BASE_URL}/blog/` },
   guides: { name: 'Guides', url: `${BASE_URL}/guides/` },
   comparisons: { name: 'Comparisons', url: `${BASE_URL}/comparisons/` },
+  opentelemetry: { name: 'OpenTelemetry', url: `${BASE_URL}/opentelemetry/` },
 }
 
 const HOME_CRUMB: BreadcrumbCrumb = { name: 'SigNoz', url: `${BASE_URL}/` }
@@ -182,7 +183,7 @@ export function generateDocsBreadcrumb(slug: string, pageTitle: string): Breadcr
 }
 
 export function getSectionArticleBreadcrumbs(
-  section: 'blog' | 'guides' | 'comparisons',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
   title: string,
   slug: string
 ): BreadcrumbCrumb[] {
@@ -195,7 +196,7 @@ export function getSectionArticleBreadcrumbs(
 }
 
 export function generateSectionArticleBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
   title: string,
   slug: string
 ): BreadcrumbListSchema {
@@ -203,7 +204,7 @@ export function generateSectionArticleBreadcrumb(
 }
 
 export function generateSectionHubBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
   page?: string
 ): BreadcrumbListSchema {
   const config = SECTION_CONFIG[section]
