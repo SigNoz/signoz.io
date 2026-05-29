@@ -1,32 +1,33 @@
 ---
-date: 2026-05-18
+date: 2026-05-28
 id: litellm-observability-with-opentelemetry
 
 title: LiteLLM Observability & Monitoring with OpenTelemetry
-description: Learn how to instrument LiteLLM SDK and Proxy with OpenTelemetry and export traces, logs, and metrics to SigNoz for real-time LLM monitoring.
+description: Configure LiteLLM observability with OpenTelemetry to export traces, logs, and metrics to SigNoz for real-time LiteLLM monitoring of SDK and Proxy.
+doc_type: howto
 ---
 
-## Overview
+## What is LiteLLM Observability?
 
-This guide walks you through setting up observability and monitoring for LiteLLM SDK and Proxy Server using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe various models performance, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your LiteLLM applications.
+LiteLLM observability with <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> gives you full visibility into your LiteLLM SDK and Proxy Server by capturing traces, logs, and metrics. This guide covers how to instrument LiteLLM and export telemetry data to SigNoz, enabling real-time visibility into model performance, request/response details, latency, error rates, and usage trends.
 
-Instrumenting LiteLLM in your AI applications with telemetry ensures full observability across your AI workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+With full LiteLLM observability in SigNoz, you can correlate traces, logs, and metrics in unified dashboards and configure alerts for LiteLLM monitoring. This makes it easier to debug issues, optimize performance, and improve reliability across your AI workflows.
 
 ## Prerequisites
 
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
 - Internet access to send telemetry data to SigNoz Cloud
-- [LiteLLM](https://www.litellm.ai/) SDK or Proxy integration
+- <a href="https://www.litellm.ai/" target="_blank" rel="noopener noreferrer nofollow">LiteLLM</a> SDK or Proxy integration
 - For Python: `pip` installed for managing Python packages and _(optional but recommended)_ a Python virtual environment to isolate dependencies
 
-## Monitoring LiteLLM
+## Instrumenting LiteLLM with OpenTelemetry
 
 LiteLLM can be monitored in two ways: using the **LiteLLM SDK** (directly embedded in your Python application code for programmatic LLM calls) or the **LiteLLM Proxy Server** (a standalone server that acts as a centralized gateway for managing and routing LLM requests across your infrastructure).
 
 <Tabs>
 <TabItem value="LiteLLM SDK" label="LiteLLM SDK" default>
 
-For more detailed info on instrumenting your LiteLLM SDK applications click [here](https://docs.litellm.ai/docs/observability/opentelemetry_integration).
+For more detailed info on instrumenting your LiteLLM SDK applications, see the <a href="https://docs.litellm.ai/docs/observability/opentelemetry_integration" target="_blank" rel="noopener noreferrer nofollow">LiteLLM OpenTelemetry integration docs</a>.
 
 <Tabs>
 <TabItem value="python" label="Python" default>
@@ -83,7 +84,7 @@ response = completion(
 print(response)
 ```
 
-> 📌 Note: LiteLLM supports a [variety of model providers](https://docs.litellm.ai/docs/providers) for LLMs. In this example, we're using OpenAI. Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+> 📌 Note: LiteLLM supports a <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer nofollow">variety of model providers</a> for LLMs. In this example, we're using OpenAI. Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
 
 **Step 5:** Run your application with auto-instrumentation
 
@@ -299,7 +300,7 @@ response = completion(
 print(response)
 ```
 
-> 📌 Note: LiteLLM supports a [variety of model providers](https://docs.litellm.ai/docs/providers) for LLMs. In this example, we're using OpenAI. Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+> 📌 Note: LiteLLM supports a <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer nofollow">variety of model providers</a> for LLMs. In this example, we're using OpenAI. Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
 
 </TabItem>
 
@@ -308,11 +309,11 @@ print(response)
 </TabItem>
 </Tabs>
 
-## View Traces, Logs, and Metrics in SigNoz
+## View LiteLLM Traces, Logs, and Metrics in SigNoz
 
-Your LiteLLM commands should now automatically emit traces, logs, and metrics.
+Once configured, your LiteLLM application automatically emits traces, logs, and metrics.
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+LiteLLM traces are available in SigNoz under the traces tab:
 
 <Figure
   src="/img/docs/llm/litellm/litellmsdk-traces.webp"
@@ -328,7 +329,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="LiteLLM SDK Detailed Trace View"
 />
 
-You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+LiteLLM logs are available in SigNoz under the logs tab. You can also view correlated logs by clicking the “Related Logs” button in the trace view:
 
 <figure data-zoomable align="center">
   <img src="/img/docs/llm/litellm/related-logs.webp" alt="Related logs" width="300" />
@@ -351,7 +352,7 @@ When you click on any of these logs in SigNoz, you'll see a detailed view of the
   caption="LiteLLM SDK Detailed Logs View"
 />
 
-You should be able to see LiteLLM related metrics in Signoz Cloud under the metrics tab:
+LiteLLM metrics are available in SigNoz under the metrics tab:
 
 <Figure
   src="/img/docs/llm/litellm/litellmsdk-metrics.webp"
@@ -367,9 +368,9 @@ When you click on any of these metrics in SigNoz, you'll see a detailed view of 
   caption="LiteLLM SDK Detailed Metrics View"
 />
 
-## Dashboard
+## LiteLLM SDK Observability Dashboard
 
-You can also check out our custom LiteLLM SDK dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/litellm-sdk-dashboard/) which provides specialized visualizations for monitoring your LiteLLM usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+The [LiteLLM SDK Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/litellm-sdk-dashboard/) provides specialized visualizations for LiteLLM monitoring, including pre-built charts for LLM usage and import instructions to get started quickly.
 
 <Figure
   src="/img/docs/llm/litellm/litellm-sdk-dashboard.webp"
@@ -426,7 +427,7 @@ litellm --config config.yaml
 
 Now any calls made through your LiteLLM proxy server will be traced and sent to SigNoz.
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+LiteLLM Proxy traces are available in SigNoz under the traces tab:
 
 <Figure
   src="/img/docs/llm/litellm/litellmproxy-traces.webp"
@@ -442,9 +443,9 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="LiteLLM Proxy Detailed Trace View"
 />
 
-## Dashboard
+## LiteLLM Proxy Dashboard
 
-You can also check out our custom LiteLLM Proxy dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/litellm-proxy-dashboard/) which provides specialized visualizations for monitoring your LiteLLM Proxy usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+The [LiteLLM Proxy Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/litellm-proxy-dashboard/) provides specialized visualizations for LiteLLM Proxy monitoring, including pre-built charts for LLM usage and import instructions to get started quickly.
 
 <Figure
   src="/img/docs/llm/litellm/litellm-proxy-dashboard.webp"

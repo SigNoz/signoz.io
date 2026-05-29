@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-05-27
 id: span-details
 title: Trace Details
 description: Visualize and analyze individual traces using the flamegraph, waterfall chart, and span inspection tools in SigNoz.
@@ -12,7 +12,7 @@ The Trace Details Page enables you to:
 
 - **Visualize the Entire Trace:** Render large traces seamlessly using synchronized flame graphs and waterfall charts.
 - **Drill Down Into Details:** Inspect individual spans to view metadata, span percentile, context, attributes and events associated with each span.
-- **Efficient Navigation and Search:** Use the dynamic search bar and filtering options to quickly jump to specific spans or error events making it easier to analyze and troubleshoot.
+- **Efficient Navigation and Search:** Use the dynamic search bar, quick filters, and highlight errors to quickly jump to specific spans or error events.
 - **Responsive and Scalable:** Handle traces from your architectures (monolithic or microservices) without performance lag, ensuring smooth and real-time analysis.
 
 <YouTube id="oQdjfhzz5oQ" mute={false} />
@@ -28,30 +28,45 @@ The Trace Details Page enables you to:
 
 ## Opening a Trace
 
-Select a trace from the Trace Explorer to open the Trace Details page. You will see two synchronized views:
+Select a trace from the [Trace Explorer](https://signoz.io/docs/userguide/traces/) to open the Trace Details page. You will see two synchronized views:
 
-- **Flame Graph** — displays a hierarchical representation of the trace, showing the nested relationships between spans.
-- **Waterfall Chart** — provides a detailed timeline view, illustrating the sequence and duration of each span.
+- **Flame Graph** — displays a hierarchical representation of the trace, showing the nested relationships between spans. The header shows the total span count and error count. It can render **100,000+ spans** at once.
+- **Waterfall Chart** — provides a detailed timeline view, illustrating the sequence and duration of each span. It supports **10,000+ spans** with virtual scrolling for smooth navigation.
+
+Both views are collapsible — click the section header to expand or collapse them and maximize screen space.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/tarce-details-overview.webp"
-  alt="Trace Details Interface"
-  caption="Trace Details Interface"
+  alt="Trace Details Interface showing flame graph and waterfall views"
+  caption="Trace Details Interface — Flame Graph and Waterfall views with synchronized navigation"
   className="box-shadowed-image"
 />
 
 ## Inspecting a Span
 
-Click on a specific span in either the flame graph or waterfall view to inspect detailed information, including:
+Click on a specific span in either the flame graph or waterfall view to open the **Span Details** panel. The panel is a floating, resizable window that can be docked to the right side or bottom of the screen, allowing you to arrange your workspace.
 
-- **Span context and attributes** — key-value metadata attached to the span.
-- **Span events** — timestamped log messages recorded during the span.
-- **Span links** — references to related spans across async operations.
-- **Span kind** — client, server, producer, consumer, or internal.
+The panel header shows:
+- **Span name** and **service name**
+- **Percentile ranking** (e.g., p52, p100) and duration
+- **Percentage of total execution time**
+- **Timestamp** and **linked spans count**
+- **Service**, **Status Code**, **Trace ID**, and **Span Kind**
+
+The details are organized into tabs:
+
+- **Overview** — span attributes in a structured view
+- **Events** — timestamped log messages and span events recorded during the span
+- **Logs** — correlated log lines from the span's service and time window
+- **Metrics** — infrastructure metrics (CPU, memory) for the host or pod
 
 ### Attributes
 
-The span details panel displays all resource and span attributes as key-value pairs. Hover over any attribute value to see quick action icons that let you interact with the data directly:
+The Overview tab displays all resource and span attributes. You can toggle between **Pretty** and raw views:
+
+- **Pretty view** — displays attributes in their original, nested JSON structure as ingested, making it easier to understand complex attribute hierarchies.
+
+Hover over any attribute value to see quick action icons:
 
 - **Pin Attribute** — pin the attribute to the top of the list for easy reference
 - **Filter for Value** — add the attribute as an `IN` filter to the current query
@@ -98,81 +113,188 @@ You can further refine this analysis by adding more resource attributes to narro
 
 ### Synchronized Navigation
 
-The flame graph and waterfall views remain perfectly synchronized. Navigating in one view automatically updates the other, so you can always see where a span fits into the overall trace timeline.
+The flame graph and waterfall views remain perfectly synchronized. Clicking a span in one view automatically highlights it in the other and opens the Span Details panel, ensuring you always see where a span fits into the overall trace timeline.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/trace-details-span-details.webp"
   alt="Span Details"
-  caption="Span Details"
+  caption="Synchronized views — selecting a span highlights it in both the Flame Graph and Waterfall"
   className="box-shadowed-image"
 />
 
-## Search and Filter
+## Analytics
 
-The Trace Detail interface allows you to filter spans for quick analysis while dynamically loading additional spans as you scroll, ensuring smooth navigation even in large traces.
+Click the **Analytics** button in the top bar to open the Analytics panel. It provides a quick breakdown of your trace by service, with two views:
 
-For example, to debug errors:
+- **% exec time** — shows each service's share of the total trace execution time
+- **Spans** — shows span count distribution across services
 
-1. Enable the `has_error = true` filter to highlight **error spans**.
-2. Click on an error span to view associated **error messages and logs**.
-3. Analyze the affected services and identify bottlenecks causing failures.
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/trace-details-analytics.webp"
+  alt="Analytics panel showing service breakdown by execution time"
+  caption="Analytics panel — service breakdown by % execution time and span count"
+  className="box-shadowed-image"
+/>
+
+## Options Menu
+
+Click the **three-dot menu** (⋯) in the top bar to access additional trace options:
+
+- **Hide trace details** — collapses the sub-header row that displays the service name, operation, duration, timestamp, and status code
+- **Preview fields** — opens a panel where you can select span attributes to display inline in the waterfall rows, so you can see key values without opening the Span Details panel
+- **Colour by** — choose how spans are colored in the flame graph and waterfall (e.g., by `service.name` or `host.name`)
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/trace-details-options-menu.webp"
+  alt="Three-dot options menu showing Hide trace details, Preview fields, and Colour by"
+  caption="Options menu — Hide trace details, Preview fields, and Colour by"
+  className="box-shadowed-image"
+/>
+
+### Preview Fields
+
+The Preview fields panel lets you search for and select up to 10 span attributes to display as inline previews in the waterfall. This is useful for surfacing key information (like HTTP status codes or database statements) directly in the trace timeline without opening individual spans.
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/trace-details-preview-fields.webp"
+  alt="Preview fields panel with searchable attribute list"
+  caption="Preview fields — select attributes to display inline in waterfall rows"
+  className="box-shadowed-image"
+/>
+
+### Colour By
+
+The Colour by submenu lets you customize how spans are colored in the flame graph and waterfall views. The following attributes are available:
+
+- `service.name`
+- `service.namespace`
+- `host.name`
+- `k8s.node.name`
+- `k8s.container.name`
+
+These options appear in the list when the corresponding attributes are ingested in your trace data. If an attribute is not present in your spans, it won't show up as an option.
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/trace-details-colour-by.webp"
+  alt="Colour by submenu showing service.name and host.name options"
+  caption="Colour by — customize span colors by service name, host name, or other attributes"
+  className="box-shadowed-image"
+/>
+
+## Waterfall Hover Tooltip
+
+Hover over any span row in the waterfall to see a tooltip with key details:
+
+- **Span name** — the operation name
+- **Status** — whether the span completed successfully or with an error
+- **Start** — the span's start time relative to the trace start
+- **Duration** — how long the span took
+
+You can add more fields to the tooltip by selecting attributes through the **Options menu (⋯) → Preview fields**. Any attribute you add there (up to 10) will also appear in the hover tooltip alongside the default fields.
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/waterfall-span-tooltip.webp"
+  alt="Waterfall hover tooltip showing span name, status, start time, and duration"
+  caption="Waterfall hover tooltip — quickly view span details without clicking"
+  className="box-shadowed-image"
+/>
+
+## Filtering and Analysis
+
+The Trace Details page provides multiple ways to filter and analyze spans within a trace.
+
+### Highlight Errors
+
+Toggle **Highlight Errors** in the top-right corner to instantly focus on error spans. When enabled:
+
+- A `has_error = true` filter is applied automatically
+- Non-error spans are **dimmed**, making red error spans stand out
+- A **counter** (e.g., 1 / 3) appears, letting you navigate between error spans using the up/down arrows
+
+<Figure
+  src="/img/docs/apm-and-distributed-tracing/trace-details-highlight-errors.webp"
+  alt="Highlight Errors toggle dimming non-error spans"
+  caption="Highlight Errors — non-error spans are dimmed, error spans stand out with navigation counter"
+  className="box-shadowed-image"
+/>
+
+### Quick Filters
+
+Quick filter buttons at the top of the page provide one-click filtering by span kind:
+
+- **All** — show all spans
+- **Database** — filter to database operations
+- **Functions** — filter to function calls
+- **HTTP** — filter to HTTP spans
+- **Jobs** — filter to job/task spans
+- **LLM** — filter to LLM-related spans
+
+These filters can be combined with the Highlight Errors toggle for targeted analysis.
+
+### Query Builder
+
+The integrated query builder allows you to write custom filter queries directly in the filter bar. For example:
+
+- `http.status_code >= 500 AND service.name = 'frontend'` — find server errors in a specific service
+- `http.method exists` — filter to HTTP spans only
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/trace-details-filters.webp"
-  alt="Filtering for error spans"
-  caption="Filtering for error spans"
+  alt="Query builder and quick filters"
+  caption="Query Builder with quick filter buttons for filtering spans within a trace"
   className="box-shadowed-image"
 />
 
 ## Adjusting the Interface
 
-If span names or details appear cramped, use the draggable anchor to adjust the size of the display area. This ensures that you can comfortably read and analyze all information.
+The Span Details panel opens by default as a **docked panel on the right**. You can switch between three layout modes using the dock buttons in the panel header:
+
+- **Dock to the right** (default) — panel appears on the right side, ideal for viewing attributes alongside the trace
+- **Dock to the bottom** — panel appears at the bottom, maximizing the horizontal trace view
+- **Floating panel** — panel detaches into a free-floating window that can be **resized in all directions** and **moved anywhere** on screen, giving you full control over your workspace layout
+
+You can also close the panel entirely and reopen it by clicking any span.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/trace-details-ui-adjustments.webp"
-  alt="Resize span names"
-  caption="Resize anchor to see complete span names"
+  alt="Trace Details Interface — Flame Graph and Waterfall views with synchronized navigation"
+  caption="Trace Details Interface — Flame Graph and Waterfall views with synchronized navigation"
   className="box-shadowed-image"
 />
 
 ## Related Signals
 
-When you inspect a span's details, a **Related Signals** section appears at the bottom of the span details panel. This lets you jump directly to logs or metrics correlated to that specific span — without leaving the trace view.
+The Span Details panel includes **Logs** and **Metrics** tabs that let you jump directly to correlated signals for the selected span — without leaving the trace view.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/span-details-related-signals.webp"
-  alt="Span details panel showing Related Signals with Logs and Metrics buttons"
-  caption="Related Signals — Logs and Metrics buttons in Span Details"
+  alt="Span details panel showing tabs for Overview, Events, Logs, and Metrics"
+  caption="Span Details panel — tabs provide access to Overview, Events, Logs, and Metrics for the selected span"
   className="box-shadowed-image"
 />
 
 ### Logs
 
-Click **Logs** in the Related Signals section to open an inline panel showing log lines correlated to the span's time window and service. The panel shows log entries with timestamps and message bodies, and an **Open in Logs Explorer** button takes you to the full Logs Explorer pre-filtered to that trace context and timestamp.
+Click the **Logs** tab to see log lines correlated to the span's time window and service. The panel shows log entries with timestamps and message bodies.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/related-signals-logs.webp"
-  alt="Related Signals logs panel showing correlated log lines for the span"
-  caption="Related Signals — Logs panel with correlated log lines"
-  className="box-shadowed-image"
-/>
-
-Clicking **Open in Logs Explorer** opens the Logs Explorer pre-filtered to the relevant trace ID and timestamp, so you can search and analyze the logs in full detail.
-
-<Figure
-  src="/img/docs/apm-and-distributed-tracing/related-signals-logs-explorer.webp"
-  alt="Logs Explorer opened from Related Signals with trace context pre-applied"
-  caption="Logs Explorer opened from Related Signals — pre-filtered to the span's trace context"
+  alt="Related Signals logs tab showing correlated log lines for the span"
+  caption="Logs tab — correlated log lines for the selected span"
   className="box-shadowed-image"
 />
 
 ### Metrics
 
-Click **Metrics** in the Related Signals section to see infrastructure metrics (Node CPU usage, Node memory usage, Pod metrics, etc.) for the host or pod that served this span. Use the **Node** and **Pod** tabs to switch between host-level and pod-level views.
+Click the **Metrics** tab to see infrastructure metrics (CPU usage, memory usage) for the host or pod that served the selected span. Use the **Node** and **Pod** tabs to switch between host-level and pod-level views.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/related-signals-metrics.webp"
-  alt="Related Signals metrics panel showing Node CPU and memory usage charts"
-  caption="Related Signals — Metrics panel with Node CPU and memory usage"
+  alt="Related Signals metrics tab showing CPU and memory usage charts"
+  caption="Metrics tab — CPU and memory usage for the span's host"
   className="box-shadowed-image"
 />
+
+## Legacy View
+
+If you prefer the previous trace details interface, click the **Legacy View** button in the top-right corner to switch back. SigNoz remembers your preference for future visits.

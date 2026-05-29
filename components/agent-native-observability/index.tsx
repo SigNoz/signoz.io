@@ -50,9 +50,10 @@ export const AgentNativeObservability = ({ className }: { className?: string }) 
               Introducing Agent Native Observability
             </h2>
             <p className="max-w-3xl text-center text-xs font-medium text-signoz_vanilla-100 sm:text-base">
-              Connect SigNoz MCP to your coding agents (eg: Claude Code, Cursor) and debug
-              production issues without leaving your dev environment. Traces, logs, metrics, service
-              topology, and your actual codebase &mdash; all in one place.
+              Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
+              issues without leaving your dev environment. Traces, logs, metrics, service topology,
+              and your actual codebase &mdash; all in one place. Or use Noz, our new AI Assistant
+              out-of-the-box.
             </p>
             <TrackingLink
               href="/docs/ai/signoz-mcp-server/"

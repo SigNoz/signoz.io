@@ -15,21 +15,20 @@ export const TRUSTED_BY_LOGOS = [
 
 export const FEATURE_CARDS = [
   {
-    title: 'From alert to root cause to fix. In one session.',
+    title: 'Talk to your observability stack in natural language.',
     description: (
       <div>
         <p>
-          Use SigNoz connected with your coding agent to get the full picture: traces, logs,
-          metrics, service topology, and deployment history — in one query. Your codebase is already
-          loaded. Correlate production telemetry with the actual code that caused it.
+          Describe what you want in natural language and SigNoz builds it. Create dashboards from
+          80+ templates or from scratch. Generate alerts with sensible defaults. Run queries and get
+          results directly in chat — no query language required.
         </p>
-        <p className="mt-3">
-          Connect to Kubernetes, Git, Jira via your cloud provider CLI in your dev environment.
-          Investigate issues, diagnose root cause, and fix without leaving your env.
+        <p className="mt-3 italic text-signoz_vanilla-300">
+          &ldquo;Create a latency dashboard for my payment service&rdquo; → Done. Fully interactive.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
-            href="/docs/ai/signoz-mcp-server/"
+            href="/blog/introducing-agent-native-observability/"
             clickType="Secondary CTA"
             clickName="Agent Native Feature 1 Learn More"
             clickLocation="Agent Native Observability Page"
@@ -46,8 +45,8 @@ export const FEATURE_CARDS = [
     description: (
       <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
-          src="/img/agent-native-observability/image-2.webp"
-          alt="Coding agent investigating an ECS service OOM issue — tracing root cause from alert to fix"
+          src="/img/agent-native-observability/feature-1-image.webp"
+          alt="Natural language observability — creating dashboards and queries in chat"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-top"
@@ -59,14 +58,43 @@ export const FEATURE_CARDS = [
     description: (
       <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
-          src="/img/agent-native-observability/image-3.webp"
-          alt="skill.md file defining custom debugging heuristics — latency propagation, backpressure, cascading failures"
+          src="/img/agent-native-observability/image-2.webp"
+          alt="Coding agent investigating an ECS service OOM issue — tracing root cause from alert to fix"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-top"
         />
       </div>
     ),
+  },
+  {
+    title: 'From alert to root cause to fix. In one session.',
+    description: (
+      <div>
+        <p>
+          You can use SigNoz connected with your coding agent to do analysis and get the full
+          picture: traces, logs, metrics, service topology, and deployment history — in one query.
+          Your codebase is already loaded. Correlate production telemetry with actual code that
+          caused it.
+        </p>
+        <p className="mt-3">
+          Connect to Kubernetes, Git, Jira via your cloud provider CLI in your dev environment.
+          Create issues, diagnose root cause, and code fix without leaving your env.
+        </p>
+        <Button asChild variant="secondary" rounded="full" className="mt-4">
+          <TrackingLink
+            href="/docs/ai/signoz-mcp-server/"
+            clickType="Secondary CTA"
+            clickName="Agent Native Feature 2 Learn More"
+            clickLocation="Agent Native Observability Page"
+            clickText="Learn more"
+          >
+            Learn more
+          </TrackingLink>
+        </Button>
+      </div>
+    ),
+    className: 'flex-col items-start justify-center gap-4',
   },
   {
     title: "Teach it your team's debugging heuristics. Not someone else's.",
@@ -95,6 +123,32 @@ export const FEATURE_CARDS = [
     className: 'flex-col items-start justify-center gap-4',
   },
   {
+    description: (
+      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
+        <Image
+          src="/img/agent-native-observability/image-3.webp"
+          alt="skill.md file defining custom debugging heuristics — latency propagation, backpressure, cascading failures"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover object-top"
+        />
+      </div>
+    ),
+  },
+  {
+    description: (
+      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg bg-signoz_ink-500">
+        <Image
+          src="/img/graphics/homepage/feature-graphic-5.svg"
+          alt="GitHub, Slack, GitLab, and Jira connected to SigNoz — tribal knowledge and integrations flow"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-contain"
+        />
+      </div>
+    ),
+  },
+  {
     title: 'Plugged into your tribal knowledge. No third-party detours.',
     description: (
       <div>
@@ -112,6 +166,8 @@ export const FEATURE_CARDS = [
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
             href="https://youtube.com/playlist?list=PL0N8FjJpzGl-pTr0H7UrX6rdLGsiVPolw&si=SvFwmnw-pjmj5zKD"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
             clickType="Secondary CTA"
             clickName="Agent Native Feature 4 Watch Video"
             clickLocation="Agent Native Observability Page"
@@ -125,17 +181,19 @@ export const FEATURE_CARDS = [
     className: 'flex-col items-start justify-center gap-4',
   },
   {
+    title: 'Open by design. No lock-in. Ever.',
     description: (
-      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg bg-signoz_ink-500">
-        <Image
-          src="/img/graphics/homepage/feature-graphic-5.svg"
-          alt="GitHub, Slack, GitLab, and Jira connected to SigNoz — tribal knowledge and integrations flow"
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-contain"
-        />
+      <div>
+        <p>
+          SigNoz is based on open standards and is a neutral data layer for AI-assisted debugging.
+          Built on OpenTelemetry, the CNCF standard — your instrumentation, your agents, and your
+          investigation data stay yours. Extend across vendors. Port across tools. Define your own
+          debugging workflows and share them as reusable skills. The open investigation format
+          SigNoz uses becomes a standard your entire team can build on.
+        </p>
       </div>
     ),
+    className: 'flex-col items-start justify-center gap-4',
   },
   {
     description: (
@@ -149,20 +207,5 @@ export const FEATURE_CARDS = [
         />
       </div>
     ),
-  },
-  {
-    title: 'Open by design. No lock-in. Ever.',
-    description: (
-      <div>
-        <p>
-          SigNoz is a neutral data layer for AI-assisted debugging. Built on OpenTelemetry, the CNCF
-          standard — your instrumentation, your agents, and your investigation data stay yours.
-          Extend across vendors. Port across tools. Define your own debugging workflows and share
-          them as reusable skills. The open investigation format SigNoz uses becomes a standard your
-          entire team can build on.
-        </p>
-      </div>
-    ),
-    className: 'flex-col items-start justify-center gap-4',
   },
 ]

@@ -24,10 +24,11 @@ export async function generateMetadata(props: {
     notFound()
   }
 
-  const fullTitle = post?.title ? `${post.title} | SigNoz Docs` : 'SigNoz Docs'
+  const seoTitle = post?.meta_title || post?.title
+  const fullTitle = seoTitle ? `${seoTitle} | SigNoz Docs` : 'SigNoz Docs'
 
   return {
-    title: post?.title,
+    title: seoTitle,
     description: post?.description,
     openGraph: {
       title: fullTitle,

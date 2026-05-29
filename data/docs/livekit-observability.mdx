@@ -36,14 +36,14 @@ Get started with a sample LiveKit starter project by following the <a href="http
 
 No-code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
 
-### **Step 1:** Clone the sample voice agent project and setup dependencies
+### Step 1: Clone the sample voice agent project and setup dependencies
 
 ```bash
 git clone https://github.com/livekit-examples/agent-starter-python
 cd agent-starter-python
 uv sync
 ```
-### **Step 2:** Setup Credentials
+### Step 2: Setup Credentials
 
 Copy .env.example to .env.local and filling in the required keys:
 
@@ -57,14 +57,14 @@ lk cloud auth
 lk app env -w -d .env.local
 ```
 
-### **Step 3:** Add Automatic Instrumentation
+### Step 3: Add Automatic Instrumentation
 
 ```bash
 uv pip install opentelemetry-distro opentelemetry-exporter-otlp
 uv run opentelemetry-bootstrap -a requirements | uv pip install --requirement -
 ```
 
-### **Step 4:** Instrument your LiveKit application
+### Step 4: Instrument your LiveKit application
 
 **Metrics:**
 
@@ -88,7 +88,7 @@ set_tracer_provider(trace.get_tracer_provider())
 
 See this <a href="https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py" target="_blank" rel="noopener noreferrer nofollow">example repo</a> for more details on how to configure instrumentation.
 
-### **Step 5:** Your `agent.py` should look something like this:
+### Step 5: Your `agent.py` should look something like this:
 
 ```python
 import logging
@@ -195,7 +195,7 @@ if __name__ == "__main__":
 
 ```
 
-### **Step 6:** Run your application with auto-instrumentation
+### Step 6: Run your application with auto-instrumentation
 
 Before your first run, you must download certain models such as Silero VAD and the LiveKit turn detector:
 
@@ -235,14 +235,14 @@ OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
 
 Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
 
-### **Step 1:** Clone the sample voice agent project and setup dependencies
+### Step 1: Clone the sample voice agent project and setup dependencies
 
 ```bash
 git clone https://github.com/livekit-examples/agent-starter-python
 cd agent-starter-python
 uv sync
 ```
-### **Step 2:** Setup Credentials
+### Step 2: Setup Credentials
 
 Copy .env.example to .env.local and filling in the required keys:
 
@@ -257,7 +257,7 @@ lk app env -w -d .env.local
 ```
 
 
-### **Step 3:** Install additional OpenTelemetry dependencies
+### Step 3: Install additional OpenTelemetry dependencies
 
 ```bash
 uv pip install \
@@ -268,7 +268,7 @@ uv pip install \
   opentelemetry-instrumentation-system-metrics
 ```
 
-### **Step 4:** Import the necessary modules in your Python application
+### Step 4: Import the necessary modules in your Python application
 
 **Traces:**
 
@@ -301,7 +301,7 @@ from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrument
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 ```
 
-### **Step 5:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+### Step 5: Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
 
 ```python
 from opentelemetry.sdk.resources import Resource
@@ -333,7 +333,7 @@ trace.set_tracer_provider(provider)
   <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
 </Admonition>
 
-### **Step 6**: Setup Logs
+### Step 6: Setup Logs
 
 ```python
 import logging
@@ -372,7 +372,7 @@ logger = logging.getLogger(__name__)
   <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
 </Admonition>
 
-### **Step 7**: Setup Metrics
+### Step 7: Setup Metrics
 
 ```python
 from opentelemetry.sdk.resources import Resource
@@ -411,7 +411,7 @@ HTTPXClientInstrumentor().instrument()
 
 > 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your LiveKit application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
 
-### **Step 8:** Instrument your LiveKit application
+### Step 8: Instrument your LiveKit application
 
 **Metrics:**
 
@@ -435,7 +435,7 @@ set_tracer_provider(trace.get_tracer_provider())
 
 See this <a href="https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py" target="_blank" rel="noopener noreferrer nofollow">example repo</a> for more details on how to configure instrumentation.
 
-### **Step 9:** Run your example `agent.py`
+### Step 9: Run your example `agent.py`
 
 Before your first run, you must download certain models such as Silero VAD and the LiveKit turn detector:
 

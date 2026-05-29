@@ -1,17 +1,17 @@
 ---
-date: 2026-05-18
+date: 2026-05-26
 id: opencode-observability-with-opentelemetry
 
 title: OpenCode Observability & Monitoring with OpenTelemetry
-description: Learn how to monitor OpenCode using OpenTelemetry and SigNoz. Track coding sessions, tool calls, and token usage with real-time traces, logs, and metrics to optimize your AI-assisted development workflow.
+description: Learn how to set up OpenCode observability and monitoring with OpenTelemetry and SigNoz. Track traces, logs, and metrics from AI coding sessions.
 doc_type: howto
 ---
 
-## Overview
+## What is OpenCode Observability?
 
-This guide walks you through enabling observability and monitoring in OpenCode using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, logs, and metrics to SigNoz using OpenTelemetry. Once set up, you’ll be able to track coding session activity, log outputs, and system-level metrics in SigNoz, giving you visibility into performance trends, error rates, and usage patterns directly from your development workflow.
+OpenCode observability and monitoring gives you real-time visibility into your AI coding sessions by collecting traces, logs, and metrics using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. This guide shows you how to instrument OpenCode with the OpenTelemetry plugin and send telemetry data to SigNoz, so you can monitor tool calls, track token usage, and debug performance issues directly from your development workflow.
 
-Instrumenting OpenCode with telemetry provides full observability into how coding assistance is used in practice. With SigNoz, you can correlate traces, logs, and metrics in a single dashboard, set up alerts, and analyze historical data to continuously improve reliability, efficiency, and user experience.
+With full OpenCode observability in SigNoz, you can correlate traces, logs, and metrics in a single dashboard, set up alerts for error rates or high latency, and analyze usage patterns over time to continuously improve reliability and efficiency.
 
 ## Prerequisites
 
@@ -21,9 +21,9 @@ Instrumenting OpenCode with telemetry provides full observability into how codin
 - Internet access to send telemetry data to SigNoz Cloud
 - <a href="https://opencode.ai/" target="_blank" rel="noopener noreferrer nofollow">OpenCode</a> installed and running on your system
 
-## Monitoring OpenCode
+## Monitor OpenCode with OpenTelemetry
 
-For detailed instructions on setting up OpenTelemetry instrumentation for OpenCode, check out the <a href="https://github.com/DEVtheOPS/opencode-plugin-otel/blob/main/README.md" target="_blank" rel="noopener noreferrer nofollow">official plugin documentation</a>.
+The steps below walk you through installing and configuring OpenTelemetry for OpenCode to export traces, logs, and metrics to SigNoz. For full plugin details, see the <a href="https://github.com/DEVtheOPS/opencode-plugin-otel/blob/main/README.md" target="_blank" rel="noopener noreferrer nofollow">official plugin documentation</a>
 
 ### Step 1: Install the OpenTelemetry Plugin
 
@@ -75,80 +75,80 @@ Run OpenCode directly in your terminal using the `opencode` command:
 opencode
 ```
 
-## View Traces, Logs, and Metrics in SigNoz
+## View OpenCode Traces, Logs, and Metrics in SigNoz
 
-Your OpenCode usage should now automatically emit traces, logs, and metrics.
+Once configured, OpenCode automatically emits traces, logs, and metrics for every AI coding session.
 
-You should be able to view traces in SigNoz Cloud under the traces tab:
+OpenCode traces are available in SigNoz under the Traces tab:
 
 <Figure
   src="/img/docs/llm/opencode/opencode-traces.webp"
-  alt="OpenCode Trace View"
-  caption="OpenCode Trace View"
+  alt="OpenCode traces in SigNoz showing AI coding session activity"
+  caption="OpenCode traces in SigNoz: monitor AI coding session spans"
 />
 
 When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
 
 <Figure
   src="/img/docs/llm/opencode/opencode-detailed-traces.webp"
-  alt="OpenCode Detailed Trace View"
-  caption="OpenCode Detailed Trace View"
+  alt="OpenCode detailed trace view in SigNoz with spans, events, and attributes"
+  caption="OpenCode detailed trace in SigNoz: spans, events, and attributes per coding session"
 />
 
-You should be able to view logs in SigNoz Cloud under the logs tab. 
+OpenCode logs are available in SigNoz under the Logs tab.
 
 <Figure
   src="/img/docs/llm/opencode/opencode-logs.webp"
-  alt="OpenCode Logs View"
-  caption="OpenCode Logs View"
+  alt="OpenCode logs in SigNoz showing telemetry output from AI coding sessions"
+  caption="OpenCode logs in SigNoz: real-time log output from AI coding sessions"
 />
 
 When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
 
 <Figure
   src="/img/docs/llm/opencode/opencode-detailed-logs.webp"
-  alt="OpenCode Detailed Log View"
-  caption="OpenCode Detailed Logs View"
+  alt="OpenCode detailed log view in SigNoz with log attributes and metadata"
+  caption="OpenCode detailed log entry in SigNoz: log attributes and metadata"
 />
 
-You should be able to see OpenCode related metrics in SigNoz Cloud under the metrics tab:
+OpenCode metrics are available in SigNoz under the Metrics tab:
 
 <Figure
   src="/img/docs/llm/opencode/opencode-metrics.webp"
-  alt="OpenCode Metrics View"
-  caption="OpenCode Metrics View"
+  alt="OpenCode metrics in SigNoz showing token usage and performance data"
+  caption="OpenCode metrics in SigNoz: track token usage, latency, and performance"
 />
 
 When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
 
 <Figure
   src="/img/docs/llm/opencode/opencode-detailed-metrics.webp"
-  alt="OpenCode Detailed Metrics View"
-  caption="OpenCode Detailed Metrics View"
+  alt="OpenCode detailed metric view in SigNoz with metric attributes and time series"
+  caption="OpenCode detailed metric in SigNoz: metric attributes and time series data"
 />
 
 <details>
 <ToggleHeading>
-## Troubleshooting
+## Troubleshooting OpenCode Observability
 </ToggleHeading>
 
 If you don't see your telemetry data:
 
-1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
-2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
-3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
-4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+1. **Verify network connectivity**: Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key**: Verify your SigNoz ingestion key is correct
+3. **Wait for data**: OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter**: Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
 
 </details>
 
-## Next Steps
+## OpenCode Observability Dashboard
 
-You can also check out our custom OpenCode dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/opencode-dashboard/) which provides specialized visualizations for monitoring your OpenCode usage. The dashboard includes pre-built charts specifically tailored for AI coding agents, along with import instructions to get started quickly.
+The [OpenCode observability dashboard](https://signoz.io/docs/dashboards/dashboard-templates/opencode-dashboard/) gives you pre-built charts tailored for AI coding agents, so you can monitor token usage, tool calls, and session performance out of the box.
 
 <Figure
   src="/img/docs/llm/opencode/opencode-dashboard.webp"
-  alt="OpenCode Dashboard"
-  caption="OpenCode Dashboard Template"
+  alt="OpenCode observability dashboard in SigNoz with pre-built charts for AI coding sessions"
+  caption="OpenCode dashboard template in SigNoz: pre-built charts for monitoring AI coding sessions"
 />
 
 <details>
@@ -162,10 +162,10 @@ Think of the OTel Collector as a middleman between your app and SigNoz. Instead 
 
 ### Why use it?
 
-- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
-- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
-- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
-- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+- **Cleaning up data**: Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight**: Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically**: The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility**: Want to send data to multiple backends later? The Collector makes that easy without changing your app.
 
 See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
 

@@ -1,18 +1,18 @@
 ---
-date: 2026-05-18
+date: 2026-05-28
 id: vercel-ai-sdk-observability-with-opentelemetry
-
 title: Vercel AI SDK Observability & Monitoring with OpenTelemetry
-description: Setup Vercel AI SDK observability with OpenTelemetry and SigNoz. Monitor AI function calls, trace requests end-to-end in your Next.js app.
+description: Set up Vercel AI SDK observability with OpenTelemetry and SigNoz. Monitor AI function calls, trace requests end-to-end in your Next.js app.
+doc_type: howto
 ---
 
-## Overview
+## What is Vercel AI SDK Observability?
 
-This guide walks you through enabling observability and monitoring in the Vercel AI SDK and streaming that data to SigNoz using OpenTelemetry. By the end of this setup, you'll be able to monitor AI-related function calls like generateText() or generateStream()—including request durations, inputs, outputs, and custom metadata—directly within SigNoz.
+Vercel AI SDK observability gives you visibility into AI function calls, request durations, inputs, outputs, and custom metadata across your Next.js application. This guide covers setting up OpenTelemetry instrumentation to capture traces and spans from the Vercel AI SDK and stream that data to SigNoz.
 
-Instrumenting your AI workflows with telemetry helps you observe performance, debug latency, and trace AI interactions end-to-end across your Next.js application. This is especially valuable when building production-grade AI features where visibility into model behavior and user interactions is critical.
+With full Vercel AI SDK observability in SigNoz, you can trace AI interactions end-to-end, debug latency, set alerts on degraded performance, and improve the reliability of your AI features. This is especially valuable for production-grade Vercel observability where visibility into model behavior and user interactions is critical.
 
-You can explore our example Vercel AI SDK chatbot, which includes observability/monitoring via OpenTelemetry, [here](https://github.com/SigNoz/vercel-ai-sdk-opentelemetry-example).
+Explore the <a href="https://github.com/SigNoz/vercel-ai-sdk-opentelemetry-example" target="_blank" rel="noopener noreferrer nofollow">SigNoz Vercel AI SDK example chatbot</a>, which includes observability and monitoring via OpenTelemetry.
 
 ## Prerequisites
 
@@ -23,11 +23,11 @@ You can explore our example Vercel AI SDK chatbot, which includes observability/
   - Self-hosted SigNoz instance
 - Network access from your app to the chosen SigNoz endpoint
 
-## Instrument your Next.js application
+## Instrument your Next.js App with OpenTelemetry
 
-Check out detailed instructions on how to set up OpenTelemetry instrumentation in your Nextjs applications and view your application traces in SigNoz over [here](https://signoz.io/docs/instrumentation/opentelemetry-nextjs/).
+For detailed OpenTelemetry instrumentation instructions for Next.js, see the [Next.js OpenTelemetry instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-nextjs/).
 
-## Send traces directly to SigNoz Cloud
+## Configure Vercel AI SDK Observability with OpenTelemetry
 
 **Step 1.** Install OpenTelemetry packages
 
@@ -80,7 +80,7 @@ export function register() {
   Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
-Your Next.js app should be properly instrumented now.
+Your Next.js app is now properly instrumented.
 
 **Step 4.** Verify Instrumentation Locally
 
@@ -90,7 +90,7 @@ Run your Next.js application in development mode:
 npm run dev
 ```
 
-In your terminal, you should see output from OpenTelemetry when the application starts, confirming that the instrumentation.ts file was loaded correctly.
+OpenTelemetry output appears in the terminal when the application starts, confirming that the instrumentation.ts file was loaded correctly.
 
 <figure data-zoomable align="center">
   <img
@@ -108,13 +108,13 @@ To see detailed trace export logs, you can temporarily set the DiagLogLevel to D
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG)
 ```
 
-## Enable Telemetry for Vercel AI SDK
+## Enable Vercel AI SDK Telemetry
 
 The Vercel AI SDK uses [OpenTelemetry](https://signoz.io/opentelemetry/) to collect telemetry data. OpenTelemetry is an open-source observability framework designed to provide standardized instrumentation for collecting telemetry data.
 
-## Enabling Telemetry
+### Enabling Telemetry
 
-Check out more detailed information about Vercel AI SDK’s telemetry options visit [here](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#telemetry).
+For more detail on available telemetry options, see the <a href="https://ai-sdk.dev/docs/ai-sdk-core/telemetry#telemetry" target="_blank" rel="noopener noreferrer nofollow">Vercel AI SDK telemetry documentation</a>.
 
 You can then use the `experimental_telemetry` option to enable telemetry on specific function calls while the feature is experimental:
 
@@ -155,7 +155,7 @@ const result = await generateText({
 
 ## Custom Tracer
 
-You may provide a `tracer` which must return an OpenTelemetry `Tracer`. This is useful in situations where you want your traces to use a `TracerProvider` other than the one provided by the `@opentelemetry/api` singleton.
+You can provide a `tracer` which must return an OpenTelemetry `Tracer`. This is useful in situations where you want your traces to use a `TracerProvider` other than the one provided by the `@opentelemetry/api` singleton.
 
 ```jsx
 const tracerProvider = new NodeTracerProvider()
@@ -169,9 +169,9 @@ const result = await generateText({
 })
 ```
 
-Your Vercel AI SDK commands should now automatically emit traces, spans, and events. You can find more details on the types of spans and events generated [here](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#collected-data).
+Once configured, your Vercel AI SDK commands automatically emit traces, spans, and events. See the <a href="https://ai-sdk.dev/docs/ai-sdk-core/telemetry#collected-data" target="_blank" rel="noopener noreferrer nofollow">Vercel AI SDK collected data reference</a> for details on the types of spans and events generated.
 
-Finally, you should be able to view this data in SigNoz under the traces tab:
+Vercel AI SDK traces are available in SigNoz under the Traces tab:
 
 <figure data-zoomable align="center">
   <img src="/img/docs/llm/vercel/vercel-traces-view.webp" alt="Traces View" />
@@ -189,9 +189,9 @@ If you click on any span, you can see the detailed trace of which it is a part o
   </figcaption>
 </figure>
 
-## Dashboard
+## Vercel AI SDK Observability Dashboard
 
-You can also check out our custom Vercel AI SDK dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard/) which provides specialized visualizations for monitoring your AI applications. The dashboard includes pre-built charts and metrics specifically tailored for Vercel AI SDK telemetry data, along with import instructions to get started quickly.
+The [Vercel AI SDK Observability Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard/) provides specialized visualizations for monitoring your AI applications. The dashboard includes pre-built charts and metrics specifically tailored for Vercel AI SDK telemetry data, along with import instructions to get started quickly.
 
 <figure data-zoomable align="center">
   <img
