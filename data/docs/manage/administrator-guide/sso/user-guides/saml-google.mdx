@@ -1,0 +1,108 @@
+---
+date: 2026-05-30
+id: saml-google
+title: SAML Authentication with Google Workspace
+description: Set up SAML 2.0 authentication between Google Workspace and SigNoz to enable your team to log in with their Google accounts.
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through setting up SAML (Security Assertion Markup Language) authentication between Google Workspace and SigNoz.
+
+**What you'll accomplish:**
+
+- Configure Google Workspace as a SAML identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing Google Workspace accounts via SAML 2.0
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **Google Workspace account** with Super-Admin access
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Configuration Steps
+
+### Step 1: Create a Custom SAML Application in Google Admin
+
+1. Log in to [Google Admin Console](https://admin.google.com)
+2. Navigate to **Apps** > **Web and mobile apps**
+3. Click **Add app** > **Add custom SAML app**
+4. Enter a name for the application (e.g., `SigNoz`)
+5. On the **Google Identity Provider details** page, note down or download:
+   - **SSO URL**
+   - **Entity ID**
+   - **Certificate**
+
+### Step 2: Configure Service Provider Details in Google
+
+In the **Service provider details** section, enter:
+
+- **ACS URL**: `https://<your-instance-url>/api/v1/complete/saml`
+- **Entity ID**: Your SigNoz instance hostname only — no `https://` prefix and no trailing slash (e.g., `signoz.example.com`)
+- **Name ID format**: EMAIL
+- **Name ID**: Basic Information > Primary email
+- **Signed response**: Unchecked
+
+> **Important**: The Entity ID must match character-for-character what SigNoz sends in the SAML request. SigNoz uses the bare hostname (e.g., `signoz.example.com`), so do not include `https://` or a trailing slash.
+
+### Step 3: Configure Attribute Mapping (Optional)
+
+Map any additional attributes as needed. At minimum, email should be mapped via the Name ID configuration above.
+
+### Step 4: Enable the Application
+
+1. In Google Admin, go to the app you created
+2. Click **User access**
+3. Enable the app for the appropriate organizational units or groups
+
+### Step 5: Configure SigNoz for SAML Authentication
+
+Now you'll configure SigNoz to accept authentication from Google Workspace:
+
+1. **Navigate to SigNoz Settings:**
+   - Go to your SigNoz dashboard
+   - Click on **Settings** in the left sidebar
+   - Navigate to **Organization Settings**
+   - Click on **Authenticated Domains**
+
+2. **Add New Domain:**
+   - Click **Add Domain**
+   - Select **SAML** as the authentication method
+
+3. **Enter Configuration Details:**
+   ```
+   Domain: example.com
+   SAML ACS URL/SAML IDP URL: <SSO URL from Google>
+   SAML X.509 Certificate: <Certificate from Google>
+   SAML Entity ID: <Entity ID from Google>
+   Skip AuthN Requests Signed: True
+   ```
+
+   **Where to find these values:**
+   - **Domain**: The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)
+   - **SAML IDP URL**: The SSO URL from Step 1
+   - **SAML X.509 Certificate**: The certificate downloaded in Step 1
+   - **SAML Entity ID**: The Entity ID from Step 1
+
+4. **Save Configuration:**
+   - Click **Save** to apply the SAML configuration
+
+### Step 6: Test the Integration
+
+1. **Log out** of SigNoz if you're currently logged in
+2. **Navigate** to your SigNoz login page in a private/incognito window
+3. **Try** logging in with a Google Workspace user email
+4. **Verify** that you're redirected to Google for authentication
+5. **Complete** the Google login process
+6. **Confirm** you're successfully logged into SigNoz
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- **Entity ID mismatch**: If login does not complete after authenticating with Google, verify that the Entity ID in Google is the bare hostname (e.g., `signoz.example.com`) with no `https://` and no trailing slash.
+- **ACS URL mismatch**: Verify the ACS URL in Google exactly matches `https://<your-instance-url>/api/v1/complete/saml`.
+- **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
