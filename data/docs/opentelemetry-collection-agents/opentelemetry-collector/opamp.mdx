@@ -1,0 +1,123 @@
+---
+date: 2026-05-30
+id: opamp
+title: OpAMP - Remote OpenTelemetry Collector Management
+description: Learn how SigNoz uses OpAMP to remotely configure its OTel Collector for Logs Pipelines without manual collector restarts.
+doc_type: explanation
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+OpAMP (Open Agent Management Protocol) is an open standard for managing telemetry collection agents remotely. SigNoz uses it to push configuration changes to its OpenTelemetry (OTel) Collector. No SSH, manual file edits, or manual restarts are required.
+
+When you create or update a Logs Pipeline in the SigNoz UI, OpAMP delivers that change to the collector and confirms it applied.
+
+## Architecture
+
+SigNoz runs an OpAMP server inside its query-service. The **signoz-otel-collector** (a custom collector binary with an OpAMP supervisor built in) connects to this server over a persistent WebSocket.
+
+<Figure
+  src="/img/docs/opentelemetry-collection-agents/opamp-architecture.svg"
+  alt="How OpAMP works in SigNoz: SigNoz pushes a new config to the SigNoz Collector over OpAMP, and the collector applies it and reports its status back"
+  caption="SigNoz pushes config changes to the collector over OpAMP; the collector applies them and reports its status back"
+/>
+
+The supervisor, built into the **signoz-otel-collector** binary, manages the running collector instance:
+
+1. Receives a new `collector.yaml` from the OpAMP server
+2. Writes it to the active collector config path
+3. Restarts the wrapped collector service inside the same binary
+4. Reports the effective running config back to the server
+
+The plain <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib" target="_blank" rel="noopener noreferrer nofollow">otelcol-contrib</a> binary has no OpAMP supervisor. Use <a href="https://github.com/SigNoz/signoz-otel-collector" target="_blank" rel="noopener noreferrer nofollow">signoz-otel-collector</a> if you need OpAMP-managed features.
+
+## What OpAMP Enables
+
+Current SigNoz deployments use OpAMP to push Logs Pipeline changes to the collector:
+
+| Feature                                                               | What gets pushed                          |
+| --------------------------------------------------------------------- | ----------------------------------------- |
+| [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) | Parsing and transformation rules for logs |
+
+Changes apply within seconds, with no SSH or manual restart.
+
+## Configuration by Deploy Type
+
+OpAMP ships pre-configured on [Kubernetes](https://signoz.io/docs/install/kubernetes/), [Docker](https://signoz.io/docs/install/docker/), and [Docker Swarm](https://signoz.io/docs/install/docker-swarm/). On [Linux](https://signoz.io/docs/install/linux/), you configure it yourself.
+
+**Kubernetes (Helm chart)**: The Helm chart generates the OpAMP configmap using the chart-generated SigNoz service name (`ws://<signoz-service-name>:4320/v1/opamp`). With default values, the SigNoz service is a **ClusterIP** service and port 4320 stays internal to the cluster.
+
+**Docker and Docker Swarm**: The collector container passes `--manager-config` pointing to `otel-collector-opamp-config.yaml`, which connects to `ws://signoz:4320/v1/opamp` via Docker's internal DNS.
+
+**Linux**: Create an `opamp.yaml` file pointing to your query-service:
+
+```yaml
+server_endpoint: ws://127.0.0.1:4320/v1/opamp
+```
+
+Start the collector with `--manager-config`:
+
+```bash
+/opt/signoz-otel-collector/bin/signoz-otel-collector \
+  --config=/opt/signoz-otel-collector/conf/config.yaml \
+  --manager-config=/opt/signoz-otel-collector/conf/opamp.yaml \
+  --copy-path=/var/lib/signoz-otel-collector/config.yaml
+```
+
+On a successful start, the collector connects to the OpAMP server. Check the logs for repeated connection errors. If none appear, OpAMP is working. See the [Linux self-hosted install guide](https://signoz.io/docs/install/linux/) for the full setup.
+
+## Deploy Status
+
+When you save a change in the UI, SigNoz tracks the config deploy status:
+
+- **Dirty** — change saved, not yet confirmed by the collector
+- **In Progress** — sent to collector, waiting for confirmation
+- **Deployed** — collector confirmed the change is running
+- **Failed** — collector reported an error applying the config
+- **Unknown** — SigNoz could not determine the deployment state
+
+If deployment fails, the collector rolls back locally to the last known good config, and SigNoz marks the version as **Failed**.
+
+## Validate
+
+Check OpAMP is working:
+
+1. Open [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) and save a change.
+2. Watch the deploy status. It moves from **In Progress** to **Deployed**. A **Deployed** status means the collector received and applied the config over OpAMP.
+3. On Linux, check the collector logs after startup. You should see the collector connected to the OpAMP server with no repeated connection errors.
+
+If the status stays on **In Progress** or shows **Failed**, see [Troubleshooting](#troubleshooting).
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+**"opamp server is down" error in Logs Pipelines**
+
+The query-service is not running. Restart it, then retry.
+
+**Logs Pipelines changes not applying**
+
+For Linux installs, check:
+
+- The `server_endpoint` in `opamp.yaml` points to the host running SigNoz
+- Port 4320 is reachable from the collector host
+- The collector started with `--manager-config` pointing to the correct file
+
+**Collector logs many connection errors on startup**
+
+If the query-service starts after the collector, the collector retries the OpAMP connection and logs many errors until the server is ready. Start the query-service first.
+
+</details>
+
+## Next Steps
+
+- [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/): Parse and transform logs from the SigNoz UI
+- [Linux Self-Hosted Install](https://signoz.io/docs/install/linux/): Full setup including OpAMP configuration
+
+## Get Help
+
+<GetHelp />

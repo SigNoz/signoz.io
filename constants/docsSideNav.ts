@@ -955,6 +955,11 @@ const docsSideNav = [
             label: 'GeoIP Processor',
             route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor',
           },
+          {
+            type: 'doc',
+            label: 'OpAMP - Remote Collector Management',
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/opamp',
+          },
         ],
       },
     ],
