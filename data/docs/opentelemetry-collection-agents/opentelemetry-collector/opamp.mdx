@@ -66,11 +66,17 @@ Start the collector with `--manager-config`:
   --copy-path=/var/lib/signoz-otel-collector/config.yaml
 ```
 
+The flags:
+
+- `--config`: base collector config the collector starts with
+- `--manager-config`: path to the `opamp.yaml` file that points the collector at the OpAMP server
+- `--copy-path`: where the collector writes the active config it receives from the OpAMP server. This becomes the effective running config of the OTel Collector
+
 On a successful start, the collector connects to the OpAMP server. Check the logs for repeated connection errors. If none appear, OpAMP is working. See the [Linux self-hosted install guide](https://signoz.io/docs/install/linux/) for the full setup.
 
 ## Deploy Status
 
-When you save a change in the UI, SigNoz tracks the config deploy status:
+When you save a change in the UI, SigNoz tracks the config deploy status. You can see it on the **Logs Pipelines** page right after saving a change:
 
 - **Dirty** — change saved, not yet confirmed by the collector
 - **In Progress** — sent to collector, waiting for confirmation
@@ -86,6 +92,13 @@ Check OpAMP is working:
 
 1. Open [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) and save a change.
 2. Watch the deploy status. It moves from **In Progress** to **Deployed**. A **Deployed** status means the collector received and applied the config over OpAMP.
+
+<Figure
+  src="/img/docs/opentelemetry-collection-agents/opamp-deploy-status.webp"
+  alt="Deploy status on the SigNoz Logs Pipelines page"
+  caption="The deploy status on the Logs Pipelines page"
+/>
+
 3. On Linux, check the collector logs after startup. You should see the collector connected to the OpAMP server with no repeated connection errors.
 
 If the status stays on **In Progress** or shows **Failed**, see [Troubleshooting](#troubleshooting).
