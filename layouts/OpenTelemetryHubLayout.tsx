@@ -8,6 +8,8 @@ import ArticleMetaDetailsCard, {
 } from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
 import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
+import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
 
 const MOBILE_TRIGGER_ID = 'ot-hub-mobile-trigger'
 
@@ -26,6 +28,7 @@ export interface HubContentProps {
   toc: { url: string; depth: number; value: string }[]
   showSidebar: boolean
   authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
+  breadcrumbs?: BreadcrumbCrumb[]
 }
 
 export function buildRenderedAuthors(
@@ -103,6 +106,7 @@ export default function OpenTelemetryHubContent({
   toc,
   showSidebar,
   authorDirectory = {},
+  breadcrumbs,
 }: HubContentProps) {
   const title = content.title || ''
   const hasToc = Array.isArray(toc) && toc.length > 0
@@ -140,6 +144,7 @@ export default function OpenTelemetryHubContent({
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
+          {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
         <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert">
           <h1 className="text-3xl font-bold">{title}</h1>
           {(formattedUpdatedDate || readingTimeText) && (

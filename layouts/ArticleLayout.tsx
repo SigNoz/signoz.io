@@ -18,6 +18,8 @@ import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
+import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
 
 const MAIN_CONTENT_ID = 'article-main'
 
@@ -45,6 +47,7 @@ interface LayoutProps {
   showNewsletter?: boolean
   showRelatedArticles?: boolean
   authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
+  breadcrumbs?: BreadcrumbCrumb[]
 }
 
 const buildRenderedAuthors = (
@@ -117,6 +120,7 @@ export default function ArticleLayout({
   showNewsletter = true,
   showRelatedArticles = true,
   authorDirectory = {},
+  breadcrumbs,
 }: LayoutProps) {
   const { title, relatedArticles } = content
   const mainRef = useRef<HTMLElement | null>(null)
@@ -189,6 +193,7 @@ export default function ArticleLayout({
           <div className="mx-auto box-border w-full min-w-0 max-w-[780px] flex-auto md:px-0 lg:px-4">
             {hasToc && <div className="mb-4 lg:hidden" />}
 
+              {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
             <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
               <h1 className="text-3xl font-bold">{title}</h1>
               {(formattedUpdatedDate || readingTimeText) && (

@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+  pull_request:
+    paths:
+      - "components/**"
+      - "hooks/**"
+      - "utils/**"
+      - "app/**"
+      - "layouts/**"
+      - "vitest.config.ts"
+      - "vitest.setup.ts"
+      - "package.json"
+      - ".github/workflows/tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Run tests
+        run: yarn test

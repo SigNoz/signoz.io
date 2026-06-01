@@ -3,6 +3,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import type { AuthorDetail, Blog } from '../types/transformedContent'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -11,6 +12,7 @@ interface LayoutProps {
   children: ReactNode
   toc: TocItemProps[]
   authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
+  breadcrumbs?: BreadcrumbCrumb[]
 }
 
 export default function BlogLayout({
@@ -20,6 +22,7 @@ export default function BlogLayout({
   children,
   toc,
   authorDirectory,
+  breadcrumbs,
 }: LayoutProps) {
   return (
     <RegionProvider>
@@ -32,6 +35,7 @@ export default function BlogLayout({
         showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
         {children}
       </ArticleLayout>

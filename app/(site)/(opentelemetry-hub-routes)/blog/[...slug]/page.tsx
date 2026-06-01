@@ -13,7 +13,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import JsonLdScript from '@/components/JsonLdScript'
-import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchBlogBySlug } from '@/utils/cachedData'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { mdxOptions } from '@/utils/mdxUtils'
@@ -111,7 +111,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
-  const breadcrumbJsonLd = generateSectionArticleBreadcrumb('blog', post.title, slug)
+  const breadcrumbs = getSectionArticleBreadcrumbs('blog', post.title, slug)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   let compiledContent
   try {
@@ -144,6 +145,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
           authorDirectory={authorDirectory}
+          breadcrumbs={breadcrumbs}
         >
           {compiledContent}
         </OpenTelemetryHubContent>
@@ -177,6 +179,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         authors={authorList}
         toc={post.toc}
         authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
         {compiledContent}
         {layoutName === 'NewsroomLayout' && <PageFeedback />}
