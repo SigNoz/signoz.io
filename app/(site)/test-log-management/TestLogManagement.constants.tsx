@@ -1,14 +1,8 @@
+import { Braces, Cloud, Database, GitCompareArrows } from 'lucide-react'
 import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
-import {
-  Braces,
-  Database,
-  GitCompareArrows,
-  Cloud,
-  Search,
-  SlidersHorizontal,
-  BarChart3,
-  LayoutDashboard,
-} from 'lucide-react'
+import { ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
+
+// --- Hero Cards (Why SigNoz) ---
 
 export const WHY_SIGNOZ_CARDS = [
   {
@@ -37,82 +31,75 @@ export const WHY_SIGNOZ_CARDS = [
   },
 ]
 
-export const QUERY_BUILDER_FEATURES = [
+// --- Search & Analytics Feature Cards ---
+
+export const SEARCH_FEATURE_CARDS = [
   {
-    icon: <Search size={20} />,
+    icon: <Braces size={20} />,
     title: 'Visual query builder',
     description:
-      'Build filters with AND and OR logic using auto-complete drawn from your real log attributes.',
+      'Build filters with AND and OR logic using auto-complete drawn from your real log attributes. Supports operators like CONTAINS, REGEX, IN, and LIKE.',
   },
   {
-    icon: <SlidersHorizontal size={20} />,
-    title: 'Flexible filtering',
-    description:
-      'Filter with attributes, regex, LIKE, IN, and nested JSON fields using dot notation.',
-  },
-  {
-    icon: <BarChart3 size={20} />,
+    icon: <Database size={20} />,
     title: 'Aggregations at scale',
     description:
-      'Run COUNT, SUM, AVG, and P50, P95, P99 across billions of log lines and group by several dimensions at once.',
+      'Run COUNT, SUM, AVG, and P50, P95, P99 across billions of log lines. Group by several dimensions at once and filter results with HAVING clauses.',
   },
   {
-    icon: <LayoutDashboard size={20} />,
-    title: 'Dashboards from queries',
+    icon: <Cloud size={20} />,
+    title: 'Dashboards and JSON queries',
     description:
-      'Turn any query into a dashboard panel or export the result to CSV for further analysis.',
+      'Query nested JSON fields using dot notation. Turn any query into a dashboard panel or export the result to CSV for further analysis.',
   },
 ]
 
-export const CORRELATION_STEPS = [
+// --- Correlation Carousel ---
+
+export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [
   {
-    number: '01',
-    label: 'Alert / metric spike',
-    title: 'Investigate alerts with context',
-    description:
-      'An error-rate alert fires. Every alert links to the logs around the event, so you start with context instead of a blank search.',
-    color: 'amber' as const,
-  },
-  {
-    number: '02',
-    label: 'Related logs',
-    title: 'Metrics to related logs',
+    id: 0,
+    title: 'Logs to Metrics',
     description:
       'Spot a spike on an infrastructure or APM metric and pivot to the logs from that same service and time window.',
-    color: 'cherry' as const,
+    image: '/img/log-management/Logs-to-Metrics.png',
+    isActive: true,
   },
   {
-    number: '03',
-    label: 'Trace',
-    title: 'Logs to traces',
+    id: 1,
+    title: 'Logs to Traces',
     description:
       'Open a log line that carries a trace ID and jump straight to the full distributed trace for that request.',
-    color: 'robin' as const,
+    image: '/img/log-management/Logs-to-Trace.png',
+    isActive: false,
   },
   {
-    number: '04',
-    label: 'Root cause',
-    title: 'Trace IDs speed up RCA',
+    id: 2,
+    title: 'APM to Logs',
     description:
       'Shared trace IDs tie logs, traces, and metrics together, which shortens the path from symptom to cause.',
-    color: 'forest' as const,
+    image: '/img/log-management/APM-to-Logs.png',
+    isActive: false,
   },
 ]
 
-export type VendorKey = 'signoz' | 'datadog' | 'newrelic' | 'elk' | 'splunk'
+// --- Comparison Table ---
 
-export const COMPARISON_VENDORS: { key: VendorKey; label: string; className?: string }[] = [
-  { key: 'signoz', label: 'SigNoz', className: 'text-signoz_cherry-500' },
+type VendorKey = 'signoz' | 'datadog' | 'newrelic' | 'elk' | 'splunk'
+
+export const COMPARISON_VENDORS: {
+  key: VendorKey
+  label: string
+  className?: string
+}[] = [
+  { key: 'signoz', label: 'SigNoz', className: 'text-signoz_robin-400' },
   { key: 'datadog', label: 'Datadog' },
   { key: 'newrelic', label: 'New Relic' },
   { key: 'elk', label: 'ELK / OpenSearch' },
   { key: 'splunk', label: 'Splunk' },
 ]
 
-export const COMPARISON_ROWS: {
-  feature: string
-  vendors: Record<VendorKey, { supported?: boolean | 'partial'; text: string }>
-}[] = [
+export const COMPARISON_ROWS: ComparisonTableRow<VendorKey>[] = [
   {
     feature: 'Open standards',
     vendors: {
@@ -164,6 +151,8 @@ export const COMPARISON_ROWS: {
     },
   },
 ]
+
+// --- FAQ ---
 
 export const FAQ_ITEMS = [
   {
