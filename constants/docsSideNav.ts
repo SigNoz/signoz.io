@@ -438,6 +438,11 @@ const docsSideNav = [
                 route: '/docs/userguide/authentication',
                 label: 'Authentication',
               },
+              {
+                type: 'doc',
+                route: '/docs/userguide/forgot-password',
+                label: 'Forgot Password',
+              },
             ],
           },
           {
