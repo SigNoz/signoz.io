@@ -579,12 +579,14 @@ const RetentionCostSection: React.FC = () => {
                   <td className="border-b border-signoz_slate-400 px-5 py-3">Higher per GB</td>
                 </tr>
                 <tr>
-                  <td className="px-5 py-3 font-mono text-xs font-semibold text-signoz_aqua-500">
+                  <td className="border-signoz_slate-400 px-5 py-3 font-mono text-xs font-semibold text-signoz_aqua-500">
                     Cold storage
                   </td>
-                  <td className="px-5 py-3">Older logs kept for compliance</td>
-                  <td className="px-5 py-3">Still queryable</td>
-                  <td className="px-5 py-3">Lower per GB</td>
+                  <td className="border-signoz_slate-400 px-5 py-3">
+                    Older logs kept for compliance
+                  </td>
+                  <td className="border-signoz_slate-400 px-5 py-3">Still queryable</td>
+                  <td className="border-signoz_slate-400 px-5 py-3">Lower per GB</td>
                 </tr>
               </tbody>
             </table>
