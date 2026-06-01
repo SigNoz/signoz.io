@@ -794,10 +794,10 @@ const TestLogManagement: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
-      <ChipRow />
-      <HeroCards cards={WHY_SIGNOZ_CARDS} cols={4} />
 
       <SectionLayout variant="bordered" className="!px-0">
+        <ChipRow />
+        <HeroCards cards={WHY_SIGNOZ_CARDS} cols={4} />
         <IngestionSection />
         <PipelineSection />
         <QueryBuilderSection />
