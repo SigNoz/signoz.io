@@ -1304,6 +1304,11 @@ const docsSideNav = [
             route: '/docs/traces-management/guides/pii-scrubbing',
             label: 'PII Scrubbing',
           },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/span-links',
+            label: 'Span Links',
+          },
         ],
       },
       {
