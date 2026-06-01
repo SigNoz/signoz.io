@@ -87,10 +87,10 @@ service:
     metrics:
       receivers: [otlp, nginx]
       processors: [resourcedetection, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 
-This snippet only shows the additions. Keep the rest of your pipeline intact. The `resourcedetection`, `batch`, and `otlp` exporter come from the [VM install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/); reuse the ones already in your config.
+Use the same processors and exporter names that already exist in your Collector config. In the [VM install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/), those entries are `resourcedetection`, `batch`, and `otlphttp`.
 
 Restart the Collector to apply the changes.
 
@@ -100,12 +100,12 @@ Restart the Collector to apply the changes.
 
 ## Metrics collected
 
-| Metric                       | Type | Unit        | Description                                                                                                                                   |
-| ---------------------------- | ---- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `nginx.requests`             | Sum  | requests    | Total requests made to the server since it started.                                                                                           |
-| `nginx.connections_accepted` | Sum  | connections | Total accepted client connections.                                                                                                            |
-| `nginx.connections_handled`  | Sum  | connections | Total handled connections. Usually equals `nginx.connections_accepted` unless a resource limit (for example `worker_connections`) is reached. |
-| `nginx.connections_current`  | Sum  | connections | Current connections, split by the `state` attribute (`active`, `reading`, `writing`, `waiting`).                                              |
+| Metric                       | Type  | Unit        | Description                                                                                                                                   |
+| ---------------------------- | ----- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nginx.requests`             | Sum   | requests    | Total requests made to the server since it started.                                                                                           |
+| `nginx.connections_accepted` | Sum   | connections | Total accepted client connections.                                                                                                            |
+| `nginx.connections_handled`  | Sum   | connections | Total handled connections. Usually equals `nginx.connections_accepted` unless a resource limit (for example `worker_connections`) is reached. |
+| `nginx.connections_current`  | Gauge | connections | Current connections, split by the `state` attribute (`active`, `reading`, `writing`, `waiting`).                                              |
 
 ## Validate
 
@@ -133,19 +133,20 @@ You can also import the pre-configured [NGINX dashboard](https://signoz.io/docs/
 
 1. **No metrics appearing in SigNoz**
 
-  - Verify the NGINX status endpoint is accessible from the Collector host (`curl http://localhost:80/nginx_status`).
-  - Check the Collector logs for connection or export errors.
-  - Ensure any firewall allows the Collector to reach the status endpoint.
+- Verify the NGINX status endpoint is accessible from the Collector host (`curl http://localhost:80/nginx_status`).
+- Check the Collector logs for connection or export errors.
+- Ensure any firewall allows the Collector to reach the status endpoint.
 
 2. **Permission denied errors**
 
-  - Check the `allow`/`deny` rules on the `stub_status` location.
-  - Verify the Collector's IP address is allowed.
+- Check the `allow`/`deny` rules on the `stub_status` location.
+- Verify the Collector's IP address is allowed.
 
 3. **Metrics showing zero values**
-  - Confirm NGINX is receiving traffic.
-  - Verify the status endpoint shows non-zero values.
-  - Note that counters reset when NGINX restarts.
+
+- Confirm NGINX is receiving traffic.
+- Verify the status endpoint shows non-zero values.
+- Note that counters reset when NGINX restarts.
 
 ## Get Help
 
