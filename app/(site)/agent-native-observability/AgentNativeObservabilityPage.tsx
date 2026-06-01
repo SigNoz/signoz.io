@@ -12,6 +12,7 @@ import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
 import { useHubspotCustomForm } from '@/components/hubspot-custom-form/useHubspotCustomForm'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
+import agentNativeHeroImageUrl from '@/public/img/platform/AgentNativeObservabilityMeta.svg?url'
 
 const Header: React.FC = () => {
   const headerButtonGroup = (
@@ -73,7 +74,7 @@ const Header: React.FC = () => {
         buttonGroup={headerButtonGroup}
         sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
         heroImageAlt="Agent Native Observability hero"
-        heroImage={'/img/platform/AgentNativeObservabilityMeta.svg'}
+        heroImage={agentNativeHeroImageUrl}
         buttonDescription={
           <div className="text-sm text-signoz_vanilla-400">
             No learning new Dashboard UX. In-context Observability in your workflows.
