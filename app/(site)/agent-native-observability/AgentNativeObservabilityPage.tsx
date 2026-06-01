@@ -73,8 +73,17 @@ const Header: React.FC = () => {
         }
         buttonGroup={headerButtonGroup}
         sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
-        heroImageAlt="Agent Native Observability hero"
-        heroImage={agentNativeHeroImageUrl.src}
+        heroImage={
+          <Image
+            src={agentNativeHeroImageUrl}
+            alt="Agent Native Observability hero"
+            className="w-full rounded-xl object-contain"
+            width={1440}
+            height={720}
+            sizes="(max-width: 768px) 100vw, 80vw"
+            priority
+          />
+        }
         buttonDescription={
           <div className="text-sm text-signoz_vanilla-400">
             No learning new Dashboard UX. In-context Observability in your workflows.
