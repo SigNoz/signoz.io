@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 340" width="920" height="340"
+     font-family="Inter, ui-sans-serif, system-ui, sans-serif">
+  <defs>
+    <marker id="arr-b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arr-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arr-dim" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+    </marker>
+    <linearGradient id="signoz-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="glow-o" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#F97316" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes pulse-signoz {
+        0%,100% { filter: url(#glow-o); }
+        50%      { filter: none; }
+      }
+      .signoz-box { animation: pulse-signoz 3s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="920" height="340" fill="#f8fafc" rx="12"/>
+
+  <!-- Kubernetes cluster boundary -->
+  <rect x="16" y="16" width="672" height="308" rx="10" fill="white"
+        stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="32" y="37" font-size="11" font-weight="600" letter-spacing="0.8" fill="#3b82f6">KUBERNETES CLUSTER</text>
+
+  <!-- SigNoz (outside cluster) -->
+  <rect x="738" y="118" width="162" height="80" rx="8" fill="url(#signoz-grad)" class="signoz-box"/>
+  <text x="819" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="white">SigNoz</text>
+  <text x="819" y="166" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.85)">Cloud or Self-hosted</text>
+  <text x="819" y="183" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.85)">Metrics Query API</text>
+
+  <!-- ── TOP ROW ── -->
+  <!-- Pod -->
+  <rect x="48" y="72" width="112" height="55" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="104" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">Pod</text>
+  <text x="104" y="115" text-anchor="middle" font-size="10" fill="#2563eb">app workload</text>
+
+  <!-- OTel Collector -->
+  <rect x="232" y="72" width="168" height="55" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="316" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">OTel Collector</text>
+  <text x="316" y="115" text-anchor="middle" font-size="10" fill="#2563eb">adds k8s.pod.name</text>
+
+  <!-- Arrow: Pod → OTel Collector -->
+  <line x1="160" y1="99" x2="230" y2="99" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="195" y="90" text-anchor="middle" font-size="9" fill="#475569">metrics</text>
+
+  <!-- Arrow: OTel Collector → SigNoz -->
+  <path d="M400 90 Q 568 56 736 142" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="554" y="62" text-anchor="middle" font-size="9" fill="#475569">OTLP</text>
+
+  <!-- ── BOTTOM ROW ── -->
+  <!-- Deployment -->
+  <rect x="48" y="215" width="134" height="55" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="115" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">Deployment</text>
+  <text x="115" y="258" text-anchor="middle" font-size="10" fill="#2563eb">scale target</text>
+
+  <!-- HPA -->
+  <rect x="258" y="215" width="118" height="55" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="317" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">HPA</text>
+  <text x="317" y="258" text-anchor="middle" font-size="10" fill="#2563eb">autoscaling/v2</text>
+
+  <!-- Adapter -->
+  <rect x="458" y="215" width="212" height="55" rx="7" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="564" y="238" text-anchor="middle" font-size="12" font-weight="600" fill="#15803d">signoz-metrics-adapter</text>
+  <text x="564" y="257" text-anchor="middle" font-size="10" fill="#16a34a">custom.metrics.k8s.io</text>
+
+  <!-- Arrow: HPA → Deployment (scales) -->
+  <line x1="258" y1="242" x2="184" y2="242" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="221" y="233" text-anchor="middle" font-size="9" fill="#475569">scales</text>
+
+  <!-- Arrow: HPA → Adapter (reads metrics) — gap: 458-376=82px, label fits -->
+  <line x1="376" y1="242" x2="456" y2="242" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="416" y="233" text-anchor="middle" font-size="9" fill="#475569">reads metrics</text>
+
+  <!-- Arrow: Adapter → SigNoz (queries) -->
+  <path d="M670 240 Q 710 240 736 184" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="726" y="234" text-anchor="middle" font-size="9" fill="#15803d">queries</text>
+
+  <!-- Arrow: Deployment → Pod (manages, static) -->
+  <path d="M115 215 L115 148 L104 148 L104 127" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-dim)"/>
+  <text x="92" y="180" text-anchor="end" font-size="9" fill="#94a3b8">manages</text>
+
+  <!-- ── ANIMATED DOTS (data flow) ── -->
+
+  <!-- 1. Pod → OTel Collector -->
+  <circle r="4" fill="#3b82f6" opacity="0.85">
+    <animateMotion dur="1.4s" repeatCount="indefinite" begin="0s"
+      path="M160 99 L230 99"/>
+  </circle>
+
+  <!-- 2. OTel → SigNoz -->
+  <circle r="4" fill="#3b82f6" opacity="0.85">
+    <animateMotion dur="2.4s" repeatCount="indefinite" begin="0.3s"
+      path="M400 90 Q 568 56 736 142"/>
+  </circle>
+
+  <!-- 3. HPA → Adapter (reads metrics) -->
+  <circle r="4" fill="#3b82f6" opacity="0.85">
+    <animateMotion dur="1.4s" repeatCount="indefinite" begin="0.8s"
+      path="M376 242 L456 242"/>
+  </circle>
+
+  <!-- 4. Adapter → SigNoz (queries) -->
+  <circle r="4" fill="#16a34a" opacity="0.85">
+    <animateMotion dur="2s" repeatCount="indefinite" begin="1s"
+      path="M670 240 Q 724 240 736 184"/>
+  </circle>
+
+  <!-- 5. HPA → Deployment (scales) -->
+  <circle r="4" fill="#3b82f6" opacity="0.85">
+    <animateMotion dur="1.4s" repeatCount="indefinite" begin="1.5s"
+      path="M258 242 L184 242"/>
+  </circle>
+</svg>

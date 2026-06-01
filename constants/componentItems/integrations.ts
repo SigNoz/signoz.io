@@ -99,7 +99,12 @@ export const INTEGRATIONS_ITEMS = {
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },
     {
-      name: 'Kong Gateway',
+      name: 'Kong (SigNoz plugin)',
+      href: '/docs/integrations/outposts/kong',
+      clickName: 'Kong SigNoz Plugin Integration Link',
+    },
+    {
+      name: 'Kong (OpenTelemetry plugin)',
       href: '/docs/integrations/opentelemetry-kong-gateway',
       clickName: 'Kong Gateway Integration Link',
     },
@@ -108,6 +113,11 @@ export const INTEGRATIONS_ITEMS = {
       name: 'Fly.io',
       href: '/docs/integrations/outposts/flyio',
       clickName: 'Fly.io Integration Link',
+    },
+    {
+      name: 'Railway',
+      href: '/docs/integrations/outposts/railway',
+      clickName: 'Railway Integration Link',
     },
   ] satisfies ComponentItem[],
 } as const

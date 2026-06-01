@@ -3,8 +3,6 @@ import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
 import { coreContent } from 'pliny/utils/contentlayer'
-import { allAuthors } from 'contentlayer/generated'
-import type { Authors } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import ComparisonsLayout from '@/layouts/ComparisonsLayout'
@@ -16,8 +14,9 @@ import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -25,14 +24,14 @@ const layouts = {
   ComparisonsLayout,
 }
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+// 1 day — see CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 export const dynamicParams = true
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchComparisonBySlug(slug)
@@ -41,10 +40,11 @@ export async function generateMetadata({
     return notFound()
   }
 
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
 
   const publishedAt = new Date(post.date).toISOString()
@@ -60,11 +60,13 @@ export async function generateMetadata({
     }
   })
 
+  const seoTitle = post.meta_title || post.title
+
   return {
-    title: post.title,
+    title: seoTitle,
     description: post?.description,
     openGraph: {
-      title: post.title,
+      title: seoTitle,
       description: post?.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
@@ -77,18 +79,20 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: post.title,
+      title: seoTitle,
       description: post?.description,
       images: imageList,
     },
   }
 }
 
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
 export const generateStaticParams = async () => {
   return []
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
 
   const post = await fetchComparisonBySlug(slug)
@@ -99,13 +103,16 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   const currentRoute = `/comparisons/${slug}`
 
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+  const breadcrumbs = getSectionArticleBreadcrumbs('comparisons', post.title, slug)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -125,16 +132,16 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   if (hubContext) {
     return (
       <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
+        <JsonLdScript data={jsonLd} />
+        <JsonLdScript data={breadcrumbJsonLd} />
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
           authors={authorList}
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
+          authorDirectory={authorDirectory}
+          breadcrumbs={breadcrumbs}
         >
           {compiledContent}
         </OpenTelemetryHubContent>
@@ -155,15 +162,15 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-      />
+      <JsonLdScript data={jsonLd} />
+      <JsonLdScript data={breadcrumbJsonLd} />
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
         authors={authorList}
         toc={post.toc}
+        authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
         {compiledContent}
       </Layout>

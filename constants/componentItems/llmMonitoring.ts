@@ -40,6 +40,7 @@ export const LLM_MONITORING_ITEMS: ComponentItem[] = [
   },
   { name: 'Crew AI', href: '/docs/crewai-observability', clickName: 'Crew AI Monitoring' },
   { name: 'DeepSeek API', href: '/docs/deepseek-monitoring', clickName: 'DeepSeek Monitoring' },
+  { name: 'Dify', href: '/docs/dify-observability', clickName: 'Dify Monitoring' },
   {
     name: 'Google ADK',
     href: '/docs/google-adk-observability',
@@ -81,7 +82,7 @@ export const LLM_MONITORING_ITEMS: ComponentItem[] = [
   { name: 'n8n Cloud', href: '/docs/n8n-monitoring', clickName: 'n8n Cloud Monitoring' },
   { name: 'Ollama', href: '/docs/ollama-monitoring', clickName: 'Ollama Monitoring' },
   { name: 'OpenAI', href: '/docs/openai-monitoring', clickName: 'OpenAI Monitoring' },
-  { name: 'OpenClaw', href: '/docs/openclaw-monitoring', clickName: 'OpenClaw Monitoring' },
+  { name: 'OpenClaw', href: '/docs/openclaw-observability', clickName: 'OpenClaw Observability' },
   { name: 'OpenCode', href: '/docs/opencode-observability', clickName: 'OpenCode Monitoring' },
   { name: 'OpenLIT', href: '/docs/openlit', clickName: 'OpenLIT' },
   {

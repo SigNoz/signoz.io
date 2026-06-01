@@ -8,7 +8,12 @@ import TrackingButton from '@/components/TrackingButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import Accordion from '../Accordion/Accordion'
-import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
+import {
+  productDropdownItemsSorted,
+  resourcesDropdownItems,
+  comparisonItems,
+  migrationItems,
+} from './constants'
 
 interface MobileMenuProps {
   open: boolean
@@ -96,17 +101,6 @@ function MainMenuContent({
     <div className="space-y-2 py-8">
       <Accordion topic="Product" subtopics={productDropdownItemsSorted} onLinkClick={onClose} />
       <TrackingLink
-        href="/why-signoz"
-        className={MOBILE_LINK_CLASS}
-        clickType="Nav Click"
-        clickName="Why Signoz Link"
-        clickText="Why Signoz"
-        clickLocation="Mobile Menu"
-        onClick={onClose}
-      >
-        Why Signoz
-      </TrackingLink>
-      <TrackingLink
         href="/docs"
         className={MOBILE_LINK_CLASS}
         clickType="Nav Click"
@@ -122,6 +116,11 @@ function MainMenuContent({
       <Accordion
         topic="Resources"
         subtopics={[...resourcesDropdownItems.learn, ...resourcesDropdownItems.explore]}
+        onLinkClick={onClose}
+      />
+      <Accordion
+        topic="Compare SigNoz"
+        subtopics={[...comparisonItems, ...migrationItems]}
         onLinkClick={onClose}
       />
       <TrackingLink

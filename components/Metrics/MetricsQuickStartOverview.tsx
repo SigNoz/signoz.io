@@ -14,6 +14,7 @@ import {
   SiOpentelemetry,
   SiTraefikproxy,
   SiClickhouse,
+  SiRender,
   SiHashicorp,
   SiDatadog,
   SiGithubactions,
@@ -25,6 +26,7 @@ import {
   SiFlydotio,
   SiEnvoyproxy,
   SiGo,
+  SiIstio,
   SiRust,
   SiDotnet,
   SiNodedotjs,
@@ -95,9 +97,11 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/integrations/nomad': <SiHashicorp className="h-7 w-7 text-purple-600" />,
   '/docs/metrics-management/fly-metrics': <SiFlydotio className="h-7 w-7 text-purple-500" />,
   '/docs/userguide/envoy-metrics': <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
+  '/docs/metrics-management/istio-metrics': <SiIstio className="h-7 w-7 text-blue-400" />,
   '/docs/metrics-management/nvidia-dcgm-metrics': <FaServer className="h-7 w-7 text-green-500" />,
   '/docs/metrics-management/slurm-metrics': <FaServer className="h-7 w-7 text-blue-600" />,
   '/docs/metrics-management/render-metrics': <FaCloud className="h-7 w-7 text-purple-500" />,
+  '/docs/integrations/outposts/render': <SiRender className="h-7 w-7 text-black dark:text-white" />,
   // Databases
   '/docs/integrations/clickhouse': <SiClickhouse className="h-7 w-7 text-yellow-400" />,
   '/docs/integrations/snowflake': <SiSnowflake className="h-7 w-7 text-blue-500" />,
@@ -174,6 +178,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet': (
     <SiDotnet className="h-7 w-7 text-blue-600" />
+  ),
+  '/docs/metrics-management/send-metrics/applications/opentelemetry-aspnetcore': (
+    <SiDotnet className="h-7 w-7 text-purple-600" />
   ),
   '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs': (
     <SiNodedotjs className="h-7 w-7 text-green-500" />

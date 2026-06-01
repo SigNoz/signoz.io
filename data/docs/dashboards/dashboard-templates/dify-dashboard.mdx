@@ -1,0 +1,76 @@
+---
+date: 2026-05-20
+id: dify-dashboard
+title: Dify Dashboard
+description: Monitor Dify LLM agent workflows including token consumption, workflow execution volumes, error rates, latency trends, and model usage distribution for optimal AI application observability.
+doc_type: explanation
+---
+
+<Admonition type="info">
+  Before using this dashboard, instrument your Dify applications with OpenTelemetry and configure export to SigNoz. See the [Dify observability guide](https://signoz.io/docs/dify-observability) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of the `langgenius/dify` service using trace data. It covers RED metrics (Rate, Errors, Duration), HTTP endpoint performance, LLM/GenAI activity (token usage, model latency, and provider breakdown), Dify app activity, streaming mode distribution, and Postgres/Redis dependency health.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/dify-dashboard.webp"
+  alt="Dify Dashboard"
+  caption="Dify Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/dify/dify-dashboard.json"
+    dashboardName=""
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks critical performance metrics for your Dify LLM service using OpenTelemetry trace data to help you:
+
+- **Measure Traffic and Errors**: See the overall request rate (spans/min) and error span count at a glance so you can detect incidents immediately.
+- **Track End-to-End Latency**: Monitor p95 latency on root spans to surface regressions and ensure consistent user-facing responsiveness.
+- **Optimize LLM Cost**: Break down input and output token consumption per model to understand cost drivers and track usage trends.
+- **Identify Slow Operations**: Drill into per-operation request counts and p95 latency to pinpoint the slowest HTTP endpoints.
+- **Monitor LLM Providers**: Compare call volumes and response latency across every AI model in use to guide provider selection.
+- **Understand App Activity**: See which Dify apps and streaming configurations are generating the most traffic.
+- **Watch Dependencies**: Track Postgres query latency and Redis operation counts to catch database bottlenecks early.
+
+## Panels Included
+
+### RED Metrics (Summary Row)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Request Rate (spans/min)** | Stat | Average spans per minute, showing the overall traffic level for the service |
+| **Error Spans** | Stat | Count of spans with `has_error = true`; turns red when any errors are present |
+| **p95 Latency (root spans)** | Stat | 95th-percentile latency for root spans (`parent_span_id = ''`) |
+| **Total LLM Tokens** | Stat | Sum of `gen_ai.usage.total_tokens` across all LLM spans in the selected window |
+
+### HTTP Operation Breakdown
+
+- **Requests by Operation**: Table showing span count per operation name to reveal which endpoints receive the most traffic.
+- **p95 Latency by Operation**: Table of p95 duration per operation name to quickly identify the slowest operations.
+
+### LLM / GenAI Activity
+
+- **LLM p95 Latency by Model**: Time-series graph of p95 latency broken down by `gen_ai.request.model` for comparing response time across providers.
+- **LLM Calls by Model**: Bar chart of LLM invocation counts per model over time, showing model adoption and call volume trends.
+- **Token Usage: Input vs Output (by model)**: Table of total input and output tokens per model, useful for per-model cost tracking.
+
+### Dify App Activity
+
+- **Activity by Dify App**: Table of request counts grouped by `dify.app_id`, showing which Dify applications are most active.
+- **Streaming vs Non-Streaming Requests**: Pie chart of the `dify.streaming` attribute, showing the proportion of streaming vs. non-streaming traffic.
+
+### Dependency Health
+
+- **Postgres Query p95 Latency**: Line graph of p95 latency for PostgreSQL operations (`db.system = 'postgresql'`), grouped by `db.operation`, to help catch slow queries.
+- **Redis Operations by Type**: Line graph of Redis operation counts (`db.system = 'redis'`), grouped by span name, revealing cache and queue activity patterns.
+
+### Endpoint Performance Table
+
+- **Slowest Endpoints (by p95)**: Full-width table listing HTTP endpoints filtered by `http.method EXISTS`, showing p95 latency and call count side by side for quick performance triage.

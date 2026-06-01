@@ -1,10 +1,7 @@
 import 'css/prism.css'
 
 import { components } from '@/components/MDXComponents'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allBlogs, allAuthors } from 'contentlayer/generated'
-import type { Authors, Blog } from 'contentlayer/generated'
+import { coreContent } from 'pliny/utils/contentlayer'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import BlogLayout from '@/layouts/BlogLayout'
@@ -15,8 +12,12 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import { safeJsonLdStringify } from '@/utils/structuredData'
-
+import JsonLdScript from '@/components/JsonLdScript'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+import { fetchBlogBySlug } from '@/utils/cachedData'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
+import { mdxOptions } from '@/utils/mdxUtils'
+import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 const defaultLayout = 'BlogLayout'
 const layouts = {
   OpenTelemetryLayout,
@@ -24,24 +25,25 @@ const layouts = {
   NewsroomLayout,
 }
 
-export const dynamicParams = false
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
+export const dynamicParams = true
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string[] }
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
+  const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
-  const post = allBlogs.find((p) => p.slug === slug)
+  const post = await fetchBlogBySlug(slug)
 
   if (!post) {
     return notFound()
   }
 
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
 
   const publishedAt = new Date(post.date).toISOString()
@@ -58,11 +60,13 @@ export async function generateMetadata({
     }
   })
 
+  const seoTitle = post.meta_title || post.title
+
   return {
-    title: post.title,
+    title: seoTitle,
     description: post.description,
     openGraph: {
-      title: post.title,
+      title: seoTitle,
       description: post.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
@@ -75,7 +79,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: post.title,
+      title: seoTitle,
       description: post.summary,
       images: imageList,
     },
@@ -83,32 +87,45 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allBlogs.map((p) => ({ slug: p.slug?.split('/') }))
-
-  return paths
+  return []
 }
 
-export default async function Page(props: { params: { slug: string[] } }) {
-  const { params } = props
+export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
+  const params = await props.params
   const suppressStructuredData = (props as { suppressStructuredData?: boolean })
     .suppressStructuredData
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/blog/${slug}`
-  // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allBlogs))
-  const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
-  if (postIndex === -1) {
+
+  const post = await fetchBlogBySlug(slug)
+
+  if (!post) {
     return notFound()
   }
 
-  const post = allBlogs.find((p) => p.slug === slug) as Blog
+  const authorDirectory = await getCachedAuthors()
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    const a = authorDirectory[author]
+    return a || { name: author }
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+  const breadcrumbs = getSectionArticleBreadcrumbs('blog', post.title, slug)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
+
+  let compiledContent
+  try {
+    const { content: mdxContent } = await compileMDX({
+      source: post?.content,
+      components,
+      options: mdxOptions as MDXRemoteProps['options'],
+    })
+    compiledContent = mdxContent
+  } catch (error) {
+    console.error(`Error compiling MDX for blog "${slug}":`, error)
+    notFound()
+  }
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -116,10 +133,10 @@ export default async function Page(props: { params: { slug: string[] } }) {
     return (
       <>
         {!suppressStructuredData && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-          />
+          <>
+            <JsonLdScript data={jsonLd} />
+            <JsonLdScript data={breadcrumbJsonLd} />
+          </>
         )}
         <OpenTelemetryHubContent
           content={mainContent}
@@ -127,8 +144,10 @@ export default async function Page(props: { params: { slug: string[] } }) {
           authors={authorList}
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
+          authorDirectory={authorDirectory}
+          breadcrumbs={breadcrumbs}
         >
-          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          {compiledContent}
         </OpenTelemetryHubContent>
       </>
     )
@@ -149,21 +168,20 @@ export default async function Page(props: { params: { slug: string[] } }) {
   return (
     <>
       {!suppressStructuredData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
+        <>
+          <JsonLdScript data={jsonLd} />
+          <JsonLdScript data={breadcrumbJsonLd} />
+        </>
       )}
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
         authors={authorList}
         toc={post.toc}
+        authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-        {/* NewsroomLayout is the only layout that needs inline PageFeedback here
-            because it doesn't extend ArticleLayout, which handles feedback placement internally
-            for BlogLayout and OpenTelemetryLayout. */}
+        {compiledContent}
         {layoutName === 'NewsroomLayout' && <PageFeedback />}
       </Layout>
     </>

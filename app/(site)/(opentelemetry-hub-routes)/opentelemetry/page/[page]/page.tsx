@@ -5,22 +5,25 @@ import {
   pickOpenTelemetryArticleFields,
   type ResourceCenterCard,
 } from '../../../content'
-import { buildListingMetadata, buildStaticPaginationParams } from '../../../metadata'
+import { buildListingMetadata } from '../../../metadata'
 import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } from '@/utils/strapi'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
+import JsonLdScript from '@/components/JsonLdScript'
 
-export const revalidate = CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
-export async function generateMetadata({ params }: { params: { page: string } }) {
+export async function generateMetadata(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   return buildListingMetadata('OpenTelemetry', params.page)
 }
 
-const contentLayerArticles = getOpenTelemetryHubContentLayerArticles()
+// To avoid dynamic treatment: https://nextjs.org/docs/app/api-reference/functions/generate-static-params#all-paths-at-runtime
+export const generateStaticParams = async () => {
+  return []
+}
 
-export const generateStaticParams = async () =>
-  buildStaticPaginationParams(contentLayerArticles.length)
-
-export default async function Page({ params }: { params: { page: string } }) {
+export default async function Page(props: { params: Promise<{ page: string }> }) {
+  const params = await props.params
   // Fetch CMS opentelemetries articles
   let cmsArticles: ResourceCenterCard[] = []
   try {
@@ -39,6 +42,9 @@ export default async function Page({ params }: { params: { page: string } }) {
     console.error('Error fetching OpenTelemetry CMS articles:', error)
   }
 
+  // Fetch contentlayer + CMS hub articles
+  const contentLayerArticles = await getOpenTelemetryHubContentLayerArticles()
+
   // Merge contentlayer articles with CMS articles, deduplicating by path
   const allArticles: ResourceCenterCard[] = [...contentLayerArticles]
   const existingPaths = new Set(
@@ -54,17 +60,22 @@ export default async function Page({ params }: { params: { page: string } }) {
 
   allArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
+  const breadcrumbJsonLd = generateSectionHubBreadcrumb('opentelemetry', params.page)
+
   return (
-    <ListingPageLayout>
-      <ListingWithSearch
-        posts={allArticles}
-        pageNumber={parseInt(params.page)}
-        pageRoute="opentelemetry"
-        title="OpenTelemetry"
-        description="Articles on OpenTelemetry concepts, implementation, and its use cases."
-        searchPlaceholder="Search for an article..."
-        gridTitle="All Articles"
-      />
-    </ListingPageLayout>
+    <>
+      <JsonLdScript data={breadcrumbJsonLd} />
+      <ListingPageLayout>
+        <ListingWithSearch
+          posts={allArticles}
+          pageNumber={parseInt(params.page)}
+          pageRoute="opentelemetry"
+          title="OpenTelemetry"
+          description="Articles on OpenTelemetry concepts, implementation, and its use cases."
+          searchPlaceholder="Search for an article..."
+          gridTitle="All Articles"
+        />
+      </ListingPageLayout>
+    </>
   )
 }

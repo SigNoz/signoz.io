@@ -1,9 +1,7 @@
 import { writeFileSync } from 'fs'
 import siteMetadata from '../data/siteMetadata.js'
 import {
-  allBlogs,
   allDocs,
-  allGuides,
 } from '../.contentlayer/generated/index.mjs'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 
@@ -25,8 +23,6 @@ function createSearchIndex(content) {
 
 const searchIndexes = () => {
   createSearchIndex([
-    ...allBlogs,
-    ...allGuides,
     ...allDocs,
   ])
   console.log('Search Indexes generated...')

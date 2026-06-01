@@ -1,0 +1,182 @@
+---
+date: 2026-05-16
+id: opentelemetry-aspnetcore
+title: Send Metrics from ASP.NET Core using OpenTelemetry
+description: Instrument your ASP.NET Core application with OpenTelemetry NuGet packages and send HTTP, Kestrel, and runtime metrics to SigNoz.
+doc_type: howto
+---
+
+Instrument your ASP.NET Core application with OpenTelemetry NuGet packages and send HTTP, Kestrel, and .NET runtime metrics to SigNoz.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- .NET 10 or later
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send Metrics to SigNoz
+
+### Step 1. Add NuGet packages
+
+```xml:YourApp.csproj
+<ItemGroup>
+  <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
+  <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
+  <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
+  <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
+</ItemGroup>
+```
+
+Or with the .NET CLI:
+
+```bash
+dotnet add package OpenTelemetry.Extensions.Hosting --version 1.15.3
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore --version 1.15.2
+dotnet add package OpenTelemetry.Instrumentation.Runtime --version 1.15.1
+dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol --version 1.15.3
+```
+
+### Step 2. Configure OpenTelemetry in Program.cs
+
+```csharp:Program.cs
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+var builder = WebApplication.CreateBuilder(args);
+
+var serviceName = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-aspnetcore-app";
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService(serviceName))
+    .WithMetrics(m => m
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddMeter("Microsoft.AspNetCore.MemoryPool")
+        .AddOtlpExporter());
+
+var app = builder.Build();
+// ... your routes ...
+app.Run();
+```
+
+The OTel SDK reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and `OTEL_EXPORTER_OTLP_PROTOCOL` automatically.
+
+<Admonition type="info">
+  `.AddMeter("Microsoft.AspNetCore.MemoryPool")` enables `aspnetcore.memory_pool.*` metrics, which only emit on .NET 10+. On .NET 8 or 9, all other HTTP, Kestrel, and runtime metrics populate as expected. The memory pool panels stay empty.
+</Admonition>
+
+### Step 3. Set environment variables
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM / Linux" default>
+
+```bash
+export OTEL_SERVICE_NAME="my-aspnetcore-app"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+```powershell
+$env:OTEL_SERVICE_NAME = "my-aspnetcore-app"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
+$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production"
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+```bash
+docker run \
+  -e OTEL_SERVICE_NAME="my-aspnetcore-app" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+  -e OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production" \
+  your-image:latest
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+```yaml
+env:
+  - name: OTEL_SERVICE_NAME
+    value: "my-aspnetcore-app"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: "http/protobuf"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "deployment.environment=production"
+```
+
+</TabItem>
+</Tabs>
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `OTEL_RESOURCE_ATTRIBUTES`: Sets `deployment.environment` on all telemetry — the [ASP.NET Core Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aspnet-metrics) uses this to filter by environment
+
+### Step 4. Validate
+
+Start your application, send some requests, then open SigNoz.
+
+1. Go to **Metrics** > **Metrics Explorer**.
+2. Search for `http.server.request.duration`.
+
+Metrics appear within the first export interval (default: 60 seconds).
+
+<Figure
+  src="/img/docs/metrics/applications/aspnetcore-sample-metrics.webp"
+  alt="ASP.NET Core Sample Metrics"
+  caption="ASP.NET Core Sample Metrics"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Metrics not appearing
+
+Check that `OTEL_EXPORTER_OTLP_ENDPOINT` is reachable from your application host. Look for OpenTelemetry startup messages in the application logs — the SDK logs the endpoint and exporter configuration at startup.
+
+### Metrics delayed
+
+The default export interval is 60 seconds. Reduce it for faster feedback during development:
+
+```bash
+OTEL_METRIC_EXPORT_INTERVAL=10000
+```
+
+### Authentication errors
+
+Verify the header is exactly `signoz-ingestion-key=<your-key>` with no extra spaces or quotes.
+
+### Metric `aspnetcore.memory_pool.*` not appearing
+
+These metrics require .NET 10+ and only emit when Kestrel reads request bodies. Add POST endpoints that read `req.Body` to trigger them.
+
+</details>
+
+## Next steps
+
+- [ASP.NET Core Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aspnet-metrics) — import the pre-built dashboard for this setup
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on your metrics
+- [Send traces](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/) from your .NET application

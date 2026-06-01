@@ -34,7 +34,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
     <div
       className={`fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px] ${className}`}
     >
-      <div className="bg-signoz_ink-500 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
+      <div className="flex h-full w-full items-center bg-signoz_ink-500 px-4 md:pl-12 lg:w-5/12 lg:pl-16">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
             <Image
@@ -42,7 +42,8 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
               src="/img/SigNozLogo-orange.svg"
               width={160}
               height={60}
-              alt="SigNoz Logo"
+              alt="SigNoz - Open Source Datadog Alternative"
+              title="Open Source Datadog Alternative"
             />
             <span className="text-[17.111px] font-medium">SigNoz</span>
           </Link>
@@ -74,7 +75,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
           Pricing
         </TrackingLink>
       </div>
-      <div className="bg-signoz_ink-500 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
+      <div className="flex h-full items-center justify-end bg-signoz_ink-500 px-4 md:px-8 lg:hidden">
         <TrackingLink
           target="_blank"
           clickType="Nav Click"

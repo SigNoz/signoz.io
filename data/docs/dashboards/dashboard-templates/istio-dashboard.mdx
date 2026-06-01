@@ -1,0 +1,120 @@
+---
+date: 2026-05-17
+id: istio-dashboard
+title: Istio Metrics Dashboard
+description: Monitor Istio service mesh performance including request rates, latency, error rates, TCP throughput, control plane health, and mTLS security metrics.
+doc_type: explanation
+---
+
+Monitor your Istio service mesh across seven areas: request traffic, latency and payload performance, error rates, control plane health, data plane connections, and security.
+
+<Admonition type="note">
+  This dashboard requires Istio metrics flowing into SigNoz. Follow the [Istio Metrics](https://signoz.io/docs/metrics-management/istio-metrics) guide to configure the OpenTelemetry Collector to scrape Istio's endpoints.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/istio-dashboard.webp"
+  alt="Istio Metrics Dashboard"
+  caption="Istio Metrics Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/istio/istio-prometheus-v1.json"
+    dashboardName="Istio Metrics"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Overview**: Total requests, request rate, average latency, error rate, request rate by service, and P95 latency by service
+- **Traffic Management**: Request distribution, retries and timeouts, and circuit breaker state
+- **Performance**: Latency percentiles, P95 payload size, and TCP throughput
+- **Error Metrics**: Error rate by service, HTTP errors by status code, and response flags
+- **Control Plane**: XDS connections, managed clusters, XDS push rate and latency, configuration conflicts, and proxy convergence time
+- **Data Plane**: Envoy active connections, upstream request counts, and connection errors
+- **Security**: mTLS usage, workload certificate expiry, Citadel CSR and issuance counts, and root certificate expiry
+
+## Metrics Included
+
+### Overview & Traffic
+
+- **Total Requests**: Shows cumulative request count over time
+- **Request Rate**: Shows requests per second over time
+- **Average Latency**: Shows mean request duration over time
+- **Error Rate**: Shows percentage of failed requests over time
+- **Request Rate by Service**: Shows per-service request rate over time
+- **P95 Latency by Service**: Shows 95th percentile latency per service over time
+
+### Traffic Management
+
+- **Request Distribution**: Shows traffic spread across upstream services over time
+- **Retries and Timeouts**: Shows Envoy retry and timeout counts over time
+- **Circuit Breakers Open**: Shows open circuit breaker state (default and high thresholds) over time
+
+### Performance
+
+- **Latency Percentiles**: Shows P50, P90, P95, P99 request latency over time
+- **Payload Size P95**: Shows 95th percentile request and response body sizes over time
+- **TCP Throughput**: Shows bytes sent and received over TCP connections over time
+
+### Error Metrics
+
+- **Error Rate by Service**: Shows per-service error percentage over time
+- **HTTP Errors by Code**: Shows error counts grouped by HTTP status code over time
+- **Response Flags**: Shows Envoy response flag distribution over time
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/istio-errors.webp"
+  alt="Istio Error Metrics"
+  caption="Istio Error Metrics"
+/>
+
+### Control Plane
+
+- **XDS Connections**: Shows active xDS connections to istiod over time
+- **Managed Clusters**: Shows number of clusters managed by istiod over time
+- **XDS Pushes**: Shows xDS push rate by type over time
+- **XDS Push Latency**: Shows xDS push duration percentiles over time
+- **XDS Send Latency**: Shows xDS send duration percentiles over time
+- **Configuration Conflicts**: Shows inbound listener conflicts and duplicate cluster counts over time
+- **Total Services**: Shows service and virtual service counts over time
+- **Proxy Convergence Time**: Shows time for proxies to converge on new configuration over time
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/istio-control-plane.webp"
+  alt="Istio Control Plane"
+  caption="Istio Control Plane"
+/>
+
+### Data Plane
+
+- **Envoy Active Connections**: Shows active upstream connections per cluster over time
+- **Envoy Upstream Requests**: Shows upstream request counts over time
+- **Connection Errors**: Shows upstream connection failures over time
+
+### Security
+
+- **mTLS Usage**: Shows mutual TLS connection counts over time
+- **Workload Certificate Expiry**: Shows seconds until workload certificates expire
+- **Citadel CSR & Issuance**: Shows certificate signing request counts and successful issuance counts over time
+- **Root Certificate Expiry**: Shows seconds until the root certificate expires
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/istio-security.webp"
+  alt="Istio Security"
+  caption="Istio Security"
+/>
+
+## Dashboard Variables
+
+- **namespace**: Filter by Kubernetes namespace
+- **cluster**: Filter by Kubernetes cluster
+- **service.name**: Filter by service name
+- **deployment.environment**: Filter by deployment environment
+
+## Related Dashboards
+
+- [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards)
+- [Envoy Proxy](https://signoz.io/docs/dashboards/dashboard-templates/envoy-dashboard)
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics)

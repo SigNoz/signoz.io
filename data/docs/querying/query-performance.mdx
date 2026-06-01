@@ -1,0 +1,111 @@
+---
+date: 2026-05-13
+id: query-performance
+title: Query Performance & Common Issues
+description: Diagnose slow queries, missing results, and unexpected output — with tips to optimize query and dashboard performance in SigNoz.
+doc_type: howto
+---
+
+### Q. Why is my query running slowly?
+
+A. Slow queries are usually caused by wide time ranges, missing filters, or high-cardinality GROUP BY clauses.
+
+<details>
+
+<summary> Show detailed explanation and solution </summary>
+
+**1. Narrow the time range**
+
+Wider time ranges scan more data. Start with the smallest time range that covers your investigation, then expand if needed.
+
+**2. Add resource attribute filters**
+
+[Resource attributes](https://signoz.io/docs/userguide/field-context-data-types/) like `service.name`, `k8s.namespace.name`, or `host.name` are indexed and significantly speed up queries. Always add at least one resource attribute to your WHERE clause.
+
+**3. Reduce GROUP BY cardinality**
+
+Grouping by high-cardinality attributes (e.g., `trace_id`, `user_id`) creates many small groups that are expensive to compute. Use lower-cardinality attributes like `service.name` or `http.method` when possible.
+
+**4. Increase the aggregation interval**
+
+Smaller step intervals produce more data points. If you don't need per-second granularity, let the auto interval do its job or manually increase the step interval.
+
+</details>
+
+### Q. Why is my query returning no results?
+
+A. Missing results are typically caused by incorrect filter syntax, wrong attribute names, or a time range that doesn't contain data.
+
+<details>
+
+<summary> Show detailed explanation and solution </summary>
+
+**1. Check filter syntax and attribute names**
+
+Verify that your [filter expressions](https://signoz.io/docs/userguide/search-syntax/) use the correct syntax and that attribute names match exactly. Attribute names are case-sensitive — `Service.Name` is not the same as `service.name`.
+
+**2. Verify the time range**
+
+Make sure the selected time range actually includes the data you expect. If you recently deployed a change or started sending new telemetry, the data may not exist in the selected window.
+
+**3. Confirm the service/attribute exists**
+
+Use the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) or Logs/Traces Explorer to verify that the metric, service, or attribute you're querying actually has data in the selected time period.
+
+**4. Check for EXISTS vs value filters**
+
+If you're filtering on an attribute that may not be present on all spans/logs, use `EXISTS` first to confirm the attribute is present before filtering on its value.
+
+</details>
+
+### Q. Why is my query returning unexpected results?
+
+A. Unexpected results are often caused by incorrect filter logic, mismatched aggregation functions, or GROUP BY attributes that don't match your intent.
+
+<details>
+
+<summary> Show detailed explanation and solution </summary>
+
+**1. Review filter combinations (AND vs OR logic)**
+
+Make sure your [filter operators](https://signoz.io/docs/userguide/operators-reference/) combine correctly. `A AND B OR C` may not mean what you intend — use parentheses: `A AND (B OR C)`.
+
+**2. Validate aggregation functions**
+
+Ensure the [aggregation function](https://signoz.io/docs/querying/aggregation-grouping/) matches your intent. For example, `avg()` on a counter metric may not be meaningful — use `rate()` or `increase()` instead.
+
+**3. Check GROUP BY attributes**
+
+Verify that your [Group By](https://signoz.io/docs/querying/aggregation-grouping/) attributes properly categorize the data. Grouping by too many attributes produces sparse results; grouping by too few may merge unrelated data.
+
+**4. Inspect the raw data**
+
+Switch to a list or table view to see individual data points. This helps confirm whether the issue is in the data itself or in how it's being aggregated.
+
+</details>
+
+### Q. How can I optimize dashboard performance?
+
+A. Dashboard slowness is usually caused by too many panels, wide time ranges, or aggressive refresh intervals.
+
+<details>
+
+<summary> Show detailed explanation and solution </summary>
+
+**1. Adjust refresh frequency**
+
+Balance data freshness with performance. A 30-second refresh on a dashboard with 20 panels creates significant load. Use 1-minute or 5-minute refresh intervals unless real-time data is critical.
+
+**2. Optimize time ranges**
+
+Avoid unnecessarily wide time windows on dashboards. A 7-day window on multiple panels is much slower than a 1-hour window. Use [dashboard variables](https://signoz.io/docs/userguide/manage-variables/) to let users control the time range dynamically.
+
+**3. Limit concurrent queries**
+
+Each panel fires its own query. If your dashboard has many panels, consider splitting it into multiple focused dashboards or using sections to organize panels so users load only what they need.
+
+**4. Apply resource attribute filters**
+
+Add a service or namespace [variable](https://signoz.io/docs/userguide/manage-variables/) to the dashboard and use it in all panel queries. This ensures every query is scoped to a specific resource, dramatically reducing scan time.
+
+</details>

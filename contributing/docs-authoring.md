@@ -61,6 +61,34 @@ Required keys:
 - `description`
 - `doc_type`
 
+### Title Guidelines
+
+The `title` field is both the page heading and the meta title shown in search results.
+
+- **Length:** 50–60 characters.
+- **Structure:** Primary keyword + feature or action. No brand suffix — "SigNoz Docs" is appended programmatically.
+- **Best practices:**
+  - Lead with the primary keyword.
+  - Use action words: Learn, Setup, Guide, Monitor, Debug, Optimize.
+  - Include a feature or benefit qualifier when it fits naturally: Fast, Real-time, Open-source, Distributed.
+- **Example:** `Logs Pipelines - Parse & Transform Logs`
+  - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
+  - In search results: *Logs Pipelines - Parse & Transform Logs | SigNoz Docs*
+
+### Description Guidelines
+
+The `description` field appears as the meta description in search results and link previews.
+
+- **Length:** 120–160 characters.
+- **Structure:** What the page covers + what the reader will learn or do + benefit.
+- **Best practices:**
+  - Clearly explain what the page is about and what the user will learn.
+  - Use action-oriented language.
+  - Highlight benefits.
+  - Include primary keywords naturally — do not stuff them.
+- **Example:** `Learn how SigNoz Logs Pipelines parse and transform logs into structured data for better debugging and observability.`
+  - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
+
 Tags:
 
 - omit `tags` when the doc applies to both Cloud and Self-Host
@@ -116,12 +144,16 @@ When documenting OpenTelemetry Collector changes:
 - Validate all added internal and external links before the PR.
 - Store docs images under `public/img/docs/<topic>/...`.
 - Use WebP format for all docs images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools.
+- **Minimum image width: 1200 px** (ideally 1400–1600 px for retina sharpness). Images below 1200 px render blurry when the docs layout stretches them to the content column width. Take screenshots at 2× resolution on retina displays or use browser DevTools device toolbar set to a wide viewport.
 - Use `Figure` with descriptive alt text and a concise caption.
 
 ## Patterns And Components
 
 - Use `Admonition` for notes, warnings, tips, and supplementary or optional material. Do not use `KeyPointCallout`.
-- Use `Tabs` and `TabItem` only when flows materially differ by platform or environment. Always provide an `entityName` prop on `<Tabs>` (e.g., `<Tabs entityName="environment">`). Ensure for vm, docker, kubernetes it is environment.
+- Use `Tabs` and `TabItem` only when flows materially differ by platform or environment. Always provide an `entityName` prop on `<Tabs>` that matches what the tabs represent:
+  - `entityName="environment"` — deployment infrastructure tabs: VM, Kubernetes, Docker, Windows. Only use this when the tabs distinguish between these deployment environments.
+  - `entityName="plans"` — SigNoz Cloud vs Self-Hosted tabs.
+  - For other tab groupings, use a short descriptive name (e.g., `"language"`, `"signal"`, `"setup"`).
 - Prefer numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful.
 
@@ -141,6 +173,7 @@ Use the template in [templates/send-data-doc.md](templates/send-data-doc.md).
 - Always include a concrete `## Validate` section.
 - Mention OpenTelemetry in the URL, slug, title, and overview.
 - Use direct export to SigNoz Cloud as the primary path.
+- **Prefer OTLP/HTTP (port 4318) over OTLP/gRPC (port 4317)** as the default export protocol in examples and instructions. HTTP is simpler to configure, easier to debug, and works through more proxies and load balancers.
 - Keep Collector-based setup optional and near the bottom.
 - Include the self-hosted adaptation callout near the top.
 - Cover VM, Kubernetes, Docker, and Windows when those paths materially apply.
@@ -275,6 +308,8 @@ node --test tests/component-items-sync.test.js
 Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-checklists.md#docs-changes) when preparing or reviewing docs work.
 
 - Frontmatter includes `date`, `id`, `title`, `description`, `doc_type`, and correct tags.
+- Title is 50–60 characters, leads with the primary keyword, and uses an action word.
+- Description is 120–160 characters, action-oriented, and explains what the page covers and what the reader will learn.
 - Content matches the chosen `doc_type`.
 - The primary job is clear and the happy path is easy to follow end to end.
 - Steps are concise, minimal, and ordered for first success.
@@ -284,5 +319,5 @@ Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-che
 - Commands and snippets explain what to do, where to do it, and the expected result.
 - Placeholders use `<...>` format and are documented.
 - Links are helpful and validated.
-- Images, if any, use the correct location and WebP format.
+- Images, if any, use the correct location, WebP format, and are at least 1200 px wide.
 - Redirect, sidebar, and discovery updates are handled when the doc URL changes or a new doc should appear in an existing surface.

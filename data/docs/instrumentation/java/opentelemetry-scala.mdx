@@ -1,0 +1,483 @@
+---
+date: 2026-05-19
+id: opentelemetry-scala
+title: Scala OpenTelemetry Setup Guide
+description: Instrument your Scala application with the OpenTelemetry Java agent and send traces to SigNoz. Covers SBT, Play Framework, Akka HTTP, ZIO, and Docker.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+This guide walks you through instrumenting your Scala application with OpenTelemetry and sending traces to SigNoz. Scala runs on the JVM, so the OpenTelemetry Java agent works directly—no additional SDK or Scala-specific library required.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- <a href="https://github.com/open-telemetry/opentelemetry-java#requirements" target="_blank" rel="noopener noreferrer nofollow">Java 8+</a>
+- Scala 2.x or 3.x
+- SBT, Maven, or Gradle
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Auto-instrumented frameworks
+
+The OpenTelemetry Java agent instruments these Scala frameworks automatically—no code changes required:
+
+| Framework          | Min version | What's instrumented                         |
+| ------------------ | ----------- | ------------------------------------------- |
+| Play MVC           | 2.4         | HTTP routes, controller spans               |
+| Play WS            | 1.0         | HTTP client spans and metrics               |
+| Akka HTTP          | 10.0        | Server spans, client spans, metrics, routes |
+| Akka Actors        | 2.3         | Context propagation                         |
+| Apache Pekko       | 1.0         | Context propagation, HTTP instrumentation   |
+| ZIO                | 2.0         | Context propagation                         |
+| ZIO HTTP           | 3.0         | Route span naming                           |
+| Scala ForkJoinPool | 2.8         | Context propagation                         |
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md" target="_blank" rel="noopener noreferrer nofollow">full supported libraries list</a> for all frameworks and versions.
+
+## Send traces to SigNoz
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+<Admonition type="info" title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your Scala application directly on a server or VM without containerization.
+
+</Admonition>
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+### Step 2. Set environment variables
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>,service.version=<service-version>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_METRICS_EXPORTER="none"
+export OTEL_LOGS_EXPORTER="none"
+```
+
+<Admonition type="info" title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+
+</Admonition>
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `checkout-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
+
+### Step 3. Run your application
+
+**SBT (recommended)**
+
+SBT runs tasks in the same JVM process by default, so the agent can't attach. Enable forking in your `build.sbt`:
+
+```scala:build.sbt
+fork := true
+run / javaOptions += "-javaagent:/path/to/opentelemetry-javaagent.jar"
+```
+
+Then run:
+
+```bash
+sbt run
+```
+
+<Admonition type="tip" title="Play Framework in production?" defaultCollapsed="true">
+When running a Play application from its generated startup script, prefix the javaagent flag with `-J`:
+
+```bash
+/path/to/bin/<project-name> -J-javaagent:/path/to/opentelemetry-javaagent.jar
+```
+
+The `-J` prefix tells Play's launcher to pass the flag to the underlying JVM instead of treating it as an application argument.
+
+</Admonition>
+
+**Assembly or fat JAR**
+
+If you package your application with <a href="https://github.com/sbt/sbt-assembly" target="_blank" rel="noopener noreferrer nofollow">sbt-assembly</a> or a similar plugin, attach the agent at startup:
+
+```bash
+java -javaagent:./opentelemetry-javaagent.jar -jar your-app-assembly.jar
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+<Tabs entityName="k8s-method">
+<TabItem value="direct" label="Direct" default>
+
+<Admonition type="tip" title="Managing multiple services?" defaultCollapsed="true">
+  For centralized instrumentation management or auto-injection without code changes, see the OTel
+  Operator tab.
+</Admonition>
+
+### Step 1. Add the agent to your Dockerfile
+
+```dockerfile:Dockerfile
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+COPY target/scala-2.13/<my-app>-assembly.jar app.jar
+
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+```
+
+Replace `<my-app>` with your assembled JAR name.
+
+### Step 2. Deploy to Kubernetes
+
+Add these environment variables to your deployment manifest:
+
+```yaml:deployment.yaml
+env:
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: 'service.name=<service-name>,service.version=<service-version>'
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: 'http/protobuf'
+  - name: OTEL_METRICS_EXPORTER
+    value: 'none'
+  - name: OTEL_LOGS_EXPORTER
+    value: 'none'
+```
+
+<Admonition type="info" title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+
+</Admonition>
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `checkout-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
+
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
+
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) auto-injects the Java agent into your pods without modifying your container image.
+
+### Step 1. Set up the OpenTelemetry Operator
+
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
+
+### Step 2. Create the Instrumentation resource
+
+Create `instrumentation.yaml` to configure Java auto-instrumentation:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: scala-instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector-collector:4318
+  propagators:
+    - tracecontext
+    - baggage
+  env:
+    - name: OTEL_EXPORTER_OTLP_PROTOCOL
+      value: "http/protobuf"
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
+    - name: OTEL_LOGS_EXPORTER
+      value: "none"
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+```
+
+<Admonition type="info" title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+
+</Admonition>
+
+Deploy this resource to your cluster.
+
+### Step 3. Add annotations to your deployment
+
+Add these annotations to your pod template's `metadata.annotations`:
+
+```yaml:deployment.yaml
+instrumentation.opentelemetry.io/inject-java: 'true'
+resource.opentelemetry.io/service.name: '<service-name>'
+resource.opentelemetry.io/service.version: '<service-version>'
+```
+
+Verify these values:
+
+- `<service-name>`: A descriptive name for your service (e.g., `checkout-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+### Step 1. Add the agent to your Dockerfile
+
+```dockerfile:Dockerfile
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+COPY target/scala-2.13/<my-app>-assembly.jar app.jar
+
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+```
+
+Replace `<my-app>` with your assembled JAR name.
+
+### Step 2. Build and run
+
+```bash
+docker build -t my-scala-app .
+docker run -p 8080:8080 \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>,service.version=<service-version>" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+  -e OTEL_METRICS_EXPORTER="none" \
+  -e OTEL_LOGS_EXPORTER="none" \
+  my-scala-app
+```
+
+<Admonition type="info" title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
+The agent enables traces, metrics, and logs by default. Setting both exporters to `none` avoids sending data you didn't ask for.
+
+To collect metrics or logs later, set the exporter to `otlp` or remove the variable entirely.
+</Admonition>
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `checkout-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar" -OutFile "opentelemetry-javaagent.jar"
+```
+
+### Step 2. Set environment variables
+
+```powershell
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>,service.version=<service-version>"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
+$env:OTEL_METRICS_EXPORTER = "none"
+$env:OTEL_LOGS_EXPORTER = "none"
+```
+
+<Admonition type="info" title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+
+</Admonition>
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `checkout-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
+
+### Step 3. Run your application
+
+**SBT (recommended)**
+
+Add to your `build.sbt`:
+
+```scala:build.sbt
+fork := true
+run / javaOptions += "-javaagent:C:\\path\\to\\opentelemetry-javaagent.jar"
+```
+
+Then run:
+
+```powershell
+sbt run
+```
+
+**Assembly or fat JAR**
+
+```powershell
+java -javaagent:.\opentelemetry-javaagent.jar -jar your-app-assembly.jar
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+With your application running, verify traces are flowing to SigNoz:
+
+1. Send a few requests to your application.
+2. In SigNoz, open the **Services** tab and click **Refresh**. Your service should appear.
+3. Go to the **Traces** tab to see your application's traces.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No traces in SigNoz after `sbt run`
+
+The most common cause: SBT shares its JVM with your application by default, so the agent flag in `javaOptions` has no effect.
+
+Fix: add `fork := true` to your `build.sbt`:
+
+```scala:build.sbt
+fork := true
+run / javaOptions += "-javaagent:/path/to/opentelemetry-javaagent.jar"
+```
+
+### Traces not showing up in SigNoz
+
+**Check environment variables:**
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_RESOURCE_ATTRIBUTES
+```
+
+**Enable debug logging:**
+
+```bash
+OTEL_LOG_LEVEL=debug java -javaagent:./opentelemetry-javaagent.jar -jar app.jar
+```
+
+Look for span output in stdout. If spans appear locally but not in SigNoz, check your endpoint URL and ingestion key.
+
+**Test connectivity:**
+
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+### "Sharing is only supported for boot loader classes" warning
+
+SBT prints this as `[error]` but it is harmless:
+
+```
+[error] OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+```
+
+The Java agent modifies the bootstrap classpath, which disables JVM class-data sharing (CDS). It does not affect instrumentation or trace collection.
+
+### Agent not attaching
+
+Make sure `-javaagent` comes before `-jar`:
+
+```bash
+# Correct
+java -javaagent:./agent.jar -jar app.jar
+
+# Wrong — agent flag after -jar is ignored
+java -jar app.jar -javaagent:./agent.jar
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+The Collector sits between your app and SigNoz. Your app sends traces to the Collector, which then forwards them to SigNoz. Use it to filter noisy spans, redact sensitive data, or fan out to multiple backends.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for setup instructions.
+
+</details>
+
+## Next steps
+
+- [Add manual instrumentation](https://signoz.io/docs/instrumentation/java/manual-instrumentation) for custom spans and business context
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on your Scala service
+
+## Get Help
+
+<GetHelp />

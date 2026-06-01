@@ -20,6 +20,7 @@ import {
   SiCelery,
   SiQuarkus,
   SiApachetomcat,
+  SiScala,
   SiNodedotjs,
   SiCloudflare,
   SiNextdotjs,
@@ -76,6 +77,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       JB
     </span>
   ),
+  '/docs/instrumentation/java/opentelemetry-scala': <SiScala className="h-7 w-7 text-red-600" />,
   // Other languages
   '/docs/instrumentation/golang': <SiGo className="h-7 w-7 text-cyan-500" />,
   '/docs/instrumentation/opentelemetry-deno': <SiDeno className="h-7 w-7 text-blue-500" />,
@@ -119,6 +121,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/integrations/opentelemetry-kong-gateway': (
     <img src="/img/icons/kong-icon.svg" alt="Kong Gateway" className="h-7 w-7 object-contain" />
+  ),
+  '/docs/integrations/outposts/kong': (
+    <img src="/img/icons/kong-icon.svg" alt="Kong" className="h-7 w-7 object-contain" />
   ),
 }
 

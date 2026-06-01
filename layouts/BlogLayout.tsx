@@ -1,21 +1,18 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
+import type { AuthorDetail, Blog } from '../types/transformedContent'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
-
-// Extend the Blog type to include CTA fields
-interface BlogContent extends Blog {
-  cta_title?: string
-  cta_text?: string
-}
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
 
 interface LayoutProps {
-  content: CoreContent<BlogContent>
-  authorDetails: CoreContent<Authors>[]
+  content: CoreContent<Blog>
+  authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
   toc: TocItemProps[]
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
+  breadcrumbs?: BreadcrumbCrumb[]
 }
 
 export default function BlogLayout({
@@ -24,6 +21,8 @@ export default function BlogLayout({
   authors,
   children,
   toc,
+  authorDirectory,
+  breadcrumbs,
 }: LayoutProps) {
   return (
     <RegionProvider>
@@ -35,6 +34,8 @@ export default function BlogLayout({
         contentType="blog"
         showNewsletter={true}
         showRelatedArticles={true}
+        authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
         {children}
       </ArticleLayout>

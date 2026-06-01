@@ -88,6 +88,11 @@ export const APM_INSTRUMENTATION_ITEMS = {
       clickName: 'Tomcat Instrumentation Link',
     },
     { name: 'JBoss', href: '/docs/instrumentation/jboss', clickName: 'JBoss Instrumentation Link' },
+    {
+      name: 'Scala',
+      href: '/docs/instrumentation/java/opentelemetry-scala',
+      clickName: 'Scala Instrumentation Link',
+    },
   ] satisfies ComponentItem[],
   other: [
     {
@@ -179,9 +184,14 @@ export const APM_INSTRUMENTATION_ITEMS = {
       clickName: 'DBOS Instrumentation Link',
     },
     {
-      name: 'Kong Gateway',
+      name: 'Kong (SigNoz plugin)',
+      href: '/docs/integrations/outposts/kong',
+      clickName: 'Kong SigNoz Plugin Instrumentation Link',
+    },
+    {
+      name: 'Kong (OpenTelemetry plugin)',
       href: '/docs/integrations/opentelemetry-kong-gateway',
-      clickName: 'Kong Gateway Instrumentation Link',
+      clickName: 'Kong OpenTelemetry Plugin Instrumentation Link',
     },
   ] satisfies ComponentItem[],
 } as const
