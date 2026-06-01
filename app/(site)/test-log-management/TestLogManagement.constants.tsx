@@ -1,6 +1,6 @@
 import { Braces, Cloud, Database, GitCompareArrows } from 'lucide-react'
-import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
 import { ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
+import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
 
 // --- Hero Cards (Why SigNoz) ---
 
@@ -31,30 +31,115 @@ export const WHY_SIGNOZ_CARDS = [
   },
 ]
 
-// --- Search & Analytics Feature Cards ---
+// --- Pipeline Steps ---
 
-export const SEARCH_FEATURE_CARDS = [
+export const PIPELINE_STEPS = [
   {
-    icon: <Braces size={20} />,
-    title: 'Visual query builder',
-    description:
-      'Build filters with AND and OR logic using auto-complete drawn from your real log attributes. Supports operators like CONTAINS, REGEX, IN, and LIKE.',
+    num: '01',
+    title: 'Raw log in',
+    desc: 'Plain text or JSON arrives from any source, often unstructured and inconsistent.',
   },
   {
-    icon: <Database size={20} />,
-    title: 'Aggregations at scale',
-    description:
-      'Run COUNT, SUM, AVG, and P50, P95, P99 across billions of log lines. Group by several dimensions at once and filter results with HAVING clauses.',
+    num: '02',
+    title: 'Parse and normalize',
+    desc: 'Grok, regex, and JSON processors extract fields and apply consistent attribute names.',
   },
   {
-    icon: <Cloud size={20} />,
-    title: 'Dashboards and JSON queries',
-    description:
-      'Query nested JSON fields using dot notation. Turn any query into a dashboard panel or export the result to CSV for further analysis.',
+    num: '03',
+    title: 'Mask sensitive data',
+    desc: 'Transform processors redact emails, tokens, and card numbers before anything is written.',
+  },
+  {
+    num: '04',
+    title: 'Store and query',
+    desc: 'Clean, structured logs land in ClickHouse, ready to filter and aggregate.',
   },
 ]
 
-// --- Correlation Carousel ---
+// --- Pipeline Examples ---
+
+export const PIPELINE_EXAMPLES = [
+  {
+    label: 'JSON parsing',
+    raw: '{"lvl":"error","user":{"id":42}}',
+    output: ['level = error', 'user.id = 42'],
+  },
+  {
+    label: 'Attribute extraction',
+    raw: 'GET /pay 502 ip=10.0.4.7',
+    output: ['status = 502', 'client_ip = 10.0.4.7'],
+  },
+  {
+    label: 'Sensitive-data masking',
+    raw: 'user=jo@acme.com ssn=412-55-1987',
+    output: ['user=*** ssn=***'],
+    isMasked: true,
+  },
+]
+
+// --- Query Builder Features ---
+
+export const QUERY_BUILDER_FEATURES = [
+  {
+    title: 'Visual query builder',
+    description:
+      'Build filters with AND and OR logic using auto-complete drawn from your real log attributes.',
+  },
+  {
+    title: 'Flexible filtering',
+    description:
+      'Filter with attributes, regex, LIKE, IN, and nested JSON fields using dot notation.',
+  },
+  {
+    title: 'Aggregations at scale',
+    description:
+      'Run COUNT, SUM, AVG, and P50, P95, P99 across billions of log lines and group by several dimensions at once.',
+  },
+  {
+    title: 'Dashboards from queries',
+    description:
+      'Turn any query into a dashboard panel or export the result to CSV for further analysis.',
+  },
+]
+
+// --- Correlation Steps ---
+
+export const CORRELATION_STEPS = [
+  {
+    number: '01',
+    label: 'Alert / metric spike',
+    title: 'Investigate alerts with context',
+    description:
+      'An error-rate alert fires. Every alert links to the logs around the event, so you start with context instead of a blank search.',
+    color: 'amber' as const,
+  },
+  {
+    number: '02',
+    label: 'Related logs',
+    title: 'Metrics to related logs',
+    description:
+      'Spot a spike on an infrastructure or APM metric and pivot to the logs from that same service and time window.',
+    color: 'cherry' as const,
+  },
+  {
+    number: '03',
+    label: 'Trace',
+    title: 'Logs to traces',
+    description:
+      'Open a log line that carries a trace ID and jump straight to the full distributed trace for that request.',
+    color: 'robin' as const,
+  },
+  {
+    number: '04',
+    label: 'Root cause',
+    title: 'Trace IDs speed up RCA',
+    description:
+      'Shared trace IDs tie logs, traces, and metrics together, which shortens the path from symptom to cause.',
+    color: 'forest' as const,
+  },
+]
+
+// --- Correlation Carousel (for existing screenshot assets) ---
 
 export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [
   {
