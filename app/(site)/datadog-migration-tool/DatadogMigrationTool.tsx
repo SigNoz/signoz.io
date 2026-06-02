@@ -20,6 +20,7 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import HubspotCustomForm from '@/components/hubspot-custom-form/HubspotCustomForm'
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 
 const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -61,11 +62,9 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
 
 const ReadyToMigrateBanner: React.FC = () => {
   return (
-    <SectionLayout
-      variant="no-border"
-      className="!border-t-1 !border-x-0 !border-dashed !border-signoz_slate-400 py-10"
-    >
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
+    <SectionLayout variant="no-border" className="!border-x-0 !px-0 pb-10">
+      <Divider />
+      <h2 className="mb-6 mt-10 text-center text-4xl text-signoz_vanilla-100">
         Ready to Migrate from Datadog?
       </h2>
       <RequestEarlyAccessButton className="!mx-auto" />
@@ -112,26 +111,23 @@ const Header: React.FC = () => {
 
 const TopHeroSection: React.FC = () => {
   return (
-    <SectionLayout
-      variant="bordered"
-      className="!border-b-1 !border-t-1 !border-dashed !border-signoz_slate-400"
-    >
+    <SectionLayout variant="bordered" className="!px-0">
+      <Divider />
       <div className="mb-8 text-center">
         <h2 className="mb-6 pt-12 text-4xl font-semibold text-signoz_sienna-100">
           Typical Migration Pain
         </h2>
       </div>
       <HeroCards cards={CARDS} layoutVariant={'no-border'} variant="combined" />
+      <Divider />
     </SectionLayout>
   )
 }
 
 const LlmPoweredIntelligenceSection: React.FC = () => {
   return (
-    <SectionLayout
-      variant="bordered"
-      className="!border-t-1 !border-dashed !border-signoz_slate-400 bg-signoz_ink-500"
-    >
+    <SectionLayout variant="bordered" className="bg-signoz_ink-500 !px-0">
+      <Divider />
       <div className="mb-6 max-w-4xl px-8 py-6">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">
           LLM-Powered Intelligence
@@ -303,10 +299,8 @@ const WhatWeSupportSection: React.FC = () => {
   }
 
   return (
-    <SectionLayout
-      variant="no-border"
-      className="!border-t-1 !border-x-0 !border-dashed !border-signoz_slate-400"
-    >
+    <SectionLayout variant="no-border" className="!border-x-0 !px-0">
+      <Divider />
       <div className="px-6 py-8">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">What We Support</h2>
         <p className="leading-relaxed text-signoz_vanilla-400">

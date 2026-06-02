@@ -12,6 +12,7 @@ import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
 import { Card } from '@/components/ui/Card'
 import { useHubspotCustomForm } from '@/components/hubspot-custom-form/useHubspotCustomForm'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 
 const Header: React.FC = () => {
   const headerButtonGroup = (
@@ -85,7 +86,7 @@ const Header: React.FC = () => {
 
 const TrustedByTeams: React.FC = () => {
   return (
-    <div className="!border-b-1 relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-t-0 border-dashed border-signoz_slate-400 py-16 md:w-[80vw]">
+    <div className="relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 py-16 md:w-[80vw]">
       <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
         Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
       </div>
@@ -121,6 +122,7 @@ const TrustedByTeams: React.FC = () => {
           </TrackingLink>
         </Button>
       </div>
+      <Divider className="absolute bottom-0 left-0" />
     </div>
   )
 }

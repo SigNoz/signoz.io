@@ -20,6 +20,7 @@ import TrackingLink from '@/components/TrackingLink'
 import ComparisonTable from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -27,7 +28,7 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Hero Start Trial',
@@ -39,7 +40,7 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Hero Docs',
@@ -214,7 +215,7 @@ const StartMonitoring: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Bottom CTA Start Trial',
@@ -226,7 +227,7 @@ const StartMonitoring: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Bottom CTA Docs',
@@ -236,10 +237,8 @@ const StartMonitoring: React.FC = () => {
     },
   ]
   return (
-    <SectionLayout
-      variant="bordered"
-      className="!border-t-1 border-dashed border-signoz_slate-400 !px-0"
-    >
+    <SectionLayout variant="bordered" className="!px-0">
+      <Divider />
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
           <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-12">

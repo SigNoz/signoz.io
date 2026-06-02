@@ -24,9 +24,7 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
   const backgroundClass = withBackground ? 'bg-signoz_ink-500' : ''
 
   return (
-    <div
-      className={`section-container ${getVariantClasses()} ${backgroundClass} ${className} max-w-8xl`}
-    >
+    <div className={`w-full px-4 ${getVariantClasses()} ${backgroundClass} ${className} max-w-8xl`}>
       {children}
     </div>
   )

@@ -20,6 +20,7 @@ import {
   DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW,
 } from './CloudwatchAlternativePage.constants'
 import TrackingLink from '@/components/TrackingLink'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -27,7 +28,7 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'Cloudwatch Alternative Hero Start Trial',
@@ -39,7 +40,7 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/cloud/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Cloudwatch Alternative Hero Docs',
@@ -115,13 +116,13 @@ const DeploymentAndDataResidency: React.FC = () => {
           variant="xl"
         />
         <div className="relative hidden w-full items-center gap-0 md:flex">
-          <div className="h-px flex-1 border-t border-dashed border-signoz_sakura-600" />
+          <Divider className="h-px flex-1 border-signoz_sakura-600" />
           <div className="absolute z-[1] flex w-full items-center justify-center">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-signoz_sakura-600 text-xl font-bold text-white">
               VS
             </span>
           </div>
-          <div className="h-px flex-1 border-t border-dashed border-signoz_sakura-600" />
+          <Divider className="h-px flex-1 border-signoz_sakura-600" />
         </div>
         <IconTitleDescriptionCardGrid
           cards={DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW}
@@ -137,7 +138,7 @@ const CostComparison: React.FC = () => {
     <>
       <SectionLayout
         variant="bordered"
-        className="!border-b-1 !border-t-1 flex flex-col gap-y-9 border-dashed border-signoz_slate-400 !px-0"
+        className="!border-b-1 flex flex-col gap-y-9 border-dashed border-signoz_slate-400 !px-0"
       >
         <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
@@ -151,7 +152,8 @@ const CostComparison: React.FC = () => {
             times at no extra charge.
           </div>
         </div>
-        <div className="border-t-1 flex flex-col border-dashed border-signoz_slate-400 sm:flex-row">
+        <Divider />
+        <div className="flex flex-col sm:flex-row">
           <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
             <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
               <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
@@ -231,6 +233,7 @@ const CloudwatchAlternativePage: React.FC = () => {
       <SectionLayout variant="bordered" className="!px-0">
         <WhyTeamsSwitchFromCloudWatch />
         <ArchitectureAndApproach />
+        <Divider />
         <CostComparison />
       </SectionLayout>
 

@@ -22,9 +22,10 @@ import {
 } from './ClickStackAlternativePage.constants'
 import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
-import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import Link from 'next/link'
+import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -32,7 +33,7 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Hero Start Trial',
@@ -44,7 +45,7 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Hero Docs',
@@ -119,7 +120,8 @@ const CostComparison: React.FC = () => {
             is free.
           </div>
         </div>
-        <div className="border-t-1 flex flex-col border-dashed border-signoz_slate-400 sm:flex-row">
+        <Divider />
+        <div className="flex flex-col sm:flex-row">
           <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
             <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
               <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
@@ -242,7 +244,7 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Start Trial',
@@ -254,7 +256,7 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/introduction/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: 'flex items-center justify-center gap-1 h-full w-full',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Read Documentation',
@@ -265,19 +267,23 @@ const BetterChoiceBanner: React.FC = () => {
   ]
 
   return (
-    <SectionLayout variant="bordered" className="flex flex-col items-center justify-center !py-20">
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-        ClickStack or HyperDX? <br />
-        Either way, SigNoz is the better choice.
-      </h2>
-      <ButtonGroup buttons={betterChoiceButtons} />
+    <SectionLayout variant="bordered" className="!px-0">
+      <CTABanner
+        title={
+          <>
+            ClickStack or HyperDX? <br />
+            Either way, SigNoz is the better choice.
+          </>
+        }
+        buttons={betterChoiceButtons}
+      />
     </SectionLayout>
   )
 }
 
 const QueryYourData: React.FC = () => {
   return (
-    <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-16">
+    <div className="bg-signoz_ink-500 py-16">
       <div className="mx-auto my-8 max-w-4xl p-6">
         <h2 className="my-4 text-center text-4xl font-semibold text-signoz_sakura-100">
           Query Your Data, Any Way You Want
@@ -316,6 +322,7 @@ const ClickStackAlternativePage: React.FC = () => {
         <QuickEvaluation />
         <DashboardsThatHelpYouInvestigate />
         <AlertingThatTellsYouWhatMatters />
+        <Divider />
         <QueryYourData />
         <CostComparison />
       </SectionLayout>
