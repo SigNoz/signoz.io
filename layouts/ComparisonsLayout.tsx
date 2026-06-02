@@ -3,6 +3,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import type { AuthorDetail, Comparison } from '../types/transformedContent'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
 
 interface LayoutProps {
   content: CoreContent<Comparison>
@@ -11,6 +12,7 @@ interface LayoutProps {
   children: ReactNode
   toc: TocItemProps[]
   authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
+  breadcrumbs?: BreadcrumbCrumb[]
 }
 
 export default function ComparisonsLayout({
@@ -20,6 +22,7 @@ export default function ComparisonsLayout({
   children,
   toc,
   authorDirectory,
+  breadcrumbs,
 }: LayoutProps) {
   return (
     <RegionProvider>
@@ -32,6 +35,7 @@ export default function ComparisonsLayout({
         showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
         {children}
       </ArticleLayout>

@@ -7,6 +7,8 @@ import {
 } from '../../../content'
 import { buildListingMetadata } from '../../../metadata'
 import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } from '@/utils/strapi'
+import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
+import JsonLdScript from '@/components/JsonLdScript'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
@@ -58,17 +60,22 @@ export default async function Page(props: { params: Promise<{ page: string }> })
 
   allArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
+  const breadcrumbJsonLd = generateSectionHubBreadcrumb('opentelemetry', params.page)
+
   return (
-    <ListingPageLayout>
-      <ListingWithSearch
-        posts={allArticles}
-        pageNumber={parseInt(params.page)}
-        pageRoute="opentelemetry"
-        title="OpenTelemetry"
-        description="Articles on OpenTelemetry concepts, implementation, and its use cases."
-        searchPlaceholder="Search for an article..."
-        gridTitle="All Articles"
-      />
-    </ListingPageLayout>
+    <>
+      <JsonLdScript data={breadcrumbJsonLd} />
+      <ListingPageLayout>
+        <ListingWithSearch
+          posts={allArticles}
+          pageNumber={parseInt(params.page)}
+          pageRoute="opentelemetry"
+          title="OpenTelemetry"
+          description="Articles on OpenTelemetry concepts, implementation, and its use cases."
+          searchPlaceholder="Search for an article..."
+          gridTitle="All Articles"
+        />
+      </ListingPageLayout>
+    </>
   )
 }

@@ -129,8 +129,8 @@ const TopHeroSection: React.FC = () => {
 const LlmPoweredIntelligenceSection: React.FC = () => {
   return (
     <SectionLayout
-      variant="bordered"
-      className="!border-t-1 !border-dashed !border-signoz_slate-400 bg-signoz_ink-500"
+      variant="full-width"
+      className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500"
     >
       <div className="mb-6 max-w-4xl px-8 py-6">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">
@@ -155,7 +155,7 @@ const CustomerStories: React.FC = () => {
   return (
     <>
       {/* Featured testimonial */}
-      <section className="relative mx-auto w-[100vw] max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw]">
+      <section className="bg-blur-ellipse-388 relative mx-auto w-[100vw] max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
 
         <div className="relative">

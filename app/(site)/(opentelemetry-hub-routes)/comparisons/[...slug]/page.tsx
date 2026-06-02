@@ -15,7 +15,7 @@ import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import JsonLdScript from '@/components/JsonLdScript'
-import { generateSectionArticleBreadcrumb } from '@/utils/breadcrumbSchema'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'ComparisonsLayout'
@@ -111,7 +111,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
-  const breadcrumbJsonLd = generateSectionArticleBreadcrumb('comparisons', post.title, slug)
+  const breadcrumbs = getSectionArticleBreadcrumbs('comparisons', post.title, slug)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -140,6 +141,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
           authorDirectory={authorDirectory}
+          breadcrumbs={breadcrumbs}
         >
           {compiledContent}
         </OpenTelemetryHubContent>
@@ -168,6 +170,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         authors={authorList}
         toc={post.toc}
         authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
         {compiledContent}
       </Layout>

@@ -307,6 +307,16 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Nginx Dashboard Template',
   },
   {
+    name: 'NGINX Ingress - Controller Overview',
+    href: '/docs/dashboards/dashboard-templates/nginx-ingress-controller-overview',
+    clickName: 'NGINX Ingress Controller Overview Dashboard Template',
+  },
+  {
+    name: 'NGINX Ingress - Request Performance',
+    href: '/docs/dashboards/dashboard-templates/nginx-ingress-request-handling-performance',
+    clickName: 'NGINX Ingress Request Handling Performance Dashboard Template',
+  },
+  {
     name: 'n8n Cloud',
     href: '/docs/dashboards/dashboard-templates/n8n-dashboard',
     clickName: 'n8n Dashboard Template',

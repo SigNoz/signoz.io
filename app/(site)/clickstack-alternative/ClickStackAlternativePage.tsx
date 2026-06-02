@@ -75,8 +75,8 @@ const Header: React.FC = () => {
 const QuickEvaluation: React.FC = () => {
   return (
     <SectionLayout
-      variant="bordered"
-      className="!border-b-1 relative mx-auto w-[100vw] overflow-hidden border !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]"
+      variant="full-width"
+      className="relative mx-auto w-[100vw] overflow-hidden border-b border-dashed border-signoz_slate-400 md:w-[80vw]"
     >
       <div className="relative flex flex-col gap-6 pt-32 md:py-20">
         <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
@@ -105,8 +105,8 @@ const CostComparison: React.FC = () => {
   return (
     <>
       <SectionLayout
-        variant="bordered"
-        className="!border-b-1 !border-t-1 flex flex-col gap-y-9 border-dashed border-signoz_slate-400 !px-0"
+        variant="full-width"
+        className="flex flex-col gap-y-9 border-y border-dashed border-signoz_slate-400 !px-0"
       >
         <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
@@ -164,7 +164,7 @@ const CostComparison: React.FC = () => {
 
 const DashboardsThatHelpYouInvestigate: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
+    <section className="relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -194,7 +194,7 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
 
 const AlertingThatTellsYouWhatMatters: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
+    <section className="relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">

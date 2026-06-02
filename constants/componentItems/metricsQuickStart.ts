@@ -95,6 +95,11 @@ export const METRICS_QUICK_START_ITEMS = {
       clickName: 'Istio Metrics Link',
     },
     {
+      name: 'NGINX Ingress Controller',
+      href: '/docs/metrics-management/nginx-ingress-controller',
+      clickName: 'NGINX Ingress Controller Metrics Link',
+    },
+    {
       name: 'NVIDIA GPU (DCGM)',
       href: '/docs/metrics-management/nvidia-dcgm-metrics',
       clickName: 'NVIDIA DCGM Metrics Link',

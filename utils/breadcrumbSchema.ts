@@ -9,7 +9,7 @@ type NavItem =
     }
   | string
 
-type BreadcrumbCrumb = {
+export type BreadcrumbCrumb = {
   name: string
   url: string
 }
@@ -27,13 +27,14 @@ type BreadcrumbListSchema = {
   itemListElement: BreadcrumbItem[]
 }
 
-const BASE_URL = 'https://signoz.io'
+export const BASE_URL = 'https://signoz.io'
 
 const SECTION_CONFIG: Record<string, BreadcrumbCrumb> = {
   docs: { name: 'Docs', url: `${BASE_URL}/docs/introduction/` },
   blog: { name: 'Blog', url: `${BASE_URL}/blog/` },
   guides: { name: 'Guides', url: `${BASE_URL}/guides/` },
   comparisons: { name: 'Comparisons', url: `${BASE_URL}/comparisons/` },
+  opentelemetry: { name: 'OpenTelemetry', url: `${BASE_URL}/opentelemetry/` },
 }
 
 const HOME_CRUMB: BreadcrumbCrumb = { name: 'SigNoz', url: `${BASE_URL}/` }
@@ -152,7 +153,7 @@ export function buildBreadcrumbSchema(crumbs: BreadcrumbCrumb[]): BreadcrumbList
   }
 }
 
-export function generateDocsBreadcrumb(slug: string, pageTitle: string): BreadcrumbListSchema {
+export function getDocsBreadcrumbs(slug: string, pageTitle: string): BreadcrumbCrumb[] {
   const targetRoute = normalizeDocsRoute(`/docs/${slug}`)
   const map = getAncestryMap()
 
@@ -161,12 +162,10 @@ export function generateDocsBreadcrumb(slug: string, pageTitle: string): Breadcr
   if (targetRoute) {
     const ancestry = map.get(targetRoute)
     if (ancestry && ancestry.length > 0) {
-      // Ancestry includes the target item itself; replace its name with pageTitle
       const ancestors = ancestry.slice(0, -1)
       crumbs.push(...ancestors)
       crumbs.push({ name: pageTitle, url: `${BASE_URL}/docs/${slug}/` })
     } else {
-      // Fallback: derive breadcrumb from URL segments
       const segments = slug.split('/').filter(Boolean)
       if (segments.length > 0) {
         crumbs.push({ name: pageTitle, url: `${BASE_URL}/docs/${slug}/` })
@@ -176,24 +175,36 @@ export function generateDocsBreadcrumb(slug: string, pageTitle: string): Breadcr
     crumbs.push({ name: pageTitle, url: `${BASE_URL}/docs/${slug}/` })
   }
 
-  return buildBreadcrumbSchema(crumbs)
+  return crumbs
 }
 
-export function generateSectionArticleBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons',
+export function generateDocsBreadcrumb(slug: string, pageTitle: string): BreadcrumbListSchema {
+  return buildBreadcrumbSchema(getDocsBreadcrumbs(slug, pageTitle))
+}
+
+export function getSectionArticleBreadcrumbs(
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
   title: string,
   slug: string
-): BreadcrumbListSchema {
+): BreadcrumbCrumb[] {
   const config = SECTION_CONFIG[section]
-  return buildBreadcrumbSchema([
+  return [
     HOME_CRUMB,
     { name: config.name, url: config.url },
     { name: title, url: `${BASE_URL}/${section}/${slug}/` },
-  ])
+  ]
+}
+
+export function generateSectionArticleBreadcrumb(
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
+  title: string,
+  slug: string
+): BreadcrumbListSchema {
+  return buildBreadcrumbSchema(getSectionArticleBreadcrumbs(section, title, slug))
 }
 
 export function generateSectionHubBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
   page?: string
 ): BreadcrumbListSchema {
   const config = SECTION_CONFIG[section]
