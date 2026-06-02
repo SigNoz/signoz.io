@@ -36,7 +36,7 @@ const cardDetails = [
   {
     logo: '/img/case_study/logos/kernel-logo.svg',
     logoAlt: 'Kernel logo',
-    title: 'How Kernel uses SigNoz MCP to debug AI agent infrastructure faster',
+    title: 'How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP',
     name: 'Hiro Tamada',
     position: 'Founding Engineer, Kernel',
     href: '/case-study/kernel/',
