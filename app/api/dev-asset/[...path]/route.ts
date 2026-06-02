@@ -21,7 +21,9 @@ const CONTENT_TYPES: Record<string, string> = {
 }
 
 function hasUnsafePathSegment(parts: string[]) {
-  return parts.some((part) => part === '..' || part.includes('/') || part.includes('\\'))
+  return parts.some(
+    (part) => part === '..' || part.includes('\0') || part.includes('/') || part.includes('\\')
+  )
 }
 
 function isInsideDirectory(baseDir: string, filePath: string) {

@@ -118,8 +118,8 @@ export function getAuthorDirectory() {
 }
 
 function getCollectionConfig(collection: CollectionInput): CollectionConfig {
-  const canonical = COLLECTION_ALIASES[String(collection)] || collection
-  const config = COLLECTION_CONFIGS[canonical as CanonicalCollection]
+  const canonical = COLLECTION_ALIASES[String(collection)]
+  const config = canonical ? COLLECTION_CONFIGS[canonical] : undefined
 
   if (!config) {
     throw new Error(`Unsupported content collection: ${collection}`)
@@ -236,7 +236,13 @@ async function readLocalContentCollection(config: CollectionConfig): Promise<MDX
 
       const entry: MDXContent = {
         ...frontmatter,
-        id: Number.parseInt(id.slice(0, 8), 16),
+        id: (() => {
+          const numericId = Number.parseInt(id.slice(0, 8), 16)
+          if (!Number.isFinite(numericId)) {
+            throw new Error(`Failed to generate numeric ID for ${config.canonical}:${contentPath}`)
+          }
+          return numericId
+        })(),
         documentId: `local-${id}`,
         title,
         slug,
