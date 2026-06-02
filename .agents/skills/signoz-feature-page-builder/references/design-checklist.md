@@ -70,14 +70,25 @@ Run through this checklist before considering a feature page complete.
 
 ## Components
 
-- [ ] Uses shared components from `shared/components/molecules/FeaturePages/` — no custom layout primitives
+- [ ] Uses shared components from `shared/components/molecules/FeaturePages/` — no custom layout primitives or inline section markup
 - [ ] `FeaturePageHeader` for hero section
-- [ ] `ButtonGroup` for grouped CTA buttons
+- [ ] `FeatureShowcase` for title + description + image sections (NOT raw `div` + `h2` + `p` + `Image`)
+- [ ] `SplitSection` for side-by-side text + image layouts (NOT raw `GridLayout variant="split"` with manual columns)
+- [ ] `CTABanner` for CTA sections (NOT inline `div` + `h2` + `ButtonGroup`)
+- [ ] `Divider` between sections (NOT inline `border-t-1 border-dashed border-signoz_slate-400` divs)
 - [ ] `HeroCards` for feature card grids
-- [ ] `GridLayout variant="split"` for text + image sections
+- [ ] `ButtonGroup` for grouped CTA buttons (with `BUTTON_CLASS_NAME` constant, NOT `flex-center`)
 - [ ] `UsageBasedPricing` with relevant signal types
 - [ ] `SigNozStats` present
 - [ ] `CustomerStoriesSection` present as final section
+
+## Data Separation
+
+- [ ] Section content (titles, descriptions, images, button configs) in `.constants.tsx` file
+- [ ] `BUTTON_CLASS_NAME` constant used instead of `flex-center` CSS class
+- [ ] FeatureShowcase data spread as props: `<FeatureShowcase {...SHOWCASE_DATA} />`
+- [ ] SplitSection panel configs as data objects, not inline JSX
+- [ ] Button arrays (header, CTA) defined in constants with tracking objects
 
 ## Build Verification
 
