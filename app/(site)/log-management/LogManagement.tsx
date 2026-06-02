@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import JsonLdScript from '@/components/JsonLdScript'
 import TrackingLink from '@/components/TrackingLink'
@@ -94,13 +94,19 @@ const Header: React.FC = () => {
 }
 
 const SectionIntro: React.FC<{
-  title: string
+  title: string | React.ReactNode
   description: string
   className?: string
 }> = ({ title, description, className = '' }) => (
-  <div className={`mx-auto max-w-4xl px-6 ${className}`}>
-    <h2 className="mb-6 text-signoz_vanilla-100">{title}</h2>
-    <p className="mb-0 leading-relaxed text-signoz_vanilla-400">{description}</p>
+  <div className={`bg-blur-ellipse-207 ${className}`}>
+    <div className="grid place-items-center py-8 text-center md:py-20">
+      <h2 className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
+        {title}
+      </h2>
+      <p className="max-w-3xl text-center text-sm font-medium text-signoz_vanilla-400 sm:text-base">
+        {description}
+      </p>
+    </div>
   </div>
 )
 
@@ -215,66 +221,115 @@ const LogProcessingSection: React.FC = () => {
 
 const VisualQueryBuilder: React.FC = () => {
   return (
-    <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-      <div className="mb-8 max-w-4xl">
-        <h2 className="mb-6 text-signoz_vanilla-100">Search and analyze logs at scale</h2>
-        <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-          Build log queries visually with auto-complete for attributes and values. Filter by regex,
-          LIKE, IN, and nested JSON fields, run aggregations across high-volume log data, and turn
-          useful queries into dashboards or alerts.
-        </p>
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="flex w-fit items-center gap-2"
-          asChild
-        >
-          <TrackingLink
-            href="/docs/userguide/query-builder-v5/"
-            clickType="Secondary CTA"
-            clickName="Visual Query Builder Read Docs Button"
-            clickLocation="Log Management Query Builder Section"
-            clickText="Read Documentation"
+    <>
+      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 px-6 py-12">
+        <div className="mb-8 max-w-4xl">
+          <h2 className="mb-6 text-signoz_vanilla-100">Search and analyze logs at scale</h2>
+          <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
+            Build log queries visually with auto-complete for attributes and values. Filter by
+            regex, LIKE, IN, and nested JSON fields, run aggregations across high-volume log data,
+            and turn useful queries into dashboards or alerts.
+          </p>
+          <Button
+            variant="secondary"
+            rounded="full"
+            className="flex w-fit items-center gap-2"
+            asChild
           >
-            Read Documentation
-            <ArrowRight size={14} />
-          </TrackingLink>
-        </Button>
+            <TrackingLink
+              href="/docs/userguide/query-builder-v5/"
+              clickType="Secondary CTA"
+              clickName="Visual Query Builder Read Docs Button"
+              clickLocation="Log Management Query Builder Section"
+              clickText="Read Documentation"
+            >
+              Read Documentation
+              <ArrowRight size={14} />
+            </TrackingLink>
+          </Button>
+        </div>
+
+        <Image
+          src="/img/log-management/logs-explorer-qb.png"
+          alt="SigNoz visual query builder for log analysis"
+          width={10000}
+          height={10000}
+          className="mb-8"
+        />
       </div>
-
-      <Image
-        src="/img/log-management/logs-explorer-qb.png"
-        alt="SigNoz visual query builder for log analysis"
-        width={10000}
-        height={10000}
-        className="mb-8"
-      />
-
-      <HeroCards cards={QUERY_BUILDER_CARDS} layoutVariant={'no-border'} variant="combined" />
-    </div>
+      <HeroCards cards={QUERY_BUILDER_CARDS} layoutVariant={'no-border'} cols={4} />
+    </>
   )
 }
 
 const CostDeploymentSection: React.FC = () => {
+  const [currentIndex, setCurrentIndex] = React.useState(0)
+  const visibleCount = 2
+  const totalPositions = COST_CONTROL_CARDS.length - visibleCount + 1
+
+  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % totalPositions)
+  const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + totalPositions) % totalPositions)
+
   return (
-    <div className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-12">
-      <SectionIntro
-        title="Control log retention, deployment, and cost"
-        description="Keep cost and deployment choices visible while your log volume grows. SigNoz gives teams hot retention controls, queryable cold storage options, Cloud or self-hosted deployment, data residency choices, and transparent usage-based pricing."
-        className="mb-10"
-      />
-      <FeatureCardGrid cards={COST_CONTROL_CARDS} />
+    <div className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500 pt-12">
+      <div className="mb-10 px-8">
+        <h2 className="mb-6 text-signoz_vanilla-100">
+          Control log retention, deployment, and cost
+        </h2>
+        <p className="mb-0 max-w-3xl leading-relaxed text-signoz_vanilla-400">
+          Keep cost and deployment choices visible while your log volume grows. SigNoz gives teams
+          hot retention controls, queryable cold storage options, Cloud or self-hosted deployment,
+          data residency choices, and transparent usage-based pricing.
+        </p>
+      </div>
+
+      <div className="relative border-t border-dashed border-signoz_slate-400">
+        <button
+          onClick={handlePrev}
+          className="absolute -left-5 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-signoz_slate-400 bg-signoz_ink-500 text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-400"
+          aria-label="Previous"
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${currentIndex * 50}%)` }}
+          >
+            {COST_CONTROL_CARDS.map((card, index) => (
+              <div
+                key={index}
+                className="w-1/2 flex-shrink-0 border-r border-dashed border-signoz_slate-400 p-8 last:border-r-0"
+              >
+                <div className="mb-4">{card.icon}</div>
+                <h3 className="m-0 text-lg font-semibold text-signoz_vanilla-100">{card.title}</h3>
+                <p className="mb-0 mt-2 text-sm leading-relaxed text-signoz_vanilla-400">
+                  {card.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={handleNext}
+          className="absolute -right-5 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-signoz_slate-400 bg-signoz_ink-500 text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-400"
+          aria-label="Next"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
     </div>
   )
 }
 
 const LegacyComparisonSection: React.FC = () => {
   return (
-    <div className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-12">
+    <div className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500 pb-12">
       <SectionIntro
         title="Compare SigNoz with legacy log management software"
         description="Use this compact comparison to evaluate SigNoz against common log management tools by open standards, deployment flexibility, cross-signal correlation, cost control, and query performance."
-        className="mb-10"
       />
 
       <div className="px-6">
@@ -305,19 +360,19 @@ const LogManagementFAQSection: React.FC = () => {
   return (
     <div className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500 px-6 py-12 text-signoz_vanilla-100">
       <JsonLdScript data={faqStructuredData} />
-      <SectionIntro
-        title="Frequently asked questions"
-        description="Quick answers for teams evaluating log management software, log analytics, OpenTelemetry-native collection, and logs-metrics-traces correlation in SigNoz."
-        className="mb-6 px-0"
-      />
-      <div className="mx-auto max-w-4xl text-signoz_vanilla-100">
+      <div className="max-w-4xl">
+        <h2 className="mb-6 text-signoz_vanilla-100">Frequently asked questions</h2>
+        <p className="mb-6 leading-relaxed text-signoz_vanilla-400">
+          Quick answers for teams evaluating log management software, log analytics,
+          OpenTelemetry-native collection, and logs-metrics-traces correlation in SigNoz.
+        </p>
         <div className="divide-y divide-signoz_slate-400 border-y border-signoz_slate-400">
           {FAQ_ITEMS.map((faq) => (
             <details key={faq.question} className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-base font-medium text-signoz_vanilla-100 sm:text-lg">
                 <span>{faq.question}</span>
                 <span className="text-signoz_robin-400 transition-transform group-open:rotate-45">
-                  +
+                  <Plus className="h-5 w-5" />
                 </span>
               </summary>
               <p className="mb-0 mt-3 text-sm leading-relaxed text-signoz_vanilla-400 sm:text-base">
@@ -336,17 +391,24 @@ const LogsManagement: React.FC = () => {
     <FeaturePageLayout>
       <Header />
 
-      <SectionIntro
-        title="Log management software built for modern engineering teams"
-        description="SigNoz helps teams collect, process, query, correlate, and control logs in the same observability platform they use for metrics, traces, dashboards, and alerts."
-        className="mb-10 mt-12"
-      />
-      <HeroCards cards={CARDS} cols={2} />
-
+      <SectionLayout variant="border-x" className="!px-0">
+        <SectionIntro
+          title={
+            <>
+              Log management software built for <br className="hidden md:inline" /> modern
+              engineering teams
+            </>
+          }
+          description="SigNoz helps teams collect, process, query, correlate, and control logs in the same observability platform they use for metrics, traces, dashboards, and alerts."
+        />
+      </SectionLayout>
+      <SectionLayout variant="border-x" className="!px-0">
+        <HeroCards cards={CARDS} layoutVariant={'no-border'} cols={4} />
+      </SectionLayout>
       <SectionLayout variant="bordered" className="!px-0">
         <LogProcessingSection />
 
-        <div className="!mx-auto !w-[80vw] px-6 pt-10">
+        <div className="px-6 pt-12">
           <h2 className="mb-6 text-signoz_vanilla-100">Correlate logs with metrics and traces</h2>
           <p className="mb-2 leading-relaxed text-signoz_vanilla-400">
             Use OpenTelemetry semantic conventions to link logs with traces and metrics. Jump from

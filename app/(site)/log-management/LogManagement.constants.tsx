@@ -23,25 +23,25 @@ type ComparisonVendorKey = 'signoz' | 'saas' | 'elk' | 'splunk'
 
 export const CARDS = [
   {
-    icon: <Atom />,
+    icon: <Atom className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'OpenTelemetry-native log collection and processing',
     description:
       'Collect logs with OpenTelemetry-native workflows and keep instrumentation vendor-neutral as your observability stack evolves.',
   },
   {
-    icon: <DatabaseZap />,
+    icon: <DatabaseZap className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Powered by a columnar datastore for fast log analytics',
     description:
       'Search high-volume logs, run aggregations, and build dashboards on a datastore designed for analytics-heavy workloads.',
   },
   {
-    icon: <GitBranch />,
+    icon: <GitBranch className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Correlate logs, metrics, and traces in one place',
     description:
       'Move from logs to traces, from infrastructure metrics to related logs, and from alerts to debugging context in the same product.',
   },
   {
-    icon: <Cloud />,
+    icon: <Cloud className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Cloud or self-hosted deployment options',
     description:
       'Start quickly with SigNoz Cloud or choose a self-hosted deployment when your team needs tighter control over data boundaries.',
@@ -50,19 +50,19 @@ export const CARDS = [
 
 export const INGESTION_CARDS = [
   {
-    icon: <Cloud />,
+    icon: <Cloud className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Collect logs from cloud, containers, databases, and applications',
     description:
       'Centralize application, infrastructure, Kubernetes, Docker, cloud, and database logs in SigNoz for a single debugging workflow.',
   },
   {
-    icon: <Atom />,
+    icon: <Atom className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Use OpenTelemetry Collector or existing agents',
     description:
       'Send logs through OpenTelemetry Collector, language SDKs, or existing collection agents without locking collection to one vendor.',
   },
   {
-    icon: <Server />,
+    icon: <Server className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Connect Kubernetes, Docker, AWS, GCP, Azure, Fluent Bit, Fluentd, and Logstash',
     description:
       'Use common collectors and platform integrations to get log data flowing without building a custom ingestion layer.',
@@ -71,25 +71,25 @@ export const INGESTION_CARDS = [
 
 export const PROCESSING_CARDS = [
   {
-    icon: <Workflow />,
+    icon: <Workflow className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Extract attributes from unstructured logs',
     description:
       'Turn raw log lines into structured attributes so teams can filter, group, and investigate by service, endpoint, customer, or environment.',
   },
   {
-    icon: <FileJson />,
+    icon: <FileJson className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Normalize JSON and log fields before storage',
     description:
       'Flatten nested JSON, standardize fields, and make important log attributes easier to query before data is stored.',
   },
   {
-    icon: <EyeOff />,
+    icon: <EyeOff className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Mask sensitive data in log pipelines',
     description:
       'Reduce risk by masking sensitive values during processing instead of waiting until data is already stored and indexed.',
   },
   {
-    icon: <ShieldCheck />,
+    icon: <ShieldCheck className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Build processing pipelines visually',
     description:
       'Use a visual pipeline builder with processors for JSON parsing, regex, Grok patterns, field transforms, and sensitive-data masking.',
@@ -98,25 +98,25 @@ export const PROCESSING_CARDS = [
 
 export const QUERY_BUILDER_CARDS = [
   {
-    icon: <Search />,
+    icon: <Search className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Use a visual query builder for log analysis',
     description:
       'Build complex filters with AND/OR logic using auto-complete for attributes and values from your actual log data.',
   },
   {
-    icon: <Search />,
+    icon: <Search className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Filter logs with attributes, regex, LIKE, IN, and JSON fields',
     description:
       'Query service attributes, full-text log bodies, regex patterns, LIKE and IN filters, and nested JSON fields with dot notation.',
   },
   {
-    icon: <Gauge />,
+    icon: <Gauge className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Run aggregations across high-volume log data',
     description:
       'Run COUNT, SUM, AVG, P50, P95, and P99 across large log volumes, then group results by multiple dimensions.',
   },
   {
-    icon: <Bell />,
+    icon: <Bell className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Create dashboards from log queries',
     description:
       'Turn log queries into dashboard panels, alert conditions, or CSV exports so recurring investigations become repeatable workflows.',
@@ -125,31 +125,31 @@ export const QUERY_BUILDER_CARDS = [
 
 export const COST_CONTROL_CARDS = [
   {
-    icon: <Gauge />,
+    icon: <Gauge className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Set hot retention for frequently queried logs',
     description:
       'Tune hot retention for recent, high-value logs that teams query during active debugging and incident response.',
   },
   {
-    icon: <DatabaseZap />,
+    icon: <DatabaseZap className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Keep older logs queryable in cold storage',
     description:
       'Use tiered storage to keep older log data available for compliance and longer-range investigations while controlling cost.',
   },
   {
-    icon: <Cloud />,
+    icon: <Cloud className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Choose SigNoz Cloud or self-hosted deployment',
     description:
       'Use SigNoz Cloud for speed, or self-host when your organization needs more control over infrastructure and data boundaries.',
   },
   {
-    icon: <ShieldCheck />,
+    icon: <ShieldCheck className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Use data residency options where required',
     description:
       'Match deployment and region choices to internal security, compliance, and data residency requirements.',
   },
   {
-    icon: <Coins />,
+    icon: <Coins className="h-5 w-5 text-signoz_vanilla-100" />,
     title: 'Avoid surprise bills with transparent usage-based pricing',
     description:
       'Pay by telemetry usage with no user seat limits or host-based pricing surprises on the log management workflow.',
