@@ -57,17 +57,14 @@ const SeeServicesCallingApis: React.FC = () => {
 
 const ReadyToMonitorYourExternalApisBanner: React.FC = () => {
   return (
-    <>
-      <CTABanner
-        title={
-          <>
-            Ready to Monitor Your <br /> External APIs?
-          </>
-        }
-        buttons={READY_TO_MONITOR_EXTERNAL_APIS_BUTTONS}
-      />
-      <Divider />
-    </>
+    <CTABanner
+      title={
+        <>
+          Ready to Monitor Your <br /> External APIs?
+        </>
+      }
+      buttons={READY_TO_MONITOR_EXTERNAL_APIS_BUTTONS}
+    />
   )
 }
 
@@ -116,6 +113,7 @@ const ExternalApis: React.FC = () => {
         <SeeServicesCallingApis />
         <Divider />
         <ReadyToMonitorYourExternalApisBanner />
+        <Divider />
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />

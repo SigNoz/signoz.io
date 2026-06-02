@@ -1,7 +1,6 @@
 import { Atom, Coins, DatabaseZap } from 'lucide-react'
 import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
-
-const BUTTON_CLASS_NAME = 'flex items-center justify-center gap-1 h-full w-full'
+import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 export const LOG_MANAGEMENT_HEADER_BUTTONS = [
   {

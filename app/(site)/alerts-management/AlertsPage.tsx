@@ -100,17 +100,14 @@ const SetMultipleSeverityThresholds: React.FC = () => {
 
 const StopAlertFatigueBanner: React.FC = () => {
   return (
-    <>
-      <CTABanner
-        title={
-          <>
-            Stop alert fatigue. <br /> Start catching real issues.
-          </>
-        }
-        buttons={STOP_ALERT_FATIGUE_BUTTONS}
-      />
-      <Divider />
-    </>
+    <CTABanner
+      title={
+        <>
+          Stop alert fatigue. <br /> Start catching real issues.
+        </>
+      }
+      buttons={STOP_ALERT_FATIGUE_BUTTONS}
+    />
   )
 }
 
@@ -145,6 +142,7 @@ const AlertsManagement: React.FC = () => {
         <ManageAlertsAsCode />
         <Divider />
         <StopAlertFatigueBanner />
+        <Divider />
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />

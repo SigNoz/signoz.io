@@ -13,8 +13,7 @@ import {
 import { BiLogoPostgresql } from 'react-icons/bi'
 import { GrMysql } from 'react-icons/gr'
 import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
-
-const BUTTON_CLASS_NAME = 'flex items-center justify-center gap-1 h-full w-full'
+import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 export const CLOUD_ICONS = [
   { src: '/img/icons/aws-icon.svg', alt: 'AWS' },

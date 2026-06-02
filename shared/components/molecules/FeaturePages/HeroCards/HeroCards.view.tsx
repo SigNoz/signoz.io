@@ -26,12 +26,7 @@ const HeroCards: React.FC<{
       <GridLayout cols={cols}>
         {cards.map((card, index) => (
           <div key={index} className="relative">
-            <FeatureCard
-              icon={card.icon}
-              title={card.title}
-              description={card.description}
-              variant={variant}
-            />
+            <FeatureCard icon={card.icon} title={card.title} description={card.description} />
             {variant !== 'combined' && index < cards.length - 1 && (index + 1) % cols !== 0 && (
               <Divider orientation="vertical" className="absolute right-0 top-0 hidden md:block" />
             )}

@@ -1,3 +1,5 @@
+import { FeatureButtonConfig } from '../FeatureButton/FeatureButton.types'
+
 export interface SplitSectionPanel {
   title: React.ReactNode
   description: React.ReactNode
@@ -7,16 +9,7 @@ export interface SplitSectionPanel {
   className?: string
   contentClassName?: string
   imageClassName?: string
-  button?: {
-    text: string
-    href: string
-    tracking?: {
-      clickType: string
-      clickName?: string
-      clickLocation?: string
-      clickText?: string
-    }
-  }
+  button?: FeatureButtonConfig
 }
 
 export interface SplitSectionProps {

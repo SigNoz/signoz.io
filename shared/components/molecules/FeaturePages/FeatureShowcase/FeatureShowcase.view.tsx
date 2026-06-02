@@ -1,8 +1,6 @@
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
-import Button from '@/components/ui/Button'
-import TrackingLink from '@/components/TrackingLink'
 import { cn } from 'app/lib/utils'
+import FeatureButton from '../FeatureButton'
 import { FeatureShowcaseProps } from './FeatureShowcase.types'
 
 const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({
@@ -27,37 +25,7 @@ const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({
           {description && (
             <div className="mb-8 leading-relaxed text-signoz_vanilla-400">{description}</div>
           )}
-
-          {button &&
-            (button.tracking ? (
-              <Button
-                variant="secondary"
-                rounded="full"
-                className="flex w-fit items-center gap-2"
-                asChild
-              >
-                <TrackingLink
-                  href={button.href}
-                  clickType={button.tracking.clickType}
-                  clickName={button.tracking.clickName || `${button.text} Button`}
-                  clickLocation={button.tracking.clickLocation || 'Feature Page'}
-                  clickText={button.tracking.clickText || button.text}
-                >
-                  {button.text}
-                  <ArrowRight size={14} />
-                </TrackingLink>
-              </Button>
-            ) : (
-              <Button
-                variant="secondary"
-                rounded="full"
-                className="flex w-fit items-center gap-2"
-                to={button.href}
-              >
-                {button.text}
-                <ArrowRight size={14} />
-              </Button>
-            ))}
+          {button && <FeatureButton button={button} />}
         </div>
       )}
 

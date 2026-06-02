@@ -1,10 +1,8 @@
 import React from 'react'
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
-import Button from '@/components/ui/Button'
-import TrackingLink from '@/components/TrackingLink'
 import GridLayout from '../GridLayout'
 import Divider from '../Divider'
+import FeatureButton from '../FeatureButton'
 import { cn } from 'app/lib/utils'
 import { SplitSectionPanel, SplitSectionProps } from './SplitSection.types'
 
@@ -26,36 +24,9 @@ const PanelContent: React.FC<{ panel: SplitSectionPanel }> = ({ panel }) => {
         <div className="mb-8 leading-relaxed text-signoz_vanilla-400">{panel.description}</div>
       </div>
 
-      {panel.button &&
-        (panel.button.tracking ? (
-          <Button
-            variant="secondary"
-            rounded="full"
-            className="mb-8 flex w-fit items-center gap-2"
-            asChild
-          >
-            <TrackingLink
-              href={panel.button.href}
-              clickType={panel.button.tracking.clickType}
-              clickName={panel.button.tracking.clickName || `${panel.button.text} Button`}
-              clickLocation={panel.button.tracking.clickLocation || 'Feature Page'}
-              clickText={panel.button.tracking.clickText || panel.button.text}
-            >
-              {panel.button.text}
-              <ArrowRight size={14} />
-            </TrackingLink>
-          </Button>
-        ) : (
-          <Button
-            variant="secondary"
-            rounded="full"
-            className="mb-8 flex w-fit items-center gap-2"
-            to={panel.button.href}
-          >
-            {panel.button.text}
-            <ArrowRight size={14} />
-          </Button>
-        ))}
+      {panel.button && (
+        <FeatureButton button={panel.button} className="mb-8 flex w-fit items-center gap-2" />
+      )}
 
       {panel.imageElement
         ? panel.imageElement
