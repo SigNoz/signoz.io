@@ -104,6 +104,22 @@ module.exports = () => {
         },
       ]
     },
+    async rewrites() {
+      return {
+        beforeFiles: [],
+        afterFiles:
+          process.env.NODE_ENV === 'development'
+            ? [
+                {
+                  // In dev, serve static assets from data-assets/ when not found in public/
+                  source: '/:path(.+\\.(?:avif|gif|ico|jpe?g|png|svg|webp))',
+                  destination: '/api/dev-asset/:path',
+                },
+              ]
+            : [],
+        fallback: [],
+      }
+    },
     async redirects() {
       return withDocsOnboardingRedirects([
         {

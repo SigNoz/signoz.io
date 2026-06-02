@@ -1,6 +1,6 @@
-// Dev-only route: serves images from `data-assets/` for local CMS previews.
-// Excluded from Vercel deployments via .vercelignore — in production,
-// Next.js serves public/img as static files automatically.
+// Dev-only route: serves static assets from `data-assets/` for local CMS previews.
+// Reached via afterFiles rewrites in next.config.js (dev only).
+// Excluded from Vercel deployments via .vercelignore.
 
 import { promises as fs } from 'fs'
 import path from 'path'
@@ -29,24 +29,6 @@ function isInsideDirectory(baseDir: string, filePath: string) {
   return relativePath === '' || (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
 }
 
-async function readAsset(baseDir: string, parts: string[]) {
-  const filePath = path.join(baseDir, ...parts)
-
-  if (!isInsideDirectory(baseDir, filePath)) {
-    return null
-  }
-
-  try {
-    const stats = await fs.stat(filePath)
-    if (!stats.isFile()) return null
-
-    return fs.readFile(filePath)
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null
-    throw error
-  }
-}
-
 export async function GET(_request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
   const params = await props.params
   const parts = params.path || []
@@ -55,10 +37,18 @@ export async function GET(_request: NextRequest, props: { params: Promise<{ path
     return new NextResponse('Not found', { status: 404 })
   }
 
-  const dataAssetsDir = path.join(process.cwd(), 'data-assets')
+  const baseDir = path.join(process.cwd(), 'data-assets')
+  const filePath = path.join(baseDir, ...parts)
 
-  const asset = await readAsset(dataAssetsDir, parts)
-  if (asset) {
+  if (!isInsideDirectory(baseDir, filePath)) {
+    return new NextResponse('Not found', { status: 404 })
+  }
+
+  try {
+    const stats = await fs.stat(filePath)
+    if (!stats.isFile()) return new NextResponse('Not found', { status: 404 })
+
+    const asset = await fs.readFile(filePath)
     return new NextResponse(new Uint8Array(asset), {
       headers: {
         'Content-Type':
@@ -67,7 +57,10 @@ export async function GET(_request: NextRequest, props: { params: Promise<{ path
         'Cache-Control': 'no-store',
       },
     })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return new NextResponse('Not found', { status: 404 })
+    }
+    throw error
   }
-
-  return new NextResponse('Not found', { status: 404 })
 }
