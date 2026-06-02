@@ -186,7 +186,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Download Changed Files Artifact
         uses: actions/download-artifact@v4
@@ -196,7 +195,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install --no-save --legacy-peer-deps \
+          yarn add --no-lockfile \
             gray-matter \
             axios \
             js-yaml \
@@ -218,20 +217,16 @@ jobs:
           STAGING_AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING || secrets.AWS_ACCESS_KEY_ID }}
           STAGING_AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING || secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          echo "Configuring environment for status: $DEPLOYMENT_STATUS"
-          
           if [[ "$DEPLOYMENT_STATUS" == "staging" ]]; then
             echo "S3_BUCKET_NAME=$STAGING_S3_BUCKET" >> $GITHUB_ENV
             echo "CDN_URL=$STAGING_CDN_URL" >> $GITHUB_ENV
             echo "AWS_ACCESS_KEY_ID=$STAGING_AWS_KEY" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=$STAGING_AWS_SECRET" >> $GITHUB_ENV
-            echo "✅ Using Staging S3 Configuration"
           else
             echo "S3_BUCKET_NAME=$PROD_S3_BUCKET" >> $GITHUB_ENV
             echo "CDN_URL=$PROD_CDN_URL" >> $GITHUB_ENV
             echo "AWS_ACCESS_KEY_ID=$PROD_AWS_KEY" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET" >> $GITHUB_ENV
-            echo "✅ Using Production S3 Configuration"
           fi
 
       - name: Sync Content to Strapi
@@ -252,15 +247,10 @@ jobs:
           CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
-          echo "🔄 Triggering ISR revalidation..."
-          echo "Environment: $DEPLOYMENT_STATUS"
-          
           if [ "$DEPLOYMENT_STATUS" = "live" ]; then
             export BASE_URL="${{ env.NEXT_PUBLIC_BASE_URL }}"
-            echo "Using production URL: $BASE_URL"
           elif [ "$DEPLOYMENT_STATUS" = "staging" ]; then
             export BASE_URL="${{ env.NEXT_PUBLIC_STAGING_BASE_URL }}"
-            echo "Using staging URL: $BASE_URL"
           else
             echo "⏭️ Skipping revalidation for draft deployment"
             exit 0
@@ -290,7 +280,6 @@ jobs:
         if: needs.sync-to-cms.result == 'success'
         run: |
           echo "✅ Workflow completed successfully!"
-          echo "Deployment Status: ${{ needs.detect-changes.outputs.deployment_status }}"
 
       - name: Report Failure
         if: needs.sync-to-cms.result == 'failure'
