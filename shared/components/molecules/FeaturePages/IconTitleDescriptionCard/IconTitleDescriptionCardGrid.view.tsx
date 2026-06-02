@@ -17,7 +17,7 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
         const isLeftDesktopColumn = index % 2 === 0
 
         return (
-          <div key={index} className="relative">
+          <div key={index} className="relative h-full">
             <IconTitleDescriptionCard
               icon={card.icon}
               iconText={card.iconText || ''}
@@ -26,8 +26,8 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
               className={card.className}
               variant={variant}
             />
-            {!isLast && <Divider className="md:hidden" />}
-            {!isLastDesktopRow && <Divider className="hidden md:block" />}
+            {!isLast && <Divider className="absolute bottom-0 left-0 md:hidden" />}
+            {!isLastDesktopRow && <Divider className="absolute bottom-0 left-0 hidden md:block" />}
             {isLeftDesktopColumn && index + 1 < cards.length && (
               <Divider orientation="vertical" className="absolute right-0 top-0 hidden md:block" />
             )}
