@@ -64,8 +64,8 @@ const SigNozStats = () => {
   ]
 
   return (
-    <SectionLayout variant="bordered" className="flex flex-col !px-0 sm:flex-row">
-      <div className="!border-b-1 flex-1 border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
+    <SectionLayout variant="bordered" className="flex flex-col !px-0 md:flex-row">
+      <div className="flex-1 border-b border-dashed border-signoz_slate-400 md:border-b-0">
         <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
           Developers <br />
           Love
@@ -89,7 +89,7 @@ const SigNozStats = () => {
               ))}
             </div>
           </div>
-          <div className="[&>div]:!border-r-1 grid grid-cols-1 text-left sm:grid-cols-2 [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
+          <div className="[&>div]:!border-r-1 grid grid-cols-1 text-left md:grid-cols-2 [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
             {STATS_LIST.map((stat, index) => (
               <StatsCard
                 logo={stat.logo}
@@ -100,7 +100,7 @@ const SigNozStats = () => {
               />
             ))}
           </div>
-          <div className="border-t border-dashed border-signoz_slate-400 py-6 sm:py-6 sm:pl-10">
+          <div className="border-t border-dashed border-signoz_slate-400 py-6 md:pl-10">
             <ButtonGroup buttons={communityButtons} className="flex-col gap-3 sm:flex-row" />
           </div>
         </div>

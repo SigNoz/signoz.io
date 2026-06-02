@@ -11,13 +11,13 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
       case 'full-width':
         return '!mx-auto md:!w-[80vw]'
       case 'bordered':
-        return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-signoz_slate-400 md:!w-[80vw]'
+        return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-signoz_slate-400'
       case 'no-border':
         return '!mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw]'
       case 'border-x':
         return '!mx-auto !w-[90vw] border border-dashed border-b-1 border-t-1 border-signoz_slate-400 md:!w-[80vw]'
       default:
-        return '!mx-auto border border-dashed !border-b-0 border-signoz_slate-400 md:!w-[80vw]'
+        return '!mx-auto border border-dashed !border-b-0 border-signoz_slate-400'
     }
   }
 
