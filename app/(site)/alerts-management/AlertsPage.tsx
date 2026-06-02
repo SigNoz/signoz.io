@@ -100,21 +100,23 @@ const SetMultipleSeverityThresholds: React.FC = () => {
 
 const StopAlertFatigueBanner: React.FC = () => {
   return (
-    <CTABanner
-      title={
-        <>
-          Stop alert fatigue. <br /> Start catching real issues.
-        </>
-      }
-      buttons={STOP_ALERT_FATIGUE_BUTTONS}
-    />
+    <>
+      <CTABanner
+        title={
+          <>
+            Stop alert fatigue. <br /> Start catching real issues.
+          </>
+        }
+        buttons={STOP_ALERT_FATIGUE_BUTTONS}
+      />
+      <Divider />
+    </>
   )
 }
 
 const FineTuneAndMaintainenceWindows: React.FC = () => {
   return (
     <SplitSection
-      className="py-16"
       left={FINE_TUNE_ALERT_BEHAVIOR_PANEL}
       right={MAINTENANCE_WINDOWS_PANEL}
       withVerticalDivider

@@ -220,7 +220,7 @@ const StorageSection: React.FC = () => {
     <div className="mb-12">
       <Divider />
       <SplitSection
-        className="bg-transparent py-6"
+        className="bg-transparent"
         left={RELATED_LOGS_PANEL}
         right={CONTROL_TRACES_VOLUME_PANEL}
         withVerticalDivider

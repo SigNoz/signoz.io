@@ -51,7 +51,6 @@ const Header: React.FC = () => {
 const LogProcessingSection: React.FC = () => {
   return (
     <SplitSection
-      className="py-16"
       left={{
         ...INGEST_LOGS_PANEL,
         imageElement: <SourcesTabsGrid />,
@@ -64,21 +63,24 @@ const LogProcessingSection: React.FC = () => {
 
 const VisualQueryBuilder: React.FC = () => {
   return (
-    <FeatureShowcase
-      {...LOG_QUERY_BUILDER_SHOWCASE}
-      imageElement={
-        <>
-          <Image
-            src={LOG_QUERY_BUILDER_IMAGE.src}
-            alt={LOG_QUERY_BUILDER_IMAGE.alt}
-            width={10000}
-            height={10000}
-            className="mb-8"
-          />
-          <HeroCards cards={QUERY_BUILDER_CARDS} layoutVariant={'no-border'} variant="combined" />
-        </>
-      }
-    />
+    <>
+      <FeatureShowcase
+        {...LOG_QUERY_BUILDER_SHOWCASE}
+        imageElement={
+          <>
+            <Image
+              src={LOG_QUERY_BUILDER_IMAGE.src}
+              alt={LOG_QUERY_BUILDER_IMAGE.alt}
+              width={10000}
+              height={10000}
+              className="mb-8"
+            />
+            <HeroCards cards={QUERY_BUILDER_CARDS} layoutVariant={'no-border'} variant="combined" />
+          </>
+        }
+      />
+      <Divider />
+    </>
   )
 }
 

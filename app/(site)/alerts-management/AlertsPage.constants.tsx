@@ -68,6 +68,7 @@ export const FINE_TUNE_ALERT_BEHAVIOR_PANEL = {
   image: '/img/alerts-management/fine-tune-alert-behavior.png',
   imageAlt: 'Fine-tune alert behavior',
   imageClassName: 'mb-8',
+  className: 'py-16',
 }
 
 export const MAINTENANCE_WINDOWS_PANEL = {
@@ -76,6 +77,7 @@ export const MAINTENANCE_WINDOWS_PANEL = {
     'Schedule one-time or recurring maintenance windows. Silence all alerts or select specific ones during planned downtime.',
   image: '/img/alerts-management/schedule-maintenance-windows.png',
   imageAlt: 'Schedule maintenance windows',
+  className: 'py-16',
 }
 
 export const MANAGE_ALERTS_AS_CODE_PANEL = {

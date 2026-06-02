@@ -87,7 +87,9 @@ const EverythingYouNeedCards: React.FC = () => {
                   Everything You Need to <br className="hidden md:block" /> Monitor LLM Applications
                 </h2>
                 <SectionLayout variant="no-border" className="!mx-auto p-0">
+                  <Divider />
                   <IconTitleDescriptionCardGrid cards={LLM_OBSERVABILITY_CARDS} />
+                  <Divider />
                 </SectionLayout>
               </div>
             </div>
@@ -111,6 +113,7 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
                   <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
                     Works with Your Favorite LLM Tools
                   </h2>
+
                   <p className="text-sm leading-relaxed text-signoz_vanilla-400">
                     Automatic instrumentation for every part of your LLM stack. From model{' '}
                     <br className="hidden md:block" /> providers to vector databases to agent
@@ -142,6 +145,7 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
         </div>
       </section>
       <SectionLayout variant="full-width" className="!mx-auto mt-10 p-0">
+        <Divider />
         <GridLayout variant="split" className="!gap-y-0">
           {LLM_TOOLS_DATA.map((section, index) => {
             const isDesktopRow1 = index < 2

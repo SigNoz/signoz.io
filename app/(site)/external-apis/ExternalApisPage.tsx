@@ -57,21 +57,23 @@ const SeeServicesCallingApis: React.FC = () => {
 
 const ReadyToMonitorYourExternalApisBanner: React.FC = () => {
   return (
-    <CTABanner
-      title={
-        <>
-          Ready to Monitor Your <br /> External APIs?
-        </>
-      }
-      buttons={READY_TO_MONITOR_EXTERNAL_APIS_BUTTONS}
-    />
+    <>
+      <CTABanner
+        title={
+          <>
+            Ready to Monitor Your <br /> External APIs?
+          </>
+        }
+        buttons={READY_TO_MONITOR_EXTERNAL_APIS_BUTTONS}
+      />
+      <Divider />
+    </>
   )
 }
 
 const FilterAndAutomaticDetectionSection: React.FC = () => {
   return (
     <SplitSection
-      className="py-16"
       left={FILTER_BY_ENVIRONMENT_PANEL}
       right={{
         ...AUTOMATIC_DETECTION_PANEL,

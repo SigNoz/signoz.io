@@ -117,7 +117,6 @@ export const INSTRUMENT_SERVICES_PANEL = {
       clickText: 'Read Documentation',
     },
   },
-  contentClassName: 'min-h-72',
 }
 
 export const FILTER_AND_ANALYZE_CARDS = [
@@ -185,6 +184,7 @@ export const RELATED_LOGS_PANEL = {
   image: '/img/distributed-tracing/see-related-logs-of-every-span.png',
   imageAlt: 'See related logs of every span',
   imageClassName: '-mt-8',
+  className: 'py-6',
 }
 
 export const CONTROL_TRACES_VOLUME_PANEL = {
@@ -203,6 +203,7 @@ export const CONTROL_TRACES_VOLUME_PANEL = {
   },
   image: '/img/distributed-tracing/control-traces-volume.png',
   imageAlt: 'Control traces volume',
+  className: 'py-6',
 }
 
 export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [

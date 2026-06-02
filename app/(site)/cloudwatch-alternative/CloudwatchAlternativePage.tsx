@@ -88,8 +88,11 @@ const WhyTeamsSwitchFromCloudWatch: React.FC = () => {
             <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
               Why Teams Switch From CloudWatch
             </h2>
+
             <SectionLayout variant="no-border" className="!mx-auto p-0">
+              <Divider />
               <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
+              <Divider />
             </SectionLayout>
           </div>
         </div>
@@ -149,41 +152,43 @@ const CostComparison: React.FC = () => {
             times at no extra charge.
           </div>
         </div>
-        <Divider />
-        <div className="flex flex-col sm:flex-row">
-          <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
-            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
-              <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
-                CloudWatch's <br className="hidden md:block" /> billing{' '}
-                <br className="hidden md:block" /> complexity
-              </h2>
-              <Button asChild variant="secondary" rounded="full">
-                <TrackingLink
-                  href="https://aws.amazon.com/cloudwatch/pricing/"
-                  clickType="Secondary CTA"
-                  clickName="Cloudwatch Alternative Cost Comparison CloudWatch Pricing Details Button"
-                  clickLocation="Cloudwatch Alternative Cost Comparison"
-                  clickText="CloudWatch pricing details"
-                >
-                  CloudWatch pricing details <ArrowRight size={16} />
-                </TrackingLink>
-              </Button>
-            </div>
-          </div>
-          <div className="flex-[2_2_0%]">
-            <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
-              <div className="flex flex-col gap-4 px-10 py-10">
-                {CLOUDWATCH_BILLING_CARDS.map((card) => (
-                  <Card
-                    key={card.title}
-                    className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+        <div>
+          <Divider />
+          <div className="flex flex-col sm:flex-row">
+            <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
+              <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
+                <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+                  CloudWatch's <br className="hidden md:block" /> billing{' '}
+                  <br className="hidden md:block" /> complexity
+                </h2>
+                <Button asChild variant="secondary" rounded="full">
+                  <TrackingLink
+                    href="https://aws.amazon.com/cloudwatch/pricing/"
+                    clickType="Secondary CTA"
+                    clickName="Cloudwatch Alternative Cost Comparison CloudWatch Pricing Details Button"
+                    clickLocation="Cloudwatch Alternative Cost Comparison"
+                    clickText="CloudWatch pricing details"
                   >
-                    <div className="p-6">
-                      <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
-                      <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
-                    </div>
-                  </Card>
-                ))}
+                    CloudWatch pricing details <ArrowRight size={16} />
+                  </TrackingLink>
+                </Button>
+              </div>
+            </div>
+            <div className="flex-[2_2_0%]">
+              <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+                <div className="flex flex-col gap-4 px-10 py-10">
+                  {CLOUDWATCH_BILLING_CARDS.map((card) => (
+                    <Card
+                      key={card.title}
+                      className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+                    >
+                      <div className="p-6">
+                        <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
+                        <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

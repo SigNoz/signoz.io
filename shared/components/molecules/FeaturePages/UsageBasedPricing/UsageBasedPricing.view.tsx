@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
 import { Section } from 'app/(site)/pricing/pricingv1/components/PricingCalculator'
+import Divider from '../Divider'
 
 const UsageBasedPricing: React.FC<{
   show: Section[]
@@ -21,6 +22,7 @@ const UsageBasedPricing: React.FC<{
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
+          <Divider />
           <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Simple
             <br /> usage-based <br /> pricing

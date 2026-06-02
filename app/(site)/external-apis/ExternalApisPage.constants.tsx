@@ -73,14 +73,14 @@ export const FILTER_BY_ENVIRONMENT_PANEL = {
     'Use the left panel to filter domains by Deployment Environment, Service Name, or RPC Method. When viewing endpoints for a domain, search for specific endpoints or filter by suggested attributes like deployment environment, host, status code, and more.',
   image: '/img/external-apis/filter-by-environment-service-or-method.png',
   imageAlt: 'Filter by environment, service or method',
-  contentClassName: 'min-h-56',
+  className: 'py-16',
 }
 
 export const AUTOMATIC_DETECTION_PANEL = {
   title: 'Automatic detection of external calls',
   description:
     "External API calls are automatically identified using OpenTelemetry's span.kind attribute to detect client spans. API details like domain, endpoint, and URL are extracted from semantic convention attributes (server.address, url.full).",
-  contentClassName: 'min-h-56',
+  className: 'py-16',
 }
 
 export const AUTOMATIC_DETECTION_IMAGE = {

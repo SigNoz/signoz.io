@@ -63,7 +63,7 @@ export const INGEST_LOGS_PANEL = {
       clickText: 'Read Documentation',
     },
   },
-  contentClassName: 'min-h-72',
+  className: 'py-6',
 }
 
 export const PROCESS_LOGS_PANEL = {
@@ -82,7 +82,7 @@ export const PROCESS_LOGS_PANEL = {
   },
   image: '/img/log-management/process-logs.png',
   imageAlt: 'Log Processing',
-  contentClassName: 'min-h-72',
+  className: 'py-6',
 }
 
 export const LOG_CORRELATION_SHOWCASE = {

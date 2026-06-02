@@ -118,15 +118,18 @@ const SeeDropOffsBetweenSteps: React.FC = () => {
 
 const StopLosingUsersBanner: React.FC = () => {
   return (
-    <CTABanner
-      title={
-        <>
-          Stop Losing Users in Multi- <br />
-          Step Flows
-        </>
-      }
-      buttons={STOP_LOSING_USERS_BUTTONS}
-    />
+    <>
+      <CTABanner
+        title={
+          <>
+            Stop Losing Users in Multi- <br />
+            Step Flows
+          </>
+        }
+        buttons={STOP_LOSING_USERS_BUTTONS}
+      />
+      <Divider />
+    </>
   )
 }
 

@@ -120,41 +120,43 @@ const CostComparison: React.FC = () => {
             is free.
           </div>
         </div>
-        <Divider />
-        <div className="flex flex-col sm:flex-row">
-          <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
-            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
-              <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
-                ClickStack's <br className="hidden md:block" /> billing{' '}
-                <br className="hidden md:block" /> complexity
-              </h2>
-              <Button asChild variant="secondary" rounded="full">
-                <TrackingLink
-                  href="/blog/clickstack-managed-pricing-compute-costs/"
-                  clickType="Secondary CTA"
-                  clickName="ClickStack Alternative Cost Comparison ClickStack Pricing Details Button"
-                  clickLocation="ClickStack Alternative Cost Comparison"
-                  clickText="ClickStack pricing details"
-                >
-                  ClickStack pricing details <ArrowRight size={16} />
-                </TrackingLink>
-              </Button>
-            </div>
-          </div>
-          <div className="flex-[2_2_0%]">
-            <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
-              <div className="flex flex-col gap-4 px-10 py-10">
-                {CLICKSTACK_BILLING_CARDS.map((card) => (
-                  <Card
-                    key={card.title}
-                    className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+        <div>
+          <Divider />
+          <div className="flex flex-col sm:flex-row">
+            <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
+              <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
+                <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+                  ClickStack's <br className="hidden md:block" /> billing{' '}
+                  <br className="hidden md:block" /> complexity
+                </h2>
+                <Button asChild variant="secondary" rounded="full">
+                  <TrackingLink
+                    href="/blog/clickstack-managed-pricing-compute-costs/"
+                    clickType="Secondary CTA"
+                    clickName="ClickStack Alternative Cost Comparison ClickStack Pricing Details Button"
+                    clickLocation="ClickStack Alternative Cost Comparison"
+                    clickText="ClickStack pricing details"
                   >
-                    <div className="p-6">
-                      <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
-                      <p className="m-0 text-sm text-signoz_vanilla-400">{card.description}</p>
-                    </div>
-                  </Card>
-                ))}
+                    ClickStack pricing details <ArrowRight size={16} />
+                  </TrackingLink>
+                </Button>
+              </div>
+            </div>
+            <div className="flex-[2_2_0%]">
+              <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+                <div className="flex flex-col gap-4 px-10 py-10">
+                  {CLICKSTACK_BILLING_CARDS.map((card) => (
+                    <Card
+                      key={card.title}
+                      className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+                    >
+                      <div className="p-6">
+                        <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
+                        <p className="m-0 text-sm text-signoz_vanilla-400">{card.description}</p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -179,15 +181,19 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
               with all your filters intact.
             </div>
           </div>
-          <SectionLayout
-            variant="no-border"
-            className="!mx-auto flex items-center justify-center !p-0"
-          >
-            <IconTitleDescriptionCardGrid
-              cards={DASHBOARD_HELP_YOU_INVESTIGATE_CARDS}
-              variant="lg"
-            />
-          </SectionLayout>
+          <div>
+            <Divider />
+            <SectionLayout
+              variant="no-border"
+              className="!mx-auto flex items-center justify-center !p-0"
+            >
+              <IconTitleDescriptionCardGrid
+                cards={DASHBOARD_HELP_YOU_INVESTIGATE_CARDS}
+                variant="lg"
+              />
+            </SectionLayout>
+            <Divider />
+          </div>
         </div>
       </div>
     </section>
@@ -210,7 +216,9 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
             </div>
           </div>
           <SectionLayout variant="no-border" className="!mx-auto !p-0">
+            <Divider />
             <IconTitleDescriptionCardGrid cards={ALERTING_ABOVE_HISTORY_CARDS} variant="lg" />
+            <Divider />
             <div className="flex flex-col items-start gap-4 border-dashed border-signoz_slate-400 px-8 py-6 text-left">
               <h4 className="m-0 p-0 font-semibold text-signoz_vanilla-100">Alert history</h4>
               <p className="m-0 p-0 text-sm text-signoz_vanilla-400">
@@ -230,6 +238,7 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
                 className="rounded-md"
               />
             </div>
+            <Divider />
             <IconTitleDescriptionCardGrid cards={ALERTING_BELOW_HISTORY_CARDS} variant="lg" />
           </SectionLayout>
         </div>
