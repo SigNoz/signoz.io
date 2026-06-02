@@ -90,6 +90,11 @@ export const METRICS_QUICK_START_ITEMS = {
     },
     { name: 'Envoy', href: '/docs/userguide/envoy-metrics', clickName: 'Envoy Metrics Link' },
     {
+      name: 'Flux',
+      href: '/docs/metrics-management/fluxcd-metrics',
+      clickName: 'Flux Metrics Link',
+    },
+    {
       name: 'Istio',
       href: '/docs/metrics-management/istio-metrics',
       clickName: 'Istio Metrics Link',

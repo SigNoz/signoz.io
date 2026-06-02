@@ -1,0 +1,147 @@
+---
+date: 2026-06-02
+id: fluxcd-metrics
+title: Send Flux Metrics to SigNoz using OpenTelemetry
+description: Collect Flux (FluxCD) controller metrics in SigNoz using the OpenTelemetry Collector Prometheus receiver.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Use the OpenTelemetry Collector to scrape the Flux controllers' Prometheus endpoints and send metrics to SigNoz. The scrape captures reconciliation throughput, errors, duration, controller workqueues, runtime resource usage, and Kubernetes API traffic.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Flux installed in your Kubernetes cluster (controllers run in the `flux-system` namespace)
+- OpenTelemetry Collector deployed in the same cluster. See [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) to get started
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Flux Metrics Endpoints
+
+Flux controllers such as source, kustomize, helm, and notification expose Prometheus-format metrics on port **8080** at `/metrics`. Flux names the container port `http-prom`, and Flux's own PodMonitor selects that port.
+
+The controllers emit three groups of metrics:
+
+- **Flux reconciliation**: per-resource reconciliation duration and counts
+- **controller-runtime**: reconcile totals, errors, active workers, and workqueue state
+- **Runtime and API**: CPU, memory, goroutines, and Kubernetes API client traffic
+
+For metric names and labels, see the official <a href="https://fluxcd.io/flux/monitoring/metrics/" target="_blank" rel="noopener noreferrer nofollow">Flux metrics reference</a>.
+
+## Send Metrics to SigNoz
+
+### Step 1. Configure the OpenTelemetry Collector
+
+Merge the following into your existing Collector config. It adds a Prometheus scrape job that discovers Flux controller pods by their `http-prom` port and an OTLP exporter pointing to SigNoz.
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'flux-controllers'
+          kubernetes_sd_configs:
+            - role: pod
+              namespaces:
+                names:
+                  - flux-system
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: http-prom
+
+exporters:
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      signoz-ingestion-key: '<your-ingestion-key>'
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      exporters: [otlphttp]
+```
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  The Collector needs `ClusterRole` permissions for Kubernetes pod discovery. The [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) guide covers the required RBAC setup.
+</Admonition>
+
+### Step 2. Restart the Collector
+
+```bash
+kubectl rollout restart deployment/otel-collector -n <collector-namespace>
+```
+
+### Step 3. Validate
+
+After the Collector restarts:
+
+1. In SigNoz, go to **Metrics** > **Metrics Explorer**.
+2. Search for `gotk_reconcile_duration_seconds` to verify Flux reconciliation metrics are flowing.
+3. Search for `controller_runtime_reconcile_total` to verify controller-runtime metrics are flowing.
+
+SigNoz shows metrics within the first scrape interval (default: 60 seconds).
+
+<Figure
+  src="/img/docs/metrics/fluxcd/sample-metrics.webp"
+  alt="Flux Metrics"
+  caption="Flux Metrics"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No metrics in SigNoz
+
+Verify the Collector pod has RBAC permissions to discover Kubernetes pods. Run:
+
+```bash
+kubectl logs deployment/otel-collector -n <collector-namespace>
+```
+
+Look for scrape errors or permission-denied messages.
+
+### Pods discovered but no metrics scraped
+
+Confirm the Flux controllers expose the `http-prom` port. Run:
+
+```bash
+kubectl get pods -n flux-system -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].ports[*].name}{"\n"}{end}'
+```
+
+Each controller should list a port named `http-prom`.
+
+### Metrics delayed
+
+The default Prometheus scrape interval is 60 seconds. Reduce it for faster feedback:
+
+```yaml
+scrape_configs:
+  - job_name: 'flux-controllers'
+    scrape_interval: 15s
+    # ...
+```
+
+</details>
+
+## Next steps
+
+- [FluxCD dashboard](https://signoz.io/docs/dashboards/dashboard-templates/fluxcd-dashboard)
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on your metrics
+
+## Get Help
+
+<GetHelp />
