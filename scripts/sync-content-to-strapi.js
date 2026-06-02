@@ -661,8 +661,7 @@ async function resolveRelations(folderName, frontmatter) {
       if (relationConfig.filterKey && relationConfig.matchValue) {
         // Special case for tags: check key contains folder name AND value matches (case-sensitive)
         matched = entities.find((entity) => {
-          const keyMatch =
-            entity?.key && entity?.key.toLowerCase().includes(folderName.toLowerCase())
+          const keyMatch = entity?.key && entity?.key.includes(folderName)
 
           const valueMatch = entity?.value && entity?.value === value
 
