@@ -12,7 +12,7 @@ export const GetStartedEnterprise = () => {
   return (
     <div className="bg-[width:50%] bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat">
       <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
-        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+        <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
