@@ -21,3 +21,11 @@ if printf '%s\n' "$STAGED_FILES" | grep -E '^data/docs/.*\.mdx$' >/dev/null; the
 else
   echo 'husky (pre-commit): skipping docs metadata check (no documentation changes staged)'
 fi
+
+# Check CMS-synced content assets
+if printf '%s\n' "$STAGED_FILES" | grep -E '^data/(faqs|case-study|opentelemetry|comparisons|guides|blog)/.*\.mdx?$' >/dev/null; then
+  echo 'husky (pre-commit): checking CMS content assets'
+  node scripts/check-cms-assets.js
+else
+  echo 'husky (pre-commit): skipping CMS asset check (no migrated content changes staged)'
+fi
