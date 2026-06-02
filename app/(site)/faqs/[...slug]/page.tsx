@@ -7,7 +7,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import Button from '@/components/ui/Button'
-import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
+import { getAuthorDirectory, getContentBySlug } from '@/utils/contentRepository'
+import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
@@ -66,6 +67,32 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
   return []
 }
 
+function getStringValue(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value : undefined
+}
+
+function getAuthorKeys(content: MDXContent): string[] {
+  if (!Array.isArray(content.authors)) return []
+
+  return content.authors
+    .map((author: string | MDXContent) =>
+      typeof author === 'string'
+        ? author
+        : getStringValue(author?.key) || getStringValue(author?.name)
+    )
+    .filter((author): author is string => Boolean(author))
+}
+
+function getTagValues(content: MDXContent): string[] {
+  if (!Array.isArray(content.tags)) return []
+
+  return content.tags
+    .map((tag: string | MDXContent) =>
+      typeof tag === 'string' ? tag : getStringValue(tag?.value) || getStringValue(tag?.key)
+    )
+    .filter((tag): tag is string => Boolean(tag))
+}
+
 export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>
 }): Promise<Metadata> {
@@ -78,33 +105,39 @@ export async function generateMetadata(props: {
 
     try {
       const deployment_status = isProduction ? 'live' : 'staging'
-      const { data: content } = await fetchMDXContentByPath('faqs', path, deployment_status)
+      const content = await getContentBySlug('faqs', path, deployment_status)
 
-      const faqContent = content as MDXContent
+      if (!content) {
+        throw new Error(`FAQ content not found for path: ${path}`)
+      }
 
-      // Extract author names from the content
-      const authorNames = faqContent?.authors?.map((author) => author?.name) || ['SigNoz Team']
-      const seoTitle = faqContent.meta_title || faqContent.title
+      const authorDirectory = await getAuthorDirectory()
+      const authorNames = getAuthorKeys(content).map(
+        (author) => authorDirectory[author]?.name || author
+      )
+      const seoTitle = content.meta_title || content.title
 
       return {
         title: seoTitle,
-        description: faqContent?.description || `${faqContent?.title} - SigNoz FAQ`,
-        authors: authorNames.map((name) => ({ name })),
+        description: content?.description || `${content?.title} - SigNoz FAQ`,
+        authors: (authorNames.length > 0 ? authorNames : ['SigNoz Team']).map((name) => ({
+          name,
+        })),
         openGraph: {
           title: seoTitle,
-          description: faqContent?.description || `${faqContent?.title} - SigNoz FAQ`,
+          description: content?.description || `${content?.title} - SigNoz FAQ`,
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          publishedTime: faqContent?.date,
-          modifiedTime: faqContent?.updatedAt,
-          url: faqContent?.path || './',
-          authors: authorNames,
+          publishedTime: content?.date,
+          modifiedTime: content?.updatedAt,
+          url: content?.path || './',
+          authors: authorNames.length > 0 ? authorNames : ['SigNoz Team'],
         },
         twitter: {
           card: 'summary_large_image',
           title: seoTitle,
-          description: faqContent?.description || `${faqContent?.title} - SigNoz FAQ`,
+          description: content?.description || `${content?.title} - SigNoz FAQ`,
         },
       }
     } catch (error) {
@@ -142,21 +175,17 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   const isProduction = process.env.VERCEL_ENV === 'production'
 
-  // Fetch content from Strapi with error handling
+  // Fetch content from the repository with error handling
   let content: MDXContent
   try {
-    if (!process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL) {
-      throw new Error('Strapi API URL is not configured')
-    }
-
     const deployment_status = isProduction ? 'live' : 'staging'
 
-    const response = await fetchMDXContentByPath('faqs', path, deployment_status)
-    if (!response || !response.data) {
+    const response = await getContentBySlug('faqs', path, deployment_status)
+    if (!response) {
       console.error(`Invalid response for path: ${path}`)
       notFound()
     }
-    content = response.data as MDXContent
+    content = response
   } catch (error) {
     console.error('Error fetching FAQ content:', error)
     notFound()
@@ -168,8 +197,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   }
 
   // Generate computed fields
-  const readingTimeData = readingTime(content?.content)
-  const toc = generateTOC(content?.content)
+  const readingTimeData = readingTime(content?.content || '')
+  const toc = generateTOC(content?.content || '')
 
   // Compile MDX content with all plugins
   let compiledContent
@@ -189,17 +218,21 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const contentForStructuredData = { ...content, path: `faqs${content.path || `/${path}`}` }
   const structuredData = generateStructuredData('faqs', contentForStructuredData)
   const relatedArticles = buildRelatedArticles(content)
+  const authorDirectory = await getAuthorDirectory()
+  const authorList = getAuthorKeys(content)
+  const authorNames = authorList.map((author) => authorDirectory[author]?.name || author)
+  const tags = getTagValues(content)
 
   // Prepare content for FAQLayout
   const mainContent = {
     title: content.title,
     date: content.date,
     lastmod: content.updatedAt,
-    tags: content.tags?.map((tag: MDXContent) => tag.value) || [],
+    tags,
     draft: content.deployment_status === 'draft',
     summary: content.description,
     images: content.images || [],
-    authors: content.authors?.map((author: MDXContent) => author?.name) || [],
+    authors: authorNames,
     slug: path,
     path: content.path || `/faqs/${path}`,
     type: 'FAQ' as const,
@@ -211,13 +244,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   }
 
   // Prepare author details from the authors relation
-  const authorDetails: { name: string; url?: string; image_url?: string }[] = content.authors?.map(
-    (author: MDXContent) => ({
-      name: author.name || 'Unknown Author',
-      url: author.url,
-      image_url: author.image_url,
-    })
-  ) || [{ name: 'SigNoz Team' }]
+  const authorDetails: { name: string; url?: string; image_url?: string }[] =
+    authorList.length > 0
+      ? authorList.map((author) => authorDirectory[author] || { name: author })
+      : [{ name: 'SigNoz Team' }]
 
   return (
     <>
@@ -238,9 +268,9 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <FAQLayout
         content={mainContent}
         authorDetails={authorDetails}
-        authors={content.authors?.map((author) => author?.name) || []}
+        authors={authorNames}
         toc={toc}
-        tags={content.tags?.map((tag) => tag?.value) || []}
+        tags={tags}
         relatedArticles={relatedArticles}
       >
         <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">

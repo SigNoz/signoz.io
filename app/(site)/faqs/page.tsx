@@ -1,35 +1,38 @@
-import { fetchMDXContentByPath, MDXContentApiResponse } from '@/utils/strapi'
+import { getAllContent } from '@/utils/contentRepository'
+import { MDXContent } from '@/utils/strapi'
 import { notFound } from 'next/navigation'
 import FAQsClient from './FAQsClient'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
+function getTagValues(content: MDXContent): string[] {
+  if (!Array.isArray(content.tags)) return []
+
+  return content.tags
+    .map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag?.value || tag?.key))
+    .filter((tag): tag is string => typeof tag === 'string' && tag.length > 0)
+}
+
 export default async function FAQsPage() {
   const isProduction = process.env.VERCEL_ENV === 'production'
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
   try {
-    // Fetch all FAQs from Strapi
-    const response = (await fetchMDXContentByPath(
-      'faqs',
-      undefined,
-      deploymentStatus,
-      true
-    )) as MDXContentApiResponse
+    const response = await getAllContent('faqs', deploymentStatus, null)
 
-    if (!response || !response.data) {
-      console.error('Invalid response from Strapi')
+    if (!response) {
+      console.error('Invalid FAQ content response')
       notFound()
     }
 
     // Transform the data to match the client component's expected format
-    const faqs = response.data.map((faq) => ({
+    const faqs = response.map((faq) => ({
       title: faq.title,
       description: faq.description,
       path: faq.path,
       date: faq.date,
-      tags: faq.tags?.map((tag) => tag.value) || [],
+      tags: getTagValues(faq),
       draft: faq.deployment_status === 'draft',
     }))
 

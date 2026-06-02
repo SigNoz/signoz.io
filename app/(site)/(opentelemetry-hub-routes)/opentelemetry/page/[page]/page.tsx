@@ -6,7 +6,7 @@ import {
   type ResourceCenterCard,
 } from '../../../content'
 import { buildListingMetadata } from '../../../metadata'
-import { fetchMDXContentByPath, type MDXContent, type MDXContentApiResponse } from '@/utils/strapi'
+import { getAllContent, getAuthorDirectory } from '@/utils/contentRepository'
 import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
 
@@ -24,19 +24,17 @@ export const generateStaticParams = async () => {
 
 export default async function Page(props: { params: Promise<{ page: string }> }) {
   const params = await props.params
-  // Fetch CMS opentelemetries articles
+  // Fetch OpenTelemetry articles from the repository
   let cmsArticles: ResourceCenterCard[] = []
   try {
     const isProduction = process.env.VERCEL_ENV === 'production'
     const deployment_status = isProduction ? 'live' : 'staging'
-    const response = await fetchMDXContentByPath(
-      'opentelemetries',
-      undefined,
-      deployment_status,
-      true
-    )
-    cmsArticles = (((response as MDXContentApiResponse).data || []) as MDXContent[]).map(
-      pickOpenTelemetryArticleFields
+    const [articles, authorDirectory] = await Promise.all([
+      getAllContent('opentelemetries', deployment_status, null),
+      getAuthorDirectory(),
+    ])
+    cmsArticles = articles.map((article) =>
+      pickOpenTelemetryArticleFields(article, authorDirectory)
     )
   } catch (error) {
     console.error('Error fetching OpenTelemetry CMS articles:', error)

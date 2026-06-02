@@ -11,6 +11,22 @@ const buildFaqSlug = (path = '') => {
 
 const getDeploymentStatus = () => (process.env.VERCEL_ENV === 'production' ? 'live' : 'staging')
 
+const mapRelationKeys = (items: unknown) => {
+  if (!Array.isArray(items)) return undefined
+
+  return items
+    .map((item: any) => (typeof item === 'string' ? item : item?.key))
+    .filter((item): item is string => typeof item === 'string' && item.length > 0)
+}
+
+const mapTaxonomyValues = (items: unknown) => {
+  if (!Array.isArray(items)) return undefined
+
+  return items
+    .map((item: any) => (typeof item === 'string' ? item : item?.value || item?.key))
+    .filter((item): item is string => typeof item === 'string' && item.length > 0)
+}
+
 const mapFaqEntries = (faqs: MDXContentApiResponse | undefined) => {
   if (!faqs?.data?.length) {
     return []
@@ -20,8 +36,8 @@ const mapFaqEntries = (faqs: MDXContentApiResponse | undefined) => {
     ...faq,
     slug: buildFaqSlug(faq.path),
     date: faq.date ?? faq.publishedAt ?? faq.updatedAt ?? faq.createdAt,
-    tags: faq.tags?.map((tag) => tag?.value),
-    authors: faq?.authors?.map((author) => author?.key),
+    tags: mapTaxonomyValues(faq.tags),
+    authors: mapRelationKeys(faq?.authors),
   }))
 }
 
@@ -30,8 +46,8 @@ const mapComparisonEntries = (comparisons: MDXContentApiResponse | undefined) =>
     ...comparison,
     slug: buildComparisonSlug(comparison.path),
     date: comparison.date ?? comparison.publishedAt ?? comparison.updatedAt ?? comparison.createdAt,
-    tags: comparison.tags?.map((tag) => tag?.value),
-    authors: comparison?.authors?.map((author) => author?.key),
+    tags: mapTaxonomyValues(comparison.tags),
+    authors: mapRelationKeys(comparison?.authors),
   }))
 }
 
@@ -71,8 +87,8 @@ const mapGuideEntries = (guides: MDXContentApiResponse | undefined) => {
     ...guide,
     slug: buildGuideSlug(guide.path),
     date: guide.date ?? guide.publishedAt ?? guide.updatedAt ?? guide.createdAt,
-    tags: guide.tags?.map((tag) => tag?.value),
-    authors: guide?.authors?.map((author) => author?.key),
+    tags: mapTaxonomyValues(guide.tags),
+    authors: mapRelationKeys(guide?.authors),
   }))
 }
 
@@ -90,8 +106,8 @@ const mapBlogEntries = (blogs: MDXContentApiResponse | undefined) => {
     ...blog,
     slug: buildBlogSlug(blog.path),
     date: blog.date ?? blog.publishedAt ?? blog.updatedAt ?? blog.createdAt,
-    tags: blog.tags?.map((tag) => tag?.value),
-    authors: blog?.authors?.map((author) => author?.key),
+    tags: mapTaxonomyValues(blog.tags),
+    authors: mapRelationKeys(blog?.authors),
   }))
 }
 

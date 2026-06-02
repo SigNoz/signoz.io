@@ -1,5 +1,5 @@
-import { fetchMDXContentByPath } from './strapi'
-import type { MDXContentApiResponse } from './strapi'
+import { getAllContent } from './contentRepository'
+import type { MDXContent, MDXContentApiResponse } from './strapi'
 
 export type CMSContentResult = {
   faqs: MDXContentApiResponse | undefined
@@ -8,6 +8,20 @@ export type CMSContentResult = {
   comparisons: MDXContentApiResponse | undefined
   guides: MDXContentApiResponse | undefined
   blogs: MDXContentApiResponse | undefined
+}
+
+function toApiResponse(data: MDXContent[]): MDXContentApiResponse {
+  return {
+    data,
+    meta: {
+      pagination: {
+        page: 1,
+        pageSize: data.length,
+        pageCount: data.length > 0 ? 1 : 0,
+        total: data.length,
+      },
+    },
+  }
 }
 
 export async function fetchAllCMSContent(deploymentStatus: string): Promise<CMSContentResult> {
@@ -19,12 +33,12 @@ export async function fetchAllCMSContent(deploymentStatus: string): Promise<CMSC
     guidesResult,
     blogsResult,
   ] = await Promise.allSettled([
-    fetchMDXContentByPath('faqs', undefined, deploymentStatus, true),
-    fetchMDXContentByPath('case-studies', undefined, deploymentStatus, true),
-    fetchMDXContentByPath('opentelemetries', undefined, deploymentStatus, true),
-    fetchMDXContentByPath('comparisons', undefined, deploymentStatus, true),
-    fetchMDXContentByPath('guides', undefined, deploymentStatus, true),
-    fetchMDXContentByPath('blogs', undefined, deploymentStatus, true),
+    getAllContent('faqs', deploymentStatus, null),
+    getAllContent('case-studies', deploymentStatus, null),
+    getAllContent('opentelemetries', deploymentStatus, null),
+    getAllContent('comparisons', deploymentStatus, null),
+    getAllContent('guides', deploymentStatus, null),
+    getAllContent('blogs', deploymentStatus, null),
   ])
 
   if (faqsResult.status === 'rejected') {
@@ -47,25 +61,16 @@ export async function fetchAllCMSContent(deploymentStatus: string): Promise<CMSC
   }
 
   return {
-    faqs:
-      faqsResult.status === 'fulfilled' ? (faqsResult.value as MDXContentApiResponse) : undefined,
+    faqs: faqsResult.status === 'fulfilled' ? toApiResponse(faqsResult.value) : undefined,
     caseStudies:
-      caseStudiesResult.status === 'fulfilled'
-        ? (caseStudiesResult.value as MDXContentApiResponse)
-        : undefined,
+      caseStudiesResult.status === 'fulfilled' ? toApiResponse(caseStudiesResult.value) : undefined,
     opentelemetries:
       opentelemetryResult.status === 'fulfilled'
-        ? (opentelemetryResult.value as MDXContentApiResponse)
+        ? toApiResponse(opentelemetryResult.value)
         : undefined,
     comparisons:
-      comparisonsResult.status === 'fulfilled'
-        ? (comparisonsResult.value as MDXContentApiResponse)
-        : undefined,
-    guides:
-      guidesResult.status === 'fulfilled'
-        ? (guidesResult.value as MDXContentApiResponse)
-        : undefined,
-    blogs:
-      blogsResult.status === 'fulfilled' ? (blogsResult.value as MDXContentApiResponse) : undefined,
+      comparisonsResult.status === 'fulfilled' ? toApiResponse(comparisonsResult.value) : undefined,
+    guides: guidesResult.status === 'fulfilled' ? toApiResponse(guidesResult.value) : undefined,
+    blogs: blogsResult.status === 'fulfilled' ? toApiResponse(blogsResult.value) : undefined,
   }
 }
