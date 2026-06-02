@@ -1,18 +1,13 @@
-// This route only exists for local development — it serves images from
-// `data-assets/img` which aren't in `public/`.  In production Next.js
-// serves `public/img` as static files automatically, so this route is
-// unnecessary and would bloat the serverless function.
+// Dev-only route: serves images from `data-assets/img` for local CMS previews.
+// In production Next.js serves `public/img` as static files automatically,
+// so this handler just returns 404 — keeping the serverless function tiny.
 
-if (process.env.NODE_ENV !== 'development') {
-  throw new Error('app/img/[...path]/route.ts must only run in development')
-}
-
-import { promises as fs } from 'fs'
-import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
+const NOT_FOUND = new NextResponse('Not found', { status: 404 })
 
 const CONTENT_TYPES: Record<string, string> = {
   '.avif': 'image/avif',
@@ -29,41 +24,35 @@ function hasUnsafePathSegment(parts: string[]) {
   return parts.some((part) => part === '..' || part.includes('/') || part.includes('\\'))
 }
 
-function isInsideDirectory(baseDir: string, filePath: string) {
-  const relativePath = path.relative(baseDir, filePath)
-  return relativePath === '' || (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
-}
-
-async function readAsset(baseDir: string, parts: string[]) {
-  const filePath = path.join(baseDir, ...parts)
-
-  if (!isInsideDirectory(baseDir, filePath)) {
-    return null
-  }
-
-  try {
-    const stats = await fs.stat(filePath)
-    if (!stats.isFile()) return null
-
-    return fs.readFile(filePath)
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null
-    throw error
-  }
-}
-
 export async function GET(_request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
+  if (process.env.NODE_ENV !== 'development') {
+    return NOT_FOUND
+  }
+
   const params = await props.params
   const parts = params.path || []
 
   if (parts.length === 0 || hasUnsafePathSegment(parts)) {
-    return new NextResponse('Not found', { status: 404 })
+    return NOT_FOUND
   }
 
-  const dataAssetsImgDir = path.join(process.cwd(), 'data-assets')
+  // Dynamic imports so fs/path are NOT traced into the production bundle
+  const { promises: fs } = await import('fs')
+  const path = await import('path')
 
-  const asset = await readAsset(dataAssetsImgDir, parts)
-  if (asset) {
+  const baseDir = path.join(process.cwd(), 'data-assets')
+  const filePath = path.join(baseDir, ...parts)
+
+  const relativePath = path.relative(baseDir, filePath)
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+    return NOT_FOUND
+  }
+
+  try {
+    const stats = await fs.stat(filePath)
+    if (!stats.isFile()) return NOT_FOUND
+
+    const asset = await fs.readFile(filePath)
     return new NextResponse(new Uint8Array(asset), {
       headers: {
         'Content-Type':
@@ -72,7 +61,8 @@ export async function GET(_request: NextRequest, props: { params: Promise<{ path
         'Cache-Control': 'no-store',
       },
     })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return NOT_FOUND
+    throw error
   }
-
-  return new NextResponse('Not found', { status: 404 })
 }
