@@ -293,7 +293,7 @@ const GetStarted = ({ page }) => {
     <div className="flex flex-col gap-16 px-20 font-medium max-md:max-w-full max-md:px-5 ">
       <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:45%] bg-[center_top_-12rem] sm:bg-no-repeat">
         <section className="container flex max-h-full max-w-full flex-col border-l border-r border-dashed border-signoz_slate-100 !px-0">
-          <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[length:110%] bg-[center_top_calc(-250px)] bg-no-repeat">
+          <div className="bg-blur-ellipse-206">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-3xl font-bold sm:text-4xl">
                 OpenTelemetry-Native Logs,

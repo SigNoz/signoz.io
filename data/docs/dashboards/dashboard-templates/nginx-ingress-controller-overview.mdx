@@ -1,0 +1,73 @@
+---
+date: 2026-05-30
+id: nginx-ingress-controller-overview
+title: Ingress Nginx - Controller Overview Dashboard
+description: Monitor NGINX Ingress Controller health including request volume, connections, config reloads, CPU and memory usage, and per-ingress success rates in SigNoz.
+doc_type: explanation
+---
+
+Track NGINX Ingress Controller health: request volume, active connections, config reload status, resource usage, and per-ingress success rates.
+
+<Admonition type="note">
+  This dashboard requires nginx-ingress-controller metrics flowing into SigNoz. Follow the [Send NGINX Ingress Controller Metrics to SigNoz](https://signoz.io/docs/metrics-management/nginx-ingress-controller/) guide to configure the OpenTelemetry Collector to scrape the controller's Prometheus endpoint.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/nginx-ingress-controller/nginx-ingress-controller-overview.webp"
+  alt="Ingress Nginx - Controller Overview Dashboard"
+  caption="Ingress Nginx - Controller Overview Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/ingress-nginx-controller.json"
+    dashboardName="Ingress Nginx - Controller Overview"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Request volume**: total requests per second at the controller and per-ingress level
+- **Connections**: active controller connections over time
+- **Success rate**: fraction of non-4xx/5xx responses at controller and per-ingress level
+- **Config reloads**: reload frequency and last-reload failure status
+- **Resource usage**: average CPU and RSS memory per controller pod
+- **Network I/O**: bytes sent and received
+- **Response times**: p50/p95/p99 latency per ingress resource
+
+## Metrics Included
+
+### Controller Health
+
+- **Controller Request Volume**: Shows requests per second across all ingresses on this controller over time
+- **Controller Connections**: Shows active controller connections over time
+- **Controller Success Rate**: Shows fraction of non-4xx/5xx responses (0–1 scale) over time
+- **Config Reloads**: Shows rate of nginx config reloads over time
+- **Last Config Failed**: Shows whether the most recent config reload failed over time
+
+### Per-Ingress
+
+- **Ingress Request Volume**: Shows requests per second for the selected ingress resource over time
+- **Ingress Success Rate**: Shows non-4xx/5xx response fraction for the selected ingress over time
+- **Ingress Percentile Response Times**: Shows p50, p95, and p99 end-to-end request duration for the selected ingress over time
+
+### Resource Usage
+
+- **Average CPU Usage**: Shows mean CPU consumption per controller pod over time
+- **Average Memory Usage**: Shows mean RSS memory in bytes per controller pod over time
+- **Network I/O pressure**: Shows bytes sent and received over time
+
+## Dashboard Variables
+
+Variables cascade in order — each filter narrows the next:
+
+- **namespace**: Kubernetes namespace where the controller runs
+- **controller_class**: Ingress class (e.g. `k8s.io/ingress-nginx`)
+- **controller**: Specific controller pod name
+- **ingress**: Ingress resource name to drill into per-ingress panels
+
+## Related Dashboards
+
+- [Ingress Nginx - Request Handling Performance](https://signoz.io/docs/dashboards/dashboard-templates/nginx-ingress-request-handling-performance)
+- [NGINX Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx)
+- [Kubernetes Pod Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed)

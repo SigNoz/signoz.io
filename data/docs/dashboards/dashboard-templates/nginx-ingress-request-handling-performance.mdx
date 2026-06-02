@@ -1,0 +1,68 @@
+---
+date: 2026-05-30
+id: nginx-ingress-request-handling-performance
+title: Ingress Nginx - Request Handling Performance Dashboard
+description: Monitor nginx-ingress-controller request latency, upstream response time, error rates, and throughput in Kubernetes with a pre-built SigNoz dashboard.
+doc_type: explanation
+---
+
+Monitor per-ingress request latency, error ratios, upstream response times, and throughput across the NGINX Ingress Controller.
+
+<Admonition type="note">
+  This dashboard requires nginx-ingress-controller metrics flowing into SigNoz. Follow the [Send NGINX Ingress Controller Metrics to SigNoz](https://signoz.io/docs/metrics-management/nginx-ingress-controller/) guide to configure the OpenTelemetry Collector to scrape the controller's Prometheus endpoint.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/nginx-ingress-controller/nginx-ingress-controller-dashboard.webp"
+  alt="Ingress Nginx - Request Handling Performance Dashboard"
+  caption="Ingress Nginx - Request Handling Performance Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/nginx-ingress-request-handling-performance.json"
+    dashboardName="Ingress Nginx - Request Handling Performance"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Latency**: p50, p95, and p99 end-to-end request duration and upstream response time
+- **Throughput**: request rate per second broken down by method, host, and path
+- **Errors**: 4xx and 5xx response ratio and per-second rate by method and path
+- **Upstream performance**: median and average upstream response time per path
+- **Response size**: average response body size by method, host, and path
+
+## Metrics Included
+
+### Latency
+
+- **Request Latency Percentiles**: Shows p50, p95, and p99 end-to-end request duration (controller + upstream) over time
+- **Upstream Response Latency Percentiles**: Shows p50, p95, and p99 upstream backend response time over time
+- **Average Upstream Response Latency**: Shows mean upstream response time across the selected ingress over time
+- **Average Upstream Response Time by Method and Path**: Shows mean upstream latency by method, host, and path over time
+- **Median Upstream Response Time by Method and Path**: Shows p50 upstream response time per observed path over time
+
+### Throughput
+
+- **Request Rate by Method and Path**: Shows requests per second by HTTP method, host, and path over time
+
+### Errors
+
+- **Response Error Ratio (4xx/5xx) by Method and Path**: Shows fraction of error responses among all responses (0–1 scale) by method and path over time
+- **Error Request Rate by Status (4xx/5xx)**: Shows error responses per second by method, path, and status code over time
+
+### Response Size
+
+- **Average Response Size by Method and Path**: Shows mean response body size in bytes by method, host, and path over time
+
+## Dashboard Variables
+
+- **ingress**: Filter all panels by ingress resource name. Supports multi-select; defaults to all ingresses.
+
+## Related Dashboards
+
+- [Ingress Nginx - Controller Overview](https://signoz.io/docs/dashboards/dashboard-templates/nginx-ingress-controller-overview)
+- [NGINX Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx)
+- [Kubernetes Pod Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed)
+- [Kubernetes Node Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed)

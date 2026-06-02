@@ -37,6 +37,7 @@ import {
   SiFlux,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
+import { Zap } from 'lucide-react'
 import { VscGraphLine } from 'react-icons/vsc'
 import IconCardGrid from '../Card/IconCardGrid'
 import { METRICS_QUICK_START_ITEMS } from '@/constants/componentItems'
@@ -100,9 +101,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/userguide/envoy-metrics': <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
   '/docs/metrics-management/fluxcd-metrics': <SiFlux className="h-7 w-7 text-blue-500" />,
   '/docs/metrics-management/istio-metrics': <SiIstio className="h-7 w-7 text-blue-400" />,
+  '/docs/metrics-management/nginx-ingress-controller': (
+    <SiNginx className="h-7 w-7 text-blue-600" />
+  ),
   '/docs/metrics-management/nvidia-dcgm-metrics': <FaServer className="h-7 w-7 text-green-500" />,
   '/docs/metrics-management/slurm-metrics': <FaServer className="h-7 w-7 text-blue-600" />,
   '/docs/metrics-management/render-metrics': <FaCloud className="h-7 w-7 text-purple-500" />,
+  '/docs/metrics-management/keda-metrics': <Zap className="h-7 w-7 text-purple-500" />,
   '/docs/integrations/outposts/render': <SiRender className="h-7 w-7 text-black dark:text-white" />,
   // Databases
   '/docs/integrations/clickhouse': <SiClickhouse className="h-7 w-7 text-yellow-400" />,
