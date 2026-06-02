@@ -1,3 +1,12 @@
+// This route only exists for local development — it serves images from
+// `data-assets/img` which aren't in `public/`.  In production Next.js
+// serves `public/img` as static files automatically, so this route is
+// unnecessary and would bloat the serverless function.
+
+if (process.env.NODE_ENV !== 'development') {
+  throw new Error('app/img/[...path]/route.ts must only run in development')
+}
+
 import { promises as fs } from 'fs'
 import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
@@ -51,24 +60,16 @@ export async function GET(_request: NextRequest, props: { params: Promise<{ path
     return new NextResponse('Not found', { status: 404 })
   }
 
-  const publicImgDir = path.join(process.cwd(), 'public', 'img')
-  const dataAssetsImgDir = path.join(process.cwd(), 'data-assets', 'img')
-  const searchDirs =
-    process.env.NODE_ENV === 'development' ? [publicImgDir, dataAssetsImgDir] : [publicImgDir]
+  const dataAssetsImgDir = path.join(process.cwd(), 'data-assets')
 
-  for (const directory of searchDirs) {
-    const asset = await readAsset(directory, parts)
-    if (!asset) continue
-
+  const asset = await readAsset(dataAssetsImgDir, parts)
+  if (asset) {
     return new NextResponse(new Uint8Array(asset), {
       headers: {
         'Content-Type':
           CONTENT_TYPES[path.extname(parts.at(-1) || '').toLowerCase()] ||
           'application/octet-stream',
-        'Cache-Control':
-          process.env.NODE_ENV === 'development'
-            ? 'no-store'
-            : 'public, max-age=31536000, immutable',
+        'Cache-Control': 'no-store',
       },
     })
   }
