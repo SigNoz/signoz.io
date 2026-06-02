@@ -27,6 +27,11 @@ export const INTEGRATIONS_ITEMS = {
     },
     { name: 'MongoDB', href: '/docs/integrations/mongodb', clickName: 'MongoDB Integration Link' },
     {
+      name: 'Cassandra',
+      href: '/docs/integrations/opentelemetry-cassandra',
+      clickName: 'Cassandra Integration Link',
+    },
+    {
       name: 'Clickhouse',
       href: '/docs/integrations/clickhouse',
       clickName: 'Clickhouse Integration Link',
