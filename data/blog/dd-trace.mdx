@@ -5,12 +5,15 @@ tags: [datadog, dd-trace,]
 authors: [aayush_sharma]
 description: "dd-trace is Datadog's proprietary tracing library and the SDK that ties your application to Datadog APM. Here's what it does, where it falls short, and how teams replace it with OpenTelemetry and SigNoz."
 keywords: [dd-trace, ddtrace, dd-trace-py, dd-trace-js, dd-trace-go, dd-trace-java, dd-trace-dotnet, dd-trace-php, datadog tracer, datadog apm client, what is dd-trace]
+related_articles:
+  - '/blog/datadog-logs-pricing/'
+  - '/blog/high-cardinality-data/'
 ---
 
 **TL;DR**
 
-- **SigNoz**: Best for teams looking for an OpenTelemetry-native destination that gives the same Datadog-like APM experience without the proprietary agent. Ships a Datadog dashboard JSON translator built specifically for this migration and supports the OpenTelemetry Collector's Datadog Receiver so you can forward Datadog Agent traffic to SigNoz while swapping SDKs at your own pace.
-- **`dd-trace` (Datadog)**: Suited to teams already committed to Datadog and willing to keep paying per-host APM charges. Locks your tracing code to the Datadog Agent through a proprietary wire protocol and `DD_*` configuration, so moving to any other backend later means rewriting the instrumentation, not just changing an endpoint.
+- **SigNoz**: OpenTelemetry-native APM with a Datadog-style UI, a Datadog dashboard translator, and Datadog Receiver support for staged migrations off `dd-trace`.
+- **Datadog (`dd-trace`)**: Per-host APM charges and a proprietary wire protocol that ties your tracing code to the Datadog Agent, so moving backends later means rewriting the instrumentation.
 
 ---
 
@@ -18,7 +21,7 @@ keywords: [dd-trace, ddtrace, dd-trace-py, dd-trace-js, dd-trace-go, dd-trace-ja
 
 `dd-trace` gets your tracing data into Datadog, but it does so by locking your application into Datadog's ecosystem. The libraries talk to Datadog's Agent in a proprietary protocol, they require Datadog-specific configuration such as `DD_SERVICE`, `DD_ENV`, `DD_TRACE_AGENT_URL`, and similar env vars. Once your code is instrumented with `dd-trace`, moving to any other observability backend means swapping out the SDK entirely, not just redirecting traffic to a different endpoint.
 
-This article walks through what `dd-trace` actually does, how it's set up across each language, the common setup issues, and how teams replace it with OpenTelemetry and SigNoz.
+This article walks through what `dd-trace` actually does, how it's set up across each language, the common setup issues, and how teams replace it with [OpenTelemetry](https://signoz.io/opentelemetry/) and SigNoz.
 
 <KeyPointCallout title="PLANNING TO MOVE OFF DD-TRACE?" defaultCollapsed="true">
 
@@ -34,7 +37,19 @@ For the full step-by-step replacement path, our [Datadog APM migration guide](ht
   caption="dd-trace data flow"
 />
 
-`dd-trace` is a per-language SDK that runs inside your application, captures spans, and ships them through the `Datadog Agent` over a proprietary HTTP API to Datadog's backend. There's a separate package per language (Python's `ddtrace`, Node.js's `dd-trace`, Go's `dd-trace-go`, Java's `dd-java-agent`, Ruby's `datadog` gem, `Datadog.Trace` for .NET, and the `datadog-setup.php` tracer for PHP, with newer support for C++, Rust, Android, and iOS), but the shape is the same in every language - instrumentation runs in-process, talks to the Agent locally, and the Agent talks to Datadog.
+`dd-trace` is a per-language SDK that runs inside your application, captures spans, and ships them through the Datadog Agent over a proprietary HTTP API to Datadog's backend. There's a separate package per language:
+
+| Language | Package |
+| --- | --- |
+| Python | `ddtrace` |
+| Node.js | `dd-trace` |
+| Go | `dd-trace-go` |
+| Java | `dd-java-agent` |
+| Ruby | `datadog` gem |
+| .NET | `Datadog.Trace` |
+| PHP | `datadog-setup.php` |
+
+Newer support also exists for C++, Rust, Android, and iOS, but the shape is the same in every language — instrumentation runs in-process, talks to the Agent locally, and the Agent talks to Datadog.
 
 The application never talks to Datadog's backend directly, and the destination is hard-coded by design. Whichever language SDK you use, changing where traces go means swapping the SDK out, not redirecting traffic to a different endpoint.
 
@@ -44,7 +59,7 @@ Beyond the bill and the lock-in, `dd-trace` quietly costs engineering time and t
 
 Each language has different problems with `dd-trace`, and Node.js has the most. There, `dd-trace` uses runtime patching to attach itself to imports and assumes the library loads before anything else, an assumption that modern Node setups (ESM imports, webpack, esbuild, Next.js, Nest.js) violate in different ways, with fixes scattered across fragmented docs. 
 
-Python has two valid entry points, `ddtrace-run` and `import ddtrace.auto`, and you have to pick one per process, using both at once is what causes duplicate-span confusion. PHP needs the `ddtrace` extension installed through Datadog's `datadog-setup.php` installer before auto-instrumentation does anything, .NET auto-instrumentation requires either the machine-wide installer or the per-app `Datadog.Trace.Bundle` package plus a set of environment variables set on the target process (neither of which is obvious from a NuGet `add package` alone), and Go now supports compile-time auto-instrumentation through Orchestrion, though teams still on the older manual path have to add per-package imports and a `tracer.Start()` call.
+Python has two valid entry points, `ddtrace-run` and `import ddtrace.auto`, and you have to pick one per process, using both at once is what causes duplicate-span confusion. PHP needs the `ddtrace` extension installed through Datadog's `datadog-setup.php` installer before auto-instrumentation does anything, [.NET auto-instrumentation](https://signoz.io/opentelemetry/) requires either the machine-wide installer or the per-app `Datadog.Trace.Bundle` package plus a set of environment variables set on the target process (neither of which is obvious from a NuGet `add package` alone), and Go now supports compile-time auto-instrumentation through Orchestrion, though teams still on the older manual path have to add per-package imports and a `tracer.Start()` call.
 
 Cutting across all of this, configuration precedence is language-specific. In most SDKs the `DD_*` environment variables take effect last and override what code sets, so the service name your application thinks it's emitting isn't always what shows up in Datadog. The exact rule varies per language, so the reliable answer is to check the per-language SDK docs before assuming env vars win.
 
@@ -77,7 +92,7 @@ Whether you stay on `dd-trace` or move to OpenTelemetry comes down to portabilit
 
 ## When to Replace dd-trace with OpenTelemetry
 
-The most common reason teams move off `dd-trace` is cost. [Datadog APM](https://signoz.io/blog/datadog-pricing/) starts at `\$31` per host per month, with `APM Pro` at `\$35` and `APM Enterprise` at `\$40`, before per-span ingestion or indexing overages. At 100 hosts on the base APM plan, that's `\$3,100/month` for APM alone. Moving to an OpenTelemetry-native backend usually drops that bill noticeably, especially at higher host counts.
+The most common reason teams move off `dd-trace` is cost. [Datadog APM pricing](https://signoz.io/blog/datadog-pricing/) starts at `\$31` per host per month, with APM Pro at `\$35` and APM Enterprise at `\$40`, before per-span ingestion or indexing overages. At 100 hosts on the base APM plan, that's `\$3,100/month` for APM alone. Moving to an OpenTelemetry-native backend usually drops that bill noticeably, especially at higher host counts.
 
 At scale, the remaining reasons start to matter as much as the bill itself. Once your tracing code uses OpenTelemetry instead of `dd-trace`, you can point traces at any backend by changing a single endpoint, which `dd-trace` simply doesn't allow. OpenTelemetry is also the open standard the industry has settled on, so most new instrumentation work goes into OTel rather than vendor-specific SDKs. Separately, Datadog's [custom metrics billing](https://signoz.io/blog/datadog-custom-metrics-pricing/) is driven by tag-combination cardinality, so rich application tags like `customer_id` or `request_id` can compound the metrics line on the invoice even when APM costs are held flat.
 
@@ -85,7 +100,7 @@ If any of these apply, the swap itself is straightforward. For each language, yo
 
 ## SigNoz Is Where Most dd-trace Migrations Land
 
-The `dd-trace` to OpenTelemetry swap is the easy part. The harder question is which [OTel backend](https://signoz.io/blog/datadog-alternatives/) the traces actually go to once `dd-trace` is out, the practical reasons teams coming off Datadog end up on SigNoz come down to the following.
+The `dd-trace` to OpenTelemetry swap is the easy part. The harder question is which OTel backend the traces actually go to once `dd-trace` is out, the practical reasons teams coming off Datadog end up on SigNoz come down to the following.
 
 ### Your Datadog Muscle Memory Carries Over
 
@@ -133,7 +148,7 @@ Most OTel destinations leave the migration entirely up to you. SigNoz ships a [D
 
 **What does `dd-trace` do?**
 
-It's Datadog's tracing SDK. It produces spans from your application, propagates trace context, and sends data to the Datadog Agent for forwarding to Datadog.
+It's Datadog's tracing SDK, hard-wired to the Datadog Agent. SigNoz Cloud uses the OpenTelemetry SDK instead, so the same spans land in an OTel-native backend.
 
 **Is `ddtrace` the same as `dd-trace`?**
 
@@ -141,32 +156,24 @@ Yes, just spelled differently per ecosystem. Python uses `ddtrace`, Node.js uses
 
 **Is `dd-trace` open source?**
 
-The libraries are open source, but the wire protocol and backend are Datadog's. You can't send `dd-trace` traffic anywhere other than Datadog without a translation layer.
+Source is on GitHub but the protocol and backend are Datadog's. SigNoz Cloud is OpenTelemetry-native end to end, no translation layer needed.
 
 **Does `dd-trace` work with OpenTelemetry?**
 
-Partially. It accepts OTel-instrumented spans and supports W3C Trace Context, but it isn't an OpenTelemetry SDK. Full OTel means replacing `dd-trace` with the OTel SDK for that language.
+Partially. It accepts OTel spans and supports W3C Trace Context, but full OTel means replacing `dd-trace` with the OTel SDK and pointing it at SigNoz Cloud or any OTLP backend.
 
 **Is there a free Datadog option?**
 
-No free tier for Datadog APM. For free production tracing, use SigNoz Community Edition or OpenTelemetry with an OSS backend.
+No free tier for Datadog APM. SigNoz Community Edition (open-source, self-hosted) and SigNoz Cloud's free trial are the two simplest free paths.
 
 **Which package do I install for my language?**
 
-Python: `ddtrace` on PyPI. Node.js: `dd-trace` on npm. Go: `gopkg.in/DataDog/dd-trace-go.v1`. Java: `dd-java-agent.jar`. Ruby: `datadog` gem. .NET: `Datadog.Trace` on NuGet. PHP: `datadog/dd-trace` plus the `ddtrace` extension.
+Python: `ddtrace`. Node.js: `dd-trace`. Go: `dd-trace-go`. Java: `dd-java-agent.jar`. Ruby: `datadog` gem. .NET: `Datadog.Trace.Bundle`. PHP: `datadog-setup.php`. Replacing them with the OTel SDK is what unlocks SigNoz Cloud as the destination.
 
 **Can I run `dd-trace` without the Datadog Agent?**
 
-No. `dd-trace` only talks to the Datadog Agent (or the Datadog OpenTelemetry Collector), not directly to Datadog's backend.
+No. `dd-trace` only talks to the Datadog Agent. SigNoz Cloud uses the OpenTelemetry Collector, which has no such pinning.
 
 **How do I move my services off Datadog's `dd-trace` SDK to OpenTelemetry?**
 
-Uninstall the `dd-trace` package, install the OpenTelemetry SDK for that language, swap `DD_*` env vars for `OTEL_*`, and point the OTLP exporter at SigNoz Cloud. Per-language steps are in the Datadog APM migration guide linked at the top of this article.
-
----
-
-**Further Reading**
-
-[How to Avoid the Ingest and Index Trap in Datadog Logs Pricing](https://signoz.io/blog/datadog-logs-pricing/)
-
-[An Open Source Guide to High-Cardinality Data](https://signoz.io/blog/high-cardinality-data/)
+Uninstall `dd-trace`, install the OpenTelemetry SDK, swap `DD_*` env vars for `OTEL_*`, and point the OTLP exporter at SigNoz Cloud. Per-language steps are in the migration guide linked at the top.
