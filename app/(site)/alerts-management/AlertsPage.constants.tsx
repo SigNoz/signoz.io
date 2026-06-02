@@ -9,7 +9,7 @@ export const ALERTS_HEADER_BUTTONS = [
   },
   {
     text: 'Read Documentation',
-    href: '/docs/trace-funnels/overview/',
+    href: '/docs/alerts/',
     variant: 'secondary' as const,
     className: BUTTON_CLASS_NAME,
   },
