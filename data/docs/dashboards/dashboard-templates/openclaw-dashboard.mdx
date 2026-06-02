@@ -1,9 +1,9 @@
 ---
-date: 2026-05-26
+date: 2026-06-01
 id: openclaw
 tags: [SigNoz Cloud, Self-Host]
 title: OpenClaw Dashboard
-description: Monitor OpenClaw usage and performance including token consumption, model distribution, request volumes, and latency trends for optimal AI workload observability.
+description: Monitor OpenClaw usage and performance including token consumption, model distribution, request volumes, latency trends, and agent run errors for optimal AI workload observability.
 doc_type: explanation
 ---
 
@@ -38,6 +38,7 @@ This dashboard tracks critical performance metrics for your OpenClaw usage using
 - **Monitor Usage Patterns**: Observe token consumption, request volume trends, and queue metrics over time to spot adoption curves, peak cycles, and unusual spikes.
 - **Ensure Responsiveness**: Track message processing latency and queue wait times to surface potential slowdowns, spikes, or regressions and maintain consistent user experience.
 - **Track Message Processing**: Monitor message outcomes by channel, queue depth by lane, and session state transitions to understand system health and throughput.
+- **Investigate Errors**: Track agent run errors and error rates over time, break failures down by model, channel, and provider, surface the slowest operations, and drill into individual errored spans to find root causes quickly.
 
 ## Metrics Included
 
@@ -66,3 +67,16 @@ This dashboard tracks critical performance metrics for your OpenClaw usage using
 - **Message Queue Rate**: Tracks the rate at which incoming messages are being queued for dispatch, broken down by channel, to help monitor inbound message load and identify surges or drop-offs in traffic hitting OpenClaw's dispatch system.
 - **Queue Depth By Lane**: Tracks the number of items sitting in each processing lane's queue at any given time, indicating how backed up each lane is.
 - **Session State Transition**: Tracks the rate of session lifecycle state transitions to show how actively OpenClaw sessions are moving through their processing stages.
+
+### Error Monitoring
+
+- **Total Agent Run Errors**: Counts `openclaw-gateway` spans with an error in the selected range, giving a single at-a-glance number for how many agent runs failed.
+- **Run Error Rate (%)**: Expresses errored spans as a percentage of all `openclaw-gateway` spans, so you can gauge reliability independent of traffic volume.
+- **Total Agent Runs**: Shows the total volume of `openclaw-gateway` spans (run/message volume) in range, providing the denominator and overall activity baseline.
+- **Messages Processed (by outcome)**: Breaks down the `openclaw.message.processed` counter by outcome, where non-completed outcomes highlight failed or aborted message runs.
+- **Agent Run Errors Over Time**: Time series of errored `openclaw-gateway` spans, helping you spot spikes and correlate failures with deployments or incidents.
+- **Run Error Rate % Over Time**: Plots errored spans divided by total spans per interval as a percentage, revealing reliability trends and regressions over time.
+- **Errors by Model**: Groups errored spans by `openclaw.model` to surface which model is associated with the most failed runs.
+- **Errors by Channel & Provider**: Groups errored spans by `openclaw.channel` and `openclaw.provider` to pinpoint which integration paths are failing.
+- **Slowest Operations (p95)**: Shows p95 span duration grouped by operation name, since slow operations often precede timeouts and errors.
+- **Errored Span Detail**: Lists individual errored spans so you can drill into specific failures and inspect their attributes for root-cause analysis.

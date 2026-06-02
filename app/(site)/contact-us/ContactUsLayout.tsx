@@ -54,10 +54,10 @@ export default function ContactUsLayout() {
             {/* Headline + subtitle */}
             <div className="flex flex-col gap-2">
               <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
-                Talk to an Engineer.
+                Talk to our Team.
               </h1>
               <p className="text-[15px] leading-[1.6] text-gray-400">
-                30 minutes. No pitch deck. Just your stack, your questions, and a real demo.
+                30 minutes. Your stack, your questions, pricing, and a real demo.
               </p>
             </div>
 
