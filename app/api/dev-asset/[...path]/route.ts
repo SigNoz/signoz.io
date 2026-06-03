@@ -20,29 +20,18 @@ const CONTENT_TYPES: Record<string, string> = {
   '.webp': 'image/webp',
 }
 
-function hasUnsafePathSegment(parts: string[]) {
-  return parts.some(
-    (part) => part === '..' || part.includes('\0') || part.includes('/') || part.includes('\\')
-  )
-}
-
-function isInsideDirectory(baseDir: string, filePath: string) {
-  const relativePath = path.relative(baseDir, filePath)
-  return relativePath === '' || (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
-}
-
 export async function GET(_request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
   const params = await props.params
   const parts = params.path || []
 
-  if (parts.length === 0 || hasUnsafePathSegment(parts)) {
+  if (parts.length === 0) {
     return new NextResponse('Not found', { status: 404 })
   }
 
-  const baseDir = path.join(process.cwd(), 'data-assets')
-  const filePath = path.join(baseDir, ...parts)
+  const baseDir = path.resolve(process.cwd(), 'data-assets')
+  const filePath = path.resolve(baseDir, ...parts)
 
-  if (!isInsideDirectory(baseDir, filePath)) {
+  if (!filePath.startsWith(baseDir + path.sep)) {
     return new NextResponse('Not found', { status: 404 })
   }
 
