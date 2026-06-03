@@ -16,12 +16,15 @@ function getTagValue(tag: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined
 }
 
-export function getAuthorKeys(content: { authors?: unknown[] | null }): string[] {
+export function getAuthorKeys(content: {
+  authors?: unknown[] | null
+  [key: string]: any
+}): string[] {
   if (!Array.isArray(content.authors)) return []
   return content.authors.map(getAuthorKey).filter((k): k is string => k !== undefined)
 }
 
-export function getTagValues(content: { tags?: unknown[] | null }): string[] {
+export function getTagValues(content: { tags?: unknown[] | null; [key: string]: any }): string[] {
   if (!Array.isArray(content.tags)) return []
   return content.tags.map(getTagValue).filter((v): v is string => v !== undefined)
 }
