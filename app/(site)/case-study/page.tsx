@@ -34,6 +34,14 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: '/img/case_study/logos/kernel-logo.svg',
+    logoAlt: 'Kernel logo',
+    title: 'How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP',
+    name: 'Hiro Tamada',
+    position: 'Founding Engineer, Kernel',
+    href: '/case-study/kernel/',
+  },
+  {
     logo: '/img/case_study/logos/shaped-logo.svg',
     logoAlt: 'Shaped logo',
     title:
