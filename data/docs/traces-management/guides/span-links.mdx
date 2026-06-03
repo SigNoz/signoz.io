@@ -10,13 +10,20 @@ import GetHelp from '@/components/shared/get-help.md'
 
 Span links connect a span to related spans without making them parent and child. Use them to correlate work across asynchronous boundaries, such as a message queue or a scheduled batch job, where the related spans live in separate traces.
 
+<Figure
+  src="/img/docs/traces-management/span-links/span-links-flow.svg"
+  alt="A single process-batch span in the orders-batch service links back to multiple receive-order spans, each in its own source request trace, across an async boundary"
+  caption="A single batch span links back to every source request it processed, a many-to-one relationship that crosses the async boundary into separate traces"
+  className="box-shadowed-image"
+/>
+
 ## Overview
 
-OpenTelemetry uses links to <a href="https://opentelemetry.io/docs/concepts/signals/traces/#span-links" target="_blank" rel="noopener noreferrer nofollow">associate one span with one or more spans, implying a causal relationship</a>. Each link stores the <a href="https://opentelemetry.io/docs/specs/otel/trace/api/#link" target="_blank" rel="noopener noreferrer nofollow"><code>SpanContext</code></a> of the span it points to, plus zero or more attributes that describe the relationship. The linked span context can come from the same trace or a different one.
+A span link is a typed pointer from one span to another. OpenTelemetry uses links to <a href="https://opentelemetry.io/docs/concepts/signals/traces/#span-links" target="_blank" rel="noopener noreferrer nofollow">associate one span with one or more spans, implying a causal relationship</a>, even when one span never directly called the other. Each link stores the <a href="https://opentelemetry.io/docs/specs/otel/trace/api/#link" target="_blank" rel="noopener noreferrer nofollow"><code>SpanContext</code></a> of the target span, its trace ID and span ID, plus zero or more attributes. The target can sit in the same trace or a separate one.
 
-A parent-child relationship models a direct call where one operation starts another and waits for it inside the same trace. Once work moves onto a queue or runs later in a batch, the downstream operation starts its own trace with a new trace ID and no parent. A link records the causal connection that the parent-child structure can no longer hold.
+Parent-child works when a caller starts an operation and waits for it inside the same trace. That breaks once work crosses a queue or runs later in a batch: the downstream operation begins a fresh trace with its own trace ID and no parent, so the path back to what triggered it is gone. A span link restores that path.
 
-Record links when you create the span. Head samplers use only information present at span creation, so a link added later may not reach the sampler.
+Add links when you start the span. A head sampler sees only what exists at span creation, so a link attached afterward may not influence its sampling decision.
 
 ## Span links vs parent-child relationships
 
@@ -39,16 +46,9 @@ The OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/messaging
 - **Asynchronous messaging.** A producer publishes to a queue and a consumer processes the message later in its own trace. The consumer span links to the producer span. Instrumentation libraries for common brokers propagate the trace context for you. For a single message, you can set the producer context as the parent; a link keeps the consumer in its own trace.
 - **Fan-out.** One span starts several parallel operations. Each downstream span links back to the initiator.
 
-## Build a demo: link a batch job to its source requests
+## Example: link a batch job to its source requests
 
-This demo uses Python for a batch job that processes work from many separate traces. An API receives requests through the day, traces each one, and enqueues it. Every hour, a job processes the batch in one span that links to each original request.
-
-<Figure
-  src="/img/docs/traces-management/span-links/span-links-flow.svg"
-  alt="A single process-batch span in the orders-batch service links back to multiple receive-order spans, each in its own source request trace, across an async boundary"
-  caption="The process-batch span links back to every source request it handles, a many-to-one relationship across the async boundary"
-  className="box-shadowed-image"
-/>
+This example uses Python for a batch job that processes work from many separate traces. An API receives requests through the day, traces each one, and enqueues it. Every hour, a job processes the batch in one span that links to each original request.
 
 The same pattern applies in any OpenTelemetry SDK. For the link API in your language, see the manual instrumentation guides for [Python](https://signoz.io/docs/instrumentation/python/manual-instrumentation/) and [Java](https://signoz.io/docs/instrumentation/java/manual-instrumentation/).
 
