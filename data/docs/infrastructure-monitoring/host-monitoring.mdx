@@ -1,5 +1,5 @@
 ---
-date: 2026-05-25
+date: 2026-06-03
 id: host-monitoring
 title: Host Monitoring
 description: Monitor host performance in SigNoz — CPU, memory, disk, network metrics with correlated traces, logs, containers, and processes.
@@ -161,13 +161,13 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 
 #### System Disk Operations/s
 
-- This chart relies on the OTel metric(s): `system.disk.operation_time`.
-- Plots the per-second rate of `system.disk.operation_time` per `device::direction`, one line per device and direction. Values approaching `1s/s` on a single line indicate that device is effectively saturated servicing reads/writes — i.e., the disk is busy nearly all the time.
+- This chart relies on the OTel metric(s): `system.disk.operations`.
+- Plots the per-second rate of completed disk operations per `device::direction`, one line per device and direction (`read`/`write`). High and sustained values indicate I/O-intensive workloads — pair with `System Disk I/O (Bytes)` to tell large-but-few ops from small-but-many; pair with `System disk operation time/s` to tell whether each op is also slow.
 
-#### Disk Operations Time
+#### System disk operation time/s
 
 - This chart relies on the OTel metric(s): `system.disk.operation_time`.
-- Average time taken for disk operations.
+- Plots the per-second rate of cumulative disk-busy time per `device::direction`, one line per device and direction. Values approaching `1s/s` on a single line mean that device is effectively saturated — the disk spent ~100% of wall-clock time servicing I/O. Compare against ops/s to distinguish "few slow ops" from "many fast ops".
 
 **Time Range Selection:**
 
