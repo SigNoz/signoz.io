@@ -7,6 +7,7 @@ import {
   fetchAllComparisonsForPage,
 } from '@/utils/cachedData'
 import { getAuthorDirectory, type AuthorDirectory } from '@/utils/contentRepository'
+import { getAuthorKey } from '@/utils/contentHelpers'
 
 type ResourceCenterCardSource = {
   slug?: string | null
@@ -52,14 +53,6 @@ export type ResourceCenterBlog = ResourceCenterCard
 export type ResourceCenterGuide = ResourceCenterCard
 export type ResourceCenterComparison = ResourceCenterCard
 export type ResourceCenterOpenTelemetryArticle = ResourceCenterCard
-
-function getAuthorKey(author: unknown): string | undefined {
-  if (typeof author === 'string' && author.length > 0) return author
-  if (!author || typeof author !== 'object') return undefined
-
-  const authorObject = author as ResourceCenterAuthor
-  return authorObject.key || authorObject.name
-}
 
 function resolveResourceCenterAuthors(
   source: ResourceCenterCardSource,

@@ -3,6 +3,7 @@ import { allDocs } from 'contentlayer/generated'
 import { MDXContentApiResponse } from '@/utils/strapi'
 import { normaliseSlug } from '../../../scripts/rssFeed.mjs'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
+import { mapRelationKeys, mapTaxonomyValues } from '@/utils/contentHelpers'
 
 const buildFaqSlug = (path = '') => {
   const cleanedPath = path.startsWith('/') ? path : `/${path}`
@@ -10,22 +11,6 @@ const buildFaqSlug = (path = '') => {
 }
 
 const getDeploymentStatus = () => (process.env.VERCEL_ENV === 'production' ? 'live' : 'staging')
-
-const mapRelationKeys = (items: unknown) => {
-  if (!Array.isArray(items)) return undefined
-
-  return items
-    .map((item: any) => (typeof item === 'string' ? item : item?.key))
-    .filter((item): item is string => typeof item === 'string' && item.length > 0)
-}
-
-const mapTaxonomyValues = (items: unknown) => {
-  if (!Array.isArray(items)) return undefined
-
-  return items
-    .map((item: any) => (typeof item === 'string' ? item : item?.value || item?.key))
-    .filter((item): item is string => typeof item === 'string' && item.length > 0)
-}
 
 const mapFaqEntries = (faqs: MDXContentApiResponse | undefined) => {
   if (!faqs?.data?.length) {

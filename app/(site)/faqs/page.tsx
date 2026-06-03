@@ -1,18 +1,10 @@
 import { getAllContent } from '@/utils/contentRepository'
-import { MDXContent } from '@/utils/strapi'
 import { notFound } from 'next/navigation'
 import FAQsClient from './FAQsClient'
+import { getTagValues } from '@/utils/contentHelpers'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
-
-function getTagValues(content: MDXContent): string[] {
-  if (!Array.isArray(content.tags)) return []
-
-  return content.tags
-    .map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag?.value || tag?.key))
-    .filter((tag): tag is string => typeof tag === 'string' && tag.length > 0)
-}
 
 export default async function FAQsPage() {
   const isProduction = process.env.VERCEL_ENV === 'production'

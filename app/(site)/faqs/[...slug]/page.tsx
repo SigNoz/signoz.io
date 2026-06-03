@@ -13,6 +13,7 @@ import { generateStructuredData } from '@/utils/structuredData'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -65,32 +66,6 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
   }
 
   return []
-}
-
-function getStringValue(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim().length > 0 ? value : undefined
-}
-
-function getAuthorKeys(content: MDXContent): string[] {
-  if (!Array.isArray(content.authors)) return []
-
-  return content.authors
-    .map((author: string | MDXContent) =>
-      typeof author === 'string'
-        ? author
-        : getStringValue(author?.key) || getStringValue(author?.name)
-    )
-    .filter((author): author is string => Boolean(author))
-}
-
-function getTagValues(content: MDXContent): string[] {
-  if (!Array.isArray(content.tags)) return []
-
-  return content.tags
-    .map((tag: string | MDXContent) =>
-      typeof tag === 'string' ? tag : getStringValue(tag?.value) || getStringValue(tag?.key)
-    )
-    .filter((tag): tag is string => Boolean(tag))
 }
 
 export async function generateMetadata(props: {

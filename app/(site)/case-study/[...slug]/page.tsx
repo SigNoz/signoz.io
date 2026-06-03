@@ -10,19 +10,10 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { getAuthorKeys } from '@/utils/contentHelpers'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
-
-function getAuthorKeys(content: MDXContent): string[] {
-  if (!Array.isArray(content.authors)) return []
-
-  return content.authors
-    .map((author: string | MDXContent) =>
-      typeof author === 'string' ? author : author?.key || author?.name
-    )
-    .filter((author): author is string => typeof author === 'string' && author.length > 0)
-}
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>
