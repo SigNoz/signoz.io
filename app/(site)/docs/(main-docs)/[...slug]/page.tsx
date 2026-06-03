@@ -8,7 +8,8 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
+import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 
 export const dynamicParams = false
 
@@ -23,10 +24,11 @@ export async function generateMetadata(props: {
     notFound()
   }
 
-  const fullTitle = post?.title ? `${post.title} | SigNoz Docs` : 'SigNoz Docs'
+  const seoTitle = post?.meta_title || post?.title
+  const fullTitle = seoTitle ? `${seoTitle} | SigNoz Docs` : 'SigNoz Docs'
 
   return {
-    title: post?.title,
+    title: seoTitle,
     description: post?.description,
     openGraph: {
       title: fullTitle,
@@ -64,13 +66,13 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = mainContent
   const jsonLd = post.structuredData
+  const breadcrumbs = getDocsBreadcrumbs(slug, title)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-      />
+      <JsonLdScript data={jsonLd} />
+      <JsonLdScript data={breadcrumbJsonLd} />
       <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
           title={title}
@@ -78,6 +80,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           toc={toc}
           hideTableOfContents={hide_table_of_contents || false}
           editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
+          breadcrumbs={breadcrumbs}
         />
       </div>
       <Chatbase disableFloatingMessages />

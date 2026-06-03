@@ -12,6 +12,11 @@ import {
   buildDocsOnboardingPath,
 } from '@/utils/docs/onboardingPath'
 
+export const SITE_BASE_URL =
+  process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL
+    ? 'https://signoz.io'
+    : `https://${process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL}`
+
 type CustomLinkProps = LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>
 
 const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
@@ -58,6 +63,11 @@ const CustomLink = ({ href, prefetch, ...rest }: CustomLinkProps) => {
 
     if (typeof resolvedHref === 'string' && resolvedHref.startsWith('https://signoz.io/')) {
       return <Link href={resolvedHref} {...rest} target="_blank" prefetch={prefetch ?? false} />
+    }
+
+    // Prepend domain to site-relative URLs
+    if (typeof resolvedHref === 'string' && resolvedHref.startsWith('/')) {
+      resolvedHref = `${SITE_BASE_URL}${resolvedHref}`
     }
 
     return <Link href={resolvedHref} {...rest} prefetch={prefetch ?? false} />

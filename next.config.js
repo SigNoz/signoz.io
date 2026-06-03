@@ -626,6 +626,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/tutorial/s3-integration-iam-role-eks/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/oci-bucket-cold-storage-integration/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
           source: '/docs/tutorial/jvm-metrics/',
           destination:
             '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
@@ -960,6 +970,11 @@ module.exports = () => {
         {
           source: '/monitoring-openclaw-with-opentelemetry/',
           destination: '/blog/monitoring-openclaw-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/openclaw-monitoring/',
+          destination: '/docs/openclaw-observability/',
           permanent: true,
         },
         // Keep /opentelemetry/ as the canonical hub landing instead of redirecting to the Resource Center.
@@ -2210,7 +2225,12 @@ module.exports = () => {
         },
         {
           source: '/docs/configuration/deep_storage',
-          destination: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/userguide/retention-period/',
           permanent: true,
         },
         {

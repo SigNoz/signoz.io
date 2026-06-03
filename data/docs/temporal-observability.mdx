@@ -1,17 +1,17 @@
 ---
-date: 2026-05-18
+date: 2026-05-27
 id: temporal-observability-with-opentelemetry
 tags: [SigNoz Cloud, Self-Host]
 title: Temporal Observability & Monitoring with OpenTelemetry
-description: Setup Temporal workflow observability with OpenTelemetry and SigNoz. Monitor OpenAI Agent SDK on Temporal with traces, logs, and metrics.
+description: Set up Temporal observability and monitoring with OpenTelemetry and SigNoz. Trace workflows, agent execution, and debug performance issues in real time.
 doc_type: howto
 ---
 
-## Overview
+## What is Temporal Observability?
 
-This guide demonstrates how to set up observability and monitoring for OpenAI Agent SDK applications running on Temporal using [OpenTelemetry](https://opentelemetry.io/) to export traces, logs, and metrics to SigNoz. This integration allows for monitoring of your Temporal workflows and agent execution patterns.
+Temporal observability gives you real-time visibility into your workflow executions and AI agent patterns by collecting traces, logs, and metrics using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. This guide shows you how to instrument your Temporal-based applications and send telemetry to SigNoz, so you can monitor workflow activity, debug agent execution, and optimize performance end-to-end.
 
-Instrumenting your Temporal-based AI applications with OpenTelemetry ensures full observability across your agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+With full Temporal observability in SigNoz, you can correlate traces, logs, and metrics in a single dashboard, set up alerts for workflow failures or high latency, and analyze agent execution patterns over time to continuously improve reliability and efficiency.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ Instrumenting your Temporal-based AI applications with OpenTelemetry ensures ful
 - Python 3.10+ with `temporalio` installed
 - For Python: `pip` installed for managing Python packages
 
-## Monitoring Temporal
+## Monitor Temporal Workflows with OpenTelemetry
 
 <Tabs>
 <TabItem value="auto-instrumentation" label="Auto-instrumentation (Recommended)" default>
@@ -437,11 +437,11 @@ asyncio.run(main())
 </Tabs>
 
 
-## View Traces, Logs, and Metrics in SigNoz
+## View Temporal Traces, Logs, and Metrics in SigNoz
 
-Your Temporal agent usage should now automatically emit traces, logs, and metrics.
+Once configured, your Temporal application automatically emits traces, logs, and metrics.
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+Temporal traces are available in SigNoz under the Traces tab:
 
 <Figure
   src="/img/docs/llm/temporal/temporal-traces.webp"
@@ -457,7 +457,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="Temporal Detailed Trace View"
 />
 
-You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+Temporal logs are available in SigNoz under the Logs tab. Click the Related Logs button in the trace view to see correlated logs:
 
 <figure data-zoomable align="center">
   <img src="/img/docs/llm/temporal/related-logs.webp" alt="Related logs" width="300" />
@@ -480,7 +480,7 @@ When you click on any of these logs in SigNoz, you'll see a detailed view of the
   caption="Temporal Detailed Logs View"
 />
 
-You should be able to see Temporal related metrics in Signoz Cloud under the metrics tab:
+Temporal metrics are available in SigNoz under the Metrics tab:
 
 <Figure
   src="/img/docs/llm/temporal/temporal-metrics.webp"
@@ -498,7 +498,7 @@ When you click on any of these metrics in SigNoz, you'll see a detailed view of 
 
 If you're using Temporal Cloud, you can also monitor cloud-specific metrics. For detailed information on setting up Temporal Cloud metrics monitoring, see the [Temporal Cloud Metrics integration guide](https://signoz.io/docs/integrations/temporal-cloud-metrics/).
 
-You should be able to see Temporal Cloud metrics in SigNoz Cloud under the metrics tab:
+Temporal Cloud metrics are available in SigNoz under the Metrics tab:
 
 <Figure
   src="/img/docs/llm/temporal/temporal-cloud-metrics.webp"
@@ -517,7 +517,7 @@ When you click on any of these Temporal Cloud metrics in SigNoz, you'll see a de
 
 <details>
 <ToggleHeading>
-## Troubleshooting
+## Troubleshooting Temporal Observability
 </ToggleHeading>
 
 If you don't see your telemetry data:
@@ -525,13 +525,13 @@ If you don't see your telemetry data:
 1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
 2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
 3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
-4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+4. **Try a console exporter** - Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
 
 </details>
 
-## Next Steps
+## Temporal Observability Dashboard
 
-You can also check out our custom [Temporal dashboard](https://signoz.io/docs/dashboards/dashboard-templates/temporal-dashboard/) which provides specialized visualizations for monitoring your Temporal usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+The [Temporal dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/temporal-dashboard/) provides pre-built visualizations for monitoring Temporal workflow performance, agent execution patterns, and resource usage in SigNoz. Import it directly to get started without manual chart configuration.
 
 <Figure
   src="/img/docs/llm/temporal/temporal-dashboard.webp"

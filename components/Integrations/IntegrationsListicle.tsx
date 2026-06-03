@@ -15,6 +15,7 @@ import {
   SiApachedruid,
   SiVercel,
   SiFlydotio,
+  SiRailway,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -107,7 +108,8 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     ),
     '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
     '/docs/integrations/vercel': <SiVercel className="h-7 w-7 text-black dark:text-white" />,
-    '/docs/integrations/flyio': <SiFlydotio className="h-7 w-7 text-purple-500" />,
+    '/docs/integrations/outposts/flyio': <SiFlydotio className="h-7 w-7 text-purple-500" />,
+    '/docs/integrations/outposts/railway': <SiRailway className="h-7 w-7 text-white" />,
     '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,
     '/docs/integrations/opentelemetry-dbos': (
       <img src="/svgs/icons/dbos.svg" alt="DBOS" className="h-7 w-7 object-contain" />
@@ -117,6 +119,9 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     ),
     '/docs/integrations/opentelemetry-kong-gateway': (
       <img src="/img/icons/kong-icon.svg" alt="Kong Gateway" className="h-7 w-7 object-contain" />
+    ),
+    '/docs/integrations/outposts/kong': (
+      <img src="/img/icons/kong-icon.svg" alt="Kong" className="h-7 w-7 object-contain" />
     ),
   }
 

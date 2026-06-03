@@ -108,7 +108,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/n8n-monitoring': <SiN8N className="h-7 w-7 text-gray-400" />,
   '/docs/ollama-monitoring': <SiOllama className="h-7 w-7 text-white" />,
   '/docs/openai-monitoring': <SiOpenai className="h-7 w-7 text-green-400" />,
-  '/docs/openclaw-monitoring': (
+  '/docs/openclaw-observability': (
     <img src="/img/docs/llm/openclaw/openclaw-logo.svg" alt="OpenClaw Icon" className="h-7 w-7" />
   ),
   '/docs/opencode-observability': (

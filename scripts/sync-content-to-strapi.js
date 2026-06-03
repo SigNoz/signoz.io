@@ -365,8 +365,6 @@ async function uploadToS3(localPath, s3Key) {
     const fileContent = fs.readFileSync(localPath)
     const contentType = mime.lookup(localPath) || 'application/octet-stream'
 
-    console.log(`    ⬆️ Uploading to S3: ${s3Key}`)
-
     await s3Client.send(
       new PutObjectCommand({
         Bucket: S3_BUCKET_NAME,
@@ -375,8 +373,6 @@ async function uploadToS3(localPath, s3Key) {
         ContentType: contentType,
       })
     )
-
-    console.log(`    ✅ Uploaded successfully`)
   } catch (error) {
     throw new Error(`Failed to upload ${s3Key} to S3: ${error.message}`)
   }
@@ -387,10 +383,6 @@ async function syncAsset(assetPath) {
   const cleanPath = assetPath.startsWith('/') ? assetPath.slice(1) : assetPath
   const localPath = path.join('data-assets', cleanPath)
   const s3Key = `web/${cleanPath}`
-
-  console.log(`  🖼️ Processing asset: ${assetPath}`)
-  console.log(`     • Local: ${localPath}`)
-  console.log(`     • S3 Key: ${s3Key}`)
 
   const localExists = fs.existsSync(localPath)
   const onCDN = await checkCDN(cleanPath)
@@ -406,14 +398,8 @@ async function syncAsset(assetPath) {
 
   if (localExists) {
     if (!onCDN || isChangedInPR) {
-      console.log(`    Triggering upload: onCDN=${onCDN}, changed=${isChangedInPR}`)
       await uploadToS3(localPath, s3Key)
-    } else {
-      console.log(`    ⏭️ Asset already on CDN and not changed, skipping upload`)
     }
-  } else {
-    // Local doesn't exist but it's on CDN
-    console.log(`    ⚠️ Asset not found locally but exists on CDN, using existing version`)
   }
 }
 
@@ -489,9 +475,6 @@ async function fetchAllEntities(endpoint) {
 
 // Helper: Filter entities by deployment_status when available
 function filterEntitiesByDeploymentStatus(entities) {
-  console.log(
-    `  🔍 [DEBUG] Filtering entities by deployment_status: ${DEPLOYMENT_STATUS} ${entities.length} entities`
-  )
   if (!Array.isArray(entities) || entities.length === 0) {
     return entities
   }
@@ -508,12 +491,6 @@ function filterEntitiesByDeploymentStatus(entities) {
     return entity.deployment_status === DEPLOYMENT_STATUS
   })
 
-  if (filteredEntities.length !== entities.length) {
-    console.log(
-      `  🔒 Filtered ${entities.length - filteredEntities.length} relation candidate(s) by deployment_status=${DEPLOYMENT_STATUS}`
-    )
-  }
-
   return filteredEntities
 }
 
@@ -529,10 +506,6 @@ async function createTagOrKeyword(endpoint, value, folderName) {
       // description is optional, so we don't include it
     }
 
-    console.log(`    🆕 Creating new ${endpoint} entry:`)
-    console.log(`       • key: "${key}"`)
-    console.log(`       • value: "${value}"`)
-
     const response = await axios.post(
       `${CMS_API_URL}/api/${endpoint}`,
       { data },
@@ -544,9 +517,6 @@ async function createTagOrKeyword(endpoint, value, folderName) {
       }
     )
 
-    console.log(
-      `    ✅ Successfully created ${endpoint} entry with documentId: ${response.data.data.documentId}`
-    )
     return response.data.data
   } catch (error) {
     const errorMsg = error.response?.data?.error?.message || error.message
@@ -615,7 +585,6 @@ async function resolveRelatedArticlesComponent(frontmatter) {
         let entities = await fetchAllEntities(typeInfo.endpoint)
         entities = filterEntitiesByDeploymentStatus(entities)
         _relatedArticleEntityCache[prefix] = entities
-        console.log(`    Cached ${entities.length} ${prefix} entities for related articles lookup`)
       } catch (err) {
         console.warn(`    Could not fetch ${prefix} from Strapi: ${err.message}`)
         _relatedArticleEntityCache[prefix] = []
@@ -639,10 +608,6 @@ async function resolveRelatedArticlesComponent(frontmatter) {
       })
       continue
     }
-
-    console.log(
-      `    Resolved "${originalUrl}" -> ${typeInfo.content_type} documentId: ${match.documentId}`
-    )
 
     // Build component entry: set content_type + the matching relation field
     // Relation field name matches content_type (case-study -> case_study for field name)
@@ -671,11 +636,8 @@ async function resolveRelations(folderName, frontmatter) {
 
     // Skip if no values in frontmatter
     if (!frontmatterValues || !Array.isArray(frontmatterValues) || frontmatterValues.length === 0) {
-      console.log(`  ⏭️ Skipping ${relationName}: No values in frontmatter`)
       continue
     }
-
-    console.log(`  🔗 Resolving ${relationName}: ${frontmatterValues.join(', ')}`)
 
     // Check if this is tags or keywords relation
     const isTagsOrKeywords = relationName === 'tags' || relationName === 'keywords'
@@ -697,20 +659,17 @@ async function resolveRelations(folderName, frontmatter) {
       let matched = null
 
       if (relationConfig.filterKey && relationConfig.matchValue) {
-        // Special case for tags: check key contains 'faq'/'faqs' AND value matches
+        // Special case for tags: check key contains folder name AND value matches (case-sensitive)
         matched = entities.find((entity) => {
-          const keyMatch =
-            entity?.key && entity?.key.toLowerCase().includes(folderName.toLowerCase())
+          const keyMatch = entity?.key && entity?.key.includes(folderName)
 
-          const valueMatch = entity?.value && entity?.value.toLowerCase() === value.toLowerCase()
+          const valueMatch = entity?.value && entity?.value === value
 
           return keyMatch && valueMatch
         })
       } else if (relationConfig.matchValue) {
-        // Match against value field (case insensitive)
-        matched = entities.find(
-          (entity) => entity?.value && entity?.value.toLowerCase() === value.toLowerCase()
-        )
+        // Match against value field (case-sensitive)
+        matched = entities.find((entity) => entity?.value && entity?.value === value)
       } else {
         // Match against specified field (exact match)
         matched = entities.find((entity) => entity?.[relationConfig.matchField] === value)
@@ -719,9 +678,6 @@ async function resolveRelations(folderName, frontmatter) {
       // Check if matched and has documentId
       if (matched && matched?.documentId) {
         matchedIds.push(matched.documentId)
-        console.log(
-          `    ✅ Matched "${value}" → ID: ${matched.documentId} with deployment_status: ${matched.deployment_status}`
-        )
       } else if (matched && !matched?.documentId) {
         // Matched entity but no documentId
         unmatchedValues.push(value)
@@ -735,14 +691,12 @@ async function resolveRelations(folderName, frontmatter) {
         // Auto-create tags or keywords if not found
         if (isTagsOrKeywords) {
           try {
-            console.log(`    🔧 Auto-creating missing ${relationName} entry for: "${value}"`)
             const newEntry = await createTagOrKeyword(relationConfig.endpoint, value, folderName)
 
             if (newEntry && newEntry.documentId) {
               matchedIds.push(newEntry.documentId)
               // Add to entities array so it's available for subsequent matches
               entities.push(newEntry)
-              console.log(`    ✅ Auto-created and matched "${value}" → ID: ${newEntry.documentId}`)
             } else {
               unmatchedValues.push(value)
               console.error(`    ❌ Created entry but no documentId returned for "${value}"`)
@@ -773,7 +727,6 @@ async function resolveRelations(folderName, frontmatter) {
     // Only add relation if at least one valid documentId was found
     if (matchedIds.length > 0) {
       relations[relationName] = matchedIds
-      console.log(`  ✅ ${relationName}: Resolved ${matchedIds.length} relation(s)`)
     } else {
       console.warn(`  ⚠️ ${relationName}: No valid relations found, key will be omitted`)
     }
@@ -798,18 +751,13 @@ async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
   }
 
   // Resolve relations
-  console.log(`  🔍 Resolving relations...`)
   const { relations, warnings } = await resolveRelations(folderName, frontmatter)
 
   // Remove raw frontmatter relation fields
   if (schema.relations) {
-    console.log(`  🧹 [DEBUG] Cleaning up relation fields from frontmatter...`)
     for (const [relationName, relationConfig] of Object.entries(schema.relations)) {
       const fieldName = relationConfig.frontmatterField
       if (data[fieldName]) {
-        console.log(
-          `    🗑️ [DEBUG] Removing raw frontmatter field: ${fieldName} = ${JSON.stringify(data[fieldName])}`
-        )
         delete data[fieldName]
       }
     }
@@ -824,34 +772,24 @@ async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
   ]
   for (const field of legacyRelatedFields) {
     if (data[field]) {
-      console.log(`    🗑️ [DEBUG] Removing legacy frontmatter field: ${field}`)
       delete data[field]
     }
   }
 
   if (Object.keys(relations).length > 0) {
-    console.log(
-      `  ➕ [DEBUG] Adding resolved relations to data:`,
-      Object.keys(relations).join(', ')
-    )
     Object.assign(data, relations)
-  } else {
-    console.log(`  ℹ️ [DEBUG] No relations were successfully resolved, none will be added`)
   }
 
   // Resolve related_articles component (interleaved, ordered)
   if (schema.hasRelatedArticles) {
-    console.log(`  🔗 Resolving related_articles component...`)
     const { components: relatedArticleComponents, warnings: raWarnings } =
       await resolveRelatedArticlesComponent(frontmatter)
 
     if (relatedArticleComponents.length > 0) {
       data.related_articles = relatedArticleComponents
-      console.log(`  ✅ related_articles: Resolved ${relatedArticleComponents.length} component(s)`)
     } else {
       // Send empty array to clear any existing component entries
       data.related_articles = []
-      console.log(`  ℹ️ related_articles: No components resolved`)
     }
 
     // Remove raw frontmatter field so it's not sent as a plain value
@@ -885,10 +823,6 @@ async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
 async function findEntryByPath(folderName, pathField) {
   const schema = COLLECTION_SCHEMAS[folderName]
   try {
-    console.log(
-      `  🔍 [DEBUG] Searching for entry: endpoint=${schema.endpoint}, path=${pathField}, deployment_status=${DEPLOYMENT_STATUS}`
-    )
-
     const response = await axios.get(`${CMS_API_URL}/api/${schema.endpoint}`, {
       params: {
         filters: { path: { $eq: pathField }, deployment_status: { $eq: DEPLOYMENT_STATUS } },
@@ -900,22 +834,15 @@ async function findEntryByPath(folderName, pathField) {
       },
     })
 
-    console.log(`  🔍 [DEBUG] Response status: ${response.status}`)
-    console.log(`  🔍 [DEBUG] Response data:`, JSON.stringify(response.data, null, 2))
-
     if (response.data.data && response.data.data.length > 0) {
-      const entry = response.data.data[0]
-      console.log(`  ✅ [DEBUG] Entry found:`, JSON.stringify(entry, null, 2))
-      return entry
+      return response.data.data[0]
     }
 
-    console.log(`  ℹ️ [DEBUG] No entry found`)
     return null
   } catch (error) {
-    console.error(`  ❌ [DEBUG] Error in findEntryByPath:`, error.message)
+    console.error(`  ❌ Error in findEntryByPath:`, error.message)
     if (error.response) {
-      console.error(`  ❌ [DEBUG] Response status:`, error.response.status)
-      console.error(`  ❌ [DEBUG] Response data:`, JSON.stringify(error.response.data, null, 2))
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
     }
     throw new Error(`Failed to find entry by path: ${error.message}`)
   }
@@ -925,10 +852,6 @@ async function findEntryByPath(folderName, pathField) {
 async function createEntry(folderName, data) {
   const schema = COLLECTION_SCHEMAS[folderName]
   try {
-    console.log(`  📝 [DEBUG] Creating entry in ${schema.endpoint}`)
-    console.log(`  📝 [DEBUG] Data keys:`, Object.keys(data).join(', '))
-    console.log(`  📝 [DEBUG] Full data:`, JSON.stringify(data, null, 2))
-
     const response = await axios.post(
       `${CMS_API_URL}/api/${schema.endpoint}`,
       { data },
@@ -940,18 +863,16 @@ async function createEntry(folderName, data) {
       }
     )
 
-    console.log(`  ✅ [DEBUG] Create response:`, JSON.stringify(response.data, null, 2))
     return response.data
   } catch (error) {
     const errorMsg = error.response?.data?.error?.message || error.message
     const errorDetails = error.response?.data?.error?.details || {}
-    console.error(`  ❌ [DEBUG] Create failed: ${errorMsg}`)
+    console.error(`  ❌ Create failed: ${errorMsg}`)
     if (Object.keys(errorDetails).length > 0) {
-      console.error(`  ❌ [DEBUG] Error details:`, JSON.stringify(errorDetails, null, 2))
+      console.error(`  Error details:`, JSON.stringify(errorDetails, null, 2))
     }
     if (error.response) {
-      console.error(`  ❌ [DEBUG] Response status:`, error.response.status)
-      console.error(`  ❌ [DEBUG] Response data:`, JSON.stringify(error.response.data, null, 2))
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
     }
     throw error
   }
@@ -961,11 +882,6 @@ async function createEntry(folderName, data) {
 async function updateEntry(folderName, documentId, data) {
   const schema = COLLECTION_SCHEMAS[folderName]
   try {
-    console.log(`  🔄 [DEBUG] Updating entry in ${schema.endpoint}`)
-    console.log(`  🔄 [DEBUG] Document ID: ${documentId}`)
-    console.log(`  🔄 [DEBUG] Update URL: ${CMS_API_URL}/api/${schema.endpoint}/${documentId}`)
-    console.log(`  🔄 [DEBUG] Data keys:`, Object.keys(data).join(', '))
-
     const response = await axios.put(
       `${CMS_API_URL}/api/${schema.endpoint}/${documentId}`,
       { data },
@@ -977,18 +893,16 @@ async function updateEntry(folderName, documentId, data) {
       }
     )
 
-    console.log(`  ✅ [DEBUG] Update response:`, JSON.stringify(response.data, null, 2))
     return response.data
   } catch (error) {
     const errorMsg = error.response?.data?.error?.message || error.message
     const errorDetails = error.response?.data?.error?.details || {}
-    console.error(`  ❌ [DEBUG] Update failed: ${errorMsg}`)
+    console.error(`  ❌ Update failed: ${errorMsg}`)
     if (Object.keys(errorDetails).length > 0) {
-      console.error(`  ❌ [DEBUG] Error details:`, JSON.stringify(errorDetails, null, 2))
+      console.error(`  Error details:`, JSON.stringify(errorDetails, null, 2))
     }
     if (error.response) {
-      console.error(`  ❌ [DEBUG] Response status:`, error.response.status)
-      console.error(`  ❌ [DEBUG] Response data:`, JSON.stringify(error.response.data, null, 2))
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
     }
     throw error
   }
@@ -998,10 +912,6 @@ async function updateEntry(folderName, documentId, data) {
 async function deleteEntry(folderName, documentId) {
   const schema = COLLECTION_SCHEMAS[folderName]
   try {
-    console.log(`  🗑️ [DEBUG] Deleting entry from ${schema.endpoint}`)
-    console.log(`  🗑️ [DEBUG] Document ID: ${documentId}`)
-    console.log(`  🗑️ [DEBUG] Delete URL: ${CMS_API_URL}/api/${schema.endpoint}/${documentId}`)
-
     const response = await axios.delete(`${CMS_API_URL}/api/${schema.endpoint}/${documentId}`, {
       headers: {
         Authorization: `Bearer ${CMS_API_TOKEN}`,
@@ -1009,15 +919,12 @@ async function deleteEntry(folderName, documentId) {
       },
     })
 
-    console.log(`  ✅ [DEBUG] Delete response status: ${response.status}`)
-    console.log(`  ✅ [DEBUG] Delete response:`, JSON.stringify(response.data, null, 2))
     return response.data
   } catch (error) {
     const errorMsg = error.response?.data?.error?.message || error.message
-    console.error(`  ❌ [DEBUG] Delete failed: ${errorMsg}`)
+    console.error(`  ❌ Delete failed: ${errorMsg}`)
     if (error.response) {
-      console.error(`  ❌ [DEBUG] Response status:`, error.response.status)
-      console.error(`  ❌ [DEBUG] Response data:`, JSON.stringify(error.response.data, null, 2))
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
     }
     throw new Error(`Failed to delete entry: ${errorMsg}`)
   }
@@ -1025,45 +932,22 @@ async function deleteEntry(folderName, documentId) {
 
 // Helper: Detect operation type
 function detectOperationType(filePath, isDeletedFile = false) {
-  console.log(`  🔍 [DEBUG] detectOperationType called for: ${filePath}`)
-  console.log(`  🔍 [DEBUG] isDeletedFile flag: ${isDeletedFile}`)
-
   if (isDeletedFile) {
-    console.log(`  🔍 [DEBUG] File is marked as deleted by GitHub`)
     return 'delete'
   }
 
-  const exists = fs.existsSync(filePath)
-  console.log(`  🔍 [DEBUG] File exists on disk: ${exists}`)
-
-  if (!exists) {
-    console.log(`  🔍 [DEBUG] File does not exist, operation: delete`)
+  if (!fs.existsSync(filePath)) {
     return 'delete'
   }
 
-  console.log(`  🔍 [DEBUG] File exists, operation: create_or_update`)
   return 'create_or_update'
 }
 
 // Main sync logic
 async function syncToStrapi() {
-  console.log('🚀 Starting sync to Strapi CMS...\n')
-  console.log(`📦 Deployment Status: ${DEPLOYMENT_STATUS}`)
-  console.log(`🔗 CMS API URL: ${CMS_API_URL}`)
-  console.log(`📁 Sync Folders: ${SYNC_FOLDERS.join(', ')}`)
-  console.log(`\n📄 Changed Files (${CHANGED_FILES.length}):`)
-  CHANGED_FILES.forEach((file, idx) => {
-    console.log(`   ${idx + 1}. ${file}`)
-  })
-  console.log(`\n🗑️ Deleted Files (${DELETED_FILES.length}):`)
-  DELETED_FILES.forEach((file, idx) => {
-    console.log(`   ${idx + 1}. ${file}`)
-  })
-  console.log(`\n🖼️ Changed Assets (${CHANGED_ASSETS.length}):`)
-  CHANGED_ASSETS.forEach((file, idx) => {
-    console.log(`   ${idx + 1}. ${file}`)
-  })
-  console.log('')
+  console.log(
+    `🚀 Starting sync — Changed: ${CHANGED_FILES.length}, Deleted: ${DELETED_FILES.length}, Assets: ${CHANGED_ASSETS.length}\n`
+  )
 
   const results = {
     created: [],
@@ -1080,11 +964,6 @@ async function syncToStrapi() {
     ...DELETED_FILES.map((file) => ({ path: file, isDeleted: true })),
   ]
 
-  console.log(`\n📊 [DEBUG] Total files to process: ${allFiles.length}`)
-  console.log(`  - Changed/Modified: ${CHANGED_FILES.length}`)
-  console.log(`  - Deleted: ${DELETED_FILES.length}`)
-  console.log('')
-
   const pendingOperations = []
 
   console.log('\n' + '='.repeat(80))
@@ -1092,13 +971,10 @@ async function syncToStrapi() {
   console.log('='.repeat(80))
 
   for (const { path: filePath, isDeleted } of allFiles) {
-    console.log(`\n📄 Analyzing: ${filePath}`)
-    console.log(`  🏷️ [DEBUG] File marked as deleted: ${isDeleted}`)
+    console.log(`\n📄 Processing: ${filePath}${isDeleted ? ' (deleted)' : ''}`)
 
     try {
-      console.log(`  🔍 [DEBUG] Extracting folder name...`)
       const folderName = getFolderName(filePath)
-      console.log(`  🔍 [DEBUG] Folder name: ${folderName}`)
 
       if (!folderName || !SYNC_FOLDERS.includes(folderName)) {
         console.log(`⏭️ Skipped: Folder '${folderName}' not in sync list`)
@@ -1106,16 +982,13 @@ async function syncToStrapi() {
         continue
       }
 
-      console.log(`  🛣️ [DEBUG] Generating path field...`)
       const pathField = generatePathField(filePath, folderName)
-      console.log(`  🛣️ [DEBUG] Path field: ${pathField}`)
 
       if (!pathField) {
         throw new Error('Could not generate path field')
       }
 
       const operationType = detectOperationType(filePath, isDeleted)
-      console.log(`  🔧 [DEBUG] Operation type: ${operationType}`)
 
       if (operationType === 'delete') {
         // For delete, we just need to store the intent
@@ -1126,20 +999,15 @@ async function syncToStrapi() {
           filePath,
         })
       } else {
-        console.log(`  📖 [DEBUG] Parsing MDX file...`)
         const { frontmatter, content } = parseMDXFile(filePath)
-        console.log(`  📖 [DEBUG] Frontmatter keys:`, Object.keys(frontmatter).join(', '))
 
         // --- ASSET HANDLING START ---
-        console.log(`  🖼️ [DEBUG] Analyzing assets...`)
         const assetPaths = extractAssetPaths(content, frontmatter)
-        console.log(`  🖼️ [DEBUG] Found ${assetPaths.length} assets:`, assetPaths)
 
         for (const assetPath of assetPaths) {
           await syncAsset(assetPath)
         }
 
-        console.log(`  🖼️ [DEBUG] Replacing asset URLs with CDN links...`)
         const { content: updatedContent, frontmatter: updatedFrontmatter } = replaceAssetPaths(
           content,
           frontmatter,
@@ -1237,7 +1105,6 @@ async function syncToStrapi() {
       } else {
         const { frontmatter, content } = op
 
-        console.log(`  🗺️ [DEBUG] Mapping to Strapi schema...`)
         const { data: strapiData, warnings } = await mapToStrapiSchema(
           folderName,
           frontmatter,
@@ -1254,7 +1121,6 @@ async function syncToStrapi() {
           })
         }
 
-        console.log(`  🔎 [DEBUG] Checking if entry exists in CMS...`)
         const existingEntry = await findEntryByPath(folderName, pathField)
 
         if (existingEntry) {
@@ -1276,10 +1142,7 @@ async function syncToStrapi() {
       console.error(`❌ Error syncing ${filePath}: ${error.message}`)
       // Detailed error logging...
       if (error.response) {
-        console.error(
-          `❌ [DEBUG] HTTP Response data:`,
-          JSON.stringify(error.response.data, null, 2)
-        )
+        console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
       }
       results.errors.push({ file: filePath, error: error.message })
     }

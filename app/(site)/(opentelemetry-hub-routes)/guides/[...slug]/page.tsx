@@ -14,10 +14,9 @@ import React from 'react'
 import { fetchGuideBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
-import { safeJsonLdStringify } from '@/utils/structuredData'
+import JsonLdScript from '@/components/JsonLdScript'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
-import Button from '@/components/ui/Button'
-import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 
 const defaultLayout = 'GuidesLayout'
@@ -62,11 +61,13 @@ export async function generateMetadata(props: {
     }
   })
 
+  const seoTitle = post.meta_title || post.title
+
   return {
-    title: post.title,
+    title: seoTitle,
     description: post?.description,
     openGraph: {
-      title: post.title,
+      title: seoTitle,
       description: post?.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
@@ -79,7 +80,7 @@ export async function generateMetadata(props: {
     },
     twitter: {
       card: 'summary_large_image',
-      title: post.title,
+      title: seoTitle,
       description: post?.description,
       images: imageList,
     },
@@ -113,6 +114,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+  const breadcrumbs = getSectionArticleBreadcrumbs('guides', post.title, slug)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -132,10 +135,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   if (hubContext) {
     return (
       <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-        />
+        <JsonLdScript data={jsonLd} />
+        <JsonLdScript data={breadcrumbJsonLd} />
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -143,6 +144,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           toc={post.toc}
           showSidebar={hubContext.pathKey !== 'quick-start' && hubContext.items.length > 0}
           authorDirectory={authorDirectory}
+          breadcrumbs={breadcrumbs}
         >
           {compiledContent}
           {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
@@ -164,19 +166,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLdStringify(jsonLd) }}
-      />
-
-      <div className="container mx-auto">
-        <Button variant={'ghost'} to={`/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
-          <span className="flex items-center">
-            <SidebarIcons.ArrowLeft />
-            <span className="pl-1.5 text-sm">Back to Guides</span>
-          </span>
-        </Button>
-      </div>
+      <JsonLdScript data={jsonLd} />
+      <JsonLdScript data={breadcrumbJsonLd} />
 
       <Layout
         content={mainContent}
@@ -184,6 +175,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         authors={authorList}
         toc={post.toc}
         authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
       >
         {compiledContent}
       </Layout>

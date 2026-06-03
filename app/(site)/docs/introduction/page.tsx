@@ -13,6 +13,8 @@ import InstallLocallySection from './InstallLocallySection'
 import { Metadata } from 'next'
 import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
 import HoverableSidebar from '@/components/HoverableSidebar'
+import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
+import JsonLdScript from '@/components/JsonLdScript'
 
 export const metadata: Metadata = {
   title: 'Introduction to SigNoz - Open Source Observability Platform',
@@ -21,8 +23,11 @@ export const metadata: Metadata = {
 }
 
 export default function DocsIntroductionPage() {
+  const breadcrumbJsonLd = generateDocsBreadcrumb('introduction', 'Introduction')
+
   return (
     <>
+      <JsonLdScript data={breadcrumbJsonLd} />
       <HoverableSidebar />
       <Header showSearchBar />
       <SendData />

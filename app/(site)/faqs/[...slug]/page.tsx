@@ -80,35 +80,31 @@ export async function generateMetadata(props: {
       const deployment_status = isProduction ? 'live' : 'staging'
       const { data: content } = await fetchMDXContentByPath('faqs', path, deployment_status)
 
+      const faqContent = content as MDXContent
+
       // Extract author names from the content
-      const authorNames = (content as MDXContent)?.authors?.map((author) => author?.name) || [
-        'SigNoz Team',
-      ]
+      const authorNames = faqContent?.authors?.map((author) => author?.name) || ['SigNoz Team']
+      const seoTitle = faqContent.meta_title || faqContent.title
 
       return {
-        title: (content as MDXContent).title,
-        description:
-          (content as MDXContent)?.description || `${(content as MDXContent)?.title} - SigNoz FAQ`,
+        title: seoTitle,
+        description: faqContent?.description || `${faqContent?.title} - SigNoz FAQ`,
         authors: authorNames.map((name) => ({ name })),
         openGraph: {
-          title: (content as MDXContent)?.title,
-          description:
-            (content as MDXContent)?.description ||
-            `${(content as MDXContent)?.title} - SigNoz FAQ`,
+          title: seoTitle,
+          description: faqContent?.description || `${faqContent?.title} - SigNoz FAQ`,
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          publishedTime: (content as MDXContent)?.date,
-          modifiedTime: (content as MDXContent)?.updatedAt,
-          url: (content as MDXContent)?.path || './',
+          publishedTime: faqContent?.date,
+          modifiedTime: faqContent?.updatedAt,
+          url: faqContent?.path || './',
           authors: authorNames,
         },
         twitter: {
           card: 'summary_large_image',
-          title: (content as MDXContent)?.title,
-          description:
-            (content as MDXContent)?.description ||
-            `${(content as MDXContent)?.title} - SigNoz FAQ`,
+          title: seoTitle,
+          description: faqContent?.description || `${faqContent?.title} - SigNoz FAQ`,
         },
       }
     } catch (error) {

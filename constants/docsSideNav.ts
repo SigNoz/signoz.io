@@ -8,6 +8,7 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     label: 'Overview',
+    route: '/docs/what-is-signoz',
     items: [
       {
         type: 'doc',
@@ -45,6 +46,11 @@ const docsSideNav = [
     label: 'Setup',
     route: '/docs/install/',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/install/',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -219,6 +225,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/manage/overview',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/manage/overview',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -564,6 +575,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/manage/administrator-guide/workspace-url',
+            label: 'Edit Workspace URL',
+          },
+          {
+            type: 'doc',
             route: '/docs/telemetry',
             label: 'Statistics Reporting',
           },
@@ -581,16 +597,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/tutorial/infinite-retention-aws-s3',
             label: 'Infinite Retention using AWS S3',
-          },
-          {
-            type: 'doc',
-            route: '/docs/tutorial/s3-integration-iam-role-eks',
-            label: 'S3 Integration With AWS IAM role in EKS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/tutorial/oci-bucket-cold-storage-integration',
-            label: 'OCI Bucket Cold Storage Integration',
           },
           {
             type: 'doc',
@@ -617,6 +623,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/opentelemetry-collection-agents/get-started',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/opentelemetry-collection-agents/get-started',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,
@@ -653,6 +664,12 @@ const docsSideNav = [
                     route:
                       '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
                     label: 'Monitoring Kubernetes Clusters using Opentelemetry Collection Agents',
+                  },
+                  {
+                    type: 'doc',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cronjobs',
+                    label: 'Monitor Kubernetes CronJobs',
                   },
                   {
                     type: 'doc',
@@ -1142,6 +1159,24 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Kong Gateway',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/integrations/kong-gateway',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/outposts/kong',
+                label: 'SigNoz Plugin',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'OpenTelemetry Plugin',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'Elixir',
             route: '/docs/instrumentation/opentelemetry-elixir',
@@ -1175,11 +1210,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Kong Gateway',
           },
         ],
       },
@@ -1582,6 +1612,24 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Kong Gateway',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/integrations/kong-gateway',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/outposts/kong',
+                label: 'SigNoz Plugin',
+              },
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-kong-gateway',
+                label: 'OpenTelemetry Plugin',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/logs-management/send-logs/collection-methods',
             label: 'Collection Methods',
@@ -1615,11 +1663,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/opentelemetry-dbos',
             label: 'DBOS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/opentelemetry-kong-gateway',
-            label: 'Kong Gateway',
           },
           {
             type: 'doc',
@@ -1773,11 +1816,6 @@ const docsSideNav = [
             label: 'Available Quick Filters',
           },
           { type: 'doc', route: '/docs/logs-management/logs-api/overview', label: 'Logs API' },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
         ],
       },
       {
@@ -1908,6 +1946,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/nginx-ingress-controller',
+                label: 'NGINX Ingress Controller',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/nvidia-dcgm-metrics',
                 label: 'NVIDIA GPU (DCGM)',
               },
@@ -1930,6 +1973,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/fly-metrics',
                 label: 'Fly.io metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/keda-metrics',
+                label: 'KEDA Metrics',
               },
             ],
           },
@@ -2171,6 +2219,142 @@ const docsSideNav = [
         label: 'Out of Box Dashboards',
         items: [
           {
+            label: 'APM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/apm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/apm-metrics',
+                label: 'APM Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
+                label: 'DB Calls Monitoring',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/http-api-monitoring',
+                label: 'HTTP API Monitoring',
+              },
+            ],
+          },
+          {
+            label: 'Hostmetrics',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Hostmetrics (K8s)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
+                label: 'Hostmetrics (VM)',
+              },
+            ],
+          },
+          {
+            label: 'Kubernetes',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
+                label: 'Kubernetes Cluster Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Host Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-events',
+                label: 'Kubernetes Events',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
+                label: 'Kubernetes PVC Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
+                label: 'Kubernetes Pod Metrics (Overall)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
+                label: 'Kubernetes Pod Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
+                label: 'Kubernetes Node Metrics (Overall)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
+                label: 'Kubernetes Node Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cronjobs',
+                label: 'Kubernetes CronJobs',
+              },
+            ],
+          },
+          {
+            label: 'LiteLLM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
+                label: 'LiteLLM Proxy',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
+                label: 'LiteLLM SDK',
+              },
+            ],
+          },
+          {
+            label: 'NGINX',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/nginx',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/nginx',
+                label: 'NGINX',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/nginx-ingress-controller-overview',
+                label: 'NGINX Ingress - Controller Overview',
+              },
+              {
+                type: 'doc',
+                route:
+                  '/docs/dashboards/dashboard-templates/nginx-ingress-request-handling-performance',
+                label: 'NGINX Ingress - Request Performance',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/agno-dashboard',
             label: 'Agno',
@@ -2194,29 +2378,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
-          },
-          {
-            label: 'APM',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/apm-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/apm-metrics',
-                label: 'APM Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
-                label: 'DB Calls Monitoring',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/http-api-monitoring',
-                label: 'HTTP API Monitoring',
-              },
-            ],
           },
           {
             type: 'doc',
@@ -2364,24 +2525,6 @@ const docsSideNav = [
             label: 'Haystack',
           },
           {
-            label: 'Hostmetrics',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
-                label: 'Hostmetrics (K8s)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
-                label: 'Hostmetrics (VM)',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
             label: 'Hugging Face',
@@ -2405,6 +2548,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
             label: 'Kafka',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/keda',
+            label: 'KEDA',
           },
           {
             label: 'Kubernetes',
@@ -2452,6 +2600,11 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
                 label: 'Kubernetes Node Metrics (Detailed)',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cronjobs',
+                label: 'Kubernetes CronJobs',
+              },
             ],
           },
           {
@@ -2463,24 +2616,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/kong-gateway',
             label: 'Kong Gateway',
-          },
-          {
-            label: 'LiteLLM',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
-                label: 'LiteLLM Proxy',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
-                label: 'LiteLLM SDK',
-              },
-            ],
           },
           {
             type: 'doc',
@@ -2506,11 +2641,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mysql',
             label: 'MySQL',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/nginx',
-            label: 'NGINX',
           },
           {
             type: 'doc',
@@ -2589,8 +2719,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: 'Supabase',
             route: '/docs/dashboards/dashboard-templates/supabase',
+            label: 'Supabase',
           },
           {
             type: 'doc',
@@ -3092,7 +3222,7 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/openclaw-monitoring',
+        route: '/docs/openclaw-observability',
         label: 'OpenClaw',
         type: 'doc',
       },
@@ -3599,6 +3729,24 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'Kong Gateway',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/integrations/kong-gateway',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/outposts/kong',
+            label: 'SigNoz Plugin',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/opentelemetry-kong-gateway',
+            label: 'OpenTelemetry Plugin',
+          },
+        ],
+      },
+      {
         label: 'Temporal',
         type: 'category',
         isExpanded: false,
@@ -3720,11 +3868,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/outposts/render',
         label: 'Render',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/opentelemetry-kong-gateway',
-        label: 'Kong Gateway',
       },
       {
         type: 'doc',
@@ -4028,6 +4171,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/migration/migrate-to-signoz',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-to-signoz',
+        label: 'Overview',
+      },
       {
         label: 'From Datadog',
         type: 'category',
@@ -4367,6 +4515,11 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/gcp-monitoring',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/gcp-monitoring',
+        label: 'Overview',
+      },
       {
         type: 'category',
         isExpanded: false,

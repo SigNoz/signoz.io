@@ -12,7 +12,7 @@ const CustomerStoriesSection: React.FC<CustomerStoriesSectionProps> = ({
   showFeaturedCaseStudy = true,
 }) => {
   const sectionClassName = showOverlay
-    ? "relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw]"
+    ? 'relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-blur-ellipse-388 md:w-[80vw]'
     : 'relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]'
 
   return (

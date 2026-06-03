@@ -1,0 +1,168 @@
+---
+title: "How to Avoid Datadog's Custom Metrics Trap"
+date: 2026-05-21
+authors: [aayush_sharma]
+description: "Datadog charges for custom metrics per unique tag combination, so one new tag can multiply your bill overnight. Here's the cardinality cost most teams miss, and how to keep it from running your invoice."
+keywords: [datadog custom metrics pricing, datadog cardinality, custom metrics cost, datadog metrics billing, opentelemetry datadog cost, time series billing]
+---
+
+**TL;DR**
+
+- **SigNoz**: Best for teams that don't want their bill tied to tag count. Metrics are priced at $0.10 per million samples regardless of how many tags they carry, with no per-host charges, no surprise bills when you go over a limit, and no surcharge for OpenTelemetry.
+- **Datadog**: Best for teams with big budgets who are willing to spend time tracking down complex billing settings and deleting unused tags. You get 100 free metrics per server on Pro (200 on Enterprise), then pay $5.00 for every 100 extra. Because tags multiply costs, a single line of code can accidentally create hundreds of thousands of extra items on your bill.
+
+---
+
+Custom metrics are the data points engineers care about most. They track your vital business KPIs, queue depths, feature flags, and unique customer signals that standard dashboards miss. Datadog treats everything you send via OpenTelemetry as a custom metric, and every tag combination multiplies your bill.
+
+<Figure
+  src="/img/blog/2026/05/datadog-custom-metrics-pricing-reddit.webp"
+  alt="Reddit post about auditing Datadog bill and discovering unused custom metrics (Credit: Reddit)"
+  caption="Reddit post about auditing Datadog bill and discovering unused custom metrics (Credit: Reddit)"
+/>
+
+Datadog includes only 100 custom metrics per host on the Pro plan and 200 per host on the Enterprise plan. Beyond the Datadog's allotment, the rate is `$5.00` per 100 custom metrics per month on annual billing, applied to every unique combination of metric name and tag values. Most teams find out the hard way that a meaningful share of their custom metrics bill comes from time series they didn't know they were producing. You end up paying for the metrics you actually need and the metrics you didn't know existed, on the same line item.
+
+A single counter tagged with `method`, `endpoint`, `status`, and `customer_id` can become hundreds of thousands of billable metrics from a single line of instrumentation code. The metric type also multiplies the count:
+
+- `COUNT`, `RATE`, and `GAUGE`: 1 custom metric per unique tag combination.
+- `HISTOGRAM`: 5 per tag combination (one each for `avg`, `count`, `median`, `95percentile`, and `max`).
+- `DISTRIBUTION`: 5 per tag combination, doubling if percentiles are enabled.
+
+This is also why teams compare Datadog against tools with simpler pricing, like [SigNoz](https://signoz.io/), which bills metrics at `$0.10` per million samples regardless of tag count or metric type, often find a large gap in cost forecasts.
+
+<InlineCTA message="Metrics priced per sample, not per tag combination. No cardinality surcharge. Try SigNoz Cloud." />
+
+This article walks through how Datadog custom metrics are actually billed, where cardinality compounds the bill, and how to reduce or avoid it. For a broader look at Datadog's pricing across all products, our [main pricing guide](https://signoz.io/blog/datadog-pricing/) covers ingestion, indexing, per-host charges, and other meters.
+
+## How Datadog Counts One Custom Metric
+
+Datadog does not bill you for a single metric name but for every unique combination of that metric's tags. Each unique mix of labels creates a separate time series, and every single series is a billable item.
+
+```
+# One custom metric:
+http_requests{method="GET", status="200"}
+
+# Two custom metrics:
+http_requests{method="GET", status="200"}
+http_requests{method="POST", status="200"}
+
+# Four custom metrics:
+http_requests{method="GET", status="200"}
+http_requests{method="POST", status="200"}
+http_requests{method="GET", status="500"}
+http_requests{method="POST", status="500"}
+```
+
+In other words, the number of custom metrics Datadog counts is the [cardinality](https://signoz.io/blog/high-cardinality-data/) of your tag set, not the number of metric names you've defined.
+
+Imagine a single `http_requests` counter tagged with six dimensions:
+
+- 4 HTTP methods
+- 50 endpoints
+- 10 status codes
+- 3 regions
+- 5 active versions
+- 5,000 customers
+
+That one metric can produce up to `4 × 50 × 10 × 3 × 5 × 5,000 = 15,000,000` time series. Even if only 5% of those combinations fire in a given month, you're still sitting at 750,000 active series, which works out to roughly `$37,500/month` at the `$5` per-100 metric rate, just for that one metric.
+
+The tags that quietly drive this:
+
+- `customer_id`, `tenant_id`, `org_id` (scales with your customer base)
+- `request_id`, `trace_id`, `correlation_id` (effectively unbounded)
+- `user_id`, `session_id` (scales with traffic)
+- `pod_name`, `container_id`, `instance_id` (scales with [Kubernetes](https://signoz.io/blog/kubernetes-monitoring/) churn)
+- IP addresses, raw URLs with path parameters
+
+Any one of these in a tag set, and the cost gets ugly fast.
+
+## How Datadog Users Discover The Trap
+
+The bill rarely blows up overnight. It moves in steps that all feel reasonable at the time.
+
+A team ships a feature-flag service and tags every metric with `flag_name` and `user_id` so A/B impact is easy to query. A few weeks later, the platform team adds `pod_name` to Kubernetes metrics so they can debug at the per-pod level. Then, customer success asks for a per-customer view of a SaaS health metric, and someone adds `customer_id` in five minutes.
+
+Each tag answers a real question, and none of them looks wrong in code review. The problem is that each new tag multiplies the cardinality rather than adding to it, and nobody runs the math until the invoice shows a number much larger than the previous month. After that, the rest of the quarter usually goes into a Datadog metric summary, hunting for which tags are driving the count.
+
+## Datadog's Suggested Solutions With Trade-offs, Not Fixes
+
+When your custom metrics invoice grows, Datadog offers a few ways to reduce costs. However, none of these options fixes the underlying pricing model. Instead, they force your team to choose between losing data visibility and taking on ongoing maintenance work:
+
+- **Drop high-cardinality tags:** You can use Datadog's metrics summary to find your most expensive tags (like `customer_id`) and delete them. While this instantly drops your bill, it also means you can no longer break down your graphs by those tags during a live system outage.
+- **Use Metrics Without Limits:** This feature splits your metric bill into two separate charges - a lower rate for everything you ingest (`$0.10 per 100 metrics`) and a higher standard rate for the specific tag combinations you choose to index. While this can lower your costs, it turns your metric pricing into a complex, dual-meter system that requires a recurring quarterly review process to maintain.
+- **Aggregate at the source:** You can reprogram your code to group per-customer data into broad service rollups before sending it out. Your high-level dashboards will still work, but you lose the ability to trigger real-time alerts for individual customers.
+- **Sample at the source:** You can choose to send every 10th data point instead of recording every action. Your bill will drop, but your metric accuracy drops with it, meaning critical data gaps usually show up exactly when you are trying to debug an active incident.
+
+Ultimately, these options are just damage control. By the time your team is forced to drop useful tags or manage a secondary billing configuration forever, Datadog's pricing model has stopped working for how modern engineering teams actually use metrics, which is why many start evaluating [alternatives](https://signoz.io/blog/datadog-alternatives/).
+
+## SigNoz Cloud Pricing Model: Saving Multiplying Cost
+
+<Figure
+  src="/img/blog/2026/05/datadog-custom-metrics-pricing-signoz.webp"
+  alt="SigNoz pricing page showing usage-based pricing for logs, traces, and metrics"
+  caption="SigNoz pricing page"
+/>
+
+The workarounds in the section above can soften the bill, but the underlying mechanism doesn't change. The Datadog bill keeps tracking active time series at `$5` per 100 custom metrics per month (annual billing) beyond your per-host allotment. Here's what that math looks like at common scales:
+
+| Active time series beyond allotment | Monthly overage |
+| --- | --- |
+| 10,000 | $500 |
+| 100,000 | $5,000 |
+| 1,000,000 | $50,000 |
+
+Custom metrics can account for up to 52% of total Datadog spend at scale and frequently become the largest line item on the bill. No amount of tag pruning or sampling changes the underlying rule that every new tag multiplies your bill, with high-cardinality tags multiplying it sharply.
+
+[SigNoz Cloud](https://signoz.io/) prices metrics on a different axis. You pay for the data you send:
+
+- `$0.10` per million metric samples ingested
+- No per-host charges
+- No per-user charges
+- No allotment-then-overage cliff
+- No separate ingested-vs-indexed tier
+- No surcharge for OpenTelemetry
+
+Adding a tag costs nothing extra, and even adding `customer_id` to every metric across every service costs nothing extra either. The bill is driven by sample volume, not by how creative your tag schema gets.
+
+- **OpenTelemetry without the tax:** Datadog bills all OTel metrics as custom. SigNoz is [OpenTelemetry](https://signoz.io/blog/opentelemetry-metrics-with-examples/)-native, so OTel is the default path and is priced the same as anything else.
+- **Forecasting is arithmetic:** Samples per second × seconds per month × `$0.10` per million gives you your bill, and new tags don't multiply that number.
+- **Migration is usually a config change:** if you're already on OpenTelemetry for Datadog, pointing the same exporter to SigNoz is just an endpoint swap.
+
+If you want concrete numbers for your own setup, the [Datadog Pricing Calculator](https://signoz.io/datadog-pricing-calculator/) takes your time series count and shows what the same workload would cost on Datadog and on the SigNoz side by side.
+
+[SigNoz Cloud](https://signoz.io/teams/) is the managed option for teams who want simpler pricing. The Teams plan starts at `$49/month`, which includes `$49` of usage credit (roughly 490 million metric samples). For data residency or compliance needs, there are [enterprise self-hosted and BYOC](https://signoz.io/contact-us/) options, and the open-source [community edition](https://signoz.io/docs/install/self-host/) is free if you'd rather run the stack yourself.
+
+## FAQs
+
+**What is a custom metric on Datadog?**
+
+A custom metric is any data point outside a built-in integration, such as Prometheus or OpenTelemetry data. Datadog bills you for every unique tag combination, whereas SigNoz charges a flat rate with no tag penalties.
+
+**How much does cardinality cost on Datadog?**
+
+You get 100 free custom metrics per server on Pro, then pay `$5.00` per 100 extra metrics. A set of 100,000 unique tag combinations costs roughly `$5,000/month`. On SigNoz, those same combinations cost pennies because you only pay for data volume.
+
+**Why is my Datadog bill higher than my data volume suggests?**
+
+Datadog bills on tag combinations (cardinality), not data size. A tiny data stream with heavy tags can easily cost more than a massive data stream with simple tags. Switching to volume-based tools like SigNoz aligns your invoice directly with the data size.
+
+**Are OpenTelemetry metrics cheaper on Datadog?**
+
+No. Datadog charges full custom-metric rates for OpenTelemetry data, with no open-source discount. To run open standards without financial penalties, teams migrate to SigNoz, which is natively built for OpenTelemetry.
+
+**Does Metrics Without Limits actually help?**
+
+Yes, but it adds complex admin work. It lowers costs by splitting your invoice into two separate metrics billing meters. You avoid this dual-meter configuration entirely with SigNoz's single flat-rate model.
+
+**What is the fastest way to cut my custom metrics bill?**
+
+Find your 10 most expensive metrics in Datadog and delete the high-cardinality tags from your code. If your team cannot afford to lose those tags for debugging, the best move is to switch to SigNoz, which supports rich tags by default.
+
+---
+
+**Further Reading**
+
+[Datadog Pricing: Main Caveats Explained](https://signoz.io/blog/datadog-pricing/)
+
+[SigNoz vs Datadog vs New Relic vs Grafana: Pricing Comparison](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/)

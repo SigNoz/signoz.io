@@ -1,0 +1,171 @@
+---
+title: How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP
+description: Kernel uses SigNoz MCP and OpenTelemetry-native observability to debug AI agent browser infrastructure, triage HTTP 502 errors faster, and reduce browser acquisition latency from 140ms to 30ms.
+image: /img/case_study/kernel-cover.webp
+authors: [mahak_kaur]
+---
+
+<div class="avatar">
+  <a
+    class="avatar__photo-link avatar__photo avatar__photo--lg"
+    href="https://www.linkedin.com/in/mahak-kaur/"
+  >
+    <img alt="Mahak Profile" src="/img/users/mahak.webp" />
+  </a>
+  <div class="avatar__intro">
+    <div class="avatar__name">Mahak Kaur</div>
+    <small class="avatar__subtitle">Developer Relations, SigNoz</small>
+  </div>
+</div>
+
+## About Kernel: Fast Browser Infrastructure for AI Agents
+
+[Kernel](https://onkernel.com/) builds fast, open-source infrastructure for AI agents to access the internet, centered around sandboxed Chromium. AI agents often need browsers to interact with websites, portals, and applications on behalf of users. Kernel provides the cloud browser infrastructure behind those workflows, handling production concerns such as browser session lifecycle, isolation, scaling, and reliability.
+
+Agents can control Kernel browser sessions through CDP, Playwright/Puppeteer-style automation, WebDriver BiDi, or computer-control APIs. This lets teams build internet-facing agent workflows without having to build and operate browser infrastructure from scratch.
+
+We sat down with [Hiro Tamada](https://www.linkedin.com/in/fumihiro-tamada-b5a06812b/), Founding Engineer at Kernel, to understand how the team uses SigNoz to monitor this infrastructure, and how SigNoz MCP has become a core part of its day-to-day engineering workflow.
+
+## The Challenge: Reliability and Latency Compound in Agentic Browser Workflows
+
+Kernel sits in the infrastructure layer for companies building AI agents. These agents may need to access a fintech portal, a healthcare portal, or another third-party website, then perform actions such as scraping information, clicking through a workflow, or completing an operation on behalf of an end user.
+
+In these workflows, reliability and latency do not exist in isolation. A small increase in browser latency, a failed CDP operation, or a flaky target website can compound across a long-running agent workflow and make the final user experience unreliable.
+
+> Even a 10% increase in latency, or an increase in the failure rate of CDP operations like a click action, can compound and make the agentic workflow unreliable. Our customers care a lot about reliability and latency, so we care about reliability and latency, too.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+When something goes wrong, Kernel needs to quickly separate its own infrastructure issues from customer-side code problems or failures in the external websites that agents are trying to access.
+
+In many cases, the issue may be a bad Playwright script, customer code, or an outage in the website being accessed. But Kernel is in the middle of that workflow. Its customer-facing engineers still need to triage quickly and answer a simple but critical question: is this Kernel's fault or not?
+
+Kernel's infrastructure also has a broader failure surface than a typical API and database application. Browser sessions are tied to microVMs. When a user requests a browser, Kernel spins up a VM on bare-metal servers and gives that browser environment to the user.
+
+That means an issue can originate in the control plane API, inside a VM, from memory pressure or OOM behavior, in proxy infrastructure, in bare-metal services, in a browser session, or in a managed deployment/runtime layer.
+
+> Our browser session is tied to a VM. It's not simple API/database I/O. The failure point could be the control plane API, but at the same time, it could be anything going on in the VM, memory on the VM, or something going on with our proxy provider.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+Kernel needed observability that could bring VM metrics, VM logs, control-plane logs, service telemetry, and dashboard data into one place, so engineers could investigate across layers without stitching together evidence from disconnected systems.
+
+## The Solution - OpenTelemetry-Native Observability and Agent-Led Debugging with SigNoz
+
+Kernel has used SigNoz from the beginning. The team had prior experience with Datadog at previous companies, and that shaped how they thought about observability costs and vendor lock-in.
+
+The first major decision driver was cost predictability. Experienced engineers on the team had seen Datadog bills compound over time until they became difficult to manage.
+
+> The consensus was that the Datadog bill gets compounded and then it becomes huge and unmanageable. At some point, every company accepts the bill and pays it like a tax.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+For day-to-day usage, Hiro did not see SigNoz as a compromise on capability. He also pointed to SigNoz's fast feedback loop as an advantage for a startup team.
+
+> At a high level, everything that I've used in Datadog is available in SigNoz. At the same time, SigNoz's feedback loop is very nice. Whenever one of our engineers requests a feature or gives feedback, SigNoz responds very quickly.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+The second driver was OpenTelemetry and open source. Kernel wanted observability that fit its engineering culture: open standards, no proprietary SDK lock-in, and the ability to understand the full path of telemetry data.
+
+> It's nice to have open source software because agents do really well with it. If we're trying to create a dashboard and there's a limitation we don't understand, we can let agents go into the open-source codebase, understand the limitation, and ask for feature requests.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+That open-source angle matters even more in an AI-native engineering workflow. Kernel's team uses agents heavily, and open-source tools give those agents more context to work with. If the team encounters a limitation, agents can inspect source code, understand behavior, and help produce more useful feature requests or internal workarounds.
+
+SigNoz's OpenTelemetry-native approach also made onboarding new services straightforward.
+
+> We add a lot of services on bare metal because our VMs are on bare metal. Onboarding that new service to SigNoz is so easy because of OTel. It's like a couple of lines of OTel configuration and that's it.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+<YouTube id="0ZrTqonLE-I" mute={false} />
+
+As Kernel adds services across bare-metal machines, such as proxy services or other independent components, the team can onboard them to SigNoz with minimal configuration overhead.
+
+The team also values SigNoz's feedback loop. When Kernel engineers send feature requests or feedback, they have found the SigNoz team responsive. For a startup building fast-moving infrastructure, that speed matters.
+
+## The Impact - Faster Triage, Lower Latency, and Proactive Monitoring
+
+Today, SigNoz is part of Kernel's daily engineering workflow. The team uses it for customer triage, incident response, post-launch monitoring, dashboards, alerts, and latency optimization.
+
+But the biggest shift has been SigNoz MCP.
+
+> When there's customer triage, incidents, or even post-launch monitoring, we let agents connect to SigNoz MCP, do queries, check metrics, and post analysis in Slack. SigNoz MCP has been a very big part of our engineering life.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+When an incident happens, Kernel's team can tag an internal agent in the incident channel and ask it to debug using SigNoz MCP. The agent queries telemetry, inspects metrics and logs, and posts a summary in Slack. Engineers then validate the evidence in SigNoz and compare it with their own investigation.
+
+This has changed the first step of triage. Instead of every investigation starting with an engineer opening the UI and manually navigating dashboards, agents can do the first pass while humans investigate in parallel.
+
+Kernel also uses SigNoz MCP beyond engineering. Sales and marketing teammates can use natural-language workflows to inspect logs when customers raise issues on calls. This makes SigNoz useful for more than the engineering team and reduces the number of issues that need to be immediately escalated.
+
+> Even marketing people or salespeople who don't know how to query logs can use the MCP server. When a customer is facing an issue, they can start an agent workflow and use SigNoz MCP to debug. Now SigNoz is helpful for not only engineers, but other people too.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+<YouTube id="rFhv0ZcfZnY" mute={false} />
+
+One of the clearest examples came during a Railway load balancer issue. Kernel experienced a full API outage where all customers were getting HTTP 502 errors for 17 minutes.
+
+At first, the failure mode was hard to reason about. Kernel does not control Railway load balancers directly. The team writes control plane logic, while Railway provides the managed deployment runtime service. Like most teams, Kernel initially expected the load balancer layer to work and looked for issues higher up in its own application and service logs.
+
+SigNoz MCP helped the team cut through that uncertainty. Agents queried SigNoz telemetry and compared request patterns across pods and services. That analysis showed that the API process was still alive, but requests were being routed to dead pods. In other words, the issue was not that Kernel's API process had failed; it was a routing-layer failure.
+
+> Agents compared each pod, how many requests were going to each pod, and which requests were getting 502s. We were just amazed by how accurate and fast agents noticed this issue.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+The distinction mattered. By showing that the API process remained healthy, SigNoz helped Kernel rule out application-level root causes faster and redirect the investigation toward Railway routing behavior.
+
+> We were able to pinpoint what was going on exactly. We were able to mitigate it and open the thread with Railway. Fast, high-confidence triage in this case, without a doubt, wasn't possible without SigNoz MCP.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+The team used that evidence to mitigate the incident and open a thread with Railway. For Kernel, this was one of the first moments where the power of agent-assisted observability became obvious: agents were not replacing engineers, but they were much faster at scanning telemetry and surfacing evidence.
+
+> They're not smarter than us, but they are definitely faster than us. You can always cross-check the evidence through the SigNoz dashboard, ask what query was used, paste that into SigNoz, and see the evidence.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+SigNoz MCP has also helped Kernel improve performance, not just respond to incidents. One of Kernel's early use cases was browser acquisition latency. Kernel promises fast cloud browser infrastructure, and the team was not satisfied with browser acquisition latency of around 140 milliseconds.
+
+To investigate, Kernel connected agents to SigNoz MCP and asked them to inspect traces for the relevant requests. The team found a major bottleneck in the hot path: Temporal workflow I/O with Temporal Cloud. By adding Redis caching and taking Temporal out of that hot path, Kernel reduced browser acquisition latency from 140ms to 30ms within a couple of weeks.
+
+> Browser acquisition latency was around 140 milliseconds, and we were not happy with it. We let agents look at traces of the requests, found the bottlenecks, and reduced the latency from 140 milliseconds to 30 milliseconds within a couple of weeks.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+<YouTube id="XnPd_0gEwoM" mute={false} />
+
+For AI agent infrastructure teams, this kind of latency improvement compounds. Faster browser acquisition improves the starting point for downstream agent workflows, and reducing latency at the infrastructure layer helps make the entire agent experience feel more reliable.
+
+SigNoz MCP has also changed how Kernel creates dashboards, alerts, and metrics. Before MCP, creating dashboards and alerts required more expertise. If someone was not comfortable with the query language or did not know exactly which attributes to use, they might avoid creating a dashboard. Alerts carried even more pressure because a noisy or flaky alert could page an on-call engineer unnecessarily.
+
+With SigNoz MCP, more people on the team are comfortable creating dashboards and alerts. Kernel now has more meaningful alerts in place and more confidence in its infrastructure stability.
+
+Kernel has also made observability part of the feature development process. When engineers add a feature or service, they are expected to add metrics, create a dashboard, monitor the feature, and set up alerts where needed. In some cases, they also create agent workflows that monitor dashboards over time.
+
+> Don't procrastinate on adding metrics at the end of the feature development cycle. Start from the beginning. If you add good metrics from day one, you can keep optimizing your code throughout the whole development cycle.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+<YouTube id="taz5FlzBQKc" mute={false} />
+
+With SigNoz and SigNoz MCP, Kernel has made observability a normal part of how the team builds, ships, and operates infrastructure. The team reduced browser acquisition latency from 140ms to 30ms, shortened incident triage by letting agents query SigNoz while engineers investigated in parallel, lowered engineering escalations by enabling non-engineering teammates to inspect logs through MCP-powered workflows, and made dashboards and alerts easier to create earlier in the feature lifecycle.
+
+For Kernel, SigNoz is not just a dashboarding tool. It is part of the operating model for AI infrastructure: telemetry flows into SigNoz, agents query that telemetry through MCP, and engineers validate the evidence to make faster decisions.
+
+> We need to know whether our browsers are working, whether our orchestration layers are working, and whether our control planes are working. Without SigNoz, we cannot achieve what we promise to our users, which is crazy reliable infrastructure.
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+---
+
+**SigNoz Cloud** is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+
+---
