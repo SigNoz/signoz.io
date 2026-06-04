@@ -1,4 +1,5 @@
 export * from './componentItems/types'
+export * from './componentItems/iconPaths'
 export * from './componentItems/llmMonitoring'
 export * from './componentItems/k8sInstallation'
 export * from './componentItems/marketplaceInstallation'

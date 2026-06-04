@@ -7,7 +7,7 @@ import TrackingLink from '../TrackingLink'
 interface IconCardData {
   name: string
   href: string
-  icon: React.ReactNode
+  icon?: string | React.ReactNode
   clickName: string
 }
 
@@ -30,6 +30,14 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
   viewAllText = 'View all',
   gridCols = 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6', // Default grid columns
 }) => {
+  const renderIcon = (card: IconCardData) => {
+    if (typeof card.icon === 'string') {
+      return <img src={card.icon} alt="" aria-hidden="true" className="h-7 w-7 object-contain" />
+    }
+
+    return card.icon
+  }
+
   return (
     <div className="mx-auto mb-12 w-full max-w-7xl">
       {/* Section Header - Only render if title or description exists */}
@@ -55,7 +63,7 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
               clickLocation={sectionName}
             >
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
-                {card.icon}
+                {renderIcon(card)}
               </div>
               <span className="text-sm font-medium text-signoz_vanilla-100">{card.name}</span>
             </TrackingLink>

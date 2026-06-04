@@ -1,5 +1,7 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
 const componentItems = loadTsModule('constants/componentItems.ts')
@@ -141,5 +143,70 @@ test('no duplicate hrefs within each section leaf array', () => {
     for (const { path, items } of leafArrays) {
       assertNoDuplicateHrefs(items, path.join('.'))
     }
+  }
+})
+
+test('withComponentIcons assigns existing data-assets SVG icon paths', () => {
+  assert.equal(
+    typeof componentItems.withComponentIcons,
+    'function',
+    'withComponentIcons should be exported'
+  )
+
+  const allArrays = [
+    ...FLAT_EXPORTS.map((name) => ({ name, items: componentItems[name] })),
+    ...GET_ALL_HELPERS.map((name) => ({ name: `${name}()`, items: componentItems[name]() })),
+  ]
+
+  for (const { name, items } of allArrays) {
+    const cards = componentItems.withComponentIcons(items)
+
+    assert.equal(cards.length, items.length, `${name} should preserve item count`)
+
+    cards.forEach((item, index) => {
+      assert.equal(typeof item.icon, 'string', `${name}[${index}].icon should be a string path`)
+      assert.ok(
+        item.icon.startsWith('/img/docs-listicles/icons/'),
+        `${name}[${index}].icon should point to docs listicle icons, got: ${item.icon}`
+      )
+      assert.ok(item.icon.endsWith('.svg'), `${name}[${index}].icon should be an SVG`)
+
+      const assetPath = path.join(__dirname, '..', 'data-assets', item.icon.slice(1))
+
+      assert.ok(
+        fs.existsSync(assetPath),
+        `${name}[${index}].icon should exist under data-assets, missing: ${assetPath}`
+      )
+    })
+  }
+})
+
+test('all component icon resolver targets exist in data-assets', () => {
+  const iconPathsSource = fs.readFileSync(
+    path.join(__dirname, '..', 'constants', 'componentItems', 'iconPaths.ts'),
+    'utf8'
+  )
+  const directIconSlugs = [...iconPathsSource.matchAll(/icon\('([^']+)'\)/g)].map(
+    (match) => match[1]
+  )
+  const hrefTokenIconSlugs = [
+    ...iconPathsSource.matchAll(/\[\s*'[^']+'\s*,\s*'([^']+)'\s*\]/g),
+  ].map((match) => match[1])
+  const iconSlugs = [...new Set([...directIconSlugs, ...hrefTokenIconSlugs])].sort()
+
+  assert.ok(iconSlugs.length > 0, 'icon resolver should include at least one SVG target')
+
+  for (const iconSlug of iconSlugs) {
+    const assetPath = path.join(
+      __dirname,
+      '..',
+      'data-assets',
+      'img',
+      'docs-listicles',
+      'icons',
+      `${iconSlug}.svg`
+    )
+
+    assert.ok(fs.existsSync(assetPath), `icon resolver target is missing: ${assetPath}`)
   }
 })

@@ -8,7 +8,6 @@ import {
   K8S_INSTALLATION_ITEMS,
   MARKETPLACE_INSTALLATION_ITEMS,
   getAllSelfHostInstallationItems,
-  COLLECTION_AGENTS_ITEMS,
   getAllCollectionAgentsItems,
   getAllAPMInstrumentationItems,
   getAllJavaInstrumentationItems,
@@ -47,40 +46,17 @@ type AgentMdxComponentPolicy = 'custom-stub' | 'reviewed-fallback'
 
 export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'Admonition',
-  'APMDashboardsListicle',
-  'APMInstrumentationListicle',
-  'APMQuickStartOverview',
-  'AWSMonitoringListicle',
-  'AWSOneClickListicle',
-  'AzureOneClickListicle',
-  'CICDMonitoringListicle',
-  'CollectionAgentsListicle',
-  'DashboardTemplatesListicle',
   'DocCard',
   'DocCardContainer',
+  'DocsListicle',
   'Figure',
   'HostingDecision',
-  'HostMetricsDashboardsListicle',
-  'IntegrationsListicle',
-  'JavaInstrumentationListicle',
-  'JavascriptInstrumentationListicle',
-  'K8sInstallationListicle',
   'KeyPointCallout',
-  'KubernetesDashboardsListicle',
-  'LiteLLMDashboardsListicle',
-  'LLMMonitoringListicle',
-  'LogsInstrumentationListicle',
-  'LogsQuickStartOverview',
-  'MarketplaceInstallationListicle',
   'MCPInstallButton',
-  'MetricsQuickStartOverview',
-  'MigrateToSigNoz',
   'RegionTable',
-  'SelfHostInstallationListicle',
   'TabItem',
   'Tabs',
   'ToggleHeading',
-  'WebVitalsGrid',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
@@ -257,6 +233,60 @@ const createUnknownComponentStub = (name: string): ComponentType<StubProps> => {
   return UnknownComponentStub
 }
 
+const LISTICLE_STUB_MAP: Record<string, { items: StubListItem[]; title: string }> = {
+  apmQuickStart: { items: [...APM_QUICK_START_ITEMS], title: 'APM Quick Start' },
+  logsQuickStart: { items: [...LOGS_QUICK_START_ITEMS], title: 'Logs Quick Start' },
+  migrateToSignoz: { items: [...MIGRATE_TO_SIGNOZ_ITEMS], title: 'Migrate to SigNoz' },
+  llmMonitoring: { items: [...LLM_MONITORING_ITEMS], title: 'LLM Monitoring Guides' },
+  azureOneClick: { items: [...AZURE_ONE_CLICK_ITEMS], title: 'Azure One-Click Integrations' },
+  apmDashboards: { items: [...APM_DASHBOARDS_ITEMS], title: 'APM Dashboards' },
+  hostMetricsDashboards: {
+    items: [...HOST_METRICS_DASHBOARDS_ITEMS],
+    title: 'Host Metrics Dashboards',
+  },
+  kubernetesDashboards: {
+    items: [...KUBERNETES_DASHBOARDS_ITEMS],
+    title: 'Kubernetes Dashboards',
+  },
+  litellmDashboards: { items: [...LITELLM_DASHBOARDS_ITEMS], title: 'LiteLLM Dashboards' },
+  k8sInstallation: {
+    items: [...K8S_INSTALLATION_ITEMS],
+    title: 'Kubernetes Installation Guides',
+  },
+  marketplaceInstallation: {
+    items: [...MARKETPLACE_INSTALLATION_ITEMS],
+    title: 'Marketplace Installation Guides',
+  },
+  webVitals: { items: [...WEB_VITALS_ITEMS], title: 'Web Vitals' },
+  apmInstrumentation: {
+    items: getAllAPMInstrumentationItems(),
+    title: 'APM Instrumentation Guides',
+  },
+  javascriptInstrumentation: {
+    items: getAllJavascriptInstrumentationItems(),
+    title: 'JavaScript Instrumentation Guides',
+  },
+  javaInstrumentation: {
+    items: getAllJavaInstrumentationItems(),
+    title: 'Java Instrumentation Guides',
+  },
+  logsInstrumentation: {
+    items: getAllLogsInstrumentationItems(),
+    title: 'Logs Collection Guides',
+  },
+  metricsQuickStart: { items: getAllMetricsQuickStartItems(), title: 'Metrics Quick Start' },
+  collectionAgents: { items: getAllCollectionAgentsItems(), title: 'Collection Agents' },
+  selfHostInstallation: {
+    items: getAllSelfHostInstallationItems(),
+    title: 'Self-Host Installation Guides',
+  },
+  awsMonitoring: { items: getAllAWSMonitoringItems(), title: 'AWS Monitoring Guides' },
+  awsOneClick: { items: getAllAWSOneClickItems(), title: 'AWS One-Click Integrations' },
+  cicdMonitoring: { items: getAllCICDMonitoringItems(), title: 'CI/CD Monitoring Guides' },
+  integrations: { items: getAllIntegrationsItems(), title: 'Integrations Guides' },
+  dashboardTemplates: { items: [...DASHBOARD_TEMPLATES_ITEMS], title: 'Dashboard Templates' },
+}
+
 const createKnownComponentStubs = (): Record<
   KnownAgentMdxComponentName,
   ComponentType<StubProps>
@@ -355,78 +385,18 @@ const createKnownComponentStubs = (): Record<
     )
   },
   HostingDecision: createItemListStub(HOSTING_DECISION_ITEMS, 'Hosting Options'),
-  APMDashboardsListicle: createItemListStub(APM_DASHBOARDS_ITEMS, 'APM Dashboards'),
-  APMInstrumentationListicle: createItemListStub(
-    getAllAPMInstrumentationItems(),
-    'APM Instrumentation Guides'
-  ),
-  APMQuickStartOverview: createItemListStub(APM_QUICK_START_ITEMS, 'APM Quick Start'),
-  AWSMonitoringListicle: createItemListStub(getAllAWSMonitoringItems(), 'AWS Monitoring Guides'),
-  AWSOneClickListicle: createItemListStub(getAllAWSOneClickItems(), 'AWS One-Click Integrations'),
-  AzureOneClickListicle: createItemListStub(AZURE_ONE_CLICK_ITEMS, 'Azure One-Click Integrations'),
-  CICDMonitoringListicle: createItemListStub(
-    getAllCICDMonitoringItems(),
-    'CI/CD Monitoring Guides'
-  ),
-  CollectionAgentsListicle: createItemListStub((props) => {
-    const platform = getStringProp(props, 'platform')
-
-    switch (platform) {
-      case 'docker':
-        return COLLECTION_AGENTS_ITEMS.docker
-      case 'ecs':
-        return COLLECTION_AGENTS_ITEMS.ecs
-      case 'kubernetes':
-        return COLLECTION_AGENTS_ITEMS.kubernetes
-      case 'vm':
-        return COLLECTION_AGENTS_ITEMS.vm
-      default:
-        return getAllCollectionAgentsItems()
+  DocsListicle: (props: StubProps) => {
+    const dataKey = getStringProp(props, 'dataKey')
+    if (!dataKey) {
+      return React.createElement('p', null, 'DocsListicle: missing dataKey')
     }
-  }, 'Collection Agents'),
-  DashboardTemplatesListicle: createItemListStub(DASHBOARD_TEMPLATES_ITEMS, 'Dashboard Templates'),
-  HostMetricsDashboardsListicle: createItemListStub(
-    HOST_METRICS_DASHBOARDS_ITEMS,
-    'Host Metrics Dashboards'
-  ),
-  IntegrationsListicle: createItemListStub(getAllIntegrationsItems(), 'Integrations Guides'),
-  JavaInstrumentationListicle: createItemListStub(
-    getAllJavaInstrumentationItems(),
-    'Java Instrumentation Guides'
-  ),
-  JavascriptInstrumentationListicle: createItemListStub(
-    getAllJavascriptInstrumentationItems(),
-    'JavaScript Instrumentation Guides'
-  ),
-  K8sInstallationListicle: createItemListStub(
-    K8S_INSTALLATION_ITEMS,
-    'Kubernetes Installation Guides'
-  ),
-  KubernetesDashboardsListicle: createItemListStub(
-    KUBERNETES_DASHBOARDS_ITEMS,
-    'Kubernetes Dashboards'
-  ),
-  LiteLLMDashboardsListicle: createItemListStub(LITELLM_DASHBOARDS_ITEMS, 'LiteLLM Dashboards'),
-  LLMMonitoringListicle: createItemListStub(LLM_MONITORING_ITEMS, 'LLM Monitoring Guides'),
-  LogsInstrumentationListicle: createItemListStub(
-    getAllLogsInstrumentationItems(),
-    'Logs Collection Guides'
-  ),
-  LogsQuickStartOverview: createItemListStub(LOGS_QUICK_START_ITEMS, 'Logs Quick Start'),
-  MarketplaceInstallationListicle: createItemListStub(
-    MARKETPLACE_INSTALLATION_ITEMS,
-    'Marketplace Installation Guides'
-  ),
-  MetricsQuickStartOverview: createItemListStub(
-    getAllMetricsQuickStartItems(),
-    'Metrics Quick Start'
-  ),
-  MigrateToSigNoz: createItemListStub(MIGRATE_TO_SIGNOZ_ITEMS, 'Migrate to SigNoz'),
-  SelfHostInstallationListicle: createItemListStub(
-    getAllSelfHostInstallationItems(),
-    'Self-Host Installation Guides'
-  ),
-  WebVitalsGrid: createItemListStub(WEB_VITALS_ITEMS, 'Web Vitals'),
+    const config = LISTICLE_STUB_MAP[dataKey]
+    if (!config) {
+      return React.createElement('p', null, `DocsListicle: unknown dataKey "${dataKey}"`)
+    }
+    const Stub = createItemListStub(config.items, config.title)
+    return React.createElement(Stub, props)
+  },
 })
 
 export const extractMdxComponentNames = (rawMdx: string): string[] => {
