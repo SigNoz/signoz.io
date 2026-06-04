@@ -1,5 +1,5 @@
 ---
-date: 2026-05-25
+date: 2026-06-04
 title: Setup Kubernetes Metrics with OpenTelemetry
 description: Setup Kubernetes monitoring with OpenTelemetry kubeletstats and k8scluster receivers. Track node, pod, container, and volume metrics in SigNoz dashboards.
 doc_type: howto
@@ -13,7 +13,7 @@ This guide explains how to set up monitoring for your Kubernetes cluster using t
 - [`kubeletstats`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md): Collects metrics from individual Kubernetes nodes
 - [`k8scluster`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md): Gathers cluster-wide metrics
 
-### Setting Up Kubelet Stats Monitoring
+### Setup Kubelet Stats Receiver
 
 #### Overview
 
@@ -130,7 +130,7 @@ receivers:
     node: ${env:K8S_NODE_NAME}
 ```
 
-#### 3. Enable Kubernetes Metadata
+#### 3. Setup k8sattributesprocessor to enable Kubernetes metadata
 
 Configure the k8sattributes processor to enrich your metrics with Kubernetes context:
 
@@ -180,7 +180,7 @@ service:
 
 Read more about the [kubeletstats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md) and [k8sattributes processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md).
 
-### Setting Up K8s Cluster Monitoring
+### Setup K8s Cluster Receiver
 
 #### Overview
 
@@ -247,7 +247,7 @@ receivers:
         enabled: true
 ```
 
-#### 2. Enable Kubernetes Metadata
+#### 2. Setup k8sattributesprocessor to enable Kubernetes metadata
 
 Configure the k8sattributes processor to add Kubernetes context:
 
