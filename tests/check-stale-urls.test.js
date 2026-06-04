@@ -35,18 +35,16 @@ test('extractUrls parses TSX href patterns with line numbers', () => {
   assert.equal(results[2].line, 4)
 })
 
-test('extractUrls parses url and route properties', () => {
+test('extractUrls parses url properties but skips route properties', () => {
   const { extractUrls } = loadScript()
   const content = [
     "const item = { url: '/old-page/', label: 'Old' }",
     "const nav = { route: '/docs/guide/' }",
   ].join('\n')
   const results = extractUrls(content, 'constants/nav.ts')
-  assert.equal(results.length, 2)
+  assert.equal(results.length, 1)
   assert.equal(results[0].url, '/old-page/')
   assert.equal(results[0].line, 1)
-  assert.equal(results[1].url, '/docs/guide/')
-  assert.equal(results[1].line, 2)
 })
 
 test('extractUrls parses MDX markdown links and component hrefs', () => {

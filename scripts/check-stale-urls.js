@@ -111,11 +111,7 @@ function extractUrls(content, filePath) {
       while ((match = urlPropRegex.exec(line)) !== null) {
         urls.add(match[1])
       }
-      // route: '...' or route: "..."
-      const routePropRegex = /route:\s*['"]([^'"]+)['"]/g
-      while ((match = routePropRegex.exec(line)) !== null) {
-        urls.add(match[1])
-      }
+      // route: properties are handled by normalizeRoute at runtime, skip them
     }
 
     for (const rawUrl of urls) {
