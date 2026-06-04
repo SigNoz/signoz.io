@@ -58,8 +58,13 @@ function normalizeTrailingSlash(urlPath) {
 }
 
 function stripFencedCodeBlocks(content) {
-  let out = content.replace(/^[ \t]*```[^\n]*\n[\s\S]*?^[ \t]*```/gm, '\n')
-  out = out.replace(/^[ \t]*~~~[^\n]*\n[\s\S]*?^[ \t]*~~~/gm, '\n')
+  // Replace content of fenced blocks with empty lines to preserve line numbers
+  function blankBlock(match) {
+    const lineCount = match.split('\n').length
+    return '\n'.repeat(lineCount - 1)
+  }
+  let out = content.replace(/^[ \t]*```[^\n]*\n[\s\S]*?^[ \t]*```/gm, blankBlock)
+  out = out.replace(/^[ \t]*~~~[^\n]*\n[\s\S]*?^[ \t]*~~~/gm, blankBlock)
   return out
 }
 
@@ -185,6 +190,8 @@ function getStagedFiles() {
 }
 
 function isRelevantFile(filePath) {
+  if (/\.test\.(tsx?|jsx?|js)$/.test(filePath)) return false
+  if (/__tests__\//.test(filePath)) return false
   const codePattern = /^(components|app|constants|hooks|utils)\/.+\.(tsx?|jsx?|js)$/
   const mdxPattern = /^data\/.+\.mdx$/
   return codePattern.test(filePath) || mdxPattern.test(filePath)
@@ -201,9 +208,13 @@ function getAllFiles() {
     for (const entry of entries) {
       const full = path.join(dir, entry.name)
       if (entry.isDirectory()) {
-        if (entry.name === 'node_modules' || entry.name === '.next') continue
+        if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === '__tests__')
+          continue
         walkDir(full)
-      } else if (codeExts.some((ext) => entry.name.endsWith(ext))) {
+      } else if (
+        codeExts.some((ext) => entry.name.endsWith(ext)) &&
+        !entry.name.match(/\.test\./)
+      ) {
         files.push(full)
       }
     }

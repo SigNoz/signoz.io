@@ -41,7 +41,7 @@ const UnifiedObservability = () => {
               single-pane unified observability platform.
             </h3>
             <div className="flex flex-col gap-2">
-              <Link href="/teams//">
+              <Link href="/teams/">
                 <Button className="flex items-center justify-center gap-2 font-bold">
                   Get Started - Free <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -296,7 +296,7 @@ const UnifiedObservability = () => {
                 <li>Active community and industry backing from major cloud providers.</li>
               </ul>
               <div className="mt-8 flex items-center gap-4">
-                <Link href="/teams//">
+                <Link href="/teams/">
                   <Button className="flex items-center gap-2">
                     Get Started with OpenTelemetry
                     <ArrowRight className="h-4 w-4" />
@@ -688,7 +688,7 @@ const UnifiedObservability = () => {
                   <li>
                     Choose your{' '}
                     <Link
-                      href="https://signoz.io/docs/introduction/instrumentation/"
+                      href="https://signoz.io/docs/instrumentation/"
                       className="text-blue-400 hover:text-blue-300"
                     >
                       programming language
@@ -939,7 +939,7 @@ const UnifiedObservability = () => {
             SigNoz today.
           </p>
           <div className="mt-4">
-            <Link href="/teams//" className="block max-w-md">
+            <Link href="/teams/" className="block max-w-md">
               <Button className="flex w-full items-center justify-center gap-2 font-bold">
                 Get Started - Free <ArrowRight className="h-4 w-4" />
               </Button>

@@ -22,10 +22,10 @@ export enum TABS {
 }
 
 export enum TAB_PATHNAMES {
-  BLOG = '/blog/',
-  COMPARISONS = '/comparisons/',
-  GUIDES = '/guides/',
-  OPENTELEMETRY = '/opentelemetry/',
+  BLOG = '/blog',
+  COMPARISONS = '/comparisons',
+  GUIDES = '/guides',
+  OPENTELEMETRY = '/opentelemetry',
 }
 
 export interface ProductItem {

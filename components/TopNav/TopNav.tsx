@@ -33,12 +33,12 @@ export default function TopNav() {
   const visibility = useNavVisibility()
 
   const isLoginRoute = pathname === '/login/'
-  const isSignupRoute = pathname === '/teams//'
+  const isSignupRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
   const isWordleRoute = pathname === '/todaysdevopswordle/'
 
   useEffect(() => {
-    const docsBase = pathname.startsWith('/docs/introduction/')
+    const docsBase = pathname.startsWith('/docs')
     setIsDocsBasePath(docsBase)
     setShowMainMenu(!docsBase)
 
