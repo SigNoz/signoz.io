@@ -217,7 +217,7 @@ const VisualQueryBuilder: React.FC = () => {
 
 const StorageSection: React.FC = () => {
   return (
-    <div className="mb-12">
+    <div>
       <Divider />
       <SplitSection
         className="bg-transparent"
@@ -225,7 +225,6 @@ const StorageSection: React.FC = () => {
         right={CONTROL_TRACES_VOLUME_PANEL}
         withVerticalDivider
       />
-      <Divider />
     </div>
   )
 }
@@ -235,10 +234,12 @@ const DistributedTracing: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
-      <HeroCards cards={CARDS} />
 
       <SectionLayout variant="bordered" className="!px-0">
-        <Divider className="mt-12" />
+        <Divider />
+        <HeroCards layoutVariant="no-border" cards={CARDS} />
+        <Divider className="mb-12" />
+        <Divider />
         <LogProcessingSection />
 
         <Divider />
@@ -257,8 +258,8 @@ const DistributedTracing: React.FC = () => {
         <Divider />
         <VisualQueryBuilder />
         <StorageSection />
+        <Divider className="pb-12" />
       </SectionLayout>
-
       <UsageBasedPricing show={['traces']} />
       <SigNozStats />
       <Divider />
