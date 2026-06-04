@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process')
+const { execSync, execFileSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
@@ -8,7 +8,7 @@ function readRedirects({ staged = false } = {}) {
   let content
   if (staged) {
     try {
-      content = execSync('git show ":next.config.js"', { encoding: 'utf8' })
+      content = execFileSync('git', ['show', ':next.config.js'], { encoding: 'utf8' })
     } catch {
       const configPath = path.join(process.cwd(), 'next.config.js')
       content = fs.readFileSync(configPath, 'utf8')
@@ -287,7 +287,7 @@ function main() {
     let content
     try {
       if (staged) {
-        content = execSync(`git show ":${filePath}"`, { encoding: 'utf8' })
+        content = execFileSync('git', ['show', `:${filePath}`], { encoding: 'utf8' })
       } else {
         content = fs.readFileSync(filePath, 'utf8')
       }
