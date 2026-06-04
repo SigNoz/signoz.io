@@ -11,7 +11,7 @@ export default function RetentionInfo() {
       </p>
       <p>
         For more details, refer to the{' '}
-        <CustomLink href="https://signoz.io/docs/userguide/retention-period">
+        <CustomLink href="https://signoz.io/docs/userguide/retention-period/">
           retention period guide
         </CustomLink>
         .

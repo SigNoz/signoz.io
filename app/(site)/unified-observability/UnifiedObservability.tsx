@@ -41,7 +41,7 @@ const UnifiedObservability = () => {
               single-pane unified observability platform.
             </h3>
             <div className="flex flex-col gap-2">
-              <Link href="/teams/">
+              <Link href="/teams//">
                 <Button className="flex items-center justify-center gap-2 font-bold">
                   Get Started - Free <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -296,7 +296,7 @@ const UnifiedObservability = () => {
                 <li>Active community and industry backing from major cloud providers.</li>
               </ul>
               <div className="mt-8 flex items-center gap-4">
-                <Link href="/teams/">
+                <Link href="/teams//">
                   <Button className="flex items-center gap-2">
                     Get Started with OpenTelemetry
                     <ArrowRight className="h-4 w-4" />
@@ -688,7 +688,7 @@ const UnifiedObservability = () => {
                   <li>
                     Choose your{' '}
                     <Link
-                      href="https://signoz.io/docs/instrumentation/"
+                      href="https://signoz.io/docs/introduction/instrumentation/"
                       className="text-blue-400 hover:text-blue-300"
                     >
                       programming language
@@ -718,7 +718,7 @@ const UnifiedObservability = () => {
                         Application Performance Monitoring
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with APM
@@ -732,7 +732,7 @@ const UnifiedObservability = () => {
                         Log Management
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Logs
@@ -746,7 +746,7 @@ const UnifiedObservability = () => {
                         Distributed Tracing
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Distributed Tracing
@@ -760,7 +760,7 @@ const UnifiedObservability = () => {
                         Infrastructure Monitoring
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Infrastructure Monitoring
@@ -774,7 +774,7 @@ const UnifiedObservability = () => {
                         Metrics and Dashboards
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Dashboards
@@ -788,7 +788,7 @@ const UnifiedObservability = () => {
                         Alerts
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Alerts
@@ -802,7 +802,7 @@ const UnifiedObservability = () => {
                         Exceptions Monitoring
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Exceptions Monitoring
@@ -919,7 +919,10 @@ const UnifiedObservability = () => {
           <div className="text-gray-300">
             <p className="mb-6 text-lg">
               Get started quickly with{' '}
-              <Link href="https://signoz.io/docs/" className="text-blue-400 hover:text-blue-300">
+              <Link
+                href="https://signoz.io/docs/introduction/"
+                className="text-blue-400 hover:text-blue-300"
+              >
                 comprehensive documentation
               </Link>
               , active community support, and detailed guides:
@@ -936,7 +939,7 @@ const UnifiedObservability = () => {
             SigNoz today.
           </p>
           <div className="mt-4">
-            <Link href="/teams/" className="block max-w-md">
+            <Link href="/teams//" className="block max-w-md">
               <Button className="flex w-full items-center justify-center gap-2 font-bold">
                 Get Started - Free <ArrowRight className="h-4 w-4" />
               </Button>

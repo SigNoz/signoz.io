@@ -172,7 +172,7 @@ function WorkspaceReady({
           <ArrowRight size={14} />
         </a>
 
-        <Link href="/docs" className="w-full" onClick={handleReadDocs}>
+        <Link href="/docs/introduction/" className="w-full" onClick={handleReadDocs}>
           <button className="flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
             <span className="flex text-xs leading-5">Read the docs </span>
             <ArrowRight size={14} />
