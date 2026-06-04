@@ -38,7 +38,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
 
   return (
     <header className={cn('relative !mx-auto max-w-8xl', className)}>
-      <div className="absolute bottom-0 left-0 right-0 top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400" />
+      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
       <div
         className={cn(

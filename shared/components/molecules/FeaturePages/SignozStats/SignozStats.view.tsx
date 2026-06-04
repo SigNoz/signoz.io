@@ -74,7 +74,7 @@ const SigNozStats = () => {
         </p>
       </div>
 
-      <div className="flex flex-[2_2_0%] flex-col">
+      <div className="flex min-w-0 flex-[2_2_0%] flex-col">
         <div className="border-b border-l border-t border-dashed border-signoz_slate-400 bg-transparent p-0">
           <div className="p-10 md:p-6">
             <h2 className="text-2xl font-bold text-signoz_vanilla-100">
@@ -101,7 +101,10 @@ const SigNozStats = () => {
             ))}
           </div>
           <div className="border-t border-dashed border-signoz_slate-400 py-6 md:pl-10">
-            <ButtonGroup buttons={communityButtons} className="flex-col gap-3 sm:flex-row" />
+            <ButtonGroup
+              buttons={communityButtons}
+              className="flex-col flex-wrap gap-3 sm:flex-row"
+            />
           </div>
         </div>
       </div>
