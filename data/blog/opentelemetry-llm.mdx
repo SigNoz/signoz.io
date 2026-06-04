@@ -83,7 +83,7 @@ git clone https://github.com/SigNoz/examples.git
 cd examples/python/opentelemetry-llm-demo
 ```
 
-Create and activate a Python virtual environment. Setting up virtual environments prevents dependency conflicts between different Python projects on your system.
+Create and activate a Python virtual environment.
 
 ```bash
 python3.12 -m venv .venv
@@ -101,7 +101,7 @@ The following dependencies enable the OpenTelemetry instrumentation process:
 - `opentelemetry-distro`: This provides a convenient mechanism to automatically configure some of the more common options for users, helping us get started with OpenTelemetry auto-instrumentation quickly.
 - `opentelemetry-exporter-otlp`: This package installs [the OTLP](https://signoz.io/blog/what-is-otlp/) exporters required to transmit telemetry data to any [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/).
 
-We will soon discuss specific dependency choices in more detail. Meanwhile, the following command detects standard libraries or frameworks (such as FastAPI) used in our application, and installs their respective instrumentation libraries:
+The following command detects standard libraries or frameworks (such as FastAPI) used in our application, and installs their respective instrumentation libraries:
 
 ```bash
 opentelemetry-bootstrap --action=install
@@ -187,7 +187,7 @@ Our web application exposes an NBA Reporter agent that reports the latest NBA ne
 
 **Defining the Agentic Workflow**
 
-The [`agent_service.py`](https://github.com/SigNoz/examples/blob/main/python/opentelemetry-llm-demo/app/agent_service.py) file plugs various configurators into our agent instance and defines the executor function used in our FastAPI endpoint to serve user queries.
+The [`agent_service.py`](https://github.com/SigNoz/examples/blob/main/python/opentelemetry-llm-demo/app/agent_service.py) file defines the agent configuration and the executor function used in our FastAPI endpoint to serve user queries.
 
 We initialize the agent with the system prompt, tools, input guardrails, and the model name. Since our agent is not expected to perform complex operations, we use the latest available version of GPT-5.4 Mini to minimize our usage costs without sacrificing the output quality.
 
@@ -233,7 +233,7 @@ def nba_content_guardrail(
         ... # removed for brevity
     ]
 		
-		# extract the last user message from chat history
+    # extract the last user message from chat history
     if isinstance(input_data, list):
         latest_user_message = next(
             (
@@ -311,15 +311,11 @@ def run_agent_turn(
     }
 ```
 
-Now that we have explored the internals of our application, it’s finally time to interact with our agent to receive live NBA updates, test guardrails, and session context across multiple API calls. 
-
 ### Visualizing Agentic Workflows with OpenTelemetry
-
-As previously mentioned, we’ll be using the Bruno API client to conveniently read the agent output, modify the request payload for follow-up queries, and easily copy values when required.
 
 #### Interacting with the Agent
 
-Let’s start by asking the NBA Reporter agent a specific question about the upcoming NBA finals. This will help validate whether the agent actually maintains conversation context across requests.
+Let’s start by asking the NBA Reporter agent a specific question about the upcoming NBA finals.
 
 <Figure src="/img/blog/2026/06/opentelemetry-llm-agent-response.webp" alt="The agent workflow response includes a response to our query and an identifier for the session context." caption="The agent workflow response includes a response to our query and an identifier for the session context." />
 
