@@ -35,7 +35,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
       follow: true,
     },
     alternates: {
-      canonical: `${siteMetadata.siteUrl}/changelog//${params.slug}`,
+      canonical: `${siteMetadata.siteUrl}/changelog/${params.slug}`,
     },
     openGraph: {
       title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
@@ -44,7 +44,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
         ' - ' +
         changelogResponse.data.version +
         ' - SigNoz Changelog',
-      url: `${siteMetadata.siteUrl}/changelog//${params.slug}`,
+      url: `${siteMetadata.siteUrl}/changelog/${params.slug}`,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'website',
