@@ -1,5 +1,5 @@
 ---
-date: 2026-05-16
+date: 2026-06-04
 id: authentication
 title: Authentication and Login
 description: Understand authentication in SigNoz — supported roles, inviting members, and managing user permissions.
@@ -42,6 +42,24 @@ You can edit permission levels of members by going to `Settings-> Org Settings` 
 You can also generate password reset link if they have forgotten their password and it needs to be reset.
 
 ![edit-member](/img/docs/edit-member.webp)
+
+## Password Reset Link Behavior
+
+When a member opens a password reset link, SigNoz validates the token before showing the form. While the token is being checked, a `Validating your reset password token...` spinner is displayed. If the token is valid, the password reset form appears and the member can set a new password.
+
+Password reset links are **single-use** and **expire after a set period**. If the token cannot be used, the form is not shown and one of the following screens appears instead:
+
+- **Reset Password token is expired** — the link has expired. Ask an admin to generate a new password reset link from `Settings -> Org Settings -> Members`.
+- **Invalid Reset Link** — the link is invalid or has already been used. Request a new link.
+- **Reset Link Unavailable** — a fallback shown for any other token error. Request a new link or contact your admin if the issue persists.
+
+<Figure src="/img/docs/invalid-reset-link.webp" alt="Invalid Reset Link error screen shown when a password reset token is invalid or already used" caption="Error screen shown when a reset password token is invalid or has already been used" />
+
+Opening `/password-reset` without a token redirects to the login page.
+
+<Admonition type="info">
+For self-hosted deployments, password reset emails require SMTP to be configured. See [Enable SMTP for Email Invitations](https://signoz.io/docs/manage/administrator-guide/configuration/smtp-email-invitations/).
+</Admonition>
 
 
 ## Permission Matrix for Admin, Editor and Viewer:
