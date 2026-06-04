@@ -134,6 +134,33 @@ test('checkUrl exempts root /, file paths, anchors', () => {
   assert.equal(checkUrl('#section', redirectMap).length, 0)
 })
 
+test('checkUrl flags trailing slash after anchor fragment', () => {
+  const { checkUrl } = loadScript()
+  const redirectMap = new Map()
+  const issues = checkUrl('/blog/post/#section/', redirectMap)
+  assert.equal(issues.length, 1)
+  assert.equal(issues[0].type, 'anchor-trailing-slash')
+  assert.equal(issues[0].suggestion, '/blog/post/#section')
+})
+
+test('checkUrl does not flag anchor without trailing slash', () => {
+  const { checkUrl } = loadScript()
+  const redirectMap = new Map()
+  const issues = checkUrl('/blog/post/#section', redirectMap)
+  assert.equal(issues.length, 0)
+})
+
+test('checkUrl fixes path and strips anchor slash together', () => {
+  const { checkUrl } = loadScript()
+  const redirectMap = new Map()
+  const issues = checkUrl('/blog/post#section/', redirectMap)
+  const types = issues.map((i) => i.type)
+  assert.ok(types.includes('anchor-trailing-slash'))
+  assert.ok(types.includes('trailing-slash'))
+  const anchorIssue = issues.find((i) => i.type === 'anchor-trailing-slash')
+  assert.equal(anchorIssue.suggestion, '/blog/post/#section')
+})
+
 test('checkUrl does not flag valid URL with trailing slash', () => {
   const { checkUrl } = loadScript()
   const redirectMap = new Map()

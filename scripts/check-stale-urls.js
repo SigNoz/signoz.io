@@ -154,7 +154,27 @@ function checkUrl(rawUrl, redirectMap) {
     })
   }
 
-  // Trailing slash check
+  // Trailing slash after anchor fragment (e.g., /path/#section/ — the / after fragment is wrong)
+  const internalPath = stripSigNozPrefix(rawUrl)
+  if (internalPath && internalPath.startsWith('/')) {
+    const hashIdx = internalPath.indexOf('#')
+    if (hashIdx !== -1) {
+      const fragment = internalPath.slice(hashIdx + 1).split('?')[0]
+      if (fragment.endsWith('/')) {
+        const pathBefore = internalPath.slice(0, hashIdx)
+        const cleanFragment = fragment.slice(0, -1)
+        const fixedPath =
+          (pathBefore.endsWith('/') ? pathBefore : pathBefore + '/') + '#' + cleanFragment
+        issues.push({
+          type: 'anchor-trailing-slash',
+          message: 'Trailing slash after anchor fragment',
+          suggestion: fixedPath,
+        })
+      }
+    }
+  }
+
+  // Trailing slash check (on the path portion, excluding anchor/query)
   if (!isExemptFromTrailingSlash(normalized)) {
     if (!normalized.endsWith('/')) {
       issues.push({
@@ -166,6 +186,12 @@ function checkUrl(rawUrl, redirectMap) {
   }
 
   return issues
+}
+
+function stripSigNozPrefix(rawUrl) {
+  const sigNozPrefix = 'https://signoz.io'
+  if (rawUrl.startsWith(sigNozPrefix)) return rawUrl.slice(sigNozPrefix.length)
+  return rawUrl
 }
 
 function isExemptFromTrailingSlash(urlPath) {
@@ -297,6 +323,10 @@ function main() {
       totalIssues++
       if (issue.type === 'stale') {
         console.error(`    line ${issue.line}: ${issue.url} -> use ${issue.suggestion}`)
+      } else if (issue.type === 'anchor-trailing-slash') {
+        console.error(
+          `    line ${issue.line}: ${issue.url} -> remove slash after anchor: ${issue.suggestion}`
+        )
       } else {
         console.error(
           `    line ${issue.line}: ${issue.url} -> add trailing slash: ${issue.suggestion}`
