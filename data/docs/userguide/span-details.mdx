@@ -1,5 +1,5 @@
 ---
-date: 2026-05-27
+date: 2026-06-04
 id: span-details
 title: Trace Details
 description: Visualize and analyze individual traces using the flamegraph, waterfall chart, and span inspection tools in SigNoz.
@@ -7,6 +7,10 @@ doc_type: howto
 ---
 
 The **Trace Details** interface in SigNoz offers a powerful and intuitive interface to visualize and analyze the journey of a request through your system. By displaying detailed trace information, it enables you to quickly diagnose performance issues, pinpoint errors, and understand the intricate flow of operations in your systems. It is engineered to handle massive trace data supporting more than a **million spans per trace** making it an ideal solution for high-volume environments.
+
+<Admonition type="info">
+The Trace Details interface described below is now the default experience for every trace link in SigNoz. Opening a trace from the [Trace Explorer](https://signoz.io/docs/userguide/traces/), an alert, or a deep link lands you directly on the synchronized flamegraph and waterfall view — no separate URL or opt-in step is required.
+</Admonition>
 
 The Trace Details Page enables you to:
 
@@ -28,23 +32,33 @@ The Trace Details Page enables you to:
 
 ## Opening a Trace
 
-Select a trace from the [Trace Explorer](https://signoz.io/docs/userguide/traces/) to open the Trace Details page. You will see two synchronized views:
+Click any trace from the [Trace Explorer](https://signoz.io/docs/userguide/traces/), an [APM service page](https://signoz.io/docs/userguide/metrics/), or a trace link from an alert, dashboard, or related signal to open the Trace Details page at `/trace/<traceId>`. You will see two synchronized views:
 
-- **Flame Graph** — displays a hierarchical representation of the trace, showing the nested relationships between spans. The header shows the total span count and error count. It can render **100,000+ spans** at once.
-- **Waterfall Chart** — provides a detailed timeline view, illustrating the sequence and duration of each span. It supports **10,000+ spans** with virtual scrolling for smooth navigation.
+- **Flame Graph** — a canvas-based, hierarchical view of the trace showing the nested relationships between spans. The header shows the total span count and error count. It renders **100,000+ spans** at once.
+- **Waterfall Chart** — a detailed timeline view showing the sequence and duration of each span. It supports **10,000+ spans** with virtual scrolling for smooth navigation.
 
-Both views are collapsible — click the section header to expand or collapse them and maximize screen space.
+A draggable divider separates the flamegraph and waterfall — drag it to resize either section. Both views are also collapsible: click the section header to expand or collapse them and maximize screen space.
 
 <Figure
-  src="/img/docs/apm-and-distributed-tracing/tarce-details-overview.webp"
-  alt="Trace Details Interface showing flame graph and waterfall views"
-  caption="Trace Details Interface — Flame Graph and Waterfall views with synchronized navigation"
+  src="/img/docs/apm-and-distributed-tracing/trace-details-v3-overview.webp"
+  alt="Trace Details page with canvas flamegraph at the top, waterfall below, and the Span Details panel docked to the right"
+  caption="Trace Details — synchronized flamegraph, waterfall, and Span Details panel"
   className="box-shadowed-image"
 />
 
+## Navigating the Flame Graph
+
+The flame graph is canvas-rendered and supports interactive navigation:
+
+- **Zoom** — use the mouse wheel over the flamegraph to zoom in and out along the time axis.
+- **Pan** — click and drag the flamegraph to scroll horizontally through long traces.
+- **Crosshair and time badge** — a vertical crosshair follows the cursor across the flamegraph, and a small badge shows the exact timestamp at the cursor position.
+- **Hover tooltip** — hover any span bar to see a tooltip with the span name, status, relative start time, and duration.
+- **Event markers** — span events appear as small markers on the corresponding span bar. Hover a marker to see a per-event tooltip with the event name and timestamp.
+
 ## Inspecting a Span
 
-Click on a specific span in either the flame graph or waterfall view to open the **Span Details** panel. The panel is a floating, resizable window that can be docked to the right side or bottom of the screen, allowing you to arrange your workspace.
+Click a span in either the flame graph or the waterfall view to open the **Span Details** panel. The panel can be displayed as a floating window, docked to the bottom of the page, or pinned as a right-side drawer — see [Adjusting the Interface](#adjusting-the-interface) for switching modes.
 
 The panel header shows:
 - **Span name** and **service name**
@@ -52,6 +66,7 @@ The panel header shows:
 - **Percentage of total execution time**
 - **Timestamp** and **linked spans count**
 - **Service**, **Status Code**, **Trace ID**, and **Span Kind**
+- A **copy link** action that generates a shareable deep-link URL containing the trace and span IDs (see [Sharing a Span](#sharing-a-span))
 
 The details are organized into tabs:
 
@@ -113,7 +128,11 @@ You can further refine this analysis by adding more resource attributes to narro
 
 ### Synchronized Navigation
 
-The flame graph and waterfall views remain perfectly synchronized. Clicking a span in one view automatically highlights it in the other and opens the Span Details panel, ensuring you always see where a span fits into the overall trace timeline.
+The flame graph and waterfall views remain synchronized. Clicking a span in one view automatically highlights it in the other and opens the Span Details panel, ensuring you always see where a span fits into the overall trace timeline.
+
+- **Clicking a span in the waterfall** updates the Span Details panel in place without refetching the trace, even when the selected span sits at the top or bottom of the visible window.
+- **Clicking a node in the flamegraph** automatically scrolls the waterfall to center the matching span.
+- **Browser back/forward and the filter prev/next arrows** move between spans you have already visited and keep the waterfall scrolled to the selected span.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/trace-details-span-details.webp"
@@ -122,17 +141,26 @@ The flame graph and waterfall views remain perfectly synchronized. Clicking a sp
   className="box-shadowed-image"
 />
 
+### Linked Spans
+
+If a span has [non-parent references](https://opentelemetry.io/docs/concepts/signals/traces/#span-links) — for example, spans correlated across asynchronous workflows or queues — the Span Details panel header shows a **linked spans** count and a section listing each reference. Click any linked span entry to jump directly to that span in the waterfall; the flame graph and Span Details panel update in sync.
+
+### Sharing a Span
+
+The Span Details panel header includes a **copy link** action next to the Trace ID. Click it to copy a deep-link URL that points to this trace and span. A confirmation toast appears when the URL is copied. Pasting the link opens the same span — selected, scrolled into view, and with the Span Details panel open in the same tab.
+
+### Add to Funnel
+
+Click **Add to Funnel** on a span to open the Add to Funnel modal. From there you can add the span to an existing [trace funnel](https://signoz.io/docs/trace-funnels/overview/) or create a new one. The action is available from the per-span controls in the waterfall and from the Span Details panel.
+
 ## Analytics
 
-Click the **Analytics** button in the top bar to open the Analytics panel. It provides a quick breakdown of your trace by service, with two views:
-
-- **% exec time** — shows each service's share of the total trace execution time
-- **Spans** — shows span count distribution across services
+Click the **Analytics** button in the top bar to open the Analytics panel alongside the Span Details panel. It shows a bar chart of per-service execution time as a share of the total trace duration, helping you quickly identify which services dominate the trace timeline.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/trace-details-analytics.webp"
   alt="Analytics panel showing service breakdown by execution time"
-  caption="Analytics panel — service breakdown by % execution time and span count"
+  caption="Analytics panel — per-service percentage of trace execution time"
   className="box-shadowed-image"
 />
 
@@ -247,13 +275,13 @@ The integrated query builder allows you to write custom filter queries directly 
 
 ## Adjusting the Interface
 
-The Span Details panel opens by default as a **docked panel on the right**. You can switch between three layout modes using the dock buttons in the panel header:
+The Span Details panel opens by default as a **docked drawer on the right**. Use the dock toggles in the panel header to switch between three layout modes:
 
-- **Dock to the right** (default) — panel appears on the right side, ideal for viewing attributes alongside the trace
-- **Dock to the bottom** — panel appears at the bottom, maximizing the horizontal trace view
-- **Floating panel** — panel detaches into a free-floating window that can be **resized in all directions** and **moved anywhere** on screen, giving you full control over your workspace layout
+- **Right-side drawer** (default) — panel pinned to the right, ideal for viewing attributes alongside the trace.
+- **Bottom dock** — panel docked at the bottom of the page, maximizing the horizontal trace view.
+- **Floating dialog** — panel detaches into a free-floating window that can be **dragged anywhere** on screen and **resized in all directions** for full control over your workspace.
 
-You can also close the panel entirely and reopen it by clicking any span.
+You can also close the panel entirely and reopen it by clicking any span in the flame graph or waterfall.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/trace-details-ui-adjustments.webp"
@@ -275,7 +303,7 @@ The Span Details panel includes **Logs** and **Metrics** tabs that let you jump 
 
 ### Logs
 
-Click the **Logs** tab to see log lines correlated to the span's time window and service. The panel shows log entries with timestamps and message bodies.
+Click the **Logs** tab to see log lines correlated to the span's time window and service. The panel shows log entries with timestamps and message bodies, and includes a link to open the same context logs in the [Logs Explorer](https://signoz.io/docs/userguide/logs/) for deeper analysis.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/related-signals-logs.webp"
@@ -288,6 +316,10 @@ Click the **Logs** tab to see log lines correlated to the span's time window and
 
 Click the **Metrics** tab to see infrastructure metrics (CPU usage, memory usage) for the host or pod that served the selected span. Use the **Node** and **Pod** tabs to switch between host-level and pod-level views.
 
+<Admonition type="info">
+Pod and node metrics require Kubernetes resource attributes on the span (for example, `k8s.pod.name`, `k8s.node.name`). The Metrics tab only displays infrastructure data when these attributes are present on the selected span.
+</Admonition>
+
 <Figure
   src="/img/docs/apm-and-distributed-tracing/related-signals-metrics.webp"
   alt="Related Signals metrics tab showing CPU and memory usage charts"
@@ -297,4 +329,4 @@ Click the **Metrics** tab to see infrastructure metrics (CPU usage, memory usage
 
 ## Legacy View
 
-If you prefer the previous trace details interface, click the **Legacy View** button in the top-right corner to switch back. SigNoz remembers your preference for future visits.
+The Trace Details interface described above is the default for all trace links in SigNoz. If you need the previous trace details interface, click the **Legacy View** (Old View) button in the top-right corner of the Trace Details header to switch back — the legacy UI is served from the `/trace-old/<traceId>` route and is reachable only through this toggle or a direct URL. SigNoz remembers your preference for future visits.
