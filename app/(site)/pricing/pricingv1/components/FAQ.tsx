@@ -5,7 +5,7 @@ import FAQBody from '@/components/FAQPricing'
 
 export default function FAQ() {
   return (
-    <section className="relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+    <section className="relative !m-0 !mx-auto border !border-t-0 border-dashed border-signoz_slate-400">
       <div className="mx-auto min-w-0 max-w-full">
         <div className="flex w-full min-w-0 flex-col sm:flex-row">
           <div className="w-full shrink-0 sm:w-[300px] sm:max-w-[300px]">

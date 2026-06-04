@@ -1,4 +1,5 @@
-// components/ProductNav/ProductNav.tsx
+'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'

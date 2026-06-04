@@ -37,8 +37,9 @@ const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({
             <Image
               src={image}
               alt={imageAlt}
-              width={10000}
-              height={10000}
+              width={1440}
+              height={810}
+              sizes="(max-width: 768px) 100vw, 80vw"
               className={cn('mb-8', imageClassName)}
             />
           )}

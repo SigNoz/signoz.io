@@ -36,7 +36,7 @@ export const TrustedByTeams = ({ page, className }: { page?: string; className?:
   return (
     <section
       className={cn(
-        'm-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6 md:w-[80vw]',
+        'm-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6',
         className
       )}
     >

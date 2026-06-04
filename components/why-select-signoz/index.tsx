@@ -18,7 +18,7 @@ const WhySelectSignoz = ({
   return (
     <div
       className={cn(
-        'section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:w-[80vw]',
+        'section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0',
         className
       )}
     >

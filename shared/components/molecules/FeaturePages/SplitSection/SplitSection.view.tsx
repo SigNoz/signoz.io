@@ -21,7 +21,9 @@ const PanelContent: React.FC<{ panel: SplitSectionPanel }> = ({ panel }) => {
     <div className={cn('flex h-full w-full flex-col px-6', panel.className)}>
       <div className={cn('flex flex-col justify-between', panel.contentClassName)}>
         <h2 className="mb-6 text-signoz_vanilla-100">{panel.title}</h2>
-        <div className="mb-8 leading-relaxed text-signoz_vanilla-400">{panel.description}</div>
+        {panel.description && (
+          <div className="mb-8 leading-relaxed text-signoz_vanilla-400">{panel.description}</div>
+        )}
       </div>
 
       {panel.button && (
@@ -34,8 +36,9 @@ const PanelContent: React.FC<{ panel: SplitSectionPanel }> = ({ panel }) => {
             <Image
               src={panel.image}
               alt={panel.imageAlt || ''}
-              width={10000}
-              height={10000}
+              width={1440}
+              height={810}
+              sizes="(max-width: 768px) 100vw, 50vw"
               className={panel.imageClassName}
             />
           )}
