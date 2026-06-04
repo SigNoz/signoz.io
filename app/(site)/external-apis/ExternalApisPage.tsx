@@ -113,11 +113,11 @@ const ExternalApis: React.FC = () => {
         <SeeServicesCallingApis />
         <Divider />
         <ReadyToMonitorYourExternalApisBanner />
-        <Divider />
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'External APIs Customer Stories Button',

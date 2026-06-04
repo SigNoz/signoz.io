@@ -99,7 +99,7 @@ const Header: React.FC = () => {
 
 const TrustedByTeams: React.FC = () => {
   return (
-    <div className="relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 py-16 md:w-[80vw]">
+    <div className="relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 py-16">
       <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
         Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
       </div>
@@ -446,6 +446,7 @@ const AgentNativeObservabilityPage: React.FC = () => {
 
       <SectionLayout variant="bordered" className="!px-0">
         <FeatureSections />
+        <Divider />
         <BottomCTA />
       </SectionLayout>
     </FeaturePageLayout>

@@ -75,7 +75,7 @@ const SigNozStats = () => {
       </div>
 
       <div className="flex min-w-0 flex-[2_2_0%] flex-col">
-        <div className="border-b border-l border-t border-dashed border-signoz_slate-400 bg-transparent p-0">
+        <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
           <div className="p-10 md:p-6">
             <h2 className="text-2xl font-bold text-signoz_vanilla-100">
               Your data stays where you want

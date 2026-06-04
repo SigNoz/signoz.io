@@ -1,4 +1,5 @@
 import { SectionLayoutProps } from './SectionLayout.types'
+import { cn } from 'app/lib/utils'
 
 const SectionLayout: React.FC<SectionLayoutProps> = ({
   children,
@@ -13,9 +14,9 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
       case 'bordered':
         return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-signoz_slate-400'
       case 'no-border':
-        return '!mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw]'
+        return '!mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400'
       case 'border-x':
-        return '!mx-auto !w-[90vw] border border-dashed border-b-1 border-t-1 border-signoz_slate-400 md:!w-[80vw]'
+        return '!mx-auto !w-[90vw] border border-dashed border-b-1 border-t-1 border-signoz_slate-400'
       default:
         return '!mx-auto border border-dashed !border-b-0 border-signoz_slate-400'
     }
@@ -24,7 +25,9 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
   const backgroundClass = withBackground ? 'bg-signoz_ink-500' : ''
 
   return (
-    <div className={`w-full px-4 ${getVariantClasses()} ${backgroundClass} ${className} max-w-8xl`}>
+    <div
+      className={cn('w-full px-4', getVariantClasses(), backgroundClass, className, 'max-w-8xl')}
+    >
       {children}
     </div>
   )

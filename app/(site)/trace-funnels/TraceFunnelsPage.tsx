@@ -147,11 +147,11 @@ const TraceFunnels: React.FC = () => {
         <AnalyzeRequestFlowsAcrossMultipleTraceIds />
         <Divider />
         <StopLosingUsersBanner />
-        <Divider />
       </SectionLayout>
 
       <UsageBasedPricing show={['traces']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Trace Funnels Customer Stories Button',

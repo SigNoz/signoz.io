@@ -142,11 +142,11 @@ const AlertsManagement: React.FC = () => {
         <ManageAlertsAsCode />
         <Divider />
         <StopAlertFatigueBanner />
-        <Divider />
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection />
     </FeaturePageLayout>
   )

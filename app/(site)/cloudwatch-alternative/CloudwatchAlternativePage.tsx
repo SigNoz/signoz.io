@@ -78,27 +78,21 @@ const Header: React.FC = () => {
 
 const WhyTeamsSwitchFromCloudWatch: React.FC = () => {
   return (
-    <SectionLayout
-      variant="full-width"
-      className="bg-blur-ellipse-388 relative mx-auto w-[100vw] overflow-hidden md:w-[80vw]"
-    >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="relative flex flex-col gap-6 pt-32 md:py-20">
-        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
-            <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
-              Why Teams Switch From CloudWatch
-            </h2>
+    <div className="relative flex flex-col gap-6 pt-32 md:py-20">
+      <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+        <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
+          <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
+            Why Teams Switch From CloudWatch
+          </h2>
 
-            <SectionLayout variant="no-border" className="!mx-auto p-0">
-              <Divider />
-              <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
-              <Divider />
-            </SectionLayout>
-          </div>
+          <SectionLayout variant="no-border" className="!mx-auto p-0">
+            <Divider />
+            <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
+            <Divider />
+          </SectionLayout>
         </div>
       </div>
-    </SectionLayout>
+    </div>
   )
 }
 
@@ -137,72 +131,66 @@ const DeploymentAndDataResidency: React.FC = () => {
 const CostComparison: React.FC = () => {
   return (
     <>
-      <SectionLayout
-        variant="full-width"
-        className="flex flex-col gap-y-9 border-y border-dashed border-signoz_slate-400 !px-0"
-      >
-        <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
-          <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
-          <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
-            You shouldn't pay to look at your own data
-          </h4>
-          <div className="text-sm text-signoz_vanilla-400">
-            CloudWatch bills across 12+ separate components for ingestion, storage, queries,
-            metrics, alarms, dashboards, and API access. SigNoz charges $0.30/GB for logs and
-            traces, $0.10 per million samples for metrics. Once data is ingested, query it unlimited
-            times at no extra charge.
-          </div>
+      <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
+        <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
+        <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
+          You shouldn't pay to look at your own data
+        </h4>
+        <div className="text-sm text-signoz_vanilla-400">
+          CloudWatch bills across 12+ separate components for ingestion, storage, queries, metrics,
+          alarms, dashboards, and API access. SigNoz charges $0.30/GB for logs and traces, $0.10 per
+          million samples for metrics. Once data is ingested, query it unlimited times at no extra
+          charge.
         </div>
-        <div>
-          <Divider />
-          <div className="flex flex-col sm:flex-row">
-            <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
-              <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
-                <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
-                  CloudWatch's <br className="hidden md:block" /> billing{' '}
-                  <br className="hidden md:block" /> complexity
-                </h2>
-                <Button asChild variant="secondary" rounded="full">
-                  <TrackingLink
-                    href="https://aws.amazon.com/cloudwatch/pricing/"
-                    clickType="Secondary CTA"
-                    clickName="Cloudwatch Alternative Cost Comparison CloudWatch Pricing Details Button"
-                    clickLocation="Cloudwatch Alternative Cost Comparison"
-                    clickText="CloudWatch pricing details"
+      </div>
+      <div>
+        <Divider />
+        <div className="flex flex-col sm:flex-row">
+          <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
+            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
+              <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+                CloudWatch's <br className="hidden md:block" /> billing{' '}
+                <br className="hidden md:block" /> complexity
+              </h2>
+              <Button asChild variant="secondary" rounded="full">
+                <TrackingLink
+                  href="https://aws.amazon.com/cloudwatch/pricing/"
+                  clickType="Secondary CTA"
+                  clickName="Cloudwatch Alternative Cost Comparison CloudWatch Pricing Details Button"
+                  clickLocation="Cloudwatch Alternative Cost Comparison"
+                  clickText="CloudWatch pricing details"
+                >
+                  CloudWatch pricing details <ArrowRight size={16} />
+                </TrackingLink>
+              </Button>
+            </div>
+          </div>
+          <div className="flex-[2_2_0%]">
+            <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+              <div className="flex flex-col gap-4 px-10 py-10">
+                {CLOUDWATCH_BILLING_CARDS.map((card) => (
+                  <Card
+                    key={card.title}
+                    className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
                   >
-                    CloudWatch pricing details <ArrowRight size={16} />
-                  </TrackingLink>
-                </Button>
-              </div>
-            </div>
-            <div className="flex-[2_2_0%]">
-              <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
-                <div className="flex flex-col gap-4 px-10 py-10">
-                  {CLOUDWATCH_BILLING_CARDS.map((card) => (
-                    <Card
-                      key={card.title}
-                      className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
-                    >
-                      <div className="p-6">
-                        <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
-                        <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                    <div className="p-6">
+                      <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
+                      <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
+                    </div>
+                  </Card>
+                ))}
               </div>
             </div>
           </div>
         </div>
-      </SectionLayout>
+      </div>
     </>
   )
 }
 
 const ArchitectureAndApproach: React.FC = () => {
   return (
-    <section className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
+    <section className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -235,6 +223,7 @@ const CloudwatchAlternativePage: React.FC = () => {
 
       <SectionLayout variant="bordered" className="!px-0">
         <WhyTeamsSwitchFromCloudWatch />
+        <Divider />
         <ArchitectureAndApproach />
         <Divider />
         <CostComparison />
@@ -257,7 +246,9 @@ const CloudwatchAlternativePage: React.FC = () => {
         }
       />
       <DeploymentAndDataResidency />
+      <Divider />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Cloudwatch Alternative Customer Stories Button',

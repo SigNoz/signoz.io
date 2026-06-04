@@ -71,7 +71,6 @@ const ReadyToMigrateBanner: React.FC = () => {
 
         <RequestEarlyAccessButton className="!mx-auto" />
       </SectionLayout>
-      <Divider />
     </>
   )
 }
@@ -130,7 +129,7 @@ const TopHeroSection: React.FC = () => {
 
 const LlmPoweredIntelligenceSection: React.FC = () => {
   return (
-    <SectionLayout variant="bordered" className="bg-signoz_ink-500 !px-0">
+    <SectionLayout variant="no-border" className="bg-signoz_ink-500 !px-0">
       <Divider />
       <div className="mb-6 max-w-4xl px-8 py-6">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">
@@ -354,6 +353,7 @@ const DatadogMigrationTool: React.FC = () => {
 
         <UsageBasedPricing show={['logs', 'traces', 'metrics']} />
         <SigNozStats />
+        <Divider />
         <CustomerStories />
       </div>
     </main>

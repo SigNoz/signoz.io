@@ -78,7 +78,7 @@ const QuickEvaluation: React.FC = () => {
   return (
     <SectionLayout
       variant="full-width"
-      className="relative mx-auto w-[100vw] overflow-hidden border-b border-dashed border-signoz_slate-400 md:w-[80vw]"
+      className="relative mx-auto overflow-hidden border-b border-dashed border-signoz_slate-400"
     >
       <div className="relative flex flex-col gap-6 pt-32 md:py-20">
         <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
@@ -86,10 +86,7 @@ const QuickEvaluation: React.FC = () => {
             <h2 className="my-6 text-center text-4xl font-semibold text-signoz_sakura-100">
               A Quick Evaluation
             </h2>
-            <SectionLayout
-              variant="no-border"
-              className="!mx-auto flex items-center justify-center"
-            >
+            <SectionLayout variant="no-border" className="flex items-center justify-center">
               <ComparisonTable
                 vendors={VENDORS}
                 rows={CLICKSTACK_COMPARISON_TABLE_ROWS}
@@ -106,10 +103,7 @@ const QuickEvaluation: React.FC = () => {
 const CostComparison: React.FC = () => {
   return (
     <>
-      <SectionLayout
-        variant="full-width"
-        className="flex flex-col gap-y-9 border-y border-dashed border-signoz_slate-400 !px-0"
-      >
+      <SectionLayout variant="full-width" className="flex flex-col gap-y-9 !px-0">
         <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
           <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
@@ -169,7 +163,7 @@ const CostComparison: React.FC = () => {
 
 const DashboardsThatHelpYouInvestigate: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
+    <section className="relative mx-auto max-w-8xl overflow-hidden">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -203,7 +197,7 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
 
 const AlertingThatTellsYouWhatMatters: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
+    <section className="relative mx-auto max-w-8xl overflow-hidden">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -334,6 +328,7 @@ const ClickStackAlternativePage: React.FC = () => {
         <AlertingThatTellsYouWhatMatters />
         <Divider />
         <QueryYourData />
+        <Divider />
         <CostComparison />
       </SectionLayout>
 
@@ -360,7 +355,9 @@ const ClickStackAlternativePage: React.FC = () => {
         }
       />
       <BetterChoiceBanner />
+      <Divider />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'ClickStack Alternative Customer Stories Button',

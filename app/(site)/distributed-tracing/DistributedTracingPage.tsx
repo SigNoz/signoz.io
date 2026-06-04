@@ -244,9 +244,10 @@ const DistributedTracing: React.FC = () => {
         <Divider />
         <FeatureShowcase
           {...MASSIVE_TRACES_SHOWCASE}
-          className="!mx-auto !w-[80vw] px-6 pb-0 pt-6"
+          className="!mx-auto px-6 pb-0 pt-6"
           contentClassName="mb-0"
         />
+        <Divider orientation="vertical" />
 
         <CarouselCards
           cards={CORRELATION_CAROUSEL_DATA}
@@ -260,6 +261,7 @@ const DistributedTracing: React.FC = () => {
 
       <UsageBasedPricing show={['traces']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Distributed Tracing Customer Stories Button',

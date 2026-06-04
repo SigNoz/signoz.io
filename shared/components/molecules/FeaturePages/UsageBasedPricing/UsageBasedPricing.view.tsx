@@ -22,14 +22,13 @@ const UsageBasedPricing: React.FC<{
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <Divider />
           <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
             Simple
             <br /> usage-based <br /> pricing
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="border-b border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+          <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
             <div className="flex flex-col gap-2 px-10 py-10">
               <div className="text-2xl font-semibold text-signoz_vanilla-100">{sectionTitle}</div>
               <p className="text-base font-normal text-signoz_vanilla-400">{sectionDescription}</p>

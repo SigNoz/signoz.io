@@ -102,11 +102,11 @@ const LogsManagement: React.FC = () => {
         <CarouselCards cards={CORRELATION_CAROUSEL_DATA} />
         <Divider />
         <VisualQueryBuilder />
-        <Divider />
       </SectionLayout>
 
       <UsageBasedPricing show={['logs']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Log Management Customer Stories Button',
