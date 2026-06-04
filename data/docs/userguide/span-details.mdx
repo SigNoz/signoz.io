@@ -1,5 +1,5 @@
 ---
-date: 2026-05-27
+date: 2026-06-04T00:00:00.000Z
 id: span-details
 title: Trace Details
 description: Visualize and analyze individual traces using the flamegraph, waterfall chart, and span inspection tools in SigNoz.
@@ -7,6 +7,10 @@ doc_type: howto
 ---
 
 The **Trace Details** interface in SigNoz offers a powerful and intuitive interface to visualize and analyze the journey of a request through your system. By displaying detailed trace information, it enables you to quickly diagnose performance issues, pinpoint errors, and understand the intricate flow of operations in your systems. It is engineered to handle massive trace data supporting more than a **million spans per trace** making it an ideal solution for high-volume environments.
+
+<Admonition type="info">
+The Trace Details interface described below is now the default experience for every trace link in SigNoz. Opening a trace from the [Trace Explorer](https://signoz.io/docs/userguide/traces/), an alert, or a deep link lands you directly on the synchronized flamegraph and waterfall view — no separate URL or opt-in step is required.
+</Admonition>
 
 The Trace Details Page enables you to:
 
@@ -28,7 +32,7 @@ The Trace Details Page enables you to:
 
 ## Opening a Trace
 
-Select a trace from the [Trace Explorer](https://signoz.io/docs/userguide/traces/) to open the Trace Details page. You will see two synchronized views:
+Click any trace from the [Trace Explorer](https://signoz.io/docs/userguide/traces/), or follow a trace link from an alert, dashboard, or related signal, to open the Trace Details page. You will see two synchronized views:
 
 - **Flame Graph** — displays a hierarchical representation of the trace, showing the nested relationships between spans. The header shows the total span count and error count. It can render **100,000+ spans** at once.
 - **Waterfall Chart** — provides a detailed timeline view, illustrating the sequence and duration of each span. It supports **10,000+ spans** with virtual scrolling for smooth navigation.
@@ -114,6 +118,10 @@ You can further refine this analysis by adding more resource attributes to narro
 ### Synchronized Navigation
 
 The flame graph and waterfall views remain perfectly synchronized. Clicking a span in one view automatically highlights it in the other and opens the Span Details panel, ensuring you always see where a span fits into the overall trace timeline.
+
+- **Clicking a span in the waterfall** updates the Span Details panel in place without refetching the trace or shifting the selected row off-screen.
+- **Clicking a node in the flamegraph** scrolls the waterfall to the matching span, including spans near the top or bottom boundary of the visible list.
+- **Browser back/forward and the filter prev/next arrows** move between spans you have already visited and keep the waterfall scrolled to the selected span, even when that span is already in memory.
 
 <Figure
   src="/img/docs/apm-and-distributed-tracing/trace-details-span-details.webp"
@@ -297,4 +305,4 @@ Click the **Metrics** tab to see infrastructure metrics (CPU usage, memory usage
 
 ## Legacy View
 
-If you prefer the previous trace details interface, click the **Legacy View** button in the top-right corner to switch back. SigNoz remembers your preference for future visits.
+The Trace Details interface described above is the default for all trace links in SigNoz. If you need the previous trace details interface, click the **Legacy View** button in the top-right corner to switch back — the legacy UI is served from the `/trace-old/:id` route and is reachable only through this toggle or a direct URL. SigNoz remembers your preference for future visits.
