@@ -248,7 +248,7 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
   },
   {
     name: 'KEDA',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/keda',
+    href: '/docs/dashboards/dashboard-templates/keda',
     clickName: 'KEDA Dashboard Template',
   },
   {

@@ -218,9 +218,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/kubernetes-dashboards': (
     <SiKubernetes className="h-7 w-7 text-blue-600" />
   ),
-  'https://github.com/SigNoz/dashboards/tree/main/keda': (
-    <Zap className="h-7 w-7 text-purple-500" />
-  ),
+  '/docs/dashboards/dashboard-templates/keda': <Zap className="h-7 w-7 text-purple-500" />,
   '/docs/dashboards/dashboard-templates/key-operations': (
     <Target className="h-7 w-7 text-green-500" />
   ),

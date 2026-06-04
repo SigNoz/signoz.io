@@ -23,12 +23,14 @@ Use this playbook for the shared workflow across docs, blogs, site code, and rev
 - Pre-commit runs `lint-staged` on staged files, which auto-fixes common JS, TS, MD, and MDX issues.
 - When staged changes include docs or redirect-related files (`data/docs/**/*.mdx`, `next.config.js`, or `scripts/check-doc-redirects.js`), pre-commit also runs `yarn check:doc-redirects`.
 - When staged changes include docs (`data/docs/**/*.mdx`), pre-commit also runs `yarn check:docs-metadata`.
+- When staged changes include CMS-migrated content (`data/(faqs|case-study|opentelemetry|comparisons|guides|blog)/**`), pre-commit runs `node scripts/check-cms-assets.js` to validate referenced assets exist in `data-assets/`.
 
 ### Fixing Hook Failures
 
 - Lint or format issues: run `yarn lint`, review auto-fixes, and re-stage changed files.
 - Redirect failures: run `yarn check:doc-redirects`, add the missing permanent redirect, then re-stage.
 - Metadata failures: run `yarn check:docs-metadata`, fix the MDX frontmatter, then re-stage.
+- CMS asset failures: add the missing asset(s) to `data-assets/`, stage them, then re-commit. See [cms-content.md](cms-content.md#pre-commit-hook).
 - Optional redirect test: run `yarn test:doc-redirects`.
 
 ### Hooks Path

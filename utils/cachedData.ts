@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache'
-import { fetchMDXContentByPath } from './strapi'
 import { transformBlog, transformComparison, transformGuide } from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { getAllContent, getContentBySlug, isLocalContentOverlayEnabled } from './contentRepository'
 
 async function getCachedMDXContent<T>(
   cacheKey: string,
@@ -9,6 +9,10 @@ async function getCachedMDXContent<T>(
   tags: string[],
   fetchFn: () => Promise<T[]>
 ): Promise<T[]> {
+  if (isLocalContentOverlayEnabled()) {
+    return fetchFn()
+  }
+
   const cachedFn = unstable_cache(
     async () => {
       const result = await fetchFn()
@@ -33,6 +37,10 @@ async function getCachedSingleMDXContent<T>(
   tags: string[],
   fetchFn: () => Promise<T>
 ): Promise<T> {
+  if (isLocalContentOverlayEnabled()) {
+    return fetchFn()
+  }
+
   const cachedFn = unstable_cache(
     async () => {
       const result = await fetchFn()
@@ -52,19 +60,8 @@ async function getCachedSingleMDXContent<T>(
 }
 
 async function fetchComparisons(deploymentStatus: string) {
-  const comparisons = await fetchMDXContentByPath(
-    'comparisons',
-    undefined,
-    deploymentStatus,
-    true,
-    ['title', 'path', 'date', 'description', 'updatedAt', 'publishedAt', 'content']
-  )
-
-  if ('data' in comparisons && Array.isArray(comparisons.data)) {
-    return comparisons.data.map((comparison) => transformComparison(comparison))
-  }
-
-  throw new Error('Unexpected response structure from comparisons API')
+  const comparisons = await getAllContent('comparisons', deploymentStatus)
+  return comparisons.map((comparison) => transformComparison(comparison))
 }
 
 export function getCachedComparisons(deploymentStatus: string) {
@@ -95,17 +92,17 @@ export async function fetchAllComparisonsForPage() {
 }
 
 async function fetchSingleComparison(slug: string, deploymentStatus: string) {
-  const response = await fetchMDXContentByPath('comparisons', slug, deploymentStatus)
+  const content = await getContentBySlug('comparisons', slug, deploymentStatus)
 
-  if ('data' in response && !Array.isArray(response.data)) {
-    const comparison = transformComparison(response.data)
+  if (content) {
+    const comparison = transformComparison(content)
     if (!comparison || !comparison.title || !comparison.content) {
       throw new Error(`Empty or invalid comparison content for slug: ${slug}`)
     }
     return comparison
   }
 
-  throw new Error(`Unexpected response structure from single comparison API for slug: ${slug}`)
+  throw new Error(`Comparison content not found for slug: ${slug}`)
 }
 
 export function getCachedSingleComparison(slug: string, deploymentStatus: string) {
@@ -141,21 +138,8 @@ export async function fetchComparisonBySlug(slug: string) {
 // --- Guides ---
 
 async function fetchGuides(deploymentStatus: string) {
-  const guides = await fetchMDXContentByPath('guides', undefined, deploymentStatus, true, [
-    'title',
-    'path',
-    'date',
-    'description',
-    'updatedAt',
-    'publishedAt',
-    'content',
-  ])
-
-  if ('data' in guides && Array.isArray(guides.data)) {
-    return guides.data.map((guide) => transformGuide(guide))
-  }
-
-  throw new Error('Unexpected response structure from guides API')
+  const guides = await getAllContent('guides', deploymentStatus)
+  return guides.map((guide) => transformGuide(guide))
 }
 
 export function getCachedGuides(deploymentStatus: string) {
@@ -183,17 +167,17 @@ export async function fetchAllGuidesForPage() {
 }
 
 async function fetchSingleGuide(slug: string, deploymentStatus: string) {
-  const response = await fetchMDXContentByPath('guides', slug, deploymentStatus)
+  const content = await getContentBySlug('guides', slug, deploymentStatus)
 
-  if ('data' in response && !Array.isArray(response.data)) {
-    const guide = transformGuide(response.data)
+  if (content) {
+    const guide = transformGuide(content)
     if (!guide || !guide.title || !guide.content) {
       throw new Error(`Empty or invalid guide content for slug: ${slug}`)
     }
     return guide
   }
 
-  throw new Error(`Unexpected response structure from single guide API for slug: ${slug}`)
+  throw new Error(`Guide content not found for slug: ${slug}`)
 }
 
 export function getCachedSingleGuide(slug: string, deploymentStatus: string) {
@@ -229,21 +213,8 @@ export async function fetchGuideBySlug(slug: string) {
 // --- Blogs ---
 
 async function fetchBlogs(deploymentStatus: string) {
-  const blogs = await fetchMDXContentByPath('blogs', undefined, deploymentStatus, true, [
-    'title',
-    'path',
-    'date',
-    'description',
-    'updatedAt',
-    'publishedAt',
-    'content',
-  ])
-
-  if ('data' in blogs && Array.isArray(blogs.data)) {
-    return blogs.data.map((blog) => transformBlog(blog))
-  }
-
-  throw new Error('Unexpected response structure from blogs API')
+  const blogs = await getAllContent('blogs', deploymentStatus)
+  return blogs.map((blog) => transformBlog(blog))
 }
 
 export function getCachedBlogs(deploymentStatus: string) {
@@ -271,17 +242,17 @@ export async function fetchAllBlogsForPage() {
 }
 
 async function fetchSingleBlog(slug: string, deploymentStatus: string) {
-  const response = await fetchMDXContentByPath('blogs', slug, deploymentStatus)
+  const content = await getContentBySlug('blogs', slug, deploymentStatus)
 
-  if ('data' in response && !Array.isArray(response.data)) {
-    const blog = transformBlog(response.data)
+  if (content) {
+    const blog = transformBlog(content)
     if (!blog || !blog.title || !blog.content) {
       throw new Error(`Empty or invalid blog content for slug: ${slug}`)
     }
     return blog
   }
 
-  throw new Error(`Unexpected response structure from single blog API for slug: ${slug}`)
+  throw new Error(`Blog content not found for slug: ${slug}`)
 }
 
 export function getCachedSingleBlog(slug: string, deploymentStatus: string) {
