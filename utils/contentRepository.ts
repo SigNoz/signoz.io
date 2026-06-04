@@ -15,6 +15,7 @@ type CanonicalCollection =
   | 'faqs'
   | 'case-studies'
   | 'opentelemetries'
+  | 'docs'
 
 type CollectionConfig = {
   canonical: CanonicalCollection
@@ -64,6 +65,12 @@ const COLLECTION_CONFIGS: Record<CanonicalCollection, CollectionConfig> = {
     cmsCollection: 'opentelemetries',
     contentType: 'opentelemetry',
   },
+  docs: {
+    canonical: 'docs',
+    dataDir: 'docs',
+    cmsCollection: 'docs',
+    contentType: 'doc',
+  },
 }
 
 const COLLECTION_ALIASES: Record<string, CanonicalCollection> = {
@@ -80,6 +87,8 @@ const COLLECTION_ALIASES: Record<string, CanonicalCollection> = {
   case_study: 'case-studies',
   opentelemetry: 'opentelemetries',
   opentelemetries: 'opentelemetries',
+  doc: 'docs',
+  docs: 'docs',
 }
 
 const RELATED_PREFIX_TO_COLLECTION: Record<string, CanonicalCollection> = {
@@ -89,6 +98,7 @@ const RELATED_PREFIX_TO_COLLECTION: Record<string, CanonicalCollection> = {
   faqs: 'faqs',
   opentelemetry: 'opentelemetries',
   'case-study': 'case-studies',
+  docs: 'docs',
 }
 
 const DEFAULT_LIST_FIELDS = [

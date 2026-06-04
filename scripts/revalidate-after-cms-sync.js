@@ -30,10 +30,10 @@ let SYNC_FOLDERS
 try {
   SYNC_FOLDERS = JSON.parse(
     process.env.SYNC_FOLDERS ||
-      '["faqs","case-study","opentelemetry","comparisons","guides","blog"]'
+      '["faqs","case-study","opentelemetry","comparisons","guides","blog","docs"]'
   )
 } catch {
-  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog']
+  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 }
 
 const FOLDER_TO_URL_PREFIX = {
@@ -43,6 +43,7 @@ const FOLDER_TO_URL_PREFIX = {
   comparisons: 'comparisons',
   guides: 'guides',
   blog: 'blog',
+  docs: 'docs',
 }
 
 function getFolderName(filePath) {
@@ -114,6 +115,9 @@ function buildPayload() {
   }
   if (cmsUrls.some((u) => u.startsWith('/blog/'))) {
     extraTags.push('blogs-list')
+  }
+  if (cmsUrls.some((u) => u.startsWith('/docs/'))) {
+    extraTags.push('docs-list')
   }
 
   return {

@@ -56,6 +56,7 @@ const RELATED_ARTICLE_TYPE_MAP = {
   faqs: { endpoint: 'faqs', content_type: 'faq' },
   opentelemetry: { endpoint: 'opentelemetries', content_type: 'opentelemetry' },
   'case-study': { endpoint: 'case-studies', content_type: 'case_study' },
+  docs: { endpoint: 'docs', content_type: 'doc' },
 }
 
 // Strapi Collection Type Schemas
@@ -152,6 +153,41 @@ const COLLECTION_SCHEMAS = {
     endpoint: 'opentelemetries',
     fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status', 'date'],
     hasRelatedArticles: true,
+    relations: {
+      authors: {
+        endpoint: 'authors',
+        matchField: 'key',
+        frontmatterField: 'authors',
+      },
+      tags: {
+        endpoint: 'tags',
+        matchField: 'key',
+        frontmatterField: 'tags',
+        filterKey: true,
+        matchValue: true,
+      },
+      keywords: {
+        endpoint: 'keywords',
+        matchField: 'key',
+        frontmatterField: 'keywords',
+        filterKey: true,
+        matchValue: true,
+      },
+    },
+  },
+  docs: {
+    apiPath: 'api::doc.doc',
+    endpoint: 'docs',
+    fields: [
+      'title',
+      'description',
+      'path',
+      'content',
+      'deployment_status',
+      'date',
+      'hide_table_of_contents',
+    ],
+    hasRelatedArticles: false,
     relations: {
       authors: {
         endpoint: 'authors',
