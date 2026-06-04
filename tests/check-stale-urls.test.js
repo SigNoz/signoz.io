@@ -198,6 +198,8 @@ test('isExemptFromTrailingSlash works correctly', () => {
   assert.equal(isExemptFromTrailingSlash('/img/logo.svg'), true)
   assert.equal(isExemptFromTrailingSlash('/img/photo.png'), true)
   assert.equal(isExemptFromTrailingSlash('/img/photo.webp'), true)
+  assert.equal(isExemptFromTrailingSlash('/static/favicons/site.webmanifest'), true)
+  assert.equal(isExemptFromTrailingSlash('/feed.xml'), true)
   assert.equal(isExemptFromTrailingSlash('/docs/install'), false)
   assert.equal(isExemptFromTrailingSlash('/docs/install/'), false)
 })

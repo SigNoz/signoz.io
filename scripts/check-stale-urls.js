@@ -172,8 +172,9 @@ function isExemptFromTrailingSlash(urlPath) {
   if (urlPath === '/') return true
   // Anchor-only (shouldn't reach here after normalization, but guard)
   if (urlPath.startsWith('#')) return true
-  // File paths (has extension)
-  if (/\.\w{2,5}$/.test(urlPath)) return true
+  // File-like paths: last segment contains a dot (e.g., /img/logo.svg, /static/site.webmanifest)
+  const lastSegment = urlPath.split('/').filter(Boolean).pop() || ''
+  if (lastSegment.includes('.')) return true
   return false
 }
 
