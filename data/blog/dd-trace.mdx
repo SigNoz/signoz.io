@@ -13,7 +13,7 @@ related_articles:
 **TL;DR**
 
 - **SigNoz**: OpenTelemetry-native APM with a Datadog-style UI, a Datadog dashboard migrator, and Datadog Receiver support for staged migrations off `dd-trace`.
-- **Datadog (`dd-trace`)**: Per-host APM charges and a proprietary wire protocol that ties your tracing code to the Datadog Agent, so moving backends later means rewriting the instrumentation.
+- **Datadog (`dd-trace`)**: Per-host APM charges and a proprietary wire protocol that ties your tracing code to the Datadog Agent, so migrating vendors later means rewriting the entire instrumentation.
 
 ---
 
@@ -55,9 +55,9 @@ The application never talks to Datadog's backend directly, and the destination i
 
 ## How dd-trace Makes Tracing Harder Than It Should Be
 
-Beyond the bill and the lock-in, `dd-trace` quietly costs engineering time and the root cause for this cost is structural - each language SDK was built around Datadog's pipeline rather than a shared open standard, so the same product behaves differently across your stack and the rules aren't always obvious until something breaks in production.
+Beyond the bill and the lock-in, `dd-trace` quietly costs engineering time because each language SDK was built around Datadog's pipeline rather than a shared open standard, so the same product behaves differently across your stack and the rules aren't always obvious until something breaks in production.
 
-Each language has different problems with `dd-trace`, and Node.js has the most. There, `dd-trace` uses runtime patching to attach itself to imports and assumes the library loads before anything else, an assumption that modern Node setups (ESM imports, webpack, esbuild, Next.js, Nest.js) violate in different ways, with fixes scattered across fragmented docs. 
+Each language has different problems with `dd-trace`, and Node.js applications encounter the majority of them. There, `dd-trace` uses runtime patching to attach itself to imports and assumes the library loads before anything else, an assumption that modern Node setups (ESM imports, webpack, esbuild, Next.js, Nest.js) violate in different ways, with fixes scattered across fragmented docs. 
 
 Python has two valid entry points, `ddtrace-run` and `import ddtrace.auto`, and you have to pick one per process, using both at once is what causes duplicate-span confusion. PHP needs the `ddtrace` extension installed through Datadog's `datadog-setup.php` installer before auto-instrumentation does anything, [.NET auto-instrumentation](https://signoz.io/opentelemetry/) requires either the machine-wide installer or the per-app `Datadog.Trace.Bundle` package plus a set of environment variables set on the target process (neither of which is obvious from a NuGet `add package` alone), and Go now supports compile-time auto-instrumentation through Orchestrion, though teams still on the older manual path have to add per-package imports and a `tracer.Start()` call.
 
@@ -80,7 +80,7 @@ Every difference below clearly shows how `dd-trace` is built for Datadog's pipel
 | Aspect | `dd-trace` | OpenTelemetry |
 | --- | --- | --- |
 | **Maintained by** | Datadog | The CNCF (Cloud Native Computing Foundation) |
-| **Wire protocol** | Datadog Agent protocol (proprietary HTTP API) | OTLP (open standard) |
+| **Wire protocol** | Datadog Agent protocol (proprietary HTTP API) | [OTLP (open standard)](https://signoz.io/blog/what-is-otlp/) |
 | **Context propagation** | Historically `x-datadog-*` headers, current SDKs also extract and inject W3C Trace Context and Baggage by default | W3C Trace Context as the cross-vendor default |
 | **Configuration** | `DD_*` environment variables | `OTEL_*` environment variables |
 | **Backend** | Datadog only | Any OTLP-compatible backend |
@@ -92,7 +92,7 @@ Whether you stay on `dd-trace` or move to OpenTelemetry comes down to portabilit
 
 ## When to Replace dd-trace with OpenTelemetry
 
-The most common reason teams move off `dd-trace` is cost. [Datadog APM pricing](https://signoz.io/blog/datadog-pricing/) starts at `\$31` per host per month, with APM Pro at `\$35` and APM Enterprise at `\$40`, before per-span ingestion or indexing overages. At 100 hosts on the base APM plan, that's `\$3,100/month` for APM alone. Moving to an OpenTelemetry-native backend usually drops that bill noticeably, especially at higher host counts.
+The most common reason teams move off `dd-trace` is cost. [Datadog APM pricing](https://signoz.io/blog/datadog-pricing/) starts at `$31` per host per month, with APM Pro at `$35` and APM Enterprise at `$40`, before per-span ingestion or indexing overages. At 100 hosts on the base APM plan, that's `$3,100/month` for APM alone. Moving to an OpenTelemetry-native backend usually drops that bill noticeably, especially at higher host counts.
 
 At scale, the remaining reasons start to matter as much as the bill itself. Once your tracing code uses OpenTelemetry instead of `dd-trace`, you can point traces at any backend by changing a single endpoint, which `dd-trace` simply doesn't allow. OpenTelemetry is also the open standard the industry has settled on, so most new instrumentation work goes into OTel rather than vendor-specific SDKs. Separately, Datadog's [custom metrics billing](https://signoz.io/blog/datadog-custom-metrics-pricing/) is driven by tag-combination cardinality, so rich application tags like `customer_id` or `request_id` can compound the metrics line on the invoice even when APM costs are held flat.
 
@@ -130,11 +130,11 @@ SigNoz keeps logs, metrics, and traces in a single platform with a single query 
   caption="SigNoz pricing page"
 />
 
-Datadog APM is billed per host (`\$31` for APM, `\$35` for APM Pro, `\$40` for APM Enterprise, per host per month), so the bill scales with how many machines you run rather than how much tracing data you actually send. [SigNoz prices traces at `\$0.30/GB`](https://signoz.io/pricing/) with no per-host or per-user charges, so the bill is bounded by trace volume alone. Adding hosts, services, or engineers doesn't change the line item.
+Datadog APM is billed per host (`$31` for APM, `$35` for APM Pro, `$40` for APM Enterprise, per host per month), so the bill scales with how many machines you run rather than how much tracing data you actually send. [SigNoz prices traces at `$0.30/GB`](https://signoz.io/pricing/) with no per-host or per-user charges, so the bill is bounded by trace volume alone. Adding hosts, services, or engineers doesn't change the line item.
 
 ### OpenTelemetry-Native, So There's No Second Lock-In
 
-A few backends accept OTLP traffic but push their own agents or SDKs back onto you for full feature parity. Picking those means trading one lock-in for another, which is exactly what you were trying to avoid when leaving `dd-trace`. SigNoz is built on OpenTelemetry from the ground up, so the instrumentation work you do for SigNoz keeps working with any other OTLP-compatible backend if you ever switch again.
+A few backends accept OTLP traffic but push their own agents or SDKs back onto you for full feature parity. Picking those means trading one lock-in for another, which is exactly what you were trying to avoid when leaving `dd-trace`. SigNoz is built on OpenTelemetry from the ground up, so the instrumentation work you do for SigNoz keeps working with any other [OTLP-compatible backend](https://signoz.io/blog/opentelemetry-backend/) if you ever switch again.
 
 For the destination choice in more depth, see [How to Migrate from `dd-trace` to OpenTelemetry (and Why Teams Pick SigNoz)](https://signoz.io/blog/migrate-datadog-apm-to-opentelemetry/).
 
