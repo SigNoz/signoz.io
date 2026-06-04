@@ -19,47 +19,73 @@ The **StatefulSets** view shows rollout status and resource utilization. Statefu
 
 ### StatefulSet Name
 
-Kubernetes StatefulSet name.
+- This column is derived from the resource attribute `k8s.statefulset.name`.
+- Identifier of the Kubernetes StatefulSet.
+- Click the name to open the detail page and drill into CPU/memory vs request/limit charts, utilization percentages, network activity, logs, and events for the StatefulSet's pods.
 
 ### Namespace Name
 
-Namespace the StatefulSet belongs to.
+- This column is derived from the resource attribute `k8s.namespace.name`.
+- Namespace the StatefulSet belongs to.
+- Use it to filter the list to a specific tenant or team and to navigate to the namespace-level view for `ResourceQuota` and aggregate workload status. ([Namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/))
 
 ### Current
 
-Current number of StatefulSet pods controlled by this StatefulSet at the current revision.
+- This column relies on the OTel metric `k8s.statefulset.current_pods` from the k8s_cluster receiver, defined as "The number of pods created by the StatefulSet controller from the StatefulSet version".
+- This is the K8s `.status.currentReplicas` field — pods at the StatefulSet's `currentRevision`. During a rolling update this is the *previous* revision; once the rollout completes, Current = Updated = Desired.
+- A persistent Current < Desired means the StatefulSet controller is still creating pods or one is stuck — and because StatefulSets update sequentially (one pod at a time by default), even a single failing pod stalls the whole rollout; inspect `kubectl describe statefulset/<name>` and the affected pod's events. ([StatefulSet update strategy](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies))
 
 ### Desired
 
-Pods specified in the spec (replicas).
+- This column relies on the OTel metric `k8s.statefulset.desired_pods` from the k8s_cluster receiver — the `.spec.replicas` field of the StatefulSet.
+- Number of pods the StatefulSet controller intends to maintain. StatefulSets are typically scaled manually (HPA support exists but is less common than for Deployments).
+- Compare against **Current** to gauge rollout/scaling state: equal → steady state; not equal → rollout in progress, scale-up adding ordinals, or a stalled pod blocking progress. ([Scaling a StatefulSet](https://kubernetes.io/docs/tasks/run-application/scale-stateful-set/))
 
 ### CPU Req Usage (%)
 
-Average CPU request utilization across all StatefulSet pods.
+- This column relies on the OTel metric `k8s.pod.cpu_request_utilization` from the kubeletstats receiver, averaged across the StatefulSet's pods.
+- Average ratio of pod CPU usage to the sum of its containers' CPU requests across the StatefulSet's pods, expressed as a percentage. Values consistently >100% mean pods are using more CPU than reserved (allowed, but a signal requests are under-provisioned); values well below 50% indicate over-provisioned reservations.
+- Use this to detect under-/over-provisioning at the StatefulSet level — adjust `resources.requests.cpu` in the StatefulSet's pod template to pack the cluster better and reduce scheduling friction. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
+- Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
 
 ### CPU Limit Usage (%)
 
-Average CPU limit utilization.
+- This column relies on the OTel metric `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver, averaged across the StatefulSet's pods.
+- Average ratio of pod CPU usage to the sum of its containers' CPU limits across the StatefulSet's pods, expressed as a percentage. Per K8s docs, "when a container approaches its `cpu` limit, the kernel restricts access to the CPU" — values near 100% indicate active or imminent throttling.
+- Sustained high values mean the StatefulSet's pods are throttling under load and either need a higher `limits.cpu` or more replicas to absorb the work. ([CPU limits and throttling](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled))
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — throttling becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### CPU Usage (cores)
 
-Total CPU consumption across all StatefulSet pods.
+- This column relies on the OTel metric `k8s.pod.cpu.usage` from the kubeletstats receiver, summed across the StatefulSet's pods.
+- Total CPU consumed by all of the StatefulSet's pods in CPU-core units — a value of `1.0` means one full core in use across the StatefulSet.
+- Use this for absolute capacity planning when you need the StatefulSet's raw CPU draw rather than a ratio; pair with the chart on the detail page to see how the cores trend against the StatefulSet's aggregate requests/limits. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
 
 ### Mem Req Usage (%)
 
-Average memory request utilization.
+- This column relies on the OTel metric `k8s.pod.memory_request_utilization` from the kubeletstats receiver, averaged across the StatefulSet's pods.
+- Average ratio of pod memory usage to the sum of its containers' memory requests, expressed as a percentage. As with CPU, sustained values >100% mean pods are using more memory than reserved; values well below 50% indicate over-provisioned reservations.
+- Use this to right-size the StatefulSet's `resources.requests.memory`; consistently low values free up scheduling capacity for other workloads. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
+- Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
 
 ### Mem Limit Usage (%)
 
-Average memory limit utilization — near 100% = OOMKill risk.
+- This column relies on the OTel metric `k8s.pod.memory_limit_utilization` from the kubeletstats receiver, averaged across the StatefulSet's pods.
+- Average ratio of pod memory usage to the sum of its containers' memory limits, expressed as a percentage. Per K8s docs, "when a container uses more than its `memory` limit, the kernel may terminate it" via an OOMKill — values near 100% indicate sustained OOMKill risk.
+- Sustained values approaching 100% mean a single pod in the StatefulSet is on the verge of an OOMKill; raise `limits.memory`, fix the memory leak, or add replicas to spread load. ([Pod OOM behavior](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#kubelet-eviction-of-end-user-pods))
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — OOMKill becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### Mem Usage (WSS)
 
-Total working set memory across all StatefulSet pods.
+- This column relies on the OTel metric `k8s.pod.memory.working_set` from the kubeletstats receiver, summed across the StatefulSet's pods.
+- Total Working Set Size across the StatefulSet's pods — anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for OOM and eviction).
+- Sustained high WSS without explicit `limits.memory` on the StatefulSet's containers means individual pods can grow until the kubelet evicts them under node MemoryPressure; set explicit limits or add a `LimitRange` to the namespace. ([Node-pressure eviction signals](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#eviction-signals), [LimitRange](https://kubernetes.io/docs/concepts/policy/limit-range/))
 
 ### Pod Counts by Phase
 
-Counts of StatefulSet pods grouped by lifecycle phase (Pending, Running, Succeeded, Failed, Unknown).
+- This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
+- Counts of the StatefulSet's pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
+- StatefulSets create pods sequentially with stable ordinal names (`<name>-0`, `<name>-1`, ...) — a single pod stuck in `Pending` blocks all higher-ordinal pods from being created, so a persistent `Pending` count of 1 can mean the entire scale-up is stalled; inspect the affected ordinal with `kubectl describe pod <name>-N`. ([Pod identity in StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#stable-network-id))
 
 ## StatefulSet Detail Page
 
@@ -76,24 +102,36 @@ Click a StatefulSet name to open the detail page. The header shows **StatefulSet
 
 #### CPU Usage, Request, Limits
 
-CPU consumption plotted against aggregate requests and limits.
+- This chart relies on the OTel metrics `k8s.pod.cpu.usage`, `k8s.container.cpu_request`, and `k8s.container.cpu_limit` from the kubeletstats receiver, aggregated across the StatefulSet's pods and containers.
+- Plots three series: the StatefulSet's total **CPU Usage** in cores, the sum of containers' **CPU Requests**, and the sum of containers' **CPU Limits**. Usage approaching Limits means the kernel is throttling the StatefulSet's CPU; Usage well below Requests means the StatefulSet is reserving more capacity than it consumes.
+- Use this to right-size the StatefulSet's `requests.cpu` and `limits.cpu` and to confirm whether high `CPU Limit Usage (%)` on the list page corresponds to a real throttling pattern — if Usage hugs the Limits line, throttle events are happening. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
 
 #### CPU Request, Limit Utilization (%)
 
-Percentage view of CPU utilization.
+- This chart relies on the OTel metrics `k8s.pod.cpu_request_utilization` and `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver, averaged across the StatefulSet's pods.
+- Plots two lines: the average **Request Utilization %** (usage as a fraction of requests) and the average **Limit Utilization %** (usage as a fraction of limits). Request line above 100% just means the StatefulSet is bursting above its reservation; Limit line approaching 100% indicates active CPU throttling.
+- Use this to see the percentage view of what the `CPU Req Usage (%)` and `CPU Limit Usage (%)` columns show in the list — Limit Utilization climbing toward 100% is the leading indicator that the StatefulSet needs a larger `limits.cpu` or more replicas. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
 
 #### Memory Usage, Request, Limits
 
-Memory consumption against aggregate requests and limits.
+- This chart relies on the OTel metrics `k8s.pod.memory.usage`, `k8s.container.memory_request`, and `k8s.container.memory_limit` from the kubeletstats receiver, aggregated across the StatefulSet's pods and containers.
+- Plots three series: total **Memory Usage** in bytes, the sum of containers' **Memory Requests**, and the sum of containers' **Memory Limits**. Note that this uses `k8s.pod.memory.usage` (which includes reclaimable page cache), so it reads higher than the working-set value the kubelet uses for OOM decisions.
+- Use this alongside the `Mem Limit Usage (%)` column on the list page — Usage approaching Limits is a leading indicator for OOMKills, and inspecting whether it's a slow climb (leak) or a sudden spike (workload change) shapes the fix. ([Pod OOM behavior](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#kubelet-eviction-of-end-user-pods))
 
 #### Memory Request, Limit Utilization (%)
 
-Percentage view of memory utilization.
+- This chart relies on the OTel metrics `k8s.pod.memory_request_utilization` and `k8s.pod.memory_limit_utilization` from the kubeletstats receiver, averaged across the StatefulSet's pods.
+- Plots two lines: average **Request Utilization %** and average **Limit Utilization %**. Request line consistently above 100% means workload exceeds its memory reservation; Limit line approaching 100% indicates imminent OOMKill risk.
+- Use this to see the percentage view of `Mem Req Usage (%)` and `Mem Limit Usage (%)` on the list — Limit Utilization >95% is the trigger to raise `limits.memory` or add replicas. ([Pod OOM behavior](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#kubelet-eviction-of-end-user-pods))
 
 #### Network IO
 
-Total network throughput across all StatefulSet pods.
+- This chart relies on the OTel metric `k8s.pod.network.io` from the kubeletstats receiver — a cumulative Sum in bytes with attributes `direction` and `interface`, shown as a per-second rate and aggregated across the StatefulSet's pods.
+- One line per `direction :: interface` combination, showing transmit/receive throughput across all pods of the StatefulSet.
+- Use this to detect whether the StatefulSet is the source of unusual network load on a node and to spot asymmetric receive-vs-transmit patterns that often indicate misconfigured clients or downstream timeouts; "No Data" means none of the pods are reporting per-pod network metrics (often due to host-networking pods or a CNI that doesn't expose them). ([Cluster networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/))
 
 #### Network Errors Count
 
-Aggregated network errors.
+- This chart relies on the OTel metric `k8s.pod.network.errors` from the kubeletstats receiver — a cumulative Sum with attributes `direction` and `interface`, shown as a per-second increase and aggregated across the StatefulSet's pods.
+- One line per `direction :: interface` combination, sourced from the kubelet's per-pod-interface error counters.
+- Sustained non-zero values warrant attention — common causes are misconfigured CNI plugins, MTU mismatches, or faulty NICs on the underlying nodes; correlate with the **Node Detail → Network Errors** chart on the specific node(s) hosting the StatefulSet's pods. ([Cluster networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/))
