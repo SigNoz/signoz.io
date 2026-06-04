@@ -1,5 +1,5 @@
 ---
-date: 2025-12-27
+date: 2026-06-04
 title: AWS One-Click Integrations
 description: Monitor your AWS infrastructure with SigNoz's One-Click AWS Integration. Automatically discover and collect metrics and logs from services like EC2, Lambda, RDS, and more.
 doc_type: explanation
@@ -30,6 +30,7 @@ The following AWS services are supported for one-click monitoring:
 
 - **AWS Account Access**: You need permissions to create CloudFormation stacks and IAM roles in your AWS account.
 - **SigNoz Cloud Account**: This feature is available for SigNoz Cloud users.
+- **Persistent ECS Task**: The integration deploys an always-running ECS task in your AWS account. This task must remain running to auto-discover new resources and maintain integration state.
 
 ### Step 1: Connect AWS Account
 
@@ -110,8 +111,9 @@ To remove the integration:
 
 ## Architecture
 
-The integration deploys an **AWS Integration Agent** in your chosen region. This agent:
+The integration deploys an **AWS Integration Agent** as a continuously running ECS task in your chosen region. This agent must remain running to support auto-discovery and maintain integration state. It:
 - Scans for selected services across enabled regions.
+- Automatically discovers new resources as they are provisioned.
 - Configures CloudWatch Metric Streams to push metrics to SigNoz.
 - Sets up CloudWatch Log Subscription Filters to forward logs via Kinesis Firehose.
 
