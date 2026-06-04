@@ -1,22 +1,26 @@
 ---
-
 title: Observing LLM Applications with OpenTelemetry—A Hands-on Guide [2026]
+description: A hands-on guide to instrumenting a Python LLM app with OpenTelemetry, tracing agent workflows, understanding the developing GenAI ecosystem, and visualizing telemetry in SigNoz.
 date: 2026-06-03
 tags: [OpenTelemetry, Python]
 authors: [dhruv_ahuja]
 image: /img/blog/2026/06/opentelemetry-llm-guardrail-trace.gif
 keywords: [opentelemetry,python,opentelemetry llm,ai observability,agentic observability,llm observability,opentelemetry genai,opentelemetry agentic,observability for ai]
-description: A hands-on guide to instrumenting a Python LLM app with OpenTelemetry, tracing agent workflows, and visualizing telemetry in SigNoz.
-
+related_articles:
+  - '/blog/what-is-opentelemetry'
+  - '/blog/opentelemetry-rust'
+  - '/blog/opentelemetry-fastapi'
+  - '/blog/opentelemetry-architecture'
+  - '/blog/opentelemetry-kubernetes'
+  - '/opentelemetry/python'
 ---
 
-Ever since OpenAI launched ChatGPT in November 2022, AI usage has exploded worldwide. Integrating <Tooltip text="LLMs" content="LLMs (Large Language Models) are specialized AI models trained to generate human-like output." />  into applications began soon after, rapidly going from an experimental, nice-to-have feature to a competitive, baseline requirement.
+Ever since OpenAI launched ChatGPT in November 2022, AI usage has exploded worldwide. Integrating <Tooltip text="LLMs" content="LLMs (Large Language Models) are specialized AI models trained to generate human-like output." /> into applications began soon after, rapidly going from an experimental, nice-to-have feature to a competitive, baseline requirement.
 
-And while you can find an AI implementation in almost every product today, shipping production-ready LLM features introduces its own set of challenges that developers must contend with.<br />
-This problem is compounded because most LLM integrations also enhance the LLM’s capability by introducing agentic features like tools, context layers and memory, guardrails, and so on.
+And while you can find an AI implementation in almost every product today, shipping production-ready LLM features introduces its own set of challenges that developers must contend with.
 
 In this article, we’ll dive into why observing LLM-based applications is now a critical requirement, what OpenTelemetry is, and how to integrate it into your applications with a practical demo.<br />
-During this process, we will also look at the current maturity level of LLM-specific OpenTelemetry libraries, the GenAI Semantic Conventions, and some caveats you should be aware of.
+During this process, we will also look at the current maturity level of LLM-specific OpenTelemetry libraries, the GenAI Semantic Conventions, and some practical challenges you can face while <Tooltip text="instrumenting" content="The process of configuring applications to emit telemetry data (traces, metrics, and logs)." /> your LLM applications.
 
 ## Why do LLM applications need observability?
 
@@ -32,14 +36,14 @@ This is why, as developers, we often have to equip our models with tools for per
 #### Ensuring context-appropriate responses
 
 Non-determinism **does not** mean that the responses are actually incorrect. In most scenarios though, developers likely want their responses to be structured in a certain way.<br />
-For example, while the response “very likely” for a query like “chances of rain tomorrow” might be suitable, the same response for a query like “chances of stock market climbing tomorrow” might be unacceptable, where the user likely expects more nuance from the application system.
+For example, while the response "very likely" for a query like "chances of rain tomorrow" might be suitable, the same response for a query like "chances of stock market climbing tomorrow" might be unacceptable, where the user likely expects more nuance from the application system.
 
 Ensuring that responses remain consistent across a range of user queries is vital to ensure your LLM application serves the user’s needs adequately.
 
 #### Managing quality across updates
 
-LLM providers frequently release model updates, modify their backends, and provide optimal usage guides. Simultaneously, developers experiment with model configurations and share the ones which work for them. All in all, the space is developing quickly, and each of these factors can affect the response quality of your LLM setup.<br />
-As a practical example, LLM providers can suffer “brown-outs” where their infrastructure cannot keep up with user demand, leading to latency spikes, timeouts, or even degraded response quality in certain scenarios.
+LLM providers frequently release model updates, modify their backends, and provide optimal usage guides. Meanwhile, developers also experiment with model configurations and share the ones which work for them. All in all, the space is developing quickly, and each of these factors can affect the response quality of your LLM setup.<br />
+As a practical example, LLM providers can suffer "brown-outs" where their infrastructure cannot keep up with user demand, leading to latency spikes, timeouts, or even degraded response quality in certain scenarios.
 
 So, it becomes critical that you observe how your LLM-based applications perform across varying configurations, model updates, and time periods.
 
@@ -47,7 +51,7 @@ Next, let’s look at OpenTelemetry and understand the role it plays in the obse
 
 ## What is OpenTelemetry?
 
-[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is a Cloud Native Computing Foundation (CNCF) project aimed at standardizing the way we <Tooltip text="instrument applications" content="The process of configuring applications to emit telemetry data such as traces, metrics, and logs." /> for generating telemetry data. Before OpenTelemetry arrived, telemetry data lived in silos and often had little or no correlation between signals.
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is a Cloud Native Computing Foundation (CNCF) project aimed at standardizing the way we instrument applications for generating telemetry data. Before OpenTelemetry arrived, telemetry data lived in silos and often had little or no correlation between signals.
 
 It follows a <a href="https://github.com/open-telemetry/opentelemetry-specification?tab=readme-ov-file" rel="noopener noreferrer nofollow" target="_blank">specification-driven development</a> model that standardizes telemetry generation and collection details, meaning any compatible backend can process and visualize telemetry data emitted via its SDKs. <br />As there is no need to rewrite the entire instrumentation plumbing each time you change observability backends, there is **no vendor lock-in**.
 
@@ -142,12 +146,12 @@ Before we move ahead, let’s look at how the OpenTelemetry community is standar
 
 #### Evolving GenAI Standards
 
-Throughout this article, we’ve used the term “LLMs”, but as become familiar with OpenTelemetry, you will see the term `Generative AI` (or `GenAI`) being used almost exclusively. OpenTelemetry uses the umbrella term `GenAI` to refer to any application utilizing AI models.<br />
+Throughout this article, we’ve used the term "LLMs", but as become familiar with OpenTelemetry, you will see the term `Generative AI` (or `GenAI`) being used almost exclusively. OpenTelemetry uses the umbrella term `GenAI` to refer to any application utilizing AI models.<br />
 Later when we use our application, you’ll see that all telemetry attributes and metrics ingested by SigNoz have the `gen_ai.*` prefix, such as <a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/#gen-ai-agent-name" rel="noopener noreferrer nofollow" target="_blank">`gen_ai.agent.name`</a>.
 
 It is crucial to understand that these standards are evolving rapidly and are still technically in <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" rel="noopener noreferrer nofollow" target="_blank">Development status</a>. Because of this fast-paced development, and the criticality of the GenAI project, the OpenTelemetry team recently created a <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">separate, dedicated repository</a> to maintain GenAI instrumentation libraries.
 
-This “immaturity” has a real-world impact on developers. For example, the `opentelemetry-bootstrap` tool currently doesn’t recognize or install the OpenAI Agents SDK that we’ll be using in our application.
+This "immaturity" has a real-world impact on developers. For example, the `opentelemetry-bootstrap` tool currently doesn’t recognize or install the OpenAI Agents SDK that we’ll be using in our application.
 
 To counter this, we have manually added the corresponding entry to the [`requirements.txt` file](https://github.com/SigNoz/examples/blob/main/python/opentelemetry-llm-demo/requirements.txt#L6).
 
@@ -173,7 +177,7 @@ Besides the essential OpenTelemetry dependencies we’ve already discussed above
     
 - **OpenAI Agents SDK Instrumentation**, which is not included via `opentelemetry-bootstrap` command, was added manually to ensure our workflow generates telemetry upon execution.
 
-<KeyPointCallout title=“Using the OpenAI Python SDK”>
+<KeyPointCallout title="Using the OpenAI Python SDK">
 
 The <a href="https://github.com/openai/openai-python" rel="noopener noreferrer nofollow" target="_blank">OpenAI Python SDK</a> is a completely fine choice for building production-ready LLM applications that don’t need the complete set of agentic orchestration capabilities.
 
@@ -368,7 +372,7 @@ Opening the detailed view of our failed trace, we can see that the root span lin
 
 <Figure src="/img/blog/2026/06/opentelemetry-llm-guardrail-trace.gif" alt="A visualization of the guardrail check failures, reflected via the exception event and span attribute." caption="A visualization of the guardrail check failures, reflected via the exception event and span attribute." />
 
-<KeyPointCallout title= “‘unknown’ spans within agent workflow traces”>
+<KeyPointCallout title= "‘unknown’ spans within agent workflow traces">
 
 You may have noticed that multiple spans in the trace tree are simply titled `unknown`. These represent certain internal API paths that haven’t been fully mapped out as part of the current instrumentation process.
 
