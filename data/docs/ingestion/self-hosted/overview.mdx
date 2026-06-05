@@ -1,10 +1,11 @@
 ---
-date: 2026-05-27
+date: 2026-06-02
 title: Ingestion Overview for Self-Hosted SigNoz
 meta_title: Self-Hosted Ingestion Overview
 description: Learn how to ingest telemetry data into self-hosted SigNoz using OTLP. Covers gRPC and HTTP endpoints, port configuration, and setup prerequisites.
 tags: [Self-Host]
 id: ingestion-overview-self-hosted
+doc_type: reference
 ---
 
 <Admonition type="info">
@@ -14,7 +15,7 @@ id: ingestion-overview-self-hosted
 
 ## Overview
 
-SigNoz is OpenTelemetry-native and works with [OpenTelemetry Protocol (OTLP)](https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md). For self-hosted deployments, you typically send OTLP data directly to the SigNoz OpenTelemetry Collector that is installed with SigNoz, or to a collector you manage and then forward it to SigNoz.
+SigNoz is OpenTelemetry-native and works with <a href="https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Protocol (OTLP)</a>. Send OTLP data directly to the SigNoz OpenTelemetry Collector installed with SigNoz, or run your own collector as an agent and forward to SigNoz.
 
 - OTLP/gRPC: default port 4317
 - OTLP/HTTP: default port 4318
@@ -31,7 +32,7 @@ SigNoz is OpenTelemetry-native and works with [OpenTelemetry Protocol (OTLP)](ht
 
 ## Endpoints
 
-Use the appropriate protocol and port based on your setup. Unless you’ve enabled TLS/ingress, use non‑TLS endpoints (http://) on 4317 (gRPC) or 4318 (HTTP). For gRPC, also set `OTEL_EXPORTER_OTLP_INSECURE=true` (or the equivalent client option) as some SDKs require it explicitly.
+Unless you’ve enabled TLS, use `http://` on port 4317 (gRPC) or 4318 (HTTP). For gRPC without TLS, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and an `http://` endpoint. Some SDKs require `insecure: true` in their exporter config as well.
 
 <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
 <table style={{width: "80%", display:"table"}}>
@@ -70,7 +71,7 @@ Examples:
 
 ### Collector Address Grid
 
-You might have specific setups for your application and your SigNoz cluster. It’s not always obvious which address to use to send data. Use the grid below to quickly pick the right OTLP endpoint.
+Use the grid below to pick the right OTLP endpoint for your deployment.
 
 <table class="custom-table">
   <thead>
@@ -119,45 +120,31 @@ You might have specific setups for your application and your SigNoz cluster. It�
 4. The grid uses OTLP/gRPC (4317). If you prefer OTLP/HTTP, use port 4318 accordingly.
 </Admonition>
 
-<Admonition type="warning" title="Using HTTPS/TLS">
-  For production, secure your endpoint with TLS via ingress or a reverse proxy. After enabling TLS,
-  use an `https://` endpoint (often on port 443) and ensure your SDKs/collectors trust the
-  certificate. See:{' '}
-  <a
-    href="https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    Secure SigNoz in Kubernetes
-  </a>
-</Admonition>
-
 ## Language SDK Configuration
 
 Most language SDKs honor the signal-agnostic environment variable `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
-If you are using the signal-agnostic variable, you can set:
+To configure with the signal-agnostic variable, set:
 
 ```bash
-# gRPC (recommended)
+# gRPC
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 OTEL_EXPORTER_OTLP_ENDPOINT=http://<signoz-host>:4317
 
-# OR HTTP/protobuf
+# HTTP/protobuf
 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 OTEL_EXPORTER_OTLP_ENDPOINT=http://<signoz-host>:4318
 
 # Common tuning
 OTEL_EXPORTER_OTLP_COMPRESSION=gzip
-OTEL_EXPORTER_OTLP_TIMEOUT=30000   # 30s
-OTEL_EXPORTER_OTLP_INSECURE=true   # when not using TLS
+OTEL_EXPORTER_OTLP_TIMEOUT=30000   # 30s in milliseconds
 ```
 
 When using OTLP/HTTP and the signal-agnostic endpoint, SDKs automatically append the correct path (for example, `/v1/traces`, `/v1/metrics`, `/v1/logs`). For language-specific instructions, see the <a href="https://signoz.io/docs/instrumentation/" target="_blank" rel="noopener noreferrer">instrumentation docs</a>.
 
 ## OpenTelemetry Collector Configuration
 
-If you run your own collector (agent or gateway) and want to forward to SigNoz, set the OTLP exporter to point at your SigNoz collector:
+To forward from your own collector to SigNoz, configure the OTLP exporter:
 
 ```yaml:/deploy/docker/otel-collector-config.yaml
 exporters:
@@ -192,7 +179,6 @@ service:
   `https://`, you can add a `tls` section (e.g., to trust custom CAs) and set `insecure: false`.
 </Admonition>
 
-This configures an OpenTelemetry Collector to forward telemetry to your SigNoz instance.
 Replace the placeholders:
 
 - `<signoz-host>`: Hostname or IP of your SigNoz OTLP endpoint
@@ -202,19 +188,53 @@ Read more: <a href="https://signoz.io/docs/opentelemetry-collection-agents/opent
 
 ## Authentication
 
-No ingestion keys are required for self-hosted SigNoz. If you need authentication, place SigNoz behind a reverse proxy (nginx/Traefik/HAProxy) or Kubernetes ingress and enforce TLS and auth there.
+Self-hosted SigNoz requires no ingestion keys. For authentication, place SigNoz behind a reverse proxy (nginx/Traefik/HAProxy) or Kubernetes ingress and enforce TLS and auth there.
 
-## Best Practices
+## Important Considerations
 
-- Prefer OTLP/gRPC where possible (better performance, backpressure) and OTLP/HTTP for browser-based telemetry.
-- Enable compression to reduce bandwidth and improve reliability. SDKs: `OTEL_EXPORTER_OTLP_COMPRESSION=gzip`. Collectors: `compression: gzip` on exporters.
-- Configure retries and queueing (Collector) for resilience. Use `retry_on_failure` and `sending_queue`. Refer to the recommended defaults below.
-- Tune timeouts. For SDKs, use `OTEL_EXPORTER_OTLP_TIMEOUT`. For collectors, adjust `exporters -> otlp -> timeout` based on payload size and network.
-- Watch payload size limits. gRPC receivers/exporters enforce limits (e.g., `max_recv_msg_size_mib` is set to 16MB). Increase if needed. See examples in <a href="https://signoz.io/docs/install/linux/" target="_blank" rel="noopener noreferrer">Linux install</a> and <a href="https://signoz.io/docs/install/azure-container-apps/" target="_blank" rel="noopener noreferrer">Azure Container Apps</a>.
-- For frontend/browser telemetry, explicitly enable CORS on the OTLP/HTTP receiver. See <a href="https://signoz.io/docs/userguide/otlp-http-enable-cors/" target="_blank" rel="noopener noreferrer">CORS in OTLP HTTP Receiver</a>.
-- Use TLS in production via ingress or reverse proxy; update SDKs and collectors to trust the certificates.
+### Payload Size
 
-Recommended exporter defaults:
+The OTLP/gRPC receiver enforces a configurable max receive message size. If you hit `ResourceExhausted` errors on large payloads, increase `max_recv_msg_size_mib` under the `grpc` receiver in your collector config:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        max_recv_msg_size_mib: 16
+```
+
+OTLP/HTTP payload limits are controlled by the HTTP server layer and configured separately.
+
+### CORS
+
+CORS is off by default for all origins. The default Docker config explicitly allows only `http://localhost:8080` and `http://localhost:8081` — every other origin, including other localhost ports, is blocked by browsers.
+
+To allow browser telemetry from your app's origin, add it to `allowed_origins` in your OTLP/HTTP receiver config:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        cors:
+          allowed_origins:
+            - https://your-app.example.com
+```
+
+See <a href="https://signoz.io/docs/userguide/otlp-http-enable-cors/" target="_blank" rel="noopener noreferrer">CORS in OTLP HTTP Receiver</a> for Docker and Kubernetes instructions.
+
+### Compression
+
+Enable gzip compression to reduce bandwidth. SDKs: set `OTEL_EXPORTER_OTLP_COMPRESSION=gzip`. Collectors: set `compression: gzip` on each exporter.
+
+### Timeouts
+
+For SDKs, set `OTEL_EXPORTER_OTLP_TIMEOUT` in milliseconds (e.g., `30000` for 30s). For collectors, tune `exporters -> otlp -> timeout` to match your payload size and network.
+
+### Retries and Queueing
+
+For Collector deployments, configure `retry_on_failure` and `sending_queue` to reduce data loss on transient failures:
 
 ```yaml:/etc/otelcol/config.yaml
 exporters:
@@ -232,14 +252,30 @@ exporters:
       queue_size: 1000
 ```
 
+SDKs expose signal-specific env vars for batch export tuning:
+
+- `OTEL_BSP_*` — batch span processor (traces)
+- `OTEL_METRIC_EXPORT_*` — metric export interval and timeout
+- `OTEL_BLRP_*` — batch log record processor (logs)
+
+See the <a href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry SDK environment variables spec</a> for all options.
+
+### Protocol Choice
+
+OTLP/gRPC (port 4317) offers better performance and backpressure handling for server-side telemetry. OTLP/HTTP (port 4318) is simpler to configure, easier to debug, and required for browser-based telemetry where gRPC is not supported.
+
+### TLS in Production
+
+Secure your endpoint with TLS via ingress or a reverse proxy. After enabling TLS, use `https://` endpoints and ensure your SDKs and collectors trust the certificate. See: <a href="https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/" target="_blank" rel="noopener noreferrer">Secure SigNoz in Kubernetes</a>.
+
 ## Troubleshooting
 
 If data doesn’t appear in SigNoz:
 
 - Verify connectivity to `4317` (gRPC) or `4318` (HTTP)
-- Double-check OTLP endpoints and protocol in your SDK/collector
-- Review application and collector logs for export errors
-- Confirm network/firewall/DNS reachability
-- Refer to the Address Grid above to verify the correct endpoint and port.
+- Check OTLP endpoints and protocol in your SDK/collector config
+- Check application and collector logs for export errors
+- Verify network/firewall/DNS reachability
+- See the Address Grid above to confirm the correct endpoint and port.
 
-If you are migrating an existing OpenTelemetry setup to SigNoz, see: <a href="https://signoz.io/docs/migration/migrate-from-opentelemetry/self-hosted/" target="_blank" rel="noopener noreferrer">Migrate from existing OpenTelemetry to Self-Hosted SigNoz</a>.
+Migrating from an existing OpenTelemetry setup? See: <a href="https://signoz.io/docs/migration/migrate-from-opentelemetry-to-signoz/" target="_blank" rel="noopener noreferrer">Migrate from existing OpenTelemetry to Self-Hosted SigNoz</a>.
