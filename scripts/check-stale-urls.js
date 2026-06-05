@@ -262,9 +262,132 @@ function getAllFiles() {
   return files
 }
 
+function computeReplacement(rawUrl, redirectMap) {
+  const normalized = normalizeForRedirectMatch(rawUrl)
+  if (!normalized) return null
+
+  const withSlash = normalizeTrailingSlash(normalized)
+  const withoutSlash = withSlash.endsWith('/') ? withSlash.slice(0, -1) : withSlash
+  const finalDest = redirectMap.get(withSlash) || redirectMap.get(withoutSlash)
+
+  if (finalDest) {
+    const sigNozPrefix = 'https://signoz.io'
+    let pathPart = rawUrl
+    let prefix = ''
+    if (rawUrl.startsWith(sigNozPrefix)) {
+      prefix = sigNozPrefix
+      pathPart = rawUrl.slice(sigNozPrefix.length)
+    }
+
+    const hashIdx = pathPart.indexOf('#')
+    const queryIdx = pathPart.indexOf('?')
+    let suffix = ''
+    if (hashIdx !== -1) suffix = pathPart.slice(hashIdx)
+    else if (queryIdx !== -1) suffix = pathPart.slice(queryIdx)
+
+    let dest = finalDest
+    if (dest.includes('#')) {
+      const [destPath, destFragment] = dest.split('#')
+      dest = (destPath.endsWith('/') ? destPath : destPath + '/') + '#' + destFragment
+    } else if (!dest.endsWith('/')) {
+      dest += '/'
+    }
+    return prefix + dest + suffix
+  }
+
+  // Anchor trailing slash fix
+  const internalPath = stripSigNozPrefix(rawUrl)
+  if (internalPath && internalPath.startsWith('/')) {
+    const hashIdx = internalPath.indexOf('#')
+    if (hashIdx !== -1) {
+      const fragment = internalPath.slice(hashIdx + 1).split('?')[0]
+      if (fragment.endsWith('/')) {
+        const pathBefore = internalPath.slice(0, hashIdx)
+        const cleanFragment = fragment.slice(0, -1)
+        const sigNozPrefix = 'https://signoz.io'
+        const prefix = rawUrl.startsWith(sigNozPrefix) ? sigNozPrefix : ''
+        return (
+          prefix + (pathBefore.endsWith('/') ? pathBefore : pathBefore + '/') + '#' + cleanFragment
+        )
+      }
+    }
+  }
+
+  // Trailing slash fix
+  if (!isExemptFromTrailingSlash(normalized) && !normalized.endsWith('/')) {
+    const sigNozPrefix = 'https://signoz.io'
+    let urlToFix = rawUrl
+    let prefix = ''
+    if (urlToFix.startsWith(sigNozPrefix)) {
+      prefix = sigNozPrefix
+      urlToFix = urlToFix.slice(sigNozPrefix.length)
+    }
+
+    const hashIdx = urlToFix.indexOf('#')
+    const queryIdx = urlToFix.indexOf('?')
+    let pathPart = urlToFix
+    let suffix = ''
+    if (hashIdx !== -1) {
+      suffix = urlToFix.slice(hashIdx)
+      pathPart = urlToFix.slice(0, hashIdx)
+    } else if (queryIdx !== -1) {
+      suffix = urlToFix.slice(queryIdx)
+      pathPart = urlToFix.slice(0, queryIdx)
+    }
+
+    if (!pathPart.endsWith('/')) {
+      return prefix + pathPart + '/' + suffix
+    }
+  }
+
+  return null
+}
+
+function fixFile(filePath, content, redirectMap) {
+  const urls = extractUrls(content, filePath)
+  if (urls.length === 0) return null
+
+  const lineReplacements = new Map()
+  for (const { url, line } of urls) {
+    const replacement = computeReplacement(url, redirectMap)
+    if (replacement && replacement !== url) {
+      if (!lineReplacements.has(line)) lineReplacements.set(line, [])
+      lineReplacements.get(line).push({ from: url, to: replacement })
+    }
+  }
+
+  if (lineReplacements.size === 0) return null
+
+  const lines = content.split('\n')
+  let fixCount = 0
+  for (const [lineNum, replacements] of lineReplacements) {
+    let line = lines[lineNum - 1]
+    const sorted = [...replacements].sort((a, b) => b.from.length - a.from.length)
+    for (const { from, to } of sorted) {
+      let idx = line.indexOf(from)
+      while (idx !== -1) {
+        const afterIdx = idx + from.length
+        const charAfter = afterIdx < line.length ? line[afterIdx] : ''
+        const isSubstring = charAfter && /[a-zA-Z0-9_\-]/.test(charAfter)
+        if (!isSubstring) {
+          line = line.slice(0, idx) + to + line.slice(afterIdx)
+          fixCount++
+          idx = line.indexOf(from, idx + to.length)
+        } else {
+          idx = line.indexOf(from, afterIdx)
+        }
+      }
+    }
+    lines[lineNum - 1] = line
+  }
+
+  return fixCount > 0 ? { content: lines.join('\n'), fixCount } : null
+}
+
 function main() {
   const args = process.argv.slice(2)
   const staged = args.includes('--staged')
+  const fix = args.includes('--fix')
 
   const redirects = readRedirects({ staged })
   const redirectMap = buildRedirectMap(redirects)
@@ -278,6 +401,44 @@ function main() {
 
   if (files.length === 0) {
     console.log('No relevant files to check.')
+    return
+  }
+
+  if (fix) {
+    let totalFixes = 0
+    let filesFixed = 0
+    const fixedFiles = []
+
+    for (const filePath of files) {
+      let content
+      try {
+        content = fs.readFileSync(filePath, 'utf8')
+      } catch {
+        continue
+      }
+
+      const result = fixFile(filePath, content, redirectMap)
+      if (result) {
+        fs.writeFileSync(filePath, result.content, 'utf8')
+        filesFixed++
+        totalFixes += result.fixCount
+        fixedFiles.push(filePath)
+        console.log(`  Fixed ${filePath} (${result.fixCount} replacement(s))`)
+      }
+    }
+
+    if (filesFixed === 0) {
+      console.log('No stale URLs to fix.')
+      return
+    }
+
+    // Re-stage fixed files if running in staged mode
+    if (staged && fixedFiles.length > 0) {
+      execFileSync('git', ['add', ...fixedFiles])
+      console.log(`\nAuto-fixed and re-staged ${totalFixes} URL(s) in ${filesFixed} file(s).`)
+    } else {
+      console.log(`\nFixed ${totalFixes} URL(s) in ${filesFixed} file(s).`)
+    }
     return
   }
 
