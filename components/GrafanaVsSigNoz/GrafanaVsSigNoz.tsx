@@ -19,7 +19,7 @@ export default function GrafanaVsSigNoz() {
           <div className="flex flex-col gap-4 sm:flex-row">
             <Link
               id="grafana-vs-signoz-compare-button"
-              href="/product-comparison/signoz-vs-grafana/"
+              href="/grafana-alternative/"
               className="flex items-center gap-2 no-underline"
             >
               <Button type={Button.TYPES.SECONDARY}>

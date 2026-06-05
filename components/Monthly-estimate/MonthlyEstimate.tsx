@@ -387,7 +387,7 @@ const MonthlyEstimate = () => {
         </div>
         <div className="mt-3 flex justify-end">
           <TrackingLink
-            href="/teams"
+            href="/teams/"
             clickType="Primary CTA"
             clickName="Sign Up Button"
             clickText="Get Started - Free"

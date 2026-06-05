@@ -101,7 +101,7 @@ function MainMenuContent({
     <div className="space-y-2 py-8">
       <Accordion topic="Product" subtopics={productDropdownItemsSorted} onLinkClick={onClose} />
       <TrackingLink
-        href="/docs"
+        href="/docs/introduction/"
         className={MOBILE_LINK_CLASS}
         clickType="Nav Click"
         clickName="Docs Link"
@@ -124,7 +124,7 @@ function MainMenuContent({
         onLinkClick={onClose}
       />
       <TrackingLink
-        href="/pricing"
+        href="/pricing/"
         className={MOBILE_LINK_CLASS}
         clickType="Nav Click"
         clickName="Pricing Link"
@@ -135,7 +135,7 @@ function MainMenuContent({
         Pricing
       </TrackingLink>
       <TrackingLink
-        href="/case-study"
+        href="/case-study/"
         className={MOBILE_LINK_CLASS}
         clickType="Nav Click"
         clickName="Customer Stories Link"
@@ -167,7 +167,7 @@ function MainMenuContent({
           </TrackingButton>
 
           <TrackingLink
-            href="/teams"
+            href="/teams/"
             clickType="Primary CTA"
             clickName="Sign Up Button"
             clickText="Get Started - Free"

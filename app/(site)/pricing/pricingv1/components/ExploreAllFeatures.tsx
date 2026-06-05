@@ -40,7 +40,7 @@ const ALL_FEATURES_DATA = {
       desc: 'Install & manage yourself',
       action: (
         <TrackingLink
-          href={'/docs/introduction'}
+          href={'/docs/introduction/'}
           className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
           clickType="Secondary CTA"
           clickName="Docs Link"

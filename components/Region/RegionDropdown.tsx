@@ -68,7 +68,7 @@ export const RegionDropdown = () => {
         Applies to code snippets on this page (and other Cloud docs pages).
       </div>
       <Link
-        href="/docs/ingestion/signoz-cloud/overview#endpoint"
+        href="/docs/ingestion/signoz-cloud/overview/#endpoint"
         className="text-xs text-signoz_robin-500"
         prefetch={false}
       >

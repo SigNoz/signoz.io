@@ -40,7 +40,7 @@ const StartupProgram = () => {
               </div>
               <div>
                 <TrackingLink
-                  href="/startups"
+                  href="/startups/"
                   target="_blank"
                   clickType="Primary CTA"
                   clickName="Startup Program Link"
