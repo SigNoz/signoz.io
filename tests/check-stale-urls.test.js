@@ -86,11 +86,11 @@ test('extractUrls normalizes https://signoz.io prefix via normalizeForRedirectMa
   assert.equal(normalizeForRedirectMatch('/local/path/'), '/local/path/')
 })
 
-test('checkUrl detects stale redirect source URLs', () => {
+test('checkUrl detects stale redirect source URLs', async () => {
   const { checkUrl, buildRedirectMap, readRedirects } = loadScript()
   const restoreCwd = enterFixture('stale-urls')
   try {
-    const redirects = readRedirects()
+    const redirects = await readRedirects()
     const redirectMap = buildRedirectMap(redirects)
     const issues = checkUrl('/old-page/', redirectMap)
     assert.equal(issues.length, 1)
@@ -101,11 +101,11 @@ test('checkUrl detects stale redirect source URLs', () => {
   }
 })
 
-test('checkUrl resolves redirect chains to final destination', () => {
+test('checkUrl resolves redirect chains to final destination', async () => {
   const { checkUrl, buildRedirectMap, readRedirects } = loadScript()
   const restoreCwd = enterFixture('stale-urls')
   try {
-    const redirects = readRedirects()
+    const redirects = await readRedirects()
     const redirectMap = buildRedirectMap(redirects)
     const issues = checkUrl('/chain-a/', redirectMap)
     assert.equal(issues.length, 1)
@@ -168,11 +168,11 @@ test('checkUrl does not flag valid URL with trailing slash', () => {
   assert.equal(issues.length, 0)
 })
 
-test('checkUrl handles signoz.io URLs for stale detection', () => {
+test('checkUrl handles signoz.io URLs for stale detection', async () => {
   const { checkUrl, buildRedirectMap, readRedirects } = loadScript()
   const restoreCwd = enterFixture('stale-urls')
   try {
-    const redirects = readRedirects()
+    const redirects = await readRedirects()
     const redirectMap = buildRedirectMap(redirects)
     const issues = checkUrl('https://signoz.io/old-page/', redirectMap)
     assert.equal(issues.length, 1)
