@@ -1,5 +1,5 @@
 ---
-date: 2026-06-04
+date: 2026-06-05
 id: k8s-jobs
 title: Jobs
 description: Monitor Kubernetes job status and resource usage in SigNoz — active, successful, and failed pod counts with CPU and memory metrics.
@@ -115,13 +115,13 @@ Click a Job name to open the detail page. The header shows **Job Name**, **Clust
 #### CPU Usage
 
 - This chart relies on the OTel metric `k8s.pod.cpu.usage` from the kubeletstats receiver, summed across the Job's pods.
-- Plots a single line: the Job's total CPU consumption in CPU-core units over time.
+- Plots a single line: the Job's CPU consumption in CPU-core units (averaged within each step interval, summed across the Job's pods).
 - Use this to see when the Job is most CPU-intensive over its lifetime — sustained-high segments are candidates for tightening `limits.cpu` (if you want to throttle) or raising it (if the Job is throttled and running slow); pair with the `CPU Limit Usage (%)` column on the list page. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
 
 #### Memory Usage
 
 - This chart relies on the OTel metric `k8s.pod.memory.usage` from the kubeletstats receiver, summed across the Job's pods.
-- Plots a single line: the Job's total memory consumption in bytes over time. Note this uses `k8s.pod.memory.usage` (which includes reclaimable page cache), so it reads higher than the working-set value the kubelet uses for OOM decisions.
+- Plots a single line: the Job's memory consumption in bytes (averaged within each step interval, summed across the Job's pods). Note this uses `k8s.pod.memory.usage` (which includes reclaimable page cache), so it reads higher than the working-set value the kubelet uses for OOM decisions.
 - Use this with the `Mem Limit Usage (%)` column on the list page — a slow upward climb across the Job's lifetime usually indicates a memory leak; a sudden spike usually correlates with a data-driven input change. ([Pod OOM behavior](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#kubelet-eviction-of-end-user-pods))
 
 #### Network IO
