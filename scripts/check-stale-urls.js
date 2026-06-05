@@ -4,25 +4,14 @@ const { execSync, execFileSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
-function readRedirects({ staged = false } = {}) {
-  let content
-  if (staged) {
-    try {
-      content = execFileSync('git', ['show', ':next.config.js'], { encoding: 'utf8' })
-    } catch {
-      const configPath = path.join(process.cwd(), 'next.config.js')
-      content = fs.readFileSync(configPath, 'utf8')
-    }
-  } else {
-    const configPath = path.join(process.cwd(), 'next.config.js')
-    content = fs.readFileSync(configPath, 'utf8')
-  }
-  const entries = []
-  const regex = /source:\s*['"]([^'"]+)['"][\s\S]*?destination:\s*['"]([^'"]+)['"]/g
-  for (const match of content.matchAll(regex)) {
-    entries.push({ source: match[1], destination: match[2] })
-  }
-  return entries
+async function readRedirects() {
+  const configPath = path.resolve(process.cwd(), 'next.config.js')
+  try {
+    delete require.cache[require.resolve(configPath)]
+  } catch {}
+  const configExport = require(configPath)
+  const config = typeof configExport === 'function' ? await configExport() : configExport
+  return config.redirects()
 }
 
 function buildRedirectMap(redirects) {
@@ -384,13 +373,13 @@ function fixFile(filePath, content, redirectMap) {
   return fixCount > 0 ? { content: lines.join('\n'), fixCount } : null
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2)
   const staged = args.includes('--staged')
   const fix = args.includes('--fix')
   const autoStage = args.includes('--stage-fixes')
 
-  const redirects = readRedirects({ staged })
+  const redirects = await readRedirects()
   const redirectMap = buildRedirectMap(redirects)
 
   if (redirectMap.size === 0) {
@@ -513,5 +502,8 @@ module.exports = {
 }
 
 if (require.main === module) {
-  main()
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
 }
