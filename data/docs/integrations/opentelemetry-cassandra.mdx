@@ -28,7 +28,7 @@ Ensure you have:
 
 - An Apache Cassandra node running version 3.11 or newer
 - A Java runtime (JRE 11 or newer) wherever you run the JMX Scraper, with network access to the Cassandra JMX port
-- For logs: an [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) (v0.88.0 or newer) that can read the Cassandra log files
+- For logs: an [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) that can read the Cassandra log files
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
 ## Set Up Telemetry
@@ -247,7 +247,8 @@ processors:
         action: upsert
 
 exporters:
-  otlphttp/cassandra:
+  # On collectors older than v0.144.0 use the otlphttp alias
+  otlp_http/cassandra:
     endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       "signoz-ingestion-key": "<your-ingestion-key>"
@@ -257,7 +258,7 @@ service:
     metrics/cassandra:
       receivers: [jmx/cassandra]
       processors: [resource/cassandra]
-      exporters: [otlphttp/cassandra]
+      exporters: [otlp_http/cassandra]
 ```
 
 Verify these values:
@@ -327,10 +328,9 @@ processors:
     timeout: 10s
 
 exporters:
-  otlp/cassandra-logs:
+  # On collectors older than v0.144.0 use the otlphttp alias
+  otlp_http/cassandra-logs:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
-    tls:
-      insecure: false
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
 
@@ -339,7 +339,7 @@ service:
     logs/cassandra:
       receivers: [filelog/cassandra]
       processors: [resource/cassandra, batch]
-      exporters: [otlp/cassandra-logs]
+      exporters: [otlp_http/cassandra-logs]
 ```
 
 <Admonition type="info">
@@ -355,7 +355,7 @@ Set the following environment variables:
 export CASSANDRA_LOG_FILE="/var/log/cassandra/system.log"
 
 # region specific SigNoz cloud ingestion endpoint
-export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
 export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
