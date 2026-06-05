@@ -312,7 +312,7 @@ const DatadogPricingCalculator = () => {
             Discover how SigNoz offers comparable features with significant cost savings.
           </p>
           <a
-            href="/datadog-alternative/"
+            href="/product-comparison/signoz-vs-datadog/"
             style={{ color: 'white', textDecoration: 'none' }}
             className="mt-2 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors duration-300 hover:bg-blue-700"
           >

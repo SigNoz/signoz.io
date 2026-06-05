@@ -20,7 +20,7 @@ export default function NewRelicVsSigNoz() {
             <Button>
               <a
                 id="newrelic-vs-signoz-compare-button"
-                href="/newrelic-alternative/"
+                href="/product-comparison/signoz-vs-newrelic/"
                 style={{ textDecoration: 'none', color: 'inherit' }}
                 className="flex items-center gap-2"
               >

@@ -57,7 +57,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
           clickName="Docs Link"
           clickLocation="focused_navbar"
           clickText="Documentation"
-          href="/docs/introduction/"
+          href="/docs"
           className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
@@ -82,7 +82,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
           clickName="Docs Link"
           clickLocation="focused_navbar"
           clickText="Docs"
-          href="/docs/introduction/"
+          href="/docs"
           className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
