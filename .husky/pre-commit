@@ -22,9 +22,12 @@ else
   echo 'husky (pre-commit): skipping docs metadata check (no documentation changes staged)'
 fi
 
-# Check for stale/redirected URLs
-if printf '%s\n' "$STAGED_FILES" | grep -E '^(components/|app/|constants/|hooks/|utils/|data/).*\.(tsx|ts|jsx|js|mdx)$' >/dev/null; then
-  echo 'husky (pre-commit): auto-fixing stale/redirected URLs'
+# Auto-fix stale/redirected URLs
+if printf '%s\n' "$STAGED_FILES" | grep -qE '^next\.config\.js$'; then
+  echo 'husky (pre-commit): next.config.js changed — scanning all files for stale URLs'
+  node scripts/check-stale-urls.js --fix --all --stage-fixes
+elif printf '%s\n' "$STAGED_FILES" | grep -qE '^(components/|app/|constants/|hooks/|utils/|data/).*\.(tsx|ts|jsx|js|mdx)$'; then
+  echo 'husky (pre-commit): auto-fixing stale/redirected URLs in staged files'
   node scripts/check-stale-urls.js --fix --staged
 else
   echo 'husky (pre-commit): skipping stale URL check (no relevant changes staged)'
