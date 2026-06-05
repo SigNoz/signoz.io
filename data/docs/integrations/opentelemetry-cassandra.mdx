@@ -214,7 +214,19 @@ spec:
           configMap: { name: scraper-config }
 ```
 
-Run Cassandra with `-Djava.rmi.server.hostname` set to the pod IP (via the downward API) so the scraper can follow the RMI stub to the Cassandra pod. Apply the manifests:
+Run Cassandra with `-Djava.rmi.server.hostname` set to the pod IP via the downward API, so the scraper can follow the RMI stub to the Cassandra pod. Add this to the Cassandra container spec (alongside the JMX flags from Step 1):
+
+```yaml
+env:
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+  - name: JVM_EXTRA_OPTS
+    value: "-Djava.rmi.server.hostname=$(POD_IP)"
+```
+
+Apply the manifests:
 
 ```bash
 kubectl apply -f cassandra-scraper.yaml
@@ -303,6 +315,7 @@ receivers:
           overwrite_text: true
           mapping:
             debug: DEBUG
+            trace: TRACE
             info: INFO
             warn: WARN
             error: ERROR
@@ -398,7 +411,7 @@ Once your application sends traces, the query spans appear under your service in
 After you start the scraper and the Collector, confirm each signal arrives.
 
 1. Check the JMX Scraper logs for **JMX scraping started**.
-2. **Metrics:** Open **Metrics** in SigNoz and search for metrics starting with `cassandra_` (for example `cassandra_client_request_read_latency_99p`) and `jvm_`.
+2. **Metrics:** Open **Metrics** in SigNoz and search for metrics starting with `cassandra.` (for example `cassandra.client.request.error.count`) and `jvm.`.
 3. **Logs:** Open the **Logs** explorer and add filter **service.name = cassandra**.
 4. **Traces:** Open the **Traces** explorer and filter on your instrumented service to find Cassandra query spans.
 
@@ -420,7 +433,7 @@ After you start the scraper and the Collector, confirm each signal arrives.
 ## Troubleshooting
 </ToggleHeading>
 
-**JMX scraper logs `Connection refused`, or no `cassandra_*` metrics appear**
+**JMX scraper logs `Connection refused`, or no `cassandra.*` metrics appear**
 - Confirm Cassandra started with `LOCAL_JMX=no` and JMX listening on port 7199.
 - Confirm the scraper host reaches `<cassandra-host>:7199` (check firewalls and security groups).
 - Set `java.rmi.server.hostname` on Cassandra to an address the scraper can resolve; the RMI stub points there.
