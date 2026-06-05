@@ -1,7 +1,7 @@
 ---
-date: 2026-06-04
+date: 2026-06-05
 title: Setup Kubernetes Metrics with OpenTelemetry
-description: Setup Kubernetes monitoring with OpenTelemetry kubeletstats and k8scluster receivers. Track node, pod, container, and volume metrics in SigNoz dashboards.
+description: Configure the OpenTelemetry kubeletstats and k8scluster receivers (plus k8sattributesprocessor) on top of a running Kubernetes Collection Agent to track node, pod, container, and volume metrics in SigNoz.
 doc_type: howto
 id: k8s-metrics
 ---
@@ -12,6 +12,16 @@ This guide explains how to set up monitoring for your Kubernetes cluster using t
 
 - [`kubeletstats`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md): Collects metrics from individual Kubernetes nodes
 - [`k8scluster`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md): Gathers cluster-wide metrics
+
+## Before you start: install the Kubernetes Collection Agent
+
+Make sure you have an OpenTelemetry Collector running in your cluster. Pick the install guide that matches your setup:
+
+- **Standard Kubernetes** → [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) — Helm chart that already wires `kubeletstats`, `k8scluster`, and `k8sattributes`.
+- **EKS Fargate / GKE Autopilot / AKS Virtual Nodes** → [Serverless Kubernetes Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) — for managed clusters that block kubelet scraping on worker nodes.
+- **OpenTelemetry Operator** → [OTel Operator Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/) — if you're already managing collectors via the OpenTelemetry Operator.
+
+Every install path ships a config that already includes the receivers and processors covered below. The sections that follow explain the receiver / processor options so you can adjust the shipped config for your needs.
 
 ### Setup Kubelet Stats Receiver
 
