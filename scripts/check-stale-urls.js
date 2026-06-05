@@ -388,6 +388,7 @@ function main() {
   const args = process.argv.slice(2)
   const staged = args.includes('--staged')
   const fix = args.includes('--fix')
+  const autoStage = args.includes('--stage-fixes')
 
   const redirects = readRedirects({ staged })
   const redirectMap = buildRedirectMap(redirects)
@@ -432,8 +433,8 @@ function main() {
       return
     }
 
-    // Re-stage fixed files if running in staged mode
-    if (staged && fixedFiles.length > 0) {
+    // Re-stage fixed files when called from pre-commit
+    if ((staged || autoStage) && fixedFiles.length > 0) {
       execFileSync('git', ['add', ...fixedFiles])
       console.log(`\nAuto-fixed and re-staged ${totalFixes} URL(s) in ${filesFixed} file(s).`)
     } else {
