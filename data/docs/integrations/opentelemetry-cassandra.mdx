@@ -19,7 +19,7 @@ You collect three signals here:
 - **Traces:** Cassandra driver spans from your application through OpenTelemetry instrumentation.
 
 <Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-  Self-hosted setup differs only in the OTLP endpoint and the removed ingestion-key header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
 ## Prerequisites
@@ -78,7 +78,7 @@ otel.metric.export.interval=30s
 otel.service.name=cassandra
 ```
 
-Setting `target_system` to `cassandra,jvm` collects both Cassandra request and compaction metrics and the underlying JVM metrics (heap, threads, GC). Set `<cassandra-host>` to the address or service name the scraper uses to reach Cassandra's JMX port
+Setting `otel.jmx.target.system` to `cassandra,jvm` collects both Cassandra request and compaction metrics and the underlying JVM metrics (heap, threads, GC). Set `<cassandra-host>` to the address or service name the scraper uses to reach Cassandra's JMX port.
 
 Pick your environment:
 
@@ -247,10 +247,8 @@ processors:
         action: upsert
 
 exporters:
-  otlp/cassandra:
-    endpoint: "ingest.<region>.signoz.cloud:443"
-    tls:
-      insecure: false
+  otlphttp/cassandra:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       "signoz-ingestion-key": "<your-ingestion-key>"
 
@@ -259,7 +257,7 @@ service:
     metrics/cassandra:
       receivers: [jmx/cassandra]
       processors: [resource/cassandra]
-      exporters: [otlp/cassandra]
+      exporters: [otlphttp/cassandra]
 ```
 
 Verify these values:
@@ -274,7 +272,7 @@ Then start the Collector with `--config cassandra-metrics-collection-config.yaml
 </TabItem>
 <TabItem value="logs" label="Logs">
 
-Cassandra writes its operational logs to `system.log`. The OpenTelemetry Collector filelog receiver tails this file and forwards the entries to SigNoz.
+Cassandra writes its operational logs to `system.log`. The OpenTelemetry Collector filelog receiver tails this file and forwards the entries to SigNoz. If you do not already run a Collector on the Cassandra host, [install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) first.
 
 ### Step 1: Create the Collector Config File
 
