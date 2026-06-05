@@ -1,11 +1,11 @@
 ---
 title: OTel-Native by Design - Building Backends That Export to Any Observability Stack
-date: 2026-03-13
+date: 2026-06-05
 tags: [OpenTelemetry, Engineering]
 authors: [nitya, dhruv_ahuja]
 description: Learn how to design an OTel-native backend that seamlessly exports logs, traces, and metrics to any observability stack via OTLP.
 image: /img/blog/2026/03/otel-native-by-design.webp
-keywords: [opentelemetry,observability,instrumentation,telemetry,saas,product]
+keywords: [opentelemetry,observability,instrumentation,telemetry,saas,product,otel-native, opentelemetry design, observability architecture]
 related_articles:
   - '/blog/what-is-opentelemetry'
   - '/blog/opentelemetry-architecture'
@@ -98,9 +98,9 @@ For example, sending traces to an OTel backend looks like this:
 ```yaml
 # MeshTrace policy
 backends:
--type: OpenTelemetry
-openTelemetry:
-endpoint: otel-collector:4317
+  - type: OpenTelemetry
+    openTelemetry:
+      endpoint: otel-collector:4317
 ```
 
 Sending access logs follows the exact same pattern with a different policy:
@@ -108,18 +108,19 @@ Sending access logs follows the exact same pattern with a different policy:
 ```yaml
 # MeshAccessLog policy
 backends:
--type: OpenTelemetry
-openTelemetry:
-endpoint: otel-collector:4317
+  - type: OpenTelemetry
+    openTelemetry:
+      endpoint: otel-collector:4317
 body:
-kvlistValue:
-values:
--key:"mesh"
-value:
-stringValue:"%KUMA_MESH%"
+  kvlistValue:
+    values:
+      - key: mesh
+        value:
+          stringValue: "%KUMA_MESH%"
 attributes:
--key:"start_time"
-value:"%START_TIME%"
+  - key: start_time
+    value:
+      stringValue: "%START_TIME%"
 ```
 
 Further reading:
@@ -138,7 +139,7 @@ It uses a single telemetry endpoint but provides granular flags to toggle specif
 
 - **Traces:** `tracing-enabled=true` (covers HTTP requests, DB, LDAP, outbound HTTP/IdP).
 - **Metrics:** Detailed metrics exposed via the same OTel integration.
-- **Logs:** Currently in preview, disabled by default  (`features=opentelemetry-logs --telemetry-logs-enabled=true`, with `-telemetry-logs-level` for level filtering.
+- **Logs:** Currently in preview and disabled by default (`--features=opentelemetry-logs --telemetry-logs-enabled=true`, with `--telemetry-logs-level` for level filtering).
 
 Defining the endpoint, optional headers, and preferred protocol (gRPC or HTTP) looks like:
 
@@ -152,7 +153,7 @@ Further reading:
 
 <KeyPointCallout title="The Common Design Pattern">
 
-The recurring theme between either deployment modes is clear: **push-based export using OTel/OTLP is the gold standard**.
+The recurring theme across both deployment modes is clear: **push-based export using OTel/OTLP is the gold standard**.
 Some products expose one endpoint for all three signals (Keycloak—typical OTLP setup), whereas others let users pick which signals to send (Heroku’s `--signals`).
 
 Natively supporting all telemetry signals gives your users the ultimate flexibility to build a complete picture in their backend of choice.
@@ -185,7 +186,7 @@ Heroku’s platform then gathers data from both the user’s application (via th
 heroku telemetry:add <endpoint> --app <app-name> --signals traces,metrics,logs --transport http --headers '{"Authorization": "ingestion key"}'
 ```
 
-Giving users granular control over whether the signals to export is a fantastic design pattern, especially for teams looking to manage data volume and ingestion costs.
+Giving users granular control over which signals to export is a fantastic design pattern, especially for teams looking to manage data volume and ingestion costs.
 
 Further reading:
 
@@ -203,7 +204,7 @@ In a pull-based setup, you expose an API for your telemetry. The user’s observ
 
 **Where it works**
 
-If you already have mature, well-tested APIs for logs or metrics, this design becomes relatively easy to setup. It also means you don't have to manage continuous outbound traffic from your infrastructure.
+If you already have mature, well-tested APIs for logs or metrics, this design becomes relatively easy to set up. It also means you don't have to manage continuous outbound traffic from your infrastructure.
 
 **Where it hurts**
 
@@ -282,7 +283,7 @@ Beyond just OTel-based environment variables, make sure you maintain consistent 
 When a user ingests your telemetry into their observability backend, everything should *knit together* to tell the complete story.
 
 The best part of this approach is that you avoid the need to build different vendor integrations. By exporting telemetry via OTLP, you enable users to transform and ingest it in their desired formats.<br />
-For example, a user might wish to forward logs to their backend and to an object store like S3 for meeting compliance requirements.
+For example, a user might wish to forward logs to their backend and to an object store like S3 to meet compliance requirements.
 
 ## Routing Telemetry to the User
 
@@ -290,7 +291,7 @@ As you design the configuration UI for your users, you’ll need to decide how g
 
 **Single Endpoint**
 
-For the mast majority of users, a single endpoint configuration is ideal. Here, the user inputs one base URL, and your exporter appends the standard OTLP paths (`v1/traces`, `v1/metrics`, and `v1/logs` ) internally.
+For the vast majority of users, a single endpoint configuration is ideal. Here, the user inputs one base URL, and your exporter appends the standard OTLP paths (`v1/traces`, `v1/metrics`, and `v1/logs`) internally.
 
 **Per-Signal Endpoints**
 
@@ -299,9 +300,9 @@ Large-scale customers, or those managing complex observability setups, may wish 
 OTLP natively supports this with signal-specific variables defined by the `OTEL_EXPORTER_<SIGNAL>_ENDPOINT` pattern, along with corresponding header configurations.
 For example, to configure a specific endpoint for logs, you would use the `OTEL_EXPORTER_LOGS_ENDPOINT`.
 
-Exposing this per-signal routing in your application is technically optional, but it is massive value add-on for advanced users.
+Exposing this per-signal routing in your application is technically optional, but it is a major value-add for advanced users.
 
-## Runnings Collectors to Manage Multi-Tenancy
+## Running Collectors to Manage Multi-Tenancy
 
 Once you’re pushing OTLP (for any combination of logs, traces, metrics), you still need to decide how to run Collectors to manage multiple tenants.
 
@@ -310,7 +311,7 @@ Your Collector architecture needs to handle two dimensions of growth: onboarding
 ### One Collector per Tenant
 
 If your architecture already isolates tenants at the infrastructure level, you can deploy a dedicated Collector instance for each customer. In this case, every instance has a dedicated configuration pointing directly to that specific customer’s export endpoint.<br />
-This provides strong logical isolation guarantees. Slowdowns or mis-configurations in one customer’s pipeline do not affect other customers.
+This provides strong logical isolation guarantees. Slowdowns or misconfigurations in one customer’s pipeline do not affect other customers.
 
 Although you can [optimize the Collector binary](https://signoz.io/blog/opentelemetry-collector-contrib/) by only shipping vital components, deploying hundreds or thousands of Collector instances will become resource-intensive.
 
@@ -322,7 +323,7 @@ Given this limitation, this architecture is usually the best fit for enterprise 
 
 In this architecture, all your platform’s telemetry funnels into a single, centralized Collector. Inside, you define separate pipelines per tenant, ensuring that the data gets routed to the correct external endpoint.
 
-This pattern is desirable for smaller-scale teams because it much simpler to operate compared to the Collector-per-tenant architecture. You only have to monitor and scale one deployment, and all routing is configured in one place.
+This pattern is desirable for smaller-scale teams because it is much simpler to operate compared to the Collector-per-tenant architecture. You only have to monitor and scale one deployment, and all routing is configured in one place.
 
 However, you must be comfortable managing a growing dynamic configuration file as your customer base grows.
 
