@@ -4,8 +4,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useRegion } from './RegionContext'
 import { Copy, CheckCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { AppTooltip } from '@/components/ui/AppTooltip'
 
 const CopyCell = ({ text }: { text: string }) => {
+  const { notifyRegionCopy } = useRegion()
   const [copied, setCopied] = useState(false)
   const isCopying = useRef(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -17,6 +19,7 @@ const CopyCell = ({ text }: { text: string }) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
+      notifyRegionCopy(text)
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
@@ -43,17 +46,25 @@ const CopyCell = ({ text }: { text: string }) => {
   return (
     <div className="group flex items-center justify-between gap-2">
       <span className="font-mono text-sm">{text}</span>
-      <Button
-        isButton
-        variant="ghost"
-        size="icon"
-        onClick={handleCopy}
-        className="h-6 w-6 p-0 text-gray-400 opacity-0 transition-opacity hover:bg-transparent hover:text-gray-600 group-hover:opacity-100 dark:text-gray-500 dark:hover:text-gray-300"
-        title="Copy to clipboard"
-        aria-label="Copy to clipboard"
-      >
-        {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-      </Button>
+      <AppTooltip content="Double-check this is your workspace region" side="top">
+        <span className="inline-flex">
+          <Button
+            isButton
+            variant="ghost"
+            size="icon"
+            onClick={handleCopy}
+            className="h-6 w-6 p-0 text-gray-400 opacity-0 transition-opacity hover:bg-transparent hover:text-gray-600 group-hover:opacity-100 dark:text-gray-500 dark:hover:text-gray-300"
+            title="Copy to clipboard"
+            aria-label="Copy to clipboard"
+          >
+            {copied ? (
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </Button>
+        </span>
+      </AppTooltip>
     </div>
   )
 }
