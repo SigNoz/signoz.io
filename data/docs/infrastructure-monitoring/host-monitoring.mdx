@@ -1,5 +1,5 @@
 ---
-date: 2026-06-05
+date: 2026-06-07
 id: host-monitoring
 title: Host Monitoring
 description: Monitor host performance in SigNoz — CPU, memory, disk, network metrics with correlated traces, logs, containers, and processes.
@@ -90,7 +90,7 @@ Click the columns icon in the toolbar to open the **Columns** panel. It shows th
 #### Load Avg
 
 - This column relies on the OTel metric(s): `system.cpu.load_average.15m`.
-- Average number of processes that are either running or in uninterruptible sleep (almost always waiting on disk I/O), smoothed over the last 15 minutes so brief spikes don't dominate. Rule of thumb: sustained load above the host's core count means the system is over-committed — on a 4-core host, a load of 4 is full utilization and anything materially higher means processes are queuing.
+- Average number of processes that are either running or in uninterruptible sleep (almost always waiting on disk I/O), smoothed over the last 15 minutes so brief spikes don't dominate. Rule of thumb: sustained load above the host's **logical CPU count** (`nproc` — physical cores × threads-per-core if SMT/hyperthreading is on) means *something* is contended — on a host with 4 logical CPUs, a load of 4 is full utilization and anything materially higher means processes are queuing. Pair with **IOWait** to disambiguate CPU contention (low IOWait + high load) from disk contention (high IOWait + high load).
 
 ## Host Details
 
