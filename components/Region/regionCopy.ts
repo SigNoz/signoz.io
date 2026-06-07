@@ -27,8 +27,3 @@ export function parseCopiedRegion(text: string | null | undefined): CopiedRegion
   }
   return null
 }
-
-/** True when the copied text contains a region-specific SigNoz URL or the placeholder. */
-export function copiedTextHasRegion(text: string | null | undefined): boolean {
-  return parseCopiedRegion(text) !== null
-}

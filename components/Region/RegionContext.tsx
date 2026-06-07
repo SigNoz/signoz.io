@@ -190,7 +190,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       value={{ regions, region, cloudRegion, setRegion, isLoading, notifyRegionCopy }}
     >
       {children}
-      <RegionCopyReminder reminder={copyReminder} onClose={closeReminder} />
+      <RegionCopyReminder key={copyReminder?.id} reminder={copyReminder} onClose={closeReminder} />
     </RegionContext.Provider>
   )
 }
