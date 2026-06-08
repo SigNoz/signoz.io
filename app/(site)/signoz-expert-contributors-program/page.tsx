@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="mx-auto mt-10 max-w-8xl px-6">
+    <div className="mx-auto mt-10 max-w-5xl px-6">
       <h1 className="text-4xl font-bold tracking-tight text-signoz_vanilla-100">
         SigNoz Expert Contributors Program
       </h1>
