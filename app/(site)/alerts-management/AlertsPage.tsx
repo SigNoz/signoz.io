@@ -1,37 +1,34 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight } from 'lucide-react'
-import Button from '@/components/ui/Button'
 import Image from 'next/image'
-import { ALERTS_MANAGEMENT_CARDS } from './AlertsPage.constants'
+import {
+  ALERTS_HEADER_BUTTONS,
+  ALERTS_MANAGEMENT_CARDS,
+  ANALYZE_ALERT_PATTERNS_SHOWCASE,
+  CREATE_ALERTS_SHOWCASE,
+  FINE_TUNE_ALERT_BEHAVIOR_PANEL,
+  MAINTENANCE_WINDOWS_PANEL,
+  MANAGE_ALERTS_AS_CODE_IMAGE,
+  MANAGE_ALERTS_AS_CODE_PANEL,
+  ROUTE_ALERTS_DYNAMICALLY_SHOWCASE,
+  SET_MULTIPLE_SEVERITY_THRESHOLDS_SHOWCASE,
+  STOP_ALERT_FATIGUE_BUTTONS,
+} from './AlertsPage.constants'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
-import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
-import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureShowcase'
+import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
+import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
 
 // Main Component Sections
 const Header: React.FC = () => {
-  const headerButtons = [
-    {
-      text: 'Start your free trial',
-      href: '/teams/',
-      variant: 'default' as const,
-      className: 'flex-center',
-    },
-    {
-      text: 'Read Documentation',
-      href: '/docs/trace-funnels/overview/',
-      variant: 'secondary' as const,
-      className: 'flex-center',
-    },
-  ]
-
   return (
     <FeaturePageHeader
       title={
@@ -46,7 +43,7 @@ const Header: React.FC = () => {
           any attribute.
         </>
       }
-      buttons={headerButtons}
+      buttons={ALERTS_HEADER_BUTTONS}
       heroImage="/img/platform/AlertsManagementMeta.webp"
       heroImageAlt="Alerts management hero"
     />
@@ -55,233 +52,72 @@ const Header: React.FC = () => {
 
 const ManageAlertsAsCode: React.FC = () => {
   return (
-    <div className="bg-signoz_ink-500 py-6">
-      <GridLayout variant="split">
-        {/* Left Column */}
-        <div className="flex h-full w-full flex-col justify-center px-6">
-          <div className="flex flex-col justify-between">
-            <h2 className="mb-6 text-signoz_vanilla-100">Manage alerts as code with Terraform</h2>
-            <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-              Define alerts as Terraform resources with full version control. Import existing alerts
-              from the UI into your codebase. Deploy consistent alert configurations across
-              environments through standard Terraform workflows.
-            </p>
-          </div>
-
-          <Button
-            variant="secondary"
-            rounded="full"
-            className="flex w-fit items-center gap-2"
-            to="/docs/alerts-management/terraform-provider-signoz/"
-          >
-            Read Documentation
-            <ArrowRight size={14} />
-          </Button>
-        </div>
-
-        {/* Right Column */}
+    <SplitSection
+      className="py-6"
+      left={{
+        ...MANAGE_ALERTS_AS_CODE_PANEL,
+        className: 'justify-center',
+      }}
+      right={
         <div className="h-full w-full px-6">
           <Image
-            src="/img/alerts-management/manage-alerts-as-code.png"
-            alt="Manage alerts as code"
+            src={MANAGE_ALERTS_AS_CODE_IMAGE.src}
+            alt={MANAGE_ALERTS_AS_CODE_IMAGE.alt}
             width={10000}
             height={10000}
           />
         </div>
-      </GridLayout>
-    </div>
+      }
+    />
   )
 }
 
 const CreateAlertsAndDefineConditions: React.FC = () => {
   return (
-    <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 px-6 pt-6">
-        <HeroCards
-          cards={ALERTS_MANAGEMENT_CARDS}
-          layoutVariant={'no-border'}
-          variant="default"
-          cols={2}
-          className="!-ml-6 -mt-6"
-        />
-
-        <Image
-          src="/img/alerts-management/create-alerts.png"
-          alt="Create alerts"
-          width={10000}
-          height={10000}
-        />
-      </div>
-    </>
+    <FeatureShowcase {...CREATE_ALERTS_SHOWCASE} className="px-6 pb-0 pt-6" imageClassName="mb-0">
+      <HeroCards
+        cards={ALERTS_MANAGEMENT_CARDS}
+        layoutVariant={'no-border'}
+        variant="default"
+        cols={2}
+        className="!-ml-6 -mt-6"
+      />
+    </FeatureShowcase>
   )
 }
 
 const RouteAlertsDynamically: React.FC = () => {
-  return (
-    <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-        <div className="mb-8 max-w-4xl">
-          <h2 className="mb-6 text-signoz_vanilla-100">
-            Route alerts dynamically with label-based policies
-          </h2>
-          <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-            Define routing policies that match alerts based on service, environment, severity,
-            Kubernetes labels, or custom attributes. Automatically send notifications to the right
-            teams and channels based on alert context. One alert can match multiple policies and
-            notify different channels.
-          </p>
-        </div>
-
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="flex w-fit items-center gap-2"
-          to="/docs/alerts-management/routing-policy/"
-        >
-          Read Documentation
-          <ArrowRight size={14} />
-        </Button>
-
-        <Image
-          src="/img/alerts-management/route-alerts-dynamically.png"
-          alt="Route alerts dynamically with label-based policies"
-          width={10000}
-          height={10000}
-          className="mb-8"
-        />
-      </div>
-    </>
-  )
+  return <FeatureShowcase {...ROUTE_ALERTS_DYNAMICALLY_SHOWCASE} />
 }
 
 const AnalyzeAlertPatterns: React.FC = () => {
-  return (
-    <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-        <div className="mb-8 max-w-4xl">
-          <h2 className="mb-6 text-signoz_vanilla-100">
-            Analyze alert patterns with history and timelines
-          </h2>
-          <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-            Understand why alerts fire repeatedly, identify which services or pods are contributing
-            most, and jump directly to related logs, traces, or metrics for faster root cause
-            analysis.
-          </p>
-        </div>
-
-        <Image
-          src="/img/alerts-management/analyze-alert-patterns.png"
-          alt="Analyze alert patterns"
-          width={10000}
-          height={10000}
-          className="mb-8"
-        />
-      </div>
-    </>
-  )
+  return <FeatureShowcase {...ANALYZE_ALERT_PATTERNS_SHOWCASE} />
 }
 
 const SetMultipleSeverityThresholds: React.FC = () => {
-  return (
-    <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-        <div className="mb-8 max-w-4xl">
-          <h2 className="mb-6 text-signoz_vanilla-100">
-            Set multiple severity thresholds in one alert rule
-          </h2>
-          <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-            Define warning, critical, and info thresholds in a single alert rule. Control how
-            conditions are evaluated (trigger at least once, all the time, on average, or in total)
-            and set evaluation windows to reduce false positives.
-          </p>
-        </div>
-
-        <Image
-          src="/img/alerts-management/set-multiple-severity-thresholds.png"
-          alt="Set multiple severity thresholds in one alert rule"
-          width={10000}
-          height={10000}
-          className="mb-8"
-        />
-      </div>
-    </>
-  )
+  return <FeatureShowcase {...SET_MULTIPLE_SEVERITY_THRESHOLDS_SHOWCASE} />
 }
 
 const StopAlertFatigueBanner: React.FC = () => {
-  const stopAlertFatigueButtons = [
-    {
-      text: 'Start your free trial',
-      href: '/teams/',
-      variant: 'default' as const,
-      className: 'flex-center',
-    },
-    {
-      text: 'Read Documentation',
-      href: '/docs/alerts/',
-      variant: 'secondary' as const,
-      className: 'flex-center',
-    },
-  ]
-
   return (
-    <div className="border-t-1 flex flex-col items-center justify-center border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6 py-20">
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-        Stop alert fatigue. <br /> Start catching real issues.
-      </h2>
-      <ButtonGroup buttons={stopAlertFatigueButtons} />
-    </div>
+    <CTABanner
+      title={
+        <>
+          Stop alert fatigue. <br /> Start catching real issues.
+        </>
+      }
+      buttons={STOP_ALERT_FATIGUE_BUTTONS}
+    />
   )
 }
 
 const FineTuneAndMaintainenceWindows: React.FC = () => {
   return (
-    <>
-      <div className="border-y-1 mt-12 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-16">
-        <GridLayout variant="split">
-          {/* Left Column */}
-          <div className="flex flex-col px-6">
-            <div className="flex flex-col justify-between">
-              <div>
-                <h2 className="mb-6 text-signoz_vanilla-100">Fine-tune alert behavior</h2>
-                <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-                  Set evaluation frequency and minimum data point requirements. Set alert when data
-                  stops flowing and test notifications before saving.
-                </p>
-              </div>
-            </div>
-
-            <Image
-              src="/img/alerts-management/fine-tune-alert-behavior.png"
-              alt="Fine-tune alert behavior"
-              width={10000}
-              height={10000}
-              className="mb-8"
-            />
-          </div>
-
-          {/* Right Column */}
-          <div className="border-l-1 -my-16 flex flex-col border-dashed border-signoz_slate-400 px-6 pt-16">
-            <div className="flex flex-col justify-between">
-              <div>
-                <h2 className="mb-6 text-signoz_vanilla-100">Schedule maintenance windows</h2>
-                <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-                  Schedule one-time or recurring maintenance windows. Silence all alerts or select
-                  specific ones during planned downtime.
-                </p>
-              </div>
-            </div>
-
-            <Image
-              src="/img/alerts-management/schedule-maintenance-windows.png"
-              alt="Schedule maintenance windows"
-              width={10000}
-              height={10000}
-            />
-          </div>
-        </GridLayout>
-      </div>
-    </>
+    <SplitSection
+      left={FINE_TUNE_ALERT_BEHAVIOR_PANEL}
+      right={MAINTENANCE_WINDOWS_PANEL}
+      withVerticalDivider
+    />
   )
 }
 
@@ -292,17 +128,25 @@ const AlertsManagement: React.FC = () => {
       <Header />
 
       <SectionLayout variant="bordered" className="!px-0">
+        <Divider />
         <CreateAlertsAndDefineConditions />
+        <Divider />
         <SetMultipleSeverityThresholds />
+        <Divider />
         <RouteAlertsDynamically />
+        <Divider />
         <AnalyzeAlertPatterns />
+        <Divider className="mt-12" />
         <FineTuneAndMaintainenceWindows />
+        <Divider />
         <ManageAlertsAsCode />
+        <Divider />
         <StopAlertFatigueBanner />
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection />
     </FeaturePageLayout>
   )
