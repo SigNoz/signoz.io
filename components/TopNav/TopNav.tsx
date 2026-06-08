@@ -71,7 +71,7 @@ export default function TopNav() {
     <div className="fixed left-0 right-0 z-[50]">
       <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
         <nav
-          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100 md:px-8"
+          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">

@@ -67,27 +67,58 @@ export default function Page() {
 'use client'
 
 import React from 'react'
-// ... imports
+import Image from 'next/image'
+import {
+  HEADER_BUTTONS, FEATURE_SHOWCASE, PANEL_DATA, PANEL_IMAGE, CTA_BUTTONS,
+} from './FeatureNamePage.constants'
+import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
+import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
+import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
+import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
+import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
+import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureShowcase'
+import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
+import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
 
-// Section components (defined in same file or extracted if large)
-const Header: React.FC = () => { /* ... */ }
-const FeatureSection1: React.FC = () => { /* ... */ }
-const FeatureSection2: React.FC = () => { /* ... */ }
-const CTABanner: React.FC = () => { /* ... */ }
+// Section components use shared components + spread constants
+const Header: React.FC = () => (
+  <FeaturePageHeader title={...} description={...} buttons={HEADER_BUTTONS} heroImage="..." />
+)
 
-// Main page component
+const FeatureSection1: React.FC = () => (
+  <FeatureShowcase {...FEATURE_SHOWCASE} />
+)
+
+const FeatureSection2: React.FC = () => (
+  <SplitSection
+    className="py-10"
+    left={PANEL_DATA}
+    right={<div className="h-full w-full px-6"><Image src={PANEL_IMAGE.src} ... /></div>}
+  />
+)
+
+const Banner: React.FC = () => (
+  <CTABanner title={<>CTA Headline</>} buttons={CTA_BUTTONS} />
+)
+
+// Main page — composes sections with <Divider /> between them
 const FeatureNamePage: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
       <SectionLayout variant="bordered" className="!px-0">
+        <Divider />
         <FeatureSection1 />
+        <Divider />
         <FeatureSection2 />
-        <CTABanner />
+        <Divider />
+        <Banner />
       </SectionLayout>
       <UsageBasedPricing show={['logs', 'traces', 'metrics']} />
       <SigNozStats />
-      <CustomerStoriesSection tracking={{ /* ... */ }} />
+      <CustomerStoriesSection tracking={{ clickName: '...', clickLocation: '...' }} />
     </FeaturePageLayout>
   )
 }
@@ -98,8 +129,8 @@ export default FeatureNamePage
 **Key rules:**
 - Marked `'use client'` — required for interactivity and hooks
 - Section components are defined as `React.FC` in the same file (co-located)
-- Sections are only extracted to separate files if they become very large (50+ lines)
-- Main component composes sections in the standard flow
+- Content data is spread from constants: `<FeatureShowcase {...SHOWCASE_DATA} />`
+- `<Divider />` is placed between sections in the main composition — content components do NOT render their own dividers
 - `SectionLayout variant="bordered" className="!px-0"` wraps all feature sections
 
 ## File 3: `<FeatureName>Page.constants.tsx`
@@ -107,6 +138,55 @@ export default FeatureNamePage
 ```tsx
 import { IconName1, IconName2, IconName3 } from 'lucide-react'
 
+const BUTTON_CLASS_NAME = 'flex items-center justify-center gap-1 h-full w-full'
+
+// Button arrays for header and CTA sections
+export const HEADER_BUTTONS = [
+  {
+    text: 'Start your free trial',
+    href: '/teams/',
+    variant: 'default' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { clickType: 'Primary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+  {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    variant: 'secondary' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { clickType: 'Secondary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+]
+
+// FeatureShowcase data — spread into component as props
+export const FEATURE_SHOWCASE = {
+  title: 'Section Title',
+  description: 'Section description.',
+  image: '/img/feature/screenshot.png',
+  imageAlt: 'Screenshot alt text',
+  button: {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    tracking: { clickType: 'Secondary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+}
+
+// SplitSection panel data
+export const LEFT_PANEL = {
+  title: 'Panel Title',
+  description: 'Panel description.',
+  image: '/img/feature/panel.png',
+  imageAlt: 'Panel screenshot',
+  button: { text: 'Read Documentation', href: '/docs/feature/' },
+}
+
+// Separate image reference (when using custom ReactNode for the other panel)
+export const PANEL_IMAGE = {
+  src: '/img/feature/image.png',
+  alt: 'Image alt text',
+}
+
+// Card arrays for HeroCards grids
 export const FEATURE_CARDS = [
   {
     icon: <IconName1 />,
@@ -116,23 +196,46 @@ export const FEATURE_CARDS = [
   // ... more cards
 ]
 
+// Carousel data
 export const CAROUSEL_DATA = [
   {
     id: 0,
     title: 'Step title',
     description: 'Step description',
-    image: '/img/<feature-name>/step-1.png',
+    image: '/img/feature/step-1.png',
     isActive: true,
   },
   // ... more items
+]
+
+// CTA button arrays
+export const CTA_BUTTONS = [
+  {
+    text: 'Start your free trial',
+    href: '/teams/',
+    variant: 'default' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { ... },
+  },
+  {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    variant: 'secondary' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { ... },
+  },
 ]
 ```
 
 **Key rules:**
 - Named exports (not default) — allows selective importing
-- Icons imported from `lucide-react` and rendered as JSX in the data
+- `BUTTON_CLASS_NAME` constant at file top — Tailwind replacement for the old `flex-center` CSS class
+- FeatureShowcase data objects are spread as props: `<FeatureShowcase {...SHOWCASE} />`
+- SplitSection panel configs have `title`, `description`, optional `image`/`button`/`imageClassName`
+- Image references as `{ src, alt }` objects for cases where images are rendered as custom ReactNode
+- Icons imported from `lucide-react` and rendered as JSX in card data
 - Image paths are absolute from `public/` root
-- Card/carousel data follows the type structure expected by shared components
+- SCREAMING_SNAKE_CASE for all constant names
 
 ## Image Directory
 

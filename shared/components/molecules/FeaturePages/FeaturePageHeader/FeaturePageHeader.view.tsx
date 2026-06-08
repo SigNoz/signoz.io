@@ -37,12 +37,12 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
     )
 
   return (
-    <header className={cn('relative !mx-auto max-w-8xl md:!w-[80vw]', className)}>
+    <header className={cn('relative !mx-auto max-w-8xl', className)}>
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
       <div
         className={cn(
-          'relative !mx-auto flex max-w-8xl flex-col border !border-b-0 border-dashed border-signoz_slate-400 px-6 pb-4 pt-12 md:!w-[80vw] md:px-8 md:pt-[4rem]',
+          'relative !mx-auto flex max-w-8xl flex-col border !border-b-0 border-dashed border-signoz_slate-400 px-6 pb-4 pt-12 md:px-8 md:pt-[4rem]',
           isLeft ? 'items-start text-left' : 'items-center text-center'
         )}
       >
@@ -67,7 +67,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
 
       <div
         className={cn(
-          'relative z-[1] !mx-auto flex max-w-8xl flex-col gap-4 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 px-6 pb-12 pt-4 md:!w-[80vw] md:px-8',
+          'relative z-[1] !mx-auto flex max-w-8xl flex-col gap-4 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 px-6 pb-12 pt-4 md:px-8',
           isLeft ? 'items-start' : 'items-center'
         )}
       >

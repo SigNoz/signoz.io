@@ -2,6 +2,238 @@
 
 All components are in `shared/components/molecules/FeaturePages/`. Import with the `@/shared/components/molecules/FeaturePages/` path alias.
 
+## Section Content Components
+
+These are the primary building blocks for feature page content sections. Use these instead of writing custom inline sections.
+
+### FeatureShowcase
+
+Full-width section with title, description, optional button, optional children, and optional image below. Replaces the old inline "title + description + image" pattern.
+
+```tsx
+import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureShowcase'
+
+// Simplest: spread a constants object
+<FeatureShowcase {...SET_MULTIPLE_SEVERITY_THRESHOLDS_SHOWCASE} />
+
+// With children inserted between text and image
+<FeatureShowcase {...CREATE_ALERTS_SHOWCASE} className="px-6 pb-0 pt-6" imageClassName="mb-0">
+  <HeroCards cards={CARDS} layoutVariant="no-border" variant="default" cols={2} />
+</FeatureShowcase>
+
+// Image-only (no title/description) — used as a section intro above a CarouselCards
+<FeatureShowcase
+  {...DRILL_INTO_DOMAINS_SHOWCASE}
+  className="!mx-auto !w-[80vw] px-6 pb-0 pt-6"
+  contentClassName="mb-0"
+/>
+
+// With custom imageElement instead of image path
+<FeatureShowcase
+  {...QUERY_BUILDER_SHOWCASE}
+  imageElement={
+    <>
+      <Image src={IMAGE.src} alt={IMAGE.alt} width={10000} height={10000} className="mb-8" />
+      <HeroCards cards={CARDS} layoutVariant="no-border" variant="combined" />
+    </>
+  }
+/>
+```
+
+**Props:**
+- `title?` (ReactNode): Section heading
+- `description?` (ReactNode): Section body text
+- `image?` (string): Image path — rendered below children
+- `imageAlt?` (string): Alt text for image
+- `imageElement?` (ReactNode): Custom image element — overrides `image`/`imageAlt`
+- `button?` (object): `{ text, href, tracking? }` — renders a secondary CTA button with ArrowRight icon. If `tracking` is provided, wraps in `TrackingLink`.
+- `children?` (ReactNode): Custom content rendered between text/button and image
+- `className?` (string): Override wrapper classes (default: `bg-signoz_ink-500 p-6`)
+- `contentClassName?` (string): Override the title+description+button wrapper (default: `mb-8 max-w-4xl`)
+- `imageClassName?` (string): Override image classes (default: `mb-8`)
+
+**Render order:** title → description → button → children → imageElement/image
+
+**When to use:** Any section that shows a title + description + screenshot. This is the most common section type.
+
+**Constants pattern:**
+```tsx
+// In .constants.tsx
+export const FEATURE_SHOWCASE = {
+  title: 'Section Title',
+  description: 'Section description text.',
+  image: '/img/feature/screenshot.png',
+  imageAlt: 'Descriptive alt text',
+  button: {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    tracking: { clickType: 'Secondary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+}
+```
+
+### SplitSection
+
+Side-by-side layout with two panels. Each panel can be a config object (auto-rendered with title/description/button/image) or a custom ReactNode. Replaces the old `GridLayout variant="split"` + manual column markup.
+
+```tsx
+import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
+
+// Both panels as config objects, with vertical divider
+<SplitSection
+  className="py-16"
+  left={FINE_TUNE_PANEL}
+  right={MAINTENANCE_WINDOWS_PANEL}
+  withVerticalDivider
+/>
+
+// Left panel as config, right panel as custom ReactNode
+<SplitSection
+  className="py-10"
+  left={DEFINE_SEQUENCES_PANEL}
+  right={
+    <div className="h-full w-full px-6">
+      <Image src={IMAGE.src} alt={IMAGE.alt} width={10000} height={10000} />
+    </div>
+  }
+/>
+
+// Spreading a panel with extra props merged
+<SplitSection
+  className="py-6"
+  left={{ ...MANAGE_AS_CODE_PANEL, className: 'justify-center' }}
+  right={<div className="h-full w-full px-6">...</div>}
+/>
+
+// Right panel with custom imageElement override
+<SplitSection
+  className="py-16"
+  left={FILTER_PANEL}
+  right={{
+    ...DETECTION_PANEL,
+    imageElement: <div className="flex h-full flex-col items-center justify-center pb-16">...</div>,
+  }}
+  withVerticalDivider
+/>
+```
+
+**Props:**
+- `left` (SplitSectionPanel | ReactNode): Left column content
+- `right` (SplitSectionPanel | ReactNode): Right column content
+- `withVerticalDivider?` (boolean, default: `false`): Show a vertical `<Divider>` between panels
+- `className?` (string): Override wrapper classes (default: `bg-signoz_ink-500`)
+
+**SplitSectionPanel config object:**
+- `title` (ReactNode): Panel heading
+- `description` (ReactNode): Panel body text — can be a string or JSX with multiple `<p>` tags
+- `image?` (string): Image path
+- `imageAlt?` (string): Alt text
+- `imageElement?` (ReactNode): Custom image content — overrides `image`
+- `button?` (object): `{ text, href, tracking? }` — secondary CTA button
+- `className?` (string): Override the panel wrapper (e.g., `'justify-center'`)
+- `contentClassName?` (string): Override the title+description wrapper
+- `imageClassName?` (string): Override image classes
+
+**How panel detection works:** If the value has `title` and `description` keys (and is not a React element), it's treated as a `SplitSectionPanel` config and auto-rendered. Otherwise it's rendered as-is.
+
+**When to use:** Two-column text+image layouts, or two side-by-side feature explanations. Use `withVerticalDivider` when both sides have their own title+description.
+
+**Constants pattern:**
+```tsx
+// In .constants.tsx
+export const LEFT_PANEL = {
+  title: 'Panel Title',
+  description: 'Panel description.',
+  image: '/img/feature/panel-left.png',
+  imageAlt: 'Panel left',
+  button: { text: 'Read Documentation', href: '/docs/feature/' },
+}
+```
+
+### CTABanner
+
+Centered call-to-action banner with title and button group. Replaces all inline CTA banner sections.
+
+```tsx
+import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
+
+<CTABanner
+  title={<>Stop alert fatigue. <br /> Start catching real issues.</>}
+  buttons={STOP_ALERT_FATIGUE_BUTTONS}
+/>
+```
+
+**Props:**
+- `title` (ReactNode): Centered heading — use `<br />` for line breaks
+- `buttons` (ButtonGroupButton[]): Array of button configs passed to `ButtonGroup`
+- `className?` (string): Override wrapper classes
+
+**Renders:** Centered flex column with `py-20` padding, `text-4xl` title, and `ButtonGroup` below.
+
+**When to use:** Bottom-of-page CTA, or mid-page conversion banners.
+
+**Constants pattern:**
+```tsx
+// In .constants.tsx — define button arrays in constants for reuse
+const BUTTON_CLASS_NAME = 'flex items-center justify-center gap-1 h-full w-full'
+
+export const CTA_BUTTONS = [
+  {
+    text: 'Start your free trial',
+    href: '/teams/',
+    variant: 'default' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { clickType: 'Primary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+  {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    variant: 'secondary' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { clickType: 'Secondary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+]
+```
+
+### Divider
+
+Replaces inline `border-t-1 border-dashed border-signoz_slate-400` divs. Use between sections inside a `SectionLayout`.
+
+```tsx
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+
+// Default horizontal dashed divider
+<Divider />
+
+// With extra spacing (e.g., after a section with its own top margin)
+<Divider className="mt-12" />
+
+// Solid variant (used for decorative lines like VS dividers)
+<Divider variant="solid" className="h-px flex-1 border-signoz_sakura-600" />
+
+// Vertical (used inside SplitSection internally, rarely needed directly)
+<Divider orientation="vertical" />
+```
+
+**Props:**
+- `orientation?`: `'horizontal'` (default) | `'vertical'`
+- `variant?`: `'dashed'` (default) | `'solid'`
+- `className?` (string): Additional classes
+
+**When to use:** Between every content section inside `SectionLayout variant="bordered"`. The parent page controls dividers — content components like `FeatureShowcase` and `SplitSection` do NOT render their own dividers.
+
+**Pattern in page composition:**
+```tsx
+<SectionLayout variant="bordered" className="!px-0">
+  <Divider />
+  <FeatureSection1 />
+  <Divider />
+  <FeatureSection2 />
+  <Divider />
+  <CTABanner ... />
+</SectionLayout>
+```
+
 ## Layout Components
 
 ### FeaturePageLayout
@@ -24,7 +256,7 @@ import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/Featur
 
 ### SectionLayout
 
-Container for content sections with consistent width and border treatment.
+Container for content sections with consistent width and border treatment. Manages side-rail borders and max-width — NOT section dividers (use `<Divider />` for those).
 
 ```tsx
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
@@ -47,7 +279,7 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 
 ### GridLayout
 
-Responsive grid wrapper for multi-column layouts.
+Responsive grid wrapper for multi-column layouts. Rarely used directly — prefer `SplitSection` for two-column layouts.
 
 ```tsx
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
@@ -62,7 +294,7 @@ import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
 - `className` (string): Additional classes
 
 **Behavior:**
-- `split`: `grid-cols-1 lg:grid-cols-2` — for text + image sections
+- `split`: `grid-cols-1 lg:grid-cols-2` — used internally by `SplitSection`
 - `default`: `grid-cols-1 md:grid-cols-{cols}` — for card grids
 - Gap: `gap-y-8 md:gap-y-16`
 
@@ -78,7 +310,7 @@ import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/Featur
 <FeaturePageHeader
   title={<>Create Visual Funnels from Traces</>}
   description={<>The only tracing tool that tracks multi-step flows.</>}
-  buttons={headerButtons}
+  buttons={HEADER_BUTTONS}
   heroImage="/img/feature/hero.webp"
   heroImageAlt="Feature hero image"
 />
@@ -89,10 +321,11 @@ import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/Featur
 - `description` (ReactNode): Subtitle text
 - `buttons` (array): Button config objects for `ButtonGroup`
 - `buttonGroup` (ReactNode): Custom button component (alternative to `buttons`)
-- `heroImage` (string): Path to hero image
+- `heroImage` (string | ReactNode): Path to hero image, or custom image element
 - `heroImageAlt` (string): Alt text for hero image
-- `buttonDescription` (string): Optional text below buttons
+- `buttonDescription` (string | ReactNode): Optional text below buttons
 - `sectionLayoutVariant`, `sectionLayoutClassName`: Override SectionLayout defaults
+- `align`: `'center'` (default) | `'left'`
 
 ### ButtonGroup
 
@@ -101,12 +334,15 @@ Renders an array of buttons with tracking support.
 ```tsx
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 
+// Buttons are typically defined in .constants.tsx
+const BUTTON_CLASS_NAME = 'flex items-center justify-center gap-1 h-full w-full'
+
 const buttons = [
   {
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: 'flex-center',
+    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Feature Hero Start Trial',
@@ -118,7 +354,7 @@ const buttons = [
     text: 'Read Documentation',
     href: '/docs/feature/',
     variant: 'secondary' as const,
-    className: 'flex-center',
+    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Feature Hero Docs',
@@ -135,7 +371,7 @@ const buttons = [
 - `buttons` (array): Each with `text`, `href`, `variant`, `className`, optional `tracking`, optional `icon`
 - `className` (string): Additional wrapper classes
 
-Auto-adds `ArrowRight` icon if no custom icon provided.
+Auto-adds `ArrowRight` icon if no custom icon provided. Use `BUTTON_CLASS_NAME` constant (Tailwind equivalent of `flex-center`) for button className.
 
 ## Card Components
 
@@ -156,7 +392,7 @@ import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 
 **Props:**
 - `cards` (array): Objects with `icon`, `title`, `description`
-- `variant`: `'default'` | `'combined'` — `combined` merges card borders
+- `variant`: `'default'` | `'combined'` — `combined` removes card borders
 - `layoutVariant`: Passed to inner SectionLayout
 - `cols` (number): Grid columns (default: 3)
 - `className` (string): Additional classes

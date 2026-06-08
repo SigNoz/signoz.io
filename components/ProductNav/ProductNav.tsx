@@ -1,4 +1,5 @@
-// components/ProductNav/ProductNav.tsx
+'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -56,7 +57,7 @@ export default function ProductNav() {
   return (
     <div className="fixed left-0 right-0 top-[56px] z-10">
       <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
-        <div className="mx-auto h-fit max-w-8xl overflow-x-auto md:px-8">
+        <div className="mx-auto h-fit max-w-8xl overflow-x-auto">
           <nav
             className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-signoz_vanilla-400 sm:gap-6"
             aria-label="Product Navigation"
