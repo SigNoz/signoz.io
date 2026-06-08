@@ -1,5 +1,5 @@
 ---
-date: 2026-06-04
+date: 2026-06-08
 id: k8s-clusters
 title: Clusters
 description: Monitor Kubernetes cluster resource allocation in SigNoz — CPU and memory vs allocatable capacity, node readiness, and workload health summaries.
@@ -86,15 +86,15 @@ Click a cluster name to open the detail page. The header shows **Cluster Name**.
 
 #### Ready Nodes
 
-- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name` with a `HAVING max(condition_ready) = 1` filter — i.e., counts nodes whose latest readiness value is `1` (True).
-- Single line: number of nodes in the cluster that are currently `Ready` and accepting pods.
-- Use this to track effective cluster capacity over time — sudden drops are the most reliable signal that a node went down or was cordoned; persistent dips below your expected node count indicate ongoing node-health issues.
+- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name` with a `having max(condition_ready) = 1` filter, rendered as a table with one row per Ready node.
+- Each row identifies a node currently in `Ready` state (latest `condition_ready` = 1) — the row count is the total Ready-node count, and the `k8s.node.name` column tells you exactly which nodes are healthy.
+- Use this to confirm cluster-wide node health at a glance — when row count drops below your expected node total, the missing node names are the ones that went down or were cordoned.
 
 #### NotReady Nodes
 
-- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name` with `HAVING max(condition_ready) = 0` — counts nodes whose latest readiness value is `0` (False).
-- Single line: number of nodes in `NotReady` state.
-- Any non-zero value means a slice of the cluster's capacity is unusable; after the default 5-minute toleration window, pods on those nodes are evicted — so a sustained spike here is also a leading indicator for pod churn elsewhere in the cluster.
+- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name` with a `having max(condition_ready) = 0` filter, rendered as a table with one row per NotReady node.
+- Each row identifies a node currently in `NotReady` state — the table is empty when the cluster is healthy and rows appear as nodes transition to NotReady.
+- Any rows mean a slice of the cluster's capacity is unusable; after the default 5-minute toleration window, pods on those nodes are evicted — the `k8s.node.name` column tells you which nodes are about to lose their pods.
 
 #### Deployments Available and Desired
 
