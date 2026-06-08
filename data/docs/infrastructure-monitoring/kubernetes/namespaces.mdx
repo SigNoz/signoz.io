@@ -38,7 +38,7 @@ The **Namespaces** view shows aggregated resource usage per namespace, useful fo
 ### Mem Usage (WSS)
 
 - This column relies on the OTel metric `k8s.pod.memory.working_set` from the kubeletstats receiver, summed across all pods in the namespace.
-- Working Set Size across every pod in the namespace — anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for OOM and eviction).
+- Working Set Size across every pod in the namespace — anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for eviction).
 - Use this to track a namespace against its `ResourceQuota` memory cap and identify which tenant is closest to its allocation; sustained high WSS with no `LimitRange` defined typically means individual pods aren't being capped and one runaway pod can starve the namespace. ([Resource quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/#compute-resource-quota), [LimitRange](https://kubernetes.io/docs/concepts/policy/limit-range/))
 
 ### Pod Counts by Phase
@@ -69,7 +69,7 @@ Click a namespace name to open the detail page. The header shows **Namespace Nam
 #### Memory Usage (bytes)
 
 - This chart relies on the OTel metrics `k8s.pod.memory.usage`, `k8s.pod.memory.working_set`, `k8s.pod.memory.rss`, and `k8s.container.memory_request` from the kubeletstats receiver, summed across all pods (and their containers) in the namespace.
-- Plots six series: usage **Avg / Max / Min**, **Working Set**, **RSS**, and total container **Requests**. `working_set` (anonymous + active file pages, excluding reclaimable inactive file pages) is the value the kubelet uses for OOM and eviction; `usage` includes reclaimable page cache and so reads higher.
+- Plots six series: usage **Avg / Max / Min**, **Working Set**, **RSS**, and total container **Requests**. `working_set` (anonymous + active file pages, excluding reclaimable inactive file pages) is the value the kubelet uses for eviction; `usage` includes reclaimable page cache and so reads higher.
 - Working Set climbing toward Requests means the namespace's pods are nearing the level at which the kubelet starts evicting under node-level MemoryPressure; sustained RSS growth without correlated Working Set growth points to memory leaks in long-running workloads. ([Node-pressure eviction signals](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#eviction-signals))
 
 #### Pods CPU (top 10)

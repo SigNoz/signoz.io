@@ -78,7 +78,7 @@ The **Deployments** view shows aggregated resource usage across all pods in each
 ### Mem Usage (WSS)
 
 - This column relies on the OTel metric `k8s.pod.memory.working_set` from the kubeletstats receiver, summed across the deployment's pods.
-- Total Working Set Size across the Deployment's pods — anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for OOM and eviction).
+- Total Working Set Size across the Deployment's pods — anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for eviction).
 - Sustained high WSS without explicit `limits.memory` on the deployment's containers means individual pods can grow until the kubelet evicts them under node MemoryPressure; set explicit limits or add a `LimitRange` to the namespace. ([Node-pressure eviction signals](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#eviction-signals), [LimitRange](https://kubernetes.io/docs/concepts/policy/limit-range/))
 
 ### Pod Counts by Phase

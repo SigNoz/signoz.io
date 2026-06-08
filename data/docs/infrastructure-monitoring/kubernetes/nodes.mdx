@@ -87,7 +87,7 @@ Click a node name to open the detail page. The header shows **Node Name** and **
 #### Memory Usage (bytes)
 
 - This chart relies on the OTel metrics `k8s.node.memory.usage`, `k8s.node.memory.working_set`, `k8s.node.memory.rss` (kubeletstats), `k8s.node.allocatable_memory` (k8s_cluster — disabled by default), and `k8s.container.memory_request` (kubeletstats) summed across containers on the node.
-- Plots seven series: usage **Avg / Max / Min**, **Working Set**, **RSS**, **Allocatable**, and total container **Requests**. `working_set` (anonymous + active file pages, excluding reclaimable inactive file pages) is the value the kubelet uses for OOM and eviction decisions; `usage` includes reclaimable page cache and so reads higher than working set.
+- Plots seven series: usage **Avg / Max / Min**, **Working Set**, **RSS**, **Allocatable**, and total container **Requests**. `working_set` (anonymous + active file pages, excluding reclaimable inactive file pages) is the value the kubelet uses for eviction decisions; `usage` includes reclaimable page cache and so reads higher than working set.
 - Working Set approaching Allocatable signals imminent MemoryPressure-driven eviction; the gap between Usage and Working Set is the reclaimable page cache the kernel can free first, before the kubelet starts evicting pods. ([Node-pressure eviction signals](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#eviction-signals))
 
 #### CPU Usage (%)
