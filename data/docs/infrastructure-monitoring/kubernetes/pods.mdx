@@ -31,7 +31,7 @@ The **Pods** view is the default Kubernetes monitoring view. It shows all active
 ### CPU Limit Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.cpu_limit_utilization`.
-- Ratio of the pod's CPU usage to the sum of its containers' CPU limits, expressed as a percentage. Per the Kubernetes resource-management docs, "when a container approaches its `cpu` limit, the kernel will restrict access to the CPU corresponding to the container's limit" — so values approaching 100% indicate active or imminent CPU throttling. Not emitted if any container is missing a `limits.cpu` spec.
+- Ratio of the pod's CPU usage to the sum of its containers' CPU limits, expressed as a percentage. [CPU limits are enforced by kernel throttling](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits), so values approaching 100% indicate active or imminent CPU throttling. Not emitted if any container is missing a `limits.cpu` spec.
 - Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — throttling becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### CPU Usage (cores)
