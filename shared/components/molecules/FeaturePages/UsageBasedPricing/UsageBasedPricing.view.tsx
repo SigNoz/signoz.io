@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
 import { Section } from 'app/(site)/pricing/pricingv1/components/PricingCalculator'
+import Divider from '../Divider'
 
 const UsageBasedPricing: React.FC<{
   show: Section[]
@@ -27,7 +28,7 @@ const UsageBasedPricing: React.FC<{
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="border-b border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+          <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
             <div className="flex flex-col gap-2 px-10 py-10">
               <div className="text-2xl font-semibold text-signoz_vanilla-100">{sectionTitle}</div>
               <p className="text-base font-normal text-signoz_vanilla-400">{sectionDescription}</p>
