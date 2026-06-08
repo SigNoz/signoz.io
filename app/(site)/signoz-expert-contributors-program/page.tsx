@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import Image from 'next/image'
-import { ArrowRight, HeartHandshakeIcon, PartyPopperIcon } from 'lucide-react'
+import { ArrowRight, HeartHandshakeIcon } from 'lucide-react'
 import Admonition from '@/components/Admonition/Admonition'
 
 export const metadata: Metadata = {
