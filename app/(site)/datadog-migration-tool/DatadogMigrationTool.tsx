@@ -62,15 +62,13 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
 
 const ReadyToMigrateBanner: React.FC = () => {
   return (
-    <>
-      <SectionLayout variant="bordered" className="pb-10">
-        <h2 className="mb-6 pt-10 text-center text-4xl text-signoz_vanilla-100">
-          Ready to Migrate from Datadog?
-        </h2>
+    <SectionLayout variant="bordered" className="pb-10">
+      <h2 className="mb-6 pt-10 text-center text-4xl text-signoz_vanilla-100">
+        Ready to Migrate from Datadog?
+      </h2>
 
-        <RequestEarlyAccessButton className="!mx-auto" />
-      </SectionLayout>
-    </>
+      <RequestEarlyAccessButton className="!mx-auto" />
+    </SectionLayout>
   )
 }
 

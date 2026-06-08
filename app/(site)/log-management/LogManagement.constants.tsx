@@ -71,7 +71,7 @@ export const PROCESS_LOGS_PANEL = {
     "Create processing pipelines through a visual UI to parse unstructured logs, extract attributes, flatten nested JSON, and mask sensitive data. Apply processors like Grok patterns, regex, and JSON parsers to transform logs before they're stored and indexed.",
   button: {
     text: 'Read Documentation',
-    href: '/docs/logs-pipelines/concepts/',
+    href: '/docs/logs-pipelines/introduction/',
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Log Processing Read Docs Button',
