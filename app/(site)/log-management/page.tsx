@@ -4,20 +4,20 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
+    absolute: 'Log Management Software for Fast Log Analytics | SigNoz',
   },
   openGraph: {
-    title: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
+    title: 'Log Management Software for Fast Log Analytics | SigNoz',
     description:
-      'Ingest, search, and analyze logs at scale with SigNoz log management powered by OpenTelemetry & Columnar Database. Correlate logs with metrics and traces for faster debugging and performance optimization.',
+      'Ingest, parse, search, and analyze logs at scale with SigNoz. Correlate logs with metrics and traces in an OpenTelemetry-native log management platform.',
     images: '/img/platform/LogsManagementHero.webp',
   },
   description:
-    'Ingest, search, and analyze logs at scale with SigNoz log management powered by OpenTelemetry & Columnar Database. Correlate logs with metrics and traces for faster debugging and performance optimization.',
+    'Ingest, parse, search, and analyze logs at scale with SigNoz. Correlate logs with metrics and traces in an OpenTelemetry-native log management platform.',
   twitter: {
-    title: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
+    title: 'Log Management Software for Fast Log Analytics | SigNoz',
     description:
-      'Ingest, search, and analyze logs at scale with SigNoz log management powered by OpenTelemetry & Columnar Database. Correlate logs with metrics and traces for faster debugging and performance optimization.',
+      'Ingest, parse, search, and analyze logs at scale with SigNoz. Correlate logs with metrics and traces in an OpenTelemetry-native log management platform.',
     images: '/img/platform/LogsManagementHero.webp',
   },
 }
