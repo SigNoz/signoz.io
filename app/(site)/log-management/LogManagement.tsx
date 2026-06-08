@@ -86,9 +86,10 @@ const LogsManagement: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
-      <HeroCards cards={CARDS} />
 
       <SectionLayout variant="bordered" className="!px-0">
+        <HeroCards cards={CARDS} layoutVariant="no-border" />
+        <Divider />
         <Divider className="mt-12" />
         <LogProcessingSection />
         <Divider />
