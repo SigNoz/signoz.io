@@ -2954,6 +2954,11 @@ module.exports = () => {
           destination: '/docs/cost-meter/alerts/',
           permanent: true,
         },
+        {
+          source: '/signoz-expert-contributors-program/',
+          destination: '/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
