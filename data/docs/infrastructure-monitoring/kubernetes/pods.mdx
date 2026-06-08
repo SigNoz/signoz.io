@@ -42,13 +42,13 @@ The **Pods** view is the default Kubernetes monitoring view. It shows all active
 ### Mem Req Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.memory_request_utilization`.
-- Ratio of the pod's memory usage to the sum of its containers' memory requests, expressed as a percentage. As with CPU, memory requests are used for scheduling — values consistently above 100% mean the pod uses more memory than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving memory the pod never uses. Not emitted if any container is missing a `requests.memory` spec.
+- Ratio of the pod's memory usage to the sum of its containers' memory requests, expressed as a percentage. As with CPU, [memory requests are used by the scheduler](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled) when fitting pods to nodes — values consistently above 100% mean the pod uses more memory than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving memory the pod never uses. Not emitted if any container is missing a `requests.memory` spec.
 - Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
 
 ### Mem Limit Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.memory_limit_utilization`.
-- Ratio of the pod's memory usage to the sum of its containers' memory limits, expressed as a percentage. Per the Kubernetes resource-management docs, "when a container uses more than its `memory` limit, the kernel may terminate it" via an OOMKill, though "terminations only happen when the kernel detects memory pressure" — values at or near 100% indicate sustained OOMKill risk under pressure. Not emitted if any container is missing a `limits.memory` spec.
+- Ratio of the pod's memory usage to the sum of its containers' memory limits, expressed as a percentage. [Memory limits are enforced reactively by OOM kills when the kernel detects memory pressure](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) — values at or near 100% indicate sustained OOMKill risk. Not emitted if any container is missing a `limits.memory` spec.
 - Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — OOMKill becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### Mem Usage (WSS)
