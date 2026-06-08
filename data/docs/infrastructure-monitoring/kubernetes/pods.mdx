@@ -1,5 +1,5 @@
 ---
-date: 2026-06-06
+date: 2026-06-08
 id: k8s-pods
 title: Pods
 description: Monitor Kubernetes pod CPU, memory, and network performance in SigNoz — request/limit utilization, per-container breakdowns, and correlated traces and logs.
@@ -25,7 +25,7 @@ The **Pods** view is the default Kubernetes monitoring view. It shows all active
 ### CPU Req Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.cpu_request_utilization`.
-- Ratio of the pod's CPU usage to the sum of its containers' CPU requests, expressed as a percentage. Per the kubeletstats receiver, requests are used for scheduling — values approaching or exceeding 100% mean the pod is using more CPU than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving capacity the pod never uses. Not emitted if any container is missing a `requests.cpu` spec.
+- Ratio of the pod's CPU usage to the sum of its containers' CPU requests, expressed as a percentage. Per the [Kubernetes resource-management docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled), requests are used by the scheduler when fitting pods to nodes — values approaching or exceeding 100% mean the pod is using more CPU than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving capacity the pod never uses. Not emitted if any container is missing a `requests.cpu` spec.
 - Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
 
 ### CPU Limit Usage (%)
