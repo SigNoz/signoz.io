@@ -98,7 +98,7 @@ const processCodeChildren = (children: ReactNode, replacements: Replacement[]): 
 }
 
 export const RegionAwarePre = (props: any) => {
-  const { region, notifyRegionCopy } = useRegion()
+  const { region, notifyRegionCopy, isOnboarding } = useRegion()
 
   const replacements = React.useMemo(() => {
     const list: Replacement[] = []
@@ -128,7 +128,7 @@ export const RegionAwarePre = (props: any) => {
 
   const [hintVisible, setHintVisible] = React.useState(false)
 
-  if (!isRegionAware) {
+  if (!isRegionAware || isOnboarding) {
     return <Pre {...props}>{renderedChildren}</Pre>
   }
 

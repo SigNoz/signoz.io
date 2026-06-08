@@ -29,10 +29,12 @@ interface RegionContextType {
   cloudRegion: string | null
   setRegion: (region: string | null, cloudRegion: string | null) => void
   isLoading: boolean
+  isOnboarding: boolean
   /**
    * Show the "double-check your region" reminder if the copied text carries a
    * region-specific SigNoz URL (or the `<region>` placeholder). No-op otherwise.
    * Called by copy buttons; Cmd/Ctrl+C is handled by a global listener below.
+   * No-op when source=onboarding (embedded in-product docs).
    */
   notifyRegionCopy: (copiedText: string) => void
 }
@@ -141,12 +143,16 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [search, regions, isOnboarding])
 
-  const notifyRegionCopy = useCallback((copiedText: string) => {
-    const copied = parseCopiedRegion(copiedText)
-    if (!copied) return
-    reminderIdRef.current += 1
-    setCopyReminder({ id: reminderIdRef.current, copied })
-  }, [])
+  const notifyRegionCopy = useCallback(
+    (copiedText: string) => {
+      if (isOnboarding) return
+      const copied = parseCopiedRegion(copiedText)
+      if (!copied) return
+      reminderIdRef.current += 1
+      setCopyReminder({ id: reminderIdRef.current, copied })
+    },
+    [isOnboarding]
+  )
 
   const closeReminder = useCallback(() => setCopyReminder(null), [])
 
@@ -187,7 +193,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   return (
     <RegionContext.Provider
-      value={{ regions, region, cloudRegion, setRegion, isLoading, notifyRegionCopy }}
+      value={{ regions, region, cloudRegion, setRegion, isLoading, isOnboarding, notifyRegionCopy }}
     >
       {children}
       <RegionCopyReminder key={copyReminder?.id} reminder={copyReminder} onClose={closeReminder} />
