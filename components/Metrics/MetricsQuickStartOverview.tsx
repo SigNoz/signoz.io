@@ -34,6 +34,7 @@ import {
   SiDeno,
   SiHasura,
   SiApachedruid,
+  SiFlux,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import { Zap } from 'lucide-react'
@@ -98,6 +99,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/integrations/nomad': <SiHashicorp className="h-7 w-7 text-purple-600" />,
   '/docs/metrics-management/fly-metrics': <SiFlydotio className="h-7 w-7 text-purple-500" />,
   '/docs/userguide/envoy-metrics': <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
+  '/docs/metrics-management/fluxcd-metrics': <SiFlux className="h-7 w-7 text-blue-500" />,
   '/docs/metrics-management/istio-metrics': <SiIstio className="h-7 w-7 text-blue-400" />,
   '/docs/metrics-management/nginx-ingress-controller': (
     <SiNginx className="h-7 w-7 text-blue-600" />

@@ -1874,6 +1874,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/fluxcd-metrics',
+                label: 'Flux Metrics',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/istio-metrics',
                 label: 'Istio Metrics',
               },
@@ -2416,6 +2421,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/flask-monitoring',
             label: 'Flask Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/fluxcd-dashboard',
+            label: 'FluxCD',
           },
           {
             type: 'doc',

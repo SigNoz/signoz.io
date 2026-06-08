@@ -38,16 +38,16 @@ export default function Tabs({ activeTab }: { activeTab: string }) {
           data-tabs-toggle="#default-tab-content"
           role="tablist"
         >
-          <TabLink href="/blog" tabId="blog-tab" activeTab={activeTab}>
+          <TabLink href="/blog/" tabId="blog-tab" activeTab={activeTab}>
             Blog
           </TabLink>
-          <TabLink href="/comparisons" tabId="comparisons-tab" activeTab={activeTab}>
+          <TabLink href="/comparisons/" tabId="comparisons-tab" activeTab={activeTab}>
             Comparisons
           </TabLink>
-          <TabLink href="/guides" tabId="guides-tab" activeTab={activeTab}>
+          <TabLink href="/guides/" tabId="guides-tab" activeTab={activeTab}>
             Guides
           </TabLink>
-          <TabLink href="/opentelemetry" tabId="openTelemetry-tab" activeTab={activeTab}>
+          <TabLink href="/opentelemetry/" tabId="openTelemetry-tab" activeTab={activeTab}>
             OpenTelemetry
           </TabLink>
           <Link

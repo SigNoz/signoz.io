@@ -1,0 +1,94 @@
+---
+date: 2026-06-02
+id: fluxcd-dashboard
+title: FluxCD Metrics Dashboard
+description: Monitor Flux controller health including reconciliation throughput, errors, duration, workqueues, runtime resource usage, and Kubernetes API traffic.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your Flux control plane across reconciliation throughput and errors, reconcile duration, controller workqueues, runtime resource usage, and Kubernetes API client traffic.
+
+<Admonition type="note">
+  Before you import this dashboard, send Flux metrics to SigNoz. Follow the [Send Flux Metrics](https://signoz.io/docs/metrics-management/fluxcd-metrics) guide to configure the OpenTelemetry Collector to scrape the Flux controllers.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/fluxcd-dashboard.webp"
+  alt="FluxCD Metrics Dashboard"
+  caption="FluxCD Metrics Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/fluxcd/fluxcd.json"
+    dashboardName="FluxCD Metrics"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Overview**: Reconciliations per second, reconcile errors, active workers, workqueue depth, reconcile duration P99, and Kubernetes API request rate
+- **Reconciliation**: Reconciliation rate by result, by controller, and by Flux kind, plus error rate by controller
+- **Reconciliation Duration**: Average duration by kind, P50/P95/P99 percentiles, P99 by kind and by resource, and controller reconcile time P99
+- **Workqueue**: Workqueue depth, add rate, retry rate, queue duration P99, and unfinished work by controller
+- **Resources**: CPU usage, working-set memory, and goroutines by controller
+- **Kubernetes API (rest_client)**: Request rate by status code, method, and host, plus the non-2xx error rate
+
+## Metrics Included
+
+### Overview
+
+- **Reconciliations / sec**: Total reconciliation throughput across controllers
+- **Reconcile Errors (range)**: Reconciliation errors across the selected range
+- **Active Workers**: Active reconcile workers per controller
+- **Workqueue Depth**: Pending items in controller workqueues
+- **Reconcile Duration p99**: 99th percentile reconciliation duration
+- **K8s API Reqs / sec**: Kubernetes API client request rate
+
+### Reconciliation
+
+- **Reconciliation Rate by Result**: Reconcile rate split by success and error
+- **Reconciliation Rate by Controller**: Per-controller reconcile rate
+- **Reconcile Error Rate by Controller**: Per-controller reconcile error rate
+- **Reconciliations by Flux Kind**: Reconcile rate grouped by Flux resource kind
+
+### Reconciliation Duration
+
+- **Avg Reconcile Duration by Kind**: Mean reconcile duration per Flux kind
+- **Reconcile Duration p50 / p95 / p99**: Reconcile duration percentiles
+- **Reconcile Duration p99 by Kind**: 99th percentile reconcile duration per Flux kind
+- **Reconcile Duration p99 by Resource**: 99th percentile reconcile duration per resource
+- **Controller Reconcile Time p99 by Controller**: Controller-runtime 99th percentile reconcile time per controller
+
+### Workqueue
+
+- **Workqueue Depth by Controller**: Pending workqueue items per controller
+- **Workqueue Add Rate by Controller**: Rate of items added to each controller's workqueue
+- **Workqueue Retry Rate by Controller**: Rate of workqueue retries per controller
+- **Workqueue Queue Duration p99**: 99th percentile time items wait in the queue
+- **Workqueue Unfinished Work Seconds**: Seconds of in-progress work not yet finished
+
+### Resources
+
+- **CPU Usage by Controller**: Per-controller CPU usage
+- **Memory (Working Set) by Controller**: Per-controller working-set memory
+- **Goroutines by Controller**: Goroutines per controller
+
+### Kubernetes API (rest_client)
+
+- **K8s API Request Rate by Status Code**: Kubernetes API request rate grouped by HTTP status code
+- **K8s API Request Rate by Method**: Kubernetes API request rate grouped by HTTP method
+- **K8s API Request Rate by Host**: Kubernetes API request rate grouped by host
+- **K8s API Error Rate (non-2xx)**: Rate of non-2xx Kubernetes API responses
+
+## Dashboard Variables
+
+- **k8s_cluster_name**: Filter by Kubernetes cluster
+- **kind**: Filter by Flux resource kind
+- **k8s_namespace**: Filter by Kubernetes namespace
+
+## Related Dashboards
+
+- [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards)
+- [Istio](https://signoz.io/docs/dashboards/dashboard-templates/istio-dashboard)
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics)

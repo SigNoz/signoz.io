@@ -1,9 +1,11 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+import { parseCopiedRegion } from './regionCopy'
+import { RegionCopyReminder, RegionCopyReminderState } from './RegionCopyReminder'
 
 interface Cluster {
   cloud_provider: string
@@ -27,6 +29,12 @@ interface RegionContextType {
   cloudRegion: string | null
   setRegion: (region: string | null, cloudRegion: string | null) => void
   isLoading: boolean
+  /**
+   * Show the "double-check your region" reminder if the copied text carries a
+   * region-specific SigNoz URL (or the `<region>` placeholder). No-op otherwise.
+   * Called by copy buttons; Cmd/Ctrl+C is handled by a global listener below.
+   */
+  notifyRegionCopy: (copiedText: string) => void
 }
 
 const FALLBACK_REGIONS: RegionData[] = [
@@ -69,6 +77,8 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [region, setRegionState] = useState<string | null>(null)
   const [cloudRegion, setCloudRegionState] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [copyReminder, setCopyReminder] = useState<RegionCopyReminderState | null>(null)
+  const reminderIdRef = useRef(0)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -131,6 +141,27 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [search, regions, isOnboarding])
 
+  const notifyRegionCopy = useCallback((copiedText: string) => {
+    const copied = parseCopiedRegion(copiedText)
+    if (!copied) return
+    reminderIdRef.current += 1
+    setCopyReminder({ id: reminderIdRef.current, copied })
+  }, [])
+
+  const closeReminder = useCallback(() => setCopyReminder(null), [])
+
+  // Catch Cmd/Ctrl+C (and right-click → Copy) of selected text anywhere within
+  // the provider. Copy buttons use the Clipboard API, which does not emit a
+  // `copy` event, so those notify via notifyRegionCopy() directly.
+  useEffect(() => {
+    const handleCopy = () => {
+      const selection = window.getSelection?.()?.toString()
+      if (selection) notifyRegionCopy(selection)
+    }
+    document.addEventListener('copy', handleCopy)
+    return () => document.removeEventListener('copy', handleCopy)
+  }, [notifyRegionCopy])
+
   const setRegion = (newRegion: string | null, newCloudRegion: string | null) => {
     const current = new URLSearchParams(search)
 
@@ -155,8 +186,11 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }
 
   return (
-    <RegionContext.Provider value={{ regions, region, cloudRegion, setRegion, isLoading }}>
+    <RegionContext.Provider
+      value={{ regions, region, cloudRegion, setRegion, isLoading, notifyRegionCopy }}
+    >
       {children}
+      <RegionCopyReminder key={copyReminder?.id} reminder={copyReminder} onClose={closeReminder} />
     </RegionContext.Provider>
   )
 }

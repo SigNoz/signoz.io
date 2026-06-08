@@ -718,7 +718,7 @@ const UnifiedObservability = () => {
                         Application Performance Monitoring
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with APM
@@ -732,7 +732,7 @@ const UnifiedObservability = () => {
                         Log Management
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Logs
@@ -746,7 +746,7 @@ const UnifiedObservability = () => {
                         Distributed Tracing
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Distributed Tracing
@@ -760,7 +760,7 @@ const UnifiedObservability = () => {
                         Infrastructure Monitoring
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Infrastructure Monitoring
@@ -774,7 +774,7 @@ const UnifiedObservability = () => {
                         Metrics and Dashboards
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Dashboards
@@ -788,7 +788,7 @@ const UnifiedObservability = () => {
                         Alerts
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Alerts
@@ -802,7 +802,7 @@ const UnifiedObservability = () => {
                         Exceptions Monitoring
                       </p>
                       <Link
-                        href="/teams"
+                        href="/teams/"
                         className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
                       >
                         Get Started with Exceptions Monitoring
@@ -919,7 +919,10 @@ const UnifiedObservability = () => {
           <div className="text-gray-300">
             <p className="mb-6 text-lg">
               Get started quickly with{' '}
-              <Link href="https://signoz.io/docs/" className="text-blue-400 hover:text-blue-300">
+              <Link
+                href="https://signoz.io/docs/introduction/"
+                className="text-blue-400 hover:text-blue-300"
+              >
                 comprehensive documentation
               </Link>
               , active community support, and detailed guides:
