@@ -57,7 +57,7 @@ The **Nodes** view shows CPU and memory usage alongside allocatable capacity for
 
 - This column relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, encoded `1` = True / Ready, `0` = False / NotReady, `-1` = Unknown.
 - The kubelet periodically posts node status to the API server; `Ready = Unknown` is what the node controller records when no kubelet update has arrived within the grace period.
-- A node going NotReady taints with `node.kubernetes.io/not-ready:NoExecute`; pods are evicted after the default 5-minute toleration window (`tolerationSeconds=300`) — investigate the kubelet, the kubelet→API-server network path, and node-level resource pressure. ([Node conditions](https://kubernetes.io/docs/concepts/architecture/nodes/#condition), [Taint-based evictions](https://kubernetes.io/docs/reference/labels-annotations-taints/#node-kubernetes-io-not-ready))
+- A NotReady node taints with `node.kubernetes.io/not-ready:NoExecute`; pods are evicted after the default 5-minute toleration window — investigate the kubelet and the kubelet→API-server network path. ([Node conditions](https://kubernetes.io/docs/concepts/architecture/nodes/#condition), [Taint-based evictions](https://kubernetes.io/docs/reference/labels-annotations-taints/#node-kubernetes-io-not-ready))
 
 ### Pod Counts by Phase
 
