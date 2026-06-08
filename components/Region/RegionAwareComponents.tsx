@@ -148,7 +148,7 @@ export const RegionAwarePre = (props: any) => {
       className="relative"
       onClickCapture={handleClickCapture}
       onMouseOver={(e) => isCopyButtonTarget(e.target) && setHintVisible(true)}
-      onMouseOut={(e) => isCopyButtonTarget(e.target) && setHintVisible(false)}
+      onMouseLeave={() => setHintVisible(false)}
     >
       <Pre {...props}>{renderedChildren}</Pre>
       {hintVisible && (
