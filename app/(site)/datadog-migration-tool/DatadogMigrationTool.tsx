@@ -5,7 +5,6 @@ import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import {
   CARDS,
@@ -15,11 +14,13 @@ import {
 } from './DatadogMigrationTool.constants'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
-import TestimonialCards from '@/shared/components/molecules/FeaturePages/TestimonialCard'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import HubspotCustomForm from '@/components/hubspot-custom-form/HubspotCustomForm'
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
+import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
 
 const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -61,27 +62,29 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
 
 const ReadyToMigrateBanner: React.FC = () => {
   return (
-    <SectionLayout
-      variant="no-border"
-      className="!border-t-1 !border-x-0 !border-dashed !border-signoz_slate-400 py-10"
-    >
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-        Ready to Migrate from Datadog?
-      </h2>
-      <RequestEarlyAccessButton className="!mx-auto" />
-    </SectionLayout>
+    <>
+      <SectionLayout variant="bordered" className="pb-10">
+        <h2 className="mb-6 pt-10 text-center text-4xl text-signoz_vanilla-100">
+          Ready to Migrate from Datadog?
+        </h2>
+
+        <RequestEarlyAccessButton className="!mx-auto" />
+      </SectionLayout>
+    </>
   )
 }
 
 // Main Component Sections
 const Header: React.FC = () => {
   return (
-    <header className="relative !mx-auto mt-16 !w-[100vw] max-w-8xl md:!w-[80vw]">
-      {/* Border decorations */}
+    <header className="relative">
+      {/* Main content */}
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
-      {/* Main content */}
-      <div className="relative !mx-auto flex !w-[100vw] max-w-8xl flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
+      <SectionLayout
+        variant="bordered"
+        className="relative !mx-auto flex flex-col items-center px-2 pb-4 pt-12 text-center"
+      >
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
           Migrate from Datadog to SigNoz <br className="hidden md:block" /> in Minutes
         </h1>
@@ -91,10 +94,10 @@ const Header: React.FC = () => {
           <br className="hidden md:block" /> SigNoz through a simple UI, preserving your
           configurations, queries, and panels.
         </p>
-      </div>
+      </SectionLayout>
 
       {/* Buttons */}
-      <RequestEarlyAccessButton className="!mx-auto !w-[100vw] max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]" />
+      <RequestEarlyAccessButton className="!mx-auto max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5" />
 
       {/* Hero image */}
       <SectionLayout variant="bordered" className="!mt-0 max-md:-mb-[3rem]">
@@ -112,26 +115,22 @@ const Header: React.FC = () => {
 
 const TopHeroSection: React.FC = () => {
   return (
-    <SectionLayout
-      variant="bordered"
-      className="!border-b-1 !border-t-1 !border-dashed !border-signoz_slate-400"
-    >
+    <SectionLayout variant="bordered" className="!px-0">
+      <Divider />
       <div className="mb-8 text-center">
         <h2 className="mb-6 pt-12 text-4xl font-semibold text-signoz_sienna-100">
           Typical Migration Pain
         </h2>
       </div>
       <HeroCards cards={CARDS} layoutVariant={'no-border'} variant="combined" />
+      <Divider />
     </SectionLayout>
   )
 }
 
 const LlmPoweredIntelligenceSection: React.FC = () => {
   return (
-    <SectionLayout
-      variant="full-width"
-      className="border-t border-dashed border-signoz_slate-400 bg-signoz_ink-500"
-    >
+    <SectionLayout variant="bordered" className="bg-signoz_ink-500 !px-0">
       <div className="mb-6 max-w-4xl px-8 py-6">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">
           LLM-Powered Intelligence
@@ -148,59 +147,6 @@ const LlmPoweredIntelligenceSection: React.FC = () => {
         variant="combined"
       />
     </SectionLayout>
-  )
-}
-
-const CustomerStories: React.FC = () => {
-  return (
-    <>
-      {/* Featured testimonial */}
-      <section className="bg-blur-ellipse-388 relative mx-auto w-[100vw] max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-
-        <div className="relative">
-          <div className="container pb-16">
-            <div className="flex flex-col gap-6 py-32">
-              <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-                <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-                  <Image
-                    src="/img/case_study/logos/shaped-logo.svg"
-                    alt="Shaped"
-                    width={100}
-                    height={100}
-                  />
-                  Every single time we have an issue, SigNoz is always the first place to check. It
-                  was super straightforward to migrate - just updating the exporter configuration,
-                  basically three lines of code.
-                  <span className="text-sm text-signoz_vanilla-400">
-                    <span className="font-semibold">Karl Lyons</span> <br /> Senior SRE, Shaped
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials grid */}
-      <SectionLayout variant="bordered" className="!mx-auto p-0 max-md:-mb-[3rem]">
-        <div className="container pb-16">
-          <TestimonialCards />
-
-          <div className="z-5 relative -mt-[25rem] flex h-96 items-end justify-center bg-gradient-to-t from-signoz_ink-500 to-transparent py-6 max-md:py-16">
-            <Button
-              variant="secondary"
-              rounded="full"
-              className="flex items-center gap-2"
-              to="/case-study/"
-            >
-              Read customer stories
-              <ArrowRight size={14} />
-            </Button>
-          </div>
-        </div>
-      </SectionLayout>
-    </>
   )
 }
 
@@ -303,10 +249,7 @@ const WhatWeSupportSection: React.FC = () => {
   }
 
   return (
-    <SectionLayout
-      variant="no-border"
-      className="!border-t-1 !border-x-0 !border-dashed !border-signoz_slate-400"
-    >
+    <SectionLayout variant="bordered">
       <div className="px-6 py-8">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">What We Support</h2>
         <p className="leading-relaxed text-signoz_vanilla-400">
@@ -334,31 +277,26 @@ const WhatWeSupportSection: React.FC = () => {
 // Main Component
 const DatadogMigrationTool: React.FC = () => {
   return (
-    <main className="!mt-[-10px] mb-auto">
-      <ProductNav />
-
-      <div className="relative bg-signoz_ink-500">
-        {/* Background decorations */}
-        <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
-        <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
-
-        {/* Main sections */}
-        <Header />
-        <TopHeroSection />
-
-        <SimpleAutomatedMigrationSection />
-
-        <SectionLayout variant="bordered" className="!px-0">
-          <WhatWeSupportSection />
-          <LlmPoweredIntelligenceSection />
-          <ReadyToMigrateBanner />
-        </SectionLayout>
-
-        <UsageBasedPricing show={['logs', 'traces', 'metrics']} />
-        <SigNozStats />
-        <CustomerStories />
-      </div>
-    </main>
+    <FeaturePageLayout showProductNav={false}>
+      <Header />
+      <TopHeroSection />
+      <SimpleAutomatedMigrationSection />
+      <Divider />
+      <WhatWeSupportSection />
+      <Divider />
+      <LlmPoweredIntelligenceSection />
+      <Divider />
+      <ReadyToMigrateBanner />
+      <UsageBasedPricing show={['logs', 'traces', 'metrics']} />
+      <SigNozStats />
+      <Divider />
+      <CustomerStoriesSection
+        tracking={{
+          clickName: 'Customer Stories Button',
+          clickLocation: 'Datadog Migration Tool Page',
+        }}
+      />
+    </FeaturePageLayout>
   )
 }
 

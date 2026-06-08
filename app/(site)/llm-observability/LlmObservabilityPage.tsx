@@ -20,6 +20,8 @@ import TrackingLink from '@/components/TrackingLink'
 import ComparisonTable from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -27,7 +29,7 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Hero Start Trial',
@@ -39,7 +41,7 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Hero Docs',
@@ -75,8 +77,10 @@ const Header: React.FC = () => {
 
 const EverythingYouNeedCards: React.FC = () => {
   return (
-    <section className="bg-blur-ellipse-388 relative mx-auto w-[100vw] max-w-8xl overflow-hidden md:w-[80vw]">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
+    <SectionLayout
+      variant="bordered"
+      className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden"
+    >
       <div className="relative">
         <div className="container">
           <div className="flex flex-col gap-6 pt-32">
@@ -86,61 +90,66 @@ const EverythingYouNeedCards: React.FC = () => {
                   Everything You Need to <br className="hidden md:block" /> Monitor LLM Applications
                 </h2>
                 <SectionLayout variant="no-border" className="!mx-auto p-0">
+                  <Divider />
                   <IconTitleDescriptionCardGrid cards={LLM_OBSERVABILITY_CARDS} />
+                  <Divider />
                 </SectionLayout>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </SectionLayout>
   )
 }
 
 const WorksWithYourFavoriteLLMTools: React.FC = () => {
   return (
     <>
-      <section className="bg-blur-ellipse-388 relative mx-auto w-[100vw] max-w-8xl overflow-hidden md:w-[80vw]">
+      <SectionLayout
+        variant="bordered"
+        className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden"
+      >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
         <div className="relative">
-          <div className="container">
-            <div className="flex flex-col gap-6">
-              <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-                <div className="flex flex-col items-center gap-8 font-medium leading-[3.25rem] text-signoz_sienna-100">
-                  <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
-                    Works with Your Favorite LLM Tools
-                  </h2>
-                  <p className="text-sm leading-relaxed text-signoz_vanilla-400">
-                    Automatic instrumentation for every part of your LLM stack. From model{' '}
-                    <br className="hidden md:block" /> providers to vector databases to agent
-                    frameworks, get instant visibility <br className="hidden md:block" /> without
-                    writing custom telemetry code.
-                  </p>
-                  <Button
-                    variant="secondary"
-                    rounded="full"
-                    className="flex w-fit items-center gap-2"
-                    asChild
+          <div className="flex flex-col gap-6">
+            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+              <div className="flex flex-col items-center gap-8 font-medium leading-[3.25rem] text-signoz_sienna-100">
+                <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
+                  Works with Your Favorite LLM Tools
+                </h2>
+
+                <p className="text-sm leading-relaxed text-signoz_vanilla-400">
+                  Automatic instrumentation for every part of your LLM stack. From model{' '}
+                  <br className="hidden md:block" /> providers to vector databases to agent
+                  frameworks, get instant visibility <br className="hidden md:block" /> without
+                  writing custom telemetry code.
+                </p>
+                <Button
+                  variant="secondary"
+                  rounded="full"
+                  className="flex w-fit items-center gap-2"
+                  asChild
+                >
+                  <TrackingLink
+                    href="/docs/llm-observability/"
+                    clickType="Secondary CTA"
+                    clickName="LLM Observability Integrations Button"
+                    clickLocation="LLM Observability Integrations Section"
+                    clickText="See All Integrations"
                   >
-                    <TrackingLink
-                      href="/docs/llm-observability/"
-                      clickType="Secondary CTA"
-                      clickName="LLM Observability Integrations Button"
-                      clickLocation="LLM Observability Integrations Section"
-                      clickText="See All Integrations"
-                    >
-                      <BookOpen className="h-5 w-5 text-signoz_vanilla-400" />
-                      See All Integrations
-                      <ArrowRight className="h-5 w-5 text-signoz_vanilla-400" />
-                    </TrackingLink>
-                  </Button>
-                </div>
+                    <BookOpen className="h-5 w-5 text-signoz_vanilla-400" />
+                    See All Integrations
+                    <ArrowRight className="h-5 w-5 text-signoz_vanilla-400" />
+                  </TrackingLink>
+                </Button>
               </div>
             </div>
           </div>
         </div>
-      </section>
-      <SectionLayout variant="full-width" className="!mx-auto mt-10 p-0">
+      </SectionLayout>
+      <SectionLayout variant="bordered" className="!mx-auto mt-10 p-0">
+        <Divider />
         <GridLayout variant="split" className="!gap-y-0">
           {LLM_TOOLS_DATA.map((section, index) => {
             const isDesktopRow1 = index < 2
@@ -183,7 +192,10 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
 
 const HowSigNozCompares: React.FC = () => {
   return (
-    <section className="bg-blur-ellipse-388 relative mx-auto w-[100vw] max-w-8xl overflow-hidden md:w-[80vw]">
+    <SectionLayout
+      variant="bordered"
+      className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden"
+    >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
       <div className="relative">
         <div className="container pb-16">
@@ -204,7 +216,7 @@ const HowSigNozCompares: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
+    </SectionLayout>
   )
 }
 
@@ -214,7 +226,7 @@ const StartMonitoring: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Bottom CTA Start Trial',
@@ -226,7 +238,7 @@ const StartMonitoring: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Bottom CTA Docs',
@@ -236,10 +248,8 @@ const StartMonitoring: React.FC = () => {
     },
   ]
   return (
-    <SectionLayout
-      variant="bordered"
-      className="!border-t-1 border-dashed border-signoz_slate-400 !px-0"
-    >
+    <SectionLayout variant="bordered" className="!px-0">
+      <Divider />
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
           <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-12">
@@ -247,7 +257,7 @@ const StartMonitoring: React.FC = () => {
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="border-b border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+          <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
             <div className="grid grid-cols-1 lg:grid-cols-3">
               <div className="col-span-2 flex flex-col gap-6 p-10">
                 <h3 className="m-0 text-2xl font-semibold text-signoz_vanilla-100">
@@ -294,16 +304,14 @@ const LlmObservabilityPage: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
-
-      <SectionLayout variant="bordered" className="!px-0">
-        <EverythingYouNeedCards />
-        <HowSigNozCompares />
-        <WorksWithYourFavoriteLLMTools />
-      </SectionLayout>
+      <EverythingYouNeedCards />
+      <HowSigNozCompares />
+      <WorksWithYourFavoriteLLMTools />
 
       <StartMonitoring />
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'LLM Observability Customer Stories Button',

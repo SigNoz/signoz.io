@@ -22,9 +22,11 @@ import {
 } from './ClickStackAlternativePage.constants'
 import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
-import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import Link from 'next/link'
+import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -32,7 +34,7 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Hero Start Trial',
@@ -44,7 +46,7 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Hero Docs',
@@ -76,7 +78,7 @@ const QuickEvaluation: React.FC = () => {
   return (
     <SectionLayout
       variant="full-width"
-      className="relative mx-auto w-[100vw] overflow-hidden border-b border-dashed border-signoz_slate-400 md:w-[80vw]"
+      className="relative mx-auto overflow-hidden border-b border-dashed border-signoz_slate-400"
     >
       <div className="relative flex flex-col gap-6 pt-32 md:py-20">
         <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
@@ -84,10 +86,7 @@ const QuickEvaluation: React.FC = () => {
             <h2 className="my-6 text-center text-4xl font-semibold text-signoz_sakura-100">
               A Quick Evaluation
             </h2>
-            <SectionLayout
-              variant="no-border"
-              className="!mx-auto flex items-center justify-center"
-            >
+            <SectionLayout variant="no-border" className="flex items-center justify-center">
               <ComparisonTable
                 vendors={VENDORS}
                 rows={CLICKSTACK_COMPARISON_TABLE_ROWS}
@@ -104,10 +103,7 @@ const QuickEvaluation: React.FC = () => {
 const CostComparison: React.FC = () => {
   return (
     <>
-      <SectionLayout
-        variant="full-width"
-        className="flex flex-col gap-y-9 border-y border-dashed border-signoz_slate-400 !px-0"
-      >
+      <SectionLayout variant="full-width" className="flex flex-col gap-y-9 !px-0">
         <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
           <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
           <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
@@ -119,40 +115,43 @@ const CostComparison: React.FC = () => {
             is free.
           </div>
         </div>
-        <div className="border-t-1 flex flex-col border-dashed border-signoz_slate-400 sm:flex-row">
-          <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
-            <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
-              <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
-                ClickStack's <br className="hidden md:block" /> billing{' '}
-                <br className="hidden md:block" /> complexity
-              </h2>
-              <Button asChild variant="secondary" rounded="full">
-                <TrackingLink
-                  href="/blog/clickstack-managed-pricing-compute-costs/"
-                  clickType="Secondary CTA"
-                  clickName="ClickStack Alternative Cost Comparison ClickStack Pricing Details Button"
-                  clickLocation="ClickStack Alternative Cost Comparison"
-                  clickText="ClickStack pricing details"
-                >
-                  ClickStack pricing details <ArrowRight size={16} />
-                </TrackingLink>
-              </Button>
-            </div>
-          </div>
-          <div className="flex-[2_2_0%]">
-            <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
-              <div className="flex flex-col gap-4 px-10 py-10">
-                {CLICKSTACK_BILLING_CARDS.map((card) => (
-                  <Card
-                    key={card.title}
-                    className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+        <div>
+          <Divider />
+          <div className="flex flex-col sm:flex-row">
+            <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
+              <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
+                <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+                  ClickStack's <br className="hidden md:block" /> billing{' '}
+                  <br className="hidden md:block" /> complexity
+                </h2>
+                <Button asChild variant="secondary" rounded="full">
+                  <TrackingLink
+                    href="/blog/clickstack-managed-pricing-compute-costs/"
+                    clickType="Secondary CTA"
+                    clickName="ClickStack Alternative Cost Comparison ClickStack Pricing Details Button"
+                    clickLocation="ClickStack Alternative Cost Comparison"
+                    clickText="ClickStack pricing details"
                   >
-                    <div className="p-6">
-                      <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
-                      <p className="m-0 text-sm text-signoz_vanilla-400">{card.description}</p>
-                    </div>
-                  </Card>
-                ))}
+                    ClickStack pricing details <ArrowRight size={16} />
+                  </TrackingLink>
+                </Button>
+              </div>
+            </div>
+            <div className="flex-[2_2_0%]">
+              <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+                <div className="flex flex-col gap-4 px-10 py-10">
+                  {CLICKSTACK_BILLING_CARDS.map((card) => (
+                    <Card
+                      key={card.title}
+                      className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+                    >
+                      <div className="p-6">
+                        <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
+                        <p className="m-0 text-sm text-signoz_vanilla-400">{card.description}</p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -164,7 +163,7 @@ const CostComparison: React.FC = () => {
 
 const DashboardsThatHelpYouInvestigate: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
+    <section className="relative mx-auto max-w-8xl overflow-hidden">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -177,15 +176,19 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
               with all your filters intact.
             </div>
           </div>
-          <SectionLayout
-            variant="no-border"
-            className="!mx-auto flex items-center justify-center !p-0"
-          >
-            <IconTitleDescriptionCardGrid
-              cards={DASHBOARD_HELP_YOU_INVESTIGATE_CARDS}
-              variant="lg"
-            />
-          </SectionLayout>
+          <div>
+            <Divider />
+            <SectionLayout
+              variant="no-border"
+              className="!mx-auto flex items-center justify-center !p-0"
+            >
+              <IconTitleDescriptionCardGrid
+                cards={DASHBOARD_HELP_YOU_INVESTIGATE_CARDS}
+                variant="lg"
+              />
+            </SectionLayout>
+            <Divider />
+          </div>
         </div>
       </div>
     </section>
@@ -194,7 +197,7 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
 
 const AlertingThatTellsYouWhatMatters: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
+    <section className="relative mx-auto max-w-8xl overflow-hidden">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -208,7 +211,9 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
             </div>
           </div>
           <SectionLayout variant="no-border" className="!mx-auto !p-0">
+            <Divider />
             <IconTitleDescriptionCardGrid cards={ALERTING_ABOVE_HISTORY_CARDS} variant="lg" />
+            <Divider />
             <div className="flex flex-col items-start gap-4 border-dashed border-signoz_slate-400 px-8 py-6 text-left">
               <h4 className="m-0 p-0 font-semibold text-signoz_vanilla-100">Alert history</h4>
               <p className="m-0 p-0 text-sm text-signoz_vanilla-400">
@@ -228,6 +233,7 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
                 className="rounded-md"
               />
             </div>
+            <Divider />
             <IconTitleDescriptionCardGrid cards={ALERTING_BELOW_HISTORY_CARDS} variant="lg" />
           </SectionLayout>
         </div>
@@ -242,7 +248,7 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Start Trial',
@@ -254,7 +260,7 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/introduction/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Read Documentation',
@@ -265,19 +271,23 @@ const BetterChoiceBanner: React.FC = () => {
   ]
 
   return (
-    <SectionLayout variant="bordered" className="flex flex-col items-center justify-center !py-20">
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-        ClickStack or HyperDX? <br />
-        Either way, SigNoz is the better choice.
-      </h2>
-      <ButtonGroup buttons={betterChoiceButtons} />
+    <SectionLayout variant="bordered" className="!px-0">
+      <CTABanner
+        title={
+          <>
+            ClickStack or HyperDX? <br />
+            Either way, SigNoz is the better choice.
+          </>
+        }
+        buttons={betterChoiceButtons}
+      />
     </SectionLayout>
   )
 }
 
 const QueryYourData: React.FC = () => {
   return (
-    <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-16">
+    <div className="bg-signoz_ink-500 py-16">
       <div className="mx-auto my-8 max-w-4xl p-6">
         <h2 className="my-4 text-center text-4xl font-semibold text-signoz_sakura-100">
           Query Your Data, Any Way You Want
@@ -316,7 +326,9 @@ const ClickStackAlternativePage: React.FC = () => {
         <QuickEvaluation />
         <DashboardsThatHelpYouInvestigate />
         <AlertingThatTellsYouWhatMatters />
+        <Divider />
         <QueryYourData />
+        <Divider />
         <CostComparison />
       </SectionLayout>
 
@@ -343,7 +355,9 @@ const ClickStackAlternativePage: React.FC = () => {
         }
       />
       <BetterChoiceBanner />
+      <Divider />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'ClickStack Alternative Customer Stories Button',
