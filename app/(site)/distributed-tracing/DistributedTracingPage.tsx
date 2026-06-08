@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight, MonitorDown, Shovel } from 'lucide-react'
+import { MonitorDown, Shovel } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
@@ -12,15 +12,21 @@ import {
   CONTAINER_ICONS,
   CORRELATION_CAROUSEL_DATA,
   DIRECT_INTEGRATIONS,
+  DISTRIBUTED_TRACING_HEADER_BUTTONS,
   LANGUAGES_ICONS,
   LEGACY_FORMAT_SUPPORT_ICONS,
+  CONTROL_TRACES_VOLUME_PANEL,
   POPULAR_TOOLS_ICONS,
   FILTER_AND_ANALYZE_CARDS,
+  INSTRUMENT_SERVICES_PANEL,
+  MASSIVE_TRACES_SHOWCASE,
+  RELATED_LOGS_PANEL,
+  TRACE_QUERY_BUILDER_IMAGE,
+  TRACE_QUERY_BUILDER_SHOWCASE,
 } from './DistributedTracingPage.constants'
 import TabItem from '@/components/TabItem'
 import Tabs from '@/components/Tabs'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
-import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
 import IconGrid from '@/shared/components/molecules/FeaturePages/IconGrid'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
@@ -29,36 +35,12 @@ import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import CarouselCards from '@/shared/components/molecules/FeaturePages/CarouselCards'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureShowcase'
+import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
 
 // Main Component Sections
 const Header: React.FC = () => {
-  const headerButtons = [
-    {
-      text: 'Start your free trial',
-      href: '/teams/',
-      variant: 'default' as const,
-      className: 'flex-center',
-      tracking: {
-        clickType: 'Primary CTA',
-        clickName: 'Distributed Tracing Hero Start Trial',
-        clickLocation: 'Distributed Tracing Hero',
-        clickText: 'Start your free trial',
-      },
-    },
-    {
-      text: 'Read Documentation',
-      href: '/docs/instrumentation/overview/',
-      variant: 'secondary' as const,
-      className: 'flex-center',
-      tracking: {
-        clickType: 'Secondary CTA',
-        clickName: 'Distributed Tracing Hero Docs',
-        clickLocation: 'Distributed Tracing Hero',
-        clickText: 'Read Documentation',
-      },
-    },
-  ]
-
   return (
     <FeaturePageHeader
       title={
@@ -72,7 +54,7 @@ const Header: React.FC = () => {
           traces with logs and metrics to find root cause in distributed systems.
         </>
       }
-      buttons={headerButtons}
+      buttons={DISTRIBUTED_TRACING_HEADER_BUTTONS}
       heroImage="/img/distributed-tracing/DistributedTracingHero.webp"
       heroImageAlt="Distributed tracing hero"
     />
@@ -82,16 +64,13 @@ const Header: React.FC = () => {
 const LogProcessingSection: React.FC = () => {
   const sourcesTabContent = (
     <div className="flex min-h-52 flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4">
-        <IconGrid
-          icons={LANGUAGES_ICONS}
-          title="LANGUAGES"
-          className="border-r-1 border-dashed border-signoz_slate-400 pr-4"
-        />
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-4">
+        <IconGrid icons={LANGUAGES_ICONS} title="LANGUAGES" className="pr-4" />
+        <Divider orientation="vertical" />
         <IconGrid icons={CONTAINER_ICONS} title="FRAMEWORKS" />
       </div>
 
-      <div className="border-b-1 border-dashed border-signoz_slate-400" />
+      <Divider />
 
       <IconGrid
         icons={POPULAR_TOOLS_ICONS}
@@ -178,39 +157,10 @@ const LogProcessingSection: React.FC = () => {
   )
 
   return (
-    <div className="border-y-1 mt-12 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-10">
-      <GridLayout variant="split">
-        {/* Left Column - Ingestion */}
-        <div className="flex flex-col px-6">
-          <div className="flex min-h-72 flex-col justify-between">
-            <div>
-              <h2 className="mb-6 text-signoz_vanilla-100">Instrument services in minutes</h2>
-              <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-                Auto-instrument your applications with OpenTelemetry across all major languages and
-                frameworks. Change one environment variable to start sending traces to SigNoz.
-              </p>
-            </div>
-            <Button
-              variant="secondary"
-              rounded="full"
-              className="mb-8 flex w-fit items-center gap-2"
-              asChild
-            >
-              <TrackingLink
-                href="/docs/instrumentation/overview/"
-                clickType="Secondary CTA"
-                clickName="Distributed Tracing Instrumentation Docs Button"
-                clickLocation="Distributed Tracing Instrumentation Section"
-                clickText="Read Documentation"
-              >
-                Read Documentation
-                <ArrowRight size={14} />
-              </TrackingLink>
-            </Button>
-          </div>
-        </div>
-
-        {/* Right Column - Processing */}
+    <SplitSection
+      className="py-10"
+      left={INSTRUMENT_SERVICES_PANEL}
+      right={
         <div className="-my-10 flex flex-col px-6 py-8">
           <div className="flex min-h-72 flex-col justify-between">
             <div>
@@ -219,7 +169,7 @@ const LogProcessingSection: React.FC = () => {
                   <TabItem
                     value="supported-sources"
                     label={
-                      <span className="flex-center">
+                      <span className="flex h-full w-full items-center justify-center gap-1">
                         <MonitorDown /> Supported Languages & Frameworks
                       </span>
                     }
@@ -229,7 +179,7 @@ const LogProcessingSection: React.FC = () => {
                   <TabItem
                     value="collection-methods"
                     label={
-                      <span className="flex-center">
+                      <span className="flex h-full w-full items-center justify-center gap-1">
                         <Shovel /> Collection Methods
                       </span>
                     }
@@ -241,55 +191,25 @@ const LogProcessingSection: React.FC = () => {
             </div>
           </div>
         </div>
-      </GridLayout>
-    </div>
+      }
+    />
   )
 }
 
 const VisualQueryBuilder: React.FC = () => {
   return (
     <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-        <div className="mb-8 max-w-4xl">
-          <h2 className="mb-6 text-signoz_vanilla-100">
-            Find and analyze traces with powerful queries
-          </h2>
-          <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-            Filter traces by session ID, user ID, HTTP headers, or custom tags with auto-complete
-            suggesting from your telemetry data as you type. Build complex queries visually, run
-            aggregations like P95 latency calculations grouped by service or region, apply HAVING
-            clauses to filter results, then dive deeper with trace operators to understand
-            parent-child span relationships across your distributed system.
-          </p>
-          <Button
-            variant="secondary"
-            rounded="full"
-            className="flex w-fit items-center gap-2"
-            asChild
-          >
-            <TrackingLink
-              href="/docs/userguide/query-builder-v5/#multi-query-analysis-advanced-comparisons"
-              clickType="Secondary CTA"
-              clickName="Distributed Tracing Query Builder Docs Button"
-              clickLocation="Distributed Tracing Query Builder Section"
-              clickText="Read Documentation"
-            >
-              Read Documentation
-              <ArrowRight size={14} />
-            </TrackingLink>
-          </Button>
-        </div>
-
+      <FeatureShowcase {...TRACE_QUERY_BUILDER_SHOWCASE}>
         <Image
-          src="/img/distributed-tracing/find-and-analyze-traces-with-powerful-queries.png"
-          alt="Find and analyze traces with powerful queries"
+          src={TRACE_QUERY_BUILDER_IMAGE.src}
+          alt={TRACE_QUERY_BUILDER_IMAGE.alt}
           width={10000}
           height={10000}
           className="mb-8"
         />
 
         {/* <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={null} variant="combined" /> */}
-      </div>
+      </FeatureShowcase>
       <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={'no-border'} variant="combined" />
     </>
   )
@@ -297,81 +217,14 @@ const VisualQueryBuilder: React.FC = () => {
 
 const StorageSection: React.FC = () => {
   return (
-    <div className="border-y-1 mb-12 border-dashed border-signoz_slate-400 bg-transparent p-0">
-      <div className="flex h-full flex-col items-start gap-8 px-6 md:flex-row">
-        <div className="border-r-1 flex h-full w-full flex-col justify-between border-dashed border-signoz_slate-400 py-6 pr-6">
-          <h2 className="mb-6 font-semibold text-signoz_vanilla-100">
-            See related logs of every span
-          </h2>
-          <p className="mb-6 leading-relaxed text-signoz_vanilla-400">
-            Click any span to see correlated logs instantly. OpenTelemetry automatically injects
-            trace context into your logs, connecting traces and logs in both directions. Jump from
-            traces to logs with one click, or click `trace_id` in any log to view the complete
-            distributed trace.
-          </p>
-          <div className="flex flex-col">
-            <Button
-              variant="secondary"
-              rounded="full"
-              className="z-10 flex w-fit items-center gap-2"
-              asChild
-            >
-              <TrackingLink
-                href="/docs/traces-management/guides/correlate-traces-and-logs/"
-                clickType="Secondary CTA"
-                clickName="Distributed Tracing Correlate Logs Docs Button"
-                clickLocation="Distributed Tracing Storage Section"
-                clickText="Read Documentation"
-              >
-                Read Documentation
-                <ArrowRight size={14} />
-              </TrackingLink>
-            </Button>
-            <Image
-              src="/img/distributed-tracing/see-related-logs-of-every-span.png"
-              alt="See related logs of every span"
-              width={10000}
-              height={10000}
-              className="-mt-8"
-            />
-          </div>
-        </div>
-
-        <div className="flex h-full w-full flex-col justify-between py-6">
-          <h2 className="mb-6 font-semibold text-signoz_vanilla-100">Control traces volume</h2>
-          <p className="mb-6 leading-relaxed text-signoz_vanilla-400">
-            Drop spans you don't need to optimize costs further. Define filter rules to exclude
-            health checks, internal endpoints, or noisy traces. Remove sensitive attributes before
-            storage, or drop entire spans based on service, operation name, or custom span
-            attributes.
-          </p>
-          <div className="flex flex-col">
-            <Button
-              variant="secondary"
-              rounded="full"
-              className="flex w-fit items-center gap-2"
-              asChild
-            >
-              <TrackingLink
-                href="/docs/traces-management/guides/drop-spans/"
-                clickType="Secondary CTA"
-                clickName="Distributed Tracing Drop Spans Docs Button"
-                clickLocation="Distributed Tracing Storage Section"
-                clickText="Read Documentation"
-              >
-                Read Documentation
-                <ArrowRight size={14} />
-              </TrackingLink>
-            </Button>
-            <Image
-              src="/img/distributed-tracing/control-traces-volume.png"
-              alt="Control traces volume"
-              width={10000}
-              height={10000}
-            />
-          </div>
-        </div>
-      </div>
+    <div>
+      <Divider />
+      <SplitSection
+        className="bg-transparent"
+        left={RELATED_LOGS_PANEL}
+        right={CONTROL_TRACES_VOLUME_PANEL}
+        withVerticalDivider
+      />
     </div>
   )
 }
@@ -381,35 +234,35 @@ const DistributedTracing: React.FC = () => {
   return (
     <FeaturePageLayout>
       <Header />
-      <HeroCards cards={CARDS} />
 
       <SectionLayout variant="bordered" className="!px-0">
+        <Divider />
+        <HeroCards layoutVariant="no-border" cards={CARDS} />
+        <Divider className="mb-12" />
+        <Divider />
         <LogProcessingSection />
 
-        <SectionLayout variant="full-width" className="px-6 pt-6">
-          <h2 className="mb-6 text-signoz_vanilla-100">
-            Load traces with million spans without browser crashes
-          </h2>
-          <p className="mb-2 leading-relaxed text-signoz_vanilla-400">
-            Virtualized rendering and progressive loading handle traces with 1M+ spans without UI
-            degradation. Synchronized flame graph and waterfall views update together as you
-            navigate, with span events appearing as timeline indicators. Hierarchical flame graphs
-            provide topology overview while detailed waterfall views show exact timing. Scroll and
-            drill down with instant response times.
-          </p>
-        </SectionLayout>
+        <Divider />
+        <FeatureShowcase
+          {...MASSIVE_TRACES_SHOWCASE}
+          className="!mx-auto px-6 pb-0 pt-6"
+          contentClassName="mb-0"
+        />
+        <Divider orientation="vertical" />
 
         <CarouselCards
           cards={CORRELATION_CAROUSEL_DATA}
           buttonLink="/opentelemetry/correlating-traces-logs-metrics-nodejs/"
           buttonText="Read Blog"
         />
+        <Divider />
         <VisualQueryBuilder />
         <StorageSection />
+        <Divider className="pb-12" />
       </SectionLayout>
-
       <UsageBasedPricing show={['traces']} />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Distributed Tracing Customer Stories Button',
