@@ -6,7 +6,7 @@ const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({
   showProductNav = true,
 }) => {
   return (
-    <main className="!mt-[-10px] mb-auto">
+    <main className="relative mx-auto !mt-[-10px] mb-auto max-w-8xl">
       {showProductNav && <ProductNav />}
 
       <div className="relative bg-signoz_ink-500">
