@@ -4,11 +4,13 @@ import CaseStudyLayout from '@/layouts/CaseStudyLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
+import { getContentBySlug } from '@/utils/contentRepository'
+import { MDXContent } from '@/utils/strapi'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { getAuthorKeys } from '@/utils/contentHelpers'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -38,8 +40,12 @@ export async function generateMetadata(props: {
     const deploymentStatus = isProduction ? 'live' : 'staging'
 
     try {
-      const response = await fetchMDXContentByPath('case-studies', path, deploymentStatus)
-      const content = Array.isArray(response.data) ? response.data[0] : response.data
+      const content = await getContentBySlug('case-studies', path, deploymentStatus)
+
+      if (!content) {
+        throw new Error(`Case study content not found for path: ${path}`)
+      }
+
       const seoTitle = content?.meta_title || content?.title
 
       return {
@@ -88,22 +94,18 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const params = await props.params
   const path = params.slug.join('/')
 
-  // Fetch content from Strapi with error handling
+  // Fetch content from the repository with error handling
   let content: MDXContent
   try {
-    if (!process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL) {
-      throw new Error('Strapi API URL is not configured')
-    }
-
     const isProduction = process.env.VERCEL_ENV === 'production'
     const deploymentStatus = isProduction ? 'live' : 'staging'
 
-    const response = await fetchMDXContentByPath('case-studies', path, deploymentStatus)
-    if (!response || !response.data) {
+    const response = await getContentBySlug('case-studies', path, deploymentStatus)
+    if (!response) {
       console.error(`Invalid response for path: ${path}`)
       notFound()
     }
-    content = Array.isArray(response.data) ? response.data[0] : response.data
+    content = response
   } catch (error) {
     console.error('Error fetching case study content:', error)
     notFound()
@@ -115,8 +117,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   }
 
   // Generate computed fields
-  const readingTimeData = readingTime(content?.content)
-  const toc = generateTOC(content?.content)
+  const readingTimeData = readingTime(content?.content || '')
+  const toc = generateTOC(content?.content || '')
 
   // Compile MDX content with all plugins
   let compiledContent
@@ -142,7 +144,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     filePath: `/case-study/${path}`,
     toc: toc,
     image: content.image,
-    authors: content.authors?.map((author) => author?.key) || [],
+    authors: getAuthorKeys(content),
   }
 
   return (

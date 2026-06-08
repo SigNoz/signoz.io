@@ -35,7 +35,7 @@ CloudWatch answers questions like:
 
 CloudWatch automatically collects some performance metrics from AWS services, so EC2 instances report CPU utilization, network traffic, and disk I/O, while Lambda functions surface invocation count, duration, and error rate. RDS databases contribute connection count, read/write latency, and storage usage to the same metrics pipeline.
 
-You can also push [custom metrics](/blog/cloudwatch-metrics) from your applications for business-specific measurements like order processing time or queue depth.
+You can also push [custom metrics](/blog/cloudwatch-metrics/) from your applications for business-specific measurements like order processing time or queue depth.
 
 <Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-ec2-metrics.webp" alt="EC2 instance Monitoring tab in the AWS Console showing default CloudWatch metrics like CPU utilization and network traffic" caption="EC2 instance Monitoring tab showing default CloudWatch metrics including CPU utilization, network I/O, and credit usage" />
 
@@ -55,7 +55,7 @@ Inside each log group, you can search and filter log events, set up metric filte
 
 With metrics and logs flowing in, the next step is acting on them. CloudWatch Alarms let you set thresholds on any metric and trigger actions when those thresholds are breached, whether that is sending a notification through SNS, triggering an Auto Scaling action, or invoking a Lambda function.
 
-Each alarm has three states (OK, ALARM, and INSUFFICIENT_DATA), and you configure the evaluation period, comparison operator, and threshold value. For a full breakdown of alarm types and their costs, see the [CloudWatch pricing guide](/guides/cloudwatch-pricing). For example, you might create an alarm that fires when EC2 CPU utilization exceeds 80% for three consecutive 5-minute periods, sending a message to your on-call channel when it transitions to ALARM state.
+Each alarm has three states (OK, ALARM, and INSUFFICIENT_DATA), and you configure the evaluation period, comparison operator, and threshold value. For a full breakdown of alarm types and their costs, see the [CloudWatch pricing guide](/guides/cloudwatch-pricing/). For example, you might create an alarm that fires when EC2 CPU utilization exceeds 80% for three consecutive 5-minute periods, sending a message to your on-call channel when it transitions to ALARM state.
 
 <Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-alarm.webp" alt="CloudWatch Create Alarm page showing metric selection, threshold configuration, and alarm conditions for EC2 CPU utilization" caption="Creating a CloudWatch Alarm with metric selection, threshold configuration, and evaluation conditions" />
 
@@ -145,7 +145,7 @@ This is why most teams need both services. CloudWatch catches the operational im
 
 <Figure src="/img/comparisons/2026/02/cloudwatch-vs-cloudtrail-signoz.webp" alt="SigNoz Log Management Dashboard" caption="SigNoz Log Management Dashboard" />
 
-CloudWatch works well for collecting AWS telemetry, but investigating incidents with it means [jumping between four separate consoles](/blog/6-silent-traps-inside-cloudWatch-that-can-hurt-your-observability): Logs Insights for log queries, the Metrics console for dashboards, X-Ray for traces, and Application Signals for service health. Each uses different query syntax, and clicking from metrics to logs resets your time filters. Finding logs for a trace requires copying trace IDs from X-Ray and running a separate search in CloudWatch Logs.
+CloudWatch works well for collecting AWS telemetry, but investigating incidents with it means [jumping between four separate consoles](/blog/6-silent-traps-inside-cloudWatch-that-can-hurt-your-observability/): Logs Insights for log queries, the Metrics console for dashboards, X-Ray for traces, and Application Signals for service health. Each uses different query syntax, and clicking from metrics to logs resets your time filters. Finding logs for a trace requires copying trace IDs from X-Ray and running a separate search in CloudWatch Logs.
 
 [SigNoz](https://signoz.io/) is an all-in-one observability platform built natively on [OpenTelemetry](https://signoz.io/opentelemetry/) that eliminates this context-switching. Metrics, traces, and logs live in a single interface, so you can jump from a latency spike to the responsible trace to the related logs without leaving one screen.
 

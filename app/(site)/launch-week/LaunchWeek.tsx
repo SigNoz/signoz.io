@@ -103,7 +103,7 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/interactive-dashboards"
+              href="/blog/interactive-dashboards/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img

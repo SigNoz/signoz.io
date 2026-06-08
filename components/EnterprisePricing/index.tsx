@@ -45,7 +45,7 @@ const EnterprisePricing = () => {
                   </p>
 
                   <Link
-                    href="/blog/introducing-ingest-guard-feature"
+                    href="/blog/introducing-ingest-guard-feature/"
                     className="mt-4 inline-flex items-center gap-2 rounded-full bg-signoz_ink-300 px-4 py-2 text-sm font-medium text-white no-underline hover:bg-signoz_ink-200"
                     prefetch={false}
                   >

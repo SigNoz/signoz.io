@@ -100,7 +100,7 @@ export default function TopNav() {
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
-                      href="/docs"
+                      href="/docs/introduction/"
                       className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Docs Link"
@@ -115,7 +115,7 @@ export default function TopNav() {
                   {visibility.showCompareSignoz && <CompareSignozDropdown />}
                   {visibility.showPricing && (
                     <TrackingLink
-                      href="/pricing"
+                      href="/pricing/"
                       className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Pricing Link"
@@ -127,7 +127,7 @@ export default function TopNav() {
                   )}
                   {visibility.showCustomerStories && (
                     <TrackingLink
-                      href="/case-study"
+                      href="/case-study/"
                       className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Customer Stories Link"
@@ -161,7 +161,7 @@ export default function TopNav() {
                       Sign In
                     </TrackingButton>
                     <TrackingLink
-                      href="/teams"
+                      href="/teams/"
                       clickType="Primary CTA"
                       clickName="Sign Up Button"
                       clickText="Get Started - Free"

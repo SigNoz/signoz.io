@@ -6,11 +6,11 @@ description: Configure the OpenTelemetry Collector on your Docker host to custom
 doc_type: howto
 ---
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install) provides a working config that collects host metrics, container metrics, container logs, and forwards application traces out of the box. This page explains what each component in that config does and how to customize it for your environment.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) provides a working config that collects host metrics, container metrics, container logs, and forwards application traces out of the box. This page explains what each component in that config does and how to customize it for your environment.
 
 ## Prerequisites
 
-- OpenTelemetry Collector installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install))
+- OpenTelemetry Collector installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/))
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Access to create and edit the collector configuration file
 
@@ -82,7 +82,7 @@ service:
       receivers: [otlp, hostmetrics]
 ```
 
-You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
+You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
 
 <KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed={true}>
 Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk metrics instead of the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
@@ -177,7 +177,7 @@ service:
       receivers: [otlp, hostmetrics, docker_stats]
 ```
 
-The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
+The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
 
 <KeyPointCallout title="Docker socket permissions" defaultCollapsed={true}>
 The install guide runs the collector as root (`user: "0:0"`) so it can read the Docker socket and host filesystem. For production, you can avoid running as root by adding the container to the host's `docker` group: `docker run --group-add $(getent group docker | cut -d: -f3) ...`. If you see permission errors on the socket, see [Troubleshooting](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/#troubleshooting) in the install guide.
@@ -236,7 +236,7 @@ service:
       receivers: [otlp, filelog]
 ```
 
-The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install).
+The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
 
 ## Tune Batch and Memory Limiter
 
@@ -313,7 +313,7 @@ Replace `my-app-container:9090` with the hostname (or IP) and port of the Promet
 
 ## Docker Compose Networking
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install) uses `network_mode: host` by default. This gives the collector direct access to host ports and simplifies configuration, but exposes all collector ports on the host.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) uses `network_mode: host` by default. This gives the collector direct access to host ports and simplifies configuration, but exposes all collector ports on the host.
 
 For environments where you need network isolation, use bridge mode with explicit port mapping:
 
@@ -374,6 +374,6 @@ After editing the config:
 
 ## Next Steps
 
-- [Docker Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview)
+- [Docker Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

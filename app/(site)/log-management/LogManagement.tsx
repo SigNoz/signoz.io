@@ -125,7 +125,7 @@ const LogProcessingSection: React.FC = () => {
               asChild
             >
               <TrackingLink
-                href="/docs/logs-pipelines/concepts/"
+                href="/docs/logs-pipelines/introduction/"
                 clickType="Secondary CTA"
                 clickName="Log Processing Read Docs Button"
                 clickLocation="Log Management Processing Section"

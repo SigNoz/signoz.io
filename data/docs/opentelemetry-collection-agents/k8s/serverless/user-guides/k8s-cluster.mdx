@@ -12,7 +12,7 @@ This guide explains how to monitor serverless Kubernetes workloads on Amazon EKS
 
 EKS Fargate runs Kubernetes Pods on serverless compute. Since there is no node access, DaemonSets and host mounts are not supported. To collect telemetry, an OpenTelemetry Collector runs as a sidecar inside each Pod you want to observe. Your app sends traces, metrics, and logs to the local sidecar via OTLP; the sidecar then forwards data to your SigNoz backend.
 
-To learn how Fargate differs from node-based setups and what the sidecar collects, see the [K8s Serverless Overview](/docs/collection-agents/k8s/serverless/overview).
+To learn how Fargate differs from node-based setups and what the sidecar collects, see the [K8s Serverless Overview](/docs/opentelemetry-collection-agents/k8s/serverless/overview/).
 
 ## Prerequisites
 
@@ -35,13 +35,13 @@ On EKS Fargate, the OpenTelemetry Collector runs as a sidecar in your Pods:
 
 Install the `k8s-infra` Helm chart to enable cluster-level collection (e.g., Kubernetes objects, events). For Fargate, disable the DaemonSet `otelAgent` and keep `otelDeployment` if you need cluster metrics/events.
 
-Follow the instructions in the [K8s-Infra Installation Guide](/docs/collection-agents/k8s/k8s-infra/install-k8s-infra).
+Follow the instructions in the [K8s-Infra Installation Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
 
 ## Step 2: Add the OpenTelemetry Sidecar to Your Pods
 
 Deploy an OpenTelemetry Collector as a sidecar in each Pod that you want to monitor. The sidecar provides local OTLP endpoints and exports telemetry to SigNoz.
 
-Follow the complete configuration in the [K8s Serverless (EKS Fargate) - Install](/docs/collection-agents/k8s/serverless/install) guide.
+Follow the complete configuration in the [K8s Serverless (EKS Fargate) - Install](/docs/opentelemetry-collection-agents/k8s/serverless/install/) guide.
 
 ## Step 3: What Telemetry Can You Collect?
 
@@ -51,7 +51,7 @@ Once deployed, the sidecar-centric approach on Fargate supports:
 - Kubelet metrics via API-server proxy using `kubeletstats` (when available)
 - Kubernetes metadata enrichment via `k8sattributes`
 
-For details and examples, see the [Install](/docs/collection-agents/k8s/serverless/install) and [Configure](/docs/collection-agents/k8s/serverless/configure) guides.
+For details and examples, see the [Install](/docs/opentelemetry-collection-agents/k8s/serverless/install/) and [Configure](/docs/opentelemetry-collection-agents/k8s/serverless/configure/) guides.
 
 ## Step 4: Configure Options and Best Practices
 
@@ -62,7 +62,7 @@ The sidecar and cluster setup can be tuned for your needs:
 - Resource detection and Kubernetes metadata enrichment
 - Performance tuning: batch sizes, timeouts, resource limits
 
-See the [K8s Serverless (EKS Fargate) - Configure](/docs/collection-agents/k8s/serverless/configure) guide for step-by-step configurations, including CloudWatch ingestion.
+See the [K8s Serverless (EKS Fargate) - Configure](/docs/opentelemetry-collection-agents/k8s/serverless/configure/) guide for step-by-step configurations, including CloudWatch ingestion.
 
 ## Step 5: Multi-Environment and Multi-Cluster Setups
 
@@ -72,7 +72,7 @@ You can send telemetry from multiple EKS Fargate environments to a single SigNoz
 2. Set unique `k8s.cluster.name` values per environment
 3. Point all sidecars to the same SigNoz OTLP endpoint
 
-Refer to the [K8s-Infra Installation Guide](/docs/collection-agents/k8s/k8s-infra/install-k8s-infra) for multi-cluster considerations.
+Refer to the [K8s-Infra Installation Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) for multi-cluster considerations.
 
 ## Step 6: Visualize Telemetry in SigNoz
 
@@ -84,7 +84,7 @@ After sending data to SigNoz, you can:
 
 ## Next Steps
 
-1. [K8s Serverless Overview](/docs/collection-agents/k8s/serverless/overview)
-2. [Install the sidecar on EKS Fargate](/docs/collection-agents/k8s/serverless/install)
-3. [Configure Fargate log routing and Collector receivers](/docs/collection-agents/k8s/serverless/configure)
+1. [K8s Serverless Overview](/docs/opentelemetry-collection-agents/k8s/serverless/overview/)
+2. [Install the sidecar on EKS Fargate](/docs/opentelemetry-collection-agents/k8s/serverless/install/)
+3. [Configure Fargate log routing and Collector receivers](/docs/opentelemetry-collection-agents/k8s/serverless/configure/)
 4. [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)

@@ -30,8 +30,8 @@ beforeEach(() => {
 })
 
 describe('SITE_BASE_URL constant', () => {
-  it('defaults to https://signoz.io when no Vercel env vars are set', () => {
-    expect(SITE_BASE_URL).toBe('https://signoz.io')
+  it('defaults to empty string when not on production', () => {
+    expect(SITE_BASE_URL).toBe('')
   })
 })
 
@@ -43,7 +43,7 @@ describe('link classification', () => {
   it('renders internal link for relative path starting with /', () => {
     render(<CustomLink href="/blog/post/">Blog</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/blog/post/')
+    expect(link).toHaveAttribute('href', '/blog/post/')
     expect(link).not.toHaveAttribute('target')
   })
 
@@ -87,16 +87,16 @@ describe('link classification', () => {
 })
 
 describe('full URL prepending', () => {
-  it('prepends SITE_BASE_URL to site-relative URLs', () => {
+  it('uses relative path on non-production (SITE_BASE_URL is empty)', () => {
     render(<CustomLink href="/blog/post/">Blog</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/blog/post/')
+    expect(link).toHaveAttribute('href', '/blog/post/')
   })
 
-  it('prepends SITE_BASE_URL to docs URLs without region param', () => {
+  it('uses relative path for docs URLs without region param', () => {
     render(<CustomLink href="/docs/install/">Install</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs/install/')
+    expect(link).toHaveAttribute('href', '/docs/install/')
   })
 
   it('does NOT prepend to already-absolute signoz.io URLs', () => {
@@ -124,10 +124,10 @@ describe('full URL prepending', () => {
     expect(link).toHaveAttribute('href', 'https://google.com/')
   })
 
-  it('prepended URLs do NOT get target="_blank"', () => {
+  it('relative URLs do NOT get target="_blank"', () => {
     render(<CustomLink href="/blog/post/">Blog</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/blog/post/')
+    expect(link).toHaveAttribute('href', '/blog/post/')
     expect(link).not.toHaveAttribute('target')
   })
 
@@ -147,40 +147,40 @@ describe('onboarding rewriting', () => {
     mockPathname.mockReturnValue('/docs-onboarding/install/')
   })
 
-  it('rewrites /docs/ href to /docs-onboarding/ with full URL', () => {
+  it('rewrites /docs/ href to /docs-onboarding/', () => {
     render(<CustomLink href="/docs/install/kubernetes/">K8s</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs-onboarding/install/kubernetes/')
+    expect(link).toHaveAttribute('href', '/docs-onboarding/install/kubernetes/')
   })
 
-  it('rewrites /docs to /docs-onboarding/introduction with full URL', () => {
+  it('rewrites /docs to /docs-onboarding/introduction', () => {
     render(<CustomLink href="/docs">Docs</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs-onboarding/introduction')
+    expect(link).toHaveAttribute('href', '/docs-onboarding/introduction')
   })
 
-  it('rewrites absolute signoz.io/docs/ URL to onboarding with full URL', () => {
+  it('rewrites absolute signoz.io/docs/ URL to onboarding', () => {
     render(<CustomLink href="https://signoz.io/docs/install/">Install</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs-onboarding/install/')
+    expect(link).toHaveAttribute('href', '/docs-onboarding/install/')
   })
 
   it('rewrites absolute signoz.io/docs (no trailing slash)', () => {
     render(<CustomLink href="https://signoz.io/docs">Docs</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs-onboarding/introduction')
+    expect(link).toHaveAttribute('href', '/docs-onboarding/introduction')
   })
 
   it('does NOT double-rewrite /docs-onboarding/ links', () => {
     render(<CustomLink href="/docs-onboarding/install/kubernetes/">K8s</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs-onboarding/install/kubernetes/')
+    expect(link).toHaveAttribute('href', '/docs-onboarding/install/kubernetes/')
   })
 
   it('does NOT rewrite non-docs links', () => {
     render(<CustomLink href="/blog/post/">Blog</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/blog/post/')
+    expect(link).toHaveAttribute('href', '/blog/post/')
   })
 
   it('does NOT rewrite external links', () => {
@@ -198,23 +198,23 @@ describe('onboarding rewriting', () => {
   it('does NOT rewrite /docs-extra (not a docs path)', () => {
     render(<CustomLink href="/docs-extra/page/">Extra</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs-extra/page/')
+    expect(link).toHaveAttribute('href', '/docs-extra/page/')
   })
 })
 
 describe('no rewriting outside onboarding', () => {
-  it('leaves /docs/ links unchanged on normal docs pages (with full URL)', () => {
+  it('leaves /docs/ links unchanged on normal docs pages', () => {
     mockPathname.mockReturnValue('/docs/install/')
     render(<CustomLink href="/docs/install/kubernetes/">K8s</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs/install/kubernetes/')
+    expect(link).toHaveAttribute('href', '/docs/install/kubernetes/')
   })
 
-  it('leaves /docs/ links unchanged on non-docs pages (with full URL)', () => {
+  it('leaves /docs/ links unchanged on non-docs pages', () => {
     mockPathname.mockReturnValue('/blog/')
     render(<CustomLink href="/docs/install/">Install</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs/install/')
+    expect(link).toHaveAttribute('href', '/docs/install/')
   })
 })
 
@@ -248,7 +248,7 @@ describe('region parameter propagation', () => {
     mockSearch.mockReturnValue('?region=us')
     render(<CustomLink href="/blog/post/">Blog</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/blog/post/')
+    expect(link).toHaveAttribute('href', '/blog/post/')
   })
 
   it('appends region to /docs-onboarding/ URL (bug fix)', () => {
@@ -271,7 +271,7 @@ describe('region parameter propagation', () => {
   it('no region param means no appending even for docs URL', () => {
     render(<CustomLink href="/docs/install/">Install</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs/install/')
+    expect(link).toHaveAttribute('href', '/docs/install/')
   })
 
   it('appends region to signoz.io/docs link in non-onboarding', () => {
@@ -291,7 +291,7 @@ describe('edge cases', () => {
     mockPathname.mockReturnValue(null)
     render(<CustomLink href="/docs/install/">Install</CustomLink>)
     const link = screen.getByTestId('next-link')
-    expect(link).toHaveAttribute('href', 'https://signoz.io/docs/install/')
+    expect(link).toHaveAttribute('href', '/docs/install/')
   })
 
   it('docs link with region opens in new tab', () => {

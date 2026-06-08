@@ -21,7 +21,7 @@ const Hero = (props) => {
         {trySigNozCloud.isVisible && (
           <Link
             className={`button primary-gradient bg-signoz_vanilla-300 text-signoz_ink-300`}
-            href="/teams"
+            href="/teams/"
             prefetch={false}
           >
             Get Started - Free
