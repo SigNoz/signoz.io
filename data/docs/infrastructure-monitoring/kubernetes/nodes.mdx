@@ -27,43 +27,43 @@ The **Nodes** view shows CPU and memory usage alongside allocatable capacity for
 
 - This column is derived from the resource attribute `k8s.cluster.name`.
 - Cluster the node belongs to.
-- In multi-cluster setups, use this to scope troubleshooting (scheduling failures, version skew, control-plane incidents) to a single cluster. ([K8s cluster architecture](https://kubernetes.io/docs/concepts/architecture/))
+- In multi-cluster setups, use this to scope troubleshooting (scheduling failures, version skew, control-plane incidents) to a single cluster.
 
 ### CPU Usage (cores)
 
 - This column relies on the OTel metric `k8s.node.cpu.usage` from the kubeletstats receiver, defined as "Total CPU usage (sum of all cores per second) averaged over the sample window".
 - Total CPU consumed across all pods on the node, expressed in CPU-core units — a value of `1.0` means one full core in use.
-- Compare against **CPU Alloc (cores)** to gauge saturation; when the gap closes, the node is a candidate for workload rebalancing, pod rightsizing, or cluster scale-out. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
+- Compare against **CPU Alloc (cores)** to gauge saturation; when the gap closes, the node is a candidate for workload rebalancing, pod rightsizing, or cluster scale-out.
 
 ### CPU Alloc (cores)
 
 - This column relies on the OTel metric `k8s.node.allocatable_cpu` from the k8s_cluster receiver; disabled by default — enable via the receiver's `allocatable_types_to_report: [cpu]` config.
 - CPU capacity available for pod scheduling, computed as `node capacity − kube-reserved − system-reserved − eviction-hard` per the K8s `Reserve Compute Resources` guide. The scheduler uses this — not the node's raw CPU capacity — when deciding if a new pod's `requests.cpu` fits.
-- When **CPU Usage (cores)** approaches this value, new pods may stay `Pending` for lack of fit; revisit reservations, pod requests, or add capacity. ([Reserve compute resources for system daemons](https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/))
+- When **CPU Usage (cores)** approaches this value, new pods may stay `Pending` for lack of fit; revisit reservations, pod requests, or add capacity.
 
 ### Memory Usage (WSS)
 
 - This column relies on the OTel metric `k8s.node.memory.working_set` from the kubeletstats receiver, sourced from the kubelet's stats-summary API.
 - Working Set Size across all pods on the node — anonymous pages plus active file pages, excluding inactive file pages (which the kernel can reclaim under pressure); this is the value the kubelet evaluates against `memory.available` to set the MemoryPressure condition.
-- A node trending toward its **Memory Allocatable** is at imminent eviction risk; the kubelet evicts in QoS order — BestEffort → Burstable → Guaranteed. ([Node-pressure eviction signals](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#eviction-signals), [Pod QoS](https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/))
+- A node trending toward its **Memory Allocatable** is at imminent eviction risk; the kubelet evicts in QoS order — BestEffort → Burstable → Guaranteed.
 
 ### Memory Allocatable
 
 - This column relies on the OTel metric `k8s.node.allocatable_memory` from the k8s_cluster receiver; disabled by default — enable via the receiver's `allocatable_types_to_report: [memory]` config.
 - Memory available for pod scheduling, computed as `node capacity − kube-reserved − system-reserved − eviction-hard`. The scheduler uses this to decide if a new pod's `requests.memory` fits.
-- When **Memory Usage (WSS)** closes in on this value and `memory.available` drops below the kubelet's hard threshold (default `100Mi`), MemoryPressure is set with `0s` grace and eviction begins. ([Hard eviction thresholds](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#hard-eviction-thresholds))
+- When **Memory Usage (WSS)** closes in on this value and `memory.available` drops below the kubelet's hard threshold (default `100Mi`), MemoryPressure is set with `0s` grace and eviction begins.
 
 ### Node Condition
 
 - This column relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, encoded `1` = True / Ready, `0` = False / NotReady, `-1` = Unknown.
 - The kubelet periodically posts node status to the API server; `Ready = Unknown` is what the node controller records when no kubelet update has arrived within the grace period.
-- A NotReady node taints with `node.kubernetes.io/not-ready:NoExecute`; pods are evicted after the default 5-minute toleration window — investigate the kubelet and the kubelet→API-server network path. ([Node conditions](https://kubernetes.io/docs/concepts/architecture/nodes/#condition), [Taint-based evictions](https://kubernetes.io/docs/reference/labels-annotations-taints/#node-kubernetes-io-not-ready))
+- A NotReady node taints with `node.kubernetes.io/not-ready:NoExecute`; pods are evicted after the default 5-minute toleration window — investigate the kubelet and the kubelet→API-server network path.
 
 ### Pod Counts by Phase
 
 - This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
 - Counts of pods on this node grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
-- A `Pending` spike on a single node typically means the scheduler can't place pods there (check **CPU Alloc** / **Memory Allocatable** headroom and node taints); `Failed` / `Unknown` spikes warrant drilling into those pods' events and logs from the node detail page. ([Pod phase](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase))
+- A `Pending` spike on a single node typically means the scheduler can't place pods there (check **CPU Alloc** / **Memory Allocatable** headroom and node taints); `Failed` / `Unknown` spikes warrant drilling into those pods' events and logs from the node detail page.
 
 ## Node Detail Page
 
@@ -82,58 +82,58 @@ Click a node name to open the detail page. The header shows **Node Name** and **
 
 - This chart relies on the OTel metrics `k8s.node.cpu.usage` (kubeletstats receiver), `k8s.node.allocatable_cpu` (k8s_cluster receiver — disabled by default), and `k8s.container.cpu_request` (kubeletstats) summed across containers on the node.
 - Plots five series: `k8s.node.cpu.usage` aggregated three ways within each step interval (**Avg**, **Max**, **Min**), the **Allocatable** capacity as a reference line, and the sum of container CPU **Requests** scheduled on the node. The Max-Min band shows intra-interval volatility.
-- When the Usage band approaches Allocatable, the node is CPU-saturated and pods may start throttling; when Requests far exceeds Usage, scheduling reservations are sitting idle and pod `requests.cpu` can be tightened to pack the node better. ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
+- When the Usage band approaches Allocatable, the node is CPU-saturated and pods may start throttling; when Requests far exceeds Usage, scheduling reservations are sitting idle and pod `requests.cpu` can be tightened to pack the node better.
 
 #### Memory Usage (bytes)
 
 - This chart relies on the OTel metrics `k8s.node.memory.usage`, `k8s.node.memory.working_set`, `k8s.node.memory.rss` (kubeletstats), `k8s.node.allocatable_memory` (k8s_cluster — disabled by default), and `k8s.container.memory_request` (kubeletstats) summed across containers on the node.
 - Plots seven series: usage **Avg / Max / Min**, **Working Set**, **RSS**, **Allocatable**, and total container **Requests**. `working_set` (anonymous + active file pages, excluding reclaimable inactive file pages) is the value the kubelet uses for eviction decisions; `usage` includes reclaimable page cache and so reads higher than working set.
-- Working Set approaching Allocatable signals imminent MemoryPressure-driven eviction; the gap between Usage and Working Set is the reclaimable page cache the kernel can free first, before the kubelet starts evicting pods. ([Node-pressure eviction signals](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#eviction-signals))
+- Working Set approaching Allocatable signals imminent MemoryPressure-driven eviction; the gap between Usage and Working Set is the reclaimable page cache the kernel can free first, before the kubelet starts evicting pods.
 
 #### CPU Usage (%)
 
 - This chart relies on the OTel metrics `k8s.node.cpu.usage`, `k8s.node.allocatable_cpu`, and `k8s.container.cpu_request` — combined via formulas `usage / allocatable` and `usage / requests`.
 - Two lines: usage as a percentage of node Allocatable, and usage as a percentage of the sum of container CPU requests scheduled on the node.
-- Allocatable % approaching 100% means the node is running out of schedulable CPU; Requests % consistently above 100% means workloads are bursting above their reservations (allowed, but a signal requests are under-provisioned and pods may contend for CPU under load). ([Managing resources for containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits))
+- Allocatable % approaching 100% means the node is running out of schedulable CPU; Requests % consistently above 100% means workloads are bursting above their reservations (allowed, but a signal requests are under-provisioned and pods may contend for CPU under load).
 
 #### Memory Usage (%)
 
 - This chart relies on the OTel metrics `k8s.node.memory.usage`, `k8s.node.allocatable_memory`, and `k8s.container.memory_request` — combined via formulas `usage / allocatable` and `usage / requests`.
 - Two lines: memory usage as a percentage of node Allocatable, and as a percentage of the sum of container memory requests scheduled on the node. Note this uses `k8s.node.memory.usage` (which includes reclaimable page cache), not working set — so it tracks slightly higher than the kubelet's own eviction signal.
-- When Allocatable % approaches 100%, drill into **Memory Usage (bytes)** to check whether **Working Set** is also at the threshold; sustained pressure triggers MemoryPressure and pod eviction in QoS order. ([Hard eviction thresholds](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#hard-eviction-thresholds))
+- When Allocatable % approaches 100%, drill into **Memory Usage (bytes)** to check whether **Working Set** is also at the threshold; sustained pressure triggers MemoryPressure and pod eviction in QoS order.
 
 #### Pods by CPU (top 10)
 
 - This chart relies on the OTel metric `k8s.pod.cpu.usage` from the kubeletstats receiver, grouped by `k8s.pod.name` and limited to 10 lines.
 - One line per pod on this node, showing its CPU consumption in CPU-core units.
-- Use this to identify noisy-neighbor pods consuming a disproportionate share of node CPU — candidates for tighter `limits.cpu`, isolation onto a dedicated node pool via taints/tolerations, or a QoS-class adjustment so they're chosen first under pressure. ([Pod QoS](https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/), [Taints and tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/))
+- Use this to identify noisy-neighbor pods consuming a disproportionate share of node CPU — candidates for tighter `limits.cpu`, isolation onto a dedicated node pool via taints/tolerations, or a QoS-class adjustment so they're chosen first under pressure.
 
 #### Pods by Memory (top 10)
 
 - This chart relies on the OTel metric `k8s.pod.memory.usage` from the kubeletstats receiver, grouped by `k8s.pod.name` and limited to 10 lines.
 - One line per pod on this node, showing its memory consumption in bytes.
-- Within a QoS class, the kubelet evicts the pod whose memory usage most exceeds its `requests.memory` first — use this chart to spot those pods before MemoryPressure hits and either right-size their requests or move them off the node. ([Pod selection for kubelet eviction](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction))
+- Within a QoS class, the kubelet evicts the pod whose memory usage most exceeds its `requests.memory` first — use this chart to spot those pods before MemoryPressure hits and either right-size their requests or move them off the node.
 
 #### Network Error Count
 
 - This chart relies on the OTel metric `k8s.node.network.errors` from the kubeletstats receiver — a cumulative Sum with attributes `direction` (receive / transmit) and `interface` (NIC name), shown as a per-second increase.
 - One line per `direction :: interface` combination, sourced from the kubelet's per-interface error counters.
-- Sustained non-zero values warrant attention — common causes are misconfigured CNI plugins, faulty NICs, MTU mismatches, or a noisy neighbor saturating the host network; K8s does not auto-evict on network errors, so follow up via the CNI plugin's troubleshooting docs. ([Cluster networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/))
+- Sustained non-zero values warrant attention — common causes are misconfigured CNI plugins, faulty NICs, MTU mismatches, or a noisy neighbor saturating the host network; K8s does not auto-evict on network errors, so follow up via the CNI plugin's troubleshooting docs.
 
 #### Network IO Rate
 
 - This chart relies on the OTel metric `k8s.node.network.io` from the kubeletstats receiver — a cumulative Sum in bytes with attributes `direction` and `interface`, shown as a per-second rate.
 - One line per `direction :: interface` combination, showing transmit and receive throughput per NIC.
-- Use this to identify which interface (and indirectly which workload) is driving network load on the node; K8s has no eviction signal for network bandwidth, so saturation is addressed via NetworkPolicy, moving heavy workloads to dedicated nodes, or scaling out. ([Cluster networking](https://kubernetes.io/docs/concepts/cluster-administration/networking/))
+- Use this to identify which interface (and indirectly which workload) is driving network load on the node; K8s has no eviction signal for network bandwidth, so saturation is addressed via NetworkPolicy, moving heavy workloads to dedicated nodes, or scaling out.
 
 #### Filesystem Usage (bytes)
 
 - This chart relies on the OTel metrics `k8s.node.filesystem.usage`, `k8s.node.filesystem.capacity`, and `k8s.node.filesystem.available` from the kubeletstats receiver.
 - Three series — **Capacity** (total provisioned), **Available** (free), **Usage** (consumed) — for the node's primary (`nodefs`) filesystem as reported by the kubelet's stats-summary API.
-- When Available drops below 10% of Capacity, the kubelet sets DiskPressure, garbage-collects dead pods/containers, and starts evicting pods; if `imagefs` is on a separate device the threshold is 15% of its capacity. ([Hard eviction thresholds](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#hard-eviction-thresholds), [Garbage collection](https://kubernetes.io/docs/concepts/architecture/garbage-collection/))
+- When Available drops below 10% of Capacity, the kubelet sets DiskPressure, garbage-collects dead pods/containers, and starts evicting pods; if `imagefs` is on a separate device the threshold is 15% of its capacity.
 
 #### Filesystem Usage (%)
 
 - This chart relies on the OTel metrics `k8s.node.filesystem.usage` and `k8s.node.filesystem.capacity` — combined via the formula `usage / capacity`.
 - One line: percentage of the node's `nodefs` currently consumed.
-- When this approaches 90% (i.e., Available below 10% of Capacity), the kubelet triggers DiskPressure and pod eviction begins; bound disk consumption with per-pod `ephemeral-storage` limits, tune image GC, or expand the underlying volume. ([Hard eviction thresholds](https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#hard-eviction-thresholds), [Ephemeral storage](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage))
+- When this approaches 90% (i.e., Available below 10% of Capacity), the kubelet triggers DiskPressure and pod eviction begins; bound disk consumption with per-pod `ephemeral-storage` limits, tune image GC, or expand the underlying volume.

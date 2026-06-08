@@ -27,43 +27,43 @@ The **Volumes** view monitors PersistentVolumeClaim (PVC) storage and inode cons
 
 - This column is derived from the resource attribute `k8s.namespace.name`.
 - Namespace the PVC belongs to.
-- Use it to filter the list to a specific tenant or team and to navigate to the namespace-level view for `ResourceQuota` and aggregate workload status. ([Namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/))
+- Use it to filter the list to a specific tenant or team and to navigate to the namespace-level view for `ResourceQuota` and aggregate workload status.
 
 ### Volume Capacity
 
 - This column relies on the OTel metric `k8s.volume.capacity` from the kubeletstats receiver, defined as "The total capacity in bytes of the volume".
 - The provisioned size of the PVC's underlying volume in bytes, as reported by the kubelet's stats-summary API. The kubelet sources this from the filesystem `statfs` call on the mounted volume — so it reflects the actual filesystem capacity (which may differ from the PVC's `.spec.resources.requests.storage` for thin-provisioned volumes).
-- Compare against your StorageClass quota and any namespace `ResourceQuota` on `requests.storage`; capacity growth from a `volumeExpansion` resize will be reflected here once the kubelet picks up the new size. ([Persistent Volumes - Storage capacity](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#capacity), [Expanding Persistent Volumes Claims](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims))
+- Compare against your StorageClass quota and any namespace `ResourceQuota` on `requests.storage`; capacity growth from a `volumeExpansion` resize will be reflected here once the kubelet picks up the new size.
 
 ### Volume Utilization
 
 - This column is computed by the v2 endpoint as `Volume Capacity − Volume Available` (formula F1 over `k8s.volume.capacity` and `k8s.volume.available`). Despite the column name, the value is displayed in **bytes** (not as a percentage).
 - Effectively this is the volume's used space in bytes — the more meaningful name would be "Volume Used". Compute the percentage yourself as `Volume Utilization / Volume Capacity` if you need a ratio.
-- A PVC trending toward 100% of its capacity will fail writes once the filesystem is full — applications typically see `ENOSPC` errors and may crash; expand the PVC via `kubectl edit pvc/<name>` (if the StorageClass has `allowVolumeExpansion: true`) or migrate the workload to a larger volume. ([Expanding Persistent Volumes Claims](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims))
+- A PVC trending toward 100% of its capacity will fail writes once the filesystem is full — applications typically see `ENOSPC` errors and may crash; expand the PVC via `kubectl edit pvc/<name>` (if the StorageClass has `allowVolumeExpansion: true`) or migrate the workload to a larger volume.
 
 ### Volume Available
 
 - This column relies on the OTel metric `k8s.volume.available` from the kubeletstats receiver, defined as "The number of available bytes in the volume".
 - Free bytes remaining on the volume's filesystem, as reported by the kubelet's stats-summary API. Note this can be slightly less than `capacity − used` because of filesystem-reserved blocks (e.g., ext4's 5% root-reserved block).
-- When Available approaches zero, applications writing to the volume will see `ENOSPC`; use this as the operational signal to expand the PVC or rotate logs / clean caches living on the volume. ([Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/))
+- When Available approaches zero, applications writing to the volume will see `ENOSPC`; use this as the operational signal to expand the PVC or rotate logs / clean caches living on the volume.
 
 ### Volume Inodes
 
 - This column relies on the OTel metric `k8s.volume.inodes` from the kubeletstats receiver, defined as "The total inodes in the filesystem".
 - Total inodes available on the volume's filesystem. For ext4 this is fixed at filesystem-creation time (default ~1 inode per 16 KB of disk); for XFS / btrfs the value grows dynamically as more inodes are needed.
-- Use this as the reference value when interpreting **Volume Inodes Used** and **Volume Inodes Free** — workloads that create many small files can hit `ENOSPC` from inode exhaustion before the volume's bytes are full. ([ext4 inode allocation](https://www.kernel.org/doc/html/latest/filesystems/ext4/overview.html#inodes))
+- Use this as the reference value when interpreting **Volume Inodes Used** and **Volume Inodes Free** — workloads that create many small files can hit `ENOSPC` from inode exhaustion before the volume's bytes are full.
 
 ### Volume Inodes Used
 
 - This column relies on the OTel metric `k8s.volume.inodes.used` from the kubeletstats receiver, defined as "The inodes used by the filesystem. This may not equal inodes − free because filesystem may share inodes with other filesystems".
 - Count of inodes currently consumed by files, directories, and symlinks on the volume.
-- A rising count with stable **Volume Available** indicates many small files being created — common with workloads that store per-request artifacts, session caches, or unbounded log fragments; remediate by rotating/expiring those files or moving them off the volume. ([ext4 inode allocation](https://www.kernel.org/doc/html/latest/filesystems/ext4/overview.html#inodes))
+- A rising count with stable **Volume Available** indicates many small files being created — common with workloads that store per-request artifacts, session caches, or unbounded log fragments; remediate by rotating/expiring those files or moving them off the volume.
 
 ### Volume Inodes Free
 
 - This column relies on the OTel metric `k8s.volume.inodes.free` from the kubeletstats receiver, defined as "The free inodes in the filesystem".
 - Count of unallocated inodes on the volume's filesystem.
-- When this approaches zero, file creation fails with `ENOSPC` even if **Volume Available** still shows free bytes — usual remediations are deleting accumulated small files or reformatting the volume with a higher `-i` ratio (smaller bytes-per-inode) and restoring the data. ([ext4 inode allocation](https://www.kernel.org/doc/html/latest/filesystems/ext4/overview.html#inodes))
+- When this approaches zero, file creation fails with `ENOSPC` even if **Volume Available** still shows free bytes — usual remediations are deleting accumulated small files or reformatting the volume with a higher `-i` ratio (smaller bytes-per-inode) and restoring the data.
 
 ## Volume Detail Page
 
@@ -75,28 +75,28 @@ Click a volume name to open the detail page.
 
 - This chart relies on the OTel metric `k8s.volume.available` from the kubeletstats receiver.
 - Plots a single line: free bytes on the volume over time, as reported by the kubelet's stats-summary API.
-- A downward trend with no recovery means the workload is filling the volume faster than it's freeing space — extrapolate the line to forecast when the volume will hit zero and either expand the PVC (`kubectl edit pvc`) or clean up before then. ([Expanding Persistent Volumes Claims](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims))
+- A downward trend with no recovery means the workload is filling the volume faster than it's freeing space — extrapolate the line to forecast when the volume will hit zero and either expand the PVC (`kubectl edit pvc`) or clean up before then.
 
 #### Volume Capacity
 
 - This chart relies on the OTel metric `k8s.volume.capacity` from the kubeletstats receiver.
 - Plots a single line: total provisioned filesystem capacity in bytes. The value is normally constant but will step up when a `volumeExpansion`-enabled PVC is resized.
-- Use this to confirm a PVC resize actually took effect — after `kubectl edit pvc` raises `.spec.resources.requests.storage`, the value here should jump within a couple of kubelet stats intervals (~1 minute). ([Expanding Persistent Volumes Claims](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims))
+- Use this to confirm a PVC resize actually took effect — after `kubectl edit pvc` raises `.spec.resources.requests.storage`, the value here should jump within a couple of kubelet stats intervals (~1 minute).
 
 #### Volume Inodes Used
 
 - This chart relies on the OTel metric `k8s.volume.inodes.used` from the kubeletstats receiver, defined as "The inodes used by the filesystem. This may not equal inodes − free because filesystem may share inodes with other filesystems".
 - Plots a single line: count of inodes consumed on the volume's filesystem over time. Each file, directory, and symlink consumes one inode.
-- A rising line with stable `Volume Available` indicates many small files being created — applications relying on filesystems with finite inode pools (e.g., ext4 with default mkfs options) can hit `ENOSPC` errors even with free disk space if inodes are exhausted; pair with `Volume Inodes Free` to forecast the failure. ([ext4 inode allocation](https://www.kernel.org/doc/html/latest/filesystems/ext4/overview.html#inodes))
+- A rising line with stable `Volume Available` indicates many small files being created — applications relying on filesystems with finite inode pools (e.g., ext4 with default mkfs options) can hit `ENOSPC` errors even with free disk space if inodes are exhausted; pair with `Volume Inodes Free` to forecast the failure.
 
 #### Volume Inodes
 
 - This chart relies on the OTel metric `k8s.volume.inodes` from the kubeletstats receiver, defined as "The total inodes in the filesystem".
 - Plots a single line: total inodes available on the volume's filesystem. The value is fixed at filesystem-creation time (ext4) or grows dynamically (XFS, btrfs).
-- Useful as a reference line to interpret `Volume Inodes Used` — for ext4, the default ratio is one inode per 16 KB of disk, so a 10 GB volume has ~640 K inodes; workloads that create many tiny files (e.g., session-cache directories) can exhaust this before the volume fills. ([ext4 inode allocation](https://www.kernel.org/doc/html/latest/filesystems/ext4/overview.html#inodes))
+- Useful as a reference line to interpret `Volume Inodes Used` — for ext4, the default ratio is one inode per 16 KB of disk, so a 10 GB volume has ~640 K inodes; workloads that create many tiny files (e.g., session-cache directories) can exhaust this before the volume fills.
 
 #### Volume Inodes Free
 
 - This chart relies on the OTel metric `k8s.volume.inodes.free` from the kubeletstats receiver, defined as "The free inodes in the filesystem".
 - Plots a single line: count of unallocated inodes on the volume's filesystem over time.
-- When this approaches zero, file creation fails with `ENOSPC` even if `Volume Available` shows free bytes — usual remediations are deleting accumulated small files (logs, temp files, cached objects), or reformatting the volume with a higher `-i` ratio (smaller bytes-per-inode) and restoring the data. ([ext4 inode allocation](https://www.kernel.org/doc/html/latest/filesystems/ext4/overview.html#inodes))
+- When this approaches zero, file creation fails with `ENOSPC` even if `Volume Available` shows free bytes — usual remediations are deleting accumulated small files (logs, temp files, cached objects), or reformatting the volume with a higher `-i` ratio (smaller bytes-per-inode) and restoring the data.
