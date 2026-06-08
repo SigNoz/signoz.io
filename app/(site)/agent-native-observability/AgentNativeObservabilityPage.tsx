@@ -439,16 +439,18 @@ const BottomCTA: React.FC = () => {
 
 const AgentNativeObservabilityPage: React.FC = () => {
   return (
-    <FeaturePageLayout showProductNav={false}>
+    <FeaturePageLayout showProductNav={false} fullWidth>
       <Header />
-      <TrustedByTeams />
-      <InContextObservability />
+      <div className="relative mx-auto max-w-8xl">
+        <TrustedByTeams />
+        <InContextObservability />
 
-      <SectionLayout variant="bordered" className="!px-0">
-        <FeatureSections />
-        <Divider />
-        <BottomCTA />
-      </SectionLayout>
+        <SectionLayout variant="bordered" className="!px-0">
+          <FeatureSections />
+          <Divider />
+          <BottomCTA />
+        </SectionLayout>
+      </div>
     </FeaturePageLayout>
   )
 }
