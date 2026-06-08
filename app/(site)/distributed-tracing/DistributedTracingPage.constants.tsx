@@ -14,11 +14,22 @@ import { BiLogoPostgresql } from 'react-icons/bi'
 import { GrMysql } from 'react-icons/gr'
 import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
 import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
+import awsIconUrl from '@/public/img/icons/aws-icon.svg?url'
+import gcpIconUrl from '@/public/img/icons/gcp-icon.svg?url'
+import azureIconUrl from '@/public/img/icons/azure-icon.svg?url'
+import redisIconUrl from '@/public/img/icons/redis-icon.svg?url'
+import grpcIconUrl from '@/public/img/icons/grpc-icon.svg?url'
+import mongoIconUrl from '@/public/img/icons/mongo-icon.svg?url'
+import elasticIconUrl from '@/public/img/icons/elastic-icon.svg?url'
+import jaegerIconUrl from '@/public/img/icons/jaeger-stag-face-icon.svg?url'
+import zipkinIconUrl from '@/public/img/icons/zipkin-icon.svg?url'
+import opencensusIconUrl from '@/public/img/icons/opencensus-icon.svg?url'
+import javaIconUrl from '@/public/img/icons/java-icon.svg?url'
 
 export const CLOUD_ICONS = [
-  { src: '/img/icons/aws-icon.svg', alt: 'AWS' },
-  { src: '/img/icons/gcp-icon.svg', alt: 'Google Cloud' },
-  { src: '/img/icons/azure-icon.svg', alt: 'Azure' },
+  { src: awsIconUrl, alt: 'AWS' },
+  { src: gcpIconUrl, alt: 'Google Cloud' },
+  { src: azureIconUrl, alt: 'Azure' },
 ]
 
 export const CONTAINER_ICONS = [
@@ -30,24 +41,24 @@ export const CONTAINER_ICONS = [
 
 export const POPULAR_TOOLS_ICONS = [
   { src: <BiLogoPostgresql className="h-7 w-7 text-blue-600" />, alt: 'Postgres' },
-  { src: '/img/icons/redis-icon.svg', alt: 'Redis' },
+  { src: redisIconUrl, alt: 'Redis' },
   { src: <SiApachekafka className="h-7 w-7" />, alt: 'Apache Kafka' },
-  { src: '/img/icons/grpc-icon.svg', alt: 'gRPC' },
+  { src: grpcIconUrl, alt: 'gRPC' },
   { src: <GrMysql className="h-7 w-7 text-cyan-600" />, alt: 'MySQL' },
-  { src: '/img/icons/mongo-icon.svg', alt: 'Mongo' },
+  { src: mongoIconUrl, alt: 'Mongo' },
   { src: <SiRabbitmq className="h-7 w-7 text-orange-600" />, alt: 'RabbitMQ' },
-  { src: '/img/icons/elastic-icon.svg', alt: 'Elastic' },
+  { src: elasticIconUrl, alt: 'Elastic' },
 ]
 
 export const LEGACY_FORMAT_SUPPORT_ICONS = [
-  { src: '/img/icons/jaeger-stag-face-icon.svg', alt: 'Jaeger' },
-  { src: '/img/icons/zipkin-icon.svg', alt: 'Zipkin' },
-  { src: '/img/icons/opencensus-icon.svg', alt: 'OpenCensus' },
+  { src: jaegerIconUrl, alt: 'Jaeger' },
+  { src: zipkinIconUrl, alt: 'Zipkin' },
+  { src: opencensusIconUrl, alt: 'OpenCensus' },
 ]
 
 export const LANGUAGES_ICONS = [
   { src: <SiPython className="h-5 w-5 text-blue-500" />, alt: 'Python' },
-  { src: '/img/icons/java-icon.svg', alt: 'Java' },
+  { src: javaIconUrl, alt: 'Java' },
   { src: <SiGo className="h-7 w-7 text-cyan-500" />, alt: 'Golang' },
   { src: <SiDotnet className="h-7 w-7" />, alt: 'Dotnet' },
 ]

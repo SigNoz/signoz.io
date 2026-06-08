@@ -1,8 +1,9 @@
 import { FeatureCardProps } from './FeatureCard.types'
+import { cn } from 'app/lib/utils'
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, className = '' }) => {
   return (
-    <div className={`bg-transparent p-0 ${className}`}>
+    <div className={cn('bg-transparent p-0', className)}>
       <div className="p-8">
         <div className="grid grid-cols-1 gap-8">
           <div className="">{icon}</div>

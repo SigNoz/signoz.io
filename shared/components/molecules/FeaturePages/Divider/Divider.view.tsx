@@ -8,6 +8,7 @@ const Divider: React.FC<DividerProps> = ({
 }) => {
   return (
     <div
+      role="separator"
       className={cn(
         'border-signoz_slate-400',
         variant === 'dashed' ? 'border-dashed' : 'border-solid',

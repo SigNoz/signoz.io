@@ -89,7 +89,7 @@ const SigNozStats = () => {
               ))}
             </div>
           </div>
-          <div className="[&>div]:!border-r-1 grid grid-cols-1 text-left md:grid-cols-2 [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
+          <div className="grid grid-cols-1 text-left md:grid-cols-2 [&>div]:!border-r [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
             {STATS_LIST.map((stat, index) => (
               <StatsCard
                 logo={stat.logo}
