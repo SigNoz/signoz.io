@@ -14,7 +14,7 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
     <>
       <section
         className={cn(
-          'mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          'mx-auto w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400',
           className
         )}
       >

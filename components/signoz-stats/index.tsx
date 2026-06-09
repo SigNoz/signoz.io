@@ -39,7 +39,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
     <section>
       <div
         className={cn(
-          'section-container mx-auto grid w-full grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)] md:w-[80vw]',
+          'section-container mx-auto grid w-full max-w-8xl grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)]',
           className
         )}
       >

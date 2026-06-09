@@ -64,7 +64,7 @@ const WhySelectSignoz = ({
                 </p>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80vw] md:shrink-0">
+            <div className="mx-auto aspect-[272/352] w-[272px] max-w-full md:shrink-0">
               <Image
                 className="w-full"
                 src={featureGraphicEnterprise}
