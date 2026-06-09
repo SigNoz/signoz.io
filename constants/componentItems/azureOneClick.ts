@@ -11,4 +11,9 @@ export const AZURE_ONE_CLICK_ITEMS = [
     href: '/docs/integrations/azure/blob-storage',
     clickName: 'Blob Storage Integration Link',
   },
+  {
+    name: 'Kubernetes Service (AKS)',
+    href: '/docs/integrations/azure/aks',
+    clickName: 'AKS Integration Link',
+  },
 ] satisfies ComponentItem[]

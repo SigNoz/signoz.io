@@ -19,6 +19,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       className="h-7 w-7"
     />
   ),
+  '/docs/integrations/azure/aks': (
+    <img
+      src="/img/icons/azure-aks-icon.svg"
+      alt="Azure Kubernetes Service (AKS)"
+      className="h-7 w-7"
+    />
+  ),
 }
 
 export default function AzureOneClickListicle() {

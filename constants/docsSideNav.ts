@@ -3671,6 +3671,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/integrations/azure/aks',
+            label: 'Kubernetes Service (AKS)',
+          },
+          {
+            type: 'doc',
             route: '/docs/integrations/azure/blob-storage',
             label: 'Blob Storage',
           },
