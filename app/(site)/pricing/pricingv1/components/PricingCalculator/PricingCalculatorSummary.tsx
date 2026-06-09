@@ -52,7 +52,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
         </div>
 
         <TrackingLink
-          href="/teams"
+          href="/teams/"
           clickType="Primary CTA"
           clickName="Sign Up Button"
           clickText="Get Started - Free"

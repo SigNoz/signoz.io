@@ -12,6 +12,7 @@ Use this file as the stable entrypoint for contributing to `signoz-web`.
 - [Review docs PRs](contributing/docs-review.md)
 - [Change site code](contributing/site-code.md)
 - [Publish or update a blog post](contributing/blog-workflow.md)
+- [Work with CMS-migrated content](contributing/cms-content.md) (blogs, guides, comparisons, FAQs, case studies, opentelemetry)
 - [Follow the shared repo workflow](contributing/repo-workflow.md)
 - [Use contributor templates](contributing/templates/)
 
@@ -50,4 +51,5 @@ See [contributing/repo-workflow.md](contributing/repo-workflow.md) for Git hooks
 - Docs review rubric and onboarding label policy: [contributing/docs-review.md](contributing/docs-review.md)
 - Frontend conventions and MDX rendering constraints: [contributing/site-code.md](contributing/site-code.md)
 - Blog-specific workflow: [contributing/blog-workflow.md](contributing/blog-workflow.md)
+- CMS-migrated content, local overlay, and assets: [contributing/cms-content.md](contributing/cms-content.md)
 - Reusable templates and checklist snippets: [contributing/templates/](contributing/templates/)

@@ -90,9 +90,19 @@ export const METRICS_QUICK_START_ITEMS = {
     },
     { name: 'Envoy', href: '/docs/userguide/envoy-metrics', clickName: 'Envoy Metrics Link' },
     {
+      name: 'Flux',
+      href: '/docs/metrics-management/fluxcd-metrics',
+      clickName: 'Flux Metrics Link',
+    },
+    {
       name: 'Istio',
       href: '/docs/metrics-management/istio-metrics',
       clickName: 'Istio Metrics Link',
+    },
+    {
+      name: 'NGINX Ingress Controller',
+      href: '/docs/metrics-management/nginx-ingress-controller',
+      clickName: 'NGINX Ingress Controller Metrics Link',
     },
     {
       name: 'NVIDIA GPU (DCGM)',
@@ -108,6 +118,11 @@ export const METRICS_QUICK_START_ITEMS = {
       name: 'Render',
       href: '/docs/integrations/outposts/render',
       clickName: 'Render Metrics Link',
+    },
+    {
+      name: 'KEDA',
+      href: '/docs/metrics-management/keda-metrics',
+      clickName: 'KEDA Metrics Link',
     },
   ] satisfies ComponentItem[],
   applications: [

@@ -19,7 +19,7 @@ export default function DatadogVsSigNoz() {
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button>
               <a
-                href="/product-comparison/signoz-vs-datadog/"
+                href="/datadog-alternative/"
                 style={{ textDecoration: 'none', color: 'inherit' }}
                 className="flex items-center gap-2"
               >

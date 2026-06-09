@@ -34,7 +34,7 @@ export default function DatadogPricingCalculatorPage() {
           <p>
             For a comprehensive breakdown of Datadog's pricing structure and optimization
             strategies, check out our{' '}
-            <Link href="/blog/datadog-pricing" className="text-blue-600 hover:underline">
+            <Link href="/blog/datadog-pricing/" className="text-blue-600 hover:underline">
               detailed guide on Datadog pricing
             </Link>
             .
@@ -78,7 +78,7 @@ export default function DatadogPricingCalculatorPage() {
           <h2 className="mb-6 text-2xl font-bold text-white">
             Datadog Plans and Pricing Summary
             <Link
-              href="/blog/datadog-pricing"
+              href="/blog/datadog-pricing/"
               className="ml-2 text-sm text-blue-400 hover:underline"
             >
               (See detailed pricing)
@@ -179,7 +179,7 @@ export default function DatadogPricingCalculatorPage() {
 
             <p>
               For a detailed breakdown of Datadog's pricing models and optimization strategies,{' '}
-              <Link href="/blog/datadog-pricing" className="text-blue-400 hover:underline">
+              <Link href="/blog/datadog-pricing/" className="text-blue-400 hover:underline">
                 read our comprehensive guide on Datadog Pricing
               </Link>
               .

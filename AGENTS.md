@@ -19,6 +19,7 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
   - `yarn check:docs-metadata` + `yarn test:docs-metadata`
   - `yarn check:doc-redirects` + `yarn test:doc-redirects`
 - Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, etc.):
+  - `yarn check:stale-urls` + `yarn test:stale-urls`
   - `yarn lint` (auto-fixes)
   - `yarn build`
 - Mixed docs + code changes: run both sets.

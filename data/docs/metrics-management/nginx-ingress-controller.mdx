@@ -1,0 +1,176 @@
+---
+date: 2026-05-30
+id: nginx-ingress-controller
+title: Send NGINX Ingress Controller Metrics to SigNoz
+description: Collect nginx-ingress-controller Prometheus metrics in SigNoz using the OpenTelemetry Collector Prometheus receiver on Kubernetes.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Configure the OpenTelemetry Collector to scrape the NGINX Ingress Controller's Prometheus endpoint and send metrics to SigNoz.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- ingress-nginx installed in your Kubernetes cluster with metrics enabled
+- OpenTelemetry Collector deployed in the same cluster. See [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) to get started
+- A SigNoz account ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## How NGINX Ingress Controller exposes metrics
+
+The ingress-nginx controller exposes Prometheus metrics on port `10254` at `/metrics` on each controller pod.
+
+For a new ingress-nginx release, enable the metrics service during install:
+
+```bash
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace \
+  --set controller.metrics.enabled=true \
+  --set controller.metrics.service.servicePort=10254
+```
+
+For an existing release, preserve your current Helm values while enabling metrics:
+
+```bash
+helm upgrade ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --reuse-values \
+  --set controller.metrics.enabled=true \
+  --set controller.metrics.service.servicePort=10254
+```
+
+If you manage ingress-nginx with a values file, pass that same file during the upgrade so your existing controller settings are retained.
+
+For metric names and labels, see the <a href="https://kubernetes.github.io/ingress-nginx/user-guide/monitoring/" target="_blank" rel="noopener noreferrer nofollow">ingress-nginx monitoring reference</a>.
+
+## Send Metrics to SigNoz
+
+### Step 1. Configure the OpenTelemetry Collector
+
+Merge the following into your existing Collector config. It adds a Prometheus scrape job that uses pod discovery to find ingress-nginx controller pods and scrape port `10254`.
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: ingress-nginx
+          scrape_interval: 30s
+          scrape_timeout: 10s
+          metrics_path: /metrics
+          kubernetes_sd_configs:
+            - role: pod
+              namespaces:
+                names: [ingress-nginx]
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+              action: keep
+              regex: ingress-nginx
+            - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+              action: keep
+              regex: controller
+            - source_labels: [__meta_kubernetes_pod_container_port_number]
+              action: keep
+              regex: "10254"
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+            - source_labels: [__meta_kubernetes_pod_node_name]
+              target_label: node
+
+processors:
+  resource:
+    attributes:
+      - key: service.name
+        value: ingress-nginx
+        action: upsert
+  batch: {}
+
+exporters:
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      signoz-ingestion-key: '<your-ingestion-key>'
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [resource, batch]
+      exporters: [otlphttp]
+```
+
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  The Collector needs `ClusterRole` permissions for Kubernetes pod discovery. The [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) guide covers the required RBAC setup.
+</Admonition>
+
+### Step 2. Restart the Collector
+
+```bash
+kubectl rollout restart deployment/otel-collector -n <collector-namespace>
+```
+
+### Step 3. Validate
+
+After the Collector restarts:
+
+1. In SigNoz, go to **Metrics** > **Metrics Explorer**.
+2. Search for `nginx_ingress_controller_requests` to verify metrics are flowing.
+
+SigNoz shows metrics within the first scrape interval (default: 30 seconds).
+
+<Figure
+  src="/img/docs/metrics/nginx/ingress-controller-metrics.webp"
+  alt="nginx-ingress-controller metrics in SigNoz Metrics Explorer"
+  caption="nginx_ingress_controller_* metrics in SigNoz Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No metrics appearing
+
+Verify the Collector pod has RBAC permissions to discover Kubernetes pods. Run:
+
+```bash
+kubectl logs deployment/otel-collector -n <collector-namespace>
+```
+
+Look for scrape errors or permission-denied messages.
+
+### Metrics present but no `ingress` label on panels
+
+Verify the controller pod has the labels `app.kubernetes.io/name=ingress-nginx` and `app.kubernetes.io/component=controller`. Check with:
+
+```bash
+kubectl get pods -n ingress-nginx --show-labels
+```
+
+### Metrics delayed
+
+The scrape interval is set to 30 seconds. Reduce it in the `scrape_configs` section for faster feedback during testing.
+
+</details>
+
+## Next steps
+
+- [Ingress Nginx - Request Handling Performance Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx-ingress-request-handling-performance/): per-request latency percentiles, error ratios, and upstream response times by path
+- [Ingress Nginx - Controller Overview Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx-ingress-controller-overview/): controller connections, config reload status, CPU/memory, and per-ingress success rates
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on your metrics
+
+## Get Help
+
+<GetHelp />

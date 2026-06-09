@@ -1879,8 +1879,18 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/fluxcd-metrics',
+                label: 'Flux Metrics',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/istio-metrics',
                 label: 'Istio Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/nginx-ingress-controller',
+                label: 'NGINX Ingress Controller',
               },
               {
                 type: 'doc',
@@ -1906,6 +1916,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/fly-metrics',
                 label: 'Fly.io metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/keda-metrics',
+                label: 'KEDA Metrics',
               },
             ],
           },
@@ -2147,6 +2162,142 @@ const docsSideNav = [
         label: 'Out of Box Dashboards',
         items: [
           {
+            label: 'APM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/apm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/apm-metrics',
+                label: 'APM Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
+                label: 'DB Calls Monitoring',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/http-api-monitoring',
+                label: 'HTTP API Monitoring',
+              },
+            ],
+          },
+          {
+            label: 'Hostmetrics',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Hostmetrics (K8s)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
+                label: 'Hostmetrics (VM)',
+              },
+            ],
+          },
+          {
+            label: 'Kubernetes',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
+                label: 'Kubernetes Cluster Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Host Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-events',
+                label: 'Kubernetes Events',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
+                label: 'Kubernetes PVC Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
+                label: 'Kubernetes Pod Metrics (Overall)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
+                label: 'Kubernetes Pod Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
+                label: 'Kubernetes Node Metrics (Overall)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
+                label: 'Kubernetes Node Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cronjobs',
+                label: 'Kubernetes CronJobs',
+              },
+            ],
+          },
+          {
+            label: 'LiteLLM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
+                label: 'LiteLLM Proxy',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
+                label: 'LiteLLM SDK',
+              },
+            ],
+          },
+          {
+            label: 'NGINX',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/nginx',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/nginx',
+                label: 'NGINX',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/nginx-ingress-controller-overview',
+                label: 'NGINX Ingress - Controller Overview',
+              },
+              {
+                type: 'doc',
+                route:
+                  '/docs/dashboards/dashboard-templates/nginx-ingress-request-handling-performance',
+                label: 'NGINX Ingress - Request Performance',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/agno-dashboard',
             label: 'Agno',
@@ -2170,29 +2321,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
-          },
-          {
-            label: 'APM',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/apm-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/apm-metrics',
-                label: 'APM Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
-                label: 'DB Calls Monitoring',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/http-api-monitoring',
-                label: 'HTTP API Monitoring',
-              },
-            ],
           },
           {
             type: 'doc',
@@ -2301,6 +2429,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/fluxcd-dashboard',
+            label: 'FluxCD',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/frontend-monitoring',
             label: 'Frontend Monitoring',
           },
@@ -2340,24 +2473,6 @@ const docsSideNav = [
             label: 'Haystack',
           },
           {
-            label: 'Hostmetrics',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
-                label: 'Hostmetrics (K8s)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/hostmetrics-vm',
-                label: 'Hostmetrics (VM)',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
             label: 'Hugging Face',
@@ -2381,6 +2496,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/kafka-dashboard',
             label: 'Kafka',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/keda',
+            label: 'KEDA',
           },
           {
             label: 'Kubernetes',
@@ -2446,24 +2566,6 @@ const docsSideNav = [
             label: 'Kong Gateway',
           },
           {
-            label: 'LiteLLM',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
-                label: 'LiteLLM Proxy',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
-                label: 'LiteLLM SDK',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/livekit-dashboard',
             label: 'LiveKit',
@@ -2487,11 +2589,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mysql',
             label: 'MySQL',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/nginx',
-            label: 'NGINX',
           },
           {
             type: 'doc',
@@ -2570,8 +2667,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: 'Supabase',
             route: '/docs/dashboards/dashboard-templates/supabase',
+            label: 'Supabase',
           },
           {
             type: 'doc',

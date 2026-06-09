@@ -32,6 +32,8 @@ import {
   SiN8N,
   SiApachekafka,
   SiPython,
+  SiFlux,
+  SiFlydotio,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -152,6 +154,12 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/flask-monitoring': (
     <SiPython className="h-7 w-7 text-yellow-400" />
   ),
+  '/docs/dashboards/dashboard-templates/fluxcd-dashboard': (
+    <SiFlux className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/fly-dashboard': (
+    <SiFlydotio className="h-7 w-7 text-purple-500" />
+  ),
   '/docs/dashboards/dashboard-templates/frontend-monitoring': (
     <Network className="h-7 w-7 text-white" />
   ),
@@ -214,9 +222,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/dashboards/dashboard-templates/kubernetes-dashboards': (
     <SiKubernetes className="h-7 w-7 text-blue-600" />
   ),
-  'https://github.com/SigNoz/dashboards/tree/main/keda': (
-    <Zap className="h-7 w-7 text-purple-500" />
-  ),
+  '/docs/dashboards/dashboard-templates/keda': <Zap className="h-7 w-7 text-purple-500" />,
   '/docs/dashboards/dashboard-templates/key-operations': (
     <Target className="h-7 w-7 text-green-500" />
   ),
@@ -247,6 +253,12 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/dashboards/dashboard-templates/mysql': <SiMysql className="h-7 w-7 text-orange-500" />,
   '/docs/dashboards/dashboard-templates/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
+  '/docs/dashboards/dashboard-templates/nginx-ingress-controller-overview': (
+    <SiNginx className="h-7 w-7 text-blue-500" />
+  ),
+  '/docs/dashboards/dashboard-templates/nginx-ingress-request-handling-performance': (
+    <SiNginx className="h-7 w-7 text-blue-600" />
+  ),
   'https://github.com/SigNoz/dashboards/tree/main/nvidia-dcgm': (
     <Cpu className="h-7 w-7 text-green-600" />
   ),

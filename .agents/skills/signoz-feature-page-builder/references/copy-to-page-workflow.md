@@ -36,28 +36,35 @@ Read through all the copy and tag each block:
 
 ### Step 2: Count and decide layout
 
-| Content shape | Recommended layout |
+| Content shape | Recommended component |
 |--------------|-------------------|
-| 2-4 `FEATURE_SPLIT` blocks | Alternating split sections (text + image) |
+| Feature with 2+ sentence description + wide screenshot | `FeatureShowcase` (title + desc + image below) |
+| 2-4 `FEATURE_SPLIT` blocks | `SplitSection` (alternating text + image sides) |
+| Two features side-by-side with equal weight | `SplitSection` with `withVerticalDivider` |
 | 3+ `FEATURE_CARD` blocks (short) | `HeroCards` grid (3 cols if 3/6/9 items, 2 cols if 2/4) |
 | 3-5 sequential steps | `CarouselCards` with step images |
-| Mix of splits + cards | Split sections first, then card grid, then CTA |
-| 6+ features, all similar length | Group into 2-3 split sections + 1 card grid |
+| Mix of splits + cards | Split/showcase sections first, then card grid, then CTA |
+| 6+ features, all similar length | Group into 2-3 FeatureShowcase/SplitSection + 1 card grid |
+| CTA text | `CTABanner` with button array from constants |
 
 ### Step 3: Arrange in page order
 
 Always follow this arrangement:
 
 ```
-1. HERO → FeaturePageHeader
-2. Primary FEATURE_SPLIT sections (alternating left/right) → GridLayout split
-3. FEATURE_CARD group (if any) → HeroCards grid
-4. Secondary FEATURE_SPLIT sections → GridLayout split
-5. FEATURE_CAROUSEL (if any) → CarouselCards
-6. CTA → CTA Banner
-7. UsageBasedPricing (auto-added)
-8. SigNozStats (auto-added)
-9. CustomerStoriesSection (auto-added)
+1. HERO → FeaturePageHeader (buttons from constants)
+2. <Divider />
+3. Primary feature sections → FeatureShowcase or SplitSection (data from constants)
+4. <Divider />
+5. FEATURE_CARD group (if any) → HeroCards grid
+6. <Divider />
+7. Secondary feature sections → FeatureShowcase or SplitSection
+8. FEATURE_CAROUSEL (if any) → CarouselCards
+9. <Divider />
+10. CTA → CTABanner (buttons from constants)
+11. UsageBasedPricing (auto-added)
+12. SigNozStats (auto-added)
+13. CustomerStoriesSection (auto-added)
 ```
 
 **Arrangement heuristics:**

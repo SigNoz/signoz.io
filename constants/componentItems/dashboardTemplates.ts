@@ -147,6 +147,11 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     clickName: 'Flask Monitoring Dashboard Template',
   },
   {
+    name: 'FluxCD',
+    href: '/docs/dashboards/dashboard-templates/fluxcd-dashboard',
+    clickName: 'FluxCD Dashboard Template',
+  },
+  {
     name: 'Fly.io',
     href: '/docs/dashboards/dashboard-templates/fly-dashboard',
     clickName: 'Fly.io Dashboard Template',
@@ -248,7 +253,7 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
   },
   {
     name: 'KEDA',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/keda',
+    href: '/docs/dashboards/dashboard-templates/keda',
     clickName: 'KEDA Dashboard Template',
   },
   {
@@ -305,6 +310,16 @@ export const DASHBOARD_TEMPLATES_ITEMS: ComponentItem[] = [
     name: 'Nginx',
     href: '/docs/dashboards/dashboard-templates/nginx',
     clickName: 'Nginx Dashboard Template',
+  },
+  {
+    name: 'NGINX Ingress - Controller Overview',
+    href: '/docs/dashboards/dashboard-templates/nginx-ingress-controller-overview',
+    clickName: 'NGINX Ingress Controller Overview Dashboard Template',
+  },
+  {
+    name: 'NGINX Ingress - Request Performance',
+    href: '/docs/dashboards/dashboard-templates/nginx-ingress-request-handling-performance',
+    clickName: 'NGINX Ingress Request Handling Performance Dashboard Template',
   },
   {
     name: 'n8n Cloud',

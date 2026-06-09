@@ -1,19 +1,9 @@
 import { FeatureCardProps } from './FeatureCard.types'
+import { cn } from 'app/lib/utils'
 
-const FeatureCard: React.FC<FeatureCardProps> = ({
-  icon,
-  title,
-  description,
-  variant = 'default',
-  className = '',
-}) => {
-  const borderClass =
-    variant === 'combined'
-      ? 'border-none'
-      : 'border-r max-md:border-l border-signoz_slate-400 border-dashed last:border-r-0'
-
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, className = '' }) => {
   return (
-    <div className={`p-0 ${borderClass} bg-transparent ${className}`}>
+    <div className={cn('bg-transparent p-0', className)}>
       <div className="p-8">
         <div className="grid grid-cols-1 gap-8">
           <div className="">{icon}</div>

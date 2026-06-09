@@ -53,14 +53,17 @@ Every feature page should follow this structure (order matters):
 ```
 FeaturePageLayout
   ├── 1. Header (FeaturePageHeader)
-  │     └── Title + description + primary/secondary buttons + hero image
+  │     └── Title + description + buttons (from constants) + hero image
   │
-  ├── 2. Feature Sections (SectionLayout variant="bordered")
-  │     ├── Feature section (split: text + image)
-  │     ├── Feature section (split: image + text)  ← alternate sides
-  │     ├── Feature section (card grid or carousel)
-  │     ├── ... more features as needed
-  │     └── CTA Banner (centered title + ButtonGroup)
+  ├── 2. Feature Sections (SectionLayout variant="bordered" className="!px-0")
+  │     ├── <Divider />
+  │     ├── FeatureShowcase / SplitSection  ← spread data from constants
+  │     ├── <Divider />
+  │     ├── FeatureShowcase / SplitSection  ← alternate sides for splits
+  │     ├── <Divider />
+  │     ├── HeroCards / CarouselCards       ← card grid or carousel
+  │     ├── <Divider />
+  │     └── CTABanner                       ← buttons from constants
   │
   ├── 3. UsageBasedPricing
   │     └── show={['logs', 'traces', 'metrics']} — pick relevant signal types
@@ -76,13 +79,22 @@ FeaturePageLayout
 
 Choose the right component for each section:
 
-- **Alternating text + image feature explanation** → `GridLayout variant="split"` with text on one side, `Image` on the other
+- **Full-width title + description + screenshot** → `FeatureShowcase` (spread data from constants)
+- **Side-by-side text + image** → `SplitSection` (left/right as panel configs or ReactNode)
+- **Two side-by-side feature explanations** → `SplitSection` with `withVerticalDivider`
 - **3+ feature highlights as cards** → `HeroCards` with `FeatureCard` items
 - **Step-by-step interactive walkthrough** → `CarouselCards` with image transitions
 - **Detailed feature explanations with icons** → `IconTitleDescriptionCard` in a grid
-- **CTA banner between sections** → Centered `h2` + `ButtonGroup` in a bordered div
+- **CTA banner** → `CTABanner` (title + buttons from constants)
+- **Section dividers** → `<Divider />` placed between sections in parent composition
 - **Pricing information** → `UsageBasedPricing` component
 - **Social proof** → `CustomerStoriesSection` component
+
+**Do NOT use:**
+- Raw `GridLayout variant="split"` for text+image sections — use `SplitSection` instead
+- Inline `border-t-1 border-dashed border-signoz_slate-400` divs — use `<Divider />` instead
+- Inline `h2` + `ButtonGroup` for CTA banners — use `CTABanner` instead
+- `flex-center` CSS class — use `BUTTON_CLASS_NAME` Tailwind constant instead
 
 ## Content Guidelines
 

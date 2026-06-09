@@ -1,75 +1,120 @@
 ---
-date: 2026-05-13
-title: NGINX metrics
-description: Monitor NGINX metrics in SigNoz using OpenTelemetry Collector and ready-made dashboards.
+date: 2026-06-01
+title: Monitor NGINX Metrics with OpenTelemetry and SigNoz
+description: Learn how to collect NGINX metrics with the OpenTelemetry Collector's nginx receiver and monitor them in SigNoz using a ready-made dashboard.
 doc_type: howto
 id: nginx-metrics
 ---
 
-This document provides an explains how to monitor NGINX metrics using OTel Collector and SigNoz.
+import GetHelp from '@/components/shared/get-help.md'
 
-## Pre-requisites
+## Overview
 
-- NGINX with `stub_status` module enabled
+This guide shows how to collect NGINX server metrics with the OpenTelemetry (OTel) Collector and visualize them in SigNoz.
 
-## Setup
+The OTel Collector's <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver" target="_blank" rel="noopener noreferrer nofollow">nginx receiver</a> periodically scrapes NGINX's `stub_status` endpoint and converts the output into metrics such as request counts and connection states.
 
-### Step 1: Setup OTel Collector
+## Prerequisites
 
-OpenTelemetry Collector is required to collect metrics from NGINX. Please refer to this [documentation](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) 
-to setup the agent.
+- An NGINX instance with the `ngx_http_stub_status_module` module available (included in most NGINX builds).
+- The OpenTelemetry Collector installed and exporting to SigNoz. If you have not set this up yet, follow the [VM install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+- A [SigNoz Cloud](https://signoz.io/teams/) account, or a self-hosted SigNoz instance.
 
-### Step 2: Preparing NGINX
+## Step 1: Enable the NGINX stub_status endpoint
 
-For the OpenTelemetry Collector to collect NGINX metrics, you need to enable the `stub_status` module and configure a status endpoint.
-The `stub_status` module in NGINX provides real-time server health metrics like active connections, handled requests, and connection states. Refer to <a href="https://nginx.org/en/docs/http/ngx_http_stub_status_module.html" target="_blank" rel="noopener noreferrer nofollow">this doc</a> for setting up the NGINX stub_status module.
+The <a href="https://nginx.org/en/docs/http/ngx_http_stub_status_module.html" target="_blank" rel="noopener noreferrer nofollow">stub_status module</a> exposes real-time server health metrics like active connections, handled requests, and connection states. The receiver reads metrics from this endpoint.
 
+Add a `location` block to your NGINX server configuration to expose the status page:
 
-### Step 3: Collecting NGINX metrics
+```nginx:nginx.conf
+server {
+    listen       80;
+    server_name  localhost;
 
-You will need to configure the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver" target="_blank" rel="noopener noreferrer nofollow">nginx receiver</a> for collecting NGINX metrics. The receiver queries the NGINX status endpoint to collect performance metrics.
+    location /nginx_status {
+        stub_status;
+        allow 127.0.0.1;   # restrict to the collector host
+        deny all;
+    }
+}
+```
 
-### Step 4: Configuring the receiver
+The `allow`/`deny` directives restrict the status page to local access, which is enough when the Collector runs on the same host. Adjust the allowed address if the Collector runs elsewhere.
 
-Edit the OTel Collector config file to configure the `nginx` receiver as shown below:
+Reload NGINX and confirm the endpoint responds:
 
-```yaml:config.yaml
+```bash
+nginx -t && nginx -s reload
+curl http://localhost:80/nginx_status
+```
+
+You should see output similar to:
+
+```
+Active connections: 2
+server accepts handled requests
+ 12 12 12
+Reading: 0 Writing: 1 Waiting: 1
+```
+
+## Step 2: Configure the nginx receiver
+
+Add the `nginx` receiver to your OTel Collector config, pointing `endpoint` at the status page from Step 1:
+
+```yaml:otel-collector-config.yaml
 receivers:
   nginx:
-    endpoint: "<nginx-status-endpoint>" # Example -> http://localhost:80/nginx_status
+    endpoint: "http://localhost:80/nginx_status"
     collection_interval: 10s
     initial_delay: 1s
-    timeout: 60s
 ```
 
 **Configuration parameters:**
 
-- `endpoint`: The URL to the NGINX status page (required)
-- `collection_interval`: How often to collect metrics (default: 1m)
-- `initial_delay`: Delay before starting collection (default: 1s)  
-- `timeout`: Request timeout (default: 10s)
+- `endpoint` (required): URL of the NGINX `stub_status` page. Upstream default is `http://localhost:80/status`.
+- `collection_interval` (default: `10s`): How often to scrape the endpoint.
+- `initial_delay` (default: `1s`): Delay before the first scrape after startup.
 
-You can find more details about the NGINX receiver configuration in the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver" target="_blank" rel="noopener noreferrer nofollow">receiver documentation</a>.
+See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/nginxreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver README</a> for advanced options such as `timeout` and TLS.
 
+## Step 3: Enable the receiver in the metrics pipeline
 
-### Step 5: Configuring the pipelines
+Add the `nginx` receiver to your metrics pipeline so the scraped metrics are exported to SigNoz:
 
-Once the receiver and processor is configured, make sure to also enable them in the `pipelines` section of the OTel Collector config file:
-
-```yaml:config.yaml
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     metrics:
-      receivers: [nginx]
-      processors: [resourcedetection, attributes]
+      receivers: [otlp, nginx]
+      processors: [resourcedetection, batch]
+      exporters: [otlphttp]
 ```
 
-## Visualizing NGINX Metrics
+Use the same processors and exporter names that already exist in your Collector config. In the [VM install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/), those entries are `resourcedetection`, `batch`, and `otlphttp`.
 
+Restart the Collector to apply the changes.
 
-Once you have configured OTel Collector to send NGINX metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+<Admonition type="info">
+  To attach a consistent `service.name` to the NGINX metrics, add a `resource` processor (`action:upsert`, `key: service.name`, `value: nginx`) and include it in the metrics pipeline.
+</Admonition>
 
-You can also use the pre-configured [NGINX dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx/) to monitor critical NGINX metrics.
+## Metrics collected
+
+| Metric                       | Type  | Unit        | Description                                                                                                                                   |
+| ---------------------------- | ----- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nginx.requests`             | Sum   | requests    | Total requests made to the server since it started.                                                                                           |
+| `nginx.connections_accepted` | Sum   | connections | Total accepted client connections.                                                                                                            |
+| `nginx.connections_handled`  | Sum   | connections | Total handled connections. Usually equals `nginx.connections_accepted` unless a resource limit (for example `worker_connections`) is reached. |
+| `nginx.connections_current`  | Gauge | connections | Current connections, split by the `state` attribute (`active`, `reading`, `writing`, `waiting`).                                              |
+
+## Validate
+
+Once the Collector restarts, NGINX metrics start flowing to SigNoz.
+
+1. Open the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and search for `nginx.requests`. Live data points confirm the pipeline is working.
+2. If a metric shows no movement, send some traffic to NGINX (for example `curl http://localhost/` a few times) and re-check.
+
+You can also import the pre-configured [NGINX dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx/) to monitor critical NGINX metrics.
 
 <Figure
   src="/img/docs/dashboards/dashboard-templates/nginx.webp"
@@ -78,28 +123,31 @@ You can also use the pre-configured [NGINX dashboard](https://signoz.io/docs/das
 />
 
 <div className="flex justify-center">
-  <DashboardActions 
+  <DashboardActions
     dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/nginx.json"
     dashboardName="NGINX"
   />
 </div>
 
-
 ## Troubleshooting
 
-### Common Issues
-
 1. **No metrics appearing in SigNoz**
-   - Verify NGINX status endpoint is accessible
-   - Check OTel Collector logs for connection errors
-   - Ensure firewall allows access to the status endpoint
+
+- Verify the NGINX status endpoint is accessible from the Collector host (`curl http://localhost:80/nginx_status`).
+- Check the Collector logs for connection or export errors.
+- Ensure any firewall allows the Collector to reach the status endpoint.
 
 2. **Permission denied errors**
-   - Check NGINX access restrictions on the status endpoint
-   - Verify the IP address of OTel Collector is allowed
+
+- Check the `allow`/`deny` rules on the `stub_status` location.
+- Verify the Collector's IP address is allowed.
 
 3. **Metrics showing zero values**
-   - Confirm NGINX is receiving traffic
-   - Verify the status endpoint shows non-zero values
-   - Check if NGINX was recently restarted (counters reset)
 
+- Confirm NGINX is receiving traffic.
+- Verify the status endpoint shows non-zero values.
+- Note that counters reset when NGINX restarts.
+
+## Get Help
+
+<GetHelp />
