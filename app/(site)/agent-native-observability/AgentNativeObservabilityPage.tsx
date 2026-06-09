@@ -375,10 +375,10 @@ const InContextObservability: React.FC = () => {
 
 const FeatureSections: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14 md:w-[80vw]">
-      <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
+    <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14">
+      <div className="relative mx-auto flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex max-w-4xl flex-col items-center gap-4">
             <h2 className="text-center text-4xl font-semibold text-signoz_vanilla-100">
               Why Agent Native Observability
             </h2>
@@ -386,9 +386,7 @@ const FeatureSections: React.FC = () => {
               Debug faster. Ship with confidence. All from your dev environment.
             </div>
           </div>
-          <SectionLayout variant="no-border" className="!mx-auto !p-0">
-            <IconTitleDescriptionCardGrid cards={FEATURE_CARDS} variant="lg" />
-          </SectionLayout>
+          <IconTitleDescriptionCardGrid cards={FEATURE_CARDS} variant="lg" />
         </div>
       </div>
     </section>

@@ -85,7 +85,7 @@ const WhyTeamsSwitchFromCloudWatch: React.FC = () => {
             Why Teams Switch From CloudWatch
           </h2>
 
-          <SectionLayout variant="no-border" className="!mx-auto p-0">
+          <SectionLayout variant="full-width" className="!mx-auto p-0">
             <Divider />
             <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
             <Divider />
@@ -207,7 +207,7 @@ const ArchitectureAndApproach: React.FC = () => {
               database with a unified query interface.
             </div>
           </div>
-          <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
+          <SectionLayout variant="full-width" className="!mx-auto flex items-center justify-center">
             <ComparisonTable vendors={VENDORS} rows={CLOUDWATCH_COMPARISON_TABLE_ROWS} />
           </SectionLayout>
         </div>

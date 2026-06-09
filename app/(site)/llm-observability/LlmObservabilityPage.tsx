@@ -79,24 +79,16 @@ const EverythingYouNeedCards: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
-      className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden"
+      className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden px-0"
     >
-      <div className="relative">
-        <div className="container">
-          <div className="flex flex-col gap-6 pt-32">
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-                <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-                  Everything You Need to <br className="hidden md:block" /> Monitor LLM Applications
-                </h2>
-                <SectionLayout variant="no-border" className="!mx-auto p-0">
-                  <Divider />
-                  <IconTitleDescriptionCardGrid cards={LLM_OBSERVABILITY_CARDS} />
-                  <Divider />
-                </SectionLayout>
-              </div>
-            </div>
-          </div>
+      <div className="relative mx-auto flex flex-col items-center gap-6 pt-32 text-center">
+        <h2 className="mb-6 max-w-4xl py-10 text-center text-4xl font-semibold leading-[3.25rem] text-signoz_sienna-100">
+          Everything You Need to <br className="hidden md:block" /> Monitor LLM Applications
+        </h2>
+        <div>
+          <Divider />
+          <IconTitleDescriptionCardGrid cards={LLM_OBSERVABILITY_CARDS} />
+          <Divider />
         </div>
       </div>
     </SectionLayout>
@@ -206,7 +198,7 @@ const HowSigNozCompares: React.FC = () => {
                   How SigNoz Compares to <br /> LLM-Only Tools
                 </h2>
                 <SectionLayout
-                  variant="no-border"
+                  variant="full-width"
                   className="!mx-auto flex items-center justify-center"
                 >
                   <ComparisonTable vendors={VENDORS} rows={LLM_COMPARISON_TABLE_ROWS} />

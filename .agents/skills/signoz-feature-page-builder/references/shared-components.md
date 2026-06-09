@@ -18,7 +18,7 @@ import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureS
 
 // With children inserted between text and image
 <FeatureShowcase {...CREATE_ALERTS_SHOWCASE} className="px-6 pb-0 pt-6" imageClassName="mb-0">
-  <HeroCards cards={CARDS} layoutVariant="no-border" variant="default" cols={2} />
+  <HeroCards cards={CARDS} layoutVariant="full-width" variant="default" cols={2} />
 </FeatureShowcase>
 
 // Image-only (no title/description) — used as a section intro above a CarouselCards
@@ -34,7 +34,7 @@ import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureS
   imageElement={
     <>
       <Image src={IMAGE.src} alt={IMAGE.alt} width={10000} height={10000} className="mb-8" />
-      <HeroCards cards={CARDS} layoutVariant="no-border" variant="combined" />
+      <HeroCards cards={CARDS} layoutVariant="full-width" variant="combined" />
     </>
   }
 />
@@ -267,14 +267,13 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 ```
 
 **Props:**
-- `variant`: `'default'` | `'full-width'` | `'bordered'` | `'no-border'` | `'border-x'`
+- `variant`: `'default'` | `'full-width'` | `'bordered'` | `'border-x'`
 - `className` (string): Additional classes
 - `withBackground` (boolean): Add `bg-signoz_ink-500`
 
 **Variants:**
 - `bordered`: Dashed side borders, 80vw width — **standard for feature sections**
 - `full-width`: Same width, no border
-- `no-border`: 90vw mobile / 80vw desktop, no border
 - `border-x`: Full dashed border (all sides)
 
 ### GridLayout
@@ -385,7 +384,7 @@ import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 <HeroCards
   cards={FEATURE_CARDS}
   variant="combined"
-  layoutVariant="no-border"
+  layoutVariant="full-width"
   cols={3}
 />
 ```
