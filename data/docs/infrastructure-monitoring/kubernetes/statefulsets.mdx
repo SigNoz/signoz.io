@@ -128,7 +128,7 @@ Click a StatefulSet name to open the detail page. The header shows **StatefulSet
 
 - This chart relies on the OTel metric `k8s.pod.network.io` from the kubeletstats receiver — a cumulative Sum in bytes with attributes `direction` and `interface`, shown as a per-second rate and aggregated across the StatefulSet's pods.
 - One line per `direction :: interface` combination, showing transmit/receive throughput across all pods of the StatefulSet.
-- Use this to detect whether the StatefulSet is the source of unusual network load on a node and to spot asymmetric receive-vs-transmit patterns that often indicate misconfigured clients or downstream timeouts; "No Data" means none of the pods are reporting per-pod network metrics (often due to host-networking pods or a CNI that doesn't expose them).
+- Use this to detect whether the StatefulSet is the source of unusual network load on a node — sudden throughput spikes, sustained saturation near the underlying NIC's rated bandwidth, or a discontinuity in the receive-vs-transmit pattern that doesn't track an explained workload change are the signals worth investigating. "No Data" means none of the pods are reporting per-pod network metrics.
 
 #### Network Errors Count
 
