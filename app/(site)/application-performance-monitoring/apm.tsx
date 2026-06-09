@@ -1,91 +1,37 @@
 'use client'
 
 import React from 'react'
-import Image from 'next/image'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
-import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
-import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
-import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureShowcase'
-import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
-import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
-import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
-import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
-import {
-  APM_HEADER_BUTTONS,
-  CARD_FASTER_ANALYTICS,
-  CARD_CORRELATION,
-  CARD_OUT_OF_BOX,
-  CARD_EMPTY,
-  FEATURE_LANGUAGES,
-  FEATURE_MONITOR_SERVICES,
-  FEATURE_APM_CHARTS,
-  FEATURE_APDEX,
-  FEATURE_DB_CALL_METRICS,
-  FEATURE_TOP_ENDPOINTS,
-  FEATURE_EXTERNAL_CALL_METRICS,
-  FEATURE_METRICS_TO_TRACES,
-  APM_USE_CASES,
-  CTA_BUTTONS,
-} from './apm.constants'
+import Card from '@/components/Card/card'
+import FeatureCard from '@/components/FeatureCard/FeatureCard'
+import ProductNav from '@/components/ProductNav/ProductNav'
+import SigNozStats from '@/components/signoz-stats'
+import { COMPANIES } from '@/components/trusted-by'
 
-// ---------------------------------------------------------------------------
-// Header
-// ---------------------------------------------------------------------------
-const Header: React.FC = () => {
+function Apm() {
   return (
-    <FeaturePageHeader
-      title={
-        <>
-          Application Performance Monitoring <br />
-          Powered by OpenTelemetry
-        </>
-      }
-      description={
-        <>
-          SigNoz APM comes with out-of-box charts for key application metrics powered by
-          OpenTelemetry.
-          <br className="hidden lg:inline" />
-          Get latency, requests per second, error percentage, apdex & other key metrics
-          <br className="hidden lg:inline" />
-          to understand your application performance.
-        </>
-      }
-      buttonGroup={
-        <div className="flex flex-col gap-3 md:flex-row">
-          <Button
-            variant="default"
-            rounded="full"
-            to={APM_HEADER_BUTTONS[0].href}
-            id={APM_HEADER_BUTTONS[0].id}
-          >
-            <span className={APM_HEADER_BUTTONS[0].className}>
-              {APM_HEADER_BUTTONS[0].text}
-              <ArrowRight size={14} />
-            </span>
-          </Button>
-          <Button
-            variant="secondary"
-            rounded="full"
-            to={APM_HEADER_BUTTONS[1].href}
-            id={APM_HEADER_BUTTONS[1].id}
-          >
-            <span className={APM_HEADER_BUTTONS[1].className}>
-              <BookOpen size={14} />
-              {APM_HEADER_BUTTONS[1].text}
-            </span>
-          </Button>
-        </div>
-      }
-      heroImage="/img/features/apm/apm-cover.webp"
-      heroImageAlt="SigNoz APM service overview with latency, rate, and apdex charts"
-    />
+    <main className="!mt-[-10px] mb-auto">
+      <ProductNav />
+      <div className="relative bg-signoz_ink-500">
+        <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
+        <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
+        <Header />
+        <TrustedByTeams page="apm" />
+        <SigNozFeatures />
+        <SigNozUsage />
+        <UsageBasedPricing />
+        {/* <ExploreDocs /> */}
+        <SigNozStats />
+        <GetStarted page="apm" />
+      </div>
+    </main>
   )
 }
 
-const PlatformCard: React.FC<{ title: string; description: string }> = ({ title, description }) => {
+export default Apm
+
+const PlatformCard = ({ title, description }) => {
   return (
     <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
       <h3 className="mb-2 text-base font-medium text-signoz_vanilla-100">{title}</h3>
@@ -94,138 +40,472 @@ const PlatformCard: React.FC<{ title: string; description: string }> = ({ title,
   )
 }
 
-const FeatureListContent: React.FC = () => {
+const FeatureList = () => {
+  const features = [
+    {
+      title: 'Real-Time Monitoring',
+      description:
+        ' Get real-time insights and alerts on application performance issues, enabling rapid response and resolution.',
+    },
+    {
+      title: 'End-point monitoring/Transaction monitoring',
+      description:
+        'Monitor top API end-points of your services for latency, number of calls, and error rate.',
+    },
+    {
+      title: 'Database Monitoring',
+      description:
+        'Monitor the performance of database queries and transactions made from your application.',
+    },
+    {
+      title: 'External API monitoring',
+      description:
+        'Track the performance and reliability of third-party APIs. Monitor the latency, error rates, and response times of external API calls.',
+    },
+    {
+      title: 'Root Cause Analysis',
+      description:
+        'Quickly identify and diagnose the root causes of performance issues and errors in applications with the ability to view traces around high latencies.',
+    },
+    {
+      title: 'Service Dependency Mapping',
+      description:
+        'Visualize service dependencies and understand how different services interact within the application architecture.',
+    },
+  ]
+
   return (
-    <div className="flex w-full flex-col gap-4 px-10 py-10">
-      {APM_USE_CASES.map((feature, index) => (
+    <div className="flex w-full flex-col gap-4">
+      {features.map((feature, index) => (
         <PlatformCard key={index} title={feature.title} description={feature.description} />
       ))}
     </div>
   )
 }
 
-const GetStartedCTA: React.FC = () => {
+const UsageList = () => {
+  const Usage = [
+    {
+      title: 'Pay only for data you send',
+      description:
+        'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.3 per GB of ingested traces.',
+    },
+    {
+      title: 'Add unlimited team members',
+      description:
+        'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why we don’t charge for user seats, and you can add as many team members as you want.',
+    },
+    {
+      title: 'No Host (container or node) based pricing',
+      description:
+        'For modern cloud-based applications it doesn’t make sense to charge on the basis of number of hosts or containers. You don’t need to worry about auto-scaling during peak hours. Only pay for the amount of data sent no matter the number of hosts.',
+    },
+  ]
+
   return (
-    <div className="flex flex-col items-center justify-center bg-signoz_ink-500 p-6 py-20">
-      <h2 className="mb-6 text-center text-4xl font-bold text-signoz_vanilla-100">
-        Get started with <br /> SigNoz Cloud today
-      </h2>
-      <div className="flex flex-col items-center justify-center gap-3 pt-4 md:flex-row">
-        <Button to={CTA_BUTTONS[0].href} variant="default" rounded="full" id={CTA_BUTTONS[0].id}>
-          <span className={CTA_BUTTONS[0].className}>
-            {CTA_BUTTONS[0].text}
+    <div className="flex w-full flex-col gap-4">
+      {Usage.map((feature, index) => (
+        <PlatformCard key={index} title={feature.title} description={feature.description} />
+      ))}
+    </div>
+  )
+}
+
+const DocsList = () => {
+  const Docs = [
+    {
+      title: 'Node.js instrumentation',
+      description: 'Instrument your Node.js application and monitor with SigNoz',
+    },
+    {
+      title: 'Python instrumentation',
+      description: 'Instrument your Python application and monitor with SigNoz',
+    },
+    {
+      title: 'Java instrumentation',
+      description: 'Instrument your Java application and monitor with SigNoz',
+    },
+    {
+      title: 'Get started with SigNoz APM',
+      description: 'Instrument your Java application and monitor with SigNoz',
+    },
+  ]
+
+  return (
+    <div className="flex w-full flex-col gap-4">
+      {Docs.map((feature, index) => (
+        <PlatformCard key={index} title={feature.title} description={feature.description} />
+      ))}
+    </div>
+  )
+}
+
+const Header = () => {
+  return (
+    <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
+      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
+      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
+        <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
+          Application Performance Monitoring <br />
+          Powered by OpenTelemetry
+        </h1>
+
+        <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
+          SigNoz APM comes with out-of-box charts for key application metrics powered by
+          OpenTelemetry.
+          <br className="hidden lg:inline" />
+          Get latency, requests per second, error percentage, apdex & other key metrics
+          <br className="hidden lg:inline" />
+          to understand your application performance.
+        </p>
+      </div>
+      <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
+        <Button variant="default" rounded="full" to="/teams/" id="btn-get-started-homepage-hero">
+          <span className="flex-center">
+            Get Started - Free
             <ArrowRight size={14} />
           </span>
         </Button>
-        <Button to={CTA_BUTTONS[1].href} variant="secondary" rounded="full" id={CTA_BUTTONS[1].id}>
-          <span className={CTA_BUTTONS[1].className}>
+
+        <Button
+          variant="secondary"
+          rounded="full"
+          to="/docs/introduction/"
+          id="btn-read-documentation-homepage-hero"
+        >
+          <span className="flex-center">
             <BookOpen size={14} />
-            {CTA_BUTTONS[1].text}
+            Read Documentation
           </span>
         </Button>
       </div>
-      <div className="relative mt-16 flex items-center justify-center">
-        <Image
-          src="/img/landing/landing_thumbnail.webp"
-          alt="SigNoz dashboard with application performance metrics - APM"
-          width={1440}
-          height={810}
-          className="z-[0] w-3/5 rounded-lg"
-        />
+      <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
+        <div className="w-100 mx-[-28px]">
+          <div className="product-explainer-video hero-figure rounded-lg p-3">
+            <div className="embed-container">
+              <div className="absolute">
+                <img
+                  src="/img/features/apm/apm-cover.webp"
+                  alt="SigNoz APM service overview with latency, rate, and apdex charts"
+                  className="w-full rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+const TrustedByTeams = ({ page }) => {
+  const customerStoriesId = `btn-customer-stories-${page}-hero`
+  return (
+    <section
+      className={`relative z-[1] !m-0 !mx-auto !w-[100vw]  border !border-b-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 pt-10 md:!w-[80vw]`}
+    >
+      <div className="section-container">
+        <div className="mb-2 flex flex-col items-center text-center md:mb-12">
+          <div className="text-sm font-semibold uppercase leading-5 tracking-[0.05em] text-signoz_vanilla-400">
+            Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+          </div>
+        </div>
+        <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
+          {COMPANIES.map((company, idx) => (
+            <div key={`${idx}-${company.imageDesc}`} className="flex items-center justify-center">
+              <company.Logo
+                className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
+                role="img"
+                aria-label={company.imageDesc}
+              />
+            </div>
+          ))}
+        </div>
+        <div
+          className={`wavy-line relative mx-[-1rem]
+          after:absolute after:top-[50%] after:h-0 after:w-full after:bg-transparent after:content-['']
+        `}
+        >
+          <div className="flex flex-col items-center text-center">
+            <Button variant="secondary" rounded="full" to="/case-study/" id={customerStoriesId}>
+              <span className="flex-center z-[1] mx-2">
+                Read customer stories <ArrowRight size={14} />
+              </span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const SigNozFeatures = () => {
+  const sections = [
+    {
+      title: 'Faster Analytics powered by ClickHouse',
+      desc: [
+        'We use ClickHouse as our datastore. ClickHouse is a very fast and resource-efficient database for real-time analytics. Big companies like Uber and Cloudflare power their observability with ClickHouse as the database. It provides best-in-class ingestion rates and great compression ratios for efficient storage.',
+      ],
+      figure: '/img/landing/property-ease-of-use.webp',
+      logo: '/img/log-management/fast.svg',
+    },
+    {
+      title: 'Correlation with other signals',
+      desc: 'We provide traces, metrics, and logs under a single pane of glass powered by OpenTelemetry SDKs. You can correlate your signals for a much richer context while debugging. Generate metrics from trace data, jump from traces to logs and vice-versa.',
+      figure: '/img/landing/property-covers-all-use-cases.webp',
+      logo: '/img/log-management/signals.svg',
+    },
+    {
+      title: 'Out-of-box charts for key application metrics',
+      desc: 'Get key application metrics charts like p99, p90, p50 latency, request rate, error rates, Apdex and others with minimal code changes. Use auto-instrumentation libraries provided by OpenTelemetry to get started with observability quickly.',
+      figure: '/img/landing/property-covers-all-use-cases.webp',
+      logo: '/img/features/apm/chart-column-big.svg',
+      buttonText: 'Instrument your application',
+      buttonLink: 'https://signoz.io/docs/instrumentation/',
+    },
+    {
+      title: '',
+    },
+  ]
+
+  const scrollsections = [
+    {
+      title: 'Support for all popular languages',
+      desc: 'SigNoz supports a wide range of popular languages for application monitoring. Instrument your application code with OpenTelemetry, and start sending data to SigNoz.',
+      image: '/img/features/apm/apm-language-supported.webp',
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/instrumentation/',
+    },
+    {
+      title: 'Monitor all your services',
+      desc: 'Be on top of your application performance with out-of-box charts for latency, error rate, operations per second, and other critical metrics of all your services.',
+      image: '/img/features/apm/apm-services.webp',
+    },
+    {
+      title: 'Out-of-box APM Charts',
+      desc: 'For each of your services, monitor p99, p90, p50 latencies, rate (ops/s), and error rate with out-of-the-box application metrics charts.',
+      image: '/img/features/apm/apm-charts.webp',
+    },
+    {
+      title: 'Apdex',
+      desc: "Apdex score indicates the end user’s level of satisfaction from 0(least satisfied) to 1(most satisfied) with application performance. It helps developers gauge their application's performance from the user's perspective.",
+      image: '/img/features/apm/apdex.webp',
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/userguide/metrics/#what-are-application-metrics',
+    },
+    {
+      title: 'Database Call Metrics',
+      desc: 'If your application makes any database calls, you can monitor them under DB Call Metrics. Monitor the number of database calls per second and their average duration.',
+      image: '/img/features/apm/database-call-metrics.webp',
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/userguide/metrics/#database-calls-in-signoz',
+    },
+    {
+      title: 'Monitor the Top Endpoints of your service',
+      desc: 'Get a list of key endpoints and important metrics about them. It helps you quickly identify slow endpoints of your application.',
+      image: '/img/features/apm/top-endpoints.webp',
+      buttonText: 'Learn More',
+      buttonLink:
+        'https://signoz.io/docs/application-monitoring/api-monitoring/#key-operations-section-in-service-page',
+    },
+    {
+      title: 'External Call Metrics',
+      desc: 'External call metrics allow you to track the external services on which your application depends. Monitor things like the percentage of external calls that resulted in errors.',
+      image: '/img/features/apm/external-call-metrics.webp',
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/userguide/metrics/#external-calls-in-signoz',
+    },
+    {
+      title: 'Application Metrics to Traces',
+      desc: "SigNoz APM allows you to view your application's traces from APM charts at any time stamp. You can click on data points with high latencies to view traces around those timestamps.",
+      image: '/img/features/apm/apm-view-traces.webp',
+    },
+  ]
+  return (
+    <>
+      <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+        <section className="bg-blur-ellipse-388 mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw] ">
+          <div className={`container pb-16`}>
+            <div className="flex flex-col gap-6 pb-44 pt-28 ">
+              <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
+                <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
+                  Why use SigNoz for <br /> Application Performance Monitoring?
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
+        <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
+          {sections.map((section, index) => (
+            <Card
+              key={index}
+              logo={section.logo}
+              subTitle={section.title}
+              description={section.desc}
+              buttonText={section.buttonText}
+              buttonLink={section.buttonLink}
+              logoSize={24}
+              subTitleSize={2}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+        <section className="bg-blur-ellipse-388 mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw] ">
+          <div className={`container pb-16`}>
+            <div className="flex flex-col gap-6 pb-44 pt-28 ">
+              <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
+                <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
+                  SigNoz Application Performance <br /> Monitoring Overview
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
+        {scrollsections.map((scrollsections, index) => (
+          <FeatureCard
+            key={index}
+            title={scrollsections.title}
+            description={scrollsections.desc}
+            buttonText={scrollsections.buttonText}
+            buttonLink={scrollsections.buttonLink}
+            img={scrollsections.image}
+          />
+        ))}
+      </div>
+    </>
+  )
+}
+
+const SigNozUsage = () => {
+  return (
+    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+      <div className="flex flex-col sm:flex-row">
+        <div className="!w-[100%]  flex-1 md:!w-[300px]">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+            Use SigNoz
+            <br /> APM for...
+          </p>
+        </div>
+        <div className="flex-[2_2_0%]">
+          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
+            <FeatureList />
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
-function Apm() {
+const UsageBasedPricing = () => {
   return (
-    <FeaturePageLayout>
-      <Header />
-
-      <SectionLayout variant="bordered" className="!px-0">
-        <Divider className="mt-12" />
-
-        <FeatureShowcase
-          title={
-            <>
-              Why use SigNoz for <br /> Application Performance Monitoring?
-            </>
-          }
-          className="py-20"
-        />
-
-        <Divider />
-
-        <SplitSection left={CARD_FASTER_ANALYTICS} right={CARD_CORRELATION} withVerticalDivider />
-
-        <Divider />
-
-        <SplitSection left={CARD_OUT_OF_BOX} right={CARD_EMPTY} withVerticalDivider />
-
-        <Divider />
-
-        <FeatureShowcase
-          title={
-            <>
-              SigNoz Application Performance <br /> Monitoring Overview
-            </>
-          }
-          className="py-20"
-        />
-
-        <Divider />
-
-        <SplitSection
-          left={FEATURE_LANGUAGES}
-          right={FEATURE_MONITOR_SERVICES}
-          withVerticalDivider
-        />
-
-        <Divider />
-
-        <SplitSection left={FEATURE_APM_CHARTS} right={FEATURE_APDEX} withVerticalDivider />
-
-        <Divider />
-
-        <SplitSection
-          left={FEATURE_DB_CALL_METRICS}
-          right={FEATURE_TOP_ENDPOINTS}
-          withVerticalDivider
-        />
-
-        <Divider />
-
-        <SplitSection
-          left={FEATURE_EXTERNAL_CALL_METRICS}
-          right={FEATURE_METRICS_TO_TRACES}
-          withVerticalDivider
-        />
-
-        <Divider />
-
-        <SplitSection
-          left={
-            <div className="flex h-full w-full flex-col px-6">
-              <p className="sticky top-[100px] pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
-                Use SigNoz
-                <br /> APM for...
-              </p>
+    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+      <div className="flex flex-col sm:flex-row">
+        <div className="!w-[100%]  flex-1 md:!w-[300px]">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+            Simple
+            <br /> usage-based <br /> pricing
+          </p>
+        </div>
+        <div className="flex-[2_2_0%]">
+          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
+            <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
+              Pricing you can trust
             </div>
-          }
-          right={<FeatureListContent />}
-        />
-
-        <Divider />
-
-        <GetStartedCTA />
-      </SectionLayout>
-
-      <UsageBasedPricing show={['traces']} />
-      <SigNozStats />
-      <Divider />
-      <CustomerStoriesSection />
-    </FeaturePageLayout>
+            <p className="text-base font-normal text-signoz_vanilla-400">
+              Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?
+              <br />
+              We’re here for you.
+            </p>
+            <UsageList />
+            <Button
+              variant="default"
+              rounded="full"
+              to="/pricing/"
+              id="btn-get-started-homepage-hero"
+              className="mt-5"
+            >
+              <span className="flex-center">
+                Check Pricing
+                <ArrowRight size={14} />
+              </span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
-export default Apm
+const ExploreDocs = () => {
+  return (
+    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+      <div className="flex flex-col sm:flex-row">
+        <div className="!w-[100%]  flex-1 md:!w-[300px]">
+          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+            Explore Docs
+          </p>
+        </div>
+        <div className="flex-[2_2_0%]">
+          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
+            <DocsList />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const GetStarted = ({ page }) => {
+  const getStartedId = `btn-get-started-${page}-bottom`
+  const readDocumentationId = `btn-read-documentation-${page}-bottom`
+
+  return (
+    <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
+      <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+        <div className="bg-blur-ellipse-206">
+          <div className="flex flex-col gap-16">
+            <div className="flex flex-col gap-12">
+              <p className="mb-0 mt-20 text-center text-4xl font-bold">
+                Get started with <br /> SigNoz Cloud today
+              </p>
+              <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
+                <Button to="/teams/" variant={'default'} rounded={'full'} id={getStartedId}>
+                  <span className="flex-center">
+                    Get Started - Free
+                    <ArrowRight size={14} />
+                  </span>
+                </Button>
+
+                <Button
+                  to="/docs/introduction/"
+                  variant={'secondary'}
+                  rounded={'full'}
+                  id={readDocumentationId}
+                >
+                  <span className="flex-center">
+                    <BookOpen size={14} />
+                    Read Documentation
+                  </span>
+                </Button>
+              </div>
+            </div>
+            <div className="relative flex items-center justify-center">
+              <img
+                src="/img/landing/landing_thumbnail.webp"
+                alt="SigNoz dashboard with application performance metrics - APM"
+                className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
