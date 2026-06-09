@@ -1,5 +1,5 @@
 ---
-date: 2026-02-22
+date: 2026-06-09
 id: sso-google
 description: Set up Google Workspace SSO authentication with SigNoz, including group-based access control and role mapping.
 title: Single Sign-on Authentication With Google Workspace
@@ -32,9 +32,14 @@ Before starting, ensure you have:
 3. Click **Create credentials → OAuth client ID → Web application**
 4. Add an **Authorized redirect URI**:
    ```
-   https://${SIGNOZ_BASEURL}/api/v1/complete/google
+   <your-instance-url>/api/v1/complete/google
    ```
+   Replace `<your-instance-url>` with your SigNoz URL (e.g., `https://signoz.example.com/api/v1/complete/google`).
 5. Click **Create** and note the **Client ID** and **Client Secret**. You'll paste these into SigNoz shortly
+
+<Admonition type="info">
+If your self-hosted SigNoz is served under a base path (for example `https://example.com/signoz`), the redirect URI automatically inherits that prefix — register `https://example.com/signoz/api/v1/complete/google` with Google. See [Serving SigNoz on an External URL](https://signoz.io/docs/manage/administrator-guide/configuration/serving-on-external-url/) for details.
+</Admonition>
 
 ### Step 2: Configure SigNoz for Google Authentication
 
@@ -173,7 +178,7 @@ Group-based role mapping requires **Fetch Groups** to be enabled (see [Step 5](#
 
 **Common issues and solutions:**
 
-- **"Authentication failed" error**: Check that the redirect URI exactly matches `https://${SIGNOZ_BASEURL}/api/v1/complete/google` in Google Cloud
+- **"Authentication failed" error**: Check that the redirect URI exactly matches `<your-instance-url>/api/v1/complete/google` in Google Cloud. If you serve SigNoz under a base path, the URI must include that prefix (e.g., `https://example.com/signoz/api/v1/complete/google`)
 - **Stuck in a login loop**: Ensure **Enforce SSO** is enabled **and** the user's email domain matches the configured authenticated domain
 - **Groups not being fetched**: Verify that the service account has Domain-Wide Delegation enabled, the `admin.directory.group.readonly` scope is authorized in Google Workspace Admin, and the Admin SDK API is enabled in Google Cloud
 - **"Insufficient permissions" error for groups**: Check that the admin email in **Domain to Admin Email** has permissions to list groups in Google Workspace. The admin must have at least the Groups Reader role

@@ -1,5 +1,5 @@
 ---
-date: 2026-04-30
+date: 2026-06-09
 id: serving-on-external-url
 title: Serving SigNoz on an External URL
 description: Learn how to serve SigNoz on a custom external URL or base path so it can run behind a reverse proxy alongside other services on the same domain.
@@ -40,6 +40,16 @@ After restarting SigNoz with the updated configuration:
 ```bash
 curl -i https://example.com/api/v1/health
 ```
+
+## SSO callback URLs
+
+SSO callback URLs (OIDC, SAML, and Google OAuth) and the failed-login redirect automatically inherit the base path you set in `SIGNOZ_GLOBAL_EXTERNAL__URL` — no manual adjustment is required. For example, with `SIGNOZ_GLOBAL_EXTERNAL__URL=https://example.com/signoz`, SigNoz advertises:
+
+- OIDC: `https://example.com/signoz/api/v1/complete/oidc`
+- SAML (ACS URL): `https://example.com/signoz/api/v1/complete/saml`
+- Google OAuth: `https://example.com/signoz/api/v1/complete/google`
+
+Register these prefixed URLs with your Identity Provider when setting up SSO. See the [SSO setup guides](https://signoz.io/docs/manage/administrator-guide/sso/overview/) for provider-specific steps.
 
 <details>
 <ToggleHeading>
