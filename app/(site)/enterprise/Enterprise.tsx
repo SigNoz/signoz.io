@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { TrustedByTeams } from '@/components/trusted-by'
-import { ArrowRight, Check, CheckCircle, CircleArrowRight } from 'lucide-react'
+import { ArrowRight, CheckCircle, CircleArrowRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Button from '@/components/Button/Button'
@@ -273,7 +273,7 @@ export default function Enterprise() {
           </div>
         </div>
 
-        <section className="bg-blur-ellipse-388 mx-auto w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80vw] ">
+        <section className="bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400">
           <div className={`container`}>
             <div className="flex flex-col py-20">
               <div className="mx-auto flex max-w-4xl flex-col items-center text-center">

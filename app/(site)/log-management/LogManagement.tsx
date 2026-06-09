@@ -74,7 +74,7 @@ const VisualQueryBuilder: React.FC = () => {
             height={10000}
             className="mb-8"
           />
-          <HeroCards cards={QUERY_BUILDER_CARDS} layoutVariant={'no-border'} variant="combined" />
+          <HeroCards cards={QUERY_BUILDER_CARDS} layoutVariant={'full-width'} variant="combined" />
         </>
       }
     />
@@ -88,7 +88,7 @@ const LogsManagement: React.FC = () => {
       <Header />
 
       <SectionLayout variant="bordered" className="!px-0">
-        <HeroCards cards={CARDS} layoutVariant="no-border" />
+        <HeroCards cards={CARDS} layoutVariant="full-width" />
         <Divider />
         <Divider className="mt-12" />
         <LogProcessingSection />
@@ -96,7 +96,7 @@ const LogsManagement: React.FC = () => {
 
         <FeatureShowcase
           {...LOG_CORRELATION_SHOWCASE}
-          className="!mx-auto !w-[80vw] px-6 pb-0 pt-6"
+          className="!mx-auto w-full px-6 pb-0 pt-6"
           contentClassName="mb-0"
         />
 

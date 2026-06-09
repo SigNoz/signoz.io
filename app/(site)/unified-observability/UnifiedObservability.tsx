@@ -708,7 +708,7 @@ const UnifiedObservability = () => {
               </div>
             </div>
           </div>
-          <div className="section-container !mx-auto hidden !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 sm:block md:!w-[80vw]">
+          <div className="section-container !mx-auto hidden w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400 !px-0 sm:block">
             <div className="flex flex-col sm:flex-row">
               <div className="!w-[100%] flex-1 md:!w-[300px]">
                 <div className="space-y-[10vh]">

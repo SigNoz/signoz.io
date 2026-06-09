@@ -102,7 +102,7 @@ const ExternalApis: React.FC = () => {
 
         <FeatureShowcase
           {...DRILL_INTO_DOMAINS_SHOWCASE}
-          className="!mx-auto !w-[80vw] px-6 pb-0 pt-6"
+          className="!mx-auto w-full px-6 pb-0 pt-6"
           contentClassName="mb-0"
         />
 
