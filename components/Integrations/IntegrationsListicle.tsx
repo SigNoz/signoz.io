@@ -6,6 +6,7 @@ import {
   SiPostgresql,
   SiNginx,
   SiMongodb,
+  SiApachecassandra,
   SiClickhouse,
   SiGo,
   SiTypescript,
@@ -68,6 +69,9 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     '/docs/integrations/redis': <SiRedis className="h-7 w-7 text-red-500" />,
     '/docs/integrations/postgresql': <SiPostgresql className="h-7 w-7 text-blue-600" />,
     '/docs/integrations/mongodb': <SiMongodb className="h-7 w-7 text-green-600" />,
+    '/docs/integrations/opentelemetry-cassandra': (
+      <SiApachecassandra className="h-7 w-7 text-blue-500" />
+    ),
     '/docs/integrations/clickhouse': <SiClickhouse className="h-7 w-7 text-yellow-500" />,
     '/docs/integrations/opentelemetry-neondb': (
       <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />

@@ -6,6 +6,7 @@ import {
   SiKubernetes,
   SiNginx,
   SiMongodb,
+  SiApachecassandra,
   SiPostgresql,
   SiRedis,
   SiApachekafka,
@@ -111,6 +112,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   '/docs/integrations/outposts/render': <SiRender className="h-7 w-7 text-black dark:text-white" />,
   // Databases
   '/docs/integrations/clickhouse': <SiClickhouse className="h-7 w-7 text-yellow-400" />,
+  '/docs/integrations/opentelemetry-cassandra': (
+    <SiApachecassandra className="h-7 w-7 text-blue-500" />
+  ),
   '/docs/integrations/snowflake': <SiSnowflake className="h-7 w-7 text-blue-500" />,
   '/docs/tutorial/mongodb-metrics': <SiMongodb className="h-7 w-7 text-green-500" />,
   '/docs/integrations/mongodb-atlas': <SiMongodb className="h-7 w-7 text-green-500" />,

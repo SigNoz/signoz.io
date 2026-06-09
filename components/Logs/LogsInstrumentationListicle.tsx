@@ -9,6 +9,7 @@ import {
   SiPython,
   SiNodedotjs,
   SiFluentd,
+  SiApachecassandra,
   SiApachetomcat,
   SiAmazonwebservices,
   SiGo,
@@ -66,6 +67,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   ),
   '/docs/logs-management/send-logs/cloudflare-logs': (
     <SiCloudflare className="h-7 w-7 text-orange-500" />
+  ),
+  '/docs/integrations/opentelemetry-cassandra': (
+    <SiApachecassandra className="h-7 w-7 text-blue-500" />
   ),
   '/docs/integrations/opentelemetry-neondb': (
     <img src="/svgs/icons/neon.svg" alt="Neon" className="h-7 w-7 object-contain" />

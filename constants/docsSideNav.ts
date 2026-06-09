@@ -1569,6 +1569,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/integrations/opentelemetry-cassandra',
+            label: 'Cassandra',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
             label: 'Convex',
           },
@@ -1924,6 +1929,11 @@ const docsSideNav = [
             label: 'Databases',
             isExpanded: false,
             items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-cassandra',
+                label: 'Cassandra',
+              },
               {
                 type: 'doc',
                 route: '/docs/tutorial/mongodb-metrics',
@@ -3736,6 +3746,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/mongodb-atlas',
         label: 'MongoDB Atlas',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-cassandra',
+        label: 'Cassandra',
       },
       {
         type: 'doc',

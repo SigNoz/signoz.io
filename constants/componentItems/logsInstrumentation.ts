@@ -33,6 +33,11 @@ export const LOGS_INSTRUMENTATION_ITEMS = {
       href: '/docs/logs-management/send-logs/cloudflare-logs',
       clickName: 'Cloudflare Logs Link',
     },
+    {
+      name: 'Cassandra',
+      href: '/docs/integrations/opentelemetry-cassandra',
+      clickName: 'Cassandra Logs Link',
+    },
     { name: 'Neon', href: '/docs/integrations/opentelemetry-neondb', clickName: 'Neon Logs Link' },
     {
       name: 'Convex',

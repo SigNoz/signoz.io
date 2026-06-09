@@ -174,6 +174,11 @@ export const METRICS_QUICK_START_ITEMS = {
       clickName: 'ClickHouse Metrics Link',
     },
     {
+      name: 'Cassandra',
+      href: '/docs/integrations/opentelemetry-cassandra',
+      clickName: 'Cassandra Metrics Link',
+    },
+    {
       name: 'Snowflake',
       href: '/docs/integrations/snowflake',
       clickName: 'Snowflake Metrics Link',
