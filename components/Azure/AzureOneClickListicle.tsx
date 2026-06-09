@@ -5,10 +5,10 @@ import IconCardGrid from '../Card/IconCardGrid'
 import { AZURE_ONE_CLICK_ITEMS } from '@/constants/componentItems'
 
 const ICON_MAP: Record<string, React.ReactNode> = {
-  '/docs/integrations/azure/cdn-frontdoor': (
+  '/docs/integrations/azure/aks': (
     <img
-      src="/img/icons/azure-cdn-frontdoor-icon.svg"
-      alt="Azure CDN FrontDoor"
+      src="/img/icons/kubernetes-icon.svg"
+      alt="Azure Kubernetes Service (AKS)"
       className="h-7 w-7"
     />
   ),
@@ -18,6 +18,16 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       alt="Azure Blob Storage"
       className="h-7 w-7"
     />
+  ),
+  '/docs/integrations/azure/cdn-frontdoor': (
+    <img
+      src="/img/icons/azure-cdn-frontdoor-icon.svg"
+      alt="Azure CDN FrontDoor"
+      className="h-7 w-7"
+    />
+  ),
+  '/docs/integrations/azure/container-apps': (
+    <img src="/img/icons/azure-icon.svg" alt="Azure Container Apps" className="h-7 w-7" />
   ),
 }
 

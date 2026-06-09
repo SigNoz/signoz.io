@@ -3671,6 +3671,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/integrations/azure/aks',
+            label: 'AKS',
+          },
+          {
+            type: 'doc',
             route: '/docs/integrations/azure/blob-storage',
             label: 'Blob Storage',
           },
@@ -3678,6 +3683,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/azure/cdn-frontdoor',
             label: 'CDN FrontDoor',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/container-apps',
+            label: 'Container Apps',
           },
         ],
       },
