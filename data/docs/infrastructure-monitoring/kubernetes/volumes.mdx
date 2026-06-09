@@ -33,7 +33,7 @@ The **Volumes** view monitors PersistentVolumeClaim (PVC) storage and inode cons
 
 - This column relies on the OTel metric `k8s.volume.capacity` from the kubeletstats receiver, defined as "The total capacity in bytes of the volume".
 - The provisioned size of the PVC's underlying volume in bytes, as reported by the kubelet's stats-summary API. The kubelet sources this from the filesystem `statfs` call on the mounted volume — so it reflects the actual filesystem capacity (which may differ from the PVC's `.spec.resources.requests.storage` for thin-provisioned volumes).
-- Compare against your StorageClass quota and any namespace `ResourceQuota` on `requests.storage`; capacity growth from a `volumeExpansion` resize will be reflected here once the kubelet picks up the new size.
+- Use this to read the PVC's provisioned size at a glance and as the reference baseline for interpreting **Volume Available** and **Volume Utilization** on this page — under steady state the value is constant, since capacity changes only when the underlying volume is explicitly resized.
 
 ### Volume Utilization
 
@@ -81,7 +81,7 @@ Click a volume name to open the detail page.
 
 - This chart relies on the OTel metric `k8s.volume.capacity` from the kubeletstats receiver.
 - Plots a single line: total provisioned filesystem capacity in bytes. The value is normally constant but will step up when a `volumeExpansion`-enabled PVC is resized.
-- Use this to confirm a PVC resize actually took effect — after `kubectl edit pvc` raises `.spec.resources.requests.storage`, the value here should jump within a couple of kubelet stats intervals (~1 minute).
+- Use this to read the PVC's provisioned size at a glance and as the reference baseline for interpreting **Volume Available** and **Volume Utilization** on this page — under steady state the line is flat, since capacity changes only when the underlying volume is explicitly resized.
 
 #### Volume Inodes Used
 
