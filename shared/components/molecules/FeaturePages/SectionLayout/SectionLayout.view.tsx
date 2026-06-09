@@ -10,6 +10,7 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
   const getVariantClasses = () => {
     switch (variant) {
       case 'full-width':
+      case 'no-border':
         return '!mx-auto'
       case 'bordered':
         return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-signoz_slate-400'

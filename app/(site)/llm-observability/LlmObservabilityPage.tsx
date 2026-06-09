@@ -198,7 +198,7 @@ const HowSigNozCompares: React.FC = () => {
                   How SigNoz Compares to <br /> LLM-Only Tools
                 </h2>
                 <SectionLayout
-                  variant="full-width"
+                  variant="no-border"
                   className="!mx-auto flex items-center justify-center"
                 >
                   <ComparisonTable vendors={VENDORS} rows={LLM_COMPARISON_TABLE_ROWS} />

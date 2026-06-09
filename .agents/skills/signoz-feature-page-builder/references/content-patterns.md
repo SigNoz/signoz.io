@@ -31,7 +31,7 @@ const FeatureSection: React.FC = () => {
 const FeatureWithCards: React.FC = () => {
   return (
     <FeatureShowcase {...SHOWCASE_DATA} className="px-6 pb-0 pt-6" imageClassName="mb-0">
-      <HeroCards cards={CARDS} layoutVariant="full-width" cols={2} />
+      <HeroCards cards={CARDS} layoutVariant="no-border" cols={2} />
     </FeatureShowcase>
   )
 }
@@ -155,7 +155,7 @@ const FeatureHighlights: React.FC = () => {
     <HeroCards
       cards={FEATURE_CARDS}
       variant="combined"
-      layoutVariant="full-width"
+      layoutVariant="no-border"
       cols={3}
     />
   )

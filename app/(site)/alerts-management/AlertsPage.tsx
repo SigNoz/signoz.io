@@ -77,7 +77,7 @@ const CreateAlertsAndDefineConditions: React.FC = () => {
     <FeatureShowcase {...CREATE_ALERTS_SHOWCASE} className="px-6 pb-0 pt-6" imageClassName="mb-0">
       <HeroCards
         cards={ALERTS_MANAGEMENT_CARDS}
-        layoutVariant={'full-width'}
+        layoutVariant={'no-border'}
         variant="default"
         cols={2}
         className="!-ml-6 -mt-6"

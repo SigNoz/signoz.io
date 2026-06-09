@@ -162,7 +162,7 @@ const HighGrowthTeams: React.FC = () => {
               <br className="hidden md:block" /> Advanced observability for micro services to LLMs.
             </div>
           </div>
-          <SectionLayout variant="full-width" className="!mx-auto !p-0">
+          <SectionLayout variant="no-border" className="!mx-auto !p-0">
             <IconTitleDescriptionCardGrid cards={HIGH_GROWTH_TEAMS_CARDS} variant="lg" />
           </SectionLayout>
         </div>
@@ -211,7 +211,7 @@ const NumbersThatSpeak: React.FC = () => {
 
       <HeroCards
         cards={NUMBERS_THAT_SPEAK_CARDS}
-        layoutVariant={'full-width'}
+        layoutVariant={'no-border'}
         variant="combined"
         className="md:!px-24"
       />

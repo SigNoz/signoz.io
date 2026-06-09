@@ -210,7 +210,7 @@ const VisualQueryBuilder: React.FC = () => {
 
         {/* <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={null} variant="combined" /> */}
       </FeatureShowcase>
-      <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={'full-width'} variant="combined" />
+      <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={'no-border'} variant="combined" />
     </>
   )
 }
@@ -237,7 +237,7 @@ const DistributedTracing: React.FC = () => {
 
       <SectionLayout variant="bordered" className="!px-0">
         <Divider />
-        <HeroCards layoutVariant="full-width" cards={CARDS} />
+        <HeroCards layoutVariant="no-border" cards={CARDS} />
         <Divider className="mb-12" />
         <Divider />
         <LogProcessingSection />

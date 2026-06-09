@@ -126,7 +126,7 @@ const CapabilitiesSection: React.FC = () => {
           Capabilities That Make SigNoz the <br className="hidden md:block" /> Default Choice for AI
           Companies
         </h2>
-        <SectionLayout variant="full-width" className="!mx-auto p-0">
+        <SectionLayout variant="no-border" className="!mx-auto p-0">
           <div className="flex flex-col items-start justify-start gap-3 border-y border-dashed border-signoz_slate-400 p-8 text-left">
             <h4 className="mb-1 text-xl font-semibold text-signoz_robin-400">
               Capabilities that AI Companies Need Most
@@ -247,7 +247,7 @@ const HowSigNozCompares: React.FC = () => {
           <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
             How SigNoz Compares to <br /> LLM-Only Tools
           </h2>
-          <SectionLayout variant="full-width" className="!mx-auto flex items-center justify-center">
+          <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
             <ComparisonTable vendors={VENDORS} rows={LLM_COMPARISON_TABLE_ROWS} />
           </SectionLayout>
         </div>
@@ -265,7 +265,7 @@ const HowSigNozComparesToTraditionalTools: React.FC = () => {
           <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
             How SigNoz Compares to <br /> Traditional Tools
           </h2>
-          <SectionLayout variant="full-width" className="!mx-auto flex items-center justify-center">
+          <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
             <ComparisonTable
               vendors={TRADITIONAL_VENDORS}
               rows={TRADITIONAL_COMPARISON_TABLE_ROWS}

@@ -105,7 +105,7 @@ const AnalyzeRequestFlowsAcrossMultipleTraceIds: React.FC = () => {
       </FeatureShowcase>
       <HeroCards
         cards={ANALYZE_REQUEST_FLOW_CARDS}
-        layoutVariant={'full-width'}
+        layoutVariant={'no-border'}
         variant="combined"
       />
     </>

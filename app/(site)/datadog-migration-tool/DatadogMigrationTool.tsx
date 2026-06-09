@@ -122,7 +122,7 @@ const TopHeroSection: React.FC = () => {
           Typical Migration Pain
         </h2>
       </div>
-      <HeroCards cards={CARDS} layoutVariant={'full-width'} variant="combined" />
+      <HeroCards cards={CARDS} layoutVariant={'no-border'} variant="combined" />
       <Divider />
     </SectionLayout>
   )
@@ -143,7 +143,7 @@ const LlmPoweredIntelligenceSection: React.FC = () => {
       </div>
       <HeroCards
         cards={LLM_POWERED_INTELLIGENCE_CARDS}
-        layoutVariant={'full-width'}
+        layoutVariant={'no-border'}
         variant="combined"
       />
     </SectionLayout>

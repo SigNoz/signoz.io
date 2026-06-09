@@ -86,7 +86,7 @@ const QuickEvaluation: React.FC = () => {
             <h2 className="my-6 text-center text-4xl font-semibold text-signoz_sakura-100">
               A Quick Evaluation
             </h2>
-            <SectionLayout variant="full-width" className="flex items-center justify-center">
+            <SectionLayout variant="no-border" className="flex items-center justify-center">
               <ComparisonTable
                 vendors={VENDORS}
                 rows={CLICKSTACK_COMPARISON_TABLE_ROWS}
@@ -179,7 +179,7 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
           <div>
             <Divider />
             <SectionLayout
-              variant="full-width"
+              variant="no-border"
               className="!mx-auto flex items-center justify-center !p-0"
             >
               <IconTitleDescriptionCardGrid
@@ -210,7 +210,7 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
               limited to creating alerts from search or dashboard context only.
             </div>
           </div>
-          <SectionLayout variant="full-width" className="!mx-auto !p-0">
+          <SectionLayout variant="no-border" className="!mx-auto !p-0">
             <Divider />
             <IconTitleDescriptionCardGrid cards={ALERTING_ABOVE_HISTORY_CARDS} variant="lg" />
             <Divider />
@@ -309,7 +309,7 @@ const QueryYourData: React.FC = () => {
 
       <HeroCards
         cards={QUERY_YOUR_DATA_CARDS}
-        layoutVariant={'full-width'}
+        layoutVariant={'no-border'}
         variant="combined"
         className="px-6"
       />
