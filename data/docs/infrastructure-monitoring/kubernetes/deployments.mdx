@@ -103,13 +103,13 @@ Click a Deployment name to open the detail page. The header shows **Deployment N
 #### CPU Usage, Request, Limits
 
 - This chart relies on the OTel metrics `k8s.pod.cpu.usage`, `k8s.container.cpu_request`, and `k8s.container.cpu_limit` from the kubeletstats receiver, aggregated across the Deployment's pods and containers.
-- Plots three series: the Deployment's **CPU Usage** in cores (averaged within each step interval, summed across the Deployment's pods), the sum of containers' **CPU Requests**, and the sum of containers' **CPU Limits**. Usage approaching Limits means the kernel is throttling the Deployment's CPU; Usage well below Requests means the Deployment is reserving more capacity than it consumes.
+- Plots three series, all averaged within the step interval and summed across the Deployment's pods: the Deployment's total **CPU Usage** in cores, container **CPU Requests**, and container **CPU Limits**. Usage approaching Limits means the kernel is throttling the Deployment's CPU; Usage well below Requests means the Deployment is reserving more capacity than it consumes.
 - Use this to right-size the Deployment's `requests.cpu` and `limits.cpu` and to confirm whether high `CPU Limit Usage (%)` on the list page corresponds to a real throttling pattern — if Usage hugs the Limits line, throttle events are happening.
 
 #### Memory Usage, Request, Limits
 
 - This chart relies on the OTel metrics `k8s.pod.memory.usage`, `k8s.container.memory_request`, and `k8s.container.memory_limit` from the kubeletstats receiver, aggregated across the Deployment's pods and containers.
-- Plots three series: the Deployment's **Memory Usage** in bytes (averaged within each step interval, summed across the Deployment's pods), the sum of containers' **Memory Requests**, and the sum of containers' **Memory Limits**. Note that this uses `k8s.pod.memory.usage` (which includes reclaimable page cache), so it reads higher than the working-set value the kubelet uses for OOM decisions.
+- Plots three series, all averaged within the step interval and summed across the Deployment's pods: the Deployment's total **Memory Usage** in bytes, container **Memory Requests**, and container **Memory Limits**. Note that this uses `k8s.pod.memory.usage` (which includes reclaimable page cache), so it reads higher than the working-set value the kubelet uses for eviction decisions.
 - Use this alongside the `Mem Limit Usage (%)` column on the list page — Usage approaching Limits is a leading indicator for OOMKills, and inspecting whether it's a slow climb (leak) or a sudden spike (workload change) shapes the fix.
 
 #### Network IO
