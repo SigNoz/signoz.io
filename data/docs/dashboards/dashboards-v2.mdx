@@ -1,0 +1,125 @@
+---
+date: 2026-06-09
+id: dashboards-v2
+title: Dashboards V2 — Detail Page Guide
+description: Learn how to use the V2 dashboard detail page in SigNoz — inline title editing, Configure drawer, collapsible sections, and the redesigned options menu.
+doc_type: howto
+---
+
+The V2 dashboard detail page redesigns how you edit, organize, and share a single dashboard. This guide covers the header toolbar, the options menu, the right-side Configure drawer, and the new section and empty-state behaviors.
+
+<Admonition type="info">
+  **Preview:** The V2 detail page is being rolled out incrementally. If your dashboard still uses the previous layout, see [Manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/) instead. Screenshots and step-by-step UI references on this page will be refreshed as V2 becomes generally available.
+</Admonition>
+
+## Dashboard header
+
+The header at the top of every V2 dashboard collects all dashboard-level controls in one toolbar.
+
+- **Breadcrumb bar** — Shows `Dashboard / <title>`. Selecting the **Dashboard** link returns to the dashboards list and restores the filters and sort you had applied before opening the dashboard.
+- **Dashboard title** — Click the title to edit it in place. Press **Enter** or click the check icon to save; press **Escape** or click the X icon to cancel. Inline editing requires edit permission on the dashboard.
+- **Lock indicator** — A lock icon appears next to the title when the dashboard is locked. Unlock the dashboard from the [options menu](#options-menu) to resume editing.
+- **Time-range picker** — Selects the time range applied to every panel on the dashboard.
+- **Configure** — Opens the right-side [Configure drawer](#configure-drawer). Visible only when the dashboard is unlocked and you have edit permission.
+- **Add Panel** — Adds a new panel to the dashboard. Visible only when the dashboard is unlocked and you have edit permission.
+- **Options menu** — The three-dots button on the right. See [Options menu](#options-menu) below.
+
+## Options menu
+
+The three-dots menu in the header groups dashboard actions into three sections.
+
+### Edit
+
+- **Rename** — Opens the inline title editor (same flow as clicking the title).
+- **Lock / Unlock Dashboard** — Toggles the locked state. Available to the dashboard author and to admins. Disabled for dashboards created by an integration. On success a confirmation toast is shown; on failure an error dialog is shown.
+- **Full Screen** — Opens the dashboard in a chromeless full-screen view for wall displays and presentations.
+
+### Export
+
+- **Export JSON** — Downloads the full dashboard definition as a `.json` file.
+- **Copy as JSON** — Copies the dashboard JSON to the clipboard.
+
+### Danger
+
+- **Delete Dashboard** — Opens a confirmation dialog with explicit **Cancel** and **Delete** buttons. The dashboard is removed only after you confirm.
+
+## Configure drawer
+
+Selecting **Configure** in the header opens the **Dashboard Configuration** drawer on the right. The drawer is the primary way to edit dashboard settings in V2 and replaces the previous configuration modal.
+
+The drawer has three tabs:
+
+- **General** — Dashboard metadata and cross-panel sync settings.
+- **Variables** — Template variables. (Coming soon — see [Variables](#variables-tab).)
+- **Publish** — Public sharing. (Coming soon — see [Publish](#publish-tab).)
+
+### General tab
+
+The General tab has two groups of settings.
+
+**Dashboard metadata**
+
+| Field | Description |
+|---|---|
+| Name | Dashboard name. Has an icon picker next to it for the dashboard's display icon. |
+| Description | Free-text description shown on the dashboard list and at the top of the dashboard. |
+| Tags | One or more tags used to filter dashboards in the list. |
+
+**Cross-Panel Sync**
+
+The Cross-Panel Sync section is rendered inside the General tab. It controls how hovering one chart highlights the same point in time on every other chart in the dashboard.
+
+1. **Sync Mode** — Choose how panels respond to a hover:
+   - **No Sync** — Panels behave independently.
+   - **Crosshair** — A vertical time-marker appears on every other panel at the hovered timestamp.
+   - **Tooltip** — Same as Crosshair, plus matching tooltips appear on related panels.
+2. **Synced Tooltip Series** — Appears only when Sync Mode is set to **Tooltip**:
+   - **All** — Shows the full tooltip with every series on the receiving panels.
+   - **Filtered** — Shows only the series that match the hovered series based on shared group-by dimensions.
+
+For the matching rules and visual behavior, see [Cross-Panel Sync](https://signoz.io/docs/dashboards/interactivity/#cross-panel-sync) in the interactivity guide.
+
+### Unsaved changes footer
+
+Editing any field on the General tab pins a footer to the bottom of the drawer. The footer shows how many fields are currently dirty and offers two actions:
+
+- **Discard** — Reverts all unsaved changes in the drawer.
+- **Save** — Persists the changes to the dashboard.
+
+The footer is hidden when no fields are dirty.
+
+### Variables tab
+
+The Variables tab is present in the drawer as a placeholder. It currently shows the message "V2 dashboard variables coming next." For now, edit dashboard variables using the [previous variables workflow](https://signoz.io/docs/userguide/manage-variables/).
+
+### Publish tab
+
+The Publish tab is present in the drawer as a placeholder. It currently shows the message "V2 public dashboard publishing coming next." For now, manage public sharing using the [previous public sharing workflow](https://signoz.io/docs/dashboards/public-sharing/).
+
+## Sections and layout
+
+V2 dashboards organize panels into **sections**. Each section has its own header and can be collapsed independently.
+
+- **Collapse / expand** — Each section header has a chevron that toggles the section open and closed. Collapsed sections hide their panels but remain in the dashboard layout.
+- **Template-variable badge** — A badge appears on a section header when the section is configured to repeat using a template variable.
+- **Inline add (empty section)** — When an unlocked section has no panels and the dashboard is in edit mode, a dashed **New Panel** button appears inside the section body. Selecting it opens the same panel creation flow as the header **Add Panel** button.
+
+## Empty dashboard welcome screen
+
+A dashboard with no panels at all shows a **Welcome to your new dashboard** screen instead of an empty grid. The welcome screen has a primary **New Panel** call-to-action that opens the panel creation flow.
+
+## Permissions
+
+The following V2 controls depend on dashboard permissions:
+
+- Inline title editing, **Configure**, **Add Panel**, and the inline section add button are visible only when the dashboard is unlocked **and** the user has edit permission.
+- **Lock / Unlock Dashboard** is available to the dashboard author and to admins. It is disabled for integration-created dashboards.
+- **Delete Dashboard** is available to users with delete permission and always prompts for confirmation.
+
+## Related
+
+- [Manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/) — Create, edit, and remove dashboards.
+- [Interactivity](https://signoz.io/docs/dashboards/interactivity/) — Cross-panel sync matching rules and other interactive features.
+- [Dashboards V2 API reference](https://signoz.io/docs/dashboards/dashboards-v2-api/) — Panel and query envelope reference for the V2 API.
+- [Public sharing](https://signoz.io/docs/dashboards/public-sharing/) — Current public sharing workflow.
+- [Variables](https://signoz.io/docs/userguide/manage-variables/) — Current variables workflow.

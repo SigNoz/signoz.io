@@ -1,0 +1,129 @@
+---
+date: 2026-06-09
+id: dashboards-v2-api
+title: Dashboards V2 API Reference
+description: Reference for the SigNoz Dashboards V2 API payload, including the panel envelope, query envelope, and the validated query kind enum.
+doc_type: reference
+---
+
+The Dashboards V2 API uses a strict, enum-validated JSON schema for panels and their underlying queries. This page documents the panel envelope, the query envelope, and the allowed values for the `kind` field on each.
+
+<Admonition type="warning">
+  **Breaking change:** The V2 API renamed the query `kind` values to lowercase snake_case and now strictly validates them as an enum. Requests that send the previous PascalCase strings (for example `TimeSeriesQuery`, `LogQuery`) or any value outside the allowed set are rejected with a validation error. See [Migrate existing payloads](#migrate-existing-payloads) below.
+</Admonition>
+
+## Panel envelope
+
+A V2 dashboard panel is wrapped in an envelope with a `kind` discriminator and a `spec` body.
+
+| Field | Type | Description |
+|---|---|---|
+| `kind` | string (enum) | Must be `"Panel"`. Any other value is rejected. |
+| `spec` | object | Panel specification — title, description, layout, visualization options, and the composite query that produces panel data. |
+
+Example panel envelope:
+
+```json
+{
+  "kind": "Panel",
+  "spec": {
+    "title": "Request rate",
+    "query": {
+      "queries": [
+        {
+          "kind": "time_series",
+          "spec": { /* query spec */ }
+        }
+      ]
+    }
+  }
+}
+```
+
+## Query envelope
+
+Every query inside a panel's composite query is wrapped in an envelope with a `kind` discriminator and a `spec` body. The API rejects any `kind` value not in the allowed set below.
+
+| Field | Type | Description |
+|---|---|---|
+| `kind` | string (enum) | One of `time_series`, `raw`, `scalar`, `raw_stream`, `trace`. |
+| `spec` | object | Query specification — its shape depends on `kind`. |
+
+### `kind` values
+
+| Value | Use it for |
+|---|---|
+| `time_series` | Time series queries that drive line, bar, area, and other time-bucketed visualizations. |
+| `raw` | Raw row queries that return individual records (for example, logs in a List panel). |
+| `scalar` | Single-value queries that return one aggregated number (for example, a Value panel). |
+| `raw_stream` | Streaming raw queries (live tail / continuous result). |
+| `trace` | Trace queries used by trace-aware panels. |
+
+<Admonition type="info">
+  The `kind` field is validated as a strict enum. Sending an unrecognized value — including the previous PascalCase names — returns a validation error. Always send the lowercase snake_case form shown above.
+</Admonition>
+
+## Migrate existing payloads
+
+If you have dashboard JSON, automation, or templates that were written against the previous V2 schema, update each query `kind` value before posting it back to the V2 API.
+
+| Previous value | New value |
+|---|---|
+| `TimeSeriesQuery` | `time_series` |
+| `LogQuery` | `raw` |
+
+Where to apply the migration:
+
+- Dashboard JSON exports kept under version control (for example, in a Git repository or Terraform module).
+- Scripts or CI jobs that create or update dashboards through the V2 API.
+- Any third-party tool that emits Dashboards V2 payloads.
+
+After updating, re-import or re-apply the dashboard JSON. The API will reject the request if any query envelope still uses a legacy value.
+
+## Sample panel payload
+
+A minimal panel envelope with a single time-series query:
+
+```json
+{
+  "kind": "Panel",
+  "spec": {
+    "title": "p95 latency",
+    "description": "p95 of HTTP server latency by service",
+    "query": {
+      "queries": [
+        {
+          "kind": "time_series",
+          "spec": {
+            "name": "A",
+            "signal": "metrics",
+            "stepInterval": 60,
+            "aggregations": [
+              { "expression": "p95(duration_ms)" }
+            ],
+            "groupBy": [
+              { "name": "service.name" }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+## Validation errors
+
+When a payload fails enum validation, the API returns an HTTP 400 with a message identifying the offending field and value. Common causes:
+
+- Sending `TimeSeriesQuery` or `LogQuery` instead of `time_series` or `raw`.
+- Sending a misspelled or capitalized variant of an allowed value (for example, `Time_Series` or `TIME_SERIES`).
+- Using a panel envelope `kind` other than `"Panel"`.
+
+Fix the value in the payload and resubmit.
+
+## Related
+
+- [Manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/) — Create and edit dashboards in the SigNoz UI.
+- [Terraform provider for SigNoz](https://signoz.io/docs/dashboards/terraform-provider-signoz/) — Manage dashboards as code.
+- [Import a dashboard](https://signoz.io/docs/dashboards/import-dashboard/) — Import dashboard JSON through the UI.

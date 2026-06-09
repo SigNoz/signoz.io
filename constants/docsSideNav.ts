@@ -2118,6 +2118,8 @@ const docsSideNav = [
         route: '/docs/userguide/manage-dashboards',
         items: [
           { type: 'doc', route: '/docs/userguide/manage-dashboards', label: 'Manage Dashboards' },
+          { type: 'doc', route: '/docs/dashboards/dashboards-v2', label: 'Dashboards V2' },
+          { type: 'doc', route: '/docs/dashboards/dashboards-v2-api', label: 'Dashboards V2 API' },
           {
             label: 'Panel Types',
             type: 'category',
