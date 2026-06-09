@@ -35,6 +35,8 @@ When you are deciding what to measure on a user-facing service, the four golden 
 
 These four catch most user-visible problems early. The point of monitoring is detection. It is the smoke alarm that tells you to go look.
 
+<Figure src="/img/blog/2026/06/red-metrics-monitoring-and-logging.webp" alt="A monitoring dashboard tracking key application performance indicators such as request rate, latency, availability, and endpoint-level metrics. These metrics help engineering teams detect anomalies, measure service reliability, and troubleshoot performance issues proactively." caption="An Out-of-the-box RED metrics dashboard for a service." />
+
 ## What is logging?
 
 Logging is the practice of recording discrete, timestamped events as a program runs. Each log entry captures one event: a request arrived, a query ran, a validation failed, a job finished. Where a metric flattens activity into a number, a log keeps the detail. That detail is what lets you reconstruct exactly what happened during an incident.
@@ -60,6 +62,7 @@ A log line can be plain text, but on any system you plan to debug under pressure
 
 Both say a payment failed. Only the second lets you ask a precise question later, like "show every ERROR from the checkout service where duration_ms is over 5000," and get an exact answer instead of grepping text. Each field becomes something you can filter, count, and group by.
 
+<Figure src="/img/blog/2026/06/log-explorer-monitoring-and-logging.webp" alt="Screenshot of a centralized logging and monitoring platform showing real-time log entries from multiple microservices. The dashboard includes filters for severity levels, service names, deployment environments, and timestamps, with error messages and application events displayed in a searchable log stream for debugging and operational monitoring." caption="Centralized SigNoz log explorer with real-time application logs and error events across distributed services" />
 A few habits make logs useful rather than noisy. Use [log levels](https://signoz.io/blog/logging-levels/) consistently so INFO, WARN, and ERROR level messages actually mean something. Disable verbose DEBUG output in production to reduce logs retention costs and improve log visibility. Include a request ID in every log entry so you can track all logs related to a single request. And never record secrets, tokens, or personal data, because [structured logs](https://signoz.io/blog/structured-logs/) are easy to search, which also makes leaked data easy to find.
 
 ## Monitoring vs Logging
@@ -93,7 +96,7 @@ Monitoring is the alarm and the scoreboard. Logging is the record that explains 
 
 ## Best way to implement monitoring and logging with OpenTelemetry
 
-For years, adding monitoring and logging meant picking a vendor and wiring your code to their proprietary agent. [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/), usually shortened to OTel, changed that. It is an open, vendor-neutral standard for generating and collecting all three signals, metrics, logs, and traces, with one set of SDKs and a shared data model. Because it is open, the way you instrument your code is decoupled from where the data ends up, so switching backends does not mean re-instrumenting everything.
+For years, adding monitoring and logging meant picking a vendor and wiring your code to their proprietary agent. [OpenTelemetry](https://signoz.io/opentelemetry/), usually shortened to OTel, changed that. It is an open, vendor-neutral standard for generating and collecting all three signals, metrics, logs, and traces, with one set of SDKs and a shared data model. Because it is open, the way you instrument your code is decoupled from where the data ends up, so switching backends does not mean re-instrumenting everything.
 
 OpenTelemetry matters here for a specific reason. Its logging support can automatically inject the active `trace_id` and `span_id` into every log record while a request is being traced. A typical setup looks like this:
 
@@ -107,6 +110,8 @@ The first three steps are standard and portable. The choice that remains is the 
 ## Why logging and monitoring are not enough?
 
 In the [How monitoring and logging work together](#how-monitoring-and-logging-work-together) section we saw how logging and monitoring compliment each other for request passing through one service. However, things get harder once a request passes through several services. A metric and a pile of logs can still leave you guessing about which hop was slow. That is why most teams collect a third kind of telemetry, traces.
+
+<Figure src="/img/blog/2026/06/log-metrics-monitoring-and-logging.webp" alt="SigNoz observability traces tab displaying a distributed trace with correlated logs and metrics, allowing developers to analyze request flows, investigate latency issues, and troubleshoot applications from a single unified interface." caption="Unified observability in SigNoz combines monitoring, logging, and distributed tracing." />
 
 A trace follows a single request as it moves across services, and it is made of spans, where each span is one unit of work with a start time, an end time, and metadata. Traces tell you where time went and where a request failed. Each answers a different question.
 
@@ -133,6 +138,8 @@ A few principles keep both useful as a system grows:
 This matters for monitoring and logging because the hardest incidents often cross signal boundaries. In a typical incident, a metric may trigger the alert, logs may explain the failure, and a trace may show the slow dependency. If those signals live in disconnected tools, engineers spend precious time copying timestamps and IDs from one place to another.
 
 With SigNoz, teams can collect OpenTelemetry data, monitor application performance, search logs, [correlate logs with traces](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/), build dashboards, and create alerts in one workflow. For example, when a latency alert fires, an engineer can inspect service metrics, jump into traces from the affected window, and review related logs with shared context.
+
+<Figure src="/img/blog/2026/06/metrics-to-traces-and-logs-monitoring-and-logging.webp" alt="Application monitoring dashboard demonstrating metrics-to-traces and logs correlation, enabling engineers to investigate latency spikes, analyze distributed traces, and troubleshoot performance issues in one click." caption="Metrics-to-traces and logs correlation application performance monitoring dashboards in SigNoz." />
 
 You can start with [SigNoz Cloud](https://signoz.io/teams/) or run the [open-source self-hosted version](https://signoz.io/docs/install/self-host/). If you already use OpenTelemetry, you can send telemetry through the OpenTelemetry Collector and avoid tying instrumentation to a proprietary agent.
 
