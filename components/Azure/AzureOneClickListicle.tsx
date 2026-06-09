@@ -19,6 +19,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
       className="h-7 w-7"
     />
   ),
+  '/docs/integrations/azure/virtual-machines': (
+    <img
+      src="/img/icons/azure-virtual-machines-icon.svg"
+      alt="Azure Virtual Machines"
+      className="h-7 w-7"
+    />
+  ),
 }
 
 export default function AzureOneClickListicle() {

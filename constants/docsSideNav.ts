@@ -3679,6 +3679,11 @@ const docsSideNav = [
             route: '/docs/integrations/azure/cdn-frontdoor',
             label: 'CDN FrontDoor',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/virtual-machines',
+            label: 'Virtual Machines',
+          },
         ],
       },
       {

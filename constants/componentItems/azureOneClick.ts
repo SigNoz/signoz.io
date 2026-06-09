@@ -11,4 +11,9 @@ export const AZURE_ONE_CLICK_ITEMS = [
     href: '/docs/integrations/azure/blob-storage',
     clickName: 'Blob Storage Integration Link',
   },
+  {
+    name: 'Virtual Machines',
+    href: '/docs/integrations/azure/virtual-machines',
+    clickName: 'Virtual Machines Integration Link',
+  },
 ] satisfies ComponentItem[]

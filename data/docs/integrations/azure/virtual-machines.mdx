@@ -1,0 +1,97 @@
+---
+date: 2026-06-09
+id: virtual-machines
+title: Azure Virtual Machines Integration
+description: Monitor Azure Virtual Machines with SigNoz. Collect CPU, memory, availability, network, and disk metrics using One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure Virtual Machines integration collects metrics from `Microsoft.Compute/virtualMachines` resources in your monitored resource groups. Once enabled, the SigNoz agent discovers Virtual Machines and configures Azure Monitor metric collection automatically.
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **Virtual Machines** from the left panel.
+3. Toggle **Metric Collection** on.
+
+The agent updates the telemetry pipeline in the background. Metrics start flowing within a few minutes. Navigate to **Dashboards** and open the **Azure Virtual Machine Overview** dashboard to confirm metrics are appearing.
+
+<Admonition type="info">
+Log collection is not yet available for Azure Virtual Machines. Only metrics are collected.
+</Admonition>
+
+## What's collected
+
+The integration collects 150+ Azure Monitor metrics across CPU, memory, availability, network, and disk I/O. Each metric family is exposed as multiple Azure Monitor statistics — typically `average`, `count`, `maximum`, `minimum`, and `total` — so each family below corresponds to several time series in SigNoz (for example, `azure_percentage_cpu_average`, `azure_percentage_cpu_maximum`, etc.).
+
+<details>
+<summary>Metrics</summary>
+
+| Metric family | Unit | Type |
+|---------------|------|------|
+| `azure_vmavailabilitymetric` | Count | Gauge |
+| `azure_percentage_cpu` | Percent | Gauge |
+| `azure_available_memory_bytes` | Bytes | Gauge |
+| `azure_available_memory_percentage` | Percent | Gauge |
+| `azure_cpu_credits_consumed` | Count | Gauge |
+| `azure_cpu_credits_remaining` | Count | Gauge |
+| `azure_network_in` | Bytes | Gauge |
+| `azure_network_in_total` | Bytes | Gauge |
+| `azure_network_out` | Bytes | Gauge |
+| `azure_network_out_total` | Bytes | Gauge |
+| `azure_inbound_flows` | Count | Gauge |
+| `azure_inbound_flows_maximum_creation_rate` | CountPerSecond | Gauge |
+| `azure_outbound_flows` | Count | Gauge |
+| `azure_outbound_flows_maximum_creation_rate` | CountPerSecond | Gauge |
+| `azure_disk_read_bytes` | Bytes | Gauge |
+| `azure_disk_write_bytes` | Bytes | Gauge |
+| `azure_disk_read_operations/sec` | CountPerSecond | Gauge |
+| `azure_disk_write_operations/sec` | CountPerSecond | Gauge |
+| `azure_os_disk_read_bytes/sec` | BytesPerSecond | Gauge |
+| `azure_os_disk_write_bytes/sec` | BytesPerSecond | Gauge |
+| `azure_os_disk_read_operations/sec` | CountPerSecond | Gauge |
+| `azure_os_disk_write_operations/sec` | CountPerSecond | Gauge |
+| `azure_os_disk_latency` | MilliSeconds | Gauge |
+| `azure_os_disk_queue_depth` | Count | Gauge |
+| `azure_os_disk_bandwidth_consumed_percentage` | Percent | Gauge |
+| `azure_os_disk_iops_consumed_percentage` | Percent | Gauge |
+| `azure_os_disk_target_bandwidth` | Count | Gauge |
+| `azure_os_disk_target_iops` | Count | Gauge |
+| `azure_vm_cached_bandwidth_consumed_percentage` | Percent | Gauge |
+| `azure_vm_cached_iops_consumed_percentage` | Percent | Gauge |
+| `azure_vm_uncached_bandwidth_consumed_percentage` | Percent | Gauge |
+| `azure_vm_uncached_iops_consumed_percentage` | Percent | Gauge |
+| `azure_vm_local_used_burst_bps_credits_percentage` | Percent | Gauge |
+| `azure_vm_local_used_burst_io_credits_percentage` | Percent | Gauge |
+| `azure_vm_remote_used_burst_bps_credits_percentage` | Percent | Gauge |
+| `azure_vm_remote_used_burst_io_credits_percentage` | Percent | Gauge |
+
+</details>
+
+## Dashboards
+
+The integration includes a pre-built **Azure Virtual Machine Overview** dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+Use the variables at the top of the dashboard to filter by **Subscription ID** (`azuremonitor.subscription_id`) and individual **VM name** so you can focus on a specific Azure subscription or virtual machine.
+
+The dashboard is grouped into three panel sections:
+
+- **Availability / Memory / CPU**: VM Availability, Available Memory Percentage, and Percentage CPU.
+- **Network**: Network In Total and Network Out Total.
+- **Disk**: Disk Write Bytes, Disk Read Bytes, Disk Write Operations/Sec, and Disk Read Operations/Sec.
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on CPU saturation, low available memory, or availability drops
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate VM metrics with application traces and logs
+
+## Get Help
+
+<GetHelp />

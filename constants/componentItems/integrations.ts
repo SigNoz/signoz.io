@@ -100,6 +100,11 @@ export const INTEGRATIONS_ITEMS = {
       href: '/docs/integrations/azure/blob-storage',
       clickName: 'Azure Blob Storage Integration Link',
     },
+    {
+      name: 'Virtual Machines',
+      href: '/docs/integrations/azure/virtual-machines',
+      clickName: 'Azure Virtual Machines Integration Link',
+    },
   ] satisfies ComponentItem[],
   other: [
     { name: 'Nginx', href: '/docs/integrations/nginx', clickName: 'Nginx Integration Link' },

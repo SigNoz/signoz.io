@@ -110,6 +110,13 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
         className="h-7 w-7 object-contain"
       />
     ),
+    '/docs/integrations/azure/virtual-machines': (
+      <img
+        src="/img/icons/azure-virtual-machines-icon.svg"
+        alt="Azure Virtual Machines"
+        className="h-7 w-7 object-contain"
+      />
+    ),
     '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
     '/docs/integrations/vercel': <SiVercel className="h-7 w-7 text-black dark:text-white" />,
     '/docs/integrations/outposts/flyio': <SiFlydotio className="h-7 w-7 text-purple-500" />,
