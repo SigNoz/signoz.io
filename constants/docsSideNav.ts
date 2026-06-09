@@ -3654,6 +3654,11 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'doc',
+        route: '/docs/integrations/cloud-integrations-api',
+        label: 'Cloud Integrations API',
+      },
+      {
         type: 'category',
         isExpanded: false,
         label: 'Azure One-Click Integrations',

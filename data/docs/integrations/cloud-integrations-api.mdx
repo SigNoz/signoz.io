@@ -1,0 +1,121 @@
+---
+date: 2026-06-09
+id: cloud-integrations-api
+title: Cloud Integrations API Reference - Account-Scoped Services
+description: Query enabled and disabled services for a connected cloud account in SigNoz using the account-scoped Cloud Integrations API endpoint.
+doc_type: reference
+tags: [SigNoz Cloud]
+---
+
+## Overview
+
+The Cloud Integrations API exposes the list of services (such as EC2, RDS, Lambda) and their enabled or disabled state for a connected cloud account in SigNoz. When a cloud account is connected, services resolve in the context of that account rather than at the provider level.
+
+Use this API to:
+
+- List the services available for a specific connected cloud account.
+- Read each service's enabled or disabled state for monitoring.
+- Drive automation, audits, or custom UI on top of the SigNoz Cloud Integrations data.
+
+## Prerequisites
+
+API key: Go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key from its **Keys** tab. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for step-by-step instructions.
+
+The Cloud Integrations endpoints require the `Admin` role. If you do not have the `Admin` role, contact your organization's admin to create an API key for you.
+
+## Authentication
+
+Add the API key to your request header:
+
+```bash
+SIGNOZ-API-KEY:{YOUR_API_KEY}
+```
+
+<Admonition type="tip">
+Secure storage and handling of your API key is crucial to prevent unauthorized access.
+</Admonition>
+
+## List Account Services Metadata
+
+Returns the list of services and their enabled or disabled state for a specific connected cloud account.
+
+`GET` `https://{URL}/api/v1/cloud_integrations/{cloud_provider}/accounts/{id}/services`
+
+Replace `{URL}` with your instance URL, e.g. `example.signoz.io`.
+
+### Path Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `cloud_provider` | string | The cloud provider slug. Currently `aws` is supported. |
+| `id` | string | The internal SigNoz account identifier returned by the [List Accounts](#list-accounts) endpoint. This is not the cloud provider's account ID (such as the AWS Account ID); use the `id` field from the accounts response. |
+
+### Example Request
+
+```bash
+curl -X GET "https://example.signoz.io/api/v1/cloud_integrations/aws/accounts/<account-id>/services" \
+  -H "SIGNOZ-API-KEY: <YOUR_API_KEY>"
+```
+
+Replace `<account-id>` with the SigNoz account `id` for the connected AWS account.
+
+### Example Response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "services": [
+      {
+        "id": "ec2",
+        "title": "EC2",
+        "icon": "<base64-encoded-icon>",
+        "enabled": true
+      },
+      {
+        "id": "rds",
+        "title": "RDS",
+        "icon": "<base64-encoded-icon>",
+        "enabled": false
+      }
+    ]
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `data.services[].id` | string | Service identifier (for example `ec2`, `rds`, `lambda`). |
+| `data.services[].title` | string | Human-readable service name. |
+| `data.services[].icon` | string | Icon associated with the service. |
+| `data.services[].enabled` | boolean | Whether the service is enabled for this connected account. |
+
+## List Accounts
+
+Use this endpoint first to discover the `id` values to pass to the services endpoint.
+
+`GET` `https://{URL}/api/v1/cloud_integrations/{cloud_provider}/accounts`
+
+The response contains an `accounts` array where each entry exposes:
+
+- `id`: the internal SigNoz identifier — use this as the `{id}` path parameter for the services endpoint.
+- `providerAccountId`: the cloud provider's own account identifier (for AWS, this is the AWS Account ID). Do not use this value in the services endpoint path.
+
+## Provider-Level Services Endpoint
+
+A provider-level endpoint is still available and returns the same payload shape:
+
+`GET` `https://{URL}/api/v1/cloud_integrations/{cloud_provider}/services`
+
+It accepts an optional `cloud_integration_id` query parameter to filter the result to a specific account. The account-scoped endpoint documented above is the preferred form for account-specific queries.
+
+<Admonition type="info">
+The provider-level endpoint remains supported for existing integrations. New clients should prefer the account-scoped path because it makes the intent explicit and resolves through the connected account.
+</Admonition>
+
+## Related Resources
+
+- [AWS One-Click Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/)
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/)
