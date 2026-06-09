@@ -26,7 +26,7 @@ Monitoring is the continuous collection of signals about a system's health and p
 
 Most monitoring starts with metrics. A metric is a number measured over time, such as requests per second, error rate, CPU usage, queue depth, or 95th-percentile latency. Metrics are cheap to store and easy to aggregate, which makes them good for spotting trends and for triggering alerts when a value crosses a threshold or breaks a service level objective (SLO).
 
-When you are deciding what to measure on a user-facing service, the four golden signalsfrom Google's SRE practice are a useful starting set:
+When you are deciding what to measure on a user-facing service, the four golden signals from Google's SRE practice are a useful starting set:
 
 - **Latency**: how long a request takes. Track successful and failed requests separately, because a fast error still hides a problem.
 - **Traffic**: how much demand the system is handling, like requests or transactions per second.
@@ -63,11 +63,11 @@ A log line can be plain text, but on any system you plan to debug under pressure
 Both say a payment failed. Only the second lets you ask a precise question later, like "show every ERROR from the checkout service where duration_ms is over 5000," and get an exact answer instead of grepping text. Each field becomes something you can filter, count, and group by.
 
 <Figure src="/img/blog/2026/06/log-explorer-monitoring-and-logging.webp" alt="Screenshot of a centralized logging and monitoring platform showing real-time log entries from multiple microservices. The dashboard includes filters for severity levels, service names, deployment environments, and timestamps, with error messages and application events displayed in a searchable log stream for debugging and operational monitoring." caption="Centralized SigNoz log explorer with real-time application logs and error events across distributed services" />
-A few habits make logs useful rather than noisy. Use [log levels](https://signoz.io/blog/logging-levels/) consistently so INFO, WARN, and ERROR level messages actually mean something. Disable verbose DEBUG output in production to reduce logs retention costs and improve log visibility. Include a request ID in every log entry so you can track all logs related to a single request. And never record secrets, tokens, or personal data, because [structured logs](https://signoz.io/blog/structured-logs/) are easy to search, which also makes leaked data easy to find.
+A few habits make logs useful rather than noisy. Use [log levels](https://signoz.io/blog/logging-levels/) consistently so INFO, WARN, and ERROR level messages actually mean something. Disable verbose DEBUG output in production to reduce log retention costs and improve log visibility. Include a request ID in every log entry so you can track all logs related to a single request. And never record secrets, tokens, or personal data, because [structured logs](https://signoz.io/blog/structured-logs/) are easy to search, which also makes leaked data easy to find.
 
 ## Monitoring vs Logging
 
-The simple way to differenciate monitoring and logging is by the question each one answers.
+The simple way to differentiate monitoring and logging is by the question each one answers.
 
 | Aspect | Monitoring | Logging |
 | ------ | ---------- | ------- |
@@ -87,12 +87,12 @@ If you only have monitoring, you may know that latency spiked but not why. If yo
 
 Imagine the error rate on your signup service starts climbing one afternoon. Here is how monitoring and logging hand off to each other, step by step.
 
-1. Monitoring raises the alarm. The error-rate metric for the signup service crosses its threshold and an alert fires. At this point you know something is wrong and roughly how bad, but not why. This is the whole job of monitoring: continuously watch a number and shout when it leaves the safe range.
-2. The dashboard scopes the problem. You open the service dashboard and see errors spiking while traffic and latency stay flat, and the climb began right after the 14:10 deploy. Monitoring has now told you what changed, when, and how much, which rules out a traffic surge and points at the release.
-3. You switch to the logs. You filter the signup service to ERROR level for that ten-minute window and find the same entry repeating: a database write rejected by a constraint that a schema migration in the 14:10 deploy introduced. This is the job of logging, to keep the event-level detail that explains the number.
+1. Monitoring raises the alarm. The error-rate metric for the signup service crosses its threshold and an alert fires. At this point, you know something is wrong and roughly how bad, but not why. This is the whole job of monitoring: continuously watching a number and alerting when it leaves the safe range.
+2. The dashboard scopes the problem. You open the service dashboard and see errors spiking while traffic and latency stay flat, and the climb began right after the 14:10 deploy. Monitoring has now told you what changed, when, and how much, which rules out a traffic surge and points to the release.
+3. You switch to the logs. You filter the signup service to ERROR level for that ten-minute window and find the same entry repeating: a database write rejected by a constraint that a schema migration in the 14:10 deploy introduced. This is the job of logging: to keep the event-level detail that explains the number.
 4. You fix it and confirm with monitoring again. You roll back the migration, then watch the same error-rate metric fall back to normal on the dashboard. The signal that raised the alarm is also what confirms the fix worked.
 
-Monitoring is the alarm and the scoreboard. Logging is the record that explains what the alarm was reacting to. Teams use them both in loop to resolve incidents quicker.
+Monitoring is the alarm and the scoreboard. Logging is the record that explains what the alarm was reacting to. Teams use them both in the loop to resolve incidents more quickly.
 
 ## Best way to implement monitoring and logging with OpenTelemetry
 
@@ -100,16 +100,16 @@ For years, adding monitoring and logging meant picking a vendor and wiring your 
 
 OpenTelemetry matters here for a specific reason. Its logging support can automatically inject the active `trace_id` and `span_id` into every log record while a request is being traced. A typical setup looks like this:
 
-1. Instrument the application with the OpenTelemetry SDK, often using auto-instrumentation for common frameworks so you get traces and metrics with little manual work.
-2. Emit structured logs through an OTel-aware logging setup so trace context is attached automatically.
+1. Instrument the application with the OpenTelemetry SDK, often using auto-instrumentation for common frameworks, so you get traces and metrics with little manual work.
+2. Emit structured logs through an OTel-aware logging setup, so trace context is attached automatically.
 3. Send everything through the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/), a separate process that receives, batches, filters, and can redact telemetry before exporting it.
 4. Point the Collector at a backend that stores the data and gives you dashboards, alerts, and search.
 
 The first three steps are standard and portable. The choice that remains is the backend.
 
-## Why logging and monitoring are not enough?
+## Why are logging and monitoring not enough?
 
-In the [How monitoring and logging work together](#how-monitoring-and-logging-work-together) section we saw how logging and monitoring compliment each other for request passing through one service. However, things get harder once a request passes through several services. A metric and a pile of logs can still leave you guessing about which hop was slow. That is why most teams collect a third kind of telemetry, traces.
+In the [How monitoring and logging work together](#how-monitoring-and-logging-work-together) section, we saw how logging and monitoring complement each other for requests passing through one service. However, things get harder once a request passes through several services. A metric and a pile of logs can still leave you guessing about which hop was slow. That is why most teams collect a third kind of telemetry, traces.
 
 <Figure src="/img/blog/2026/06/log-metrics-monitoring-and-logging.webp" alt="SigNoz observability traces tab displaying a distributed trace with correlated logs and metrics, allowing developers to analyze request flows, investigate latency issues, and troubleshoot applications from a single unified interface." caption="Unified observability in SigNoz combines monitoring, logging, and distributed tracing." />
 
@@ -119,7 +119,7 @@ A trace follows a single request as it moves across services, and it is made of 
 - **Logs** are event records. They tell you *what* happened in detail.
 - **Traces** tell you *where* a request spent its time and where it failed across services.
 
-Together they are often called the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/).
+Together, they are often called the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/).
 
 ## Best practices for monitoring and logging
 
@@ -147,7 +147,7 @@ You can start with [SigNoz Cloud](https://signoz.io/teams/) or run the [open-sou
 
 ## Conclusion
 
-Monitoring surfaces health changes, logging preserves the events behind them, and tracing shows where a request traveled.
+Monitoring surface health changes, logging preserves the events behind them, and tracing shows where a request traveled.
 
 The strongest production setups connect all three. Start with a small set of health metrics, write structured logs with useful context, propagate trace IDs, and keep alerts tied to real action. That gives your team a path from symptom to evidence to root cause.
 
@@ -159,7 +159,7 @@ Monitoring continuously tracks system health and performance through signals suc
 
 ### What is the difference between monitoring and logging?
 
-Monitoring focuses on aggregate health signals over time, such as latency, error rate, and resource usage. Logging focuses on event-level records, such as exceptions, user actions, deployment events, and security events. Monitoring is usually used for detection and alerting. Logging is usually used for debugging, audit, and root-cause analysis.
+Monitoring focuses on aggregate health signals over time, such as latency, error rate, and resource usage. Logging focuses on event-level records, such as exceptions, user actions, deployment events, and security events. Monitoring is usually used for detection and alerting. Logging is usually used for debugging, auditing, and root-cause analysis.
 
 ### Is logging part of monitoring?
 
