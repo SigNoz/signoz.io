@@ -1,5 +1,5 @@
 ---
-date: 2026-03-26
+date: 2026-06-11
 id: opentelemetry-java
 title: Send Metrics from Java Application using OpenTelemetry
 description: Send custom and JVM runtime metrics from your Java application to SigNoz using the OpenTelemetry Java agent.
@@ -50,6 +50,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 export OTEL_TRACES_EXPORTER="none"
 export OTEL_LOGS_EXPORTER="none"
 ```
@@ -63,6 +64,12 @@ Replace the following:
 The Java agent auto-instruments web frameworks like Spring Boot, JAX-RS, and Servlet containers, generating traces for every HTTP request. Since traces and logs export is enabled by default, these would be sent to SigNoz even though this guide only covers metrics.
 
 For applications handling many requests, this can generate significant data volume and costs. Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables them while keeping metrics working. If you want traces or logs later, change them to `otlp` or remove these variables.
+</KeyPointCallout>
+
+<KeyPointCallout title="Why delta temporality?" defaultCollapsed="true">
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` set to `delta`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
+
+Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
 </KeyPointCallout>
 
 ### Step 3. Add OpenTelemetry API dependency
@@ -157,6 +164,8 @@ env:
   value: 'otlp'
 - name: OTEL_METRIC_EXPORT_INTERVAL
   value: '60000'
+- name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+  value: 'delta'
 - name: OTEL_TRACES_EXPORTER
   value: 'none'
 - name: OTEL_LOGS_EXPORTER
@@ -186,6 +195,7 @@ $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
+$env:OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = "delta"
 $env:OTEL_TRACES_EXPORTER = "none"
 $env:OTEL_LOGS_EXPORTER = "none"
 ```
@@ -220,6 +230,7 @@ ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
+ENV OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ENV OTEL_TRACES_EXPORTER="none"
 ENV OTEL_LOGS_EXPORTER="none"
 
@@ -248,6 +259,7 @@ docker run -p 8080:8080 \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
   -e OTEL_METRICS_EXPORTER="otlp" \
   -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
+  -e OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta" \
   -e OTEL_TRACES_EXPORTER="none" \
   -e OTEL_LOGS_EXPORTER="none" \
   my-java-app
