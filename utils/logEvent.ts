@@ -16,6 +16,21 @@ type LogEventOptions = {
   queryParams?: Record<string, string>
 }
 
+const SITE_LOG_ENDPOINT = process.env.NEXT_PUBLIC_SITE_LOG_ENDPOINT || '/log/'
+
+const POSTHOG_EVENT_NAMES = new Set([
+  'Website Page View',
+  'Website Click',
+  'Website Form Submitted',
+  'HubSpot Form Submitted',
+  'User Signed Up',
+  'User Associated with Company',
+])
+
+const shouldSendToPostHog = (payload: LogEventPayload) => {
+  return POSTHOG_EVENT_NAMES.has(payload.eventName)
+}
+
 const buildQueryString = (queryParams?: Record<string, string>) => {
   if (!queryParams) return ''
 
@@ -37,22 +52,38 @@ const buildQueryString = (queryParams?: Record<string, string>) => {
 export const logEvent = async (payload: LogEventPayload, options?: LogEventOptions) => {
   const endpoint = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
 
-  if (!endpoint) {
-    console.warn('No tunnel endpoint configured for client-side logging')
-    return
-  }
-
   try {
     const queryString = buildQueryString(options?.queryParams)
+    const timestampedPayload = {
+      ...payload,
+      timestamp: payload.timestamp || new Date().toISOString(),
+    }
 
-    await fetch(`${endpoint}/log${queryString}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...payload,
-        timestamp: payload.timestamp || new Date().toISOString(),
-      }),
-    })
+    const requests: Promise<Response | void>[] = []
+
+    if (endpoint) {
+      requests.push(
+        fetch(`${endpoint}/log${queryString}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(timestampedPayload),
+        })
+      )
+    } else {
+      console.warn('No tunnel endpoint configured for client-side logging')
+    }
+
+    if (shouldSendToPostHog(payload)) {
+      requests.push(
+        fetch(SITE_LOG_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(timestampedPayload),
+        })
+      )
+    }
+
+    await Promise.allSettled(requests)
   } catch (err) {
     console.error('Error logging event:', err)
   }

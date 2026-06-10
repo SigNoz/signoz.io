@@ -74,6 +74,9 @@ export const useLogEvent = () => {
 
       const enhancedAttributes = {
         ...attributes,
+        pageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+        pageTitle: typeof document !== 'undefined' ? document.title : undefined,
+        pageReferrer: typeof document !== 'undefined' ? document.referrer : undefined,
         custom_ip: userIp || 'unknown',
         custom_vercel_ip: vercelIp || 'unknown',
         custom_os: getOS(),
