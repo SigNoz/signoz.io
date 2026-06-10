@@ -4,22 +4,7 @@ const { loadTsModule } = require('./helpers/loadTsModule')
 const { readdirSync, readFileSync } = require('fs')
 const { join } = require('path')
 
-const componentItems = loadTsModule('constants/componentItems.ts')
 const { getListicleSectionItems } = loadTsModule('constants/listicles/utils.ts')
-
-// ── Non-listicle componentItems (still in TS) ───────────────────────
-
-const FLAT_EXPORTS = [
-  'APM_QUICK_START_ITEMS',
-  'LOGS_QUICK_START_ITEMS',
-  'MIGRATE_TO_SIGNOZ_ITEMS',
-  'WEB_VITALS_ITEMS',
-  'HOSTING_DECISION_ITEMS',
-]
-
-const GET_ALL_HELPERS = ['getAllMetricsQuickStartItems']
-
-const SECTIONED_EXPORTS = ['METRICS_QUICK_START_ITEMS']
 
 const isValidHref = (href) =>
   typeof href === 'string' && (href.startsWith('/') || href.startsWith('https://'))
@@ -39,70 +24,6 @@ const assertNoDuplicateHrefs = (items, name) => {
     `${name} has duplicate hrefs: ${hrefs.filter((h, i) => hrefs.indexOf(h) !== i).join(', ')}`
   )
 }
-
-const walkLeafArrays = (value, path = []) => {
-  if (Array.isArray(value)) return [{ path, items: value }]
-  if (!value || typeof value !== 'object') return []
-  return Object.entries(value).flatMap(([key, nestedValue]) =>
-    walkLeafArrays(nestedValue, [...path, key])
-  )
-}
-
-test('all flat item arrays are non-empty', () => {
-  for (const name of FLAT_EXPORTS) {
-    const items = componentItems[name]
-    assert.ok(Array.isArray(items), `${name} should be an array`)
-    assert.ok(items.length > 0, `${name} should not be empty`)
-  }
-})
-
-test('all getAll*() helpers return non-empty arrays', () => {
-  for (const name of GET_ALL_HELPERS) {
-    const fn = componentItems[name]
-    assert.ok(typeof fn === 'function', `${name} should be a function`)
-    const items = fn()
-    assert.ok(Array.isArray(items), `${name}() should return an array`)
-    assert.ok(items.length > 0, `${name}() should not return empty`)
-  }
-})
-
-test('all componentItems have valid name, href, and clickName', () => {
-  const allArrays = [
-    ...FLAT_EXPORTS.map((name) => ({ name, items: componentItems[name] })),
-    ...GET_ALL_HELPERS.map((name) => ({ name: `${name}()`, items: componentItems[name]() })),
-  ]
-
-  for (const { name, items } of allArrays) {
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i]
-      assert.ok(
-        typeof item.name === 'string' && item.name.trim().length > 0,
-        `${name}[${i}].name should be a non-empty string`
-      )
-      assert.ok(isValidHref(item.href), `${name}[${i}].href should start with / or https://`)
-      assert.ok(
-        typeof item.clickName === 'string' && item.clickName.trim().length > 0,
-        `${name}[${i}].clickName should be a non-empty string`
-      )
-    }
-  }
-})
-
-test('no duplicate hrefs within each flat array', () => {
-  for (const name of FLAT_EXPORTS) {
-    assertNoDuplicateHrefs(componentItems[name], name)
-  }
-})
-
-test('no duplicate hrefs within each section leaf array', () => {
-  for (const name of SECTIONED_EXPORTS) {
-    const leafArrays = walkLeafArrays(componentItems[name], [name])
-    assert.ok(leafArrays.length > 0, `${name} should contain at least one leaf array`)
-    for (const { path, items } of leafArrays) {
-      assertNoDuplicateHrefs(items, path.join('.'))
-    }
-  }
-})
 
 // ── Listicle JSON configs ───────────────────────────────────────────
 
@@ -188,8 +109,18 @@ test('all listicle JSON configs have valid top-level fields', () => {
     assertNonEmptyString(config.sectionName, `${name}.sectionName`)
 
     if (config.gridCols !== undefined) assertNonEmptyString(config.gridCols, `${name}.gridCols`)
+    if (config.viewAllHref !== undefined) {
+      assert.ok(
+        isValidHref(config.viewAllHref),
+        `${name}.viewAllHref should start with / or https://`
+      )
+    }
     if (config.viewAllText !== undefined) {
       assertNonEmptyString(config.viewAllText, `${name}.viewAllText`)
+    }
+    if (config.title !== undefined) assertNonEmptyString(config.title, `${name}.title`)
+    if (config.description !== undefined) {
+      assertNonEmptyString(config.description, `${name}.description`)
     }
     if (config.searchPlaceholder !== undefined) {
       assertNonEmptyString(config.searchPlaceholder, `${name}.searchPlaceholder`)

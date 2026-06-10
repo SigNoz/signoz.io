@@ -38,8 +38,11 @@ function FlatPattern({ config }: { config: ListicleConfig }) {
   const items = getListicleItems(config)
   const content = (
     <ListicleCardGrid
+      title={config.title}
+      description={config.description}
       items={items}
       sectionName={config.sectionName}
+      viewAllHref={config.viewAllHref}
       viewAllText={config.viewAllText}
       gridCols={config.gridCols || DEFAULT_GRID_COLS}
     />

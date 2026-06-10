@@ -3,15 +3,20 @@ import type { ComponentType, ReactNode } from 'react'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkMdx from 'remark-mdx'
-import {
-  APM_QUICK_START_ITEMS,
-  LOGS_QUICK_START_ITEMS,
-  getAllMetricsQuickStartItems,
-  MIGRATE_TO_SIGNOZ_ITEMS,
-  WEB_VITALS_ITEMS,
-  HOSTING_DECISION_ITEMS,
-} from '../../constants/componentItems'
 import { getListicleConfig, getListicleItems } from '../../constants/listicles/utils'
+
+const HOSTING_DECISION_ITEMS = [
+  {
+    name: 'Compare Self Host vs Cloud',
+    href: '/blog/cloud-vs-self-hosted-deployment-guide/',
+    clickName: 'Compare Self Host vs Cloud',
+  },
+  {
+    name: 'Get Started - Free',
+    href: '/teams/',
+    clickName: 'Get Started - Free',
+  },
+] as const
 
 type StubProps = {
   children?: ReactNode
@@ -28,22 +33,17 @@ type AgentMdxComponentPolicy = 'custom-stub' | 'reviewed-fallback'
 
 export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'Admonition',
-  'APMQuickStartOverview',
   'DocCard',
   'DocCardContainer',
   'Figure',
   'HostingDecision',
   'KeyPointCallout',
   'Listicle',
-  'LogsQuickStartOverview',
   'MCPInstallButton',
-  'MetricsQuickStartOverview',
-  'MigrateToSigNoz',
   'RegionTable',
   'TabItem',
   'Tabs',
   'ToggleHeading',
-  'WebVitalsGrid',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
@@ -320,8 +320,7 @@ const createKnownComponentStubs = (): Record<
       'SigNoz Cloud region and endpoint reference is available in the rendered docs.'
     )
   },
-  HostingDecision: createItemListStub(HOSTING_DECISION_ITEMS, 'Hosting Options'),
-  APMQuickStartOverview: createItemListStub(APM_QUICK_START_ITEMS, 'APM Quick Start'),
+  HostingDecision: createItemListStub([...HOSTING_DECISION_ITEMS], 'Hosting Options'),
   Listicle: createItemListStub(
     (props) => {
       const name = getStringProp(props, 'name')
@@ -335,13 +334,6 @@ const createKnownComponentStubs = (): Record<
       return config?.markdownTitle || 'Listicle'
     }
   ),
-  LogsQuickStartOverview: createItemListStub(LOGS_QUICK_START_ITEMS, 'Logs Quick Start'),
-  MetricsQuickStartOverview: createItemListStub(
-    getAllMetricsQuickStartItems(),
-    'Metrics Quick Start'
-  ),
-  MigrateToSigNoz: createItemListStub(MIGRATE_TO_SIGNOZ_ITEMS, 'Migrate to SigNoz'),
-  WebVitalsGrid: createItemListStub(WEB_VITALS_ITEMS, 'Web Vitals'),
 })
 
 export const extractMdxComponentNames = (rawMdx: string): string[] => {

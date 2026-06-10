@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ListicleRenderSection } from '@/constants/listicles/utils'
 import ListicleCardGrid from './ListicleCardGrid'
 
@@ -30,6 +30,20 @@ export default function SectionedListicleClient({
       ? defaultSection
       : 'all'
   )
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const hash = window.location.hash.replace('#', '')
+      if (hash && sectionTabs.some((section) => section.id === hash)) {
+        setActiveSection(hash)
+      }
+    }
+
+    syncFromHash()
+    window.addEventListener('hashchange', syncFromHash)
+    return () => window.removeEventListener('hashchange', syncFromHash)
+  }, [sectionTabs])
+
   const visibleSections =
     activeSection === 'all' ? sections : sections.filter((section) => section.id === activeSection)
 

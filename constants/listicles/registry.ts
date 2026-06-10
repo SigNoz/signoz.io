@@ -1,5 +1,6 @@
 import type { ListicleConfig } from '@/components/Listicle/types'
 
+import apmQuickStart from './apm-quick-start.json'
 import apmInstrumentation from './apm-instrumentation.json'
 import apmDashboards from './apm-dashboards.json'
 import awsMonitoring from './aws-monitoring.json'
@@ -17,10 +18,15 @@ import kubernetesDashboards from './kubernetes-dashboards.json'
 import litellmDashboards from './litellm-dashboards.json'
 import llmMonitoring from './llm-monitoring.json'
 import logsInstrumentation from './logs-instrumentation.json'
+import logsQuickStart from './logs-quick-start.json'
 import marketplaceInstallation from './marketplace-installation.json'
+import metricsQuickStart from './metrics-quick-start.json'
+import migrateToSignoz from './migrate-to-signoz.json'
 import selfHostInstallation from './self-host-installation.json'
+import webVitals from './web-vitals.json'
 
 export const listicleConfigs: Record<string, ListicleConfig> = {
+  'apm-quick-start': apmQuickStart as unknown as ListicleConfig,
   'apm-instrumentation': apmInstrumentation as unknown as ListicleConfig,
   'apm-dashboards': apmDashboards as unknown as ListicleConfig,
   'aws-monitoring': awsMonitoring as unknown as ListicleConfig,
@@ -38,6 +44,10 @@ export const listicleConfigs: Record<string, ListicleConfig> = {
   'litellm-dashboards': litellmDashboards as unknown as ListicleConfig,
   'llm-monitoring': llmMonitoring as unknown as ListicleConfig,
   'logs-instrumentation': logsInstrumentation as unknown as ListicleConfig,
+  'logs-quick-start': logsQuickStart as unknown as ListicleConfig,
   'marketplace-installation': marketplaceInstallation as unknown as ListicleConfig,
+  'metrics-quick-start': metricsQuickStart as unknown as ListicleConfig,
+  'migrate-to-signoz': migrateToSignoz as unknown as ListicleConfig,
   'self-host-installation': selfHostInstallation as unknown as ListicleConfig,
+  'web-vitals': webVitals as unknown as ListicleConfig,
 }

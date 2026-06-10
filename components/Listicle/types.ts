@@ -30,7 +30,10 @@ export interface ListicleConfig {
   pattern: 'flat' | 'sectioned' | 'searchable'
   markdownTitle: string
   sectionName: string
+  title?: string
+  description?: string
   gridCols?: string
+  viewAllHref?: string
   viewAllText?: string
   searchPlaceholder?: string
   items?: ListicleItem[]

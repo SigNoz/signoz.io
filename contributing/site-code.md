@@ -47,9 +47,9 @@ Each listicle is fully self-contained in a single JSON file — items, icons, ma
 | MDX usage    | `data/docs/**/*.mdx`               | `<Listicle name="..." />` with optional `defaultSection`                        |
 | Agent stubs  | `utils/docs/agentMarkdownStubs.ts` | Markdown fallback — auto-extracts items from JSON configs                       |
 
-Non-listicle item lists (QuickStart, MigrateToSigNoz, WebVitals, HostingDecision) still live in `constants/componentItems/*.ts`.
+Discovery grids (quick starts, migration vendors, web vitals, instrumentation hubs, etc.) are listicles in `constants/listicles/*.json`. Use `<Listicle name="..." />` in MDX; agent markdown stubs read the same JSON automatically.
 
-Listicles are JSON-only. Do not add listicle data to `constants/componentItems/*.ts`; rendered docs and agent markdown stubs read `constants/listicles/*.json` through the shared utilities.
+`HostingDecision` is the one exception: it is a prose + CTA banner (`components/shared/HostingDecision.tsx`), not an icon card grid. Its link targets are defined inline in that component and mirrored in the `HostingDecision` agent stub.
 
 ### Adding a new listicle
 

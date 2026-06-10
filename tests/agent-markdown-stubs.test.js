@@ -80,6 +80,22 @@ test('Listicle stubs render flat listicle items from JSON', async () => {
   assert.match(html, /\/docs\/amazon-bedrock-monitoring/)
 })
 
+test('Listicle stubs render metrics quick start sections from JSON', async () => {
+  const doc = createDoc('<Listicle name="metrics-quick-start" defaultSection="databases" />')
+  const components = buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Listicle, {
+      name: 'metrics-quick-start',
+      defaultSection: 'databases',
+    })
+  )
+
+  assert.match(html, /Metrics Quick Start/)
+  assert.match(html, /ClickHouse/)
+  assert.match(html, /PostgreSQL/)
+  assert.doesNotMatch(html, /OTel Receivers/)
+})
+
 test('Listicle stubs use the configured markdown title', async () => {
   const doc = createDoc('<Listicle name="aws-monitoring" />')
   const components = buildAgentMdxComponentsForDoc(doc)

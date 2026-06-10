@@ -35,13 +35,11 @@ import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticle
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
 import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
-import APMQuickStartOverview from './APM/APMQuickStartOverview'
 import Listicle from './Listicle/Listicle'
 import LibraryTabs from './LibraryTabs/LibraryTabs'
 import LibraryTab from './LibraryTabs/LibraryTab'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
-import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
 import HostingDecision from './shared/HostingDecision'
 import CloneRepo from './shared/CloneRepo'
 import CommonPrerequisites from './shared/CommonPrerequisites'
@@ -55,14 +53,12 @@ import OtelOperatorAutoInstrumentation from './shared/OtelOperatorAutoInstrument
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
-import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
 import DashboardActions from './Dashboards/DashboardActions'
 import ProductFeatureShowcase from './ProductFeatureShowcase/ProductFeatureShowcase'
 
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
-import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
 import ToggleHeading from './Headings/ToggleHeading'
 import Region from './Region/Region'
 import RegionTable from './Region/RegionTable'
@@ -136,17 +132,14 @@ export const components = {
   GetStartedInfrastructureMonitoring,
   ImageCTA,
   TrackingLink,
-  APMQuickStartOverview,
   Listicle,
   LibraryTabs,
   LibraryTab,
   MDXButton,
   IconCardGrid,
-  LogsQuickStartOverview,
   HostingDecision,
   ArticleSeriesBottom,
   ArticleSeriesTop,
-  MigrateToSigNoz,
   DashboardActions,
   OtelCollectorFlow,
   K8sInstall,
@@ -158,7 +151,6 @@ export const components = {
   OtelOperatorAutoInstrumentation,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
-  MetricsQuickStartOverview,
   CloneRepo,
   CommonPrerequisites,
   CardinalityExplosion,

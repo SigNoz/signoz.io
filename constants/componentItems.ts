@@ -1,7 +1,0 @@
-export * from './componentItems/types'
-export * from './componentItems/apmQuickStart'
-export * from './componentItems/logsQuickStart'
-export * from './componentItems/metricsQuickStart'
-export * from './componentItems/migrateToSignoz'
-export * from './componentItems/webVitals'
-export * from './componentItems/hostingDecision'
