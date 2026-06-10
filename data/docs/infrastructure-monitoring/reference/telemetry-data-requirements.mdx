@@ -1,5 +1,5 @@
 ---
-date: 2026-06-04
+date: 2026-06-10
 id: telemetry-data-requirements
 title: Telemetry Data Requirements for Infrastructure Monitoring
 description: Understand the required resource attributes and metric types for SigNoz Infrastructure Monitoring. Verify host.name, entity UIDs, and data source dependencies for accurate dashboards.
@@ -14,7 +14,7 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 ## Prerequisites
 
 - Host and Kubernetes workloads must export metrics to SigNoz through an OpenTelemetry (OTel) Collector or a supported agent.
-- For Kubernetes, you need both cluster-level metrics (from `kube-state-metrics` or similar) **and** kubelet metrics scraped per node. Missing either source breaks entity resolution.
+- For Kubernetes, you need both cluster-level metrics (from the OTel `k8s_cluster` receiver) **and** per-node kubelet metrics (from the OTel `kubeletstats` receiver). Missing either source breaks entity resolution.
 
 ## Mandatory attributes and required metrics
 
@@ -124,7 +124,7 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 - **Required attributes**: `k8s.persistentvolumeclaim.name`, `k8s.namespace.name`, `k8s.cluster.name`.
 - **Required metrics**:
   - From kubeletstats: `k8s.volume.capacity`, `k8s.volume.available`
-- `Volume Utilization` is a computed value (`capacity − available`), not a separate metric. Inode columns are an upcoming addition and will rely on `k8s.volume.inodes`, `k8s.volume.inodes.used`, `k8s.volume.inodes.free`.
+- `Volume Used` is a computed value (`capacity − available`), not a separate metric. Inode columns are an upcoming addition and will rely on `k8s.volume.inodes`, `k8s.volume.inodes.used`, `k8s.volume.inodes.free`.
 - **Setup**:
   - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for `k8s.volume.*` metrics.
   - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.

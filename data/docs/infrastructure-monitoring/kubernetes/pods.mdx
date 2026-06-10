@@ -1,5 +1,5 @@
 ---
-date: 2026-06-08
+date: 2026-06-10
 id: k8s-pods
 title: Pods
 description: Monitor Kubernetes pod CPU, memory, and network performance in SigNoz — request/limit utilization, per-container breakdowns, and correlated traces and logs.
@@ -54,12 +54,13 @@ The **Pods** view is the default Kubernetes monitoring view. It shows all active
 ### Mem Usage (WSS)
 
 - This column relies on the OTel metric(s): `k8s.pod.memory.working_set`.
-- Working Set Size — the pod's memory that is actively in use, including "recently accessed memory, dirty memory, and kernel memory" per the OTel semantic convention for `k8s.pod.memory.working_set`. The kubelet uses this value (not total memory) for node-pressure eviction decisions, because it excludes file-backed memory that can be reclaimed under pressure.
+- Working Set Size — anonymous + active file pages, excluding reclaimable inactive file pages. The kubelet uses this value (not total memory) for node-pressure eviction decisions, since the excluded pages can be reclaimed under pressure.
 
 ### Pod Phase
 
 - This column relies on the OTel metric(s): `k8s.pod.phase`.
 - Latest lifecycle phase for the pod within the selected window — one of `Pending`, `Running`, `Succeeded`, `Failed`, or `Unknown`. Per the Kubernetes Pod-lifecycle docs: `Pending` means containers haven't been set up yet (waiting to be scheduled or downloading images); `Succeeded` and `Failed` are terminal (`Failed` means at least one container exited non-zero or was terminated by the system); `Unknown` "typically occurs due to an error in communicating with the node where the Pod should be running."
+- Use this to spot stuck `Pending` pods (scheduling pressure, image-pull failure, missing toleration) or unexpected `Failed` / `Unknown` pods — open the pod detail page to inspect events and logs for the root cause.
 
 Additional columns available via the Columns selector: **Namespace**, **Node**, **Cluster**.
 
