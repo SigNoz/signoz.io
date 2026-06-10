@@ -1,0 +1,120 @@
+---
+date: 2026-06-10
+id: container-apps
+title: Azure Container Apps Monitoring Integration with SigNoz
+description: Monitor Azure Container Apps with SigNoz. Collect metrics and logs from your container apps using One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure Container Apps integration collects metrics and logs from your container apps. Once enabled, the SigNoz agent discovers Container App resources in your monitored resource groups and configures telemetry collection.
+
+<Admonition type="info">
+This integration requires SigNoz Azure agent version **v0.0.11** or later.
+</Admonition>
+
+Note: To collect logs, choose **Azure Monitor** as the logging option for the Container App Environment. Only `ContainerAppConsoleLogs` and `ContainerAppSystemLogs` diagnostic settings categories are ingested.
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **Container App** from the left panel.
+3. Toggle **Log Collection** and **Metric Collection** on.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-container-apps-enable.webp"
+  alt="SigNoz Azure integration panel showing Container App with Log Collection and Metric Collection toggles enabled"
+  caption="Enable log and metric collection for Azure Container Apps in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+The agent deploys the necessary Event Hubs and diagnostic settings in the background. Data starts flowing within a few minutes. Navigate to **Dashboards** and open the **Container App Overview** dashboard to confirm metrics are appearing.
+
+## What's collected
+
+<details>
+<summary>Logs</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Resource ID | `resources.azure.resource.id` | string |
+
+</details>
+
+<details>
+<summary>Metrics</summary>
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `azure_coresquotaused_maximum` | Count | Gauge |
+| `azure_coresquotaused_minimum` | Count | Gauge |
+| `azure_cpupercentage_average` | Percent | Gauge |
+| `azure_cpupercentage_maximum` | Percent | Gauge |
+| `azure_cpupercentage_minimum` | Percent | Gauge |
+| `azure_cpupercentage_total` | Percent | Gauge |
+| `azure_memorypercentage_average` | Percent | Gauge |
+| `azure_memorypercentage_maximum` | Percent | Gauge |
+| `azure_memorypercentage_minimum` | Percent | Gauge |
+| `azure_memorypercentage_total` | Percent | Gauge |
+| `azure_replicas_average` | Count | Gauge |
+| `azure_replicas_maximum` | Count | Gauge |
+| `azure_replicas_minimum` | Count | Gauge |
+| `azure_replicas_total` | Count | Gauge |
+| `azure_restartcount_average` | Count | Gauge |
+| `azure_restartcount_maximum` | Count | Gauge |
+| `azure_restartcount_minimum` | Count | Gauge |
+| `azure_restartcount_total` | Count | Gauge |
+| `azure_rxbytes_average` | Bytes | Gauge |
+| `azure_rxbytes_maximum` | Bytes | Gauge |
+| `azure_rxbytes_minimum` | Bytes | Gauge |
+| `azure_rxbytes_total` | Bytes | Gauge |
+| `azure_totalcoresquotaused_average` | Count | Gauge |
+| `azure_totalcoresquotaused_maximum` | Count | Gauge |
+| `azure_totalcoresquotaused_minimum` | Count | Gauge |
+| `azure_txbytes_average` | Bytes | Gauge |
+| `azure_txbytes_maximum` | Bytes | Gauge |
+| `azure_txbytes_minimum` | Bytes | Gauge |
+| `azure_txbytes_total` | Bytes | Gauge |
+| `azure_usagenanocores_average` | Count | Gauge |
+| `azure_usagenanocores_maximum` | Count | Gauge |
+| `azure_usagenanocores_minimum` | Count | Gauge |
+| `azure_usagenanocores_total` | Count | Gauge |
+| `azure_workingsetbytes_average` | Bytes | Gauge |
+| `azure_workingsetbytes_maximum` | Bytes | Gauge |
+| `azure_workingsetbytes_minimum` | Bytes | Gauge |
+| `azure_workingsetbytes_total` | Bytes | Gauge |
+
+</details>
+
+## Dashboards
+
+The integration includes a pre-built Container Apps dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-container-apps-dashboard.webp"
+  alt="SigNoz dashboard showing Azure Container App metrics including CPU percentage, memory percentage, replica count, and network throughput"
+  caption="Azure Container Apps dashboard in SigNoz"
+  className="box-shadowed-image"
+/>
+
+Key panels include:
+- CPU and memory percentage
+- Replica count and restart count
+- Received and transmitted bytes (RX/TX)
+- CPU usage in nanocores and working set bytes
+- Cores quota used
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on high restart counts or CPU/memory saturation
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate container metrics with application traces
+
+## Get Help
+
+<GetHelp />

@@ -3684,6 +3684,26 @@ const docsSideNav = [
             route: '/docs/integrations/azure/cdn-frontdoor',
             label: 'CDN FrontDoor',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/virtual-machines',
+            label: 'Virtual Machines',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/container-apps',
+            label: 'Container Apps',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/app-service',
+            label: 'App Services',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/aks',
+            label: 'AKS',
+          },
         ],
       },
       {
