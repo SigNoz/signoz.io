@@ -33,12 +33,12 @@ The **Volumes** view monitors PersistentVolumeClaim (PVC) storage and inode cons
 
 - This column relies on the OTel metric `k8s.volume.capacity` from the kubeletstats receiver, defined as "The total capacity in bytes of the volume".
 - The provisioned size of the PVC's underlying volume in bytes, as reported by the kubelet's stats-summary API. The kubelet sources this from the filesystem `statfs` call on the mounted volume — so it reflects the actual filesystem capacity, which is typically slightly less than the PVC's `.spec.resources.requests.storage` due to filesystem-metadata overhead (journal, inode tables, root-reserved blocks).
-- Use this to read the PVC's provisioned size at a glance and as the reference baseline for interpreting **Volume Available** and **Volume Utilization** on this page — under steady state the value is constant, since capacity changes only when the underlying volume is explicitly resized.
+- Use this to read the PVC's provisioned size at a glance and as the reference baseline for interpreting **Volume Available** and **Volume Used** on this page — under steady state the value is constant, since capacity changes only when the underlying volume is explicitly resized.
 
-### Volume Utilization
+### Volume Used
 
-- This column is computed by the v2 endpoint as `Volume Capacity − Volume Available` (formula F1 over `k8s.volume.capacity` and `k8s.volume.available`). Despite the column name, the value is displayed in **bytes** (not as a percentage).
-- Effectively this is the volume's used space in bytes — the more meaningful name would be "Volume Used". Compute the percentage yourself as `Volume Utilization / Volume Capacity` if you need a ratio.
+- This column is computed as `Volume Capacity − Volume Available` (formula F1 over `k8s.volume.capacity` and `k8s.volume.available`), shown in bytes.
+- Represents bytes consumed by all on-disk content — user files, directories, symlinks, and filesystem-level metadata (inodes, journal, etc.). Together with **Volume Available** it sums to roughly **Volume Capacity**, with a small gap due to filesystem-reserved blocks (e.g., ext4's default 5% root reservation).
 - A PVC trending toward 100% of its capacity will fail writes once the filesystem is full — applications typically see `ENOSPC` errors and may crash; expand the PVC via `kubectl edit pvc/<name>` (if the StorageClass has `allowVolumeExpansion: true`) or migrate the workload to a larger volume.
 
 ### Volume Available
@@ -81,7 +81,7 @@ Click a volume name to open the detail page.
 
 - This chart relies on the OTel metric `k8s.volume.capacity` from the kubeletstats receiver.
 - Plots a single line: total provisioned filesystem capacity in bytes. The value is normally constant but will step up when a `volumeExpansion`-enabled PVC is resized.
-- Use this to read the PVC's provisioned size at a glance and as the reference baseline for interpreting **Volume Available** and **Volume Utilization** on this page — under steady state the line is flat, since capacity changes only when the underlying volume is explicitly resized.
+- Use this to read the PVC's provisioned size at a glance and as the reference baseline for interpreting **Volume Available** and **Volume Used** on this page — under steady state the line is flat, since capacity changes only when the underlying volume is explicitly resized.
 
 #### Volume Inodes Used
 
