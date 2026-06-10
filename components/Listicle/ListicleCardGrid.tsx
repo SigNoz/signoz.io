@@ -13,7 +13,7 @@ interface ListicleCardGridProps {
   gridCols?: string
 }
 
-const DEFAULT_GRID_COLS = 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'
+const DEFAULT_GRID_COLS = 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
 
 function renderIcon(spec?: IconSpec): React.ReactNode {
   if (!spec) {

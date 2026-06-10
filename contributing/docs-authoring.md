@@ -284,7 +284,7 @@ Listicles use a generic `<Listicle name="..." />` component driven by self-conta
 
 That's it — items, icons, and sections are all in one JSON file.
 
-Do not add listicle entries to `constants/componentItems/*.ts`. Listicle rendering and agent markdown fallbacks both read the JSON config automatically.
+Do not create per-listicle TypeScript or React component files. Listicle rendering and agent markdown fallbacks both read the JSON config automatically.
 
 For full details on creating new listicles or changing listicle structure (sections, patterns, icons), see [contributing/site-code.md](site-code.md#listicle-and-discovery-data).
 
@@ -301,7 +301,7 @@ yarn check:doc-redirects
 yarn test:doc-redirects
 ```
 
-If `constants/listicles/*.json` or `constants/componentItems/*.ts` changed, also run:
+If `constants/listicles/*.json` changed, also run:
 
 ```bash
 node --test tests/component-items-sync.test.js

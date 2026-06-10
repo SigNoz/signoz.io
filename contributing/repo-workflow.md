@@ -57,7 +57,7 @@ Use this playbook for the shared workflow across docs, blogs, site code, and rev
   - `yarn build`
 - Mixed docs + code changes:
   - run both sets
-- `constants/listicles/*.json` or `constants/componentItems/*.ts` changes:
+- `constants/listicles/*.json` changes:
   - `node --test tests/component-items-sync.test.js`
 
 ## CI Checks

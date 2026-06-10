@@ -40,7 +40,7 @@ Each listicle is fully self-contained in a single JSON file — items, icons, ma
 | Layer        | Location                           | Purpose                                                                         |
 | ------------ | ---------------------------------- | ------------------------------------------------------------------------------- |
 | JSON configs | `constants/listicles/*.json`       | Items, icons, markdown title, sections, layout — everything in one file         |
-| Registry     | `constants/listicles/index.ts`     | Barrel that maps `name` string to config                                        |
+| Registry     | `constants/listicles/registry.ts`  | Maps `name` string to config; `index.ts` re-exports                             |
 | Utilities    | `constants/listicles/utils.ts`     | Shared traversal for rendered UI and agent markdown                             |
 | Component    | `components/Listicle/Listicle.tsx` | Generic renderer for flat, sectioned, and searchable patterns                   |
 | Icons        | `public/img/icons/listicle/*.svg`  | Generated SVGs (brand icons); existing assets elsewhere are referenced directly |
@@ -58,7 +58,7 @@ Discovery grids (quick starts, migration vendors, web vitals, instrumentation hu
    - `"sectioned"` — navigation pills with categorized sections
    - `"searchable"` — search input with flat grid
 2. **Add metadata and items** — set `markdownTitle` to the heading that should appear in agent/Copy Markdown output. Each item needs `name`, `href`, and `icon`. Optional: `clickName` (defaults to `name`).
-3. **Register** — import the JSON in `constants/listicles/index.ts` and add it to the `listicleConfigs` map.
+3. **Register** — import the JSON in `constants/listicles/registry.ts` and add it to the `listicleConfigs` map.
 4. **Use in MDX** — add `<Listicle name="<name>" />` in the docs page. Use `defaultSection` to pre-select a pill.
 
 Agent stubs auto-discover items from the JSON, including `defaultSection` behavior — no separate stub update needed.
