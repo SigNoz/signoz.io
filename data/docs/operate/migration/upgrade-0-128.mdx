@@ -1,0 +1,102 @@
+---
+date: 2026-06-10
+id: upgrade-0-128
+tags: [Self-Host]
+title: Upgrade to v0.128.0 (Waterfall Config Rename)
+description: Upgrade SigNoz to v0.128 after renaming the trace waterfall configuration block and removing legacy waterfall API versions.
+doc_type: howto
+---
+
+## Overview
+
+SigNoz v0.128.0 finalizes the trace waterfall v4 migration. Two operator-facing changes ship with this release:
+
+- The YAML configuration block for trace waterfall tuning moves from `tracedetail.waterfall.*` to `traces.waterfall.*`. Operators who have customized any waterfall tunable must update their config file before upgrading.
+- The legacy `POST /api/v2/traces/waterfall/{traceId}` and `POST /api/v3/traces/{traceID}/waterfall` endpoints are removed. Any direct API caller must move to `POST /api/v4/traces/{traceID}/waterfall`.
+
+End-user behavior in the Traces view is unchanged — these are deployment-config and API-surface changes only.
+
+<Admonition type="warning">
+Both changes take effect immediately on upgrade. There is no compatibility alias for the old config key, and the v2/v3 waterfall endpoints return `404` once the upgrade lands.
+</Admonition>
+
+## Breaking Changes
+
+### Waterfall config block renamed
+
+If your deployment config customizes any waterfall tunable, rename the top-level key from `tracedetail` to `traces` before starting v0.128.0. The keys inside the `waterfall` block are unchanged.
+
+```diff:signoz-config.yaml
+-tracedetail:
++traces:
+   waterfall:
+     span_page_size: 500
+     max_depth_to_auto_expand: 5
+     max_limit_to_select_all_spans: 10000
+```
+
+The three tunables continue to work as before:
+
+| Key                              | Description                                                                              |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| `span_page_size`                 | Number of spans returned per request when the trace is too large to show all at once.    |
+| `max_depth_to_auto_expand`       | Maximum depth of descendants to auto-expand for the selected span.                       |
+| `max_limit_to_select_all_spans`  | Threshold below which all spans are returned without windowing.                          |
+
+If you rely on environment variables, update the prefix accordingly. For example, `SIGNOZ_TRACEDETAIL_WATERFALL_SPAN__PAGE__SIZE` becomes `SIGNOZ_TRACES_WATERFALL_SPAN__PAGE__SIZE`. See [Configuration](https://signoz.io/docs/operate/configuration/) for the naming convention.
+
+<Admonition type="info">
+If you do not override any of these values in your config, no action is required — defaults apply automatically under the new key.
+</Admonition>
+
+### v2 and v3 waterfall API endpoints removed
+
+The following endpoints no longer exist and return `404`:
+
+- `POST /api/v2/traces/waterfall/{traceId}`
+- `POST /api/v3/traces/{traceID}/waterfall`
+
+Callers must migrate to `POST /api/v4/traces/{traceID}/waterfall`. Two v4 schema notes for callers coming from v3:
+
+- The `limit` field has been removed from the request body. The effective ceiling is now set server-side via `traces.waterfall.max_limit_to_select_all_spans`.
+- The `aggregations` object (per-service span count, duration, and execution-time percentage) has been removed from the v4 response. Callers that depended on this field must compute the same breakdown client-side or via the [Traces API](https://signoz.io/docs/apm-and-distributed-tracing/traces-api/).
+
+The waterfall API is consumed by the SigNoz frontend; most self-hosted operators have no direct callers. If you have automation or custom dashboards that hit `/api/v2/...` or `/api/v3/...`, update them before upgrading.
+
+## Upgrade Instructions
+
+### Docker Standalone
+
+Update your config file (see [Breaking Changes](#breaking-changes)) if applicable, then follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) using the image tag `v0.128.0` for `signoz`.
+
+### Docker Swarm
+
+Update your config file (see [Breaking Changes](#breaking-changes)) if applicable, then follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) using the image tag `v0.128.0` for `signoz`.
+
+### Kubernetes
+
+Update your `values.yaml` if you set `signoz.config.override.tracedetail.*` — rename the block to `signoz.config.override.traces.*`. Then follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes-deployment) using the image tag `v0.128.0` for `signoz`.
+
+### Linux Binary Installation
+
+Update your config file (see [Breaking Changes](#breaking-changes)) if applicable, then follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#linux-binary-installation) for v0.128.0.
+
+## Validate
+
+After upgrading, check that the SigNoz server starts and the Traces view loads as before:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/health
+```
+
+Expected response: `{"status":"ok"}`
+
+If the server fails to start with a validation error mentioning `traces.waterfall.*`, your config still contains a value that no longer passes validation under the new path — re-check the rename and the values you set.
+
+## Getting Help
+
+If you need assistance with the upgrade:
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack/)
