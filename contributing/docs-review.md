@@ -18,6 +18,7 @@ Review these when relevant:
 - `data/docs/**`
 - `public/img/docs/**`
 - `constants/docsSideNav.ts`
+- `constants/listicles/*.json`
 - `constants/componentItems.ts`
 - `constants/componentItems/*.ts`
 - `next.config.js` when docs URLs change

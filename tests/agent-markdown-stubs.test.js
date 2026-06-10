@@ -46,20 +46,36 @@ test('Admonition stubs preserve the admonition type label', async () => {
   assert.match(html, /Keep existing receivers\./)
 })
 
-test('CollectionAgentsListicle stubs respect the selected platform', async () => {
-  const doc = createDoc('<CollectionAgentsListicle platform="kubernetes" />')
+test('Listicle stubs respect the selected default section', async () => {
+  const doc = createDoc('<Listicle name="collection-agents" defaultSection="kubernetes" />')
   const components = buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
-    React.createElement(components.CollectionAgentsListicle, {
-      platform: 'kubernetes',
+    React.createElement(components.Listicle, {
+      name: 'collection-agents',
+      defaultSection: 'kubernetes',
     })
   )
 
   assert.match(html, /K8s-Infra \(Helm Chart\)/)
   assert.match(html, /OpenTelemetry Operator/)
+  assert.match(html, /K8s Serverless \(EKS Fargate\)/)
   assert.doesNotMatch(html, /Docker Swarm/)
   assert.doesNotMatch(html, /ECS Serverless \(Sidecar\)/)
   assert.doesNotMatch(html, /OpenTelemetry Binary/)
+})
+
+test('Listicle stubs render flat listicle items from JSON', async () => {
+  const doc = createDoc('<Listicle name="llm-monitoring" />')
+  const components = buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Listicle, {
+      name: 'llm-monitoring',
+    })
+  )
+
+  assert.match(html, /Amazon Bedrock/)
+  assert.match(html, /Anthropic API/)
+  assert.match(html, /\/docs\/amazon-bedrock-monitoring/)
 })
 
 test('HostingDecision stub matches the banner CTA destinations', async () => {

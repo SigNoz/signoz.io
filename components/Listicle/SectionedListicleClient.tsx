@@ -1,0 +1,80 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import type { ListicleRenderSection } from '@/constants/listicles/utils'
+import ListicleCardGrid from './ListicleCardGrid'
+
+interface SectionedListicleClientProps {
+  sections: ListicleRenderSection[]
+  defaultSection?: string
+  gridCols?: string
+}
+
+export default function SectionedListicleClient({
+  sections,
+  defaultSection,
+  gridCols,
+}: SectionedListicleClientProps) {
+  const sectionTabs = useMemo(
+    () => [
+      { id: 'all', label: 'All' },
+      ...sections.map((section) => ({
+        id: section.id,
+        label: section.label,
+      })),
+    ],
+    [sections]
+  )
+  const [activeSection, setActiveSection] = useState(
+    defaultSection && sectionTabs.some((section) => section.id === defaultSection)
+      ? defaultSection
+      : 'all'
+  )
+  const visibleSections =
+    activeSection === 'all' ? sections : sections.filter((section) => section.id === activeSection)
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-wrap gap-2">
+        {sectionTabs.map((section) => (
+          <button
+            key={section.id}
+            type="button"
+            onClick={() => setActiveSection(section.id)}
+            className={`inline-block rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              activeSection === section.id
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+            }`}
+          >
+            {section.label}
+          </button>
+        ))}
+      </div>
+
+      {visibleSections.map((section) => (
+        <div key={section.id} className="mb-10">
+          <h2 className="mb-4 text-2xl font-semibold">{section.title}</h2>
+          {section.subsections && section.subsections.length > 0 ? (
+            section.subsections.map((subsection) => (
+              <div key={subsection.id}>
+                <h3 className="mb-4 text-xl font-semibold">{subsection.title}</h3>
+                <ListicleCardGrid
+                  items={subsection.items}
+                  sectionName={subsection.sectionName}
+                  gridCols={subsection.gridCols || section.gridCols || gridCols}
+                />
+              </div>
+            ))
+          ) : (
+            <ListicleCardGrid
+              items={section.items}
+              sectionName={section.sectionName}
+              gridCols={section.gridCols || gridCols}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}

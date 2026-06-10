@@ -31,18 +31,96 @@ Use this playbook when changing frontend or site code such as `app/**`, `compone
 
 ## Listicle And Discovery Data
 
-- Keep listicle and icon-card source data in `constants/componentItems/*.ts`, not inside React components.
-- Treat `constants/componentItems.ts` as the public barrel only.
-- Use one top-level export per source file.
-- Use a flat `ComponentItem[]` for ungrouped surfaces.
-- Use named sub-keys for grouped surfaces, such as `cloud: { aws, azure, gcp }`.
-- When a grouped structure is used, also export a `getAll*()` helper that flattens every leaf array for shared consumers and tests.
-- Never use hardcoded `slice()` boundaries to fake sections.
-- After adding or removing items, update the relevant `ICON_MAP` and run:
+Listicles are rendered by a single generic component (`components/Listicle/Listicle.tsx`), driven by JSON config files in `constants/listicles/`. MDX files use `<Listicle name="..." />` to render them.
+
+### Architecture
+
+Each listicle is fully self-contained in a single JSON file — items, icons, sections, and layout are all in one place.
+
+| Layer        | Location                           | Purpose                                                                         |
+| ------------ | ---------------------------------- | ------------------------------------------------------------------------------- |
+| JSON configs | `constants/listicles/*.json`       | Items, icons, sections, layout — everything in one file                         |
+| Registry     | `constants/listicles/index.ts`     | Barrel that maps `name` string to config                                        |
+| Utilities    | `constants/listicles/utils.ts`     | Shared traversal for rendered UI and agent markdown                             |
+| Component    | `components/Listicle/Listicle.tsx` | Generic renderer for flat, sectioned, and searchable patterns                   |
+| Icons        | `public/img/icons/listicle/*.svg`  | Generated SVGs (brand icons); existing assets elsewhere are referenced directly |
+| MDX usage    | `data/docs/**/*.mdx`               | `<Listicle name="..." />` with optional `defaultSection`                        |
+| Agent stubs  | `utils/docs/agentMarkdownStubs.ts` | Markdown fallback — auto-extracts items from JSON configs                       |
+
+Non-listicle item lists (QuickStart, MigrateToSigNoz, WebVitals, HostingDecision) still live in `constants/componentItems/*.ts`.
+
+Listicles are JSON-only. Do not add listicle data to `constants/componentItems/*.ts`; rendered docs and agent markdown stubs read `constants/listicles/*.json` through the shared utilities.
+
+### Adding a new listicle
+
+1. **Create a JSON config** — add `constants/listicles/<name>.json`. Choose the pattern:
+   - `"flat"` — single grid, no filtering
+   - `"sectioned"` — navigation pills with categorized sections
+   - `"searchable"` — search input with flat grid
+2. **Add items** — each item needs `name`, `href`, and `icon`. Optional: `clickName` (defaults to `name`).
+3. **Register** — import the JSON in `constants/listicles/index.ts` and add it to the `listicleConfigs` map.
+4. **Use in MDX** — add `<Listicle name="<name>" />` in the docs page. Use `defaultSection` to pre-select a pill.
+
+Agent stubs auto-discover items from the JSON, including `defaultSection` behavior — no separate stub update needed.
+
+### Updating an existing listicle
+
+- **Add/remove items**: edit the `items` array in the JSON config directly. Each item has `name`, `href`, `icon`, and optional `clickName`.
+- **Change icons**: update the `icon` path on the item. To generate a new SVG from a react-icon, add it to `scripts/generate-listicle-icons.mjs` and re-run the script.
+- **Add/remove sections**: edit the `sections` array in the JSON config. Move items between sections as needed.
+
+### JSON config reference
+
+**Flat listicle:**
+
+```jsonc
+{
+  "id": "example", // Matches the `name` prop in MDX
+  "pattern": "flat", // "flat" | "sectioned" | "searchable"
+  "sectionName": "Example Section", // For click tracking
+  "gridCols": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+  "items": [
+    {
+      "name": "Foo Service",
+      "href": "/docs/example/foo",
+      "icon": "/img/icons/listicle/si-foo.svg",
+    },
+    {
+      "name": "Bar Service",
+      "href": "/docs/example/bar",
+      "icon": { "badge": "BR", "color": "#dc2626" },
+    },
+  ],
+}
+```
+
+**Sectioned listicle:**
+
+```jsonc
+{
+  "id": "example",
+  "pattern": "sectioned",
+  "sectionName": "Example",
+  "sections": [
+    {
+      "id": "category-a",
+      "label": "Category A", // Pill text
+      "title": "Category A Items", // Section heading
+      "sectionName": "Category A", // For click tracking
+      "items": [
+        { "name": "Item 1", "href": "/docs/item-1", "icon": "/img/icons/listicle/si-item1.svg" },
+      ],
+    },
+  ],
+}
+```
+
+### Verification after listicle changes
 
 ```bash
-yarn tsc --noEmit
 node --test tests/component-items-sync.test.js
+node --test tests/agent-markdown-stubs.test.js
+yarn build
 ```
 
 ## Async And DOM Safety

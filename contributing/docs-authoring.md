@@ -73,7 +73,7 @@ The `title` field is both the page heading and the meta title shown in search re
   - Include a feature or benefit qualifier when it fits naturally: Fast, Real-time, Open-source, Distributed.
 - **Example:** `Logs Pipelines - Parse & Transform Logs`
   - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
-  - In search results: *Logs Pipelines - Parse & Transform Logs | SigNoz Docs*
+  - In search results: _Logs Pipelines - Parse & Transform Logs | SigNoz Docs_
 
 ### Description Guidelines
 
@@ -277,11 +277,16 @@ async redirects() {
 
 Some docs also need updates beyond the sidebar. Update discovery surfaces when a new page should appear in listicles, quick starts, overview cards, installation path cards, dashboard template listings, or similar surfaced integration collections.
 
-When needed:
+Listicles use a generic `<Listicle name="..." />` component driven by self-contained JSON configs. To add a new entry to an existing listicle:
 
-- Add or update the source data in the relevant `constants/componentItems/*.ts` file.
-- Keep `constants/componentItems.ts` as the public barrel.
-- Update the matching component `ICON_MAP` when required.
+1. Open the JSON config in `constants/listicles/<name>.json`.
+2. Add an item object with `name`, `href`, and `icon` to the relevant `items` array.
+
+That's it — items, icons, and sections are all in one JSON file.
+
+Do not add listicle entries to `constants/componentItems/*.ts`. Listicle rendering and agent markdown fallbacks both read the JSON config automatically.
+
+For full details on creating new listicles or changing listicle structure (sections, patterns, icons), see [contributing/site-code.md](site-code.md#listicle-and-discovery-data).
 
 ### Tag Definitions
 
@@ -296,10 +301,9 @@ yarn check:doc-redirects
 yarn test:doc-redirects
 ```
 
-If `constants/componentItems/*.ts` changed, also run:
+If `constants/listicles/*.json` or `constants/componentItems/*.ts` changed, also run:
 
 ```bash
-yarn tsc --noEmit
 node --test tests/component-items-sync.test.js
 ```
 
