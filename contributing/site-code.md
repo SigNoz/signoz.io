@@ -35,11 +35,11 @@ Listicles are rendered by a single generic component (`components/Listicle/Listi
 
 ### Architecture
 
-Each listicle is fully self-contained in a single JSON file — items, icons, sections, and layout are all in one place.
+Each listicle is fully self-contained in a single JSON file — items, icons, markdown output title, sections, and layout are all in one place.
 
 | Layer        | Location                           | Purpose                                                                         |
 | ------------ | ---------------------------------- | ------------------------------------------------------------------------------- |
-| JSON configs | `constants/listicles/*.json`       | Items, icons, sections, layout — everything in one file                         |
+| JSON configs | `constants/listicles/*.json`       | Items, icons, markdown title, sections, layout — everything in one file         |
 | Registry     | `constants/listicles/index.ts`     | Barrel that maps `name` string to config                                        |
 | Utilities    | `constants/listicles/utils.ts`     | Shared traversal for rendered UI and agent markdown                             |
 | Component    | `components/Listicle/Listicle.tsx` | Generic renderer for flat, sectioned, and searchable patterns                   |
@@ -57,7 +57,7 @@ Listicles are JSON-only. Do not add listicle data to `constants/componentItems/*
    - `"flat"` — single grid, no filtering
    - `"sectioned"` — navigation pills with categorized sections
    - `"searchable"` — search input with flat grid
-2. **Add items** — each item needs `name`, `href`, and `icon`. Optional: `clickName` (defaults to `name`).
+2. **Add metadata and items** — set `markdownTitle` to the heading that should appear in agent/Copy Markdown output. Each item needs `name`, `href`, and `icon`. Optional: `clickName` (defaults to `name`).
 3. **Register** — import the JSON in `constants/listicles/index.ts` and add it to the `listicleConfigs` map.
 4. **Use in MDX** — add `<Listicle name="<name>" />` in the docs page. Use `defaultSection` to pre-select a pill.
 
@@ -77,6 +77,7 @@ Agent stubs auto-discover items from the JSON, including `defaultSection` behavi
 {
   "id": "example", // Matches the `name` prop in MDX
   "pattern": "flat", // "flat" | "sectioned" | "searchable"
+  "markdownTitle": "Example Guides", // Heading used in markdown fallback output
   "sectionName": "Example Section", // For click tracking
   "gridCols": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
   "items": [
@@ -100,6 +101,7 @@ Agent stubs auto-discover items from the JSON, including `defaultSection` behavi
 {
   "id": "example",
   "pattern": "sectioned",
+  "markdownTitle": "Example Guides",
   "sectionName": "Example",
   "sections": [
     {

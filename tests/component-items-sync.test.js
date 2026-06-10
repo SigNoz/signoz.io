@@ -184,6 +184,7 @@ test('all listicle JSON configs have valid top-level fields', () => {
       ['flat', 'sectioned', 'searchable'].includes(config.pattern),
       `${name}.pattern should be flat, sectioned, or searchable`
     )
+    assertNonEmptyString(config.markdownTitle, `${name}.markdownTitle`)
     assertNonEmptyString(config.sectionName, `${name}.sectionName`)
 
     if (config.gridCols !== undefined) assertNonEmptyString(config.gridCols, `${name}.gridCols`)

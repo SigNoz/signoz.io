@@ -56,6 +56,7 @@ test('Listicle stubs respect the selected default section', async () => {
     })
   )
 
+  assert.match(html, /Collection Agents/)
   assert.match(html, /K8s-Infra \(Helm Chart\)/)
   assert.match(html, /OpenTelemetry Operator/)
   assert.match(html, /K8s Serverless \(EKS Fargate\)/)
@@ -73,9 +74,23 @@ test('Listicle stubs render flat listicle items from JSON', async () => {
     })
   )
 
+  assert.match(html, /LLM Monitoring Guides/)
   assert.match(html, /Amazon Bedrock/)
   assert.match(html, /Anthropic API/)
   assert.match(html, /\/docs\/amazon-bedrock-monitoring/)
+})
+
+test('Listicle stubs use the configured markdown title', async () => {
+  const doc = createDoc('<Listicle name="aws-monitoring" />')
+  const components = buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Listicle, {
+      name: 'aws-monitoring',
+    })
+  )
+
+  assert.match(html, /AWS Monitoring Guides/)
+  assert.doesNotMatch(html, /<h2>Listicle<\/h2>/)
 })
 
 test('HostingDecision stub matches the banner CTA destinations', async () => {

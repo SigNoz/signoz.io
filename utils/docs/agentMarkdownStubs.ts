@@ -163,22 +163,24 @@ const buildLabeledContent = (label: string | null, children?: ReactNode): ReactN
 }
 
 type StubListItem = { name: string; href: string }
+type StubListTitle = string | ((props: StubProps) => string)
 
 const createItemListStub = (
   items: StubListItem[] | ((props: StubProps) => StubListItem[]),
-  title: string
+  title: StubListTitle
 ): ComponentType<StubProps> => {
   const ItemListStub = (props: StubProps) => {
     const resolvedItems = typeof items === 'function' ? items(props) : items
+    const resolvedTitle = typeof title === 'function' ? title(props) : title
 
     if (resolvedItems.length === 0) {
-      return React.createElement('p', null, `${title}: No items found.`)
+      return React.createElement('p', null, `${resolvedTitle}: No items found.`)
     }
 
     return React.createElement(
       'section',
       null,
-      React.createElement('h2', null, title),
+      React.createElement('h2', null, resolvedTitle),
       React.createElement(
         'ul',
         null,
@@ -193,7 +195,8 @@ const createItemListStub = (
     )
   }
 
-  ItemListStub.displayName = `${title.replace(/[^a-zA-Z0-9]+/g, '') || 'ItemList'}Stub`
+  const displayTitle = typeof title === 'string' ? title : 'ItemList'
+  ItemListStub.displayName = `${displayTitle.replace(/[^a-zA-Z0-9]+/g, '') || 'ItemList'}Stub`
 
   return ItemListStub
 }
@@ -319,12 +322,19 @@ const createKnownComponentStubs = (): Record<
   },
   HostingDecision: createItemListStub(HOSTING_DECISION_ITEMS, 'Hosting Options'),
   APMQuickStartOverview: createItemListStub(APM_QUICK_START_ITEMS, 'APM Quick Start'),
-  Listicle: createItemListStub((props) => {
-    const name = getStringProp(props, 'name')
-    const config = name ? getListicleConfig(name) : null
-    if (!config) return []
-    return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
-  }, 'Listicle'),
+  Listicle: createItemListStub(
+    (props) => {
+      const name = getStringProp(props, 'name')
+      const config = name ? getListicleConfig(name) : null
+      if (!config) return []
+      return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
+    },
+    (props) => {
+      const name = getStringProp(props, 'name')
+      const config = name ? getListicleConfig(name) : null
+      return config?.markdownTitle || 'Listicle'
+    }
+  ),
   LogsQuickStartOverview: createItemListStub(LOGS_QUICK_START_ITEMS, 'Logs Quick Start'),
   MetricsQuickStartOverview: createItemListStub(
     getAllMetricsQuickStartItems(),

@@ -28,6 +28,7 @@ export interface SectionConfig {
 export interface ListicleConfig {
   id: string
   pattern: 'flat' | 'sectioned' | 'searchable'
+  markdownTitle: string
   sectionName: string
   gridCols?: string
   viewAllText?: string
