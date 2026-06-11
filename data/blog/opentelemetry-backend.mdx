@@ -17,15 +17,21 @@ related_articles:
 
 OpenTelemetry is a Cloud Native Computing Foundation(<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) graduated project that standardizes how we instrument applications to generate telemetry data (logs, metrics, and traces). While OpenTelemetry provides the tools to collect and export this data, it purposefully does not include a storage, analysis, or visualization layer. That is the job of an OpenTelemetry backend.
 
+Reading the above, you might wonder: **why is observability even needed in the first place**?
+
+Cloud computing and containerization made deploying and scaling applications easier. Modern applications make use of modular code and architectures like microservices and serverless that enable engineering teams to ship features faster, and meet any surge in user demand by spinning up more containers, either manually or via auto-scaling. 
+
+But every coin has two sides. While having benefits like smaller engineering teams and on-demand scaling of applications, cloud computing and containerization have also increased operational complexity manifold. Troubleshooting an application based on a distributed system for performance issues is like finding a needle in a haystack.
+
 [![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
 
 Collecting telemetry data from applications that can act as a signal for troubleshooting performance issues is a practice as old as writing software. [OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) solves the problem of inconsistent instrumentation by providing an open standard.
 
 ## What is an OpenTelemetry Backend?
 
-While it defines how telemetry data is generated and collected, OpenTelemetry does **not** store, query, or visualize that data. That responsibility falls entirely on an OpenTelemetry backend. 
+Earlier we mentioned that OpenTelemetry itself does **not** store, query, or visualize telemetry data, instead assigning that responsibility to an OpenTelemetry backend.
 
-A backend is the system that sits at the end of your telemetry pipeline and handles:
+An OpenTelemetry backend is the software that sits at the end of your telemetry pipeline and handles:
 - **Storage** of logs, metrics, and traces at scale
 - **Querying** across signals for debugging and analysis
 - **Visualization** through dashboards, flamegraphs, and service maps
@@ -33,8 +39,7 @@ A backend is the system that sits at the end of your telemetry pipeline and hand
 
 OpenTelemetry is an open standard that consists of APIs, SDKs, the Collector, and semantic conventions. It provides a pluggable architecture that frees users from vendor lock-in, as the same instrumentation logic works across all compatible backends. 
 
-However, OTel itself does not outline constraints for building backends. Observability vendors use different mechanisms to store, process, and visualize ingested telemetry based on their needs and goals.
-
+Since it does not define guidelines for building backends, observability vendors freely choose different mechanisms to store, process, and visualize ingested telemetry based on their needs and goals.
 
 In practice, the data flow looks like this: OpenTelemetry SDKs instrument your application code, the generated telemetry is sent to the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) for processing and routing, and the Collector then exports it to one or more observability backends.
 
