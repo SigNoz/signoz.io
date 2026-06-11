@@ -26,10 +26,6 @@
  *       → resolveLatestDate() used in rssUtils, sitemap, content.ts, mdxUtils related articles
  */
 
-// ---------------------------------------------------------------------------
-// Core derivation — used by transform functions
-// ---------------------------------------------------------------------------
-
 type RawDateFields = {
   published_date?: string | null
   updated_date?: string | null
@@ -59,10 +55,6 @@ export function deriveDates(content: RawDateFields) {
   return { publishedDate, updatedDate, sortDate }
 }
 
-// ---------------------------------------------------------------------------
-// Display formatting — used by layouts
-// ---------------------------------------------------------------------------
-
 /**
  * Format a date string for UI display.
  * @returns `"Month DD, YYYY"` (e.g. `"June 11, 2026"`) or `null`.
@@ -89,10 +81,6 @@ export function getFormattedDates(content: RawDateFields) {
   const updatedDate = formatDisplayDate(content.updated_date ?? content.date)
   return { publishedDate, updatedDate }
 }
-
-// ---------------------------------------------------------------------------
-// Full fallback chains — used by RSS, sitemaps, resource-center cards
-// ---------------------------------------------------------------------------
 
 type CMSDateFields = RawDateFields & {
   publishedAt?: string | null
