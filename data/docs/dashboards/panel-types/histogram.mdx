@@ -2,7 +2,7 @@
 id: histogram-viz
 
 title: Histogram Panel Type
-date: 2026-05-13
+date: 2026-06-11
 description: Learn how to use the Histogram panel type in SigNoz dashboards to visualize data distributions.
 doc_type: reference
 ---
@@ -15,6 +15,10 @@ A Histogram is a plot chart that shows the frequency distribution of a set of me
 
 This panel type allows users to create a chart where the data is grouped into buckets (such as “40 to 49”, “50 to 59”, etc.), and then plotted as bars. Similar to a Bar Graph, but in a Histogram, each bar represents a range of data. The panel type allows the user to control the number of bins, and will automatically calculate the size of each bin accordingly.
 
+<Admonition type="warning">
+This panel computes a frequency distribution of the **values returned by your query** — it does not reconstruct distributions from pre-bucketed histogram **metrics** (OpenTelemetry or Prometheus histogram series such as `<metric>.bucket`). Selecting a `.bucket` metric here plots the distribution of the bucket counter values themselves, which typically renders as a single meaningless bar at a very large value. See [Visualizing OpenTelemetry Histogram Metrics](#visualizing-opentelemetry-histogram-metrics) for the correct approach.
+</Admonition>
+
 ### Data Formats
 
 #### Support signals
@@ -23,7 +27,10 @@ This panel type allows users to create a chart where the data is grouped into bu
 - Traces
 - Metrics
 
-This panel type supports any time series data. The time series data can be from logs, traces, or metrics.
+This panel type supports any time series data. The time series data can be from logs, traces, or metrics. The panel collects the values of the queried time series over the selected time range and bins them into buckets, plotting how frequently values fall in each range.
+
+Good candidates are plain numeric series whose value distribution you want to inspect — for example, gauge readings (memory usage), per-series request rates, or span durations queried from traces.
+
 
 #### Examples
 
@@ -184,6 +191,15 @@ Multiple series can be merged into a Histogram using the option `MERGE ALL SERIE
   alt="Histogram with two series merged into one and 15 buckets"
   caption="Histogram with two series merged into one and 15 buckets."
 />
+
+### Visualizing OpenTelemetry Histogram Metrics
+
+OpenTelemetry histogram metrics arrive **pre-bucketed**: a `<metric>.bucket` series stores cumulative observation counts per upper bound (the `le` label), alongside `<metric>.sum` and `<metric>.count` series. The Histogram panel does not interpret these bucket semantics — it only bins the raw values your query returns. Plotting `<metric>.bucket` in this panel therefore charts the distribution of the counter values themselves (usually one bar at a large cumulative count), not the distribution of the measurements.
+
+To visualize a histogram metric such as `http.server.request.duration.bucket`, use a [Time Series panel](https://signoz.io/docs/dashboards/panel-types/timeseries/) instead:
+
+- **Percentiles (recommended)** — Select the `<metric>.bucket` metric in the query builder and choose a percentile aggregation (P50, P75, P90, P95, or P99). SigNoz computes the percentile from the bucket distribution, and you can group by any attribute. See [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#histogram--exponential-histogram) for how this works.
+- **Average** — Query `<metric>.sum` (query A) and `<metric>.count` (query B), each with the **Rate** temporal aggregation, then add a formula `A/B` to chart the average value over time.
 
 ### Configuration
 
