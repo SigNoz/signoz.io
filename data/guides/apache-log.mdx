@@ -227,7 +227,7 @@ This rotates Apache log files daily, keeps seven days of history, compresses old
 
 Reading Apache log files manually works for debugging individual requests, but production servers generate thousands of Apache log entries per minute. Manual Apache log file analysis does not scale when you are managing dozens of servers. For Apache log management at scale, you need a centralized platform where you can search, filter, and set alerts on Apache log data in real time.
 
-[SigNoz](https://signoz.io/) is an observability platform that ingests Apache logs via the OpenTelemetry Collector, giving you full-text search, field-level filtering, and alerting on error patterns across all your [Apache log files](https://signoz.io/blog/opentelemetry-apache-server-metrics-monitoring/).
+[SigNoz](https://signoz.io/) is an observability platform that ingests Apache logs via the [OpenTelemetry Collector](https://signoz.io/docs/logs-management/send-logs/collection-methods/), giving you full-text search, field-level filtering, and alerting on error patterns across all your [Apache log files](https://signoz.io/blog/opentelemetry-apache-server-metrics-monitoring/).
 
 This section walks through setting up Apache log monitoring with SigNoz Cloud using the OpenTelemetry Collector as the log shipper.
 
@@ -249,7 +249,7 @@ sudo yum install httpd -y
 sudo apt install apache2 -y
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%201.webp" alt="Installing Apache server" caption="Installing Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-1.webp" alt="Installing Apache server" caption="Installing Apache server" />
 
 Start and enable the Apache service:
 
@@ -265,7 +265,7 @@ sudo systemctl enable apache2
 sudo systemctl status apache2
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%202.webp" alt="Starting and enabling Apache server" caption="Starting and enabling Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-2.webp" alt="Starting and enabling Apache server" caption="Starting and enabling Apache server" />
 
 Verify that Apache logging is enabled by checking the directives in your Apache configuration file.
 
@@ -275,7 +275,7 @@ For the Apache access log, confirm the `CustomLog` directive is present:
 CustomLog logs/access_log combined
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%203.webp" alt="CustomLog directive in Apache Configuration File" caption="CustomLog directive in Apache configuration file" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-3.webp" alt="CustomLog directive in Apache Configuration File" caption="CustomLog directive in Apache configuration file" />
 
 For the Apache error log, confirm the `ErrorLog` directive is present:
 
@@ -283,7 +283,7 @@ For the Apache error log, confirm the `ErrorLog` directive is present:
 ErrorLog logs/error_log
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%204.webp" alt="ErrorLog Configuration in Apache Configuration File" caption="ErrorLog directive in Apache configuration file" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-4.webp" alt="ErrorLog Configuration in Apache Configuration File" caption="ErrorLog directive in Apache configuration file" />
 
 ### Step 2: Install and Configure the OpenTelemetry Collector
 
@@ -299,7 +299,7 @@ sudo yum update -y
 sudo apt update -y
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%205.webp" alt="Updating packages" caption="Updating system packages" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-5.webp" alt="Updating packages" caption="Updating system packages" />
 
 **Download and extract the OpenTelemetry Collector:**
 
@@ -308,7 +308,7 @@ wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases
 mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%206.webp" alt="Installing OpenTelemetry collector" caption="Installing OpenTelemetry Collector" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-6.webp" alt="Installing OpenTelemetry collector" caption="Installing OpenTelemetry Collector" />
 
 Check the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases/releases" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Releases</a> page for the latest version and replace `0.116.0` in the commands above if a newer release is available.
 
@@ -414,7 +414,7 @@ If you are on Debian/Ubuntu, update the `filelog.include` paths to `/var/log/apa
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%207.webp" alt="Running OpenTelemetry Collector" caption="Running the OpenTelemetry Collector" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-7.webp" alt="Running OpenTelemetry Collector" caption="Running the OpenTelemetry Collector" />
 
 ### Step 3: Verify Apache Logs in SigNoz
 
@@ -424,7 +424,7 @@ If you are on Debian/Ubuntu, update the `filelog.include` paths to `/var/log/apa
 for i in {1..10}; do curl http://localhost/; done
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%208.webp" alt="Sending GET requests to Apache server" caption="Sending GET requests to Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-8.webp" alt="Sending GET requests to Apache server" caption="Sending GET requests to Apache server" />
 
 Test different HTTP methods to produce varied Apache access log entries:
 
@@ -435,11 +435,11 @@ curl -X PUT http://localhost/
 curl -X DELETE http://localhost/
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%209.webp" alt="Sending POST requests to Apache server" caption="Sending POST requests to Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-9.webp" alt="Sending POST requests to Apache server" caption="Sending POST requests to Apache server" />
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2010.webp" alt="Sending PUT requests to Apache server" caption="Sending PUT requests to Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-10.webp" alt="Sending PUT requests to Apache server" caption="Sending PUT requests to Apache server" />
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2011.webp" alt="Sending DELETE requests to Apache server" caption="Sending DELETE requests to Apache server" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-11.webp" alt="Sending DELETE requests to Apache server" caption="Sending DELETE requests to Apache server" />
 
 **Verify locally** that Apache is writing log entries to the Apache log files:
 
@@ -455,15 +455,15 @@ Check the Apache error log as well:
 sudo tail -f /var/log/httpd/error_log
 ```
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2012.webp" alt="Verifying error logs in Apache" caption="Verifying Apache error log entries" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-12.webp" alt="Verifying error logs in Apache" caption="Verifying Apache error log entries" />
 
 **Check SigNoz** by logging in to your SigNoz Cloud dashboard and navigating to the Logs section. Your Apache log entries should appear in the log explorer within a few seconds of being written to the Apache log files.
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2013.webp" alt="Visualizing and monitoring Apache logs in SigNoz Dashboard" caption="Apache logs visible in the SigNoz log explorer" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-13.webp" alt="Visualizing and monitoring Apache logs in SigNoz Dashboard" caption="Apache logs visible in the SigNoz log explorer" />
 
 Use the search and filter controls to narrow down Apache log entries by log file name, status code, or any text pattern in the Apache log data.
 
-<Figure src="/img/guides/2024/07/apache-log-Untitled%2014.webp" alt="Filtering Apache logs based on log file name" caption="Filtering Apache log entries by log file name in SigNoz" />
+<Figure src="/img/guides/2024/07/apache-log-Untitled-14.webp" alt="Filtering Apache logs based on log file name" caption="Filtering Apache log entries by log file name in SigNoz" />
 
 With your Apache logs flowing into SigNoz, you can build dashboards for Apache access log analytics, set up alerts on error rate thresholds, and correlate Apache log data with metrics and traces from other services in your infrastructure. This turns SigNoz into the single platform for all your Apache log analysis, Apache log management, and Apache log file analysis needs across your entire fleet.
 
