@@ -84,17 +84,45 @@ const getPathname = (attributes: Record<string, unknown>) => {
   )
 }
 
+const POSTHOG_UTM_PROPERTIES: Record<string, string> = {
+  utm_source: '$utm_source',
+  utm_medium: '$utm_medium',
+  utm_campaign: '$utm_campaign',
+  utm_term: '$utm_term',
+  utm_content: '$utm_content',
+  gclid: '$gclid',
+}
+
+const getHost = (url?: string) => {
+  if (!url) return undefined
+
+  try {
+    return new URL(url).host
+  } catch {
+    return undefined
+  }
+}
+
+const getReferrerProperties = (referrer?: string) => {
+  if (!referrer) return {}
+
+  const referrerHost = getHost(referrer)
+
+  return {
+    $referrer: referrer,
+    ...(referrerHost && { $referring_domain: referrerHost }),
+  }
+}
+
 const getUtmProperties = (attributes: Record<string, unknown>) => {
   const properties: Record<string, unknown> = {}
 
-  ;['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid'].forEach(
-    (key) => {
-      const value = getString(attributes[key])
-      if (value) {
-        properties[key] = value
-      }
+  Object.entries(POSTHOG_UTM_PROPERTIES).forEach(([key, postHogKey]) => {
+    const value = getString(attributes[key])
+    if (value) {
+      properties[postHogKey] = value
     }
-  )
+  })
 
   return properties
 }
@@ -106,9 +134,12 @@ const getCommonProperties = (
 ) => {
   const pathname = getPathname(attributes)
   const currentUrl = getCurrentUrl(attributes, context)
+  const currentHost = getHost(currentUrl)
   const pageTitle = getString(attributes.pageTitle)
   const pageType = getString(attributes.pageType)
+  const pageReferrer = getString(attributes.pageReferrer)
   const rawUserAgent = getRawUserAgent(attributes, context)
+  const os = getString(attributes.custom_os)
 
   return {
     source_event_name: payload.eventName,
@@ -116,22 +147,17 @@ const getCommonProperties = (
     source_app: 'signoz.io',
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
     ...(context.ip && { $ip: context.ip }),
-    ...(currentUrl && { $current_url: currentUrl, page_url: currentUrl }),
-    ...(pathname && { $pathname: pathname, page_location: pathname }),
+    ...(currentUrl && { $current_url: currentUrl }),
+    ...(currentHost && { $host: currentHost }),
+    ...(pathname && { $pathname: pathname }),
     ...(pageTitle && { page_title: pageTitle }),
     ...(pageType && { page_type: pageType }),
     ...(getString(attributes.custom_initial_referrer) && {
       initial_referrer: getString(attributes.custom_initial_referrer),
     }),
-    ...(getString(attributes.pageReferrer) && {
-      page_referrer: getString(attributes.pageReferrer),
-    }),
-    ...(context.referrer && { request_referrer: context.referrer }),
-    ...(rawUserAgent && { user_agent: rawUserAgent, $raw_user_agent: rawUserAgent }),
-    ...(getString(attributes.custom_os) && { os: getString(attributes.custom_os) }),
-    ...(getString(attributes.custom_timezone) && {
-      timezone: getString(attributes.custom_timezone),
-    }),
+    ...getReferrerProperties(pageReferrer),
+    ...(rawUserAgent && { $raw_user_agent: rawUserAgent }),
+    ...(os && { $os: os }),
     ...(getBoolean(attributes.custom_is_bot_client) !== undefined && {
       is_bot_client: getBoolean(attributes.custom_is_bot_client),
     }),
@@ -259,7 +285,7 @@ const buildSignupProperties = (attributes: Record<string, unknown>, context: Req
     source_app: 'signoz.io',
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
     ...(context.ip && { $ip: context.ip }),
-    ...(context.userAgent && { user_agent: context.userAgent, $raw_user_agent: context.userAgent }),
+    ...(context.userAgent && { $raw_user_agent: context.userAgent }),
   }
 }
 
@@ -357,7 +383,6 @@ const identifyCompanyGroup = async (
       environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
       ...(context.ip && { $ip: context.ip }),
       ...(context.userAgent && {
-        user_agent: context.userAgent,
         $raw_user_agent: context.userAgent,
       }),
     },
@@ -377,7 +402,6 @@ const identifyCompanyGroup = async (
       environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
       ...(context.ip && { $ip: context.ip }),
       ...(context.userAgent && {
-        user_agent: context.userAgent,
         $raw_user_agent: context.userAgent,
       }),
     },
