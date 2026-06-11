@@ -110,8 +110,8 @@ const formatDate = (dateStr: string | undefined | null) =>
 
 const getFormattedDates = (content: LayoutProps['content']) => {
   const c = content as any
-  const publishedDate = formatDate(c.published_date || (c.updated_date ? content.date : null))
-  const updatedDate = formatDate(c.updated_date || (c.published_date ? null : content.date))
+  const publishedDate = formatDate(c.published_date)
+  const updatedDate = formatDate(c.updated_date)
   return { publishedDate, updatedDate }
 }
 

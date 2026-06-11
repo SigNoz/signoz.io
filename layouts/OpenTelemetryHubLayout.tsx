@@ -94,12 +94,8 @@ const formatDate = (dateStr: string | undefined | null) =>
     : null
 
 export function getFormattedDates(content: HubContentProps['content']) {
-  const publishedDate = formatDate(
-    content.published_date || (content.updated_date ? content.date : null)
-  )
-  const updatedDate = formatDate(
-    content.updated_date || (content.published_date ? null : content.date)
-  )
+  const publishedDate = formatDate(content.published_date)
+  const updatedDate = formatDate(content.updated_date)
   return { publishedDate, updatedDate }
 }
 
