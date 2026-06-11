@@ -95,6 +95,8 @@ const DEFAULT_LIST_FIELDS = [
   'title',
   'path',
   'date',
+  'published_date',
+  'updated_date',
   'description',
   'updatedAt',
   'publishedAt',
