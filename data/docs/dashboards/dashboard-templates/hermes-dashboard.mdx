@@ -1,0 +1,84 @@
+---
+date: 2026-06-11
+id: hermes
+tags: [SigNoz Cloud, Self-Host]
+title: Hermes Agent Dashboard
+description: Monitor Hermes coding agent sessions, LLM API calls and token usage, tool-call activity, latency, and errors using OTel traces for complete AI agent observability.
+doc_type: explanation
+---
+
+<Admonition type="info">
+  Before using this dashboard, instrument your Hermes agent with OpenTelemetry and configure export to SigNoz. See the [Hermes monitoring guide](https://signoz.io/docs/hermes-monitoring/) for complete setup instructions.
+</Admonition>
+
+
+This dashboard offers a clear view into Hermes coding agent behavior and performance. It highlights key metrics such as agent turn volume, LLM API call patterns, token consumption, tool-call activity, and error trends. Teams can track end-to-end turn latency, per-model token costs, and individual failing spans to keep their agents fast and reliable.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/hermes-dashboard.webp"
+  alt="Hermes Agent Dashboard"
+  caption="Hermes Agent Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/hermes/hermes-dashboard.json"
+    dashboardName=""
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks critical performance metrics for your Hermes coding agent using OpenTelemetry traces (service: `hermes-agent`) to help you:
+
+- **Monitor Agent Activity**: Track agent turn and LLM turn counts, total tool calls, and overall API call volume to understand how actively the agent is working across sessions.
+- **Analyze Token Consumption**: Observe input, output, and cache-read token usage over time and per model to understand costs, spot consumption spikes, and optimize prompting strategies.
+- **Track Model Usage**: See which LLM models are being called, how tokens are distributed across them, and how finish reasons break down to measure model health and behavior.
+- **Ensure Responsiveness**: Monitor end-to-end agent turn latency and LLM API call latency at p50, p95, and p99 to surface slowdowns and maintain a consistent coding experience.
+- **Understand Tool Behavior**: Measure which tools are called most often, how long each tool takes, and whether tool calls succeed or error — including a summary table with call counts and p95 latency per tool.
+- **Investigate Errors**: Track error spans over time by operation, view a ranked table of the most-failing operations, and drill into individual failing spans with status messages for root-cause analysis.
+
+## Metrics Included
+
+### Overview Scorecards
+
+- **Agent Turns**: Count of root `agent` spans in the selected time range, representing the total number of agent turns or sessions processed.
+- **LLM Turns**: Count of `llm.*` wrapper spans, showing how many LLM interaction cycles the agent performed.
+- **LLM API Calls**: Count of spans where `llm.model_name` exists, representing individual chat completion calls made to the model provider.
+- **Tool Calls**: Count of `tool.*` spans, showing the total number of tool invocations across all agent turns.
+- **Total Tokens**: Sum of `gen_ai.usage.total_tokens` across all spans, giving the aggregate token consumption for the selected range.
+- **Error Spans**: Count of spans where `hasError = true`, with a red threshold triggered by any non-zero value for immediate attention.
+
+### LLM & Model Metrics
+
+- **LLM API Calls by Model**: Pie chart breaking down chat completion call counts by `llm.model_name`, helping you understand which models are called most frequently and track adoption across model versions.
+- **Token Usage Over Time**: Time series showing input tokens, output tokens, and cache-read tokens stacked over time, revealing consumption trends and the benefit of prompt caching.
+- **Total Tokens by Model**: Pie chart showing total token consumption split by model, useful for understanding which model drives the most cost.
+- **LLM API Call Latency (p50 / p95 / p99)**: Duration percentiles for chat completion spans over time, surfacing model response time trends and latency regressions.
+- **Cost Proxy: Input vs Output Tokens by Model**: Line chart plotting input and output token volume per model over time as a cost proxy, since no native cost attribute is available — scale by your per-model pricing to estimate spend.
+- **Responses by Finish Reason**: Pie chart of `llm.response.finish_reason` values (e.g. `stop`, `tool_calls`, `length`) to reveal how often the model terminates normally versus hitting limits or requesting tool use.
+
+### Agent & Turn Metrics
+
+- **Agent Turns Over Time**: Time series of root `agent` span counts, showing turn volume trends and helping identify peak activity windows or unexpected drops.
+- **Agent Turn Duration (p50 / p95)**: End-to-end duration percentiles for `agent` spans, measuring how long complete agent turns take from start to finish.
+- **Avg API Calls per Turn**: Average of `hermes.turn.api_call_count` per agent span over time, showing how many model round-trips a typical turn requires.
+- **Avg Tools per Turn**: Average of `hermes.turn.tool_count` per agent span, indicating how tool-heavy the agent's reasoning is on a typical turn.
+- **Turn Final Status**: Pie chart of `hermes.turn.final_status` values, showing the distribution of how agent turns complete (e.g. success, error, timeout).
+- **Sessions by Kind**: Pie chart of `hermes.session.kind` values, breaking down sessions by their interaction type or mode.
+
+### Tool Call Metrics
+
+- **Tool Calls by Type**: Pie chart of `tool.*` span counts grouped by operation name, showing which tool types the agent invokes most.
+- **Tool Call Latency (p95) by Type**: Line chart of p95 duration per tool over time, identifying which tools are the slowest and most likely to bottleneck agent turns.
+- **Tool Outcomes (completed vs error)**: Pie chart of `hermes.tool.outcome` values, showing the ratio of successful versus failed tool executions.
+- **GenAI Tool Invocations by Name**: Pie chart of tool call counts grouped by `tool.name` (model-requested tools), revealing which tools the model chooses most during its reasoning loop.
+- **Tool Usage Summary**: Table showing each tool type with its total call count (sorted descending) and p95 latency, giving a quick reference for the most-used and slowest tools.
+
+### Error Monitoring
+
+- **Errors Over Time**: Time series of `hasError = true` spans grouped by span name, letting you see which operations are failing and when failure spikes occur.
+- **Error Count by Operation**: Table of error counts per operation name sorted descending, identifying the most-failing span types at a glance.
+- **Recent Error Spans**: List of the 25 most recent errored spans sorted by timestamp, showing the span name, status message, `hermes.tool.outcome`, and duration — use this to drill into individual failures and find root causes.
