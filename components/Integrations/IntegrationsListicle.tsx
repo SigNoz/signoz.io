@@ -17,6 +17,7 @@ import {
   SiVercel,
   SiFlydotio,
   SiRailway,
+  SiCloudflare,
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -112,6 +113,9 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     ),
     '/docs/integrations/nginx': <SiNginx className="h-7 w-7 text-green-500" />,
     '/docs/integrations/vercel': <SiVercel className="h-7 w-7 text-black dark:text-white" />,
+    '/docs/integrations/outposts/cloudflare-workers': (
+      <SiCloudflare className="h-7 w-7 text-[#F38020]" />
+    ),
     '/docs/integrations/outposts/flyio': <SiFlydotio className="h-7 w-7 text-purple-500" />,
     '/docs/integrations/outposts/railway': <SiRailway className="h-7 w-7 text-white" />,
     '/docs/integrations/opentelemetry-hasura': <SiHasura className="h-7 w-7 text-blue-600" />,

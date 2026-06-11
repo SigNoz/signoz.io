@@ -115,6 +115,11 @@ export const INTEGRATIONS_ITEMS = {
     },
     { name: 'Vercel', href: '/docs/integrations/vercel', clickName: 'Vercel Integration Link' },
     {
+      name: 'Cloudflare Workers',
+      href: '/docs/integrations/outposts/cloudflare-workers',
+      clickName: 'Cloudflare Workers Integration Link',
+    },
+    {
       name: 'Fly.io',
       href: '/docs/integrations/outposts/flyio',
       clickName: 'Fly.io Integration Link',
