@@ -23,7 +23,7 @@ export default async function FAQsPage() {
       title: faq.title,
       description: faq.description,
       path: faq.path,
-      date: faq.date,
+      date: faq.updated_date || faq.published_date || faq.date,
       tags: getTagValues(faq),
       draft: faq.deployment_status === 'draft',
     }))

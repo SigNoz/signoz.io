@@ -20,6 +20,7 @@ import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import { getFormattedDates } from '@/utils/dateUtils'
 
 const MAIN_CONTENT_ID = 'article-main'
 
@@ -99,21 +100,6 @@ const getReadingTimeText = (content: LayoutProps['content']) => {
     return rt.text || (rt.minutes ? `${Math.ceil(rt.minutes)} min read` : null)
   }
   return null
-}
-
-const formatDate = (dateStr: string | undefined | null) =>
-  dateStr
-    ? new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'long',
-        day: '2-digit',
-        year: 'numeric',
-      })
-    : null
-
-const getFormattedDates = (content: LayoutProps['content']) => {
-  const publishedDate = formatDate(content.published_date)
-  const updatedDate = formatDate(content.updated_date)
-  return { publishedDate, updatedDate }
 }
 
 export default function ArticleLayout({

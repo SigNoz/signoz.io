@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from 'utils/cmsContent'
 import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
@@ -18,8 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (faqs) {
     faqRoutes = faqs.data.map((faq) => ({
       url: `${siteUrl}/faqs${faq.path}/`,
-      lastModified:
-        faq.updated_date || faq.published_date || faq.date || faq.updatedAt || faq.publishedAt,
+      lastModified: resolveLatestDate(faq),
     }))
   }
 
@@ -27,12 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (caseStudies) {
     caseStudyRoutes = caseStudies.data.map((caseStudy) => ({
       url: `${siteUrl}/case-study${caseStudy.path}/`,
-      lastModified:
-        caseStudy.updated_date ||
-        caseStudy.published_date ||
-        caseStudy.date ||
-        caseStudy.updatedAt ||
-        caseStudy.publishedAt,
+      lastModified: resolveLatestDate(caseStudy),
     }))
   }
 
@@ -40,12 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (opentelemetries) {
     opentelemetryRoutes = opentelemetries.data.map((opentelemetry) => ({
       url: `${siteUrl}/opentelemetry${opentelemetry.path}/`,
-      lastModified:
-        opentelemetry.updated_date ||
-        opentelemetry.published_date ||
-        opentelemetry.date ||
-        opentelemetry.updatedAt ||
-        opentelemetry.publishedAt,
+      lastModified: resolveLatestDate(opentelemetry),
     }))
   }
 
@@ -53,12 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (comparisons) {
     comparisonRoutes = comparisons.data.map((comparison) => ({
       url: `${siteUrl}/comparisons${comparison.path}/`,
-      lastModified:
-        comparison.updated_date ||
-        comparison.published_date ||
-        comparison.date ||
-        comparison.updatedAt ||
-        comparison.publishedAt,
+      lastModified: resolveLatestDate(comparison),
       changeFrequency: 'weekly' as const,
       priority: 0.5,
     }))
@@ -68,12 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (guides) {
     guideRoutes = guides.data.map((guide) => ({
       url: `${siteUrl}/guides${guide.path}/`,
-      lastModified:
-        guide.updated_date ||
-        guide.published_date ||
-        guide.date ||
-        guide.updatedAt ||
-        guide.publishedAt,
+      lastModified: resolveLatestDate(guide),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }))
@@ -85,12 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((post) => !post.excludeFromSitemap)
       .map((post) => ({
         url: `${siteUrl}/blog${post.path}/`,
-        lastModified:
-          post.updated_date ||
-          post.published_date ||
-          post.date ||
-          post.updatedAt ||
-          post.publishedAt,
+        lastModified: resolveLatestDate(post),
         changeFrequency: 'weekly' as const,
         priority: 0.5,
       }))

@@ -231,7 +231,7 @@ export const fetchChangelogById = async (
   }
 }
 
-// MDX Content schema
+// MDX Content schema — see utils/dateUtils.ts for date field semantics
 export type MDXContent = {
   id: number
   documentId: string

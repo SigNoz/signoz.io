@@ -50,7 +50,8 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
 
         return {
           title: doc.title,
-          publishedOn: doc.date || doc.updatedAt || doc.publishedAt,
+          publishedOn:
+            doc.updated_date || doc.published_date || doc.date || doc.updatedAt || doc.publishedAt,
           url: `/${routePrefix}${doc.path || ''}`,
         }
       })
@@ -60,7 +61,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
   if (Array.isArray(content.related_faqs)) {
     return content.related_faqs.map((faq: MDXContent) => ({
       title: faq.title,
-      publishedOn: faq.date,
+      publishedOn: faq.updated_date || faq.published_date || faq.date,
       url: `/faqs${faq.path || ''}`,
     }))
   }
@@ -201,6 +202,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   // Prepare content for FAQLayout
   const mainContent = {
     title: content.title,
+    published_date: content.published_date,
+    updated_date: content.updated_date,
     date: content.date,
     lastmod: content.updatedAt,
     tags,

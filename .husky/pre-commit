@@ -40,3 +40,9 @@ if printf '%s\n' "$STAGED_FILES" | grep -E '^data/(faqs|case-study|opentelemetry
 else
   echo 'husky (pre-commit): skipping CMS asset check (no migrated content changes staged)'
 fi
+
+# Warn about deprecated `date` frontmatter field (non-blocking)
+CONTENT_MDX=$(printf '%s\n' "$STAGED_FILES" | grep -E '^data/(blog|guides|comparisons|faqs|opentelemetry|case-study)/.*\.mdx?$' || true)
+if [ -n "$CONTENT_MDX" ]; then
+  node scripts/check-date-deprecation.js $CONTENT_MDX || true
+fi

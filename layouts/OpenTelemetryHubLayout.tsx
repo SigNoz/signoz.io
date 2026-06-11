@@ -10,15 +10,17 @@ import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import { getFormattedDates } from '@/utils/dateUtils'
 
 const MOBILE_TRIGGER_ID = 'ot-hub-mobile-trigger'
 
 export interface HubContentProps {
   content: {
     title?: string
-    published_date?: string
-    updated_date?: string
-    date?: string
+    published_date?: string | null
+    updated_date?: string | null
+    /** @deprecated Use `published_date` and `updated_date` instead. */
+    date?: string | null
     lastmod?: string
     tags?: string[]
     readingTime?: { text?: string; minutes?: number; time?: number; words?: number }
@@ -82,21 +84,6 @@ export function getReadingTimeText(content: HubContentProps['content']) {
     )
   }
   return null
-}
-
-const formatDate = (dateStr: string | undefined | null) =>
-  dateStr
-    ? new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'long',
-        day: '2-digit',
-        year: 'numeric',
-      })
-    : null
-
-export function getFormattedDates(content: HubContentProps['content']) {
-  const publishedDate = formatDate(content.published_date)
-  const updatedDate = formatDate(content.updated_date)
-  return { publishedDate, updatedDate }
 }
 
 /**

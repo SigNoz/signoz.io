@@ -14,6 +14,7 @@ import remarkMath from 'remark-math'
 import readingTime from 'reading-time'
 import { generateStructuredData } from './structuredData'
 import { MDXContent } from './strapi'
+import { deriveDates, resolveLatestDate } from './dateUtils'
 import siteMetadata from '@/data/siteMetadata'
 
 // Heroicon mini link for auto-linking headers
@@ -115,8 +116,8 @@ function transformRelatedArticles(content: MDXContent): any[] {
 
       articles.push({
         title: doc.title,
-        date: doc.published_date || doc.date || doc.updatedAt || doc.publishedAt,
-        publishedOn: doc.published_date || doc.date || doc.updatedAt || doc.publishedAt,
+        date: resolveLatestDate(doc),
+        publishedOn: resolveLatestDate(doc),
         url: `${siteMetadata.siteUrl}/${routePrefix}${doc.path || ''}`,
         content_type: contentType,
       })
@@ -146,8 +147,8 @@ function transformRelatedArticles(content: MDXContent): any[] {
           url: `${siteMetadata.siteUrl}/${prefix}${item.path || ''}`,
           slug: (item.path || '').split('/').pop() || '',
           title: item.title,
-          date: item.published_date || item.date || item.updatedAt || item.publishedAt,
-          publishedOn: item.published_date || item.date || item.updatedAt || item.publishedAt,
+          date: resolveLatestDate(item),
+          publishedOn: resolveLatestDate(item),
           tags: item.tags?.map((tag: string | MDXContent) =>
             typeof tag === 'string' ? tag : tag.value
           ),
@@ -175,13 +176,6 @@ function extractAuthorObjects(raw: unknown): { key?: string; name?: string; imag
       return { key: a.key, name: a.name, image_url: a.image_url }
     })
     .filter((a) => a.name)
-}
-
-function deriveDates(content: MDXContent) {
-  const publishedDate = content.published_date || (content.updated_date ? content.date : null)
-  const updatedDate = content.updated_date || (content.published_date ? null : content.date)
-  const sortDate = content.updated_date || content.published_date || content.date
-  return { publishedDate, updatedDate, sortDate }
 }
 
 export const transformComparison = (comparison: MDXContent) => {

@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((post) => !post.draft && post.slug !== 'introduction')
     .map((post) => ({
       url: `${siteUrl}/${post.path}/`,
-      lastModified: post.lastmod || post.date,
+      lastModified: post.updated_date || post.lastmod || post.published_date || post.date,
       changeFrequency: 'weekly' as const,
       priority: 0.5,
     }))

@@ -42,7 +42,8 @@ export const getPostLink = (config, post) => {
 
 export const generateRssItem = (config, post) => {
   const link = getPostLink(config, post)
-  const date = getDefaultDate(post.date ?? post.publishedAt ?? post.updated_at)
+  // Prefer updated_date (most recent) → published_date → legacy date fields
+  const date = getDefaultDate(post.updated_date ?? post.published_date ?? post.date ?? post.publishedAt ?? post.updatedAt)
 
   return `
   <item>
@@ -80,7 +81,7 @@ export const generateRss = (config, posts, options = {}) => {
 
   const channelLinkPath = normaliseSlug(channelPath)
   const feedLinkPath = normaliseSlug(feedPath)
-  const lastBuildDate = getDefaultDate(posts[0]?.date ?? posts[0]?.publishedAt ?? posts[0]?.updated_at)
+  const lastBuildDate = getDefaultDate(posts[0]?.updated_date ?? posts[0]?.published_date ?? posts[0]?.date ?? posts[0]?.publishedAt ?? posts[0]?.updatedAt)
 
   const items = posts.map((post) => generateRssItem(config, post)).join('\n      ')
 
