@@ -2957,6 +2957,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/alerts-management/user-guides/example-alerts',
+            label: 'Alert Examples for Common Use Cases',
+          },
+          {
+            type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'Configure Alerts for Missing Data',
           },
