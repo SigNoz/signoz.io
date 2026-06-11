@@ -20,7 +20,7 @@ const mapFaqEntries = (faqs: MDXContentApiResponse | undefined) => {
   return faqs.data.map((faq) => ({
     ...faq,
     slug: buildFaqSlug(faq.path),
-    date: faq.date ?? faq.publishedAt ?? faq.updatedAt ?? faq.createdAt,
+    date: faq.published_date ?? faq.date ?? faq.publishedAt ?? faq.updatedAt ?? faq.createdAt,
     tags: mapTaxonomyValues(faq.tags),
     authors: mapRelationKeys(faq?.authors),
   }))
@@ -30,7 +30,12 @@ const mapComparisonEntries = (comparisons: MDXContentApiResponse | undefined) =>
   return comparisons?.data.map((comparison) => ({
     ...comparison,
     slug: buildComparisonSlug(comparison.path),
-    date: comparison.date ?? comparison.publishedAt ?? comparison.updatedAt ?? comparison.createdAt,
+    date:
+      comparison.published_date ??
+      comparison.date ??
+      comparison.publishedAt ??
+      comparison.updatedAt ??
+      comparison.createdAt,
     tags: mapTaxonomyValues(comparison.tags),
     authors: mapRelationKeys(comparison?.authors),
   }))
@@ -51,6 +56,7 @@ const mapOpentelemetryEntries = (opentelemetries: MDXContentApiResponse | undefi
     ...opentelemetry,
     slug: buildOpentelemetrySlug(opentelemetry.path),
     date:
+      opentelemetry.published_date ??
       opentelemetry.date ??
       opentelemetry.publishedAt ??
       opentelemetry.updatedAt ??
@@ -71,7 +77,8 @@ const mapGuideEntries = (guides: MDXContentApiResponse | undefined) => {
   return guides.data.map((guide) => ({
     ...guide,
     slug: buildGuideSlug(guide.path),
-    date: guide.date ?? guide.publishedAt ?? guide.updatedAt ?? guide.createdAt,
+    date:
+      guide.published_date ?? guide.date ?? guide.publishedAt ?? guide.updatedAt ?? guide.createdAt,
     tags: mapTaxonomyValues(guide.tags),
     authors: mapRelationKeys(guide?.authors),
   }))
@@ -90,7 +97,7 @@ const mapBlogEntries = (blogs: MDXContentApiResponse | undefined) => {
   return blogs.data.map((blog) => ({
     ...blog,
     slug: buildBlogSlug(blog.path),
-    date: blog.date ?? blog.publishedAt ?? blog.updatedAt ?? blog.createdAt,
+    date: blog.published_date ?? blog.date ?? blog.publishedAt ?? blog.updatedAt ?? blog.createdAt,
     tags: mapTaxonomyValues(blog.tags),
     authors: mapRelationKeys(blog?.authors),
   }))

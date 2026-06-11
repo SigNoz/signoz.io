@@ -228,11 +228,16 @@ function validateMetadata(filePath, options = {}) {
     }
   }
 
-  // Validate date field (required)
-  if (!fieldMap.has('date')) {
+  // Validate date field (required — accepts 'date' or 'published_date')
+  const dateFieldKey = fieldMap.has('published_date')
+    ? 'published_date'
+    : fieldMap.has('date')
+      ? 'date'
+      : null
+  if (!dateFieldKey) {
     errors.push('missing date')
   } else {
-    const dateValue = fieldMap.get('date').replace(/['"]/g, '').trim()
+    const dateValue = fieldMap.get(dateFieldKey).replace(/['"]/g, '').trim()
     const datePattern = /^\d{4}-\d{2}-\d{2}$/
     if (!datePattern.test(dateValue)) {
       errors.push('invalid date format - use YYYY-MM-DD')
@@ -268,8 +273,8 @@ function validateMetadata(filePath, options = {}) {
   }
 
   // Compare frontmatter date with git commit date
-  if (fieldMap.has('date') && shouldEnforceRecentDate) {
-    const frontmatterDate = fieldMap.get('date').replace(/['"]/g, '').trim()
+  if (dateFieldKey && shouldEnforceRecentDate) {
+    const frontmatterDate = fieldMap.get(dateFieldKey).replace(/['"]/g, '').trim()
     const gitDate = getGitAuthorDate(filePath)
 
     if (gitDate) {
@@ -366,7 +371,7 @@ function main() {
       console.error(`  • ${file}: ${issues.join('; ')}`)
     })
     console.error('\nRequired fields:')
-    console.error('  - date: Date in YYYY-MM-DD format')
+    console.error('  - published_date (or date): Date in YYYY-MM-DD format')
     console.error('  - title: Non-empty title field')
     console.error('  - description: Non-empty description field')
     console.error('  - tags: Array of tags (recommended)')

@@ -99,15 +99,20 @@ const getReadingTimeText = (content: LayoutProps['content']) => {
   return null
 }
 
-const getFormattedDate = (content: LayoutProps['content']) => {
-  const updatedDate = content.date
-  return updatedDate
-    ? new Date(updatedDate).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
+const formatDate = (dateStr: string | undefined | null) =>
+  dateStr
+    ? new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'long',
+        day: '2-digit',
         year: 'numeric',
       })
     : null
+
+const getFormattedDates = (content: LayoutProps['content']) => {
+  const c = content as any
+  const publishedDate = formatDate(c.published_date || (c.updated_date ? content.date : null))
+  const updatedDate = formatDate(c.updated_date || (c.published_date ? null : content.date))
+  return { publishedDate, updatedDate }
 }
 
 export default function ArticleLayout({
@@ -158,7 +163,8 @@ export default function ArticleLayout({
   const hasToc = Array.isArray(toc) && toc.length > 0
 
   const renderedAuthors = buildRenderedAuthors(authorDetails, authors, authorDirectory)
-  const formattedUpdatedDate = getFormattedDate(content)
+  const { publishedDate: formattedPublishedDate, updatedDate: formattedUpdatedDate } =
+    getFormattedDates(content)
   const readingTimeText = getReadingTimeText(content)
 
   const MAX_VISIBLE_TAGS = 2
@@ -170,6 +176,7 @@ export default function ArticleLayout({
   const hasMetaInfo =
     renderedAuthors.length > 0 ||
     Boolean(readingTimeText) ||
+    Boolean(formattedPublishedDate) ||
     Boolean(formattedUpdatedDate) ||
     primaryTags.length > 0
 
@@ -177,6 +184,7 @@ export default function ArticleLayout({
     <ArticleMetaDetailsCard
       authors={renderedAuthors}
       readingTimeText={readingTimeText}
+      formattedPublishedDate={formattedPublishedDate}
       formattedUpdatedDate={formattedUpdatedDate}
       primaryTags={primaryTags}
       hiddenTags={hiddenTags}
@@ -193,12 +201,13 @@ export default function ArticleLayout({
           <div className="mx-auto box-border w-full min-w-0 max-w-[780px] flex-auto md:px-0 lg:px-4">
             {hasToc && <div className="mb-4 lg:hidden" />}
 
-              {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
+            {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
             <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
               <h1 className="text-3xl font-bold">{title}</h1>
-              {(formattedUpdatedDate || readingTimeText) && (
+              {(formattedPublishedDate || formattedUpdatedDate || readingTimeText) && (
                 <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
-                  {formattedUpdatedDate && <span>Updated {formattedUpdatedDate}</span>}
+                  {formattedPublishedDate && <span>Published on: {formattedPublishedDate}</span>}
+                  {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
                   {readingTimeText && <span>{readingTimeText}</span>}
                 </div>
               )}

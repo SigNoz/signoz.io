@@ -160,8 +160,15 @@ export const generateStructuredData = (
       '@id': fullUrl,
     },
     url: fullUrl,
-    datePublished: content.publishedAt || content.createdAt,
-    dateModified: content.updatedAt || content.publishedAt || content.createdAt,
+    datePublished:
+      content.published_date || content.date || content.publishedAt || content.createdAt,
+    dateModified:
+      content.updated_date ||
+      content.published_date ||
+      content.date ||
+      content.updatedAt ||
+      content.publishedAt ||
+      content.createdAt,
     inLanguage: siteMetadata.language,
     wordCount: getWordCount(content),
     author: collectionType === 'docs' ? getDefaultAuthor() : getAuthors(content),

@@ -18,7 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (faqs) {
     faqRoutes = faqs.data.map((faq) => ({
       url: `${siteUrl}/faqs${faq.path}/`,
-      lastModified: faq.date || faq.updatedAt || faq.publishedAt,
+      lastModified:
+        faq.updated_date || faq.published_date || faq.date || faq.updatedAt || faq.publishedAt,
     }))
   }
 
@@ -26,7 +27,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (caseStudies) {
     caseStudyRoutes = caseStudies.data.map((caseStudy) => ({
       url: `${siteUrl}/case-study${caseStudy.path}/`,
-      lastModified: caseStudy.date || caseStudy.updatedAt || caseStudy.publishedAt,
+      lastModified:
+        caseStudy.updated_date ||
+        caseStudy.published_date ||
+        caseStudy.date ||
+        caseStudy.updatedAt ||
+        caseStudy.publishedAt,
     }))
   }
 
@@ -34,7 +40,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (opentelemetries) {
     opentelemetryRoutes = opentelemetries.data.map((opentelemetry) => ({
       url: `${siteUrl}/opentelemetry${opentelemetry.path}/`,
-      lastModified: opentelemetry.date || opentelemetry.updatedAt || opentelemetry.publishedAt,
+      lastModified:
+        opentelemetry.updated_date ||
+        opentelemetry.published_date ||
+        opentelemetry.date ||
+        opentelemetry.updatedAt ||
+        opentelemetry.publishedAt,
     }))
   }
 
@@ -42,7 +53,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (comparisons) {
     comparisonRoutes = comparisons.data.map((comparison) => ({
       url: `${siteUrl}/comparisons${comparison.path}/`,
-      lastModified: comparison.date || comparison.updatedAt || comparison.publishedAt,
+      lastModified:
+        comparison.updated_date ||
+        comparison.published_date ||
+        comparison.date ||
+        comparison.updatedAt ||
+        comparison.publishedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.5,
     }))
@@ -52,7 +68,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (guides) {
     guideRoutes = guides.data.map((guide) => ({
       url: `${siteUrl}/guides${guide.path}/`,
-      lastModified: guide.date || guide.updatedAt || guide.publishedAt,
+      lastModified:
+        guide.updated_date ||
+        guide.published_date ||
+        guide.date ||
+        guide.updatedAt ||
+        guide.publishedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }))
@@ -64,7 +85,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((post) => !post.excludeFromSitemap)
       .map((post) => ({
         url: `${siteUrl}/blog${post.path}/`,
-        lastModified: post.date || post.updatedAt || post.publishedAt,
+        lastModified:
+          post.updated_date ||
+          post.published_date ||
+          post.date ||
+          post.updatedAt ||
+          post.publishedAt,
         changeFrequency: 'weekly' as const,
         priority: 0.5,
       }))

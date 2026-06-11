@@ -243,6 +243,8 @@ export type MDXContent = {
   publishedAt: string
   createdAt: string
   updatedAt: string
+  published_date?: string
+  updated_date?: string
   image?: string
   layout?: string
   [key: string]: any

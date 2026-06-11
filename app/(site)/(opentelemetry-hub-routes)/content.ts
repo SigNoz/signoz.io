@@ -12,6 +12,8 @@ import { getAuthorKey } from '@/utils/contentHelpers'
 type ResourceCenterCardSource = {
   slug?: string | null
   path: string
+  published_date?: string | null
+  updated_date?: string | null
   date?: string | null
   publishedAt?: string | null
   title: string
@@ -91,7 +93,7 @@ export function pickResourceCenterCardFields(
   return {
     slug: source.slug ?? source.path.split('/').filter(Boolean).pop() ?? '',
     path: source.path,
-    date: source.date ?? source.publishedAt ?? '',
+    date: source.published_date ?? source.date ?? source.publishedAt ?? '',
     title: source.title,
     description: source.description ?? undefined,
     summary: source.summary ?? undefined,

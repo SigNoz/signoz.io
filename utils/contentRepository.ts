@@ -231,7 +231,8 @@ async function readLocalContentCollection(config: CollectionConfig): Promise<MDX
       const slug = contentPath.split('/').filter(Boolean).pop() || ''
       const id = deterministicLocalId(config.canonical, contentPath)
       const frontmatterDate = dateToString(frontmatter.date)
-      const publishedAt = frontmatterDate || stats.mtime.toISOString()
+      const frontmatterPublishedDate = dateToString(frontmatter.published_date)
+      const publishedAt = frontmatterPublishedDate || frontmatterDate || stats.mtime.toISOString()
       const title = typeof frontmatter.title === 'string' ? frontmatter.title : slug
 
       const entry: MDXContent = {
@@ -254,6 +255,8 @@ async function readLocalContentCollection(config: CollectionConfig): Promise<MDX
         publishedAt,
         createdAt: publishedAt,
         updatedAt: dateToString(frontmatter.lastmod) || publishedAt,
+        published_date: frontmatterPublishedDate,
+        updated_date: dateToString(frontmatter.updated_date),
         date: frontmatterDate,
         filePath: path.relative(path.join(process.cwd(), 'data'), filePath).replace(/\\/g, '/'),
         __source: 'local',

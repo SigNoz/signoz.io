@@ -16,6 +16,8 @@ const MOBILE_TRIGGER_ID = 'ot-hub-mobile-trigger'
 export interface HubContentProps {
   content: {
     title?: string
+    published_date?: string
+    updated_date?: string
     date?: string
     lastmod?: string
     tags?: string[]
@@ -82,15 +84,23 @@ export function getReadingTimeText(content: HubContentProps['content']) {
   return null
 }
 
-export function getFormattedDate(content: HubContentProps['content']) {
-  const updatedDate = content.date
-  return updatedDate
-    ? new Date(updatedDate).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
+const formatDate = (dateStr: string | undefined | null) =>
+  dateStr
+    ? new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'long',
+        day: '2-digit',
         year: 'numeric',
       })
     : null
+
+export function getFormattedDates(content: HubContentProps['content']) {
+  const publishedDate = formatDate(
+    content.published_date || (content.updated_date ? content.date : null)
+  )
+  const updatedDate = formatDate(
+    content.updated_date || (content.published_date ? null : content.date)
+  )
+  return { publishedDate, updatedDate }
 }
 
 /**
@@ -112,7 +122,8 @@ export default function OpenTelemetryHubContent({
   const hasToc = Array.isArray(toc) && toc.length > 0
 
   const renderedAuthors = buildRenderedAuthors(authorDetails, authors, authorDirectory)
-  const formattedUpdatedDate = getFormattedDate(content)
+  const { publishedDate: formattedPublishedDate, updatedDate: formattedUpdatedDate } =
+    getFormattedDates(content)
   const readingTimeText = getReadingTimeText(content)
 
   const MAX_VISIBLE_TAGS = 2
@@ -123,6 +134,7 @@ export default function OpenTelemetryHubContent({
   const hasMetaInfo =
     renderedAuthors.length > 0 ||
     Boolean(readingTimeText) ||
+    Boolean(formattedPublishedDate) ||
     Boolean(formattedUpdatedDate) ||
     primaryTags.length > 0
 
@@ -130,6 +142,7 @@ export default function OpenTelemetryHubContent({
     <ArticleMetaDetailsCard
       authors={renderedAuthors}
       readingTimeText={readingTimeText}
+      formattedPublishedDate={formattedPublishedDate}
       formattedUpdatedDate={formattedUpdatedDate}
       primaryTags={primaryTags}
       hiddenTags={hiddenTags}
@@ -144,12 +157,13 @@ export default function OpenTelemetryHubContent({
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
-          {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
+        {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
         <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert">
           <h1 className="text-3xl font-bold">{title}</h1>
-          {(formattedUpdatedDate || readingTimeText) && (
+          {(formattedPublishedDate || formattedUpdatedDate || readingTimeText) && (
             <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
-              {formattedUpdatedDate && <span>Updated {formattedUpdatedDate}</span>}
+              {formattedPublishedDate && <span>Published on: {formattedPublishedDate}</span>}
+              {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
               {readingTimeText && <span>{readingTimeText}</span>}
             </div>
           )}
