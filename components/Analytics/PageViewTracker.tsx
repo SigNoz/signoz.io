@@ -35,6 +35,7 @@ export default function PageViewTracker() {
   const searchParams = useSearchParams()
   const logEvent = useLogEvent()
   const previousPath = useRef<string | null>(null)
+  const previousPageUrl = useRef<string | null>(null)
   const currentPage = useRef<TrackedPage | null>(null)
 
   const sendPageLeave = useCallback(
@@ -69,6 +70,28 @@ export default function PageViewTracker() {
   )
 
   useEffect(() => {
+    const handlePageHide = () => {
+      if (currentPage.current) {
+        sendPageLeave(currentPage.current)
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && currentPage.current) {
+        sendPageLeave(currentPage.current)
+      }
+    }
+
+    window.addEventListener('pagehide', handlePageHide)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [sendPageLeave])
+
+  useEffect(() => {
     // Combine pathname and searchParams for a complete URL identifier
     const queryString = searchParams?.toString()
     const currentUrl = `${pathname}${queryString ? `?${queryString}` : ''}`
@@ -79,6 +102,10 @@ export default function PageViewTracker() {
       return
     }
 
+    if (currentPage.current) {
+      sendPageLeave(currentPage.current)
+    }
+
     const pageType = getPageType(pathname || '') // Ensure pathname is defined
     const botDetection = detectBotClientSide()
     const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : ''
@@ -86,7 +113,8 @@ export default function PageViewTracker() {
     const pageUrl =
       typeof window !== 'undefined' ? `${window.location.origin}${currentUrl}` : currentUrl
     const pageTitle = typeof document !== 'undefined' ? document.title : undefined
-    const pageReferrer = typeof document !== 'undefined' ? document.referrer : undefined
+    const documentReferrer = typeof document !== 'undefined' ? document.referrer : undefined
+    const pageReferrer = previousPageUrl.current || documentReferrer
     const resolvedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
     const timezoneOffsetMinutes = new Date().getTimezoneOffset()
     const isFlaggedTimeZone = resolvedTimeZone ? FLAGGED_TIMEZONE_SET.has(resolvedTimeZone) : false
@@ -143,6 +171,7 @@ export default function PageViewTracker() {
 
     if (!shouldTrackHumanPageLeave) {
       currentPage.current = null
+      previousPageUrl.current = pageUrl
       return
     }
 
@@ -157,29 +186,7 @@ export default function PageViewTracker() {
       left: false,
     }
 
-    const handlePageHide = () => {
-      if (currentPage.current) {
-        sendPageLeave(currentPage.current)
-      }
-    }
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' && currentPage.current) {
-        sendPageLeave(currentPage.current)
-      }
-    }
-
-    window.addEventListener('pagehide', handlePageHide)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      window.removeEventListener('pagehide', handlePageHide)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-
-      if (currentPage.current) {
-        sendPageLeave(currentPage.current)
-      }
-    }
+    previousPageUrl.current = pageUrl
   }, [pathname, searchParams, logEvent, sendPageLeave]) // Rerun effect when path or search params change
 
   return null // This component doesn't render anything visible

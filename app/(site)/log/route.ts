@@ -22,6 +22,14 @@ const getClientIp = (req: Request) => {
   return req.headers.get('x-real-ip') || undefined
 }
 
+const getContentLength = (req: Request) => {
+  const rawContentLength = req.headers.get('content-length')
+  if (!rawContentLength) return undefined
+
+  const contentLength = Number(rawContentLength)
+  return Number.isFinite(contentLength) && contentLength >= 0 ? contentLength : undefined
+}
+
 const parsePayload = (body: Record<string, unknown>): LogEventPayload | null => {
   const eventName = getTrimmedString(body.eventName)
   const eventType = getTrimmedString(body.eventType)
@@ -42,6 +50,11 @@ const parsePayload = (body: Record<string, unknown>): LogEventPayload | null => 
 }
 
 export async function POST(req: Request) {
+  const contentLength = getContentLength(req)
+  if (contentLength && contentLength > MAX_REQUEST_BYTES) {
+    return NextResponse.json({ ok: false, message: 'Request body too large' }, { status: 413 })
+  }
+
   let rawBody: string
 
   try {

@@ -70,7 +70,15 @@ const getDate = (value: unknown) => {
   return Number.isNaN(date.getTime()) ? undefined : date
 }
 
-const getDistinctId = (payload: LogEventPayload) => payload.anonymousId || payload.userId
+const getDistinctId = (payload: LogEventPayload) => payload.userId || payload.anonymousId
+
+const getAnonymousDistinctId = (payload: LogEventPayload) => {
+  if (!payload.anonymousId || payload.anonymousId === payload.userId) {
+    return undefined
+  }
+
+  return payload.anonymousId
+}
 
 const getCurrentUrl = (attributes: Record<string, unknown>, context: RequestContext) => {
   return (
@@ -338,13 +346,15 @@ const identifySignup = async (
 ) => {
   if (payload.eventType !== 'identify' || payload.eventName !== 'User Signed Up') return
 
-  const distinctId = getDistinctId(payload)
   const email = payload.userId || getString(attributes.email)
+  const distinctId = email || getDistinctId(payload)
 
   if (!distinctId || !email) return
 
   const client = getPostHogClient()
   if (!client) return
+
+  const anonymousDistinctId = getAnonymousDistinctId(payload)
 
   const personProperties = {
     ...buildSignupProperties({ ...attributes, email }, context),
@@ -353,7 +363,10 @@ const identifySignup = async (
 
   await client.identifyImmediate({
     distinctId,
-    properties: personProperties,
+    properties: {
+      ...personProperties,
+      ...(anonymousDistinctId && { $anon_distinct_id: anonymousDistinctId }),
+    },
     disableGeoip: true,
   })
 
