@@ -93,7 +93,7 @@ export function pickResourceCenterCardFields(
   return {
     slug: source.slug ?? source.path.split('/').filter(Boolean).pop() ?? '',
     path: source.path,
-    date: source.published_date ?? source.date ?? source.publishedAt ?? '',
+    date: source.updated_date ?? source.published_date ?? source.date ?? source.publishedAt ?? '',
     title: source.title,
     description: source.description ?? undefined,
     summary: source.summary ?? undefined,

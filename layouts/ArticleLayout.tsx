@@ -34,6 +34,8 @@ type ContentType = Blog | Guide | Comparison
 type ArticleContent = ContentType & {
   cta_title?: string
   cta_text?: string
+  published_date?: string | null
+  updated_date?: string | null
   relatedArticles?: Array<{ title: string; url: string; publishedOn: string }>
 }
 
@@ -109,9 +111,8 @@ const formatDate = (dateStr: string | undefined | null) =>
     : null
 
 const getFormattedDates = (content: LayoutProps['content']) => {
-  const c = content as any
-  const publishedDate = formatDate(c.published_date)
-  const updatedDate = formatDate(c.updated_date)
+  const publishedDate = formatDate(content.published_date)
+  const updatedDate = formatDate(content.updated_date)
   return { publishedDate, updatedDate }
 }
 

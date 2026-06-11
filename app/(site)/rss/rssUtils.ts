@@ -20,7 +20,7 @@ const mapFaqEntries = (faqs: MDXContentApiResponse | undefined) => {
   return faqs.data.map((faq) => ({
     ...faq,
     slug: buildFaqSlug(faq.path),
-    date: faq.published_date ?? faq.date ?? faq.publishedAt ?? faq.updatedAt ?? faq.createdAt,
+    date: faq.updated_date ?? faq.date ?? faq.publishedAt ?? faq.updatedAt ?? faq.createdAt,
     tags: mapTaxonomyValues(faq.tags),
     authors: mapRelationKeys(faq?.authors),
   }))
@@ -31,7 +31,7 @@ const mapComparisonEntries = (comparisons: MDXContentApiResponse | undefined) =>
     ...comparison,
     slug: buildComparisonSlug(comparison.path),
     date:
-      comparison.published_date ??
+      comparison.updated_date ??
       comparison.date ??
       comparison.publishedAt ??
       comparison.updatedAt ??
@@ -56,7 +56,7 @@ const mapOpentelemetryEntries = (opentelemetries: MDXContentApiResponse | undefi
     ...opentelemetry,
     slug: buildOpentelemetrySlug(opentelemetry.path),
     date:
-      opentelemetry.published_date ??
+      opentelemetry.updated_date ??
       opentelemetry.date ??
       opentelemetry.publishedAt ??
       opentelemetry.updatedAt ??
@@ -78,7 +78,7 @@ const mapGuideEntries = (guides: MDXContentApiResponse | undefined) => {
     ...guide,
     slug: buildGuideSlug(guide.path),
     date:
-      guide.published_date ?? guide.date ?? guide.publishedAt ?? guide.updatedAt ?? guide.createdAt,
+      guide.updated_date ?? guide.date ?? guide.publishedAt ?? guide.updatedAt ?? guide.createdAt,
     tags: mapTaxonomyValues(guide.tags),
     authors: mapRelationKeys(guide?.authors),
   }))
@@ -97,7 +97,7 @@ const mapBlogEntries = (blogs: MDXContentApiResponse | undefined) => {
   return blogs.data.map((blog) => ({
     ...blog,
     slug: buildBlogSlug(blog.path),
-    date: blog.published_date ?? blog.date ?? blog.publishedAt ?? blog.updatedAt ?? blog.createdAt,
+    date: blog.updated_date ?? blog.date ?? blog.publishedAt ?? blog.updatedAt ?? blog.createdAt,
     tags: mapTaxonomyValues(blog.tags),
     authors: mapRelationKeys(blog?.authors),
   }))

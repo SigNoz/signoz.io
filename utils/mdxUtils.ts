@@ -177,15 +177,18 @@ function extractAuthorObjects(raw: unknown): { key?: string; name?: string; imag
     .filter((a) => a.name)
 }
 
+function deriveDates(content: MDXContent) {
+  const publishedDate = content.published_date || (content.updated_date ? content.date : null)
+  const updatedDate = content.updated_date || (content.published_date ? null : content.date)
+  const sortDate = content.updated_date || content.published_date || content.date
+  return { publishedDate, updatedDate, sortDate }
+}
+
 export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`
 
-  const publishedDate =
-    comparison.published_date || (comparison.updated_date ? comparison.date : null)
-  const updatedDate =
-    comparison.updated_date || (comparison.published_date ? null : comparison.date)
-  const sortDate = comparison.updated_date || comparison.published_date || comparison.date
+  const { publishedDate, updatedDate, sortDate } = deriveDates(comparison)
 
   const authors = Array.isArray(comparison.authors)
     ? comparison.authors.map((author: string | MDXContent) =>
@@ -246,9 +249,7 @@ export const transformBlog = (blog: MDXContent) => {
   const slug = blog.path?.split('/').pop() || ''
   const path = `blog/${slug}`
 
-  const publishedDate = blog.published_date || (blog.updated_date ? blog.date : null)
-  const updatedDate = blog.updated_date || (blog.published_date ? null : blog.date)
-  const sortDate = blog.updated_date || blog.published_date || blog.date
+  const { publishedDate, updatedDate, sortDate } = deriveDates(blog)
 
   const authors = Array.isArray(blog.authors)
     ? blog.authors.map((author: string | MDXContent) =>
@@ -320,9 +321,7 @@ export const transformGuide = (guide: MDXContent) => {
   const slug = guide.path?.split('/').pop() || ''
   const path = `guides/${slug}`
 
-  const publishedDate = guide.published_date || (guide.updated_date ? guide.date : null)
-  const updatedDate = guide.updated_date || (guide.published_date ? null : guide.date)
-  const sortDate = guide.updated_date || guide.published_date || guide.date
+  const { publishedDate, updatedDate, sortDate } = deriveDates(guide)
 
   const authors = Array.isArray(guide.authors)
     ? guide.authors.map((author: string | MDXContent) =>
