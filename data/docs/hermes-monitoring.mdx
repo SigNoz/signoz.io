@@ -78,15 +78,19 @@ hermes plugins list --plain --no-bundled | grep hermes_otel
 
 Edit Hermes' environment file at `~/.hermes/.env` and add these values:
 
-```bash
-OTEL_SIGNOZ_ENDPOINT=https://ingest.us.signoz.cloud:443/v1/traces
-OTEL_SIGNOZ_INGESTION_KEY=replace_with_your_signoz_ingestion_key
+```~/.hermes/.env:bash
+OTEL_SIGNOZ_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/traces
+OTEL_SIGNOZ_INGESTION_KEY=<your-ingestion-key>
 OTEL_PROJECT_NAME=hermes-agent
 ```
 
-- Keep the ingestion key in `.env`; do **not** put the key directly in YAML.
-- Change `OTEL_SIGNOZ_ENDPOINT` if your [SigNoz region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) or self-hosted endpoint is different. It should end with `/v1/traces`.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `OTEL_PROJECT_NAME` is the resource name you will see in SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ### Step 4: Configure traces, metrics, and logs
 
