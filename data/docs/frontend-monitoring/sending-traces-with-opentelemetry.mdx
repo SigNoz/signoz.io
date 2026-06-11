@@ -1,5 +1,5 @@
 ---
-date: 2026-05-27
+date: 2026-06-11
 
 title: Sending Traces from your frontend application using OpenTelemetry
 meta_title: Send Frontend Traces using OpenTelemetry
@@ -24,7 +24,7 @@ Client side traces help you understand how user actions trigger requests, how lo
 
 Install the following dependencies.
 
-<Tabs groupId="traces-dependencies">
+<Tabs entityName="package-manager">
   <TabItem value="npm" label="Npm">
     ```sh
     npm install @opentelemetry/sdk-trace-base
@@ -79,7 +79,7 @@ Install the following dependencies.
 
 The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture traces within your application and export them to your collector.
 
-<Tabs entityName="plans">
+<Tabs entityName="language">
   <TabItem value="typescript" label="TypeScript" default>
     ```ts:instrumentation.ts
     import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
@@ -228,7 +228,7 @@ Going through each of the 3 instrumentations set up:
   Import the instrumentation file at the top level of your application. This ensures that the OpenTelemetry instrumentation is initialized before any other code runs, allowing it to capture telemetry data from the very beginning of your application's execution.
 </Admonition>
 
-<Tabs groupId="framework-choice">
+<Tabs entityName="framework-choice">
   <TabItem value="react" label="React (Vite/CRA)" default>
     In your main entry file (typically `main.tsx` or `index.tsx`), import the instrumentation file at the very top:
 
@@ -468,8 +468,8 @@ You can enrich traces with additional metadata like browser type, user ID etc. t
 
 To do so, you need to write a custom implementation of `SpanProcessor` which will intercept all your exported spans and attach additional attributes to them.
 
-<Tabs entityName="plans">
-  <TabItem value="ts" label="TypeScript">
+<Tabs entityName="language">
+  <TabItem value="typescript" label="TypeScript">
     ```ts:custom-processor.ts
     import { SpanProcessor } from '@opentelemetry/sdk-trace-web';
     import { UAParser } from 'ua-parser-js';
@@ -527,7 +527,7 @@ To do so, you need to write a custom implementation of `SpanProcessor` which wil
     ```
 
   </TabItem>
-  <TabItem value="js" label="JavaScript" default>
+  <TabItem value="javascript" label="JavaScript" default>
     ```js:custom-processor.js
     import { UAParser } from 'ua-parser-js';
 
