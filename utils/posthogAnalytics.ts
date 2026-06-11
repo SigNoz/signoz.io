@@ -12,6 +12,7 @@ type RequestContext = {
 
 type PostHogEventName =
   | '$pageview'
+  | '$pageleave'
   | 'site:element_click'
   | 'site:form_submit'
   | 'user_signed_up'
@@ -60,6 +61,8 @@ const getString = (value: unknown) =>
 
 const getBoolean = (value: unknown) => (typeof value === 'boolean' ? value : undefined)
 
+const getNumber = (value: unknown) => (typeof value === 'number' ? value : undefined)
+
 const getDate = (value: unknown) => {
   if (typeof value !== 'string') return undefined
 
@@ -70,7 +73,12 @@ const getDate = (value: unknown) => {
 const getDistinctId = (payload: LogEventPayload) => payload.anonymousId || payload.userId
 
 const getCurrentUrl = (attributes: Record<string, unknown>, context: RequestContext) => {
-  return getString(attributes.pageUrl) || getString(attributes.hubspot_page_url) || context.referrer
+  return (
+    getString(attributes.pageUrl) ||
+    getString(attributes.$current_url) ||
+    getString(attributes.hubspot_page_url) ||
+    context.referrer
+  )
 }
 
 const getRawUserAgent = (attributes: Record<string, unknown>, context: RequestContext) =>
@@ -140,6 +148,7 @@ const getCommonProperties = (
   const pageReferrer = getString(attributes.pageReferrer)
   const rawUserAgent = getRawUserAgent(attributes, context)
   const os = getString(attributes.custom_os)
+  const sessionId = getString(attributes.$session_id)
 
   return {
     source_event_name: payload.eventName,
@@ -147,6 +156,7 @@ const getCommonProperties = (
     source_app: 'signoz.io',
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
     ...(context.ip && { $ip: context.ip }),
+    ...(sessionId && { $session_id: sessionId }),
     ...(currentUrl && { $current_url: currentUrl }),
     ...(currentHost && { $host: currentHost }),
     ...(pathname && { $pathname: pathname }),
@@ -218,6 +228,24 @@ const buildTrackPayload = (
       disableGeoip: false,
       properties: withAnonymousProfileMode({
         ...common,
+      }),
+    }
+  }
+
+  if (payload.eventName === 'Website Page Leave') {
+    return {
+      distinctId: getDistinctId(payload),
+      event: '$pageleave',
+      timestamp: getDate(payload.timestamp),
+      disableGeoip: false,
+      properties: withAnonymousProfileMode({
+        ...common,
+        ...(getNumber(attributes.$prev_pageview_duration) !== undefined && {
+          $prev_pageview_duration: getNumber(attributes.$prev_pageview_duration),
+        }),
+        ...(getString(attributes.$prev_pageview_pathname) && {
+          $prev_pageview_pathname: getString(attributes.$prev_pageview_pathname),
+        }),
       }),
     }
   }

@@ -12,14 +12,17 @@ export type LogEventPayload = {
   timestamp?: string
 }
 
-type LogEventOptions = {
+export type LogEventOptions = {
   queryParams?: Record<string, string>
+  sendToTunnel?: boolean
+  transport?: 'fetch' | 'beacon'
 }
 
 const SITE_LOG_ENDPOINT = process.env.NEXT_PUBLIC_SITE_LOG_ENDPOINT || '/log/'
 
 const POSTHOG_EVENT_NAMES = new Set([
   'Website Page View',
+  'Website Page Leave',
   'Website Click',
   'Website Form Submitted',
   'HubSpot Form Submitted',
@@ -49,6 +52,27 @@ const buildQueryString = (queryParams?: Record<string, string>) => {
   return serialized ? `?${serialized}` : ''
 }
 
+const sendBeaconRequest = (url: string, body: string) => {
+  if (typeof navigator === 'undefined' || typeof navigator.sendBeacon !== 'function') {
+    return false
+  }
+
+  return navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
+}
+
+const sendLogRequest = (url: string, body: string, transport?: LogEventOptions['transport']) => {
+  if (transport === 'beacon' && sendBeaconRequest(url, body)) {
+    return Promise.resolve()
+  }
+
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+    keepalive: transport === 'beacon',
+  })
+}
+
 export const logEvent = async (payload: LogEventPayload, options?: LogEventOptions) => {
   const endpoint = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
 
@@ -61,26 +85,18 @@ export const logEvent = async (payload: LogEventPayload, options?: LogEventOptio
 
     const requests: Promise<Response | void>[] = []
 
-    if (endpoint) {
-      requests.push(
-        fetch(`${endpoint}/log${queryString}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(timestampedPayload),
-        })
-      )
-    } else {
-      console.warn('No tunnel endpoint configured for client-side logging')
+    const body = JSON.stringify(timestampedPayload)
+
+    if (options?.sendToTunnel !== false) {
+      if (endpoint) {
+        requests.push(sendLogRequest(`${endpoint}/log${queryString}`, body, options?.transport))
+      } else {
+        console.warn('No tunnel endpoint configured for client-side logging')
+      }
     }
 
     if (shouldSendToPostHog(payload)) {
-      requests.push(
-        fetch(SITE_LOG_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(timestampedPayload),
-        })
-      )
+      requests.push(sendLogRequest(SITE_LOG_ENDPOINT, body, options?.transport))
     }
 
     await Promise.allSettled(requests)
