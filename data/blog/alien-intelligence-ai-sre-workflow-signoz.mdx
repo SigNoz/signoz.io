@@ -17,7 +17,7 @@ AI workflows are everywhere - for better or worse, everyone is preaching about i
 
 We recently launched our [hosted MCP server](https://signoz.io/docs/ai/signoz-mcp-server/), and our users are building interesting workflows to make their lives easier.
 
-I got on a call with one such user. [Leo Blondel](https://www.linkedin.com/in/leo-blondel-963435202/), CTO at [Alien Intelligence](https://www.alien.club/), was kind to take the time to discuss their AI SRE workflow, which they built with SigNoz. If you’re currently building such workflows, this blog will give you a clear look at how they built it, what worked, and what other teams can borrow from it.
+We got on a call with one such user. [Leo Blondel](https://www.linkedin.com/in/leo-blondel-963435202/), CTO at [Alien Intelligence](https://www.alien.club/), was kind to take the time to discuss their AI SRE workflow, which they built with SigNoz. If you’re currently building such workflows, this blog will give you a clear look at how they built it, what worked, and what other teams can borrow from it.
 
 ## What Leo Built at Alien Intelligence
 
@@ -28,7 +28,8 @@ For a small team, that creates a familiar problem: the infrastructure is product
 When Leo started looking for a solution, he came across Datadog. But they quoted him over $2,000 a month.
 
 > They gave me a free trial for two weeks. At the end of it, they came back and said, 'okay, the trial's over – it's going to cost you over 2k.' I was like, sorry, what?
-- Leo on Datadog’s cost for monitoring his tech stack with AI workflows
+
+-Leo on Datadog’s cost for monitoring his tech stack with AI workflows
 
 He already knew about SigNoz and wanted to use an OpenTelemetry-native solution. He also liked the fact that we’re open source.
 
@@ -59,7 +60,8 @@ An open-ended monitoring job gives the agent too much to do with no clear succes
 Alerts are different. Alien Intelligence already had rules in SigNoz covering high error rates, pod crash loops, ArgoCD sync failures, PVC warnings, latency anomalies, database errors, and Falco security events. The team had already decided what mattered enough to fire. The agent's job was to handle the first question every alert demanded:
 
 > Is it real? Is it noise? Because there's a lot of noise in alerts as well.
-- Leo on the first question his AI SRE agent asks for every SigNoz alert
+
+-Leo on the first question his AI SRE agent asks for every SigNoz alert
 
 <YouTube id="TvGESlK2aNE" mute={false} />
 
@@ -74,7 +76,8 @@ Say a 401 shows up in SigNoz. The trace can show where it happened, but Leo stil
 If the agent only reports that there was a 401, it has repeated what the dashboard already showed. He can find that himself in SigNoz in a few clicks. What he wants is the question after that, and the question after that.
 
 > What I want is there's been a 401. Why has there been a 401? Okay, it's here. Which services is that? Was there a GitLab merge request? Did something change in the code? Because that 401 wasn't there before.
-- Leo on why logs and traces need to be connected with deploys, code, and service context
+
+-Leo on why logs and traces need to be connected with deploys, code, and service context
 
 <YouTube id="8JBlXcFLCEI" mute={false} />
 
@@ -89,7 +92,8 @@ By the tenth time the same alert fires for the same service and ends with the sa
 That is the difference between a one-shot investigation and a system that learns. The agent writes every verdict to a SQL database: what fired, what the root cause was, what action was taken, which merge request was involved, how it resolved.
 
 > I've seen this alert. It's happened 10 times today. It was noise, but actually, I'm going to report it because this noise is recurrent.
-- Leo on using agent memory to spot noisy alert patterns
+
+-Leo on using agent memory to spot noisy alert patterns
 
 His runbook includes a noise-report workflow that groups recurring noisy alerts and proposes concrete fixes at the end of the day: increase the evaluation window, add a minimum duration, exclude a test namespace, adjust the threshold. Ten silent dismissals become one useful conversation about what to fix.
 
@@ -98,7 +102,8 @@ There are two memory layers in the workflow. SQL keeps the operational memory: a
 ## Keep the Main Agent Lightweight
 
 > Your context window is your lifeline. If it fills up, you die and must restart.
-- Leo on why the main agent delegates investigations to smaller sub-agents
+
+-Leo on why the main agent delegates investigations to smaller sub-agents
 
 <YouTube id="rTt5iUmCU20" mute={false} />
 
@@ -131,7 +136,8 @@ Every alert has a playbook like this. Pod crash loops have one. ArgoCD degraded 
 Each alert maps to one playbook file. When the workflow misses something, the fix is small: update the alert or update the playbook. The agent itself does not need to change.
 
 > The beauty of it is that it's with this playbook and this alert system. Both of them are modular. And so each alert has a playbook file. So each alert comes in and knows what to do with this alert.
-- Leo on why pairing each alert with a playbook makes the workflow easy to improve
+
+-Leo on why pairing each alert with a playbook makes the workflow easy to improve
 
 <YouTube id="RgThoGZyInk" mute={false} />
 
@@ -150,7 +156,8 @@ The list of what it cannot do is longer. And it is not enforced by a prompt.
 RBAC blocks namespace deletion, PVC deletion, database access, scaling services to zero, git pushes, and ArgoCD application deletion. The runbook says not to do these things, and the service account permissions make sure the agent never had the ability to begin with.
 
 > I don't let the AI run my GitOps and my Kubernetes stack. I let it analyze what's happening, tell me why it's happening, tell me remediation strategies.
-- Leo on keeping the agent focused on investigation while hard systems control production changes
+
+-Leo on keeping the agent focused on investigation while hard systems control production changes
 
 <YouTube id="UyIkKAwMOEY" mute={false} />
 
@@ -161,7 +168,8 @@ His framing is three layers working together: a knowledge base that gives the ag
 That framing also comes from Leo's background. Before Alien Intelligence, he worked in academia on human-AI interaction, including how AI systems can help people understand complex data. So when he talks about keeping the human in the loop, it is not a throwaway line.
 
 > I don't want the AI to replace something. I want the AI to augment.
-- Leo on why the human still stays in the loop
+
+-Leo on why the human still stays in the loop
 
 ## What a Month of This Workflow Actually Changed
 
@@ -172,21 +180,24 @@ His phone buzzed. Sometimes he was in a meeting. Sometimes it was late, after th
 More often than not: noise. But he still had to check.
 
 > It's more than time. It's brain time. Like it's responsibility and it frees up mental space for other things.
-- Leo on how the workflow changed the mental load of being responsible for alerts
+
+-Leo on how the workflow changed the mental load of being responsible for alerts
 
 Now, if the alert is real, Leo gets a Slack message. What fired. What was checked. What changed recently. What the agent recommends. If a critical alert goes unacknowledged, the agent follows up. It does not forget about something real just because Leo was unavailable.
 
 He shared how the workflow had behaved so far:
 
 > False positives? No. False negatives? Yes. Has done it once.
-- Leo on how the AI SRE workflow behaved in its first month
+
+-Leo on how the AI SRE workflow behaved in its first month
 
 <YouTube id="DdCP5jolz8o" mute={false} />
 
 In other words, Leo had not seen the agent mark a serious alert as noise. He had seen one missed case, which he used to update the alert and playbook. For a new system running complex production infrastructure, that changes how you relate to a buzzing phone.
 
 > I know that if there's a real alert, I actually get a real message. And it means that I need to look at it. And so I don't worry in a way.
-- Leo on trusting the agent enough to stop checking every alert himself
+
+-Leo on trusting the agent enough to stop checking every alert himself
 
 The real change is that Leo now spends less judgment on noise, which is exactly what a small, focused team needs.
 
@@ -197,7 +208,8 @@ Leo has dashboards in SigNoz. He set them up when he was first configuring the s
 The last time he opened them was to take screenshots for an ISO certification.
 
 > I have dashboards just because I set them up at the beginning. I haven't opened them except for screenshots for my ISO certification.
-- Leo on how his day-to-day workflow moved from dashboards to agent conversations
+
+-Leo on how his day-to-day workflow moved from dashboards to agent conversations
 
 Leo pushed further in the call. When you open a dashboard, you see lines, curves, and gauges. A panel might tell you memory pressure is high, but it still does not tell you what to do next. His view is that dashboards matter at scale, when there are dedicated teams watching dedicated screens. For a three-person team where the agent surfaces actionable signals through Slack, the dashboard is one more interface that rarely has more to say than what the agent already sent.
 
@@ -208,7 +220,8 @@ That means observability tools need two access paths: visual interfaces for huma
 ## Why SigNoz Worked for This Workflow
 
 > You guys, MCP's pretty dope, honestly. That was really neat.
-- Leo on setting up SigNoz MCP for the AI SRE workflow
+
+-Leo on setting up SigNoz MCP for the AI SRE workflow
 
 That was Leo's reaction after setting it up. Unfiltered. It is the most useful kind of feedback: someone who tried a thing and it worked the way it was supposed to.
 
