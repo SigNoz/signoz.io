@@ -60,8 +60,9 @@ Review each changed doc against these checks in order:
 13. Next steps help users complete the broader job.
 14. Links directly help readers complete the current step.
 15. Added or edited links resolve and use canonical production paths.
-16. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
-17. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
+16. When `entityName="plans"` tabs are present, every Self-Hosted `TabItem` value starts with `self-host` (e.g., `self-host`, `self-hosted`, `self-host-deployment`). Values that don't match this prefix will leak through and show in the in-product onboarding iframe.
+17. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
+18. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 

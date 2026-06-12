@@ -35,18 +35,16 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
   const firstChild = validChildren[0]
   const defaultActiveTab = defaultChild?.props.value ?? firstChild?.props.value ?? null
 
-  const urlKey = entityName && entityName !== 'plans' ? entityName : null
+  const urlKey = entityName || null
 
   const resolveActiveTab = useCallback((): string | null => {
-    if (entityName === 'plans') return defaultActiveTab
-
     if (urlKey) {
       const urlValue = searchParams.get(urlKey)
       if (urlValue && tabValuesSet.has(urlValue)) return urlValue
     }
 
     return defaultActiveTab
-  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab, entityName])
+  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab])
 
   const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
 
@@ -75,7 +73,7 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
           if (!isValidElement(child)) return null
           const { value, label } = child.props
 
-          if (hideSelfHostTab && value === 'self-host') return null
+          if (hideSelfHostTab && value.startsWith('self-host')) return null
           return (
             <button
               key={value}
@@ -94,7 +92,10 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
       </div>
       <div className="mt-4">
         {childrenArray.map((child) => {
-          if (!isValidElement(child) || (hideSelfHostTab && child.props.value === 'self-host')) {
+          if (
+            !isValidElement(child) ||
+            (hideSelfHostTab && child.props.value.startsWith('self-host'))
+          ) {
             return null
           }
 
