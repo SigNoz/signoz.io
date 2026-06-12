@@ -144,7 +144,7 @@ export default function OpenTelemetryHubContent({
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
-          {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
+        {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
         <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert">
           <h1 className="text-3xl font-bold">{title}</h1>
           {(formattedUpdatedDate || readingTimeText) && (

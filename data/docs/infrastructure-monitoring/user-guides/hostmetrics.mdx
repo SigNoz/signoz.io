@@ -1,17 +1,17 @@
 ---
-date: 2026-05-25
+date: 2026-06-05
 title: Setup Host Metrics with OpenTelemetry
 id: opentelemetry-hostmetrics
-description: Learn how to collect host metrics using the OpenTelemetry hostmetrics receiver. Monitor CPU, memory, disk, and network usage and send data to SigNoz for real-time insights.
+description: Configure the OpenTelemetry hostmetrics receiver to collect CPU, memory, disk, network, paging, and process metrics from your hosts and send them to SigNoz.
 doc_type: howto
 hide_table_of_contents: true
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
 
-Host metrics are fundamental performance indicators collected directly from a system's operating system. These metrics provide granular visibility into the physical or virtual server's resource utilization and health status.
+Host metrics are fundamental performance indicators collected directly from a system's operating system. These metrics provide granular visibility into a host's resource utilization and health.
 
-The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, network, paging, and system performance.
+The OpenTelemetry **hostmetrics** receiver collects metrics for CPU, memory, disk, network, paging, load average, and processes. This guide explains how to configure the receiver on top of an OpenTelemetry Collector that's already running on your host.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -20,32 +20,22 @@ The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, ne
 ## Prerequisites
 
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- An OpenTelemetry Collector installed and running on each host you want to monitor
 
-<Tabs entityName="environment">
+## Before you start: install the OpenTelemetry Collector
 
-<TabItem value="vm" label="Virtual Machine" default>
+Make sure an OpenTelemetry Collector is installed and running on each host you want to monitor. Pick the install guide that matches your environment:
 
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
-A VM is a virtual computer that runs on physical hardware. This includes:
-- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
-- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
-- **Bare metal servers**: Physical servers running Linux/Unix directly
+- **VM (Linux, macOS, Windows)** → [VM Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) — covers DEB / RPM / tarball on Linux, tarball on macOS, MSI on Windows.
+- **Docker host** → [Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) — Docker Compose / `docker run` install.
+- **Kubernetes (node-level host metrics)** → [k8s-infra Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/) — Helm chart that already wires `hostmetrics` per node.
+- **AWS ECS** → [ECS Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/).
 
-Use this section if you're deploying your application directly on a server or VM without containerization.
+Every Collection Agent guide ships a complete `config.yaml` that already includes the `hostmetrics` receiver. The sections below explain its options so you can adjust the shipped config for your needs.
 
-</KeyPointCallout>
+## Configure the hostmetrics receiver
 
-## Step 1: Install OpenTelemetry Collector
-
-Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to install OpenTelemetry Collector.
-
-## Step 2: Configure the Collector
-
-### Configure the Hostmetrics Receiver
-
-Open your OpenTelemetry Collector configuration file which is typically located at `/etc/otelcol-contrib/config.yaml`.
-
-Add the `hostmetrics` receiver which scrapes metrics from the host system, add it to the `receivers` section:
+Add (or adjust) the `hostmetrics` receiver in your collector's `config.yaml`:
 
 ```yaml:config.yaml
 receivers:
@@ -58,7 +48,7 @@ receivers:
       filesystem: {}
       memory: {}
       network: {}
-      nfs: {} # Linux only
+      nfs: {}        # Linux only — remove on Windows / macOS
       paging: {}
       process:
         mute_process_name_error: true
@@ -68,9 +58,52 @@ receivers:
       system: {}
 ```
 
-### Configure the Processors
+Each entry under `scrapers:` enables a metric category. `collection_interval` controls how often metrics refresh; `60s` is a sensible default. For finer-grained data, drop it to `10s` (see [Advanced Configuration](#advanced-configuration) for mixed cadences).
 
-Add `resourcedetection` processor to the `processors` section to enrich metrics with resource attributes:
+### Platform-specific receiver tweaks
+
+**Docker / container-based collectors**: set `root_path: /hostfs` and bind-mount the host root filesystem into the container — without this the receiver reads container-internal stats, not host stats.
+
+```yaml:config.yaml {3}
+receivers:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 60s
+    scrapers: ...
+```
+
+And the collector container must run with the bind mount:
+
+```bash
+docker run -v /:/hostfs:ro ...
+```
+
+See [Minimal Docker example](#minimal-docker-example--host-metrics-only) below for a complete config.
+
+**Windows**: omit the `nfs:` scraper (Linux-only) and add `mute_process_user_error: true` to the `process:` scraper to suppress access-denied warnings on the Windows process table.
+
+```yaml:config.yaml
+scrapers:
+  cpu: {}
+  disk: {}
+  load: {}
+  filesystem: {}
+  memory: {}
+  network: {}
+  paging: {}
+  process:
+    mute_process_name_error: true
+    mute_process_exe_error: true
+    mute_process_io_error: true
+    mute_process_user_error: true     # Windows
+  system: {}
+```
+
+**macOS**: omit the `nfs:` scraper (Linux-only); other scrapers behave the same as on Linux.
+
+## Configure the resourcedetection processor
+
+Add the `resourcedetection` processor in the `processors` section:
 
 ```yaml:config.yaml {3-4}
 processors:
@@ -80,31 +113,12 @@ processors:
 ```
 
 <Admonition type="info">
-  The `resourcedetection` processor automatically adds resource attributes like hostname and OS information to your metrics.
+  The `resourcedetection` processor automatically attaches resource attributes — including `host.name`, `host.id`, and OS/cloud metadata — to every metric emitted by the receiver. Without it, hosts appear in SigNoz without a hostname and aren't clickable on the Hosts list.
 </Admonition>
 
-### Configure the Exporters
+## Add the receiver and processor to the service pipeline
 
-Add `otlp` exporter with SigNoz endpoint and ingestion key to the `exporters` section:
-
-```yaml:config.yaml {2-7}
-exporters:
-  otlp:
-    endpoint: 'ingest.<region>.signoz.cloud:443'
-    tls:
-      insecure: false
-    headers:
-      'signoz-ingestion-key': '<your-ingestion-key>'
-```
-
-Verify these values:
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-### Configure the Service
-
-Enable `hostmetrics` receiver, `resourcedetection` and `batch` processors in the `service` section:
+Wire both the receiver and the processor into the metrics pipeline:
 
 ```yaml:config.yaml {4-6}
 service:
@@ -115,173 +129,12 @@ service:
       exporters: [otlp]
 ```
 
-<details>
-<summary>View Complete Configuration</summary>
-
-Here is how the complete `config.yaml` file should look:
-
-```yaml:config.yaml
-receivers:
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      nfs: {} # Linux only
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
-      system: {}
-
-processors:
-  batch:
-  resourcedetection:
-    detectors: [env, system]
-
-exporters:
-  otlp:
-    endpoint: "ingest.<region>.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      "signoz-ingestion-key": "<your-ingestion-key>"
-
-service:
-  pipelines:
-    metrics:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-```
-
-</details>
-
-## Step 3: Run the Collector
-
-After saving the configuration, restart the collector service to apply changes.
-
-<Tabs>
-<TabItem value="systemd" label="Systemd" default>
-
-If you are using systemd to manage the collector service:
-
-```bash
-sudo systemctl restart otelcol-contrib
-sudo systemctl status otelcol-contrib
-```
-
-</TabItem>
-<TabItem value="manual" label="Manual Binary">
-
-If you are running the binary manually (e.g., for testing):
-
-```bash
-./otelcol-contrib --config config.yaml
-```
-
-</TabItem>
-</Tabs>
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-<KeyPointCallout title="Want to monitor Docker container metrics?" defaultCollapsed="true">
-  This section explains how to run the collector as a Docker container to collect **Host Metrics** (like CPU/Memory of the underlying Node).
-
-  If you want to monitor the performance of your Docker containers themselves (e.g. CPU/Memory usage per container), please refer to the [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/) documentation.
-</KeyPointCallout>
-
-## Step 1: Install OpenTelemetry Collector
-
-Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) to install OpenTelemetry Collector.
-
-## Step 2: Configure the Collector
-
-To collect host metrics from a Docker container, you must bind mount the host filesystem.
-
-### Configure the Hostmetrics Receiver
-
-Create a `config.yaml` file and add the following configuration. Note the `root_path` setting which is required for Docker.
-
-```yaml:config.yaml
-receivers:
-  hostmetrics:
-    root_path: /hostfs  # Required: points to the host filesystem mounted inside the container
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-        mute_process_user_error: true
-      processes: {}
-      system: {}
-```
-
-### Configure the Processors
-
-Add resource detection processor to enrich metrics:
-
-```yaml:config.yaml {2-3}
-processors:
-  resourcedetection:
-    detectors: [env, system]
-```
-
-### Configure the Exporters
-
-Add the exporter configuration:
-
-```yaml:config.yaml {2-7}
-exporters:
-  otlp:
-    endpoint: 'ingest.<region>.signoz.cloud:443'
-    tls:
-      insecure: false
-    headers:
-      'signoz-ingestion-key': '<your-ingestion-key>'
-```
-
-Verify these values:
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-### Configure the Service
-
-Set up the pipeline:
-
-```yaml:config.yaml {4-6}
-service:
-  pipelines:
-    metrics:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-```
-
-<Admonition type="note">
-  The `mute_process_*_error` settings suppress common errors when the collector can't access certain process information due to permissions. This is normal in containerized or restricted environments.
-</Admonition>
+Restart the collector to apply changes.
 
 <details>
-<summary>View Complete Configuration</summary>
+<summary>Minimal Docker example — host metrics only</summary>
 
-Here is how the complete `config.yaml` file should look:
+If you only want host metrics from a Docker host (no container metrics, no log shipping), use this trimmed config:
 
 ```yaml:config.yaml
 receivers:
@@ -307,7 +160,7 @@ receivers:
 processors:
   batch:
   resourcedetection:
-    detectors: [env, system]
+    detectors: [env, system, docker]
 
 exporters:
   otlp:
@@ -325,11 +178,7 @@ service:
       exporters: [otlp]
 ```
 
-</details>
-
-## Step 3: Run the Collector
-
-Run the collector container with the `--volume` flag to mount the host root directory to `/hostfs`.
+Then run:
 
 ```bash
 docker run -d \
@@ -340,95 +189,9 @@ docker run -d \
   --config=/etc/otelcol-contrib/config.yaml
 ```
 
-</TabItem>
+For a fuller collector that also captures container metrics and logs, use the [Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) install guide.
 
-<TabItem value="windows" label="Windows">
-
-## Step 1: Install OpenTelemetry Collector
-
-Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to install OpenTelemetry Collector.
-
-## Step 2: Configure the Collector
-
-1.  Locate your `config.yaml` file.
-    - **Default:** `C:\Program Files\OpenTelemetry Collector\config.yaml`
-
-### Configure the Hostmetrics Receiver
-
-Add the following to your `config.yaml`:
-
-```yaml:config.yaml
-receivers:
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-        mute_process_user_error: true
-      system: {}
-```
-
-### Configure the Processors
-
-Add the resource detection processor:
-
-```yaml:config.yaml {2-3}
-processors:
-  resourcedetection:
-    detectors: [env, system]
-```
-
-### Configure the Exporters
-
-Configure the OTLP exporter:
-
-```yaml:config.yaml {2-7}
-exporters:
-  otlp:
-    endpoint: 'ingest.<region>.signoz.cloud:443'
-    tls:
-      insecure: false
-    headers:
-      'signoz-ingestion-key': '<your-ingestion-key>'
-```
-
-Verify these values:
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-### Configure the Service
-
-Enable the pipeline:
-
-```yaml:config.yaml {4-6}
-service:
-  pipelines:
-    metrics:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-```
-
-## Step 3: Run the Collector
-
-After saving the configuration, run the collector service to apply changes.
- 
- ```powershell
- .\otelcol-contrib.exe --config config.yaml
- ```
-
-</TabItem>
-</Tabs>
+</details>
 
 <details>
 <ToggleHeading>
@@ -499,28 +262,9 @@ Once configured, verify that metrics are flowing to SigNoz.
 
 **Resolution:**
 
-1. Check collector logs for errors.
-
-   **Linux (Systemd):**
-
-   ```bash
-   journalctl -u otelcol-contrib -f
-   ```
-
-   **Docker:**
-
-   ```bash
-   docker logs otelcol-hostmetrics -f
-   ```
-
-   **Windows (PowerShell):**
-
-   ```powershell
-   Get-Content "C:\Program Files\OpenTelemetry Collector\otelcol.log" -Wait
-   ```
-
-2. Verify the hostmetrics receiver is enabled in your config.
-3. Ensure the collector can reach the SigNoz endpoint (port 443 for Cloud, 4317 for Self-Hosted).
+1. Check the collector logs — refer to the troubleshooting section of your environment's collector guide ([VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) / [Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) / [k8s-infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/)) for the exact command.
+2. Verify the `hostmetrics` receiver is enabled in your config and listed in the `metrics` pipeline under `service > pipelines`.
+3. Ensure the collector can reach the SigNoz endpoint (port `443` for Cloud, `4317` for Self-Hosted).
 
 ### Host Name is blank/empty
 
@@ -552,7 +296,7 @@ service:
       exporters: [otlp]
 ```
 
-3. Restart the collector to apply changes and check logs for errors (see [Run the Collector](#step-3-run-the-collector)).
+3. Restart the collector to apply changes.
 
 <Admonition type="info">
 The `resourcedetection` processor automatically detects resource attributes like `host.name` and OS information from the host environment. For the full list of supported detectors, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">resourcedetection processor documentation</a>.

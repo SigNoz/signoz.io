@@ -1,5 +1,5 @@
 ---
-date: 2026-05-25
+date: 2026-06-10
 id: k8s-clusters
 title: Clusters
 description: Monitor Kubernetes cluster resource allocation in SigNoz — CPU and memory vs allocatable capacity, node readiness, and workload health summaries.
@@ -15,15 +15,49 @@ The **Clusters** view provides a high-level overview of resource allocation and 
   className="box-shadowed-image"
 />
 
-## Columns
+## Clusters List Page Columns
 
-| Column | Description |
-|--------|-------------|
-| **Cluster Name** | Kubernetes cluster name |
-| **CPU Usage (cores)** | Total CPU consumption across all nodes |
-| **CPU Alloc (cores)** | Total allocatable CPU — the cluster's scheduling capacity |
-| **Memory Usage (WSS)** | Total working set memory across all nodes |
-| **Memory Allocatable** | Total allocatable memory across all nodes |
+### Cluster Name
+
+- This column is derived from the resource attribute `k8s.cluster.name`.
+- Identifier of the Kubernetes cluster.
+- Click the name to open the cluster detail page and drill into per-cluster CPU/memory vs allocatable charts, node readiness counts, and workload-controller status (Deployments, StatefulSets, DaemonSets, Jobs).
+
+### CPU Usage (cores)
+
+- This column relies on the OTel metric `k8s.node.cpu.usage` from the kubeletstats receiver, summed across all nodes in the cluster.
+- Total CPU consumed cluster-wide, expressed in CPU-core units — includes all node-level overhead (kubelet, kube-proxy, container runtime, OS) in addition to pod workloads.
+- Use this with **CPU Alloc (cores)** to assess cluster headroom; persistent saturation is the signal to add nodes via Cluster Autoscaler or revisit per-pod `requests.cpu`.
+
+### CPU Alloc (cores)
+
+- This column relies on the OTel metric `k8s.node.allocatable_cpu` from the k8s_cluster receiver; disabled by default — enable via the receiver's `allocatable_types_to_report: [cpu]` config.
+- Total CPU available for pod scheduling cluster-wide, summed across each node's `node capacity − kube-reserved − system-reserved − eviction-hard`.
+- When **CPU Usage (cores)** consistently approaches this, the cluster's scheduling capacity is exhausted and new pods will stay `Pending` until either nodes are added or existing pod requests are tightened.
+
+### Memory Usage (WSS)
+
+- This column relies on the OTel metric `k8s.node.memory.working_set` from the kubeletstats receiver, summed across all nodes in the cluster.
+- Total working-set memory across every node — anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for eviction).
+- Use this with **Memory Allocatable** to assess cluster memory headroom; sustained saturation triggers per-node MemoryPressure and eviction across the cluster — the same scenario the Cluster Autoscaler is designed to relieve.
+
+### Memory Allocatable
+
+- This column relies on the OTel metric `k8s.node.allocatable_memory` from the k8s_cluster receiver; disabled by default — enable via `allocatable_types_to_report: [memory]`.
+- Total memory available for pod scheduling cluster-wide, summed across each node's `node capacity − kube-reserved − system-reserved − eviction-hard`.
+- When **Memory Usage (WSS)** closes in on this, individual nodes are at imminent risk of triggering MemoryPressure and evicting pods; if the gap is structurally narrow, expand reservations are needed or the cluster needs more nodes.
+
+### Node Readiness
+
+- This column relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, encoded `1` = True / Ready, `0` = False / NotReady, `-1` = Unknown — counted per node and rolled up by readiness state.
+- Two values shown side-by-side: nodes currently `Ready` (accepting pods) and nodes currently `NotReady` (kubelet unhealthy or unreachable).
+- A non-zero NotReady count means a slice of the cluster's capacity is offline and pods on those nodes will be evicted after the 5-minute toleration window; investigate kubelet logs and the kubelet→API-server network path on affected nodes.
+
+### Pod Counts by Phase
+
+- This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
+- Cluster-wide counts of pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
+- A growing `Pending` backlog cluster-wide indicates scheduling pressure (insufficient CPU/memory across all nodes, taints blocking placement, or namespace ResourceQuotas saturated); persistent `Failed` / `Unknown` warrants drilling into specific workloads.
 
 ## Cluster Detail Page
 
@@ -36,15 +70,52 @@ Click a cluster name to open the detail page. The header shows **Cluster Name**.
   className="box-shadowed-image"
 />
 
-### Metrics Tab
+### Clusters Metrics - Charts and Panels
 
-| Widget | Description |
-|--------|-------------|
-| **CPU Usage, Allocatable** | Cluster CPU consumption vs total capacity — converging lines mean you need to scale |
-| **Memory Usage, Allocatable** | Cluster memory vs capacity — convergence means scheduling failures and evictions |
-| **Ready Nodes** | Number of nodes in Ready state, able to accept pods |
-| **NotReady Nodes** | Nodes unable to accept pods — kubelet crash, network partition, or resource exhaustion |
-| **Deployments Available and Desired** | Overview of deployment health — a gap indicates degraded deployments |
-| **StatefulSet Pods** | Current vs desired pods across all StatefulSets |
-| **DaemonSet Nodes** | Current vs desired nodes across all DaemonSets |
-| **Jobs** | Active, successful, and failed pods across all jobs |
+#### CPU Usage, Allocatable
+
+- This chart relies on the OTel metrics `k8s.pod.cpu.usage` from the kubeletstats receiver (summed across all pods in the cluster) and `k8s.node.allocatable_cpu` from the k8s_cluster receiver (summed across all nodes; disabled by default).
+- Plots four series: `k8s.pod.cpu.usage` aggregated three ways within each step interval (**Avg**, **Max**, **Min**) and the cluster's total **Allocatable** CPU as a reference line. Because this uses pod-level CPU (not `k8s.node.cpu.usage`), it excludes system overhead like the kubelet and kube-proxy — so the value reads lower than the **CPU Usage (cores)** column on the list page.
+- When the Usage band climbs toward Allocatable, the cluster is running out of room for new pods and the Cluster Autoscaler — if enabled — will start adding nodes; converging lines are the signal to verify autoscaler is configured for this workload.
+
+#### Memory Usage, Allocatable
+
+- This chart relies on the OTel metrics `k8s.pod.memory.usage` from the kubeletstats receiver (summed across all pods in the cluster) and `k8s.node.allocatable_memory` from the k8s_cluster receiver (summed across all nodes; disabled by default).
+- Plots four series: `k8s.pod.memory.usage` aggregated three ways (**Avg / Max / Min**) and the cluster's **Allocatable** memory. Because this uses pod-level usage (which includes reclaimable page cache), it reads higher than what the kubelet's own eviction logic checks (which uses `working_set`); for the eviction-relevant signal at the node level, see the **Memory Usage (WSS)** column.
+- When Usage converges with Allocatable, individual nodes are close to MemoryPressure-driven evictions and the cluster needs more memory — either by adding nodes (Cluster Autoscaler) or by right-sizing pods so they pack better.
+
+#### Ready Nodes
+
+- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name` and rendered as a table with one row per node — each row shows the node's latest `condition_ready` value (`1` = Ready, `0` = NotReady, `-1` = Unknown).
+- The table lists every node the cluster is reporting on; Ready nodes show `condition_ready = 1` and are the ones currently accepting pods.
+- Use this to confirm cluster-wide node health at a glance — sort or scan the `condition_ready` column to spot any node not at `1`; those are the ones that went down, were cordoned, or lost contact with the API server.
+
+#### NotReady Nodes
+
+- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name` and rendered as a table with one row per node — each row shows the node's latest `condition_ready` value (`1` = Ready, `0` = NotReady, `-1` = Unknown).
+- The table lists every node; NotReady nodes show `condition_ready = 0` (kubelet reporting unhealthy) and `-1` for Unknown (no kubelet update within the grace period).
+- Any node not at `1` means a slice of the cluster's capacity is unusable; after the default 5-minute toleration window, pods on those nodes are evicted — the `k8s.node.name` column tells you which nodes are about to lose their pods.
+
+#### Deployments Available and Desired
+
+- This chart relies on the OTel metrics `k8s.deployment.available` (latest) and `k8s.deployment.desired` (avg) from the k8s_cluster receiver, rendered as a table with one row per Deployment in the cluster (grouped by `k8s.deployment.name` and `k8s.namespace.name`).
+- **Desired** is `.spec.replicas`; **Available** is pods ready for at least `minReadySeconds` (`.status.availableReplicas`).
+- A persistent Available < Desired row points to a stuck rollout or crashlooping pods — `kubectl rollout status deployment/<name> -n <namespace>` and the pod events surface the root cause (image pull failure, readiness-probe failure, insufficient capacity).
+
+#### StatefulSet Pods
+
+- This chart relies on the OTel metrics `k8s.statefulset.current_pods`, `k8s.statefulset.desired_pods`, `k8s.statefulset.ready_pods`, and `k8s.statefulset.updated_pods` from the k8s_cluster receiver, rendered as a table with one row per StatefulSet (grouped by `k8s.statefulset.name` and `k8s.namespace.name`).
+- Columns: **Desired** (`.spec.replicas`), **Current** (pods at the StatefulSet's current revision), **Ready** (pods with the `Ready` condition), and **Updated** (pods at the latest revision) — the K8s `StatefulSetStatus` fields.
+- Ready < Desired means pods aren't passing readiness checks; Updated < Current during a rollout means the update is paused or wedged — inspect with `kubectl describe statefulset` and the pods' events.
+
+#### DaemonSet Nodes
+
+- This chart relies on the OTel metrics `k8s.daemonset.desired_scheduled_nodes`, `k8s.daemonset.current_scheduled_nodes`, and `k8s.daemonset.ready_nodes` from the k8s_cluster receiver, rendered as a table with one row per DaemonSet (grouped by `k8s.daemonset.name`).
+- Columns: **Desired** (nodes that should run the pod), **Current** (nodes running at least one pod and supposed to), and **Ready** (nodes whose pod is running and `Ready`).
+- DaemonSets are commonly used for node-level agents (log collectors, CNI plugins, monitoring agents) — Ready < Desired means a subset of nodes is missing the agent and that observability/networking is degraded on those nodes; investigate by listing the DaemonSet's pods and checking events.
+
+#### Jobs
+
+- This chart relies on the OTel metrics `k8s.job.active_pods`, `k8s.job.successful_pods`, `k8s.job.failed_pods`, and `k8s.job.desired_successful_pods` from the k8s_cluster receiver, rendered as a table with one row per Job in the cluster (grouped by `k8s.job.name` and `k8s.namespace.name`).
+- Columns: **Active** (running pods), **Succeeded** (pods that completed successfully), **Failed** (pods that exited non-zero), and **Desired Successful** (`.spec.completions` — pods needed for the Job to be considered complete).
+- A Job stays in the table until cleaned up — non-zero **Failed** is the primary signal to triage (retry policy exhausted, application bug, missing dependency); persistently non-zero **Active** with **Succeeded** stuck below **Desired Successful** means the Job is taking longer than expected.

@@ -1,7 +1,7 @@
 ---
-date: 2026-05-25
+date: 2026-06-05
 title: Setup Kubernetes Metrics with OpenTelemetry
-description: Setup Kubernetes monitoring with OpenTelemetry kubeletstats and k8scluster receivers. Track node, pod, container, and volume metrics in SigNoz dashboards.
+description: Configure the OpenTelemetry kubeletstats and k8scluster receivers (plus k8sattributesprocessor) on top of a running Kubernetes Collection Agent to track node, pod, container, and volume metrics in SigNoz.
 doc_type: howto
 id: k8s-metrics
 ---
@@ -13,7 +13,17 @@ This guide explains how to set up monitoring for your Kubernetes cluster using t
 - [`kubeletstats`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md): Collects metrics from individual Kubernetes nodes
 - [`k8scluster`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md): Gathers cluster-wide metrics
 
-### Setting Up Kubelet Stats Monitoring
+## Before you start: install the Kubernetes Collection Agent
+
+Make sure you have an OpenTelemetry Collector running in your cluster. Pick the install guide that matches your setup:
+
+- **Standard Kubernetes** → [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) — Helm chart that already wires `kubeletstats`, `k8scluster`, and `k8sattributes`.
+- **EKS Fargate / GKE Autopilot / AKS Virtual Nodes** → [Serverless Kubernetes Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) — for managed clusters that block kubelet scraping on worker nodes.
+- **OpenTelemetry Operator** → [OTel Operator Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/) — if you're already managing collectors via the OpenTelemetry Operator.
+
+Every install path ships a config that already includes the receivers and processors covered below. The sections that follow explain the receiver / processor options so you can adjust the shipped config for your needs.
+
+### Setup Kubelet Stats Receiver
 
 #### Overview
 
@@ -130,7 +140,7 @@ receivers:
     node: ${env:K8S_NODE_NAME}
 ```
 
-#### 3. Enable Kubernetes Metadata
+#### 3. Setup k8sattributesprocessor to enable Kubernetes metadata
 
 Configure the k8sattributes processor to enrich your metrics with Kubernetes context:
 
@@ -151,6 +161,7 @@ processors:
         - k8s.pod.uid
         - k8s.pod.start_time
         - k8s.container.name
+        - k8s.persistentvolumeclaim.name
     filter:
       node_from_env_var: K8S_NODE_NAME
     passthrough: false
@@ -180,7 +191,7 @@ service:
 
 Read more about the [kubeletstats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md) and [k8sattributes processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md).
 
-### Setting Up K8s Cluster Monitoring
+### Setup K8s Cluster Receiver
 
 #### Overview
 
@@ -215,10 +226,12 @@ Monitor the health and status of your nodes with these key conditions:
 
 #### 2. Resource Allocation Tracking
 Monitor resource allocation across your cluster:
-- `cpu`: CPU resource allocation (enabled by default)
-- `memory`: Memory resource allocation (enabled by default)
+- `cpu`: CPU resource allocation
+- `memory`: Memory resource allocation
 - `ephemeral-storage`: Temporary storage allocation
 - `storage`: Persistent storage allocation
+
+These allocations are exposed via the `k8s.node.allocatable_cpu`, `k8s.node.allocatable_memory`, etc. metrics. They are **disabled by default** in the upstream `k8scluster` receiver — opt in via the `allocatable_types_to_report` config option (shown in the manual configuration example below).
 
 #### 3. Optional Metrics
 Key optional metrics for enhanced monitoring:
@@ -247,7 +260,7 @@ receivers:
         enabled: true
 ```
 
-#### 2. Enable Kubernetes Metadata
+#### 2. Setup k8sattributesprocessor to enable Kubernetes metadata
 
 Configure the k8sattributes processor to add Kubernetes context:
 
@@ -268,6 +281,7 @@ processors:
         - k8s.pod.uid
         - k8s.pod.start_time
         - k8s.container.name
+        - k8s.persistentvolumeclaim.name
     passthrough: false
     pod_association:
       - sources:
