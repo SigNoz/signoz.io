@@ -73,7 +73,7 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
           if (!isValidElement(child)) return null
           const { value, label } = child.props
 
-          if (hideSelfHostTab && value === 'self-host') return null
+          if (hideSelfHostTab && value.startsWith('self-host')) return null
           return (
             <button
               key={value}
@@ -92,7 +92,10 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
       </div>
       <div className="mt-4">
         {childrenArray.map((child) => {
-          if (!isValidElement(child) || (hideSelfHostTab && child.props.value === 'self-host')) {
+          if (
+            !isValidElement(child) ||
+            (hideSelfHostTab && child.props.value.startsWith('self-host'))
+          ) {
             return null
           }
 
