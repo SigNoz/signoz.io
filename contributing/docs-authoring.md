@@ -152,7 +152,7 @@ When documenting OpenTelemetry Collector changes:
 - Use `Admonition` for notes, warnings, tips, and supplementary or optional material. Do not use `KeyPointCallout`.
 - Use `Tabs` and `TabItem` only when flows materially differ by platform or environment. Always provide an `entityName` prop on `<Tabs>` that matches what the tabs represent:
   - `entityName="environment"` — deployment infrastructure tabs: VM, Kubernetes, Docker, Windows. Only use this when the tabs distinguish between these deployment environments.
-  - `entityName="plans"` — SigNoz Cloud vs Self-Hosted tabs.
+  - `entityName="plans"` — SigNoz Cloud vs Self-Hosted tabs. **Self-Hosted `TabItem` values must start with `self-host`** (e.g., `self-host`, `self-hosted`, `self-host-deployment`). The onboarding iframe hides tabs whose value starts with `self-host` — any other naming (e.g., `selfhosted`, `deployment-selfhosted`) will leak through and show in the in-product onboarding view.
   - For other tab groupings, use a short descriptive name (e.g., `"language"`, `"signal"`, `"setup"`).
 - Prefer numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful.
