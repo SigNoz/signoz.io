@@ -35,18 +35,16 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
   const firstChild = validChildren[0]
   const defaultActiveTab = defaultChild?.props.value ?? firstChild?.props.value ?? null
 
-  const urlKey = entityName && entityName !== 'plans' ? entityName : null
+  const urlKey = entityName || null
 
   const resolveActiveTab = useCallback((): string | null => {
-    if (entityName === 'plans') return defaultActiveTab
-
     if (urlKey) {
       const urlValue = searchParams.get(urlKey)
       if (urlValue && tabValuesSet.has(urlValue)) return urlValue
     }
 
     return defaultActiveTab
-  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab, entityName])
+  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab])
 
   const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
 
