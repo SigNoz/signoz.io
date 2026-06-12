@@ -1,7 +1,18 @@
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '../TrackingLink'
 import Button from '../Button/Button'
-import { HOSTING_DECISION_ITEMS } from '@/constants/componentItems'
+const HOSTING_DECISION_ITEMS = [
+  {
+    name: 'Compare Self Host vs Cloud',
+    href: '/blog/cloud-vs-self-hosted-deployment-guide/',
+    clickName: 'Compare Self Host vs Cloud',
+  },
+  {
+    name: 'Get Started - Free',
+    href: '/teams/',
+    clickName: 'Get Started - Free',
+  },
+] as const
 
 const [compareHostingOption, getStartedHostingOption] = HOSTING_DECISION_ITEMS
 
