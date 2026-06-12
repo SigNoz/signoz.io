@@ -8,10 +8,14 @@ import {
 } from '@/utils/cachedData'
 import { getAuthorDirectory, type AuthorDirectory } from '@/utils/contentRepository'
 import { getAuthorKey } from '@/utils/contentHelpers'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 type ResourceCenterCardSource = {
   slug?: string | null
   path: string
+  published_date?: string | null
+  updated_date?: string | null
+  /** @deprecated Use `published_date` and `updated_date` instead. Kept for backwards compatibility. */
   date?: string | null
   publishedAt?: string | null
   title: string
@@ -91,7 +95,7 @@ export function pickResourceCenterCardFields(
   return {
     slug: source.slug ?? source.path.split('/').filter(Boolean).pop() ?? '',
     path: source.path,
-    date: source.date ?? source.publishedAt ?? '',
+    date: resolveLatestDate(source) ?? '',
     title: source.title,
     description: source.description ?? undefined,
     summary: source.summary ?? undefined,

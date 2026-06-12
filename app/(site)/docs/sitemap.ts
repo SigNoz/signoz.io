@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import { allDocs } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 import { toSitemapDateOnly } from 'utils/sitemapXml'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = siteMetadata.siteUrl
@@ -17,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((post) => !post.draft && post.slug !== 'introduction')
     .map((post) => ({
       url: `${siteUrl}/${post.path}/`,
-      lastModified: post.lastmod || post.date,
+      lastModified: post.lastmod || resolveLatestDate(post),
       changeFrequency: 'weekly' as const,
       priority: 0.5,
     }))
