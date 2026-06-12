@@ -295,3 +295,66 @@ describe('plans tabs sync to URL', () => {
     expect(selfHostPanel).not.toHaveAttribute('hidden')
   })
 })
+
+describe('nested tabs do not reset parent plans tab', () => {
+  it('parent stays on self-host after nested tab click triggers remount', () => {
+    const NestedTabs = () => (
+      <Tabs entityName="plans">
+        <TabItem value="cloud" label="Cloud" default>
+          Cloud content
+        </TabItem>
+        <TabItem value="self-host" label="Self-Hosted">
+          <Tabs entityName="client">
+            <TabItem value="npm" label="npm" default>
+              npm content
+            </TabItem>
+            <TabItem value="yarn" label="yarn">
+              yarn content
+            </TabItem>
+          </Tabs>
+        </TabItem>
+      </Tabs>
+    )
+
+    // Render with plans=self-host already in URL (user previously clicked Self-Hosted)
+    mockSearchParams.mockReturnValue(new URLSearchParams('plans=self-host'))
+    const { unmount } = render(<NestedTabs />)
+
+    // Click "yarn" in the nested tabs
+    fireEvent.click(screen.getByRole('button', { name: 'yarn' }))
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('plans=self-host'), {
+      scroll: false,
+    })
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('client=yarn'), {
+      scroll: false,
+    })
+
+    // Simulate URL state after nested tab click
+    mockSearchParams.mockReturnValue(new URLSearchParams('plans=self-host&client=yarn'))
+
+    // Simulate Next.js remount triggered by router.replace
+    unmount()
+    render(<NestedTabs />)
+
+    // Verify parent is still on Self-Hosted
+    const parentRoot = document.querySelectorAll('[data-tabs-root]')[0]
+    const parentPanels = parentRoot.querySelectorAll(':scope > .mt-4 > [data-tab-value]')
+    const cloudPanel = Array.from(parentPanels).find(
+      (p) => p.getAttribute('data-tab-value') === 'cloud'
+    )
+    const selfHostPanel = Array.from(parentPanels).find(
+      (p) => p.getAttribute('data-tab-value') === 'self-host'
+    )
+
+    expect(cloudPanel).toHaveAttribute('hidden')
+    expect(selfHostPanel).not.toHaveAttribute('hidden')
+
+    // Verify nested tab also restored to yarn
+    const nestedRoot = document.querySelectorAll('[data-tabs-root]')[1]
+    const nestedPanels = nestedRoot.querySelectorAll(':scope > .mt-4 > [data-tab-value]')
+    const yarnPanel = Array.from(nestedPanels).find(
+      (p) => p.getAttribute('data-tab-value') === 'yarn'
+    )
+    expect(yarnPanel).not.toHaveAttribute('hidden')
+  })
+})
