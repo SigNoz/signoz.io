@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 import Button from '@/components/ui/Button'
+import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-otel.svg?url'
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
@@ -197,13 +198,15 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg bg-signoz_ink-500">
+      <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
         <Image
-          src="/img/graphics/homepage/feature-graphic-otel.webp"
-          alt="SigNoz built on top of OpenTelemetry — isometric layers showing the open-standards foundation"
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain"
+          src={featureGraphicOtel}
+          alt="SigNoz built on top of OpenTelemetry — isometric layers showing the open-standards foundation"
+          width={449}
+          height={352}
+          loading="lazy"
+          decoding="async"
         />
       </div>
     ),

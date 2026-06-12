@@ -76,7 +76,7 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
           asChild
         >
           <TrackingLink
-            href="/docs/signoz-mcp-server/"
+            href="/docs/ai/signoz-mcp-server/"
             clickType="Observability for AI Native Companies Card CTA"
             clickName="MCP Server for Agentic SRE Button"
             clickLocation="Capabilities Section"

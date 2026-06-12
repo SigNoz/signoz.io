@@ -5,6 +5,7 @@ Use this playbook for content under `data/blog/**`.
 ## Blog Expectations
 
 - Follow the shared repo workflow in [repo-workflow.md](repo-workflow.md).
+- Blog content is CMS-migrated. See [cms-content.md](cms-content.md) for environment setup, local content overlay, and the `data-assets/` image workflow.
 - Do not force docs-only structure or checklist items onto blog posts.
 - Use existing posts in `data/blog/**` as local style references when formatting a new post.
 
@@ -20,7 +21,7 @@ At minimum, include:
 
 ## Images
 
-- Store blog images under `public/img/blog/<YYYY-MM>/`.
+- Store blog images under `data-assets/img/blog/<YYYY-MM>/` (not `public/`). See [cms-content.md](cms-content.md#images-and-assets) for why.
 - Use WebP format for all blog images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools.
 
 ## Authoring Notes

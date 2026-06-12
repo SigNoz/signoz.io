@@ -1,0 +1,122 @@
+---
+date: 2026-06-10
+id: app-service
+title: Azure App Services Monitoring Integration with SigNoz
+description: Monitor Azure App Services with SigNoz. Collect metrics and logs from your web apps using One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure App Services integration collects metrics and logs from your web apps. Once enabled, the SigNoz agent discovers App Service resources in your monitored resource groups and configures telemetry collection.
+
+<Admonition type="info">
+This integration requires SigNoz Azure agent version **v0.0.11** or later.
+</Admonition>
+
+Note: This integration does not collect metrics for any database set up with the App Service.
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **App Services** from the left panel.
+3. Toggle **Log Collection** and **Metric Collection** on.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-app-service-enable.webp"
+  alt="SigNoz Azure integration panel showing App Services with Log Collection and Metric Collection toggles enabled"
+  caption="Enable log and metric collection for Azure App Services in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+The agent deploys the necessary Event Hubs and diagnostic settings in the background. Data starts flowing within a few minutes. Navigate to **Dashboards** and open the **App Services Overview** dashboard to confirm metrics are appearing.
+
+## What's collected
+
+<details>
+<summary>Logs</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Resource ID | `resources.azure.resource.id` | string |
+
+</details>
+
+<details>
+<summary>Metrics</summary>
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `azure_averagememoryworkingset_average` | Bytes | Gauge |
+| `azure_backendrequestcount_total` | Count | Gauge |
+| `azure_bytesreceived_total` | Bytes | Gauge |
+| `azure_bytessent_total` | Bytes | Gauge |
+| `azure_cputime_count` | Milliseconds | Gauge |
+| `azure_cputime_maximum` | Milliseconds | Gauge |
+| `azure_cputime_minimum` | Milliseconds | Gauge |
+| `azure_cputime_total` | Milliseconds | Gauge |
+| `azure_currentassemblies_average` | Count | Gauge |
+| `azure_filesystemusage_average` | Bytes | Gauge |
+| `azure_gen0collections_total` | Count | Gauge |
+| `azure_gen1collections_total` | Count | Gauge |
+| `azure_gen2collections_total` | Count | Gauge |
+| `azure_handles_average` | Count | Gauge |
+| `azure_healthcheckstatus_average` | Count | Gauge |
+| `azure_http101_total` | Count | Gauge |
+| `azure_http2xx_total` | Count | Gauge |
+| `azure_http3xx_total` | Count | Gauge |
+| `azure_http401_total` | Count | Gauge |
+| `azure_http403_total` | Count | Gauge |
+| `azure_http404_total` | Count | Gauge |
+| `azure_http406_total` | Count | Gauge |
+| `azure_http4xx_total` | Count | Gauge |
+| `azure_http5xx_total` | Count | Gauge |
+| `azure_httpresponsetime_average` | Milliseconds | Gauge |
+| `azure_iootherbytespersecond_total` | BytesPerSecond | Gauge |
+| `azure_iootheroperationspersecond_total` | BytesPerSecond | Gauge |
+| `azure_ioreadbytespersecond_total` | BytesPerSecond | Gauge |
+| `azure_ioreadoperationspersecond_total` | BytesPerSecond | Gauge |
+| `azure_iowritebytespersecond_total` | BytesPerSecond | Gauge |
+| `azure_iowriteoperationspersecond_total` | BytesPerSecond | Gauge |
+| `azure_privatebytes_average` | Bytes | Gauge |
+| `azure_requests_total` | Count | Gauge |
+| `azure_requestsinapplicationqueue_average` | Count | Gauge |
+| `azure_thread_average` | Count | Gauge |
+| `azure_totalappdomains_average` | Count | Gauge |
+| `azure_totalappdomainsunloaded_average` | Count | Gauge |
+
+</details>
+
+## Dashboards
+
+The integration includes a pre-built App Services dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-app-service-dashboard.webp"
+  alt="SigNoz dashboard showing Azure App Services metrics including request count, HTTP response codes, CPU time, and memory"
+  caption="Azure App Services dashboard in SigNoz"
+  className="box-shadowed-image"
+/>
+
+Key panels include:
+- Request count and requests in application queue
+- HTTP response codes (2xx, 3xx, 4xx, 5xx)
+- HTTP response time
+- CPU time and memory working set
+- Bytes received and sent
+- I/O bytes and operations per second
+- Health check status
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on error rate increases or high response times
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate App Service metrics with application traces
+
+## Get Help
+
+<GetHelp />

@@ -107,7 +107,7 @@ const Header: React.FC = () => {
 
 const TrustedByTeams: React.FC = () => {
   return (
-    <div className="!border-b-1 relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-t-0 border-dashed border-signoz_slate-400 py-16 md:w-[80vw]">
+    <div className="!border-b-1 relative mx-auto flex w-full max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-t-0 border-dashed border-signoz_slate-400 py-16">
       <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
         Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
       </div>
@@ -149,7 +149,7 @@ const TrustedByTeams: React.FC = () => {
 
 const HighGrowthTeams: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 pt-14 md:w-[80vw]">
+    <section className="relative mx-auto w-full max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -222,7 +222,7 @@ const NumbersThatSpeak: React.FC = () => {
 const EnterpriseObservability: React.FC = () => {
   return (
     <SectionLayout
-      variant="bordered"
+      variant="full-width"
       className="flex flex-col items-center justify-center gap-6 !px-8 !py-20 md:!px-0"
     >
       <h2 className="mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold text-signoz_vanilla-100">
@@ -251,8 +251,8 @@ const EnterpriseObservability: React.FC = () => {
 const GettingStarted: React.FC = () => {
   return (
     <SectionLayout
-      variant="bordered"
-      className="!border-b-1 !border-t-1 flex flex-col items-center justify-center gap-10 !px-8 !py-20 md:!px-0"
+      variant="full-width"
+      className="flex flex-col items-center justify-center gap-10 border-y border-dashed border-signoz_slate-400 !px-8 !py-20 md:!px-0"
     >
       <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
         Getting Started with SigNoz
@@ -269,7 +269,7 @@ const GettingStarted: React.FC = () => {
 const PricingToScale: React.FC = () => {
   return (
     <SectionLayout
-      variant="bordered"
+      variant="full-width"
       className="flex flex-col items-center justify-center gap-10 !px-8 !py-20 md:!px-0"
     >
       <div>

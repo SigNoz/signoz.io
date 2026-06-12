@@ -103,7 +103,7 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/interactive-dashboards"
+              href="/blog/interactive-dashboards/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
@@ -410,7 +410,7 @@ const GetStarted = ({ page }) => {
     <Card className="flex flex-col gap-16 bg-transparent px-20 font-medium max-md:max-w-full max-md:px-5">
       <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:45%] bg-[center_top_-12rem] sm:bg-no-repeat">
         <section className="container flex max-h-full max-w-full flex-col !px-0">
-          <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[length:110%] bg-[center_top_calc(-250px)] bg-no-repeat">
+          <div className="bg-blur-ellipse-206">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
                 Get started with <br /> SigNoz Cloud today

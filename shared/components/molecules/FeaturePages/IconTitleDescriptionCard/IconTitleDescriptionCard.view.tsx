@@ -23,7 +23,7 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
 
   return (
     <div
-      className={`relative flex w-full flex-col items-start ${styles.gap} border border-dashed border-signoz_slate-400/50 px-8 py-6 ${className}`}
+      className={`relative flex h-full w-full flex-col items-start ${styles.gap} px-8 py-6 ${className}`}
     >
       <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-[0.05rem] text-signoz_vanilla-400">
         {icon && (

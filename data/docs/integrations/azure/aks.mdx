@@ -1,0 +1,125 @@
+---
+date: 2026-06-10
+id: aks
+title: Azure Kubernetes Service (AKS) Monitoring with SigNoz
+description: Monitor Azure Kubernetes Service (AKS) with SigNoz. Collect metrics and logs from your managed Kubernetes clusters using One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure Kubernetes Service (AKS) integration collects metrics and logs from your managed Kubernetes clusters. Once enabled, the SigNoz agent discovers AKS resources in your monitored resource groups and configures telemetry collection.
+
+<Admonition type="info">
+This integration requires SigNoz Azure agent version **v0.0.11** or later.
+</Admonition>
+
+Note: This integration is only for AKS clusters with resource type `Microsoft.ContainerService/managedClusters`.
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **Azure Kubernetes Service (AKS)** from the left panel.
+3. Toggle **Log Collection** and **Metric Collection** on.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-aks-enable.webp"
+  alt="SigNoz Azure integration panel showing AKS with Log Collection and Metric Collection toggles enabled"
+  caption="Enable log and metric collection for Azure Kubernetes Service (AKS) in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+The agent deploys the necessary Event Hubs and diagnostic settings in the background. Data starts flowing within a few minutes. Navigate to **Dashboards** and open the **Azure Kubernetes Service (AKS) Overview** dashboard to confirm metrics are appearing.
+
+## What's collected
+
+<details>
+<summary>Logs</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Resource ID | `resources.azure.resource.id` | string |
+
+</details>
+
+<details>
+<summary>Metrics</summary>
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `azure_apiserver_cpu_usage_percentage_average` | Percent | Gauge |
+| `azure_apiserver_cpu_usage_percentage_maximum` | Percent | Gauge |
+| `azure_apiserver_current_inflight_requests_average` | Count | Gauge |
+| `azure_apiserver_current_inflight_requests_total` | Count | Gauge |
+| `azure_apiserver_memory_usage_percentage_average` | Percent | Gauge |
+| `azure_apiserver_memory_usage_percentage_maximum` | Percent | Gauge |
+| `azure_etcd_cpu_usage_percentage_average` | Percent | Gauge |
+| `azure_etcd_cpu_usage_percentage_maximum` | Percent | Gauge |
+| `azure_etcd_database_usage_percentage_average` | Percent | Gauge |
+| `azure_etcd_database_usage_percentage_maximum` | Percent | Gauge |
+| `azure_etcd_memory_usage_percentage_average` | Percent | Gauge |
+| `azure_etcd_memory_usage_percentage_maximum` | Percent | Gauge |
+| `azure_kube_node_status_allocatable_cpu_cores_average` | Count | Gauge |
+| `azure_kube_node_status_allocatable_cpu_cores_total` | Count | Gauge |
+| `azure_kube_node_status_allocatable_memory_bytes_average` | Bytes | Gauge |
+| `azure_kube_node_status_allocatable_memory_bytes_total` | Bytes | Gauge |
+| `azure_kube_node_status_condition_average` | Count | Gauge |
+| `azure_kube_node_status_condition_total` | Count | Gauge |
+| `azure_kube_pod_status_phase_average` | Count | Gauge |
+| `azure_kube_pod_status_phase_total` | Count | Gauge |
+| `azure_kube_pod_status_ready_average` | Count | Gauge |
+| `azure_kube_pod_status_ready_total` | Count | Gauge |
+| `azure_node_cpu_usage_millicores_average` | Count | Gauge |
+| `azure_node_cpu_usage_millicores_maximum` | Count | Gauge |
+| `azure_node_cpu_usage_percentage_average` | Percent | Gauge |
+| `azure_node_cpu_usage_percentage_maximum` | Percent | Gauge |
+| `azure_node_disk_usage_bytes_average` | Bytes | Gauge |
+| `azure_node_disk_usage_bytes_maximum` | Bytes | Gauge |
+| `azure_node_disk_usage_percentage_average` | Percent | Gauge |
+| `azure_node_disk_usage_percentage_maximum` | Percent | Gauge |
+| `azure_node_memory_rss_bytes_average` | Bytes | Gauge |
+| `azure_node_memory_rss_bytes_maximum` | Bytes | Gauge |
+| `azure_node_memory_rss_percentage_average` | Percent | Gauge |
+| `azure_node_memory_rss_percentage_maximum` | Percent | Gauge |
+| `azure_node_memory_working_set_bytes_average` | Bytes | Gauge |
+| `azure_node_memory_working_set_bytes_maximum` | Bytes | Gauge |
+| `azure_node_memory_working_set_percentage_average` | Percent | Gauge |
+| `azure_node_memory_working_set_percentage_maximum` | Percent | Gauge |
+| `azure_node_network_in_bytes_average` | Bytes | Gauge |
+| `azure_node_network_in_bytes_maximum` | Bytes | Gauge |
+| `azure_node_network_out_bytes_average` | Bytes | Gauge |
+| `azure_node_network_out_bytes_maximum` | Bytes | Gauge |
+
+</details>
+
+## Dashboards
+
+The integration includes a pre-built AKS dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-aks-dashboard.webp"
+  alt="SigNoz dashboard showing Azure AKS metrics including pod status, node CPU and memory, API server requests, and etcd usage"
+  caption="Azure Kubernetes Service (AKS) dashboard in SigNoz"
+  className="box-shadowed-image"
+/>
+
+Key panels include:
+- Pod status (ready and phase)
+- Node status conditions and allocatable resources
+- Node CPU, memory (RSS and working set), disk, and network usage
+- API server inflight requests, CPU, and memory usage
+- etcd CPU, memory, and database usage
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on node failures or high API server load
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate cluster metrics with application traces
+
+## Get Help
+
+<GetHelp />

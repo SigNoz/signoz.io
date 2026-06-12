@@ -1,6 +1,7 @@
 import SectionLayout from '../SectionLayout'
 import GridLayout from '../GridLayout'
 import FeatureCard from '../FeatureCard'
+import Divider from '../Divider'
 import { SectionLayoutProps } from '../SectionLayout'
 
 const HeroCards: React.FC<{
@@ -24,13 +25,12 @@ const HeroCards: React.FC<{
     <SectionLayout variant={layoutVariant} className={`p-0 max-md:mt-8 ${className}`}>
       <GridLayout cols={cols}>
         {cards.map((card, index) => (
-          <FeatureCard
-            key={index}
-            icon={card.icon}
-            title={card.title}
-            description={card.description}
-            variant={variant}
-          />
+          <div key={index} className="relative">
+            <FeatureCard icon={card.icon} title={card.title} description={card.description} />
+            {variant !== 'combined' && index < cards.length - 1 && (index + 1) % cols !== 0 && (
+              <Divider orientation="vertical" className="absolute right-0 top-0 hidden md:block" />
+            )}
+          </div>
         ))}
       </GridLayout>
     </SectionLayout>

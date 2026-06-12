@@ -80,3 +80,29 @@ test('renderDocMarkdownForAgents preserves MCP install links for agent consumers
   assert.match(markdown, /cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install/)
   assert.match(markdown, /Add to Cursor \(EU\)/)
 })
+
+test('renderDocMarkdownForAgents uses listicle markdown titles from JSON', async () => {
+  const markdown = await renderDocMarkdownForAgents(
+    createDoc({
+      _id: 'doc-listicle-title',
+      slug: 'aws-monitoring/overview',
+      title: 'AWS Monitoring Overview',
+      description: 'Discover supported AWS services.',
+      docTags: ['SigNoz Cloud', 'Self-Host'],
+      body: {
+        raw: '<Listicle name="aws-monitoring" />',
+        code: `return {
+          default: function MDXContent(props) {
+            const { components } = props
+            return _jsx_runtime.jsx(components.Listicle, {
+              name: 'aws-monitoring'
+            })
+          }
+        }`,
+      },
+    })
+  )
+
+  assert.match(markdown, /^## AWS Monitoring Guides$/m)
+  assert.doesNotMatch(markdown, /^## Listicle$/m)
+})

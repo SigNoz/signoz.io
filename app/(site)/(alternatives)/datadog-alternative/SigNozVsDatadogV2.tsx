@@ -569,7 +569,7 @@ const SigNozVsDatadogV2 = () => {
                     OpenTelemetry(and that's coming from us 😃). For example, if you want to
                     instrument your Java application with OpenTelemetry, you can go to our{' '}
                     <Link
-                      href="https://signoz.io/docs/instrumentation/opentelemetry-java/"
+                      href="https://signoz.io/docs/instrumentation/java/opentelemetry-java/"
                       className="text-blue-400 hover:text-blue-300"
                       target="_blank"
                     >
@@ -611,7 +611,7 @@ const SigNozVsDatadogV2 = () => {
 
                   <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
                     <Link
-                      href="/docs/instrumentation/opentelemetry-java/"
+                      href="/docs/instrumentation/java/opentelemetry-java/"
                       target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
@@ -621,7 +621,7 @@ const SigNozVsDatadogV2 = () => {
                       </div>
                     </Link>
                     <Link
-                      href="/docs/instrumentation/javascript/"
+                      href="/docs/instrumentation/javascript/opentelemetry-nodejs/"
                       target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
@@ -631,7 +631,7 @@ const SigNozVsDatadogV2 = () => {
                       </div>
                     </Link>
                     <Link
-                      href="/docs/instrumentation/python/"
+                      href="/docs/instrumentation/opentelemetry-python/"
                       target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
@@ -641,7 +641,7 @@ const SigNozVsDatadogV2 = () => {
                       </div>
                     </Link>
                     <Link
-                      href="/docs/instrumentation/golang/"
+                      href="/docs/instrumentation/opentelemetry-golang/"
                       target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
@@ -651,7 +651,7 @@ const SigNozVsDatadogV2 = () => {
                       </div>
                     </Link>
                     <Link
-                      href="/docs/ec2-monitoring/"
+                      href="/docs/aws-monitoring/ec2/"
                       target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
@@ -1772,7 +1772,7 @@ const SigNozVsDatadogV2 = () => {
                 But if you're looking to use OpenTelemetry, SigNoz is a better choice. OpenTelemetry
                 Collector has a{' '}
                 <Link
-                  href="https://signoz.io/docs/userguide/hostmetrics/"
+                  href="https://signoz.io/docs/infrastructure-monitoring/hostmetrics/"
                   className="text-blue-400 hover:text-blue-300"
                   target="_blank"
                 >

@@ -52,7 +52,7 @@ const HeroSection = () => {
       </div>
       <SectionLayout
         variant="bordered"
-        className="mx-8 block !w-[100vw] border-b border-dashed border-signoz_slate-400 md:hidden"
+        className="mx-8 block w-full border-b border-dashed border-signoz_slate-400 md:hidden"
       >
         <Image
           src="/img/events/kubecon-cloudnativecon-north-america-2025/hero-illustration-md.png"

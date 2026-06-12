@@ -6,11 +6,11 @@ description: Configure the OpenTelemetry Collector on your Docker Swarm cluster 
 doc_type: howto
 ---
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install) provides a working config that collects host metrics, container metrics, container logs, and forwards application traces out of the box. This page explains what each component in that config does and how to customize it for your Swarm environment.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/) provides a working config that collects host metrics, container metrics, container logs, and forwards application traces out of the box. This page explains what each component in that config does and how to customize it for your Swarm environment.
 
 ## Prerequisites
 
-- OpenTelemetry Collector installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install))
+- OpenTelemetry Collector installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/))
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Access to create and edit the collector configuration file
 
@@ -82,7 +82,7 @@ service:
       receivers: [otlp, hostmetrics]
 ```
 
-You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/).
 
 <KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed={true}>
 Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk metrics instead of the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
@@ -177,7 +177,7 @@ service:
       receivers: [otlp, hostmetrics, docker_stats]
 ```
 
-The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/).
 
 ### Map container labels to metric attributes (Swarm)
 
@@ -238,7 +238,7 @@ service:
       receivers: [otlp, filelog]
 ```
 
-The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/).
 
 ## Tune Batch and Memory Limiter
 
@@ -315,9 +315,9 @@ Replace `my-app-container:9090` with the hostname (or IP) and port of the Promet
 
 ## Swarm Networking
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install) uses `--publish ... mode=host` so each node exposes 4317 and 4318. Application containers can reach the collector via `localhost` when on the same node, or via the node IP when on a different node.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/) uses `--publish ... mode=host` so each node exposes 4317 and 4318. Application containers can reach the collector via `localhost` when on the same node, or via the node IP when on a different node.
 
-For overlay networks, attach the collector to your app's network so services can reach it by service name. See the optional overlay network step in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install).
+For overlay networks, attach the collector to your app's network so services can reach it by service name. See the optional overlay network step in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/).
 
 ## Validate
 
@@ -338,6 +338,6 @@ After editing the config:
 
 ## Next Steps
 
-- [Docker Swarm Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/overview)
+- [Docker Swarm Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

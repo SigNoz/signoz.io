@@ -40,7 +40,7 @@ export const AgentNativeObservability = ({ className }: { className?: string }) 
     <>
       <section
         className={cn(
-          'mx-auto w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          'mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400',
           className
         )}
       >

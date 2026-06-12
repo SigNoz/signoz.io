@@ -49,7 +49,7 @@ export default function BlogHeader({
   return (
     <div className=" p-4">
       <div className="mb-4">
-        {/* <Link href="/blog" className="flex items-center gap-4">
+        {/* <Link href="/blog/" className="flex items-center gap-4">
           <ArrowLeft size={16} /> Back to Blog
         </Link> */}
       </div>

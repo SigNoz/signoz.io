@@ -49,7 +49,7 @@ const talks = {
 
 const KubeConPage: React.FC = () => {
   return (
-    <div className="mx-auto min-h-screen w-[100vw] border-x border-dashed border-signoz_slate-400 md:w-[80vw]">
+    <div className="mx-auto min-h-screen w-full max-w-8xl border-x border-dashed border-signoz_slate-400">
       <KubeconHeroSection />
 
       <TalksLayout
