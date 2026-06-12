@@ -1,17 +1,27 @@
 #!/usr/bin/env node
 
 /**
- * Pre-commit warning: nudge authors toward `published_date` + `updated_date`
- * instead of the legacy `date` frontmatter field.
+ * Pre-commit check for date frontmatter fields in content MDX files.
  *
- * This script is intentionally a WARNING (non-blocking).
- * It exits 0 so commits are never rejected.
+ * BLOCKING (exits 1) for invalid combinations:
+ *   - `date` mixed with `published_date` or `updated_date`
+ *   - `updated_date` without `published_date`
+ *
+ * NON-BLOCKING (warning only) for deprecated usage:
+ *   - `date` used alone (legacy — prefer `published_date` + `updated_date`)
+ *
+ * Valid combinations:
+ *   - `published_date` + `updated_date`
+ *   - `published_date` only
+ *   - `date` only (legacy, deprecated)
+ *   - none (CMS timestamps used as fallback)
  *
  * See utils/dateUtils.ts for the full date-field semantics.
  */
 
 const fs = require('fs')
 
+const RED = '\x1b[31m'
 const YELLOW = '\x1b[33m'
 const RESET = '\x1b[0m'
 const BOLD = '\x1b[1m'
@@ -50,10 +60,27 @@ function checkFile(filePath) {
   const hasPublishedDate = /^published_date\s*:/m.test(frontmatter)
   const hasUpdatedDate = /^updated_date\s*:/m.test(frontmatter)
 
-  // Warn if file has `date` but neither of the new fields
-  if (hasDate && !hasPublishedDate && !hasUpdatedDate) {
-    return filePath
+  // Invalid: date mixed with new fields
+  if (hasDate && (hasPublishedDate || hasUpdatedDate)) {
+    return {
+      file: filePath,
+      error: 'date must not be combined with published_date or updated_date',
+    }
   }
+
+  // Invalid: updated_date without published_date
+  if (hasUpdatedDate && !hasPublishedDate) {
+    return {
+      file: filePath,
+      error: 'updated_date requires published_date',
+    }
+  }
+
+  // Warning: legacy date field used alone
+  if (hasDate && !hasPublishedDate && !hasUpdatedDate) {
+    return { file: filePath, warning: true }
+  }
+
   return null
 }
 
@@ -67,20 +94,45 @@ function main() {
   )
   if (contentFiles.length === 0) return
 
-  const warnings = contentFiles.map(checkFile).filter(Boolean)
-  if (warnings.length === 0) return
+  const results = contentFiles.map(checkFile).filter(Boolean)
+  if (results.length === 0) return
 
-  console.log('')
-  console.log(`${YELLOW}${BOLD}⚠  date field deprecation notice${RESET}`)
-  console.log(
-    `${YELLOW}The "date" frontmatter field is deprecated. Prefer "published_date" and "updated_date".${RESET}`
-  )
-  console.log(`${YELLOW}See utils/dateUtils.ts for details.${RESET}`)
-  console.log('')
-  for (const file of warnings) {
-    console.log(`${YELLOW}  → ${file}${RESET}`)
+  const errors = results.filter((r) => r.error)
+  const warnings = results.filter((r) => r.warning)
+
+  if (errors.length > 0) {
+    console.log('')
+    console.log(`${RED}${BOLD}✗  Invalid date field combinations${RESET}`)
+    for (const { file, error } of errors) {
+      console.log(`${RED}  ✗ ${file}: ${error}${RESET}`)
+    }
+    console.log('')
+    console.log(`${RED}Valid combinations:${RESET}`)
+    console.log(`${RED}  - published_date + updated_date  (new-style)${RESET}`)
+    console.log(`${RED}  - published_date only            (published, never updated)${RESET}`)
+    console.log(`${RED}  - date only                      (legacy, deprecated)${RESET}`)
+    console.log(`${RED}See utils/dateUtils.ts for details.${RESET}`)
+    console.log('')
+    process.exit(1)
   }
-  console.log('')
+
+  if (warnings.length > 0) {
+    console.log('')
+    console.log(`${YELLOW}${BOLD}⚠  date field deprecation notice${RESET}`)
+    console.log(
+      `${YELLOW}The "date" frontmatter field is deprecated. Prefer "published_date" and "updated_date".${RESET}`
+    )
+    console.log(`${YELLOW}See utils/dateUtils.ts for details.${RESET}`)
+    console.log('')
+    for (const { file } of warnings) {
+      console.log(`${YELLOW}  → ${file}${RESET}`)
+    }
+    console.log('')
+  }
 }
 
-main()
+module.exports = { checkFile, getFiles, main }
+
+if (require.main === module) {
+  main()
+}

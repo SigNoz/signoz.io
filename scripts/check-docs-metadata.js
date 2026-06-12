@@ -228,53 +228,71 @@ function validateMetadata(filePath, options = {}) {
     }
   }
 
-  // Validate date field (required — accepts 'date' or 'published_date')
-  const dateFieldKey = fieldMap.has('published_date')
-    ? 'published_date'
-    : fieldMap.has('date')
-      ? 'date'
-      : null
+  // Validate date field combinations.
+  // Valid: (published_date + updated_date), (published_date only), (date only), (none).
+  // Invalid: date mixed with published_date or updated_date; updated_date without published_date.
+  const hasPublishedDate = fieldMap.has('published_date')
+  const hasUpdatedDate = fieldMap.has('updated_date')
+  const hasDate = fieldMap.has('date')
+
+  if (hasDate && (hasPublishedDate || hasUpdatedDate)) {
+    errors.push(
+      'date must not be combined with published_date or updated_date — use either date (legacy) or published_date + updated_date (new-style)'
+    )
+  }
+
+  if (hasUpdatedDate && !hasPublishedDate) {
+    errors.push('updated_date requires published_date — set both or use date instead')
+  }
+
+  // At least one date field required
+  const dateFieldKey = hasPublishedDate ? 'published_date' : hasDate ? 'date' : null
   if (!dateFieldKey) {
-    errors.push('missing date')
-  } else {
-    const dateValue = fieldMap.get(dateFieldKey).replace(/['"]/g, '').trim()
+    errors.push('missing date — set published_date or date')
+  }
+
+  // Validate format and recency for each date field present
+  const dateFieldsToValidate = ['published_date', 'updated_date', 'date'].filter((f) =>
+    fieldMap.has(f)
+  )
+  for (const key of dateFieldsToValidate) {
+    const dateValue = fieldMap.get(key).replace(/['"]/g, '').trim()
     const datePattern = /^\d{4}-\d{2}-\d{2}$/
     if (!datePattern.test(dateValue)) {
-      errors.push('invalid date format - use YYYY-MM-DD')
+      errors.push(`invalid ${key} format - use YYYY-MM-DD`)
     } else {
-      // Check if date is valid
       const date = new Date(dateValue)
       if (isNaN(date.getTime())) {
-        errors.push('invalid date value')
-      } else {
-        if (shouldEnforceRecentDate) {
-          const today = new Date()
-          today.setHours(0, 0, 0, 0)
+        errors.push(`invalid ${key} value`)
+      } else if (
+        shouldEnforceRecentDate &&
+        key === (hasUpdatedDate ? 'updated_date' : dateFieldKey)
+      ) {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
 
-          const dateToCheck = new Date(date)
-          dateToCheck.setHours(0, 0, 0, 0)
+        const dateToCheck = new Date(date)
+        dateToCheck.setHours(0, 0, 0, 0)
 
-          // Allow dates up to 7 days in the future
-          const maxFutureDate = new Date(today)
-          maxFutureDate.setDate(maxFutureDate.getDate() + 7)
+        const maxFutureDate = new Date(today)
+        maxFutureDate.setDate(maxFutureDate.getDate() + 7)
 
-          // Allow dates up to 7 days in the past
-          const minPastDate = new Date(today)
-          minPastDate.setDate(minPastDate.getDate() - 7)
+        const minPastDate = new Date(today)
+        minPastDate.setDate(minPastDate.getDate() - 7)
 
-          if (dateToCheck > maxFutureDate) {
-            errors.push('date cannot be more than 7 days in the future')
-          } else if (dateToCheck < minPastDate) {
-            errors.push('date cannot be more than 7 days in the past')
-          }
+        if (dateToCheck > maxFutureDate) {
+          errors.push(`${key} cannot be more than 7 days in the future`)
+        } else if (dateToCheck < minPastDate) {
+          errors.push(`${key} cannot be more than 7 days in the past`)
         }
       }
     }
   }
 
-  // Compare frontmatter date with git commit date
-  if (dateFieldKey && shouldEnforceRecentDate) {
-    const frontmatterDate = fieldMap.get(dateFieldKey).replace(/['"]/g, '').trim()
+  // Compare the most-recent frontmatter date with git commit date
+  const mostRecentDateKey = hasUpdatedDate ? 'updated_date' : dateFieldKey
+  if (mostRecentDateKey && shouldEnforceRecentDate) {
+    const frontmatterDate = fieldMap.get(mostRecentDateKey).replace(/['"]/g, '').trim()
     const gitDate = getGitAuthorDate(filePath)
 
     if (gitDate) {
@@ -283,7 +301,7 @@ function validateMetadata(filePath, options = {}) {
 
       if (frontDate < commitDate) {
         warnings.push(
-          `frontmatter date (${frontmatterDate}) is before git commit date (${gitDate})`
+          `frontmatter ${mostRecentDateKey} (${frontmatterDate}) is before git commit date (${gitDate})`
         )
       }
     }
@@ -375,10 +393,14 @@ function main() {
     console.error('  - title: Non-empty title field')
     console.error('  - description: Non-empty description field')
     console.error('  - tags: Array of tags (recommended)')
-    console.error('\nExample:')
+    console.error('\nDate field rules:')
+    console.error('  - Use date (legacy) OR published_date — never both')
+    console.error('  - updated_date requires published_date')
+    console.error('  - Do not mix date with published_date or updated_date')
+    console.error('\nExample (new-style):')
     console.error('---')
     console.error('title: My Documentation Page')
-    console.error(`date: ${new Date().toISOString().split('T')[0]}`)
+    console.error(`published_date: ${new Date().toISOString().split('T')[0]}`)
     console.error('description: A brief description of this page for SEO')
     console.error('tags: ["SigNoz Cloud", "Self-Host"]')
     console.error('---\n')

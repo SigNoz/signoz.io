@@ -6,24 +6,23 @@
  *   - `updated_date`   — when the article was last meaningfully updated
  *   - `date`           — **@deprecated** legacy field; prefer `published_date` + `updated_date`
  *
- * The `date` field is kept for backwards compatibility. During the transition
- * period every consumer falls back to `date` when the new fields are absent.
+ * Valid field combinations (enforced by check-docs-metadata.js):
+ *   1. `published_date` + `updated_date`  — new-style explicit dates
+ *   2. `published_date` only              — published, never updated
+ *   3. `date` only                        — legacy articles
+ *   4. none                               — falls back to CMS timestamps
  *
- * Fallback priority (most → least specific):
+ * Mixing `date` with `published_date` or `updated_date` is forbidden.
+ * Setting `updated_date` without `published_date` is forbidden.
  *
- *   published_date takes priority (only these two places):
- *     "Published on:" UI label:  published_date → (date, only when updated_date exists) → null
- *       → getFormattedDates() in ArticleLayout, OpenTelemetryHubLayout
- *     Schema.org datePublished:  published_date → date → publishedAt → updatedAt → createdAt
- *       → resolvePublishedDate() in structuredData.ts, hub route metadata (publishedTime)
+ * Display:
+ *   "Published on:" → published_date (null for legacy `date`-only articles)
+ *   "Last Updated:" → updated_date, or `date` for legacy articles (null when only published_date)
  *
- *   updated_date takes priority (everything else):
- *     "Last Updated:" UI label:  updated_date → (date, only when published_date is absent) → null
- *     Sort / RSS / sitemap:      updated_date → published_date → date → publishedAt → updatedAt → createdAt
- *     Schema.org dateModified:   updated_date → published_date → date → updatedAt → publishedAt → createdAt
- *     Related article cards:     updated_date → published_date → date → publishedAt → updatedAt → createdAt
- *     Resource-center cards:     updated_date → published_date → date → publishedAt → updatedAt → createdAt
- *       → resolveLatestDate() used in rssUtils, sitemap, content.ts, mdxUtils related articles
+ * SEO / sorting:
+ *   datePublished:  published_date → date → publishedAt → updatedAt → createdAt
+ *   dateModified:   updated_date → published_date → date → publishedAt → updatedAt → createdAt
+ *   sort/RSS:       updated_date → published_date → date → publishedAt → updatedAt → createdAt
  */
 
 type RawDateFields = {
@@ -41,16 +40,14 @@ type RawDateFields = {
  *
  * | published_date | updated_date | date | → publishedDate  | → updatedDate  | → sortDate       |
  * |----------------|-------------|------|------------------|----------------|------------------|
- * | set            | set         | *    | published_date   | updated_date   | updated_date     |
- * | set            | —           | *    | published_date   | null           | published_date   |
- * | —              | set         | set  | date             | updated_date   | updated_date     |
- * | —              | set         | —    | null             | updated_date   | updated_date     |
+ * | set            | set         | —    | published_date   | updated_date   | updated_date     |
+ * | set            | —           | —    | published_date   | null           | published_date   |
  * | —              | —           | set  | null             | date           | date             |
  * | —              | —           | —    | null             | null           | null             |
  */
 export function deriveDates(content: RawDateFields) {
-  const publishedDate = content.published_date || (content.updated_date ? content.date : null)
-  const updatedDate = content.updated_date || (content.published_date ? null : content.date)
+  const publishedDate = content.published_date || null
+  const updatedDate = content.updated_date || (content.published_date ? null : content.date) || null
   const sortDate = content.updated_date || content.published_date || content.date || ''
   return { publishedDate, updatedDate, sortDate }
 }
@@ -72,13 +69,12 @@ export function formatDisplayDate(dateStr: string | undefined | null): string | 
 /**
  * Get formatted display dates from **already-transformed** content.
  *
- * Transforms (`deriveDates`) resolve `published_date` and `updated_date`;
- * the `content.date` fallback on `updatedDate` is a safety net for content
- * that somehow bypasses transforms (should not happen, but defensive).
+ * Transforms (`deriveDates`) set `updated_date` to the correct value
+ * (including the legacy `date` fallback), so no secondary fallback is needed.
  */
 export function getFormattedDates(content: RawDateFields) {
   const publishedDate = formatDisplayDate(content.published_date)
-  const updatedDate = formatDisplayDate(content.updated_date ?? content.date)
+  const updatedDate = formatDisplayDate(content.updated_date)
   return { publishedDate, updatedDate }
 }
 
