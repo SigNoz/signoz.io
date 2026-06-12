@@ -1,0 +1,159 @@
+---
+date: 2026-06-12
+id: saml-google
+title: SAML Authentication with Google Workspace
+description: Set up SAML 2.0 SSO between Google Workspace and SigNoz so your team signs in to SigNoz with their existing Google accounts.
+doc_type: tutorial
+---
+
+## Overview
+
+This guide walks you through setting up SAML (Security Assertion Markup Language) authentication between Google Workspace and SigNoz.
+
+**What you'll accomplish:**
+
+- Configure Google Workspace as an identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing Google Workspace accounts
+
+<Admonition type="info">
+Google Workspace also supports a simpler OAuth2 sign-on method. If you don't specifically need SAML, see [Single Sign-on Authentication With Google Workspace](https://signoz.io/docs/manage/administrator-guide/sso/user-guides/sso-google/) instead.
+</Admonition>
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **Google Workspace account** with Super-Admin access to the [Google Admin console](https://admin.google.com)
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Configuration Steps
+
+### Step 1: Create a custom SAML app in Google Workspace
+
+1. Sign in to the [Google Admin console](https://admin.google.com) as a super admin.
+2. Go to **Apps** > **Web and mobile apps**.
+3. Click **Add app** > **Add custom SAML app**.
+4. Enter an **App name** (e.g., `SigNoz`), then click **Continue**.
+
+### Step 2: Copy Google's IdP details
+
+On the **Google Identity Provider details** page, Google shows the values SigNoz needs:
+
+- **SSO URL** (e.g., `https://accounts.google.com/o/saml2/idp?idpid=...`)
+- **Entity ID** (e.g., `https://accounts.google.com/o/saml2?idpid=...`)
+- **Certificate**
+
+Click **DOWNLOAD CERTIFICATE**, copy the **SSO URL** and **Entity ID**, then click **Continue**. You'll add these to SigNoz in [Step 6](#step-6-configure-signoz-for-saml-authentication).
+
+### Step 3: Enter SigNoz service provider details
+
+On the **Service provider details** page, enter the following:
+
+| Field | Value |
+|-------|-------|
+| **ACS URL** | `https://<your-instance-url>/api/v1/complete/saml` |
+| **Entity ID** | `<your-instance-host>` (your SigNoz host without `https://`, e.g., `signoz.example.com`) |
+| **Start URL** *(optional)* | `https://<your-instance-url>` |
+| **Signed response** | Leave unchecked |
+| **Name ID format** | `EMAIL` |
+| **Name ID** | `Basic Information > Primary email` |
+
+Click **Continue**.
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/saml-google/service-provider-details.webp" alt="SigNoz service provider details in Google" />
+  <figcaption><i>Enter your SigNoz details on the Service provider details page</i></figcaption>
+</figure>
+
+### Step 4: Map SAML attributes
+
+On the **Attribute mapping** page, add these mappings:
+
+| Google Directory attribute | App attribute |
+|----------------------------|---------------|
+| **Basic Information > Primary email** | `email` |
+| **Basic Information > First name** | `name` |
+
+Click **Finish**.
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/saml-google/gadmin-attribute-mapping.webp" alt="SAML attribute mapping in Google" />
+  <figcaption><i>Map Google directory fields to SigNoz attributes</i></figcaption>
+</figure>
+
+### Step 5: Turn on user access
+
+A new app is off by default. To let users sign in:
+
+1. On the app's page, open the **User access** card.
+2. Set the service status to **ON for everyone**, or turn it on for specific organizational units or groups.
+3. Click **Save**.
+
+<Admonition type="note">
+User access changes can take a few minutes to take effect.
+</Admonition>
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/saml-google/user-access.webp" alt="Turn on user access for the SigNoz app" />
+  <figcaption><i>Turn on the app for your users</i></figcaption>
+</figure>
+
+### Step 6: Configure SigNoz for SAML authentication
+
+Now add the Google IdP details you copied in [Step 2](#step-2-copy-googles-idp-details) to SigNoz:
+
+1. **Navigate to SigNoz Settings:**
+
+   - Go to your SigNoz dashboard
+   - Click on **Settings** in the left sidebar
+   - Navigate to **Organization Settings**
+   - Click on **Authenticated Domains**
+
+2. **Add New Domain:**
+
+   - Click **Add Domain**
+   - Enter the domain your users log in with (e.g., for emails like `john@example.com`, enter `example.com`)
+
+3. **Enter Configuration Details:**
+
+   ```
+   Domain: example.com
+   SAML ACS URL/SAML IDP URL: <google-sso-url>
+   SAML X.509 Certificate: <google-certificate-data>
+   SAML Entity ID: <google-entity-id>
+   Skip AuthN Requests Signed: False
+   ```
+
+   **Where to find these values:**
+
+   - **Domain**: The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)
+   - **SAML ACS URL/SAML IDP URL**: Google's **SSO URL** from [Step 2](#step-2-copy-googles-idp-details)
+   - **SAML X.509 Certificate**: The certificate you downloaded from Google in [Step 2](#step-2-copy-googles-idp-details)
+   - **SAML Entity ID**: Google's **Entity ID** from [Step 2](#step-2-copy-googles-idp-details)
+
+4. **Save Configuration:**
+   - Click **Save** to apply the SAML configuration
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/saml-google/signoz-saml-config.webp" alt="SAML configuration in SigNoz Authenticated Domains" />
+  <figcaption><i>Add Google's IdP details in SigNoz</i></figcaption>
+</figure>
+
+### Step 7: Test the integration
+
+1. **Log out** of SigNoz if you're currently logged in.
+2. **Open** your SigNoz login page in a private/incognito window.
+3. **Log in** with a Google Workspace user email.
+4. **Verify** that you're redirected to Google for authentication.
+5. **Complete** the Google login.
+6. **Confirm** you're logged into SigNoz.
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- **"Authentication failed" error**: Check that the ACS URL in Google exactly matches `https://<your-instance-url>/api/v1/complete/saml`, and that the SSO URL, Entity ID, and certificate in SigNoz match Google's IdP details.
+- **Wrong values entered**: Make sure you added Google's details (SSO URL, Entity ID, certificate) to SigNoz, not your SigNoz ACS URL and Entity ID.
+- **User can't sign in**: Make sure the app's **User access** is **ON** for that user (see [Step 5](#step-5-turn-on-user-access)), and allow a few minutes for it to take effect.
+- **Locked out?**: If you can't log in because of a faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
