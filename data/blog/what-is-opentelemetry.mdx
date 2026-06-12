@@ -71,7 +71,19 @@ The primary purpose of the OTel specification is to create a vendor-neutral stan
 
 The OpenTelemetry architecture consists of the following key components:
 
+| Component | What it does | Why it matters |
+|---|---|---|
+| **API** | Interface for instrumenting code | Safe dependency; no-op if SDK is absent |
+| **SDK** | Processes, samples, and exports telemetry | Pluggable implementation of the API |
+| **OTLP** | Wire protocol for telemetry transport | Efficient, standard format accepted by any compatible backend |
+| **Collector** | Receives, processes, and exports telemetry | Centralized pipeline for advanced use-cases; decouples apps from backends |
+| **Semantic Conventions** | Standard attribute names | Consistent data across languages and services |
+
+Let's look at each of these in more detail.
+
 ### 1. OpenTelemetry API vs SDK
+
+In short: the **API** is the lightweight interface you code against; the **SDK** is the engine that actually collects, processes, and exports the data. For a deeper comparison, see [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
 
 Beginners often confuse these two, but the distinction is vital for stability.
 
@@ -87,6 +99,8 @@ The primary reason for separating the API from the SDK is that it makes it easie
 
 OTLP is the native language of OpenTelemetry. It is a highly efficient protocol used to transmit data from the SDK to the Collector, or from the Collector to a backend. It supports both gRPC and HTTP transport. While OTel supports other formats (like Zipkin or Jaeger), OTLP is the recommended default protocol for efficiently transporting telemetry.
 
+Because OTLP is the standard wire format, any backend that supports it can ingest your data without conversion, which is what makes backend portability practical. Learn more in our deep dive on [what is OTLP](https://signoz.io/blog/what-is-otlp/).
+
 ### 3. The OpenTelemetry Collector
 
 The [OTel Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is a vendor-agnostic proxy that sits between your applications and your backend. While optional, it is highly recommended for production environments.
@@ -99,10 +113,9 @@ It performs three main jobs:
 
 You can deploy the Collector as an **Agent** (a daemon running on every host) or as a **Gateway** (a centralized service).
 
-### 4. Semantic conventions
+### 4. Semantic Conventions
 
-These define common attribute names (e.g., `http.request.method`, `db.system`) for uniformity across different components and services. This ensures that a database call looks the same whether it comes from a Python app or a Java app.
-
+These define common attribute names (e.g., `http.request.method`, `db.system`) for uniformity across different components and services. This ensures that a database call looks the same whether it comes from a Python app or a Java app. In practice, this consistency means your dashboards and alert queries work the same way regardless of which service or language generated the data.
 
 The specification is what keeps OpenTelemetry *modular, extensible, and future-proof*. It's what enables you to instrument once and choose (or switch) backends later whether that's SigNoz, Prometheus, Grafana, Datadog, or any other observability tool that supports OTel.
 
