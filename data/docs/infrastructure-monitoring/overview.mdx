@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-06-12
 id: overview
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
@@ -277,6 +277,25 @@ The **Logs** tab provides real-time logs from selected Kubernetes pods, helping 
 - Seamless integration with the Logs Explorer feature.
 - The "Explore in Logs Explorer" button opens the full logs interface, keeping time ranges and filters.
 - Highlighted warning and error messages.
+
+### Volumes View: Monitoring Persistent Volume Claims
+
+The **Volumes View** lists the Persistent Volume Claims (PVCs) in your cluster so you can track storage capacity and inode usage for each volume.
+
+#### Table Columns
+
+- **PVC Name**: Name of the Persistent Volume Claim.
+- **Namespace Name**: The namespace where the PVC is used.
+- **Capacity**: Total storage capacity of the volume.
+- **Used**: Amount of storage currently used on the volume.
+- **Available**: Amount of storage available on the volume.
+- **Inodes**: Total number of inodes on the volume.
+- **Inodes Used**: Number of inodes in use on the volume.
+- **Inodes Free**: Number of free inodes on the volume.
+
+<Admonition type="info">
+Inode columns help you catch inode exhaustion, where a volume runs out of inodes and cannot create new files even though free disk space remains. Volume metrics are collected by the `kubeletstats` receiver — see [Kubernetes Metrics](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/) to make sure the `volume` metric group is enabled.
+</Admonition>
 
 ### Consistent Monitoring Across Views
 
