@@ -1,15 +1,15 @@
 ---
-
-title: "What is OpenTelemetry? [Everything You Need to Know]"
+title: "What is OpenTelemetry? Architecture, Benefits, and How It Works"
 # /blog/what-is-opentelemetry/ redirects to /opentelemetry/ — keep the hub in sitemap, not this URL.
 excludeFromSitemap: true
 date: "2026-06-01"
 tags: [OpenTelemetry, Observability]
-authors: [elizabeth_mathew]
-description: "Confused by what is opentelemetry? We break down the basics of OTel, the Collector, and how to instrument your apps in our all-in-one OTel learning hub."
+authors: [elizabeth_mathew, dhruv_ahuja]
+description: "Learn what OpenTelemetry is, how it collects traces, metrics, and logs, its core architecture, benefits, challenges, and how to get started with SigNoz."
 keywords: [OpenTelemetry, OTel, what is opentelemetry, observability framework, OTLP, OpenTelemetry Collector, distributed tracing, OTel vs Prometheus]
 related_articles:
   - '/blog/opentelemetry-ui'
+  - '/blog/opentelemetry-backend'
   - '/blog/opentelemetry-collector-prometheus-receiver'
   - '/blog/opentelemetry-collector-complete-guide'
   - '/opentelemetry/collector-nodejs'
@@ -55,7 +55,7 @@ Using OTel, you will NOT be tied to a single vendor. It's very similar to *plug 
 
 ### Cross-Platform
 
-Supports various languages [Java, Python, Go, etc.] and platforms, making it versatile and adaptive for different development environments.
+Supports various languages like [Java](https://signoz.io/blog/opentelemetry-java/), [Python](https://signoz.io/opentelemetry/python/), [Node.js](https://signoz.io/opentelemetry/nodejs/), and [Go](https://signoz.io/opentelemetry/go/), making it versatile and adaptive for different development environments.
 
 ## The OpenTelemetry Architecture
 
@@ -65,13 +65,13 @@ alt="OpenTelemetry Framework"
 caption="OpenTelemetry Framework"
 />
 
-At the heart of OTel is its **specification**, a formal set of guidelines that defines how telemetry data should be generated, processed, and exported. The specification ensures interoperability across programming languages, tools, and vendors, providing a consistent model for observability data.
+At the heart of the [OpenTelemetry architecture](https://signoz.io/blog/opentelemetry-architecture/) is its **specification**, a formal set of guidelines that defines how telemetry data should be generated, processed, and exported. The specification ensures interoperability across programming languages, [OpenTelemetry tools](https://signoz.io/blog/opentelemetry-tools/), and vendors, providing a consistent model for observability data.
 
 The primary purpose of the OTel specification is to create a vendor-neutral standard for telemetry. It ensures that whether you're instrumenting an application in Go, Java, Python, or any other supported language, the data produced follows the same structure, semantics, and protocols.
 
 The OpenTelemetry architecture consists of the following key components:
 
-### 1. OTel API & OTel SDK
+### 1. OpenTelemetry API vs SDK
 
 Beginners often confuse these two, but the distinction is vital for stability.
 
@@ -118,7 +118,7 @@ We have already skimmed through the fact that OTel lets us collect, process and 
 
 4/  The processed data is then converted, if needed, into formats expected by observability backends and passed to exporters. Exporters are responsible for delivering the data to its destination.
 
-5/ Before data leaves the Collector, it may undergo additional time-based batching and is then routed to one or more backend systems like SigNoz or any other cloud APM service.
+5/ Before data leaves the Collector, it may undergo additional time-based batching and is then routed to one or more backend systems like SigNoz or any other cloud [OpenTelemetry APM](https://signoz.io/blog/opentelemetry-apm/) service.
 
 Thus, we understand that OTel enables a *telemetry pipeline* that begins inside your application and ends in your observability backend:
 
@@ -150,13 +150,13 @@ OTel moves observability from a "siloed operational task" to a developer concern
 
 ## Challenges and Considerations
 
-While OTel is powerful, it comes with a learning curve.
+While OTel is powerful, there is a learning curve before you can consider your [OpenTelemetry integration ready for production](https://signoz.io/guides/is-opentelemetry-ready-for-production/).
 
 **Configuration Complexity:** The Collector is extremely flexible, which means it can be complex to configure correctly. Managing sampling rates and memory limits on the Collector requires attention.
 
 **Version Maturity:** Tracing is fully stable across most languages. Metrics are stable in major languages but still evolving in others. Logging is the newest signal and has varying levels of maturity depending on the language SDK.
 
-## OpenTelemetry vs. Prometheus & Jaeger
+## OpenTelemetry vs Prometheus & Jaeger
 
 A common confusion is how OTel compares to existing tools.
 
@@ -166,9 +166,13 @@ A common confusion is how OTel compares to existing tools.
 | **Signals** | Traces, Metrics, Logs | Metrics only (mostly) | Traces only |
 | **Backend?** | No | Yes | Yes |
 
-**OTel vs. Prometheus:** They are complementary. OTel can scrape metrics and export them *to* Prometheus. Alternatively, OTel can replace the scraping mechanism entirely, sending metrics directly to a backend that supports PromQL (like SigNoz).
+### OpenTelemetry vs Prometheus
 
-**OTel vs. Jaeger:** Jaeger is a backend for storing and viewing traces. OTel is the pipeline that sends data *to* Jaeger. Note that the Jaeger *client libraries* have been deprecated in favor of OpenTelemetry SDKs.
+They are complementary. OTel can scrape metrics and export them *to* Prometheus. Alternatively, OTel can replace the scraping mechanism entirely, sending metrics directly to a backend that supports PromQL (like SigNoz).
+
+### OpenTelemetry vs Jaeger
+
+Jaeger is a backend for storing and viewing traces. OTel is the pipeline that sends data *to* Jaeger. Note that the Jaeger *client libraries* have been deprecated in favor of OpenTelemetry SDKs.
 
 ## Getting Started With OpenTelemetry: The Workflow
 
