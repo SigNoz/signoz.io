@@ -14,6 +14,7 @@ import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
 import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFromRendered'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+import { resolveLatestDate, formatDisplayDate } from '@/utils/dateUtils'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
 
@@ -26,14 +27,8 @@ const DocContent: React.FC<{
   breadcrumbs?: BreadcrumbCrumb[]
 }> = ({ title, post, toc, hideTableOfContents, editLink, breadcrumbs }) => {
   const pathname = usePathname()
-  const lastUpdatedDate = post?.updated_date || post?.lastmod || post?.published_date || post?.date
-  const formattedDate = lastUpdatedDate
-    ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null
+  const lastUpdatedDate = post?.lastmod || resolveLatestDate(post)
+  const formattedDate = formatDisplayDate(lastUpdatedDate)
   const isOnboarding = isDocsOnboardingPathname(pathname)
   // Check if this is the introduction page (exclude copy functionality)
   const isIntroductionPage = post.slug === 'introduction'

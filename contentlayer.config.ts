@@ -16,6 +16,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
+import { resolvePublishedDate, resolveLatestDate } from './utils/dateUtils'
 
 // heroicon mini link
 const icon = fromHtmlIsomorphic(
@@ -196,9 +197,8 @@ export const Doc = defineDocumentType(() => ({
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
         inLanguage: siteMetadata.language,
         wordCount: doc.body.raw.split(/\s+/g).filter(Boolean).length,
-        datePublished: doc.published_date || doc.date || '2025-06-06', // Setting it Jun 06, 2025 as date metadata doesn't exist for docs, TODO: add date to all existing doc files
-        dateModified:
-          doc.updated_date || doc.published_date || doc.lastmod || doc.date || '2025-06-06',
+        datePublished: resolvePublishedDate(doc) || '2025-06-06',
+        dateModified: doc.lastmod || resolveLatestDate(doc) || '2025-06-06',
       }),
     },
   },

@@ -40,10 +40,16 @@ export const getPostLink = (config, post) => {
   return `${config.siteUrl}/${normaliseSlug(postPath)}`
 }
 
+/**
+ * Local-only date resolution for ESM scripts that can't import .ts files.
+ * This MUST stay in sync with resolveLatestDate() in utils/dateUtils.ts.
+ * does not have publishedAt, updatedAt, createdAt since not from CMS
+ */
+export const resolveLatestDate = (content) => content?.updated_date ?? content?.published_date ?? content?.date ?? undefined
+
 export const generateRssItem = (config, post) => {
   const link = getPostLink(config, post)
-  // Prefer updated_date (most recent) → published_date → legacy date fields
-  const date = getDefaultDate(post.updated_date ?? post.published_date ?? post.date ?? post.publishedAt ?? post.updatedAt)
+  const date = getDefaultDate(resolveLatestDate(post))
 
   return `
   <item>
@@ -81,7 +87,7 @@ export const generateRss = (config, posts, options = {}) => {
 
   const channelLinkPath = normaliseSlug(channelPath)
   const feedLinkPath = normaliseSlug(feedPath)
-  const lastBuildDate = getDefaultDate(posts[0]?.updated_date ?? posts[0]?.published_date ?? posts[0]?.date ?? posts[0]?.publishedAt ?? posts[0]?.updatedAt)
+  const lastBuildDate = getDefaultDate(resolveLatestDate(posts[0]))
 
   const items = posts.map((post) => generateRssItem(config, post)).join('\n      ')
 
