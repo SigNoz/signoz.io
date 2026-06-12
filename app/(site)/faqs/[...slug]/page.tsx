@@ -14,6 +14,7 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -50,8 +51,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
 
         return {
           title: doc.title,
-          publishedOn:
-            doc.updated_date || doc.published_date || doc.date || doc.updatedAt || doc.publishedAt,
+          publishedOn: resolveLatestDate(doc) ?? '',
           url: `/${routePrefix}${doc.path || ''}`,
         }
       })
@@ -61,7 +61,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
   if (Array.isArray(content.related_faqs)) {
     return content.related_faqs.map((faq: MDXContent) => ({
       title: faq.title,
-      publishedOn: faq.updated_date || faq.published_date || faq.date,
+      publishedOn: resolveLatestDate(faq) ?? '',
       url: `/faqs${faq.path || ''}`,
     }))
   }

@@ -26,7 +26,7 @@ const DocContent: React.FC<{
   breadcrumbs?: BreadcrumbCrumb[]
 }> = ({ title, post, toc, hideTableOfContents, editLink, breadcrumbs }) => {
   const pathname = usePathname()
-  const lastUpdatedDate = post?.lastmod || post?.date
+  const lastUpdatedDate = post?.updated_date || post?.lastmod || post?.published_date || post?.date
   const formattedDate = lastUpdatedDate
     ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
         year: 'numeric',
