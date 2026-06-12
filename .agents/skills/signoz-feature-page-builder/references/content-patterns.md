@@ -2,133 +2,148 @@
 
 ## Section Composition Patterns
 
-### Split Feature Section (Text + Image)
+Content sections are built using four shared components: `FeatureShowcase`, `SplitSection`, `CTABanner`, and `HeroCards`. Section dividers are handled by the parent page using `<Divider />`.
 
-The most common section pattern. Text on one side, product screenshot on the other.
+### FeatureShowcase — Full-Width Feature Section
+
+For features where the screenshot needs full width below the text.
 
 ```tsx
-const FeatureSection: React.FC = () => {
-  return (
-    <div className="mt-12 border-y-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-10">
-      <GridLayout variant="split">
-        {/* Text Column */}
-        <div className="flex h-full w-full flex-col justify-center px-6">
-          <div className="flex flex-col justify-between">
-            <h2 className="mb-6 text-signoz_vanilla-100">Section Title</h2>
-            <p className="leading-relaxed text-signoz_vanilla-400">
-              Description paragraph explaining the feature.
-            </p>
-          </div>
-        </div>
-
-        {/* Image Column */}
-        <div className="h-full w-full px-6">
-          <Image
-            src="/img/feature/screenshot.png"
-            alt="Descriptive alt text"
-            width={10000}
-            height={10000}
-          />
-        </div>
-      </GridLayout>
-    </div>
-  )
+// In .constants.tsx
+export const FEATURE_SHOWCASE = {
+  title: 'Section Title',
+  description: 'Description text explaining the feature in 2-3 sentences.',
+  image: '/img/feature/wide-screenshot.png',
+  imageAlt: 'Descriptive alt text',
+  button: {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    tracking: { clickType: 'Secondary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
 }
-```
 
-**Rules:**
-- Alternate text/image sides between sections for visual rhythm
-- Text column: `flex flex-col justify-center px-6`
-- Image column: `h-full w-full px-6`
-- Wrapper: `border-y-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-10`
-- First section often uses `mt-12` for spacing from header
+// In page component — simplest usage
+const FeatureSection: React.FC = () => {
+  return <FeatureShowcase {...FEATURE_SHOWCASE} />
+}
 
-### Full-Width Feature Section (Text + Wide Image Below)
-
-For features where the screenshot needs full width.
-
-```tsx
-const WideFeatureSection: React.FC = () => {
+// With children (e.g., HeroCards grid between text and image)
+const FeatureWithCards: React.FC = () => {
   return (
-    <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-      <div className="mb-8 max-w-4xl">
-        <h2 className="mb-6 text-signoz_vanilla-100">Section Title</h2>
-        <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-          Description text.
-        </p>
-        <Button variant="secondary" rounded="full" className="flex w-fit items-center gap-2" asChild>
-          <TrackingLink href="/docs/feature/" {...trackingProps}>
-            Read Documentation
-            <ArrowRight size={14} />
-          </TrackingLink>
-        </Button>
-      </div>
-      <Image
-        src="/img/feature/wide-screenshot.png"
-        alt="Descriptive alt text"
-        width={10000}
-        height={10000}
-        className="mb-8"
-      />
-    </div>
+    <FeatureShowcase {...SHOWCASE_DATA} className="px-6 pb-0 pt-6" imageClassName="mb-0">
+      <HeroCards cards={CARDS} layoutVariant="no-border" cols={2} />
+    </FeatureShowcase>
   )
 }
 ```
 
 **Rules:**
 - Text constrained by `max-w-4xl` for readable line length
-- Image sits below text at full section width
+- Image sits below children at full section width
 - Optional inline CTA button between text and image
+- Content data lives in `.constants.tsx`, JSX composition stays in page
 
-### CTA Banner Section
+### SplitSection — Text + Image Side-by-Side
 
-Centered call-to-action between feature sections.
+The most common section pattern. Text on one side, product screenshot on the other.
 
 ```tsx
-const CTABanner: React.FC = () => {
-  const ctaButtons = [
-    {
-      text: 'Start your free trial',
-      href: '/teams/',
-      variant: 'default' as const,
-      className: 'flex-center',
-      tracking: {
-        clickType: 'Primary CTA',
-        clickName: 'Feature Banner Start Trial',
-        clickLocation: 'Feature Bottom Banner',
-        clickText: 'Start your free trial',
-      },
-    },
-    {
-      text: 'Read Documentation',
-      href: '/docs/feature/',
-      variant: 'secondary' as const,
-      className: 'flex-center',
-      tracking: {
-        clickType: 'Secondary CTA',
-        clickName: 'Feature Banner Docs',
-        clickLocation: 'Feature Bottom Banner',
-        clickText: 'Read Documentation',
-      },
-    },
-  ]
+// In .constants.tsx
+export const LEFT_PANEL = {
+  title: 'Feature Title',
+  description: 'Description paragraph explaining the feature.',
+  button: { text: 'Read Documentation', href: '/docs/feature/' },
+}
 
+export const RIGHT_IMAGE = {
+  src: '/img/feature/screenshot.png',
+  alt: 'Descriptive alt text',
+}
+
+// In page component — panel config + custom ReactNode
+const FeatureSection: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-center border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6 py-20">
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-        Compelling CTA Headline
-      </h2>
-      <ButtonGroup buttons={ctaButtons} />
-    </div>
+    <SplitSection
+      className="py-10"
+      left={LEFT_PANEL}
+      right={
+        <div className="h-full w-full px-6">
+          <Image src={RIGHT_IMAGE.src} alt={RIGHT_IMAGE.alt} width={10000} height={10000} />
+        </div>
+      }
+    />
+  )
+}
+
+// Two panel configs with vertical divider
+const TwoPanelSection: React.FC = () => {
+  return (
+    <SplitSection
+      className="py-16"
+      left={FINE_TUNE_PANEL}
+      right={MAINTENANCE_PANEL}
+      withVerticalDivider
+    />
   )
 }
 ```
 
 **Rules:**
-- Centered layout with `flex flex-col items-center justify-center`
-- Generous padding: `py-20`
-- Title: `text-center text-4xl text-signoz_vanilla-100`
-- ButtonGroup below title with `mb-6` spacing
+- Alternate text/image sides between sections for visual rhythm
+- Use `withVerticalDivider` when both sides have title+description
+- Panel configs go in `.constants.tsx`; custom ReactNode children stay in JSX
+- First section often uses `className="py-10"`, with the `<Divider className="mt-12" />` above it for spacing
+
+### CTABanner — Call-to-Action Section
+
+Centered call-to-action between feature sections.
+
+```tsx
+// In .constants.tsx
+const BUTTON_CLASS_NAME = 'flex items-center justify-center gap-1 h-full w-full'
+
+export const CTA_BUTTONS = [
+  {
+    text: 'Start your free trial',
+    href: '/teams/',
+    variant: 'default' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: {
+      clickType: 'Primary CTA',
+      clickName: 'Feature Banner Start Trial',
+      clickLocation: 'Feature Bottom Banner',
+      clickText: 'Start your free trial',
+    },
+  },
+  {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    variant: 'secondary' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: {
+      clickType: 'Secondary CTA',
+      clickName: 'Feature Banner Docs',
+      clickLocation: 'Feature Bottom Banner',
+      clickText: 'Read Documentation',
+    },
+  },
+]
+
+// In page component
+const Banner: React.FC = () => {
+  return (
+    <CTABanner
+      title={<>Compelling CTA Headline</>}
+      buttons={CTA_BUTTONS}
+    />
+  )
+}
+```
+
+**Rules:**
+- Title accepts ReactNode — use `<br />` for line breaks
+- Buttons defined in constants with tracking objects
+- Use `BUTTON_CLASS_NAME` constant for button className (Tailwind replacement for `flex-center`)
 
 ### Card Grid Section
 
@@ -153,7 +168,84 @@ const FeatureHighlights: React.FC = () => {
 - `variant="combined"` for connected card look, `"default"` for separated cards
 - Cards defined in constants file
 
+### Section Dividers
+
+Dividers are placed by the parent page between content sections. Content components (`FeatureShowcase`, `SplitSection`, `CTABanner`) do NOT render their own dividers.
+
+```tsx
+// Page composition pattern
+<SectionLayout variant="bordered" className="!px-0">
+  <Divider />
+  <FeatureSection1 />
+  <Divider />
+  <FeatureSection2 />
+  <Divider className="mt-12" />   {/* Extra top margin when needed */}
+  <SplitSection ... />
+  <Divider />
+  <CTABanner ... />
+</SectionLayout>
+```
+
 ## Constants File Patterns
+
+### Button Arrays
+
+```tsx
+// Shared button className constant — Tailwind replacement for `flex-center`
+const BUTTON_CLASS_NAME = 'flex items-center justify-center gap-1 h-full w-full'
+
+export const HEADER_BUTTONS = [
+  {
+    text: 'Start your free trial',
+    href: '/teams/',
+    variant: 'default' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { clickType: 'Primary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+  {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    variant: 'secondary' as const,
+    className: BUTTON_CLASS_NAME,
+    tracking: { clickType: 'Secondary CTA', clickName: '...', clickLocation: '...', clickText: '...' },
+  },
+]
+```
+
+### FeatureShowcase Data
+
+```tsx
+export const FEATURE_SHOWCASE = {
+  title: 'Section Title',
+  description: 'Description text — string or JSX.',
+  image: '/img/feature/screenshot.png',
+  imageAlt: 'Alt text',
+  button: {
+    text: 'Read Documentation',
+    href: '/docs/feature/',
+    tracking: { clickType: 'Secondary CTA', ... },  // optional
+  },
+}
+```
+
+### SplitSectionPanel Data
+
+```tsx
+export const PANEL = {
+  title: 'Panel Title',
+  description: 'Panel description — string or JSX with <p> tags.',
+  image: '/img/feature/panel.png',
+  imageAlt: 'Alt text',
+  imageClassName: 'mb-8',  // optional
+  button: { text: 'Read Documentation', href: '/docs/feature/' },  // optional
+}
+
+// Image reference (for custom right-column rendering)
+export const PANEL_IMAGE = {
+  src: '/img/feature/panel.png',
+  alt: 'Alt text',
+}
+```
 
 ### Card Data Structure
 

@@ -1,0 +1,462 @@
+---
+date: 2026-06-05
+id: opentelemetry-cassandra
+title: Monitor Apache Cassandra with OpenTelemetry and SigNoz
+description: Monitor Apache Cassandra metrics and logs in SigNoz using OpenTelemetry, and trace Cassandra queries from your application.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+Apache Cassandra runs on the JVM and exposes its internal metrics over JMX. This guide shows you how to collect those metrics with the standalone OpenTelemetry JMX Scraper, ship Cassandra logs through the OpenTelemetry Collector filelog receiver, and trace Cassandra queries from your application. Correlate all three signals in SigNoz on one platform.
+
+You collect three signals here:
+
+- **Metrics:** read/write latency, compaction backlog, storage load, and JVM health through the OpenTelemetry JMX Scraper.
+- **Logs:** `system.log` through the Collector filelog receiver.
+- **Traces:** Cassandra driver spans from your application through OpenTelemetry instrumentation.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+Ensure you have:
+
+- An Apache Cassandra node running version 3.11 or newer
+- A Java runtime (JRE 11 or newer) wherever you run the JMX Scraper, with network access to the Cassandra JMX port
+- For logs: an [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) that can read the Cassandra log files
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Set Up Telemetry
+
+Set up each signal you want. Collect metrics and logs separately; traces come from your application.
+
+<Tabs entityName="signal">
+<TabItem value="metrics" label="Metrics">
+
+Cassandra exposes its metrics over JMX. The recommended collector is the standalone <a href="https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/jmx-scraper" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry JMX Scraper</a>: it connects to Cassandra's JMX port, maps the `cassandra` MBeans to OpenTelemetry metrics, and exports them to SigNoz.
+
+<Admonition type="info">
+The older Collector `jmxreceiver` is deprecated as of 2026-01-30: it runs Java inside the Collector, and the official Collector images ship without a Java runtime. This guide uses the JMX Scraper instead. If you already run the receiver, see the [legacy jmxreceiver config](#legacy-collector-jmxreceiver) below.
+</Admonition>
+
+### Step 1: Enable JMX on Cassandra
+
+Cassandra ships with JMX enabled on **localhost:7199** by default. To let the scraper connect, edit `cassandra-env.sh` and set the JMX bind options:
+
+```bash
+# in cassandra-env.sh
+LOCAL_JMX=no
+JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.port=7199"
+JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.rmi.port=7199"
+JVM_OPTS="$JVM_OPTS -Djava.rmi.server.hostname=<cassandra-host>"
+# cassandra-env.sh turns JMX authentication ON when LOCAL_JMX=no. Disable it for a
+# quick setup, or configure a jmxremote.password file and pass the credentials to the scraper.
+JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
+JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.ssl=false"
+```
+
+Restart Cassandra to apply the change. Replace `<cassandra-host>` with the address the scraper uses to reach the node (the RMI stub points back here, so it must be resolvable from the scraper).
+
+<Admonition type="warning">
+`authenticate=false` and `ssl=false` expose JMX unauthenticated on the network. Use them only for a local trial. For production, keep authentication on (configure a `jmxremote.password` file and set `otel.jmx.username`/`otel.jmx.password` in the scraper config), enable TLS, and restrict access with firewall rules. See the <a href="https://cassandra.apache.org/doc/latest/cassandra/managing/operating/security.html#jmx-access" target="_blank" rel="noopener noreferrer nofollow">Cassandra JMX security documentation</a>.
+</Admonition>
+
+### Step 2: Configure and run the JMX Scraper
+
+Configure the scraper's JMX connection in a properties file and its SigNoz destination via `OTEL_*` environment variables. Create `scraper.properties`:
+
+```properties:scraper.properties
+otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://<cassandra-host>:7199/jmxrmi
+otel.jmx.target.system=cassandra,jvm
+otel.metric.export.interval=30s
+# sets service.name so Cassandra telemetry is easy to filter from everything else in SigNoz
+otel.service.name=cassandra
+```
+
+Setting `otel.jmx.target.system` to `cassandra,jvm` collects both Cassandra request and compaction metrics and the underlying JVM metrics (heap, threads, GC). Set `<cassandra-host>` to the address or service name the scraper uses to reach Cassandra's JMX port.
+
+Pick your environment:
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM">
+
+Download the scraper JAR and run it on any host with a JRE and network access to the JMX port:
+
+```bash
+curl -sL -O https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/1.57.0-alpha/opentelemetry-jmx-scraper-1.57.0-alpha.jar
+
+export OTEL_METRICS_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
+java -jar opentelemetry-jmx-scraper-1.57.0-alpha.jar -config scraper.properties
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+For a long-running setup, wrap this in a systemd unit so the scraper restarts with the host.
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+In **scraper.properties**, point `otel.jmx.service.url` at the Cassandra service name: `service:jmx:rmi:///jndi/rmi://cassandra:7199/jmxrmi`. Download the JAR next to your `docker-compose.yml`:
+
+```bash
+curl -sL -O https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/1.57.0-alpha/opentelemetry-jmx-scraper-1.57.0-alpha.jar
+```
+
+Add the scraper service:
+
+```yaml:docker-compose.yml
+jmx-scraper:
+  image: eclipse-temurin:17-jre
+  depends_on: [cassandra]
+  volumes:
+    - ./opentelemetry-jmx-scraper-1.57.0-alpha.jar:/opt/jmx-scraper.jar:ro
+    - ./scraper.properties:/etc/otel/scraper.properties:ro
+  environment:
+    - "OTEL_METRICS_EXPORTER=otlp"
+    - "OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf"
+    - "OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+    - "OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
+  command: ["java", "-jar", "/opt/jmx-scraper.jar", "-config", "/etc/otel/scraper.properties"]
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Start the Docker Compose stack:
+
+```bash
+docker compose up -d jmx-scraper
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+Store the SigNoz destination in a Secret, the scraper config in a ConfigMap, and run the scraper as a Deployment. An init container fetches the JAR, since no official scraper image exists.
+
+```bash
+kubectl create secret generic signoz-otlp -n "<namespace>" \
+  --from-literal="OTEL_METRICS_EXPORTER=otlp" \
+  --from-literal="OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf" \
+  --from-literal="OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443" \
+  --from-literal="OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<namespace>`: Kubernetes namespace to run the scraper in
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Create the ConfigMap and Deployment:
+
+```yaml:cassandra-scraper.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scraper-config
+  namespace: <namespace>
+data:
+  scraper.properties: |
+    otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://cassandra:7199/jmxrmi
+    otel.jmx.target.system=cassandra,jvm
+    otel.metric.export.interval=30s
+    otel.service.name=cassandra
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jmx-scraper
+  namespace: <namespace>
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: jmx-scraper }
+  template:
+    metadata:
+      labels: { app: jmx-scraper }
+    spec:
+      initContainers:
+        - name: fetch-jar
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - curl -sL -o /jars/jmx-scraper.jar https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/1.57.0-alpha/opentelemetry-jmx-scraper-1.57.0-alpha.jar
+          volumeMounts:
+            - { name: jars, mountPath: /jars }
+      containers:
+        - name: jmx-scraper
+          image: eclipse-temurin:17-jre
+          command: ["java", "-jar", "/jars/jmx-scraper.jar", "-config", "/config/scraper.properties"]
+          envFrom:
+            - secretRef: { name: signoz-otlp }
+          volumeMounts:
+            - { name: jars, mountPath: /jars }
+            - { name: config, mountPath: /config }
+      volumes:
+        - name: jars
+          emptyDir: {}
+        - name: config
+          configMap: { name: scraper-config }
+```
+
+Run Cassandra with `-Djava.rmi.server.hostname` set to the pod IP via the downward API, so the scraper can follow the RMI stub to the Cassandra pod. Add this to the Cassandra container spec (alongside the JMX flags from Step 1):
+
+```yaml
+env:
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+  - name: JVM_EXTRA_OPTS
+    value: "-Djava.rmi.server.hostname=$(POD_IP)"
+```
+
+Apply the manifests:
+
+```bash
+kubectl apply -f cassandra-scraper.yaml
+```
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+### Legacy: Collector jmxreceiver
+</ToggleHeading>
+
+The `jmxreceiver` (deprecated 2026-01-30) embeds the JMX Metric Gatherer JAR inside the Collector. It still works on a host that has a JRE. Download a gatherer JAR version your Collector accepts from <a href="https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-metrics/" target="_blank" rel="noopener noreferrer nofollow">Maven Central</a> (on a `jar hash does not match known versions` error, the Collector logs the versions it accepts), then add the receiver:
+
+```yaml:cassandra-metrics-collection-config.yaml
+receivers:
+  jmx/cassandra:
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
+    endpoint: <cassandra-host>:7199
+    target_system: cassandra,jvm
+    collection_interval: 30s
+
+processors:
+  resource/cassandra:
+    attributes:
+      - key: service.name
+        value: cassandra
+        action: upsert
+
+exporters:
+  # On collectors older than v0.144.0 use the otlphttp alias
+  otlp_http/cassandra:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics/cassandra:
+      receivers: [jmx/cassandra]
+      processors: [resource/cassandra]
+      exporters: [otlp_http/cassandra]
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Then start the Collector with `--config cassandra-metrics-collection-config.yaml`.
+
+</details>
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+Cassandra writes its operational logs to `system.log`. The OpenTelemetry Collector filelog receiver tails this file and forwards the entries to SigNoz. If you do not already run a Collector on the Cassandra host, [install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) first.
+
+### Step 1: Create the Collector Config File
+
+Create a file named `cassandra-logs-collection-config.yaml` with the following content:
+
+```yaml:cassandra-logs-collection-config.yaml
+receivers:
+  filelog/cassandra:
+    include: ["${env:CASSANDRA_LOG_FILE}"]
+    # Each log entry starts with a level; stack traces and multi-line dumps belong to the
+    # preceding entry. Group them so the parser sees whole entries, not stray lines.
+    multiline:
+      line_start_pattern: '^(?:INFO|WARN|ERROR|DEBUG|TRACE|FATAL)\s'
+    operators:
+      # Parse the standard Cassandra system.log line format, e.g.:
+      # INFO  [main] 2026-01-02T03:04:05,678 StorageService.java:1234 - Node is now part of the cluster
+      # Cassandra 5.0 separates date and time with 'T'; the [ T] class also covers the space form 4.x used.
+      # (?s) lets the message group span the lines of multi-line entries.
+      - type: regex_parser
+        regex: '(?s)^(?P<level>\w+)\s+\[(?P<thread>[^\]]+)\]\s+(?P<ts>\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2},\d{3})\s+(?P<logger>[^\s]+)\s+-\s+(?P<message>.*)$'
+        timestamp:
+          parse_from: attributes.ts
+          layout: '2006-01-02T15:04:05,000'
+          layout_type: gotime
+        severity:
+          parse_from: attributes.level
+          overwrite_text: true
+          mapping:
+            debug: DEBUG
+            trace: TRACE
+            info: INFO
+            warn: WARN
+            error: ERROR
+            fatal: FATAL
+      - type: move
+        if: attributes.message != nil
+        from: attributes.message
+        to: body
+      - type: add
+        field: attributes.source
+        value: cassandra
+
+processors:
+  # sets service.name so Cassandra logs are easy to filter from everything else in SigNoz
+  resource/cassandra:
+    attributes:
+      - key: service.name
+        value: cassandra
+        action: upsert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # On collectors older than v0.144.0 use the otlphttp alias
+  otlp_http/cassandra-logs:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    logs/cassandra:
+      receivers: [filelog/cassandra]
+      processors: [resource/cassandra, batch]
+      exporters: [otlp_http/cassandra-logs]
+```
+
+<Admonition type="info">
+  These settings target Cassandra 5.0+, which writes the ISO 8601 `T` date/time separator (`2026-01-02T03:04:05,678`). For Cassandra 4.x, which uses a space separator, change the timestamp `layout` to `2006-01-02 15:04:05,000`.
+</Admonition>
+
+### Step 2: Set Environment Variables
+
+Set the following environment variables:
+
+```bash
+# path of the Cassandra log file, must be readable by the otel collector
+export CASSANDRA_LOG_FILE="/var/log/cassandra/system.log"
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3: Use the Collector Config File
+
+Add the following flag to your collector run command:
+
+```bash
+--config cassandra-logs-collection-config.yaml
+```
+
+**Note:** The collector can use multiple config files by specifying multiple `--config` flags.
+
+</TabItem>
+<TabItem value="traces" label="Traces">
+
+Metrics and logs come from the Cassandra node. Query traces come from your application. When you instrument the service that talks to Cassandra with OpenTelemetry, the driver produces client spans for each query. Following the <a href="https://opentelemetry.io/docs/specs/semconv/database/cassandra/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry semantic conventions for Cassandra</a>, the driver sets `db.system.name` to `cassandra` on each span. Depending on the instrumentation, spans can also carry the keyspace, the operation, and the consistency level.
+
+Pick the instrumentation guide for your application language:
+
+- **Java**: the OpenTelemetry Java agent auto-instruments the DataStax and Cassandra drivers. See [OpenTelemetry Java](https://signoz.io/docs/instrumentation/java/opentelemetry-java/).
+- **Python**: instrument the `cassandra-driver` with [OpenTelemetry Python](https://signoz.io/docs/instrumentation/opentelemetry-python/).
+- **Node.js**: instrument the `cassandra-driver` with [OpenTelemetry JavaScript](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/).
+- **Go**: instrument `gocql` with [OpenTelemetry Go](https://signoz.io/docs/instrumentation/opentelemetry-golang/).
+
+Once your application sends traces, the query spans appear under your service in the Traces explorer, alongside the Cassandra metrics and logs you collected above.
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+After you start the scraper and the Collector, confirm each signal arrives.
+
+1. Check the JMX Scraper logs for **JMX scraping started**.
+2. **Metrics:** Open **Metrics** in SigNoz and search for metrics starting with `cassandra.` (for example `cassandra.client.request.error.count`) and `jvm.`.
+3. **Logs:** Open the **Logs** explorer and add filter **service.name = cassandra**.
+4. **Traces:** Open the **Traces** explorer and filter on your instrumented service to find Cassandra query spans.
+
+<Figure
+  src="/img/docs/integrations/cassandra/sample-metrics.webp"
+  alt="Cassandra metrics in SigNoz Metrics"
+  caption="Cassandra metrics in SigNoz, filtered by service.name = cassandra"
+/>
+
+<Figure
+  src="/img/docs/integrations/cassandra/sample-logs.webp"
+  alt="Cassandra in SigNoz Logs explorer"
+  caption="Cassandra logs in SigNoz, filtered by service.name = cassandra"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+**JMX scraper logs `Connection refused`, or no `cassandra.*` metrics appear**
+- Confirm Cassandra started with `LOCAL_JMX=no` and JMX listening on port 7199.
+- Confirm the scraper host reaches `<cassandra-host>:7199` (check firewalls and security groups).
+- Set `java.rmi.server.hostname` on Cassandra to an address the scraper can resolve; the RMI stub points there.
+- If JMX authentication is on, set `otel.jmx.username` and `otel.jmx.password` in `scraper.properties`.
+
+**Scraper connects but no data reaches SigNoz**
+- Read the scraper logs after `JMX scraping started` for export errors.
+- Verify `OTEL_EXPORTER_OTLP_ENDPOINT`, the `signoz-ingestion-key` value, and `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`.
+
+**Logs arrive but timestamps fail to parse**
+- Cassandra 4.x writes a space date/time separator. Change the timestamp `layout` to `2006-01-02 15:04:05,000` (see the note under the logs config).
+
+**Legacy jmxreceiver: `jar hash does not match known versions`**
+- Download a JMX Metric Gatherer JAR version your Collector accepts; the Collector logs the supported versions.
+
+</details>
+
+## Next Steps
+
+- [Send traces from your application](https://signoz.io/docs/instrumentation/) to correlate Cassandra queries with node metrics
+- [JMX Metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/) for collecting JMX metrics from any JVM application
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on Cassandra latency and compaction backlog
+
+## Get Help
+
+<GetHelp />

@@ -19,7 +19,7 @@ export default function IntroductionLayout({ children }: LayoutProps) {
       <SectionContainer>
         <ProgressBar target={mainRef} />
 
-        <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-8 pt-12 md:!w-[90vw] md:px-0 md:px-5 md:pt-24">
+        <div className="relative !mx-auto flex w-full max-w-8xl flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-8 pt-12 md:px-0 md:px-5 md:pt-24">
           {children}
         </div>
       </SectionContainer>

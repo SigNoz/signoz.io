@@ -18,8 +18,7 @@ Review these when relevant:
 - `data/docs/**`
 - `public/img/docs/**`
 - `constants/docsSideNav.ts`
-- `constants/componentItems.ts`
-- `constants/componentItems/*.ts`
+- `constants/listicles/*.json`
 - `next.config.js` when docs URLs change
 - `components/**/*.mdx` when the PR adds or meaningfully changes these alongside docs (see **Shared doc fragments** below)
 

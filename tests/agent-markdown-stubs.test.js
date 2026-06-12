@@ -46,20 +46,67 @@ test('Admonition stubs preserve the admonition type label', async () => {
   assert.match(html, /Keep existing receivers\./)
 })
 
-test('CollectionAgentsListicle stubs respect the selected platform', async () => {
-  const doc = createDoc('<CollectionAgentsListicle platform="kubernetes" />')
+test('Listicle stubs respect the selected default section', async () => {
+  const doc = createDoc('<Listicle name="collection-agents" defaultSection="kubernetes" />')
   const components = buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
-    React.createElement(components.CollectionAgentsListicle, {
-      platform: 'kubernetes',
+    React.createElement(components.Listicle, {
+      name: 'collection-agents',
+      defaultSection: 'kubernetes',
     })
   )
 
+  assert.match(html, /Collection Agents/)
   assert.match(html, /K8s-Infra \(Helm Chart\)/)
   assert.match(html, /OpenTelemetry Operator/)
+  assert.match(html, /K8s Serverless \(EKS Fargate\)/)
   assert.doesNotMatch(html, /Docker Swarm/)
   assert.doesNotMatch(html, /ECS Serverless \(Sidecar\)/)
   assert.doesNotMatch(html, /OpenTelemetry Binary/)
+})
+
+test('Listicle stubs render flat listicle items from JSON', async () => {
+  const doc = createDoc('<Listicle name="llm-monitoring" />')
+  const components = buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Listicle, {
+      name: 'llm-monitoring',
+    })
+  )
+
+  assert.match(html, /LLM Monitoring Guides/)
+  assert.match(html, /Amazon Bedrock/)
+  assert.match(html, /Anthropic API/)
+  assert.match(html, /\/docs\/amazon-bedrock-monitoring/)
+})
+
+test('Listicle stubs render metrics quick start sections from JSON', async () => {
+  const doc = createDoc('<Listicle name="metrics-quick-start" defaultSection="databases" />')
+  const components = buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Listicle, {
+      name: 'metrics-quick-start',
+      defaultSection: 'databases',
+    })
+  )
+
+  assert.match(html, /Metrics Quick Start/)
+  assert.match(html, /ClickHouse/)
+  assert.match(html, /PostgreSQL/)
+  assert.doesNotMatch(html, /OTel Receivers/)
+})
+
+test('Listicle stubs use the configured markdown title', async () => {
+  const doc = createDoc('<Listicle name="aws-monitoring" />')
+  const components = buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Listicle, {
+      name: 'aws-monitoring',
+    })
+  )
+
+  assert.match(html, /AWS Monitoring Guides/)
+  assert.doesNotMatch(html, /<h2>Listicle<\/h2>/)
 })
 
 test('HostingDecision stub matches the banner CTA destinations', async () => {

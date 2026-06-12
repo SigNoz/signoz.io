@@ -1,5 +1,5 @@
 ---
-date: 2026-05-07
+date: 2026-06-11
 title: Collecting Docker Logs
 description: Collect Docker container logs and Docker daemon logs using OpenTelemetry Collector and send them to SigNoz.
 id: collect_docker_logs
@@ -24,7 +24,7 @@ Docker writes container output to JSON log files on the host and daemon events t
 
 ## Setup
 
-<Tabs>
+<Tabs entityName="log-type">
 <TabItem value="container-logs" label="Container Logs" default>
 
 ### Step 1. Update Collector configuration
@@ -34,7 +34,7 @@ Two approaches for collecting container logs, pick one:
 - **<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">filelog</a>**: tails all container log files under a single glob. Simpler setup. Requires only read access to `/var/lib/docker/containers`.
 - **<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/receivercreator/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver_creator</a> + <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/observer/dockerobserver/README.md" target="_blank" rel="noopener noreferrer nofollow">docker_observer</a>**: spawns one receiver per container by watching the Docker socket. Sets `container.name` and `container.image.name` automatically with no regex.
 
-<Tabs>
+<Tabs entityName="receiver">
 <TabItem value="filelog" label="Using filelog receiver (recommended)" default>
 
 Get your Collector's container ID so you can exclude its own logs:
@@ -222,7 +222,7 @@ What each key part does:
 
 ### Step 2. Start the Collector
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="docker-run" label="Using docker run" default>
 
 ```bash
@@ -320,7 +320,7 @@ Apr 23 12:01:06 myhost dockerd[1234]: time="2025-04-23T12:01:06Z" level=info msg
 
 If the command returns no output or an error, your daemon uses syslog instead. Use the matching tab below.
 
-<Tabs>
+<Tabs entityName="log-source">
 <TabItem value="journald" label="journald" default>
 
 ### Step 1. Add the journald receiver

@@ -8,7 +8,7 @@ export default function DocsOnboardingIntroductionLayout({ children }: { childre
       <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
 
       <SectionContainer>
-        <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-8 pt-12 md:!w-[90vw] md:px-0 md:px-5 md:pt-24">
+        <div className="relative !mx-auto flex w-full max-w-8xl flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-8 pt-12 md:px-0 md:px-5 md:pt-24">
           {children}
         </div>
       </SectionContainer>

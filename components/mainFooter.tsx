@@ -19,8 +19,8 @@ function Footer() {
 
   return (
     <div className="z-[10] flex flex-col justify-center border-t border-solid border-gray-900 bg-signoz_ink-500 bg-opacity-70 backdrop-blur-md">
-      <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 max-md:max-w-full max-md:px-5">
-        <div className="container w-full max-w-[1200px] justify-between max-md:max-w-full">
+      <div className="flex w-full items-center justify-center bg-opacity-70 px-4 py-14 max-md:max-w-full">
+        <div className="w-full max-w-8xl justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
@@ -70,13 +70,13 @@ function Footer() {
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="/support" prefetch={false}>
+                  <Link href="/support/" prefetch={false}>
                     Support
                   </Link>
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="https://signoz.io/slack" target="_blank" prefetch={false}>
+                  <Link href="https://signoz.io/slack/" target="_blank" prefetch={false}>
                     Slack
                   </Link>
                   <ArrowUpRight size={16} />
@@ -94,7 +94,7 @@ function Footer() {
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="/changelog" prefetch={false}>
+                  <Link href="/changelog/" prefetch={false}>
                     Changelog
                   </Link>
                 </div>
@@ -171,13 +171,13 @@ function Footer() {
                   <ArrowUpRight size={16} />
                 </div>
 
-                <Link href="/about-us" className="mt-5 hover:underline " prefetch={false}>
+                <Link href="/about-us/" className="mt-5 hover:underline " prefetch={false}>
                   About
                 </Link>
-                <Link href="/terms-of-service" className="mt-5 hover:underline" prefetch={false}>
+                <Link href="/terms-of-service/" className="mt-5 hover:underline" prefetch={false}>
                   Terms
                 </Link>
-                <Link href="/privacy" className="mt-5 hover:underline" prefetch={false}>
+                <Link href="/privacy/" className="mt-5 hover:underline" prefetch={false}>
                   Privacy
                 </Link>
 
@@ -231,7 +231,7 @@ function Footer() {
                   </Link>
 
                   <Link
-                    href={'https://signoz.io/slack'}
+                    href={'https://signoz.io/slack/'}
                     target="_blank"
                     aria-label="SigNoz Slack Connect URL"
                     prefetch={false}

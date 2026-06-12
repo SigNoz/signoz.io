@@ -13,6 +13,7 @@ import Image from 'next/image'
 import { useHubspotCustomForm } from '@/components/hubspot-custom-form/useHubspotCustomForm'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 import agentNativeHeroImageUrl from '@/public/img/platform/AgentNativeObservabilityMeta.svg?url'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 
 const Header: React.FC = () => {
   const headerButtonGroup = (
@@ -98,7 +99,7 @@ const Header: React.FC = () => {
 
 const TrustedByTeams: React.FC = () => {
   return (
-    <div className="!border-b-1 relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-t-0 border-dashed border-signoz_slate-400 py-16 md:w-[80vw]">
+    <div className="relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 py-16">
       <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
         Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
       </div>
@@ -134,6 +135,7 @@ const TrustedByTeams: React.FC = () => {
           </TrackingLink>
         </Button>
       </div>
+      <Divider className="absolute bottom-0 left-0" />
     </div>
   )
 }
@@ -373,10 +375,10 @@ const InContextObservability: React.FC = () => {
 
 const FeatureSections: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14 md:w-[80vw]">
-      <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
+    <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14">
+      <div className="relative mx-auto flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex max-w-4xl flex-col items-center gap-4">
             <h2 className="text-center text-4xl font-semibold text-signoz_vanilla-100">
               Why Agent Native Observability
             </h2>
@@ -384,9 +386,7 @@ const FeatureSections: React.FC = () => {
               Debug faster. Ship with confidence. All from your dev environment.
             </div>
           </div>
-          <SectionLayout variant="no-border" className="!mx-auto !p-0">
-            <IconTitleDescriptionCardGrid cards={FEATURE_CARDS} variant="lg" />
-          </SectionLayout>
+          <IconTitleDescriptionCardGrid cards={FEATURE_CARDS} variant="lg" />
         </div>
       </div>
     </section>
@@ -437,15 +437,18 @@ const BottomCTA: React.FC = () => {
 
 const AgentNativeObservabilityPage: React.FC = () => {
   return (
-    <FeaturePageLayout showProductNav={false}>
+    <FeaturePageLayout showProductNav={false} fullWidth>
       <Header />
-      <TrustedByTeams />
-      <InContextObservability />
+      <div className="relative mx-auto max-w-8xl">
+        <TrustedByTeams />
+        <InContextObservability />
 
-      <SectionLayout variant="bordered" className="!px-0">
-        <FeatureSections />
-        <BottomCTA />
-      </SectionLayout>
+        <SectionLayout variant="bordered" className="!px-0">
+          <FeatureSections />
+          <Divider />
+          <BottomCTA />
+        </SectionLayout>
+      </div>
     </FeaturePageLayout>
   )
 }

@@ -13,7 +13,8 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import { getHubContextForRoute } from '@/utils/opentelemetryHub'
-import { fetchMDXContentByPath, MDXContent } from '@/utils/strapi'
+import { getAuthorDirectory, getContentBySlug } from '@/utils/contentRepository'
+import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
@@ -21,7 +22,7 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
-import { getCachedAuthors } from '@/utils/cmsAuthors'
+import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -45,14 +46,23 @@ export async function generateMetadata(props: {
     try {
       const isProduction = process.env.VERCEL_ENV === 'production'
       const deployment_status = isProduction ? 'live' : 'staging'
-      const response = await fetchMDXContentByPath('opentelemetries', path, deployment_status)
-      const content = response.data as MDXContent
+      const content = await getContentBySlug('opentelemetries', path, deployment_status)
 
-      // Extract author names from the content
-      const authorNames = content.authors?.map((author) => author?.name) || ['SigNoz Team']
+      if (!content) {
+        throw new Error(`OpenTelemetry content not found for path: ${path}`)
+      }
 
-      const publishedAt = new Date(content.date).toISOString()
-      const modifiedAt = new Date(content.lastmod || content.date).toISOString()
+      const authorDirectory = await getAuthorDirectory()
+      const authorNames = getAuthorKeys(content).map(
+        (author) => authorDirectory[author]?.name || author
+      )
+
+      const publishedAt = new Date(
+        content.date || content.publishedAt || content.updatedAt
+      ).toISOString()
+      const modifiedAt = new Date(
+        content.lastmod || content.updatedAt || content.date || content.publishedAt
+      ).toISOString()
 
       let imageList = [siteMetadata.socialBanner]
       if (content.image) {
@@ -121,22 +131,18 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   const path = params.slug.join('/')
 
-  // Fetch content from Strapi with error handling
+  // Fetch content from the repository with error handling
   let content: MDXContent
   try {
-    if (!process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL) {
-      throw new Error('Strapi API URL is not configured')
-    }
-
     const isProduction = process.env.VERCEL_ENV === 'production'
     const deployment_status = isProduction ? 'live' : 'staging'
 
-    const response = await fetchMDXContentByPath('opentelemetries', path, deployment_status)
-    if (!response || !response.data) {
+    const response = await getContentBySlug('opentelemetries', path, deployment_status)
+    if (!response) {
       console.error(`Invalid response for path: ${path}`)
       notFound()
     }
-    content = response.data as MDXContent
+    content = response
   } catch (error) {
     console.error('Error fetching opentelemetry content:', error)
     notFound()
@@ -171,18 +177,22 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     path: `opentelemetry${content.path || `/${path}`}`,
   }
   const structuredData = generateStructuredData('opentelemetry', contentForStructuredData)
+  const authorDirectory = await getAuthorDirectory()
+  const authorList = getAuthorKeys(content)
+  const layoutAuthorList = authorList.length > 0 ? authorList : ['default']
+  const tags = getTagValues(content)
 
   // Prepare content for Layout
   const mainContent: CoreContent<MDXContent> = {
     title: content.title,
     date: content.date,
     lastmod: content.lastmod,
-    tags: content.tags?.map((tag) => tag.value) || [],
+    tags,
     draft: content.deployment_status === 'draft',
     summary: content.summary,
     description: content.description,
     images: content.images || [],
-    authors: content.authors?.map((author) => author?.key) || [],
+    authors: layoutAuthorList,
     slug: path,
     path: content.path || `/opentelemetry/${path}`,
     type: 'Opentelemetry',
@@ -195,9 +205,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   }
 
   // Prepare author details
-  const authorDirectory = await getCachedAuthors()
-  const authorList = content.authors?.map((author) => author?.key) || ['default']
-  const authorDetails = authorList.map((author) => {
+  const authorDetails = layoutAuthorList.map((author) => {
     const a = authorDirectory[author]
     return a || { name: author }
   })
@@ -230,7 +238,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
-          authors={authorList}
+          authors={layoutAuthorList}
           toc={toc}
           showSidebar={showSidebar}
           authorDirectory={authorDirectory}
@@ -256,7 +264,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <Layout
         content={mainContent}
         authorDetails={authorDetails as any}
-        authors={authorList}
+        authors={layoutAuthorList}
         toc={toc}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

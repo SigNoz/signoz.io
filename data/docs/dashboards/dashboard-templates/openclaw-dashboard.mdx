@@ -1,5 +1,5 @@
 ---
-date: 2026-06-01
+date: 2026-06-10
 id: openclaw
 tags: [SigNoz Cloud, Self-Host]
 title: OpenClaw Dashboard
@@ -39,6 +39,7 @@ This dashboard tracks critical performance metrics for your OpenClaw usage using
 - **Ensure Responsiveness**: Track message processing latency and queue wait times to surface potential slowdowns, spikes, or regressions and maintain consistent user experience.
 - **Track Message Processing**: Monitor message outcomes by channel, queue depth by lane, and session state transitions to understand system health and throughput.
 - **Investigate Errors**: Track agent run errors and error rates over time, break failures down by model, channel, and provider, surface the slowest operations, and drill into individual errored spans to find root causes quickly.
+- **Understand Agent Behavior**: See how tool calls are distributed across tools and where execution time goes, and measure steps per thread — items started vs completed, tool executions, and model calls per trace — to understand how much work each agent run performs.
 
 ## Metrics Included
 
@@ -78,5 +79,14 @@ This dashboard tracks critical performance metrics for your OpenClaw usage using
 - **Run Error Rate % Over Time**: Plots errored spans divided by total spans per interval as a percentage, revealing reliability trends and regressions over time.
 - **Errors by Model**: Groups errored spans by `openclaw.model` to surface which model is associated with the most failed runs.
 - **Errors by Channel & Provider**: Groups errored spans by `openclaw.channel` and `openclaw.provider` to pinpoint which integration paths are failing.
+- **Tool Call Distribution**: Shows how tool calls are spread across different tools (grouped by `openclaw.toolName`), helping you see which tools agents rely on most.
+- **Tool Calls Time Distribution**: Breaks down total execution time spent in each tool, surfacing the tools that consume the most time and are most likely to slow down or destabilize runs.
 - **Slowest Operations (p95)**: Shows p95 span duration grouped by operation name, since slow operations often precede timeouts and errors.
 - **Errored Span Detail**: Lists individual errored spans so you can drill into specific failures and inspect their attributes for root-cause analysis.
+
+### Steps Per Thread
+
+- **Items Started vs Completed vs Active**: Plots the average number of harness items started, completed, and active per agent run over time, showing how much work runs take on and whether items are finishing or piling up.
+- **Steps per Thread (Current Avg Completed)**: Single value showing the average number of completed items per harness run in the selected range, a quick gauge of how many steps a typical thread takes.
+- **Tool Executions per Trace**: Table of `openclaw.tool.execution` span counts grouped by trace, identifying the threads that performed the most tool calls.
+- **Model Calls (Turns) per Trace**: Table of `openclaw.model.call` span counts grouped by trace, showing how many model turns each thread consumed and highlighting unusually long conversations.

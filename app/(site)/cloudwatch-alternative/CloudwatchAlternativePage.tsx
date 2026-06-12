@@ -20,6 +20,8 @@ import {
   DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW,
 } from './CloudwatchAlternativePage.constants'
 import TrackingLink from '@/components/TrackingLink'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -27,7 +29,7 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'Cloudwatch Alternative Hero Start Trial',
@@ -39,7 +41,7 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/cloud/',
       variant: 'secondary' as const,
-      className: 'flex-center',
+      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Cloudwatch Alternative Hero Docs',
@@ -76,24 +78,21 @@ const Header: React.FC = () => {
 
 const WhyTeamsSwitchFromCloudWatch: React.FC = () => {
   return (
-    <SectionLayout
-      variant="full-width"
-      className="bg-blur-ellipse-388 relative mx-auto w-[100vw] overflow-hidden md:w-[80vw]"
-    >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="relative flex flex-col gap-6 pt-32 md:py-20">
-        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
-            <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
-              Why Teams Switch From CloudWatch
-            </h2>
-            <SectionLayout variant="no-border" className="!mx-auto p-0">
-              <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
-            </SectionLayout>
-          </div>
+    <div className="relative flex flex-col gap-6 pt-32 md:py-20">
+      <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+        <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
+          <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
+            Why Teams Switch From CloudWatch
+          </h2>
+
+          <SectionLayout variant="no-border" className="!mx-auto p-0">
+            <Divider />
+            <IconTitleDescriptionCardGrid cards={TEAM_SWITCH_CARDS} variant="xl" />
+            <Divider />
+          </SectionLayout>
         </div>
       </div>
-    </SectionLayout>
+    </div>
   )
 }
 
@@ -112,13 +111,13 @@ const DeploymentAndDataResidency: React.FC = () => {
           variant="xl"
         />
         <div className="relative hidden w-full items-center gap-0 md:flex">
-          <div className="h-px flex-1 border-t border-dashed border-signoz_sakura-600" />
+          <Divider className="h-px flex-1 border-signoz_sakura-600" />
           <div className="absolute z-[1] flex w-full items-center justify-center">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-signoz_sakura-600 text-xl font-bold text-white">
               VS
             </span>
           </div>
-          <div className="h-px flex-1 border-t border-dashed border-signoz_sakura-600" />
+          <Divider className="h-px flex-1 border-signoz_sakura-600" />
         </div>
         <IconTitleDescriptionCardGrid
           cards={DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW}
@@ -132,23 +131,21 @@ const DeploymentAndDataResidency: React.FC = () => {
 const CostComparison: React.FC = () => {
   return (
     <>
-      <SectionLayout
-        variant="full-width"
-        className="flex flex-col gap-y-9 border-y border-dashed border-signoz_slate-400 !px-0"
-      >
-        <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
-          <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
-          <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
-            You shouldn't pay to look at your own data
-          </h4>
-          <div className="text-sm text-signoz_vanilla-400">
-            CloudWatch bills across 12+ separate components for ingestion, storage, queries,
-            metrics, alarms, dashboards, and API access. SigNoz charges $0.30/GB for logs and
-            traces, $0.10 per million samples for metrics. Once data is ingested, query it unlimited
-            times at no extra charge.
-          </div>
+      <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
+        <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
+        <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
+          You shouldn't pay to look at your own data
+        </h4>
+        <div className="text-sm text-signoz_vanilla-400">
+          CloudWatch bills across 12+ separate components for ingestion, storage, queries, metrics,
+          alarms, dashboards, and API access. SigNoz charges $0.30/GB for logs and traces, $0.10 per
+          million samples for metrics. Once data is ingested, query it unlimited times at no extra
+          charge.
         </div>
-        <div className="border-t-1 flex flex-col border-dashed border-signoz_slate-400 sm:flex-row">
+      </div>
+      <div>
+        <Divider />
+        <div className="flex flex-col sm:flex-row">
           <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
             <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
               <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
@@ -186,15 +183,14 @@ const CostComparison: React.FC = () => {
             </div>
           </div>
         </div>
-      </SectionLayout>
+      </div>
     </>
   )
 }
 
 const ArchitectureAndApproach: React.FC = () => {
   return (
-    <section className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden md:w-[80vw]">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
+    <section className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <div className="flex flex-col items-center gap-4">
@@ -227,7 +223,9 @@ const CloudwatchAlternativePage: React.FC = () => {
 
       <SectionLayout variant="bordered" className="!px-0">
         <WhyTeamsSwitchFromCloudWatch />
+        <Divider />
         <ArchitectureAndApproach />
+        <Divider />
         <CostComparison />
       </SectionLayout>
 
@@ -248,7 +246,9 @@ const CloudwatchAlternativePage: React.FC = () => {
         }
       />
       <DeploymentAndDataResidency />
+      <Divider />
       <SigNozStats />
+      <Divider />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Cloudwatch Alternative Customer Stories Button',

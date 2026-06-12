@@ -85,7 +85,7 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
             </div>
             <Link
               className="flex items-center gap-2 text-base text-signoz_vanilla-400"
-              href="/changelog"
+              href="/changelog/"
             >
               <ArrowLeft size={16} />
               Back to all posts

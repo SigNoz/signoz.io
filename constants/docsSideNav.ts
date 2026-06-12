@@ -1304,6 +1304,11 @@ const docsSideNav = [
             route: '/docs/traces-management/guides/pii-scrubbing',
             label: 'PII Scrubbing',
           },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/span-links',
+            label: 'Span Links',
+          },
         ],
       },
       {
@@ -1636,6 +1641,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/integrations/opentelemetry-cassandra',
+            label: 'Cassandra',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
             label: 'Convex',
           },
@@ -1941,6 +1951,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/fluxcd-metrics',
+                label: 'Flux Metrics',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/istio-metrics',
                 label: 'Istio Metrics',
               },
@@ -1986,6 +2001,11 @@ const docsSideNav = [
             label: 'Databases',
             isExpanded: false,
             items: [
+              {
+                type: 'doc',
+                route: '/docs/integrations/opentelemetry-cassandra',
+                label: 'Cassandra',
+              },
               {
                 type: 'doc',
                 route: '/docs/tutorial/mongodb-metrics',
@@ -2483,6 +2503,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/flask-monitoring',
             label: 'Flask Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/fluxcd-dashboard',
+            label: 'FluxCD',
           },
           {
             type: 'doc',
@@ -3726,6 +3751,26 @@ const docsSideNav = [
             route: '/docs/integrations/azure/cdn-frontdoor',
             label: 'CDN FrontDoor',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/virtual-machines',
+            label: 'Virtual Machines',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/container-apps',
+            label: 'Container Apps',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/app-service',
+            label: 'App Services',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/aks',
+            label: 'AKS',
+          },
         ],
       },
       {
@@ -3793,6 +3838,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/mongodb-atlas',
         label: 'MongoDB Atlas',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-cassandra',
+        label: 'Cassandra',
       },
       {
         type: 'doc',

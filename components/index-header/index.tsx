@@ -12,7 +12,7 @@ export function Header() {
   const primaryCTA = 'Get Started - Free'
 
   return (
-    <header className="relative mx-auto mt-16 max-w-8xl md:w-[80vw]">
+    <header className="relative mx-auto mt-16 w-full max-w-8xl">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
       <div className="relative mx-auto flex w-full flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 pt-12 text-center md:pt-16">
