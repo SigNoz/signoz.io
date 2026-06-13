@@ -1,5 +1,5 @@
 ---
-date: 2026-02-24
+date: 2026-06-13
 title: Understanding Metrics Billing and Reducing Costs
 id: reducing-metrics-costs
 description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
@@ -56,11 +56,23 @@ Reduce the number of buckets while maintaining meaningful data. See [Configure C
 
 Reduce the volume of metrics sent from your application. This directly reduces the number of data points ingested.
 
-### 4. Review Attribute Necessity
+### 4. Use SDK-Level Delta Temporality for Idle Series
+
+Setting delta temporality at the SDK level (via `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta` or during SDK initialization) causes synchronous instruments to emit no datapoint during intervals where nothing was recorded. This eliminates cost for inactive series entirely.
+
+<Admonition type="warning">
+This benefit applies only to **synchronous instruments** (counters, histograms recorded inline with application code). Observable/async instruments (registered callbacks) emit a datapoint every collection cycle regardless of temporality.
+</Admonition>
+
+<Admonition type="info">
+Using the `cumulativetodelta` collector processor does **not** provide the same savings. The SDK still exports cumulative values every interval even when nothing changed, and the processor converts each of those unchanged points into a zero-value delta point. To benefit from idle-series elimination, configure delta temporality in the SDK itself.
+</Admonition>
+
+### 5. Review Attribute Necessity
 
 Ensure all identifying attributes are essential for your monitoring needs. Remove any attributes that don't provide actionable insights.
 
-### 5. Aggregate or Drop Metrics
+### 6. Aggregate or Drop Metrics
 
 Consider using the following techniques:
 
