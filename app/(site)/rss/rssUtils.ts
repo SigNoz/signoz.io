@@ -4,6 +4,7 @@ import { MDXContentApiResponse } from '@/utils/strapi'
 import { normaliseSlug } from '../../../scripts/rssFeed.mjs'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 import { mapRelationKeys, mapTaxonomyValues } from '@/utils/contentHelpers'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 const buildFaqSlug = (path = '') => {
   const cleanedPath = path.startsWith('/') ? path : `/${path}`
@@ -20,7 +21,7 @@ const mapFaqEntries = (faqs: MDXContentApiResponse | undefined) => {
   return faqs.data.map((faq) => ({
     ...faq,
     slug: buildFaqSlug(faq.path),
-    date: faq.date ?? faq.publishedAt ?? faq.updatedAt ?? faq.createdAt,
+    date: resolveLatestDate(faq),
     tags: mapTaxonomyValues(faq.tags),
     authors: mapRelationKeys(faq?.authors),
   }))
@@ -30,7 +31,7 @@ const mapComparisonEntries = (comparisons: MDXContentApiResponse | undefined) =>
   return comparisons?.data.map((comparison) => ({
     ...comparison,
     slug: buildComparisonSlug(comparison.path),
-    date: comparison.date ?? comparison.publishedAt ?? comparison.updatedAt ?? comparison.createdAt,
+    date: resolveLatestDate(comparison),
     tags: mapTaxonomyValues(comparison.tags),
     authors: mapRelationKeys(comparison?.authors),
   }))
@@ -50,11 +51,7 @@ const mapOpentelemetryEntries = (opentelemetries: MDXContentApiResponse | undefi
   return opentelemetries?.data.map((opentelemetry) => ({
     ...opentelemetry,
     slug: buildOpentelemetrySlug(opentelemetry.path),
-    date:
-      opentelemetry.date ??
-      opentelemetry.publishedAt ??
-      opentelemetry.updatedAt ??
-      opentelemetry.createdAt,
+    date: resolveLatestDate(opentelemetry),
   }))
 }
 
@@ -71,7 +68,7 @@ const mapGuideEntries = (guides: MDXContentApiResponse | undefined) => {
   return guides.data.map((guide) => ({
     ...guide,
     slug: buildGuideSlug(guide.path),
-    date: guide.date ?? guide.publishedAt ?? guide.updatedAt ?? guide.createdAt,
+    date: resolveLatestDate(guide),
     tags: mapTaxonomyValues(guide.tags),
     authors: mapRelationKeys(guide?.authors),
   }))
@@ -90,7 +87,7 @@ const mapBlogEntries = (blogs: MDXContentApiResponse | undefined) => {
   return blogs.data.map((blog) => ({
     ...blog,
     slug: buildBlogSlug(blog.path),
-    date: blog.date ?? blog.publishedAt ?? blog.updatedAt ?? blog.createdAt,
+    date: resolveLatestDate(blog),
     tags: mapTaxonomyValues(blog.tags),
     authors: mapRelationKeys(blog?.authors),
   }))

@@ -73,7 +73,7 @@ The `title` field is both the page heading and the meta title shown in search re
   - Include a feature or benefit qualifier when it fits naturally: Fast, Real-time, Open-source, Distributed.
 - **Example:** `Logs Pipelines - Parse & Transform Logs`
   - URL: `https://signoz.io/docs/logs-pipelines/introduction/`
-  - In search results: *Logs Pipelines - Parse & Transform Logs | SigNoz Docs*
+  - In search results: _Logs Pipelines - Parse & Transform Logs | SigNoz Docs_
 
 ### Description Guidelines
 
@@ -152,7 +152,7 @@ When documenting OpenTelemetry Collector changes:
 - Use `Admonition` for notes, warnings, tips, and supplementary or optional material. Do not use `KeyPointCallout`.
 - Use `Tabs` and `TabItem` only when flows materially differ by platform or environment. Always provide an `entityName` prop on `<Tabs>` that matches what the tabs represent:
   - `entityName="environment"` — deployment infrastructure tabs: VM, Kubernetes, Docker, Windows. Only use this when the tabs distinguish between these deployment environments.
-  - `entityName="plans"` — SigNoz Cloud vs Self-Hosted tabs.
+  - `entityName="plans"` — SigNoz Cloud vs Self-Hosted tabs. **Self-Hosted `TabItem` values must start with `self-host`** (e.g., `self-host`, `self-hosted`, `self-host-deployment`). The onboarding iframe hides tabs whose value starts with `self-host` — any other naming (e.g., `selfhosted`, `deployment-selfhosted`) will leak through and show in the in-product onboarding view.
   - For other tab groupings, use a short descriptive name (e.g., `"language"`, `"signal"`, `"setup"`).
 - Prefer numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful.
@@ -277,11 +277,16 @@ async redirects() {
 
 Some docs also need updates beyond the sidebar. Update discovery surfaces when a new page should appear in listicles, quick starts, overview cards, installation path cards, dashboard template listings, or similar surfaced integration collections.
 
-When needed:
+Listicles use a generic `<Listicle name="..." />` component driven by self-contained JSON configs. To add a new entry to an existing listicle:
 
-- Add or update the source data in the relevant `constants/componentItems/*.ts` file.
-- Keep `constants/componentItems.ts` as the public barrel.
-- Update the matching component `ICON_MAP` when required.
+1. Open the JSON config in `constants/listicles/<name>.json`.
+2. Add an item object with `name`, `href`, and `icon` to the relevant `items` array.
+
+That's it — items, icons, and sections are all in one JSON file.
+
+Do not create per-listicle TypeScript or React component files. Listicle rendering and agent markdown fallbacks both read the JSON config automatically.
+
+For full details on creating new listicles or changing listicle structure (sections, patterns, icons), see [contributing/site-code.md](site-code.md#listicle-and-discovery-data).
 
 ### Tag Definitions
 
@@ -296,10 +301,9 @@ yarn check:doc-redirects
 yarn test:doc-redirects
 ```
 
-If `constants/componentItems/*.ts` changed, also run:
+If `constants/listicles/*.json` changed, also run:
 
 ```bash
-yarn tsc --noEmit
 node --test tests/component-items-sync.test.js
 ```
 

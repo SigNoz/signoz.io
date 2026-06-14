@@ -23,6 +23,7 @@ import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
+import { resolvePublishedDate, resolveLatestDate } from '@/utils/dateUtils'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -57,12 +58,8 @@ export async function generateMetadata(props: {
         (author) => authorDirectory[author]?.name || author
       )
 
-      const publishedAt = new Date(
-        content.date || content.publishedAt || content.updatedAt
-      ).toISOString()
-      const modifiedAt = new Date(
-        content.lastmod || content.updatedAt || content.date || content.publishedAt
-      ).toISOString()
+      const publishedAt = new Date(resolvePublishedDate(content) || Date.now()).toISOString()
+      const modifiedAt = new Date(resolveLatestDate(content) || Date.now()).toISOString()
 
       let imageList = [siteMetadata.socialBanner]
       if (content.image) {
@@ -185,6 +182,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   // Prepare content for Layout
   const mainContent: CoreContent<MDXContent> = {
     title: content.title,
+    published_date: content.published_date,
+    updated_date: content.updated_date,
     date: content.date,
     lastmod: content.lastmod,
     tags,
