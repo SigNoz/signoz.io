@@ -31,7 +31,7 @@ const Header: React.FC = () => {
           clickLocation="Agent Native Observability Page Hero"
           clickText="Noz: SigNoz AI Assistant"
         >
-          Noz: SigNoz AI Assistant
+          Noz: SigNoz AI Teammate
           <ArrowRight size={14} />
         </TrackingLink>
       </Button>
@@ -68,8 +68,8 @@ const Header: React.FC = () => {
           <span className="text-base">
             Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
             issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
-            logs, metrics, service topology, and your actual codebase — all in one place. Or use
-            Noz, our new AI Assistant out-of-the-box. No AI SRE required.
+            logs, metrics, service topology, and your actual codebase - all in one place. Or use
+            Noz, our new AI teammate out-of-the-box.
           </span>
         }
         buttonGroup={headerButtonGroup}
@@ -324,9 +324,9 @@ const InContextObservability: React.FC = () => {
               </div>
               <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
               <p className="text-sm leading-relaxed text-signoz_vanilla-400">
-                Plug directly into Claude Code, Cursor in minutes. Get full observability context -
-                traces, logs, metrics, service topology, deployment history - in every session.
-                Start debugging in your terminal.
+                Plug into Claude Code or Cursor in minutes. Get full observability context in every
+                session: traces, logs, metrics, service topology, and deployment history. Start
+                debugging in your terminal.
               </p>
               <div className="mt-auto pb-5 pt-4">
                 <Button
@@ -353,11 +353,12 @@ const InContextObservability: React.FC = () => {
             <div className="flex h-full flex-col gap-4 p-8">
               <NozAnimatedIcon size={40} />
               <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
-                Noz : SigNoz AI Assistant
+                Noz : SigNoz AI Teammate
               </h3>
               <p className="text-sm leading-relaxed text-signoz_vanilla-400">
-                A sidepane as you work, or full-screen view to dig in. Ask about logs, traces,
-                metrics in plain English - pulls up the right explorer view with the query.
+                Your AI teammate inside SigNoz. Ask about your logs, traces, and metrics in plain
+                English, and Noz investigates across your data, explains what it finds, and suggests
+                what to do next.
               </p>
               <div className="mt-auto">
                 <p className="mb-2 text-sm font-semibold text-signoz_vanilla-100">
@@ -413,7 +414,7 @@ const BottomCTA: React.FC = () => {
               clickLocation="Agent Native Observability Page Bottom CTA"
               clickText="Noz: SigNoz AI Assistant"
             >
-              Noz: SigNoz AI Assistant
+              Noz: SigNoz AI Teammate
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
