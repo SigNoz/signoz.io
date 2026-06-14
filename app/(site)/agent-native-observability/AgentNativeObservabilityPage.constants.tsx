@@ -101,8 +101,8 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          Install the SigNoz plugin and your coding agent: Claude Code, Cursor, Codex, or Gemini can
-          work in SigNoz from your editor: look up docs, query your data, build dashboards, and
+          Install the SigNoz plugin in your coding agent. Claude Code, Cursor, Codex, or Gemini can
+          then work in SigNoz from your editor: look up docs, query your data, build dashboards, and
           create and triage alerts.
         </p>
         <p className="mt-3">
