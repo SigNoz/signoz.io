@@ -955,6 +955,11 @@ const docsSideNav = [
             label: 'GeoIP Processor',
             route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor',
           },
+          {
+            type: 'doc',
+            label: 'OTTL Reference',
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/ottl',
+          },
         ],
       },
     ],
