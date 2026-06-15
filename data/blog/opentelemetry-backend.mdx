@@ -55,9 +55,9 @@ There are three main components that an OpenTelemetry backend is responsible for
 
 ### Data Storage
 
-Observability data can be large in size, and is the reason why most observability vendors bill for signals per-GB. After all, your systems (applications and infrastructure) must generate significant enough data for you to visualize, understand, and learn from their behaviour over a period of time.
+Observability data can be large in size, and is the reason why most observability vendors bill for signals per-GB. After all, instrumented systems (applications and infrastructure) typically generate significant enough data that enable users to visualize, understand, and learn from their behaviour over a period of time.
 
-The data storage capabilities of an OpenTelemetry backend should be highly scalable, and query execution performance should be top-notch. Consider whether the backend can handle high-cardinality trace and log data, supports configurable retention policies, and can scale horizontally as your telemetry volume grows.
+The data storage capabilities of an OpenTelemetry backend should be highly scalable, and query execution performance should be top-notch. Consider whether the backend [can handle high-cardinality](https://signoz.io/blog/high-cardinality-data/) trace and log data, supports configurable retention policies, and can scale horizontally as your telemetry volume grows.
 
 ### Query Service
 
@@ -65,7 +65,9 @@ OpenTelemetry has three distinct signals. Each signal has different data formats
 
 ### Visualization
 
-Making sense out of data is what impacts the end-user of observability dashboards. OpenTelemetry backends should provide intuitive dashboards that enable end-users to take quick actions on performance issues. Look for built-in support for flamegraphs, service maps, and the ability to build custom dashboards without needing a separate visualization tool.
+OpenTelemetry backends should provide intuitive dashboards that enable end-users to take quick actions on performance issues. Look for built-in support for flamegraphs, service maps, and the ability to build custom dashboards without needing a separate visualization tool.
+
+Once you have configured alerts and consolidated queries into dashboards, the visualization medium becomes critical. Lack of proper visualization mechanisms, or non-intutive experiences will hamper your ability to get the most out of your OpenTelemetry deployment.
 
 Beyond these three considerations, you should further consider these specific factors when selecting an OpenTelemetry backend:
 
@@ -77,7 +79,11 @@ Beyond these three considerations, you should further consider these specific fa
   <Figure src="/img/blog/2026/01/otel-baggage-correlation.webp" alt="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." caption="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." />
 
 - **Native [OTLP](https://signoz.io/blog/what-is-otlp/) and semantic convention support**<br />
-  In OpenTelemetry, every component of a distributed system is defined as an attribute — key-value pairs that describe the entity they are attached to, like a span for a web request. These attributes are standardized by the OpenTelemetry specification as [OpenTelemetry semantic conventions](https://signoz.io/blog/otel-resource-attributes/#standardizing-resource-attributes-at-scale). For example, here is a glimpse of how HTTP conventions look:
+  In OpenTelemetry, telemetry signals and the resources they originate from (like applications or infrastructure) are enriched with key-value pairs known as attributes, providing context like the response method or error code. The OpenTelemetry specification understood that a lack of a common standard would mean different vendors, or even different teams in the same organization, might define these attributes differently, leading to a fragmentation in end-user observability pipelines.
+
+  To solve this problem, they introduced standards known as **[OpenTelemetry semantic conventions](https://signoz.io/blog/otel-resource-attributes/#standardizing-resource-attributes-at-scale)**. These conventions provide a common language for describing observability data, ensuring that everyone speaks the same language, regardless of their vendor or team.
+  
+  For example, here is a glimpse of how some HTTP attributes are defined via semantic conventions:
     
   | Attribute | Description | Example |
   | --- | --- | --- |
@@ -111,7 +117,7 @@ For most teams building on OpenTelemetry, an all-in-one backend reduces operatio
 
 <Figure src="/img/blog/common/signoz_flamegraphs.webp" alt="SigNoz distributed traces view provides detailed breakdown via Flamegraphs and Gantt charts." caption="SigNoz distributed traces view provides detailed breakdown via Flamegraphs and Gantt charts." />
 
-[SigNoz](https://signoz.io/) is a full-stack open-source APM tool built to support OpenTelemetry natively. It serves as a backend for storing telemetry data, provides metrics monitoring, distributed tracing, and logs management under a single pane of glass, and leverages the power of ClickHouse, a columnar database, for highly effective log analytics.
+[SigNoz](https://signoz.io/) is a full-stack open-source [APM tool](https://signoz.io/application-performance-monitoring/) built to support OpenTelemetry natively. It serves as a backend for storing telemetry data, provides metrics monitoring, distributed tracing, and [log management](https://signoz.io/log-management/) under a single pane of glass.
 
 SigNoz is an ideal choice for [distributed tracing](https://signoz.io/distributed-tracing/) based on OpenTelemetry. With SigNoz, you can do the following:
 
@@ -209,11 +215,11 @@ The table below summarizes the key characteristics of each backend to help you m
 
 | Backend | Type | Signals Supported | Open Source | Self-Hosted |
 |---|---|---|---|---|
-| SigNoz | All-in-one | Logs, Metrics, Traces | ✅ | ✅ |
-| Jaeger | Trace-specific | Traces only | ✅ | ✅ |
-| Prometheus | Metric-specific | Metrics only | ✅ | ✅ |
-| Honeycomb | All-in-one | Events, Logs, Traces | ❌ | ❌ |
-| Grafana Tempo | Trace-focused | Traces (+ Metrics/Logs with full Grafana stack) | ✅ | ✅ |
+| SigNoz | All-in-one | Logs, Metrics, Traces | Yes | Yes |
+| Jaeger | Trace-specific | Traces only | Yes | Yes |
+| Prometheus | Metric-specific | Metrics only | Yes | Yes |
+| Honeycomb | All-in-one | Events, Logs, Traces | No | No |
+| Grafana Tempo | Trace-focused | Traces (+ Metrics/Logs with full Grafana stack) | Yes | Yes |
 
 If you need a self-hosted OpenTelemetry backend that covers all three signals without stitching together multiple tools, SigNoz is the most feature-rich, OpenTelemetry-native option available today.
 
@@ -241,20 +247,20 @@ The getting-started flow is straightforward:
 
 ## Frequently Asked Questions
 
-**Does OpenTelemetry store data?**
+#### Does OpenTelemetry store data?
 
 No. OpenTelemetry is responsible for generating, collecting, and exporting telemetry data from your applications. It does not provide storage, querying, or visualization. You need a dedicated OpenTelemetry backend such as [SigNoz](https://signoz.io/) to store and analyze the data that OpenTelemetry exports.
 
-**What is the difference between the OpenTelemetry Collector and an OpenTelemetry backend?**
+#### What is the difference between the OpenTelemetry Collector and an OpenTelemetry backend?
 
 The [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is a vendor-agnostic proxy that receives, processes, and routes telemetry data. Rather than act like a storage or analysis system, it instead acts like a pipeline layer.
 
 This data ultimately lands in an OpenTelemetry backend which is responsible for storing, indexing, querying, and visualizing the telemetry. Think of the Collector as the router; the backend as the destination.
 
-**Can I use one backend for OpenTelemetry logs, metrics, and traces?**
+#### Can I use one backend for OpenTelemetry logs, metrics, and traces?
 
 Yes, and for most teams this is the logical approach. All-in-one backends like SigNoz support all three signals natively, letting you correlate a spike in error traces with a specific log event or a metrics anomaly, all in one view. Signal-specific backends like Jaeger (traces) or Prometheus (metrics) can work, but require operating multiple tools and stitching cross-signal correlation together manually.
 
-**How do I choose a self-hosted OpenTelemetry backend?**
+#### How do I choose a self-hosted OpenTelemetry backend?
 
 SigNoz is one of the most popular self-hosted OpenTelemetry backends because it is built natively on OpenTelemetry and supports logs, metrics, and traces out of the box. It uses ClickHouse as its storage engine, which provides strong query performance at scale. For teams that need traces only, Jaeger is a lightweight self-hosted option. For metrics-only workloads, Prometheus remains the standard choice.
