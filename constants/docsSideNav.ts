@@ -3759,28 +3759,23 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/integrations/redis',
-        label: 'Redis',
+        route: '/docs/integrations/opentelemetry-apache-druid',
+        label: 'Apache Druid',
       },
       {
         type: 'doc',
-        route: '/docs/integrations/postgresql',
-        label: 'PostgreSQL',
+        route: '/docs/integrations/aws-elasticache-redis',
+        label: 'AWS Elasticache Redis',
       },
       {
         type: 'doc',
-        route: '/docs/integrations/nginx',
-        label: 'Nginx',
+        route: '/docs/integrations/aws-rds-mysql',
+        label: 'AWS RDS MySQL',
       },
       {
         type: 'doc',
-        route: '/docs/integrations/mongodb',
-        label: 'MongoDB',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/mongodb-atlas',
-        label: 'MongoDB Atlas',
+        route: '/docs/integrations/aws-rds-postgres',
+        label: 'AWS RDS PostgreSQL',
       },
       {
         type: 'doc',
@@ -3794,53 +3789,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/integrations/snowflake',
-        label: 'Snowflake',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/aws-rds-postgres',
-        label: 'AWS RDS PostgreSQL',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/aws-rds-mysql',
-        label: 'AWS RDS MySQL',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/aws-elasticache-redis',
-        label: 'AWS Elasticache Redis',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/sql-server',
-        label: 'Microsoft SQL Server',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/opentelemetry-neondb',
-        label: 'Neon',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/supabase',
-        label: 'Supabase',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/opentelemetry-apache-druid',
-        label: 'Apache Druid',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/vercel',
-        label: 'Vercel',
-      },
-      {
-        type: 'doc',
-        route: '/docs/integrations/opentelemetry-hasura',
-        label: 'Hasura',
+        route: '/docs/integrations/outposts/cloudflare-workers',
+        label: 'Cloudflare Workers',
       },
       {
         type: 'doc',
@@ -3854,8 +3804,53 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/opentelemetry-hasura',
+        label: 'Hasura',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/sql-server',
+        label: 'Microsoft SQL Server',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/mongodb',
+        label: 'MongoDB',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/mongodb-atlas',
+        label: 'MongoDB Atlas',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/opentelemetry-neondb',
+        label: 'Neon',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nginx',
+        label: 'Nginx',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nomad',
+        label: 'Nomad',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/postgresql',
+        label: 'PostgreSQL',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/outposts/railway',
         label: 'Railway',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/redis',
+        label: 'Redis',
       },
       {
         type: 'doc',
@@ -3864,8 +3859,18 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/integrations/nomad',
-        label: 'Nomad',
+        route: '/docs/integrations/snowflake',
+        label: 'Snowflake',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/supabase',
+        label: 'Supabase',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/vercel',
+        label: 'Vercel',
       },
     ],
   },
