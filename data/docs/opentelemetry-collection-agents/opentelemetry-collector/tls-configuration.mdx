@@ -1,8 +1,8 @@
 ---
 date: 2026-06-15
 id: tls-configuration
-title: Enable TLS for the OpenTelemetry Collector
-description: Secure your OpenTelemetry Collector with TLS. Configure encrypted receivers, encrypted exporter connections, and mutual TLS (mTLS) for bidirectional authentication.
+title: Configure TLS Encryption for the OpenTelemetry Collector
+description: Secure your OpenTelemetry Collector with TLS. Configure encrypted receivers, exporter connections, and mutual TLS (mTLS) for bidirectional authentication.
 doc_type: howto
 ---
 
@@ -89,7 +89,7 @@ The collector acts as a TLS client when sending data to a backend. For SigNoz Cl
 
 ```yaml:otel-collector-config.yaml
 exporters:
-  otlp_http: # use 'otlphttp' for collector versions older than v0.144.0
+  otlp_http: # 'otlp_http' introduced in v0.144.0; use 'otlphttp' on older versions
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
     headers:
       'signoz-ingestion-key': '<your-ingestion-key>'
@@ -103,7 +103,7 @@ If your backend uses a certificate signed by a private CA, supply the CA cert so
 
 ```yaml:otel-collector-config.yaml
 exporters:
-  otlp_grpc: # use 'otlp' for collector versions older than v0.144.0
+  otlp_grpc: # 'otlp_grpc' introduced in v0.144.0; use 'otlp' on older versions
     endpoint: 'your-signoz-host:4317'
     tls:
       ca_file: /etc/otelcol/certs/ca.pem
@@ -114,7 +114,7 @@ For OTLP/HTTP:
 
 ```yaml:otel-collector-config.yaml
 exporters:
-  otlp_http: # use 'otlphttp' for collector versions older than v0.144.0
+  otlp_http: # 'otlp_http' introduced in v0.144.0; use 'otlphttp' on older versions
     endpoint: 'https://your-signoz-host:4318'
     tls:
       ca_file: /etc/otelcol/certs/ca.pem
