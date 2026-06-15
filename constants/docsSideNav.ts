@@ -3120,6 +3120,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/hermes-monitoring',
+        label: 'Hermes Agent',
+        type: 'doc',
+      },
+      {
         route: '/docs/huggingface-observability',
         label: 'Hugging Face',
         type: 'doc',
