@@ -3,7 +3,7 @@ date: 2026-06-15
 id: ottl
 title: OTTL - OpenTelemetry Transformation Language
 description: Learn OTTL syntax, contexts, and key functions to filter and transform traces, metrics, and logs in the OpenTelemetry Collector with practical examples.
-doc_type: explanation
+doc_type: reference
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -178,7 +178,7 @@ processors:
       - metric.name == "go_gc_duration_seconds"
 ```
 
-**Drop data points by attribute value**
+**Drop a metric when a data point matches an attribute value**
 
 ```yaml:otel-collector-config.yaml
 processors:
@@ -233,7 +233,7 @@ processors:
     log_statements:
       - context: log
         statements:
-          - set(resource.attributes["deployment.region"], "us-east-1")
+          - set(attributes["deployment.region"], "us-east-1")
 ```
 
 ## Filter processor vs transform processor
@@ -266,7 +266,7 @@ transform:
 - **No cross-signal access.** A span statement cannot read log fields. Contexts are fully isolated from each other.
 - **Stability.** Traces, metrics, and logs contexts are beta. Profile context is in development.
 - **Performance.** Complex regex in `replace_pattern` or `IsMatch` on high-throughput pipelines adds CPU overhead. Test under load before deploying.
-- **error_mode.** The default is `ignore` (via the `processor.*.defaultErrorModeIgnore` feature gate, enabled by default in recent collector releases). Set `error_mode: propagate` to surface type mismatch failures as pipeline errors instead of skipping them silently.
+- **error_mode.** The transform processor default is `ignore` (via the `processor.transform.defaultErrorModeIgnore` feature gate, enabled by default in recent collector releases). The filter processor default may differ; check your collector version. Set `error_mode: propagate` to surface type mismatch failures as pipeline errors instead of skipping them silently.
 
 ## Next Steps
 
