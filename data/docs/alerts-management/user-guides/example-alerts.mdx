@@ -8,8 +8,6 @@ doc_type: howto
 
 This page collects ready-to-use alert recipes for the jobs teams set up most often: catching a service that went silent, an endpoint that got slow or error-prone, a host running out of memory, and a business flow that stopped. Each recipe gives the Query Builder fields to set, a PromQL or ClickHouse variant where it helps, and the settings that keep the alert from firing when nothing is wrong.
 
-Query Builder is the default path in every example because it needs no query language. PromQL and ClickHouse variants appear where they express the same intent more directly.
-
 For the meaning of each condition field (operators, match type, evaluation window, threshold unit, no-data handling), see the per-signal references: [metrics](https://signoz.io/docs/alerts-management/metrics-based-alerts/), [logs](https://signoz.io/docs/alerts-management/log-based-alerts/), [traces](https://signoz.io/docs/alerts-management/trace-based-alerts/), and [exceptions](https://signoz.io/docs/alerts-management/exceptions-based-alerts/).
 
 ## Prerequisites
@@ -130,20 +128,6 @@ Build a trace alert with two queries and a formula:
 - **Alert on**: F1
 - **Condition**: Above, **Threshold** `5`, **Match type** `on average` over a 5-minute window
 
-PromQL variant using the span metric:
-
-In generated APM metrics, use the `operation` label. In trace Query Builder alerts, use the route or span name available on your spans, such as `http.route` or `name`.
-
-```promql
-100 * sum by ("service.name", "operation") (
-  rate({"signoz_calls_total", "service.name"="<your-service>", "operation"="<operation-name>", "span.kind"="SPAN_KIND_SERVER", "status.code"="STATUS_CODE_ERROR"}[5m])
-)
-/
-sum by ("service.name", "operation") (
-  rate({"signoz_calls_total", "service.name"="<your-service>", "operation"="<operation-name>", "span.kind"="SPAN_KIND_SERVER"}[5m])
-) > 5
-```
-
 <Admonition type="warning">
 Without the **Having** minimum-traffic guard, a single error during a quiet minute (1 error in 20 requests) reads as a 5% error rate and pages you. Require a minimum request count, and prefer `on average` or `all the times` over `at least once` so one noisy data point does not fire the alert.
 </Admonition>
@@ -173,17 +157,6 @@ Alert on P95 or P99 when endpoint slowdowns matter more than averages.
 - **Condition**: Above, **Threshold** `1200`, **Threshold Unit** `ms`
 - **Match type**: `at least once` for spike detection, or `on average` for sustained slowness
 - **Evaluation window**: `5m`
-
-PromQL variant using the latency histogram:
-
-```promql
-histogram_quantile(
-  0.95,
-  sum by (le, "service.name", "operation") (
-    rate({"signoz_latency.bucket", "service.name"="<your-service>", "operation"="<operation-name>", "span.kind"="SPAN_KIND_SERVER"}[5m])
-  )
-) > 1200
-```
 
 <Admonition type="warning">
 Always set **Threshold Unit** to `ms`. Span duration is stored in nanoseconds, so a bare threshold of `1200` is read as 1200 ns and the alert fires on nearly every request. On self-hosted SigNoz with a sharded ClickHouse cluster, percentile values computed across shards can read higher than the raw data; cross-check against the dashboard before tuning the threshold.
