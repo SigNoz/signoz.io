@@ -18,7 +18,7 @@ export type LogEventOptions = {
   transport?: 'fetch' | 'beacon'
 }
 
-const SITE_LOG_ENDPOINT = process.env.NEXT_PUBLIC_SITE_LOG_ENDPOINT || '/log/'
+const SITE_LOG_ENDPOINT = process.env.NEXT_PUBLIC_SITE_LOG_ENDPOINT || '/log'
 
 const POSTHOG_EVENT_NAMES = new Set([
   'Website Page View',

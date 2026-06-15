@@ -44,6 +44,7 @@ const getPostHogClient = () => {
   if (!posthogClient) {
     posthogClient = new PostHog(projectToken, {
       host: POSTHOG_HOST,
+      // Serverless invocations need each waitUntil task to flush before the function is frozen.
       flushAt: 1,
       flushInterval: 0,
       disableGeoip: true,
@@ -457,11 +458,7 @@ export const capturePostHogAnalyticsEvent = async (
   payload: LogEventPayload,
   context: RequestContext = {}
 ) => {
-  if (!isRecord(payload.attributes)) {
-    payload.attributes = {}
-  }
-
-  const attributes = payload.attributes
+  const attributes: Record<string, unknown> = isRecord(payload.attributes) ? payload.attributes : {}
 
   if (shouldDropForHumanAnalytics(payload, attributes, context)) {
     return

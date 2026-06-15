@@ -75,12 +75,20 @@ export const useLogEvent = () => {
       const userIp = Cookies.get('user_ip')
       const vercelIp = Cookies.get('vercel_ip')
       const postHogSessionId = getOrCreatePostHogSessionId()
+      const providedAttributes = attributes || {}
 
       const enhancedAttributes = {
-        pageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
-        pageTitle: typeof document !== 'undefined' ? document.title : undefined,
-        pageReferrer: typeof document !== 'undefined' ? document.referrer : undefined,
-        $session_id: postHogSessionId,
+        ...providedAttributes,
+        pageUrl:
+          providedAttributes.pageUrl ||
+          (typeof window !== 'undefined' ? window.location.href : undefined),
+        pageTitle:
+          providedAttributes.pageTitle ||
+          (typeof document !== 'undefined' ? document.title : undefined),
+        pageReferrer:
+          providedAttributes.pageReferrer ||
+          (typeof document !== 'undefined' ? document.referrer : undefined),
+        $session_id: providedAttributes.$session_id || postHogSessionId,
         custom_ip: userIp || 'unknown',
         custom_vercel_ip: vercelIp || 'unknown',
         custom_os: getOS(),
@@ -101,7 +109,6 @@ export const useLogEvent = () => {
         ...getJSCapabilitySignals(),
         ...getAnalyticsHealthSignals(),
         ...utmParams,
-        ...attributes,
       }
 
       const eventPayload: LogEventPayload = {

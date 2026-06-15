@@ -6,6 +6,9 @@ import { capturePostHogAnalyticsEvent } from '@/utils/posthogAnalytics'
 export const runtime = 'nodejs'
 
 const MAX_REQUEST_BYTES = 128 * 1024
+const RATE_LIMIT_WINDOW_MS = 60 * 1000
+const RATE_LIMIT_MAX_REQUESTS = 120
+const rateLimitBuckets = new Map<string, { count: number; windowStart: number }>()
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -30,6 +33,54 @@ const getContentLength = (req: Request) => {
   return Number.isFinite(contentLength) && contentLength >= 0 ? contentLength : undefined
 }
 
+const isAllowedRequestSource = (req: Request) => {
+  const requestHost = req.headers.get('host')
+  const source = req.headers.get('origin') || req.headers.get('referer')
+
+  if (!requestHost || !source) return false
+
+  try {
+    const sourceHost = new URL(source).host
+    const allowedHosts = new Set([
+      requestHost,
+      'signoz.io',
+      'www.signoz.io',
+      'staging.signoz.io',
+      ...(process.env.VERCEL_URL ? [process.env.VERCEL_URL] : []),
+    ])
+
+    if (sourceHost === 'localhost' || sourceHost.startsWith('localhost:')) {
+      return true
+    }
+
+    return allowedHosts.has(sourceHost)
+  } catch {
+    return false
+  }
+}
+
+const isRateLimited = (key: string) => {
+  const now = Date.now()
+  const existing = rateLimitBuckets.get(key)
+
+  if (!existing || now - existing.windowStart > RATE_LIMIT_WINDOW_MS) {
+    rateLimitBuckets.set(key, { count: 1, windowStart: now })
+    return false
+  }
+
+  existing.count += 1
+
+  if (rateLimitBuckets.size > 1000) {
+    rateLimitBuckets.forEach((bucket, bucketKey) => {
+      if (now - bucket.windowStart > RATE_LIMIT_WINDOW_MS) {
+        rateLimitBuckets.delete(bucketKey)
+      }
+    })
+  }
+
+  return existing.count > RATE_LIMIT_MAX_REQUESTS
+}
+
 const parsePayload = (body: Record<string, unknown>): LogEventPayload | null => {
   const eventName = getTrimmedString(body.eventName)
   const eventType = getTrimmedString(body.eventType)
@@ -50,6 +101,16 @@ const parsePayload = (body: Record<string, unknown>): LogEventPayload | null => 
 }
 
 export async function POST(req: Request) {
+  if (!isAllowedRequestSource(req)) {
+    return NextResponse.json({ ok: false, message: 'Invalid request source' }, { status: 403 })
+  }
+
+  const clientIp = getClientIp(req)
+
+  if (isRateLimited(clientIp || 'unknown')) {
+    return NextResponse.json({ ok: false, message: 'Too many requests' }, { status: 429 })
+  }
+
   const contentLength = getContentLength(req)
   if (contentLength && contentLength > MAX_REQUEST_BYTES) {
     return NextResponse.json({ ok: false, message: 'Request body too large' }, { status: 413 })
@@ -87,7 +148,7 @@ export async function POST(req: Request) {
 
   waitUntil(
     capturePostHogAnalyticsEvent(payload, {
-      ip: getClientIp(req),
+      ip: clientIp,
       referrer: req.headers.get('referer') || undefined,
       userAgent: req.headers.get('user-agent') || undefined,
     }).catch((error) => {
