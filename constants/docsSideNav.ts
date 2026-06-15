@@ -2484,6 +2484,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/hermes-dashboard',
+            label: 'Hermes Agent',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/huggingface-dashboard',
             label: 'Hugging Face',
           },
