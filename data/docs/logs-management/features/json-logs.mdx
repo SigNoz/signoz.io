@@ -1,0 +1,114 @@
+---
+date: 2026-06-15
+title: Native JSON Log Body
+id: json-logs
+description: Learn about SigNoz's native JSON support for log bodies — automatic JSON transformation, body key filtering, array querying, and GroupBy on keys.
+doc_type: explanation
+---
+
+SigNoz supports native JSON for log bodies. When this feature is active in your workspace, every log body is stored as JSON, text logs are automatically wrapped into a `message` key.
+
+## Availability
+
+Native JSON body support is available based on your region and account sign-up date:
+
+| Region | Available for accounts signed up on or after |
+|--------|----------------------------------------------|
+| `in2`  | May 7, 2026 |
+| `eu2`  | May 8, 2026 |
+| `us2`  | May 11, 2026 |
+
+This feature cannot be disabled.
+
+## How to verify it is active
+
+You can confirm native JSON body is active in your workspace in either of two ways:
+
+- Check the date your account was created against the table above.
+- Open any log that was sent as plain text. If the body appears as `{"message": "your original text"}`, the feature is active.
+
+## How it works
+
+Before any user-defined pipeline runs, SigNoz applies a **default Pipeline** to every incoming log entry. This step ensures the body is always a JSON and that `message` field is always String, if exists. Your Logs Pipelines always receive an already-processed entry.
+
+### Body transformation
+
+The default Pipeline handles three body shapes:
+
+| Body type | What happens |
+|-----------|--------------|
+| **String** | Attempt to parse as a JSON object (`{…}`). If valid, the parsed map is used. else, the string is wrapped: `{"message": "<original string>"}` |
+| **Map** (`{…}`) | Used as-is. No transformation. |
+| **Other scalar** (int, bool, float, …) | Wrapped as `{"message": <value>}`. The `message` field is always stored as a string in the final log. |
+
+### Message field standardization
+
+After the body is a map, the default Pipeline ensures a well-defined `message` field.
+
+**Synonym promotion** — if `message` is absent or `null`, SigNoz looks for certain fields that are eligible to be promoted as the log message. The first eligible field found is moved to `message`; the original field is deleted.
+
+```
+{"msg": "hello", "level": "info"} → {"message": "hello", "level": "info"}
+
+{"log": "server started", "level": "info"} → {"message": "server started", "level": "info"}
+```
+
+**Map flattening** — if `message` is itself a map, its keys are promoted to the top level of the body. This makes the nested keys independently queryable. If the inner map contained its own `message` key, that value becomes the new top-level `message`; if it did not, there is no `message` field after flattening.
+
+```
+{"message": {"status": 400, "method": "GET"}, "level": "info"}
+→ {"status": 400, "method": "GET", "level": "info"}
+   # no top-level message — inner map had none
+
+{"message": {"status": 400, "message": "bad request"}, "level": "info"}
+→ {"status": 400, "level": "info", "message": "bad request"}
+   # inner message: "bad request" survives as the new top-level message
+```
+
+<Admonition type="info">
+When a map-type `message` is flattened, inner keys override any top-level fields with the same name. This is intentional — the inner map is assumed to contain the authoritative details.
+</Admonition>
+
+No additional pipelines or configuration changes are required for any of this.
+
+## Filtering on JSON body keys
+
+Multi-type values for the same key are supported. A key that holds a string in one log and a number in another can be filtered with either type.
+
+## Querying arrays
+
+You can filter on values inside a JSON array using the `[]` notation. Querying a specific array index is not supported — the filter checks whether **any** element in the array matches the condition. This works regardless of whether the array contains uniform types or a mix of strings, numbers, and objects.
+
+```
+requests[].status_code >= 500
+```
+
+For example, even a mixed-type array like this:
+
+```json
+{
+  "malformed": ["string data", 4.05, {"status_code": 500}]
+}
+```
+
+can be queried the same way:
+
+```
+malformed[].status_code >= 500
+```
+
+To check whether a scalar value is present in an array, use the `has` function:
+
+```
+has(malformed, "string data")
+```
+
+## GroupBy on body keys
+
+Body keys can be used in the **Group By** field in the Query Builder, the same as resource and attribute keys. This lets you aggregate and chart logs by any key from the body.
+
+## Related
+
+- [Querying Logs](https://signoz.io/docs/logs-management/querying-logs/) — full reference for filter operators and aggregations
+- [Logs Quick Filters](https://signoz.io/docs/logs-management/features/logs-quick-filters/) — sidebar filters for the Logs Explorer
+- [Parse JSON Logs with Pipelines](https://signoz.io/docs/logs-pipelines/guides/json/) — extract JSON body fields into top-level attributes for more efficient querying

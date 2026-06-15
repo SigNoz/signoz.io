@@ -1648,6 +1648,11 @@ const docsSideNav = [
             label: 'Logs Quick Filters',
           },
           {
+            type: 'doc',
+            route: '/docs/logs-management/features/json-logs',
+            label: 'Native JSON Log Body',
+          },
+          {
             label: 'User Guides',
             type: 'category',
             isExpanded: false,
