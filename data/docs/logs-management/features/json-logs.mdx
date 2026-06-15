@@ -1,6 +1,6 @@
 ---
 date: 2026-06-15
-title: Native JSON Log Body
+title: Native JSON Log Body - Automatic Transformation & Querying
 id: json-logs
 description: Learn about SigNoz's native JSON support for log bodies — automatic JSON transformation, body key filtering, array querying, and GroupBy on keys.
 doc_type: explanation
@@ -30,15 +30,15 @@ You can confirm native JSON body is active in your workspace in either of two wa
 
 ## How it works
 
-Before any user-defined pipeline runs, SigNoz applies a **default Pipeline** to every incoming log entry. This step ensures the body is always a JSON and that `message` field is always String, if exists. Your Logs Pipelines always receive an already-processed entry.
 Before any user-defined pipeline runs, SigNoz applies a **default Pipeline** to every incoming log entry. This step ensures the body is always valid JSON and that the `message` field is always a string, if it exists. Your Logs Pipelines always receive an already-processed entry.
+
 ### Body transformation
 
 The default Pipeline handles three body shapes:
 
 | Body type | What happens |
 |-----------|--------------|
-| **String** | Attempt to parse as a JSON object (`{…}`). If valid, the parsed map is used. else, the string is wrapped: `{"message": "<original string>"}` |
+| **String** | Attempt to parse as a JSON object (`{…}`). If valid, the parsed map is used. Otherwise, the string is wrapped: `{"message": "<original string>"}` |
 | **Map** (`{…}`) | Used as-is. No transformation. |
 | **Other scalar** (int, bool, float, …) | Wrapped as `{"message": <value>}`. The `message` field is always stored as a string in the final log. |
 
@@ -46,7 +46,10 @@ The default Pipeline handles three body shapes:
 
 After the body is a map, the default Pipeline ensures a well-defined `message` field.
 
-**Synonym promotion** — if `message` is absent or `null`, SigNoz looks for certain fields that are eligible to be promoted as the log message. The first eligible field found is moved to `message`; the original field is deleted.
+**Synonym promotion** — if `message` is absent or `null`, SigNoz checks the following fields in order and promotes the first one found to `message`; the original field is deleted:
+
+- `log`
+- `msg`
 
 ```
 {"msg": "hello", "level": "info"} → {"message": "hello", "level": "info"}
@@ -71,10 +74,6 @@ When a map-type `message` is flattened, inner keys override any top-level fields
 </Admonition>
 
 No additional pipelines or configuration changes are required for any of this.
-
-## Filtering on JSON body keys
-
-Multi-type values for the same key are supported. A key that holds a string in one log and a number in another can be filtered with either type.
 
 ## Querying arrays
 
