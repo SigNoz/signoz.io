@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-06-15
 id: signoz-mcp-server
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Assistant Integration Guide
@@ -231,7 +231,7 @@ If you run into authentication issues, open the command palette and run **Authen
 
 When you add the hosted MCP URL to your client, the MCP client will initiate an authentication flow. You will be prompted to enter:
 1. Your **SigNoz instance URL** (e.g., `https://your-instance.signoz.cloud`)
-2. Your **API key** — go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key (requires **Admin** role). See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
+2. Your **API key** — go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key (requires **Admin** role). The service account must have at least a **Viewer** role assigned for MCP tools to access observability data. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
 
 <Admonition type="info" title="How authentication works?" defaultCollapsed={true}>
 SigNoz Cloud's hosted MCP server uses OAuth 2.1 for client-to-MCP authentication. MCP clients discover the auth endpoints from the server metadata, dynamically register as an OAuth client using Dynamic Client Registration (DCR, RFC 7591) when supported, then use Authorization Code + PKCE. During the browser step, SigNoz asks for your SigNoz instance URL and service account API key; the MCP server validates those credentials and issues bearer/refresh tokens for future MCP requests.
@@ -282,7 +282,7 @@ For self-hosted SigNoz, you run the MCP server locally. The server supports two 
 
 1. Log in to your SigNoz instance.
 2. Go to **Settings** → **Service Accounts**.
-3. Create a service account, open its **Keys** tab, click **Add Key**, and copy the generated key. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
+3. Create a service account, assign at least a **Viewer** role, open its **Keys** tab, click **Add Key**, and copy the generated key. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
 
 <Admonition type="warning">
 Only **Admin** users can create API keys. Keep your key secure — never commit it to version control.
@@ -887,6 +887,10 @@ For detailed parameter reference, see the <a href="https://github.com/SigNoz/sig
 - For SigNoz Cloud: ensure you are using the correct [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) in the MCP URL.
 - Confirm your API key is valid and has not expired.
 - For self-hosted HTTP mode where the client sends the key, use the `SIGNOZ-API-KEY: <your-api-key>` header.
+
+### 403 Forbidden errors on tool calls
+
+If the MCP connection succeeds but tool calls fail with a 403 error, the service account's API key is valid but the account lacks the required role. Go to **Settings → Service Accounts** in SigNoz and assign at least a **Viewer** role to the service account. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for details.
 
 ### SigNoz Cloud connection issues
 
