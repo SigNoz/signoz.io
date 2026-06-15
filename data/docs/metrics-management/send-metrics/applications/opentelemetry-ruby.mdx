@@ -1,5 +1,5 @@
 ---
-date: 2026-03-05
+date: 2026-06-11
 id: opentelemetry-ruby
 title: Send Metrics from Ruby Application Using OpenTelemetry
 description: Learn how to send metrics from Ruby applications (Rails, Sinatra, Sidekiq) to SigNoz using OpenTelemetry
@@ -151,6 +151,10 @@ This guide installs only metrics packages (`opentelemetry-exporter-otlp-metrics`
 `OTEL_LOGS_EXPORTER` is also set to `none` as an explicit metrics-only guard. With the current gems and SDK behavior in this setup, logs are not exported.
 
 Keeping both `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` set to `none` avoids trace exporter warnings and keeps configuration intent clear. If you add traces/logs instrumentation and exporters later, you can set them to `otlp` or remove the env variables altogether.
+</KeyPointCallout>
+
+<KeyPointCallout title="Metric temporality" defaultCollapsed={true}>
+The Ruby Metrics SDK currently exports metrics with **delta** temporality (cumulative temporality is not yet implemented), so no extra configuration is needed. Delta is also what we recommend for cost efficiency: synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
 </KeyPointCallout>
 
 ### Step 2. Install OpenTelemetry packages
