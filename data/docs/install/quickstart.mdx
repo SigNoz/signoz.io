@@ -1,0 +1,176 @@
+---
+title: Send OTel Demo Telemetry to Self-Hosted SigNoz in 5 Minutes
+id: quickstart
+tags: [Self-Host]
+date: 2026-06-15
+doc_type: tutorial
+description: Spin up the OpenTelemetry Demo App and start exploring traces, logs, metrics, and service maps in self-hosted SigNoz in under 5 minutes.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+This quickstart spins up a multi-service <a href="https://github.com/SigNoz/opentelemetry-demo-lite" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Demo</a> app and sends traces, logs, and metrics to your self-hosted SigNoz instance. No code changes needed. No ingestion key required.
+
+## Prerequisites
+
+- Self-hosted SigNoz running. If you haven't installed it yet, follow the [installation guide](https://signoz.io/docs/install/self-host/).
+- <a href="https://docs.docker.com/get-docker/" target="_blank" rel="noopener noreferrer nofollow">Docker</a> and <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Compose</a> installed
+
+## Setup
+
+### Step 1: Clone the demo app
+
+```bash
+git clone https://github.com/SigNoz/opentelemetry-demo-lite.git
+cd opentelemetry-demo-lite
+```
+
+### Step 2: Start the demo app
+
+Run the following command from the `opentelemetry-demo-lite` directory:
+
+```bash
+OTLP_ENDPOINT=<host>:4317 OTLP_INSECURE=true docker compose up -d
+```
+
+Replace `<host>` with the IP or hostname of your SigNoz machine.
+
+<Admonition type="info" title="Local install: use host.docker.internal instead of localhost" defaultCollapsed="true">
+The demo app runs inside Docker, so `localhost` inside the container points back to the container itself, not your host machine. Use `host.docker.internal:4317` on Docker Desktop (Mac/Windows):
+
+```bash
+OTLP_ENDPOINT=host.docker.internal:4317 OTLP_INSECURE=true docker compose up -d
+```
+
+On Linux, use your host's IP address directly:
+
+```bash
+OTLP_ENDPOINT=172.17.0.1:4317 OTLP_INSECURE=true docker compose up -d
+```
+
+Run `ip route | grep docker0` to find the correct bridge IP on your machine.
+</Admonition>
+
+<Admonition type="tip" title="Alternative: use a .env file" defaultCollapsed="true">
+Instead of passing environment variables inline, create a `.env` file in the project root:
+
+```bash:.env
+OTLP_ENDPOINT=<host>:4317
+OTLP_INSECURE=true
+```
+
+Then start the app:
+
+```bash
+docker compose up -d
+```
+</Admonition>
+
+### Step 3: Verify containers are running
+
+```bash
+docker compose ps -a
+```
+
+You should see all 12 services in the `running` state:
+
+<Figure
+  src="/img/docs/otel-demo-docker-containers.webp"
+  alt="Docker containers of the OpenTelemetry demo app running"
+  caption="All demo app containers should show a running status"
+/>
+
+The app's built-in browser simulator generates traffic automatically, so telemetry starts flowing to SigNoz immediately.
+
+## Validate
+
+After 2-3 minutes, open SigNoz at `http://<host>:8080` and verify each signal:
+
+1. **Services:** Navigate to the **Services** tab. You should see services like `frontend`, `cartservice`, `checkoutservice`, and others listed with live RED metrics (Rate, Errors, Duration).
+
+<Figure
+  src="/img/docs/otel-demo-services.webp"
+  alt="SigNoz Services tab showing demo app services"
+  caption="Demo app services appear in the Services tab with live metrics"
+/>
+
+2. **Traces:** Go to **Traces** and search for traces from any service. Click a trace to see the full request journey across services.
+3. **Logs:** Go to the **Logs** tab and filter by any service name to see structured log entries.
+4. **Metrics:** Go to **Metrics Explorer** and explore metrics.
+
+<Admonition type="info">
+The demo app's browser simulator generates continuous traffic at ~5 requests per second, so you'll see a steady stream of telemetry data.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Services not appearing in SigNoz
+
+- **Check the endpoint:** Verify `OTLP_ENDPOINT` points to your SigNoz host on port `4317` and that `OTLP_INSECURE=true` is set. Re-run with corrected values if needed.
+- **Wait for data:** OpenTelemetry batches data before sending. Wait 2-3 minutes after starting the demo app.
+- **Check network connectivity:** Ensure your machine can reach the SigNoz host on port `4317`:
+  ```bash
+  nc -zv <host> 4317
+  ```
+
+### Containers not starting
+
+Check logs for the failing service:
+
+```bash
+docker compose logs <service-name>
+```
+
+Common causes:
+- **Insufficient memory.** The demo app requires ~4 GB of available Docker memory. Check Docker Desktop settings.
+- **Port conflicts.** Ensure no other services are using ports required by the demo containers.
+
+### Enable Collector debug logging
+
+Edit `otel-collector-config.yaml` and change the log level:
+
+```yaml {4}
+service:
+  telemetry:
+    logs:
+      level: debug
+```
+
+Restart and rebuild to apply changes:
+
+```bash
+docker compose up -d --build
+```
+
+Then check the OTel Collector logs:
+
+```bash
+docker compose logs otel-col
+```
+
+Look for export confirmation messages or errors like connection failures.
+
+</details>
+
+## Clean up
+
+When you're done exploring, stop and remove all containers:
+
+```bash
+docker compose down
+```
+
+## Next Steps
+
+- **Instrument your own app:** Set up [OpenTelemetry instrumentation](https://signoz.io/docs/instrumentation/) for your language and framework.
+- **Send logs:** Collect and send [application logs](https://signoz.io/docs/logs-management/send-logs-to-signoz/) to SigNoz from your own services.
+- **Send metrics:** Push [custom metrics](https://signoz.io/docs/metrics-management/send-metrics/) from your applications to SigNoz.
+- **Set up alerts:** Create [alerts](https://signoz.io/docs/alerts/) for high latency or error rates.
+- **Monitor infrastructure:** Use [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for a unified view of host and container performance.
+
+## Get Help
+
+<GetHelp />

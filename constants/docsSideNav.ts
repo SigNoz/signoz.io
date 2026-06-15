@@ -71,6 +71,11 @@ const docsSideNav = [
         route: '/docs/install/self-host',
         items: [
           {
+            type: 'doc',
+            label: 'Quickstart',
+            route: '/docs/install/quickstart',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'Install on Docker',
