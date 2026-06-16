@@ -68,17 +68,21 @@ Because every step runs against your live telemetry, Noz tailors each answer to 
 
 ### Example: investigating what changed after a deploy
 
-> **You:** Errors on the checkout service jumped after the 2pm deploy. What changed?
+> **You:** Errors on the checkout service jumped after the latest deploy. What changed?
 
-Noz compares checkout's error rate before and after 2pm, pulls the error signatures that are new since the release, and inspects a failing trace, then reports back something like:
+Noz traces a failing request end to end, identifies which dependency is returning errors, and checks whether the failures line up with the new release, then reports back something like:
 
-> Checkout's 5xx rate went from ~0.2% to 6% right after the 2pm deploy. The failures are new since the release:
+> Checkout's `POST /checkout` is returning **502s**, and they're sustained across the window, all on `v2.0.0`. The trigger is downstream, not checkout itself:
 >
-> - **New 500s on `POST /checkout/confirm`.** They start at 14:03, minutes after the deploy, and were absent in the prior hour.
-> - **A downstream call is the trigger.** Failing traces show `payments-api` timing out at 3s on a call this release added.
-> - **Latency moved with it.** p99 on the endpoint rose from 420ms to 3.1s, in line with the new timeout.
+> - **The failure is in one dependency.** The outbound `external_api_call` to `external-svc` gets an HTTP 500 from `https://httpbin.org/status/500`; `POST /checkout` then surfaces it to the caller as a 502.
+> - **Checkout isn't broken** — it's faithfully propagating a downstream 500 as a 502.
+> - **The errors are concentrated in `external-svc`.** The other three dependencies in the checkout path are clean.
+>
+> Worth confirming whether the `v2.0.0` release pointed checkout at that `external-svc` endpoint (or changed how its 500s are handled), since that's the only failing leg.
 
-It then points to the likely cause and offers **Suggested Actions** to keep investigating.
+It then points to the likely cause and offers **Suggested Actions** (here, *Check external-svc*, *Alert on 5xx*, and *Confirm regression*) to keep investigating.
+
+<Figure src="/img/docs/noz/noz-agentic-answer.webp" alt="Noz answer diagnosing a post-deploy error spike on the checkout service: POST /checkout returns 502s on v2.0.0 because the external-svc dependency returns an HTTP 500, shown with a Suggested Actions panel (Check external-svc, Alert on 5xx, Confirm regression)" caption="Noz traces the failing checkout request to a downstream dependency, ties the spike to the new release, and ends with Suggested Actions." />
 
 ### Suggested actions and follow-ups
 
