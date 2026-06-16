@@ -8,6 +8,8 @@ import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import { AnonymousIdSetter } from './anonymous-id-setter'
+import { EXPERIMENTS } from '@/constants/experiments'
+import { getFeatureValue } from '@/utils/growthbookServer'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -58,7 +60,31 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+type HomepageHeroVariant =
+  (typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants)[keyof typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants]
+type HomepageHeroFeatureValue = HomepageHeroVariant | boolean
+
+async function getHomepageHeroVariant(): Promise<HomepageHeroVariant> {
+  const defaultVariant: HomepageHeroVariant =
+    process.env.NODE_ENV === 'development'
+      ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
+      : EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.defaultVariant
+  const featureValue = await getFeatureValue<HomepageHeroFeatureValue>(
+    EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.flagName,
+    defaultVariant
+  )
+
+  if (featureValue === true) return EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
+  if (featureValue === false) return EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
+
+  return featureValue
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const homepageHeroVariant = await getHomepageHeroVariant()
+  const isHomepageHeroVariant =
+    homepageHeroVariant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
+
   return (
     <html
       lang={siteMetadata.language}
@@ -94,7 +120,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/rss/" />
 
-      <body className="pl-[calc(100vw-100%)] text-white antialiased">
+      <body
+        className={`pl-[calc(100vw-100%)] text-white antialiased ${
+          isHomepageHeroVariant ? 'homepage-hero-redesign-variant' : ''
+        }`}
+      >
         <SpeedInsights />
         <Suspense fallback={null}>
           <PageViewTracker />
