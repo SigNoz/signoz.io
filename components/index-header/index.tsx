@@ -59,17 +59,17 @@ function HomepageHeroVariant() {
   return (
     <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-[220px] lg:px-[78px]">
       <div className="relative mx-auto flex w-full flex-col">
-        <h1 className="m-0 max-w-[900px] text-left text-[44px] font-[510] leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
-          Observe every request, from trace
+        <h1 className="m-0 max-w-[900px] text-left text-[44px] font-medium leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
+          Open observability for engineers
           <br />
-          to root cause
+          and their agents
         </h1>
 
         <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-stretch md:justify-between">
           <div className="flex flex-col items-start">
             <p className="m-0 max-w-[760px] text-left text-[15px] font-normal leading-6 tracking-[-0.165px] text-signoz_vanilla-400">
-              OpenTelemetry-native traces, metrics, and logs in one place. Debug faster without
-              vendor lock-in.
+              SigNoz brings your traces, metrics, logs, and alerts into one OpenTelemetry-native
+              workspace so you don&apos;t have to stitch together five tools during an incident.
             </p>
 
             <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-8">
@@ -106,15 +106,15 @@ function HomepageHeroVariant() {
 
           <div className="flex flex-col items-start gap-4 md:items-end md:justify-end">
             <TrackingLink
-              href="/trace-funnels/"
+              href="/agent-native-observability/"
               clickType="Secondary CTA"
-              clickName="Trace Funnels Link"
-              clickText="New Trace Funnels"
+              clickName="Agent Native Observability Link"
+              clickText="Introducing Agent Native Observability"
               clickLocation="Hero Section"
               className="group inline-flex items-center gap-2 text-base font-normal leading-6 text-signoz_vanilla-400 transition-colors hover:text-signoz_vanilla-100"
             >
               <span className="text-signoz_vanilla-100">New</span>
-              Trace Funnels
+              Agent Native Observability
               <ArrowRight
                 size={15}
                 className="transition-transform duration-200 group-hover:translate-x-1"
