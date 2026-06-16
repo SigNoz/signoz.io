@@ -33,6 +33,23 @@ const getContentLength = (req: Request) => {
   return Number.isFinite(contentLength) && contentLength >= 0 ? contentLength : undefined
 }
 
+const getHostFromSource = (source: string) => {
+  const trimmedSource = source.trim()
+  if (!trimmedSource) return undefined
+
+  try {
+    return new URL(trimmedSource.includes('://') ? trimmedSource : `https://${trimmedSource}`).host
+  } catch {
+    return undefined
+  }
+}
+
+const getConfiguredAllowedHosts = () =>
+  (process.env.SITE_LOG_ALLOWED_HOSTS || '')
+    .split(',')
+    .map(getHostFromSource)
+    .filter((host): host is string => Boolean(host))
+
 const isAllowedRequestSource = (req: Request) => {
   const requestHost = req.headers.get('host')
   const source = req.headers.get('origin') || req.headers.get('referer')
@@ -43,10 +60,8 @@ const isAllowedRequestSource = (req: Request) => {
     const sourceHost = new URL(source).host
     const allowedHosts = new Set([
       requestHost,
-      'signoz.io',
-      'www.signoz.io',
-      'staging.signoz.io',
       ...(process.env.VERCEL_URL ? [process.env.VERCEL_URL] : []),
+      ...getConfiguredAllowedHosts(),
     ])
 
     if (sourceHost === 'localhost' || sourceHost.startsWith('localhost:')) {
