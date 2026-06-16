@@ -1951,6 +1951,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-planetscale',
+                label: 'PlanetScale',
+              },
+              {
+                type: 'doc',
                 route: '/docs/integrations/opentelemetry-neondb',
                 label: 'Neon',
               },
