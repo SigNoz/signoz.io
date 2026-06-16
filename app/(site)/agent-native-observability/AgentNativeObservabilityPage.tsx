@@ -358,7 +358,7 @@ const InContextObservability: React.FC = () => {
               <p className="text-sm leading-relaxed text-signoz_vanilla-400">
                 Your AI teammate inside SigNoz. Ask about your logs, traces, and metrics in plain
                 English, and Noz investigates across your data, explains what it finds, and suggests
-                what to do next.
+                what to do next. It can also create dashboards, alerts, and views for you.
               </p>
               <div className="mt-auto">
                 <p className="mb-2 text-sm font-semibold text-signoz_vanilla-100">
