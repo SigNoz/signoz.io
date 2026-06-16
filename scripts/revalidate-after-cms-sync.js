@@ -45,6 +45,8 @@ const FOLDER_TO_URL_PREFIX = {
   blog: 'blog',
 }
 
+const LISTICLE_CONFIG_DIR = 'constants/listicles'
+
 function getFolderName(filePath) {
   const parts = filePath.split('/')
   if (parts[0] === 'data' && parts.length > 1) {
@@ -77,6 +79,69 @@ function filePathToCmsUrl(filePath) {
   return `/${prefix}${pathField}`
 }
 
+function filePathToListicleKey(filePath) {
+  const match = filePath.match(/^constants\/listicles\/([^/]+)\.json$/)
+  return match ? match[1] : null
+}
+
+function changedAssetFileToListicleAssetPath(filePath) {
+  if (filePath.startsWith('data-assets/')) {
+    return `/${filePath.replace(/^data-assets\//, '')}`
+  }
+
+  return null
+}
+
+function collectListicleItems(config) {
+  const items = []
+
+  if (config.items) items.push(...config.items)
+  if (config.staticSections) {
+    config.staticSections.forEach((section) => items.push(...(section.items || [])))
+  }
+  if (config.sections) {
+    config.sections.forEach((section) => {
+      if (section.items) items.push(...section.items)
+      if (section.subsections) {
+        section.subsections.forEach((subsection) => items.push(...(subsection.items || [])))
+      }
+    })
+  }
+
+  return items
+}
+
+function listicleReferencesAsset(config, assetPath) {
+  return collectListicleItems(config).some((item) => item.icon === assetPath)
+}
+
+function findListiclesForAssets(assetPaths) {
+  if (!fs.existsSync(LISTICLE_CONFIG_DIR) || assetPaths.length === 0) {
+    return []
+  }
+
+  const assetSet = new Set(assetPaths)
+  const keys = []
+
+  for (const file of fs
+    .readdirSync(LISTICLE_CONFIG_DIR)
+    .filter((entry) => entry.endsWith('.json'))) {
+    const filePath = `${LISTICLE_CONFIG_DIR}/${file}`
+    try {
+      const config = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+      if ([...assetSet].some((assetPath) => listicleReferencesAsset(config, assetPath))) {
+        keys.push(file.replace(/\.json$/, ''))
+      }
+    } catch (error) {
+      console.warn(
+        `⚠️ Could not inspect ${filePath} for listicle asset revalidation: ${error.message}`
+      )
+    }
+  }
+
+  return keys
+}
+
 function uniqueStrings(arr) {
   return [...new Set(arr.filter(Boolean))]
 }
@@ -84,9 +149,16 @@ function uniqueStrings(arr) {
 function buildPayload() {
   const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
   const cmsUrls = uniqueStrings(allContentFiles.map(filePathToCmsUrl))
+  const listicleKeys = uniqueStrings(allContentFiles.map(filePathToListicleKey))
+  const changedListicleAssetPaths = uniqueStrings(
+    CHANGED_ASSETS.map(changedAssetFileToListicleAssetPath)
+  )
+  const listicleAssetKeys = findListiclesForAssets(changedListicleAssetPaths)
+  const affectedListicleKeys = uniqueStrings([...listicleKeys, ...listicleAssetKeys])
 
   const hasAssetChanges = CHANGED_ASSETS.length > 0
   const hasCmsPaths = cmsUrls.length > 0
+  const hasListicleChanges = affectedListicleKeys.length > 0
 
   if (cmsUrls.length > BULK_THRESHOLD) {
     console.log(
@@ -95,12 +167,12 @@ function buildPayload() {
     return { mode: 'all', reason: 'bulk' }
   }
 
-  if (!hasCmsPaths && hasAssetChanges) {
+  if (!hasCmsPaths && !hasListicleChanges && hasAssetChanges) {
     console.log('📣 Asset-only change: using full revalidation (cannot map to page paths).')
     return { mode: 'all', reason: 'assets-only' }
   }
 
-  if (!hasCmsPaths) {
+  if (!hasCmsPaths && !hasListicleChanges) {
     console.log('⏭️ No CMS-backed content paths in this sync; skipping revalidation.')
     return { mode: 'skip', reason: 'no-cms-paths' }
   }
@@ -114,6 +186,10 @@ function buildPayload() {
   }
   if (cmsUrls.some((u) => u.startsWith('/blog/'))) {
     extraTags.push('blogs-list')
+  }
+  if (hasListicleChanges) {
+    extraTags.push('listicles-list')
+    affectedListicleKeys.forEach((key) => extraTags.push(`listicle-${key}`))
   }
 
   return {

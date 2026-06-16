@@ -39,7 +39,6 @@ const S3_REGION = process.env.S3_REGION
 const CDN_URL = process.env.CDN_URL
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
-
 const s3Client = new S3Client({
   region: S3_REGION,
   credentials: {
@@ -47,6 +46,9 @@ const s3Client = new S3Client({
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
   },
 })
+
+const LISTICLE_CONFIG_DIR = 'constants/listicles'
+const LISTICLE_ENDPOINT = 'listicles'
 
 // URL prefix to Strapi endpoint/content_type mapping for related_articles component
 const RELATED_ARTICLE_TYPE_MAP = {
@@ -287,6 +289,14 @@ function getFolderName(filePath) {
   return null
 }
 
+function isListicleConfigFile(filePath) {
+  return new RegExp(`^${LISTICLE_CONFIG_DIR}/[^/]+\\.json$`).test(filePath)
+}
+
+function getListicleKeyFromPath(filePath) {
+  return path.basename(filePath, '.json')
+}
+
 // Helper: Generate path field from file path
 function generatePathField(filePath, folderName) {
   const parts = filePath.split('/')
@@ -310,6 +320,135 @@ function parseMDXFile(filePath) {
   } catch (error) {
     throw new Error(`Failed to parse file ${filePath}: ${error.message}`)
   }
+}
+
+function parseListicleConfig(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  } catch (error) {
+    throw new Error(`Failed to parse listicle config ${filePath}: ${error.message}`)
+  }
+}
+
+function assertNonEmptyString(value, fieldName) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`${fieldName} should be a non-empty string`)
+  }
+}
+
+function assertValidHref(href, fieldName) {
+  assertNonEmptyString(href, fieldName)
+  if (!href.startsWith('/') && !href.startsWith('https://')) {
+    throw new Error(`${fieldName} should start with / or https://`)
+  }
+}
+
+function assertValidIcon(icon, fieldName) {
+  if (typeof icon === 'string') {
+    assertNonEmptyString(icon, fieldName)
+    return
+  }
+
+  if (!icon || typeof icon !== 'object') {
+    throw new Error(`${fieldName} should be a string path or badge object`)
+  }
+
+  assertNonEmptyString(icon.badge, `${fieldName}.badge`)
+  assertNonEmptyString(icon.color, `${fieldName}.color`)
+}
+
+function assertValidListicleItems(items, fieldName) {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error(`${fieldName} should be a non-empty array`)
+  }
+
+  items.forEach((item, index) => {
+    assertNonEmptyString(item.name, `${fieldName}[${index}].name`)
+    assertValidHref(item.href, `${fieldName}[${index}].href`)
+    assertValidIcon(item.icon, `${fieldName}[${index}].icon`)
+    if (item.clickName !== undefined) {
+      assertNonEmptyString(item.clickName, `${fieldName}[${index}].clickName`)
+    }
+  })
+}
+
+function validateListicleConfig(config, key) {
+  if (!config || typeof config !== 'object') {
+    throw new Error(`${key}.json should contain an object`)
+  }
+
+  if (config.id !== key) {
+    throw new Error(`${key}.json id should match filename`)
+  }
+
+  if (!['flat', 'sectioned', 'searchable'].includes(config.pattern)) {
+    throw new Error(`${key}.pattern should be flat, sectioned, or searchable`)
+  }
+
+  assertNonEmptyString(config.markdownTitle, `${key}.markdownTitle`)
+  assertNonEmptyString(config.sectionName, `${key}.sectionName`)
+
+  if (config.pattern === 'sectioned') {
+    if (!Array.isArray(config.sections) || config.sections.length === 0) {
+      throw new Error(`${key}.sections should be a non-empty array`)
+    }
+
+    config.sections.forEach((section, index) => {
+      assertNonEmptyString(section.id, `${key}.sections[${index}].id`)
+      assertNonEmptyString(section.label, `${key}.sections[${index}].label`)
+      assertNonEmptyString(section.title, `${key}.sections[${index}].title`)
+      assertNonEmptyString(section.sectionName, `${key}.sections[${index}].sectionName`)
+
+      if (section.items) {
+        assertValidListicleItems(section.items, `${key}.sections[${index}].items`)
+      }
+
+      if (section.subsections) {
+        if (!Array.isArray(section.subsections) || section.subsections.length === 0) {
+          throw new Error(`${key}.sections[${index}].subsections should be a non-empty array`)
+        }
+
+        section.subsections.forEach((subsection, subsectionIndex) => {
+          assertNonEmptyString(
+            subsection.id,
+            `${key}.sections[${index}].subsections[${subsectionIndex}].id`
+          )
+          assertNonEmptyString(
+            subsection.title,
+            `${key}.sections[${index}].subsections[${subsectionIndex}].title`
+          )
+          assertNonEmptyString(
+            subsection.sectionName,
+            `${key}.sections[${index}].subsections[${subsectionIndex}].sectionName`
+          )
+          assertValidListicleItems(
+            subsection.items,
+            `${key}.sections[${index}].subsections[${subsectionIndex}].items`
+          )
+        })
+      }
+
+      if (!section.items && !section.subsections) {
+        throw new Error(`${key}.sections[${index}] should have items or subsections`)
+      }
+    })
+    return
+  }
+
+  if (config.staticSections) {
+    if (config.pattern !== 'flat') {
+      throw new Error(`${key}.staticSections should only be used with flat listicles`)
+    }
+
+    config.staticSections.forEach((section, index) => {
+      assertNonEmptyString(section.title, `${key}.staticSections[${index}].title`)
+      assertNonEmptyString(section.sectionName, `${key}.staticSections[${index}].sectionName`)
+      assertValidListicleItems(section.items, `${key}.staticSections[${index}].items`)
+    })
+    return
+  }
+
+  assertValidListicleItems(config.items, `${key}.items`)
 }
 
 /**
@@ -480,6 +619,204 @@ function replaceAssetPaths(content, frontmatter, assets) {
   })
 
   return { content: newContent, frontmatter: newFrontmatter }
+}
+
+function isRemoteUrl(value) {
+  return typeof value === 'string' && /^https?:\/\//.test(value)
+}
+
+function toCdnAssetUrl(assetPath, cdnUrl = CDN_URL) {
+  if (isRemoteUrl(assetPath)) return assetPath
+  const cleanPath = assetPath.startsWith('/') ? assetPath.slice(1) : assetPath
+  return `${cdnUrl}/${cleanPath}`
+}
+
+function collectListicleItems(config) {
+  const items = []
+
+  if (config.items) items.push(...config.items)
+  if (config.staticSections) {
+    config.staticSections.forEach((section) => items.push(...(section.items || [])))
+  }
+  if (config.sections) {
+    config.sections.forEach((section) => {
+      if (section.items) items.push(...section.items)
+      if (section.subsections) {
+        section.subsections.forEach((subsection) => items.push(...(subsection.items || [])))
+      }
+    })
+  }
+
+  return items
+}
+
+function extractListicleAssetPaths(config) {
+  const paths = new Set()
+
+  collectListicleItems(config).forEach((item) => {
+    if (typeof item.icon === 'string' && !isRemoteUrl(item.icon)) {
+      paths.add(item.icon)
+    }
+  })
+
+  return Array.from(paths)
+}
+
+function resolveListicleAssetLocalPath(assetPath) {
+  const cleanPath = assetPath.startsWith('/') ? assetPath.slice(1) : assetPath
+  const localPath = path.join('data-assets', cleanPath)
+  return fs.existsSync(localPath) ? localPath : null
+}
+
+async function checkListicleCDN(assetPath) {
+  const url = toCdnAssetUrl(assetPath)
+  try {
+    await axios.head(url)
+    return true
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return false
+    }
+
+    console.warn(`    ⚠️ Error checking listicle CDN for ${url}: ${error.message}`)
+    return false
+  }
+}
+
+async function uploadListicleAsset(assetPath, force = false) {
+  const cleanPath = assetPath.startsWith('/') ? assetPath.slice(1) : assetPath
+  const localPath = resolveListicleAssetLocalPath(assetPath)
+  const s3Key = `web/${cleanPath}`
+  const onCDN = await checkListicleCDN(assetPath)
+
+  if (!localPath && !onCDN) {
+    throw new Error(
+      `❌ Listicle asset sync failed: "${assetPath}" does not exist in 'data-assets' and was not found on the CDN.`
+    )
+  }
+
+  if (!localPath || (onCDN && !force)) {
+    return
+  }
+
+  try {
+    const fileContent = fs.readFileSync(localPath)
+    const contentType = mime.lookup(localPath) || 'application/octet-stream'
+
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: S3_BUCKET_NAME,
+        Key: s3Key,
+        Body: fileContent,
+        ContentType: contentType,
+      })
+    )
+  } catch (error) {
+    throw new Error(`Failed to upload listicle asset ${s3Key} to S3: ${error.message}`)
+  }
+}
+
+function mapListicleItemToStrapi(item) {
+  const data = {
+    name: item.name,
+    href: item.href,
+  }
+
+  if (item.clickName) {
+    data.click_name = item.clickName
+  }
+
+  if (typeof item.icon === 'string') {
+    data.icon_path = toCdnAssetUrl(item.icon)
+  } else if (item.icon) {
+    data.icon_badge = item.icon.badge
+    data.icon_color = item.icon.color
+  }
+
+  return data
+}
+
+function mapListicleSubsectionToStrapi(subsection) {
+  return {
+    section_id: subsection.id,
+    title: subsection.title,
+    section_name: subsection.sectionName,
+    grid_cols: subsection.gridCols,
+    items: (subsection.items || []).map(mapListicleItemToStrapi),
+  }
+}
+
+function mapListicleSectionToStrapi(section) {
+  return {
+    section_id: section.id,
+    label: section.label,
+    title: section.title,
+    section_name: section.sectionName,
+    grid_cols: section.gridCols,
+    items: (section.items || []).map(mapListicleItemToStrapi),
+    subsections: (section.subsections || []).map(mapListicleSubsectionToStrapi),
+  }
+}
+
+function mapListicleStaticSectionToStrapi(section) {
+  return {
+    title: section.title,
+    section_name: section.sectionName,
+    grid_cols: section.gridCols,
+    items: (section.items || []).map(mapListicleItemToStrapi),
+  }
+}
+
+function mapListicleConfigToStrapi(config) {
+  return {
+    key: config.id,
+    pattern: config.pattern,
+    markdown_title: config.markdownTitle,
+    section_name: config.sectionName,
+    title: config.title,
+    description: config.description,
+    grid_cols: config.gridCols,
+    view_all_href: config.viewAllHref,
+    view_all_text: config.viewAllText,
+    search_placeholder: config.searchPlaceholder,
+    wrapper_title: config.wrapperTitle,
+    items: (config.items || []).map(mapListicleItemToStrapi),
+    sections: (config.sections || []).map(mapListicleSectionToStrapi),
+    static_sections: (config.staticSections || []).map(mapListicleStaticSectionToStrapi),
+  }
+}
+
+function changedAssetFileToListicleAssetPath(filePath) {
+  if (filePath.startsWith('data-assets/')) {
+    return `/${filePath.replace(/^data-assets\//, '')}`
+  }
+
+  return null
+}
+
+function loadListicleConfigsReferencingAssets(assetPaths) {
+  const referencedByKey = new Map()
+  if (!fs.existsSync(LISTICLE_CONFIG_DIR) || assetPaths.length === 0) {
+    return referencedByKey
+  }
+
+  const assetSet = new Set(assetPaths)
+  const files = fs.readdirSync(LISTICLE_CONFIG_DIR).filter((file) => file.endsWith('.json'))
+
+  files.forEach((file) => {
+    const filePath = path.join(LISTICLE_CONFIG_DIR, file)
+    const key = getListicleKeyFromPath(filePath)
+    const config = parseListicleConfig(filePath)
+    const referencedAssets = extractListicleAssetPaths(config).filter((assetPath) =>
+      assetSet.has(assetPath)
+    )
+
+    if (referencedAssets.length > 0) {
+      referencedByKey.set(key, referencedAssets)
+    }
+  })
+
+  return referencedByKey
 }
 
 // Helper: Fetch all entities from Strapi endpoint
@@ -979,6 +1316,109 @@ async function deleteEntry(folderName, documentId) {
   }
 }
 
+async function findListicleByKey(key) {
+  try {
+    const response = await axios.get(`${CMS_API_URL}/api/${LISTICLE_ENDPOINT}`, {
+      params: {
+        filters: { key: { $eq: key } },
+        pagination: { limit: 1 },
+      },
+      headers: {
+        Authorization: `Bearer ${CMS_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (response.data.data && response.data.data.length > 0) {
+      return response.data.data[0]
+    }
+
+    return null
+  } catch (error) {
+    console.error(`  ❌ Error in findListicleByKey:`, error.message)
+    if (error.response) {
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
+    }
+    throw new Error(`Failed to find listicle by key: ${error.message}`)
+  }
+}
+
+async function createListicleEntry(data) {
+  try {
+    const response = await axios.post(
+      `${CMS_API_URL}/api/${LISTICLE_ENDPOINT}`,
+      { data },
+      {
+        headers: {
+          Authorization: `Bearer ${CMS_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    return response.data
+  } catch (error) {
+    const errorMsg = error.response?.data?.error?.message || error.message
+    const errorDetails = error.response?.data?.error?.details || {}
+    console.error(`  ❌ Listicle create failed: ${errorMsg}`)
+    if (Object.keys(errorDetails).length > 0) {
+      console.error(`  Error details:`, JSON.stringify(errorDetails, null, 2))
+    }
+    if (error.response) {
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
+    }
+    throw error
+  }
+}
+
+async function updateListicleEntry(documentId, data) {
+  try {
+    const response = await axios.put(
+      `${CMS_API_URL}/api/${LISTICLE_ENDPOINT}/${documentId}`,
+      { data },
+      {
+        headers: {
+          Authorization: `Bearer ${CMS_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    return response.data
+  } catch (error) {
+    const errorMsg = error.response?.data?.error?.message || error.message
+    const errorDetails = error.response?.data?.error?.details || {}
+    console.error(`  ❌ Listicle update failed: ${errorMsg}`)
+    if (Object.keys(errorDetails).length > 0) {
+      console.error(`  Error details:`, JSON.stringify(errorDetails, null, 2))
+    }
+    if (error.response) {
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
+    }
+    throw error
+  }
+}
+
+async function deleteListicleEntry(documentId) {
+  try {
+    const response = await axios.delete(`${CMS_API_URL}/api/${LISTICLE_ENDPOINT}/${documentId}`, {
+      headers: {
+        Authorization: `Bearer ${CMS_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    return response.data
+  } catch (error) {
+    const errorMsg = error.response?.data?.error?.message || error.message
+    console.error(`  ❌ Listicle delete failed: ${errorMsg}`)
+    if (error.response) {
+      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
+    }
+    throw new Error(`Failed to delete listicle: ${errorMsg}`)
+  }
+}
+
 // Helper: Detect operation type
 function detectOperationType(filePath, isDeletedFile = false) {
   if (isDeletedFile) {
@@ -1005,6 +1445,7 @@ async function syncToStrapi() {
     skipped: [],
     errors: [],
     relationWarnings: [], // Track unmatched relations
+    listicleAssets: [],
   }
 
   // Combine changed and deleted files with a flag to indicate deletion
@@ -1023,6 +1464,38 @@ async function syncToStrapi() {
     console.log(`\n📄 Processing: ${filePath}${isDeleted ? ' (deleted)' : ''}`)
 
     try {
+      if (isListicleConfigFile(filePath)) {
+        const key = getListicleKeyFromPath(filePath)
+        const operationType = detectOperationType(filePath, isDeleted)
+
+        if (operationType === 'delete') {
+          pendingOperations.push({
+            type: 'delete_listicle',
+            key,
+            filePath,
+          })
+          continue
+        }
+
+        const config = parseListicleConfig(filePath)
+        validateListicleConfig(config, key)
+
+        const assetPaths = extractListicleAssetPaths(config)
+        for (const assetPath of assetPaths) {
+          const localPath = resolveListicleAssetLocalPath(assetPath)
+          const force = localPath ? CHANGED_ASSETS.includes(localPath) : false
+          await uploadListicleAsset(assetPath, force)
+        }
+
+        pendingOperations.push({
+          type: 'upsert_listicle',
+          key,
+          filePath,
+          config,
+        })
+        continue
+      }
+
       const folderName = getFolderName(filePath)
 
       if (!folderName || !SYNC_FOLDERS.includes(folderName)) {
@@ -1076,6 +1549,28 @@ async function syncToStrapi() {
     } catch (error) {
       console.error(`❌ Error processing ${filePath}: ${error.message}`)
       results.errors.push({ file: filePath, error: error.message })
+    }
+  }
+
+  const changedListicleAssetPaths = CHANGED_ASSETS.map(changedAssetFileToListicleAssetPath).filter(
+    Boolean
+  )
+  const listicleRefsByKey = loadListicleConfigsReferencingAssets(changedListicleAssetPaths)
+
+  for (const [key, assetPaths] of listicleRefsByKey) {
+    const hasPendingListicleConfig = pendingOperations.some(
+      (op) => op.key === key && (op.type === 'upsert_listicle' || op.type === 'delete_listicle')
+    )
+    if (hasPendingListicleConfig) continue
+
+    for (const assetPath of assetPaths) {
+      try {
+        await uploadListicleAsset(assetPath, true)
+        results.listicleAssets.push({ key, asset: assetPath })
+      } catch (error) {
+        console.error(`❌ Error syncing listicle asset ${assetPath}: ${error.message}`)
+        results.errors.push({ file: assetPath, error: error.message })
+      }
     }
   }
 
@@ -1139,7 +1634,39 @@ async function syncToStrapi() {
     console.log(`\n📄 Syncing: ${filePath} (${type})`)
 
     try {
-      if (type === 'delete') {
+      if (type === 'delete_listicle') {
+        const { key } = op
+        console.log(`🗑️ Deleting listicle from CMS: ${key}`)
+        const existingEntry = await findListicleByKey(key)
+
+        if (existingEntry) {
+          await deleteListicleEntry(existingEntry.documentId)
+          console.log(`✅ Deleted listicle successfully`)
+          results.deleted.push({ file: filePath, key })
+        } else {
+          console.log(`⚠️ Listicle not found in CMS, skipping deletion`)
+          results.skipped.push(filePath)
+        }
+      } else if (type === 'upsert_listicle') {
+        const { key, config } = op
+        const strapiData = mapListicleConfigToStrapi(config)
+        const existingEntry = await findListicleByKey(key)
+
+        if (existingEntry) {
+          console.log(`🔄 Updating listicle in CMS: ${key}`)
+          if (!existingEntry.documentId) {
+            throw new Error(`Listicle found but has no documentId`)
+          }
+          await updateListicleEntry(existingEntry.documentId, strapiData)
+          console.log(`✅ Updated listicle successfully`)
+          results.updated.push({ file: filePath, key })
+        } else {
+          console.log(`➕ Creating listicle in CMS: ${key}`)
+          await createListicleEntry(strapiData)
+          console.log(`✅ Created listicle successfully`)
+          results.created.push({ file: filePath, key })
+        }
+      } else if (type === 'delete') {
         console.log(`🗑️ Deleting from CMS: ${pathField}`)
         const existingEntry = await findEntryByPath(folderName, pathField)
 
