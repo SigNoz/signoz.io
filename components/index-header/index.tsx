@@ -1,5 +1,4 @@
 import React from 'react'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import Hero from '@/components/ui/Hero'
 import Button from '@/components/Button/Button'
@@ -9,7 +8,8 @@ import { getFeatureValue } from '@/utils/growthbookServer'
 import { EXPERIMENTS } from '@/constants/experiments'
 import { VideoModalPlayer } from './VideoModalPlayer'
 import { HeroSectionPill } from './HeroSectionPill'
-import heroTraces from '@/public/img/landing/homepage-hero-traces.png'
+import HeroCopyMotion from './HeroCopyMotion'
+import HeroTracePreview from './HeroTracePreview'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
 type HomepageHeroVariant =
@@ -58,84 +58,83 @@ function HomepageHeroVariant() {
 
   return (
     <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-[220px] lg:px-[78px]">
-      <div className="relative mx-auto flex w-full flex-col">
-        <h1 className="m-0 max-w-[900px] text-left text-[44px] font-medium leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
-          Open observability for engineers
-          <br />
-          and their agents
-        </h1>
+      <div className="relative mx-auto flex w-full max-w-[1200px] flex-col">
+        <HeroCopyMotion>
+          <h1 className="m-0 max-w-[900px] text-left text-[44px] font-medium leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
+            Open observability for engineers
+            <br />
+            and their agents
+          </h1>
+        </HeroCopyMotion>
 
         <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-stretch md:justify-between">
           <div className="flex flex-col items-start">
-            <p className="m-0 max-w-[760px] text-left text-[15px] font-normal leading-6 tracking-[-0.165px] text-signoz_vanilla-400">
-              SigNoz brings your traces, metrics, logs, and alerts into one OpenTelemetry-native
-              workspace so you don&apos;t have to stitch together five tools during an incident.
-            </p>
+            <HeroCopyMotion delay={0.12}>
+              <p className="m-0 max-w-[760px] text-left text-[15px] font-normal leading-6 tracking-[-0.165px] text-signoz_vanilla-400">
+                SigNoz brings your traces, metrics, logs, and alerts into one OpenTelemetry-native
+                workspace so you don&apos;t have to stitch together five tools during an incident.
+              </p>
+            </HeroCopyMotion>
 
-            <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-8">
-              <TrackingLink
-                href="/teams/"
-                clickType="Primary CTA"
-                clickName="Sign Up Button"
-                clickText={primaryCTA}
-                clickLocation="Hero Section"
-                className="block w-full sm:w-[176px]"
-              >
-                <Button className="!w-full" id="btn-get-started-homepage-hero">
-                  {primaryCTA}
-                </Button>
-              </TrackingLink>
-              <TrackingLink
-                href="/contact-us/?source=homepage"
-                clickType="Secondary CTA"
-                clickName="Book a Demo Button"
-                clickText="Book a Demo"
-                clickLocation="Hero Section"
-                className="block w-full sm:w-[160px]"
-                prefetch={false}
-              >
-                <Button
-                  className="experiment-button--secondary-with-icon !w-full"
-                  type={Button.TYPES.SECONDARY}
+            <HeroCopyMotion delay={0.2}>
+              <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-8">
+                <TrackingLink
+                  href="/teams/"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText={primaryCTA}
+                  clickLocation="Hero Section"
+                  className="block w-full sm:w-[176px]"
                 >
-                  Book a Demo
-                </Button>
-              </TrackingLink>
-            </div>
+                  <Button className="!w-full" id="btn-get-started-homepage-hero">
+                    {primaryCTA}
+                  </Button>
+                </TrackingLink>
+                <TrackingLink
+                  href="/contact-us/?source=homepage"
+                  clickType="Secondary CTA"
+                  clickName="Book a Demo Button"
+                  clickText="Book a Demo"
+                  clickLocation="Hero Section"
+                  className="block w-full sm:w-[160px]"
+                  prefetch={false}
+                >
+                  <Button
+                    className="experiment-button--secondary-with-icon !w-full"
+                    type={Button.TYPES.SECONDARY}
+                  >
+                    Book a Demo
+                  </Button>
+                </TrackingLink>
+              </div>
+            </HeroCopyMotion>
           </div>
 
           <div className="flex flex-col items-start gap-4 md:items-end md:justify-end">
-            <TrackingLink
-              href="/agent-native-observability/"
-              clickType="Secondary CTA"
-              clickName="Agent Native Observability Link"
-              clickText="Introducing Agent Native Observability"
-              clickLocation="Hero Section"
-              className="group inline-flex items-center gap-2 text-base font-normal leading-6 text-signoz_vanilla-400 transition-colors hover:text-signoz_vanilla-100"
-            >
-              <span className="text-signoz_vanilla-100">New</span>
-              Agent Native Observability
-              <ArrowRight
-                size={15}
-                className="transition-transform duration-200 group-hover:translate-x-1"
-              />
-            </TrackingLink>
+            <HeroCopyMotion delay={0.24}>
+              <TrackingLink
+                href="/agent-native-observability/"
+                clickType="Secondary CTA"
+                clickName="Agent Native Observability Link"
+                clickText="Introducing Agent Native Observability"
+                clickLocation="Hero Section"
+                className="group inline-flex items-center gap-2 text-base font-normal leading-6 text-signoz_vanilla-400 transition-colors hover:text-signoz_vanilla-100"
+              >
+                <span className="text-signoz_vanilla-100">New</span>
+                Agent Native Observability
+                <ArrowRight
+                  size={15}
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                />
+              </TrackingLink>
+            </HeroCopyMotion>
           </div>
         </div>
 
-        <div className="relative left-1/2 mt-[76px] w-[calc(100dvw-8px)] -translate-x-1/2 px-5 pb-52 md:px-[90px]">
+        <div className="relative left-1/2 mt-[76px] w-[calc(100dvw-8px)] -translate-x-1/2 px-5 pb-52 md:px-[78px]">
           <div className="pointer-events-none absolute bottom-24 left-1/2 h-56 w-[calc(100%-32px)] max-w-[1410px] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.46)_0%,rgba(86,95,104,0.34)_38%,rgba(8,9,10,0)_74%)] blur-2xl" />
           <div className="pointer-events-none absolute bottom-40 left-1/2 h-28 w-[min(1180px,82vw)] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.16)_0%,rgba(96,105,115,0.12)_44%,rgba(8,9,10,0)_76%)] blur-xl" />
-          <div className="relative mx-auto max-w-[1258px] overflow-hidden border border-signoz_slate-400/60 bg-signoz_ink-400 shadow-[0_32px_86px_rgba(0,0,0,0.72)] md:rounded-[14px]">
-            <Image
-              src={heroTraces}
-              alt="SigNoz trace waterfall showing distributed traces, spans, latency, and request status"
-              priority
-              sizes="(max-width: 768px) 1200px, 1500px"
-              className="h-auto w-full min-w-[980px] max-w-none object-cover object-top opacity-95 md:h-[705px]"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,10,0)_58%,rgba(8,9,10,0.60)_100%)]" />
-          </div>
+          <HeroTracePreview />
         </div>
       </div>
     </header>
