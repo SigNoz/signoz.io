@@ -569,6 +569,11 @@ const docsSideNav = [
                     route: '/docs/manage/administrator-guide/sso/user-guides/oidc-keycloak',
                     label: 'Keycloak - OIDC Authentication',
                   },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-google',
+                    label: 'Google Workspace - SAML Authentication',
+                  },
                 ],
               },
             ],
