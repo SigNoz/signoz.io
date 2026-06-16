@@ -2,13 +2,14 @@ import * as React from 'react'
 import Link from '@/components/Link'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from '@radix-ui/react-slot'
+import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
 
 // -----------------------------------------------------------------------------
 // Variants
 // -----------------------------------------------------------------------------
-// Inspired by shadcn/ui default button implementation with custom SigNoz palette
+// Button variants use the shadcn/ui pattern with custom SigNoz palette tokens.
 export const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ring-offset-background',
   {
@@ -91,6 +92,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       isButton = false,
       outlined = false,
       rounded,
+      children,
       ...props
     },
     ref
@@ -115,13 +117,46 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       }
     }
 
+    const isExperimentButton = mappedVariant === 'default' || mappedVariant === 'secondary'
+    const experimentButtonTypeClass =
+      mappedVariant === 'default'
+        ? 'experiment-button experiment-button--primary'
+        : mappedVariant === 'secondary'
+          ? 'experiment-button experiment-button--secondary'
+          : ''
+    const shouldRenderExperimentButtonContent = isExperimentButton && !asChild
+
     return (
       <Comp
         ref={!asChild ? (ref as any) : undefined}
-        className={cn(buttonVariants({ variant: mappedVariant, size, rounded }), className)}
+        className={cn(
+          buttonVariants({ variant: mappedVariant, size, rounded }),
+          experimentButtonTypeClass,
+          className
+        )}
         {...extraProps}
         {...props}
-      />
+      >
+        {shouldRenderExperimentButtonContent ? (
+          <>
+            <span className="experiment-button__label flex min-w-0 items-center justify-center gap-1.5">
+              {children}
+            </span>
+            <span
+              className={`experiment-button__icon hidden ${
+                mappedVariant === 'default'
+                  ? 'experiment-button__icon--primary'
+                  : 'experiment-button__icon--secondary'
+              }`}
+              aria-hidden="true"
+            >
+              <ArrowUpRight size={16} strokeWidth={2.5} />
+            </span>
+          </>
+        ) : (
+          children
+        )}
+      </Comp>
     )
   }
 )

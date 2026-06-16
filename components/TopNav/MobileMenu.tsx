@@ -176,6 +176,7 @@ function MainMenuContent({
             onClick={onClose}
           >
             <Button
+              variant="default"
               className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
               id="btn-get-started-website-navbar"
             >
