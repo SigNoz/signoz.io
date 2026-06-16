@@ -1,5 +1,6 @@
 import React from 'react'
 import TrackingLink from '@/components/TrackingLink'
+import Button from '@/components/Button/Button'
 import {
   CheckSolid,
   CrossSolid,
@@ -41,14 +42,19 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/docs/introduction/'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className="block w-full"
           clickType="Secondary CTA"
           clickName="Docs Link"
           clickText="Read Documentation"
           clickLocation="Explore All Features Table"
           id="btn-documentation-pricing-table"
         >
-          Read Documentation
+          <Button
+            type={Button.TYPES.SECONDARY}
+            className="!h-8 !w-full truncate !px-4 !py-2 text-[9px] sm:text-sm"
+          >
+            Read Documentation
+          </Button>
         </TrackingLink>
       ),
     },
@@ -58,14 +64,16 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/teams/'}
-          className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className="block w-full"
           clickType="Primary CTA"
           clickName="Sign Up Button"
           clickText="Get Started - Free"
           clickLocation="Explore All Features Table"
           id="btn-get-started-pricing-table"
         >
-          Get Started - Free
+          <Button className="!h-8 !w-full truncate !px-4 !py-2 text-[9px] sm:text-sm">
+            Get Started - Free
+          </Button>
         </TrackingLink>
       ),
     },
@@ -75,14 +83,19 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/contact-us/?source=pricing'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
+          className="block w-full"
           clickType="Secondary CTA"
           clickName="Enterprise Contact Button"
           clickText="Contact Us"
           clickLocation="Explore All Features Table"
           id="btn-contact-us-pricing-table"
         >
-          Contact Us
+          <Button
+            type={Button.TYPES.SECONDARY}
+            className="!h-8 !w-full truncate !px-4 !py-2 text-[9px] sm:text-sm"
+          >
+            Contact Us
+          </Button>
         </TrackingLink>
       ),
     },
