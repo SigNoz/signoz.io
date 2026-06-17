@@ -97,18 +97,7 @@ export async function getRuntimeListicleConfig(name: string) {
 
   try {
     return await getCachedCmsListicle(name)
-  } catch (cacheError) {
-    console.warn(`Cached listicle fetch failed for "${name}", retrying without cache:`, cacheError)
-
-    try {
-      return await fetchCmsListicle(name)
-    } catch (directError) {
-      console.warn(
-        `Direct CMS fetch also failed for "${name}", falling back to local config:`,
-        directError
-      )
-
-      return getLocalListicleConfig(name)
-    }
+  } catch {
+    return getLocalListicleConfig(name)
   }
 }
