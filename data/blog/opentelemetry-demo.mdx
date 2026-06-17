@@ -1,9 +1,10 @@
 ---
 title: "Understanding OpenTelemetry Demo: A Hands-on Guide" 
-date: 2026-02-17
+published_date: 2025-03-26
+updated_date: 2026-06-16
 tags: [OpenTelemetry]
 authors: [elizabeth_mathew, dhruv_ahuja]
-description: OpenTelemetry Demo Application is a sample application that demonstrates how to use OpenTelemetry to instrument an application and send telemetry data to a backend. In this blog post, we will explore the OpenTelemetry Demo Application and see how to use SigNoz to monitor the application with popular debugging scenarios.
+description: Set up the OpenTelemetry Demo (Astronomy Shop) with SigNoz, view the service map, and debug real failure scenarios across traces, metrics, and logs.
 image: /img/blog/2025/03/otel-demo-cover.webp
 hide_table_of_contents: false
 keywords: [opentelemetry, opentelemetry demo application, signoz, monitoring, debugging, logs, metrics, traces]
@@ -81,7 +82,7 @@ The application simulates an e-commerce store with a complex microservices-based
 | :--- | :--- | :--- |
 | **Cache** | Valkey | Stores session and shopping cart data. |
 | **Queue** | Kafka | Enables asynchronous messaging between services. |
-| **Database** | PostgreSQL | Provides persistent storage for application data. |
+| **Database** | [PostgreSQL](https://signoz.io/blog/postgresql-monitoring/) | Provides persistent storage for application data. |
 | **Image Provider** | nginx | Serves product images to the frontend. |
 | **Flagd** | Go | Feature flag engine backend. |
 
@@ -206,7 +207,7 @@ Going to the Logs Tab and filtering for logs from the *fraud detection* service 
 
 This is the missing piece of our puzzle - the consumer delay caused by the service sleeping for a second, which causes the bottleneck.
 
-SigNoz also has a dedicated tab for *Messaging Queues*, where we can monitor the consumers of the Kafka topics and their stats. Currently, we support both Celery and Kafka Queues.
+SigNoz also has a dedicated tab for *Messaging Queues*, where we can monitor the consumers of the Kafka topics and their stats. Currently, we support both [Celery](https://signoz.io/blog/opentelemetry-powered-kafka-celery-monitoring/) and Kafka Queues.
 
 <Figure src="/img/blog/2025/03/otel-demo-msg-queues.webp" alt="Messaging Queues with fraud-detection service in focus" caption="Messaging Queues with fraud-detection service in focus" />
 
@@ -236,7 +237,7 @@ Thus, we have not only debugged the issue quickly, but we have also drawn suffic
 When OpenTelemetry instruments your application, it creates unique trace and span IDs for tracking request flows. These same identifiers can be automatically injected into your logs, creating a direct link between your traces and related log entries.
 </Admonition>
 
-### Getting to the bottom of a ProductCatalogue Error
+### Getting to the bottom of a ProductCatalog Error
 
 We are using a custom dashboard called *Spanmetrics* dashboard here, which helps to monitor the trace span calls. You can export the JSON [here](https://github.com/SigNoz/signoz-web/tree/main/public/dashboards/otel-demo-span-metrics.json). Read this to understand in detail about [SigNoz dashboards](https://signoz.io/metrics-and-dashboards/). Also, make sure to enable the *productCatalogFailure* flag to simulate this. A few minutes after enabling the flag, if you browse to the astronomy shop UI, you can see a lot of red in the network calls.
 
@@ -250,7 +251,7 @@ Go to the [Traces](https://signoz.io/distributed-tracing/) tab, let’s filter o
 
 <Figure src="/img/blog/2025/03/otel-demo-traces-explorer.webp" alt="Traces explorer with Error filter applied and subsequent query output" caption="Traces explorer with Error filter applied and subsequent query output" />
 
-The output indicates that *ProductCatalogueService* could be a *service of interest.*  If you explore all of the traces that call `ProductCatalogService/GetProduct`, you may notice that the errors all have something in common: they happen only when the attribute is a specific value. 
+The output indicates that *ProductCatalogService* could be a *service of interest.*  If you explore all of the traces that call `ProductCatalogService/GetProduct`, you may notice that the errors all have something in common: they happen only when the attribute is a specific value. 
 
 <Figure src="/img/blog/2025/03/otel-demo-pid.webp" alt="Detailed trace view with flame graph and span details emphasising a specific product id which likely causes failure" caption="Detailed trace view with flame graph and span details emphasising a specific product id which likely causes failure" />
 <Admonition>
