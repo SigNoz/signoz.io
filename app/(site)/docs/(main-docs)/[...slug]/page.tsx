@@ -11,7 +11,7 @@ import Chatbase from '@/components/Chatbase'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 
-export const dynamicParams = false
+export const dynamicParams = true
 export const revalidate = 86400 // 1 day - see CMS_REVALIDATE_INTERVAL
 
 export async function generateMetadata(props: {
