@@ -76,7 +76,7 @@ function HomepageHeroVariant() {
               </p>
             </HeroCopyMotion>
 
-            <HeroCopyMotion delay={0.2}>
+            <HeroCopyMotion className="w-full sm:w-auto" delay={0.2}>
               <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-8">
                 <TrackingLink
                   href="/teams/"

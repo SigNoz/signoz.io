@@ -5,18 +5,20 @@ import type { ReactNode } from 'react'
 
 type HeroCopyMotionProps = {
   children: ReactNode
+  className?: string
   delay?: number
 }
 
-export default function HeroCopyMotion({ children, delay = 0 }: HeroCopyMotionProps) {
+export default function HeroCopyMotion({ children, className, delay = 0 }: HeroCopyMotionProps) {
   const prefersReducedMotion = useReducedMotion()
 
   if (prefersReducedMotion) {
-    return <>{children}</>
+    return className ? <div className={className}>{children}</div> : <>{children}</>
   }
 
   return (
     <motion.div
+      className={className}
       initial={{ opacity: 0, y: 10, filter: 'blur(28px)' }}
       animate={{
         opacity: [0, 0.72, 1],

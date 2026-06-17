@@ -1,10 +1,11 @@
 'use client'
 
-import { Dialog, Button } from '@headlessui/react'
+import { Dialog } from '@headlessui/react'
 import { ArrowBigLeft, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import { Button } from '@/components/ui/Button'
 import GitHubStars from '../GithubStars/GithubStars'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import Accordion from '../Accordion/Accordion'
@@ -176,12 +177,15 @@ function MainMenuContent({
             onClick={onClose}
           >
             <Button
+              asChild
               variant="default"
               className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
               id="btn-get-started-website-navbar"
             >
-              Get Started - Free
-              <ArrowRight size={14} />
+              <span>
+                Get Started - Free
+                <ArrowRight size={14} />
+              </span>
             </Button>
           </TrackingLink>
         </>
