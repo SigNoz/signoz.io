@@ -10,7 +10,11 @@ export default function ResourcesDropdown() {
   const { isOpen, open, close, triggerRef } = useNavDropdown('resources')
 
   return (
-    <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
+    <div
+      onPointerEnter={open}
+      onPointerLeave={close}
+      className="-mx-1.5 flex items-center px-1.5"
+    >
       <Button
         ref={triggerRef}
         className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
@@ -20,7 +24,7 @@ export default function ResourcesDropdown() {
           Resources
           <ChevronDown
             size={12}
-            className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+            className={`ml-1 transform transition-transform duration-200 ease-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
           />
         </div>
       </Button>
@@ -65,7 +69,10 @@ function ResourceSection({
             <div>
               <div className="flex flex-row items-center gap-1">
                 <span>{item.name}</span>{' '}
-                <ArrowRight size={14} className="opacity-0 group-hover:opacity-100" />
+                <ArrowRight
+                  size={14}
+                  className="-translate-x-1 opacity-0 transition-[opacity,transform] duration-150 ease-out group-hover:translate-x-0 group-hover:opacity-100"
+                />
               </div>
               <div className="line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400 group-hover:text-[#FFF]">
                 {item.description}

@@ -98,6 +98,8 @@ export default function TopNav() {
                   className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
                 >
                   {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showResources && <ResourcesDropdown />}
+                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
@@ -111,8 +113,6 @@ export default function TopNav() {
                       Docs
                     </TrackingLink>
                   )}
-                  {visibility.showResources && <ResourcesDropdown />}
-                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
                   {visibility.showPricing && (
                     <TrackingLink
                       href="/pricing/"

@@ -10,7 +10,11 @@ export default function CompareSignozDropdown() {
   const { isOpen, open, close, triggerRef } = useNavDropdown('compare')
 
   return (
-    <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
+    <div
+      onPointerEnter={open}
+      onPointerLeave={close}
+      className="-mx-1.5 flex items-center px-1.5"
+    >
       <Button
         ref={triggerRef}
         className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
@@ -20,7 +24,7 @@ export default function CompareSignozDropdown() {
           Compare
           <ChevronDown
             size={12}
-            className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+            className={`ml-1 transform transition-transform duration-200 ease-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
           />
         </div>
       </Button>
@@ -85,7 +89,7 @@ function LinkSection({
                   {item.name}
                 </span>
                 <ArrowRight
-                  className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="shrink-0 -translate-x-1 opacity-0 transition-[opacity,transform] duration-150 ease-out group-hover:translate-x-0 group-hover:opacity-100"
                   size={14}
                 />
               </div>
