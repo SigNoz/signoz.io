@@ -20,6 +20,7 @@ function isLocalListicleOverlayEnabled() {
 }
 
 async function fetchCmsListicle(key: string) {
+  console.log(`[listicle:${key}] fetchCmsListicle called — API_URL: ${API_URL}`)
   if (!API_URL) {
     throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
   }
@@ -91,13 +92,26 @@ function getCachedCmsListicle(key: string) {
 }
 
 export async function getRuntimeListicleConfig(name: string) {
+  const env = {
+    dev: isLocalListicleOverlayEnabled(),
+    cms: hasCMSConfig(),
+    nodeEnv: process.env.NODE_ENV,
+  }
+  console.log(`[listicle:${name}] start — env:`, JSON.stringify(env))
+
   if (isLocalListicleOverlayEnabled() || !hasCMSConfig()) {
+    console.log(`[listicle:${name}] → local (dev overlay or no CMS config)`)
     return getLocalListicleConfig(name)
   }
 
   try {
-    return await getCachedCmsListicle(name)
-  } catch {
+    console.log(`[listicle:${name}] → trying unstable_cache CMS fetch`)
+    const result = await getCachedCmsListicle(name)
+    console.log(`[listicle:${name}] → CMS success, got config: ${result ? 'yes' : 'null'}`)
+    return result
+  } catch (err) {
+    console.log(`[listicle:${name}] → unstable_cache failed:`, (err as Error).message)
+    console.log(`[listicle:${name}] → falling back to local config`)
     return getLocalListicleConfig(name)
   }
 }
