@@ -97,7 +97,7 @@ const features: BentoFeature[] = [
 function FeatureCard({ feature }: { feature: BentoFeature }) {
   const isWideCard = feature.size === 'large' || feature.size === 'wide'
   const imageWellClassName =
-    feature.visual === 'tall' ? 'h-[270px] lg:h-[327px]' : 'h-[206px] lg:h-[252px]'
+    feature.visual === 'tall' ? 'h-[238px] lg:h-[284px]' : 'h-[184px] lg:h-[214px]'
 
   const panClassName =
     feature.pan === 'left'
@@ -135,7 +135,7 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-signoz_ink-500 to-transparent" />
       </div>
 
-      <div className="relative z-[1] flex min-h-[120px] items-start p-4 md:p-6 lg:min-h-[130px]">
+      <div className="relative z-[1] flex min-h-[104px] items-start p-4 md:p-6 lg:min-h-[116px]">
         <div className="pointer-events-none absolute left-1/2 top-0 h-px w-screen -translate-x-1/2 bg-signoz_slate-400/25" />
         <h3 className="m-0 max-w-[720px] text-[20px] font-medium leading-[1.18] tracking-[-0.25px] md:text-[22px] md:tracking-[-0.35px] lg:leading-[1.18]">
           <span className="text-signoz_vanilla-100">{feature.product}</span>{' '}
@@ -253,22 +253,22 @@ export default function FeatureBentoExperiment() {
               />
               <div
                 className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(457px + 7px)' }}
+                style={{ top: 'calc(400px + 7px)' }}
               />
               <div
                 className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(457px + 13px)' }}
+                style={{ top: 'calc(400px + 13px)' }}
               />
               <div
                 className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(457px + 20px + 382px + 7px)' }}
+                style={{ top: 'calc(400px + 20px + 334px + 7px)' }}
               />
               <div
                 className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(457px + 20px + 382px + 13px)' }}
+                style={{ top: 'calc(400px + 20px + 334px + 13px)' }}
               />
             </div>
-            <div className="grid gap-4 md:grid-cols-3 md:grid-rows-[390px_326px_326px] md:gap-5 lg:grid-rows-[457px_382px_382px]">
+            <div className="grid gap-4 md:grid-cols-3 md:grid-rows-[344px_288px_288px] md:gap-5 lg:grid-rows-[400px_334px_334px]">
               {features.map((feature) => (
                 <FeatureCard key={feature.product} feature={feature} />
               ))}
