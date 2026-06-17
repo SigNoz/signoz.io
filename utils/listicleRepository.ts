@@ -107,11 +107,24 @@ export async function getRuntimeListicleConfig(name: string) {
   try {
     console.log(`[listicle:${name}] → trying unstable_cache CMS fetch`)
     const result = await getCachedCmsListicle(name)
-    console.log(`[listicle:${name}] → CMS success, got config: ${result ? 'yes' : 'null'}`)
+    console.log(
+      `[listicle:${name}] → unstable_cache CMS success, got config: ${result ? 'yes' : 'null'}`
+    )
     return result
   } catch (err) {
-    console.log(`[listicle:${name}] → unstable_cache failed:`, (err as Error).message)
-    console.log(`[listicle:${name}] → falling back to local config`)
-    return getLocalListicleConfig(name)
+    console.log(`[listicle:${name}] → unstable_cache failed: ${(err as Error).message}`)
+
+    try {
+      console.log(`[listicle:${name}] → trying direct CMS fetch (no unstable_cache)`)
+      const result = await fetchCmsListicle(name)
+      console.log(
+        `[listicle:${name}] → direct CMS fetch success, got config: ${result ? 'yes' : 'null'}`
+      )
+      return result
+    } catch (directErr) {
+      console.log(`[listicle:${name}] → direct CMS fetch failed: ${(directErr as Error).message}`)
+      console.log(`[listicle:${name}] → falling back to local config`)
+      return getLocalListicleConfig(name)
+    }
   }
 }
