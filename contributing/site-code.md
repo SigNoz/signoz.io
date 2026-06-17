@@ -43,7 +43,7 @@ Each listicle is fully self-contained in a single JSON file — items, icons, ma
 | Registry     | `constants/listicles/registry.ts`  | Maps `name` string to config; `index.ts` re-exports                             |
 | Utilities    | `constants/listicles/utils.ts`     | Shared traversal for rendered UI and agent markdown                             |
 | Component    | `components/Listicle/Listicle.tsx` | Generic renderer for flat, sectioned, and searchable patterns                   |
-| Icons        | `public/img/icons/listicle/*.svg`  | Generated SVGs (brand icons); existing assets elsewhere are referenced directly |
+| Icons        | `data-assets/img/icons/listicle/*.svg` | Generated SVGs (brand icons); existing assets elsewhere are referenced directly |
 | MDX usage    | `data/docs/**/*.mdx`               | `<Listicle name="..." />` with optional `defaultSection`                        |
 | Agent stubs  | `utils/docs/agentMarkdownStubs.ts` | Markdown fallback — auto-extracts items from JSON configs                       |
 
