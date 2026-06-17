@@ -47,6 +47,13 @@ const agentPromptTabs = [
 
 const thinkingVerbs = ['Channelling', 'Contemplating', 'Metamorphosing']
 
+const agentIntegrations = [
+  { label: 'OpenAI', domain: 'openai.com' },
+  { label: 'Claude', domain: 'claude.ai' },
+  { label: 'Cursor', domain: 'cursor.com' },
+  { label: 'OpenCode', domain: 'opencode.ai' },
+]
+
 const sharedToolCallLines = [
   'Pulled p99 latency, call volume, and error-rate signals for the top operations.',
 ]
@@ -122,12 +129,34 @@ function LocalAgentSurface() {
   const [animationCycle, setAnimationCycle] = useState(0)
   const activePrompt = agentPromptTabs[activePromptIndex]
   const toolCallLines = [activePrompt.toolLine, signozMcpToolLine, ...sharedToolCallLines]
+  const getFaviconUrl = (domain: string) =>
+    `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
 
   return (
-    <div className="relative h-full overflow-hidden rounded-[3px] px-6 pb-8 pt-11 font-mono md:pb-10 md:pl-8 md:pr-10 md:pt-14 lg:pl-10 lg:pr-12">
+    <div className="relative h-full overflow-visible rounded-[3px] px-6 pb-8 pt-11 font-mono md:pb-10 md:pl-8 md:pr-10 md:pt-14 lg:pl-10 lg:pr-12">
       <div className="pointer-events-none absolute inset-y-0 left-0 right-0 rounded-[3px] bg-gradient-to-r from-signoz_ink-400 via-signoz_ink-400/95 to-signoz_ink-400/0 shadow-[0_28px_90px_rgba(0,0,0,0.58)]" />
       <div className="pointer-events-none absolute left-0 right-0 top-0 h-9 border-b border-white/[0.055] bg-gradient-to-r from-white/[0.025] via-white/[0.012] to-transparent" />
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 rounded-[3px] ring-1 ring-inset ring-white/[0.05]" />
+      <div className="absolute left-0 top-[-42px] z-[3] flex h-8 items-center gap-3 text-[15px] tracking-[-0.01em] text-[#8f948f] md:text-[16px]">
+        <span>Work with your agent</span>
+        <div className="flex items-center gap-1.5">
+          {agentIntegrations.map((agent) => (
+            <span
+              key={agent.label}
+              aria-label={agent.label}
+              className="group relative flex size-6 items-center justify-center transition-transform duration-200 hover:z-10 hover:-translate-y-1 hover:scale-125 md:size-7"
+              role="img"
+              title={agent.label}
+            >
+              <span
+                className="size-full rounded-[2px] bg-contain bg-center bg-no-repeat drop-shadow-[0_8px_18px_rgba(0,0,0,0.45)]"
+                style={{ backgroundImage: `url("${getFaviconUrl(agent.domain)}")` }}
+              />
+            </span>
+          ))}
+        </div>
+        <span>and more</span>
+      </div>
       <div className="absolute left-0 right-0 top-0 z-[2] flex h-9 items-center gap-1 overflow-hidden px-2 text-[11px] leading-none text-[#aaa79f]">
         {agentPromptTabs.map((tab, index) => {
           const isActive = index === activePromptIndex
@@ -301,19 +330,20 @@ export default function AgentNativeObservabilityExperiment() {
 
         <div className="grid gap-8 md:grid-cols-[0.9fr_1fr] md:items-start md:gap-20">
           <h2 className="m-0 max-w-[540px] text-[40px] font-medium leading-[1.04] tracking-[-1.1px] text-signoz_vanilla-100 md:text-[58px] md:tracking-[-1.65px]">
-            Agent-native observability for production teams.
+            Agent-native observability, inside your IDE and SigNoz.
           </h2>
 
           <div className="max-w-[560px] md:pt-2">
             <p className="text-signoz_vanilla-300/82 m-0 text-[19px] leading-9 tracking-[-0.28px]">
-              Give coding agents and Noz the same traces, logs, metrics, alerts, and infra context
-              your engineers use, so investigations can start wherever your team is already working.
+              Use the SigNoz MCP server to bring telemetry into coding agents, or use Noz, your AI
+              teammate inside SigNoz, to investigate incidents, tune alerts, and build dashboards
+              with the same production context your team sees.
             </p>
             <CustomLink
               className="group mt-9 inline-flex items-center gap-2 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
               href="/agent-native-observability/"
             >
-              Agent Native Observability
+              Explore MCP and Noz
               <ArrowRight
                 className="transition-transform duration-200 group-hover:translate-x-1"
                 size={15}
