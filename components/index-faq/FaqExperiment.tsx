@@ -12,35 +12,34 @@ type Faq = {
 
 const faqs: Faq[] = [
   {
-    question: 'How quickly can we start sending telemetry to SigNoz?',
+    question: 'How quickly can we start sending data to SigNoz?',
     answer:
-      'Most teams can start with OpenTelemetry auto-instrumentation or an OpenTelemetry Collector and see traces, logs, or metrics in SigNoz within minutes. The exact setup depends on your language, framework, and whether you use SigNoz Cloud or self-host.',
+      'Most teams start with OpenTelemetry instrumentation or the OpenTelemetry Collector. For Kubernetes, the SigNoz Helm chart can collect cluster metrics, logs, and traces; for AWS, CloudWatch logs can be routed to SigNoz Cloud. Your exact path depends on language, cloud, and whether you use SigNoz Cloud or self-host.',
   },
   {
-    question:
-      'Can SigNoz replace separate tools for logs, metrics, traces, alerts, and dashboards?',
+    question: 'Can SigNoz replace Datadog, Grafana, or CloudWatch?',
     answer:
-      'Yes. SigNoz brings APM, distributed tracing, logs, metrics, exceptions, alerts, dashboards, and infrastructure monitoring into one OpenTelemetry-native workspace so teams can investigate issues without switching between disconnected tools.',
+      'Yes, for teams that want logs, metrics, traces, dashboards, alerts, and infrastructure monitoring in one OpenTelemetry-native product. Many migrations start by sending OpenTelemetry data to SigNoz, then rebuilding the dashboards, alerts, and incident workflows that matter most.',
   },
   {
-    question: 'How does SigNoz pricing stay predictable as usage grows?',
+    question: 'How is SigNoz pricing calculated?',
     answer:
-      'SigNoz uses simple usage-based pricing. There is no user-based pricing, no host-based pricing, and no special pricing for custom metrics. Teams can estimate logs, traces, and metrics cost from expected volume and retention on the pricing page.',
+      'SigNoz pricing is usage based. There is no user-based pricing, no host-based pricing, and no special pricing for custom metrics. Teams can estimate cost from expected logs, traces, metrics volume, and retention, then use ingestion controls to drop noisy telemetry before it is stored.',
   },
   {
-    question: 'Can we self-host SigNoz or run it in our own cloud?',
+    question: 'Can we self-host SigNoz or keep data in our cloud?',
     answer:
-      'Yes. SigNoz supports Cloud, open-source self-hosting, and enterprise deployment options including BYOC and dedicated environments. Enterprise plans are designed for teams that need stronger support, data-residency, compliance, or deployment control.',
+      'Yes. SigNoz supports Cloud, open-source self-hosting, and enterprise options including dedicated cloud, bring-your-own-cloud, and self-hosting with support. Enterprise plans are built for teams that need data residency, compliance reviews, SSO, migration help, or stronger deployment control.',
   },
   {
-    question: 'How does SigNoz help with migration from Datadog, Grafana, or CloudWatch?',
+    question: 'Can alerts route to the right team?',
     answer:
-      'Teams usually start by sending OpenTelemetry data to SigNoz, then recreate critical dashboards, alerts, and investigation workflows. SigNoz also offers migration support for larger teams, including help with dashboards, alerts, and instrumentation strategy.',
+      'Yes. SigNoz supports alerts on metrics, logs, traces, exceptions, anomaly detection, and Apdex. You can send notifications to channels like Slack, PagerDuty, Opsgenie, MS Teams, email, or webhooks, and use routing policies to send alerts to the right team based on labels such as service, severity, or environment.',
   },
   {
-    question: 'What does agent-native observability mean in SigNoz?',
+    question: 'How does SigNoz help teams debug incidents faster?',
     answer:
-      'It means engineers and agents can use the same production telemetry context. SigNoz MCP brings traces, logs, metrics, dashboards, and alerts into local agent workflows, while Noz works inside the product to help investigate, explain, and act on issues.',
+      'SigNoz keeps logs, traces, metrics, exceptions, dashboards, and alerts connected in one workspace. Teams can move from a latency spike to related traces, from a trace to surrounding logs, or from an alert to the service and attributes behind it without stitching context across separate tools.',
   },
 ]
 
@@ -84,8 +83,7 @@ export default function FaqExperiment() {
   return (
     <section
       className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 py-24 sm:px-6 lg:px-[78px] lg:py-32"
-      data-homepage-floating-cta="Talk to us"
-      data-homepage-floating-href="/contact-us/"
+      data-homepage-floating-stop="true"
     >
       <div className="mx-auto grid max-w-[1200px] gap-12 lg:grid-cols-[0.82fr_1.45fr]">
         <div>
@@ -96,7 +94,7 @@ export default function FaqExperiment() {
             Quick answers to the questions teams usually ask while evaluating SigNoz.
           </p>
           <CustomLink
-            className="experiment-button experiment-button--secondary mt-8 inline-flex h-10 items-center justify-center gap-3 px-4 text-sm"
+            className="experiment-button experiment-button--primary mt-8 inline-flex h-10 items-center justify-center gap-3 px-4 text-sm"
             href="/contact-us/"
           >
             Contact us

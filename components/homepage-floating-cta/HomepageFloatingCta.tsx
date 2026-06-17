@@ -19,7 +19,9 @@ export default function HomepageFloatingCta() {
 
   useEffect(() => {
     const sections = Array.from(
-      document.querySelectorAll<HTMLElement>('[data-homepage-floating-cta]')
+      document.querySelectorAll<HTMLElement>(
+        '[data-homepage-floating-cta], [data-homepage-floating-stop]'
+      )
     )
 
     if (!sections.length) return undefined
@@ -40,6 +42,11 @@ export default function HomepageFloatingCta() {
       }, null)
 
       if (!activeSection) {
+        setIsVisible(false)
+        return
+      }
+
+      if (activeSection.dataset.homepageFloatingStop === 'true') {
         setIsVisible(false)
         return
       }

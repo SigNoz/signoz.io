@@ -17,6 +17,7 @@ import AgentNativeObservabilityExperiment from '@/components/index-agent-native-
 import FeatureBentoExperiment from '@/components/index-feature-bento/FeatureBentoExperiment'
 import WhySignozExperiment from '@/components/index-why-signoz/WhySignozExperiment'
 import PricingExperiment from '@/components/index-pricing/PricingExperiment'
+import HomepageGetStartedExperiment from '@/components/index-get-started/HomepageGetStartedExperiment'
 
 import siteMetadata from '@/data/siteMetadata'
 import JsonLdScript from '@/components/JsonLdScript'
@@ -224,6 +225,7 @@ export default function Page() {
             <AgentNativeObservability className="max-w-8xl" />
           </div>
           <CustomerStoriesExperiment />
+          <HomepageGetStartedExperiment />
           <PricingExperiment />
           <FaqExperiment />
           <BuildForDevelopers className="homepage-control-only max-w-8xl" />
