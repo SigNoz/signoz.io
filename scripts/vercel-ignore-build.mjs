@@ -11,6 +11,7 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'data/guides',
   'data/blog',
   'data-assets',
+  'constants/listicles',
   '.agents',
   '.claude',
   '.github',
