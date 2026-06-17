@@ -90,13 +90,18 @@ function GitHubProof() {
 
   return (
     <CustomLink
-      className="inline-flex h-10 items-center gap-2 rounded-full border border-signoz_slate-400/45 bg-signoz_ink-400/70 px-4 text-sm font-medium text-signoz_vanilla-100 transition-colors hover:border-signoz_robin-400/45 hover:bg-signoz_slate-500"
+      className="group inline-flex items-center gap-2 text-sm font-medium text-signoz_vanilla-300 transition-colors hover:text-signoz_robin-300"
       href="https://github.com/SigNoz/signoz"
       target="_blank"
     >
-      <Github className="h-4 w-4 fill-signoz_vanilla-100" />
+      <Github className="h-4 w-4 fill-current" />
       <span>{stars === null ? 'Open source on GitHub' : `${formatStars(stars)} GitHub stars`}</span>
-      <span aria-hidden="true">-&gt;</span>
+      <span
+        aria-hidden="true"
+        className="transition-transform duration-200 group-hover:translate-x-1"
+      >
+        -&gt;
+      </span>
     </CustomLink>
   )
 }
@@ -104,27 +109,29 @@ function GitHubProof() {
 function StoryCard({ story }: { story: CustomerStory }) {
   return (
     <CustomLink
-      className="bg-signoz_ink-500/72 group relative flex min-h-[300px] flex-col justify-between overflow-hidden rounded-[22px] border border-signoz_slate-400/45 p-8 transition-colors hover:border-signoz_robin-400/50"
+      className="border-signoz_slate-400/22 group relative flex min-h-[300px] flex-col justify-between overflow-hidden border bg-[#07090d] p-8 transition-colors hover:border-signoz_robin-400/50"
       href={story.href}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_0%,rgba(78,116,248,0.16),transparent_38%)] opacity-80 transition-opacity group-hover:opacity-100" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(190,198,207,0.045)_1px,transparent_1px),linear-gradient(rgba(190,198,207,0.045)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.08),transparent_34%)] opacity-80" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(190,198,207,0.035)_1px,transparent_1px),linear-gradient(rgba(190,198,207,0.035)_1px,transparent_1px)] bg-[size:32px_32px] opacity-35" />
 
       <div className="relative">
-        <div className="mb-12 flex h-16 w-16 items-center justify-center rounded-full border border-signoz_slate-400/35 bg-white/[0.04]">
+        <div className="mb-12 flex h-14 w-14 items-center justify-center border border-signoz_slate-400/25 bg-white/[0.035]">
           <Image
             alt={story.logoAlt}
-            className={`max-h-10 w-auto object-contain ${story.logoClassName ?? ''}`}
+            className={`max-h-9 w-auto object-contain opacity-85 transition-opacity group-hover:opacity-100 ${
+              story.logoClassName ?? ''
+            }`}
             height={42}
             src={story.logoSrc}
             width={42}
           />
         </div>
 
-        <p className="m-0 text-sm font-medium uppercase tracking-[0.12em] text-signoz_robin-300">
+        <p className="m-0 text-[12px] font-medium uppercase tracking-[0.14em] text-signoz_robin-400">
           {story.metric}
         </p>
-        <h3 className="m-0 mt-4 text-[26px] font-medium leading-tight tracking-[-0.45px] text-signoz_vanilla-100">
+        <h3 className="m-0 mt-5 text-[24px] font-medium leading-tight tracking-[-0.35px] text-signoz_vanilla-100">
           {story.title}
         </h3>
         <p className="m-0 mt-4 max-w-[360px] text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400">
@@ -150,35 +157,58 @@ export default function CustomerStoriesExperiment() {
       data-homepage-floating-href="/case-study/"
     >
       <div className="mx-auto max-w-[1200px]">
-        <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="m-0 max-w-[720px] text-[40px] font-medium leading-[1.04] tracking-[-1.1px] text-signoz_vanilla-100 md:text-[56px] md:tracking-[-1.6px]">
+            <h2 className="m-0 max-w-[760px] text-[40px] font-medium leading-[1.04] tracking-[-1.1px] text-signoz_vanilla-100 md:text-[58px] md:tracking-[-1.65px]">
               Production stories from teams running SigNoz.
             </h2>
-            <p className="m-0 mt-4 max-w-[720px] text-[18px] leading-8 tracking-[-0.2px] text-signoz_vanilla-400">
+          </div>
+
+          <div className="max-w-[430px]">
+            <p className="m-0 text-[17px] leading-8 tracking-[-0.2px] text-signoz_vanilla-400">
               See how engineering teams use SigNoz to debug faster, reduce tool sprawl, and keep
               production reliable.
             </p>
-          </div>
 
-          <div className="flex flex-col items-start gap-3 md:items-end">
-            <GitHubProof />
-            <CustomLink
-              className="group inline-flex items-center gap-2 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
-              href="/case-study/"
-            >
-              Read customer stories
-              <span className="transition-transform duration-200 group-hover:translate-x-1">
-                -&gt;
-              </span>
-            </CustomLink>
+            <div className="mt-6 flex flex-col items-start gap-3">
+              <GitHubProof />
+              <CustomLink
+                className="group inline-flex items-center gap-2 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
+                href="/case-study/"
+              >
+                Read customer stories
+                <span className="transition-transform duration-200 group-hover:translate-x-1">
+                  -&gt;
+                </span>
+              </CustomLink>
+            </div>
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
-          {customerStories.map((story) => (
-            <StoryCard key={story.title} story={story} />
-          ))}
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-0 hidden md:block">
+            <div
+              className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
+              style={{ left: 'calc(33.333333% - 6.333px)' }}
+            />
+            <div
+              className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
+              style={{ left: 'calc(33.333333% - 0.333px)' }}
+            />
+            <div
+              className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
+              style={{ left: 'calc(66.666667% + 0.333px)' }}
+            />
+            <div
+              className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
+              style={{ left: 'calc(66.666667% + 6.333px)' }}
+            />
+          </div>
+          <div className="grid gap-4 md:grid-cols-3 md:gap-5">
+            {customerStories.map((story) => (
+              <StoryCard key={story.title} story={story} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
