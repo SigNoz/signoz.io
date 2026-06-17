@@ -1951,13 +1951,13 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/metrics-management/opentelemetry-planetscale',
-                label: 'PlanetScale',
+                route: '/docs/integrations/opentelemetry-neondb',
+                label: 'Neon',
               },
               {
                 type: 'doc',
-                route: '/docs/integrations/opentelemetry-neondb',
-                label: 'Neon',
+                route: '/docs/metrics-management/opentelemetry-planetscale',
+                label: 'PlanetScale',
               },
               {
                 type: 'doc',
