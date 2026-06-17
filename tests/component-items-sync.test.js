@@ -231,6 +231,23 @@ test('all listicle items have valid name, href, and icon', () => {
   }
 })
 
+test('all listicle string icon paths exist in data-assets/', () => {
+  for (const { name, config } of loadAllListicleConfigs()) {
+    const items = collectItems(config)
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (typeof item.icon === 'string') {
+        const cleanPath = item.icon.startsWith('/') ? item.icon.slice(1) : item.icon
+        const dataAssetsPath = join(__dirname, '..', 'data-assets', cleanPath)
+        assert.ok(
+          require('fs').existsSync(dataAssetsPath),
+          `${name} item "${item.name}" icon "${item.icon}" missing from data-assets/`
+        )
+      }
+    }
+  }
+})
+
 test('no duplicate hrefs within each listicle section', () => {
   for (const { name, config } of loadAllListicleConfigs()) {
     for (const section of getListicleSectionItems(config)) {

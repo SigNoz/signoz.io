@@ -33,8 +33,8 @@ else
   echo 'husky (pre-commit): skipping stale URL check (no relevant changes staged)'
 fi
 
-# Check CMS-synced content assets
-if printf '%s\n' "$STAGED_FILES" | grep -E '^data/(faqs|case-study|opentelemetry|comparisons|guides|blog)/.*\.mdx?$' >/dev/null; then
+# Check CMS-synced content assets (MDX content and listicle JSON configs)
+if printf '%s\n' "$STAGED_FILES" | grep -E '^(data/(faqs|case-study|opentelemetry|comparisons|guides|blog)/.*\.mdx?|constants/listicles/.*\.json)$' >/dev/null; then
   echo 'husky (pre-commit): checking CMS content assets'
   node scripts/check-cms-assets.js
 else

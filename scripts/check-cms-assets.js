@@ -15,6 +15,7 @@ const matter = require('gray-matter')
 const SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog']
 
 const MIGRATED_PATTERN = new RegExp(`^data/(${SYNC_FOLDERS.join('|')})/.*\\.mdx?$`)
+const LISTICLE_PATTERN = /^constants\/listicles\/.*\.json$/
 
 function stripFencedCodeBlocks(content) {
   let out = content.replace(/^[ \t]*```[^\n]*\n[\s\S]*?^[ \t]*```/gm, '\n')
@@ -90,6 +91,32 @@ function getStagedMigratedFiles() {
     .filter((f) => f && MIGRATED_PATTERN.test(f))
 }
 
+function getStagedListicleFiles() {
+  const output = execSync('git diff --cached --name-only --diff-filter=ACM', { encoding: 'utf8' })
+  return output
+    .trim()
+    .split('\n')
+    .filter((f) => f && LISTICLE_PATTERN.test(f))
+}
+
+function collectListicleIconPaths(config) {
+  const paths = new Set()
+  function collect(items) {
+    ;(items || []).forEach((item) => {
+      if (typeof item.icon === 'string' && !item.icon.startsWith('http')) {
+        paths.add(item.icon)
+      }
+    })
+  }
+  collect(config.items)
+  ;(config.staticSections || []).forEach((s) => collect(s.items))
+  ;(config.sections || []).forEach((s) => {
+    collect(s.items)
+    ;(s.subsections || []).forEach((ss) => collect(ss.items))
+  })
+  return Array.from(paths)
+}
+
 function readStagedFile(filePath) {
   return execSync(`git show ":${filePath}"`, { encoding: 'utf8' })
 }
@@ -104,7 +131,7 @@ function isUsedOutsideMigratedContent(assetPath) {
     ).trim()
 
     const files = result.split('\n').filter(Boolean)
-    return files.some((f) => !MIGRATED_PATTERN.test(f))
+    return files.some((f) => !MIGRATED_PATTERN.test(f) && !LISTICLE_PATTERN.test(f))
   } catch {
     return false
   }
@@ -112,9 +139,11 @@ function isUsedOutsideMigratedContent(assetPath) {
 
 function main() {
   const stagedFiles = getStagedMigratedFiles()
-  if (stagedFiles.length === 0) return
+  const stagedListicles = getStagedListicleFiles()
+  if (stagedFiles.length === 0 && stagedListicles.length === 0) return
 
-  console.log(`\nChecking assets for ${stagedFiles.length} CMS-synced file(s)...\n`)
+  const totalCount = stagedFiles.length + stagedListicles.length
+  console.log(`\nChecking assets for ${totalCount} CMS-synced file(s)...\n`)
 
   const allAssets = new Map()
 
@@ -123,6 +152,21 @@ function main() {
       const raw = readStagedFile(file)
       const { data: frontmatter, content: body } = matter(raw)
       const assets = extractAssetPaths(body, frontmatter)
+
+      for (const asset of assets) {
+        if (!allAssets.has(asset)) allAssets.set(asset, new Set())
+        allAssets.get(asset).add(file)
+      }
+    } catch (err) {
+      console.warn(`  Warning: could not parse ${file}: ${err.message}`)
+    }
+  }
+
+  for (const file of stagedListicles) {
+    try {
+      const raw = readStagedFile(file)
+      const config = JSON.parse(raw)
+      const assets = collectListicleIconPaths(config)
 
       for (const asset of assets) {
         if (!allAssets.has(asset)) allAssets.set(asset, new Set())
