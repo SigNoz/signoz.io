@@ -1,7 +1,7 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
-const { readdirSync, readFileSync } = require('fs')
+const { readdirSync, readFileSync, existsSync } = require('fs')
 const { join } = require('path')
 
 const { getListicleSectionItems } = loadTsModule('constants/listicles/utils.ts')
@@ -240,7 +240,7 @@ test('all listicle string icon paths exist in data-assets/', () => {
         const cleanPath = item.icon.startsWith('/') ? item.icon.slice(1) : item.icon
         const dataAssetsPath = join(__dirname, '..', 'data-assets', cleanPath)
         assert.ok(
-          require('fs').existsSync(dataAssetsPath),
+          existsSync(dataAssetsPath),
           `${name} item "${item.name}" icon "${item.icon}" missing from data-assets/`
         )
       }

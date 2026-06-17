@@ -77,18 +77,28 @@ function transformIcon(item: CmsListicleItem): IconSpec | undefined {
     }
   }
 
+  if (item.icon_badge || item.icon_color) {
+    console.warn(
+      `Listicle item "${item.name}": partial badge icon (badge=${item.icon_badge}, color=${item.icon_color}) — both required`
+    )
+  }
+
   return undefined
 }
 
 function transformItem(item: CmsListicleItem): ListicleItem {
+  const icon = transformIcon(item)
+  if (!icon) {
+    console.warn(`Listicle item "${item.name}": missing icon data from CMS`)
+  }
+
   const transformed: ListicleItem = {
     name: item.name,
     href: item.href,
+    icon: icon ?? '',
   }
 
   setOptionalString(transformed, 'clickName', item.click_name)
-  const icon = transformIcon(item)
-  if (icon) transformed.icon = icon
 
   return transformed
 }

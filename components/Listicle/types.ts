@@ -4,7 +4,7 @@ export interface ListicleItem {
   name: string
   href: string
   clickName?: string
-  icon?: IconSpec
+  icon: IconSpec
 }
 
 export interface SubsectionConfig {

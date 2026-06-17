@@ -83,20 +83,13 @@ function extractAssetPaths(content, frontmatter) {
   return Array.from(paths)
 }
 
-function getStagedMigratedFiles() {
+function getStagedFiles() {
   const output = execSync('git diff --cached --name-only --diff-filter=ACM', { encoding: 'utf8' })
-  return output
-    .trim()
-    .split('\n')
-    .filter((f) => f && MIGRATED_PATTERN.test(f))
-}
-
-function getStagedListicleFiles() {
-  const output = execSync('git diff --cached --name-only --diff-filter=ACM', { encoding: 'utf8' })
-  return output
-    .trim()
-    .split('\n')
-    .filter((f) => f && LISTICLE_PATTERN.test(f))
+  const files = output.trim().split('\n').filter(Boolean)
+  return {
+    migrated: files.filter((f) => MIGRATED_PATTERN.test(f)),
+    listicles: files.filter((f) => LISTICLE_PATTERN.test(f)),
+  }
 }
 
 function collectListicleIconPaths(config) {
@@ -138,8 +131,7 @@ function isUsedOutsideMigratedContent(assetPath) {
 }
 
 function main() {
-  const stagedFiles = getStagedMigratedFiles()
-  const stagedListicles = getStagedListicleFiles()
+  const { migrated: stagedFiles, listicles: stagedListicles } = getStagedFiles()
   if (stagedFiles.length === 0 && stagedListicles.length === 0) return
 
   const totalCount = stagedFiles.length + stagedListicles.length
