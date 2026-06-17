@@ -13,6 +13,7 @@ import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
 import HomepageFloatingCta from '@/components/homepage-floating-cta/HomepageFloatingCta'
 import CustomerStoriesExperiment from '@/components/index-customer-stories/CustomerStoriesExperiment'
 import FaqExperiment from '@/components/index-faq/FaqExperiment'
+import AgentNativeObservabilityExperiment from '@/components/index-agent-native-observability/AgentNativeObservabilityExperiment'
 import FeatureBentoExperiment from '@/components/index-feature-bento/FeatureBentoExperiment'
 import WhySignozExperiment from '@/components/index-why-signoz/WhySignozExperiment'
 import PricingExperiment from '@/components/index-pricing/PricingExperiment'
@@ -217,8 +218,11 @@ export default function Page() {
           <TrustedByTeams page="homepage" className="homepage-experiment-logo-strip max-w-8xl" />
           <WhySignozExperiment />
           <FeatureBentoExperiment />
+          <AgentNativeObservabilityExperiment />
           <SigNozFeatures className="homepage-control-only max-w-8xl" />
-          <AgentNativeObservability className="homepage-control-only max-w-8xl" />
+          <div className="homepage-control-only">
+            <AgentNativeObservability className="max-w-8xl" />
+          </div>
           <CustomerStoriesExperiment />
           <PricingExperiment />
           <FaqExperiment />
