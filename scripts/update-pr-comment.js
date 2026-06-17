@@ -56,7 +56,8 @@ module.exports = async ({ github, context, core }) => {
         body += `| Operation | Route |\n`
         body += `|-----------|-------|\n`
         allProcessed.forEach((item) => {
-          body += `| ${item.operation} | \`${item.path}\` |\n`
+          const route = item.key ? `listicle:${item.key}` : item.path
+          body += `| ${item.operation} | \`${route}\` |\n`
         })
         body += `\n</details>\n\n`
       }
