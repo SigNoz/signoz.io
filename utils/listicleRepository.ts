@@ -91,16 +91,14 @@ function getCachedCmsListicle(key: string) {
 }
 
 export async function getRuntimeListicleConfig(name: string) {
-  const localConfig = getLocalListicleConfig(name)
-
   if (isLocalListicleOverlayEnabled() || !hasCMSConfig()) {
-    return localConfig
+    return getLocalListicleConfig(name)
   }
 
   try {
-    return (await getCachedCmsListicle(name)) || localConfig
+    return await getCachedCmsListicle(name)
   } catch (error) {
-    console.warn(`Failed to fetch listicle "${name}" from CMS; using local fallback:`, error)
-    return localConfig
+    console.error(`Failed to fetch listicle "${name}" from CMS:`, error)
+    return null
   }
 }

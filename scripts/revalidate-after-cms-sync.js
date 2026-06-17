@@ -142,6 +142,63 @@ function findListiclesForAssets(assetPaths) {
   return keys
 }
 
+const DOCS_DIR = 'data/docs'
+
+/**
+ * Converts a docs MDX file path to its URL route.
+ * e.g. data/docs/instrumentation.mdx -> /docs/instrumentation/
+ *      data/docs/cloud.mdx -> /docs/cloud/
+ *      data/docs/install/kubernetes.mdx -> /docs/install/kubernetes/
+ */
+function docsFileToRoute(filePath) {
+  const rel = filePath.replace(/^data\/docs\//, '').replace(/\.(mdx?|md)$/, '')
+  return `/docs/${rel}/`
+}
+
+/**
+ * Scans data/docs/ MDX files for <Listicle name="KEY" /> usage and builds
+ * a map of listicle key -> doc routes that embed it.
+ */
+function buildListicleKeyToDocPaths(keys) {
+  const keySet = new Set(keys)
+  if (keySet.size === 0) return new Map()
+
+  const pattern = /<Listicle\s+name=["']([^"']+)["']/g
+  const map = new Map()
+
+  function scanDir(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = `${dir}/${entry.name}`
+      if (entry.isDirectory()) {
+        scanDir(full)
+      } else if (/\.mdx?$/.test(entry.name)) {
+        const content = fs.readFileSync(full, 'utf8')
+        let match
+        while ((match = pattern.exec(content)) !== null) {
+          const key = match[1]
+          if (keySet.has(key)) {
+            if (!map.has(key)) map.set(key, [])
+            map.get(key).push(docsFileToRoute(full))
+          }
+        }
+        pattern.lastIndex = 0
+      }
+    }
+  }
+
+  if (fs.existsSync(DOCS_DIR)) scanDir(DOCS_DIR)
+  return map
+}
+
+function getDocPathsForListicleKeys(keys) {
+  const map = buildListicleKeyToDocPaths(keys)
+  const paths = []
+  for (const docPaths of map.values()) {
+    paths.push(...docPaths)
+  }
+  return uniqueStrings(paths)
+}
+
 function uniqueStrings(arr) {
   return [...new Set(arr.filter(Boolean))]
 }
@@ -192,9 +249,14 @@ function buildPayload() {
     affectedListicleKeys.forEach((key) => extraTags.push(`listicle-${key}`))
   }
 
+  const listicleDocPaths = hasListicleChanges
+    ? getDocPathsForListicleKeys(affectedListicleKeys)
+    : []
+  const allPaths = uniqueStrings([...cmsUrls, ...listicleDocPaths])
+
   return {
     mode: 'selective',
-    paths: cmsUrls,
+    paths: allPaths,
     tags: uniqueStrings(extraTags),
   }
 }
