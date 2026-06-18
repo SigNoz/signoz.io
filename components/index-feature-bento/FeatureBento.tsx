@@ -519,6 +519,24 @@ function DashboardPanelsVisual() {
   )
 }
 
+function DashboardMobileChartVisual() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute bottom-[-10px] left-5 right-5 z-[1] h-[238px] overflow-hidden rounded-[5px] bg-[#111217] shadow-[0_24px_64px_rgba(0,0,0,0.28)] md:hidden"
+    >
+      <Image
+        alt=""
+        className="h-full w-[510px] max-w-none object-cover object-left-top opacity-90"
+        height={632}
+        src="/img/graphics/homepage/infra-getcart-latency.png"
+        width={1356}
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-signoz_ink-500 to-transparent" />
+    </div>
+  )
+}
+
 function InfraAlbumVisual() {
   const [activeChartIndex, setActiveChartIndex] = useState<number | null>(null)
   const charts = [
@@ -629,20 +647,20 @@ function ApmBrowserShell() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute bottom-[-24px] left-[20%] hidden h-[500px] w-[720px] overflow-hidden rounded-t-[4px] border border-signoz_slate-100 bg-signoz_slate-300 shadow-[0_26px_80px_rgba(0,0,0,0.24)] md:block lg:bottom-[-28px] lg:left-[20%] lg:h-[520px] lg:w-[760px]"
+      className="pointer-events-none absolute bottom-[-26px] left-[18px] h-[330px] w-[510px] overflow-hidden rounded-t-[4px] border border-signoz_slate-100 bg-signoz_slate-300 shadow-[0_26px_80px_rgba(0,0,0,0.24)] md:bottom-[-24px] md:left-[20%] md:h-[500px] md:w-[720px] lg:bottom-[-28px] lg:left-[20%] lg:h-[520px] lg:w-[760px]"
     >
-      <div className="flex h-14 items-center gap-5 bg-signoz_slate-300 px-7">
-        <div className="flex gap-[7px]">
-          <span className="h-3 w-3 rounded-full bg-signoz_slate-50/45" />
-          <span className="h-3 w-3 rounded-full bg-signoz_slate-50/45" />
-          <span className="h-3 w-3 rounded-full bg-signoz_slate-50/45" />
+      <div className="flex h-11 items-center gap-3 bg-signoz_slate-300 px-5 md:h-14 md:gap-5 md:px-7">
+        <div className="flex gap-[6px] md:gap-[7px]">
+          <span className="h-2.5 w-2.5 rounded-full bg-signoz_slate-50/45 md:h-3 md:w-3" />
+          <span className="h-2.5 w-2.5 rounded-full bg-signoz_slate-50/45 md:h-3 md:w-3" />
+          <span className="h-2.5 w-2.5 rounded-full bg-signoz_slate-50/45 md:h-3 md:w-3" />
         </div>
-        <div className="ml-auto flex h-[34px] w-[420px] items-center justify-center rounded-[18px] border border-signoz_slate-100 bg-signoz_slate-200 text-[13px] font-medium leading-none text-signoz_vanilla-400 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+        <div className="ml-auto flex h-[28px] w-[310px] items-center justify-center rounded-[14px] border border-signoz_slate-100 bg-signoz_slate-200 text-[11px] font-medium leading-none text-signoz_vanilla-400 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:h-[34px] md:w-[420px] md:rounded-[18px] md:text-[13px]">
           olly.us.signoz.cloud/services/cartservice/
         </div>
       </div>
 
-      <div className="relative ml-1.5 h-[calc(100%-56px)] w-[calc(100%-6px)] overflow-hidden rounded-[8px] bg-[#070b12]">
+      <div className="relative ml-1.5 h-[calc(100%-44px)] w-[calc(100%-6px)] overflow-hidden rounded-[8px] bg-[#070b12] md:h-[calc(100%-56px)]">
         <Image
           alt=""
           className="h-full w-full rounded-[8px] object-cover object-left-top"
@@ -657,17 +675,21 @@ function ApmBrowserShell() {
 
 function FeatureCard({ feature }: { feature: BentoFeature }) {
   return (
-    <CustomLink
-      aria-label={`${feature.product} ${feature.outcome}`}
-      className={`group relative flex min-h-[430px] flex-col overflow-hidden rounded-[6px] border border-signoz_slate-400/25 bg-signoz_ink-500 no-underline transition-[transform,border-color] duration-300 ease-out hover:scale-[1.012] hover:border-signoz_slate-400/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70 md:min-h-0 ${feature.layout}`}
-      href={feature.href}
+    <div
+      className={`group relative flex min-h-[430px] w-[82vw] max-w-[430px] shrink-0 snap-start flex-col overflow-hidden rounded-[6px] border border-signoz_slate-400/25 bg-signoz_ink-500 transition-[transform,border-color] duration-300 ease-out hover:scale-[1.012] hover:border-signoz_slate-400/40 md:min-h-0 md:w-auto md:max-w-none ${feature.layout}`}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(180deg,rgba(11,12,14,0.12),rgba(11,12,14,0.82)_78%)]" />
       <div className="relative z-[2] p-5 sm:p-6 lg:p-7">
-        <h3 className="m-0 max-w-[720px] text-[22px] font-light leading-[1.12] tracking-[-0.22px] text-signoz_vanilla-100 sm:text-[24px] md:text-[26px] md:tracking-[-0.26px]">
-          <span className="text-signoz_vanilla-100">{feature.product}</span>{' '}
-          <span className="text-signoz_vanilla-400/70">{feature.outcome}</span>
-        </h3>
+        <CustomLink
+          aria-label={`${feature.product} ${feature.outcome}`}
+          className="block max-w-[720px] rounded-[4px] no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70"
+          href={feature.href}
+        >
+          <h3 className="m-0 text-[22px] font-light leading-[1.12] tracking-[-0.22px] text-signoz_vanilla-100 sm:text-[24px] md:text-[26px] md:tracking-[-0.26px]">
+            <span className="text-signoz_vanilla-100">{feature.product}</span>{' '}
+            <span className="text-signoz_vanilla-400/70">{feature.outcome}</span>
+          </h3>
+        </CustomLink>
       </div>
       {feature.visual === 'apm-browser' ? <ApmBrowserShell /> : null}
       {feature.visual === 'logs-stream' ? <LogsStreamVisual /> : null}
@@ -675,8 +697,9 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
       {feature.visual === 'alert-card' ? <AlertCardVisual /> : null}
       {feature.visual === 'llm-logo-grid' ? <LlmLogoGridVisual /> : null}
       {feature.visual === 'dashboard-panels' ? <DashboardPanelsVisual /> : null}
+      {feature.visual === 'dashboard-panels' ? <DashboardMobileChartVisual /> : null}
       {feature.visual === 'infra-album' ? <InfraAlbumVisual /> : null}
-    </CustomLink>
+    </div>
   )
 }
 
@@ -768,7 +791,7 @@ export default function FeatureBento() {
 
         <div className="relative mx-auto w-full max-w-[1245px]">
           <div className="relative">
-            <div className="grid gap-2 md:grid-cols-6 md:grid-rows-[686px_342px_342px_456px] lg:gap-[6px]">
+            <div className="-mx-5 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-4 [scrollbar-width:none] md:mx-0 md:grid md:snap-none md:grid-cols-6 md:grid-rows-[686px_342px_342px_456px] md:overflow-visible md:px-0 md:pb-0 lg:gap-[6px] [&::-webkit-scrollbar]:hidden">
               {features.map((feature) => (
                 <FeatureCard key={feature.product} feature={feature} />
               ))}
