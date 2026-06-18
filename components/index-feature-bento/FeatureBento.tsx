@@ -15,7 +15,14 @@ type BentoFeature = {
   product: string
   textureOpacity?: string
   texturePosition: string
-  visual?: 'alert-card' | 'apm-browser' | 'llm-logo-grid' | 'logs-stream' | 'trace-spans'
+  visual?:
+    | 'alert-card'
+    | 'apm-browser'
+    | 'dashboard-panels'
+    | 'infra-album'
+    | 'llm-logo-grid'
+    | 'logs-stream'
+    | 'trace-spans'
 }
 
 const features: BentoFeature[] = [
@@ -78,6 +85,7 @@ const features: BentoFeature[] = [
     href: '/docs/infrastructure-monitoring/overview/',
     layout: 'md:col-span-2 md:col-start-5 md:row-span-2 md:row-start-2',
     texturePosition: 'object-center',
+    visual: 'infra-album',
   },
   {
     product: 'Dashboards.',
@@ -87,6 +95,7 @@ const features: BentoFeature[] = [
     href: '/metrics-and-dashboards/',
     layout: 'md:col-span-6 md:col-start-1 md:row-span-1 md:row-start-4',
     texturePosition: 'object-left-bottom',
+    visual: 'dashboard-panels',
   },
 ]
 
@@ -346,7 +355,7 @@ function TraceSpansVisual() {
               </div>
               <div className="relative h-full">
                 <div
-                  className={`absolute top-1/2 flex h-[20px] -translate-y-1/2 items-center justify-between rounded-[2px] px-2 text-[10px] font-semibold text-signoz_ink-500 shadow-[0_10px_24px_rgba(0,0,0,0.24)] ${span.color}`}
+                  className={`absolute top-1/2 flex h-[20px] -translate-y-1/2 items-center justify-between rounded-[2px] px-2 text-[10px] font-semibold text-signoz_ink-500 opacity-70 shadow-[0_8px_18px_rgba(0,0,0,0.16)] ${span.color}`}
                   style={{ left: `${span.offset}%`, width: `${span.width}%` }}
                 >
                   <span className="truncate opacity-85">{span.label}</span>
@@ -452,6 +461,118 @@ function LlmLogoGridVisual() {
   )
 }
 
+function DashboardPanelsVisual() {
+  const metricPanels = [
+    {
+      className: 'left-[550px] top-0 h-[116px] w-[170px]',
+      label: 'Pod CPU utilization',
+      unit: '%',
+      value: '0.88',
+    },
+    {
+      className: 'left-[732px] top-0 h-[116px] w-[170px]',
+      label: 'Pod memory usage',
+      unit: 'MiB',
+      value: '73.2',
+    },
+    {
+      className: 'left-[550px] top-[128px] h-[116px] w-[352px]',
+      label: 'GC pause (rate of .NET GC duration)',
+      unit: 'μs',
+      value: '20.67',
+    },
+  ]
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute bottom-5 left-[360px] z-[1] h-[244px] w-[902px] font-mono"
+    >
+      {metricPanels.map((panel) => (
+        <div
+          key={panel.label}
+          className={`absolute overflow-hidden rounded-[4px] bg-[#111217] shadow-[0_20px_54px_rgba(0,0,0,0.24)] ${panel.className}`}
+        >
+          <p className="text-signoz_vanilla-100/88 m-0 px-3.5 pt-4 text-[12px] font-semibold leading-[1.15] tracking-[-0.1px]">
+            {panel.label}
+          </p>
+          <div className="text-signoz_vanilla-100/88 absolute inset-x-0 bottom-7 flex items-baseline justify-center gap-1.5">
+            <span className="text-[38px] font-light leading-none tracking-[-1.2px]">
+              {panel.value}
+            </span>
+            <span className="text-[20px] font-light leading-none text-signoz_vanilla-400">
+              {panel.unit}
+            </span>
+          </div>
+        </div>
+      ))}
+      <div className="absolute left-0 top-0 h-[244px] w-[524px] overflow-hidden rounded-[4px] shadow-[0_24px_64px_rgba(0,0,0,0.28)]">
+        <Image
+          alt=""
+          className="h-full w-full object-cover object-left-top"
+          height={632}
+          src="/img/graphics/homepage/infra-getcart-latency.png"
+          width={1356}
+        />
+      </div>
+    </div>
+  )
+}
+
+function InfraAlbumVisual() {
+  const [activeChartIndex, setActiveChartIndex] = useState<number | null>(null)
+  const charts = [
+    {
+      alt: '',
+      src: '/img/graphics/homepage/infra-cpu-usage.png',
+    },
+    {
+      alt: '',
+      src: '/img/graphics/homepage/infra-memory-usage.png',
+    },
+    {
+      alt: '',
+      src: '/img/graphics/homepage/infra-cpu-request-limit.png',
+    },
+    {
+      alt: '',
+      src: '/img/graphics/homepage/infra-network-rate.png',
+    },
+  ]
+
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute inset-x-5 bottom-5 top-[170px] z-[1] grid gap-2 overflow-hidden transition-[grid-template-rows] duration-300 ease-out md:inset-x-6"
+      onMouseLeave={() => setActiveChartIndex(null)}
+      style={{
+        gridTemplateRows:
+          activeChartIndex === null
+            ? charts.map(() => '1fr').join(' ')
+            : charts.map((_, index) => (index === activeChartIndex ? '3.8fr' : '0.5fr')).join(' '),
+      }}
+    >
+      {charts.map((chart, index) => (
+        <div
+          key={chart.src}
+          className="group/infra-sheet min-h-0 overflow-hidden rounded-[5px] bg-[#111217] shadow-[0_22px_58px_rgba(0,0,0,0.28)] transition-[filter] duration-300 ease-out hover:filter-none"
+          onMouseEnter={() => setActiveChartIndex(index)}
+          style={{ filter: `brightness(${index === 0 ? 0.86 : 0.72})` }}
+        >
+          <Image
+            alt={chart.alt}
+            className="h-full w-full max-w-none object-cover object-left-top opacity-85 transition-opacity duration-300 ease-out group-hover/infra-sheet:opacity-100"
+            height={686}
+            src={chart.src}
+            width={992}
+          />
+        </div>
+      ))}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-signoz_ink-500 to-transparent" />
+    </div>
+  )
+}
+
 function LogsStreamVisual() {
   const [cursor, setCursor] = useState(0)
   const visibleLogs = useMemo(
@@ -553,6 +674,8 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
       {feature.visual === 'trace-spans' ? <TraceSpansVisual /> : null}
       {feature.visual === 'alert-card' ? <AlertCardVisual /> : null}
       {feature.visual === 'llm-logo-grid' ? <LlmLogoGridVisual /> : null}
+      {feature.visual === 'dashboard-panels' ? <DashboardPanelsVisual /> : null}
+      {feature.visual === 'infra-album' ? <InfraAlbumVisual /> : null}
     </CustomLink>
   )
 }
