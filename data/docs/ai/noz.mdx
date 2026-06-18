@@ -1,5 +1,5 @@
 ---
-date: 2026-06-16
+date: 2026-06-18
 id: noz
 title: "Noz: SigNoz's AI Teammate for Observability"
 meta_title: Noz - SigNoz's In-Product AI Teammate & Assistant
@@ -24,6 +24,19 @@ The panel header gives you a few controls:
 - **New conversation**: start a fresh thread.
 - **Expand**: open Noz full screen, with a searchable conversation list on the left and more room to read long answers.
 - **Close**: dismiss the panel.
+
+### Open Noz from a specific view
+
+Besides the header button, Noz appears inside a few views so you can launch it without leaving what you're looking at. When you open it from one of these, Noz pre-loads the relevant context for you:
+
+- **Trace detail page**: the Noz button sits in the waterfall filter header, just before the **Highlight errors** toggle (in both the collapsed and expanded filter states). Opening it from here adds the current trace as context, so you can ask about that request right away.
+- **Dashboard panel editor**: open any panel for editing, and the Noz button appears in the panel editor's header.
+
+<Figure src="/img/docs/noz/noz-trace-detail.webp" alt="Trace detail waterfall view with the Noz button in the filter header next to Highlight errors, and the Noz side panel open showing the current trace attached as context" caption="Opening Noz from the trace detail page attaches the current trace as context automatically." />
+
+<Admonition type="info">
+These in-context entry points are rolling out across SigNoz Cloud, OSS, and Enterprise, and the trace detail button appears only when the AI assistant is enabled for your account. If you don't see it yet, open Noz from the **Noz** button in the SigNoz header instead.
+</Admonition>
 
 ## Ask your first question
 
@@ -55,9 +68,21 @@ Adding context narrows Noz's scope so its answer covers only the dashboard, aler
 
 <Figure src="/img/docs/noz/noz-add-context.webp" alt="Noz Add Context picker open with Dashboards, Alerts, and Services tabs, letting you attach a specific entity to scope the investigation" caption="The Add Context picker, where you attach a dashboard, alert, or service before you ask." />
 
+### Automatic context
+
+When you open Noz from a view that's already about a specific entity, Noz attaches that entity for you, so you don't have to pick it from **Add Context**:
+
+- **From a trace**: opening Noz on the trace detail page adds that trace as context.
+- **From an alert**: opening Noz while viewing an alert rule's **Overview** or **History** tab adds that alert as context.
+- **From the triggered-alerts view**: when no single rule is selected, Noz loads your triggered alerts as context instead.
+
+The attached entity shows as a chip above the input. Remove it to broaden the scope, or use **Add Context** to attach a different entity.
+
 ## Understand and act on an answer
 
 Noz doesn't just give you a conclusion. It shows the steps it took to get there and usually offers one-click follow-ups, so you can trust what you're seeing and keep moving without breaking flow. Expand the section below to see how Noz works through a problem and what it lets you do next.
+
+Some actions take you straight to the right place in SigNoz. Ask Noz to **open a saved view** by name and it lands you in the matching Logs, Traces, or Metrics Explorer with that view's filters and query already applied. Ask it to **open a notification channel** and it opens that channel's edit page.
 
 <details>
 <ToggleHeading>
@@ -100,7 +125,18 @@ Every conversation is saved, so an investigation you started this morning is sti
 - **Find a past investigation.** Use **Search** in the full-screen view to pull up an old conversation by what you asked.
 - **Keep your list focused.** Start a **new conversation** for an unrelated question so each thread stays on one topic, and **archive** the ones you're done with.
 
-On any answer you can **copy** it to drop into a ticket or share with your team, **regenerate** it for another pass, and use **thumbs up / thumbs down** to flag when an answer was helpful or off. Your feedback trains Noz to give better answers over time.
+On any answer you can **copy** it to drop into a ticket or share with your team, **regenerate** it for another pass, and use **thumbs up / thumbs down** to flag when an answer was helpful or off. Your feedback trains Noz to give better answers over time. Any links in a reply open in a new browser tab, so you keep the conversation open while you follow them.
+
+## Rate limits and error messages
+
+When something goes wrong, Noz shows the specific reason rather than a generic failure, so you know what to do next:
+
+- **Thread is busy.** A previous request in the same conversation is still running. Wait a moment, then try again.
+- **Usage limit reached.** SigNoz Cloud applies usage limits to Noz, such as an hourly message limit, a daily message limit, or a token or cost cap. When you hit one, Noz names the limit that was reached.
+
+<Admonition type="info">
+When a usage limit is the cause, Noz hides the **regenerate** control so you aren't prompted to retry a request that would immediately fail again. Wait for the limit window to reset, then continue the conversation.
+</Admonition>
 
 ## Noz vs. the SigNoz MCP Server
 
