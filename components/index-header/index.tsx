@@ -3,57 +3,13 @@ import { ArrowRight } from 'lucide-react'
 import Hero from '@/components/ui/Hero'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
-import { ExperimentTracker } from '@/components/ExperimentTracker'
-import { getFeatureValue } from '@/utils/growthbookServer'
-import { EXPERIMENTS } from '@/constants/experiments'
 import { VideoModalPlayer } from './VideoModalPlayer'
 import { HeroSectionPill } from './HeroSectionPill'
 import HeroCopyMotion from './HeroCopyMotion'
 import HeroTracePreview from './HeroTracePreview'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
-type HomepageHeroVariant =
-  (typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants)[keyof typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants]
-type HomepageHeroFeatureValue = HomepageHeroVariant | boolean
-
-export async function Header() {
-  const defaultVariant: HomepageHeroVariant =
-    process.env.NODE_ENV === 'development'
-      ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
-      : EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.defaultVariant
-  const featureValue = await getFeatureValue<HomepageHeroFeatureValue>(
-    EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.flagName,
-    defaultVariant
-  )
-  const variant =
-    featureValue === true
-      ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
-      : featureValue === false
-        ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
-        : featureValue
-
-  if (variant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT) {
-    return (
-      <ExperimentTracker
-        experimentId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id}
-        variantId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT}
-      >
-        <HomepageHeroVariant />
-      </ExperimentTracker>
-    )
-  }
-
-  return (
-    <ExperimentTracker
-      experimentId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id}
-      variantId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL}
-    >
-      <ControlHeader />
-    </ExperimentTracker>
-  )
-}
-
-function HomepageHeroVariant() {
+export function HomepageHeroRedesign() {
   const primaryCTA = 'Get Started - Free'
 
   return (
@@ -100,7 +56,7 @@ function HomepageHeroVariant() {
                   prefetch={false}
                 >
                   <Button
-                    className="experiment-button--secondary-with-icon !w-full"
+                    className="homepage-button--secondary-with-icon !w-full"
                     type={Button.TYPES.SECONDARY}
                   >
                     Book a Demo
@@ -141,7 +97,7 @@ function HomepageHeroVariant() {
   )
 }
 
-function ControlHeader() {
+export function Header() {
   const primaryCTA = 'Get Started - Free'
 
   return (

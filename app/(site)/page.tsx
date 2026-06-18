@@ -1,26 +1,8 @@
-import { Header } from '@/components/index-header'
-import BuildForDevelopers from '@/components/build-for-developers'
-import { SigNozFeatures } from '@/components/index-features'
-import SigNozStats from '@/components/signoz-stats'
-import { Testimonials } from '@/components/testimonials'
-import { TrustedByTeams } from '@/components/trusted-by'
-import { AgentNativeObservability } from '@/components/agent-native-observability'
-import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
-import WhySelectSignoz from '@/components/why-select-signoz'
-import { GetStarted } from '@/components/GetStarted'
 import { Metadata } from 'next'
-import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
-import HomepageFloatingCta from '@/components/homepage-floating-cta/HomepageFloatingCta'
-import CustomerStoriesExperiment from '@/components/index-customer-stories/CustomerStoriesExperiment'
-import FaqExperiment from '@/components/index-faq/FaqExperiment'
-import AgentNativeObservabilityExperiment from '@/components/index-agent-native-observability/AgentNativeObservabilityExperiment'
-import FeatureBentoExperiment from '@/components/index-feature-bento/FeatureBentoExperiment'
-import WhySignozExperiment from '@/components/index-why-signoz/WhySignozExperiment'
-import PricingExperiment from '@/components/index-pricing/PricingExperiment'
-import HomepageGetStartedExperiment from '@/components/index-get-started/HomepageGetStartedExperiment'
 
 import siteMetadata from '@/data/siteMetadata'
 import JsonLdScript from '@/components/JsonLdScript'
+import HomepageHeroExperiment from './HomepageHeroExperiment'
 
 const siteUrl = siteMetadata.siteUrl
 const organizationId = `${siteUrl}/#organization`
@@ -215,28 +197,8 @@ export default function Page() {
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <main className="relative z-[1] mx-auto max-w-8xl xl:max-[1728px]:max-w-[80vw]">
-          <Header />
-          <TrustedByTeams page="homepage" className="homepage-experiment-logo-strip max-w-8xl" />
-          <WhySignozExperiment />
-          <FeatureBentoExperiment />
-          <AgentNativeObservabilityExperiment />
-          <SigNozFeatures className="homepage-control-only max-w-8xl" />
-          <div className="homepage-control-only">
-            <AgentNativeObservability className="max-w-8xl" />
-          </div>
-          <CustomerStoriesExperiment />
-          <HomepageGetStartedExperiment />
-          <PricingExperiment />
-          <FaqExperiment />
-          <BuildForDevelopers className="homepage-control-only max-w-8xl" />
-          <WhyOpenTelemetry className="homepage-control-only max-w-8xl" />
-          <WhySelectSignoz className="homepage-control-only max-w-8xl" />
-          <SigNozStats className="homepage-control-only max-w-8xl" />
-          <Testimonials page="homepage" className="homepage-control-only max-w-8xl" />
-          <GetStarted page="homepage" className="max-w-8xl" />
+          <HomepageHeroExperiment />
         </main>
-        <HomepageFloatingCta />
-        <ChatbaseClient />
       </div>
     </>
   )

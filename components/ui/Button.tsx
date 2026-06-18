@@ -117,36 +117,36 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       }
     }
 
-    const isExperimentButton = mappedVariant === 'default' || mappedVariant === 'secondary'
-    const experimentButtonTypeClass =
+    const isHomepageButton = mappedVariant === 'default' || mappedVariant === 'secondary'
+    const homepageButtonTypeClass =
       mappedVariant === 'default'
-        ? 'experiment-button experiment-button--primary'
+        ? 'homepage-button homepage-button--primary'
         : mappedVariant === 'secondary'
-          ? 'experiment-button experiment-button--secondary'
+          ? 'homepage-button homepage-button--secondary'
           : ''
-    const shouldRenderExperimentButtonContent = isExperimentButton && !asChild
+    const shouldRenderHomepageButtonContent = isHomepageButton && !asChild
 
     return (
       <Comp
         ref={!asChild ? (ref as any) : undefined}
         className={cn(
           buttonVariants({ variant: mappedVariant, size, rounded }),
-          experimentButtonTypeClass,
+          homepageButtonTypeClass,
           className
         )}
         {...extraProps}
         {...props}
       >
-        {shouldRenderExperimentButtonContent ? (
+        {shouldRenderHomepageButtonContent ? (
           <>
-            <span className="experiment-button__label flex min-w-0 items-center justify-center gap-1.5">
+            <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
               {children}
             </span>
             <span
-              className={`experiment-button__icon hidden ${
+              className={`homepage-button__icon hidden ${
                 mappedVariant === 'default'
-                  ? 'experiment-button__icon--primary'
-                  : 'experiment-button__icon--secondary'
+                  ? 'homepage-button__icon--primary'
+                  : 'homepage-button__icon--secondary'
               }`}
               aria-hidden="true"
             >

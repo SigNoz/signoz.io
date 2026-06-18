@@ -76,7 +76,7 @@ export default function HomepageFloatingCta() {
 
   return (
     <div
-      className={`homepage-variant-only pointer-events-none fixed bottom-5 left-1/2 z-50 w-[calc(100%-32px)] max-w-[430px] -translate-x-1/2 transition-all duration-300 md:bottom-8 ${
+      className={`pointer-events-none fixed bottom-5 left-1/2 z-50 w-[calc(100%-32px)] max-w-[430px] -translate-x-1/2 transition-all duration-300 md:bottom-8 ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       }`}
     >

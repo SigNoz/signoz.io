@@ -176,12 +176,12 @@ export default function TopNav() {
                         className="start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
                       >
                         <span id="btn-get-started-website-navbar">
-                          <span className="experiment-button__label flex min-w-0 items-center justify-center gap-1.5">
+                          <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
                             Get Started - Free
                             <ArrowRight size={14} />
                           </span>
                           <span
-                            className="experiment-button__icon experiment-button__icon--primary hidden"
+                            className="homepage-button__icon homepage-button__icon--primary hidden"
                             aria-hidden="true"
                           >
                             <ArrowRight size={16} strokeWidth={2.5} />

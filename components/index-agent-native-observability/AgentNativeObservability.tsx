@@ -372,7 +372,7 @@ function NozPanelCard({ className = '' }: { className?: string }) {
   )
 }
 
-export default function AgentNativeObservabilityExperiment() {
+export default function AgentNativeObservabilitySection() {
   const sectionRef = useRef<HTMLElement>(null)
   const [isActive, setIsActive] = useState(false)
 
@@ -398,7 +398,7 @@ export default function AgentNativeObservabilityExperiment() {
   return (
     <section
       ref={sectionRef}
-      className={`homepage-variant-only homepage-agent-native-section relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32 ${
+      className={`homepage-agent-native-section relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32 ${
         isActive ? 'homepage-agent-native-active' : ''
       }`}
       data-homepage-agent-native-observability

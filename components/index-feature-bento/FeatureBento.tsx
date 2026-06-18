@@ -198,10 +198,10 @@ function EnterpriseReadyStrip() {
   )
 }
 
-export default function FeatureBentoExperiment() {
+export default function FeatureBento() {
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
       data-homepage-feature-bento
     >
       <div className="mx-auto max-w-[1200px]">

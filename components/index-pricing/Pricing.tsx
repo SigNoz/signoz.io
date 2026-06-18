@@ -68,10 +68,10 @@ function PricingValueColumn({
   )
 }
 
-export default function PricingExperiment() {
+export default function Pricing() {
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-[78px] lg:py-20"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-[78px] lg:py-20"
       data-homepage-floating-cta="View pricing"
       data-homepage-floating-href="/pricing/"
     >

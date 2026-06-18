@@ -79,10 +79,10 @@ function FaqItem({ answer, question }: Faq) {
   )
 }
 
-export default function FaqExperiment() {
+export default function Faq() {
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
       data-homepage-floating-stop="true"
     >
       <div className="mx-auto grid max-w-[1200px] gap-10 lg:grid-cols-[0.82fr_1.45fr] lg:gap-12">
@@ -94,7 +94,7 @@ export default function FaqExperiment() {
             Quick answers to the questions teams usually ask while evaluating SigNoz.
           </p>
           <CustomLink
-            className="experiment-button experiment-button--primary mt-8 inline-flex h-10 items-center justify-center gap-3 px-4 text-sm"
+            className="homepage-button homepage-button--primary mt-8 inline-flex h-10 items-center justify-center gap-3 px-4 text-sm"
             href="/contact-us/"
           >
             Contact us

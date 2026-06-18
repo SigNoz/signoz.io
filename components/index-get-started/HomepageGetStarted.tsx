@@ -52,10 +52,10 @@ function GetStartedColumn({ option, index }: { option: GetStartedOption; index: 
   )
 }
 
-export default function HomepageGetStartedExperiment() {
+export default function HomepageGetStarted() {
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-12 sm:px-6 sm:py-16 lg:px-[78px] lg:py-20"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-12 sm:px-6 sm:py-16 lg:px-[78px] lg:py-20"
       data-homepage-floating-cta="Get started"
       data-homepage-floating-href="/teams/"
     >
