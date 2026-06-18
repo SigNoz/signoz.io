@@ -3768,6 +3768,46 @@ const docsSideNav = [
             route: '/docs/integrations/azure/aks',
             label: 'AKS',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/sql-database',
+            label: 'SQL Database',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/sql-managed-instance',
+            label: 'SQL Managed Instance',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/mysql-flexible-server',
+            label: 'MySQL Flexible Server',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/postgresql-flexible-server',
+            label: 'PostgreSQL Flexible Server',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/mongodb',
+            label: 'MongoDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/cosmos-db',
+            label: 'Cosmos DB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/cassandra-db',
+            label: 'Cassandra DB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/redis',
+            label: 'Redis',
+          },
         ],
       },
       {
