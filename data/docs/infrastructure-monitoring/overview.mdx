@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-06-18
 id: overview
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
@@ -158,6 +158,40 @@ The Kubernetes monitoring interface offers multiple views to analyze different a
 
 By default, the **Pods View** is selected, offering a detailed breakdown of pod-level resource utilization.
 
+### Workload Views: Deployments, StatefulSets, Jobs, and DaemonSets
+
+The **Deployments**, **StatefulSets**, **Jobs**, and **DaemonSets** views list your Kubernetes workloads alongside their resource utilization. Each row represents a single workload, identified by the unique combination of **name + namespace + cluster**.
+
+Because a workload is identified by all three attributes, two workloads that share the same name but run in different namespaces or clusters appear as **separate rows**, each with its own accurate metrics. They are never collapsed into one merged row or have their metrics summed together.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-deployments-list.webp"
+  alt="Kubernetes Deployments view listing each deployment as a distinct row with its Deployment Name and Namespace Name columns"
+  caption="Deployments view — each workload is a distinct row per unique name, namespace, and cluster"
+  width={1512}
+  height={1100}
+/>
+
+#### Table Columns
+
+- **Name**: Name of the workload (Deployment, StatefulSet, Job, or DaemonSet).
+- **Namespace Name**: The namespace where the workload runs.
+- **CPU Request, Limit, and Usage**: CPU consumption shown against requests and limits, plus actual usage in cores.
+- **Memory Request, Limit, and Usage**: Memory consumption shown against requests and limits, plus actual working-set usage.
+
+Use the **Cluster Name** filter in the left **Filters** panel to scope any workload view to a specific cluster.
+
+<Admonition type="info">
+Row counts can be higher than before if the same workload name is deployed across multiple namespaces or clusters. This is expected: each unique (name, namespace, cluster) combination is listed separately so that its metrics stay accurate, rather than being merged and summed under a single name.
+</Admonition>
+
+<Admonition type="info">
+Workloads whose pods do not carry a cluster label — for example, collectors not deployed through the SigNoz Helm chart and configured without a resource processor — appear as a separate row with an empty cluster value. They are not dropped, hidden, or merged with other same-named workloads. To populate the cluster value, deploy with the [SigNoz Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) or add the cluster attribute via a resource processor in your collector.
+</Admonition>
+
+<Admonition type="warning">
+Opening a workload's detail drawer or drilling into its metrics does not yet scope to the full (name, namespace, cluster) triplet. When same-named workloads exist across namespaces or clusters, the detail view may not isolate the exact workload from its list row. Use the **Namespace Name** and **Cluster Name** filters to narrow the list before drilling in. This is a known limitation that will be addressed in a follow-up.
+</Admonition>
 
 ### Pods View: Monitoring Kubernetes Pods
 
