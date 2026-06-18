@@ -1,0 +1,116 @@
+---
+date: 2026-06-18
+id: telemetry-stats-api
+title: Stats API - Verify SigNoz Telemetry Ingestion Health
+description: Look up the SigNoz Stats API to fetch per-organization telemetry row counts and last-observed timestamps for traces, logs, and metrics.
+doc_type: reference
+---
+
+## Overview
+
+The SigNoz Stats API returns per-organization telemetry statistics — row counts and last-observed timestamps for traces, logs, and metrics. Use it to programmatically confirm that data is being ingested, build ingestion health checks, or surface storage stats in an external dashboard.
+
+The endpoint is always available. The stats aggregator starts at server startup and needs no feature flag or configuration change, so the endpoint responds regardless of whether usage analytics reporting is enabled.
+
+## API Endpoint
+
+`GET` `https://{URL}/api/v1/stats`
+
+Replace `{URL}` with your instance URL, e.g., `example.signoz.io`.
+
+## Prerequisites
+
+- **Access level:** The endpoint requires at least the `VIEWER` role — the minimum role in SigNoz. No admin or editor privileges are needed to read stats.
+- **API key:** To call the API with a key, go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key from its **Keys** tab. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for step-by-step instructions. API keys can only be created or managed by users with the `Admin` role.
+
+## Authentication
+
+The endpoint accepts either of the following credentials:
+
+- **API key** — pass it in the `SigNoz-Api-Key` header (recommended for scripts and external integrations):
+
+  ```bash
+  SigNoz-Api-Key:{YOUR_API_KEY}
+  ```
+
+- **Session token** — a bearer token issued to a signed-in user, passed in the `Authorization` header:
+
+  ```bash
+  Authorization: Bearer {YOUR_TOKEN}
+  ```
+
+Either credential must map to a user or service account with at least the `VIEWER` role.
+
+<Admonition type="tip">
+Secure storage and handling of your API key is crucial to prevent unauthorized access.
+</Admonition>
+
+## Example Request
+
+```bash
+curl -H "SigNoz-Api-Key: <your-api-key>" \
+     https://<your-signoz-host>/api/v1/stats
+```
+
+- `<your-api-key>` — an API key for a service account with at least the `VIEWER` role.
+- `<your-signoz-host>` — your instance host, e.g., `example.signoz.io`.
+
+## Response
+
+A successful request returns HTTP `200` with a JSON envelope. All statistics are nested under the top-level `data` object as a flat key-value map; `status` is `"success"`.
+
+```json
+{
+  "status": "success",
+  "data": {
+    "telemetry.traces.count": 4821934,
+    "telemetry.traces.last_observed.time": "2026-06-18T09:14:22Z",
+    "telemetry.traces.last_observed.time_unix": 1781770462,
+    "telemetry.logs.count": 19384726,
+    "telemetry.logs.last_observed.time": "2026-06-18T09:14:25Z",
+    "telemetry.logs.last_observed.time_unix": 1781770465,
+    "telemetry.metrics.count": 73650281,
+    "telemetry.metrics.last_observed.time": "2026-06-18T09:14:20Z",
+    "telemetry.metrics.last_observed.time_unix": 1781770460
+  }
+}
+```
+
+### Telemetry statistics
+
+| Key | Type | Description |
+| --- | --- | --- |
+| `telemetry.traces.count` | integer | Total number of trace (span) rows in storage. |
+| `telemetry.traces.last_observed.time` | string | Timestamp of the most recent trace, in UTC (RFC 3339). |
+| `telemetry.traces.last_observed.time_unix` | integer | Timestamp of the most recent trace, as a Unix epoch (seconds). |
+| `telemetry.logs.count` | integer | Total number of log rows in storage. |
+| `telemetry.logs.last_observed.time` | string | Timestamp of the most recent log, in UTC (RFC 3339). |
+| `telemetry.logs.last_observed.time_unix` | integer | Timestamp of the most recent log, as a Unix epoch (seconds). |
+| `telemetry.metrics.count` | integer | Total number of metric sample rows in storage. |
+| `telemetry.metrics.last_observed.time` | string | Timestamp of the most recent metric sample, in UTC (RFC 3339). |
+| `telemetry.metrics.last_observed.time_unix` | integer | Timestamp of the most recent metric sample, as a Unix epoch (seconds). |
+
+<Admonition type="info">
+The `telemetry.*.count` values are cumulative lifetime row counts in storage — not a time-windowed count. For long-running installations these can be very large integers. The `last_observed.*` keys for a signal are omitted from the response when that signal has no data yet, so check for their presence before reading them.
+</Admonition>
+
+### Additional statistics
+
+The `data` object is an extensible flat map. Alongside the telemetry keys above, the response also includes operational statistics contributed by other SigNoz subsystems, such as:
+
+- `user.count`, `user.count.active`, `user.count.pending_invite`
+- `serviceaccount.count`, `serviceaccount.keys.count`
+- `logs_pipeline.total.count`, `logs_pipeline.enabled.count`
+- `alert.firing.count`
+- `authdomain.count`
+
+Treat `data` as an open key-value map rather than a fixed schema: the exact set of keys can grow across SigNoz versions, so read keys by name and tolerate additional, unknown keys.
+
+## API Specification
+
+The full API specification is available in the [OpenAPI Reference](https://signoz.io/api-reference/).
+
+## Related
+
+- [Verify data ingestion](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/) — use this endpoint to confirm traces, logs, or metrics are arriving.
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — create the API key used to authenticate.

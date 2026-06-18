@@ -4215,6 +4215,11 @@ const docsSideNav = [
         route: '/docs/metrics-management/query-range-api',
         label: 'Metrics Query API',
       },
+      {
+        type: 'doc',
+        route: '/docs/telemetry-stats-api',
+        label: 'Stats API',
+      },
     ],
   },
   {
