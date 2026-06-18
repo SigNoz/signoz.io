@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-06-18
 id: query-performance
 title: Query Performance & Common Issues
 description: Diagnose slow queries, missing results, and unexpected output — with tips to optimize query and dashboard performance in SigNoz.
@@ -52,7 +52,11 @@ Make sure the selected time range actually includes the data you expect. If you 
 
 Use the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) or Logs/Traces Explorer to verify that the metric, service, or attribute you're querying actually has data in the selected time period.
 
-**4. Check for EXISTS vs value filters**
+**4. Check the query warnings for a misnamed metric**
+
+A metrics query that references a metric name that has never been received returns an empty result with a warning instead of an error — the panel simply shows no data. Check the query or panel warning for `metric <metric-name> has never been received. Check the metric name and instrumentation`, which points to a metric-name typo or an instrumentation gap. A group-by attribute that doesn't exist on the metric produces a similar `` key `<attribute-name>` not found on metric <metric-name> `` warning. See the [Metrics API reference](https://signoz.io/docs/metrics-management/query-range-api/#response-warnings) for all warning messages.
+
+**5. Check for EXISTS vs value filters**
 
 If you're filtering on an attribute that may not be present on all spans/logs, use `EXISTS` first to confirm the attribute is present before filtering on its value.
 

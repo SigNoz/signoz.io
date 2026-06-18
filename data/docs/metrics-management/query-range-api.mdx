@@ -1,8 +1,8 @@
 ---
-date: 2026-05-06
+date: 2026-06-18
 title: Metrics API
 id: metrics-query-api
-description: API reference for querying SigNoz metrics.
+description: API reference for querying SigNoz metrics, including the response warnings array for missing metrics and group-by attributes.
 doc_type: reference
 ---
 
@@ -174,3 +174,49 @@ Use two queries and a formula (`A/B`) to calculate error rate:
   }
 }
 ```
+
+## Response Warnings
+
+A query can succeed (HTTP `200`) and still report non-fatal issues through a `warning` object in the response. Querying a metric that has never been ingested, or grouping by an attribute that does not exist on a metric, no longer fails the request — the query returns an empty result for that series along with a warning explaining why.
+
+<Admonition type="warning">
+Querying a metric that has never been received **does not** return a not-found (HTTP `404`) error. To detect misnamed or missing metrics programmatically, inspect the `warnings` array in the response rather than relying on the HTTP status code.
+</Admonition>
+
+Warnings appear under `data.warning.warnings`, where each entry is an object with a `message` field:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "type": "time_series",
+    "data": { "results": [] },
+    "meta": {},
+    "warning": {
+      "warnings": [
+        {
+          "message": "metric http.server.duration has never been received. Check the metric name and instrumentation"
+        }
+      ]
+    }
+  }
+}
+```
+
+The `warning` object is omitted entirely when a query has no warnings.
+
+### Warning Messages
+
+| Scenario | Message format |
+|---|---|
+| A single referenced metric has never been received | `metric <metric-name> has never been received. Check the metric name and instrumentation` |
+| Multiple referenced metrics have never been received | `the following metrics have never been received. Check the metric names and instrumentation: <metric-1>, <metric-2>` |
+| A group-by attribute does not exist on the metric | `` key `<attribute-name>` not found on metric <metric-name> `` |
+| A single metric exists but has no data in the query time range | `no data found for the metric <metric-name> in the query time range` |
+| Multiple metrics exist but have no data in the query time range | `no data found for the following metrics in the query time range: <metric-1>, <metric-2>` |
+
+A single query can return more than one warning at once — for example, when it references several non-existent metrics, the response includes one entry per metric.
+
+### Group-by Attribute Fallback
+
+When a group-by field is applied to a metric but that attribute does not exist on it, the query still completes. The missing attribute is treated as a string-type fallback (it produces empty values rather than failing the query), and a `` key `<attribute-name>` not found on metric <metric-name> `` warning is added so you can correct the attribute name.

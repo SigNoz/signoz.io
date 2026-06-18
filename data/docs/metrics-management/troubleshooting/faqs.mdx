@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-06-18
 id: faqs
 title: Metrics Management FAQs
 description: Frequently asked questions about metrics management and troubleshooting in SigNoz
@@ -37,5 +37,21 @@ When you can't see specific metrics in SigNoz, this is often caused by a tempora
 Maintain consistent temporality in your metrics to avoid these issues and ensure optimal performance through the query builder interface.
 
 For more information about metric temporality, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
+
+</details>
+
+### Why does my panel say "metric has never been received"?
+
+A query that references a metric name that has never been ingested no longer returns an error — it returns an empty result with the warning `metric <metric-name> has never been received. Check the metric name and instrumentation`. This warning is a diagnostic signal that the metric name is misspelled or that the expected telemetry isn't reaching SigNoz.
+
+<details>
+
+<summary> Show resolution steps </summary>
+
+1. **Verify the metric name** — Compare the name in your query against what your application or collector actually exports. Names are case-sensitive and OpenTelemetry metric names use dots (for example `http.server.duration`).
+2. **Confirm instrumentation is sending data** — Check that the relevant SDK or collector is configured and that the metric is being produced. See [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/).
+3. **Browse available metrics** — Use the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) to find the exact name of a metric that has been received.
+
+For the full list of query warning messages, including the group-by attribute fallback, see the [Metrics API reference](https://signoz.io/docs/metrics-management/query-range-api/#response-warnings).
 
 </details> 
