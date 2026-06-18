@@ -15,7 +15,7 @@ type BentoFeature = {
   product: string
   textureOpacity?: string
   texturePosition: string
-  visual?: 'apm-browser' | 'logs-stream' | 'trace-spans'
+  visual?: 'alert-card' | 'apm-browser' | 'llm-logo-grid' | 'logs-stream' | 'trace-spans'
 }
 
 const features: BentoFeature[] = [
@@ -58,6 +58,7 @@ const features: BentoFeature[] = [
     href: '/alerts-management/',
     layout: 'md:col-span-2 md:col-start-3 md:row-span-1 md:row-start-2',
     texturePosition: 'object-center',
+    visual: 'alert-card',
   },
   {
     product: 'LLM Observability.',
@@ -67,6 +68,7 @@ const features: BentoFeature[] = [
     href: '/llm-observability/',
     layout: 'md:col-span-2 md:col-start-3 md:row-span-1 md:row-start-3',
     texturePosition: 'object-right-bottom',
+    visual: 'llm-logo-grid',
   },
   {
     product: 'Infra Monitoring.',
@@ -359,6 +361,97 @@ function TraceSpansVisual() {
   )
 }
 
+function AlertCardVisual() {
+  return (
+    <div
+      aria-hidden="true"
+      className="bg-signoz_ink-400/88 pointer-events-none absolute inset-x-4 bottom-[-132px] z-[1] rounded-[6px] border border-signoz_slate-100/50 p-4 font-mono shadow-[0_24px_70px_rgba(0,0,0,0.46)] backdrop-blur-sm transition-transform duration-500 ease-out group-hover:-translate-y-[112px] group-focus-visible:-translate-y-[112px] sm:inset-x-5 md:bottom-[-142px] lg:inset-x-6"
+    >
+      <div className="absolute inset-0 rounded-[6px] bg-[radial-gradient(circle_at_28%_8%,rgba(229,72,77,0.12),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.025),transparent)]" />
+      <div className="absolute bottom-4 left-4 top-4 w-1 rounded-full bg-signoz_cherry-500 shadow-[0_0_24px_rgba(229,72,77,0.42)]" />
+
+      <div className="relative pl-7">
+        <p className="text-signoz_vanilla-400/62 m-0 text-[11px] uppercase tracking-[0.12em]">
+          May 4, 2024 - 04:24:24
+        </p>
+
+        <div className="mt-3 flex items-start gap-3">
+          <span className="rounded-full bg-signoz_cherry-500 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-signoz_ink-500">
+            Firing
+          </span>
+          <p className="m-0 text-[15px] font-semibold leading-[1.35] tracking-[-0.1px] text-signoz_cherry-300">
+            Deployment error for ingress-nginx
+          </p>
+        </div>
+
+        <div className="text-signoz_vanilla-300/82 mt-4 space-y-2 text-[12px] leading-5 tracking-[-0.1px]">
+          <p className="m-0">
+            <span className="text-signoz_vanilla-400/64">Alert:</span> Deployment Error
+          </p>
+          <p className="m-0">
+            <span className="text-signoz_vanilla-400/64">Summary:</span> threshold 10, observed
+            value 11
+          </p>
+        </div>
+
+        <div className="mt-4 inline-flex items-center gap-2 rounded-[4px] bg-signoz_slate-300 px-3 py-2 text-[12px] font-medium tracking-[-0.1px] text-signoz_vanilla-100">
+          Related logs
+          <span aria-hidden="true">-&gt;</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const llmIntegrations = [
+  { label: 'Claude', domain: 'claude.ai' },
+  { label: 'OpenAI', domain: 'openai.com' },
+  { label: 'Vercel', domain: 'vercel.com' },
+  { label: 'Groq', domain: 'groq.com' },
+  { label: 'Anthropic', domain: 'anthropic.com' },
+  { label: 'Amazon Bedrock', domain: 'aws.amazon.com' },
+  { label: 'Gemini', domain: 'gemini.google.com' },
+  { label: 'OpenRouter', domain: 'openrouter.ai' },
+]
+
+const getFaviconUrl = (domain: string, size = 64) =>
+  `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=${size}`
+
+function LlmLogoGridVisual() {
+  const logoRows = [llmIntegrations.slice(0, 4), llmIntegrations.slice(4)]
+
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute inset-x-0 bottom-[-10px] z-[1] px-7 sm:px-8 lg:bottom-[-8px]"
+    >
+      <div className="flex w-full flex-col gap-6">
+        {logoRows.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex w-full items-center justify-between">
+            {row.map((integration, index) => (
+              <span
+                key={integration.label}
+                className="group/logo relative flex size-10 items-center justify-center transition-transform duration-200 ease-out hover:z-10 hover:-translate-y-1.5 hover:scale-110 sm:size-11"
+                style={{ transitionDelay: `${(rowIndex * 4 + index) * 28}ms` }}
+                title={integration.label}
+              >
+                <span className="absolute bottom-full left-1/2 mb-2 max-w-[120px] -translate-x-1/2 rounded-[3px] bg-signoz_slate-300 px-2 py-1 text-[10px] font-medium leading-none tracking-[-0.1px] text-signoz_vanilla-100 opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.34)] transition-opacity duration-150 group-hover/logo:opacity-100">
+                  {integration.label}
+                </span>
+                <span
+                  className="size-8 rounded-[3px] bg-contain bg-center bg-no-repeat drop-shadow-[0_12px_24px_rgba(0,0,0,0.48)] transition-[filter] duration-200 group-hover/logo:drop-shadow-[0_16px_30px_rgba(0,0,0,0.6)] sm:size-9"
+                  style={{ backgroundImage: `url("${getFaviconUrl(integration.domain, 64)}")` }}
+                />
+                <span className="sr-only">{integration.label}</span>
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function LogsStreamVisual() {
   const [cursor, setCursor] = useState(0)
   const visibleLogs = useMemo(
@@ -445,19 +538,9 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
   return (
     <CustomLink
       aria-label={`${feature.product} ${feature.outcome}`}
-      className={`relative flex min-h-[430px] flex-col overflow-hidden rounded-[6px] border border-signoz_slate-400/25 bg-signoz_ink-500 no-underline transition-[transform,border-color] duration-300 ease-out hover:scale-[1.012] hover:border-signoz_slate-400/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70 md:min-h-0 ${feature.layout}`}
+      className={`group relative flex min-h-[430px] flex-col overflow-hidden rounded-[6px] border border-signoz_slate-400/25 bg-signoz_ink-500 no-underline transition-[transform,border-color] duration-300 ease-out hover:scale-[1.012] hover:border-signoz_slate-400/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70 md:min-h-0 ${feature.layout}`}
       href={feature.href}
     >
-      <Image
-        alt=""
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover ${
-          feature.textureOpacity ?? 'opacity-[0.28]'
-        } mix-blend-screen ${feature.texturePosition}`}
-        height={574}
-        src="/img/graphics/homepage/bento-purple-texture.png"
-        width={1020}
-      />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(180deg,rgba(11,12,14,0.12),rgba(11,12,14,0.82)_78%)]" />
       <div className="relative z-[2] p-5 sm:p-6 lg:p-7">
         <h3 className="m-0 max-w-[720px] text-[22px] font-light leading-[1.12] tracking-[-0.22px] text-signoz_vanilla-100 sm:text-[24px] md:text-[26px] md:tracking-[-0.26px]">
@@ -468,6 +551,8 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
       {feature.visual === 'apm-browser' ? <ApmBrowserShell /> : null}
       {feature.visual === 'logs-stream' ? <LogsStreamVisual /> : null}
       {feature.visual === 'trace-spans' ? <TraceSpansVisual /> : null}
+      {feature.visual === 'alert-card' ? <AlertCardVisual /> : null}
+      {feature.visual === 'llm-logo-grid' ? <LlmLogoGridVisual /> : null}
     </CustomLink>
   )
 }
