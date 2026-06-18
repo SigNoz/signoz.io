@@ -19,7 +19,7 @@ export function HomepageHeroRedesign() {
           <h1 className="m-0 max-w-[900px] text-left text-[44px] font-medium leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
             Open observability for engineers
             <br />
-            and their agents
+            and their AI Agents
           </h1>
         </HeroCopyMotion>
 
