@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-06-18
 id: overview
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
@@ -180,6 +180,50 @@ The **Pods View** provides real-time visibility into pod resource utilization, e
 - **Search & Filtering**: Quickly locate specific pods using various filters.
 - **Group By Attribute**: Group pods by Namespace, Node, or Deployment.
 - **Sortable Metrics**: Sort columns for better trend analysis.
+
+### Namespaces View: Monitoring Kubernetes Namespaces
+
+The **Namespaces View** lists every namespace across your clusters along with its aggregate resource usage. Each row uniquely represents one **namespace name + cluster** combination, so the same namespace name (for example `default` or `kube-system`) running in different clusters appears as a separate row scoped to its own cluster.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-namespaces-view.webp" alt="Namespaces view showing the Namespace Name and Cluster Name columns, with each namespace attributed to its cluster"/>
+    <figcaption><i>Namespaces View — each row is scoped to a namespace and its cluster</i></figcaption>
+</figure>
+
+#### Table Columns
+
+- **Namespace Name**: Name of the Kubernetes namespace.
+- **Cluster Name**: Cluster the namespace belongs to.
+- **CPU Usage (cores)**: Aggregate CPU consumption across the namespace.
+- **Mem Usage (WSS)**: Aggregate working set memory across the namespace.
+
+<Admonition type="info">
+Each row is identified by namespace **and** cluster. In multi-cluster deployments the row count is higher than before, because same-named namespaces are no longer merged into a single summed row. Telemetry sources that do not emit a `k8s.cluster.name` value appear as their own row with an empty cluster field rather than being dropped or merged with named-cluster rows.
+</Admonition>
+
+### Volumes View: Monitoring Persistent Volume Claims (PVCs)
+
+The **Volumes View** tracks storage usage for Persistent Volume Claims (PVCs). Each row uniquely represents one **PVC name + namespace + cluster** combination. Because PVC names are unique only within a namespace — and namespaces recur across clusters — same-named PVCs in different namespaces or clusters now appear as separate rows, each scoped to its own namespace and cluster.
+
+#### Table Columns
+
+- **PVC Volume Claim Name**: Name of the Persistent Volume Claim.
+- **Namespace Name**: Namespace the PVC belongs to.
+- **Cluster Name**: Cluster the PVC belongs to.
+- **Usage metrics**: Volume capacity, used, and available space for the claim.
+
+<Admonition type="info">
+Each row is identified by PVC name, namespace, **and** cluster. In multi-namespace or multi-cluster deployments the row count is higher than before, because same-named PVCs are no longer merged into a single summed row. Telemetry sources that do not emit a `k8s.cluster.name` value appear as their own row with an empty cluster field rather than being dropped or merged with named-cluster rows.
+</Admonition>
+
+<Admonition type="warning" title="Breaking change for API and dashboard consumers">
+The Volumes and Namespaces list responses now return one row per **namespace name + cluster** (Namespaces) or per **PVC name + namespace + cluster** (Volumes) instead of a single summed row per name. In multi-cluster or multi-namespace environments these views return **more rows than before**.
+
+- **Previous behavior**: same-named namespaces or PVCs were merged into one summed row with an arbitrary cluster/namespace in the response metadata.
+- **New behavior**: each distinct (name + cluster) — and, for PVCs, namespace — combination is its own row.
+
+This applies to all deployments immediately; there is no feature flag. If you built dashboards, alerts, or API integrations against these list endpoints assuming a single row per name, update those queries and any downstream logic to account for the cluster (and namespace) dimension.
+</Admonition>
 
 ### Filtering and Selection Panel
 
