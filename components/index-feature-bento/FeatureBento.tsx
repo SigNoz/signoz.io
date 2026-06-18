@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import CustomLink from '@/components/Link'
 import HipaaLogo from '@/public/svgs/icons/hipaa.svg'
@@ -12,8 +13,9 @@ type BentoFeature = {
   layout: string
   outcome: string
   product: string
+  textureOpacity?: string
   texturePosition: string
-  visual?: 'apm-browser'
+  visual?: 'apm-browser' | 'logs-stream' | 'trace-spans'
 }
 
 const features: BentoFeature[] = [
@@ -35,6 +37,7 @@ const features: BentoFeature[] = [
     href: '/log-management/',
     layout: 'md:col-span-2 md:col-start-5 md:row-span-1 md:row-start-1',
     texturePosition: 'object-right-top',
+    visual: 'logs-stream',
   },
   {
     product: 'Tracing.',
@@ -43,7 +46,9 @@ const features: BentoFeature[] = [
       'Use flamegraphs, waterfalls, filters, and span aggregates to isolate slow work across high-volume traces.',
     href: '/distributed-tracing/',
     layout: 'md:col-span-2 md:col-start-1 md:row-span-2 md:row-start-2',
+    textureOpacity: 'opacity-[0.16]',
     texturePosition: 'object-left-bottom',
+    visual: 'trace-spans',
   },
   {
     product: 'Alerts.',
@@ -83,6 +88,329 @@ const features: BentoFeature[] = [
   },
 ]
 
+type LogSeverity = 'error' | 'info' | 'warn' | 'default'
+
+type LogEntry = {
+  body: string
+  severity: LogSeverity
+  timestamp: string
+}
+
+const logEntries: LogEntry[] = [
+  {
+    timestamp: '2026-06-18 16:32:41.012',
+    severity: 'error',
+    body: 'GET /generate-error 500 latency=2.48s trace_id=8f32',
+  },
+  {
+    timestamp: '2026-06-18 16:32:40.901',
+    severity: 'info',
+    body: 'INFO frontend/cartservice.go:90 item added cart_id=olly',
+  },
+  {
+    timestamp: '2026-06-18 16:32:40.772',
+    severity: 'default',
+    body: 'POST /checkout 200 duration=184ms user=zelda',
+  },
+  {
+    timestamp: '2026-06-18 16:32:40.418',
+    severity: 'warn',
+    body: 'WARN payment retry scheduled attempt=2 provider=stripe',
+  },
+  {
+    timestamp: '2026-06-18 16:32:39.995',
+    severity: 'default',
+    body: 'GET /list 200 duration=42ms cache=hit',
+  },
+  {
+    timestamp: '2026-06-18 16:32:39.540',
+    severity: 'info',
+    body: 'INFO route/server.go:71 request completed span=cart',
+  },
+  {
+    timestamp: '2026-06-18 16:32:39.104',
+    severity: 'default',
+    body: 'Aggregated 5488250 rows in 92ms source=clickhouse',
+  },
+  {
+    timestamp: '2026-06-18 16:32:38.812',
+    severity: 'error',
+    body: 'GET /api/cart 503 upstream timeout service=cartservice',
+  },
+]
+
+const severityClassNames: Record<LogSeverity, string> = {
+  default: 'border-signoz_slate-100/30 text-signoz_vanilla-400/58',
+  error: 'border-signoz_cherry-500 bg-signoz_cherry-500/13 text-signoz_cherry-400',
+  info: 'border-signoz_robin-500 bg-signoz_robin-500/12 text-signoz_robin-400',
+  warn: 'border-signoz_amber-500 bg-signoz_amber-500/10 text-signoz_amber-400',
+}
+
+type TraceSpan = {
+  color: string
+  depth: number
+  duration: string
+  label: string
+  offset: number
+  width: number
+}
+
+const traceSpans: TraceSpan[] = [
+  {
+    label: 'POST',
+    duration: '3.02s',
+    depth: 0,
+    offset: 0,
+    width: 96,
+    color: 'bg-signoz_sienna-400',
+  },
+  {
+    label: 'ingress',
+    duration: '3.01s',
+    depth: 1,
+    offset: 2,
+    width: 94,
+    color: 'bg-signoz_sakura-400',
+  },
+  {
+    label: 'router frontend egress',
+    duration: '3.01s',
+    depth: 2,
+    offset: 3,
+    width: 92,
+    color: 'bg-signoz_sakura-500',
+  },
+  {
+    label: 'POST /api/checkout',
+    duration: '2.59s',
+    depth: 3,
+    offset: 13,
+    width: 78,
+    color: 'bg-signoz_sienna-300',
+  },
+  {
+    label: 'executing api route',
+    duration: '2.59s',
+    depth: 4,
+    offset: 14,
+    width: 76,
+    color: 'bg-signoz_sienna-300',
+  },
+  {
+    label: 'CheckoutService/PlaceOrder',
+    duration: '2.20s',
+    depth: 5,
+    offset: 21,
+    width: 68,
+    color: 'bg-signoz_sienna-400',
+  },
+  {
+    label: 'prepareOrderItemsAndShipping',
+    duration: '1.83s',
+    depth: 6,
+    offset: 28,
+    width: 58,
+    color: 'bg-signoz_robin-400',
+  },
+  {
+    label: 'CartService/GetCart',
+    duration: '420ms',
+    depth: 7,
+    offset: 31,
+    width: 22,
+    color: 'bg-signoz_robin-500',
+  },
+  {
+    label: 'CurrencyService/Convert',
+    duration: '318ms',
+    depth: 8,
+    offset: 34,
+    width: 18,
+    color: 'bg-signoz_aqua-500',
+  },
+  {
+    label: 'POST /send_order_confirmation',
+    duration: '1.77s',
+    depth: 6,
+    offset: 33,
+    width: 54,
+    color: 'bg-signoz_robin-400',
+  },
+  {
+    label: 'send_email',
+    duration: '1.76s',
+    depth: 7,
+    offset: 35,
+    width: 51,
+    color: 'bg-signoz_robin-500',
+  },
+  {
+    label: 'HGET inventory',
+    duration: '84ms',
+    depth: 8,
+    offset: 38,
+    width: 10,
+    color: 'bg-signoz_amber-500',
+  },
+]
+
+function TraceSpansVisual() {
+  const visualRef = useRef<HTMLDivElement>(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const spanRows = [...traceSpans, ...traceSpans]
+
+  useEffect(() => {
+    let frame = 0
+
+    const updateProgress = () => {
+      const visual = visualRef.current
+      if (!visual) return
+
+      const rect = visual.getBoundingClientRect()
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+      const travel = rect.height * 1.35
+      const progress = (viewportHeight * 0.7 - rect.top) / travel
+
+      setScrollProgress(Math.min(1, Math.max(0, progress)))
+    }
+
+    const requestUpdate = () => {
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(updateProgress)
+    }
+
+    updateProgress()
+    window.addEventListener('scroll', requestUpdate, { passive: true })
+    window.addEventListener('resize', requestUpdate)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', requestUpdate)
+      window.removeEventListener('resize', requestUpdate)
+    }
+  }, [])
+
+  return (
+    <div
+      aria-hidden="true"
+      ref={visualRef}
+      className="pointer-events-none absolute inset-x-0 bottom-0 top-[148px] overflow-hidden px-4 pb-0 md:top-[166px] lg:px-5"
+    >
+      <div className="absolute inset-x-4 top-0 z-[2] border-b border-signoz_slate-100/30 pb-3 font-mono lg:inset-x-5">
+        <div className="text-signoz_vanilla-300/78 flex items-center justify-between text-[12px] font-medium tracking-[-0.01em]">
+          <span>Flame Graph</span>
+          <span className="text-signoz_vanilla-400/54">Spans: 53</span>
+        </div>
+        <div className="text-signoz_vanilla-400/42 mt-3 grid grid-cols-[124px_1fr] gap-2 text-[10px]">
+          <span aria-hidden="true" />
+          <div className="grid grid-cols-4">
+            <span>0ms</span>
+            <span>800ms</span>
+            <span>1600ms</span>
+            <span className="text-right">2400ms</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute bottom-0 left-[138px] right-0 top-[78px] opacity-45">
+        <div className="bg-signoz_slate-100/34 absolute inset-y-0 left-0 w-px" />
+        <div className="bg-signoz_slate-100/24 absolute inset-y-0 left-1/3 w-px" />
+        <div className="bg-signoz_slate-100/24 absolute inset-y-0 left-2/3 w-px" />
+        <div className="absolute inset-y-0 right-0 w-px bg-signoz_slate-100/20" />
+      </div>
+
+      <div className="absolute inset-x-4 bottom-0 top-[78px] overflow-hidden [mask-image:linear-gradient(180deg,transparent_0%,black_8%,black_88%,transparent_100%)] lg:inset-x-5">
+        <div
+          className="homepage-trace-span-stream relative space-y-1.5 font-mono"
+          style={{ transform: `translateY(${-50 * scrollProgress}%)` }}
+        >
+          {spanRows.map((span, index) => (
+            <div
+              key={`${span.label}-${index}`}
+              className="text-signoz_vanilla-400/72 grid h-[30px] min-w-[500px] grid-cols-[124px_1fr] items-center gap-2 text-[12px] leading-none"
+            >
+              <div
+                className="relative flex items-center gap-2 overflow-hidden whitespace-nowrap"
+                style={{ paddingLeft: `${span.depth * 9}px` }}
+              >
+                {span.depth > 0 ? (
+                  <span
+                    className="bg-signoz_slate-100/28 absolute bottom-[-18px] top-[-18px] w-px"
+                    style={{ left: `${Math.max(0, span.depth * 9 - 5)}px` }}
+                  />
+                ) : null}
+                <span className="size-1.5 shrink-0 rounded-full bg-signoz_slate-50/80" />
+                <span className="truncate">{span.label}</span>
+              </div>
+              <div className="relative h-full">
+                <div
+                  className={`absolute top-1/2 flex h-[20px] -translate-y-1/2 items-center justify-between rounded-[2px] px-2 text-[10px] font-semibold text-signoz_ink-500 shadow-[0_10px_24px_rgba(0,0,0,0.24)] ${span.color}`}
+                  style={{ left: `${span.offset}%`, width: `${span.width}%` }}
+                >
+                  <span className="truncate opacity-85">{span.label}</span>
+                  <span className="ml-2 shrink-0">{span.duration}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LogsStreamVisual() {
+  const [cursor, setCursor] = useState(0)
+  const visibleLogs = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, index) => {
+        const logIndex = (cursor + index) % logEntries.length
+        return {
+          ...logEntries[logIndex],
+          key: `${cursor}-${index}-${logEntries[logIndex].timestamp}`,
+        }
+      }),
+    [cursor]
+  )
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCursor((current) => (current + 1) % logEntries.length)
+    }, 1350)
+
+    return () => window.clearInterval(interval)
+  }, [])
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 bottom-0 top-[180px] overflow-hidden px-5 md:top-[194px] lg:px-6"
+    >
+      <div className="border-signoz_slate-100/24 text-signoz_vanilla-400/48 absolute inset-x-5 top-0 grid min-w-[620px] grid-cols-[250px_1fr] gap-4 border-b pb-3 pl-[14px] pr-4 font-mono text-[12px] uppercase tracking-[0.08em] lg:inset-x-6">
+        <span>Timestamp</span>
+        <span>Body</span>
+      </div>
+
+      <div className="relative mt-12 space-y-2 font-mono text-[14px] leading-none tracking-[-0.2px] text-signoz_vanilla-400/60 lg:text-[15px]">
+        {visibleLogs.map((log, index) => (
+          <div
+            key={log.key}
+            className={`pointer-events-auto grid min-w-[620px] grid-cols-[250px_1fr] items-center gap-4 rounded-r-[3px] border-l-2 py-2 pl-3 pr-4 transition-[opacity,transform,background-color,box-shadow,color] duration-200 ease-out hover:translate-x-1 hover:bg-signoz_slate-100/[0.07] hover:text-signoz_vanilla-100 hover:shadow-[0_0_28px_rgba(78,116,248,0.18)] ${
+              severityClassNames[log.severity]
+            } ${index === 0 ? 'animate-[homepage-log-enter_520ms_ease-out]' : ''}`}
+            style={{ opacity: Math.max(0.18, 1 - index * 0.095) }}
+          >
+            <span>{log.timestamp}</span>
+            <span className="whitespace-nowrap">{log.body}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-signoz_ink-500 to-transparent" />
+    </div>
+  )
+}
+
 function ApmBrowserShell() {
   return (
     <div
@@ -117,25 +445,29 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
   return (
     <CustomLink
       aria-label={`${feature.product} ${feature.outcome}`}
-      className={`relative flex min-h-[430px] flex-col overflow-hidden rounded-[6px] border border-signoz_slate-400/25 bg-[#07090d] no-underline transition-[transform,border-color] duration-300 ease-out hover:scale-[1.012] hover:border-signoz_slate-400/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70 md:min-h-0 ${feature.layout}`}
+      className={`relative flex min-h-[430px] flex-col overflow-hidden rounded-[6px] border border-signoz_slate-400/25 bg-signoz_ink-500 no-underline transition-[transform,border-color] duration-300 ease-out hover:scale-[1.012] hover:border-signoz_slate-400/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70 md:min-h-0 ${feature.layout}`}
       href={feature.href}
     >
       <Image
         alt=""
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.28] mix-blend-screen ${feature.texturePosition}`}
+        className={`pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover ${
+          feature.textureOpacity ?? 'opacity-[0.28]'
+        } mix-blend-screen ${feature.texturePosition}`}
         height={574}
         src="/img/graphics/homepage/bento-purple-texture.png"
         width={1020}
       />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(180deg,rgba(7,9,13,0.12),rgba(7,9,13,0.82)_78%)]" />
-      <div className="p-5 sm:p-6 lg:p-7">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(180deg,rgba(11,12,14,0.12),rgba(11,12,14,0.82)_78%)]" />
+      <div className="relative z-[2] p-5 sm:p-6 lg:p-7">
         <h3 className="m-0 max-w-[720px] text-[22px] font-light leading-[1.12] tracking-[-0.22px] text-signoz_vanilla-100 sm:text-[24px] md:text-[26px] md:tracking-[-0.26px]">
           <span className="text-signoz_vanilla-100">{feature.product}</span>{' '}
           <span className="text-signoz_vanilla-400/70">{feature.outcome}</span>
         </h3>
       </div>
       {feature.visual === 'apm-browser' ? <ApmBrowserShell /> : null}
+      {feature.visual === 'logs-stream' ? <LogsStreamVisual /> : null}
+      {feature.visual === 'trace-spans' ? <TraceSpansVisual /> : null}
     </CustomLink>
   )
 }
