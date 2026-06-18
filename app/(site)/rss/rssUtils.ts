@@ -1,7 +1,7 @@
 import { sortPosts } from 'pliny/utils/contentlayer.js'
-import { allDocs } from 'contentlayer/generated'
 import { MDXContentApiResponse } from '@/utils/strapi'
 import { normaliseSlug } from '../../../scripts/rssFeed.mjs'
+import { fetchAllDocsForPage } from '@/utils/cachedData'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 import { mapRelationKeys, mapTaxonomyValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
@@ -103,12 +103,13 @@ export const loadPublishedPosts = async () => {
   const comparisonPosts = mapComparisonEntries(comparisons)
   const guidePosts = mapGuideEntries(guides)
   const blogPosts = mapBlogEntries(blogs)
+  const docPosts = await fetchAllDocsForPage()
 
   const combinedPosts = [
     ...faqPosts,
     ...blogPosts,
     ...(opentelemetryPosts || []),
-    ...allDocs,
+    ...docPosts,
     ...guidePosts,
     ...(comparisonPosts || []),
   ]

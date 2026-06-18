@@ -1,11 +1,8 @@
-import { writeFileSync, mkdirSync } from 'fs'
-import path from 'path'
+import { writeFileSync } from 'fs'
 import siteMetadata from '../data/siteMetadata.js'
-import {
-  allDocs,
-} from '../.contentlayer/generated/index.mjs'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
-import { generateRss } from './rssFeed.mjs';
+import { generateRss } from './rssFeed.mjs'
+import { loadLocalDocs } from './localDocs.mjs'
 
 const FEED_FILENAME = 'feed.xml'
 
@@ -22,9 +19,7 @@ function generateRSS(config, allCollections) {
 }
 
 const rss = () => {
-  generateRSS(siteMetadata, [
-    ...allDocs,
-  ])
+  generateRSS(siteMetadata, loadLocalDocs())
   console.log('RSS feed generated...')
 }
 

@@ -1,9 +1,7 @@
 import { writeFileSync } from 'fs'
 import siteMetadata from '../data/siteMetadata.js'
-import {
-  allDocs,
-} from '../.contentlayer/generated/index.mjs'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+import { loadLocalDocs } from './localDocs.mjs'
 
 function createSearchIndex(content) {
   if (
@@ -22,9 +20,7 @@ function createSearchIndex(content) {
 }
 
 const searchIndexes = () => {
-  createSearchIndex([
-    ...allDocs,
-  ])
+  createSearchIndex(loadLocalDocs())
   console.log('Search Indexes generated...')
 }
 

@@ -1,7 +1,15 @@
-import { coreContent } from 'pliny/utils/contentlayer.js'
-import DocContent from '@/components/DocContent/DocContent'
-import { RegionProvider } from '@/components/Region/RegionContext'
-import type { Doc } from 'contentlayer/generated'
+import React, { useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+type UpgradeDoc = {
+  title: string
+  slug: string
+  content: string
+  body?: {
+    raw?: string
+  }
+}
 
 const DocRenderer = ({
   docUrl,
@@ -9,29 +17,27 @@ const DocRenderer = ({
   setHasError,
 }: {
   docUrl: string
-  docsBySlug: Record<string, Doc>
+  docsBySlug: Record<string, UpgradeDoc>
   setHasError: (hasError: boolean) => void
 }) => {
   const slug = decodeURI(`${docUrl.replace('https://signoz.io/docs/', '').replace(/^\/+/, '')}`)
-
   const post = docsBySlug[slug]
 
+  useEffect(() => {
+    setHasError(!post)
+  }, [post, setHasError])
+
   if (!post) {
-    setHasError(true)
+    return null
   }
 
-  const mainContent = coreContent(post)
-  const toc = post?.toc || []
-  const { title } = mainContent
+  const markdown = post.body?.raw || post.content || ''
 
   return (
-    <>
-      {post && (
-        <RegionProvider>
-          <DocContent title={title} post={post} toc={toc} hideTableOfContents={true} />
-        </RegionProvider>
-      )}
-    </>
+    <article>
+      <h1>{post.title}</h1>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+    </article>
   )
 }
 

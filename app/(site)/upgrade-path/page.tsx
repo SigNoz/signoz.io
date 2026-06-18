@@ -1,10 +1,11 @@
-import { allDocs } from 'contentlayer/generated'
-import type { Doc } from 'contentlayer/generated'
 import UpgradePathTool from './components/UpgradePathTool'
 import upgradeSchema from '@/constants/upgradeSchema.json'
 import { STANDARD_GUIDE_URL } from './utils/upgradeUtils'
+import { fetchAllDocsForPage } from '@/utils/cachedData'
 
-function getUpgradeDocsBySlug(): Record<string, Doc> {
+type UpgradeDoc = Awaited<ReturnType<typeof fetchAllDocsForPage>>[number]
+
+async function getUpgradeDocsBySlug(): Promise<Record<string, UpgradeDoc>> {
   const guideUrls = Array.from(
     new Set([
       ...Object.values(upgradeSchema.releases)
@@ -14,22 +15,24 @@ function getUpgradeDocsBySlug(): Record<string, Doc> {
     ])
   )
 
+  const docs = await fetchAllDocsForPage()
+
   return Object.fromEntries(
     guideUrls
       .map((guideUrl) => {
         const slug = decodeURI(
           `${guideUrl.replace('https://signoz.io/docs/', '').replace(/^\/+/, '')}`
         )
-        const doc = allDocs.find((candidate) => candidate.slug === slug)
+        const doc = docs.find((candidate) => candidate.slug === slug)
 
         return doc ? [slug, doc] : null
       })
-      .filter(Boolean) as [string, Doc][]
+      .filter(Boolean) as [string, UpgradeDoc][]
   )
 }
 
-function UpgradePathToolPage() {
-  const docsBySlug = getUpgradeDocsBySlug()
+async function UpgradePathToolPage() {
+  const docsBySlug = await getUpgradeDocsBySlug()
 
   return (
     <>

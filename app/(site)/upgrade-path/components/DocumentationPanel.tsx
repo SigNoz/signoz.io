@@ -4,14 +4,23 @@ import DocRenderer from './DocRender'
 import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
-import type { Doc } from 'contentlayer/generated'
+
+type UpgradeDoc = {
+  title: string
+  slug: string
+  content: string
+  body?: {
+    raw?: string
+  }
+  [key: string]: unknown
+}
 
 interface DocumentationPanelProps {
   currentStep: UpgradePath
   className?: string
   docUrl: string
   version: string
-  docsBySlug: Record<string, Doc>
+  docsBySlug: Record<string, UpgradeDoc>
 }
 
 const DocumentationPanel: React.FC<DocumentationPanelProps> = ({

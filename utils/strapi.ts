@@ -267,6 +267,16 @@ export type MDXContentByIdApiResponse = {
   meta: {}
 }
 
+export type DocsSideNavApiResponse = {
+  data: {
+    id: number
+    documentId?: string
+    items?: unknown[]
+    [key: string]: any
+  }
+  meta: {}
+}
+
 // Cache for storing paths to avoid repeated API calls - avoid later maybe
 let pathsCache: string[] | null = null
 let pathsCacheTimestamp: number = 0
@@ -310,6 +320,35 @@ const singleContentPopulateByCollection: Record<string, Record<string, unknown>>
     tags: '*',
     keywords: '*',
   },
+  docs: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+}
+
+export const fetchDocsSideNavFromCMS = async () => {
+  if (!API_URL) {
+    throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
+  }
+
+  const response = await fetch(`${API_URL}/api/docs-side-nav`, {
+    cache: 'force-cache',
+    next: {
+      tags: ['docs-side-nav'],
+    },
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    const errorMessage = await response.text()
+    throw new Error(`Failed to fetch docs side nav: ${response.status} ${errorMessage}`)
+  }
+
+  const payload = (await response.json()) as DocsSideNavApiResponse
+  return payload.data
 }
 
 // Fetch MDX content by path or all content for a collection

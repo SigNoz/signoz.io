@@ -1,4 +1,5 @@
 import docsSideNav from '@/constants/docsSideNav'
+import type { DocsSideNavItem } from '@/utils/docsSideNav'
 
 type NavItem =
   | {
@@ -151,13 +152,17 @@ const flattenTree = (nodes: DocsRouteTreeItem[], depth: number, output: DocsRout
   })
 }
 
-export function getDocsRouteTree(): DocsRouteTreeItem[] {
-  return toTree(docsSideNav as NavItem[])
+export function getDocsRouteTree(
+  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
+): DocsRouteTreeItem[] {
+  return toTree(items as NavItem[])
 }
 
-export function getDocsRouteList(): DocsRouteListItem[] {
+export function getDocsRouteList(
+  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
+): DocsRouteListItem[] {
   const all: DocsRouteListItem[] = []
-  flattenTree(getDocsRouteTree(), 0, all)
+  flattenTree(getDocsRouteTree(items), 0, all)
 
   const seen = new Set<string>()
   return all.filter((item) => {
@@ -167,8 +172,11 @@ export function getDocsRouteList(): DocsRouteListItem[] {
   })
 }
 
-export function getLlmStarterLinks(limit = 24): Array<Pick<DocsRouteListItem, 'label' | 'route'>> {
-  const routes = getDocsRouteList()
+export function getLlmStarterLinks(
+  limit = 24,
+  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
+): Array<Pick<DocsRouteListItem, 'label' | 'route'>> {
+  const routes = getDocsRouteList(items)
   const starters: Array<Pick<DocsRouteListItem, 'label' | 'route'>> = []
   const seen = new Set<string>()
   const sortedRoutes = [...routes].sort(

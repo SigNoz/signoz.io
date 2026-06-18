@@ -1,19 +1,17 @@
 'use client'
 
-import { ReactNode, useEffect, useRef } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Doc } from 'contentlayer/generated'
+import { ReactNode, useRef } from 'react'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
 import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 import { usePathname } from 'next/navigation'
 import { getPrevAndNextRoutes } from '../utils/common'
-import docsSideNav from '@/constants/docsSideNav'
 import Link from 'next/link'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import { DOC_TOC_CLASSES, DOC_SIDENAV_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
+import type { NavItem } from '@/components/DocsSidebar/types'
 
 export interface tocItemProps {
   url: string
@@ -22,16 +20,19 @@ export interface tocItemProps {
 }
 
 interface LayoutProps {
-  content: CoreContent<Doc>
+  content: {
+    title: string
+  }
   children: ReactNode
   toc: tocItemProps[]
+  sideNavItems: NavItem[]
 }
 
-export default function DocLayout({ content, children, toc }: LayoutProps) {
+export default function DocLayout({ content, children, toc, sideNavItems }: LayoutProps) {
   const { title } = content
   const pathname = usePathname()
   const mainRef = useRef<HTMLElement | null>(null)
-  const { prev, next } = getPrevAndNextRoutes(docsSideNav, pathname)
+  const { prev, next } = getPrevAndNextRoutes(sideNavItems, pathname)
 
   return (
     <RegionProvider>
@@ -40,7 +41,7 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
         <SectionContainer>
           <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 overflow-clip">
             <div className={DOC_SIDENAV_CLASSES}>
-              <DocsSidebar />
+              <DocsSidebar items={sideNavItems} />
             </div>
 
             <div className="box-border min-w-0 flex-[1_1_auto] md:px-0 lg:px-4">

@@ -1,7 +1,19 @@
-import type { Doc } from 'contentlayer/generated'
 import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
 import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
+
+type DocMarkdownSource = {
+  _id?: string
+  slug?: string
+  title: string
+  description?: string
+  docTags?: unknown
+  toc?: unknown[]
+  body: {
+    raw: string
+    code?: string
+  }
+}
 
 // Next.js static generation is the primary cache for this route. This Map is only a
 // best-effort warm-process optimization, and eviction is intentionally FIFO rather than LRU
@@ -15,7 +27,7 @@ type GenericNode = {
   children?: GenericNode[]
 }
 
-const getDocTags = (doc: Doc): string[] => {
+const getDocTags = (doc: DocMarkdownSource): string[] => {
   if (!Array.isArray(doc.docTags)) return []
   return doc.docTags.filter(
     (tag): tag is string => typeof tag === 'string' && tag.trim().length > 0
@@ -49,7 +61,7 @@ const hasMatchingLeadingH1 = (markdown: string, title: string): boolean => {
   return normalizeHeadingText(leadingH1) === normalizeHeadingText(title)
 }
 
-const buildFallbackMarkdown = (doc: Doc): string => {
+const buildFallbackMarkdown = (doc: DocMarkdownSource): string => {
   const includeTitle = !hasMatchingLeadingH1(doc.body.raw, doc.title)
   return buildMarkdownDocument({
     title: doc.title,
@@ -144,8 +156,8 @@ const getMdxComponentFromCode = async (code: string) => {
     _jsx_runtime: jsxRuntime,
   }
 
-  // This is effectively eval(), but the input is Contentlayer-compiled MDX from trusted
-  // repository content at build/render time. Do not use this with untrusted input.
+  // This is effectively eval(), but the input is compiled MDX from trusted repository
+  // content at build/render time. Do not use this with untrusted input.
   const fn = new Function(...Object.keys(scope), code)
   const moduleExports = fn(...Object.values(scope)) as { default?: unknown }
 
@@ -156,7 +168,11 @@ const getMdxComponentFromCode = async (code: string) => {
   return moduleExports.default as unknown
 }
 
-const convertCompiledMdxToMarkdown = async (doc: Doc): Promise<string> => {
+const convertCompiledMdxToMarkdown = async (doc: DocMarkdownSource): Promise<string> => {
+  if (!doc.body.code) {
+    return convertRawMdxToMarkdown(doc.body.raw)
+  }
+
   const React = await import('react')
   const { renderToStaticMarkup } = await import('react-dom/server')
   const mdxComponents = buildAgentMdxComponentsForDoc(doc)
@@ -181,8 +197,8 @@ const setMarkdownCache = (key: string, value: string): void => {
   markdownCache.set(key, value)
 }
 
-export async function renderDocMarkdownForAgents(doc: Doc): Promise<string> {
-  const cacheKey = doc.slug || doc._id
+export async function renderDocMarkdownForAgents(doc: DocMarkdownSource): Promise<string> {
+  const cacheKey = doc.slug || doc._id || doc.title
   const cached = markdownCache.get(cacheKey)
 
   if (cached) {
