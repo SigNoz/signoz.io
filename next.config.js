@@ -2983,6 +2983,19 @@ module.exports = () => {
       // Exclude *.svg from the original rule since we handle it above
       fileLoaderRule.exclude = /\.svg$/i
 
+      // @stoplight/elements-core uses ReactDOM.render which was removed
+      // in React 19. No fix upstream — https://github.com/stoplightio/elements/issues/2793
+      // javascript/auto downgrades the missing export from a hard error to a warning.
+      // Remove this when stoplight ships React 19 support or we change to a different component library.
+      config.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules[\\/]@stoplight/,
+        type: 'javascript/auto',
+        resolve: {
+          fullySpecified: false,
+        },
+      })
+
       // this is to avoid caching for webpack
       // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
       if (config.cache && !options.dev) {
