@@ -405,7 +405,7 @@ export default function AgentNativeObservabilitySection() {
     >
       <div className="mx-auto max-w-[1200px]">
         <div
-          className="absolute left-4 right-4 top-24 h-[760px] sm:left-6 sm:right-6 lg:left-[78px] lg:right-[78px] lg:top-32"
+          className="pointer-events-none absolute left-4 right-4 top-24 h-[760px] sm:left-6 sm:right-6 lg:left-[78px] lg:right-[78px] lg:top-32"
           data-homepage-floating-cta="Explore agent-native observability"
           data-homepage-floating-href="/agent-native-observability/"
           aria-hidden="true"

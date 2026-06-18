@@ -3,24 +3,17 @@
 import Image from 'next/image'
 
 import CustomLink from '@/components/Link'
-import featureGraphic3 from '@/public/img/graphics/homepage/feature-graphic-3.svg?url'
-import featureGraphic4 from '@/public/img/graphics/homepage/feature-graphic-4.svg?url'
-import featureGraphic5 from '@/public/img/graphics/homepage/feature-graphic-5.svg?url'
-import featureGraphic6 from '@/public/img/graphics/homepage/feature-graphic-6.svg?url'
-import featureGraphic8 from '@/public/img/graphics/homepage/feature-graphic-8.svg?url'
 import HipaaLogo from '@/public/svgs/icons/hipaa.svg'
 import Soc2Logo from '@/public/svgs/icons/SOC-2.svg'
 
 type BentoFeature = {
   description: string
-  graphic: string
   href: string
-  imageClassName?: string
+  layout: string
   outcome: string
-  pan?: 'left' | 'right' | 'up'
   product: string
-  size?: 'large' | 'wide'
-  visual?: 'tall'
+  texturePosition: string
+  visual?: 'apm-browser'
 }
 
 const features: BentoFeature[] = [
@@ -29,122 +22,120 @@ const features: BentoFeature[] = [
     outcome: 'P99, Apdex, database calls, and external calls per service.',
     description:
       'Monitor RED metrics, Apdex, database calls, and external calls from trace-derived service views.',
-    graphic: '/img/graphics/homepage/apm-feature-bento-crop.png',
     href: '/application-performance-monitoring/',
-    pan: 'right',
-    size: 'large',
-    visual: 'tall',
+    layout: 'md:col-span-4 md:col-start-1 md:row-span-1 md:row-start-1',
+    texturePosition: 'object-left-top',
+    visual: 'apm-browser',
   },
   {
     product: 'Logs.',
     outcome: 'Columnar database search with trace correlation built in.',
     description:
       'Search logs in a columnar database, parse attributes, and use trace IDs to move between logs and traces.',
-    graphic: featureGraphic4,
     href: '/log-management/',
-    pan: 'right',
-    visual: 'tall',
+    layout: 'md:col-span-2 md:col-start-5 md:row-span-1 md:row-start-1',
+    texturePosition: 'object-right-top',
   },
   {
     product: 'Tracing.',
     outcome: 'Load and analyze traces with up to a million spans.',
     description:
       'Use flamegraphs, waterfalls, filters, and span aggregates to isolate slow work across high-volume traces.',
-    graphic: featureGraphic3,
     href: '/distributed-tracing/',
-    pan: 'right',
-  },
-  {
-    product: 'Infra Monitoring.',
-    outcome: 'Kubernetes, hosts, and cloud metrics next to every service.',
-    description:
-      'Bring host, Kubernetes, and cloud resource metrics into the same view as application signals.',
-    graphic: featureGraphic6,
-    href: '/docs/infrastructure-monitoring/overview/',
-    pan: 'up',
+    layout: 'md:col-span-2 md:col-start-1 md:row-span-2 md:row-start-2',
+    texturePosition: 'object-left-bottom',
   },
   {
     product: 'Alerts.',
     outcome: 'Threshold, anomaly, and Apdex alerts on any telemetry signal.',
     description:
       'Create threshold, anomaly, Apdex, metric, log, or trace alerts and tune them with alert history.',
-    graphic: featureGraphic5,
     href: '/alerts-management/',
-    pan: 'left',
+    layout: 'md:col-span-2 md:col-start-3 md:row-span-1 md:row-start-2',
+    texturePosition: 'object-center',
   },
   {
     product: 'LLM Observability.',
     outcome: 'OpenAI, Azure OpenAI, Gemini, OpenRouter, LiteLLM, and agent telemetry.',
     description:
       'Monitor LiteLLM, OpenRouter, Azure OpenAI, Gemini, Hermes, and other AI workflows through OpenTelemetry.',
-    graphic: featureGraphic8,
     href: '/llm-observability/',
-    pan: 'right',
+    layout: 'md:col-span-2 md:col-start-3 md:row-span-1 md:row-start-3',
+    texturePosition: 'object-right-bottom',
+  },
+  {
+    product: 'Infra Monitoring.',
+    outcome: 'Kubernetes, hosts, and cloud metrics next to every service.',
+    description:
+      'Bring host, Kubernetes, and cloud resource metrics into the same view as application signals.',
+    href: '/docs/infrastructure-monitoring/overview/',
+    layout: 'md:col-span-2 md:col-start-5 md:row-span-2 md:row-start-2',
+    texturePosition: 'object-center',
   },
   {
     product: 'Dashboards.',
     outcome: 'Reusable templates for services, infra, cloud, databases, and LLM usage.',
     description:
       'Start from templates or build custom views for services, infra, cloud, databases, and LLM usage.',
-    graphic: '/img/graphics/homepage/dashboard-feature-bento-crop.png',
     href: '/metrics-and-dashboards/',
-    pan: 'up',
-    size: 'wide',
+    layout: 'md:col-span-6 md:col-start-1 md:row-span-1 md:row-start-4',
+    texturePosition: 'object-left-bottom',
   },
 ]
 
+function ApmBrowserShell() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute bottom-[-24px] left-[20%] hidden h-[500px] w-[720px] overflow-hidden rounded-t-[4px] border border-signoz_slate-100 bg-signoz_slate-300 shadow-[0_26px_80px_rgba(0,0,0,0.24)] md:block lg:bottom-[-28px] lg:left-[20%] lg:h-[520px] lg:w-[760px]"
+    >
+      <div className="flex h-14 items-center gap-5 bg-signoz_slate-300 px-7">
+        <div className="flex gap-[7px]">
+          <span className="h-3 w-3 rounded-full bg-signoz_slate-50/45" />
+          <span className="h-3 w-3 rounded-full bg-signoz_slate-50/45" />
+          <span className="h-3 w-3 rounded-full bg-signoz_slate-50/45" />
+        </div>
+        <div className="ml-auto flex h-[34px] w-[420px] items-center justify-center rounded-[18px] border border-signoz_slate-100 bg-signoz_slate-200 text-[13px] font-medium leading-none text-signoz_vanilla-400 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+          olly.us.signoz.cloud/services/cartservice/
+        </div>
+      </div>
+
+      <div className="relative ml-1.5 h-[calc(100%-56px)] w-[calc(100%-6px)] overflow-hidden rounded-[8px] bg-[#070b12]">
+        <Image
+          alt=""
+          className="h-full w-full rounded-[8px] object-cover object-left-top"
+          height={462}
+          src="/img/graphics/homepage/apm-browser-overview.png"
+          width={758}
+        />
+      </div>
+    </div>
+  )
+}
+
 function FeatureCard({ feature }: { feature: BentoFeature }) {
-  const isWideCard = feature.size === 'large' || feature.size === 'wide'
-  const imageWellClassName =
-    feature.visual === 'tall'
-      ? 'h-[176px] sm:h-[238px] lg:h-[284px]'
-      : 'h-[176px] sm:h-[184px] lg:h-[214px]'
-
-  const panClassName =
-    feature.pan === 'left'
-      ? 'translate-x-[-4%] group-hover:translate-x-0'
-      : feature.pan === 'up'
-        ? 'translate-y-[4%] group-hover:translate-y-0'
-        : 'translate-x-[4%] group-hover:translate-x-0'
-
   return (
     <CustomLink
       aria-label={`${feature.product} ${feature.outcome}`}
-      className={`group relative flex min-h-[276px] w-[82vw] max-w-[360px] shrink-0 snap-start flex-col justify-between overflow-hidden border border-signoz_slate-400/20 bg-[#07090d] no-underline transition-colors [--box-padding:16px] focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70 sm:min-h-[326px] sm:w-[76vw] sm:max-w-[420px] md:w-auto md:max-w-none md:shrink ${
-        isWideCard ? 'md:col-span-2 md:min-h-0' : 'md:col-span-1 md:min-h-0'
-      }`}
+      className={`relative flex min-h-[430px] flex-col overflow-hidden rounded-[6px] border border-signoz_slate-400/25 bg-[#07090d] no-underline transition-[transform,border-color] duration-300 ease-out hover:scale-[1.012] hover:border-signoz_slate-400/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70 md:min-h-0 ${feature.layout}`}
       href={feature.href}
     >
-      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.08),transparent_32%)] opacity-80" />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_-18%,rgba(99,144,255,0.26),transparent_42%)] opacity-0 blur-2xl transition-opacity duration-500 ease-out group-hover:opacity-100" />
-      <div className="pointer-events-none absolute -left-1/3 top-0 z-[2] hidden h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/[0.10] to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-full group-hover:opacity-100 sm:block" />
-      <div
-        className={`relative z-[3] flex shrink-0 items-center justify-center overflow-hidden ${imageWellClassName}`}
-      >
-        <Image
-          alt=""
-          className={`h-[106%] max-h-none w-[106%] max-w-none object-cover opacity-[0.56] transition duration-500 ease-out group-hover:scale-[1.015] group-hover:opacity-[0.72] sm:h-[112%] sm:w-[112%] sm:opacity-[0.42] ${
-            feature.imageClassName ?? 'object-center'
-          } ${panClassName}`}
-          height={feature.visual === 'tall' ? 330 : 260}
-          sizes={
-            isWideCard
-              ? '(min-width: 1024px) 760px, calc(100vw - 48px)'
-              : '(min-width: 1024px) 360px, calc(100vw - 48px)'
-          }
-          src={feature.graphic}
-          width={isWideCard ? 760 : 360}
-        />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-signoz_ink-500 to-transparent" />
-      </div>
-
-      <div className="relative z-[3] flex min-h-[100px] items-start p-4 sm:min-h-[104px] md:p-6 lg:min-h-[116px]">
-        <div className="pointer-events-none absolute left-1/2 top-0 h-px w-screen -translate-x-1/2 bg-signoz_slate-400/25" />
-        <h3 className="m-0 max-w-[720px] text-[18px] font-medium leading-[1.22] tracking-[-0.2px] sm:text-[20px] md:text-[22px] md:tracking-[-0.35px] lg:leading-[1.18]">
+      <Image
+        alt=""
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-[0.28] mix-blend-screen ${feature.texturePosition}`}
+        height={574}
+        src="/img/graphics/homepage/bento-purple-texture.png"
+        width={1020}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(180deg,rgba(7,9,13,0.12),rgba(7,9,13,0.82)_78%)]" />
+      <div className="p-5 sm:p-6 lg:p-7">
+        <h3 className="m-0 max-w-[720px] text-[22px] font-light leading-[1.12] tracking-[-0.22px] text-signoz_vanilla-100 sm:text-[24px] md:text-[26px] md:tracking-[-0.26px]">
           <span className="text-signoz_vanilla-100">{feature.product}</span>{' '}
           <span className="text-signoz_vanilla-400/70">{feature.outcome}</span>
         </h3>
       </div>
+      {feature.visual === 'apm-browser' ? <ApmBrowserShell /> : null}
     </CustomLink>
   )
 }
@@ -204,9 +195,9 @@ export default function FeatureBento() {
       className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
       data-homepage-feature-bento
     >
-      <div className="mx-auto max-w-[1200px]">
+      <div className="mx-auto max-w-[1245px]">
         <div
-          className="absolute left-4 right-4 top-24 h-[720px] sm:left-6 sm:right-6 lg:left-[78px] lg:right-[78px] lg:top-32"
+          className="pointer-events-none absolute left-4 right-4 top-24 h-[1740px] sm:left-6 sm:right-6 lg:left-[78px] lg:right-[78px] lg:top-32"
           data-homepage-floating-cta="Explore docs"
           data-homepage-floating-href="/docs/introduction/"
           aria-hidden="true"
@@ -235,43 +226,9 @@ export default function FeatureBento() {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[1200px]">
+        <div className="relative mx-auto w-full max-w-[1245px]">
           <div className="relative">
-            <div className="pointer-events-none absolute inset-0 hidden md:block">
-              <div
-                className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
-                style={{ left: 'calc(33.333333% - 6.333px)' }}
-              />
-              <div
-                className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
-                style={{ left: 'calc(33.333333% - 0.333px)' }}
-              />
-              <div
-                className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
-                style={{ left: 'calc(66.666667% + 0.333px)' }}
-              />
-              <div
-                className="absolute bottom-0 top-0 w-px bg-signoz_slate-400/30"
-                style={{ left: 'calc(66.666667% + 6.333px)' }}
-              />
-              <div
-                className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(400px + 7px)' }}
-              />
-              <div
-                className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(400px + 13px)' }}
-              />
-              <div
-                className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(400px + 20px + 334px + 7px)' }}
-              />
-              <div
-                className="absolute left-0 right-0 h-px bg-signoz_slate-400/30"
-                style={{ top: 'calc(400px + 20px + 334px + 13px)' }}
-              />
-            </div>
-            <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 [scrollbar-width:none] sm:-mx-6 sm:gap-4 sm:px-6 md:mx-0 md:grid md:snap-none md:grid-cols-3 md:grid-rows-[344px_288px_288px] md:gap-5 md:overflow-visible md:px-0 md:pb-0 md:[scrollbar-width:auto] lg:grid-rows-[400px_334px_334px] [&::-webkit-scrollbar]:hidden">
+            <div className="grid gap-2 md:grid-cols-6 md:grid-rows-[686px_342px_342px_456px] lg:gap-[6px]">
               {features.map((feature) => (
                 <FeatureCard key={feature.product} feature={feature} />
               ))}

@@ -40,9 +40,13 @@ export function HomepageHeroRedesign() {
                   clickName="Sign Up Button"
                   clickText={primaryCTA}
                   clickLocation="Hero Section"
-                  className="block w-full sm:w-[176px]"
+                  className="block w-full sm:w-auto"
                 >
-                  <Button as="span" className="!w-full" id="btn-get-started-homepage-hero">
+                  <Button
+                    as="span"
+                    className="!w-full sm:!w-auto sm:min-w-[184px]"
+                    id="btn-get-started-homepage-hero"
+                  >
                     {primaryCTA}
                   </Button>
                 </TrackingLink>
