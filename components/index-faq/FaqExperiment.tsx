@@ -47,14 +47,14 @@ function FaqItem({ answer, question }: Faq) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="bg-signoz_ink-500/72 rounded-[18px] border border-signoz_slate-400/35 transition-colors hover:border-signoz_slate-300/50">
+    <div className="bg-signoz_ink-500/72 rounded-[14px] border border-signoz_slate-400/35 transition-colors hover:border-signoz_slate-300/50 sm:rounded-[18px]">
       <button
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between gap-6 px-6 py-6 text-left md:px-8"
+        className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:gap-6 sm:px-6 sm:py-6 md:px-8"
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
-        <span className="text-[18px] font-medium leading-7 tracking-[-0.2px] text-signoz_vanilla-100 md:text-[20px]">
+        <span className="text-[16px] font-medium leading-6 tracking-[-0.15px] text-signoz_vanilla-100 sm:text-[18px] sm:leading-7 sm:tracking-[-0.2px] md:text-[20px]">
           {question}
         </span>
         <ChevronDown
@@ -70,7 +70,7 @@ function FaqItem({ answer, question }: Faq) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="m-0 max-w-[820px] px-6 pb-6 text-[15px] leading-7 tracking-[-0.1px] text-signoz_vanilla-400 md:px-8 md:text-[16px]">
+          <p className="m-0 max-w-[820px] px-5 pb-5 text-[15px] leading-7 tracking-[-0.1px] text-signoz_vanilla-400 sm:px-6 sm:pb-6 md:px-8 md:text-[16px]">
             {answer}
           </p>
         </div>
@@ -82,15 +82,15 @@ function FaqItem({ answer, question }: Faq) {
 export default function FaqExperiment() {
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 py-24 sm:px-6 lg:px-[78px] lg:py-32"
+      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
       data-homepage-floating-stop="true"
     >
-      <div className="mx-auto grid max-w-[1200px] gap-12 lg:grid-cols-[0.82fr_1.45fr]">
+      <div className="mx-auto grid max-w-[1200px] gap-10 lg:grid-cols-[0.82fr_1.45fr] lg:gap-12">
         <div>
-          <h2 className="m-0 max-w-[430px] text-[48px] font-medium leading-[1.02] tracking-[-1.4px] text-signoz_vanilla-100 md:text-[72px] md:tracking-[-2.2px]">
+          <h2 className="m-0 max-w-[430px] text-[38px] font-medium leading-[1.04] tracking-[-0.95px] text-signoz_vanilla-100 sm:text-[48px] sm:leading-[1.02] sm:tracking-[-1.4px] md:text-[72px] md:tracking-[-2.2px]">
             Your questions, answered.
           </h2>
-          <p className="m-0 mt-6 max-w-[420px] text-[18px] leading-8 tracking-[-0.2px] text-signoz_vanilla-400">
+          <p className="m-0 mt-5 max-w-[420px] text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:mt-6 sm:text-[18px] sm:leading-8 sm:tracking-[-0.2px]">
             Quick answers to the questions teams usually ask while evaluating SigNoz.
           </p>
           <CustomLink

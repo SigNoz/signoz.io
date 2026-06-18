@@ -171,20 +171,20 @@ export default function WhySignozExperiment() {
 
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 py-24 sm:px-6 lg:px-[78px] lg:py-32"
+      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
       data-homepage-floating-cta="Start sending telemetry in 20 minutes"
       data-homepage-floating-href="/docs/install/"
     >
       <div className="mx-auto max-w-[1200px]">
         <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
           <div>
-            <h2 className="m-0 max-w-[650px] text-[40px] font-medium leading-[1.04] tracking-[-1.1px] text-signoz_vanilla-100 md:text-[58px] md:tracking-[-1.65px]">
+            <h2 className="m-0 max-w-[650px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
               Monitor and troubleshoot from one shared context.
             </h2>
           </div>
 
           <div className="pt-1 lg:pt-10">
-            <p className="m-0 max-w-[560px] text-[17px] leading-8 tracking-[-0.2px] text-signoz_vanilla-400">
+            <p className="m-0 max-w-[560px] text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:text-[17px] sm:leading-8 sm:tracking-[-0.2px]">
               SigNoz brings production signals, OpenTelemetry context, and agent workflows into the
               same place, so every investigation can move from symptom to root cause to action.
             </p>
@@ -201,7 +201,7 @@ export default function WhySignozExperiment() {
           </div>
         </div>
 
-        <div className="mt-16 grid gap-5 lg:hidden">
+        <div className="mt-10 grid gap-4 sm:mt-16 sm:gap-5 lg:hidden">
           {items.map((item) => (
             <MobileWhyCard item={item} key={item.title} />
           ))}

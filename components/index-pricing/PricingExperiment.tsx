@@ -54,11 +54,13 @@ function PricingValueColumn({
   title: string
 }) {
   return (
-    <article className="flex min-h-[220px] flex-col justify-between border-l border-signoz_slate-400/25 px-8 py-1 md:px-10 lg:px-12">
-      <Icon className="h-5 w-5 text-signoz_robin-400" />
+    <article className="flex min-h-[176px] flex-col justify-between border-t border-signoz_slate-400/25 py-6 first:border-t-0 md:min-h-[220px] md:border-l md:border-t-0 md:px-10 md:py-1 md:first:border-l lg:px-12">
       <div>
-        <p className="m-0 text-sm leading-5 text-signoz_vanilla-400">{title}</p>
-        <p className="m-0 mt-3 max-w-[330px] text-xl font-medium leading-8 tracking-[-0.2px] text-signoz_vanilla-100">
+        <div className="flex items-center gap-3 md:block">
+          <Icon className="h-5 w-5 shrink-0 text-signoz_robin-400" />
+          <p className="m-0 text-sm leading-5 text-signoz_vanilla-400 md:mt-0">{title}</p>
+        </div>
+        <p className="m-0 mt-3 max-w-[330px] text-[18px] font-medium leading-7 tracking-[-0.15px] text-signoz_vanilla-100 md:text-xl md:leading-8 md:tracking-[-0.2px]">
           {description}
         </p>
       </div>
@@ -69,17 +71,17 @@ function PricingValueColumn({
 export default function PricingExperiment() {
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 py-16 sm:px-6 lg:px-[78px] lg:py-20"
+      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-[78px] lg:py-20"
       data-homepage-floating-cta="View pricing"
       data-homepage-floating-href="/pricing/"
     >
       <div className="mx-auto max-w-[1200px]">
-        <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <h2 className="m-0 max-w-[720px] text-[40px] font-medium leading-[1.04] tracking-[-1.1px] text-signoz_vanilla-100 md:text-[58px] md:tracking-[-1.65px]">
+        <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-start md:justify-between md:gap-6">
+          <h2 className="m-0 max-w-[720px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
             Pricing that stays predictable as you scale.
           </h2>
           <div className="max-w-[430px]">
-            <p className="m-0 text-[17px] leading-8 tracking-[-0.2px] text-signoz_vanilla-400">
+            <p className="m-0 text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:text-[17px] sm:leading-8 sm:tracking-[-0.2px]">
               Add teammates freely, monitor autoscaling infrastructure, and estimate telemetry costs
               before you commit.
             </p>
@@ -96,15 +98,15 @@ export default function PricingExperiment() {
         </div>
 
         <div className="relative">
-          <div className="grid gap-y-12 md:grid-cols-3">
+          <div className="grid md:grid-cols-3">
             {pricingValueProps.map(({ description, Icon, title }) => (
               <PricingValueColumn key={title} description={description} Icon={Icon} title={title} />
             ))}
           </div>
         </div>
 
-        <div className="mt-16 grid gap-8 border-t border-signoz_slate-400/25 pt-8 md:grid-cols-[0.82fr_2fr]">
-          <p className="m-0 max-w-[310px] text-[38px] font-medium leading-[1.08] tracking-[-0.95px] text-signoz_vanilla-100 md:text-[44px] md:tracking-[-1.15px]">
+        <div className="mt-12 grid gap-8 border-t border-signoz_slate-400/25 pt-8 md:mt-16 md:grid-cols-[0.82fr_2fr]">
+          <p className="m-0 max-w-[310px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[38px] sm:tracking-[-0.95px] md:text-[44px] md:tracking-[-1.15px]">
             What makes
             <br />
             SigNoz different

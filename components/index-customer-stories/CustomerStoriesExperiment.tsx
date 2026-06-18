@@ -46,9 +46,9 @@ const customerStories: CustomerStory[] = [
 
 function StoryColumn({ story }: { story: CustomerStory }) {
   return (
-    <article className="flex min-h-[320px] flex-col border-l border-signoz_slate-400/25 px-8 py-1 md:px-10 lg:px-12">
+    <article className="flex min-h-[270px] flex-col border-t border-signoz_slate-400/25 py-7 first:border-t-0 md:min-h-[320px] md:border-l md:border-t-0 md:px-10 md:py-1 lg:px-12">
       <div>
-        <div className="mb-10 flex h-[72px] items-center">
+        <div className="mb-7 flex h-12 items-center md:mb-10 md:h-[72px]">
           <Image
             alt={story.logoAlt}
             className={`w-auto object-contain opacity-95 ${story.logoClassName ?? 'max-h-12 max-w-[150px]'}`}
@@ -61,12 +61,12 @@ function StoryColumn({ story }: { story: CustomerStory }) {
         <p className="m-0 mb-5 text-[12px] font-medium uppercase tracking-[0.14em] text-signoz_robin-400">
           {story.metric}
         </p>
-        <p className="m-0 max-w-[340px] text-[20px] font-normal leading-[1.42] tracking-[-0.3px] text-signoz_vanilla-100">
+        <p className="m-0 max-w-[340px] text-[18px] font-normal leading-[1.44] tracking-[-0.2px] text-signoz_vanilla-100 md:text-[20px] md:leading-[1.42] md:tracking-[-0.3px]">
           {story.description}
         </p>
       </div>
 
-      <div className="mt-auto pt-10">
+      <div className="mt-auto pt-7 md:pt-10">
         <CustomLink
           className="inline-flex h-9 shrink-0 items-center rounded-md border border-signoz_slate-400/35 px-3.5 text-sm font-medium text-signoz_vanilla-300 transition-colors hover:border-signoz_robin-400/55 hover:text-signoz_vanilla-100"
           href={story.href}
@@ -81,20 +81,20 @@ function StoryColumn({ story }: { story: CustomerStory }) {
 export default function CustomerStoriesExperiment() {
   return (
     <section
-      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 py-24 sm:px-6 lg:px-[78px] lg:py-32"
+      className="homepage-variant-only relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
       data-homepage-floating-cta="Read customer stories"
       data-homepage-floating-href="/case-study/"
     >
       <div className="mx-auto max-w-[1200px]">
-        <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-start md:justify-between md:gap-6">
           <div>
-            <h2 className="m-0 max-w-[760px] text-[40px] font-medium leading-[1.04] tracking-[-1.1px] text-signoz_vanilla-100 md:text-[58px] md:tracking-[-1.65px]">
+            <h2 className="m-0 max-w-[760px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
               Production stories from teams running SigNoz.
             </h2>
           </div>
 
           <div className="max-w-[430px]">
-            <p className="m-0 text-[17px] leading-8 tracking-[-0.2px] text-signoz_vanilla-400">
+            <p className="m-0 text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:text-[17px] sm:leading-8 sm:tracking-[-0.2px]">
               See how engineering teams use SigNoz to debug faster, reduce tool sprawl, and keep
               production reliable.
             </p>
@@ -114,7 +114,7 @@ export default function CustomerStoriesExperiment() {
         </div>
 
         <div className="relative">
-          <div className="grid gap-y-12 md:grid-cols-3">
+          <div className="grid md:grid-cols-3">
             {customerStories.map((story) => (
               <StoryColumn key={story.title} story={story} />
             ))}
