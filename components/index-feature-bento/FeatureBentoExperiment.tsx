@@ -3,7 +3,6 @@
 import Image from 'next/image'
 
 import CustomLink from '@/components/Link'
-import featureGraphic2 from '@/public/img/graphics/homepage/feature-graphic-2.svg?url'
 import featureGraphic3 from '@/public/img/graphics/homepage/feature-graphic-3.svg?url'
 import featureGraphic4 from '@/public/img/graphics/homepage/feature-graphic-4.svg?url'
 import featureGraphic5 from '@/public/img/graphics/homepage/feature-graphic-5.svg?url'
@@ -30,7 +29,7 @@ const features: BentoFeature[] = [
     outcome: 'P99, Apdex, database calls, and external calls per service.',
     description:
       'Monitor RED metrics, Apdex, database calls, and external calls from trace-derived service views.',
-    graphic: featureGraphic2,
+    graphic: '/img/graphics/homepage/apm-feature-bento-crop.png',
     href: '/application-performance-monitoring/',
     pan: 'right',
     size: 'large',
@@ -87,7 +86,7 @@ const features: BentoFeature[] = [
     outcome: 'Reusable templates for services, infra, cloud, databases, and LLM usage.',
     description:
       'Start from templates or build custom views for services, infra, cloud, databases, and LLM usage.',
-    graphic: featureGraphic6,
+    graphic: '/img/graphics/homepage/dashboard-feature-bento-crop.png',
     href: '/metrics-and-dashboards/',
     pan: 'up',
     size: 'wide',
@@ -115,12 +114,14 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
       href={feature.href}
     >
       <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.08),transparent_32%)] opacity-80" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_-18%,rgba(99,144,255,0.26),transparent_42%)] opacity-0 blur-2xl transition-opacity duration-500 ease-out group-hover:opacity-100" />
+      <div className="pointer-events-none absolute -left-1/3 top-0 z-[2] h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/[0.10] to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-full group-hover:opacity-100" />
       <div
-        className={`relative z-[1] flex shrink-0 items-center justify-center overflow-hidden ${imageWellClassName}`}
+        className={`relative z-[3] flex shrink-0 items-center justify-center overflow-hidden ${imageWellClassName}`}
       >
         <Image
           alt=""
-          className={`h-[112%] max-h-none w-[112%] max-w-none object-cover opacity-[0.38] transition duration-500 ease-out group-hover:scale-[1.015] group-hover:opacity-[0.66] ${
+          className={`h-[112%] max-h-none w-[112%] max-w-none object-cover opacity-[0.42] transition duration-500 ease-out group-hover:scale-[1.015] group-hover:opacity-[0.72] ${
             feature.imageClassName ?? 'object-center'
           } ${panClassName}`}
           height={feature.visual === 'tall' ? 330 : 260}
@@ -135,7 +136,7 @@ function FeatureCard({ feature }: { feature: BentoFeature }) {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-signoz_ink-500 to-transparent" />
       </div>
 
-      <div className="relative z-[1] flex min-h-[104px] items-start p-4 md:p-6 lg:min-h-[116px]">
+      <div className="relative z-[3] flex min-h-[104px] items-start p-4 md:p-6 lg:min-h-[116px]">
         <div className="pointer-events-none absolute left-1/2 top-0 h-px w-screen -translate-x-1/2 bg-signoz_slate-400/25" />
         <h3 className="m-0 max-w-[720px] text-[20px] font-medium leading-[1.18] tracking-[-0.25px] md:text-[22px] md:tracking-[-0.35px] lg:leading-[1.18]">
           <span className="text-signoz_vanilla-100">{feature.product}</span>{' '}
