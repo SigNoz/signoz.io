@@ -42,7 +42,7 @@ export function HomepageHeroRedesign() {
                   clickLocation="Hero Section"
                   className="block w-full sm:w-[176px]"
                 >
-                  <Button className="!w-full" id="btn-get-started-homepage-hero">
+                  <Button as="span" className="!w-full" id="btn-get-started-homepage-hero">
                     {primaryCTA}
                   </Button>
                 </TrackingLink>
@@ -56,6 +56,7 @@ export function HomepageHeroRedesign() {
                   prefetch={false}
                 >
                   <Button
+                    as="span"
                     className="homepage-button--secondary-with-icon !w-full"
                     type={Button.TYPES.SECONDARY}
                   >
@@ -135,7 +136,7 @@ export function Header() {
               clickLocation="Hero Section"
               className="block w-[220px]"
             >
-              <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
+              <Button as="span" className="flex-center !w-full" id="btn-get-started-homepage-hero">
                 {primaryCTA}
               </Button>
             </TrackingLink>
@@ -152,7 +153,7 @@ export function Header() {
             className="block w-[220px]"
             prefetch={false}
           >
-            <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
+            <Button as="span" className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
               Book a Demo
             </Button>
           </TrackingLink>

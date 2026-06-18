@@ -19,11 +19,17 @@ const TYPE_TO_ICON_STYLES_MAP = {
 }
 
 function Button(props) {
-  const { children, type = BUTTON_TYPES.PRIMARY, className = '', ...rest } = props
+  const {
+    as: Component = 'button',
+    children,
+    type = BUTTON_TYPES.PRIMARY,
+    className = '',
+    ...rest
+  } = props
   const style = `${TYPE_TO_STYLES_MAP[type]} ${className}`
 
   return (
-    <button className={style} {...rest}>
+    <Component className={style} {...rest}>
       <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
         {children}
       </span>
@@ -33,7 +39,7 @@ function Button(props) {
       >
         <ArrowUpRight size={16} strokeWidth={2.5} />
       </span>
-    </button>
+    </Component>
   )
 }
 

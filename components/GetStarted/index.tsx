@@ -33,7 +33,7 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   clickText="Get Started - Free"
                   clickLocation="Get Started Section"
                 >
-                  <Button id={getStartedId} className="flex-center">
+                  <Button as="span" id={getStartedId} className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Button>
@@ -49,6 +49,7 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   prefetch={false}
                 >
                   <Button
+                    as="span"
                     type={Button.TYPES.SECONDARY}
                     id={readDocumentationId}
                     className="flex-center"

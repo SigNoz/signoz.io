@@ -75,7 +75,7 @@ export default function HomepageGetStarted() {
               clickLocation="Homepage Get Started Section"
               className="block w-fit"
             >
-              <Button>Compare plans</Button>
+              <Button as="span">Compare plans</Button>
             </TrackingLink>
           </div>
 

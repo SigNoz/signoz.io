@@ -3,7 +3,8 @@
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 
-import CustomLink from '@/components/Link'
+import Button from '@/components/Button/Button'
+import TrackingLink from '@/components/TrackingLink'
 
 type Faq = {
   answer: string
@@ -93,12 +94,18 @@ export default function Faq() {
           <p className="m-0 mt-5 max-w-[420px] text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:mt-6 sm:text-[18px] sm:leading-8 sm:tracking-[-0.2px]">
             Quick answers to the questions teams usually ask while evaluating SigNoz.
           </p>
-          <CustomLink
-            className="homepage-button homepage-button--primary mt-8 inline-flex h-10 items-center justify-center gap-3 px-4 text-sm"
+          <TrackingLink
+            className="mt-8 block w-full max-w-[370px]"
+            clickLocation="Homepage FAQ Section"
+            clickName="Contact Us Button"
+            clickText="Contact us"
+            clickType="Primary CTA"
             href="/contact-us/"
           >
-            Contact us
-          </CustomLink>
+            <Button as="span" className="!w-full">
+              Contact us
+            </Button>
+          </TrackingLink>
         </div>
 
         <div className="space-y-3">
